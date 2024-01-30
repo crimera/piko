@@ -1,0 +1,53 @@
+{
+  "branches": [
+    "main",
+    {
+      "name": "dev",
+      "prerelease": true
+    }
+  ],
+  "plugins": [
+    [
+      "@semantic-release/commit-analyzer", {
+        "releaseRules": [
+          { "type": "build", "scope": "Needs bump", "release": "patch" }
+        ]
+      }
+    ],
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/changelog",
+    "gradle-semantic-release-plugin",
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "README.md",
+          "CHANGELOG.md",
+          "gradle.properties",
+          "patches.json"
+        ]
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          {
+            "path": "build/libs/*.jar"
+          },
+          {
+            "path": "patches.json"
+          }
+        ],
+        successComment: false
+      }
+    ],
+    [
+      "@saithodev/semantic-release-backmerge",
+      {
+        backmergeBranches: [{"from": "main", "to": "dev"}],
+        clearWorkspace: true
+      }
+    ]
+  ]
+}

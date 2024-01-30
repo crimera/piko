@@ -1,0 +1,11 @@
+[versions]
+revanced-patcher = "19.0.0"
+smali = "3.0.3"
+guava = "32.1.2-jre"
+gson = "2.10.1"
+
+[libraries]
+revanced-patcher = { module = "app.revanced:revanced-patcher", version.ref = "revanced-patcher" }
+smali = { module = "com.android.tools.smali:smali", version.ref = "smali" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
