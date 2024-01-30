@@ -5,7 +5,7 @@ plugins {
     `maven-publish`
 }
 
-group = "your.org"
+group = "crimera"
 
 repositories {
     mavenCentral()
@@ -32,12 +32,12 @@ kotlin {
 
 tasks.withType(Jar::class) {
     manifest {
-        attributes["Name"] = "Your Patches"
+        attributes["Name"] = "Piko"
         attributes["Description"] = "Patches for ReVanced."
-        attributes["Version"] = version
+        attributes["Version"] = 1
         attributes["Timestamp"] = System.currentTimeMillis().toString()
         attributes["Source"] = "git@github.com:you/revanced-patches.git"
-        attributes["Author"] = "You"
+        attributes["Author"] = "crimera"
         attributes["Contact"] = "contact@your.homepage"
         attributes["Origin"] = "https://your.homepage"
         attributes["License"] = "GNU General Public License v3.0"
@@ -82,7 +82,7 @@ publishing {
             from(components["java"])
 
             pom {
-                name = "Your Patches"
+                name = "Piko"
                 description = "Patches for ReVanced."
                 url = "https://your.homepage"
 
@@ -95,14 +95,14 @@ publishing {
                 developers {
                     developer {
                         id = "Your ID"
-                        name = "Your Name"
+                        name = "crimera"
                         email = "contact@your.homepage"
                     }
                 }
                 scm {
-                    connection = "scm:git:git://github.com/you/revanced-patches.git"
-                    developerConnection = "scm:git:git@github.com:you/revanced-patches.git"
-                    url = "https://github.com/you/revanced-patches"
+                    connection = "scm:git:git://github.com/crimera/piko.git"
+                    developerConnection = "scm:git:git@github.com:crimera/piko.git"
+                    url = "https://github.com/crimera/piko"
                 }
             }
         }
