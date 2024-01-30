@@ -1,4 +1,4 @@
-package your.org.patches.twitter.view
+package crimera.patches.twitter.view
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.data.ResourceContext
@@ -10,7 +10,7 @@ import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.ResourcePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
-import your.org.patches.twitter.view.fingerprints.RemoveViewCountPatchFingerprint
+import crimera.patches.twitter.view.fingerprints.RemoveViewCountPatchFingerprint
 
 @Patch(
     name = "Remove view count",
