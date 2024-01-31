@@ -53,7 +53,7 @@ object DownloadPatch : BytecodePatch(
         val f2Result = FIleDownloaderFingerprint.result
             ?: throw PatchException("FIleDownloaderFingerprint not found")
 
-        print(f2Result.classDef.superclass)
+//        print(f2Result.classDef.superclass)
 
         f2Result.mutableClass.methods.forEach {
             if (it.name == "a") {
