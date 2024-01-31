@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/crimera/piko/compare/v1.0.0...v1.1.0) (2024-01-31)
+
+
+### Features
+
+* **twitter:** Add google ads patch ([152b118](https://github.com/crimera/piko/commit/152b118737f84ebc155377ca58c7131486bad8a9))
+
 # 1.0.0 (2024-01-30)
 
 
