@@ -19,6 +19,7 @@ import crimera.patches.twitter.download.fingerprints.FIleDownloaderFingerprint
     description = "Unlocks the ability to download videos from Twitter",
     compatiblePackages = [CompatiblePackage("com.twitter.android")]
 )
+@Suppress("unused")
 object DownloadPatch : BytecodePatch(
     setOf(DownloadPatchFingerprint, FIleDownloaderFingerprint)
 ) {
@@ -28,9 +29,9 @@ object DownloadPatch : BytecodePatch(
 
         val method = result.mutableMethod
         val instructions = method.getInstructions()
-        instructions.forEach {
-            println(it.opcode)
-        }
+//        instructions.forEach {
+//            println(it.opcode)
+//        }
 
         val index = instructions.filter { it.opcode == Opcode.IF_EQ }[1].location.index
 

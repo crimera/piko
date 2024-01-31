@@ -17,6 +17,7 @@ import crimera.patches.twitter.view.fingerprints.RemoveViewCountPatchFingerprint
     description = "Removes the view count from the bottom of tweets",
     compatiblePackages = [CompatiblePackage("com.twitter.android")]
 )
+@Suppress("unused")
 object RemoveViewCountPatch: BytecodePatch(
     setOf(RemoveViewCountPatchFingerprint)
 ) {
