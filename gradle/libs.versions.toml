@@ -1,7 +1,7 @@
 [versions]
-revanced-patcher = "19.0.0"
+revanced-patcher = "19.2.0"
 smali = "3.0.3"
-guava = "32.1.2-jre"
+guava = "33.0.0-jre"
 gson = "2.10.1"
 
 [libraries]
