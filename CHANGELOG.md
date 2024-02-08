@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/crimera/piko/compare/v1.1.0...v1.2.0) (2024-02-08)
+
+
+### Features
+
+* **twitter:** Add selectable text patch ([ee3bcf1](https://github.com/crimera/piko/commit/ee3bcf17900dfe549a07426182a2149bcf16f87a))
+
 # [1.1.0](https://github.com/crimera/piko/compare/v1.0.0...v1.1.0) (2024-01-31)
 
 
