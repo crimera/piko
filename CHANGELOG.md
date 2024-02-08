@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/crimera/piko/compare/v1.2.1...v1.3.0) (2024-02-08)
+
+
+### Features
+
+* **twitter:** Add Show sensitive media patch ([21c3fb4](https://github.com/crimera/piko/commit/21c3fb429b82acfb3a6b497c06c2a4e2ad596a9f))
+
 ## [1.2.1](https://github.com/crimera/piko/compare/v1.2.0...v1.2.1) (2024-02-08)
 
 
