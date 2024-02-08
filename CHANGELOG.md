@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/crimera/piko/compare/v1.2.0...v1.2.1) (2024-02-08)
+
+
+### Bug Fixes
+
+* **twitter:** Add twitter to compatible package for SelectableTextPatch ([0b6ee33](https://github.com/crimera/piko/commit/0b6ee33a044433c498c7d522b92b33623dca1a93))
+
 # [1.2.0](https://github.com/crimera/piko/compare/v1.1.0...v1.2.0) (2024-02-08)
 
 
