@@ -1,17 +1,16 @@
 package crimera.patches.twitter.view
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.data.ResourceContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.removeInstructions
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
-import app.revanced.patcher.patch.ResourcePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import crimera.patches.twitter.view.fingerprints.RemoveViewCountPatchFingerprint
 
+// Credits to @iKirby
 @Patch(
     name = "Remove view count",
     description = "Removes the view count from the bottom of tweets",

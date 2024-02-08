@@ -14,6 +14,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.download.fingerprints.DownloadPatchFingerprint
 import crimera.patches.twitter.download.fingerprints.FIleDownloaderFingerprint
 
+// Credits to @iKirby
 @Patch(
     name = "Download patch",
     description = "Unlocks the ability to download videos from Twitter",
@@ -29,9 +30,6 @@ object DownloadPatch : BytecodePatch(
 
         val method = result.mutableMethod
         val instructions = method.getInstructions()
-//        instructions.forEach {
-//            println(it.opcode)
-//        }
 
         val index = instructions.filter { it.opcode == Opcode.IF_EQ }[1].location.index
 
@@ -52,8 +50,6 @@ object DownloadPatch : BytecodePatch(
 
         val f2Result = FIleDownloaderFingerprint.result
             ?: throw PatchException("FIleDownloaderFingerprint not found")
-
-//        print(f2Result.classDef.superclass)
 
         f2Result.mutableClass.methods.forEach {
             if (it.name == "a") {
