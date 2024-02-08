@@ -3,12 +3,14 @@ package crimera.patches.twitter.selectabletext
 import app.revanced.patcher.data.ResourceContext
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.ResourcePatch
+import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import org.w3c.dom.Element
 
 @Patch(
     name = "SelectableTextPatch",
     description = "Makes bio and username selectable",
+    compatiblePackages = [CompatiblePackage("com.twitter.android")]
 )
 @Suppress("unused")
 object SelectableTextPatch: ResourcePatch() {
