@@ -21,7 +21,8 @@ object GoogleAdsPatchFingerprint: MethodFingerprint(
 @Patch(
     name = "Google Ads Patch",
     description = "Remove Google Ads",
-    compatiblePackages = [CompatiblePackage("com.twitter.android")]
+    compatiblePackages = [CompatiblePackage("com.twitter.android")],
+    use = false
 )
 @Suppress("unused")
 object GoogleAdsPatch: BytecodePatch(
