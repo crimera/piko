@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/crimera/piko/compare/v1.3.0...v1.3.1) (2024-02-10)
+
+
+### Bug Fixes
+
+* **twitter:** Remove debug code ([2eb2fa3](https://github.com/crimera/piko/commit/2eb2fa34e101a6d838b28eabc3c0c7ae08af9dc4))
+
 # [1.3.0](https://github.com/crimera/piko/compare/v1.2.1...v1.3.0) (2024-02-08)
 
 
