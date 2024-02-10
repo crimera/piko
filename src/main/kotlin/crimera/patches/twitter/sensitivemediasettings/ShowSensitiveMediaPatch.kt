@@ -30,9 +30,5 @@ object SensitiveMediaPatch: BytecodePatch(
         instructions.filter{ it.opcode == Opcode.IPUT_BOOLEAN }.forEach {
             method.removeInstruction(it.location.index)
         }
-
-        instructions.forEach {
-            println(it.opcode)
-        }
     }
 }
