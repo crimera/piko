@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/crimera/piko/compare/v1.3.2...v1.4.0) (2024-02-10)
+
+
+### Features
+
+* **twitter:** Add `Clear tracking params` patch @FrozenAlex's ([c1f3148](https://github.com/crimera/piko/commit/c1f3148c8b701d76fa518256b320552b9b8a2dd7))
+
 ## [1.3.2](https://github.com/crimera/piko/compare/v1.3.1...v1.3.2) (2024-02-10)
 
 
