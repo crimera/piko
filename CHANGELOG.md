@@ -1,3 +1,10 @@
+## [1.3.2](https://github.com/crimera/piko/compare/v1.3.1...v1.3.2) (2024-02-10)
+
+
+### Bug Fixes
+
+* **twitter:** Exclude `Google Ads Patch` by default ([a26e03a](https://github.com/crimera/piko/commit/a26e03a157815445d8416a68dd43aa96b2859ce1))
+
 ## [1.3.1](https://github.com/crimera/piko/compare/v1.3.0...v1.3.1) (2024-02-10)
 
 
