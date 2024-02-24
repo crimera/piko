@@ -8,7 +8,7 @@ import app.revanced.patcher.patch.annotation.Patch
 import org.w3c.dom.Element
 
 @Patch(
-    name = "SelectableTextPatch",
+    name = "Selectable Text",
     description = "Makes bio and username selectable",
     compatiblePackages = [CompatiblePackage("com.twitter.android")]
 )
