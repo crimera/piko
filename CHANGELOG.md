@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/crimera/piko/compare/v1.4.0...v1.5.0) (2024-02-27)
+
+
+### Features
+
+* **Twitter:** Added mod settings ([76ee8a1](https://github.com/crimera/piko/commit/76ee8a1cfbfe895d006d57afd0c56ed2373d96e6))
+
 # [1.4.0](https://github.com/crimera/piko/compare/v1.3.2...v1.4.0) (2024-02-10)
 
 
