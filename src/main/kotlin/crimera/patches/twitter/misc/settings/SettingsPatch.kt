@@ -21,6 +21,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
     dependencies = [SettingsResourcePatch::class, IntegrationsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
+@Suppress("unused")
 object SettingsPatch : BytecodePatch(
     setOf(SettingsFingerprint)
 ) {
@@ -28,8 +29,6 @@ object SettingsPatch : BytecodePatch(
     private const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
     private const val START_ACTIVITY_DESCRIPTOR =
         "invoke-static {}, $UTILS_DESCRIPTOR;->startActivity()V"
-
-    private const val ADD_CONTEXT_DESCRIPTOR = "invoke-static {p0}, $UTILS_DESCRIPTOR;->setCtx(Landroid/app/Application;)V"
 
     override fun execute(context: BytecodeContext) {
         val result = SettingsFingerprint.result
@@ -70,7 +69,8 @@ object SettingsPatch : BytecodePatch(
 
         // startActivity
         h0Method.addInstructions(
-            igetObjectIndex + 1, """
+            igetObjectIndex + 1,
+            """
             const-string v0, "Working"
             $START_ACTIVITY_DESCRIPTOR
             const/4 v3, 0x1
@@ -79,9 +79,11 @@ object SettingsPatch : BytecodePatch(
         )
 
         // if block end
-        val ifBlockEnd = h0Method.getInstructions().first { it.opcode == Opcode.RETURN }.location.index+1
+        val ifBlockEnd =
+            h0Method.getInstructions().first { it.opcode == Opcode.RETURN }.location.index + 1
 
-        h0Method.addInstructionsWithLabels(igetObjectIndex+1,
+        h0Method.addInstructionsWithLabels(
+            igetObjectIndex + 1,
             """
             const-string v1, "pref_mod" 
             invoke-virtual {p1, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
@@ -90,7 +92,9 @@ object SettingsPatch : BytecodePatch(
             if-nez v2, :cond_idk
             goto :end
         """.trimIndent(),
-            ExternalLabel("end", h0Method.getInstructions().first { it.opcode == Opcode.CONST_STRING }),
+            ExternalLabel(
+                "end",
+                h0Method.getInstructions().first { it.opcode == Opcode.CONST_STRING }),
             ExternalLabel("cond_idk", h0Method.getInstruction(ifBlockEnd)),
         )
     }
