@@ -1,3 +1,11 @@
+# [1.6.0-dev.1](https://github.com/crimera/piko/compare/v1.5.1...v1.6.0-dev.1) (2024-03-01)
+
+
+### Features
+
+* **Twitter:** Hide For You ([c18f143](https://github.com/crimera/piko/commit/c18f1437882d6aba85c076a198a1a3c87067b716))
+* **Twitter:** Hide Recommended Users ([2a55292](https://github.com/crimera/piko/commit/2a55292f81cd2d6f06058c8b4f347016700695eb))
+
 ## [1.5.1](https://github.com/crimera/piko/compare/v1.5.0...v1.5.1) (2024-03-01)
 
 
