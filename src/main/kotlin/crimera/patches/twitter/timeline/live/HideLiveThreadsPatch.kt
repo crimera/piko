@@ -1,4 +1,4 @@
-package crimera.patches.twitter.live
+package crimera.patches.twitter.timeline.live
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
@@ -10,7 +10,7 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import crimera.patches.twitter.live.fingerprints.HideLiveThreadsFingerprint
+import crimera.patches.twitter.timeline.live.fingerprints.HideLiveThreadsFingerprint
 
 @Patch(
     name = "Hide Live Threads",
@@ -30,7 +30,6 @@ object HideLiveThreadsPatch :  BytecodePatch(
 
         val loc = instructions.first{it.opcode == Opcode.IGET_OBJECT}.location.index
         val reg = method.getInstruction<OneRegisterInstruction>(loc).registerA
-        
         method.addInstruction(loc+1,"""
             const v$reg, 0x0
         """.trimIndent())
