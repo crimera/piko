@@ -7,5 +7,5 @@ import com.android.tools.smali.dexlib2.AccessFlags
 
 internal object JsonObjectMapperFingerprint : MethodFingerprint(
     // Lcom/twitter/model/json/core/JsonUrlEntity$$JsonObjectMapper;
-    customFingerprint = { methodDef, _ -> methodDef.name.startsWith("_parse") && methodDef.definingClass == "Lcom/twitter/model/json/core/JsonUrlEntity\$\$JsonObjectMapper;" }
+    customFingerprint = { methodDef, _ -> methodDef.name.contains("parse") && methodDef.definingClass == "Lcom/twitter/model/json/core/JsonUrlEntity\$\$JsonObjectMapper;" }
 )
