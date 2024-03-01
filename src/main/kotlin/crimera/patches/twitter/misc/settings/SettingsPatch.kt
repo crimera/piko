@@ -11,6 +11,7 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import crimera.patches.twitter.misc.integrations.IntegrationsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
 
@@ -27,6 +28,7 @@ object SettingsPatch : BytecodePatch(
 ) {
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
     private const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
+    private const val ADD_PREF_DESCRIPTOR = "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
     private const val START_ACTIVITY_DESCRIPTOR =
         "invoke-static {}, $UTILS_DESCRIPTOR;->startActivity()V"
 
@@ -37,65 +39,33 @@ object SettingsPatch : BytecodePatch(
         val initMethod = result.mutableClass.methods.first()
 
         val arrayCreation = initMethod.getInstructions()
-            .first { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }.location.index
+            .first { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }.location.index+1
 
-        initMethod.addInstructions(
-            arrayCreation + 2, """
-            array-length v1, v0
+        initMethod.getInstruction<BuilderInstruction11x>(arrayCreation).registerA.also { reg->
+            initMethod.addInstructions(arrayCreation+1, """
+                const-string v1, "pref_mod"
+                invoke-static {v$reg, v1}, $ADD_PREF_DESCRIPTOR
+                move-result-object v$reg
+            """)
+        }
 
-            add-int/lit8 v1, v1, 0x1
+        val prefCLickedMethod = result.mutableClass.methods.find { it.returnType == "Z" }!!
+        val constIndex = prefCLickedMethod.getInstructions().first{ it.opcode == Opcode.CONST_4 }.location.index
 
-            invoke-static {v0, v1}, Ljava/util/Arrays;->copyOf([Ljava/lang/Object;I)[Ljava/lang/Object;
-
-            move-result-object v1
-
-            check-cast v1, [Ljava/lang/String;
-
-            .local v1, "bigger":[Ljava/lang/String;
-            array-length v2, v0
-
-            const-string v3, "pref_mod"
-
-            aput-object v3, v1, v2
-    
-            move-object v0, v1
-        """.trimIndent()
-        )
-
-        val h0Method = result.mutableClass.methods.first { it.returnType == "Z" }
-
-        val igetObjectIndex = h0Method.getInstructions()
-            .first { it.opcode == Opcode.IGET_OBJECT }.location.index
-
-        // startActivity
-        h0Method.addInstructions(
-            igetObjectIndex + 1,
-            """
-            const-string v0, "Working"
-            $START_ACTIVITY_DESCRIPTOR
-            const/4 v3, 0x1
-            return v3
-        """.trimIndent(),
-        )
-
-        // if block end
-        val ifBlockEnd =
-            h0Method.getInstructions().first { it.opcode == Opcode.RETURN }.location.index + 1
-
-        h0Method.addInstructionsWithLabels(
-            igetObjectIndex + 1,
-            """
+        prefCLickedMethod.addInstructionsWithLabels(1, """
             const-string v1, "pref_mod" 
             invoke-virtual {p1, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
             move-result v2
 
-            if-nez v2, :cond_idk
-            goto :end
-        """.trimIndent(),
-            ExternalLabel(
-                "end",
-                h0Method.getInstructions().first { it.opcode == Opcode.CONST_STRING }),
-            ExternalLabel("cond_idk", h0Method.getInstruction(ifBlockEnd)),
+            if-nez v2, :start
+            goto :cont
+            
+            :start
+            $START_ACTIVITY_DESCRIPTOR
+            const/4 v3, 0x1
+            return v3 
+        """,
+            ExternalLabel("cont", prefCLickedMethod.getInstruction(constIndex))
         )
     }
 }
