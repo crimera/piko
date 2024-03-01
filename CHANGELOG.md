@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/crimera/piko/compare/v1.5.0...v1.5.1) (2024-03-01)
+
+
+### Reverts
+
+* Revert "feat(Twitter): Added mod settings" ([c252333](https://github.com/crimera/piko/commit/c2523332865ce6338361e49a6c862d491ef3323b))
+
 # [1.5.0](https://github.com/crimera/piko/compare/v1.4.0...v1.5.0) (2024-02-27)
 
 
