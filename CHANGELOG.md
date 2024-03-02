@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/crimera/piko/compare/v1.8.0...v1.8.1) (2024-03-02)
+
+
+### Bug Fixes
+
+* Update pull_request.yml[skip ci] ([30e1e4f](https://github.com/crimera/piko/commit/30e1e4f828e4018b3595ea99d21d2a527145b2f5))
+
 # [1.8.0](https://github.com/crimera/piko/compare/v1.7.0...v1.8.0) (2024-03-02)
 
 
