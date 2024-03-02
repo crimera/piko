@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/crimera/piko/compare/v1.9.0...v1.9.1) (2024-03-02)
+
+
+### Bug Fixes
+
+* **Twitter:** Only show settings category if patch is applied ([2141680](https://github.com/crimera/piko/commit/21416800ce7176c713b1521649d9760fcd450158))
+
 ## [1.9.1-dev.1](https://github.com/crimera/piko/compare/v1.9.0...v1.9.1-dev.1) (2024-03-02)
 
 
