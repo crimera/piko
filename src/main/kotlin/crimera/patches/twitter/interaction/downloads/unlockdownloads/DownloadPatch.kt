@@ -1,4 +1,4 @@
-package crimera.patches.twitter.download
+package crimera.patches.twitter.interaction.downloads.unlockdownloads
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
@@ -11,8 +11,8 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
-import crimera.patches.twitter.download.fingerprints.DownloadPatchFingerprint
-import crimera.patches.twitter.download.fingerprints.FIleDownloaderFingerprint
+import crimera.patches.twitter.interaction.downloads.unlockdownloads.fingerprints.DownloadPatchFingerprint
+import crimera.patches.twitter.interaction.downloads.unlockdownloads.fingerprints.FIleDownloaderFingerprint
 
 // Credits to @iKirby
 @Patch(
@@ -38,7 +38,7 @@ object DownloadPatch : BytecodePatch(
             """
                const/4 v5, 0x2
                
-               if-eq v4, v5, :cond_0  
+               if-eq v4, v5, :cond_0
             """,
             ExternalLabel("cond_0", method.getInstructions().first { it.opcode == Opcode.NEW_INSTANCE })
         )

@@ -1,4 +1,4 @@
-package crimera.patches.twitter.googleads
+package crimera.patches.twitter.ads.googleads
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
