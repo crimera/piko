@@ -15,7 +15,8 @@ import crimera.patches.twitter.foryou.fingerprints.HideForYouFingerprint
 @Patch(
     name = "Hide For You",
     description = "Hides For You tab from timeline",
-    compatiblePackages = [CompatiblePackage("com.twitter.android")]
+    compatiblePackages = [CompatiblePackage("com.twitter.android")],
+    use = false
 )
 @Suppress("unused")
 object HideForYouPatch : BytecodePatch(
