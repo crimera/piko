@@ -1,6 +1,7 @@
 package crimera.patches.twitter.interaction.downloads.changedirectory
 
 import app.revanced.patcher.data.BytecodeContext
+import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
@@ -12,6 +13,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import crimera.patches.twitter.interaction.downloads.changedirectory.fingerprints.SetDownloadDestinationFingerprint
 import crimera.patches.twitter.misc.settings.SettingsPatch.UTILS_DESCRIPTOR
+import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 @Patch(
     name = "Custom download folder",
@@ -21,7 +23,7 @@ import crimera.patches.twitter.misc.settings.SettingsPatch.UTILS_DESCRIPTOR
 )
 @Suppress("unused")
 object ChangeDownloadDirPatch: BytecodePatch(
-    setOf(SetDownloadDestinationFingerprint)
+    setOf(SetDownloadDestinationFingerprint, SettingsStatusLoadFingerprint)
 ) {
     private const val GETFOLDER_DESCRIPTOR =
         "invoke-static {p1}, $UTILS_DESCRIPTOR;->getVideoFolder(Ljava/lang/String;)Ljava/lang/String;"
@@ -45,5 +47,10 @@ object ChangeDownloadDirPatch: BytecodePatch(
             $GETFOLDER_DESCRIPTOR
             move-result-object p1
         """.trimIndent())
+
+        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+            0,
+            "invoke-static {}, Lapp/revanced/integrations/twitter/settings/SettingsStatus;->enableDownload()V"
+        )
     }
 }
