@@ -1,3 +1,18 @@
+# [1.7.0-dev.2](https://github.com/crimera/piko/compare/v1.7.0-dev.1...v1.7.0-dev.2) (2024-03-02)
+
+
+### Bug Fixes
+
+* **Twitter:** disable `Hide For You` by default. ([b933c19](https://github.com/crimera/piko/commit/b933c196f8325a02e82520419c049260cc3a4590))
+
+# [1.7.0-dev.1](https://github.com/crimera/piko/compare/v1.6.0...v1.7.0-dev.1) (2024-03-02)
+
+
+### Features
+
+* **Twitter:** Hide Banner ([b653c84](https://github.com/crimera/piko/commit/b653c84d4992be90386ce3e9031b138a4310b9fa))
+* **Twitter:** Hide Live Threads ([0202771](https://github.com/crimera/piko/commit/0202771020f97c32370d9ee7d110399eae6c264c))
+
 # [1.6.0](https://github.com/crimera/piko/compare/v1.5.1...v1.6.0) (2024-03-01)
 
 
