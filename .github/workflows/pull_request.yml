@@ -8,6 +8,7 @@ on:
 
 env:
   TITLE: 'chore: Merge branch `${{ github.head_ref || github.ref_name }}` to `main`'
+  BODY: 'This pull request will `${{ github.head_ref || github.ref_name }}` to `main`.'
 
 jobs:
   pull-request:
@@ -18,6 +19,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Open pull request
-        run: gh pr create -B main -H dev --title '${{ env.TITLE }}' --body 'Created by Github action'
+        run: gh pr create -B main -H dev --title '${{ env.TITLE }}' --body '${{ env.BODY }}'
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
