@@ -14,8 +14,8 @@ import crimera.patches.twitter.timeline.banner.fingerprints.HideBannerFingerprin
 @Patch(
     name = "Hide Banner",
     description = "Hide new post banner",
-    compatiblePackages = [CompatiblePackage("com.twitter.android")]
-    ,use = false
+    compatiblePackages = [CompatiblePackage("com.twitter.android")],
+    use = false
 )
 @Suppress("unused")
 object HideBannerPatch : BytecodePatch(
