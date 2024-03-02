@@ -4,7 +4,6 @@ import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
@@ -26,6 +25,9 @@ object ChangeDownloadDirPatch: BytecodePatch(
 ) {
     private const val GETFOLDER_DESCRIPTOR =
         "invoke-static {p1}, $UTILS_DESCRIPTOR;->getVideoFolder(Ljava/lang/String;)Ljava/lang/String;"
+    private const val PUBLICFOLDER_DESCRIPTOR =
+        "invoke-static {}, $UTILS_DESCRIPTOR;->getPublicFolder()Ljava/lang/String;"
+
     override fun execute(context: BytecodeContext) {
         val result = SetDownloadDestinationFingerprint.result
             ?: throw PatchException("Could not find fingerprint")
@@ -36,11 +38,10 @@ object ChangeDownloadDirPatch: BytecodePatch(
             .first { it.opcode == Opcode.INVOKE_VIRTUAL }.location.index
 
         val publicFolderRegister = method.getInstruction<OneRegisterInstruction>(insertAt-1).registerA
-        method.replaceInstruction(insertAt-1, """
-            sget-object v$publicFolderRegister, Landroid/os/Environment;->DIRECTORY_MOVIES:Ljava/lang/String;
-        """.trimIndent())
-
         method.addInstructions(insertAt, """
+            $PUBLICFOLDER_DESCRIPTOR
+            move-result-object v$publicFolderRegister
+            
             $GETFOLDER_DESCRIPTOR
             move-result-object p1
         """.trimIndent())

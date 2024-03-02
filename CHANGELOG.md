@@ -1,3 +1,10 @@
+# [1.9.0-dev.1](https://github.com/crimera/piko/compare/v1.8.1...v1.9.0-dev.1) (2024-03-02)
+
+
+### Features
+
+* **Twitter:** Allow choosing public folder ([6c36202](https://github.com/crimera/piko/commit/6c362027f608ea2a84407d681d9b47775ccb0f4d))
+
 ## [1.8.1](https://github.com/crimera/piko/compare/v1.8.0...v1.8.1) (2024-03-02)
 
 
