@@ -1,3 +1,11 @@
+# [1.8.0](https://github.com/crimera/piko/compare/v1.7.0...v1.8.0) (2024-03-02)
+
+
+### Features
+
+* **Twitter:** Add `Custom download folder` ([7c93541](https://github.com/crimera/piko/commit/7c935415329303066cd69753bdeba9657be0f742))
+* **Twitter:** Add back settings ([5ba3580](https://github.com/crimera/piko/commit/5ba3580ec94a158c2e1043393aab76a0fae3481c))
+
 # [1.8.0-dev.2](https://github.com/crimera/piko/compare/v1.8.0-dev.1...v1.8.0-dev.2) (2024-03-02)
 
 
