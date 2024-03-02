@@ -28,7 +28,7 @@ object HideForYouPatch : BytecodePatch(
 
         val method = result.mutableMethod
 
-        val instructions = method.getInstructions();
+        val instructions = method.getInstructions()
 
         val check = instructions.first { it.opcode == Opcode.CONST_16 }.location.index
         val reg = method.getInstruction<OneRegisterInstruction>(check).registerA
