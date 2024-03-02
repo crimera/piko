@@ -1,4 +1,4 @@
-package crimera.patches.twitter.sensitivemediasettings
+package crimera.patches.twitter.misc.sensitivemediasettings
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
@@ -8,7 +8,7 @@ import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
-import crimera.patches.twitter.sensitivemediasettings.fingerprints.SensitiveMediaSettingsPatchFingerprint
+import crimera.patches.twitter.misc.sensitivemediasettings.fingerprints.SensitiveMediaSettingsPatchFingerprint
 
 // Credits to @Cradlesofashes
 @Patch(

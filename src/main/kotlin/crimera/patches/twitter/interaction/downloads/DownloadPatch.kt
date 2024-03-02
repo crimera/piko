@@ -1,4 +1,4 @@
-package crimera.patches.twitter.download
+package crimera.patches.twitter.interaction.downloads
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
@@ -11,8 +11,8 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
-import crimera.patches.twitter.download.fingerprints.DownloadPatchFingerprint
-import crimera.patches.twitter.download.fingerprints.FIleDownloaderFingerprint
+import crimera.patches.twitter.interaction.downloads.fingerprints.DownloadPatchFingerprint
+import crimera.patches.twitter.interaction.downloads.fingerprints.FIleDownloaderFingerprint
 
 // Credits to @iKirby
 @Patch(

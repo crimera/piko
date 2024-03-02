@@ -1,4 +1,4 @@
-package crimera.patches.twitter.sensitivemediasettings.fingerprints
+package crimera.patches.twitter.misc.sensitivemediasettings.fingerprints
 
 import app.revanced.patcher.fingerprint.MethodFingerprint
 import com.android.tools.smali.dexlib2.Opcode
