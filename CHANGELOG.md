@@ -1,3 +1,15 @@
+# [1.10.0](https://github.com/crimera/piko/compare/v1.9.1...v1.10.0) (2024-03-03)
+
+
+### Bug Fixes
+
+* **Twitter:** Fixup patch dependecy ([867926a](https://github.com/crimera/piko/commit/867926acccd1b768b63475aa79d376940a87e075))
+
+
+### Features
+
+* **Twitter:** Add `Disable chirp font` patch ([59eafd1](https://github.com/crimera/piko/commit/59eafd1ecf9459123fd8565121fd0a42404956bc))
+
 ## [1.9.1](https://github.com/crimera/piko/compare/v1.9.0...v1.9.1) (2024-03-02)
 
 
