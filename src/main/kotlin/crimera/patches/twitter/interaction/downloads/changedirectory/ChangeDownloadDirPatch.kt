@@ -12,13 +12,14 @@ import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import crimera.patches.twitter.interaction.downloads.changedirectory.fingerprints.SetDownloadDestinationFingerprint
+import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.SettingsPatch.UTILS_DESCRIPTOR
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 @Patch(
     name = "Custom download folder",
     description = "Change the download directory for video downloads",
-    requiresIntegrations = true,
+    dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")]
 )
 @Suppress("unused")

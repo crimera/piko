@@ -16,7 +16,6 @@ import crimera.patches.twitter.misc.integrations.IntegrationsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
 
 @Patch(
-    name = "Settings",
     description = "Adds settings",
     requiresIntegrations = true,
     dependencies = [SettingsResourcePatch::class, IntegrationsPatch::class],
