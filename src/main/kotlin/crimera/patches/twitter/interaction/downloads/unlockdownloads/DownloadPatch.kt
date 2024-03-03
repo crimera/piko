@@ -18,7 +18,8 @@ import crimera.patches.twitter.interaction.downloads.unlockdownloads.fingerprint
 @Patch(
     name = "Download patch",
     description = "Unlocks the ability to download videos from Twitter",
-    compatiblePackages = [CompatiblePackage("com.twitter.android")]
+    compatiblePackages = [CompatiblePackage("com.twitter.android")],
+    use = false
 )
 @Suppress("unused")
 object DownloadPatch : BytecodePatch(
