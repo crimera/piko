@@ -1,3 +1,12 @@
+# [1.11.0-dev.2](https://github.com/crimera/piko/compare/v1.11.0-dev.1...v1.11.0-dev.2) (2024-03-04)
+
+
+### Features
+
+* **Twitter:** Hide FAB ([4cdf50f](https://github.com/crimera/piko/commit/4cdf50fb036ed8596c9e4a3e3f1702ae78525d28))
+* **Twitter:** Hide FAB Menu Buttons ([4f25bd6](https://github.com/crimera/piko/commit/4f25bd60888b70ccd4518a42459583b6ef8fcc54))
+* **Twitter:** Hide Promoted Trends ([1be736e](https://github.com/crimera/piko/commit/1be736e31ae11d21a62f7a3f4aad2689647ada92))
+
 # [1.11.0-dev.1](https://github.com/crimera/piko/compare/v1.10.0...v1.11.0-dev.1) (2024-03-03)
 
 
