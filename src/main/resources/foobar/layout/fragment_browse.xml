@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:gravity="center" android:orientation="horizontal"
+        android:layout_width="fill_parent" android:layout_height="wrap_content">
+        <LinearLayout android:gravity="center" android:orientation="horizontal"
+            android:layout_width="0.0dip" android:layout_height="wrap_content"
+            android:layout_weight="1.0">
+            <TextView android:textAppearance="?android:textAppearanceLarge" android:textStyle="bold"
+                android:gravity="center" android:id="@id/title" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:text="TITLE" android:maxLines="2" />
+            <TextView android:textStyle="bold" android:gravity="center"
+                android:layout_gravity="center" android:id="@id/labelEditing"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="  [editing]" />
+        </LinearLayout>
+        <Button android:layout_gravity="center_horizontal" android:id="@id/endReorder"
+            android:layout_width="wrap_content" android:layout_height="50.0dip"
+            android:text="end editing" android:contentDescription="End editing" />
+        <Button android:layout_gravity="center_horizontal" android:id="@id/add"
+            android:background="@android:drawable/ic_menu_add" android:layout_width="50.0dip"
+            android:layout_height="50.0dip" android:contentDescription="Add" />
+        <Button android:layout_gravity="center_horizontal" android:id="@id/beginReorder"
+            android:background="@android:drawable/ic_menu_edit" android:layout_width="50.0dip"
+            android:layout_height="50.0dip" android:contentDescription="Edit" />
+        <Button android:layout_gravity="center_horizontal" android:id="@id/search"
+            android:background="@android:drawable/ic_menu_search" android:layout_width="50.0dip"
+            android:layout_height="50.0dip" android:contentDescription="Search" />
+        <Button android:layout_gravity="center_horizontal" android:id="@id/tools"
+            android:background="@android:drawable/ic_menu_preferences"
+            android:layout_width="50.0dip" android:layout_height="50.0dip"
+            android:contentDescription="Tools" />
+        <Button android:layout_gravity="center_horizontal" android:id="@id/help"
+            android:background="@android:drawable/ic_menu_help" android:layout_width="50.0dip"
+            android:layout_height="50.0dip" android:contentDescription="Help" />
+    </LinearLayout>
+    <com.foobar2000.foobar2000.ReorderingListView android:layout_gravity="center|left"
+        android:id="@id/listView" android:layout_width="fill_parent"
+        android:layout_height="fill_parent" android:fastScrollEnabled="true" />
+</LinearLayout>

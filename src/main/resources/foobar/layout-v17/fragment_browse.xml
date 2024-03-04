@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_gravity="center"
+    android:paddingTop="20dp"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="0.0dip"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.0"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="TITLE"
+                android:textAppearance="?android:textAppearanceLarge" />
+
+            <TextView
+                android:id="@id/labelEditing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="  [editing]"
+                android:textAlignment="gravity"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@id/search"
+            android:layout_width="30.0dip"
+            android:layout_height="30.0dip"
+            android:scaleType="fitXY"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:layout_marginRight="20dip"
+            android:padding="1dip"
+            android:src="@drawable/search"
+            android:contentDescription="Search" />
+
+        <ImageButton
+            android:id="@id/tools"
+            android:scaleType="fitXY"
+            android:background="?android:selectableItemBackgroundBorderless"
+            android:layout_width="30.0dip"
+            android:layout_height="30.0dip"
+            android:padding="1dip"
+            android:src="@drawable/cog"
+            android:contentDescription="Tools" />
+
+        <Button
+            android:id="@id/help"
+            android:layout_width="50.0dip"
+            android:layout_height="50.0dip"
+            android:background="@android:drawable/ic_menu_help"
+            android:contentDescription="Help" />
+    </LinearLayout>
+
+    <Space
+        android:layout_height="20dp"
+        android:layout_width="match_parent" />
+
+    <com.foobar2000.foobar2000.ReorderingListView
+        android:id="@id/listView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center|left"
+        android:divider="@android:color/system_neutral1_900"
+        android:paddingBottom="100dp"
+        android:clipToPadding="false"
+        android:fastScrollEnabled="true" />
+
+</LinearLayout>

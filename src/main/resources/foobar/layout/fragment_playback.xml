@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center" android:layout_height="fill_parent"
+    android:layout_width="fill_parent" android:orientation="vertical" android:paddingLeft="10.0dip"
+    android:paddingRight="10.0dip" xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Space android:layout_height="25.0dip" android:layout_weight="1.0"
+        android:layout_width="fill_parent" />
+
+    <ImageView android:id="@id/artwork" android:layout_height="0.0dip"
+        android:layout_marginLeft="10.0dip" android:layout_marginRight="10.0dip"
+        android:layout_weight="11" android:layout_width="fill_parent"></ImageView>
+
+    <Space android:layout_height="25.0dip" android:layout_weight="1.0"
+        android:layout_width="fill_parent" />
+
+    <LinearLayout android:gravity="center_horizontal" android:layout_height="0.0dip"
+        android:layout_marginLeft="10.0dip" android:layout_marginRight="10.0dip"
+        android:layout_weight="10" android:layout_width="fill_parent" android:orientation="vertical">
+
+        <LinearLayout android:gravity="center" android:layout_height="wrap_content"
+            android:layout_width="fill_parent" android:orientation="horizontal">
+
+            <TextView android:id="@id/timeElapsed" android:layout_height="wrap_content"
+                android:layout_width="wrap_content" android:text="Medium Text"
+                android:textAppearance="?android:textAppearanceSmall"></TextView>
+
+            <SeekBar android:id="@id/seekBar" android:layout_height="wrap_content"
+                android:layout_weight="1" android:layout_width="wrap_content"></SeekBar>
+
+            <TextView android:id="@id/timeRemaining" android:layout_height="wrap_content"
+                android:layout_width="wrap_content" android:text="Medium Text"
+                android:textAppearance="?android:textAppearanceSmall"></TextView>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="2"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:gravity="center"
+            android:layout_height="0dp">
+
+            <Space android:layout_height="wrap_content" android:layout_weight="1.0"
+                android:layout_width="fill_parent" />
+
+            <TextView
+                android:id="@id/labelTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:text="Large Text\neiwu"
+                android:textAppearance="?android:textAppearanceLarge"></TextView>
+
+            <Space android:layout_height="wrap_content" android:layout_weight="1"
+                android:layout_width="fill_parent" />
+
+            <TextView android:id="@id/labelArtist"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:layout_width="wrap_content" android:text="Medium Text"
+                android:textAppearance="?android:textAppearanceMedium"></TextView>
+
+        </LinearLayout>
+
+        <LinearLayout android:layout_height="wrap_content" android:layout_weight="1"
+            android:layout_width="wrap_content" android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@id/buttonPrev"
+                android:layout_height="45.0dip"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:layout_width="45.0dip"
+                android:padding="3dp"
+                android:scaleType="fitXY"
+                android:src="@drawable/prev"
+                style="?android:buttonBarButtonStyle" />
+
+            <ImageButton
+                android:id="@id/buttonPlay"
+                android:layout_height="45.0dip"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:padding="3dp"
+                android:layout_marginLeft="60.0dip"
+                android:layout_marginRight="60.0dip"
+                android:layout_width="45.0dip"
+                android:scaleType="fitXY"
+                android:src="@drawable/play"
+                style="?android:buttonBarButtonStyle" />
+
+            <ImageButton
+                android:id="@id/buttonNext"
+                android:layout_height="45.0dip"
+                android:background="?android:selectableItemBackgroundBorderless"
+                android:padding="3dp"
+                android:layout_width="45.0dip"
+                android:scaleType="fitXY"
+                android:src="@drawable/next"
+                style="?android:buttonBarButtonStyle" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
