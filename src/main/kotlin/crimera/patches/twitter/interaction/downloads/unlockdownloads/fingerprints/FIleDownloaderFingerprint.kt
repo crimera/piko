@@ -3,9 +3,9 @@ package crimera.patches.twitter.interaction.downloads.unlockdownloads.fingerprin
 import app.revanced.patcher.fingerprint.MethodFingerprint
 
 object FIleDownloaderFingerprint: MethodFingerprint(
-    returnType = "V",
+    returnType = "Z",
     strings = listOf(
-        "fileDownloader",
-        "dialogOpener"
+        "mediaEntity",
+        "variantToDownload.url"
     )
 )
