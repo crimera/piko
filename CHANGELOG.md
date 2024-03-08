@@ -1,3 +1,10 @@
+## [1.11.1-dev.1](https://github.com/crimera/piko/compare/v1.11.0...v1.11.1-dev.1) (2024-03-08)
+
+
+### Bug Fixes
+
+* **Twitter:** Brick back download and viewcount patch ([8bf9de4](https://github.com/crimera/piko/commit/8bf9de44a875c2cfd3d248df5a6aa4d1e18903ee))
+
 # [1.11.0](https://github.com/crimera/piko/compare/v1.10.0...v1.11.0) (2024-03-08)
 
 
