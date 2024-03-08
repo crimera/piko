@@ -7,5 +7,6 @@ java -jar cli.jar patch \
   -b official-revanced.jar \
   -b piko.jar \
   -m integrations.apk \
+  -e "Unlock downloads"
   -o out.apk input.apk
 ```
