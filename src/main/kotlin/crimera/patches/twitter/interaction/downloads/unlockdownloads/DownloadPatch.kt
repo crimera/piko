@@ -16,6 +16,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import crimera.patches.twitter.interaction.downloads.unlockdownloads.fingerprints.DownloadPatchFingerprint
 import crimera.patches.twitter.interaction.downloads.unlockdownloads.fingerprints.FIleDownloaderFingerprint
+import crimera.patches.twitter.interaction.downloads.unlockdownloads.fingerprints.MediaEntityFingerprint
 
 // Credits to @iKirby
 @Patch(
@@ -26,7 +27,7 @@ import crimera.patches.twitter.interaction.downloads.unlockdownloads.fingerprint
 )
 @Suppress("unused")
 object DownloadPatch : BytecodePatch(
-    setOf(DownloadPatchFingerprint, FIleDownloaderFingerprint)
+    setOf(DownloadPatchFingerprint,FIleDownloaderFingerprint,MediaEntityFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
         val result = DownloadPatchFingerprint.result
@@ -40,7 +41,7 @@ object DownloadPatch : BytecodePatch(
         val r1 = reg.registerA
         val r2 = reg.registerB
 
-        //add support for gif
+        ////add support for gif
         method.addInstructionsWithLabels(
             first_if_loc + 1,
             """
@@ -50,13 +51,13 @@ object DownloadPatch : BytecodePatch(
             """,
             ExternalLabel("cond_1212", method.getInstructions().first { it.opcode == Opcode.NEW_INSTANCE })
         )
-        
+
         //enable download for all media
         instructions.first { it.opcode == Opcode.IGET_BOOLEAN }.location.index.apply {
             method.removeInstruction(this)
             method.removeInstruction(this)
         }
-        
+       
         val f2Result = FIleDownloaderFingerprint.result
             ?: throw PatchException("FIleDownloaderFingerprint not found")
 
@@ -65,10 +66,31 @@ object DownloadPatch : BytecodePatch(
         val instructions2 = method2.getInstructions()
         val first_if2_loc = instructions2.first { it.opcode == Opcode.IF_EQZ }.location.index
         val r3 = method2.getInstruction<OneRegisterInstruction>(first_if2_loc).registerA
-        
+
         //remove premium restriction
         method2.addInstructions(first_if2_loc,"""
             const v$r3, true
         """.trimIndent())
+
+
+        //force video downloadable
+        val f3Result = MediaEntityFingerprint.result
+            ?: throw PatchException("MediaEntityFingerprint not found")
+
+        val method3 = f3Result.mutableMethod
+        val instructions3 = method3.getInstructions()
+        val loc = instructions3.last { it.opcode == Opcode.IGET_BOOLEAN }.location.index
+        val r4 = method3.getInstruction<TwoRegisterInstruction>(loc).registerA
+
+        method3.addInstructions(loc+1,"""
+            const v$r4, true
+        """.trimIndent())
+
+
+
+
+        //end
     }
+
+
 }
