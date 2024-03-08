@@ -1,3 +1,10 @@
+## [1.11.1](https://github.com/crimera/piko/compare/v1.11.0...v1.11.1) (2024-03-08)
+
+
+### Bug Fixes
+
+* **Twitter:** Bring back download and viewcount patch ([3eea91f](https://github.com/crimera/piko/commit/3eea91f06a65433275bbd7437b290212654a308d))
+
 ## [1.11.1-dev.1](https://github.com/crimera/piko/compare/v1.11.0...v1.11.1-dev.1) (2024-03-08)
 
 
