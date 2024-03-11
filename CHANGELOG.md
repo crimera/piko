@@ -1,3 +1,10 @@
+# [1.12.0-dev.1](https://github.com/crimera/piko/compare/v1.11.1...v1.12.0-dev.1) (2024-03-11)
+
+
+### Features
+
+* **Twitter:** Hide Community Notes ([2f018a4](https://github.com/crimera/piko/commit/2f018a443202d90c7de6324de00becca57a3de21))
+
 ## [1.11.1](https://github.com/crimera/piko/compare/v1.11.0...v1.11.1) (2024-03-08)
 
 
