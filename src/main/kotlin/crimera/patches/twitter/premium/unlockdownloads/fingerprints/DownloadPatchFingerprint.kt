@@ -1,4 +1,4 @@
-package crimera.patches.twitter.interaction.downloads.unlockdownloads.fingerprints
+package crimera.patches.twitter.premium.unlockdownloads.fingerprints
 
 import app.revanced.patcher.fingerprint.MethodFingerprint
 
