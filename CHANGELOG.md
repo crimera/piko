@@ -1,3 +1,11 @@
+# [1.12.0-dev.2](https://github.com/crimera/piko/compare/v1.12.0-dev.1...v1.12.0-dev.2) (2024-03-13)
+
+
+### Features
+
+* **Twitter:** added `Reader Mode patch` ([e4c9e1a](https://github.com/crimera/piko/commit/e4c9e1ade4125c1e75d3becb7fa6271f83d526de))
+* **Twitter:** added `Undo Posts Patch` ([9411550](https://github.com/crimera/piko/commit/9411550e26a18bbf90ee049bc3da558350275d81))
+
 # [1.12.0-dev.1](https://github.com/crimera/piko/compare/v1.11.1...v1.12.0-dev.1) (2024-03-11)
 
 
