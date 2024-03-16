@@ -1,3 +1,10 @@
+# [1.13.0-dev.1](https://github.com/crimera/piko/compare/v1.12.0...v1.13.0-dev.1) (2024-03-16)
+
+
+### Features
+
+* Add settings for `Disable chirp font` patch ([dad0a70](https://github.com/crimera/piko/commit/dad0a70b13a281937ea608e7866b20ae30863cb9))
+
 # [1.12.0](https://github.com/crimera/piko/compare/v1.11.1...v1.12.0) (2024-03-16)
 
 
