@@ -1,3 +1,27 @@
+# [1.12.0-dev.1](https://github.com/crimera/piko/compare/v1.11.1...v1.12.0-dev.1) (2024-03-16)
+
+
+### Features
+
+* **Twitter:** added `Reader Mode patch` ([1348099](https://github.com/crimera/piko/commit/134809970363b6eb76b15f1c76b779307a663cc6))
+* **Twitter:** added `Undo Posts Patch` ([ced73c6](https://github.com/crimera/piko/commit/ced73c6e316dbbdfaa60858ae5bc8a75b9afc3c0))
+* **Twitter:** Hide Community Notes ([ab48b40](https://github.com/crimera/piko/commit/ab48b402009c8603bd9ad9507a444742642282df))
+
+# [1.12.0-dev.2](https://github.com/crimera/piko/compare/v1.12.0-dev.1...v1.12.0-dev.2) (2024-03-13)
+
+
+### Features
+
+* **Twitter:** added `Reader Mode patch` ([e4c9e1a](https://github.com/crimera/piko/commit/e4c9e1ade4125c1e75d3becb7fa6271f83d526de))
+* **Twitter:** added `Undo Posts Patch` ([9411550](https://github.com/crimera/piko/commit/9411550e26a18bbf90ee049bc3da558350275d81))
+
+# [1.12.0-dev.1](https://github.com/crimera/piko/compare/v1.11.1...v1.12.0-dev.1) (2024-03-11)
+
+
+### Features
+
+* **Twitter:** Hide Community Notes ([2f018a4](https://github.com/crimera/piko/commit/2f018a443202d90c7de6324de00becca57a3de21))
+
 ## [1.11.1](https://github.com/crimera/piko/compare/v1.11.0...v1.11.1) (2024-03-08)
 
 
