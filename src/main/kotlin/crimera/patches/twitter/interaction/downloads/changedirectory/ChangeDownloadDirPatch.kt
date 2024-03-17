@@ -50,8 +50,8 @@ object ChangeDownloadDirPatch: BytecodePatch(
         """.trimIndent())
 
         SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "invoke-static {}, Lapp/revanced/integrations/twitter/settings/SettingsStatus;->enableDownloadFolder()V"
+                0,
+        "invoke-static {}, Lapp/revanced/integrations/twitter/settings/SettingsStatus;->enableDownloadFolder()V"
         )
     }
 }
