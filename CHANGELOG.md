@@ -1,3 +1,10 @@
+# [1.13.0-dev.2](https://github.com/crimera/piko/compare/v1.13.0-dev.1...v1.13.0-dev.2) (2024-03-17)
+
+
+### Features
+
+* **Twitter:** Add Settings for `Hide Live Threads` and `Hide Banner` patch ([ca474d4](https://github.com/crimera/piko/commit/ca474d4e7a1baa5f9cfcfd03a0640a4867089131))
+
 # [1.13.0-dev.1](https://github.com/crimera/piko/compare/v1.12.0...v1.13.0-dev.1) (2024-03-16)
 
 
