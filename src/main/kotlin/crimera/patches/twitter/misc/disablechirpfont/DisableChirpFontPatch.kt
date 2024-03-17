@@ -20,7 +20,7 @@ object DisableChirpFontPatch: BytecodePatch(
     setOf(ChirpFontFingerprint)
 ) {
     private const val CHIRP_FONT_DESCRIPTOR =
-        "invoke-static {}, ${SettingsPatch.UTILS_DESCRIPTOR};->isChirpFontEnabled()Z"
+        "invoke-static {}, ${SettingsPatch.PREF_DESCRIPTOR};->isChirpFontEnabled()Z"
 
     override fun execute(context: BytecodeContext) {
         ChirpFontFingerprint.result!!.mutableMethod.addInstructions(
