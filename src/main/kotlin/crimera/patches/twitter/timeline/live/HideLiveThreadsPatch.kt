@@ -17,6 +17,7 @@ import crimera.patches.twitter.timeline.live.fingerprints.HideLiveThreadsFingerp
 
 @Patch(
     name = "Hide Live Threads",
+    dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = false
 )
@@ -35,7 +36,7 @@ object HideLiveThreadsPatch :  BytecodePatch(
         val reg = method.getInstruction<OneRegisterInstruction>(loc).registerA
 
         val HIDE_LIVE_DESCRIPTOR =
-            "invoke-static {v$reg}, ${SettingsPatch.UTILS_DESCRIPTOR};->liveThread(Ljava/util/ArrayList;)Ljava/util/ArrayList;"
+            "invoke-static {v$reg}, ${SettingsPatch.PREF_DESCRIPTOR};->liveThread(Ljava/util/ArrayList;)Ljava/util/ArrayList;"
 
         method.addInstructions(loc+1,"""
             $HIDE_LIVE_DESCRIPTOR
@@ -44,7 +45,7 @@ object HideLiveThreadsPatch :  BytecodePatch(
 
         SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
             0,
-            "invoke-static {}, Lapp/revanced/integrations/twitter/settings/SettingsStatus;->hideLiveThreads()V"
+            "${SettingsPatch.SSTS_DESCRIPTOR}->hideLiveThreads()V"
         )
     }
 }

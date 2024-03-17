@@ -13,6 +13,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
 @Patch(
     name = "Disable chirp font",
     use = false,
+    dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")]
 )
 @Suppress("unused")
@@ -20,7 +21,7 @@ object DisableChirpFontPatch: BytecodePatch(
     setOf(ChirpFontFingerprint)
 ) {
     private const val CHIRP_FONT_DESCRIPTOR =
-        "invoke-static {}, ${SettingsPatch.UTILS_DESCRIPTOR};->isChirpFontEnabled()Z"
+        "invoke-static {}, ${SettingsPatch.PREF_DESCRIPTOR};->isChirpFontEnabled()Z"
 
     override fun execute(context: BytecodeContext) {
         ChirpFontFingerprint.result!!.mutableMethod.addInstructions(
@@ -34,7 +35,7 @@ object DisableChirpFontPatch: BytecodePatch(
 
         SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
             0,
-            "invoke-static {}, Lapp/revanced/integrations/twitter/settings/SettingsStatus;->enableFont()V"
+            "${SettingsPatch.SSTS_DESCRIPTOR}->enableFont()V"
         )
     }
 }
