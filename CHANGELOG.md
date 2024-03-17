@@ -1,3 +1,10 @@
+# [1.13.0-dev.3](https://github.com/crimera/piko/compare/v1.13.0-dev.2...v1.13.0-dev.3) (2024-03-17)
+
+
+### Features
+
+* **Twitter:** Added `Hide For You` in Mod Settings ([86ea20f](https://github.com/crimera/piko/commit/86ea20f7c4309de0fcae2ba8fa2fa47990290a5a))
+
 # [1.13.0-dev.2](https://github.com/crimera/piko/compare/v1.13.0-dev.1...v1.13.0-dev.2) (2024-03-17)
 
 
