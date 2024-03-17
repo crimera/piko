@@ -17,6 +17,7 @@ import crimera.patches.twitter.timeline.live.fingerprints.HideLiveThreadsFingerp
 
 @Patch(
     name = "Hide Live Threads",
+    dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = false
 )
@@ -44,7 +45,7 @@ object HideLiveThreadsPatch :  BytecodePatch(
 
         SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
             0,
-            "invoke-static {}, Lapp/revanced/integrations/twitter/settings/SettingsStatus;->hideLiveThreads()V"
+            "${SettingsPatch.SSTS_DESCRIPTOR}->hideLiveThreads()V"
         )
     }
 }

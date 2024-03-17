@@ -29,6 +29,7 @@ object SettingsPatch : BytecodePatch(
     const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
     const val PREF_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Pref"
     private const val ADD_PREF_DESCRIPTOR = "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
+    const val SSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/settings/SettingsStatus;"
     private const val START_ACTIVITY_DESCRIPTOR =
         "invoke-static {}, $UTILS_DESCRIPTOR;->startSettingsActivity()V"
 

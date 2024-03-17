@@ -17,6 +17,7 @@ import crimera.patches.twitter.timeline.banner.fingerprints.HideBannerFingerprin
 @Patch(
     name = "Hide Banner",
     description = "Hide new post banner",
+    dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = false
 )
@@ -44,7 +45,7 @@ object HideBannerPatch : BytecodePatch(
 
         SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
             0,
-            "invoke-static {}, Lapp/revanced/integrations/twitter/settings/SettingsStatus;->hideBanner()V"
+            "${SettingsPatch.SSTS_DESCRIPTOR}->hideBanner()V"
         )
 
 //        method.removeInstruction(loc)

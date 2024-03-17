@@ -51,7 +51,7 @@ object ChangeDownloadDirPatch: BytecodePatch(
 
         SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
             0,
-            "invoke-static {}, Lapp/revanced/integrations/twitter/settings/SettingsStatus;->enableDownloadFolder()V"
+            "${SettingsPatch.SSTS_DESCRIPTOR}->enableDownloadFolder()V"
         )
     }
 }
