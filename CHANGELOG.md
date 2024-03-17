@@ -1,3 +1,12 @@
+# [1.13.0](https://github.com/crimera/piko/compare/v1.12.0...v1.13.0) (2024-03-17)
+
+
+### Features
+
+* Add settings for `Disable chirp font` patch ([dad0a70](https://github.com/crimera/piko/commit/dad0a70b13a281937ea608e7866b20ae30863cb9))
+* **Twitter:** Add Settings for `Hide Live Threads` and `Hide Banner` patch ([ca474d4](https://github.com/crimera/piko/commit/ca474d4e7a1baa5f9cfcfd03a0640a4867089131))
+* **Twitter:** Added `Hide For You` in Mod Settings ([86ea20f](https://github.com/crimera/piko/commit/86ea20f7c4309de0fcae2ba8fa2fa47990290a5a))
+
 # [1.13.0-dev.3](https://github.com/crimera/piko/compare/v1.13.0-dev.2...v1.13.0-dev.3) (2024-03-17)
 
 
