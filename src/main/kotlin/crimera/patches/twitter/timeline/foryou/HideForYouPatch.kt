@@ -1,4 +1,4 @@
-package crimera.patches.twitter.foryou
+package crimera.patches.twitter.timeline.foryou
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
@@ -36,7 +36,5 @@ object HideForYouPatch : BytecodePatch(
         method.addInstruction(check+1,"""
             const/16 v$reg, 0x22
         """.trimIndent())
-
-
     }
 }
