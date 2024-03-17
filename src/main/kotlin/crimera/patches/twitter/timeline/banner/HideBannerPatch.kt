@@ -35,7 +35,7 @@ object HideBannerPatch : BytecodePatch(
 
 //        TODO: make the register dynamic
         val HIDE_BANNER_DESCRIPTOR =
-            "invoke-static {}, ${SettingsPatch.UTILS_DESCRIPTOR};->hideBanner()Z"
+            "invoke-static {}, ${SettingsPatch.PREF_DESCRIPTOR};->hideBanner()Z"
 
         method.addInstructions(loc, """
             $HIDE_BANNER_DESCRIPTOR

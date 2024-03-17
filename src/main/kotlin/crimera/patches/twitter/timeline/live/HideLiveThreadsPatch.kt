@@ -35,7 +35,7 @@ object HideLiveThreadsPatch :  BytecodePatch(
         val reg = method.getInstruction<OneRegisterInstruction>(loc).registerA
 
         val HIDE_LIVE_DESCRIPTOR =
-            "invoke-static {v$reg}, ${SettingsPatch.UTILS_DESCRIPTOR};->liveThread(Ljava/util/ArrayList;)Ljava/util/ArrayList;"
+            "invoke-static {v$reg}, ${SettingsPatch.PREF_DESCRIPTOR};->liveThread(Ljava/util/ArrayList;)Ljava/util/ArrayList;"
 
         method.addInstructions(loc+1,"""
             $HIDE_LIVE_DESCRIPTOR

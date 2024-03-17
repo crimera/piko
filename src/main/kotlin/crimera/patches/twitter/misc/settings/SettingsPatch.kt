@@ -27,9 +27,10 @@ object SettingsPatch : BytecodePatch(
 ) {
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
     const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
+    const val PREF_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Pref"
     private const val ADD_PREF_DESCRIPTOR = "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
     private const val START_ACTIVITY_DESCRIPTOR =
-        "invoke-static {}, $UTILS_DESCRIPTOR;->startActivity()V"
+        "invoke-static {}, $UTILS_DESCRIPTOR;->startSettingsActivity()V"
 
     override fun execute(context: BytecodeContext) {
         val result = SettingsFingerprint.result

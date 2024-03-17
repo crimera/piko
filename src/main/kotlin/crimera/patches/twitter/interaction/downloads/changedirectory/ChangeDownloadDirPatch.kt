@@ -13,7 +13,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import crimera.patches.twitter.interaction.downloads.changedirectory.fingerprints.SetDownloadDestinationFingerprint
 import crimera.patches.twitter.misc.settings.SettingsPatch
-import crimera.patches.twitter.misc.settings.SettingsPatch.UTILS_DESCRIPTOR
+import crimera.patches.twitter.misc.settings.SettingsPatch.PREF_DESCRIPTOR
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 @Patch(
@@ -27,9 +27,9 @@ object ChangeDownloadDirPatch: BytecodePatch(
     setOf(SetDownloadDestinationFingerprint, SettingsStatusLoadFingerprint)
 ) {
     private const val GETFOLDER_DESCRIPTOR =
-        "invoke-static {p1}, $UTILS_DESCRIPTOR;->getVideoFolder(Ljava/lang/String;)Ljava/lang/String;"
+        "invoke-static {p1}, $PREF_DESCRIPTOR;->getVideoFolder(Ljava/lang/String;)Ljava/lang/String;"
     private const val PUBLICFOLDER_DESCRIPTOR =
-        "invoke-static {}, $UTILS_DESCRIPTOR;->getPublicFolder()Ljava/lang/String;"
+        "invoke-static {}, $PREF_DESCRIPTOR;->getPublicFolder()Ljava/lang/String;"
 
     override fun execute(context: BytecodeContext) {
         val result = SetDownloadDestinationFingerprint.result
@@ -51,7 +51,7 @@ object ChangeDownloadDirPatch: BytecodePatch(
 
         SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
             0,
-            "invoke-static {}, Lapp/revanced/integrations/twitter/settings/SettingsStatus;->enableDownload()V"
+            "invoke-static {}, Lapp/revanced/integrations/twitter/settings/SettingsStatus;->enableDownloadFolder()V"
         )
     }
 }
