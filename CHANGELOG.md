@@ -1,3 +1,10 @@
+# [1.14.0-dev.1](https://github.com/crimera/piko/compare/v1.13.0...v1.14.0-dev.1) (2024-03-18)
+
+
+### Features
+
+* **Twitter:** Add Settings for `Hide Recommended Users` patch ([f43f027](https://github.com/crimera/piko/commit/f43f027ef6ab0d5ab0bc3433762e9200a3d8e50d))
+
 # [1.13.0](https://github.com/crimera/piko/compare/v1.12.0...v1.13.0) (2024-03-17)
 
 
