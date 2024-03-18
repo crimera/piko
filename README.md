@@ -7,8 +7,8 @@ java -jar cli.jar patch \
   -b official-revanced.jar \
   -b piko.jar \
   -m integrations.apk \
-  -e "Unlock downloads"
-  -e "Hide Recommended Users"
+  -e "Unlock downloads" \
+  -e "Hide recommended users" \
   -o out.apk input.apk
 ```
 
