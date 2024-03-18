@@ -1,3 +1,11 @@
+# [1.14.0-dev.4](https://github.com/crimera/piko/compare/v1.14.0-dev.3...v1.14.0-dev.4) (2024-03-18)
+
+
+### Features
+
+* **Twitter:** Added `Hide Community Notes` to mod settings ([157a32b](https://github.com/crimera/piko/commit/157a32b1e9f24157ad81c2434206f6e13404bbc3))
+* **Twitter:** Added `Hide Promoted Trends` to Mod Settings ([9d29f45](https://github.com/crimera/piko/commit/9d29f45ba67ab2d682afe466c2d30af8b3421975))
+
 # [1.14.0-dev.3](https://github.com/crimera/piko/compare/v1.14.0-dev.2...v1.14.0-dev.3) (2024-03-18)
 
 
