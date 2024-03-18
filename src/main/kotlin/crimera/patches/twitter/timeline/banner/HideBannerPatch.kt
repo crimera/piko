@@ -34,7 +34,6 @@ object HideBannerPatch : BytecodePatch(
 
         val loc = instuctions.first{it.opcode == Opcode.IF_NEZ}.location.index
 
-//        TODO: make the register dynamic
         val HIDE_BANNER_DESCRIPTOR =
             "invoke-static {}, ${SettingsPatch.PREF_DESCRIPTOR};->hideBanner()Z"
 
@@ -47,8 +46,5 @@ object HideBannerPatch : BytecodePatch(
             0,
             "${SettingsPatch.SSTS_DESCRIPTOR}->hideBanner()V"
         )
-
-//        method.removeInstruction(loc)
-
     }
 }
