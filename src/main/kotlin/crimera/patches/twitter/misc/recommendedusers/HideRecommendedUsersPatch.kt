@@ -1,4 +1,4 @@
-package crimera.patches.twitter.recommendedusers
+package crimera.patches.twitter.misc.recommendedusers
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
@@ -13,7 +13,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
-import crimera.patches.twitter.recommendedusers.fingerprints.HideRecommendedUsersFingerprint
+import crimera.patches.twitter.misc.recommendedusers.fingerprints.HideRecommendedUsersFingerprint
 
 
 @Patch(
