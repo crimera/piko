@@ -1,13 +1,14 @@
 package crimera.patches.twitter.misc.viewcount
 
 import app.revanced.patcher.data.BytecodeContext
+import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.removeInstructions
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
+import crimera.patches.twitter.misc.settings.SettingsPatch
+import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.misc.viewcount.fingerprints.RemoveViewCountPatchFingerprint
 
 // Credits to @iKirby
@@ -25,14 +26,17 @@ object RemoveViewCountPatch: BytecodePatch(
             ?: throw PatchException("Fingerprint not found")
 
         val method = result.mutableMethod
-        val instructions = method.getInstructions()
 
-        method.removeInstructions(0, instructions.count())
-
-        method.addInstructions("""
-            const/4 v0, 0x0
+        method.addInstructions(0, """
+            invoke-static {}, ${SettingsPatch.PREF_DESCRIPTOR};->hideViewCount()Z
+            move-result v0
             return v0
         """.trimIndent())
+
+        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+            0,
+            "${SettingsPatch.SSTS_DESCRIPTOR}->hideViewCount()V"
+        )
     }
 
 }
