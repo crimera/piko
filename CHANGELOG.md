@@ -1,3 +1,10 @@
+# [1.14.0-dev.2](https://github.com/crimera/piko/compare/v1.14.0-dev.1...v1.14.0-dev.2) (2024-03-18)
+
+
+### Features
+
+* **Twitter:** Add settings for `Hide FAB` patch ([d5dde7c](https://github.com/crimera/piko/commit/d5dde7cb2e843bb0c8b90b7d1d5989bcf91e712b))
+
 # [1.14.0-dev.1](https://github.com/crimera/piko/compare/v1.13.0...v1.14.0-dev.1) (2024-03-18)
 
 
