@@ -21,7 +21,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
     name = "Hide Promoted Trends",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false
+    use = true
 )
 @Suppress("unused")
 class HidePromotedTrendPatch : BytecodePatch(

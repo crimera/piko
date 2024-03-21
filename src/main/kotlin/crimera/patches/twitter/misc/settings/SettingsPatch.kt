@@ -28,6 +28,7 @@ object SettingsPatch : BytecodePatch(
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
     const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
     const val PREF_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Pref"
+    const val PATCHES_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/patches"
     private const val ADD_PREF_DESCRIPTOR = "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
     const val SSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/settings/SettingsStatus;"
     private const val START_ACTIVITY_DESCRIPTOR =
