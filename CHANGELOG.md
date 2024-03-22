@@ -1,3 +1,10 @@
+# [1.15.0-dev.1](https://github.com/crimera/piko/compare/v1.14.0...v1.15.0-dev.1) (2024-03-22)
+
+
+### Features
+
+* **Twitter:** Add `Dynamic color` patch from revanced ([d2bd0ef](https://github.com/crimera/piko/commit/d2bd0ef4a6c36650edde7c6d8c0c7587dcfb46ac))
+
 # [1.14.0](https://github.com/crimera/piko/compare/v1.13.0...v1.14.0) (2024-03-22)
 
 
