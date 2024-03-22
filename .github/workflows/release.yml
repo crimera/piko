@@ -30,7 +30,7 @@ jobs:
       - name: Build with Gradle
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew build clean
+        run: ./gradlew generatePatchesFiles clean
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
