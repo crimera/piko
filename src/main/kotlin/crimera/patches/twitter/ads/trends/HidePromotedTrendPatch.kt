@@ -1,6 +1,7 @@
 package crimera.patches.twitter.ads.trends
 
 import app.revanced.patcher.data.BytecodeContext
+import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
@@ -13,15 +14,18 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import crimera.patches.twitter.ads.trends.fingerprints.HidePromotedTrendFingerprint
+import crimera.patches.twitter.misc.settings.SettingsPatch
+import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 @Patch(
     name = "Hide Promoted Trends",
+    dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false
+    use = true
 )
 @Suppress("unused")
 class HidePromotedTrendPatch : BytecodePatch(
-    setOf(HidePromotedTrendFingerprint)
+    setOf(HidePromotedTrendFingerprint,SettingsStatusLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
         val result = HidePromotedTrendFingerprint.result
@@ -36,11 +40,23 @@ class HidePromotedTrendPatch : BytecodePatch(
         val loc = return_loc-7
         val reg = method.getInstruction<TwoRegisterInstruction>(loc).registerA
 
+        val HOOK_DESCRIPTOR =
+            "invoke-static {v$reg}, ${SettingsPatch.PREF_DESCRIPTOR};->hidePromotedTrend(Ljava/lang/Object;)Z"
+
+
         method.addInstructionsWithLabels(return_loc,"""
+            $HOOK_DESCRIPTOR
+            move-result v$reg
             if-eqz v$reg, :cond_1212
             const v$return_reg, 0x0
         """.trimIndent(),
             ExternalLabel("cond_1212", return_obj)
+        )
+
+
+        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+            0,
+            "${SettingsPatch.SSTS_DESCRIPTOR}->hidePromotedTrends()V"
         )
     }
 }

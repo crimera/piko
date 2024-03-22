@@ -1,3 +1,39 @@
+# [1.14.0-dev.5](https://github.com/crimera/piko/compare/v1.14.0-dev.4...v1.14.0-dev.5) (2024-03-22)
+
+
+### Features
+
+* **Twitter:** Added Ad block hooks ([4811584](https://github.com/crimera/piko/commit/4811584abfb764c3539733818cf1d2dc96ef1349))
+
+# [1.14.0-dev.4](https://github.com/crimera/piko/compare/v1.14.0-dev.3...v1.14.0-dev.4) (2024-03-18)
+
+
+### Features
+
+* **Twitter:** Added `Hide Community Notes` to mod settings ([157a32b](https://github.com/crimera/piko/commit/157a32b1e9f24157ad81c2434206f6e13404bbc3))
+* **Twitter:** Added `Hide Promoted Trends` to Mod Settings ([9d29f45](https://github.com/crimera/piko/commit/9d29f45ba67ab2d682afe466c2d30af8b3421975))
+
+# [1.14.0-dev.3](https://github.com/crimera/piko/compare/v1.14.0-dev.2...v1.14.0-dev.3) (2024-03-18)
+
+
+### Features
+
+* **Twitter:** Add settings for `Remove view count` patch ([67bb8ad](https://github.com/crimera/piko/commit/67bb8ad9837bdc21c2fffcad7851e67a8e37054d))
+
+# [1.14.0-dev.2](https://github.com/crimera/piko/compare/v1.14.0-dev.1...v1.14.0-dev.2) (2024-03-18)
+
+
+### Features
+
+* **Twitter:** Add settings for `Hide FAB` patch ([d5dde7c](https://github.com/crimera/piko/commit/d5dde7cb2e843bb0c8b90b7d1d5989bcf91e712b))
+
+# [1.14.0-dev.1](https://github.com/crimera/piko/compare/v1.13.0...v1.14.0-dev.1) (2024-03-18)
+
+
+### Features
+
+* **Twitter:** Add Settings for `Hide Recommended Users` patch ([f43f027](https://github.com/crimera/piko/commit/f43f027ef6ab0d5ab0bc3433762e9200a3d8e50d))
+
 # [1.13.0](https://github.com/crimera/piko/compare/v1.12.0...v1.13.0) (2024-03-17)
 
 
