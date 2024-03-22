@@ -1,3 +1,17 @@
+# [1.15.0](https://github.com/crimera/piko/compare/v1.14.0...v1.15.0) (2024-03-22)
+
+
+### Bug Fixes
+
+* Change run config ([9dc5772](https://github.com/crimera/piko/commit/9dc5772d527189b01d10c0ce8cb22acdb9c38bcd))
+
+
+### Features
+
+* Add support for packages.json ([f133c12](https://github.com/crimera/piko/commit/f133c1205f88d6fa1b00800a98d1895a52be412a))
+* **Twitter:** Add `Dynamic color` patch from revanced ([d2bd0ef](https://github.com/crimera/piko/commit/d2bd0ef4a6c36650edde7c6d8c0c7587dcfb46ac))
+* **Twitter:** Hide `Pinned posts by followers` ([5807471](https://github.com/crimera/piko/commit/5807471dda09eb379337f55edd650be12e66ff57))
+
 # [1.15.0-dev.3](https://github.com/crimera/piko/compare/v1.15.0-dev.2...v1.15.0-dev.3) (2024-03-22)
 
 
