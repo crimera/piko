@@ -1,3 +1,10 @@
+# [1.15.0-dev.2](https://github.com/crimera/piko/compare/v1.15.0-dev.1...v1.15.0-dev.2) (2024-03-22)
+
+
+### Features
+
+* **Twitter:** Hide `Pinned posts by followers` ([5807471](https://github.com/crimera/piko/commit/5807471dda09eb379337f55edd650be12e66ff57))
+
 # [1.15.0-dev.1](https://github.com/crimera/piko/compare/v1.14.0...v1.15.0-dev.1) (2024-03-22)
 
 
