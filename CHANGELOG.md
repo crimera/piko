@@ -1,3 +1,15 @@
+# [1.15.0-dev.3](https://github.com/crimera/piko/compare/v1.15.0-dev.2...v1.15.0-dev.3) (2024-03-22)
+
+
+### Bug Fixes
+
+* Change run config ([9dc5772](https://github.com/crimera/piko/commit/9dc5772d527189b01d10c0ce8cb22acdb9c38bcd))
+
+
+### Features
+
+* Add support for packages.json ([f133c12](https://github.com/crimera/piko/commit/f133c1205f88d6fa1b00800a98d1895a52be412a))
+
 # [1.15.0-dev.2](https://github.com/crimera/piko/compare/v1.15.0-dev.1...v1.15.0-dev.2) (2024-03-22)
 
 
