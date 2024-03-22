@@ -69,10 +69,20 @@ tasks {
         }
     }
 
+    register<JavaExec>("generatePatchesFiles") {
+        description = "Generate patches files"
+
+        dependsOn(build)
+
+        classpath = sourceSets["main"].runtimeClasspath
+        mainClass.set("app.revanced.generator.MainKt")
+    }
+
     // Required to run tasks because Gradle semantic-release plugin runs the publish task.
     // Tracking: https://github.com/KengoTODA/gradle-semantic-release-plugin/issues/435
     named("publish") {
         dependsOn("generateBundle")
+        dependsOn("generatePatchesFiles")
     }
 }
 
