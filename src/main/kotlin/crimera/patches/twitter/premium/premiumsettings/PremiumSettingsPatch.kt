@@ -18,6 +18,7 @@ import crimera.patches.twitter.premium.premiumsettings.fingerprints.PremiumSetti
     description = "Unlocks premium options from settings like custom app icon and custom navbar",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
+@Suppress("unused")
 object PremiumSettingsPatch : BytecodePatch(
     setOf(PremiumSettingsPatchFingerprint, SettingsFingerprint)
 ) {

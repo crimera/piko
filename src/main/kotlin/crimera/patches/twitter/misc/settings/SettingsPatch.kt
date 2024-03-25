@@ -26,7 +26,7 @@ object SettingsPatch : BytecodePatch(
     setOf(SettingsFingerprint)
 ) {
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
-    const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
+    private const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
     const val PREF_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Pref"
     const val PATCHES_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/patches"
     private const val ADD_PREF_DESCRIPTOR = "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
