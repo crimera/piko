@@ -1,3 +1,16 @@
+# [1.15.0-dev.3](https://github.com/crimera/piko/compare/v1.15.0-dev.2...v1.15.0-dev.3) (2024-03-25)
+
+
+### Bug Fixes
+
+* Change run config ([18d4dce](https://github.com/crimera/piko/commit/18d4dcebb67a568e460931c6cd2003a0df7ae5ec))
+
+
+### Features
+
+* Add support for patches.json ([f5f63a3](https://github.com/crimera/piko/commit/f5f63a330a06d03a10e1a3232d96764fc2d1ac7c))
+* **Twitter:** Add `Premium settings` patch, Unlocks premium options from settings like custom app icon and custom navbar ([066e953](https://github.com/crimera/piko/commit/066e9538a983e6c261a56b1b568375132c0ca33c))
+
 # [1.15.0](https://github.com/crimera/piko/compare/v1.14.0...v1.15.0) (2024-03-22)
 
 
