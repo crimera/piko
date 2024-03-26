@@ -16,7 +16,9 @@ import crimera.patches.twitter.premium.readermode.fingerprints.EnableReaderMode2
 @Patch(
     name = "Enable Reader Mode",
     description = "Enables \"Reader Mode\" on long threads",
+    dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
+    requiresIntegrations = true
 )
 @Suppress("unused")
 object EnableReaderModePatch:BytecodePatch(
