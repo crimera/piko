@@ -1,3 +1,10 @@
+# [1.16.0-dev.1](https://github.com/crimera/piko/compare/v1.15.0-dev.3...v1.16.0-dev.1) (2024-03-27)
+
+
+### Bug Fixes
+
+* Activate release so i can test ([34b7227](https://github.com/crimera/piko/commit/34b7227934bc77e024d37ae5f14b719a9d165288))
+
 # [1.15.0-dev.3](https://github.com/crimera/piko/compare/v1.15.0-dev.2...v1.15.0-dev.3) (2024-03-27)
 
 
