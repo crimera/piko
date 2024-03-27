@@ -1,4 +1,20 @@
-# [1.15.0](https://github.com/crimera/piko/compare/v1.14.0...v1.15.0) (2024-03-27)
+# [1.16.0-dev.1](https://github.com/crimera/piko/compare/v1.15.0-dev.3...v1.16.0-dev.1) (2024-03-27)
+
+
+### Bug Fixes
+
+* Activate release so i can test ([34b7227](https://github.com/crimera/piko/commit/34b7227934bc77e024d37ae5f14b719a9d165288))
+* Remove semicolon ;-) ([46e60f7](https://github.com/crimera/piko/commit/46e60f71d3eefc2eb81fbca01451d52731c397c1))
+
+# [1.16.0-dev.1](https://github.com/crimera/piko/compare/v1.15.0-dev.3...v1.16.0-dev.1) (2024-03-27)
+
+
+### Bug Fixes
+
+* Activate release so i can test ([34b7227](https://github.com/crimera/piko/commit/34b7227934bc77e024d37ae5f14b719a9d165288))
+
+# [1.16.0-dev.1](https://github.com/crimera/piko/compare/v1.15.0-dev.3...v1.16.0-dev.1) (2024-03-27)
+
 
 
 ### Bug Fixes
@@ -51,6 +67,7 @@
 * **Twitter:** Added `App Icon and NavBar Customisation` settings ([7e67d2f](https://github.com/crimera/piko/commit/7e67d2f84049007fe0b836567fd5572ad62b8a43))
 * **Twitter:** Added `Undo Post Patch` in mod settings ([54c722e](https://github.com/crimera/piko/commit/54c722e409e3367a9a1e42a7c51878ba81c3aa98))
 * **Twitter:** Hide `Pinned posts by followers` ([5807471](https://github.com/crimera/piko/commit/5807471dda09eb379337f55edd650be12e66ff57))
+
 
 # [1.15.0-dev.3](https://github.com/crimera/piko/compare/v1.15.0-dev.2...v1.15.0-dev.3) (2024-03-27)
 
