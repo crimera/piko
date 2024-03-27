@@ -1,3 +1,12 @@
+# [1.16.0-dev.2](https://github.com/crimera/piko/compare/v1.16.0-dev.1...v1.16.0-dev.2) (2024-03-27)
+
+
+### Bug Fixes
+
+* idk ([0a4ade0](https://github.com/crimera/piko/commit/0a4ade0e4cf65078cfbdde349c8f7ee92754067f))
+* refactor ([eab113e](https://github.com/crimera/piko/commit/eab113e471c2b588bbda05acba57e669a312f52c))
+* update pr if it already exists ([6d616d2](https://github.com/crimera/piko/commit/6d616d20ea0a0a4880e5fb339dd569db1cc530a2))
+
 ## [1.15.2](https://github.com/crimera/piko/compare/v1.15.1...v1.15.2) (2024-03-27)
 
 

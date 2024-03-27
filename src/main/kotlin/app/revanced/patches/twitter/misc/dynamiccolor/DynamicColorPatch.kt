@@ -16,7 +16,7 @@ import java.nio.file.Files
 @Suppress("unused")
 object DynamicColorPatch : ResourcePatch() {
     override fun execute(context: ResourceContext) {
-        val resDirectory = context.get("res")
+        val resDirectory = context["res"]
         if (!resDirectory.isDirectory) throw PatchException("The res folder can not be found.")
 
         val valuesV31Directory = resDirectory.resolve("values-v31")
