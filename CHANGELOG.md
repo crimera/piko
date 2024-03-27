@@ -1,3 +1,23 @@
+# [1.15.0](https://github.com/crimera/piko/compare/v1.14.0...v1.15.0) (2024-03-27)
+
+
+### Bug Fixes
+
+* Activate release so i can test ([34b7227](https://github.com/crimera/piko/commit/34b7227934bc77e024d37ae5f14b719a9d165288))
+* Change run config ([18d4dce](https://github.com/crimera/piko/commit/18d4dcebb67a568e460931c6cd2003a0df7ae5ec))
+* Remove semicolon ;-) ([46e60f7](https://github.com/crimera/piko/commit/46e60f71d3eefc2eb81fbca01451d52731c397c1))
+* **Twitter:** fix `Reader mode` for 10.34 ([01cb8c9](https://github.com/crimera/piko/commit/01cb8c94c951c103f0ebea56f8daf88214eb77ae))
+
+
+### Features
+
+* Add support for patches.json ([f5f63a3](https://github.com/crimera/piko/commit/f5f63a330a06d03a10e1a3232d96764fc2d1ac7c))
+* **Twitter:** Add `Dynamic color` patch from revanced ([d2bd0ef](https://github.com/crimera/piko/commit/d2bd0ef4a6c36650edde7c6d8c0c7587dcfb46ac))
+* **Twitter:** Add `Premium settings` patch, Unlocks premium options from settings like custom app icon and custom navbar ([066e953](https://github.com/crimera/piko/commit/066e9538a983e6c261a56b1b568375132c0ca33c))
+* **Twitter:** Added `App Icon and NavBar Customisation` settings ([7e67d2f](https://github.com/crimera/piko/commit/7e67d2f84049007fe0b836567fd5572ad62b8a43))
+* **Twitter:** Added `Undo Post Patch` in mod settings ([54c722e](https://github.com/crimera/piko/commit/54c722e409e3367a9a1e42a7c51878ba81c3aa98))
+* **Twitter:** Hide `Pinned posts by followers` ([5807471](https://github.com/crimera/piko/commit/5807471dda09eb379337f55edd650be12e66ff57))
+
 # [1.16.0-dev.1](https://github.com/crimera/piko/compare/v1.15.0-dev.3...v1.16.0-dev.1) (2024-03-27)
 
 
