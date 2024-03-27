@@ -30,3 +30,4 @@ java -jar cli.jar patch \
 | `Hide Recommended Users` | Hide recommended users that pops up when you follow someone |
 | `Hide Banner` | Hide new post banner |
 | `Hide Live Threads` | Hides the Live Threads feature from main timeline|
+| `Enable custom app icon and nav icon settings` | Unlock custom nav bars and app icons |
