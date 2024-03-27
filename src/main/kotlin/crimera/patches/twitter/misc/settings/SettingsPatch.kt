@@ -21,7 +21,6 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
     dependencies = [SettingsResourcePatch::class, IntegrationsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
-@Suppress("unused")
 object SettingsPatch : BytecodePatch(
     setOf(SettingsFingerprint)
 ) {

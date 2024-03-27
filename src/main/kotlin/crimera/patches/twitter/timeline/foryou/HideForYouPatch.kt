@@ -12,7 +12,7 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import crimera.patches.twitter.foryou.fingerprints.HideForYouFingerprint
+import crimera.patches.twitter.timeline.foryou.fingerprints.HideForYouFingerprint
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 

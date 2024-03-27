@@ -1,4 +1,4 @@
-package crimera.patches.twitter.foryou.fingerprints
+package crimera.patches.twitter.timeline.foryou.fingerprints
 
 import app.revanced.patcher.fingerprint.MethodFingerprint
 import com.android.tools.smali.dexlib2.Opcode
