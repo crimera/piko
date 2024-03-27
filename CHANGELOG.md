@@ -1,3 +1,10 @@
+## [1.15.2](https://github.com/crimera/piko/compare/v1.15.1...v1.15.2) (2024-03-27)
+
+
+### Bug Fixes
+
+* update pr if it already exists ([6d616d2](https://github.com/crimera/piko/commit/6d616d20ea0a0a4880e5fb339dd569db1cc530a2))
+
 # [1.15.0](https://github.com/crimera/piko/compare/v1.14.0...v1.15.0) (2024-03-27)
 
 
