@@ -1,3 +1,10 @@
+# [1.16.0](https://github.com/crimera/piko/compare/v1.15.3...v1.16.0) (2024-03-27)
+
+
+### Features
+
+* Update README.md ([7d801a9](https://github.com/crimera/piko/commit/7d801a983d7f36eeba927514a26d943e0ea371d5))
+
 # [1.16.0-dev.3](https://github.com/crimera/piko/compare/v1.16.0-dev.2...v1.16.0-dev.3) (2024-03-27)
 
 
