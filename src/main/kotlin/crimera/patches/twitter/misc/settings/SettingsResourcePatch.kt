@@ -10,7 +10,6 @@ import org.w3c.dom.Element
 @Patch(
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
-@Suppress("unused")
 object SettingsResourcePatch: ResourcePatch() {
     override fun execute(context: ResourceContext) {
         val settingsRoot = context["res/xml/settings_root.xml"]

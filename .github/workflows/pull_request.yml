@@ -19,6 +19,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Open pull request
-        run: gh pr create -B main -H dev --title '${{ env.TITLE }}' --body '${{ env.BODY }}'
+        run: gh pr create -d -B main -H dev --title '${{ env.TITLE }}' --body '${{ env.BODY }}'
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
