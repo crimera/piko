@@ -1,6 +1,7 @@
 package crimera.patches.twitter.premium.undoposts
 
 import app.revanced.patcher.data.BytecodeContext
+import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
@@ -12,57 +13,59 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import crimera.patches.twitter.misc.settings.SettingsPatch
+import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.premium.undoposts.fingerprints.UndoPost1Fingerprint
 import crimera.patches.twitter.premium.undoposts.fingerprints.UndoPost2Fingerprint
 import crimera.patches.twitter.premium.undoposts.fingerprints.UndoPost3Fingerprint
 
 @Patch(
     name = "Enable Undo Posts",
-    description = "Enable ability to undo posts before it gets posted",
+    description = "Enables ability to undo posts before posting",
+    dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false
+    requiresIntegrations = true
 )
 object EnableUndoPostPatch :BytecodePatch(
-    setOf(UndoPost1Fingerprint,UndoPost2Fingerprint,UndoPost3Fingerprint)
+    setOf(UndoPost1Fingerprint,UndoPost2Fingerprint,UndoPost3Fingerprint,SettingsStatusLoadFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
 
         val result1 = UndoPost1Fingerprint.result
             ?: throw PatchException("UndoPost1Fingerprint not found")
 
-        //removes flag check
+        val PREF = "invoke-static {}, ${SettingsPatch.PREF_DESCRIPTOR};->enableUndoPosts()Z"
+
+        //flag check 1
         val method1 = result1.mutableMethod
         val loc1 = method1.getInstructions().first { it.opcode == Opcode.IF_EQZ }.location.index
-        method1.removeInstruction(loc1)
+        method1.addInstruction(loc1-1,PREF.trimIndent())
 
 
 
         val result2 = UndoPost2Fingerprint.result
             ?: throw PatchException("UndoPost2Fingerprint not found")
 
-        //removes flag check
+        //flag check 2
         val method2 = result2.mutableMethod
         val loc2 = method2.getInstructions().first { it.opcode == Opcode.IF_EQZ }.location.index
-        method2.removeInstruction(loc2)
+        method2.addInstruction(loc2-1,PREF.trimIndent())
+
+
 
         val result3 = UndoPost3Fingerprint.result
             ?: throw PatchException("UndoPost2Fingerprint not found")
 
-
-
-        //removes flag check and always return true
+        //flag check 3
         val method3 = result3.mutableMethod
-
-        val instructions = method3.getInstructions()
-        method3.removeInstructions(0, instructions.count())
-
-       method3.addInstructions(0,"""
-           sget-object v0, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
-           return-object v0
-       """.trimIndent())
+        val loc3 = method3.getInstructions().last{ it.opcode == Opcode.INVOKE_STATIC }.location.index
+        method3.addInstruction(loc3-1,PREF.trimIndent())
 
 
-
+        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+            0,
+            "${SettingsPatch.SSTS_DESCRIPTOR}->enableUndoPosts()V"
+        )
         //end
     }
 

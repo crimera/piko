@@ -4,8 +4,8 @@ import app.revanced.patcher.fingerprint.MethodFingerprint
 
 object EnableReaderMode1Fingerprint: MethodFingerprint(
     returnType = "V",
+    parameters = listOf("Ljava/lang/Object;"),
     strings = listOf(
-        "android_audio_protected_account_creation_enabled",
         "subscriptions_feature_1005"
     )
 )
