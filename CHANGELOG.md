@@ -52,6 +52,22 @@
 ### Bug Fixes
 
 * Change run config ([18d4dce](https://github.com/crimera/piko/commit/18d4dcebb67a568e460931c6cd2003a0df7ae5ec))
+* **Twitter:** fix `Reader mode` for 10.34 ([01cb8c9](https://github.com/crimera/piko/commit/01cb8c94c951c103f0ebea56f8daf88214eb77ae))
+
+
+### Features
+
+* Add support for patches.json ([f5f63a3](https://github.com/crimera/piko/commit/f5f63a330a06d03a10e1a3232d96764fc2d1ac7c))
+* **Twitter:** Add `Premium settings` patch, Unlocks premium options from settings like custom app icon and custom navbar ([066e953](https://github.com/crimera/piko/commit/066e9538a983e6c261a56b1b568375132c0ca33c))
+* **Twitter:** Added `App Icon and NavBar Customisation` settings ([7e67d2f](https://github.com/crimera/piko/commit/7e67d2f84049007fe0b836567fd5572ad62b8a43))
+* **Twitter:** Added `Undo Post Patch` in mod settings ([54c722e](https://github.com/crimera/piko/commit/54c722e409e3367a9a1e42a7c51878ba81c3aa98))
+
+# [1.15.0-dev.3](https://github.com/crimera/piko/compare/v1.15.0-dev.2...v1.15.0-dev.3) (2024-03-27)
+
+
+### Bug Fixes
+
+* Change run config ([18d4dce](https://github.com/crimera/piko/commit/18d4dcebb67a568e460931c6cd2003a0df7ae5ec))
 
 
 ### Features
