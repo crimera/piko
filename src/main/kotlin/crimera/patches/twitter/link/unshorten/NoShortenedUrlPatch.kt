@@ -35,7 +35,7 @@ object NoShortenedUrlPatch : BytecodePatch(
         val targetIndex2 = instructions.size - 1
         for (i in 0..targetIndex2) {
             if (instructions[i].opcode == Opcode.IF_EQ) {
-                targetIndex = i;
+                targetIndex = i
             }
         }
 
