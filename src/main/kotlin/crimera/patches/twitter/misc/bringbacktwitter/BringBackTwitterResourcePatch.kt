@@ -15,6 +15,7 @@ import org.w3c.dom.Element
     description = "Bring back old twitter logo and name",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
+@Suppress("unused")
 object BringBackTwitterResourcePatch: ResourcePatch() {
     val icons = arrayOf(
         "ic_launcher_twitter",
