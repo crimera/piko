@@ -1,3 +1,18 @@
+# [1.17.0](https://github.com/crimera/piko/compare/v1.16.0...v1.17.0) (2024-03-29)
+
+
+### Bug Fixes
+
+* **Twitter - Bring back twitter:** Add other languages ([2c63ff1](https://github.com/crimera/piko/commit/2c63ff1bc1444ed6d83f911becca4289001c306c))
+* **Twitter - Bring back twitter:** Now changes notification icon ([7e281e4](https://github.com/crimera/piko/commit/7e281e42f2c809ad669113b81f9f888b168882ca))
+* **Twitter - Bring back twitter:** Now changes notification icon ([8b57a07](https://github.com/crimera/piko/commit/8b57a07dfb7ca6ce3d92af92b09f2a786e0544f2))
+* **Twitter:** Add splash screen icon ([b30e083](https://github.com/crimera/piko/commit/b30e0838de4ac5f72848dcc813d477e52a6d3f1c))
+
+
+### Features
+
+* **Twitter:** Add `Bring back twitter` patch ([b299b0c](https://github.com/crimera/piko/commit/b299b0c076a9ef68970bc57547830027d336b442))
+
 # [1.17.0-dev.3](https://github.com/crimera/piko/compare/v1.17.0-dev.2...v1.17.0-dev.3) (2024-03-29)
 
 
