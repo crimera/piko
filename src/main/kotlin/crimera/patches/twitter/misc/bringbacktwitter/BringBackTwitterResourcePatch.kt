@@ -4,10 +4,9 @@ import app.revanced.patcher.data.ResourceContext
 import app.revanced.patcher.patch.ResourcePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
-import app.revanced.util.ResourceGroup
-import app.revanced.util.asSequence
-import app.revanced.util.copyResources
+import app.revanced.util.*
 import org.w3c.dom.Element
+import java.nio.file.Files
 
 
 @Patch(
@@ -16,21 +15,25 @@ import org.w3c.dom.Element
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 @Suppress("unused")
-object BringBackTwitterResourcePatch: ResourcePatch() {
-    val icons = arrayOf(
+object BringBackTwitterResourcePatch : ResourcePatch() {
+    val mipmapIcons = arrayOf(
         "ic_launcher_twitter",
         "ic_launcher_twitter_round",
         "ic_launcher_twitter_foreground",
-    )
+    ).map { "$it.webp" }.toTypedArray()
 
-    val mipmapDirectories = arrayOf(
+    val drawableIcons = arrayOf(
+        "ic_vector_twitter",
+        "splash_screen_icon"
+    ).map { "$it.xml" }.toTypedArray()
+
+    val sizes = arrayOf(
         "xxxhdpi",
         "xxhdpi",
         "xhdpi",
         "hdpi",
         "mdpi",
-        "anydpi",
-    ).map { "mipmap-$it" }
+    )
 
     val languages = arrayOf(
         "fa", "de", "sr", "ko", "pt", "ro", "bg",
@@ -64,27 +67,30 @@ object BringBackTwitterResourcePatch: ResourcePatch() {
             }
         }
 
-        // Change app icon
-        mipmapDirectories.map { directory ->
-            if (directory.contains("anydpi")) {
-                ResourceGroup(
-                    directory,
-                    *icons.map { "$it.xml" }.filter { !it.contains("foreground") }.toTypedArray()
-                )
+        // app icons
+        // drawable icons
+        sizes.map { "drawable-$it" }.plus("drawable").map {
+            if (it == "drawable") {
+                ResourceGroup(it, *drawableIcons)
             } else {
-                ResourceGroup(
-                    directory,
-                    *icons.map { "$it.webp" }.toTypedArray()
-                )
+                ResourceGroup(it, "ic_stat_twitter.webp")
             }
         }.forEach {
             context.copyResources("twitter", it)
         }
 
-        // copy vector icons for topbar and splash
-        val drawables = arrayOf("ic_vector_twitter", "splash_screen_icon").map { "$it.xml" }.toTypedArray()
-        context.copyResources("twitter", ResourceGroup("drawable", *drawables))
+        // mipmap icons
+        sizes.map { "mipmap-$it" }.map {
+            if (it == "mipmap-xxhdpi") {
+                ResourceGroup(it, *mipmapIcons.plus("fg_launcher_twitter.webp"))
+            } else {
+                ResourceGroup(it, *mipmapIcons)
+            }
+        }.forEach {
+            context.copyResources("twitter", it)
+        }
 
+        // bring back twitter blue
         context.xmlEditor["res/layout/ocf_twitter_logo.xml"].use {
             val imageView = it.file.getElementsByTagName("ImageView").item(0) as Element
             imageView.setAttribute("app:tint", "@color/twitter_blue")
@@ -95,7 +101,6 @@ object BringBackTwitterResourcePatch: ResourcePatch() {
             imageView.setAttribute("app:tint", "@color/twitter_blue")
         }
 
-        // bring back twitter blue
         context.xmlEditor["res/values/colors.xml"].use {
             it.file.getElementsByTagName("color").asSequence().find { color ->
                 (color as Element).getAttribute("name") == "ic_launcher_background"
