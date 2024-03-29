@@ -1,3 +1,10 @@
+# [1.17.0-dev.2](https://github.com/crimera/piko/compare/v1.17.0-dev.1...v1.17.0-dev.2) (2024-03-29)
+
+
+### Bug Fixes
+
+* **Twitter - Bring back twitter:** Add other languages ([2c63ff1](https://github.com/crimera/piko/commit/2c63ff1bc1444ed6d83f911becca4289001c306c))
+
 # [1.17.0-dev.1](https://github.com/crimera/piko/compare/v1.16.0...v1.17.0-dev.1) (2024-03-29)
 
 
