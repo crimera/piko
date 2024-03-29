@@ -31,3 +31,4 @@ java -jar cli.jar patch \
 | `Hide Banner` | Hide new post banner |
 | `Hide Live Threads` | Hides the Live Threads feature from main timeline|
 | `Enable custom app icon and nav icon settings` | Unlock custom nav bars and app icons |
+| `Bring back Twitter` | Bring back old Twitter logo and name |
