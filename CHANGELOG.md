@@ -1,3 +1,11 @@
+## [1.17.1](https://github.com/crimera/piko/compare/v1.17.0...v1.17.1) (2024-03-29)
+
+
+### Bug Fixes
+
+* **Twitter - Bring back twitter:** Exclude by default ([e654549](https://github.com/crimera/piko/commit/e654549c95412b50932453732b215ebb097d4c19))
+* **Twitter - Bring back twitter:** Now changes the app name by writing directly to AndroidManifest (Should make patching faster) ([f61468c](https://github.com/crimera/piko/commit/f61468c4cd1d42d7697a3179a4711dcb9ea01c9e))
+
 ## [1.17.1-dev.2](https://github.com/crimera/piko/compare/v1.17.1-dev.1...v1.17.1-dev.2) (2024-03-29)
 
 
