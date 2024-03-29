@@ -38,36 +38,12 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         "mdpi",
     )
 
-    val languages = arrayOf(
-        "fa", "de", "sr", "ko", "pt", "ro", "bg",
-        "zh-rCN", "tl", "gu", "ar-rEH", "cs", "hr", "hu",
-        "bn", "fr", "ja", "uk", "sk", "it", "iw",
-        "in", "pl", "hi", "ru", "ms", "th", "nl",
-        "en-rGB", "ca", "zh-rTW", "zh-rHK", "el", "ta", "es",
-        "kn", "fi", "vi", "ar", "mr", "da", "sv",
-        "tr", "nb", ""
-    ).map {
-        if (it == "") {
-            "res/values/strings.xml"
-        } else {
-            "res/values-$it/strings.xml"
-        }
-    }
-
     override fun execute(context: ResourceContext) {
 
         // Change app name
-        languages.forEach { file ->
-            context.xmlEditor[file].use {
-                val strings = it.file.getElementsByTagName("string")
-                for (i in 0 until strings.length) {
-                    val string = strings.item(i) as Element
-
-                    if (!string.getAttribute("name").contains("api_key")) {
-                        string.textContent = string.textContent.replace("X", "Twitter")
-                    }
-                }
-            }
+        context.xmlEditor["AndroidManifest.xml"].use {
+            val application = it.file.getElementsByTagName("application").item(0) as Element
+            application.setAttribute("android:label", "Twitter")
         }
 
         // app icons
