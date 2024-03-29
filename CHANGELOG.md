@@ -1,3 +1,15 @@
+# [1.17.0-dev.1](https://github.com/crimera/piko/compare/v1.16.0...v1.17.0-dev.1) (2024-03-29)
+
+
+### Bug Fixes
+
+* **Twitter:** Add splash screen icon ([b30e083](https://github.com/crimera/piko/commit/b30e0838de4ac5f72848dcc813d477e52a6d3f1c))
+
+
+### Features
+
+* **Twitter:** Add `Bring back twitter` patch ([b299b0c](https://github.com/crimera/piko/commit/b299b0c076a9ef68970bc57547830027d336b442))
+
 # [1.16.0](https://github.com/crimera/piko/compare/v1.15.3...v1.16.0) (2024-03-27)
 
 
