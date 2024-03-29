@@ -49,5 +49,6 @@ jobs:
       - name: Run apk build
         run: |          
           curl -X POST https://api.github.com/repos/crimera/piko-builds/dispatches \
-          -H 'Accept: application/vnd.github.everest-preview+json' \
-          -u ${{ secrets.ACCESS_TOKEN }}
+          -H 'Accept: application/vnd.github+json' \
+          -H "Authorization: Bearer ${{secrets.ACCESS_TOKEN}}" \
+          -d '{"event_type": "build"}'
