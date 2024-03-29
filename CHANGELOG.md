@@ -1,3 +1,11 @@
+# [1.17.0-dev.3](https://github.com/crimera/piko/compare/v1.17.0-dev.2...v1.17.0-dev.3) (2024-03-29)
+
+
+### Bug Fixes
+
+* **Twitter - Bring back twitter:** Now changes notification icon ([7e281e4](https://github.com/crimera/piko/commit/7e281e42f2c809ad669113b81f9f888b168882ca))
+* **Twitter - Bring back twitter:** Now changes notification icon ([8b57a07](https://github.com/crimera/piko/commit/8b57a07dfb7ca6ce3d92af92b09f2a786e0544f2))
+
 # [1.17.0-dev.2](https://github.com/crimera/piko/compare/v1.17.0-dev.1...v1.17.0-dev.2) (2024-03-29)
 
 
