@@ -4,15 +4,17 @@ import app.revanced.patcher.data.ResourceContext
 import app.revanced.patcher.patch.ResourcePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
-import app.revanced.util.*
+import app.revanced.util.ResourceGroup
+import app.revanced.util.asSequence
+import app.revanced.util.copyResources
 import org.w3c.dom.Element
-import java.nio.file.Files
 
 
 @Patch(
     name = "Bring back twitter",
     description = "Bring back old twitter logo and name",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
+    use = false
 )
 @Suppress("unused")
 object BringBackTwitterResourcePatch : ResourcePatch() {
