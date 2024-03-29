@@ -106,6 +106,8 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
                 (color as Element).getAttribute("name") == "ic_launcher_background"
             }?.textContent = "@color/twitter_blue"
         }
+
+        updateStrings(context)
     }
 
     private fun updateStrings(context: ResourceContext) {
