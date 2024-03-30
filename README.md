@@ -35,63 +35,63 @@ java -jar cli.jar patch \
 <td><code>Remove Ads</code></td>
 <td>Removes promoted posts in timeline and replies</td>
 <td>Ads</td>
-<td> <details><img src="./docs/images/1-ad-block.webp" alt="1-ad-block" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/1-ad-block.webp" alt="1-ad-block" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Remove Google Ads</code></td>
 <td>Removes Google ads in timeline and replies</td>
 <td>Ads</td>
-<td> <details><img src="./docs/images/5-g-ads-block.webp" alt="5-g-ads-block" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/5-g-ads-block.webp" alt="5-g-ads-block" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Remove "Who to follow" Banner</code></td>
 <td>Removes "Who to follow" block in timeline</td>
 <td>Ads</td>
-<td> <details><img src="./docs/images/8-who-to-follow.webp" alt="8-who-to-follow" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/8-who-to-follow.webp" alt="8-who-to-follow" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Remove "Communities to join" Banner</code></td>
 <td>Removes "Communities to join" block in timeline</td>
 <td>Ads</td>
-<td> <details><img src="./docs/images/2-comm-to-join.webp" alt="2-comm-to-join" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/2-comm-to-join.webp" alt="2-comm-to-join" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Remove "Creators to subscribe" Banner</code></td>
 <td>Removes "Creators to subscribe" block in timeline</td>
 <td>Ads</td>
-<td> <details><img src="./docs/images/3-creator-to-sub.webp" alt="3-creator-to-sub" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/3-creator-to-sub.webp" alt="3-creator-to-sub" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Remove "Pinned posts by followers" Banner</code></td>
 <td>Removes "Pinned posts by followers" block in timeline</td>
 <td>Ads</td>
-<td> <details><img src="./docs/images/6-pinned-by-followers.webp" alt="6-pinned-by-followers" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/6-pinned-by-followers.webp" alt="6-pinned-by-followers" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Remove "Revisit Bookmark" Banner</code></td>
 <td>Removes "Revisit your bookmark" block in timeline</td>
 <td>Ads</td>
-<td> <details><img src="./docs/images/7-revisit-your-bmk.webp" alt="7-revisit-your-bmk" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/7-revisit-your-bmk.webp" alt="7-revisit-your-bmk" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Remove Detailed posts</code></td>
 <td>Removes "Discover more" Banner in threads</td>
 <td>Ads</td>
-<td> <details><img src="./docs/images/4-discover-more.webp" alt="4-discover-more" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/4-discover-more.webp" alt="4-discover-more" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Hide Promoted Trends</code></td>
 <td>Removes Hide Promoted Trends in explore</td>
 <td>Ads</td>
-<td> <details><img src="./docs/images/9-promoted-trends.webp" alt="9-promoted-trends" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/9-promoted-trends.webp" alt="9-promoted-trends" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
@@ -133,105 +133,105 @@ java -jar cli.jar patch \
 <td><code>Hide FAB</code></td>
 <td>Hides Floating Action Button</td>
 <td>Misc</td>
-<td> <details><img src="./docs/images/10-hide-fab.webp" alt="10-hide-fab" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/10-hide-fab.webp" alt="10-hide-fab" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Hide FAB Menu Buttons</code></td>
 <td>Hides Floating Action Button menu buttons</td>
 <td>Misc</td>
-<td> <details><img src="./docs/images/24-hide-fab-btns.webp" alt="24-hide-fab-btns" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/24-hide-fab-btns.webp" alt="24-hide-fab-btns" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Hide Community Notes</code></td>
 <td></td>
 <td>Misc</td>
-<td> <details><img src="./docs/images/11-hide-comm-notes.webp" alt="11-hide-comm-notes" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/11-hide-comm-notes.webp" alt="11-hide-comm-notes" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Hide Recommended Users</code></td>
 <td>Hide recommended users that pops up when you follow someone</td>
 <td>Misc</td>
-<td> <details><img src="./docs/images/12-recc-users.webp" alt="12-recc-users" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/12-recc-users.webp" alt="12-recc-users" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Selectable Text</code></td>
 <td>Makes bio and username selectable</td>
 <td>Misc</td>
-<td> <details><img src="./docs/images/13-selectable-text.webp" alt="13-selectable-text" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/13-selectable-text.webp" alt="13-selectable-text" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Show sensitive media</code></td>
 <td></td>
 <td>Misc</td>
-<td> <details><img src="./docs/images/14-show-sen-media.webp" alt="14-show-sen-media" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/14-show-sen-media.webp" alt="14-show-sen-media" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Adds settings</code></td>
 <td>Adds mod settings</td>
 <td>Misc</td>
-<td> <details><img src="./docs/images/15-mod-settings.webp" alt="15-mod-settings" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/15-mod-settings.webp" alt="15-mod-settings" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Remove view count</code></td>
 <td>Removes the view count from the bottom of tweets</td>
 <td>Misc</td>
-<td> <details><img src="./docs/images/16-hide-view-count.webp" alt="16-hide-view-count" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/16-hide-view-count.webp" alt="16-hide-view-count" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Enable custom app icon and nav icon settings</code></td>
 <td></td>
 <td>Premium</td>
-<td> <details><img src="./docs/images/17-customize-icon-n-navbar.webp" alt="17-customize-icon-n-navbar" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/17-customize-icon-n-navbar.webp" alt="17-customize-icon-n-navbar" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Enable Reader Mode</code></td>
 <td>Enables \"Reader Mode\" on long threads</td>
 <td>Premium</td>
-<td> <details><img src="./docs/images/18-reader-mode.webp" alt="18-reader-mode" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/18-reader-mode.webp" alt="18-reader-mode" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Enable Undo Posts</code></td>
 <td>Enables ability to undo posts before posting</td>
 <td>Premium</td>
-<td> <details><img src="./docs/images/19-undo-mode.webp" alt="19-undo-mode" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/19-undo-mode.webp" alt="19-undo-mode" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Download patch</code></td>
 <td>Unlocks the ability to download videos and gifs</td>
 <td>Premium</td>
-<td> <details><img src="./docs/images/20-download-media.webp" alt="20-download-media" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/20-download-media.webp" alt="20-download-media" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Hide Banner</code></td>
 <td>Hide new post banner</td>
 <td>Timeline</td>
-<td> <details><img src="./docs/images/21-hide-banner.webp" alt="21-hide-banner" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/21-hide-banner.webp" alt="21-hide-banner" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Hide For You</code></td>
 <td>Hides For You tab from timeline</td>
 <td>Timeline</td>
-<td> <details><img src="./docs/images/22-hide-foryou.webp" alt="22-hide-foryou" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/22-hide-foryou.webp" alt="22-hide-foryou" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
 <td><code>Hide Live Threads</code></td>
 <td>Hide Live section</td>
 <td>Timeline</td>
-<td> <details><img src="./docs/images/23-hide-live-threads.webp" alt="23-hide-live-threads" width="360" height="360"/></details></td>
+<td> <details><img src="./docs/images/23-hide-live-threads.webp" alt="23-hide-live-threads" width="800" height="240"/></details></td>
 </tr>
 
 </tbody>
