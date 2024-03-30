@@ -124,9 +124,9 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
                     }
                 }
 
-                // log in rv manager itself, which string keys were not found or failed
+                // log which keys were not found or failed
                 if (!keyReplaced) {
-                    throw PatchException("key not found: $key")
+                    println("Key not found: $key")
                 }
             }
         }
