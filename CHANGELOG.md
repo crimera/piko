@@ -1,3 +1,5 @@
+## [1.17.2](https://github.com/crimera/piko/compare/v1.17.1...v1.17.2) (2024-03-31)
+
 ## [1.17.1](https://github.com/crimera/piko/compare/v1.17.0...v1.17.1) (2024-03-29)
 
 
