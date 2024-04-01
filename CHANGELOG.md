@@ -1,4 +1,15 @@
-## [1.17.2](https://github.com/crimera/piko/compare/v1.17.1...v1.17.2) (2024-03-31)
+# [1.18.0-dev.1](https://github.com/crimera/piko/compare/v1.17.1...v1.18.0-dev.1) (2024-03-31)
+
+
+### Bug Fixes
+
+* **Twitter - Custom sharing domain:** Disable by default ([6e7c170](https://github.com/crimera/piko/commit/6e7c17014b75d098eaef5ba3fbe4ed777eb416b1))
+
+
+### Features
+
+* **Twitter:** Add `Custom sharing domain` patch ([8ffd36c](https://github.com/crimera/piko/commit/8ffd36c4097f3dc1de9f654b44f077e8ed1e9481))
+
 
 ## [1.17.1](https://github.com/crimera/piko/compare/v1.17.0...v1.17.1) (2024-03-29)
 

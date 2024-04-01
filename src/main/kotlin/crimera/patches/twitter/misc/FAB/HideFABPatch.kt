@@ -16,12 +16,13 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
 
 @Patch(
     name = "Hide FAB",
+    dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")] ,
     use = false
 )
 @Suppress("unused")
 class HideFABPatch :BytecodePatch(
-    setOf(HideFABFingerprint)
+    setOf(HideFABFingerprint,SettingsStatusLoadFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
         val result = HideFABFingerprint.result
