@@ -234,6 +234,13 @@ java -jar cli.jar patch \
 <td> <details><img src="./docs/images/23-hide-live-threads.webp" alt="23-hide-live-threads" width="800" height="240"/></details></td>
 </tr>
 
+<tr>
+<td><code>Hide bookmark icon in timeline</code></td>
+<td></td>
+<td>Timeline</td>
+<td></td>
+</tr>
+
 </tbody>
 </table>
 </details>
