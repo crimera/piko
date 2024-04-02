@@ -1,3 +1,10 @@
+# [1.19.0](https://github.com/crimera/piko/compare/v1.18.0...v1.19.0) (2024-04-02)
+
+
+### Features
+
+* **Twitter:** Added `Hide bookmark icon in timeline` ([ff66167](https://github.com/crimera/piko/commit/ff66167e5678adff4fde4e092a03b030a2a49693))
+
 # [1.19.0-dev.1](https://github.com/crimera/piko/compare/v1.18.0...v1.19.0-dev.1) (2024-04-01)
 
 
