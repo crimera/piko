@@ -16,6 +16,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
 
 @Patch(
     name = "Hide FAB",
+    description = "Adds an option to hide Floating action bar",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")] ,
     use = false
