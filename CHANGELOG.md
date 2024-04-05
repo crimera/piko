@@ -1,3 +1,10 @@
+## [1.19.1-dev.1](https://github.com/crimera/piko/compare/v1.19.0...v1.19.1-dev.1) (2024-04-05)
+
+
+### Bug Fixes
+
+* **Hide FAB:** Add description ([ae418a8](https://github.com/crimera/piko/commit/ae418a83d94cbb1091ba9fec3ce07a8704ab5c00))
+
 # [1.19.0](https://github.com/crimera/piko/compare/v1.18.0...v1.19.0) (2024-04-02)
 
 
