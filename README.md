@@ -13,6 +13,8 @@ Use <a href="https://github.com/crimera/revanced-integrations">crimera/revanced-
 
 ## Usage
 
+</div>
+
 To use these patches in ReVanced Manager, follow the steps below or see image:
 
 1. Set `crimera` as the patches organization.
@@ -22,6 +24,8 @@ To use these patches in ReVanced Manager, follow the steps below or see image:
 <div style="display:flex; justify-content:space-between;">  
 <img src="docs/images/manager.png" alt="usage" width="200" />  
 </div>  
+
+<div  align="center">
 
 ```sh
 java -jar cli.jar patch \
