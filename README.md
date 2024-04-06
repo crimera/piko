@@ -8,10 +8,10 @@
 <summary><h2>🚀 Patch yourself</h2></summary>
 Use <a href="https://github.com/crimera/revanced-integrations">crimera/revanced-integrations</a> when building.
 
-<h2>Join our official Telegram Channel</h2>
+<summary><h2>📢 Join official Telegram group</h2></summary>
 <a href ="https://t.me/pikopatches">Piko - Twitter Revanced</a>
 
-## Usage
+<summary><h2>🕹️Usage</h2></summary>
 
 </div>
 
@@ -20,6 +20,8 @@ To use these patches in ReVanced Manager, follow the steps below or see image:
 1. Set `crimera` as the patches organization.
 2. Set `piko` the patches source.
 3. Set `crimera` as integration organization.
+
+🚨 Note : Always use ```crimera/revanced-integrations``` when building.
 
 <div style="display:flex; justify-content:space-between;">  
 <img src="docs/images/manager.png" alt="usage" width="200" />  
