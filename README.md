@@ -12,7 +12,7 @@
 
 <summary><h2>🕹️ Usage</h2></summary>
 
-<h4>Revanced Cli</h4>
+<b>Revanced Cli</b>
 
 🚨 Use [crimera/revanced-integrations](https://github.com/crimera/revanced-integrations) when building.
 
@@ -23,7 +23,7 @@ java -jar cli.jar patch \
   -o out.apk input.apk
 ```
 
-<p><h4>or Revanced Manager</h4>
+<p><b>or Revanced Manager</b>
 <details>
 
 <div align="left">
