@@ -8,23 +8,11 @@
 <summary><h2>📢 Join official Telegram group</h2></summary>
 <a href ="https://t.me/pikopatches">Piko - Twitter Revanced</a>
 
-<summary><h2>🕹️Usage</h2></summary>
+<summary><h2>🕹️ Usage</h2></summary>
 
-</div>
+<h4>Revanced Cli</h4>
 
-To use these patches in ReVanced Manager, follow the steps below or see image:
-
-1. Set `crimera` as the patches organization.
-2. Set `piko` the patches source.
-3. Set `crimera` as integration organization.
-
-🚨 Note : Always use ```crimera/revanced-integrations``` when building.
-
-<div style="display:flex; justify-content:space-between;">  
-<img src="docs/images/manager.png" alt="usage" width="200" />  
-</div>  
-
-<div  align="center">
+🚨 Use [crimera/revanced-integrations](https://github.com/crimera/revanced-integrations) when building.
 
 ```sh
 java -jar cli.jar patch \
@@ -33,6 +21,20 @@ java -jar cli.jar patch \
   -o out.apk input.apk
 ```
 
+<p><h4>or Revanced Manager</h4>
+<details>
+
+<div align="left">
+To use these patches in ReVanced Manager, follow the steps below or see image:
+
+1. Set `crimera` as the patches organization.<br>
+2. Set `piko` the patches source.<br>
+3. Set `crimera` as integration organization.<br>
+
+<img src="docs/images/manager.png" alt="usage" width="200" />
+</div>
+
+</details>
 
 <summary><h2>⚙️ Patch Details</h2></summary>
 <details>
@@ -45,7 +47,7 @@ java -jar cli.jar patch \
 <th>Image</th>
 </tr>
 </thead>
-  
+
 <tbody>
 
 <tr>
