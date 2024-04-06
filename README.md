@@ -9,6 +9,7 @@
 Use <a href="https://github.com/crimera/revanced-integrations">crimera/revanced-integrations</a> when building.
 
 <h2>Join our official Telegram Channel</h2>
+[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/pikopatches)
 <a href ="https://t.me/pikopatches">Piko - Twitter Revanced </a>
 
 ## Usage
