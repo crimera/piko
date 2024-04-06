@@ -5,9 +5,23 @@
 </p>
 <h1 align="center">Revanced patches focused on Twitter/X</h1>
 
-
 <summary><h2>🚀 Patch yourself</h2></summary>
 Use <a href="https://github.com/crimera/revanced-integrations">crimera/revanced-integrations</a> when building.
+
+<h2>Join our official Telegram Channel</h2>
+<a href ="https://t.me/pikopatches">Piko - Twitter Revanced </a>
+
+## Usage
+
+To use these patches in ReVanced Manager, follow the steps below or see image:
+
+1. Set `crimera` as the patches organization.
+2. Set `piko` the patches source.
+3. Set `crimera` as integration organization.
+
+<div style="display:flex; justify-content:space-between;">  
+<img src="docs/images/manager.png" alt="usage" width="200" />  
+</div>  
 
 ```sh
 java -jar cli.jar patch \
@@ -256,3 +270,10 @@ To build ReVanced Patches, you can follow the <a href="https://github.com/ReVanc
 </p>
 
 </div>
+
+## License
+[![GNU GPLv3 Image](https://www.gnu.org/graphics/gplv3-127x51.png)](http://www.gnu.org/licenses/gpl-3.0.en.html)
+
+These patches are fully FOSS. You can use, study, share and modify it at your will. They can be redistributed and/or modified under the terms of the [GNU General Public License](https://www.gnu.org/licenses/gpl.html) version 3 or later published by the Free Software Foundation.
+
+---
