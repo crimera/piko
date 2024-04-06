@@ -1,3 +1,11 @@
+## [1.19.1-dev.2](https://github.com/crimera/piko/compare/v1.19.1-dev.1...v1.19.1-dev.2) (2024-04-06)
+
+
+### Bug Fixes
+
+* **Custom sharing domain:** Now works on "Copy Link" ([8f71415](https://github.com/crimera/piko/commit/8f71415e2c7cb5cf351bbcf11d2942d5f0771995))
+* **Hide For You:** Included by default ([3b51053](https://github.com/crimera/piko/commit/3b51053658847d9d4d1864c5664c5247dd029bcf))
+
 ## [1.19.1-dev.1](https://github.com/crimera/piko/compare/v1.19.0...v1.19.1-dev.1) (2024-04-05)
 
 
