@@ -32,6 +32,7 @@ To use these patches in ReVanced Manager, follow the steps below or see image:
 1. Set `crimera` as the patches organization.<br>
 2. Set `piko` the patches source.<br>
 3. Set `crimera` as integration organization.<br>
+4. Press ok then force stop Revanced Manager before opening it again
 
 <img src="docs/images/manager.png" alt="usage" width="200" />
 </div>
