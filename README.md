@@ -3,10 +3,12 @@
 <p align="center">
     <img src="https://socialify.git.ci/crimera/piko/image?forks=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Auto" alt="piko" width="640" height="320" />
 </p>
-<h1 align="center">Revanced patches focused on Twitter/X</h1>
-
-<summary><h2>📢 Join official Telegram group</h2></summary>
-<a href ="https://t.me/pikopatches">Piko - Twitter Revanced</a>
+<h1 align="center">
+    Revanced patches focused on Twitter/X <br>
+    <a href ="https://t.me/pikopatches">
+        <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/>
+    </a>
+</h1>
 
 <summary><h2>🕹️ Usage</h2></summary>
 
