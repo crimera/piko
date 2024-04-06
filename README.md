@@ -5,9 +5,6 @@
 </p>
 <h1 align="center">Revanced patches focused on Twitter/X</h1>
 
-<summary><h2>🚀 Patch yourself</h2></summary>
-Use <a href="https://github.com/crimera/revanced-integrations">crimera/revanced-integrations</a> when building.
-
 <summary><h2>📢 Join official Telegram group</h2></summary>
 <a href ="https://t.me/pikopatches">Piko - Twitter Revanced</a>
 
