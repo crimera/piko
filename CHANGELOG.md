@@ -1,3 +1,10 @@
+# [1.20.0-dev.2](https://github.com/crimera/piko/compare/v1.20.0-dev.1...v1.20.0-dev.2) (2024-04-07)
+
+
+### Features
+
+* **Show poll results:** Add a toggle on mod settings ([2624561](https://github.com/crimera/piko/commit/262456164e84d81b6c33436ac9f8fa21fa05e2ba))
+
 # [1.20.0-dev.1](https://github.com/crimera/piko/compare/v1.19.1-dev.2...v1.20.0-dev.1) (2024-04-07)
 
 
