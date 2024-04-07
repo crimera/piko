@@ -1,3 +1,5 @@
+# [1.20.0-dev.3](https://github.com/crimera/piko/compare/v1.20.0-dev.2...v1.20.0-dev.3) (2024-04-07)
+
 # [1.20.0-dev.2](https://github.com/crimera/piko/compare/v1.20.0-dev.1...v1.20.0-dev.2) (2024-04-07)
 
 
