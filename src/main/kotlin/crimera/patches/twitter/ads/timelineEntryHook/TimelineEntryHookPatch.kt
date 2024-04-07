@@ -1,7 +1,7 @@
 package crimera.patches.twitter.ads.timelineEntryHook
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
@@ -35,13 +35,12 @@ object TimelineEntryHookPatch:BytecodePatch(
         val methods = result.mutableMethod
         val instructions = methods.getInstructions()
 
-        val returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }
+        val returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
 
-        methods.addInstructionsWithLabels(returnObj.location.index,"""
+        methods.addInstructions(returnObj,"""
         invoke-static {p1}, $TIMELINE_ENTRY_DESCRIPTOR;->checkEntry(Lcom/twitter/model/json/timeline/urt/JsonTimelineEntry;)Lcom/twitter/model/json/timeline/urt/JsonTimelineEntry;
         move-result-object p1
-        """.trimIndent(),
-            ExternalLabel("end",returnObj))
+        """.trimIndent())
 
         //end
     }
