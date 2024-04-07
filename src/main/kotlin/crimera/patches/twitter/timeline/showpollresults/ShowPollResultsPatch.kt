@@ -1,6 +1,7 @@
 package crimera.patches.twitter.timeline.showpollresults
 
 import app.revanced.patcher.data.BytecodeContext
+import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.patch.BytecodePatch
@@ -9,14 +10,16 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.misc.settings.SettingsPatch
+import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.timeline.showpollresults.fingerprints.JsonCardInstanceDataFingerprint
 
 @Patch(
     name = "Show poll results",
+    description = "Adds an option to show poll results without voting",
     compatiblePackages = [CompatiblePackage("com.twitter.android")]
 )
 object ShowPollResultsPatch: BytecodePatch(
-    setOf(JsonCardInstanceDataFingerprint)
+    setOf(JsonCardInstanceDataFingerprint, SettingsStatusLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
         val result = JsonCardInstanceDataFingerprint.result
@@ -35,6 +38,11 @@ object ShowPollResultsPatch: BytecodePatch(
                 $pollDescriptor
                 move-result-object p2
             """.trimIndent()
+        )
+
+        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+            0,
+            "${SettingsPatch.SSTS_DESCRIPTOR}->enableShowPollResults()V"
         )
     }
 }
