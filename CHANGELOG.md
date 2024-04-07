@@ -1,3 +1,10 @@
+# [1.20.0-dev.1](https://github.com/crimera/piko/compare/v1.19.1-dev.2...v1.20.0-dev.1) (2024-04-07)
+
+
+### Features
+
+* Add `Show poll results` patch ([7b48f1b](https://github.com/crimera/piko/commit/7b48f1b9da05deb9aae73f0982f65eb527666fdc))
+
 ## [1.19.1-dev.2](https://github.com/crimera/piko/compare/v1.19.1-dev.1...v1.19.1-dev.2) (2024-04-06)
 
 
