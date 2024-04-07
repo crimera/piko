@@ -2,10 +2,12 @@ package crimera.patches.twitter.link.unshorten
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
+import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
+import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.link.unshorten.fingerprints.JsonObjectMapperFingerprint
 
@@ -20,31 +22,25 @@ object NoShortenedUrlPatch : BytecodePatch(
 ) {
     private const val METHOD_REFERENCE =
         "Lapp/revanced/integrations/twitter/patches/links/UnshortenUrlsPatch;->" +
-                "unshort(Ljava/lang/Object;)V"
+                "unshort(Lcom/twitter/model/json/core/JsonUrlEntity;)Lcom/twitter/model/json/core/JsonUrlEntity;"
 
     override fun execute(context: BytecodeContext) {
 
         val result = JsonObjectMapperFingerprint.result
             ?: throw Exception("Fingerprint not found")
 
-        val method = result.mutableMethod
-        val instructions = method.getInstructions()
+        val methods = result.mutableMethod
+        val instructions = methods.getInstructions()
 
-        // somehow targetIndex2 is above :cond_2, inject again before branching
-        var targetIndex = -1
-        val targetIndex2 = instructions.size - 1
-        for (i in 0..targetIndex2) {
-            if (instructions[i].opcode == Opcode.IF_EQ) {
-                targetIndex = i
-            }
-        }
+        val returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
 
-        val inject = """
-                invoke-static { v0 }, $METHOD_REFERENCE
-            """.trimIndent()
+        methods.addInstructions(returnObj,"""
+        invoke-static { p1 }, $METHOD_REFERENCE
+        move-result-object p1
+        """.trimIndent()
+        )
 
-        result.mutableMethod.addInstructions(targetIndex, inject)
-        result.mutableMethod.addInstructions(targetIndex2, inject)
+        //end
 
     }
 }
