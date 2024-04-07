@@ -38,10 +38,8 @@ object TimelineEntryHookPatch:BytecodePatch(
         val returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }
 
         methods.addInstructionsWithLabels(returnObj.location.index,"""
-        invoke-static {p1}, $TIMELINE_ENTRY_DESCRIPTOR;->checkEntry(Ljava/lang/Object;)Z
-        move-result v0
-        if-eqz v0, :end
-        const p1,0x0
+        invoke-static {p1}, $TIMELINE_ENTRY_DESCRIPTOR;->checkEntry(Lcom/twitter/model/json/timeline/urt/JsonTimelineEntry;)Lcom/twitter/model/json/timeline/urt/JsonTimelineEntry;
+        move-result-object p1
         """.trimIndent(),
             ExternalLabel("end",returnObj))
 
