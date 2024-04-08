@@ -1,3 +1,10 @@
+## [1.20.0-dev.4](https://github.com/crimera/piko/compare/v1.20.0-dev.3...v1.20.0-dev.4) (2024-04-08)
+
+
+### Features
+
+* **ci:** Add updates and refactors to changelog ([5fb8ef7](https://github.com/crimera/piko/commit/5fb8ef7902e6be592305c34cf3add0f06e477a68))
+
 # [1.20.0-dev.3](https://github.com/crimera/piko/compare/v1.20.0-dev.2...v1.20.0-dev.3) (2024-04-07)
 
 # [1.20.0-dev.2](https://github.com/crimera/piko/compare/v1.20.0-dev.1...v1.20.0-dev.2) (2024-04-07)
