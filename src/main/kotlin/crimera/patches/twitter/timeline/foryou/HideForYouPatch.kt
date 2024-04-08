@@ -18,10 +18,9 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
 
 @Patch(
     name = "Hide For You",
-    description = "Hides For You tab from timeline",
+    description = "Adds an option to hide For You tab from timeline",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false
 )
 @Suppress("unused")
 object HideForYouPatch : BytecodePatch(

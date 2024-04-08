@@ -3,11 +3,18 @@
 <p align="center">
     <img src="https://socialify.git.ci/crimera/piko/image?forks=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Auto" alt="piko" width="640" height="320" />
 </p>
-<h1 align="center">Revanced patches focused on Twitter/X</h1>
+<h1 align="center">
+    Revanced patches focused on Twitter/X <br>
+    <a href ="https://t.me/pikopatches">
+        <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/>
+    </a>
+</h1>
 
+<summary><h2>🕹️ Usage</h2></summary>
 
-<summary><h2>🚀 Patch yourself</h2></summary>
-Use <a href="https://github.com/crimera/revanced-integrations">crimera/revanced-integrations</a> when building.
+<b>Revanced Cli</b>
+
+🚨 Use [crimera/revanced-integrations](https://github.com/crimera/revanced-integrations) when building.
 
 ```sh
 java -jar cli.jar patch \
@@ -16,6 +23,21 @@ java -jar cli.jar patch \
   -o out.apk input.apk
 ```
 
+<p><b>or Revanced Manager</b>
+<details>
+
+<div align="left">
+To use these patches in ReVanced Manager, follow the steps below or see image:
+
+1. Set `crimera` as the patches organization.<br>
+2. Set `piko` the patches source.<br>
+3. Set `crimera` as integration organization.<br>
+4. Press ok then force stop Revanced Manager before opening it again
+
+<img src="docs/images/manager.png" alt="usage" width="200" />
+</div>
+
+</details>
 
 <summary><h2>⚙️ Patch Details</h2></summary>
 <details>
@@ -28,7 +50,7 @@ java -jar cli.jar patch \
 <th>Image</th>
 </tr>
 </thead>
-  
+
 <tbody>
 
 <tr>
@@ -256,3 +278,10 @@ To build ReVanced Patches, you can follow the <a href="https://github.com/ReVanc
 </p>
 
 </div>
+
+## License
+[![GNU GPLv3 Image](https://www.gnu.org/graphics/gplv3-127x51.png)](http://www.gnu.org/licenses/gpl-3.0.en.html)
+
+These patches are fully FOSS. You can use, study, share and modify it at your will. They can be redistributed and/or modified under the terms of the [GNU General Public License](https://www.gnu.org/licenses/gpl.html) version 3 or later published by the Free Software Foundation.
+
+---

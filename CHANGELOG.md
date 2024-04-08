@@ -1,3 +1,41 @@
+## [1.20.0-dev.4](https://github.com/crimera/piko/compare/v1.20.0-dev.3...v1.20.0-dev.4) (2024-04-08)
+
+
+### Features
+
+* **ci:** Add updates and refactors to changelog ([5fb8ef7](https://github.com/crimera/piko/commit/5fb8ef7902e6be592305c34cf3add0f06e477a68))
+
+# [1.20.0-dev.3](https://github.com/crimera/piko/compare/v1.20.0-dev.2...v1.20.0-dev.3) (2024-04-07)
+
+# [1.20.0-dev.2](https://github.com/crimera/piko/compare/v1.20.0-dev.1...v1.20.0-dev.2) (2024-04-07)
+
+
+### Features
+
+* **Show poll results:** Add a toggle on mod settings ([2624561](https://github.com/crimera/piko/commit/262456164e84d81b6c33436ac9f8fa21fa05e2ba))
+
+# [1.20.0-dev.1](https://github.com/crimera/piko/compare/v1.19.1-dev.2...v1.20.0-dev.1) (2024-04-07)
+
+
+### Features
+
+* Add `Show poll results` patch ([7b48f1b](https://github.com/crimera/piko/commit/7b48f1b9da05deb9aae73f0982f65eb527666fdc))
+
+## [1.19.1-dev.2](https://github.com/crimera/piko/compare/v1.19.1-dev.1...v1.19.1-dev.2) (2024-04-06)
+
+
+### Bug Fixes
+
+* **Custom sharing domain:** Now works on "Copy Link" ([8f71415](https://github.com/crimera/piko/commit/8f71415e2c7cb5cf351bbcf11d2942d5f0771995))
+* **Hide For You:** Included by default ([3b51053](https://github.com/crimera/piko/commit/3b51053658847d9d4d1864c5664c5247dd029bcf))
+
+## [1.19.1-dev.1](https://github.com/crimera/piko/compare/v1.19.0...v1.19.1-dev.1) (2024-04-05)
+
+
+### Bug Fixes
+
+* **Hide FAB:** Add description ([ae418a8](https://github.com/crimera/piko/commit/ae418a83d94cbb1091ba9fec3ce07a8704ab5c00))
+
 # [1.19.0](https://github.com/crimera/piko/compare/v1.18.0...v1.19.0) (2024-04-02)
 
 
