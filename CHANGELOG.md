@@ -1,3 +1,26 @@
+## [1.20.0](https://github.com/crimera/piko/compare/v1.19.0...v1.20.0) (2024-04-08)
+
+
+### Bug Fixes
+
+* **Custom sharing domain:** Now works on "Copy Link" ([8f71415](https://github.com/crimera/piko/commit/8f71415e2c7cb5cf351bbcf11d2942d5f0771995))
+* **Hide FAB:** Add description ([ae418a8](https://github.com/crimera/piko/commit/ae418a83d94cbb1091ba9fec3ce07a8704ab5c00))
+* **Hide For You:** Included by default ([3b51053](https://github.com/crimera/piko/commit/3b51053658847d9d4d1864c5664c5247dd029bcf))
+
+
+### Features
+
+* Add `Show poll results` patch ([7b48f1b](https://github.com/crimera/piko/commit/7b48f1b9da05deb9aae73f0982f65eb527666fdc))
+* **ci:** Add updates and refactors to changelog ([5fb8ef7](https://github.com/crimera/piko/commit/5fb8ef7902e6be592305c34cf3add0f06e477a68))
+* **Show poll results:** Add a toggle on mod settings ([2624561](https://github.com/crimera/piko/commit/262456164e84d81b6c33436ac9f8fa21fa05e2ba))
+
+
+### Updates
+
+* **Twitter:** Added stubs to `No shortened URL` patch ([6d4f436](https://github.com/crimera/piko/commit/6d4f436f4773a667076930cbfb32eef2691b28bc))
+* **Twitter:** refactor Timeline entry Hook ([271da73](https://github.com/crimera/piko/commit/271da73408735e8a3ef83e36bd2462d072c16bf2))
+* **Twitter:** use stubs for Timeline entry Hook ([3ce1aee](https://github.com/crimera/piko/commit/3ce1aee32df656c64ba105cb45d148cd88db990a))
+
 ## [1.20.0-dev.4](https://github.com/crimera/piko/compare/v1.20.0-dev.3...v1.20.0-dev.4) (2024-04-08)
 
 
