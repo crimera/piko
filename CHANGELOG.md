@@ -1,3 +1,16 @@
+## [1.21.0-dev.1](https://github.com/crimera/piko/compare/v1.20.0...v1.21.0-dev.1) (2024-04-09)
+
+
+### Features
+
+* **Twitter:** Added `Feature Flag Hook` ([2328baf](https://github.com/crimera/piko/commit/2328baf92c733cf99ca364c978514b14b6aae2e0))
+* **Twitter:** Added `Hide immersive player` patch ([a649652](https://github.com/crimera/piko/commit/a649652c982903ac29100933122db47e9ed86d17))
+
+
+### Updates
+
+* **Twitter:** Made some features to use flags ([04c366a](https://github.com/crimera/piko/commit/04c366a6cfac0e8d3ce0bcc41f61df76b6043f42))
+
 ## [1.20.0](https://github.com/crimera/piko/compare/v1.19.0...v1.20.0) (2024-04-08)
 
 
