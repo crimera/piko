@@ -1,7 +1,7 @@
 package app.revanced.patches.shared.misc.integrations
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
+import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.fingerprint.MethodFingerprint
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
@@ -60,10 +60,13 @@ abstract class BaseIntegrationsPatch(
             result?.mutableMethod?.let { method ->
                 val contextRegister = contextRegisterResolver(method)
 
-                method.addInstruction(
+                method.addInstructions(
                     0,
-                    "sput-object v$contextRegister, " +
-                            "$integrationsDescriptor->context:Landroid/content/Context;"
+                    """
+                        sput-object v$contextRegister,$integrationsDescriptor->context:Landroid/content/Context;
+                        invoke-static {}, $integrationsDescriptor->load()V
+                        
+                    """.trimIndent()
                 )
             } ?: throw PatchException("Could not find hook target fingerprint.")
         }
