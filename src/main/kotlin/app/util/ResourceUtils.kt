@@ -111,6 +111,29 @@ fun String.copyXmlNode(source: DomFileEditor, target: DomFileEditor): AutoClosea
     }
 }
 
+//Credits @inotia00
+/**
+ * Copy resources from the current class loader to the resource directory.
+ * @param resourceDirectory The directory of the resource.
+ * @param targetResource The target resource.
+ * @param elementTag The element to copy.
+ */
+fun ResourceContext.copyXmlNode(
+    resourceDirectory: String,
+    targetResource: String,
+    elementTag: String
+) {
+    val stringsResourceInputStream =
+        classLoader.getResourceAsStream("$resourceDirectory/$targetResource")!!
+
+    // Copy nodes from the resources node to the real resource node
+    elementTag.copyXmlNode(
+        this.xmlEditor[stringsResourceInputStream],
+        this.xmlEditor["res/$targetResource"]
+    ).close()
+}
+
+
 // /**
 //  * Copies the specified node of the source [Document] to the target [Document].
 //  * @param source the source [Document].
