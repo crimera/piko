@@ -1,3 +1,10 @@
+## [1.21.0-dev.2](https://github.com/crimera/piko/compare/v1.21.0-dev.1...v1.21.0-dev.2) (2024-04-11)
+
+
+### Features
+
+* Added resource file for strings ([181fd29](https://github.com/crimera/piko/commit/181fd298748c38dc53c10609b6714d8ce255d5be))
+
 ## [1.21.0-dev.1](https://github.com/crimera/piko/compare/v1.20.0...v1.21.0-dev.1) (2024-04-09)
 
 
