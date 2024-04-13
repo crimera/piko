@@ -14,6 +14,7 @@ import crimera.patches.twitter.misc.settings.SettingsPatch
 @Patch(
     name = "Hook feature flag",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
+    dependencies = [FeatureFlagResourcePatch::class],
     use = true
 )
 @Suppress("unused")
