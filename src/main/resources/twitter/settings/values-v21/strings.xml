@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Translation Exception -->
-    <string name="piko_settings_title">Piko Mod Settings</string>
+    <string name="piko_title_settings">Piko Mod Settings</string>
 </resources>

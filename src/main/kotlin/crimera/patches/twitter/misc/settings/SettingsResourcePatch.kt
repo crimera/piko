@@ -23,7 +23,7 @@ object SettingsResourcePatch: ResourcePatch() {
 
             val prefMod = editor.file.createElement("Preference")
             prefMod.setAttribute("android:icon", "@drawable/ic_vector_settings_stroke")
-            prefMod.setAttribute("android:title", "@string/piko_settings_title")
+            prefMod.setAttribute("android:title", "@string/piko_title_settings")
             prefMod.setAttribute("android:key", "pref_mod")
             prefMod.setAttribute("android:order", "110")
 
@@ -34,7 +34,7 @@ object SettingsResourcePatch: ResourcePatch() {
             val applicationNode = it.file.getElementsByTagName("application").item(0)
 
             val modActivity = it.file.createElement("activity").apply {
-                setAttribute("android:label", "@strings/piko_settings_title")
+                setAttribute("android:label", "@strings/piko_title_settings")
                 setAttribute("android:name", "app.revanced.integrations.twitter.settings.SettingsActivity")
                 setAttribute("android:excludeFromRecents", "true")
             }
