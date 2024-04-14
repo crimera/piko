@@ -1,6 +1,7 @@
 package crimera.patches.twitter.featureFlag
 
 import app.revanced.patcher.data.BytecodeContext
+import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.patch.BytecodePatch
@@ -10,10 +11,12 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.misc.settings.SettingsPatch
+import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 @Patch(
     name = "Hook feature flag",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
+    dependencies = [FeatureFlagResourcePatch::class],
     use = true
 )
 @Suppress("unused")
@@ -36,6 +39,11 @@ object FeatureFlagPatch:BytecodePatch(
         val loc = booleanMethod.getInstructions().first { it.opcode == Opcode.MOVE_RESULT_OBJECT }.location.index
 
         booleanMethod.addInstructions(loc+1,METHOD)
+
+        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+            0,
+            "${SettingsPatch.SSTS_DESCRIPTOR}->enableFeatureFlags()V"
+        )
         //end
     }
 }

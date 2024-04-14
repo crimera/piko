@@ -34,6 +34,9 @@
     <string name="piko_pref_hide_view_count">Hide view count</string>
     <string name="piko_pref_custom_share_domain">Custom sharing domain</string>
     <string name="piko_pref_custom_share_domain_desc">The domain to use when sharing tweets</string>
+    <string name="piko_pref_feature_flags">Feature flags</string>
+    <string name="piko_pref_edit_flag_title">Edit flag</string>
+    <string name="piko_pref_add_flag_title">Add flag</string>
 
     <string name="piko_title_timeline">Timeline</string>
     <string name="piko_pref_hide_for_you">Hide for you tab</string>
