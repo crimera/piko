@@ -6,7 +6,7 @@
               android:orientation="horizontal">
 
     <TextView
-            style="@style/TextAppearance.AppCompat.Medium"
+            style="@style/TextAppearance.AppCompat.Body2"
             android:id="@+id/textView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
