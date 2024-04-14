@@ -1,3 +1,10 @@
+## [1.21.0-dev.6](https://github.com/crimera/piko/compare/v1.21.0-dev.5...v1.21.0-dev.6) (2024-04-14)
+
+
+### Features
+
+* **Translations:** add hindi ( हिन्दी ) translations [#91](https://github.com/crimera/piko/issues/91) ([a766771](https://github.com/crimera/piko/commit/a766771d848a43c3a4d2ba5e955ab72015dfb69d))
+
 ## [1.21.0-dev.5](https://github.com/crimera/piko/compare/v1.21.0-dev.4...v1.21.0-dev.5) (2024-04-14)
 
 
