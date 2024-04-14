@@ -49,6 +49,7 @@ object SettingsResourcePatch: ResourcePatch() {
          * create directory for the untranslated language resources
          */
         val languages = arrayOf(
+            "hi",
             "ru",
             "v21"
         ).map { "values-$it" }
