@@ -7,8 +7,8 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.util.ResourceGroup
 import app.revanced.util.copyResources
-import org.w3c.dom.Element
 import app.revanced.util.copyXmlNode
+import org.w3c.dom.Element
 
 @Patch(
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
@@ -48,16 +48,18 @@ object SettingsResourcePatch: ResourcePatch() {
         /**
          * create directory for the untranslated language resources
          */
-        context["res/values-v21"].mkdirs()
-        arrayOf(
-            ResourceGroup(
-                "values-v21",
-                "strings.xml"
-            )
-        ).forEach { resourceGroup ->
-            context.copyResources("twitter/settings", resourceGroup)
+        val languages = arrayOf(
+            "ru",
+            "v21"
+        ).map { "values-$it" }
+
+        languages.forEach {
+            if (context["res/$it"].exists()) {
+                context.copyXmlNode("twitter/settings", "$it/strings.xml", "resources")
+            } else {
+                context["res/$it"].mkdirs()
+                context.copyResources("twitter/settings", ResourceGroup(it, "strings.xml"))
+            }
         }
-
-
     }
 }
