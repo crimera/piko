@@ -50,6 +50,7 @@ object SettingsResourcePatch: ResourcePatch() {
          */
         val languages = arrayOf(
             "ru",
+            "pt-rBR",
             "v21"
         ).map { "values-$it" }
 
