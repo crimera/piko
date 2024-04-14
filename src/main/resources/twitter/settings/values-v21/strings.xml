@@ -2,4 +2,5 @@
 <resources>
     <!-- Translation Exception -->
     <string name="piko_title_settings">Piko Mod Settings</string>
+    <string name="piko_title_feature_flags">Feature flags</string>
 </resources>
