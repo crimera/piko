@@ -1,3 +1,10 @@
+## [1.21.0-dev.7](https://github.com/crimera/piko/compare/v1.21.0-dev.6...v1.21.0-dev.7) (2024-04-14)
+
+
+### Features
+
+* Add support for adding custom feature flags ([a6a91d1](https://github.com/crimera/piko/commit/a6a91d13a8623b505ba299ee23845f2a62399f33))
+
 ## [1.21.0-dev.6](https://github.com/crimera/piko/compare/v1.21.0-dev.5...v1.21.0-dev.6) (2024-04-14)
 
 
