@@ -1,3 +1,10 @@
+## [1.21.0-dev.3](https://github.com/crimera/piko/compare/v1.21.0-dev.2...v1.21.0-dev.3) (2024-04-14)
+
+
+### Features
+
+* Add russian translation ([2dc9cee](https://github.com/crimera/piko/commit/2dc9ceed63a5a965f9979e3df1094f6b7a12a001))
+
 ## [1.21.0-dev.2](https://github.com/crimera/piko/compare/v1.21.0-dev.1...v1.21.0-dev.2) (2024-04-11)
 
 
