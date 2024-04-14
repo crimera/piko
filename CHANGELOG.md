@@ -1,3 +1,10 @@
+## [1.21.0-dev.4](https://github.com/crimera/piko/compare/v1.21.0-dev.3...v1.21.0-dev.4) (2024-04-14)
+
+
+### Updates
+
+* Change settings string id ([b9c86d7](https://github.com/crimera/piko/commit/b9c86d715c0ae4ec2da63384462be3c784db7b73))
+
 ## [1.21.0-dev.3](https://github.com/crimera/piko/compare/v1.21.0-dev.2...v1.21.0-dev.3) (2024-04-14)
 
 
