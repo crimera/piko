@@ -208,6 +208,13 @@ To use these patches in ReVanced Manager, follow the steps below or see image:
 </tr>
 
 <tr>
+<td><code>Hook feature flag</code></td>
+<td>Allows for adding custom feature flags</td>
+<td>Misc</td>
+<td></td>
+</tr>
+
+<tr>
 <td><code>Enable custom app icon and nav icon settings</code></td>
 <td></td>
 <td>Premium</td>
