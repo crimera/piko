@@ -1,3 +1,17 @@
+## [1.21.0-dev.4](https://github.com/crimera/piko/compare/v1.21.0-dev.3...v1.21.0-dev.4) (2024-04-14)
+
+
+### Updates
+
+* Change settings string id ([b9c86d7](https://github.com/crimera/piko/commit/b9c86d715c0ae4ec2da63384462be3c784db7b73))
+
+## [1.21.0-dev.3](https://github.com/crimera/piko/compare/v1.21.0-dev.2...v1.21.0-dev.3) (2024-04-14)
+
+
+### Features
+
+* Add russian translation ([2dc9cee](https://github.com/crimera/piko/commit/2dc9ceed63a5a965f9979e3df1094f6b7a12a001))
+
 ## [1.21.0-dev.2](https://github.com/crimera/piko/compare/v1.21.0-dev.1...v1.21.0-dev.2) (2024-04-11)
 
 
