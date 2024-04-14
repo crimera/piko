@@ -1,3 +1,22 @@
+## [1.21.0](https://github.com/crimera/piko/compare/v1.20.0...v1.21.0) (2024-04-14)
+
+
+### Features
+
+* Add russian translation ([2dc9cee](https://github.com/crimera/piko/commit/2dc9ceed63a5a965f9979e3df1094f6b7a12a001))
+* Add support for adding custom feature flags ([a6a91d1](https://github.com/crimera/piko/commit/a6a91d13a8623b505ba299ee23845f2a62399f33))
+* Added resource file for strings ([181fd29](https://github.com/crimera/piko/commit/181fd298748c38dc53c10609b6714d8ce255d5be))
+* **Translations:** add hindi ( हिन्दी ) translations [#91](https://github.com/crimera/piko/issues/91) ([a766771](https://github.com/crimera/piko/commit/a766771d848a43c3a4d2ba5e955ab72015dfb69d))
+* **Translations:** Added Brazilian Portuguese [#90](https://github.com/crimera/piko/issues/90) ([ad307da](https://github.com/crimera/piko/commit/ad307da5ba7f0739024c7a30de2cb3b09d8aee28))
+* **Twitter:** Added `Feature Flag Hook` ([2328baf](https://github.com/crimera/piko/commit/2328baf92c733cf99ca364c978514b14b6aae2e0))
+* **Twitter:** Added `Hide immersive player` patch ([a649652](https://github.com/crimera/piko/commit/a649652c982903ac29100933122db47e9ed86d17))
+
+
+### Updates
+
+* Change settings string id ([b9c86d7](https://github.com/crimera/piko/commit/b9c86d715c0ae4ec2da63384462be3c784db7b73))
+* **Twitter:** Made some features to use flags ([04c366a](https://github.com/crimera/piko/commit/04c366a6cfac0e8d3ce0bcc41f61df76b6043f42))
+
 ## [1.21.0-dev.7](https://github.com/crimera/piko/compare/v1.21.0-dev.6...v1.21.0-dev.7) (2024-04-14)
 
 
