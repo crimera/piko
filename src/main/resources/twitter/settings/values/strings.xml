@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="piko_title_premium">Premium</string>
+    <string name="piko_pref_reader_mode">Enable reader mode</string>
+    <string name="piko_pref_reader_mode_desc">Enables "reader mode" on long threads</string>
+    <string name="piko_pref_undo_posts">Enable undo posts</string>
+    <string name="piko_pref_undo_posts_desc">Enables ability to undo posts before posting</string>
+    <string name="piko_pref_undo_posts_btn">Undo posts settings</string>
+    <string name="piko_pref_icon_n_navbar_btn">App icon and navbar customisation settings</string>
+
+    <string name="piko_title_download">Download</string>
+    <string name="piko_pref_download_path">Public folder</string>
+    <string name="piko_pref_download_path_desc">The public folder to use for video downloads</string>
+    <string name="piko_pref_download_folder">Download subfolder</string>
+    <string name="piko_pref_download_folder_desc">The subfolder to download videos to ([PublicFolder]/[Subfolder])</string>
+
+    <string name="piko_title_ads">Ads</string>
+    <string name="piko_pref_hide_promoted_posts">Hide promoted posts</string>
+    <string name="piko_pref_hide_g_ads">Hide google ads</string>
+    <string name="piko_pref_wtf_section">Hide "Who to follow" section</string>
+    <string name="piko_pref_cts_section">Hide "Creators to subscribe" section</string>
+    <string name="piko_pref_ctj_section">Hide "Community to join" section</string>
+    <string name="piko_pref_ryb_section">Hide "Revist your bookmark" section</string>
+    <string name="piko_pref_pinned_posts_section">Hide "Pinned posts by followers" section</string>
+    <string name="piko_pref_hide_detailed_posts">Hide detailed posts (in replies)</string>
+    <string name="piko_pref_hide_trends">Hide promoted trends</string>
+
+    <string name="piko_title_misc">Misc</string>
+    <string name="piko_pref_chirp_font">Enable chirp font</string>
+    <string name="piko_pref_hide_fab">Hide floating action button</string>
+    <string name="piko_pref_hide_fab_menu">Hide floating action button menu</string>
+    <string name="piko_pref_rec_users">Hide recommended users</string>
+    <string name="piko_pref_comm_notes">Hide community notes</string>
+    <string name="piko_pref_hide_view_count">Hide view count</string>
+    <string name="piko_pref_custom_share_domain">Custom sharing domain</string>
+    <string name="piko_pref_custom_share_domain_desc">The domain to use when sharing tweets</string>
+    <string name="piko_pref_feature_flags">Feature flags</string>
+    <string name="piko_pref_edit_flag_title">Edit flag</string>
+    <string name="piko_pref_add_flag_title">Add flag</string>
+
+    <string name="piko_title_timeline">Timeline</string>
+    <string name="piko_pref_hide_for_you">Hide for you tab</string>
+    <string name="piko_pref_hide_live_threads">Hide live threads</string>
+    <string name="piko_pref_hide_live_threads_desc">Hides live section in timeline</string>
+    <string name="piko_pref_hide_banner">Hide banner</string>
+    <string name="piko_pref_hide_banner_desc">Hide new posts pill</string>
+    <string name="piko_pref_hide_bmk_timeline">Hide bookmark icon in timeline</string>
+    <string name="piko_pref_show_poll_result">Show poll results</string>
+    <string name="piko_pref_show_poll_result_desc">View poll results without voting</string>
+    <string name="piko_pref_hide_immersive_player">Hide immersive player</string>
+    <string name="piko_pref_hide_immersive_player_desc">Removes swipe up for more videos in video player</string>
+
+</resources>

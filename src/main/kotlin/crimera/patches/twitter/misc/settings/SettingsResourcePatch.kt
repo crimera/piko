@@ -5,6 +5,9 @@ import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.ResourcePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
+import app.revanced.util.ResourceGroup
+import app.revanced.util.copyResources
+import app.revanced.util.copyXmlNode
 import org.w3c.dom.Element
 
 @Patch(
@@ -20,7 +23,7 @@ object SettingsResourcePatch: ResourcePatch() {
 
             val prefMod = editor.file.createElement("Preference")
             prefMod.setAttribute("android:icon", "@drawable/ic_vector_settings_stroke")
-            prefMod.setAttribute("android:title", "Mod Settings")
+            prefMod.setAttribute("android:title", "@string/piko_title_settings")
             prefMod.setAttribute("android:key", "pref_mod")
             prefMod.setAttribute("android:order", "110")
 
@@ -31,12 +34,34 @@ object SettingsResourcePatch: ResourcePatch() {
             val applicationNode = it.file.getElementsByTagName("application").item(0)
 
             val modActivity = it.file.createElement("activity").apply {
-                setAttribute("android:label", "Mod Settings")
+                setAttribute("android:label", "@strings/piko_title_settings")
                 setAttribute("android:name", "app.revanced.integrations.twitter.settings.SettingsActivity")
                 setAttribute("android:excludeFromRecents", "true")
             }
 
             applicationNode.appendChild(modActivity)
+        }
+
+        //credits @inotia00
+        context.copyXmlNode("twitter/settings", "values/strings.xml", "resources")
+
+        /**
+         * create directory for the untranslated language resources
+         */
+        val languages = arrayOf(
+            "hi",
+            "ru",
+            "pt-rBR",
+            "v21"
+        ).map { "values-$it" }
+
+        languages.forEach {
+            if (context["res/$it"].exists()) {
+                context.copyXmlNode("twitter/settings", "$it/strings.xml", "resources")
+            } else {
+                context["res/$it"].mkdirs()
+                context.copyResources("twitter/settings", ResourceGroup(it, "strings.xml"))
+            }
         }
     }
 }

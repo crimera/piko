@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="piko_title_premium">Премиум</string>
+    <string name="piko_pref_reader_mode">Включить режим чтения</string>
+    <string name="piko_pref_reader_mode_desc">Удобный просмотр длинных постов</string>
+    <string name="piko_pref_undo_posts">Включить отмену постов</string>
+    <string name="piko_pref_undo_posts_desc">Возможность отменить пост до истечения таймера</string>
+    <string name="piko_pref_undo_posts_btn">Настройки отмены постов</string>
+    <string name="piko_pref_icon_n_navbar_btn">Иконка и панель навигации</string>
+
+    <string name="piko_title_download">Скачивание</string>
+    <string name="piko_pref_download_path">Выбрать папку</string>
+    <string name="piko_pref_download_path_desc">Папка для скачивания видео</string>
+    <string name="piko_pref_download_folder">Выбрать подпапку</string>
+    <string name="piko_pref_download_folder_desc">Подпапка для скачивания видео ([Папка]/[Подпапка])</string>
+
+    <string name="piko_title_ads">Реклама</string>
+    <string name="piko_pref_hide_promoted_posts">Скрыть продвигаемые посты</string>
+    <string name="piko_pref_hide_g_ads">Скрыть рекламу Google</string>
+    <string name="piko_pref_wtf_section">Скрыть панель "Кого читать"</string>
+    <string name="piko_pref_cts_section">Скрыть панель "Авторы для вас"</string>
+    <string name="piko_pref_ctj_section">Скрыть панель "Обзор сообществ"</string>
+    <string name="piko_pref_ryb_section">Скрыть панель "Обзор закладок"</string>
+    <string name="piko_pref_pinned_posts_section">Скрыть панель "Закреплено пользователями"</string>
+    <string name="piko_pref_hide_detailed_posts">Скрыть панель "Похожие твиты"</string>
+    <string name="piko_pref_hide_trends">Скрыть продвигаемые тренды</string>
+
+    <string name="piko_title_misc">Прочее</string>
+    <string name="piko_pref_chirp_font">Включить шрифт Chirp</string>
+    <string name="piko_pref_hide_fab">Скрыть плавающую кнопку</string>
+    <string name="piko_pref_hide_fab_menu">Скрыть меню плавающей кнопки</string>
+    <string name="piko_pref_rec_users">Скрыть рекомендуемых пользователей</string>
+    <string name="piko_pref_comm_notes">Скрыть контекст к постам</string>
+    <string name="piko_pref_hide_view_count">Скрыть счетчик просмотров</string>
+    <string name="piko_pref_custom_share_domain">Кастомный домен ссылки</string>
+    <string name="piko_pref_custom_share_domain_desc">Изменить домен ссылки на пост</string>
+
+    <string name="piko_title_timeline">Лента</string>
+    <string name="piko_pref_hide_for_you">Скрыть ленту "Для вас"</string>
+    <string name="piko_pref_hide_live_threads">Скрыть треды в прямом эфире</string>
+    <string name="piko_pref_hide_live_threads_desc">Баннер прямых эфиров поверх ленты</string>
+    <string name="piko_pref_hide_banner">Скрыть баннер новых постов</string>
+    <string name="piko_pref_hide_banner_desc">Баннер "добавил(а) публикацию" поверх ленты</string>
+    <string name="piko_pref_hide_bmk_timeline">Скрыть иконку закладки в ленте</string>
+    <string name="piko_pref_show_poll_result">Показывать результаты опросов</string>
+    <string name="piko_pref_show_poll_result_desc">Отображение результатов без голосования</string>
+    <string name="piko_pref_hide_immersive_player">Отключить новый видеоплеер</string>
+    <string name="piko_pref_hide_immersive_player_desc">Отключает переключение видео свайпами</string>
+
+</resources>

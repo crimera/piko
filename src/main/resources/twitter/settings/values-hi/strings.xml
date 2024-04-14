@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="piko_title_premium">प्रीमियम</string>
+    <string name="piko_pref_reader_mode">रीडर मोड चालू करें</string>
+    <string name="piko_pref_reader_mode_desc">लंबे थ्रेड्स पर "रीडर मोड" सक्षम करता है</string>
+    <string name="piko_pref_undo_posts">पोस्ट वापस लेने को सक्षम करें</string>
+    <string name="piko_pref_undo_posts_desc">पोस्ट करने से पहले पोस्ट को वापस लेने की क्षमता को सक्षम करता है</string>
+    <string name="piko_pref_undo_posts_btn">पोस्ट वापस लेने की सेटिंग्स</string>
+    <string name="piko_pref_icon_n_navbar_btn"> ऐप आइकन और नेविगेशन बार कस्टमाइजेशन</string>
+
+    <string name="piko_title_download">डाउनलोड</string>
+    <string name="piko_pref_download_path">पब्लिक फ़ोल्डर</string>
+    <string name="piko_pref_download_path_desc">वीडियो डाउनलोड के लिए उपयोग करने वाला पब्लिक फ़ोल्डर</string>
+    <string name="piko_pref_download_folder">डाउनलोड सबफ़ोल्डर</string>
+    <string name="piko_pref_download_folder_desc">वीडियो डाउनलोड करने के लिए सबफ़ोल्डर ([सार्वजनिक फ़ोल्डर]/[सबफ़ोल्डर])</string>
+
+    <string name="piko_title_ads">विज्ञापन</string>
+    <string name="piko_pref_hide_promoted_posts">प्रचारित पोस्ट छिपाएं</string>
+    <string name="piko_pref_hide_g_ads">Google विज्ञापन छिपाएं</string>
+    <string name="piko_pref_wtf_section">"किसको फॉलो करना है" सेक्शन छिपाएं</string>
+    <string name="piko_pref_cts_section">"क्रिएटर्स को सब्सक्राइब करें" सेक्शन छिपाएं</string>
+    <string name="piko_pref_ctj_section">"कम्युनिटी जॉइन करें" सेक्शन छिपाएं</string>
+    <string name="piko_pref_ryb_section">"अपने बुकमार्क को फिर से देखें" सेक्शन छिपाएं</string>
+    <string name="piko_pref_pinned_posts_section">"फॉलोअर्स के पिन किए गए पोस्ट" सेक्शन छिपाएं</string>
+    <string name="piko_pref_hide_detailed_posts">विस्तृत पोस्ट छिपाएं</string>
+    <string name="piko_pref_hide_trends">प्रचारित रुझान छिपाएं</string>
+
+    <string name="piko_title_misc">अन्य</string>
+    <string name="piko_pref_chirp_font">चिरप फ़ॉन्ट सक्षम करें</string>
+    <string name="piko_pref_hide_fab">फ्लोटिंग एक्शन बटन छिपाएं</string>
+    <string name="piko_pref_hide_fab_menu">फ्लोटिंग एक्शन बटन मेनू छिपाएं</string>
+    <string name="piko_pref_rec_users">सुझाए गए उपयोगकर्ता छिपाएं</string>
+    <string name="piko_pref_comm_notes">कम्युनिटी नोट्स छिपाएं</string>
+    <string name="piko_pref_hide_view_count">व्यू काउंट छिपाएं</string>
+    <string name="piko_pref_custom_share_domain">कस्टम शेयरिंग डोमेन</string>
+    <string name="piko_pref_custom_share_domain_desc">ट्वीट साझा करते समय उपयोग करने के लिए डोमेन</string>
+
+    <string name="piko_title_timeline">टाइमलाइन</string>
+    <string name="piko_pref_hide_for_you">छिपाएं "आपके लिए" टैब</string>
+    <string name="piko_pref_hide_live_threads">लाइव थ्रेड्स छिपाएं</string>
+    <string name="piko_pref_hide_live_threads_desc">टाइमलाइन में लाइव सेक्शन छिपाता है</string>
+    <string name="piko_pref_hide_banner">बैनर छिपाएं</string>
+    <string name="piko_pref_hide_banner_desc">नए पोस्ट पिल को छिपाएं</string>
+    <string name="piko_pref_hide_bmk_timeline">टाइमलाइन में बुकमार्क आइकन छिपा</string>
+    <string name="piko_pref_show_poll_result">मतदान परिणाम दिखाएं</string>
+    <string name="piko_pref_show_poll_result_desc">मतदान के बिना मतदान परिणाम देखें</string>
+    <string name="piko_pref_hide_immersive_player">इमर्सिव प्लेयर छिपाएं</string>
+    <string name="piko_pref_hide_immersive_player_desc">वीडियो प्लेयर में अधिक वीडियो के लिए स्वाइप अप को हटा देता है</string>
+
+</resources>
