@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="piko_title_premium">Premium</string>
+    <string name="piko_pref_reader_mode">Aktifkan mode pembaca</string>
+    <string name="piko_pref_reader_mode_desc">Mengaktifkan "mode pembaca" pada thread panjang</string>
+    <string name="piko_pref_undo_posts">Aktifkan batalkan post</string>
+    <string name="piko_pref_undo_posts_desc">Mengaktifkan kemampuan untuk membatalkan post sebelum diposting</string>
+    <string name="piko_pref_undo_posts_btn">Pengaturan batalkan post</string>
+    <string name="piko_pref_icon_n_navbar_btn">Pengaturan kustomisasi ikon aplikasi dan bilah navigasi</string>
+
+    <string name="piko_title_download">Unduh</string>
+    <string name="piko_pref_download_path">Folder publik</string>
+    <string name="piko_pref_download_path_desc">Folder publik yang digunakan untuk unduhan video</string>
+    <string name="piko_pref_download_folder">Subfolder unduhan</string>
+    <string name="piko_pref_download_folder_desc">Subfolder untuk mengunduh video ([FolderPublik]/[Subfolder])</string>
+
+    <string name="piko_title_ads">Iklan</string>
+    <string name="piko_pref_hide_promoted_posts">Sembunyikan post yang dipromosikan</string>
+    <string name="piko_pref_hide_g_ads">Sembunyikan iklan Google</string>
+    <string name="piko_pref_wtf_section">Sembunyikan bagian "Siapa yang harus diikuti"</string>
+    <string name="piko_pref_cts_section">Sembunyikan bagian "Kreator yang harus diikuti"</string>
+    <string name="piko_pref_ctj_section">Sembunyikan bagian "Komunitas yang harus diikuti"</string>
+    <string name="piko_pref_ryb_section">Sembunyikan bagian "Revist bookmark Anda"</string>
+    <string name="piko_pref_pinned_posts_section">Sembunyikan bagian "Post yang diposting oleh pengikut"</string>
+    <string name="piko_pref_hide_detailed_posts">Sembunyikan post detail (dalam balasan)</string>
+    <string name="piko_pref_hide_trends">Sembunyikan tren yang dipromosikan</string>
+
+    <string name="piko_title_misc">Lain-lain</string>
+    <string name="piko_pref_chirp_font">Aktifkan font chirp</string>
+    <string name="piko_pref_hide_fab">Sembunyikan tombol tindakan mengambang</string>
+    <string name="piko_pref_hide_fab_menu">Sembunyikan menu tombol tindakan mengambang</string>
+    <string name="piko_pref_rec_users">Sembunyikan pengguna yang direkomendasikan</string>
+    <string name="piko_pref_comm_notes">Sembunyikan catatan komunitas</string>
+    <string name="piko_pref_hide_view_count">Sembunyikan jumlah penayangan</string>
+    <string name="piko_pref_custom_share_domain">Domain berbagi kustom</string>
+    <string name="piko_pref_custom_share_domain_desc">Domain yang digunakan saat berbagi tweet</string>
+    <string name="piko_pref_feature_flags">Fitur flag</string>
+    <string name="piko_pref_edit_flag_title">Edit flag</string>
+    <string name="piko_pref_add_flag_title">Tambahkan flag</string>
+
+    <string name="piko_title_timeline">Timeline</string>
+    <string name="piko_pref_hide_for_you">Sembunyikan tab untuk Anda</string>
+    <string name="piko_pref_hide_live_threads">Sembunyikan thread langsung</string>
+    <string name="piko_pref_hide_live_threads_desc">Menyembunyikan bagian live dalam timeline</string>
+    <string name="piko_pref_hide_banner">Sembunyikan banner</string>
+    <string name="piko_pref_hide_banner_desc">Menyembunyikan pil post baru</string>
+    <string name="piko_pref_hide_bmk_timeline">Sembunyikan ikon bookmark dalam timeline</string>
+    <string name="piko_pref_show_poll_result">Tampilkan hasil polling</string>
+    <string name="piko_pref_show_poll_result_desc">Melihat hasil polling tanpa melakukan pemungutan suara</string>
+    <string name="piko_pref_hide_immersive_player">Sembunyikan pemutar imersif</string>
+    <string name="piko_pref_hide_immersive_player_desc">Menghapus geser ke atas untuk video lebih lanjut dalam pemutar video</string>
+
+</resources>
