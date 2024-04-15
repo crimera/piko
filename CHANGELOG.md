@@ -1,3 +1,10 @@
+## [1.23.0-dev.1](https://github.com/crimera/piko/compare/v1.22.0...v1.23.0-dev.1) (2024-04-15)
+
+
+### Features
+
+* **Translations:** Add Arabic translations ([c1d797b](https://github.com/crimera/piko/commit/c1d797b21bcbf0752bb48c94e4009e8221e46b36))
+
 ## [1.22.0](https://github.com/crimera/piko/compare/v1.21.0...v1.22.0) (2024-04-15)
 
 
