@@ -34,6 +34,9 @@
     <string name="piko_pref_hide_view_count">Ocultar contagem de visualizações</string>
     <string name="piko_pref_custom_share_domain">Domínio de compartilhamento personalizado</string>
     <string name="piko_pref_custom_share_domain_desc">O domínio a ser usado ao compartilhar tweets</string>
+    <string name="piko_pref_feature_flags">Sinalizadores de recursos</string>
+    <string name="piko_pref_edit_flag_title">Editar sinalizador</string>
+    <string name="piko_pref_add_flag_title">Adicionar sinalizador</string>
 
     <string name="piko_title_timeline">Linha do tempo</string>
     <string name="piko_pref_hide_for_you">Ocultar aba "Para você"</string>
