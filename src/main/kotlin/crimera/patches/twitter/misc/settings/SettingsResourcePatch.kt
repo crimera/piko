@@ -51,6 +51,7 @@ object SettingsResourcePatch: ResourcePatch() {
         val languages = arrayOf(
             "hi",
             "in",
+            "zh-rCN",
             "ru",
             "pl",
             "pt-rBR",
