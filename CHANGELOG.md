@@ -1,3 +1,10 @@
+## [1.22.0-dev.1](https://github.com/crimera/piko/compare/v1.21.0...v1.22.0-dev.1) (2024-04-15)
+
+
+### Features
+
+* **Translations:** Updated Brazilian Portuguese ([45aac73](https://github.com/crimera/piko/commit/45aac7374731e2d3b4a24e3c22ad5aaaccbbc33a))
+
 ## [1.21.0](https://github.com/crimera/piko/compare/v1.20.0...v1.21.0) (2024-04-14)
 
 
