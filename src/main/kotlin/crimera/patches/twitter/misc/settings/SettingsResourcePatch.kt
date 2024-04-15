@@ -38,8 +38,21 @@ object SettingsResourcePatch: ResourcePatch() {
                 setAttribute("android:name", "app.revanced.integrations.twitter.settings.SettingsActivity")
                 setAttribute("android:excludeFromRecents", "true")
             }
-
             applicationNode.appendChild(modActivity)
+
+            val bkActivity = it.file.createElement("activity").apply {
+                setAttribute("android:label", "@strings/piko_pref_export")
+                setAttribute("android:name", "app.revanced.integrations.twitter.settings.BackupPrefActivity")
+                setAttribute("android:excludeFromRecents", "true")
+            }
+            applicationNode.appendChild(bkActivity)
+
+            val resActivity = it.file.createElement("activity").apply {
+                setAttribute("android:label", "@strings/piko_pref_import")
+                setAttribute("android:name", "app.revanced.integrations.twitter.settings.RestorePrefActivity")
+                setAttribute("android:excludeFromRecents", "true")
+            }
+            applicationNode.appendChild(resActivity)
         }
 
         //credits @inotia00
