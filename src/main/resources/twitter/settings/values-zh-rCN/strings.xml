@@ -6,7 +6,7 @@
     <string name="piko_pref_undo_posts">启用撤销帖子</string>
     <string name="piko_pref_undo_posts_desc">在发布前启用撤销帖子的功能</string>
     <string name="piko_pref_undo_posts_btn">撤销帖子设置</string>
-    <string name="piko_pref_icon_n_navbar_btn">应用图标和导航栏定制设置</string>
+    <string name="piko_pref_icon_n_navbar_btn">应用图标和自定义导航栏设置</string>
 
     <string name="piko_title_download">下载</string>
     <string name="piko_pref_download_path">公共文件夹</string>
@@ -19,10 +19,10 @@
     <string name="piko_pref_hide_g_ads">隐藏谷歌广告</string>
     <string name="piko_pref_wtf_section">隐藏推荐关注</string>
     <string name="piko_pref_cts_section">隐藏创作者推荐</string>
-    <string name="piko_pref_ctj_section">隐藏加入的社群</string>
-    <string name="piko_pref_ryb_section">隐藏查看你的书签</string>
+    <string name="piko_pref_ctj_section">隐藏发现社群</string>
+    <string name="piko_pref_ryb_section">隐藏重新查看你的书签</string>
     <string name="piko_pref_pinned_posts_section">隐藏已由你关注的人置顶</string>
-    <string name="piko_pref_hide_detailed_posts">隐藏详细帖子（在回复中）</string>
+    <string name="piko_pref_hide_detailed_posts">隐藏帖子详情（在回复中）</string>
     <string name="piko_pref_hide_trends">隐藏推广趋势</string>
 
     <string name="piko_title_misc">其他</string>
@@ -33,7 +33,7 @@
     <string name="piko_pref_comm_notes">隐藏社群动态</string>
     <string name="piko_pref_hide_view_count">隐藏查看次数</string>
     <string name="piko_pref_custom_share_domain">自定义分享域名</string>
-    <string name="piko_pref_custom_share_domain_desc">分享推文时使用的域名</string>
+    <string name="piko_pref_custom_share_domain_desc">自定义分享推文时使用的域名</string>
     <string name="piko_pref_feature_flags">功能标志</string>
     <string name="piko_pref_edit_flag_title">编辑标志</string>
     <string name="piko_pref_add_flag_title">添加标志</string>
