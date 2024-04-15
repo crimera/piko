@@ -1,3 +1,10 @@
+## [1.23.0-dev.2](https://github.com/crimera/piko/compare/v1.23.0-dev.1...v1.23.0-dev.2) (2024-04-15)
+
+
+### Bug Fixes
+
+* Fix oopsie ([2af661f](https://github.com/crimera/piko/commit/2af661f5dfa1cc08e436ce04800ab230030a5079))
+
 ## [1.23.0-dev.1](https://github.com/crimera/piko/compare/v1.22.0...v1.23.0-dev.1) (2024-04-15)
 
 
