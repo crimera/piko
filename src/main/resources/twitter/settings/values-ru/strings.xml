@@ -50,4 +50,17 @@
     <string name="piko_pref_hide_immersive_player">Отключить новый видеоплеер</string>
     <string name="piko_pref_hide_immersive_player_desc">Отключает переключение видео свайпами</string>
 
+    <string name="piko_title_backup">Бэкап и восстановление</string>
+    <string name="piko_pref_export">Экспорт настроек</string>
+    <string name="piko_pref_export_flags">Экспорт флагов функций</string>
+    <string name="piko_pref_export_saved">Экспорт завершен</string>
+    <string name="piko_pref_export_failed">Сбой: ошибка экспорта настроек</string>
+    <string name="piko_pref_export_no_uri">Сбой: не выбрана папка</string>
+    <string name="piko_pref_import">Импорт настроек</string>
+    <string name="piko_pref_import_flags">Импорт флагов функций</string>
+    <string name="piko_pref_import_warn">Рекомендуется перезапуск приложения</string>
+    <string name="piko_pref_import_saved">Импорт завершен</string>
+    <string name="piko_pref_import_failed">Сбой: ошибка импорта настроек</string>
+    <string name="piko_pref_import_no_uri">Сбой: не выбран файл</string>
+    
 </resources>
