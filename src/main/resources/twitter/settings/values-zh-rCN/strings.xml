@@ -2,7 +2,7 @@
 <resources>
     <string name="piko_title_premium">高级</string>
     <string name="piko_pref_reader_mode">启用阅读模式</string>
-    <string name="piko_pref_reader_mode_desc">在长主题贴中启用"阅读模式"</string>
+    <string name="piko_pref_reader_mode_desc">在长主题贴中启用阅读模式</string>
     <string name="piko_pref_undo_posts">启用撤销帖子</string>
     <string name="piko_pref_undo_posts_desc">在发布前启用撤销帖子的功能</string>
     <string name="piko_pref_undo_posts_btn">撤销帖子设置</string>
