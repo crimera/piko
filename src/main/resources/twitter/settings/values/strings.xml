@@ -50,4 +50,17 @@
     <string name="piko_pref_hide_immersive_player">Hide immersive player</string>
     <string name="piko_pref_hide_immersive_player_desc">Removes swipe up for more videos in video player</string>
 
+    <string name="piko_title_backup">Backup and restore</string>
+    <string name="piko_pref_export">Export preferences</string>
+    <string name="piko_pref_export_flags">Export feature flags</string>
+    <string name="piko_pref_export_saved">Exported successfully</string>
+    <string name="piko_pref_export_failed">Error: Exporting preferences failed</string>
+    <string name="piko_pref_export_no_uri">Error: No destination provided</string>
+    <string name="piko_pref_import">Import preferences</string>
+    <string name="piko_pref_import_flags">Import feature flags</string>
+    <string name="piko_pref_import_warn">App restart is recommended</string>
+    <string name="piko_pref_import_saved">Imported successfully</string>
+    <string name="piko_pref_import_failed">Error: Importing preferences failed</string>
+    <string name="piko_pref_import_no_uri">Error: No file provided</string>
+
 </resources>
