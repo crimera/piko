@@ -16,7 +16,7 @@
 
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモートされたポストを非表示にする</string>
-    <string name="piko_pref_hide_g_ads">google 広告を非表示する </string>
+    <string name="piko_pref_hide_g_ads">google 広告を非表示する</string>
     <string name="piko_pref_wtf_section">「Who to follow」セクションを非表示にする</string>
     <string name="piko_pref_cts_section">「サブスクリプションクリエイター」セクションを非表示にする</string>
     <string name="piko_pref_ctj_section">「参加するコミュニティ」セクションを非表示にする</string>
