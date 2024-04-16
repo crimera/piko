@@ -71,6 +71,7 @@ object SettingsResourcePatch: ResourcePatch() {
             "pl",
             "pt-rBR",
             "v21"
+            "tr"
         ).map { "values-$it" }
 
         languages.forEach {
