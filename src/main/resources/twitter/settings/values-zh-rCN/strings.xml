@@ -41,7 +41,7 @@
 
     <string name="piko_title_timeline">时间线</string>
     <string name="piko_pref_hide_for_you">隐藏为你推荐</string>
-    <string name="piko_pref_hide_live_threads">隐藏实时广播</string>
+    <string name="piko_pref_hide_live_threads">隐藏直播空间</string>
     <string name="piko_pref_hide_live_threads_desc">隐藏正在直播通知横幅</string>
     <string name="piko_pref_hide_banner">隐藏新贴通知</string>
     <string name="piko_pref_hide_banner_desc">隐藏弹出的新帖子通知横幅</string>
