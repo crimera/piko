@@ -70,7 +70,7 @@ object SettingsResourcePatch: ResourcePatch() {
             "ru",
             "pl",
             "pt-rBR",
-            "v21"
+            "v21",
             "tr"
         ).map { "values-$it" }
 
