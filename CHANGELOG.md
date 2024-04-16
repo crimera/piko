@@ -1,3 +1,17 @@
+## [1.23.0-dev.6](https://github.com/crimera/piko/compare/v1.23.0-dev.5...v1.23.0-dev.6) (2024-04-16)
+
+
+### Bug Fixes
+
+* Missing `,` ([67675fe](https://github.com/crimera/piko/commit/67675fe381f0554cb69c0f061ec792df9e523479))
+
+
+### Features
+
+* **Translations:** Add `Turkish` ([bf70b91](https://github.com/crimera/piko/commit/bf70b913775ec299a87725b15d30bb2506da7a5d))
+* **Translations:** Update Russian translation ([54ba664](https://github.com/crimera/piko/commit/54ba664921218ce79218e4ce4a9a2d4d2d1cf1b6))
+* **Translations:** Updated Brazilian Portuguese ([e25ec0e](https://github.com/crimera/piko/commit/e25ec0ecee9e576f6fe74c2bf70d750399275b7e))
+
 ## [1.23.0-dev.5](https://github.com/crimera/piko/compare/v1.23.0-dev.4...v1.23.0-dev.5) (2024-04-16)
 
 
