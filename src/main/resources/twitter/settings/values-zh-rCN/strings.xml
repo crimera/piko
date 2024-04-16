@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="piko_title_settings">Piko 模组设置</string>
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">启用阅读模式</string>
     <string name="piko_pref_reader_mode_desc">在长主题贴中启用阅读模式</string>
@@ -40,10 +41,10 @@
 
     <string name="piko_title_timeline">时间线</string>
     <string name="piko_pref_hide_for_you">隐藏为你推荐</string>
-    <string name="piko_pref_hide_live_threads">隐藏实时帖子</string>
-    <string name="piko_pref_hide_live_threads_desc">隐藏直播空间</string>
-    <string name="piko_pref_hide_banner">隐藏通知横幅</string>
-    <string name="piko_pref_hide_banner_desc">隐藏弹出的新帖子通知</string>
+    <string name="piko_pref_hide_live_threads">隐藏实时广播</string>
+    <string name="piko_pref_hide_live_threads_desc">隐藏正在直播通知横幅</string>
+    <string name="piko_pref_hide_banner">隐藏新贴通知</string>
+    <string name="piko_pref_hide_banner_desc">隐藏弹出的新帖子通知横幅</string>
     <string name="piko_pref_hide_bmk_timeline">隐藏时间线中的书签图标</string>
     <string name="piko_pref_show_poll_result">显示投票结果</string>
     <string name="piko_pref_show_poll_result_desc">无需投票即可查看投票结果</string>
