@@ -57,7 +57,7 @@
     <string name="piko_pref_export_failed">Erro: falha na exportação de preferências</string>
     <string name="piko_pref_export_no_uri">Erro: nenhum destino fornecido</string>
     <string name="piko_pref_import">Importar preferências</string>
-    <string name="piko_pref_import_flags">Import feature flags</string>
+    <string name="piko_pref_import_flags">Importar sinalizadores de recursos</string>
     <string name="piko_pref_import_warn">Recomenda-se reiniciar o aplicativo</string>
     <string name="piko_pref_import_saved">Importado com sucesso</string>
     <string name="piko_pref_import_failed">Erro: falha na importação de preferências</string>
