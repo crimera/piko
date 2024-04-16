@@ -1,3 +1,12 @@
+## [1.23.0-dev.5](https://github.com/crimera/piko/compare/v1.23.0-dev.4...v1.23.0-dev.5) (2024-04-16)
+
+
+### Features
+
+* **Translations:** Update `japanese` ([f5ece19](https://github.com/crimera/piko/commit/f5ece191a724f7bc0aed0cb90df8902f6d9e110b))
+* **translation:** Update Simplified Chinese translation ([4f3027a](https://github.com/crimera/piko/commit/4f3027a2279e9cd1a2cc010d190cab3551c45cd4))
+* **Translation:** Update Simplified Chinese translation ([b9fe0e8](https://github.com/crimera/piko/commit/b9fe0e83a3ddd1fd2633dca6403723c4dbea32ce))
+
 ## [1.23.0-dev.4](https://github.com/crimera/piko/compare/v1.23.0-dev.3...v1.23.0-dev.4) (2024-04-15)
 
 
