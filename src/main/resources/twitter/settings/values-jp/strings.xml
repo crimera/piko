@@ -2,7 +2,7 @@
 <resources>
     <string name="piko_title_premium">プレミアム</string>
     <string name="piko_pref_reader_mode">リーダーモードを有効にする</string>
-    <string name="piko_pref_reader_mode_desc">長いスレッドで「リーダー モード」を有効にします</string>
+    <string name="piko_pref_reader_mode_desc">長いスレッドでリーダーモードを有効にします</string>
     <string name="piko_pref_undo_posts">ポストの取り消しを有効にする</string>
     <string name="piko_pref_undo_posts_desc">ポスト前にポストを取り消す機能を有効にします</string>
     <string name="piko_pref_undo_posts_btn">ポスト設定を元に戻す</string>
@@ -16,12 +16,12 @@
 
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモートされたポストを非表示にする</string>
-    <string name="piko_pref_hide_g_ads">google 広告を非表示する </string>
-    <string name="piko_pref_wtf_section">「Who to follow」セクションを非表示にする</string>
-    <string name="piko_pref_cts_section">「サブスクリプションクリエイター」セクションを非表示にする</string>
-    <string name="piko_pref_ctj_section">「参加するコミュニティ」セクションを非表示にする</string>
-    <string name="piko_pref_ryb_section">「ブックマークを再表示」セクションを非表示にする</string>
-    <string name="piko_pref_pinned_posts_section">「フォロワーによる固定ポスト」セクションを非表示にする</string>
+    <string name="piko_pref_hide_g_ads">Google 広告を非表示する</string>
+    <string name="piko_pref_wtf_section">[Who to follow] セクションを非表示にする</string>
+    <string name="piko_pref_cts_section">[サブスクリプションクリエイター] セクションを非表示にする</string>
+    <string name="piko_pref_ctj_section">[コミュニティに参加する] セクションを非表示にする</string>
+    <string name="piko_pref_ryb_section">[ブックマークを再表示] セクションを非表示にする</string>
+    <string name="piko_pref_pinned_posts_section">[フォロワーによる固定ポスト] セクションを非表示にする</string>
     <string name="piko_pref_hide_detailed_posts">詳細な投稿を非表示にする (返信内)</string>
     <string name="piko_pref_hide_trends">プロモートされたトレンドを非表示にする</string>
 
