@@ -1,3 +1,10 @@
+## [1.23.0-dev.8](https://github.com/crimera/piko/compare/v1.23.0-dev.7...v1.23.0-dev.8) (2024-04-17)
+
+
+### Bug Fixes
+
+* Not creating `values-night-v31` dir ([e3f3491](https://github.com/crimera/piko/commit/e3f3491fea403f55d5200d1afc4aebd5c7507c2e))
+
 ## [1.23.0-dev.7](https://github.com/crimera/piko/compare/v1.23.0-dev.6...v1.23.0-dev.7) (2024-04-17)
 
 
