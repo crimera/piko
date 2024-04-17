@@ -1,3 +1,10 @@
+## [1.23.0-dev.10](https://github.com/crimera/piko/compare/v1.23.0-dev.9...v1.23.0-dev.10) (2024-04-17)
+
+
+### Features
+
+* **Translations:** Fix Simplified Chinese Translation ([ec0a3dc](https://github.com/crimera/piko/commit/ec0a3dcadf4027c3a6a6d411d44043d245b5ca29))
+
 ## [1.23.0-dev.9](https://github.com/crimera/piko/compare/v1.23.0-dev.8...v1.23.0-dev.9) (2024-04-17)
 
 
