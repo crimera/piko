@@ -1,3 +1,10 @@
+## [1.23.0-dev.9](https://github.com/crimera/piko/compare/v1.23.0-dev.8...v1.23.0-dev.9) (2024-04-17)
+
+
+### Bug Fixes
+
+* switch jp to ja for Japanese translation ([c13cc87](https://github.com/crimera/piko/commit/c13cc87afeaea8cb623e7652a154a507ce532d61))
+
 ## [1.23.0-dev.8](https://github.com/crimera/piko/compare/v1.23.0-dev.7...v1.23.0-dev.8) (2024-04-17)
 
 
