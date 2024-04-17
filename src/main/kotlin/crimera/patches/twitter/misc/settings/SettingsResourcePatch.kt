@@ -63,7 +63,7 @@ object SettingsResourcePatch: ResourcePatch() {
          */
         val languages = arrayOf(
             "ar",
-            "jp",
+            "ja",
             "hi",
             "in",
             "zh-rCN",
