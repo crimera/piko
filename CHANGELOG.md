@@ -1,3 +1,10 @@
+## [1.23.0-dev.7](https://github.com/crimera/piko/compare/v1.23.0-dev.6...v1.23.0-dev.7) (2024-04-17)
+
+
+### Features
+
+* **ui:** full app wide material theming in dim mode replacing dark blue ([52d7444](https://github.com/crimera/piko/commit/52d74441f0ae509ec66ba04b3939c90deb4755c5))
+
 ## [1.23.0-dev.6](https://github.com/crimera/piko/compare/v1.23.0-dev.5...v1.23.0-dev.6) (2024-04-16)
 
 
