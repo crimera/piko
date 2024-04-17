@@ -13,6 +13,7 @@ import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import crimera.patches.twitter.misc.integrations.IntegrationsPatch
+import crimera.patches.twitter.misc.settings.fingerprints.AuthorizeAppActivity
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
 
 @Patch(
@@ -22,17 +23,21 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 object SettingsPatch : BytecodePatch(
-    setOf(SettingsFingerprint)
+    setOf(SettingsFingerprint, AuthorizeAppActivity)
 ) {
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
     private const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
+    private const val ACTIVITY_HOOK_CLASS = "Lapp/revanced/integrations/twitter/settings/ActivityHook;"
+    private const val ADD_PREF_DESCRIPTOR =
+        "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
+
     const val PREF_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Pref"
     const val PATCHES_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/patches"
-    private const val ADD_PREF_DESCRIPTOR = "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
     const val SSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/settings/SettingsStatus;"
     const val FSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/patches/FeatureSwitchPatch;"
+
     private const val START_ACTIVITY_DESCRIPTOR =
-        "invoke-static {}, $UTILS_DESCRIPTOR;->startSettingsActivity()V"
+        "invoke-static {}, $ACTIVITY_HOOK_CLASS->startSettingsActivity()V"
 
     override fun execute(context: BytecodeContext) {
         val result = SettingsFingerprint.result
@@ -41,20 +46,23 @@ object SettingsPatch : BytecodePatch(
         val initMethod = result.mutableClass.methods.first()
 
         val arrayCreation = initMethod.getInstructions()
-            .first { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }.location.index+1
+            .first { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }.location.index + 1
 
-        initMethod.getInstruction<BuilderInstruction11x>(arrayCreation).registerA.also { reg->
-            initMethod.addInstructions(arrayCreation+1, """
+        initMethod.getInstruction<BuilderInstruction11x>(arrayCreation).registerA.also { reg ->
+            initMethod.addInstructions(
+                arrayCreation + 1, """
                 const-string v1, "pref_mod"
                 invoke-static {v$reg, v1}, $ADD_PREF_DESCRIPTOR
                 move-result-object v$reg
-            """)
+            """
+            )
         }
 
         val prefCLickedMethod = result.mutableClass.methods.find { it.returnType == "Z" }!!
-        val constIndex = prefCLickedMethod.getInstructions().first{ it.opcode == Opcode.CONST_4 }.location.index
+        val constIndex = prefCLickedMethod.getInstructions().first { it.opcode == Opcode.CONST_4 }.location.index
 
-        prefCLickedMethod.addInstructionsWithLabels(1, """
+        prefCLickedMethod.addInstructionsWithLabels(
+            1, """
             const-string v1, "pref_mod" 
             invoke-virtual {p1, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
             move-result v2
@@ -69,5 +77,20 @@ object SettingsPatch : BytecodePatch(
         """,
             ExternalLabel("cont", prefCLickedMethod.getInstruction(constIndex))
         )
+
+        AuthorizeAppActivity.result?.apply {
+            mutableMethod.addInstructionsWithLabels(
+                1,
+                """
+                invoke-static {p0}, $ACTIVITY_HOOK_CLASS->create(Landroid/app/Activity;)Z
+                move-result v0
+                if-eqz v0, :no_piko_settings_init
+                return-void
+            """.trimIndent(),
+                ExternalLabel(
+                    "no_piko_settings_init",
+                    mutableMethod.getInstructions().first { it.opcode == Opcode.INVOKE_VIRTUAL })
+            )
+        } ?: throw PatchException("ProxySettingsActivityFingerprint not found")
     }
 }

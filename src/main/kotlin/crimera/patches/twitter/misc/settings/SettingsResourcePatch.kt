@@ -30,17 +30,17 @@ object SettingsResourcePatch: ResourcePatch() {
             parent.appendChild(prefMod)
         }
 
-        context.xmlEditor["AndroidManifest.xml"].use {
-            val applicationNode = it.file.getElementsByTagName("application").item(0)
-
-            val modActivity = it.file.createElement("activity").apply {
-                setAttribute("android:label", "@strings/piko_title_settings")
-                setAttribute("android:name", "app.revanced.integrations.twitter.settings.SettingsActivity")
-                setAttribute("android:excludeFromRecents", "true")
-            }
-
-            applicationNode.appendChild(modActivity)
-        }
+//        context.xmlEditor["AndroidManifest.xml"].use {
+//            val applicationNode = it.file.getElementsByTagName("application").item(0)
+//
+//            val modActivity = it.file.createElement("activity").apply {
+//                setAttribute("android:label", "@strings/piko_title_settings")
+//                setAttribute("android:name", "app.revanced.integrations.twitter.settings.SettingsActivity")
+//                setAttribute("android:excludeFromRecents", "true")
+//            }
+//
+//            applicationNode.appendChild(modActivity)
+//        }
 
         //credits @inotia00
         context.copyXmlNode("twitter/settings", "values/strings.xml", "resources")
