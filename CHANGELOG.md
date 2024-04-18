@@ -1,3 +1,15 @@
+## [1.23.0-dev.11](https://github.com/crimera/piko/compare/v1.23.0-dev.10...v1.23.0-dev.11) (2024-04-18)
+
+
+### Features
+
+* **Twitter:** Added `Enable app downgrading` patch ([9f581ce](https://github.com/crimera/piko/commit/9f581ce41b202fe7e5dfbb634a18a5bf6fb8faa5))
+
+
+### Refactors
+
+* **Twitter:** load `Utils.load()` dynamically ([5379276](https://github.com/crimera/piko/commit/53792768e4e5465559478041f51e516159c1f93f))
+
 ## [1.23.0-dev.10](https://github.com/crimera/piko/compare/v1.23.0-dev.9...v1.23.0-dev.10) (2024-04-17)
 
 
