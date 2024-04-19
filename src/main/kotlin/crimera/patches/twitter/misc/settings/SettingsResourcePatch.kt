@@ -57,10 +57,12 @@ object SettingsResourcePatch: ResourcePatch() {
 
         //credits @inotia00
         context.copyXmlNode("twitter/settings", "values/strings.xml", "resources")
+        context.copyXmlNode("twitter/settings", "values/arrays.xml", "resources")
 
         /**
          * create directory for the untranslated language resources
          */
+        //Strings
         val languages = arrayOf(
             "ar",
             "ja",
@@ -70,8 +72,8 @@ object SettingsResourcePatch: ResourcePatch() {
             "ru",
             "pl",
             "pt-rBR",
-            "v21",
-            "tr"
+            "tr",
+            "v21"
         ).map { "values-$it" }
 
         languages.forEach {
@@ -82,5 +84,7 @@ object SettingsResourcePatch: ResourcePatch() {
                 context.copyResources("twitter/settings", ResourceGroup(it, "strings.xml"))
             }
         }
+
+     //end
     }
 }
