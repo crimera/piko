@@ -20,10 +20,10 @@
     <string name="piko_pref_hide_g_ads">隐藏谷歌广告</string>
     <string name="piko_pref_wtf_section">隐藏推荐关注</string>
     <string name="piko_pref_cts_section">隐藏创作者推荐</string>
-    <string name="piko_pref_ctj_section">隐藏加入社群</string>
-    <string name="piko_pref_ryb_section">隐藏重新查看你的书签</string>
+    <string name="piko_pref_ctj_section">隐藏探索社群</string>
+    <string name="piko_pref_ryb_section">隐藏重新访问你的书签</string>
     <string name="piko_pref_pinned_posts_section">隐藏已由你关注的人置顶</string>
-    <string name="piko_pref_hide_detailed_posts">隐藏帖子详情（在回复中）</string>
+    <string name="piko_pref_hide_detailed_posts">隐藏帖子回复中的发现更多</string>
     <string name="piko_pref_hide_trends">隐藏推广趋势</string>
 
     <string name="piko_title_misc">杂项</string>
@@ -31,7 +31,7 @@
     <string name="piko_pref_hide_fab">隐藏发帖按钮</string>
     <string name="piko_pref_hide_fab_menu">隐藏发帖按钮菜单</string>
     <string name="piko_pref_rec_users">隐藏推荐用户</string>
-    <string name="piko_pref_comm_notes">隐藏帖子中的社群注释</string>
+    <string name="piko_pref_comm_notes">隐藏社群附注</string>
     <string name="piko_pref_hide_view_count">隐藏帖子查看次数</string>
     <string name="piko_pref_custom_share_domain">自定义分享域名</string>
     <string name="piko_pref_custom_share_domain_desc">自定义分享推文时使用的域名</string>
@@ -42,13 +42,13 @@
     <string name="piko_title_timeline">时间线</string>
     <string name="piko_pref_hide_for_you">隐藏为你推荐</string>
     <string name="piko_pref_hide_live_threads">隐藏直播空间</string>
-    <string name="piko_pref_hide_live_threads_desc">隐藏正在直播通知横幅</string>
-    <string name="piko_pref_hide_banner">隐藏新贴通知</string>
-    <string name="piko_pref_hide_banner_desc">隐藏弹出的新帖子通知横幅</string>
+    <string name="piko_pref_hide_live_threads_desc">隐藏顶部直播通知条</string>
+    <string name="piko_pref_hide_banner">隐藏新贴提醒</string>
+    <string name="piko_pref_hide_banner_desc">隐藏弹出的新发布按钮</string>
     <string name="piko_pref_hide_bmk_timeline">隐藏时间线中的书签图标</string>
     <string name="piko_pref_show_poll_result">显示投票结果</string>
     <string name="piko_pref_show_poll_result_desc">无需投票即可查看投票结果</string>
-    <string name="piko_pref_hide_immersive_player">隐藏视频向上滑动切换</string>
+    <string name="piko_pref_hide_immersive_player">隐藏视频滑动切换</string>
     <string name="piko_pref_hide_immersive_player_desc">在视频播放器中移除向上滑动查看更多视频的功能</string>
     
     <string name="piko_title_backup">备份和恢复</string>
@@ -56,10 +56,10 @@
     <string name="piko_pref_export_flags">导出功能标志</string>
     <string name="piko_pref_export_saved">导出成功</string>
     <string name="piko_pref_export_failed">错误：导出配置失败</string>
-    <string name="piko_pref_export_no_uri">错误：未提供目标位置</string>
+    <string name="piko_pref_export_no_uri">错误：未提供保存位置</string>
     <string name="piko_pref_import">导入配置</string>
     <string name="piko_pref_import_flags">导入功能标志</string>
-    <string name="piko_pref_import_warn">建议重新启动应用</string>
+    <string name="piko_pref_import_warn">建议重新启动应用以确保更改生效</string>
     <string name="piko_pref_import_saved">导入成功</string>
     <string name="piko_pref_import_failed">错误：导入配置失败</string>
     <string name="piko_pref_import_no_uri">错误：未提供配置文件</string>
