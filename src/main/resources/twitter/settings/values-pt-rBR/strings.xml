@@ -49,6 +49,9 @@
     <string name="piko_pref_show_poll_result_desc">Veja os resultados da enquete sem votar</string>
     <string name="piko_pref_hide_immersive_player">Desativar o player imersivo</string>
     <string name="piko_pref_hide_immersive_player_desc">Remove o deslizar para cima para ver mais vídeos no player de vídeo</string>
+
+    <string name="piko_title_customisation">Customização</string>
+    <string name="piko_pref_customisation_profiletabs">Guias de perfil para ocultar</string>
     
     <string name="piko_title_backup">Backup e restauração</string>
     <string name="piko_pref_export">Exportar preferências</string>
