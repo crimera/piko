@@ -51,7 +51,7 @@
     <string name="piko_pref_hide_immersive_player_desc">Removes swipe up for more videos in video player</string>
 
     <string name="piko_title_customisation">Customization</string>
-    <string name="piko_pref_customisation_profiletabs">Profile tabs</string>
+    <string name="piko_pref_customisation_profiletabs">Profile tabs to hide</string>
 
     <string name="piko_title_backup">Backup and restore</string>
     <string name="piko_pref_export">Export preferences</string>
