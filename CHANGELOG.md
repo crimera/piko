@@ -1,3 +1,15 @@
+## [1.24.0-dev.1](https://github.com/crimera/piko/compare/v1.23.0...v1.24.0-dev.1) (2024-04-19)
+
+
+### Features
+
+* **Twitter:** Added `Profile tabs customisation` ([db0298b](https://github.com/crimera/piko/commit/db0298b9f0cc6066974630d29812a2e8a11e7262))
+
+
+### Refactors
+
+* **Twitter:** updated profile tab string ([1af7846](https://github.com/crimera/piko/commit/1af78461de97661a82d5eb638300402eaab00afe))
+
 ## [1.23.0](https://github.com/crimera/piko/compare/v1.22.0...v1.23.0) (2024-04-19)
 
 
