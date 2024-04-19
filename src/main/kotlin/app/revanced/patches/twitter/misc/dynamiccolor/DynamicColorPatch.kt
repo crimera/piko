@@ -9,7 +9,7 @@ import java.io.FileWriter
 import java.nio.file.Files
 
 @Patch(
-    name = "Dynamic color - Monet",
+    name = "Dynamic color",
     description = "Replaces the default Blue accent with the user's Material You palette and Dim Theme with Full Material Design.",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
