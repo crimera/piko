@@ -50,4 +50,17 @@
     <string name="piko_pref_hide_immersive_player">Desativar o player imersivo</string>
     <string name="piko_pref_hide_immersive_player_desc">Remove o deslizar para cima para ver mais vídeos no player de vídeo</string>
 
+    <string name="piko_title_backup">Backup e restauração</string>
+    <string name="piko_pref_export">Exportar preferências</string>
+    <string name="piko_pref_export_flags">Exportar sinalizadores de recursos</string>
+    <string name="piko_pref_export_saved">Exportado com sucesso</string>
+    <string name="piko_pref_export_failed">Erro: falha na exportação de preferências</string>
+    <string name="piko_pref_export_no_uri">Erro: nenhum destino fornecido</string>
+    <string name="piko_pref_import">Importar preferências</string>
+    <string name="piko_pref_import_flags">Importar sinalizadores de recursos</string>
+    <string name="piko_pref_import_warn">Recomenda-se reiniciar o aplicativo</string>
+    <string name="piko_pref_import_saved">Importado com sucesso</string>
+    <string name="piko_pref_import_failed">Erro: falha na importação de preferências</string>
+    <string name="piko_pref_import_no_uri">Erro: Nenhum arquivo fornecido</string>
+
 </resources>

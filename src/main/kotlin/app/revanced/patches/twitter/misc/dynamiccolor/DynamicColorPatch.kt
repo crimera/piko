@@ -10,7 +10,7 @@ import java.nio.file.Files
 
 @Patch(
     name = "Dynamic color",
-    description = "Replaces the default X (Formerly Twitter) Blue with the user's Material You palette.",
+    description = "Replaces the default Blue accent with the user's Material You palette and Dim Theme with Full Material Design.",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 @Suppress("unused")
@@ -75,6 +75,44 @@ object DynamicColorPatch : ResourcePatch() {
 
                 document.getElementsByTagName("resources").item(0).appendChild(colorElement)
             }
+        }
+
+        /** fun fullMaterialDesign() { **/
+        // backward compatible, creates style into v31 res dir (A12+)
+        // replace parts of DimTheme with user's material 3 neutral palette
+        context.xmlEditor["res/values-night-v31/colors.xml"].use { editor ->
+            val document = editor.file
+
+            val newStyle = document.createElement("style")
+            newStyle.setAttribute("name", "PaletteDim")
+            newStyle.setAttribute("parent", "@style/HorizonColorPaletteDark")
+
+            val styleItems = mapOf(
+                "abstractColorCellBackground" to "@color/material_dynamic_neutral10",
+                "abstractColorCellBackgroundTranslucent" to "@color/material_dynamic_neutral10",
+                "abstractColorDeepGray" to "#ff8899a6",
+                "abstractColorDivider" to "#ff38444d",
+                "abstractColorFadedGray" to "@color/material_dynamic_neutral10",
+                "abstractColorFaintGray" to "@color/material_dynamic_neutral10",
+                "abstractColorHighlightBackground" to "@color/material_dynamic_neutral20",
+                "abstractColorLightGray" to "#ff3d5466",
+                "abstractColorLink" to "@color/twitter_blue",
+                "abstractColorMediumGray" to "#ff6b7d8c",
+                "abstractColorText" to "@color/white",
+                "abstractColorUnread" to "#ff163043",
+                "abstractElevatedBackground" to "#ff1c2c3c",
+                "abstractElevatedBackgroundShadow" to "#1a15202b"
+            )
+
+            styleItems.forEach { (k, v) ->
+                val styleElement = document.createElement("item")
+
+                styleElement.setAttribute("name", k)
+                styleElement.textContent = v
+                newStyle.appendChild(styleElement)
+            }
+
+            document.getElementsByTagName("resources").item(0).appendChild(newStyle)
         }
     }
 }

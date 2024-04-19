@@ -38,8 +38,21 @@ object SettingsResourcePatch: ResourcePatch() {
                 setAttribute("android:name", "app.revanced.integrations.twitter.settings.SettingsActivity")
                 setAttribute("android:excludeFromRecents", "true")
             }
-
             applicationNode.appendChild(modActivity)
+
+            val bkActivity = it.file.createElement("activity").apply {
+                setAttribute("android:label", "@strings/piko_pref_export")
+                setAttribute("android:name", "app.revanced.integrations.twitter.settings.BackupPrefActivity")
+                setAttribute("android:excludeFromRecents", "true")
+            }
+            applicationNode.appendChild(bkActivity)
+
+            val resActivity = it.file.createElement("activity").apply {
+                setAttribute("android:label", "@strings/piko_pref_import")
+                setAttribute("android:name", "app.revanced.integrations.twitter.settings.RestorePrefActivity")
+                setAttribute("android:excludeFromRecents", "true")
+            }
+            applicationNode.appendChild(resActivity)
         }
 
         //credits @inotia00
@@ -49,12 +62,16 @@ object SettingsResourcePatch: ResourcePatch() {
          * create directory for the untranslated language resources
          */
         val languages = arrayOf(
+            "ar",
+            "ja",
             "hi",
             "in",
+            "zh-rCN",
             "ru",
             "pl",
             "pt-rBR",
-            "v21"
+            "v21",
+            "tr"
         ).map { "values-$it" }
 
         languages.forEach {

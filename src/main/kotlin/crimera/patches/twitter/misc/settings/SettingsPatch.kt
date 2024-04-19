@@ -1,6 +1,7 @@
 package crimera.patches.twitter.misc.settings
 
 import app.revanced.patcher.data.BytecodeContext
+import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
@@ -10,6 +11,7 @@ import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.patcher.util.smali.ExternalLabel
+import app.revanced.patches.shared.misc.integrations.fingerprint.IntegrationsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import crimera.patches.twitter.misc.integrations.IntegrationsPatch
@@ -22,7 +24,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 object SettingsPatch : BytecodePatch(
-    setOf(SettingsFingerprint)
+    setOf(SettingsFingerprint,IntegrationsUtilsFingerprint)
 ) {
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
     private const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
@@ -69,5 +71,12 @@ object SettingsPatch : BytecodePatch(
         """,
             ExternalLabel("cont", prefCLickedMethod.getInstruction(constIndex))
         )
+
+        IntegrationsUtilsFingerprint.result!!.mutableMethod.addInstruction(
+            0,
+            "${SSTS_DESCRIPTOR}->load()V"
+        )
+
+        //end
     }
 }
