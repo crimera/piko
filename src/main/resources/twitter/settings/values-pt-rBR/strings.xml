@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="piko_title_settings">Configurações Piko</string>
+    
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">Ativar modo leitor</string>
     <string name="piko_pref_reader_mode_desc">Ativa o "modo leitor" em threads longos</string>
