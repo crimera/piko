@@ -41,20 +41,49 @@ object SettingsResourcePatch: ResourcePatch() {
 //
 //            applicationNode.appendChild(modActivity)
 //        }
+        context.xmlEditor["AndroidManifest.xml"].use {
+            val applicationNode = it.file.getElementsByTagName("application").item(0)
+
+            val modActivity = it.file.createElement("activity").apply {
+                setAttribute("android:label", "@strings/piko_title_settings")
+                setAttribute("android:name", "app.revanced.integrations.twitter.settings.SettingsActivity")
+                setAttribute("android:excludeFromRecents", "true")
+            }
+            applicationNode.appendChild(modActivity)
+
+            val bkActivity = it.file.createElement("activity").apply {
+                setAttribute("android:label", "@strings/piko_pref_export")
+                setAttribute("android:name", "app.revanced.integrations.twitter.settings.BackupPrefActivity")
+                setAttribute("android:excludeFromRecents", "true")
+            }
+            applicationNode.appendChild(bkActivity)
+
+            val resActivity = it.file.createElement("activity").apply {
+                setAttribute("android:label", "@strings/piko_pref_import")
+                setAttribute("android:name", "app.revanced.integrations.twitter.settings.RestorePrefActivity")
+                setAttribute("android:excludeFromRecents", "true")
+            }
+            applicationNode.appendChild(resActivity)
+        }
 
         //credits @inotia00
         context.copyXmlNode("twitter/settings", "values/strings.xml", "resources")
+        context.copyXmlNode("twitter/settings", "values/arrays.xml", "resources")
 
         /**
          * create directory for the untranslated language resources
          */
+        //Strings
         val languages = arrayOf(
             "ar",
+            "ja",
             "hi",
             "in",
+            "zh-rCN",
             "ru",
             "pl",
             "pt-rBR",
+            "tr",
             "v21"
         ).map { "values-$it" }
 

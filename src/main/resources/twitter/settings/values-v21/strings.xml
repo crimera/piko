@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Translation Exception -->
-    <string name="piko_title_settings">Piko Mod Settings</string>
+    <!-- Dont translate these -->
+    <string name="piko_title_settings">Piko mod Settings</string>
     <string name="piko_title_feature_flags">Feature flags</string>
 </resources>

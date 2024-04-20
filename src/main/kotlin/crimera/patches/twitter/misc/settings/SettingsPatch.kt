@@ -1,6 +1,7 @@
 package crimera.patches.twitter.misc.settings
 
 import app.revanced.patcher.data.BytecodeContext
+import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
@@ -10,10 +11,10 @@ import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.patcher.util.smali.ExternalLabel
+import app.revanced.patches.shared.misc.integrations.fingerprint.IntegrationsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import crimera.patches.twitter.misc.integrations.IntegrationsPatch
-import crimera.patches.twitter.misc.settings.fingerprints.AuthorizeAppActivity
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
 
 @Patch(
@@ -23,7 +24,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 object SettingsPatch : BytecodePatch(
-    setOf(SettingsFingerprint, AuthorizeAppActivity)
+    setOf(SettingsFingerprint, AuthorizeAppActivity, IntegrationsUtilsFingerprint)
 ) {
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
     private const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
@@ -33,6 +34,7 @@ object SettingsPatch : BytecodePatch(
 
     const val PREF_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Pref"
     const val PATCHES_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/patches"
+    const val CUSTOMISE_DESCRIPTOR = "$PATCHES_DESCRIPTOR/customise"
     const val SSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/settings/SettingsStatus;"
     const val FSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/patches/FeatureSwitchPatch;"
 
@@ -46,23 +48,20 @@ object SettingsPatch : BytecodePatch(
         val initMethod = result.mutableClass.methods.first()
 
         val arrayCreation = initMethod.getInstructions()
-            .first { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }.location.index + 1
+            .first { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }.location.index+1
 
-        initMethod.getInstruction<BuilderInstruction11x>(arrayCreation).registerA.also { reg ->
-            initMethod.addInstructions(
-                arrayCreation + 1, """
+        initMethod.getInstruction<BuilderInstruction11x>(arrayCreation).registerA.also { reg->
+            initMethod.addInstructions(arrayCreation+1, """
                 const-string v1, "pref_mod"
                 invoke-static {v$reg, v1}, $ADD_PREF_DESCRIPTOR
                 move-result-object v$reg
-            """
-            )
+            """)
         }
 
         val prefCLickedMethod = result.mutableClass.methods.find { it.returnType == "Z" }!!
-        val constIndex = prefCLickedMethod.getInstructions().first { it.opcode == Opcode.CONST_4 }.location.index
+        val constIndex = prefCLickedMethod.getInstructions().first{ it.opcode == Opcode.CONST_4 }.location.index
 
-        prefCLickedMethod.addInstructionsWithLabels(
-            1, """
+        prefCLickedMethod.addInstructionsWithLabels(1, """
             const-string v1, "pref_mod" 
             invoke-virtual {p1, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
             move-result v2
@@ -92,5 +91,12 @@ object SettingsPatch : BytecodePatch(
                     mutableMethod.getInstructions().first { it.opcode == Opcode.INVOKE_VIRTUAL })
             )
         } ?: throw PatchException("ProxySettingsActivityFingerprint not found")
+
+        IntegrationsUtilsFingerprint.result!!.mutableMethod.addInstruction(
+            0,
+            "${SSTS_DESCRIPTOR}->load()V"
+        )
+
+        //end
     }
 }

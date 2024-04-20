@@ -9,6 +9,7 @@ import app.revanced.patcher.patch.PatchException
 import crimera.patches.twitter.featureFlag.fingerprints.FeatureFlagFingerprint
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
+import app.revanced.patches.shared.misc.integrations.fingerprint.IntegrationsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
@@ -21,7 +22,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
 )
 @Suppress("unused")
 object FeatureFlagPatch:BytecodePatch(
-    setOf(FeatureFlagFingerprint)
+    setOf(FeatureFlagFingerprint,IntegrationsUtilsFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
 
@@ -44,6 +45,11 @@ object FeatureFlagPatch:BytecodePatch(
             0,
             "${SettingsPatch.SSTS_DESCRIPTOR}->enableFeatureFlags()V"
         )
+        IntegrationsUtilsFingerprint.result!!.mutableMethod.addInstruction(
+            1,
+            "${SettingsPatch.FSTS_DESCRIPTOR}->load()V"
+        )
+
         //end
     }
 }
