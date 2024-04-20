@@ -15,6 +15,7 @@ import app.revanced.patches.shared.misc.integrations.fingerprint.IntegrationsUti
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import crimera.patches.twitter.misc.integrations.IntegrationsPatch
+import crimera.patches.twitter.misc.settings.fingerprints.AuthorizeAppActivity
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
 
 @Patch(
@@ -96,7 +97,5 @@ object SettingsPatch : BytecodePatch(
             0,
             "${SSTS_DESCRIPTOR}->load()V"
         )
-
-        //end
     }
 }
