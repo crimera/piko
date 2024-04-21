@@ -80,16 +80,14 @@ object SettingsPatch : BytecodePatch(
 
         AuthorizeAppActivity.result?.apply {
             mutableMethod.addInstructionsWithLabels(
-                1,
-                """
+                1, """
                 invoke-static {p0}, $ACTIVITY_HOOK_CLASS->create(Landroid/app/Activity;)Z
                 move-result v0
-                if-eqz v0, :no_piko_settings_init
-                return-void
-            """.trimIndent(),
+                if-nez v0, :no_piko_settings_init
+                """.trimIndent(),
                 ExternalLabel(
                     "no_piko_settings_init",
-                    mutableMethod.getInstructions().first { it.opcode == Opcode.INVOKE_VIRTUAL })
+                    mutableMethod.getInstructions().first { it.opcode == Opcode.RETURN_VOID })
             )
         } ?: throw PatchException("ProxySettingsActivityFingerprint not found")
 
