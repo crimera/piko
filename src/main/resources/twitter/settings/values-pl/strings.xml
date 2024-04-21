@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="piko_title_premium">Premium</string>
-    <string name="piko_pref_reader_mode">Włącz 'Tryb czytania'</string>
-    <string name="piko_pref_reader_mode_desc">Włącza 'Tryb czytania' dla długich wątków</string>
+    <string name="piko_pref_reader_mode">Włącz \'Tryb czytania\'</string>
+    <string name="piko_pref_reader_mode_desc">Włącza \'Tryb czytania\' dla długich wątków</string>
     <string name="piko_pref_undo_posts">Włącz cofanie postów</string>
     <string name="piko_pref_undo_posts_desc">Umożliwia cofanie postów przed opublikowaniem</string>
     <string name="piko_pref_undo_posts_btn">Ustawienia cofania postów</string>
@@ -17,11 +17,11 @@
     <string name="piko_title_ads">Reklamy</string>
     <string name="piko_pref_hide_promoted_posts">Ukryj promowane posty</string>
     <string name="piko_pref_hide_g_ads">Ukryj reklamy Google</string>
-    <string name="piko_pref_wtf_section">Ukryj sekcję 'Warci obserwowania'</string>
-    <string name="piko_pref_cts_section">Ukryj sekcję 'Twórcy treści polecani dla Ciebie'</string>
-    <string name="piko_pref_ctj_section">Ukryj sekcję 'Dołącz do społeczności'</string>
-    <string name="piko_pref_ryb_section">Ukryj sekcję 'Przejrzyj zakładki'</string>
-    <string name="piko_pref_pinned_posts_section">Ukryj sekcję 'Przypięte posty przez obserwujących'</string>
+    <string name="piko_pref_wtf_section">Ukryj sekcję \'Warci obserwowania\'</string>
+    <string name="piko_pref_cts_section">Ukryj sekcję \'Twórcy treści polecani dla Ciebie\'</string>
+    <string name="piko_pref_ctj_section">Ukryj sekcję \'Dołącz do społeczności\'</string>
+    <string name="piko_pref_ryb_section">Ukryj sekcję \'Przejrzyj zakładki\'</string>
+    <string name="piko_pref_pinned_posts_section">Ukryj sekcję \'Przypięte posty przez obserwujących\'</string>
     <string name="piko_pref_hide_detailed_posts">Ukryj szczegółowe posty (w odpowiedziach)</string>
     <string name="piko_pref_hide_trends">Ukryj promowane trendy</string>
 
@@ -39,9 +39,9 @@
     <string name="piko_pref_add_flag_title">Dodaj flagę</string>
 
     <string name="piko_title_timeline">Oś czasu</string>
-    <string name="piko_pref_hide_for_you">Ukryj kartę 'Dla Ciebie'</string>
-    <string name="piko_pref_hide_live_threads">Ukryj pokoje 'Na żywo'</string>
-    <string name="piko_pref_hide_live_threads_desc">Ukrywa sekcję 'Na żywo' na osi czasu</string>
+    <string name="piko_pref_hide_for_you">Ukryj kartę \'Dla Ciebie\'</string>
+    <string name="piko_pref_hide_live_threads">Ukryj pokoje \'Na żywo\'</string>
+    <string name="piko_pref_hide_live_threads_desc">Ukrywa sekcję \'Na żywo\' na osi czasu</string>
     <string name="piko_pref_hide_banner">Ukryj baner</string>
     <string name="piko_pref_hide_banner_desc">Ukryj wyskakujące powiadomienie o nowych postach</string>
     <string name="piko_pref_hide_bmk_timeline">Ukryj ikonę zakładek na osi czasu</string>
