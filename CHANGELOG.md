@@ -1,3 +1,24 @@
+## [1.24.0-dev.2](https://github.com/crimera/piko/compare/v1.24.0-dev.1...v1.24.0-dev.2) (2024-04-21)
+
+
+### Bug Fixes
+
+* Opening mod settings with root installation results in crash ([8161644](https://github.com/crimera/piko/commit/81616443f2104eb1633c2c92c555f45341a7680e))
+* Opening mod settings with root installation results in crash ([47e7670](https://github.com/crimera/piko/commit/47e7670cc09da736cbca6c9447f82d9fa343ee56))
+* unescaped character on `pl` string values ([a6444be](https://github.com/crimera/piko/commit/a6444bed45872df6a55be17a2b64dd2d40e2d16a))
+
+## [1.24.0-dev.1](https://github.com/crimera/piko/compare/v1.23.0...v1.24.0-dev.1) (2024-04-19)
+
+
+### Features
+
+* **Twitter:** Added `Profile tabs customisation` ([db0298b](https://github.com/crimera/piko/commit/db0298b9f0cc6066974630d29812a2e8a11e7262))
+
+
+### Refactors
+
+* **Twitter:** updated profile tab string ([1af7846](https://github.com/crimera/piko/commit/1af78461de97661a82d5eb638300402eaab00afe))
+
 ## [1.23.0](https://github.com/crimera/piko/compare/v1.22.0...v1.23.0) (2024-04-19)
 
 

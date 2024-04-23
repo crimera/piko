@@ -15,6 +15,7 @@ import app.revanced.patches.shared.misc.integrations.fingerprint.IntegrationsUti
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import crimera.patches.twitter.misc.integrations.IntegrationsPatch
+import crimera.patches.twitter.misc.settings.fingerprints.AuthorizeAppActivity
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
 
 @Patch(
@@ -24,17 +25,22 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 object SettingsPatch : BytecodePatch(
-    setOf(SettingsFingerprint,IntegrationsUtilsFingerprint)
+    setOf(SettingsFingerprint, AuthorizeAppActivity, IntegrationsUtilsFingerprint)
 ) {
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
     private const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
+    private const val ACTIVITY_HOOK_CLASS = "Lapp/revanced/integrations/twitter/settings/ActivityHook;"
+    private const val ADD_PREF_DESCRIPTOR =
+        "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
+
     const val PREF_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Pref"
     const val PATCHES_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/patches"
-    private const val ADD_PREF_DESCRIPTOR = "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
+    const val CUSTOMISE_DESCRIPTOR = "$PATCHES_DESCRIPTOR/customise"
     const val SSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/settings/SettingsStatus;"
     const val FSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/patches/FeatureSwitchPatch;"
+
     private const val START_ACTIVITY_DESCRIPTOR =
-        "invoke-static {}, $UTILS_DESCRIPTOR;->startSettingsActivity()V"
+        "invoke-static {}, $ACTIVITY_HOOK_CLASS->startSettingsActivity()V"
 
     override fun execute(context: BytecodeContext) {
         val result = SettingsFingerprint.result
@@ -72,11 +78,22 @@ object SettingsPatch : BytecodePatch(
             ExternalLabel("cont", prefCLickedMethod.getInstruction(constIndex))
         )
 
+        AuthorizeAppActivity.result?.apply {
+            mutableMethod.addInstructionsWithLabels(
+                1, """
+                invoke-static {p0}, $ACTIVITY_HOOK_CLASS->create(Landroid/app/Activity;)Z
+                move-result v0
+                if-nez v0, :no_piko_settings_init
+                """.trimIndent(),
+                ExternalLabel(
+                    "no_piko_settings_init",
+                    mutableMethod.getInstructions().first { it.opcode == Opcode.RETURN_VOID })
+            )
+        } ?: throw PatchException("ProxySettingsActivityFingerprint not found")
+
         IntegrationsUtilsFingerprint.result!!.mutableMethod.addInstruction(
             0,
             "${SSTS_DESCRIPTOR}->load()V"
         )
-
-        //end
     }
 }

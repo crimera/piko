@@ -49,6 +49,9 @@
     <string name="piko_pref_show_poll_result_desc">Отображение результатов без голосования</string>
     <string name="piko_pref_hide_immersive_player">Отключить новый видеоплеер</string>
     <string name="piko_pref_hide_immersive_player_desc">Отключает переключение видео свайпами</string>
+    
+    <string name="piko_title_customisation">Кастомизация</string>
+    <string name="piko_pref_customisation_profiletabs">Скрыть разделы профиля</string>
 
     <string name="piko_title_backup">Бэкап и восстановление</string>
     <string name="piko_pref_export">Экспорт настроек</string>
