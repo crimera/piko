@@ -42,7 +42,7 @@
     <string name="piko_pref_hide_for_you">Sizin için sekmesini gizle</string>
     <string name="piko_pref_hide_live_threads">Canlı konuları gizle</string>
     <string name="piko_pref_hide_live_threads_desc">Zaman çizelgesinde canlı bölümünü gizle</string>
-    <string name="piko_pref_hide_banner">Banner'ı gizle</string>
+    <string name="piko_pref_hide_banner">Banner\'ı gizle</string>
     <string name="piko_pref_hide_banner_desc">Yeni gönderiler baloncuğunu gizle</string>
     <string name="piko_pref_hide_bmk_timeline">Ana Sayfada yer imi simgesini gizle</string>
     <string name="piko_pref_show_poll_result">Anket sonuçlarını göster</string>
