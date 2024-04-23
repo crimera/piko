@@ -42,14 +42,17 @@
     <string name="piko_pref_hide_for_you">Sizin için sekmesini gizle</string>
     <string name="piko_pref_hide_live_threads">Canlı konuları gizle</string>
     <string name="piko_pref_hide_live_threads_desc">Zaman çizelgesinde canlı bölümünü gizle</string>
-    <string name="piko_pref_hide_banner">Son yeni gönderileri gizle</string>
-    <string name="piko_pref_hide_banner_desc">Yeni gönderiler bildirimine gizle</string>
-    <string name="piko_pref_hide_bmk_timeline">Ana Sayfada kitaplık simgesini gizle</string>
+    <string name="piko_pref_hide_banner">Banner\'ı gizle</string>
+    <string name="piko_pref_hide_banner_desc">Yeni gönderiler baloncuğunu gizle</string>
+    <string name="piko_pref_hide_bmk_timeline">Ana Sayfada yer imi simgesini gizle</string>
     <string name="piko_pref_show_poll_result">Anket sonuçlarını göster</string>
     <string name="piko_pref_show_poll_result_desc">Anket sonuçlarını, oy vermeden göster</string>
     <string name="piko_pref_hide_immersive_player">Toplu oynatmayı gizle</string>
     <string name="piko_pref_hide_immersive_player_desc">Video oynatıcısında daha fazla video için sola kaydırma özelliğini gizle</string>
 
+    <string name="piko_title_customisation">Kişiselleştirme</string>
+    <string name="piko_pref_customisation_profiletabs">Gizlenecek profil sekmeleri</string>
+    
     <string name="piko_title_backup">Yedekleme ve geri yükleme</string>
     <string name="piko_pref_export">Tercihleri dışa aktar</string>
     <string name="piko_pref_export_flags">Özellik bayraklarını dışa aktar</string>
