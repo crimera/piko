@@ -1,3 +1,10 @@
+## [1.24.0-dev.3](https://github.com/crimera/piko/compare/v1.24.0-dev.2...v1.24.0-dev.3) (2024-04-23)
+
+
+### Features
+
+* **Translations:** Added Traditional Chinese translation ([1c0b10a](https://github.com/crimera/piko/commit/1c0b10af732a6e159862a99369b57368cbbdab91))
+
 ## [1.24.0-dev.2](https://github.com/crimera/piko/compare/v1.24.0-dev.1...v1.24.0-dev.2) (2024-04-21)
 
 
