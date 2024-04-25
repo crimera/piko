@@ -50,7 +50,7 @@
     <string name="piko_pref_hide_immersive_player">Sembunyikan pemutar imersif</string>
     <string name="piko_pref_hide_immersive_player_desc">Menghapus geser ke atas untuk video lebih lanjut dalam pemutar video</string>
 	
-	<string name="piko_title_customisation">Kustomisasi</string>
+    <string name="piko_title_customisation">Kustomisasi</string>
     <string name="piko_pref_customisation_profiletabs">Tab profil untuk disembunyikan</string>
 
     <string name="piko_title_backup">Cadangkan dan pulihkan</string>
