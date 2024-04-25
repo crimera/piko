@@ -1,3 +1,11 @@
+## [1.25.0](https://github.com/crimera/piko/compare/v1.24.0...v1.25.0) (2024-04-25)
+
+
+### Features
+
+* **Twitter:** Added `Customize timeline top bar` patch ([245c5f6](https://github.com/crimera/piko/commit/245c5f6f8f82e98b405ec853624c3cad52ae1764))
+* use browser chooser when opening links ([cc165f4](https://github.com/crimera/piko/commit/cc165f41db4392d9dcc554ee8800333e87dc8cdf))
+
 ## [1.25.0-dev.2](https://github.com/crimera/piko/compare/v1.25.0-dev.1...v1.25.0-dev.2) (2024-04-25)
 
 
