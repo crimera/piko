@@ -12,4 +12,10 @@
         <item>@string/profile_tab_title_media</item>
         <item>@string/profile_tab_title_likes</item>
     </string-array>
+
+    <string-array name="piko_array_timelinetabs">
+        <item>@string/piko_pref_customisation_timelinetabs_both</item>
+        <item>@string/piko_pref_customisation_timelinetabs_foryou</item>
+        <item>@string/piko_pref_customisation_timelinetabs_following</item>
+    </string-array>
 </resources>
