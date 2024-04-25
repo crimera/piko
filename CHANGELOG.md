@@ -1,3 +1,10 @@
+## [1.25.0-dev.1](https://github.com/crimera/piko/compare/v1.24.0...v1.25.0-dev.1) (2024-04-25)
+
+
+### Features
+
+* use browser chooser when opening links ([cc165f4](https://github.com/crimera/piko/commit/cc165f41db4392d9dcc554ee8800333e87dc8cdf))
+
 ## [1.24.0](https://github.com/crimera/piko/compare/v1.23.0...v1.24.0) (2024-04-25)
 
 
