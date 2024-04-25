@@ -49,5 +49,21 @@
     <string name="piko_pref_show_poll_result_desc">Melihat hasil polling tanpa melakukan pemungutan suara</string>
     <string name="piko_pref_hide_immersive_player">Sembunyikan pemutar imersif</string>
     <string name="piko_pref_hide_immersive_player_desc">Menghapus geser ke atas untuk video lebih lanjut dalam pemutar video</string>
+	
+    <string name="piko_title_customisation">Kustomisasi</string>
+    <string name="piko_pref_customisation_profiletabs">Tab profil untuk disembunyikan</string>
+
+    <string name="piko_title_backup">Cadangkan dan pulihkan</string>
+    <string name="piko_pref_export">Preferensi ekspor</string>
+    <string name="piko_pref_export_flags">Ekspor flag fitur</string>
+    <string name="piko_pref_export_saved">Berhasil diekspor</string>
+    <string name="piko_pref_export_failed">Kesalahan: Gagal mengekspor preferensi</string>
+    <string name="piko_pref_export_no_uri">Kesalahan: Tidak ada tujuan yang tersedia</string>
+    <string name="piko_pref_import">Preferensi impor</string>
+    <string name="piko_pref_import_flags">Impor flag fitur</string>
+    <string name="piko_pref_import_warn">Disarankan memulai ulang aplikasi</string>
+    <string name="piko_pref_import_saved">Berhasil diimpor</string>
+    <string name="piko_pref_import_failed">Kesalahan: Gagal mengimpor preferensi</string>
+    <string name="piko_pref_import_no_uri">Kesalahan: Tidak ada file yang disediakan</string>
 
 </resources>

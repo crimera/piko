@@ -50,7 +50,10 @@
     <string name="piko_pref_show_poll_result_desc">无需投票即可查看投票结果</string>
     <string name="piko_pref_hide_immersive_player">隐藏视频滑动切换</string>
     <string name="piko_pref_hide_immersive_player_desc">在视频播放器中移除向上滑动查看更多视频的功能</string>
-    
+
+    <string name="piko_title_customisation">自定义</string>
+    <string name="piko_pref_customisation_profiletabs">隐藏个人资料标签页</string>
+
     <string name="piko_title_backup">备份和恢复</string>
     <string name="piko_pref_export">导出配置</string>
     <string name="piko_pref_export_flags">导出功能标志</string>
