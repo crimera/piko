@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="piko_title_settings">Меню Piko</string>
+    
     <string name="piko_title_premium">Премиум</string>
     <string name="piko_pref_reader_mode">Включить режим чтения</string>
     <string name="piko_pref_reader_mode_desc">Удобный просмотр длинных постов</string>
@@ -51,7 +53,11 @@
     <string name="piko_pref_hide_immersive_player_desc">Отключает переключение видео свайпами</string>
     
     <string name="piko_title_customisation">Кастомизация</string>
-    <string name="piko_pref_customisation_profiletabs">Скрыть разделы профиля</string>
+    <string name="piko_pref_customisation_profiletabs">Разделы профиля</string>
+    <string name="piko_pref_customisation_timelinetabs">Разделы ленты</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">Скрыть \"Для вас\"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">Скрыть \"Вы читаете\"</string>
+    <string name="piko_pref_customisation_timelinetabs_both">Отображать все</string>
 
     <string name="piko_title_backup">Бэкап и восстановление</string>
     <string name="piko_pref_export">Экспорт настроек</string>
