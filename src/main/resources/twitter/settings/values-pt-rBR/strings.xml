@@ -54,6 +54,10 @@
 
     <string name="piko_title_customisation">Customização</string>
     <string name="piko_pref_customisation_profiletabs">Guias de perfil para ocultar</string>
+    <string name="piko_pref_customisation_timelinetabs">Guias da linha do tempo</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">Ocultar \"Para você\"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">Ocultar \"Seguindo\"</string>
+    <string name="piko_pref_customisation_timelinetabs_both">Mostrar ambos</string>
     
     <string name="piko_title_backup">Backup e restauração</string>
     <string name="piko_pref_export">Exportar preferências</string>
