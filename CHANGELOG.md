@@ -1,3 +1,15 @@
+## [1.26.0-dev.1](https://github.com/crimera/piko/compare/v1.25.1-dev.1...v1.26.0-dev.1) (2024-04-26)
+
+
+### Features
+
+* Add toggle for `Open browser chooser on opening links` patch ([6f217f0](https://github.com/crimera/piko/commit/6f217f08a8037be067791b318b750d7f6d91b4ea))
+
+
+### Updates
+
+* **Translations:** Update Russian translation ([8b1c4c8](https://github.com/crimera/piko/commit/8b1c4c8185a482a72ecc7cdc2dbb31940660a70d))
+
 ## [1.25.1-dev.1](https://github.com/crimera/piko/compare/v1.25.0...v1.25.1-dev.1) (2024-04-26)
 
 
