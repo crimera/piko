@@ -34,6 +34,8 @@
     <string name="piko_pref_hide_view_count">表示回数を非表示にする</string>
     <string name="piko_pref_custom_share_domain">カスタム共有ドメイン</string>
     <string name="piko_pref_custom_share_domain_desc">ポストを共有するときに使用するドメイン</string>
+    <string name="piko_pref_browser_chooser">外部ブラウザを使用</string>
+    <string name="piko_pref_browser_chooser_desc">アプリ内ブラウザではなく、外部ブラウザでリンクを開く</string>
     <string name="piko_pref_feature_flags">機能フラグ</string>
     <string name="piko_pref_edit_flag_title">フラグを編集</string>
     <string name="piko_pref_add_flag_title">フラグを追加</string>
