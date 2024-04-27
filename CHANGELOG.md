@@ -1,3 +1,10 @@
+## [1.25.1](https://github.com/crimera/piko/compare/v1.25.0...v1.25.1) (2024-04-27)
+
+
+### Updates
+
+* **Translations:** Update polish ([9d8f4fc](https://github.com/crimera/piko/commit/9d8f4fc57174b0cc28540e29b7b9725af5e65421))
+
 ## [1.25.0](https://github.com/crimera/piko/compare/v1.24.0...v1.25.0) (2024-04-25)
 
 
