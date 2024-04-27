@@ -1,3 +1,12 @@
+## [1.26.0-dev.2](https://github.com/crimera/piko/compare/v1.26.0-dev.1...v1.26.0-dev.2) (2024-04-27)
+
+
+### Updates
+
+* **Translations:** Update `Indonesian (Bahasa)` ([b9488d6](https://github.com/crimera/piko/commit/b9488d6fed4e521f80ca9c292112130d806f77aa))
+* **Translations:** Update Japanese ([61ff288](https://github.com/crimera/piko/commit/61ff288ba6aa086c984a317a52fb7228710878f5))
+* **Translations:** Update simplified chinese translation ([147cb29](https://github.com/crimera/piko/commit/147cb29cd4e4f260fd168934584971e6620e7f9b))
+
 ## [1.26.0-dev.1](https://github.com/crimera/piko/compare/v1.25.1-dev.1...v1.26.0-dev.1) (2024-04-26)
 
 
