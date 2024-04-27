@@ -55,8 +55,8 @@
     <string name="piko_pref_hide_immersive_player_desc">Отключает переключение видео свайпами</string>
     
     <string name="piko_title_customisation">Кастомизация</string>
-    <string name="piko_pref_customisation_profiletabs">Разделы профиля</string>
-    <string name="piko_pref_customisation_timelinetabs">Разделы ленты</string>
+    <string name="piko_pref_customisation_profiletabs">Скрыть разделы профиля</string>
+    <string name="piko_pref_customisation_timelinetabs">Скрыть разделы ленты</string>
     <string name="piko_pref_customisation_timelinetabs_foryou">Скрыть \"Для вас\"</string>
     <string name="piko_pref_customisation_timelinetabs_following">Скрыть \"Вы читаете\"</string>
     <string name="piko_pref_customisation_timelinetabs_both">Отображать все</string>
