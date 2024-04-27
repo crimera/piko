@@ -34,9 +34,11 @@
     <string name="piko_pref_hide_view_count">إخفاء عدد المشاهدات</string>
     <string name="piko_pref_custom_share_domain">نطاق المشاركة المخصص</string>
     <string name="piko_pref_custom_share_domain_desc">النطاق الذي سيتم استخدامه عند مشاركة التغريدات</string>
+    <string name="piko_pref_browser_chooser">استخدام منتقي المتصفح</string>
+    <string name="piko_pref_browser_chooser_desc">فتح الروابط باستخدام منتقي المتصفح بدلاً من استخدام المتصفح داخل التطبيق</string>
     <string name="piko_pref_feature_flags">Feature Flags</string>
-    <string name="piko_pref_edit_flag_title">Edit Flag</string>
-    <string name="piko_pref_add_flag_title">Add Flag</string>
+    <string name="piko_pref_edit_flag_title">Flag تعديل</string>
+    <string name="piko_pref_add_flag_title">Flag إضافة</string>
 
     <string name="piko_title_timeline">الخط الزمني</string>
     <string name="piko_pref_hide_for_you">إخفاء علامة التبويب لك</string>
@@ -50,6 +52,13 @@
     <string name="piko_pref_hide_immersive_player">Hide immersive player</string>
     <string name="piko_pref_hide_immersive_player_desc">يزيل التمرير السريع لمزيد من مقاطع الفيديو في مشغل الفيديو</string>
 
+    <string name="piko_title_customisation">التخصيص</string>
+    <string name="piko_pref_customisation_profiletabs">إخفاء علامات تبويب الملف الشخصي</string>
+    <string name="piko_pref_customisation_timelinetabs">علامات تبويب الخط الزمني</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">إخفاء \"لك\"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">إخفاء \"متابعَة\"</string>
+    <string name="piko_pref_customisation_timelinetabs_both">عرض كليهما</string>
+    
     <string name="piko_title_backup">النسخ الاحتياطي والإستعادة</string>
     <string name="piko_pref_export">تصدير التفضيلات</string>
     <string name="piko_pref_export_flags">Feature Flags تصدير</string>
