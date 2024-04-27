@@ -50,6 +50,13 @@
     <string name="piko_pref_hide_immersive_player">Ukryj immersyjny tryb odtwarzacza</string>
     <string name="piko_pref_hide_immersive_player_desc">Wyłącza przesuwanie w górę dla kolejnych filmów</string>
 
+    <string name="piko_title_customisation">Dostosowywanie</string>
+    <string name="piko_pref_customisation_profiletabs">Zakładki profilu do ukrycia</string>
+    <string name="piko_pref_customisation_timelinetabs">Zakładki osi czasu</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">Ukryj \'Dla Ciebie\'</string>
+    <string name="piko_pref_customisation_timelinetabs_following">Ukryj \'Obserwujesz\'</string>
+    <string name="piko_pref_customisation_timelinetabs_both">Wyświetl oba</string>
+
     <string name="piko_title_backup">Kopia zapasowa i przywracanie</string>
     <string name="piko_pref_export">Eksportuj ustawienia</string>
     <string name="piko_pref_export_flags">Eksportuj flagi funkcjonalne</string>
