@@ -1,3 +1,10 @@
+## [1.26.0-dev.4](https://github.com/crimera/piko/compare/v1.26.0-dev.3...v1.26.0-dev.4) (2024-04-27)
+
+
+### Updates
+
+* **Translations:** Update Turkish translations ([bab6ae9](https://github.com/crimera/piko/commit/bab6ae97e400d89f7551eebfc1ee04f385a1c62c))
+
 ## [1.26.0-dev.3](https://github.com/crimera/piko/compare/v1.26.0-dev.2...v1.26.0-dev.3) (2024-04-27)
 
 
