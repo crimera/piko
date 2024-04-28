@@ -98,7 +98,6 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
     }
 
     private fun updateStrings(context: ResourceContext) {
-
         val langs = StringsMap.replacementMap
         for ((key, value) in langs) {
             val stringsFile = context["res/$key/strings.xml"]
@@ -117,7 +116,6 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
             for ((key, value) in stringsMap) {
                 val nodes = document.getElementsByTagName("string")
                 var keyReplaced = false
-                println(value)
                 for (i in 0 until nodes.length) {
                     val node = nodes.item(i)
                     if (node.attributes.getNamedItem("name")?.nodeValue == key) {
