@@ -1,3 +1,16 @@
+## [1.26.0-dev.5](https://github.com/crimera/piko/compare/v1.26.0-dev.4...v1.26.0-dev.5) (2024-04-28)
+
+
+### Updates
+
+* **Translation:** Update Hindi translations [Bring back Twitter] ([20ac044](https://github.com/crimera/piko/commit/20ac044efe3f96f2cefadce6cb42a00e1a820840))
+
+
+### Refactors
+
+* **Twitter:** Added multiple language support for `Bring back twitter` ([9eacab3](https://github.com/crimera/piko/commit/9eacab308dab4f4ea1de834d81308e9d616766c2))
+* **Twitter:** Rearrange `Bring back twitter` resources ([a476924](https://github.com/crimera/piko/commit/a47692437d7f80c44b67ff61204b02db93743b86))
+
 ## [1.26.0-dev.4](https://github.com/crimera/piko/compare/v1.26.0-dev.3...v1.26.0-dev.4) (2024-04-27)
 
 
