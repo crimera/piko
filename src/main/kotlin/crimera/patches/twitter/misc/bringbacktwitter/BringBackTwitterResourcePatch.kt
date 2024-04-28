@@ -51,11 +51,14 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         sizes.map { "drawable-$it" }.plus("drawable").map {
             if (it == "drawable") {
                 ResourceGroup(it, *drawableIcons)
-            } else {
+            } else{
                 ResourceGroup(it, "ic_stat_twitter.webp")
             }
         }.forEach {
-            context.copyResources("twitter", it)
+            val folderName = context["res/${it.resourceDirectoryName}"]
+            if(folderName.exists()){
+                context.copyResources("twitter/bringbacktwitter", it)
+            }
         }
 
         // mipmap icons
@@ -66,7 +69,10 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
                 ResourceGroup(it, *mipmapIcons)
             }
         }.forEach {
-            context.copyResources("twitter", it)
+            val folderName = context["res/${it.resourceDirectoryName}"]
+            if(folderName.exists()) {
+                context.copyResources("twitter/bringbacktwitter", it)
+            }
         }
 
         // bring back twitter blue
