@@ -9,6 +9,7 @@ import app.revanced.util.ResourceGroup
 import app.revanced.util.asSequence
 import app.revanced.util.copyResources
 import org.w3c.dom.Element
+import crimera.patches.twitter.misc.bringbacktwitter.strings.StringsMap
 import java.io.File
 
 @Patch(
@@ -97,30 +98,26 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
     }
 
     private fun updateStrings(context: ResourceContext) {
-        val stringsFile = context["res/values/strings.xml"]
-        val stringsUK = context["res/values-en-rGB/strings.xml"]
 
-        when {
-            !stringsUK.isFile -> throw PatchException("$stringsUK file not found.")
-            !stringsFile.isFile -> throw PatchException("$stringsFile file not found.")
+        val langs = StringsMap.replacementMap
+        for ((key, value) in langs) {
+            val stringsFile = context["res/$key/strings.xml"]
+            if(!stringsFile.isFile){
+                println("$key/strings.xml not found")
+                continue
+            }
+            updateStringsFile(stringsFile, value, context)
         }
-
-        // Update strings.xml
-        updateStringsFile(stringsFile, context)
-        // Update strings-en-rGB.xml (British English)
-        updateStringsFile(stringsUK, context)
     }
 
-    private fun updateStringsFile(stringsFile: File, context: ResourceContext) {
+    private fun updateStringsFile(stringsFile: File,stringsMap: Map<String,String>, context: ResourceContext) {
         context.xmlEditor[stringsFile.toString()].use { editor ->
             val document = editor.file
-
-            val stringsMap = StringsMap.replacementMap
 
             for ((key, value) in stringsMap) {
                 val nodes = document.getElementsByTagName("string")
                 var keyReplaced = false
-
+                println(value)
                 for (i in 0 until nodes.length) {
                     val node = nodes.item(i)
                     if (node.attributes.getNamedItem("name")?.nodeValue == key) {
