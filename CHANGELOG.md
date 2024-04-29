@@ -1,3 +1,10 @@
+## [1.26.0-dev.6](https://github.com/crimera/piko/compare/v1.26.0-dev.5...v1.26.0-dev.6) (2024-04-29)
+
+
+### Features
+
+* **Translations:** Add Brazilian Portuguese translations [Bring back Twitter] ([3a831d3](https://github.com/crimera/piko/commit/3a831d3869a5fbbb22342cbfe1859241b2126fa5))
+
 ## [1.26.0-dev.5](https://github.com/crimera/piko/compare/v1.26.0-dev.4...v1.26.0-dev.5) (2024-04-28)
 
 
