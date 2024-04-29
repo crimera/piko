@@ -1,6 +1,6 @@
 package crimera.patches.twitter.misc.bringbacktwitter.strings
 
-object en_rGB {
+object pt_rBR {
     val values = mapOf(
         "button_action_add_tweet" to "Adicionar um tweet",
         "button_action_options_tweet" to "Opções do tweet",
