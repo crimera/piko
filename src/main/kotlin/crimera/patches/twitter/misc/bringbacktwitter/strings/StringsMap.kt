@@ -6,6 +6,6 @@ object StringsMap {
         "values-en-rGB" to en_rGB.values,
         "values-hi" to hi.values,
         "values-pt-rBR" to pt_rBR.values,
-        "values-zh-rCN" to zh-rCN.values,
+        "values-zh-rCN" to zh_rCN.values,
         )
 }
