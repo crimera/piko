@@ -35,7 +35,7 @@
     <string name="piko_pref_hide_view_count">隐藏帖子查看次数</string>
     <string name="piko_pref_custom_share_domain">自定义分享域名</string>
     <string name="piko_pref_custom_share_domain_desc">自定义分享推文时使用的域名</string>
-    <string name="piko_pref_browser_chooser">启用在浏览器中打开</string>
+    <string name="piko_pref_browser_chooser">使用外部浏览器</string>
     <string name="piko_pref_browser_chooser_desc">使用外部浏览器打开链接，而不是内置浏览器</string>
     <string name="piko_pref_feature_flags">功能标志</string>
     <string name="piko_pref_edit_flag_title">编辑标志</string>
