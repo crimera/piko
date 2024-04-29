@@ -7,7 +7,6 @@ object StringsMap {
         "values-hi" to hi.values,
         "values-pt-rBR" to pt_rBR.values,
         "values-zh-rCN" to zh_rCN.values,
-        "values-zh-rHK" to zh_rHK.values,
         "values-zh-rTW" to zh_rTW.values,
         )
 }
