@@ -13,7 +13,6 @@ import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.misc.hidecommunitynotes.fingerprints.HideCommunityNoteFingerprint
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
-import kotlin.jvm.Throws
 
 @Patch(
     name = "Hide Community Notes",

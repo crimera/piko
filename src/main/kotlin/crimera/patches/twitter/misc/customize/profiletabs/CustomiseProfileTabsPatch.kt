@@ -77,10 +77,10 @@ object CustomiseProfileTabsPatch:BytecodePatch(
             """.trimIndent(), ExternalLabel("check1",instructions.last { it.opcode == Opcode.INVOKE_STATIC })
         )
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
             0,
             "${SettingsPatch.SSTS_DESCRIPTOR}->profileTabCustomisation()V"
-        )
+        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
         //end
     }
 }

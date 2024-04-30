@@ -19,11 +19,12 @@ import crimera.patches.twitter.misc.recommendedusers.fingerprints.HideRecommende
 @Patch(
     name = "Hide Recommended Users",
     description = "Hide recommended users that pops up when you follow someone",
-    compatiblePackages = [CompatiblePackage("com.twitter.android")]
+    compatiblePackages = [CompatiblePackage("com.twitter.android")],
+    dependencies = [SettingsPatch::class]
 )
 @Suppress("unused")
 object HideRecommendedUsers: BytecodePatch(
-    setOf(HideRecommendedUsersFingerprint)
+    setOf(HideRecommendedUsersFingerprint, SettingsStatusLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
         val result = HideRecommendedUsersFingerprint.result
@@ -43,9 +44,9 @@ object HideRecommendedUsers: BytecodePatch(
             move-result-object v$reg
         """.trimIndent())
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
             0,
             "${SettingsPatch.SSTS_DESCRIPTOR}->hideRecommendedUsers()V"
-        )
+        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
     }
 }

@@ -3,6 +3,7 @@ package crimera.patches.twitter.featureFlag
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.patch.BytecodePatch
+import app.revanced.patcher.patch.PatchException
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
@@ -26,10 +27,10 @@ object HideBookmarkInTimelinePatch:BytecodePatch(
             "${SettingsPatch.FSTS_DESCRIPTOR}->bookmarkInTimeline()V"
         )
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
             0,
             "${SettingsPatch.SSTS_DESCRIPTOR}->hideInlineBmk()V"
-        )
+        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
 
         //end
     }

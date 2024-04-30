@@ -41,9 +41,9 @@ class HideFABPatch :BytecodePatch(
             ExternalLabel("cond_1212",constObj)
         )
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
             0,
             "${SettingsPatch.SSTS_DESCRIPTOR}->hideFAB()V"
-        )
+        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
     }
 }

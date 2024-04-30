@@ -21,7 +21,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
     requiresIntegrations = true
 )
 object CustomAppIconAndNavBtnsPatch:BytecodePatch(
-    setOf(CustomAppIconAndNavBtnsFingerprint)
+    setOf(CustomAppIconAndNavBtnsFingerprint, SettingsStatusLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
         val result = CustomAppIconAndNavBtnsFingerprint.result
@@ -35,10 +35,10 @@ object CustomAppIconAndNavBtnsPatch:BytecodePatch(
         methods.removeInstruction(loc)
         methods.removeInstruction(loc-1)
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
             0,
             "${SettingsPatch.SSTS_DESCRIPTOR}->enableAppIconNNavIcon()V"
-        )
+        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
         //end
     }
 }

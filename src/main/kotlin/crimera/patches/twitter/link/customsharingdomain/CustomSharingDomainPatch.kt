@@ -36,9 +36,9 @@ object CustomSharingDomainPatch: BytecodePatch(
             """.trimIndent()
         )
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
             0,
             "${SettingsPatch.SSTS_DESCRIPTOR}->enableCustomSharingDomain()V"
-        )
+        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
     }
 }
