@@ -1,3 +1,11 @@
+## [1.26.1-dev.3](https://github.com/crimera/piko/compare/v1.26.1-dev.2...v1.26.1-dev.3) (2024-04-30)
+
+
+### Refactors
+
+* Add `enableSettings` helper function ([7d6ebd5](https://github.com/crimera/piko/commit/7d6ebd579a32161bf782f2ce0843817dbbf8b69d))
+* Optimize imports ([2f42add](https://github.com/crimera/piko/commit/2f42add01463d36336423574b76670c6cbf2659a))
+
 ## [1.26.1-dev.2](https://github.com/crimera/piko/compare/v1.26.1-dev.1...v1.26.1-dev.2) (2024-04-30)
 
 
