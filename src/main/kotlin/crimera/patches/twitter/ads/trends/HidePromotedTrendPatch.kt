@@ -37,7 +37,9 @@ class HidePromotedTrendPatch : BytecodePatch(
         val return_obj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }
         val return_loc = return_obj.location.index
         val return_reg = method.getInstruction<OneRegisterInstruction>(return_loc).registerA
-        val loc = return_loc-7
+
+        val last_new_inst = instructions.last { it.opcode == Opcode.NEW_INSTANCE }.location.index
+        val loc = last_new_inst+3
         val reg = method.getInstruction<TwoRegisterInstruction>(loc).registerA
 
         val HOOK_DESCRIPTOR =

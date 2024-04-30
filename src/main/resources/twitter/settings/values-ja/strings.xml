@@ -34,6 +34,8 @@
     <string name="piko_pref_hide_view_count">表示回数を非表示にする</string>
     <string name="piko_pref_custom_share_domain">カスタム共有ドメイン</string>
     <string name="piko_pref_custom_share_domain_desc">ポストを共有するときに使用するドメイン</string>
+    <string name="piko_pref_browser_chooser">外部ブラウザを使用</string>
+    <string name="piko_pref_browser_chooser_desc">アプリ内ブラウザではなく、外部ブラウザでリンクを開く</string>
     <string name="piko_pref_feature_flags">機能フラグ</string>
     <string name="piko_pref_edit_flag_title">フラグを編集</string>
     <string name="piko_pref_add_flag_title">フラグを追加</string>
@@ -49,7 +51,15 @@
     <string name="piko_pref_show_poll_result_desc">投票せずに投票結果を表示します</string>
     <string name="piko_pref_hide_immersive_player">イマーシブプレーヤーを非表示にする</string>
     <string name="piko_pref_hide_immersive_player_desc">動画再生時にスワイプして他の動画を表示する機能を削除します</string>
+    
+    <string name="piko_title_customisation">カスタマイズ</string>
+    <string name="piko_pref_customisation_profiletabs">プロフィール タブを非表示にする</string>
+    <string name="piko_pref_customisation_timelinetabs">タイムライン タブ</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">For You を非表示</string>
+    <string name="piko_pref_customisation_timelinetabs_following">フォロー中 を非表示</string>
+    <string name="piko_pref_customisation_timelinetabs_both">両方を表示</string>
 
+    
     <string name="piko_title_backup">バックアップと復元</string>
     <string name="piko_pref_export">設定をエクスポート</string>
     <string name="piko_pref_export_flags">機能プラグをエクスポート</string>

@@ -15,7 +15,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
     name = "Custom sharing domain",
     description = "Allows for using domains like fxtwitter when sharing tweets/posts.",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false
+    dependencies = [SettingsPatch::class],
 )
 object CustomSharingDomainPatch: BytecodePatch(
     setOf(AddSessionTokenFingerprint, SettingsStatusLoadFingerprint)

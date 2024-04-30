@@ -1,24 +1,19 @@
 package crimera.patches.twitter.link.browserchooser
 
 import app.revanced.patcher.data.BytecodeContext
+import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
-import app.revanced.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
-import com.android.tools.smali.dexlib2.AccessFlags
-import com.android.tools.smali.dexlib2.builder.MutableMethodImplementation
-import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
-import com.android.tools.smali.dexlib2.immutable.ImmutableMethodParameter
-import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.link.browserchooser.fingerprints.OpenLinkFingerprint
 import crimera.patches.twitter.misc.settings.SettingsPatch
-import java.lang.IllegalStateException
+import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 @Patch(
     name = "Open browser chooser on opening links",
     description = "Instead of open the link directly in one of the installed browsers",
-    compatiblePackages = [CompatiblePackage("com.twitter.android")]
+    compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 @Suppress("unused")
 object BrowserChooserPatch : BytecodePatch(
@@ -36,5 +31,9 @@ object BrowserChooserPatch : BytecodePatch(
 
         result.mutableMethod.addInstructions(0, inject)
 
+        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+            0,
+            "${SettingsPatch.SSTS_DESCRIPTOR}->enableBrowserChooser()V"
+        )
     }
 }

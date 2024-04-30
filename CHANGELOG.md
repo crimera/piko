@@ -1,9 +1,86 @@
-## [1.25.1](https://github.com/crimera/piko/compare/v1.25.0...v1.25.1) (2024-04-27)
+## [1.26.0-dev.9](https://github.com/crimera/piko/compare/v1.26.0-dev.8...v1.26.0-dev.9) (2024-04-30)
+
+
+### Features
+
+* **Translations:** Add Simplified Chinese translations and Taiwanese Traditional Chinese translations[Bring back Twitter] ([d44bfd7](https://github.com/crimera/piko/commit/d44bfd73f0063703179c097d68738063a000d80b))
+
+## [1.26.0-dev.8](https://github.com/crimera/piko/compare/v1.26.0-dev.7...v1.26.0-dev.8) (2024-04-30)
+
+
+### Updates
+
+* **Bring back twitter:** Create strings file if not found ([9f51a5c](https://github.com/crimera/piko/commit/9f51a5cf9525e829166a5b82261abe209823eb5b))
+* **Custom sharing domain:** require settings patch also turned it on by default. ([6a3777f](https://github.com/crimera/piko/commit/6a3777f0631a97dff3a31129a45cfc671e71283d))
+
+## [1.26.0-dev.7](https://github.com/crimera/piko/compare/v1.26.0-dev.6...v1.26.0-dev.7) (2024-04-30)
 
 
 ### Updates
 
 * **Translations:** Update polish ([9d8f4fc](https://github.com/crimera/piko/commit/9d8f4fc57174b0cc28540e29b7b9725af5e65421))
+
+## [1.26.0-dev.6](https://github.com/crimera/piko/compare/v1.26.0-dev.5...v1.26.0-dev.6) (2024-04-29)
+
+
+### Features
+
+* **Translations:** Add Brazilian Portuguese translations [Bring back Twitter] ([3a831d3](https://github.com/crimera/piko/commit/3a831d3869a5fbbb22342cbfe1859241b2126fa5))
+
+## [1.26.0-dev.5](https://github.com/crimera/piko/compare/v1.26.0-dev.4...v1.26.0-dev.5) (2024-04-28)
+
+
+### Updates
+
+* **Translation:** Update Hindi translations [Bring back Twitter] ([20ac044](https://github.com/crimera/piko/commit/20ac044efe3f96f2cefadce6cb42a00e1a820840))
+
+
+### Refactors
+
+* **Twitter:** Added multiple language support for `Bring back twitter` ([9eacab3](https://github.com/crimera/piko/commit/9eacab308dab4f4ea1de834d81308e9d616766c2))
+* **Twitter:** Rearrange `Bring back twitter` resources ([a476924](https://github.com/crimera/piko/commit/a47692437d7f80c44b67ff61204b02db93743b86))
+
+## [1.26.0-dev.4](https://github.com/crimera/piko/compare/v1.26.0-dev.3...v1.26.0-dev.4) (2024-04-27)
+
+
+### Updates
+
+* **Translations:** Update Turkish translations ([bab6ae9](https://github.com/crimera/piko/commit/bab6ae97e400d89f7551eebfc1ee04f385a1c62c))
+
+## [1.26.0-dev.3](https://github.com/crimera/piko/compare/v1.26.0-dev.2...v1.26.0-dev.3) (2024-04-27)
+
+
+### Bug Fixes
+
+* **Twitter:** Fix `Hide Promoted Trends` patch ([7052d25](https://github.com/crimera/piko/commit/7052d2583527354ee1a719f808993049364c8718))
+
+## [1.26.0-dev.2](https://github.com/crimera/piko/compare/v1.26.0-dev.1...v1.26.0-dev.2) (2024-04-27)
+
+
+### Updates
+
+* **Translations:** Update `Indonesian (Bahasa)` ([b9488d6](https://github.com/crimera/piko/commit/b9488d6fed4e521f80ca9c292112130d806f77aa))
+* **Translations:** Update Japanese ([61ff288](https://github.com/crimera/piko/commit/61ff288ba6aa086c984a317a52fb7228710878f5))
+* **Translations:** Update simplified chinese translation ([147cb29](https://github.com/crimera/piko/commit/147cb29cd4e4f260fd168934584971e6620e7f9b))
+
+## [1.26.0-dev.1](https://github.com/crimera/piko/compare/v1.25.1-dev.1...v1.26.0-dev.1) (2024-04-26)
+
+
+### Features
+
+* Add toggle for `Open browser chooser on opening links` patch ([6f217f0](https://github.com/crimera/piko/commit/6f217f08a8037be067791b318b750d7f6d91b4ea))
+
+
+### Updates
+
+* **Translations:** Update Russian translation ([8b1c4c8](https://github.com/crimera/piko/commit/8b1c4c8185a482a72ecc7cdc2dbb31940660a70d))
+
+## [1.25.1-dev.1](https://github.com/crimera/piko/compare/v1.25.0...v1.25.1-dev.1) (2024-04-26)
+
+
+### Updates
+
+* **Translations:** Update Brazilian Portuguese ([7de9493](https://github.com/crimera/piko/commit/7de949327844e06e1fda1946bed5555fb150b67c))
 
 ## [1.25.0](https://github.com/crimera/piko/compare/v1.24.0...v1.25.0) (2024-04-25)
 
