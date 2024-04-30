@@ -1,15 +1,14 @@
 package crimera.patches.twitter.misc.bringbacktwitter
 
 import app.revanced.patcher.data.ResourceContext
-import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.ResourcePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.util.ResourceGroup
 import app.revanced.util.asSequence
 import app.revanced.util.copyResources
-import org.w3c.dom.Element
 import crimera.patches.twitter.misc.bringbacktwitter.strings.StringsMap
+import org.w3c.dom.Element
 import java.io.File
 import java.io.FileWriter
 

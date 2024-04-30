@@ -1,9 +1,7 @@
 package crimera.patches.twitter.ads.timelineEntryHook
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.patch.BytecodePatch
-import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import crimera.patches.twitter.misc.settings.SettingsPatch

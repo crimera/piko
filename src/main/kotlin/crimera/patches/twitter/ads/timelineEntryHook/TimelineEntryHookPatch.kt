@@ -3,14 +3,13 @@ package crimera.patches.twitter.ads.timelineEntryHook
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
+import app.revanced.patcher.fingerprint.MethodFingerprint
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
-import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.misc.settings.SettingsPatch
-import app.revanced.patcher.fingerprint.MethodFingerprint
 
 object TimelineEntryHookFingerprint:MethodFingerprint(
     returnType = "Ljava/lang/Object",

@@ -1,18 +1,16 @@
 package crimera.patches.twitter.premium.customAppIconAndNavBtns
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.removeInstruction
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
-import crimera.patches.twitter.premium.customAppIconAndNavBtns.fingerprints.CustomAppIconAndNavBtnsFingerprint
-
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
+import crimera.patches.twitter.premium.customAppIconAndNavBtns.fingerprints.CustomAppIconAndNavBtnsFingerprint
 
 @Patch(
     name = "Enable custom app icon and nav icon settings",
