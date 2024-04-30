@@ -1,3 +1,10 @@
+## [1.26.1-dev.2](https://github.com/crimera/piko/compare/v1.26.1-dev.1...v1.26.1-dev.2) (2024-04-30)
+
+
+### Refactors
+
+* Add `SettingsPatch ` dependencies to patches ([6d252f8](https://github.com/crimera/piko/commit/6d252f84c6086b15e7be4a58676254748bd8ff73))
+
 ## [1.26.1-dev.1](https://github.com/crimera/piko/compare/v1.26.0...v1.26.1-dev.1) (2024-04-30)
 
 
