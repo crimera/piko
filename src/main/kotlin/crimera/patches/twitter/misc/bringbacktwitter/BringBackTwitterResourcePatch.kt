@@ -11,6 +11,7 @@ import app.revanced.util.copyResources
 import org.w3c.dom.Element
 import crimera.patches.twitter.misc.bringbacktwitter.strings.StringsMap
 import java.io.File
+import java.io.FileWriter
 
 @Patch(
     name = "Bring back twitter",
@@ -102,8 +103,12 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         for ((key, value) in langs) {
             val stringsFile = context["res/$key/strings.xml"]
             if(!stringsFile.isFile){
-                println("$key/strings.xml not found")
-                continue
+//                println("$key/strings.xml not found")
+
+                context["res/$key"].mkdirs()
+                FileWriter(stringsFile).use {
+                    it.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
+                }
             }
             updateStringsFile(stringsFile, value, context)
         }
@@ -127,7 +132,12 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
 
                 // log which keys were not found or failed
                 if (!keyReplaced) {
-                    println("Key not found: $key")
+                    val colorElement = document.createElement("string")
+
+                    colorElement.setAttribute("name", key)
+                    colorElement.textContent = value
+
+                    document.getElementsByTagName("resources").item(0).appendChild(colorElement)
                 }
             }
         }
