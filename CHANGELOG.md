@@ -1,3 +1,11 @@
+## [1.26.0-dev.8](https://github.com/crimera/piko/compare/v1.26.0-dev.7...v1.26.0-dev.8) (2024-04-30)
+
+
+### Updates
+
+* **Bring back twitter:** Create strings file if not found ([9f51a5c](https://github.com/crimera/piko/commit/9f51a5cf9525e829166a5b82261abe209823eb5b))
+* **Custom sharing domain:** require settings patch also turned it on by default. ([6a3777f](https://github.com/crimera/piko/commit/6a3777f0631a97dff3a31129a45cfc671e71283d))
+
 ## [1.26.0-dev.7](https://github.com/crimera/piko/compare/v1.26.0-dev.6...v1.26.0-dev.7) (2024-04-30)
 
 
