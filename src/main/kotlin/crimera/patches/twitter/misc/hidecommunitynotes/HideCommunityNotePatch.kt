@@ -13,6 +13,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.misc.hidecommunitynotes.fingerprints.HideCommunityNoteFingerprint
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
+import kotlin.jvm.Throws
 
 @Patch(
     name = "Hide Community Notes",
@@ -21,7 +22,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
     use = false
 )
 object HideCommunityNotePatch :BytecodePatch(
-    setOf(HideCommunityNoteFingerprint)
+    setOf(HideCommunityNoteFingerprint, SettingsStatusLoadFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
         val result = HideCommunityNoteFingerprint.result
@@ -43,10 +44,10 @@ object HideCommunityNotePatch :BytecodePatch(
             ExternalLabel("end",instructions.last { it.opcode == Opcode.RETURN_VOID })
         )
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
+        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
             0,
             "${SettingsPatch.SSTS_DESCRIPTOR}->hideCommunityNotes()V"
-        )
+        ) ?: throw PatchException("${SettingsStatusLoadFingerprint.javaClass.name} not found")
 
         //end
     }
