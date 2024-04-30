@@ -1,3 +1,10 @@
+## [1.26.0-dev.9](https://github.com/crimera/piko/compare/v1.26.0-dev.8...v1.26.0-dev.9) (2024-04-30)
+
+
+### Features
+
+* **Translations:** Add Simplified Chinese translations and Taiwanese Traditional Chinese translations[Bring back Twitter] ([d44bfd7](https://github.com/crimera/piko/commit/d44bfd73f0063703179c097d68738063a000d80b))
+
 ## [1.26.0-dev.8](https://github.com/crimera/piko/compare/v1.26.0-dev.7...v1.26.0-dev.8) (2024-04-30)
 
 
