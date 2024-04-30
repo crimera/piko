@@ -1,3 +1,10 @@
+## [1.26.1-dev.1](https://github.com/crimera/piko/compare/v1.26.0...v1.26.1-dev.1) (2024-04-30)
+
+
+### Bug Fixes
+
+* add "SettingsStatusLoadFingerprint" to fingerprints of `Hide Community Notes` and `Hide Live Threads` patch ([9c0232a](https://github.com/crimera/piko/commit/9c0232afd684024cc7028960aa2c65a82ce90cb7))
+
 ## [1.26.0](https://github.com/crimera/piko/compare/v1.25.1...v1.26.0) (2024-04-30)
 
 
