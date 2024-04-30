@@ -22,10 +22,7 @@ class HideImmersivePlayer : BytecodePatch(
     setOf( FeatureFlagLoadFingerprint,SettingsStatusLoadFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideImmersivePlayer()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("hideImmersivePlayer")
 
         FeatureFlagLoadFingerprint.result!!.mutableMethod.addInstruction(
             0,

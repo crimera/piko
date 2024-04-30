@@ -57,10 +57,7 @@ object EnableUndoPostPatch :BytecodePatch(
         method3.addInstruction(loc3-1,PREF.trimIndent())
 
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->enableUndoPosts()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("enableUndoPosts")
         //end
     }
 

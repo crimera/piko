@@ -33,9 +33,6 @@ object BrowserChooserPatch : BytecodePatch(
 
         result.mutableMethod.addInstructions(0, inject)
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->enableBrowserChooser()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("enableBrowserChooser")
     }
 }

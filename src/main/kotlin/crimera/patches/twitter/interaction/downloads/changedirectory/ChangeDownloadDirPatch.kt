@@ -49,9 +49,6 @@ object ChangeDownloadDirPatch: BytecodePatch(
             move-result-object p1
         """.trimIndent())
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->enableDownloadFolder()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("enableDownloadFolder")
     }
 }

@@ -43,11 +43,6 @@ object HideCommunityNotePatch :BytecodePatch(
             ExternalLabel("end",instructions.last { it.opcode == Opcode.RETURN_VOID })
         )
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideCommunityNotes()V"
-        ) ?: throw PatchException("${SettingsStatusLoadFingerprint.javaClass.name} not found")
-
-        //end
+        SettingsStatusLoadFingerprint.enableSettings("hideCommunityNotes")
     }
 }

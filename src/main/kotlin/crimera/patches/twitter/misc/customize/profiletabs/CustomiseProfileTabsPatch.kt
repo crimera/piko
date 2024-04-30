@@ -63,7 +63,7 @@ object CustomiseProfileTabsPatch:BytecodePatch(
         val last_if_nez_loc = instructions.last { it.opcode == Opcode.IF_NEZ }.location.index
         val r2 = method.getInstruction<OneRegisterInstruction>(last_if_nez_loc).registerA
 
-        //it works dont ask me how
+        //it works don't ask me how
         method.removeInstruction(last_if_eqz)
         method.removeInstruction(last_if_eqz)
         method.removeInstruction(last_if_eqz)
@@ -77,10 +77,7 @@ object CustomiseProfileTabsPatch:BytecodePatch(
             """.trimIndent(), ExternalLabel("check1",instructions.last { it.opcode == Opcode.INVOKE_STATIC })
         )
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->profileTabCustomisation()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("profileTabCustomisation")
         //end
     }
 }

@@ -26,10 +26,7 @@ object DisableChirpFontPatch: BytecodePatch(
             "${SettingsPatch.FSTS_DESCRIPTOR}->chirpFont()V"
         )
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->enableFont()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("enableFont")
         //end
     }
 }

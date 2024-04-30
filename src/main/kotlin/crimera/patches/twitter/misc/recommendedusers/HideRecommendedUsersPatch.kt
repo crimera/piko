@@ -44,9 +44,6 @@ object HideRecommendedUsers: BytecodePatch(
             move-result-object v$reg
         """.trimIndent())
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideRecommendedUsers()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("hideRecommendedUsers")
     }
 }

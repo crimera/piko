@@ -41,10 +41,7 @@ object FeatureFlagPatch:BytecodePatch(
 
         booleanMethod.addInstructions(loc+1,METHOD)
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->enableFeatureFlags()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("enableFeatureFlags")
         IntegrationsUtilsFingerprint.result!!.mutableMethod.addInstruction(
             1,
             "${SettingsPatch.FSTS_DESCRIPTOR}->load()V"

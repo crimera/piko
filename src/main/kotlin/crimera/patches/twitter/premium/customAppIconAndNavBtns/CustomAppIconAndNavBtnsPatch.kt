@@ -35,10 +35,7 @@ object CustomAppIconAndNavBtnsPatch:BytecodePatch(
         methods.removeInstruction(loc)
         methods.removeInstruction(loc-1)
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->enableAppIconNNavIcon()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("enableAppIconNNavIcon")
         //end
     }
 }

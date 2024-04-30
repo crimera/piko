@@ -41,9 +41,6 @@ object ShowPollResultsPatch: BytecodePatch(
             """.trimIndent()
         )
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->enableShowPollResults()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("enableShowPollResults")
     }
 }

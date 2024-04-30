@@ -27,10 +27,7 @@ object RemoveViewCountPatch: BytecodePatch(
             "${SettingsPatch.FSTS_DESCRIPTOR}->viewCount()V"
         )
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideViewCount()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("hideViewCount")
     }
 
 }

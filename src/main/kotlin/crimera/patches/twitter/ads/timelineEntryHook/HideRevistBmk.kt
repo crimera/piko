@@ -19,10 +19,6 @@ object HideRevistBmk :BytecodePatch(
     setOf(SettingsStatusLoadFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideRevistBookmark()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
-
+        SettingsStatusLoadFingerprint.enableSettings("hideRevistBookmark")
     }
 }

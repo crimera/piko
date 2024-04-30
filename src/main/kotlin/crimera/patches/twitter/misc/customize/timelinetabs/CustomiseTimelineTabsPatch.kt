@@ -73,9 +73,6 @@ object CustomiseTimelineTabsPatch : BytecodePatch(
         """.trimIndent(), ExternalLabel("escape",arr)
         )
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->timelineTabCustomisation()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("timelineTabCustomisation")
     }
 }

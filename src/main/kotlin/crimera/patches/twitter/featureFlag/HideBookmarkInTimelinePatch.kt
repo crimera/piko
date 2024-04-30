@@ -27,10 +27,7 @@ object HideBookmarkInTimelinePatch:BytecodePatch(
             "${SettingsPatch.FSTS_DESCRIPTOR}->bookmarkInTimeline()V"
         )
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideInlineBmk()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("hideInlineBmk")
 
         //end
     }

@@ -64,10 +64,7 @@ object EnableReaderModePatch:BytecodePatch(
         val loc = methods2.getInstructions().first{it.opcode == Opcode.IF_EQZ}.location.index
         methods2.addInstruction(loc-1, PREF.trimIndent())
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->enableReaderMode()V"
-        ) ?: throw PatchException("SettingsStatusLoadFingerprint not found")
+        SettingsStatusLoadFingerprint.enableSettings("enableReaderMode")
         //end
     }
 

@@ -43,9 +43,6 @@ object HideLiveThreadsPatch :  BytecodePatch(
             move-result-object v$reg
         """.trimIndent())
 
-        SettingsStatusLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideLiveThreads()V"
-        ) ?: throw PatchException("${SettingsStatusLoadFingerprint.javaClass.name} not found")
+        SettingsStatusLoadFingerprint.enableSettings("hideLiveThreads")
     }
 }
