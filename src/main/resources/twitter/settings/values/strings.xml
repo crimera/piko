@@ -13,6 +13,10 @@
     <string name="piko_pref_download_path_desc">The public folder to use for video downloads</string>
     <string name="piko_pref_download_folder">Download subfolder</string>
     <string name="piko_pref_download_folder_desc">The subfolder to download videos to ([PublicFolder]/[Subfolder])</string>
+    <string name="piko_pref_download_media_link_handle">Video download preference</string>
+    <string name="piko_pref_download_media_link_handle_download">Direct download</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">Direct copy media link</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">Always ask</string>
 
     <string name="piko_title_ads">Ads</string>
     <string name="piko_pref_hide_promoted_posts">Hide promoted posts</string>
