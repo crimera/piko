@@ -1,3 +1,10 @@
+## [1.27.0-dev.2](https://github.com/crimera/piko/compare/v1.27.0-dev.1...v1.27.0-dev.2) (2024-05-01)
+
+
+### Bug Fixes
+
+* Unescaped characters ([8e539df](https://github.com/crimera/piko/commit/8e539dfd8c4e1ef6889357b9850a842db54a2a99))
+
 ## [1.27.0-dev.1](https://github.com/crimera/piko/compare/v1.26.1-dev.3...v1.27.0-dev.1) (2024-05-01)
 
 
