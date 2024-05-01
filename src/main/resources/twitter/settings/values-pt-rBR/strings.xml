@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="piko_title_settings">Configurações Piko</string>
+    
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">Ativar modo leitor</string>
     <string name="piko_pref_reader_mode_desc">Ativa o "modo leitor" em threads longos</string>
@@ -34,9 +36,11 @@
     <string name="piko_pref_hide_view_count">Ocultar contagem de visualizações</string>
     <string name="piko_pref_custom_share_domain">Domínio de compartilhamento personalizado</string>
     <string name="piko_pref_custom_share_domain_desc">O domínio a ser usado ao compartilhar tweets</string>
-    <string name="piko_pref_feature_flags">Sinalizadores de recursos</string>
-    <string name="piko_pref_edit_flag_title">Editar sinalizador</string>
-    <string name="piko_pref_add_flag_title">Adicionar sinalizador</string>
+    <string name="piko_pref_browser_chooser">Use o seletor de navegador</string>
+    <string name="piko_pref_browser_chooser_desc">Abra links com o seletor de navegador em vez de usar o navegador do aplicativo</string>
+    <string name="piko_pref_feature_flags">Feature flags</string>
+    <string name="piko_pref_edit_flag_title">Editar flag</string>
+    <string name="piko_pref_add_flag_title">Adicionar flag</string>
 
     <string name="piko_title_timeline">Linha do tempo</string>
     <string name="piko_pref_hide_for_you">Ocultar aba "Para você"</string>
@@ -50,17 +54,24 @@
     <string name="piko_pref_hide_immersive_player">Desativar o player imersivo</string>
     <string name="piko_pref_hide_immersive_player_desc">Remove o deslizar para cima para ver mais vídeos no player de vídeo</string>
 
+    <string name="piko_title_customisation">Customização</string>
+    <string name="piko_pref_customisation_profiletabs">Guias de perfil para ocultar</string>
+    <string name="piko_pref_customisation_timelinetabs">Guias da linha do tempo</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">Ocultar \"Para você\"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">Ocultar \"Seguindo\"</string>
+    <string name="piko_pref_customisation_timelinetabs_both">Mostrar ambos</string>
+    
     <string name="piko_title_backup">Backup e restauração</string>
     <string name="piko_pref_export">Exportar preferências</string>
-    <string name="piko_pref_export_flags">Exportar sinalizadores de recursos</string>
+    <string name="piko_pref_export_flags">Exportar feature flags</string>
     <string name="piko_pref_export_saved">Exportado com sucesso</string>
     <string name="piko_pref_export_failed">Erro: falha na exportação de preferências</string>
     <string name="piko_pref_export_no_uri">Erro: nenhum destino fornecido</string>
     <string name="piko_pref_import">Importar preferências</string>
-    <string name="piko_pref_import_flags">Import feature flags</string>
+    <string name="piko_pref_import_flags">Importar feature flags</string>
     <string name="piko_pref_import_warn">Recomenda-se reiniciar o aplicativo</string>
     <string name="piko_pref_import_saved">Importado com sucesso</string>
     <string name="piko_pref_import_failed">Erro: falha na importação de preferências</string>
     <string name="piko_pref_import_no_uri">Erro: Nenhum arquivo fornecido</string>
-
+    
 </resources>

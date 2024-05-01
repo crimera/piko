@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+<!-- Dont translate these -->
+    <string-array name="piko_array_profiletabs">
+        <item>@string/profile_tab_title_timeline</item>
+        <item>@string/profile_tab_title_timeline_tweets_and_replies_sentence_case</item>
+        <item>@string/profile_tab_title_affiliates</item>
+        <item>@string/profile_tab_title_timeline_super_follow_tweets</item>
+        <item>@string/profile_tab_title_highlights</item>
+        <item>@string/profile_tab_title_articles</item>
+        <item>@string/profile_tab_title_media</item>
+        <item>@string/profile_tab_title_likes</item>
+    </string-array>
+
+    <string-array name="piko_array_timelinetabs">
+        <item>@string/piko_pref_customisation_timelinetabs_both</item>
+        <item>@string/piko_pref_customisation_timelinetabs_foryou</item>
+        <item>@string/piko_pref_customisation_timelinetabs_following</item>
+    </string-array>
+</resources>

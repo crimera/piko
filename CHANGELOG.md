@@ -1,3 +1,263 @@
+## [1.26.0](https://github.com/crimera/piko/compare/v1.25.1...v1.26.0) (2024-04-30)
+
+
+### Bug Fixes
+
+* **Twitter:** Fix `Hide Promoted Trends` patch ([7052d25](https://github.com/crimera/piko/commit/7052d2583527354ee1a719f808993049364c8718))
+
+
+### Features
+
+* Add toggle for `Open browser chooser on opening links` patch ([6f217f0](https://github.com/crimera/piko/commit/6f217f08a8037be067791b318b750d7f6d91b4ea))
+* **Translations:** Add Brazilian Portuguese translations [Bring back Twitter] ([3a831d3](https://github.com/crimera/piko/commit/3a831d3869a5fbbb22342cbfe1859241b2126fa5))
+* **Translations:** Add Simplified Chinese translations and Taiwanese Traditional Chinese translations[Bring back Twitter] ([d44bfd7](https://github.com/crimera/piko/commit/d44bfd73f0063703179c097d68738063a000d80b))
+
+
+### Updates
+
+* **Bring back twitter:** Create strings file if not found ([9f51a5c](https://github.com/crimera/piko/commit/9f51a5cf9525e829166a5b82261abe209823eb5b))
+* **Custom sharing domain:** require settings patch also turned it on by default. ([6a3777f](https://github.com/crimera/piko/commit/6a3777f0631a97dff3a31129a45cfc671e71283d))
+* **Translations:** Update `Indonesian (Bahasa)` ([b9488d6](https://github.com/crimera/piko/commit/b9488d6fed4e521f80ca9c292112130d806f77aa))
+* **Translations:** Update Brazilian Portuguese ([7de9493](https://github.com/crimera/piko/commit/7de949327844e06e1fda1946bed5555fb150b67c))
+* **Translations:** Update Japanese ([61ff288](https://github.com/crimera/piko/commit/61ff288ba6aa086c984a317a52fb7228710878f5))
+* **Translations:** Update Russian translation ([8b1c4c8](https://github.com/crimera/piko/commit/8b1c4c8185a482a72ecc7cdc2dbb31940660a70d))
+* **Translations:** Update simplified chinese translation ([147cb29](https://github.com/crimera/piko/commit/147cb29cd4e4f260fd168934584971e6620e7f9b))
+* **Translations:** Update Turkish translations ([bab6ae9](https://github.com/crimera/piko/commit/bab6ae97e400d89f7551eebfc1ee04f385a1c62c))
+* **Translation:** Update Hindi translations [Bring back Twitter] ([20ac044](https://github.com/crimera/piko/commit/20ac044efe3f96f2cefadce6cb42a00e1a820840))
+
+
+### Refactors
+
+* **Twitter:** Added multiple language support for `Bring back twitter` ([9eacab3](https://github.com/crimera/piko/commit/9eacab308dab4f4ea1de834d81308e9d616766c2))
+* **Twitter:** Rearrange `Bring back twitter` resources ([a476924](https://github.com/crimera/piko/commit/a47692437d7f80c44b67ff61204b02db93743b86))
+
+## [1.26.0-dev.9](https://github.com/crimera/piko/compare/v1.26.0-dev.8...v1.26.0-dev.9) (2024-04-30)
+
+
+### Features
+
+* **Translations:** Add Simplified Chinese translations and Taiwanese Traditional Chinese translations[Bring back Twitter] ([d44bfd7](https://github.com/crimera/piko/commit/d44bfd73f0063703179c097d68738063a000d80b))
+
+## [1.26.0-dev.8](https://github.com/crimera/piko/compare/v1.26.0-dev.7...v1.26.0-dev.8) (2024-04-30)
+
+
+### Updates
+
+* **Bring back twitter:** Create strings file if not found ([9f51a5c](https://github.com/crimera/piko/commit/9f51a5cf9525e829166a5b82261abe209823eb5b))
+* **Custom sharing domain:** require settings patch also turned it on by default. ([6a3777f](https://github.com/crimera/piko/commit/6a3777f0631a97dff3a31129a45cfc671e71283d))
+
+## [1.26.0-dev.7](https://github.com/crimera/piko/compare/v1.26.0-dev.6...v1.26.0-dev.7) (2024-04-30)
+
+
+### Updates
+
+* **Translations:** Update polish ([9d8f4fc](https://github.com/crimera/piko/commit/9d8f4fc57174b0cc28540e29b7b9725af5e65421))
+
+## [1.26.0-dev.6](https://github.com/crimera/piko/compare/v1.26.0-dev.5...v1.26.0-dev.6) (2024-04-29)
+
+
+### Features
+
+* **Translations:** Add Brazilian Portuguese translations [Bring back Twitter] ([3a831d3](https://github.com/crimera/piko/commit/3a831d3869a5fbbb22342cbfe1859241b2126fa5))
+
+## [1.26.0-dev.5](https://github.com/crimera/piko/compare/v1.26.0-dev.4...v1.26.0-dev.5) (2024-04-28)
+
+
+### Updates
+
+* **Translation:** Update Hindi translations [Bring back Twitter] ([20ac044](https://github.com/crimera/piko/commit/20ac044efe3f96f2cefadce6cb42a00e1a820840))
+
+
+### Refactors
+
+* **Twitter:** Added multiple language support for `Bring back twitter` ([9eacab3](https://github.com/crimera/piko/commit/9eacab308dab4f4ea1de834d81308e9d616766c2))
+* **Twitter:** Rearrange `Bring back twitter` resources ([a476924](https://github.com/crimera/piko/commit/a47692437d7f80c44b67ff61204b02db93743b86))
+
+## [1.26.0-dev.4](https://github.com/crimera/piko/compare/v1.26.0-dev.3...v1.26.0-dev.4) (2024-04-27)
+
+
+### Updates
+
+* **Translations:** Update Turkish translations ([bab6ae9](https://github.com/crimera/piko/commit/bab6ae97e400d89f7551eebfc1ee04f385a1c62c))
+
+## [1.26.0-dev.3](https://github.com/crimera/piko/compare/v1.26.0-dev.2...v1.26.0-dev.3) (2024-04-27)
+
+
+### Bug Fixes
+
+* **Twitter:** Fix `Hide Promoted Trends` patch ([7052d25](https://github.com/crimera/piko/commit/7052d2583527354ee1a719f808993049364c8718))
+
+## [1.26.0-dev.2](https://github.com/crimera/piko/compare/v1.26.0-dev.1...v1.26.0-dev.2) (2024-04-27)
+
+
+### Updates
+
+* **Translations:** Update `Indonesian (Bahasa)` ([b9488d6](https://github.com/crimera/piko/commit/b9488d6fed4e521f80ca9c292112130d806f77aa))
+* **Translations:** Update Japanese ([61ff288](https://github.com/crimera/piko/commit/61ff288ba6aa086c984a317a52fb7228710878f5))
+* **Translations:** Update simplified chinese translation ([147cb29](https://github.com/crimera/piko/commit/147cb29cd4e4f260fd168934584971e6620e7f9b))
+
+## [1.26.0-dev.1](https://github.com/crimera/piko/compare/v1.25.1-dev.1...v1.26.0-dev.1) (2024-04-26)
+
+
+### Features
+
+* Add toggle for `Open browser chooser on opening links` patch ([6f217f0](https://github.com/crimera/piko/commit/6f217f08a8037be067791b318b750d7f6d91b4ea))
+
+
+### Updates
+
+* **Translations:** Update Russian translation ([8b1c4c8](https://github.com/crimera/piko/commit/8b1c4c8185a482a72ecc7cdc2dbb31940660a70d))
+
+## [1.25.1-dev.1](https://github.com/crimera/piko/compare/v1.25.0...v1.25.1-dev.1) (2024-04-26)
+
+
+### Updates
+
+* **Translations:** Update Brazilian Portuguese ([7de9493](https://github.com/crimera/piko/commit/7de949327844e06e1fda1946bed5555fb150b67c))
+
+## [1.25.0](https://github.com/crimera/piko/compare/v1.24.0...v1.25.0) (2024-04-25)
+
+
+### Features
+
+* **Twitter:** Added `Customize timeline top bar` patch ([245c5f6](https://github.com/crimera/piko/commit/245c5f6f8f82e98b405ec853624c3cad52ae1764))
+* use browser chooser when opening links ([cc165f4](https://github.com/crimera/piko/commit/cc165f41db4392d9dcc554ee8800333e87dc8cdf))
+
+## [1.25.0-dev.2](https://github.com/crimera/piko/compare/v1.25.0-dev.1...v1.25.0-dev.2) (2024-04-25)
+
+
+### Features
+
+* **Twitter:** Added `Customize timeline top bar` patch ([245c5f6](https://github.com/crimera/piko/commit/245c5f6f8f82e98b405ec853624c3cad52ae1764))
+
+## [1.25.0-dev.1](https://github.com/crimera/piko/compare/v1.24.0...v1.25.0-dev.1) (2024-04-25)
+
+
+### Features
+
+* use browser chooser when opening links ([cc165f4](https://github.com/crimera/piko/commit/cc165f41db4392d9dcc554ee8800333e87dc8cdf))
+
+## [1.24.0](https://github.com/crimera/piko/compare/v1.23.0...v1.24.0) (2024-04-25)
+
+
+### Bug Fixes
+
+* Opening mod settings with root installation results in crash ([8161644](https://github.com/crimera/piko/commit/81616443f2104eb1633c2c92c555f45341a7680e))
+* Opening mod settings with root installation results in crash ([47e7670](https://github.com/crimera/piko/commit/47e7670cc09da736cbca6c9447f82d9fa343ee56))
+* unescaped character on `pl` string values ([a6444be](https://github.com/crimera/piko/commit/a6444bed45872df6a55be17a2b64dd2d40e2d16a))
+
+
+### Features
+
+* **Translations:** Added Traditional Chinese translation ([1c0b10a](https://github.com/crimera/piko/commit/1c0b10af732a6e159862a99369b57368cbbdab91))
+* **Twitter:** Added `Profile tabs customisation` ([db0298b](https://github.com/crimera/piko/commit/db0298b9f0cc6066974630d29812a2e8a11e7262))
+
+
+### Refactors
+
+* **Twitter:** updated profile tab string ([1af7846](https://github.com/crimera/piko/commit/1af78461de97661a82d5eb638300402eaab00afe))
+
+## [1.24.0-dev.3](https://github.com/crimera/piko/compare/v1.24.0-dev.2...v1.24.0-dev.3) (2024-04-23)
+
+
+### Features
+
+* **Translations:** Added Traditional Chinese translation ([1c0b10a](https://github.com/crimera/piko/commit/1c0b10af732a6e159862a99369b57368cbbdab91))
+
+## [1.24.0-dev.2](https://github.com/crimera/piko/compare/v1.24.0-dev.1...v1.24.0-dev.2) (2024-04-21)
+
+
+### Bug Fixes
+
+* Opening mod settings with root installation results in crash ([8161644](https://github.com/crimera/piko/commit/81616443f2104eb1633c2c92c555f45341a7680e))
+* Opening mod settings with root installation results in crash ([47e7670](https://github.com/crimera/piko/commit/47e7670cc09da736cbca6c9447f82d9fa343ee56))
+* unescaped character on `pl` string values ([a6444be](https://github.com/crimera/piko/commit/a6444bed45872df6a55be17a2b64dd2d40e2d16a))
+
+## [1.24.0-dev.1](https://github.com/crimera/piko/compare/v1.23.0...v1.24.0-dev.1) (2024-04-19)
+
+
+### Features
+
+* **Twitter:** Added `Profile tabs customisation` ([db0298b](https://github.com/crimera/piko/commit/db0298b9f0cc6066974630d29812a2e8a11e7262))
+
+
+### Refactors
+
+* **Twitter:** updated profile tab string ([1af7846](https://github.com/crimera/piko/commit/1af78461de97661a82d5eb638300402eaab00afe))
+
+## [1.23.0](https://github.com/crimera/piko/compare/v1.22.0...v1.23.0) (2024-04-19)
+
+
+### Bug Fixes
+
+* Fix oopsie ([2af661f](https://github.com/crimera/piko/commit/2af661f5dfa1cc08e436ce04800ab230030a5079))
+* Missing `,` ([67675fe](https://github.com/crimera/piko/commit/67675fe381f0554cb69c0f061ec792df9e523479))
+* Not creating `values-night-v31` dir ([e3f3491](https://github.com/crimera/piko/commit/e3f3491fea403f55d5200d1afc4aebd5c7507c2e))
+* switch jp to ja for Japanese translation ([c13cc87](https://github.com/crimera/piko/commit/c13cc87afeaea8cb623e7652a154a507ce532d61))
+
+
+### Features
+
+* **Translations:** Add `Turkish` ([bf70b91](https://github.com/crimera/piko/commit/bf70b913775ec299a87725b15d30bb2506da7a5d))
+* **Translations:** Add Arabic translations ([c1d797b](https://github.com/crimera/piko/commit/c1d797b21bcbf0752bb48c94e4009e8221e46b36))
+* **Translations:** Add japanese ([c123d8e](https://github.com/crimera/piko/commit/c123d8ed58f92dce6337cd194be64e21b3d9559c))
+* **Translations:** Add simplified Chinese translation ([7662a34](https://github.com/crimera/piko/commit/7662a34a87e2dd5d819188993054a8fc4808ef03))
+* **Translations:** Fix Simplified Chinese Translation ([ec0a3dc](https://github.com/crimera/piko/commit/ec0a3dcadf4027c3a6a6d411d44043d245b5ca29))
+* **Translations:** Update `japanese` ([f5ece19](https://github.com/crimera/piko/commit/f5ece191a724f7bc0aed0cb90df8902f6d9e110b))
+* **Translations:** Update Russian translation ([54ba664](https://github.com/crimera/piko/commit/54ba664921218ce79218e4ce4a9a2d4d2d1cf1b6))
+* **Translations:** Updated Brazilian Portuguese ([e25ec0e](https://github.com/crimera/piko/commit/e25ec0ecee9e576f6fe74c2bf70d750399275b7e))
+* **translation:** Update Simplified Chinese translation ([4f3027a](https://github.com/crimera/piko/commit/4f3027a2279e9cd1a2cc010d190cab3551c45cd4))
+* **Translation:** Update Simplified Chinese translation ([b9fe0e8](https://github.com/crimera/piko/commit/b9fe0e83a3ddd1fd2633dca6403723c4dbea32ce))
+* **Twitter:** Added `Enable app downgrading` patch ([9f581ce](https://github.com/crimera/piko/commit/9f581ce41b202fe7e5dfbb634a18a5bf6fb8faa5))
+* **Twitter:** Added ability to export and import prefs & feature flags ([01cdd6b](https://github.com/crimera/piko/commit/01cdd6b7b25f08a3b258704f38c25b11aa1a9703))
+* **Twitter:** Added ability to export and import prefs & feature flags ([a591133](https://github.com/crimera/piko/commit/a591133381a0b620a82d83580757300042680c85))
+* **ui:** full app wide material theming in dim mode replacing dark blue ([52d7444](https://github.com/crimera/piko/commit/52d74441f0ae509ec66ba04b3939c90deb4755c5))
+
+
+### Refactors
+
+* **Twitter:** load `Utils.load()` dynamically ([5379276](https://github.com/crimera/piko/commit/53792768e4e5465559478041f51e516159c1f93f))
+
+## [1.23.0-dev.11](https://github.com/crimera/piko/compare/v1.23.0-dev.10...v1.23.0-dev.11) (2024-04-18)
+
+
+### Features
+
+* **Twitter:** Added `Enable app downgrading` patch ([9f581ce](https://github.com/crimera/piko/commit/9f581ce41b202fe7e5dfbb634a18a5bf6fb8faa5))
+
+
+### Refactors
+
+* **Twitter:** load `Utils.load()` dynamically ([5379276](https://github.com/crimera/piko/commit/53792768e4e5465559478041f51e516159c1f93f))
+
+## [1.23.0-dev.10](https://github.com/crimera/piko/compare/v1.23.0-dev.9...v1.23.0-dev.10) (2024-04-17)
+
+
+### Features
+
+* **Translations:** Fix Simplified Chinese Translation ([ec0a3dc](https://github.com/crimera/piko/commit/ec0a3dcadf4027c3a6a6d411d44043d245b5ca29))
+
+## [1.23.0-dev.9](https://github.com/crimera/piko/compare/v1.23.0-dev.8...v1.23.0-dev.9) (2024-04-17)
+
+
+### Bug Fixes
+
+* switch jp to ja for Japanese translation ([c13cc87](https://github.com/crimera/piko/commit/c13cc87afeaea8cb623e7652a154a507ce532d61))
+
+## [1.23.0-dev.8](https://github.com/crimera/piko/compare/v1.23.0-dev.7...v1.23.0-dev.8) (2024-04-17)
+
+
+### Bug Fixes
+
+* Not creating `values-night-v31` dir ([e3f3491](https://github.com/crimera/piko/commit/e3f3491fea403f55d5200d1afc4aebd5c7507c2e))
+
+## [1.23.0-dev.7](https://github.com/crimera/piko/compare/v1.23.0-dev.6...v1.23.0-dev.7) (2024-04-17)
+
+
+### Features
+
+* **ui:** full app wide material theming in dim mode replacing dark blue ([52d7444](https://github.com/crimera/piko/commit/52d74441f0ae509ec66ba04b3939c90deb4755c5))
+
 ## [1.23.0-dev.6](https://github.com/crimera/piko/compare/v1.23.0-dev.5...v1.23.0-dev.6) (2024-04-16)
 
 

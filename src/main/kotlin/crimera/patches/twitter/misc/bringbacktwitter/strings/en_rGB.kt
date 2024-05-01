@@ -1,7 +1,7 @@
-package crimera.patches.twitter.misc.bringbacktwitter
+package crimera.patches.twitter.misc.bringbacktwitter.strings
 
-object StringsMap {
-    val replacementMap = mapOf(
+object en_rGB {
+    val values = mapOf(
         "button_action_add_tweet" to "Add a tweet",
         "button_action_options_tweet" to "Tweet options",
         "button_action_retweet" to "Retweet",

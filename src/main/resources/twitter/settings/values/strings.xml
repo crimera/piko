@@ -34,6 +34,8 @@
     <string name="piko_pref_hide_view_count">Hide view count</string>
     <string name="piko_pref_custom_share_domain">Custom sharing domain</string>
     <string name="piko_pref_custom_share_domain_desc">The domain to use when sharing tweets</string>
+    <string name="piko_pref_browser_chooser">Use browser chooser</string>
+    <string name="piko_pref_browser_chooser_desc">Open links with browser chooser instead of using the in-app browser</string>
     <string name="piko_pref_feature_flags">Feature flags</string>
     <string name="piko_pref_edit_flag_title">Edit flag</string>
     <string name="piko_pref_add_flag_title">Add flag</string>
@@ -49,6 +51,13 @@
     <string name="piko_pref_show_poll_result_desc">View poll results without voting</string>
     <string name="piko_pref_hide_immersive_player">Hide immersive player</string>
     <string name="piko_pref_hide_immersive_player_desc">Removes swipe up for more videos in video player</string>
+
+    <string name="piko_title_customisation">Customization</string>
+    <string name="piko_pref_customisation_profiletabs">Profile tabs to hide</string>
+    <string name="piko_pref_customisation_timelinetabs">Timeline tabs</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">Hide \"For You\"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">Hide \"Following\"</string>
+    <string name="piko_pref_customisation_timelinetabs_both">Show both</string>
 
     <string name="piko_title_backup">Backup and restore</string>
     <string name="piko_pref_export">Export preferences</string>
