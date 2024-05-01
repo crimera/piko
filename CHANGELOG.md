@@ -1,3 +1,10 @@
+## [1.27.0-dev.1](https://github.com/crimera/piko/compare/v1.26.1-dev.3...v1.27.0-dev.1) (2024-05-01)
+
+
+### Features
+
+* **Twitter:** Added `Ability to copy video media link` patch ([14bfdc7](https://github.com/crimera/piko/commit/14bfdc7d0b2d1fbf6644e496cbc186bd5ade3494))
+
 ## [1.26.1-dev.3](https://github.com/crimera/piko/compare/v1.26.1-dev.2...v1.26.1-dev.3) (2024-04-30)
 
 
