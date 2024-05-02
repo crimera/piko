@@ -8,6 +8,7 @@ import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
+import crimera.patches.twitter.featureFlag.fingerprints.FeatureFlagLoadFingerprint
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.premium.customAppIconAndNavBtns.fingerprints.CustomAppIconAndNavBtnsFingerprint
@@ -20,7 +21,7 @@ import crimera.patches.twitter.premium.customAppIconAndNavBtns.fingerprints.NavB
     requiresIntegrations = true
 )
 object CustomAppIconAndNavBtnsPatch:BytecodePatch(
-    setOf(CustomAppIconAndNavBtnsFingerprint, SettingsStatusLoadFingerprint,NavBarFixFingerprint)
+    setOf(CustomAppIconAndNavBtnsFingerprint, SettingsStatusLoadFingerprint,NavBarFixFingerprint,FeatureFlagLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
         val result = CustomAppIconAndNavBtnsFingerprint.result
@@ -43,6 +44,8 @@ object CustomAppIconAndNavBtnsPatch:BytecodePatch(
         methods2.removeInstruction(loc2)
         methods2.removeInstruction(loc2)
         methods2.removeInstruction(loc2)
+
+        FeatureFlagLoadFingerprint.enableSettings("navbarFix")
 
         SettingsStatusLoadFingerprint.enableSettings("enableAppIconNNavIcon")
         //end
