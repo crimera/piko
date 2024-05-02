@@ -22,11 +22,7 @@ class HideFABMenuButtonsPatch : BytecodePatch(
 ){
     override fun execute(context: BytecodeContext) {
         SettingsStatusLoadFingerprint.enableSettings("hideFABBtns")
-
-        FeatureFlagLoadFingerprint.result?.mutableMethod?.addInstruction(
-            0,
-            "${SettingsPatch.FSTS_DESCRIPTOR}->fabMenu()V"
-        ) ?: throw PatchException("FeatureFlagLoadFingerprint not found")
+        FeatureFlagLoadFingerprint.enableSettings("fabMenu")
         //end
     }
 }
