@@ -22,7 +22,7 @@
     <string name="piko_pref_ctj_section">Ukryj sekcję \'Dołącz do społeczności\'</string>
     <string name="piko_pref_ryb_section">Ukryj sekcję \'Przejrzyj zakładki\'</string>
     <string name="piko_pref_pinned_posts_section">Ukryj sekcję \'Przypięte posty przez obserwujących\'</string>
-    <string name="piko_pref_hide_detailed_posts">Ukryj szczegółowe posty (w odpowiedziach)</string>
+    <string name="piko_pref_hide_detailed_posts">Ukryj \'Odkryj więcej\' (w odpowiedziach)</string>
     <string name="piko_pref_hide_trends">Ukryj promowane trendy</string>
 
     <string name="piko_title_misc">Różne</string>
@@ -34,6 +34,8 @@
     <string name="piko_pref_hide_view_count">Ukryj licznik wyświetleń pod postami</string>
     <string name="piko_pref_custom_share_domain">Własna domena do udostepniana</string>
     <string name="piko_pref_custom_share_domain_desc">Domena używana do udostępniania tweetów</string>
+    <string name="piko_pref_browser_chooser">Używaj domyślnej przeglądarki</string>
+    <string name="piko_pref_browser_chooser_desc">Otwieraj linki w Twojej domyślnej przeglądarce, a nie wbudowanej w aplikacji</string>
     <string name="piko_pref_feature_flags">Flagi funkcjonalne</string>
     <string name="piko_pref_edit_flag_title">Edytuj flagę</string>
     <string name="piko_pref_add_flag_title">Dodaj flagę</string>
