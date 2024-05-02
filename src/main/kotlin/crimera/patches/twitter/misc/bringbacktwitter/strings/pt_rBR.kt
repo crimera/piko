@@ -37,7 +37,7 @@ object pt_rBR {
         "filter_item_tweets_and_replies" to "Tweets & respostas",
         "profile_tab_title_timeline" to "Tweets",
         "users_turn_off_retweets" to "Desativar retweets",
-        "tweets_retweet" to "Retweets",
+        "tweets_retweet" to "Retweetar",
         "tweets_retweeted" to "%s retweetou",
         "tweets_undo_retweet_vertical" to "Desfazer retweet",
         "users_turn_on_retweets" to "Ativar retweets",
