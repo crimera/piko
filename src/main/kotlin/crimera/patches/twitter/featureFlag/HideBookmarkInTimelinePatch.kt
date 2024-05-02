@@ -20,11 +20,7 @@ object HideBookmarkInTimelinePatch:BytecodePatch(
 ) {
     override fun execute(context: BytecodeContext) {
 
-        FeatureFlagLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.FSTS_DESCRIPTOR}->bookmarkInTimeline()V"
-        )
-
+        FeatureFlagLoadFingerprint.enableSettings("bookmarkInTimeline")
         SettingsStatusLoadFingerprint.enableSettings("hideInlineBmk")
 
         //end

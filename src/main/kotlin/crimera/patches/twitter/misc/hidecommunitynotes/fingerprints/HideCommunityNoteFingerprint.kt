@@ -10,7 +10,7 @@ object HideCommunityNoteFingerprint : MethodFingerprint(
         "birdwatch_pivot",
     ),
     customFingerprint = {it,_ ->
-        it.definingClass =="Lcom/twitter/api/model/json/core/JsonApiTweet\$\$JsonObjectMapper;"
+        it.definingClass =="Lcom/twitter/api/model/json/core/JsonApiTweet\$\$JsonObjectMapper;" && it.name == "parseField"
     }
 
 )

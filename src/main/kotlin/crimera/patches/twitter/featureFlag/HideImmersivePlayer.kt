@@ -22,11 +22,7 @@ class HideImmersivePlayer : BytecodePatch(
 ){
     override fun execute(context: BytecodeContext) {
         SettingsStatusLoadFingerprint.enableSettings("hideImmersivePlayer")
-
-        FeatureFlagLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.FSTS_DESCRIPTOR}->immersivePlayer()V"
-        )
+        FeatureFlagLoadFingerprint.enableSettings("immersivePlayer")
         //end
     }
 }
