@@ -1,3 +1,10 @@
+## [1.27.0-dev.3](https://github.com/crimera/piko/compare/v1.27.0-dev.2...v1.27.0-dev.3) (2024-05-02)
+
+
+### Updates
+
+* **Translations:** Update `japanese` ([9fce4a2](https://github.com/crimera/piko/commit/9fce4a20d7db77992bd92eaa5ada75af8af56103))
+
 ## [1.27.0-dev.2](https://github.com/crimera/piko/compare/v1.27.0-dev.1...v1.27.0-dev.2) (2024-05-01)
 
 
