@@ -15,6 +15,10 @@
     <string name="piko_pref_download_path_desc">Папка для скачивания видео</string>
     <string name="piko_pref_download_folder">Выбрать подпапку</string>
     <string name="piko_pref_download_folder_desc">Подпапка для скачивания видео ([Папка]/[Подпапка])</string>
+    <string name="piko_pref_download_media_link_handle">Метод скачивания</string>
+    <string name="piko_pref_download_media_link_handle_download">Сохранять на устройство</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">Копировать прямую ссылку</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">Всегда спрашивать</string>
 
     <string name="piko_title_ads">Реклама</string>
     <string name="piko_pref_hide_promoted_posts">Скрыть продвигаемые посты</string>
