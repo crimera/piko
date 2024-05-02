@@ -14,6 +14,10 @@
     <string name="piko_pref_download_path_desc">下载视频的主文件夹</string>
     <string name="piko_pref_download_folder">子文件夹</string>
     <string name="piko_pref_download_folder_desc">下载视频到 主文件夹/子文件夹</string>
+    <string name="piko_pref_download_media_link_handle">下载视频设置</string>
+    <string name="piko_pref_download_media_link_handle_download">直接下载</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">复制链接</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">每次询问</string>
 
     <string name="piko_title_ads">广告</string>
     <string name="piko_pref_hide_promoted_posts">隐藏推广帖子</string>
