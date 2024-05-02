@@ -13,6 +13,10 @@
     <string name="piko_pref_download_path_desc">動画のダウンロードに使用するパブリックフォルダー</string>
     <string name="piko_pref_download_folder">サブフォルダーをダウンロード</string>
     <string name="piko_pref_download_folder_desc">動画を ([パブリックフォルダー]/[サブフォルダー]) にダウンロードするサブフォルダー</string>
+    <string name="piko_pref_download_media_link_handle">動画のダウンロード設定</string>
+    <string name="piko_pref_download_media_link_handle_download">直接ダウンロード</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">メディアの直接コピーリンク</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">毎回尋ねる</string>
 
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモートされたポストを非表示にする</string>
