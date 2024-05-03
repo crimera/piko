@@ -51,6 +51,10 @@
     <string name="piko_pref_hide_banner">Hide banner</string>
     <string name="piko_pref_hide_banner_desc">Hide new posts pill</string>
     <string name="piko_pref_hide_bmk_timeline">Hide bookmark icon in timeline</string>
+    <string name="piko_pref_force_translate">Force enable translate</string>
+    <string name="piko_pref_force_translate_desc">Get translate option for all posts</string>
+    <string name="piko_pref_hide_quick_promote">Hide promote button</string>
+    <string name="piko_pref_hide_quick_promote_desc">Hides promote button under self posts</string>
     <string name="piko_pref_show_poll_result">Show poll results</string>
     <string name="piko_pref_show_poll_result_desc">View poll results without voting</string>
     <string name="piko_pref_hide_immersive_player">Hide immersive player</string>
