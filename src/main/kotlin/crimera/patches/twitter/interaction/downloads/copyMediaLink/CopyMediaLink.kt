@@ -24,7 +24,7 @@ object DownloadCallFingerprint: MethodFingerprint(
 
 
 @Patch(
-    name = "Add ability to copy video media link",
+    name = "Add ability to copy media link",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     dependencies = [SettingsPatch::class],
     use = false
