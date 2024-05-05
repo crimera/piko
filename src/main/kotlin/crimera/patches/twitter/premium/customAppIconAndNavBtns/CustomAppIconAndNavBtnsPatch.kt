@@ -15,7 +15,7 @@ import crimera.patches.twitter.premium.customAppIconAndNavBtns.fingerprints.Cust
 import crimera.patches.twitter.premium.customAppIconAndNavBtns.fingerprints.NavBarFixFingerprint
 
 @Patch(
-    name = "Enable custom app icon and nav icon settings",
+    name = "Enable app and nav icon settings",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     dependencies = [SettingsPatch::class],
     requiresIntegrations = true
