@@ -8,7 +8,7 @@
     <string name="piko_pref_undo_posts_btn">Pengaturan batalkan post</string>
     <string name="piko_pref_icon_n_navbar_btn">Pengaturan kustomisasi ikon aplikasi dan bilah navigasi</string>
 
-    <string name="piko_title_download">Unduh</string>
+    <string name="piko_title_download">Unduhan</string>
     <string name="piko_pref_download_path">Folder publik</string>
     <string name="piko_pref_download_path_desc">Folder publik yang digunakan untuk unduhan video</string>
     <string name="piko_pref_download_folder">Subfolder unduhan</string>
@@ -16,7 +16,9 @@
     <string name="piko_pref_download_media_link_handle">Preferensi pengunduhan video</string>
     <string name="piko_pref_download_media_link_handle_download">Unduh langsung</string>
     <string name="piko_pref_download_media_link_handle_copy_link">Tautan media salinan langsung</string>
-    <string name="piko_pref_download_media_link_handle_always_ask">Selalu tanyakan</string>	
+    <string name="piko_pref_download_media_link_handle_always_ask">Selalu tanyakan</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">Salin tautan media</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">Bagikan tautan media</string>
 
     <string name="piko_title_ads">Iklan</string>
     <string name="piko_pref_hide_promoted_posts">Sembunyikan post yang dipromosikan</string>
@@ -51,8 +53,12 @@
     <string name="piko_pref_hide_banner">Sembunyikan banner</string>
     <string name="piko_pref_hide_banner_desc">Menyembunyikan pil post baru</string>
     <string name="piko_pref_hide_bmk_timeline">Sembunyikan ikon bookmark dalam timeline</string>
+    <string name="piko_pref_force_translate">Aktifkan paksa terjemahan</string>
+    <string name="piko_pref_force_translate_desc">Mendapatkan opsi terjemahan untuk semua post</string>
+    <string name="piko_pref_hide_quick_promote">Sembunyikan tombol promosi</string>
+    <string name="piko_pref_hide_quick_promote_desc">Menyembunyikan tombol promosi di bawah post mandiri</string>	
     <string name="piko_pref_show_poll_result">Tampilkan hasil polling</string>
-    <string name="piko_pref_show_poll_result_desc">Melihat hasil polling tanpa melakukan pemungutan suara</string>
+    <string name="piko_pref_show_poll_result_desc">Melihat hasil polling tanpa melakukan voting</string>
     <string name="piko_pref_hide_immersive_player">Sembunyikan pemutar imersif</string>
     <string name="piko_pref_hide_immersive_player_desc">Menghapus geser ke atas untuk video lebih lanjut dalam pemutar video</string>
 	
