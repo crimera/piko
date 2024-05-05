@@ -45,7 +45,6 @@
     <string name="piko_pref_add_flag_title">フラグを追加</string>
 
     <string name="piko_title_timeline">タイムライン</string>
-    <string name="piko_pref_hide_for_you">For you タブを非表示にする</string>
     <string name="piko_pref_hide_live_threads">ライブスレッドを非表示にする</string>
     <string name="piko_pref_hide_live_threads_desc">タイムラインのライブセクションを非表示にします</string>
     <string name="piko_pref_hide_banner">バナーを非表示</string>
@@ -59,8 +58,8 @@
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">プロフィール タブを非表示にする</string>
     <string name="piko_pref_customisation_timelinetabs">タイムライン タブ</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">For You を非表示</string>
-    <string name="piko_pref_customisation_timelinetabs_following">フォロー中 を非表示</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">フォロー中 だけを表示</string>
+    <string name="piko_pref_customisation_timelinetabs_following">おすすめ だけを表示</string>
     <string name="piko_pref_customisation_timelinetabs_both">両方を表示</string>
 
     
