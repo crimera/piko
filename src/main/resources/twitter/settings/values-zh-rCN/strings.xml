@@ -59,7 +59,7 @@
     <string name="piko_pref_hide_banner_desc">隐藏弹出的新发布按钮</string>
     <string name="piko_pref_hide_bmk_timeline">隐藏时间线中的书签图标</string>
     <string name="piko_pref_force_translate">强制显示翻译按钮</string>
-    <string name="piko_pref_force_translate_desc">在每条帖子中显示翻译按钮</string>
+    <string name="piko_pref_force_translate_desc">在每个帖子中显示翻译按钮</string>
     <string name="piko_pref_hide_quick_promote">隐藏推广按钮</string>
     <string name="piko_pref_hide_quick_promote_desc">隐藏自发帖子下的推广按钮</string>
     <string name="piko_pref_show_poll_result">显示投票结果</string>
