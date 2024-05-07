@@ -1,3 +1,10 @@
+## [1.27.0-dev.6](https://github.com/crimera/piko/compare/v1.27.0-dev.5...v1.27.0-dev.6) (2024-05-07)
+
+
+### Features
+
+* **Twitter:** Added `Patch info` section ([7f794c3](https://github.com/crimera/piko/commit/7f794c3cc88b1fd1170f43589aaff356532bb9e4))
+
 ## [1.27.0-dev.5](https://github.com/crimera/piko/compare/v1.27.0-dev.4...v1.27.0-dev.5) (2024-05-05)
 
 
