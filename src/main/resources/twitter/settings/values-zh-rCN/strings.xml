@@ -10,14 +10,18 @@
     <string name="piko_pref_icon_n_navbar_btn">应用图标和自定义导航栏设置</string>
 
     <string name="piko_title_download">下载</string>
+    <string name="piko_pref_video_download">启用视频下载</string>
+    <string name="piko_pref_download">更改下载目录</string>
     <string name="piko_pref_download_path">主文件夹</string>
     <string name="piko_pref_download_path_desc">下载视频的主文件夹</string>
     <string name="piko_pref_download_folder">子文件夹</string>
     <string name="piko_pref_download_folder_desc">下载视频到 主文件夹/子文件夹</string>
     <string name="piko_pref_download_media_link_handle">下载视频设置</string>
-    <string name="piko_pref_download_media_link_handle_download">直接下载</string>
+    <string name="piko_pref_download_media_link_handle_download">下载视频</string>
     <string name="piko_pref_download_media_link_handle_copy_link">复制链接</string>
     <string name="piko_pref_download_media_link_handle_always_ask">每次询问</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">复制链接</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">分享链接</string>
 
     <string name="piko_title_ads">广告</string>
     <string name="piko_pref_hide_promoted_posts">隐藏推广帖子</string>
@@ -44,6 +48,8 @@
     <string name="piko_pref_feature_flags">功能标志</string>
     <string name="piko_pref_edit_flag_title">编辑标志</string>
     <string name="piko_pref_add_flag_title">添加标志</string>
+    <string name="piko_pref_show_sensitive_media">显示敏感媒体</string>
+    <string name="piko_pref_selectable_text">可选文本</string>
 
     <string name="piko_title_timeline">时间线</string>
     <string name="piko_pref_hide_for_you">隐藏为你推荐</string>
@@ -52,6 +58,10 @@
     <string name="piko_pref_hide_banner">隐藏新贴提醒</string>
     <string name="piko_pref_hide_banner_desc">隐藏弹出的新发布按钮</string>
     <string name="piko_pref_hide_bmk_timeline">隐藏时间线中的书签图标</string>
+    <string name="piko_pref_force_translate">强制显示翻译按钮</string>
+    <string name="piko_pref_force_translate_desc">在每条帖子中显示翻译按钮</string>
+    <string name="piko_pref_hide_quick_promote">隐藏推广按钮</string>
+    <string name="piko_pref_hide_quick_promote_desc">隐藏自发帖子下的推广按钮</string>
     <string name="piko_pref_show_poll_result">显示投票结果</string>
     <string name="piko_pref_show_poll_result_desc">无需投票即可查看投票结果</string>
     <string name="piko_pref_hide_immersive_player">隐藏视频滑动切换</string>
@@ -76,5 +86,13 @@
     <string name="piko_pref_import_saved">导入成功</string>
     <string name="piko_pref_import_failed">错误：导入配置失败</string>
     <string name="piko_pref_import_no_uri">错误：未提供配置文件</string>
+
+    <string name="piko_title_about">关于</string>
+    <string name="piko_pref_app_version">App 版本</string>
+    <string name="piko_pref_patch_info">补丁信息</string>
+    <string name="piko_pref_version_info">版本信息</string>
+    <string name="piko_pref_patches">补丁</string>
+    <string name="piko_pref_included">包括</string>
+    <string name="piko_pref_excluded">排除</string>
 
 </resources>
