@@ -14,6 +14,7 @@ import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.premium.unlockdownloads.fingerprints.DownloadPatchFingerprint
 import crimera.patches.twitter.premium.unlockdownloads.fingerprints.FIleDownloaderFingerprint
 import crimera.patches.twitter.premium.unlockdownloads.fingerprints.MediaEntityFingerprint
@@ -26,7 +27,7 @@ import crimera.patches.twitter.premium.unlockdownloads.fingerprints.MediaEntityF
 )
 @Suppress("unused")
 object DownloadPatch : BytecodePatch(
-    setOf(DownloadPatchFingerprint,FIleDownloaderFingerprint,MediaEntityFingerprint)
+    setOf(DownloadPatchFingerprint,FIleDownloaderFingerprint,MediaEntityFingerprint, SettingsStatusLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
         val result = DownloadPatchFingerprint.result
@@ -87,7 +88,7 @@ object DownloadPatch : BytecodePatch(
 
 
 
-
+        SettingsStatusLoadFingerprint.enableSettings("enableVidDownload")
         //end
     }
 

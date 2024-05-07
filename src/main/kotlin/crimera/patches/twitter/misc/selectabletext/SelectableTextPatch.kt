@@ -1,15 +1,19 @@
 package crimera.patches.twitter.misc.selectabletext
 
 import app.revanced.patcher.data.ResourceContext
+import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.ResourcePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
+import crimera.patches.twitter.misc.settings.SettingsPatch
+import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import org.w3c.dom.Element
 
 @Patch(
     name = "Selectable Text",
     description = "Makes bio and username selectable",
+    dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")]
 )
 @Suppress("unused")
@@ -34,5 +38,7 @@ object SelectableTextPatch: ResourcePatch() {
                 }
             }
         }
+
+        SettingsStatusLoadFingerprint.enableSettings("selectableText")
     }
 }

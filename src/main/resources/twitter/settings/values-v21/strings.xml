@@ -3,4 +3,7 @@
     <!-- Dont translate these -->
     <string name="piko_title_settings">Piko mod Settings</string>
     <string name="piko_title_feature_flags">Feature flags</string>
+    <string name="piko_title_piko_patches">Piko Patches</string>
+    <string name="piko_title_piko_patches_ver">1.27.0-dev.5</string>
+    <string name="piko_title_piko_integrations">Piko Integrations</string>
 </resources>
