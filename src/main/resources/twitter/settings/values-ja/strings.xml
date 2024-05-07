@@ -10,7 +10,7 @@
 
     <string name="piko_title_download">ダウンロード</string>
     <string name="piko_pref_video_download">動画のダウンロードを有効する</string>
-    <string name="piko_pref_download">ダウンロードのディレクトリーを変更</string>
+    <string name="piko_pref_download">ダウンロードディレクトリーを変更</string>
     <string name="piko_pref_download_path">パブリックフォルダー</string>
     <string name="piko_pref_download_path_desc">動画のダウンロードに使用するパブリックフォルダー</string>
     <string name="piko_pref_download_folder">サブフォルダーをダウンロード</string>
