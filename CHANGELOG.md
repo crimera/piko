@@ -1,3 +1,11 @@
+## [1.27.0-dev.8](https://github.com/crimera/piko/compare/v1.27.0-dev.7...v1.27.0-dev.8) (2024-05-08)
+
+
+### Updates
+
+* **Translations:** Update `Indonesian (Bahasa)` ([1442b6c](https://github.com/crimera/piko/commit/1442b6c798f5fd58e1381f1e23581cc8f55ca0fc))
+* **Translations:** update simplified chinese translation ([b24f7cc](https://github.com/crimera/piko/commit/b24f7cca23c6b003c7246951de8a361ff5ef2dfb))
+
 ## [1.27.0-dev.7](https://github.com/crimera/piko/compare/v1.27.0-dev.6...v1.27.0-dev.7) (2024-05-08)
 
 
