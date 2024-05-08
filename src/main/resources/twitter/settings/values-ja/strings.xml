@@ -9,6 +9,8 @@
     <string name="piko_pref_icon_n_navbar_btn">アプリアイコンとナビゲーションバーのカスタマイズ設定</string>
 
     <string name="piko_title_download">ダウンロード</string>
+    <string name="piko_pref_video_download">動画のダウンロードを有効する</string>
+    <string name="piko_pref_download">ダウンロードディレクトリーを変更</string>
     <string name="piko_pref_download_path">パブリックフォルダー</string>
     <string name="piko_pref_download_path_desc">動画のダウンロードに使用するパブリックフォルダー</string>
     <string name="piko_pref_download_folder">サブフォルダーをダウンロード</string>
@@ -17,15 +19,17 @@
     <string name="piko_pref_download_media_link_handle_download">直接ダウンロード</string>
     <string name="piko_pref_download_media_link_handle_copy_link">メディアの直接コピーリンク</string>
     <string name="piko_pref_download_media_link_handle_always_ask">毎回尋ねる</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">メディアリンクをコピー</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">メディアリンクを共有</string>
 
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモートされたポストを非表示にする</string>
-    <string name="piko_pref_hide_g_ads">Google 広告を非表示する</string>
-    <string name="piko_pref_wtf_section">[Who to follow] セクションを非表示にする</string>
-    <string name="piko_pref_cts_section">[サブスクリプションクリエイター] セクションを非表示にする</string>
-    <string name="piko_pref_ctj_section">[コミュニティに参加する] セクションを非表示にする</string>
-    <string name="piko_pref_ryb_section">[ブックマークを再表示] セクションを非表示にする</string>
-    <string name="piko_pref_pinned_posts_section">[フォロワーによる固定ポスト] セクションを非表示にする</string>
+    <string name="piko_pref_hide_g_ads">Google 広告を非表示にする</string>
+    <string name="piko_pref_wtf_section">「Who to follow」 を非表示にする</string>
+    <string name="piko_pref_cts_section">「サブスクリプションクリエイター」 を非表示にする</string>
+    <string name="piko_pref_ctj_section">「コミュニティに参加する」 を非表示にする</string>
+    <string name="piko_pref_ryb_section">「ブックマークを再表示」 を非表示にする</string>
+    <string name="piko_pref_pinned_posts_section">「フォロワーによる固定ポスト」 を非表示にする</string>
     <string name="piko_pref_hide_detailed_posts">詳細な投稿を非表示にする (返信内)</string>
     <string name="piko_pref_hide_trends">プロモートされたトレンドを非表示にする</string>
 
@@ -33,6 +37,8 @@
     <string name="piko_pref_chirp_font">チャープフォントを有効にする</string>
     <string name="piko_pref_hide_fab">フローティングアクションボタンを非表示にする</string>
     <string name="piko_pref_hide_fab_menu">フローティングアクションボタンメニューを非表示にする</string>
+    <string name="piko_pref_show_sensitive_media">センシティブなメディアを表示する</string>
+    <string name="piko_pref_selectable_text">選択可能なテキスト</string>
     <string name="piko_pref_rec_users">おすすめユーザーを非表示にする</string>
     <string name="piko_pref_comm_notes">コミュニティノートを非表示にする</string>
     <string name="piko_pref_hide_view_count">表示回数を非表示にする</string>
@@ -50,6 +56,10 @@
     <string name="piko_pref_hide_banner">バナーを非表示</string>
     <string name="piko_pref_hide_banner_desc">新しい投稿を非表示にする</string>
     <string name="piko_pref_hide_bmk_timeline">タイムラインのブックマークアイコンを非表示にする</string>
+    <string name="piko_pref_force_translate">翻訳を強制的に有効にする</string>
+    <string name="piko_pref_force_translate_desc">翻訳された全てのオプションを取得します</string>
+    <string name="piko_pref_hide_quick_promote">プロモートボタンを非表示にする</string>
+    <string name="piko_pref_hide_quick_promote_desc">自己投稿の下にプロモートボタンを非表示にします</string>
     <string name="piko_pref_show_poll_result">投票結果を表示</string>
     <string name="piko_pref_show_poll_result_desc">投票せずに投票結果を表示します</string>
     <string name="piko_pref_hide_immersive_player">イマーシブプレーヤーを非表示にする</string>
@@ -58,8 +68,8 @@
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">プロフィール タブを非表示にする</string>
     <string name="piko_pref_customisation_timelinetabs">タイムライン タブ</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">フォロー中 だけを表示</string>
-    <string name="piko_pref_customisation_timelinetabs_following">おすすめ だけを表示</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">フォロー中 のみを表示</string>
+    <string name="piko_pref_customisation_timelinetabs_following">おすすめ のみを表示</string>
     <string name="piko_pref_customisation_timelinetabs_both">両方を表示</string>
 
     
@@ -75,5 +85,14 @@
     <string name="piko_pref_import_saved">インポートは成功しました</string>
     <string name="piko_pref_import_failed">エラー: 設定のインポートに失敗しました</string>
     <string name="piko_pref_import_no_uri">エラー: ファイルが選択されていません</string>
+
+    <string name="piko_title_about">アプリに関する情報</string>
+    <string name="piko_pref_app_version">App version</string>
+    <string name="piko_pref_patch_info">適用されたパッチに関する情報</string>
+    <string name="piko_pref_version_info">バージョン情報</string>
+    <string name="piko_pref_patches">パッチ</string>
+    <string name="piko_pref_included">Included</string>
+    <string name="piko_pref_excluded">Excluded</string>
+
 
 </resources>
