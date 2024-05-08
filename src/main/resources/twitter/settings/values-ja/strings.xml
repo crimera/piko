@@ -38,7 +38,7 @@
     <string name="piko_pref_hide_fab">フローティングアクションボタンを非表示にする</string>
     <string name="piko_pref_hide_fab_menu">フローティングアクションボタンメニューを非表示にする</string>
     <string name="piko_pref_show_sensitive_media">センシティブなメディアを表示する</string>
-    <string name="piko_pref_selectable_text">選択テキスト</string>
+    <string name="piko_pref_selectable_text">選択可能なテキスト</string>
     <string name="piko_pref_rec_users">おすすめユーザーを非表示にする</string>
     <string name="piko_pref_comm_notes">コミュニティノートを非表示にする</string>
     <string name="piko_pref_hide_view_count">表示回数を非表示にする</string>
