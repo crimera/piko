@@ -1,7 +1,6 @@
 package crimera.patches.twitter.ads.trends
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
@@ -56,9 +55,6 @@ class HidePromotedTrendPatch : BytecodePatch(
         )
 
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hidePromotedTrends()V"
-        )
+        SettingsStatusLoadFingerprint.enableSettings("hidePromotedTrends")
     }
 }

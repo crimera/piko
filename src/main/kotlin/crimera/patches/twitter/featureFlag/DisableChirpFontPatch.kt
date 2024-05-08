@@ -20,15 +20,9 @@ object DisableChirpFontPatch: BytecodePatch(
     setOf( FeatureFlagLoadFingerprint,SettingsStatusLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
-        FeatureFlagLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.FSTS_DESCRIPTOR}->chirpFont()V"
-        )
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->enableFont()V"
-        )
+        FeatureFlagLoadFingerprint.enableSettings("chirpFont")
+        SettingsStatusLoadFingerprint.enableSettings("enableFont")
         //end
     }
 }

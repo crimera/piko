@@ -2,7 +2,6 @@ package crimera.patches.twitter.timeline.banner
 
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.patch.BytecodePatch
@@ -23,7 +22,7 @@ import crimera.patches.twitter.timeline.banner.fingerprints.HideBannerFingerprin
 )
 @Suppress("unused")
 object HideBannerPatch : BytecodePatch(
-    setOf(HideBannerFingerprint)
+    setOf(HideBannerFingerprint, SettingsStatusLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
         val result = HideBannerFingerprint.result
@@ -42,9 +41,6 @@ object HideBannerPatch : BytecodePatch(
             move-result v0
         """.trimIndent())
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideBanner()V"
-        )
+        SettingsStatusLoadFingerprint.enableSettings("hideBanner")
     }
 }

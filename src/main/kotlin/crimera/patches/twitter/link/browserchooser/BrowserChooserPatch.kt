@@ -1,7 +1,6 @@
 package crimera.patches.twitter.link.browserchooser
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
@@ -14,10 +13,11 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
     name = "Open browser chooser on opening links",
     description = "Instead of open the link directly in one of the installed browsers",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
+    dependencies = [SettingsPatch::class]
 )
 @Suppress("unused")
 object BrowserChooserPatch : BytecodePatch(
-    setOf(OpenLinkFingerprint)
+    setOf(OpenLinkFingerprint, SettingsStatusLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
 
@@ -31,9 +31,6 @@ object BrowserChooserPatch : BytecodePatch(
 
         result.mutableMethod.addInstructions(0, inject)
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->enableBrowserChooser()V"
-        )
+        SettingsStatusLoadFingerprint.enableSettings("enableBrowserChooser")
     }
 }

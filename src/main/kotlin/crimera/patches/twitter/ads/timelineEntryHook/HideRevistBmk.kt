@@ -1,7 +1,6 @@
 package crimera.patches.twitter.ads.timelineEntryHook
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
@@ -15,13 +14,9 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
     use = true
 )
 object HideRevistBmk :BytecodePatch(
-    setOf()
+    setOf(SettingsStatusLoadFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideRevistBookmark()V"
-        )
-
+        SettingsStatusLoadFingerprint.enableSettings("hideRevistBookmark")
     }
 }

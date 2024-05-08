@@ -34,7 +34,7 @@ tasks.withType(Jar::class) {
     manifest {
         attributes["Name"] = "Piko"
         attributes["Description"] = "Patches for ReVanced."
-        attributes["Version"] = 1
+        attributes["Version"] = version
         attributes["Timestamp"] = System.currentTimeMillis().toString()
         attributes["Source"] = "git@github.com:you/revanced-patches.git"
         attributes["Author"] = "crimera"

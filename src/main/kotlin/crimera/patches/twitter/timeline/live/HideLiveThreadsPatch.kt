@@ -1,7 +1,6 @@
 package crimera.patches.twitter.timeline.live
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
@@ -23,7 +22,7 @@ import crimera.patches.twitter.timeline.live.fingerprints.HideLiveThreadsFingerp
 )
 @Suppress("unused")
 object HideLiveThreadsPatch :  BytecodePatch(
-    setOf(HideLiveThreadsFingerprint)
+    setOf(HideLiveThreadsFingerprint, SettingsStatusLoadFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
         val result = HideLiveThreadsFingerprint.result
@@ -43,9 +42,6 @@ object HideLiveThreadsPatch :  BytecodePatch(
             move-result-object v$reg
         """.trimIndent())
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideLiveThreads()V"
-        )
+        SettingsStatusLoadFingerprint.enableSettings("hideLiveThreads")
     }
 }

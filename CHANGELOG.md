@@ -1,3 +1,88 @@
+## [1.27.0-dev.8](https://github.com/crimera/piko/compare/v1.27.0-dev.7...v1.27.0-dev.8) (2024-05-08)
+
+
+### Updates
+
+* **Translations:** Update `Indonesian (Bahasa)` ([1442b6c](https://github.com/crimera/piko/commit/1442b6c798f5fd58e1381f1e23581cc8f55ca0fc))
+* **Translations:** update simplified chinese translation ([b24f7cc](https://github.com/crimera/piko/commit/b24f7cca23c6b003c7246951de8a361ff5ef2dfb))
+
+## [1.27.0-dev.7](https://github.com/crimera/piko/compare/v1.27.0-dev.6...v1.27.0-dev.7) (2024-05-08)
+
+
+### Updates
+
+* Improve the retrieval of the patches version ([ba940da](https://github.com/crimera/piko/commit/ba940da7b84e52345533dd3802410811b7fa4cb7))
+
+## [1.27.0-dev.6](https://github.com/crimera/piko/compare/v1.27.0-dev.5...v1.27.0-dev.6) (2024-05-07)
+
+
+### Features
+
+* **Twitter:** Added `Patch info` section ([7f794c3](https://github.com/crimera/piko/commit/7f794c3cc88b1fd1170f43589aaff356532bb9e4))
+
+## [1.27.0-dev.5](https://github.com/crimera/piko/compare/v1.27.0-dev.4...v1.27.0-dev.5) (2024-05-05)
+
+
+### Refactors
+
+* **Twitter:** `Add ability to copy media link` patch ([e8ef551](https://github.com/crimera/piko/commit/e8ef5519abf64594676f0de1e0e3e01b06571079))
+
+## [1.27.0-dev.4](https://github.com/crimera/piko/compare/v1.27.0-dev.3...v1.27.0-dev.4) (2024-05-02)
+
+
+### Bug Fixes
+
+* **Twitter:** Bookmark in nav bar dix ([03fb96c](https://github.com/crimera/piko/commit/03fb96c485edb8931e9d37452f5a45c0b8a0103b))
+* **Twitter:** Bookmark nav bar fix ([a6e8ab9](https://github.com/crimera/piko/commit/a6e8ab9c6817e15fa7c9ba182650f65ee2e65132))
+
+
+### Refactors
+
+* **Twitter:** refactor default feature flag hook ([6fd6001](https://github.com/crimera/piko/commit/6fd60012c74c83944fd80b57e444c3f54da5823c))
+
+## [1.27.0-dev.3](https://github.com/crimera/piko/compare/v1.27.0-dev.2...v1.27.0-dev.3) (2024-05-02)
+
+
+### Updates
+
+* **Translations:** Update `japanese` ([9fce4a2](https://github.com/crimera/piko/commit/9fce4a20d7db77992bd92eaa5ada75af8af56103))
+
+## [1.27.0-dev.2](https://github.com/crimera/piko/compare/v1.27.0-dev.1...v1.27.0-dev.2) (2024-05-01)
+
+
+### Bug Fixes
+
+* Unescaped characters ([8e539df](https://github.com/crimera/piko/commit/8e539dfd8c4e1ef6889357b9850a842db54a2a99))
+
+## [1.27.0-dev.1](https://github.com/crimera/piko/compare/v1.26.1-dev.3...v1.27.0-dev.1) (2024-05-01)
+
+
+### Features
+
+* **Twitter:** Added `Ability to copy video media link` patch ([14bfdc7](https://github.com/crimera/piko/commit/14bfdc7d0b2d1fbf6644e496cbc186bd5ade3494))
+
+## [1.26.1-dev.3](https://github.com/crimera/piko/compare/v1.26.1-dev.2...v1.26.1-dev.3) (2024-04-30)
+
+
+### Refactors
+
+* Add `enableSettings` helper function ([7d6ebd5](https://github.com/crimera/piko/commit/7d6ebd579a32161bf782f2ce0843817dbbf8b69d))
+* Optimize imports ([2f42add](https://github.com/crimera/piko/commit/2f42add01463d36336423574b76670c6cbf2659a))
+
+## [1.26.1-dev.2](https://github.com/crimera/piko/compare/v1.26.1-dev.1...v1.26.1-dev.2) (2024-04-30)
+
+
+### Refactors
+
+* Add `SettingsPatch ` dependencies to patches ([6d252f8](https://github.com/crimera/piko/commit/6d252f84c6086b15e7be4a58676254748bd8ff73))
+
+## [1.26.1-dev.1](https://github.com/crimera/piko/compare/v1.26.0...v1.26.1-dev.1) (2024-04-30)
+
+
+### Bug Fixes
+
+* add "SettingsStatusLoadFingerprint" to fingerprints of `Hide Community Notes` and `Hide Live Threads` patch ([9c0232a](https://github.com/crimera/piko/commit/9c0232afd684024cc7028960aa2c65a82ce90cb7))
+
 ## [1.26.0](https://github.com/crimera/piko/compare/v1.25.1...v1.26.0) (2024-04-30)
 
 

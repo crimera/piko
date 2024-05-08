@@ -1,7 +1,6 @@
 package crimera.patches.twitter.misc.recommendedusers
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
@@ -11,19 +10,20 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import crimera.patches.twitter.misc.recommendedusers.fingerprints.HideRecommendedUsersFingerprint
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
-import crimera.patches.twitter.misc.recommendedusers.fingerprints.HideRecommendedUsersFingerprint
 
 
 @Patch(
     name = "Hide Recommended Users",
     description = "Hide recommended users that pops up when you follow someone",
-    compatiblePackages = [CompatiblePackage("com.twitter.android")]
+    compatiblePackages = [CompatiblePackage("com.twitter.android")],
+    dependencies = [SettingsPatch::class]
 )
 @Suppress("unused")
 object HideRecommendedUsers: BytecodePatch(
-    setOf(HideRecommendedUsersFingerprint)
+    setOf(HideRecommendedUsersFingerprint, SettingsStatusLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
         val result = HideRecommendedUsersFingerprint.result
@@ -43,9 +43,6 @@ object HideRecommendedUsers: BytecodePatch(
             move-result-object v$reg
         """.trimIndent())
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideRecommendedUsers()V"
-        )
+        SettingsStatusLoadFingerprint.enableSettings("hideRecommendedUsers")
     }
 }

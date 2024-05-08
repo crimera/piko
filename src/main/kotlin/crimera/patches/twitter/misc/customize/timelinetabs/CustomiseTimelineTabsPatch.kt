@@ -1,7 +1,6 @@
 package crimera.patches.twitter.misc.customize.timelinetabs
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
@@ -73,9 +72,6 @@ object CustomiseTimelineTabsPatch : BytecodePatch(
         """.trimIndent(), ExternalLabel("escape",arr)
         )
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->timelineTabCustomisation()V"
-        )
+        SettingsStatusLoadFingerprint.enableSettings("timelineTabCustomisation")
     }
 }

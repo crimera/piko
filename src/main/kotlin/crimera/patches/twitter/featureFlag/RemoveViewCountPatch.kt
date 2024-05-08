@@ -21,15 +21,8 @@ object RemoveViewCountPatch: BytecodePatch(
     setOf(FeatureFlagLoadFingerprint,SettingsStatusLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
-        FeatureFlagLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.FSTS_DESCRIPTOR}->viewCount()V"
-        )
-
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideViewCount()V"
-        )
+        FeatureFlagLoadFingerprint.enableSettings("viewCount")
+        SettingsStatusLoadFingerprint.enableSettings("hideViewCount")
     }
 
 }

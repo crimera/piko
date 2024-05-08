@@ -9,10 +9,18 @@
     <string name="piko_pref_icon_n_navbar_btn">App icon and navbar customisation settings</string>
 
     <string name="piko_title_download">Download</string>
+    <string name="piko_pref_video_download">Enable video downloading</string>
+    <string name="piko_pref_download">Change download directory</string>
     <string name="piko_pref_download_path">Public folder</string>
     <string name="piko_pref_download_path_desc">The public folder to use for video downloads</string>
     <string name="piko_pref_download_folder">Download subfolder</string>
     <string name="piko_pref_download_folder_desc">The subfolder to download videos to ([PublicFolder]/[Subfolder])</string>
+    <string name="piko_pref_download_media_link_handle">Download preference</string>
+    <string name="piko_pref_download_media_link_handle_download">Direct download</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">Direct copy media link</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">Always ask</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">Copy media link</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">Share media link</string>
 
     <string name="piko_title_ads">Ads</string>
     <string name="piko_pref_hide_promoted_posts">Hide promoted posts</string>
@@ -39,6 +47,8 @@
     <string name="piko_pref_feature_flags">Feature flags</string>
     <string name="piko_pref_edit_flag_title">Edit flag</string>
     <string name="piko_pref_add_flag_title">Add flag</string>
+    <string name="piko_pref_show_sensitive_media">Show sensitive media</string>
+    <string name="piko_pref_selectable_text">Selectable text</string>
 
     <string name="piko_title_timeline">Timeline</string>
     <string name="piko_pref_hide_for_you">Hide for you tab</string>
@@ -47,6 +57,10 @@
     <string name="piko_pref_hide_banner">Hide banner</string>
     <string name="piko_pref_hide_banner_desc">Hide new posts pill</string>
     <string name="piko_pref_hide_bmk_timeline">Hide bookmark icon in timeline</string>
+    <string name="piko_pref_force_translate">Force enable translate</string>
+    <string name="piko_pref_force_translate_desc">Get translate option for all posts</string>
+    <string name="piko_pref_hide_quick_promote">Hide promote button</string>
+    <string name="piko_pref_hide_quick_promote_desc">Hides promote button under self posts</string>
     <string name="piko_pref_show_poll_result">Show poll results</string>
     <string name="piko_pref_show_poll_result_desc">View poll results without voting</string>
     <string name="piko_pref_hide_immersive_player">Hide immersive player</string>
@@ -71,5 +85,13 @@
     <string name="piko_pref_import_saved">Imported successfully</string>
     <string name="piko_pref_import_failed">Error: Importing preferences failed</string>
     <string name="piko_pref_import_no_uri">Error: No file provided</string>
+
+    <string name="piko_title_about">About</string>
+    <string name="piko_pref_app_version">App version</string>
+    <string name="piko_pref_patch_info">Patch Information</string>
+    <string name="piko_pref_version_info">Version Information</string>
+    <string name="piko_pref_patches">Patches</string>
+    <string name="piko_pref_included">Included</string>
+    <string name="piko_pref_excluded">Excluded</string>
 
 </resources>

@@ -1,4 +1,4 @@
-package crimera.patches.twitter.ads.timelineEntryHook
+package crimera.patches.twitter.timeline.tweetinfo
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.patch.BytecodePatch
@@ -8,15 +8,16 @@ import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 @Patch(
-    name = "Remove \"Pinned posts by followers\" Banner",
-    dependencies = [SettingsPatch::class,TimelineEntryHookPatch::class],
+    name = "Force enable translate",
+    description = "Get translate option for all posts",
+    dependencies = [SettingsPatch::class, TweetInfoHook::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = true
+    use = false
 )
-object HidePinnedByFollowers :BytecodePatch(
+object ForceTranslate :BytecodePatch(
     setOf(SettingsStatusLoadFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
-        SettingsStatusLoadFingerprint.enableSettings("hideRevistPinnedPost")
+        SettingsStatusLoadFingerprint.enableSettings("forceTranslate")
     }
 }

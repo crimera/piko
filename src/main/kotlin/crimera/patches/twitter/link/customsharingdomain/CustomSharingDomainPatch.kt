@@ -1,7 +1,6 @@
 package crimera.patches.twitter.link.customsharingdomain
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
@@ -36,9 +35,6 @@ object CustomSharingDomainPatch: BytecodePatch(
             """.trimIndent()
         )
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->enableCustomSharingDomain()V"
-        )
+        SettingsStatusLoadFingerprint.enableSettings("enableCustomSharingDomain")
     }
 }

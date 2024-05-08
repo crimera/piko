@@ -18,4 +18,10 @@
         <item>@string/piko_pref_customisation_timelinetabs_foryou</item>
         <item>@string/piko_pref_customisation_timelinetabs_following</item>
     </string-array>
+
+    <string-array name="piko_array_download_media_handle">
+        <item>@string/piko_pref_download_media_link_handle_download</item>
+        <item>@string/piko_pref_download_media_link_handle_copy_link</item>
+        <item>@string/piko_pref_download_media_link_handle_always_ask</item>
+    </string-array>
 </resources>

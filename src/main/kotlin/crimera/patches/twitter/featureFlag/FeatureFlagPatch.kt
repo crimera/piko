@@ -17,12 +17,12 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
 @Patch(
     name = "Hook feature flag",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    dependencies = [FeatureFlagResourcePatch::class],
+    dependencies = [FeatureFlagResourcePatch::class, SettingsPatch::class],
     use = true
 )
 @Suppress("unused")
 object FeatureFlagPatch:BytecodePatch(
-    setOf(FeatureFlagFingerprint,IntegrationsUtilsFingerprint)
+    setOf(FeatureFlagFingerprint,IntegrationsUtilsFingerprint, SettingsStatusLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
 
@@ -41,10 +41,7 @@ object FeatureFlagPatch:BytecodePatch(
 
         booleanMethod.addInstructions(loc+1,METHOD)
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->enableFeatureFlags()V"
-        )
+        SettingsStatusLoadFingerprint.enableSettings("enableFeatureFlags")
         IntegrationsUtilsFingerprint.result!!.mutableMethod.addInstruction(
             1,
             "${SettingsPatch.FSTS_DESCRIPTOR}->load()V"

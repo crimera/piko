@@ -1,4 +1,4 @@
-package crimera.patches.twitter.ads.timelineEntryHook
+package crimera.patches.twitter.timeline.tweetinfo
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.patch.BytecodePatch
@@ -8,15 +8,16 @@ import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 @Patch(
-    name = "Remove \"Pinned posts by followers\" Banner",
-    dependencies = [SettingsPatch::class,TimelineEntryHookPatch::class],
+    name = "Hide promote button",
+    description = "Hides promote button under self posts",
+    dependencies = [SettingsPatch::class, TweetInfoHook::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = true
+    use = false
 )
-object HidePinnedByFollowers :BytecodePatch(
+object HidePromoteButton :BytecodePatch(
     setOf(SettingsStatusLoadFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
-        SettingsStatusLoadFingerprint.enableSettings("hideRevistPinnedPost")
+        SettingsStatusLoadFingerprint.enableSettings("hidePromoteButton")
     }
 }

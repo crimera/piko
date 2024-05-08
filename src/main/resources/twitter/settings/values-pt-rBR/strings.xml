@@ -15,6 +15,10 @@
     <string name="piko_pref_download_path_desc">A pasta pública a ser usada para downloads de vídeo</string>
     <string name="piko_pref_download_folder">Subpasta de download</string>
     <string name="piko_pref_download_folder_desc">A subpasta para baixar vídeos ([Pasta pública]/[Subpasta])</string>
+    <string name="piko_pref_download_media_link_handle">Preferência de download de vídeo</string>
+    <string name="piko_pref_download_media_link_handle_download">Download direto</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">Cópia direta do link de mídia</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">Perguntar sempre</string>
 
     <string name="piko_title_ads">Anúncios</string>
     <string name="piko_pref_hide_promoted_posts">Ocultar postagens promovidas</string>

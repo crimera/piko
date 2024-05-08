@@ -1,7 +1,6 @@
 package crimera.patches.twitter.misc.FAB
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.patch.BytecodePatch
@@ -41,9 +40,6 @@ class HideFABPatch :BytecodePatch(
             ExternalLabel("cond_1212",constObj)
         )
 
-        SettingsStatusLoadFingerprint.result!!.mutableMethod.addInstruction(
-            0,
-            "${SettingsPatch.SSTS_DESCRIPTOR}->hideFAB()V"
-        )
+        SettingsStatusLoadFingerprint.enableSettings("hideFAB")
     }
 }
