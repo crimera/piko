@@ -1,3 +1,10 @@
+## [1.27.0-dev.7](https://github.com/crimera/piko/compare/v1.27.0-dev.6...v1.27.0-dev.7) (2024-05-08)
+
+
+### Updates
+
+* Improve the retrieval of the patches version ([ba940da](https://github.com/crimera/piko/commit/ba940da7b84e52345533dd3802410811b7fa4cb7))
+
 ## [1.27.0-dev.6](https://github.com/crimera/piko/compare/v1.27.0-dev.5...v1.27.0-dev.6) (2024-05-07)
 
 
