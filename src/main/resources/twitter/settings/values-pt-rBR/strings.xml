@@ -59,7 +59,7 @@
     <string name="piko_pref_hide_banner">Ocultar banner</string>
     <string name="piko_pref_hide_banner_desc">Oculta a pílula de novas postagens</string>
     <string name="piko_pref_hide_bmk_timeline">Ocultar ícone de items salvos na linha do tempo</string>
-    <string name="piko_pref_force_translate">Force habilitar tradução</string>
+    <string name="piko_pref_force_translate">Force ativar tradução</string>
     <string name="piko_pref_force_translate_desc">Obtenha a opção de tradução para todas as postagens</string>
     <string name="piko_pref_hide_quick_promote">Ocultar botão de promoção</string>
     <string name="piko_pref_hide_quick_promote_desc">Oculta o botão de promoção em postagens próprias</string>
