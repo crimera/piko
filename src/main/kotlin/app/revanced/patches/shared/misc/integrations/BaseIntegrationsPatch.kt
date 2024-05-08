@@ -9,10 +9,12 @@ import app.revanced.patches.shared.misc.integrations.BaseIntegrationsPatch.Integ
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
+import crimera.patches.twitter.misc.integrations.fingerprints.ReVancedUtilsPatchesVersionFingerprint
+import java.util.jar.JarFile
 
 abstract class BaseIntegrationsPatch(
     private val hooks: Set<IntegrationsFingerprint>
-) : BytecodePatch(hooks) {
+) : BytecodePatch(hooks + setOf(ReVancedUtilsPatchesVersionFingerprint)) {
 
     @Deprecated(
         "Use the constructor without the integrationsDescriptor parameter",
@@ -32,6 +34,45 @@ abstract class BaseIntegrationsPatch(
         hooks.forEach { hook ->
             hook.invoke(INTEGRATIONS_CLASS_DESCRIPTOR)
         }
+
+        ReVancedUtilsPatchesVersionFingerprint.result?.mutableMethod?.apply {
+            val manifestValue = getPatchesManifestEntry("Version")
+
+            addInstructions(
+                0,
+                """
+                       const-string v0, "$manifestValue"
+                        return-object v0 
+                    """
+            )
+        }
+    }
+
+    /**
+     * @return The value for the manifest entry,
+     *         or "Unknown" if the entry does not exist or is blank.
+     */
+    @Suppress("SameParameterValue")
+    private fun getPatchesManifestEntry(attributeKey: String) = JarFile(getCurrentJarFilePath()).use { jarFile ->
+        jarFile.manifest.mainAttributes.entries.firstOrNull { it.key.toString() == attributeKey }?.value?.toString()
+            ?: "Unknown"
+    }
+
+    /**
+     * @return The file path for the jar this classfile is contained inside.
+     */
+    private fun getCurrentJarFilePath(): String {
+        val className = object {}::class.java.enclosingClass.name.replace('.', '/') + ".class"
+        val classUrl = object {}::class.java.classLoader.getResource(className)
+        if (classUrl != null) {
+            val urlString = classUrl.toString()
+
+            if (urlString.startsWith("jar:file:")) {
+                val end = urlString.indexOf('!')
+                return urlString.substring("jar:file:".length, end)
+            }
+        }
+        throw IllegalStateException("Not running from inside a JAR file.")
     }
 
     /**
@@ -76,7 +117,7 @@ abstract class BaseIntegrationsPatch(
         }
     }
 
-    private companion object {
-        private const val INTEGRATIONS_CLASS_DESCRIPTOR = "Lapp/revanced/integrations/shared/Utils;"
+    internal companion object {
+        internal const val INTEGRATIONS_CLASS_DESCRIPTOR = "Lapp/revanced/integrations/shared/Utils;"
     }
 }
