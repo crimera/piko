@@ -1,3 +1,10 @@
+## [1.27.1](https://github.com/crimera/piko/compare/v1.27.0...v1.27.1) (2024-05-09)
+
+
+### Updates
+
+* **Translations:** Improved & updates polish translations ([9bbb9f4](https://github.com/crimera/piko/commit/9bbb9f4ea8c5aa3fee0be0580a281dc967f7981a))
+
 ## [1.27.0](https://github.com/crimera/piko/compare/v1.26.0...v1.27.0) (2024-05-08)
 
 
