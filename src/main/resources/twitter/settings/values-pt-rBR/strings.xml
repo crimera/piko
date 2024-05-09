@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="piko_title_settings">Configurações Piko</string>
-    
+	
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">Ativar modo leitor</string>
     <string name="piko_pref_reader_mode_desc">Ativa o "modo leitor" em threads longos</string>
@@ -11,14 +11,18 @@
     <string name="piko_pref_icon_n_navbar_btn">Configurações de personalização do ícone do aplicativo e da barra de navegação</string>
 
     <string name="piko_title_download">Download</string>
+    <string name="piko_pref_video_download">Ativar download de vídeo</string>
+    <string name="piko_pref_download">Alterar diretório de download</string>
     <string name="piko_pref_download_path">Pasta pública</string>
     <string name="piko_pref_download_path_desc">A pasta pública a ser usada para downloads de vídeo</string>
     <string name="piko_pref_download_folder">Subpasta de download</string>
     <string name="piko_pref_download_folder_desc">A subpasta para baixar vídeos ([Pasta pública]/[Subpasta])</string>
-    <string name="piko_pref_download_media_link_handle">Preferência de download de vídeo</string>
+    <string name="piko_pref_download_media_link_handle">Preferência de download</string>
     <string name="piko_pref_download_media_link_handle_download">Download direto</string>
     <string name="piko_pref_download_media_link_handle_copy_link">Cópia direta do link de mídia</string>
     <string name="piko_pref_download_media_link_handle_always_ask">Perguntar sempre</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">Copiar link de mídia</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">Compartilhar link de mídia</string>
 
     <string name="piko_title_ads">Anúncios</string>
     <string name="piko_pref_hide_promoted_posts">Ocultar postagens promovidas</string>
@@ -45,6 +49,8 @@
     <string name="piko_pref_feature_flags">Feature flags</string>
     <string name="piko_pref_edit_flag_title">Editar flag</string>
     <string name="piko_pref_add_flag_title">Adicionar flag</string>
+    <string name="piko_pref_show_sensitive_media">Mostrar mídia sensível</string>
+    <string name="piko_pref_selectable_text">Texto selecionável</string>
 
     <string name="piko_title_timeline">Linha do tempo</string>
     <string name="piko_pref_hide_for_you">Ocultar aba "Para você"</string>
@@ -53,11 +59,15 @@
     <string name="piko_pref_hide_banner">Ocultar banner</string>
     <string name="piko_pref_hide_banner_desc">Oculta a pílula de novas postagens</string>
     <string name="piko_pref_hide_bmk_timeline">Ocultar ícone de items salvos na linha do tempo</string>
+    <string name="piko_pref_force_translate">Force ativar tradução</string>
+    <string name="piko_pref_force_translate_desc">Obtenha a opção de tradução para todas as postagens</string>
+    <string name="piko_pref_hide_quick_promote">Ocultar botão de promoção</string>
+    <string name="piko_pref_hide_quick_promote_desc">Oculta o botão de promoção em postagens próprias</string>
     <string name="piko_pref_show_poll_result">Mostrar resultados da enquete</string>
     <string name="piko_pref_show_poll_result_desc">Veja os resultados da enquete sem votar</string>
     <string name="piko_pref_hide_immersive_player">Desativar o player imersivo</string>
     <string name="piko_pref_hide_immersive_player_desc">Remove o deslizar para cima para ver mais vídeos no player de vídeo</string>
-
+    
     <string name="piko_title_customisation">Customização</string>
     <string name="piko_pref_customisation_profiletabs">Guias de perfil para ocultar</string>
     <string name="piko_pref_customisation_timelinetabs">Guias da linha do tempo</string>
@@ -77,5 +87,13 @@
     <string name="piko_pref_import_saved">Importado com sucesso</string>
     <string name="piko_pref_import_failed">Erro: falha na importação de preferências</string>
     <string name="piko_pref_import_no_uri">Erro: Nenhum arquivo fornecido</string>
+    
+    <string name="piko_title_about">Sobre</string>
+    <string name="piko_pref_app_version">Versão do aplicativo</string>
+    <string name="piko_pref_patch_info">Informações do patch</string>
+    <string name="piko_pref_version_info">Versão</string>
+    <string name="piko_pref_patches">Patches</string>
+    <string name="piko_pref_included">Incluído</string>
+    <string name="piko_pref_excluded">Excluido</string>
     
 </resources>
