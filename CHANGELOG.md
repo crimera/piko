@@ -1,3 +1,15 @@
+## [1.28.0-dev.1](https://github.com/crimera/piko/compare/v1.27.0...v1.28.0-dev.1) (2024-05-09)
+
+
+### Features
+
+* **Translations:** Update `japanese` ([444623f](https://github.com/crimera/piko/commit/444623faaa5761b33445705e04e5c3078ff88124))
+
+
+### Updates
+
+* **Translations:** Update Brazilian Portuguese ([8745f61](https://github.com/crimera/piko/commit/8745f61c060a62152bd84ee510d835ac8346e01e))
+
 ## [1.27.0](https://github.com/crimera/piko/compare/v1.26.0...v1.27.0) (2024-05-08)
 
 
