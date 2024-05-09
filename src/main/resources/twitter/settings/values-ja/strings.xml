@@ -3,9 +3,9 @@
     <string name="piko_title_premium">プレミアム</string>
     <string name="piko_pref_reader_mode">リーダーモードを有効にする</string>
     <string name="piko_pref_reader_mode_desc">長いスレッドでリーダーモードを有効にします</string>
-    <string name="piko_pref_undo_posts">ポストの取り消しを有効にする</string>
-    <string name="piko_pref_undo_posts_desc">ポスト前にポストを取り消す機能を有効にします</string>
-    <string name="piko_pref_undo_posts_btn">ポスト設定を元に戻す</string>
+    <string name="piko_pref_undo_posts">ツイートの取り消しを有効にする</string>
+    <string name="piko_pref_undo_posts_desc">ツイート前にツイートを取り消す機能を有効にします</string>
+    <string name="piko_pref_undo_posts_btn">ツイート取り消し設定</string>
     <string name="piko_pref_icon_n_navbar_btn">アプリアイコンとナビゲーションバーのカスタマイズ設定</string>
 
     <string name="piko_title_download">ダウンロード</string>
@@ -23,18 +23,18 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">メディアリンクを共有</string>
 
     <string name="piko_title_ads">広告</string>
-    <string name="piko_pref_hide_promoted_posts">プロモートされたポストを非表示にする</string>
+    <string name="piko_pref_hide_promoted_posts">プロモートされたツイートを非表示にする</string>
     <string name="piko_pref_hide_g_ads">Google 広告を非表示にする</string>
-    <string name="piko_pref_wtf_section">「Who to follow」 を非表示にする</string>
-    <string name="piko_pref_cts_section">「サブスクリプションクリエイター」 を非表示にする</string>
-    <string name="piko_pref_ctj_section">「コミュニティに参加する」 を非表示にする</string>
-    <string name="piko_pref_ryb_section">「ブックマークを再表示」 を非表示にする</string>
-    <string name="piko_pref_pinned_posts_section">「フォロワーによる固定ポスト」 を非表示にする</string>
+    <string name="piko_pref_wtf_section">「Who to follow」を非表示にする</string>
+    <string name="piko_pref_cts_section">「サブスクリプションクリエイター」を非表示にする</string>
+    <string name="piko_pref_ctj_section">「コミュニティに参加する」を非表示にする</string>
+    <string name="piko_pref_ryb_section">「ブックマークを再表示」を非表示にする</string>
+    <string name="piko_pref_pinned_posts_section">「フォロワーによる固定ポスト」を非表示にする</string>
     <string name="piko_pref_hide_detailed_posts">詳細な投稿を非表示にする (返信内)</string>
     <string name="piko_pref_hide_trends">プロモートされたトレンドを非表示にする</string>
 
     <string name="piko_title_misc">その他</string>
-    <string name="piko_pref_chirp_font">チャープフォントを有効にする</string>
+    <string name="piko_pref_chirp_font">Chirp フォントを有効にする</string>
     <string name="piko_pref_hide_fab">フローティングアクションボタンを非表示にする</string>
     <string name="piko_pref_hide_fab_menu">フローティングアクションボタンメニューを非表示にする</string>
     <string name="piko_pref_show_sensitive_media">センシティブなメディアを表示する</string>
@@ -43,7 +43,7 @@
     <string name="piko_pref_comm_notes">コミュニティノートを非表示にする</string>
     <string name="piko_pref_hide_view_count">表示回数を非表示にする</string>
     <string name="piko_pref_custom_share_domain">カスタム共有ドメイン</string>
-    <string name="piko_pref_custom_share_domain_desc">ポストを共有するときに使用するドメイン</string>
+    <string name="piko_pref_custom_share_domain_desc">ツイートを共有するときに使用するドメイン</string>
     <string name="piko_pref_browser_chooser">外部ブラウザを使用</string>
     <string name="piko_pref_browser_chooser_desc">アプリ内ブラウザではなく、外部ブラウザでリンクを開く</string>
     <string name="piko_pref_feature_flags">機能フラグ</string>
@@ -58,8 +58,8 @@
     <string name="piko_pref_hide_bmk_timeline">タイムラインのブックマークアイコンを非表示にする</string>
     <string name="piko_pref_force_translate">翻訳を強制的に有効にする</string>
     <string name="piko_pref_force_translate_desc">翻訳された全てのオプションを取得します</string>
-    <string name="piko_pref_hide_quick_promote">プロモートボタンを非表示にする</string>
-    <string name="piko_pref_hide_quick_promote_desc">自己投稿の下にプロモートボタンを非表示にします</string>
+    <string name="piko_pref_hide_quick_promote">プロモーションボタンを非表示にする</string>
+    <string name="piko_pref_hide_quick_promote_desc">自身のツイートの「プロモーションする」ボタンを削除します</string>
     <string name="piko_pref_show_poll_result">投票結果を表示</string>
     <string name="piko_pref_show_poll_result_desc">投票せずに投票結果を表示します</string>
     <string name="piko_pref_hide_immersive_player">イマーシブプレーヤーを非表示にする</string>
