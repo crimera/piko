@@ -51,6 +51,7 @@
     <string name="piko_pref_selectable_text">Selectable text</string>
 
     <string name="piko_title_timeline">Timeline</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">Disable auto timeline scroll on launch</string>
     <string name="piko_pref_hide_for_you">Hide for you tab</string>
     <string name="piko_pref_hide_live_threads">Hide live threads</string>
     <string name="piko_pref_hide_live_threads_desc">Hides live section in timeline</string>
