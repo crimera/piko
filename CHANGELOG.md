@@ -1,3 +1,10 @@
+## [1.28.0-dev.2](https://github.com/crimera/piko/compare/v1.28.0-dev.1...v1.28.0-dev.2) (2024-05-11)
+
+
+### Features
+
+* **Twitter:** Added `Disable auto timeline scroll on launch` patch ([b8d431e](https://github.com/crimera/piko/commit/b8d431ea44a2b53f9065c226116d86ec1fb7b70f))
+
 ## [1.28.0-dev.1](https://github.com/crimera/piko/compare/v1.27.0...v1.28.0-dev.1) (2024-05-09)
 
 
