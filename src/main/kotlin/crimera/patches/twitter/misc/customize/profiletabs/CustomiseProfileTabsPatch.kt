@@ -50,7 +50,7 @@ object CustomiseProfileTabsPatch:BytecodePatch(
         val r0 = method.getInstruction<OneRegisterInstruction>(returnObj_loc).registerA
 
         val METHOD = """
-            invoke-static {v$r0}, ${SettingsPatch.CUSTOMISE_DESCRIPTOR}/ProfileTabs;->a(Ljava/util/ArrayList;)Ljava/util/ArrayList;
+            invoke-static {v$r0}, ${SettingsPatch.CUSTOMISE_DESCRIPTOR}/ProfileTabs;->profiletabs(Ljava/util/ArrayList;)Ljava/util/ArrayList;
             move-result-object v$r0
         """.trimIndent()
 
