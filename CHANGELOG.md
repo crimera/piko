@@ -1,3 +1,15 @@
+## [1.28.0-dev.3](https://github.com/crimera/piko/compare/v1.28.0-dev.2...v1.28.0-dev.3) (2024-05-12)
+
+
+### Features
+
+* **Twitter:** Added `Customize side bar items` patch ([ca0d28f](https://github.com/crimera/piko/commit/ca0d28f96d65d7d7f300f6089029ec24e55802b4))
+
+
+### Refactors
+
+* **Twitter:** Added missing patches names ([b3fda95](https://github.com/crimera/piko/commit/b3fda9558251eda91e6e3b43e994a9dbcdb1daac))
+
 ## [1.28.0-dev.2](https://github.com/crimera/piko/compare/v1.28.0-dev.1...v1.28.0-dev.2) (2024-05-11)
 
 
