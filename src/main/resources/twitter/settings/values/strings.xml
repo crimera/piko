@@ -75,6 +75,7 @@
     <string name="piko_pref_customisation_timelinetabs_foryou">Hide \"For You\"</string>
     <string name="piko_pref_customisation_timelinetabs_following">Hide \"Following\"</string>
     <string name="piko_pref_customisation_timelinetabs_both">Show both</string>
+    <string name="piko_pref_customisation_sidebartabs">Side bar items to hide</string>
 
     <string name="piko_title_backup">Backup and restore</string>
     <string name="piko_pref_export">Export preferences</string>
