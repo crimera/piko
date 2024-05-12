@@ -51,6 +51,7 @@
     <string name="piko_pref_selectable_text">Teks yang dapat dipilih</string>
 
     <string name="piko_title_timeline">Timeline</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">Nonaktifkan gulir timeline otomatis saat peluncuran</string>
     <string name="piko_pref_hide_for_you">Sembunyikan tab untuk Anda</string>
     <string name="piko_pref_hide_live_threads">Sembunyikan thread langsung</string>
     <string name="piko_pref_hide_live_threads_desc">Menyembunyikan bagian live dalam timeline</string>
