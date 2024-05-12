@@ -52,6 +52,7 @@
     <string name="piko_pref_selectable_text">可选文本</string>
 
     <string name="piko_title_timeline">时间线</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">启动时保持时间线位置不变</string>
     <string name="piko_pref_hide_for_you">隐藏为你推荐</string>
     <string name="piko_pref_hide_live_threads">隐藏直播空间</string>
     <string name="piko_pref_hide_live_threads_desc">隐藏顶部直播通知条</string>
