@@ -1,7 +1,8 @@
 import org.gradle.kotlin.dsl.support.listFilesOrdered
 
 plugins {
-    kotlin("jvm") version "1.9.23"
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.binary.compatibility.validator)
     `maven-publish`
 }
 
@@ -11,7 +12,13 @@ repositories {
     mavenCentral()
     mavenLocal()
     google()
-    maven { url = uri("https://jitpack.io") }
+    maven {
+        url = uri("https://maven.pkg.github.com/revanced/registry")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("GITHUB_ACTOR")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("GITHUB_TOKEN")
+        }
+    }
 }
 
 dependencies {
@@ -59,7 +66,7 @@ tasks {
 
             exec {
                 workingDir = workingDirectory
-                commandLine = listOf(d8, artifacts)
+                commandLine = listOf(d8, "--release", artifacts)
             }
 
             exec {
