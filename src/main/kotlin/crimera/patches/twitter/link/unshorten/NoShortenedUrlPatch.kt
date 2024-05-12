@@ -8,6 +8,7 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.link.unshorten.fingerprints.JsonObjectMapperFingerprint
+import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 @Patch(
     name = "No shortened URL",
@@ -38,6 +39,7 @@ object NoShortenedUrlPatch : BytecodePatch(
         """.trimIndent()
         )
 
+        SettingsStatusLoadFingerprint.enableSettings("unshortenlink")
         //end
 
     }
