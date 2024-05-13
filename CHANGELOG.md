@@ -1,3 +1,10 @@
+## [1.28.0-dev.4](https://github.com/crimera/piko/compare/v1.28.0-dev.3...v1.28.0-dev.4) (2024-05-13)
+
+
+### Features
+
+* **Twitter:** Added `Customize Navigation Bar items` patch ([9c6f59c](https://github.com/crimera/piko/commit/9c6f59cf6f40cc4d4d61b13bf496f800f452c0c1))
+
 ## [1.28.0-dev.3](https://github.com/crimera/piko/compare/v1.28.0-dev.2...v1.28.0-dev.3) (2024-05-12)
 
 
