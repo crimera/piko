@@ -7,6 +7,7 @@ import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import crimera.patches.twitter.link.cleartrackingparams.fingerprints.AddSessionTokenFingerprint
+import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 // https://github.com/FrozenAlex/revanced-patches-new
 @Patch(
@@ -16,12 +17,14 @@ import crimera.patches.twitter.link.cleartrackingparams.fingerprints.AddSessionT
 )
 @Suppress("unused")
 object ClearTrackingParamsPatch: BytecodePatch(
-    setOf(AddSessionTokenFingerprint)
+    setOf(AddSessionTokenFingerprint,SettingsStatusLoadFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
         val result = AddSessionTokenFingerprint.result
             ?: throw PatchException("Fingerprint not found")
 
         result.mutableMethod.addInstruction(0, "return-object p0")
+
+        SettingsStatusLoadFingerprint.enableSettings("cleartrackingparams")
     }
 }
