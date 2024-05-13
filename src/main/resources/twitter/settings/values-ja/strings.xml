@@ -72,8 +72,8 @@
     <string name="piko_pref_customisation_timelinetabs_foryou">フォロー中 のみを表示</string>
     <string name="piko_pref_customisation_timelinetabs_following">おすすめ のみを表示</string>
     <string name="piko_pref_customisation_timelinetabs_both">両方を表示</string>
+    <string name="piko_pref_customisation_sidebartabs">サイドバーの項目を非表示にする</string>
 
-    
     <string name="piko_title_backup">バックアップと復元</string>
     <string name="piko_pref_export">設定をエクスポート</string>
     <string name="piko_pref_export_flags">機能プラグをエクスポート</string>
@@ -94,6 +94,5 @@
     <string name="piko_pref_patches">パッチ</string>
     <string name="piko_pref_included">Included</string>
     <string name="piko_pref_excluded">Excluded</string>
-
 
 </resources>
