@@ -42,4 +42,18 @@
         <item>@string/drawer_media_transparency_title</item>
         <item>@string/drawer_imprint_title</item>
     </string-array>
+
+    <string-array name="piko_array_navbar">
+        <item>@string/tab_home_title</item>
+        <item>@string/tab_explore_title</item>
+        <item>@string/spaces_grid_tab</item>
+        <item>@string/tab_communities</item>
+        <item>@string/notifications_grid_tab</item>
+        <item>@string/people_discovery_title</item>
+        <item>@string/drawer_birdwatch_title</item>
+        <item>@string/bookmarks_title</item>
+        <item>@string/drawer_direct_messages_title</item>
+        <item>@string/grok_tab_title</item>
+        <item>@string/product_media_label</item>
+    </string-array>
 </resources>
