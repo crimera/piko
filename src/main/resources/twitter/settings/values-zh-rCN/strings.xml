@@ -50,6 +50,8 @@
     <string name="piko_pref_add_flag_title">添加标志</string>
     <string name="piko_pref_show_sensitive_media">显示敏感媒体</string>
     <string name="piko_pref_selectable_text">可选文本</string>
+    <string name="piko_pref_clear_tracking_params">清除跟踪参数</string>
+    <string name="piko_pref_unshorten_link">没有缩短的 URL</string>
 
     <string name="piko_title_timeline">时间线</string>
     <string name="piko_pref_disable_auto_timeline_scroll">启动时保持时间线位置不变</string>
