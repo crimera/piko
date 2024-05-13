@@ -74,6 +74,7 @@
     <string name="piko_pref_customisation_timelinetabs_foryou">隐藏为你推荐</string>
     <string name="piko_pref_customisation_timelinetabs_following">隐藏正在关注</string>
     <string name="piko_pref_customisation_timelinetabs_both">显示两者</string>
+    <string name="piko_pref_customisation_sidebartabs">隐藏侧滑栏项目</string>
 
     <string name="piko_title_backup">备份和恢复</string>
     <string name="piko_pref_export">导出配置</string>
