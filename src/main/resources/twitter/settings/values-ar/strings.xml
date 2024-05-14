@@ -49,8 +49,11 @@
     <string name="piko_pref_add_flag_title">Flag إضافة</string>
     <string name="piko_pref_show_sensitive_media">عرض الوسائط الحساسة</string>
     <string name="piko_pref_selectable_text">نص قابل للتحديد</string>
+    <string name="piko_pref_clear_tracking_params">مسح معلمات التتبع</string>
+    <string name="piko_pref_unshorten_link">لا عنوان URL مختصر</string>
 
     <string name="piko_title_timeline">الخط الزمني</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">تعطيل التمرير التلقائي للخط الزمني عند التشغيل</string>
     <string name="piko_pref_hide_for_you">إخفاء علامة التبويب لك</string>
     <string name="piko_pref_hide_live_threads">إخفاء المواضيع المباشرة</string>
     <string name="piko_pref_hide_live_threads_desc">إخفاء قسم مباشر في الخط الزمني</string>
@@ -72,6 +75,8 @@
     <string name="piko_pref_customisation_timelinetabs_foryou">إخفاء \"لك\"</string>
     <string name="piko_pref_customisation_timelinetabs_following">إخفاء \"متابعَة\"</string>
     <string name="piko_pref_customisation_timelinetabs_both">عرض كليهما</string>
+    <string name="piko_pref_customisation_sidebartabs">عناصر الشريط الجانبي المراد إخفاؤها</string>
+    <string name="piko_pref_customisation_navbartabs">عناصر شريط التنقل المراد إخفاؤها</string>
     
     <string name="piko_title_backup">النسخ الاحتياطي والإستعادة</string>
     <string name="piko_pref_export">تصدير التفضيلات</string>
@@ -86,7 +91,7 @@
     <string name="piko_pref_import_failed">خطأ: فشل إستيراد التفضيلات</string>
     <string name="piko_pref_import_no_uri">خطأ: لم يتم تقديم ملف</string>
 
-     <string name="piko_title_about">حول</string>
+    <string name="piko_title_about">حول</string>
     <string name="piko_pref_app_version">إصدار التطبيق</string>
     <string name="piko_pref_patch_info">معلومات التعديل</string>
     <string name="piko_pref_version_info">معلومات الإصدار</string>
