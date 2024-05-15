@@ -9,10 +9,18 @@
     <string name="piko_pref_icon_n_navbar_btn">إعدادات تخصيص أيقونة التطبيق وشريط التنقل</string>
 
     <string name="piko_title_download">التنزيل</string>
+    <string name="piko_pref_video_download">تمكين تنزيل الفيديو</string>
+    <string name="piko_pref_download">تغيير دليل التنزيل</string>
     <string name="piko_pref_download_path">المجلد العام</string>
     <string name="piko_pref_download_path_desc">المجلد العام الذي سيتم استخدامه لتنزيلات الفيديو</string>
     <string name="piko_pref_download_folder">مجلد التنزيل الفرعي</string>
     <string name="piko_pref_download_folder_desc">المجلد الفرعي لتنزيل مقاطع الفيديو إلى ([PublicFolder]/[Subfolder])</string>
+    <string name="piko_pref_download_media_link_handle">تفضيل التنزيل</string>
+    <string name="piko_pref_download_media_link_handle_download">تنزيل مباشر</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">نسخ رابط الوسائط مباشرةً</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">السؤال دائمًا</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">نسخ رابط الوسائط</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">مشاركة رابط الوسائط</string>
 
     <string name="piko_title_ads">الإعلانات</string>
     <string name="piko_pref_hide_promoted_posts">إخفاء منشورات المحتوى المُروَّج</string>
@@ -39,14 +47,23 @@
     <string name="piko_pref_feature_flags">Feature Flags</string>
     <string name="piko_pref_edit_flag_title">Flag تعديل</string>
     <string name="piko_pref_add_flag_title">Flag إضافة</string>
+    <string name="piko_pref_show_sensitive_media">عرض الوسائط الحساسة</string>
+    <string name="piko_pref_selectable_text">نص قابل للتحديد</string>
+    <string name="piko_pref_clear_tracking_params">مسح معلمات التتبع</string>
+    <string name="piko_pref_unshorten_link">لا عنوان URL مختصر</string>
 
     <string name="piko_title_timeline">الخط الزمني</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">تعطيل التمرير التلقائي للخط الزمني عند التشغيل</string>
     <string name="piko_pref_hide_for_you">إخفاء علامة التبويب لك</string>
     <string name="piko_pref_hide_live_threads">إخفاء المواضيع المباشرة</string>
     <string name="piko_pref_hide_live_threads_desc">إخفاء قسم مباشر في الخط الزمني</string>
     <string name="piko_pref_hide_banner">إخفاء لافتة قاموا بالنشر</string>
     <string name="piko_pref_hide_banner_desc">إخفاء لافتة منشورات جديدة</string>
     <string name="piko_pref_hide_bmk_timeline">إخفاء أيقونة الإشارة المرجعية في الخط الزمني</string>
+    <string name="piko_pref_force_translate">فرض تمكين الترجمة</string>
+    <string name="piko_pref_force_translate_desc">الحصول على خيار الترجمة لجميع المنشورات</string>
+    <string name="piko_pref_hide_quick_promote">إخفاء زر الترويج</string>
+    <string name="piko_pref_hide_quick_promote_desc">إخفاء زر الترويج أسفل المنشورات الذاتية</string>
     <string name="piko_pref_show_poll_result">عرض نتائج التصويت</string>
     <string name="piko_pref_show_poll_result_desc">عرض نتائج التصويت دون التصويت</string>
     <string name="piko_pref_hide_immersive_player">Hide immersive player</string>
@@ -58,6 +75,8 @@
     <string name="piko_pref_customisation_timelinetabs_foryou">إخفاء \"لك\"</string>
     <string name="piko_pref_customisation_timelinetabs_following">إخفاء \"متابعَة\"</string>
     <string name="piko_pref_customisation_timelinetabs_both">عرض كليهما</string>
+    <string name="piko_pref_customisation_sidebartabs">عناصر الشريط الجانبي المراد إخفاؤها</string>
+    <string name="piko_pref_customisation_navbartabs">عناصر شريط التنقل المراد إخفاؤها</string>
     
     <string name="piko_title_backup">النسخ الاحتياطي والإستعادة</string>
     <string name="piko_pref_export">تصدير التفضيلات</string>
@@ -71,5 +90,13 @@
     <string name="piko_pref_import_saved">تم الإستيراد بنجاح</string>
     <string name="piko_pref_import_failed">خطأ: فشل إستيراد التفضيلات</string>
     <string name="piko_pref_import_no_uri">خطأ: لم يتم تقديم ملف</string>
+
+    <string name="piko_title_about">حول</string>
+    <string name="piko_pref_app_version">إصدار التطبيق</string>
+    <string name="piko_pref_patch_info">معلومات التعديل</string>
+    <string name="piko_pref_version_info">معلومات الإصدار</string>
+    <string name="piko_pref_patches">التعديلات</string>
+    <string name="piko_pref_included">متضمن</string>
+    <string name="piko_pref_excluded">مستبعد</string>
 
 </resources>

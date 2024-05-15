@@ -1,9 +1,47 @@
-## [1.27.1](https://github.com/crimera/piko/compare/v1.27.0...v1.27.1) (2024-05-09)
+## [1.28.0-dev.5](https://github.com/crimera/piko/compare/v1.28.0-dev.4...v1.28.0-dev.5) (2024-05-15)
 
 
 ### Updates
 
 * **Translations:** Improved & updates polish translations ([9bbb9f4](https://github.com/crimera/piko/commit/9bbb9f4ea8c5aa3fee0be0580a281dc967f7981a))
+
+## [1.28.0-dev.4](https://github.com/crimera/piko/compare/v1.28.0-dev.3...v1.28.0-dev.4) (2024-05-13)
+
+
+### Features
+
+* **Twitter:** Added `Customize Navigation Bar items` patch ([9c6f59c](https://github.com/crimera/piko/commit/9c6f59cf6f40cc4d4d61b13bf496f800f452c0c1))
+
+## [1.28.0-dev.3](https://github.com/crimera/piko/compare/v1.28.0-dev.2...v1.28.0-dev.3) (2024-05-12)
+
+
+### Features
+
+* **Twitter:** Added `Customize side bar items` patch ([ca0d28f](https://github.com/crimera/piko/commit/ca0d28f96d65d7d7f300f6089029ec24e55802b4))
+
+
+### Refactors
+
+* **Twitter:** Added missing patches names ([b3fda95](https://github.com/crimera/piko/commit/b3fda9558251eda91e6e3b43e994a9dbcdb1daac))
+
+## [1.28.0-dev.2](https://github.com/crimera/piko/compare/v1.28.0-dev.1...v1.28.0-dev.2) (2024-05-11)
+
+
+### Features
+
+* **Twitter:** Added `Disable auto timeline scroll on launch` patch ([b8d431e](https://github.com/crimera/piko/commit/b8d431ea44a2b53f9065c226116d86ec1fb7b70f))
+
+## [1.28.0-dev.1](https://github.com/crimera/piko/compare/v1.27.0...v1.28.0-dev.1) (2024-05-09)
+
+
+### Features
+
+* **Translations:** Update `japanese` ([444623f](https://github.com/crimera/piko/commit/444623faaa5761b33445705e04e5c3078ff88124))
+
+
+### Updates
+
+* **Translations:** Update Brazilian Portuguese ([8745f61](https://github.com/crimera/piko/commit/8745f61c060a62152bd84ee510d835ac8346e01e))
 
 ## [1.27.0](https://github.com/crimera/piko/compare/v1.26.0...v1.27.0) (2024-05-08)
 

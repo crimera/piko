@@ -49,8 +49,11 @@
     <string name="piko_pref_add_flag_title">Add flag</string>
     <string name="piko_pref_show_sensitive_media">Show sensitive media</string>
     <string name="piko_pref_selectable_text">Selectable text</string>
+    <string name="piko_pref_clear_tracking_params">Clear tracking params</string>
+    <string name="piko_pref_unshorten_link">No shortened URL</string>
 
     <string name="piko_title_timeline">Timeline</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">Disable auto timeline scroll on launch</string>
     <string name="piko_pref_hide_for_you">Hide for you tab</string>
     <string name="piko_pref_hide_live_threads">Hide live threads</string>
     <string name="piko_pref_hide_live_threads_desc">Hides live section in timeline</string>
@@ -72,6 +75,8 @@
     <string name="piko_pref_customisation_timelinetabs_foryou">Hide \"For You\"</string>
     <string name="piko_pref_customisation_timelinetabs_following">Hide \"Following\"</string>
     <string name="piko_pref_customisation_timelinetabs_both">Show both</string>
+    <string name="piko_pref_customisation_sidebartabs">Side bar items to hide</string>
+    <string name="piko_pref_customisation_navbartabs">Navigation bar items to hide</string>
 
     <string name="piko_title_backup">Backup and restore</string>
     <string name="piko_pref_export">Export preferences</string>

@@ -49,8 +49,11 @@
     <string name="piko_pref_add_flag_title">Dodaj flagę</string>
     <string name="piko_pref_show_sensitive_media">Wyświetlaj wrażliwe treści</string>
     <string name="piko_pref_selectable_text">Możliwość zaznaczenia tekstu</string>
+    <string name="piko_pref_clear_tracking_params">Usuń parametry śledzenia</string>
+    <string name="piko_pref_unshorten_link">Brak skróconych adresów URL</string>
 
     <string name="piko_title_timeline">Oś czasu</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">Wyłącz automatyczne odświeżanie osi czasu po uruchomieniu aplikacji</string>
     <string name="piko_pref_hide_for_you">Ukryj kartę \'Dla Ciebie\'</string>
     <string name="piko_pref_hide_live_threads">Ukryj pokoje \'Na żywo\'</string>
     <string name="piko_pref_hide_live_threads_desc">Ukrywa sekcję \'Na żywo\' na osi czasu</string>
@@ -72,6 +75,8 @@
     <string name="piko_pref_customisation_timelinetabs_foryou">Ukryj \'Dla Ciebie\'</string>
     <string name="piko_pref_customisation_timelinetabs_following">Ukryj \'Obserwujesz\'</string>
     <string name="piko_pref_customisation_timelinetabs_both">Wyświetl oba</string>
+    <string name="piko_pref_customisation_sidebartabs">Elementy do ukrycia w pasku bocznym</string>
+    <string name="piko_pref_customisation_navbartabs">Elementy do ukrycia w pasku nawigacyjnym</string>
 
     <string name="piko_title_backup">Kopia zapasowa i przywracanie</string>
     <string name="piko_pref_export">Eksportuj ustawienia</string>
@@ -91,7 +96,7 @@
     <string name="piko_pref_patch_info">Informacje o łatkach</string>
     <string name="piko_pref_version_info">Informacje o wersjach</string>
     <string name="piko_pref_patches">Łatki</string>
-    <string name="piko_pref_included">Zaimplementowany</string>
-    <string name="piko_pref_excluded">Wykluczony</string>
+    <string name="piko_pref_included">Zaimplementowano</string>
+    <string name="piko_pref_excluded">Wykluczono</string>
 
 </resources>
