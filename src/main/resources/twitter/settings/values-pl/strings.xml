@@ -9,10 +9,18 @@
     <string name="piko_pref_icon_n_navbar_btn">Ustawienia ikony aplikacji i paska nawigacji</string>
 
     <string name="piko_title_download">Pobieranie</string>
+    <string name="piko_pref_video_download">Włącz możliwość pobierania treści</string>
+    <string name="piko_pref_download">Zmień folder do pobierania treści</string>
     <string name="piko_pref_download_path">Główny folder</string>
-    <string name="piko_pref_download_path_desc">Główny folder do pobierania filmów</string>
+    <string name="piko_pref_download_path_desc">Główny folder do pobierania treści</string>
     <string name="piko_pref_download_folder">Subfolder</string>
-    <string name="piko_pref_download_folder_desc">Subfolder do pobierania filmów ([główny folder]/[subfolder])</string>
+    <string name="piko_pref_download_folder_desc">Subfolder do pobierania treści ([główny folder]/[subfolder])</string>
+    <string name="piko_pref_download_media_link_handle">Preferencje pobierania</string>
+    <string name="piko_pref_download_media_link_handle_download">Bezpośrednie pobieranie</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">Bezpośrednie kopiowanie linku</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">Zawsze pytaj</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">Skopiuj link</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">Udostępnij link</string>
 
     <string name="piko_title_ads">Reklamy</string>
     <string name="piko_pref_hide_promoted_posts">Ukryj promowane posty</string>
@@ -35,18 +43,27 @@
     <string name="piko_pref_custom_share_domain">Własna domena do udostepniana</string>
     <string name="piko_pref_custom_share_domain_desc">Domena używana do udostępniania tweetów</string>
     <string name="piko_pref_browser_chooser">Używaj domyślnej przeglądarki</string>
-    <string name="piko_pref_browser_chooser_desc">Otwieraj linki w Twojej domyślnej przeglądarce, a nie wbudowanej w aplikacji</string>
+    <string name="piko_pref_browser_chooser_desc">Otwieraj linki w zewnętrznej (domyślnej) przeglądarce</string>
     <string name="piko_pref_feature_flags">Flagi funkcjonalne</string>
     <string name="piko_pref_edit_flag_title">Edytuj flagę</string>
     <string name="piko_pref_add_flag_title">Dodaj flagę</string>
+    <string name="piko_pref_show_sensitive_media">Wyświetlaj wrażliwe treści</string>
+    <string name="piko_pref_selectable_text">Możliwość zaznaczenia tekstu</string>
+    <string name="piko_pref_clear_tracking_params">Usuń parametry śledzenia</string>
+    <string name="piko_pref_unshorten_link">Brak skróconych adresów URL</string>
 
     <string name="piko_title_timeline">Oś czasu</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">Wyłącz automatyczne odświeżanie osi czasu po uruchomieniu aplikacji</string>
     <string name="piko_pref_hide_for_you">Ukryj kartę \'Dla Ciebie\'</string>
     <string name="piko_pref_hide_live_threads">Ukryj pokoje \'Na żywo\'</string>
     <string name="piko_pref_hide_live_threads_desc">Ukrywa sekcję \'Na żywo\' na osi czasu</string>
     <string name="piko_pref_hide_banner">Ukryj baner</string>
     <string name="piko_pref_hide_banner_desc">Ukryj wyskakujące powiadomienie o nowych postach</string>
     <string name="piko_pref_hide_bmk_timeline">Ukryj ikonę zakładek na osi czasu</string>
+    <string name="piko_pref_force_translate">Wymuś opcję tłumaczenia</string>
+    <string name="piko_pref_force_translate_desc">Uzyskaj możliwość przetłumaczenia każdego postu</string>
+    <string name="piko_pref_hide_quick_promote">Ukryj przycisk do promowania postu</string>
+    <string name="piko_pref_hide_quick_promote_desc">Ukrywa przycisk promowania pod własnymi postami</string>
     <string name="piko_pref_show_poll_result">Pokaż wyniki ankiet</string>
     <string name="piko_pref_show_poll_result_desc">Możesz zobaczyć wyniki ankiet bez głosowania</string>
     <string name="piko_pref_hide_immersive_player">Ukryj immersyjny tryb odtwarzacza</string>
@@ -58,6 +75,8 @@
     <string name="piko_pref_customisation_timelinetabs_foryou">Ukryj \'Dla Ciebie\'</string>
     <string name="piko_pref_customisation_timelinetabs_following">Ukryj \'Obserwujesz\'</string>
     <string name="piko_pref_customisation_timelinetabs_both">Wyświetl oba</string>
+    <string name="piko_pref_customisation_sidebartabs">Elementy do ukrycia w pasku bocznym</string>
+    <string name="piko_pref_customisation_navbartabs">Elementy do ukrycia w pasku nawigacyjnym</string>
 
     <string name="piko_title_backup">Kopia zapasowa i przywracanie</string>
     <string name="piko_pref_export">Eksportuj ustawienia</string>
@@ -71,5 +90,13 @@
     <string name="piko_pref_import_saved">Zaimportowano pomyślnie</string>
     <string name="piko_pref_import_failed">Błąd: Importowanie ustawień nie powiodło się</string>
     <string name="piko_pref_import_no_uri">Błąd: Nie podano pliku</string>
+
+    <string name="piko_title_about">Więcej o Piko</string>
+    <string name="piko_pref_app_version">Wersja aplikacji</string>
+    <string name="piko_pref_patch_info">Informacje o łatkach</string>
+    <string name="piko_pref_version_info">Informacje o wersjach</string>
+    <string name="piko_pref_patches">Łatki</string>
+    <string name="piko_pref_included">Zaimplementowano</string>
+    <string name="piko_pref_excluded">Wykluczono</string>
 
 </resources>
