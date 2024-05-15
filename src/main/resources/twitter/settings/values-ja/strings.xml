@@ -67,7 +67,7 @@
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">プロフィールタブを非表示</string>
     <string name="piko_pref_customisation_timelinetabs">タイムラインのタブ</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">「フォロー中」タブを表示</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">「おすすめ」タブを非表示</string>
     <string name="piko_pref_customisation_timelinetabs_following">「おすすめ」タブを非表示</string>
     <string name="piko_pref_customisation_timelinetabs_both">両方とも表示</string>
     <string name="piko_pref_customisation_sidebartabs">サイドバーの各メニューを非表示</string>
