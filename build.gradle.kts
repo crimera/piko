@@ -2,7 +2,6 @@ import org.gradle.kotlin.dsl.support.listFilesOrdered
 
 plugins {
     alias(libs.plugins.kotlin)
-    alias(libs.plugins.binary.compatibility.validator)
     `maven-publish`
 }
 
