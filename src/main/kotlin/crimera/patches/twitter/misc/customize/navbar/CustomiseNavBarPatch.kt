@@ -2,7 +2,6 @@ package crimera.patches.twitter.misc.customize.navbar
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.removeInstruction
@@ -11,9 +10,9 @@ import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
-import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import crimera.patches.twitter.featureFlag.fingerprints.FeatureFlagLoadFingerprint
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
@@ -27,6 +26,13 @@ object CustomiseNavBarFingerprint:MethodFingerprint(
     )
 )
 
+object NavBarFixFingerprint: MethodFingerprint(
+    returnType = "Ljava/util/List;",
+    strings = listOf(
+        "subscriptions_feature_1008"
+    )
+)
+
 @Patch(
     name = "Customize Navigation Bar items",
     dependencies = [SettingsPatch::class],
@@ -36,7 +42,7 @@ object CustomiseNavBarFingerprint:MethodFingerprint(
 )
 @Suppress("unused")
 object CustomiseNavBarPatch:BytecodePatch(
-    setOf(CustomiseNavBarFingerprint,SettingsStatusLoadFingerprint)
+    setOf(CustomiseNavBarFingerprint,NavBarFixFingerprint,SettingsStatusLoadFingerprint,FeatureFlagLoadFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
         val results = CustomiseNavBarFingerprint.result
@@ -55,7 +61,20 @@ object CustomiseNavBarPatch:BytecodePatch(
 
         method.addInstructions(returnObj_loc,METHOD)
 
+
+        //credits aero
+        val result2 = NavBarFixFingerprint.result
+            ?:throw PatchException("NavBarFixFingerprint not found")
+
+        val methods2 = result2.mutableMethod
+        val loc2 = methods2.getInstructions().first { it.opcode == Opcode.IF_NEZ }.location.index
+        methods2.removeInstruction(loc2)
+        methods2.removeInstruction(loc2)
+        methods2.removeInstruction(loc2)
+
         SettingsStatusLoadFingerprint.enableSettings("navBarCustomisation")
+
+        FeatureFlagLoadFingerprint.enableSettings("navbarFix")
         //end
     }
 }
