@@ -1,3 +1,10 @@
+## [1.28.1-dev.1](https://github.com/crimera/piko/compare/v1.28.0...v1.28.1-dev.1) (2024-05-16)
+
+
+### Refactors
+
+* **Twitter:** Separated `App icon` and `Navigation icon` patch ([8a67f12](https://github.com/crimera/piko/commit/8a67f12e0430dbd06a6184a150ba75da832a2c54))
+
 ## [1.28.0](https://github.com/crimera/piko/compare/v1.27.1...v1.28.0) (2024-05-15)
 
 
