@@ -23,7 +23,6 @@ import crimera.patches.instagram.interaction.download.fingerprints.itemclickedcl
     name = "Download patch",
     compatiblePackages = [CompatiblePackage("com.instagram.android")],
     requiresIntegrations = true,
-    dependencies = [AddDownloadIconPatch::class]
 )
 object DownloadPatch : BytecodePatch(
     setOf(
