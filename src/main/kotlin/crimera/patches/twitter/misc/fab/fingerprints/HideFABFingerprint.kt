@@ -1,4 +1,4 @@
-package crimera.patches.twitter.misc.FAB.fingerprints
+package crimera.patches.twitter.misc.fab.fingerprints
 
 import app.revanced.patcher.fingerprint.MethodFingerprint
 
