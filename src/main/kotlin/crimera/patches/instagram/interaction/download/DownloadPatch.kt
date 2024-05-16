@@ -77,7 +77,6 @@ object DownloadPatch : BytecodePatch(
             )
         } ?: throw FeedBottomSheetFingerprint.exception
 
-//        Need to make new icon on Hgy
         DialogItemClickedFingerprint.result?.mutableMethod?.let { method ->
             val loc = method.getInstructions().first { it.opcode == Opcode.PACKED_SWITCH }.location.index
 
@@ -86,32 +85,6 @@ object DownloadPatch : BytecodePatch(
                 method.getInstructions().filter { it.opcode == Opcode.CONST_4 }[1].location.index,
                 "const/4 v0, 0x0"
             )
-
-            /*            Fingerprints
-                          2Tf: strings - "Music Overlay Not Found"
-
-                          only one fingerprint {
-                            3Pw: strings - "shouldShowFeedDelaySkipPill"
-                            is a function of 3Pw
-                            3Pw->Aj5:get the first function that returns an int and that has only one register
-                          }
-
-                          0wU: class have more than 2 fields, and has the method getDeviceSession
-
-                    iget-object v5, v0, LX/Ikk;->A04:Landroidx/fragment/app/FragmentActivity;
-
-                    iget-object v2, v0, LX/Ikk;->A0D:LX/2Tf;
-
-                    iget-object v4, v0, LX/Ikk;->A0G:LX/3Pw;
-
-                    invoke-virtual {v4}, LX/3Pw;->Aj5()I
-
-                    move-result v4
-
-                    iget-object v6, v0, LX/Ikk;->A09:LX/0wU;
-
-                    invoke-static {v2, v4, v6, v5}, Lme/bluepapilte/DownloadPosts;->downloadSpecificPosts(Ljava/lang/Object;ILjava/lang/Object;Landroid/app/Activity;)V
-             */
 
             val itemClickedClass = method.definingClass
             val postMediaClass =
