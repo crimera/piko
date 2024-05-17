@@ -1,3 +1,10 @@
+## [1.28.1-dev.2](https://github.com/crimera/piko/compare/v1.28.1-dev.1...v1.28.1-dev.2) (2024-05-17)
+
+
+### Refactors
+
+* **Twitter:** Refactor `Enable app icon settings` patch ([e7b3d0e](https://github.com/crimera/piko/commit/e7b3d0e3bfdfb5fc7dff3564c021c04d7d2d564c))
+
 ## [1.28.1-dev.1](https://github.com/crimera/piko/compare/v1.28.0...v1.28.1-dev.1) (2024-05-16)
 
 
