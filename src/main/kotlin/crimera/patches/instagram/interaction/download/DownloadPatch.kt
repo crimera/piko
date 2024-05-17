@@ -14,6 +14,8 @@ import app.revanced.util.exception
 import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.instagram.interaction.download.fingerprints.*
 import crimera.patches.instagram.interaction.download.fingerprints.DialogItemClickedFingerprint
+import crimera.patches.instagram.interaction.download.fingerprints.hook.FeedItemClassNameHookFingerprint
+import crimera.patches.instagram.interaction.download.fingerprints.hook.FeedOptionItemIconClassNameHookFingerprint
 import crimera.patches.instagram.interaction.download.fingerprints.itemclickedclasses.DeviceSessionClassFingerprint
 import crimera.patches.instagram.interaction.download.fingerprints.itemclickedclasses.MediaViewFingerprint
 import crimera.patches.instagram.interaction.download.fingerprints.itemclickedclasses.PostMediaFingerprint
@@ -23,49 +25,19 @@ import crimera.patches.instagram.interaction.download.fingerprints.itemclickedcl
     name = "Download patch",
     compatiblePackages = [CompatiblePackage("com.instagram.android")],
     requiresIntegrations = true,
+    dependencies = [SetupHookSignaturesPatch::class]
 )
 object DownloadPatch : BytecodePatch(
     setOf(
         DialogItemClickedFingerprint,
-        MediaOptionsSheetFingerprint,
         FeedBottomSheetFingerprint,
-        FeedItemIconsFingerprint,
-        FeedItemClassFingerprint,
-        FeedOptionItemIconClassNameHookFingerprint,
-        FeedItemClassNameHookFingerprint,
 
         PostMediaFingerprint,
         MediaViewFingerprint,
         DeviceSessionClassFingerprint
     )
 ) {
-    private fun String.toClassName() =
-        this.replace("/".toRegex(), ".").removePrefix("L").removeSuffix(";")
-
-    private fun setFeedItemClassName() {
-        val downloadPatchHooksClass = FeedItemClassNameHookFingerprint.result?.mutableMethod
-            ?: throw FeedItemClassNameHookFingerprint.exception
-
-        val feedItemClassName = FeedItemClassFingerprint.result?.classDef?.toString()?.toClassName()
-            ?: throw FeedItemClassFingerprint.exception
-
-        downloadPatchHooksClass.replaceInstruction(0, "const-string v0, \"$feedItemClassName\"")
-    }
-
-    private fun setFeedIconClassName() {
-        val feedIconHookMethod = FeedOptionItemIconClassNameHookFingerprint.result?.mutableMethod
-            ?: throw FeedOptionItemIconClassNameHookFingerprint.exception
-
-        val feedItemIconsClassName = FeedItemIconsFingerprint.result?.classDef?.toString()?.toClassName()
-            ?: throw FeedItemIconsFingerprint.exception
-
-        feedIconHookMethod.replaceInstruction(0, "const-string v0, \"$feedItemIconsClassName\"")
-    }
-
     override fun execute(context: BytecodeContext) {
-        setFeedItemClassName()
-        setFeedIconClassName()
-
         FeedBottomSheetFingerprint.result?.mutableMethod?.let { method ->
             val loc = method.getInstructions().filter { it.opcode == Opcode.GOTO }[2].location.index + 3
             method.addInstructions(

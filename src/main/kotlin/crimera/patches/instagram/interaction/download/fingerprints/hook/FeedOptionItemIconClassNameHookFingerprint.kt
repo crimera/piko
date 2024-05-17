@@ -1,4 +1,4 @@
-package crimera.patches.instagram.interaction.download.fingerprints
+package crimera.patches.instagram.interaction.download.fingerprints.hook
 
 import app.revanced.patcher.fingerprint.MethodFingerprint
 
