@@ -1,3 +1,10 @@
+## [1.29.0-dev.1](https://github.com/crimera/piko/compare/v1.28.1-dev.2...v1.29.0-dev.1) (2024-05-17)
+
+
+### Features
+
+* **ui:** app wide monet theming in light mode ([46f920b](https://github.com/crimera/piko/commit/46f920bd35841e3df85617aed6a439f0df114d7b))
+
 ## [1.28.1-dev.2](https://github.com/crimera/piko/compare/v1.28.1-dev.1...v1.28.1-dev.2) (2024-05-17)
 
 
