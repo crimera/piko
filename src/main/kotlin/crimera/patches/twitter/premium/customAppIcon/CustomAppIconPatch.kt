@@ -1,8 +1,9 @@
-package crimera.patches.twitter.premium.customAppIconAndNavBtns
+package crimera.patches.twitter.premium.customAppIcon
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.removeInstruction
+import app.revanced.patcher.fingerprint.MethodFingerprint
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
@@ -10,23 +11,28 @@ import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
-import crimera.patches.twitter.premium.customAppIconAndNavBtns.fingerprints.CustomAppIconFingerprint
+
+object CustomiseAppIconFingerprint:MethodFingerprint(
+    strings = listOf(
+        "current_app_icon_id"
+    )
+)
 
 @Patch(
     name = "Enable app icon settings",
-    compatiblePackages = [CompatiblePackage("com.twitter.android")],
     dependencies = [SettingsPatch::class],
+    compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = false,
     requiresIntegrations = true
 )
-object CustomAppIconPatch:BytecodePatch(
-    setOf(CustomAppIconFingerprint, SettingsStatusLoadFingerprint)
-) {
+@Suppress("unused")
+object CustomiseAppIcon:BytecodePatch(
+    setOf(CustomiseAppIconFingerprint,SettingsStatusLoadFingerprint)
+){
     override fun execute(context: BytecodeContext) {
-        val result = CustomAppIconFingerprint.result
-            ?:throw PatchException("CustomAppIconFingerprint not found")
+        val result = CustomiseAppIconFingerprint.result
+            ?:throw PatchException("CustomiseAppIconFingerprint not found")
 
-        //usually the last method
         val methods = result.mutableClass.methods.last()
         val loc = methods.getInstructions().last { it.opcode == Opcode.CONST }.location.index
 
@@ -36,5 +42,6 @@ object CustomAppIconPatch:BytecodePatch(
 
 
         SettingsStatusLoadFingerprint.enableSettings("customAppIcon")
+        //end
     }
 }
