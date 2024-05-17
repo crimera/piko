@@ -12,20 +12,19 @@ import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.patcher.util.smali.ExternalLabel
 import app.revanced.util.exception
 import com.android.tools.smali.dexlib2.Opcode
-import crimera.patches.instagram.interaction.download.fingerprints.*
 import crimera.patches.instagram.interaction.download.fingerprints.DialogItemClickedFingerprint
-import crimera.patches.instagram.interaction.download.fingerprints.hook.FeedItemClassNameHookFingerprint
-import crimera.patches.instagram.interaction.download.fingerprints.hook.FeedOptionItemIconClassNameHookFingerprint
+import crimera.patches.instagram.interaction.download.fingerprints.FeedBottomSheetFingerprint
 import crimera.patches.instagram.interaction.download.fingerprints.itemclickedclasses.DeviceSessionClassFingerprint
 import crimera.patches.instagram.interaction.download.fingerprints.itemclickedclasses.MediaViewFingerprint
 import crimera.patches.instagram.interaction.download.fingerprints.itemclickedclasses.PostMediaFingerprint
+import crimera.patches.instagram.misc.integrations.IntegrationsPatch
 
 
 @Patch(
     name = "Download patch",
     compatiblePackages = [CompatiblePackage("com.instagram.android")],
     requiresIntegrations = true,
-    dependencies = [SetupHookSignaturesPatch::class]
+    dependencies = [SetupHookSignaturesPatch::class, IntegrationsPatch::class]
 )
 object DownloadPatch : BytecodePatch(
     setOf(
