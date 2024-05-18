@@ -1,3 +1,15 @@
+## [1.30.0-dev.1](https://github.com/crimera/piko/compare/v1.29.0...v1.30.0-dev.1) (2024-05-18)
+
+
+### Features
+
+* **Twitter:** Added `Round off numbers` patch ([b1c1b13](https://github.com/crimera/piko/commit/b1c1b1361b55f08e2eba64e086943b30b2dc1212))
+
+
+### Refactors
+
+* **Twitter:** Force enable `Enable app icon settings` patch ([ee605f1](https://github.com/crimera/piko/commit/ee605f11f8c95e6b8cf5d1d1cf2357593e1ea318))
+
 ## [1.29.0](https://github.com/crimera/piko/compare/v1.28.0...v1.29.0) (2024-05-18)
 
 
