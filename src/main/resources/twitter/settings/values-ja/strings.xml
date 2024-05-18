@@ -48,8 +48,8 @@
     <string name="piko_pref_selectable_text">選択可能なテキスト</string>
     <string name="piko_pref_clear_tracking_params">トラッキングパラメータを削除</string>
     <string name="piko_pref_unshorten_link">短縮URLを無効化</string>
-    <string name="piko_pref_round_off_numbers">数字を短く表示</string>
-    <string name="piko_pref_round_off_numbers_desc">K（千）やM（百万）のように数字を短く表示します</string>
+    <string name="piko_pref_round_off_numbers">数字を四捨五入</string>
+    <string name="piko_pref_round_off_numbers_desc">K（千）やM（百万）のように数字を四捨五入します</string>
     <string name="piko_title_timeline">タイムライン</string>
     <string name="piko_pref_disable_auto_timeline_scroll">起動時の自動タイムラインスクロールを無効化</string>
     <string name="piko_pref_hide_for_you">「おすすめ」タブを非表示</string>
