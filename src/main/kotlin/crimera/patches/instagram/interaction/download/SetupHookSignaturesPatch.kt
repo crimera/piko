@@ -1,8 +1,10 @@
 package crimera.patches.instagram.interaction.download
 
 import app.revanced.patcher.data.BytecodeContext
+import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
+import app.revanced.patcher.extensions.InstructionExtensions.removeInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.revanced.patcher.fingerprint.MethodFingerprint
 import app.revanced.patcher.patch.BytecodePatch
@@ -12,7 +14,11 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22c
 import com.android.tools.smali.dexlib2.iface.reference.Reference
-import crimera.patches.instagram.interaction.download.fingerprints.hook.*
+import crimera.patches.instagram.interaction.download.fingerprints.VideoModelFingerprint
+import crimera.patches.instagram.interaction.download.fingerprints.hook.FeedItemClassFingerprint
+import crimera.patches.instagram.interaction.download.fingerprints.hook.FeedItemIconsFingerprint
+import crimera.patches.instagram.interaction.download.fingerprints.hook.MediaListFingerprint
+import crimera.patches.instagram.interaction.download.fingerprints.itemclickedclasses.PostMediaFingerprint
 
 
 object DownloadPatchHooksFingerprint : MethodFingerprint(
@@ -27,7 +33,9 @@ object SetupHookSignaturesPatch : BytecodePatch(
         DownloadPatchHooksFingerprint,
         FeedItemClassFingerprint,
         FeedItemIconsFingerprint,
-        MediaListFingerprint
+        MediaListFingerprint,
+        PostMediaFingerprint,
+        VideoModelFingerprint
     )
 ) {
 
@@ -71,7 +79,51 @@ object SetupHookSignaturesPatch : BytecodePatch(
                         it.setReturnString(fieldName)
                     }
                 }
+            }
 
+            val postMediaClass = PostMediaFingerprint.result?.classDef ?: throw PostMediaFingerprint.exception
+
+            methods.getMethod("isVideo")?.let { mutableMethod ->
+                val isVideoMethod = postMediaClass.methods.firstOrNull {
+                    it.implementation?.instructions?.elementAtOrNull(5)?.let { instruction ->
+                        instruction.opcode == Opcode.IF_EQ
+                    } ?: false
+                } ?: throw PostMediaFingerprint.exception
+                mutableMethod.removeInstruction(1)
+                mutableMethod.addInstructions(
+                    0, """
+                    invoke-virtual {p0}, $isVideoMethod
+                    move-result v0
+                        
+                    return v0
+                """
+                )
+            }
+
+            methods.getMethod("getVideoLink")?.let { getVideoLink ->
+                val videoModelResult = VideoModelFingerprint.result ?: throw VideoModelFingerprint.exception
+                val videoModelClass = videoModelResult.classDef
+                val getVideoModel = postMediaClass.methods.firstOrNull {
+                    it.returnType == videoModelClass.toString() && it.implementation?.registerCount == 2
+                }
+
+                val videoUrlField = videoModelClass.fields.firstOrNull {
+                    it.type == "Lcom/instagram/model/mediasize/VideoUrlImpl;"
+                }
+
+                getVideoLink.removeInstruction(1)
+                getVideoLink.addInstructions(
+                    0, """
+                   invoke-virtual {p0}, $getVideoModel
+                   move-result-object v0
+                   
+                   iget-object v0, v0, $videoUrlField
+                   
+                   iget-object v0, v0, Lcom/instagram/model/mediasize/VideoUrlImpl;->A06:Ljava/lang/String;
+                   
+                   return v0
+                """
+                )
             }
         }
     }
