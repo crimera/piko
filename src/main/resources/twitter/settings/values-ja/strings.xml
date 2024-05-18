@@ -48,6 +48,8 @@
     <string name="piko_pref_selectable_text">選択可能なテキスト</string>
     <string name="piko_pref_clear_tracking_params">トラッキングパラメータを削除</string>
     <string name="piko_pref_unshorten_link">短縮URLを無効化</string>
+    <string name="piko_pref_round_off_numbers">数字を短く表示</string>
+    <string name="piko_pref_round_off_numbers_desc">K（千）やM（百万）のように数字を短く表示します</string>
     <string name="piko_title_timeline">タイムライン</string>
     <string name="piko_pref_disable_auto_timeline_scroll">起動時の自動タイムラインスクロールを無効化</string>
     <string name="piko_pref_hide_for_you">「おすすめ」タブを非表示</string>
@@ -59,11 +61,11 @@
     <string name="piko_pref_force_translate">翻訳を強制的に有効化</string>
     <string name="piko_pref_force_translate_desc">すべてのポストで翻訳を利用できるようにします。</string>
     <string name="piko_pref_hide_quick_promote">プロモーションボタンを非表示</string>
-    <string name="piko_pref_hide_quick_promote_desc">自身のポストの「プロモーションする」ボタンを削除します。</string>
+    <string name="piko_pref_hide_quick_promote_desc">自身のポストの「プロモーションする」ボタンを削除します</string>
     <string name="piko_pref_show_poll_result">投票結果を表示</string>
-    <string name="piko_pref_show_poll_result_desc">投票せずに投票結果を表示できるようにします。</string>
+    <string name="piko_pref_show_poll_result_desc">投票せずに投票結果を表示できるようにします</string>
     <string name="piko_pref_hide_immersive_player">イマーシブプレーヤーを非表示</string>
-    <string name="piko_pref_hide_immersive_player_desc">動画再生時にスワイプして他の動画を表示する機能を無効化します。</string>
+    <string name="piko_pref_hide_immersive_player_desc">動画再生時にスワイプして他の動画を表示する機能を無効化します</string>
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">プロフィールタブを非表示</string>
     <string name="piko_pref_customisation_timelinetabs">タイムラインのタブ</string>
