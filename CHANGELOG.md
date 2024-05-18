@@ -1,3 +1,16 @@
+## [1.29.0](https://github.com/crimera/piko/compare/v1.28.0...v1.29.0) (2024-05-18)
+
+
+### Features
+
+* **ui:** app wide monet theming in light mode ([46f920b](https://github.com/crimera/piko/commit/46f920bd35841e3df85617aed6a439f0df114d7b))
+
+
+### Refactors
+
+* **Twitter:** Refactor `Enable app icon settings` patch ([e7b3d0e](https://github.com/crimera/piko/commit/e7b3d0e3bfdfb5fc7dff3564c021c04d7d2d564c))
+* **Twitter:** Separated `App icon` and `Navigation icon` patch ([8a67f12](https://github.com/crimera/piko/commit/8a67f12e0430dbd06a6184a150ba75da832a2c54))
+
 ## [1.29.0-dev.1](https://github.com/crimera/piko/compare/v1.28.1-dev.2...v1.29.0-dev.1) (2024-05-17)
 
 
