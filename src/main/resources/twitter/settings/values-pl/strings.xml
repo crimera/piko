@@ -51,9 +51,11 @@
     <string name="piko_pref_selectable_text">Możliwość zaznaczenia tekstu</string>
     <string name="piko_pref_clear_tracking_params">Usuń parametry śledzenia</string>
     <string name="piko_pref_unshorten_link">Brak skróconych adresów URL</string>
+    <string name="piko_pref_round_off_numbers">Zaokrąglij liczby</string>
+    <string name="piko_pref_round_off_numbers_desc">Zaokrąglaj liczby do K dla tysięcy i M dla milionów</string>
 
     <string name="piko_title_timeline">Oś czasu</string>
-    <string name="piko_pref_disable_auto_timeline_scroll">Wyłącz automatyczne odświeżanie osi czasu po uruchomieniu aplikacji</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">Wyłącz autoodświeżanie osi przy starcie apki</string>
     <string name="piko_pref_hide_for_you">Ukryj kartę \'Dla Ciebie\'</string>
     <string name="piko_pref_hide_live_threads">Ukryj pokoje \'Na żywo\'</string>
     <string name="piko_pref_hide_live_threads_desc">Ukrywa sekcję \'Na żywo\' na osi czasu</string>
