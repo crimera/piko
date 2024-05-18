@@ -1,3 +1,10 @@
+## [1.30.0-dev.2](https://github.com/crimera/piko/compare/v1.30.0-dev.1...v1.30.0-dev.2) (2024-05-18)
+
+
+### Features
+
+* **Twitter:** Added ability to reset pref and flags ([4aaeb09](https://github.com/crimera/piko/commit/4aaeb09ce6c38c6513be6293140a7e7e0b796f28))
+
 ## [1.30.0-dev.1](https://github.com/crimera/piko/compare/v1.29.0...v1.30.0-dev.1) (2024-05-18)
 
 
