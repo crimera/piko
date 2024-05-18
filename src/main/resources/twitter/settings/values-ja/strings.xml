@@ -6,7 +6,7 @@
     <string name="piko_pref_undo_posts">ポストの取り消しを有効化</string>
     <string name="piko_pref_undo_posts_desc">ポストする前にポストを取り消す機能を有効化します</string>
     <string name="piko_pref_undo_posts_btn">ポストの取り消しの設定</string>
-    <string name="piko_pref_icon_n_navbar_btn">アプリのアイコンとナビゲーションバーのカスタマイズ設定</string>
+    <string name="piko_pref_icon_n_navbar_btn">アプリアイコンとナビゲーションバーのカスタマイズ設定</string>
 
     <string name="piko_title_download">ダウンロード</string>
     <string name="piko_pref_video_download">動画のダウンロードを有効化</string>
@@ -76,7 +76,7 @@
     <string name="piko_pref_customisation_timelinetabs_following">「おすすめ」タブを非表示</string>
     <string name="piko_pref_customisation_timelinetabs_both">両方とも表示</string>
     <string name="piko_pref_customisation_sidebartabs">サイドバーの各メニューを非表示</string>
-    <string name="piko_pref_customisation_navbartabs">非表示にするナビゲーションバーの項目</string>
+    <string name="piko_pref_customisation_navbartabs">ナビゲーションバーの各タブを非表示</string>
 
     <string name="piko_title_backup">バックアップと復元</string>
     <string name="piko_pref_export">設定をエクスポート</string>
@@ -96,6 +96,7 @@
     <string name="piko_pref_patch_info">適用されたパッチに関する情報</string>
     <string name="piko_pref_version_info">バージョン情報</string>
     <string name="piko_pref_patches">パッチ</string>
-    <string name="piko_pref_included">適用されています</string>
+    <string name="piko_pref_included">適用済み</string>
     <string name="piko_pref_excluded">除外されています</string>
+    
 </resources>
