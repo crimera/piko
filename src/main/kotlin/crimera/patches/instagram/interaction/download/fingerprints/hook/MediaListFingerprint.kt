@@ -2,8 +2,9 @@ package crimera.patches.instagram.interaction.download.fingerprints.hook
 
 import app.revanced.patcher.fingerprint.MethodFingerprint
 
-object FeedOptionItemIconClassNameHookFingerprint: MethodFingerprint(
+object MediaListFingerprint : MethodFingerprint(
+    strings = listOf("XDTMediaDict"),
     customFingerprint = { methodDef, classDef ->
-        methodDef.name == "feedOptionItemIconClassName"
-    },
+        classDef.interfaces.size == 2
+    }
 )

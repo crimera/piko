@@ -44,7 +44,7 @@ object DownloadPatch :
                     loc,
                     // TODO make the register dynamic
                     """
-                  invoke-static {v5}, Lapp/revanced/integrations/instagram/patches/DownloadPatch;->addDownloadButton(Ljava/util/List;)V
+                  invoke-static {v5}, Lapp/revanced/integrations/instagram/patches/download/DownloadPatch;->addDownloadButton(Ljava/util/List;)V
                 """
             )
         }
@@ -99,7 +99,7 @@ object DownloadPatch :
                     iget-object v6, v0, $itemClickedClass->A09:$deviceSessionClass
                     iget-object v5, v0, $itemClickedClass->A04:Landroidx/fragment/app/FragmentActivity;
                     
-                    invoke-static {v2, v4, v6, v5}, Lapp/revanced/integrations/instagram/patches/DownloadPatch;->downloadPost(Ljava/lang/Object;ILjava/lang/Object;Landroid/app/Activity;)V
+                    invoke-static {v2, v4, v6, v5}, Lapp/revanced/integrations/instagram/patches/download/DownloadPatch;->downloadPost(Ljava/lang/Object;ILjava/lang/Object;Landroid/app/Activity;)V
                     
                     const-string v0, "BRUH"
                     const-string v1, "Download clicked"
