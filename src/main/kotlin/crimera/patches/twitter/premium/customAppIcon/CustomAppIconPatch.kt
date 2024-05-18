@@ -22,7 +22,7 @@ object CustomiseAppIconFingerprint:MethodFingerprint(
     name = "Enable app icon settings",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false,
+    use = true,
     requiresIntegrations = true
 )
 @Suppress("unused")
