@@ -3,9 +3,9 @@
     <string name="piko_title_premium">प्रीमियम</string>
     <string name="piko_pref_reader_mode">रीडर मोड सक्षम करें</string>
     <string name="piko_pref_reader_mode_desc">लंबी थ्रेडों पर "रीडर मोड" सक्षम करें</string>
-    <string name="piko_pref_undo_posts">पोस्ट अनदो करें</string>
-    <string name="piko_pref_undo_posts_desc">पोस्ट करने से पहले पोस्ट को अनदो करने की क्षमता सक्षम करें</string>
-    <string name="piko_pref_undo_posts_btn">पोस्ट सेटिंग्स को अनदो करें</string>
+    <string name="piko_pref_undo_posts">पोस्ट अन्डू करें</string>
+    <string name="piko_pref_undo_posts_desc">पोस्ट करने से पहले पोस्ट को अन्डू करने की क्षमता सक्षम करें</string>
+    <string name="piko_pref_undo_posts_btn">पोस्ट सेटिंग्स को अन्डू करें</string>
     <string name="piko_pref_icon_n_navbar_btn">एप्लिकेशन आइकन और नैविगेशन बार अनुकूलन सेटिंग्स</string>
 
     <string name="piko_title_download">डाउनलोड</string>
@@ -51,6 +51,8 @@
     <string name="piko_pref_selectable_text">चयनीय पाठ</string>
     <string name="piko_pref_clear_tracking_params">ट्रैकिंग पैरामीटर हटाएं</string>
     <string name="piko_pref_unshorten_link">संक्षिप्त URL नहीं</string>
+    <string name="piko_pref_round_off_numbers">संख्याओं को पूर्णांकित करें</string>
+    <string name="piko_pref_round_off_numbers_desc">संख्याओं को K और M के रूप में पूर्णांकित करें</string>
 
     <string name="piko_title_timeline">टाइमलाइन</string>
     <string name="piko_pref_disable_auto_timeline_scroll">लॉन्च पर ऑटो टाइमलाइन स्क्रॉल को अक्षम करें</string>
