@@ -79,6 +79,7 @@
     <string name="piko_pref_customisation_timelinetabs_both">दोनों दिखाएं</string>
     <string name="piko_pref_customisation_sidebartabs">साइडबार आइटम्स छुपाएं</string>
     <string name="piko_pref_customisation_navbartabs">नेविगेशन बार आइटम्स छुपाएं</string>
+    <string name="piko_pref_customisation_inlinetabs">छुपाने के लिए इनलाइन बार आइटम</string>
 
     <string name="piko_title_backup">बैकअप और बहाली</string>
     <string name="piko_pref_export">प्राथमिकताएँ निर्यात करें</string>
