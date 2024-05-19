@@ -11,10 +11,13 @@ import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.patcher.util.smali.ExternalLabel
+import app.revanced.patches.shared.misc.integrations.BaseIntegrationsPatch
 import app.revanced.patches.shared.misc.integrations.fingerprint.IntegrationsUtilsFingerprint
+import app.revanced.util.exception
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import crimera.patches.twitter.misc.integrations.IntegrationsPatch
+import crimera.patches.twitter.misc.integrations.fingerprints.InitFingerprint
 import crimera.patches.twitter.misc.settings.fingerprints.AuthorizeAppActivity
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
 
@@ -25,7 +28,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 object SettingsPatch : BytecodePatch(
-    setOf(SettingsFingerprint, AuthorizeAppActivity, IntegrationsUtilsFingerprint)
+    setOf(SettingsFingerprint, AuthorizeAppActivity, IntegrationsUtilsFingerprint, InitFingerprint)
 ) {
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
     private const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
@@ -91,9 +94,16 @@ object SettingsPatch : BytecodePatch(
             )
         } ?: throw PatchException("ProxySettingsActivityFingerprint not found")
 
-        IntegrationsUtilsFingerprint.result!!.mutableMethod.addInstruction(
+        InitFingerprint.result?.mutableMethod?.addInstructions(
+            1,
+            """
+                invoke-static {}, ${BaseIntegrationsPatch.INTEGRATIONS_CLASS_DESCRIPTOR}->load()V
+            """
+        ) ?: throw InitFingerprint.exception
+
+        IntegrationsUtilsFingerprint.result?.mutableMethod?.addInstruction(
             0,
             "${SSTS_DESCRIPTOR}->load()V"
-        )
+        ) ?: throw IntegrationsUtilsFingerprint.exception
     }
 }
