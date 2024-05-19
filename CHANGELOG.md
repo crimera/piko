@@ -1,3 +1,15 @@
+## [1.30.0-dev.3](https://github.com/crimera/piko/compare/v1.30.0-dev.2...v1.30.0-dev.3) (2024-05-19)
+
+
+### Features
+
+* **Twitter:** Added `Customize Inline action Bar items` patch ([05b06f9](https://github.com/crimera/piko/commit/05b06f9fa4a183c9626acc7fda69c0bebdbae761))
+
+
+### Refactors
+
+* **Twitter:** Combined `customize patch` into single class ([6c04aed](https://github.com/crimera/piko/commit/6c04aed5ec958cb86471d94dd1729c4ad7952c8d))
+
 ## [1.30.0-dev.2](https://github.com/crimera/piko/compare/v1.30.0-dev.1...v1.30.0-dev.2) (2024-05-18)
 
 
