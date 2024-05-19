@@ -55,7 +55,7 @@ object CustomiseNavBarPatch:BytecodePatch(
         val r0 = method.getInstruction<OneRegisterInstruction>(returnObj_loc).registerA
 
         val METHOD = """
-            invoke-static {v$r0}, ${SettingsPatch.CUSTOMISE_DESCRIPTOR}/NavBar;->navBar(Ljava/util/List;)Ljava/util/List;
+            invoke-static {v$r0}, ${SettingsPatch.CUSTOMISE_DESCRIPTOR};->navBar(Ljava/util/List;)Ljava/util/List;
             move-result-object v$r0
         """.trimIndent()
 
