@@ -79,6 +79,7 @@
     <string name="piko_pref_customisation_timelinetabs_both">Wyświetl oba</string>
     <string name="piko_pref_customisation_sidebartabs">Elementy do ukrycia w pasku bocznym</string>
     <string name="piko_pref_customisation_navbartabs">Elementy do ukrycia w pasku nawigacyjnym</string>
+    <string name="piko_pref_customisation_inlinetabs">Elementy do ukrycia w pasku pod postem</string>
 
     <string name="piko_title_backup">Kopia zapasowa i przywracanie</string>
     <string name="piko_pref_export">Eksportuj ustawienia</string>
@@ -92,7 +93,6 @@
     <string name="piko_pref_import_saved">Zaimportowano pomyślnie</string>
     <string name="piko_pref_import_failed">Błąd: Importowanie ustawień nie powiodło się</string>
     <string name="piko_pref_import_no_uri">Błąd: Nie podano pliku</string>
-    <string name="piko_pref_reset_pref">Czy na pewno chcesz usunąć %s ?\n(Pamiętaj, aby wcześniej wykonać kopię zapasową)</string>
 
     <string name="piko_title_about">Więcej o Piko</string>
     <string name="piko_pref_app_version">Wersja aplikacji</string>
