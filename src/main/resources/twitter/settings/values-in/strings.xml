@@ -51,6 +51,8 @@
     <string name="piko_pref_selectable_text">Teks yang dapat dipilih</string>
     <string name="piko_pref_clear_tracking_params">Hapus parameter pelacakan</string>
     <string name="piko_pref_unshorten_link">Tidak ada URL yang dipersingkat</string>
+    <string name="piko_pref_round_off_numbers">Bulatkan angka</string>
+    <string name="piko_pref_round_off_numbers_desc">Membulatkan angka menjadi K dan M </string>
 
     <string name="piko_title_timeline">Timeline</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Nonaktifkan gulir timeline otomatis saat peluncuran</string>
@@ -76,6 +78,7 @@
     <string name="piko_pref_customisation_timelinetabs_following">Sembunyikan \"Mengikuti\"</string>
     <string name="piko_pref_customisation_timelinetabs_both">Tampilkan keduanya</string>
     <string name="piko_pref_customisation_sidebartabs">Item bilah samping yang akan disembunyikan</string>
+    <string name="piko_pref_customisation_navbartabs">Item bilah navigasi untuk disembunyikan</string>
 
     <string name="piko_title_backup">Cadangkan dan pulihkan</string>
     <string name="piko_pref_export">Preferensi ekspor</string>
@@ -89,6 +92,7 @@
     <string name="piko_pref_import_saved">Berhasil diimpor</string>
     <string name="piko_pref_import_failed">Kesalahan: Gagal mengimpor preferensi</string>
     <string name="piko_pref_import_no_uri">Kesalahan: Tidak ada file yang disediakan</string>
+    <string name="piko_pref_reset_pref">Apakah Anda yakin ingin menghapus %s ?\n(Pastikan Anda membuat cadangan sebelumnya)</string>
 
     <string name="piko_title_about">Tentang</string>
     <string name="piko_pref_app_version">Versi aplikasi</string>
