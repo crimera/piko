@@ -79,6 +79,7 @@
     <string name="piko_pref_customisation_timelinetabs_both">Show both</string>
     <string name="piko_pref_customisation_sidebartabs">Side bar items to hide</string>
     <string name="piko_pref_customisation_navbartabs">Navigation bar items to hide</string>
+    <string name="piko_pref_customisation_inlinetabs">Inline bar items to hide</string>
 
     <string name="piko_title_backup">Backup and restore</string>
     <string name="piko_pref_export">Export preferences</string>
@@ -92,7 +93,6 @@
     <string name="piko_pref_import_saved">Imported successfully</string>
     <string name="piko_pref_import_failed">Error: Importing preferences failed</string>
     <string name="piko_pref_import_no_uri">Error: No file provided</string>
-    <string name="piko_pref_reset_pref">Are you sure you want to delete %s ?\n(Make sure to take a backup before)</string>
 
     <string name="piko_title_about">About</string>
     <string name="piko_pref_app_version">App version</string>

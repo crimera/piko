@@ -56,4 +56,14 @@
         <item>@string/grok_tab_title</item>
         <item>@string/product_media_label</item>
     </string-array>
+
+    <string-array name="piko_array_inlinetabs">
+        <item>@string/replies</item>
+        <item>@string/tweets_retweet</item>
+        <item>@string/button_action_like</item>
+        <item>@string/view_count_dialog_title</item>
+        <item>@string/bookmarks_title</item>
+        <item>@string/button_action_share</item>
+    </string-array>
+
 </resources>
