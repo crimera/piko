@@ -92,6 +92,7 @@
     <string name="piko_pref_import_saved">Zaimportowano pomyślnie</string>
     <string name="piko_pref_import_failed">Błąd: Importowanie ustawień nie powiodło się</string>
     <string name="piko_pref_import_no_uri">Błąd: Nie podano pliku</string>
+    <string name="piko_pref_reset_pref">Czy na pewno chcesz usunąć %s ?\n(Pamiętaj, aby wcześniej wykonać kopię zapasową)</string>
 
     <string name="piko_title_about">Więcej o Piko</string>
     <string name="piko_pref_app_version">Wersja aplikacji</string>
