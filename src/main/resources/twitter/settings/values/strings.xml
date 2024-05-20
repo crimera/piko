@@ -72,6 +72,7 @@
     <string name="piko_pref_show_poll_result_desc">View poll results without voting</string>
     <string name="piko_pref_hide_immersive_player">Hide immersive player</string>
     <string name="piko_pref_hide_immersive_player_desc">Removes swipe up for more videos in video player</string>
+    <string name="piko_pref_hide_hidden_replies">Hide hidden replies</string>
 
     <string name="piko_title_customisation">Customization</string>
     <string name="piko_pref_customisation_profiletabs">Profile tabs to hide</string>
