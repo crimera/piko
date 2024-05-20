@@ -1,3 +1,10 @@
+## [1.30.0-dev.4](https://github.com/crimera/piko/compare/v1.30.0-dev.3...v1.30.0-dev.4) (2024-05-20)
+
+
+### Features
+
+* **Twitter:** Added `Debug Menu` patch ([7d5ca77](https://github.com/crimera/piko/commit/7d5ca77bf633a8dfcd8657d12b24bd076b2f5d11))
+
 ## [1.30.0-dev.3](https://github.com/crimera/piko/compare/v1.30.0-dev.2...v1.30.0-dev.3) (2024-05-19)
 
 
