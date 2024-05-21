@@ -9,19 +9,27 @@
     <string name="piko_pref_icon_n_navbar_btn">應用程式圖示和導航欄自訂設定</string>
 
     <string name="piko_title_download">下載</string>
+    <string name="piko_pref_video_download">啟用影片下載</string>
+    <string name="piko_pref_download">變更下載目錄</string>
     <string name="piko_pref_download_path">下載主資料夾</string>
     <string name="piko_pref_download_path_desc">儲存下載影片的主資料夾</string>
     <string name="piko_pref_download_folder">下載子資料夾</string>
     <string name="piko_pref_download_folder_desc">儲存下載影片的子資料夾：下載主資料夾/子資料夾</string>
+    <string name="piko_pref_download_media_link_handle">下載偏好設定</string>
+    <string name="piko_pref_download_media_link_handle_download">直接開始下載</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">直接複製多媒體網址</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">每次詢問</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">複製多媒體網址</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">分享多媒體網址</string>
 
     <string name="piko_title_ads">廣告</string>
     <string name="piko_pref_hide_promoted_posts">隱藏「推薦推文」</string>
     <string name="piko_pref_hide_g_ads">隱藏Google 廣告</string>
     <string name="piko_pref_wtf_section">隱藏「推薦關注者」</string>
     <string name="piko_pref_cts_section">隱藏「訂閱創作者」</string>
-    <string name="piko_pref_ctj_section">隱藏「探索社群」</string>
+    <string name="piko_pref_ctj_section">隱藏「探索新的社群」</string>
     <string name="piko_pref_ryb_section">隱藏「重新訪問您的書籤」</string>
-    <string name="piko_pref_pinned_posts_section">隱藏關注者釘選的推文</string>
+    <string name="piko_pref_pinned_posts_section">隱藏「已被你跟隨的人釘選」</string>
     <string name="piko_pref_hide_detailed_posts">隱藏推文回覆中的「發現更多」</string>
     <string name="piko_pref_hide_trends">隱藏流行趨勢</string>
 
@@ -34,17 +42,28 @@
     <string name="piko_pref_hide_view_count">隱藏瀏覽次數</string>
     <string name="piko_pref_custom_share_domain">自訂分享網域</string>
     <string name="piko_pref_custom_share_domain_desc">分享推文時使用的網域</string>
+    <string name="piko_pref_browser_chooser">使用瀏覽器選擇器</string>
+    <string name="piko_pref_browser_chooser_desc">使用瀏覽器選擇器開啟網址，而不是使用應用程式內瀏覽器</string>
     <string name="piko_pref_feature_flags">功能標記</string>
     <string name="piko_pref_edit_flag_title">編輯標記</string>
     <string name="piko_pref_add_flag_title">新增標記</string>
+    <string name="piko_pref_show_sensitive_media">顯示敏感多媒體</string>
+    <string name="piko_pref_selectable_text">可選取文字</string>
+    <string name="piko_pref_clear_tracking_params">清除追蹤參數</string>
+    <string name="piko_pref_unshorten_link">不縮短網址</string>
 
     <string name="piko_title_timeline">時間軸</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">啟動應用時停用時間軸自動捲動</string>
     <string name="piko_pref_hide_for_you">隱藏「為你推薦」分頁</string>
     <string name="piko_pref_hide_live_threads">隱藏直播提醒橫幅</string>
     <string name="piko_pref_hide_live_threads_desc">隱藏畫面頂部的直播通知</string>
     <string name="piko_pref_hide_banner">隱藏新推文提醒</string>
     <string name="piko_pref_hide_banner_desc">隱藏新推文的跳轉按鈕</string>
     <string name="piko_pref_hide_bmk_timeline">隱藏時間軸中的書籤按鈕</string>
+    <string name="piko_pref_force_translate">強制啟用翻譯</string>
+    <string name="piko_pref_force_translate_desc">獲得所有貼文的翻譯按鈕</string>
+    <string name="piko_pref_hide_quick_promote">隱藏推廣按鈕</string>
+    <string name="piko_pref_hide_quick_promote_desc">隱藏自己貼文下的推廣按鈕</string>
     <string name="piko_pref_show_poll_result">顯示投票結果</string>
     <string name="piko_pref_show_poll_result_desc">在沒有投票的情況下查看投票結果</string>
     <string name="piko_pref_hide_immersive_player">隱藏沉浸式播放器（上下滑動）</string>
@@ -52,6 +71,12 @@
 
     <string name="piko_title_customisation">客製化</string>
     <string name="piko_pref_customisation_profiletabs">隱藏個人資料頁的標籤頁</string>
+    <string name="piko_pref_customisation_timelinetabs">時間軸標籤頁</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">隱藏 \「為你推薦」"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">隱藏 \「正在跟隨」"</string>
+    <string name="piko_pref_customisation_timelinetabs_both">兩個都顯示</string>
+    <string name="piko_pref_customisation_sidebartabs">要隱藏的側邊欄項目</string>
+    <string name="piko_pref_customisation_navbartabs">要隱藏的導航欄項目</string>
 
     <string name="piko_title_backup">備份和還原</string>
     <string name="piko_pref_export">匯出偏好設定</string>
@@ -65,5 +90,13 @@
     <string name="piko_pref_import_saved">已成功匯入</string>
     <string name="piko_pref_import_failed">錯誤：匯入偏好設定失敗</string>
     <string name="piko_pref_import_no_uri">錯誤：未提供檔案</string>
+
+    <string name="piko_title_about">關於</string>
+    <string name="piko_pref_app_version">應用程式版本</string>
+    <string name="piko_pref_patch_info">修改補丁資訊</string>
+    <string name="piko_pref_version_info">版本資訊</string>
+    <string name="piko_pref_patches">修改補丁</string>
+    <string name="piko_pref_included">包含</string>
+    <string name="piko_pref_excluded">排除</string>
 
 </resources>
