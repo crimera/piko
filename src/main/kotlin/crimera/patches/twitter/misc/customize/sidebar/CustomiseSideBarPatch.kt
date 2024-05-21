@@ -45,7 +45,7 @@ object CustomiseSideBarPatch : BytecodePatch(
         val r0 = method.getInstruction<OneRegisterInstruction>(return_obj).registerA
 
         val METHOD = """
-            invoke-static {v$r0}, ${SettingsPatch.CUSTOMISE_DESCRIPTOR}/SideBar;->sideBar(Ljava/util/List;)Ljava/util/List;
+            invoke-static {v$r0}, ${SettingsPatch.CUSTOMISE_DESCRIPTOR};->sideBar(Ljava/util/List;)Ljava/util/List;
             move-result-object v$r0
         """.trimIndent()
 
