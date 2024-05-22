@@ -25,7 +25,6 @@ object RoundOffNumbersFingerprint: MethodFingerprint(
     description = "Enable or disable rounding off numbers",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false
 )
 object RoundOffNumbersPatch:BytecodePatch(
     setOf(SettingsStatusLoadFingerprint,RoundOffNumbersFingerprint)

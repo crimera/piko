@@ -25,7 +25,6 @@ object CustomiseInlineBarFingerprint:MethodFingerprint(
     name = "Customize Inline action Bar items",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false,
     requiresIntegrations = true
 )
 @Suppress("unused")

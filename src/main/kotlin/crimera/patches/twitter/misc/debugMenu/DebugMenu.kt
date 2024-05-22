@@ -27,7 +27,6 @@ object DebugMenuFingerprint: MethodFingerprint(
     name = "Enable debug menu for posts",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false
 )
 object DebugMenu:BytecodePatch(
     setOf(SettingsStatusLoadFingerprint,DebugMenuFingerprint)
