@@ -1,3 +1,101 @@
+## [1.30.0](https://github.com/crimera/piko/compare/v1.29.0...v1.30.0) (2024-05-22)
+
+
+### Bug Fixes
+
+* URL decode path to JAR containing spaces by osumatrix ([e6671ba](https://github.com/crimera/piko/commit/e6671ba4a8359db7aefa1ab20600e1f17144e002))
+* Use UrlDecoder API available in older Android versions ([d9e6374](https://github.com/crimera/piko/commit/d9e63740b7eb7c8a4f44abf6d59998ea14194346))
+
+
+### Features
+
+* Remove throw file ([86bff99](https://github.com/crimera/piko/commit/86bff993636928c67ca95dabeebcf1f5cc191a36))
+* **Twitter:** Added `Customize Inline action Bar items` patch ([05b06f9](https://github.com/crimera/piko/commit/05b06f9fa4a183c9626acc7fda69c0bebdbae761))
+* **Twitter:** Added `Debug Menu` patch ([7d5ca77](https://github.com/crimera/piko/commit/7d5ca77bf633a8dfcd8657d12b24bd076b2f5d11))
+* **Twitter:** Added `Hide Buy Premium Banner` patch ([7ba6419](https://github.com/crimera/piko/commit/7ba64198f289ffac2e3d397e5bf0f1137ba2aa2b))
+* **Twitter:** Added `Hide hidden replies` patch ([431acc4](https://github.com/crimera/piko/commit/431acc435675002c7d9f068b4fc3ebade2487db3))
+* **Twitter:** Added `Round off numbers` patch ([b1c1b13](https://github.com/crimera/piko/commit/b1c1b1361b55f08e2eba64e086943b30b2dc1212))
+* **Twitter:** Added ability to reset pref and flags ([4aaeb09](https://github.com/crimera/piko/commit/4aaeb09ce6c38c6513be6293140a7e7e0b796f28))
+
+
+### Updates
+
+* **Twitter:** Enable new patches by default ([19f9149](https://github.com/crimera/piko/commit/19f9149452fafae83584508fe7ae9d594fcf5543))
+
+
+### Refactors
+
+* **Twitter:** Combined `customize patch` into single class ([6c04aed](https://github.com/crimera/piko/commit/6c04aed5ec958cb86471d94dd1729c4ad7952c8d))
+* **Twitter:** Force enable `Enable app icon settings` patch ([ee605f1](https://github.com/crimera/piko/commit/ee605f11f8c95e6b8cf5d1d1cf2357593e1ea318))
+
+## [1.30.0-dev.8](https://github.com/crimera/piko/compare/v1.30.0-dev.7...v1.30.0-dev.8) (2024-05-22)
+
+
+### Features
+
+* Remove throw file ([86bff99](https://github.com/crimera/piko/commit/86bff993636928c67ca95dabeebcf1f5cc191a36))
+
+## [1.30.0-dev.7](https://github.com/crimera/piko/compare/v1.30.0-dev.6...v1.30.0-dev.7) (2024-05-22)
+
+
+### Bug Fixes
+
+* URL decode path to JAR containing spaces by osumatrix ([e6671ba](https://github.com/crimera/piko/commit/e6671ba4a8359db7aefa1ab20600e1f17144e002))
+* Use UrlDecoder API available in older Android versions ([d9e6374](https://github.com/crimera/piko/commit/d9e63740b7eb7c8a4f44abf6d59998ea14194346))
+
+## [1.30.0-dev.6](https://github.com/crimera/piko/compare/v1.30.0-dev.5...v1.30.0-dev.6) (2024-05-22)
+
+
+### Updates
+
+* **Twitter:** Enable new patches by default ([19f9149](https://github.com/crimera/piko/commit/19f9149452fafae83584508fe7ae9d594fcf5543))
+
+## [1.30.0-dev.5](https://github.com/crimera/piko/compare/v1.30.0-dev.4...v1.30.0-dev.5) (2024-05-22)
+
+
+### Features
+
+* **Twitter:** Added `Hide Buy Premium Banner` patch ([7ba6419](https://github.com/crimera/piko/commit/7ba64198f289ffac2e3d397e5bf0f1137ba2aa2b))
+* **Twitter:** Added `Hide hidden replies` patch ([431acc4](https://github.com/crimera/piko/commit/431acc435675002c7d9f068b4fc3ebade2487db3))
+
+## [1.30.0-dev.4](https://github.com/crimera/piko/compare/v1.30.0-dev.3...v1.30.0-dev.4) (2024-05-20)
+
+
+### Features
+
+* **Twitter:** Added `Debug Menu` patch ([7d5ca77](https://github.com/crimera/piko/commit/7d5ca77bf633a8dfcd8657d12b24bd076b2f5d11))
+
+## [1.30.0-dev.3](https://github.com/crimera/piko/compare/v1.30.0-dev.2...v1.30.0-dev.3) (2024-05-19)
+
+
+### Features
+
+* **Twitter:** Added `Customize Inline action Bar items` patch ([05b06f9](https://github.com/crimera/piko/commit/05b06f9fa4a183c9626acc7fda69c0bebdbae761))
+
+
+### Refactors
+
+* **Twitter:** Combined `customize patch` into single class ([6c04aed](https://github.com/crimera/piko/commit/6c04aed5ec958cb86471d94dd1729c4ad7952c8d))
+
+## [1.30.0-dev.2](https://github.com/crimera/piko/compare/v1.30.0-dev.1...v1.30.0-dev.2) (2024-05-18)
+
+
+### Features
+
+* **Twitter:** Added ability to reset pref and flags ([4aaeb09](https://github.com/crimera/piko/commit/4aaeb09ce6c38c6513be6293140a7e7e0b796f28))
+
+## [1.30.0-dev.1](https://github.com/crimera/piko/compare/v1.29.0...v1.30.0-dev.1) (2024-05-18)
+
+
+### Features
+
+* **Twitter:** Added `Round off numbers` patch ([b1c1b13](https://github.com/crimera/piko/commit/b1c1b1361b55f08e2eba64e086943b30b2dc1212))
+
+
+### Refactors
+
+* **Twitter:** Force enable `Enable app icon settings` patch ([ee605f1](https://github.com/crimera/piko/commit/ee605f11f8c95e6b8cf5d1d1cf2357593e1ea318))
+
 ## [1.29.0](https://github.com/crimera/piko/compare/v1.28.0...v1.29.0) (2024-05-18)
 
 

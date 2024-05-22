@@ -47,7 +47,7 @@ object DynamicColorPatch : ResourcePatch() {
             mapOf(
                 "ps__twitter_blue" to "@color/twitter_blue",
                 "ps__twitter_blue_pressed" to "@color/twitter_blue_fill_pressed",
-                "twitter_blue" to "@android:color/system_accent1_400",
+                "twitter_blue" to "@android:color/system_accent1_500",
                 "twitter_blue_fill_pressed" to "@android:color/system_accent1_300",
                 "twitter_blue_opacity_30" to "@android:color/system_accent1_100",
                 "twitter_blue_opacity_50" to "@android:color/system_accent1_200",
@@ -130,17 +130,17 @@ object DynamicColorPatch : ResourcePatch() {
             newStyle.setAttribute("parent", "@style/HorizonColorPaletteLight")
 
             val styleItems = mapOf(
-                "abstractColorCellBackground" to "@color/material_dynamic_primary95",
-                "abstractColorCellBackgroundTranslucent" to "@color/material_dynamic_primary95",
-                "abstractColorDeepGray" to "@color/gray_700",
-                "abstractColorDivider" to "@color/material_dynamic_secondary90",
-                "abstractColorFadedGray" to "@color/material_dynamic_secondary95",
-                "abstractColorFaintGray" to "@color/material_dynamic_secondary95",
-                "abstractColorHighlightBackground" to "@color/material_dynamic_secondary95",
-                "abstractColorLightGray" to "@color/gray_200",
+                "abstractColorCellBackground" to "@android:color/system_neutral2_50",
+                "abstractColorCellBackgroundTranslucent" to "@android:color/system_neutral2_50",
+                "abstractColorDeepGray" to "@color/gray_1000",
+                "abstractColorDivider" to "@android:color/system_accent1_400",
+                "abstractColorFadedGray" to "@color/material_dynamic_primary99",
+                "abstractColorFaintGray" to "@color/material_dynamic_primary99",
+                "abstractColorHighlightBackground" to "@android:color/system_accent1_10",
+                "abstractColorLightGray" to "@color/gray_1100",
                 "abstractColorLink" to "@color/twitter_blue",
-                "abstractColorMediumGray" to "@color/gray_300",
-                "abstractColorText" to "@color/gray_1100",
+                "abstractColorMediumGray" to "@color/gray_1100",
+                "abstractColorText" to "#0d1115",
                 "abstractColorUnread" to "@color/blue_0",
                 "abstractElevatedBackground" to "@color/white",
                 "abstractElevatedBackgroundShadow" to "@color/black_opacity_10"
