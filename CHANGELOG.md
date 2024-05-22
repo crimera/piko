@@ -1,3 +1,10 @@
+## [1.30.0-dev.8](https://github.com/crimera/piko/compare/v1.30.0-dev.7...v1.30.0-dev.8) (2024-05-22)
+
+
+### Features
+
+* Remove throw file ([86bff99](https://github.com/crimera/piko/commit/86bff993636928c67ca95dabeebcf1f5cc191a36))
+
 ## [1.30.0-dev.7](https://github.com/crimera/piko/compare/v1.30.0-dev.6...v1.30.0-dev.7) (2024-05-22)
 
 
