@@ -1,3 +1,10 @@
+## [1.30.0-dev.6](https://github.com/crimera/piko/compare/v1.30.0-dev.5...v1.30.0-dev.6) (2024-05-22)
+
+
+### Updates
+
+* **Twitter:** Enable new patches by default ([19f9149](https://github.com/crimera/piko/commit/19f9149452fafae83584508fe7ae9d594fcf5543))
+
 ## [1.30.0-dev.5](https://github.com/crimera/piko/compare/v1.30.0-dev.4...v1.30.0-dev.5) (2024-05-22)
 
 
