@@ -1,3 +1,11 @@
+## [1.30.0-dev.7](https://github.com/crimera/piko/compare/v1.30.0-dev.6...v1.30.0-dev.7) (2024-05-22)
+
+
+### Bug Fixes
+
+* URL decode path to JAR containing spaces by osumatrix ([e6671ba](https://github.com/crimera/piko/commit/e6671ba4a8359db7aefa1ab20600e1f17144e002))
+* Use UrlDecoder API available in older Android versions ([d9e6374](https://github.com/crimera/piko/commit/d9e63740b7eb7c8a4f44abf6d59998ea14194346))
+
 ## [1.30.0-dev.6](https://github.com/crimera/piko/compare/v1.30.0-dev.5...v1.30.0-dev.6) (2024-05-22)
 
 
