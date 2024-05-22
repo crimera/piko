@@ -1,3 +1,11 @@
+## [1.30.0-dev.5](https://github.com/crimera/piko/compare/v1.30.0-dev.4...v1.30.0-dev.5) (2024-05-22)
+
+
+### Features
+
+* **Twitter:** Added `Hide Buy Premium Banner` patch ([7ba6419](https://github.com/crimera/piko/commit/7ba64198f289ffac2e3d397e5bf0f1137ba2aa2b))
+* **Twitter:** Added `Hide hidden replies` patch ([431acc4](https://github.com/crimera/piko/commit/431acc435675002c7d9f068b4fc3ebade2487db3))
+
 ## [1.30.0-dev.4](https://github.com/crimera/piko/compare/v1.30.0-dev.3...v1.30.0-dev.4) (2024-05-20)
 
 
