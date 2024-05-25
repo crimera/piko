@@ -35,7 +35,7 @@ jobs:
       - name: Upload patches jar
         uses: actions/upload-artifact@v4
         with:
-          name: app
+          name: patches
           path: build/libs/*.jar
 
       - name: Setup Node.js
