@@ -32,6 +32,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew generatePatchesFiles clean
 
+      - name: Upload patches jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: app
+          path: build/libs/*.jar
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
