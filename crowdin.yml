@@ -1,5 +1,0 @@
-files:
-  - source: src/main/resources/twitter/settings/values/strings.xml
-    translation: src/main/resources/twitter/settings/values-ja/strings.xml
-bundles:
-  - 4
