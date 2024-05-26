@@ -158,7 +158,3 @@ object DynamicColorPatch : ResourcePatch() {
         }
     }
 }
-
-/**
-
-**/
