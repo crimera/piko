@@ -22,7 +22,7 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">メディアのリンクを共有</string>
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモーションポストを非表示</string>
-    <string name="piko_pref_hide_g_ads">Google広告を非表示</string>
+    <string name="piko_pref_hide_g_ads">Googleの広告を非表示</string>
     <string name="piko_pref_wtf_section">「Who to follow」を非表示</string>
     <string name="piko_pref_cts_section">「おすすめクリエイター」を非表示</string>
     <string name="piko_pref_ctj_section">「新しいコミュニティを見つける」を非表示</string>
@@ -96,5 +96,5 @@
     <string name="piko_pref_version_info">バージョン情報</string>
     <string name="piko_pref_patches">パッチ</string>
     <string name="piko_pref_included">適用済み</string>
-    <string name="piko_pref_excluded">除外されています</string>
+    <string name="piko_pref_excluded">除外済み</string>
 </resources>
