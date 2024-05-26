@@ -1,3 +1,10 @@
+## [1.30.1-dev.2](https://github.com/crimera/piko/compare/v1.30.1-dev.1...v1.30.1-dev.2) (2024-05-26)
+
+
+### Bug Fixes
+
+* tweet highlight color on hold ([#243](https://github.com/crimera/piko/issues/243)) ([b22ea42](https://github.com/crimera/piko/commit/b22ea426830b250abaa336e3b158dea34f82f6d6))
+
 ## [1.30.1-dev.1](https://github.com/crimera/piko/compare/v1.30.0...v1.30.1-dev.1) (2024-05-25)
 
 
