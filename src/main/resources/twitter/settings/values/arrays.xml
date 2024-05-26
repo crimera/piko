@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-
+<!-- Don't translate any of these -->
 <resources>
-<!-- Dont translate these -->
     <string-array name="piko_array_profiletabs">
         <item>@string/profile_tab_title_timeline</item>
         <item>@string/profile_tab_title_timeline_tweets_and_replies_sentence_case</item>
@@ -56,4 +55,14 @@
         <item>@string/grok_tab_title</item>
         <item>@string/product_media_label</item>
     </string-array>
+
+    <string-array name="piko_array_inlinetabs">
+        <item>@string/replies</item>
+        <item>@string/tweets_retweet</item>
+        <item>@string/button_action_like</item>
+        <item>@string/view_count_dialog_title</item>
+        <item>@string/bookmarks_title</item>
+        <item>@string/button_action_share</item>
+    </string-array>
+
 </resources>
