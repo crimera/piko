@@ -136,7 +136,7 @@ object DynamicColorPatch : ResourcePatch() {
                 "abstractColorDivider" to "@android:color/system_accent1_400",
                 "abstractColorFadedGray" to "@color/material_dynamic_primary99",
                 "abstractColorFaintGray" to "@color/material_dynamic_primary99",
-                "abstractColorHighlightBackground" to "@android:color/system_accent1_10",
+                "abstractColorHighlightBackground" to "@android:color/system_accent2_100",
                 "abstractColorLightGray" to "@color/gray_1100",
                 "abstractColorLink" to "@color/twitter_blue",
                 "abstractColorMediumGray" to "@color/gray_1100",
@@ -158,3 +158,7 @@ object DynamicColorPatch : ResourcePatch() {
         }
     }
 }
+
+/**
+
+**/

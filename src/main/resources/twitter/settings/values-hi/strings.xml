@@ -32,6 +32,7 @@
     <string name="piko_pref_pinned_posts_section">"अनुयायियों द्वारा टिप्पणी की गई पोस्ट्स" सेक्शन छुपाएं</string>
     <string name="piko_pref_hide_detailed_posts">विस्तृत पोस्ट छुपाएं (उत्तरों में)</string>
     <string name="piko_pref_hide_trends">प्रोमोट किए गए प्रवृत्तियों को छुपाएं</string>
+    <string name="piko_pref_hide_premium_prompt">"प्रीमियम खरीदें" अनुभाग छिपाएँ</string>
 
     <string name="piko_title_misc">विविध</string>
     <string name="piko_pref_chirp_font">चिरप फ़ॉन्ट सक्षम करें</string>
@@ -53,6 +54,7 @@
     <string name="piko_pref_unshorten_link">संक्षिप्त URL नहीं</string>
     <string name="piko_pref_round_off_numbers">संख्याओं को पूर्णांकित करें</string>
     <string name="piko_pref_round_off_numbers_desc">संख्याओं को K और M के रूप में पूर्णांकित करें</string>
+    <string name="piko_pref_debug_menu">ट्वीट्स के लिए डिबग मेनू सक्षम करें</string>
 
     <string name="piko_title_timeline">टाइमलाइन</string>
     <string name="piko_pref_disable_auto_timeline_scroll">लॉन्च पर ऑटो टाइमलाइन स्क्रॉल को अक्षम करें</string>
@@ -70,6 +72,7 @@
     <string name="piko_pref_show_poll_result_desc">मतदान किए बिना पोल के परिणाम देखें</string>
     <string name="piko_pref_hide_immersive_player">इमर्सिव प्लेयर छुपाएं</string>
     <string name="piko_pref_hide_immersive_player_desc">वीडियो प्लेयर में अधिक वीडियो के लिए ऊपर की ओर स्वाइप करें</string>
+    <string name="piko_pref_hide_hidden_replies">छुपे हुए उत्तर छिपाएँ</string>
 
     <string name="piko_title_customisation">कस्टमाइज़ेशन</string>
     <string name="piko_pref_customisation_profiletabs">छुपाने के लिए प्रोफ़ाइल टैब</string>
