@@ -7,7 +7,6 @@
     <string name="piko_pref_undo_posts_desc">ポストする前にポストを取り消す機能を有効化します</string>
     <string name="piko_pref_undo_posts_btn">ポストの取り消しの設定</string>
     <string name="piko_pref_icon_n_navbar_btn">アプリアイコンとナビゲーションバーのカスタマイズ設定</string>
-
     <string name="piko_title_download">ダウンロード</string>
     <string name="piko_pref_video_download">動画のダウンロードを有効化</string>
     <string name="piko_pref_download">ダウンロードディレクトリを変更</string>
@@ -21,10 +20,9 @@
     <string name="piko_pref_download_media_link_handle_always_ask">毎回尋ねる</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">メディアのリンクをコピー</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">メディアのリンクを共有</string>
-
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモーションポストを非表示</string>
-    <string name="piko_pref_hide_g_ads">Google広告を非表示</string>
+    <string name="piko_pref_hide_g_ads">Googleの広告を非表示</string>
     <string name="piko_pref_wtf_section">「Who to follow」を非表示</string>
     <string name="piko_pref_cts_section">「おすすめクリエイター」を非表示</string>
     <string name="piko_pref_ctj_section">「新しいコミュニティを見つける」を非表示</string>
@@ -32,7 +30,7 @@
     <string name="piko_pref_pinned_posts_section">「フォロー中のユーザーが固定」を非表示</string>
     <string name="piko_pref_hide_detailed_posts">関連ポスト欄を非表示 (返信内)</string>
     <string name="piko_pref_hide_trends">プロモーショントレンドを非表示</string>
-
+    <string name="piko_pref_hide_premium_prompt">「広告をなくす」の欄を非表示</string>
     <string name="piko_title_misc">その他</string>
     <string name="piko_pref_chirp_font">Chirp フォントを有効化</string>
     <string name="piko_pref_hide_fab">フローティングアクションボタンを非表示</string>
@@ -51,9 +49,9 @@
     <string name="piko_pref_selectable_text">選択可能なテキスト</string>
     <string name="piko_pref_clear_tracking_params">トラッキングパラメータを削除</string>
     <string name="piko_pref_unshorten_link">短縮URLを無効化</string>
-
     <string name="piko_pref_round_off_numbers">数字を四捨五入</string>
-    <string name="piko_pref_round_off_numbers_desc">K（千）やM（百万）のように数字を四捨五入します</string>
+    <string name="piko_pref_round_off_numbers_desc">例: 1,234 → 1.2K のように数字を四捨五入して表示します</string>
+    <string name="piko_pref_debug_menu">ポストのデバッグメニューを有効化</string>
     <string name="piko_title_timeline">タイムライン</string>
     <string name="piko_pref_disable_auto_timeline_scroll">起動時の自動タイムラインスクロールを無効化</string>
     <string name="piko_pref_hide_for_you">「おすすめ」タブを非表示</string>
@@ -70,15 +68,16 @@
     <string name="piko_pref_show_poll_result_desc">投票せずに投票結果を表示できるようにします</string>
     <string name="piko_pref_hide_immersive_player">イマーシブプレーヤーを非表示</string>
     <string name="piko_pref_hide_immersive_player_desc">動画再生時にスワイプして他の動画を表示する機能を無効化します。</string>
+    <string name="piko_pref_hide_hidden_replies">「非表示の返信」を非表示</string>
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">プロフィールタブを非表示</string>
     <string name="piko_pref_customisation_timelinetabs">タイムラインのタブ</string>
     <string name="piko_pref_customisation_timelinetabs_foryou">「フォロー中」タブを表示</string>
-    <string name="piko_pref_customisation_timelinetabs_following">「おすすめ」タブを表示</string>
+    <string name="piko_pref_customisation_timelinetabs_following">「おすすめ」タブを非表示</string>
     <string name="piko_pref_customisation_timelinetabs_both">両方とも表示</string>
     <string name="piko_pref_customisation_sidebartabs">サイドバーの各メニューを非表示</string>
     <string name="piko_pref_customisation_navbartabs">ナビゲーションバーの各タブを非表示</string>
-
+    <string name="piko_pref_customisation_inlinetabs">サイドバーの各メニューを非表示</string>
     <string name="piko_title_backup">バックアップと復元</string>
     <string name="piko_pref_export">設定をエクスポート</string>
     <string name="piko_pref_export_flags">機能フラグをエクスポート</string>
@@ -91,13 +90,11 @@
     <string name="piko_pref_import_saved">インポートは成功しました</string>
     <string name="piko_pref_import_failed">エラー: 設定のインポートに失敗しました</string>
     <string name="piko_pref_import_no_uri">エラー: ファイルが選択されていません</string>
-
     <string name="piko_title_about">アプリに関する情報</string>
     <string name="piko_pref_app_version">アプリのバージョン</string>
     <string name="piko_pref_patch_info">適用されたパッチに関する情報</string>
     <string name="piko_pref_version_info">バージョン情報</string>
     <string name="piko_pref_patches">パッチ</string>
     <string name="piko_pref_included">適用済み</string>
-    <string name="piko_pref_excluded">除外されています</string>
-    
+    <string name="piko_pref_excluded">除外済み</string>
 </resources>
