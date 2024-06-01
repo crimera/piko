@@ -2,7 +2,7 @@
 revanced-patcher = "19.2.0"
 smali = "3.0.5"
 guava = "33.1.0-jre"
-gson = "2.10.1"
+gson = "2.11.0"
 
 [libraries]
 revanced-patcher = { module = "app.revanced:revanced-patcher", version.ref = "revanced-patcher" }
