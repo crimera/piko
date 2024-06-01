@@ -8,6 +8,7 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
 import crimera.patches.twitter.link.unshorten.fingerprints.JsonObjectMapperFingerprint
+import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 @Patch(
@@ -20,7 +21,7 @@ object NoShortenedUrlPatch : BytecodePatch(
     setOf(JsonObjectMapperFingerprint)
 ) {
     private const val METHOD_REFERENCE =
-        "Lapp/revanced/integrations/twitter/patches/links/UnshortenUrlsPatch;->" +
+        "${SettingsPatch.PATCHES_DESCRIPTOR}/links/UnshortenUrlsPatch;->" +
                 "unshort(Lcom/twitter/model/json/core/JsonUrlEntity;)Lcom/twitter/model/json/core/JsonUrlEntity;"
 
     override fun execute(context: BytecodeContext) {
