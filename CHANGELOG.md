@@ -1,3 +1,23 @@
+## [1.30.1](https://github.com/crimera/piko/compare/v1.30.0...v1.30.1) (2024-06-01)
+
+
+### Bug Fixes
+
+* tweet highlight color on hold ([#243](https://github.com/crimera/piko/issues/243)) ([b22ea42](https://github.com/crimera/piko/commit/b22ea426830b250abaa336e3b158dea34f82f6d6))
+* **Twitter:** Fix `Customize profile tabs` crash after `10.43` ([a38d621](https://github.com/crimera/piko/commit/a38d6213e06404fde21f6b5b8eddfcdfe8edd73e))
+
+
+### Updates
+
+* Translations ([d3ae8ec](https://github.com/crimera/piko/commit/d3ae8ec55dced8d7d09146c224d332f72414382a))
+* **Translations:** update simplified chinese translation ([3e5a8fd](https://github.com/crimera/piko/commit/3e5a8fdd07a7f7646e860a76fc81165b67b211bf))
+
+
+### Refactors
+
+* **Twitter:** Added `No shortened URL` as a settings toggle ([ea33a30](https://github.com/crimera/piko/commit/ea33a308c277e3e40e085112e970406cee64f0cd))
+* **Twitter:** Renamed patch `Remove Buy Premium Banner` to `Remove message prompts Banner` ([45dbad8](https://github.com/crimera/piko/commit/45dbad85abb22e0ab74d1dd0bcd977c4aeef3349))
+
 ## [1.30.1-dev.4](https://github.com/crimera/piko/compare/v1.30.1-dev.3...v1.30.1-dev.4) (2024-06-01)
 
 
