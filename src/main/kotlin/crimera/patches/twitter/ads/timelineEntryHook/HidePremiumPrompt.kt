@@ -8,7 +8,7 @@ import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 @Patch(
-    name = "Remove \"Buy Premium\" Banner",
+    name = "Remove message prompts Banner",
     dependencies = [SettingsPatch::class,TimelineEntryHookPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = true

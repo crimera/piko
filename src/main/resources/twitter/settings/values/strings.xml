@@ -32,7 +32,7 @@
     <string name="piko_pref_pinned_posts_section">Hide "Pinned posts by followers" section</string>
     <string name="piko_pref_hide_detailed_posts">Hide detailed posts (in replies)</string>
     <string name="piko_pref_hide_trends">Hide promoted trends</string>
-    <string name="piko_pref_hide_premium_prompt">Hide "Buy premium" section</string>
+    <string name="piko_pref_hide_premium_prompt">Hide message prompts</string>
 
     <string name="piko_title_misc">Misc</string>
     <string name="piko_pref_chirp_font">Enable chirp font</string>
@@ -52,6 +52,7 @@
     <string name="piko_pref_selectable_text">Selectable text</string>
     <string name="piko_pref_clear_tracking_params">Clear tracking params</string>
     <string name="piko_pref_unshorten_link">No shortened URL</string>
+    <string name="piko_pref_unshorten_link_desc">Get rid of t.co short urls</string>
     <string name="piko_pref_round_off_numbers">Round off numbers</string>
     <string name="piko_pref_round_off_numbers_desc">Rounds off number as K and M </string>
     <string name="piko_pref_debug_menu">Enable debug menu for posts</string>

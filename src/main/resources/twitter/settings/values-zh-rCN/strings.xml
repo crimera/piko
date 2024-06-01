@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="piko_title_settings">Piko 模组设置</string>
+    <string name="piko_title_feature_flags">功能标志</string>
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">启用阅读模式</string>
     <string name="piko_pref_reader_mode_desc">在长主题贴中启用阅读模式</string>
@@ -33,6 +34,7 @@
     <string name="piko_pref_pinned_posts_section">隐藏已由你关注的人置顶</string>
     <string name="piko_pref_hide_detailed_posts">隐藏帖子回复中的发现更多</string>
     <string name="piko_pref_hide_trends">隐藏推广趋势</string>
+    <string name="piko_pref_hide_premium_prompt">隐藏订阅 Premium+ 推广</string>
 
     <string name="piko_title_misc">杂项</string>
     <string name="piko_pref_chirp_font">启用 chirp 字体</string>
@@ -52,6 +54,9 @@
     <string name="piko_pref_selectable_text">可选文本</string>
     <string name="piko_pref_clear_tracking_params">清除跟踪参数</string>
     <string name="piko_pref_unshorten_link">没有缩短的 URL</string>
+    <string name="piko_pref_round_off_numbers">数字简化显示</string>
+    <string name="piko_pref_round_off_numbers_desc">将较大数字进行四舍五入，并简化为 K 和 M 单位显示</string>
+    <string name="piko_pref_debug_menu">启用帖子的 Debug 菜单</string>
 
     <string name="piko_title_timeline">时间线</string>
     <string name="piko_pref_disable_auto_timeline_scroll">启动时保持时间线位置不变</string>
@@ -69,23 +74,25 @@
     <string name="piko_pref_show_poll_result_desc">无需投票即可查看投票结果</string>
     <string name="piko_pref_hide_immersive_player">隐藏视频滑动切换</string>
     <string name="piko_pref_hide_immersive_player_desc">在视频播放器中移除向上滑动查看更多视频的功能</string>
+    <string name="piko_pref_hide_hidden_replies">隐藏帖子中的隐藏回复图标</string>
 
     <string name="piko_title_customisation">自定义</string>
     <string name="piko_pref_customisation_profiletabs">隐藏个人资料标签页</string>
-    <string name="piko_pref_customisation_timelinetabs">时间线标签页</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">隐藏为你推荐</string>
-    <string name="piko_pref_customisation_timelinetabs_following">隐藏正在关注</string>
+    <string name="piko_pref_customisation_timelinetabs">隐藏时间线标签页</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">为你推荐</string>
+    <string name="piko_pref_customisation_timelinetabs_following">正在关注</string>
     <string name="piko_pref_customisation_timelinetabs_both">显示两者</string>
     <string name="piko_pref_customisation_sidebartabs">隐藏侧滑栏项目</string>
     <string name="piko_pref_customisation_navbartabs">隐藏导航栏项目</string>
+    <string name="piko_pref_customisation_inlinetabs">隐藏互动栏项目</string>
 
     <string name="piko_title_backup">备份和恢复</string>
-    <string name="piko_pref_export">导出配置</string>
+    <string name="piko_pref_export">导出配置文件</string>
     <string name="piko_pref_export_flags">导出功能标志</string>
     <string name="piko_pref_export_saved">导出成功</string>
     <string name="piko_pref_export_failed">错误：导出配置失败</string>
     <string name="piko_pref_export_no_uri">错误：未提供保存位置</string>
-    <string name="piko_pref_import">导入配置</string>
+    <string name="piko_pref_import">导入配置文件</string>
     <string name="piko_pref_import_flags">导入功能标志</string>
     <string name="piko_pref_import_warn">建议重新启动应用以确保更改生效</string>
     <string name="piko_pref_import_saved">导入成功</string>
