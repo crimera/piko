@@ -56,25 +56,39 @@ object CustomiseProfileTabsPatch:BytecodePatch(
 
         method.addInstructions(returnObj_loc,METHOD)
 
-        val last_if_eqz = instructions.last { it.opcode == Opcode.IF_EQZ }.location.index
-        val r1 = method.getInstruction<OneRegisterInstruction>(last_if_eqz).registerA
+        val last_invoke_static = instructions.last { it.opcode == Opcode.INVOKE_STATIC }
 
         val last_if_nez_loc = instructions.last { it.opcode == Opcode.IF_NEZ }.location.index
         val r2 = method.getInstruction<OneRegisterInstruction>(last_if_nez_loc).registerA
 
-        //it works don't ask me how
-        method.removeInstruction(last_if_eqz)
-        method.removeInstruction(last_if_eqz)
-        method.removeInstruction(last_if_eqz)
+        val op = instructions.get(last_if_nez_loc-1).opcode
 
-        method.addInstructionsWithLabels(last_if_eqz,
-            """
-                if-eqz v$r1, :check2
-                const/4 v$r2, 0x1
-                :check2
-                if-nez v$r2, :check1
-            """.trimIndent(), ExternalLabel("check1",instructions.last { it.opcode == Opcode.INVOKE_STATIC })
-        )
+        if(op == Opcode.CONST_4){ //before 10.43
+            val last_if_eqz = instructions.last { it.opcode == Opcode.IF_EQZ }.location.index
+            val r1 = method.getInstruction<OneRegisterInstruction>(last_if_eqz).registerA
+
+            //it works don't ask me how
+            method.removeInstruction(last_if_eqz)
+            method.removeInstruction(last_if_eqz)
+            method.removeInstruction(last_if_eqz)
+
+            method.addInstructionsWithLabels(last_if_eqz,
+                """
+                    if-eqz v$r1, :check2
+                    const/4 v$r2, 0x1
+                    :check2
+                    if-nez v$r2, :check1
+                """.trimIndent(), ExternalLabel("check1",last_invoke_static)
+            )
+        }else{ //after 10.43
+            method.removeInstruction(last_if_nez_loc)
+
+            method.addInstructionsWithLabels(last_if_nez_loc,
+                """
+                    if-nez v$r2, :check1
+                """.trimIndent(), ExternalLabel("check1",last_invoke_static)
+            )
+        }
 
         SettingsStatusLoadFingerprint.enableSettings("profileTabCustomisation")
         //end
