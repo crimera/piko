@@ -65,4 +65,16 @@
         <item>@string/button_action_share</item>
     </string-array>
 
+    <string-array name="piko_array_ads_hooks">
+        <item>@string/piko_pref_hide_promoted_posts</item>
+        <item>@string/piko_pref_hide_g_ads</item>
+        <item>@string/piko_pref_wtf_section</item>
+        <item>@string/piko_pref_cts_section</item>
+        <item>@string/piko_pref_ctj_section</item>
+        <item>@string/piko_pref_ryb_section</item>
+        <item>@string/piko_pref_pinned_posts_section</item>
+        <item>@string/piko_pref_hide_detailed_posts</item>
+        <item>@string/piko_pref_hide_premium_prompt</item>
+    </string-array>
+
 </resources>
