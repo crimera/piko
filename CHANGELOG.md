@@ -1,3 +1,15 @@
+## [1.31.0-dev.1](https://github.com/crimera/piko/compare/v1.30.1...v1.31.0-dev.1) (2024-06-02)
+
+
+### Features
+
+* **Twitter:** Added `Delete from database` patch ([d785660](https://github.com/crimera/piko/commit/d7856602786d3fb9d7a8721f05d80be97bc4fd3b))
+
+
+### Updates
+
+* Enable `Customize profile tabs` patch by default ([a8543bf](https://github.com/crimera/piko/commit/a8543bf0d2eebe8a1580870b95c75a890e845ff4))
+
 ## [1.30.1](https://github.com/crimera/piko/compare/v1.30.0...v1.30.1) (2024-06-01)
 
 
