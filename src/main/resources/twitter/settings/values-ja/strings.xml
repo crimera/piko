@@ -65,7 +65,7 @@
     <string name="piko_title_timeline">タイムライン</string>
     <string name="piko_pref_disable_auto_timeline_scroll">起動時の自動タイムラインスクロールを無効化</string>
     <string name="piko_pref_hide_for_you">「おすすめ」タブを非表示</string>
-    <string name="piko_pref_hide_live_threads">「おすすめ」タブを非表示</string>
+    <string name="piko_pref_hide_live_threads">ライブスレッドを非表示</string>
     <string name="piko_pref_hide_live_threads_desc">上部のライブスレッドを非表示にします</string>
     <string name="piko_pref_hide_banner">バナーを非表示</string>
     <string name="piko_pref_hide_banner_desc">「新しい投稿」を非表示</string>
