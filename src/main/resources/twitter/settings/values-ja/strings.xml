@@ -2,7 +2,7 @@
 <resources>
     <string name="piko_title_premium">プレミアム</string>
     <string name="piko_pref_reader_mode">リーダーモードを有効化</string>
-    <string name="piko_pref_reader_mode_desc">長いスレッドでリーダーモードを有効にします</string>
+    <string name="piko_pref_reader_mode_desc">長いスレッドで「リーダーモード」を有効化します</string>
     <string name="piko_pref_undo_posts">ポストの取り消しを有効化</string>
     <string name="piko_pref_undo_posts_desc">ポストする前にポストを取り消す機能を有効化します</string>
     <string name="piko_pref_undo_posts_btn">ポストの取り消しの設定</string>
@@ -20,6 +20,7 @@
     <string name="piko_pref_download_media_link_handle_always_ask">毎回尋ねる</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">メディアのリンクをコピー</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">メディアのリンクを共有</string>
+    <string name="piko_pref_hide">%s を非表示</string>
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモーションポストを非表示</string>
     <string name="piko_pref_hide_g_ads">Googleの広告を非表示</string>
@@ -31,7 +32,10 @@
     <string name="piko_pref_hide_detailed_posts">関連ポスト欄を非表示 (返信内)</string>
     <string name="piko_pref_hide_trends">プロモーショントレンドを非表示</string>
     <string name="piko_pref_hide_premium_prompt">「プレミアムを購入」セクションを非表示</string>
-
+    <string name="piko_pref_del_from_db">データベースから項目を削除</string>
+    <string name="piko_pref_db_not_found">データベースが見つかりません</string>
+    <string name="piko_pref_db_not_open">データベースが開かれていません</string>
+    <string name="piko_pref_db_del_items">削除した項目</string>
     <string name="piko_title_misc">その他</string>
     <string name="piko_pref_chirp_font">Chirp フォントを有効化</string>
     <string name="piko_pref_hide_fab">フローティングアクションボタンを非表示</string>
@@ -50,6 +54,7 @@
     <string name="piko_pref_selectable_text">選択可能なテキスト</string>
     <string name="piko_pref_clear_tracking_params">トラッキングパラメータを削除</string>
     <string name="piko_pref_unshorten_link">短縮URLを無効化</string>
+    <string name="piko_pref_unshorten_link_desc">t.coの短縮URLを取り除く</string>
     <string name="piko_pref_round_off_numbers">数字を短く表記</string>
     <string name="piko_pref_round_off_numbers_desc">65,536を6.5万のように数字を短く表記します</string>
     <string name="piko_pref_debug_menu">ポストのデバッグメニューを表示</string>
@@ -73,13 +78,12 @@
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">プロフィールタブを非表示</string>
     <string name="piko_pref_customisation_timelinetabs">タイムラインのタブ</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">「フォロー中」タブを表示</string>
-    <string name="piko_pref_customisation_timelinetabs_following">「おすすめ」タブを非表示</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">「おすすめ」タブを非表示</string>
+    <string name="piko_pref_customisation_timelinetabs_following">「フォロー中」タブを非表示</string>
     <string name="piko_pref_customisation_timelinetabs_both">両方とも表示</string>
     <string name="piko_pref_customisation_sidebartabs">サイドバーの各メニューを非表示</string>
     <string name="piko_pref_customisation_navbartabs">ナビゲーションバーの各タブを非表示</string>
     <string name="piko_pref_customisation_inlinetabs">非表示にするインラインバーの項目</string>
-
     <string name="piko_title_backup">バックアップと復元</string>
     <string name="piko_pref_export">設定をエクスポート</string>
     <string name="piko_pref_export_flags">機能フラグをエクスポート</string>
