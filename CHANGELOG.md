@@ -1,3 +1,10 @@
+## [1.31.0-dev.2](https://github.com/crimera/piko/compare/v1.31.0-dev.1...v1.31.0-dev.2) (2024-06-04)
+
+
+### Refactors
+
+* **Twitter:** Major string changes ([f22fdf0](https://github.com/crimera/piko/commit/f22fdf086184f71447d2696461d76914dbef731d))
+
 ## [1.31.0-dev.1](https://github.com/crimera/piko/compare/v1.30.1...v1.31.0-dev.1) (2024-06-02)
 
 
