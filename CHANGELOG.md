@@ -1,3 +1,10 @@
+## [1.31.0-dev.3](https://github.com/crimera/piko/compare/v1.31.0-dev.2...v1.31.0-dev.3) (2024-06-06)
+
+
+### Features
+
+* **all:** Added `Export all activities` patch from ReVanced ([7cc405f](https://github.com/crimera/piko/commit/7cc405f7e900b85aaa172e8693cd4ca2e790451d))
+
 ## [1.31.0-dev.2](https://github.com/crimera/piko/compare/v1.31.0-dev.1...v1.31.0-dev.2) (2024-06-04)
 
 
