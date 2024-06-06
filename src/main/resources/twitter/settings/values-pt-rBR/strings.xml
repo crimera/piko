@@ -74,10 +74,10 @@
     <string name="piko_pref_show_poll_result">Exibir resultados da enquete</string>
     <string name="piko_pref_show_poll_result_desc">Veja os resultados da enquete sem votar</string>
     <string name="piko_pref_hide_immersive_player">reprodutor imersivo</string>
-    <string name="piko_pref_hide_immersive_player_desc">Remove deslizar para cima para ver mais vídeos no reprodutor de vídeo</string>
+    <string name="piko_pref_hide_immersive_player_desc">Remove o deslizar para cima para ver mais vídeos no reprodutor de vídeo</string>
     <string name="piko_pref_hide_hidden_replies">respostas ocultas</string>
 
-    <string name="piko_title_customisation">Custumização</string>
+    <string name="piko_title_customisation">Customização</string>
     <string name="piko_pref_customisation_profiletabs">Guias do perfil para ocultar</string>
     <string name="piko_pref_customisation_timelinetabs">Guias da linha do tempo</string>
     <string name="piko_pref_customisation_timelinetabs_foryou">Remover \"Para você\"</string>
