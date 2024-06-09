@@ -1,3 +1,10 @@
+## [1.31.0-dev.4](https://github.com/crimera/piko/compare/v1.31.0-dev.3...v1.31.0-dev.4) (2024-06-09)
+
+
+### Features
+
+* **Twitter:** Added tab redirects hook (for Bookmark Navbar) ([f01b418](https://github.com/crimera/piko/commit/f01b418fcc13e9fe54d845eab3bea1cd62687f9f))
+
 ## [1.31.0-dev.3](https://github.com/crimera/piko/compare/v1.31.0-dev.2...v1.31.0-dev.3) (2024-06-06)
 
 
