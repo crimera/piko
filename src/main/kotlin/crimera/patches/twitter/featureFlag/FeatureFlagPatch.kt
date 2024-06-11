@@ -10,9 +10,7 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.patches.shared.misc.integrations.fingerprint.IntegrationsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
-import crimera.patches.twitter.featureFlag.fingerprints.CustomAdapterFingerprint
-import crimera.patches.twitter.featureFlag.fingerprints.FeatureFlagFingerprint
-import crimera.patches.twitter.featureFlag.fingerprints.RecyclerViewGetCountFingerprint
+import crimera.patches.twitter.featureFlag.fingerprints.*
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
@@ -29,7 +27,9 @@ object FeatureFlagPatch : BytecodePatch(
         IntegrationsUtilsFingerprint,
         SettingsStatusLoadFingerprint,
         CustomAdapterFingerprint,
-        RecyclerViewGetCountFingerprint
+        GetCountFingerprint,
+        OnCreateViewHolderFingerprint,
+        OnBindViewHolderFingerprint
     )
 ) {
     override fun execute(context: BytecodeContext) {
@@ -54,10 +54,18 @@ object FeatureFlagPatch : BytecodePatch(
         )
 
         // Change the getCount override method name
-        val getCountMethod = CustomAdapterFingerprint.result?.mutableMethod
+        val customAdapter = CustomAdapterFingerprint.result
             ?: throw PatchException("getCount Method of CustomAdapter not found")
 
-        getCountMethod.name = RecyclerViewGetCountFingerprint.result?.method?.name
+        customAdapter.mutableMethod.name = GetCountFingerprint.result?.method?.name
             ?: throw PatchException("getCount Method of RecyclerView not found")
+
+        // onCreateViewHolder
+        customAdapter.mutableClass.methods.first { it.name == "onCreateViewHolder" }.name = OnCreateViewHolderFingerprint.result?.method?.name
+            ?: throw PatchException("onCreateViewHolder Method of RecyclerView not found")
+
+        // onBindViewHolder
+        customAdapter.mutableClass.methods.first { it.name == "onBindViewHolder" }.name = OnBindViewHolderFingerprint.result?.method?.name
+            ?: throw PatchException("onBindViewHolder Method of RecyclerView not found")
     }
 }
