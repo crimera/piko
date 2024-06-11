@@ -18,7 +18,6 @@ import crimera.patches.twitter.timeline.live.fingerprints.HideLiveThreadsFingerp
     name = "Hide Live Threads",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false
 )
 @Suppress("unused")
 object HideLiveThreadsPatch :  BytecodePatch(
