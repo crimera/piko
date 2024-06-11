@@ -1,3 +1,15 @@
+## [1.31.0-dev.5](https://github.com/crimera/piko/compare/v1.31.0-dev.4...v1.31.0-dev.5) (2024-06-11)
+
+
+### Bug Fixes
+
+* Fix crash when opening feature flags ([2b1484d](https://github.com/crimera/piko/commit/2b1484d6c291a997283d98358cff98b0195acfed))
+
+
+### Updates
+
+* Enable `Hide Live Threads` patch by default ([b9862b5](https://github.com/crimera/piko/commit/b9862b50b97741721448c0ea667769b0024961c9))
+
 ## [1.31.0-dev.4](https://github.com/crimera/piko/compare/v1.31.0-dev.3...v1.31.0-dev.4) (2024-06-09)
 
 
