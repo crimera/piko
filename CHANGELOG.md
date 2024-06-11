@@ -1,3 +1,10 @@
+## [1.31.1-dev.1](https://github.com/crimera/piko/compare/v1.31.0...v1.31.1-dev.1) (2024-06-11)
+
+
+### Updates
+
+* Improved the hooking of the recyclerview methods. also fixes the crash when opening feature flags. ([25e5bc4](https://github.com/crimera/piko/commit/25e5bc422c3893747b8fadd0744833a4ecb7b6ea))
+
 ## [1.31.0](https://github.com/crimera/piko/compare/v1.30.2...v1.31.0) (2024-06-11)
 
 
