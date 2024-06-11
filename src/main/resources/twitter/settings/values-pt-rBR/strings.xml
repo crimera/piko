@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="piko_title_settings">Configurações Piko</string>
-	
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">Ativar modo leitor</string>
     <string name="piko_pref_reader_mode_desc">Ativa o "modo leitor" em threads longos</string>
-    <string name="piko_pref_undo_posts">Ativar desfazer post</string>
-    <string name="piko_pref_undo_posts_desc">Permite desfazer posts antes de postar</string>
-    <string name="piko_pref_undo_posts_btn">Configurações de desfazer post</string>
+    <string name="piko_pref_undo_posts">Ativar desfazer postagens</string>
+    <string name="piko_pref_undo_posts_desc">Permite desfazer postagens antes de postar</string>
+    <string name="piko_pref_undo_posts_btn">Configurações de desfazer postagens</string>
     <string name="piko_pref_icon_n_navbar_btn">Configurações de personalização do ícone do aplicativo e da barra de navegação</string>
 
     <string name="piko_title_download">Download</string>
@@ -16,7 +14,7 @@
     <string name="piko_pref_download_path">Pasta pública</string>
     <string name="piko_pref_download_path_desc">A pasta pública a ser usada para downloads de vídeo</string>
     <string name="piko_pref_download_folder">Subpasta de download</string>
-    <string name="piko_pref_download_folder_desc">A subpasta para baixar vídeos ([Pasta pública]/[Subpasta])</string>
+    <string name="piko_pref_download_folder_desc">A subpasta para download de vídeos ([Pasta pública]/[Subpasta])</string>
     <string name="piko_pref_download_media_link_handle">Preferência de download</string>
     <string name="piko_pref_download_media_link_handle_download">Download direto</string>
     <string name="piko_pref_download_media_link_handle_copy_link">Cópia direta do link de mídia</string>
@@ -25,24 +23,27 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">Compartilhar link de mídia</string>
 
     <string name="piko_title_ads">Anúncios</string>
-    <string name="piko_pref_hide_promoted_posts">Ocultar postagens promovidas</string>
-    <string name="piko_pref_hide_g_ads">Ocultar anúncios do Google</string>
-    <string name="piko_pref_wtf_section">Ocultar a seção "Quem seguir"</string>
-    <string name="piko_pref_cts_section">Ocultar a seção "Criadores para assinar"</string>
-    <string name="piko_pref_ctj_section">Ocultar a seção "Comunidade para participar"</string>
-    <string name="piko_pref_ryb_section">Ocultar a seção "Revisar seu favorito"</string>
-    <string name="piko_pref_pinned_posts_section">Ocultar a seção "Postagens fixadas por seguidores"</string>
-    <string name="piko_pref_hide_detailed_posts">Ocultar postagens detalhadas (nas respostas)</string>
-    <string name="piko_pref_hide_trends">Ocultar tendências promovidas</string>
-    <string name="piko_pref_hide_premium_prompt">Ocultar a seção "Comprar premium"</string>
+    <string name="piko_pref_hide_promoted_posts">Postagens promovidas</string>
+    <string name="piko_pref_hide_g_ads">Anúncios do Google</string>
+    <string name="piko_pref_wtf_section">Seção "Quem seguir"</string>
+    <string name="piko_pref_cts_section">Seção "Criadores para assinar"</string>
+    <string name="piko_pref_ctj_section">Seção "Comunidade para participar"</string>
+    <string name="piko_pref_ryb_section">Seção "Revisar seu favorito"</string>
+    <string name="piko_pref_pinned_posts_section">Seção "Postagens fixadas por seguidores"</string>
+    <string name="piko_pref_hide_detailed_posts">Postagens detalhadas (em respostas)</string>
+    <string name="piko_pref_hide_trends">Tendências promovidas</string>
+    <string name="piko_pref_hide_premium_prompt">Solicitações de mensagens</string>
+    <string name="piko_pref_del_from_db">Excluir entradas do banco de dados</string>
+    <string name="piko_pref_db_not_found">Banco de dados não encontrado</string>
+    <string name="piko_pref_db_not_open">Banco de dados não está aberto</string>
+    <string name="piko_pref_db_del_items">Itens deletados</string>
 
     <string name="piko_title_misc">Diversos</string>
     <string name="piko_pref_chirp_font">Ativar fonte chirp</string>
-    <string name="piko_pref_hide_fab">Ocultar botão de ação flutuante</string>
-    <string name="piko_pref_hide_fab_menu">Ocultar menu flutuante do botão de ação</string>
-    <string name="piko_pref_rec_users">Ocultar usuários recomendados</string>
-    <string name="piko_pref_comm_notes">Ocultar notas da comunidade</string>
-    <string name="piko_pref_hide_view_count">Ocultar contagem de visualizações</string>
+    <string name="piko_pref_hide_fab">botão de ação flutuante</string>
+    <string name="piko_pref_hide_fab_menu">menu flutuante do botão de ação</string>
+    <string name="piko_pref_rec_users">usuários recomendados</string>
+    <string name="piko_pref_hide_view_count">contagem de visualizações</string>
     <string name="piko_pref_custom_share_domain">Domínio de compartilhamento personalizado</string>
     <string name="piko_pref_custom_share_domain_desc">O domínio a ser usado ao compartilhar tweets</string>
     <string name="piko_pref_browser_chooser">Use o seletor de navegador</string>
@@ -50,61 +51,59 @@
     <string name="piko_pref_feature_flags">Feature flags</string>
     <string name="piko_pref_edit_flag_title">Editar flag</string>
     <string name="piko_pref_add_flag_title">Adicionar flag</string>
-    <string name="piko_pref_show_sensitive_media">Mostrar mídia sensível</string>
+    <string name="piko_pref_show_sensitive_media">Exibir mídia sensível</string>
     <string name="piko_pref_selectable_text">Texto selecionável</string>
     <string name="piko_pref_clear_tracking_params">Limpar parâmetros de rastreamento</string>
     <string name="piko_pref_unshorten_link">Não abreviar URL</string>
+    <string name="piko_pref_unshorten_link_desc">Livre-se dos URLs curtos t.co</string>
     <string name="piko_pref_round_off_numbers">Arredondar números</string>
     <string name="piko_pref_round_off_numbers_desc">Arredonda o número como K e M</string>
     <string name="piko_pref_debug_menu">Ativar menu de depuração para postagens</string>
 
     <string name="piko_title_timeline">Linha do tempo</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Desativar rolagem automática da linha do tempo na inicialização</string>
-    <string name="piko_pref_hide_for_you">Ocultar aba "Para você"</string>
-    <string name="piko_pref_hide_live_threads">Ocultar tópicos ativos</string>
+    <string name="piko_pref_hide_live_threads">tópicos ao vivo</string>
     <string name="piko_pref_hide_live_threads_desc">Oculta a seção ao vivo na linha do tempo</string>
-    <string name="piko_pref_hide_banner">Ocultar banner</string>
-    <string name="piko_pref_hide_banner_desc">Oculta a pílula de novas postagens</string>
-    <string name="piko_pref_hide_bmk_timeline">Ocultar ícone de items salvos na linha do tempo</string>
-    <string name="piko_pref_force_translate">Forçar ativar tradução</string>
+    <string name="piko_pref_hide_banner">banner</string>
+    <string name="piko_pref_hide_banner_desc">pílula de novas postagens</string>
+    <string name="piko_pref_hide_bmk_timeline">ícone de items salvos na linha do tempo</string>
+    <string name="piko_pref_force_translate">Forçar ativação de tradução</string>
     <string name="piko_pref_force_translate_desc">Obtenha a opção de tradução para todas as postagens</string>
-    <string name="piko_pref_hide_quick_promote">Ocultar botão de promoção</string>
+    <string name="piko_pref_hide_quick_promote">botão promover</string>
     <string name="piko_pref_hide_quick_promote_desc">Oculta o botão de promoção em postagens próprias</string>
-    <string name="piko_pref_show_poll_result">Mostrar resultados da enquete</string>
+    <string name="piko_pref_show_poll_result">Exibir resultados da enquete</string>
     <string name="piko_pref_show_poll_result_desc">Veja os resultados da enquete sem votar</string>
-    <string name="piko_pref_hide_immersive_player">Desativar o player imersivo</string>
-    <string name="piko_pref_hide_immersive_player_desc">Remove o deslizar para cima para ver mais vídeos no player de vídeo</string>
-    <string name="piko_pref_hide_hidden_replies">Ocultar respostas ocultas</string>
-    
+    <string name="piko_pref_hide_immersive_player">reprodutor imersivo</string>
+    <string name="piko_pref_hide_immersive_player_desc">Remove o deslizar para cima para ver mais vídeos no reprodutor de vídeo</string>
+    <string name="piko_pref_hide_hidden_replies">respostas ocultas</string>
+
     <string name="piko_title_customisation">Customização</string>
-    <string name="piko_pref_customisation_profiletabs">Guias de perfil para ocultar</string>
+    <string name="piko_pref_customisation_profiletabs">Guias do perfil para ocultar</string>
     <string name="piko_pref_customisation_timelinetabs">Guias da linha do tempo</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">Ocultar \"Para você\"</string>
-    <string name="piko_pref_customisation_timelinetabs_following">Ocultar \"Seguindo\"</string>
-    <string name="piko_pref_customisation_timelinetabs_both">Mostrar ambos</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">Remover \"Para você\"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">Remover \"Seguindo\"</string>
+    <string name="piko_pref_customisation_timelinetabs_both">Exibir ambos</string>
     <string name="piko_pref_customisation_sidebartabs">Itens da barra lateral para ocultar</string>
     <string name="piko_pref_customisation_navbartabs">Itens da barra de navegação para ocultar</string>
     <string name="piko_pref_customisation_inlinetabs">Itens da barra embutida para ocultar</string>
-    
+
     <string name="piko_title_backup">Backup e restauração</string>
-    <string name="piko_pref_export">Exportar preferências</string>
-    <string name="piko_pref_export_flags">Exportar feature flags</string>
-    <string name="piko_pref_export_saved">Exportado com sucesso</string>
-    <string name="piko_pref_export_failed">Erro: falha na exportação de preferências</string>
-    <string name="piko_pref_export_no_uri">Erro: nenhum destino fornecido</string>
-    <string name="piko_pref_import">Importar preferências</string>
-    <string name="piko_pref_import_flags">Importar feature flags</string>
-    <string name="piko_pref_import_warn">Recomenda-se reiniciar o aplicativo</string>
-    <string name="piko_pref_import_saved">Importado com sucesso</string>
-    <string name="piko_pref_import_failed">Erro: falha na importação de preferências</string>
+    <string name="piko_pref_export">Exportar %s</string>
+    <string name="piko_pref_import">Importar %s</string>
+    <string name="piko_pref_success">bem-sucedido</string>
+    <string name="piko_pref_export_failed">Erro: Falha na exportação de %s</string>
+    <string name="piko_pref_import_failed">Erro: Falha na importação de %s</string>
+    <string name="piko_pref_export_no_uri">Erro: Nenhum destino fornecido</string>
     <string name="piko_pref_import_no_uri">Erro: Nenhum arquivo fornecido</string>
-    
+
     <string name="piko_title_about">Sobre</string>
     <string name="piko_pref_app_version">Versão do aplicativo</string>
     <string name="piko_pref_patch_info">Informações do patch</string>
     <string name="piko_pref_version_info">Versão</string>
     <string name="piko_pref_patches">Patches</string>
     <string name="piko_pref_included">Incluído</string>
-    <string name="piko_pref_excluded">Excluido</string>
-    
+    <string name="piko_pref_excluded">Excluído</string>
+    <string name="piko_pref_app_restart_rec">Recomenda-se reiniciar o aplicativo</string>
+    <string name="piko_pref_remove">Remover %s</string>
+
 </resources>
