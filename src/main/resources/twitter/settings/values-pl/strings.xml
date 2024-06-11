@@ -23,16 +23,16 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">Udostępnij link</string>
 
     <string name="piko_title_ads">Reklamy</string>
-    <string name="piko_pref_hide_promoted_posts">Promowane posty</string>
-    <string name="piko_pref_hide_g_ads">Reklamy Google</string>
-    <string name="piko_pref_wtf_section">Sekcja \'Warci obserwowania\'</string>
-    <string name="piko_pref_cts_section">Sekcja \'Twórcy treści polecani dla Ciebie\'</string>
-    <string name="piko_pref_ctj_section">Sekcja \'Dołącz do społeczności\'</string>
-    <string name="piko_pref_ryb_section">Sekcja \'Przejrzyj zakładki\'</string>
+    <string name="piko_pref_hide_promoted_posts">promowane posty</string>
+    <string name="piko_pref_hide_g_ads">reklamy Google</string>
+    <string name="piko_pref_wtf_section">sekcję \'Warci obserwowania\'</string>
+    <string name="piko_pref_cts_section">sekcję \'Twórcy treści polecani dla Ciebie\'</string>
+    <string name="piko_pref_ctj_section">sekcję \'Dołącz do społeczności\'</string>
+    <string name="piko_pref_ryb_section">sekcję \'Przejrzyj zakładki\'</string>
     <string name="piko_pref_pinned_posts_section">Sekcja \'Przypięte posty przez obserwujących\'</string>
     <string name="piko_pref_hide_detailed_posts">\'Odkryj więcej\' (w odpowiedziach)</string>
-    <string name="piko_pref_hide_trends">Promowane trendy</string>
-    <string name="piko_pref_hide_premium_prompt">Message prompts</string>
+    <string name="piko_pref_hide_trends">promowane trendy</string>
+    <string name="piko_pref_hide_premium_prompt">banerowe reklamy (np. kup premium)</string>
     <string name="piko_pref_del_from_db">Usuń wpisy z bazy danych</string>
     <string name="piko_pref_db_not_found">Nie znaleziono bazy danych</string>
     <string name="piko_pref_db_not_open">Baza danych nie jest otwarta</string>
@@ -40,11 +40,11 @@
 
     <string name="piko_title_misc">Różne</string>
     <string name="piko_pref_chirp_font">Włącz czcionkę Chirp</string>
-    <string name="piko_pref_hide_fab">Pływający przycisk akcji</string>
-    <string name="piko_pref_hide_fab_menu">Pływające menu przycisków akcji</string>
-    <string name="piko_pref_rec_users">Rekomendowani użytkownikcy</string>
-    <string name="piko_pref_hide_view_count">Licznik wyświetleń pod postami</string>
-    <string name="piko_pref_custom_share_domain">Własna domena do udostepniana</string>
+    <string name="piko_pref_hide_fab">pływający przycisk akcji</string>
+    <string name="piko_pref_hide_fab_menu">pływające menu przycisków akcji</string>
+    <string name="piko_pref_rec_users">rekomendowanych użytkowników</string>
+    <string name="piko_pref_hide_view_count">licznik wyświetleń pod postami</string>
+    <string name="piko_pref_custom_share_domain">Własna domena do udostepniania</string>
     <string name="piko_pref_custom_share_domain_desc">Domena używana do udostępniania tweetów</string>
     <string name="piko_pref_browser_chooser">Używaj domyślnej przeglądarki</string>
     <string name="piko_pref_browser_chooser_desc">Otwieraj linki w zewnętrznej (domyślnej) przeglądarce</string>
@@ -62,20 +62,20 @@
 
     <string name="piko_title_timeline">Oś czasu</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Wyłącz autoodświeżanie osi przy starcie apki</string>
-    <string name="piko_pref_hide_live_threads">Pokoje \'Na żywo\'</string>
-    <string name="piko_pref_hide_live_threads_desc">Hides live section in timeline</string>
-    <string name="piko_pref_hide_banner">Baner</string>
-    <string name="piko_pref_hide_banner_desc">Wyskakujące powiadomienie o nowych postach</string>
-    <string name="piko_pref_hide_bmk_timeline">Ikona zakładek na osi czasu</string>
+    <string name="piko_pref_hide_live_threads">pokoje \'Na żywo\'</string>
+    <string name="piko_pref_hide_live_threads_desc">Ukrywa sekcję \'Na żywo\' na osi czasu</string>
+    <string name="piko_pref_hide_banner">baner</string>
+    <string name="piko_pref_hide_banner_desc">wyskakujące powiadomienie o nowych postach</string>
+    <string name="piko_pref_hide_bmk_timeline">ikonę zakładek na osi czasu</string>
     <string name="piko_pref_force_translate">Wymuś opcję tłumaczenia</string>
     <string name="piko_pref_force_translate_desc">Uzyskaj możliwość przetłumaczenia każdego postu</string>
-    <string name="piko_pref_hide_quick_promote">Przycisk do promowania postu</string>
+    <string name="piko_pref_hide_quick_promote">przycisk do promowania postu</string>
     <string name="piko_pref_hide_quick_promote_desc">Ukrywa przycisk promowania pod własnymi postami</string>
     <string name="piko_pref_show_poll_result">Pokaż wyniki ankiet</string>
     <string name="piko_pref_show_poll_result_desc">Możesz zobaczyć wyniki ankiet bez głosowania</string>
-    <string name="piko_pref_hide_immersive_player">Immersyjny tryb odtwarzacza</string>
+    <string name="piko_pref_hide_immersive_player">immersyjny tryb odtwarzacza</string>
     <string name="piko_pref_hide_immersive_player_desc">Wyłącza przesuwanie w górę dla kolejnych filmów</string>
-    <string name="piko_pref_hide_hidden_replies">Ukryte odpowiedzi</string>
+    <string name="piko_pref_hide_hidden_replies">ukryte odpowiedzi</string>
 
     <string name="piko_title_customisation">Dostosowywanie</string>
     <string name="piko_pref_customisation_profiletabs">Zakładki profilu do ukrycia</string>
@@ -88,9 +88,9 @@
     <string name="piko_pref_customisation_inlinetabs">Elementy do ukrycia w pasku pod postem</string>
 
     <string name="piko_title_backup">Kopia zapasowa i przywracanie</string>
-    <string name="piko_pref_export">Eksport %s</string>
-    <string name="piko_pref_import">Import %s</string>
-    <string name="piko_pref_success">sukces</string>
+    <string name="piko_pref_export">Eksportowanie %s</string>
+    <string name="piko_pref_import">Importowanie %s</string>
+    <string name="piko_pref_success">powiodło się</string>
     <string name="piko_pref_export_failed">Błąd: Eksportowanie %s nie powiodło się</string>
     <string name="piko_pref_import_failed">Błąd: Importowanie %s nie powiodło się</string>
     <string name="piko_pref_export_no_uri">Błąd: Nie podano miejsca docelowego</string>
