@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="piko_title_settings">Configuración del Mod</string>
+    
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">Habilitar modo de lectura</string>
     <string name="piko_pref_reader_mode_desc">Habilita el "modo de lectura" en hilos largos</string>
