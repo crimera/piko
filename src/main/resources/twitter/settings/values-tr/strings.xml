@@ -33,13 +33,16 @@
     <string name="piko_pref_hide_detailed_posts">Ayrıntılı gönderileri gizle (yanıtlarda)</string>
     <string name="piko_pref_hide_trends">Tanıtılan trendleri gizle</string>
     <string name="piko_pref_hide_premium_prompt">Mesaj istemlerini gizle</string>
+    <string name="piko_pref_del_from_db">Girişleri veritabanından sil</string>
+    <string name="piko_pref_db_not_found">Veritabanı bulunamadı</string>
+    <string name="piko_pref_db_not_open">Veritabanı açılmadı</string>
+    <string name="piko_pref_db_del_items">Silinmiş öğeler</string>
 
     <string name="piko_title_misc">Çeşitli</string>
     <string name="piko_pref_chirp_font">Chirp yazı tipini etkinleştir</string>
     <string name="piko_pref_hide_fab">Kayan eylem düğmesini gizle</string>
     <string name="piko_pref_hide_fab_menu">Kayan eylem düğmesi menüsünü gizle</string>
     <string name="piko_pref_rec_users">Önerilen kullanıcıları gizle</string>
-    <string name="piko_pref_comm_notes">Topluluk notlarını gizle</string>
     <string name="piko_pref_hide_view_count">Görüntüleme sayısını gizle</string>
     <string name="piko_pref_custom_share_domain">Özel paylaşım alanı</string>
     <string name="piko_pref_custom_share_domain_desc">Tweet paylaşırken kullanılacak alan adı</string>
@@ -59,7 +62,6 @@
 
     <string name="piko_title_timeline">Zaman çizelgesi</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Başlatma sırasında otomatik zaman çizelgesi kaydırmayı devre dışı bırak</string>
-    <string name="piko_pref_hide_for_you">Sizin için sekmesini gizle</string>
     <string name="piko_pref_hide_live_threads">Canlı konuları gizle</string>
     <string name="piko_pref_hide_live_threads_desc">Zaman çizelgesindeki canlı bölümü gizler</string>
     <string name="piko_pref_hide_banner">”Banner’ı gizle”</string>
@@ -87,15 +89,11 @@
 
     <string name="piko_title_backup">Yedekle ve yeniden yükle</string>
     <string name="piko_pref_export">Dışa aktarma tercihleri</string>
-    <string name="piko_pref_export_flags">Özellik bayraklarını dışa aktar</string>
-    <string name="piko_pref_export_saved">Başarıyla dışa aktarıldı</string>
-    <string name="piko_pref_export_failed">Hata: Tercihler dışa aktarılamadı</string>
-    <string name="piko_pref_export_no_uri">Hata: Hedef belirtilmedi</string>
     <string name="piko_pref_import">Tercihleri içe aktar</string>
-    <string name="piko_pref_import_flags">Özellik bayraklarını içe aktar</string>
-    <string name="piko_pref_import_warn">Uygulamanın yeniden başlatılması önerilir</string>
-    <string name="piko_pref_import_saved">Başarıyla içe aktarıldı</string>
-    <string name="piko_pref_import_failed">Hata: Tercihlerin içe aktarılması başarısız oldu</string>
+    <string name="piko_pref_success">başarılı</string>
+    <string name="piko_pref_export_failed">Hata: %s dışa aktarılamadı</string>
+    <string name="piko_pref_import_failed">Hata: %s içe aktarılamadı</string>
+    <string name="piko_pref_export_no_uri">Hata: Hedef belirtilmedi</string>
     <string name="piko_pref_import_no_uri">Hata: Dosya sağlanmadı</string>
 
     <string name="piko_title_about">Hakkında</string>
@@ -105,5 +103,7 @@
     <string name="piko_pref_patches">Yamalar</string>
     <string name="piko_pref_included">Dahil</string>
     <string name="piko_pref_excluded">Hariç</string>
+    <string name="piko_pref_app_restart_rec">Uygulamanın yeniden başlatılması önerilir</string>
+    <string name="piko_pref_remove">%s kaldır</string>
 
 </resources>

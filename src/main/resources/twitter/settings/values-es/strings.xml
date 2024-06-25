@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="piko_title_settings">Configuración del Mod</string>
+    
+    <string name="piko_title_premium">Premium</string>
+    <string name="piko_pref_reader_mode">Habilitar modo de lectura</string>
+    <string name="piko_pref_reader_mode_desc">Habilita el "modo de lectura" en hilos largos</string>
+    <string name="piko_pref_undo_posts">Habilitar deshacer publicaciones</string>
+    <string name="piko_pref_undo_posts_desc">Permite deshacer publicaciones antes de publicar</string>
+    <string name="piko_pref_undo_posts_btn">Configuración de deshacer publicaciones</string>
+    <string name="piko_pref_icon_n_navbar_btn">Configuración de icono de la app y &#10;barra de navegación</string>
+
+    <string name="piko_title_download">Descargar</string>
+    <string name="piko_pref_video_download">Habilitar descarga de videos</string>
+    <string name="piko_pref_download">Cambiar directorio de descarga</string>
+    <string name="piko_pref_download_path">Carpeta pública</string>
+    <string name="piko_pref_download_path_desc">La carpeta pública a utilizar para las descargas de video</string>
+    <string name="piko_pref_download_folder">Subcarpeta de descargas</string>
+    <string name="piko_pref_download_folder_desc">La subcarpeta para descargar videos ([CarpetaPública]/[Subcarpeta])</string>
+    <string name="piko_pref_download_media_link_handle">Preferencia de descarga</string>
+    <string name="piko_pref_download_media_link_handle_download">Descarga directa</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">Copiar enlace directo de medios</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">Preguntar siempre</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">Copiar enlace de medios</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">Compartir enlace de medios</string>
+
+    <string name="piko_title_ads">Anuncios</string>
+    <string name="piko_pref_hide_promoted_posts">Publicaciones promocionadas</string>
+    <string name="piko_pref_hide_g_ads">Anuncios de Google</string>
+    <string name="piko_pref_wtf_section">Sección "A quién seguir"</string>
+    <string name="piko_pref_cts_section">Sección "Creadores a los que suscribirse"</string>
+    <string name="piko_pref_ctj_section">Sección "Comunidad a la que unirse"</string>
+    <string name="piko_pref_ryb_section">Sección "Revisita tus marcadores"</string>
+    <string name="piko_pref_pinned_posts_section">Sección "Publicaciones fijadas por seguidores"</string>
+    <string name="piko_pref_hide_detailed_posts">Publicaciones detalladas (en respuestas)</string>
+    <string name="piko_pref_hide_trends">Tendencias promocionadas</string>
+    <string name="piko_pref_hide_premium_prompt">Mensajes emergentes</string>
+    <string name="piko_pref_del_from_db">Eliminar entradas de la base de datos</string>
+    <string name="piko_pref_db_not_found">Base de datos no encontrada</string>
+    <string name="piko_pref_db_not_open">Base de datos no abierta</string>
+    <string name="piko_pref_db_del_items">Elementos eliminados</string>
+
+    <string name="piko_title_misc">Misceláneo</string>
+    <string name="piko_pref_chirp_font">Habilitar fuente chirp</string>
+    <string name="piko_pref_hide_fab">Botón de acción flotante</string>
+    <string name="piko_pref_hide_fab_menu">Botones del menú de acción flotante</string>
+    <string name="piko_pref_rec_users">Usuarios recomendados</string>
+    <string name="piko_pref_hide_view_count">Contador de vistas</string>
+    <string name="piko_pref_custom_share_domain">Dominio de compartición personalizado</string>
+    <string name="piko_pref_custom_share_domain_desc">El dominio a utilizar al compartir tweets</string>
+    <string name="piko_pref_browser_chooser">Usar selector de navegador</string>
+    <string name="piko_pref_browser_chooser_desc">Abrir enlaces con el selector de navegador en lugar de usar el navegador de la aplicación</string>
+    <string name="piko_pref_feature_flags">Flags de características</string>
+    <string name="piko_pref_edit_flag_title">Editar flag</string>
+    <string name="piko_pref_add_flag_title">Añadir flag</string>
+    <string name="piko_pref_show_sensitive_media">Mostrar medios sensibles</string>
+    <string name="piko_pref_selectable_text">Texto seleccionable</string>
+    <string name="piko_pref_clear_tracking_params">Limpiar parámetros de seguimiento</string>
+    <string name="piko_pref_unshorten_link">No usar URL acortadas</string>
+    <string name="piko_pref_unshorten_link_desc">Eliminar URLs cortas t.co</string>
+    <string name="piko_pref_round_off_numbers">Redondear números</string>
+    <string name="piko_pref_round_off_numbers_desc">Redondear números a K y M</string>
+    <string name="piko_pref_debug_menu">Habilitar menú de depuración para publicaciones</string>
+
+    <string name="piko_title_timeline">Cronología</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">Deshabilitar desplazamiento automático en la cronología al iniciar</string>
+    <string name="piko_pref_hide_live_threads">Hilos en vivo</string>
+    <string name="piko_pref_hide_live_threads_desc">Oculta la sección en vivo en la cronología</string>
+    <string name="piko_pref_hide_banner">Banner</string>
+    <string name="piko_pref_hide_banner_desc">Píldora de nuevas publicaciones</string>
+    <string name="piko_pref_hide_bmk_timeline">Ícono de marcador en la cronología</string>
+    <string name="piko_pref_force_translate">Forzar traducción</string>
+    <string name="piko_pref_force_translate_desc">Obtener opción de traducir para todas las publicaciones</string>
+    <string name="piko_pref_hide_quick_promote">Botón de promoción</string>
+    <string name="piko_pref_hide_quick_promote_desc">Oculta el botón de promoción en publicaciones propias</string>
+    <string name="piko_pref_show_poll_result">Mostrar resultados de encuestas</string>
+    <string name="piko_pref_show_poll_result_desc">Ver resultados de encuestas sin votar</string>
+    <string name="piko_pref_hide_immersive_player">Reproductor inmersivo</string>
+    <string name="piko_pref_hide_immersive_player_desc">Elimina el deslizamiento hacia arriba para más videos en el reproductor de video</string>
+    <string name="piko_pref_hide_hidden_replies">Respuestas ocultas</string>
+
+    <string name="piko_title_customisation">Personalización</string>
+    <string name="piko_pref_customisation_profiletabs">Pestañas del perfil a ocultar</string>
+    <string name="piko_pref_customisation_timelinetabs">Pestañas de la cronología</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">Eliminar "Para ti"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">Eliminar "Siguiendo"</string>
+    <string name="piko_pref_customisation_timelinetabs_both">Mostrar ambos</string>
+    <string name="piko_pref_customisation_sidebartabs">Elementos de la barra lateral a ocultar</string>
+    <string name="piko_pref_customisation_navbartabs">Elementos de la barra de navegación a ocultar</string>
+    <string name="piko_pref_customisation_inlinetabs">Elementos de la barra en línea a ocultar</string>
+
+    <string name="piko_title_backup">Respaldo y restauración</string>
+    <string name="piko_pref_export">Exportar %s</string>
+    <string name="piko_pref_import">Importar %s</string>
+    <string name="piko_pref_success">exitoso</string>
+    <string name="piko_pref_export_failed">Error: Fallo al exportar %s</string>
+    <string name="piko_pref_import_failed">Error: Fallo al importar %s</string>
+    <string name="piko_pref_export_no_uri">Error: No se proporcionó destino</string>
+    <string name="piko_pref_import_no_uri">Error: No se proporcionó archivo</string>
+
+    <string name="piko_title_about">Acerca de</string>
+    <string name="piko_pref_app_version">Versión de la app</string>
+    <string name="piko_pref_patch_info">Información del parche</string>
+    <string name="piko_pref_version_info">Información de la versión</string>
+    <string name="piko_pref_patches">Parches</string>
+    <string name="piko_pref_included">Incluido</string>
+    <string name="piko_pref_excluded">Excluido</string>
+    <string name="piko_pref_app_restart_rec">Se recomienda reiniciar la app</string>
+    <string name="piko_pref_remove">Eliminar %s</string>
+
+</resources>
