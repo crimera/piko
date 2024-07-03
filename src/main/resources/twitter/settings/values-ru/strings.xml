@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="piko_title_settings">Меню Piko</string>
+    <string name="piko_title_feature_flags">Флаги функций</string>
+    <string name="piko_title_piko_patches">Патчи Piko</string>
+    <string name="piko_title_piko_integrations">Интеграции Piko</string>
     
     <string name="piko_title_premium">Премиум</string>
     <string name="piko_pref_reader_mode">Включить режим чтения</string>
