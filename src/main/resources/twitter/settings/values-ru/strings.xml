@@ -25,16 +25,16 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">Поделиться ссылкой на медиа</string>
 
     <string name="piko_title_ads">Реклама</string>
-    <string name="piko_pref_hide_promoted_posts">Скрыть продвигаемые посты</string>
-    <string name="piko_pref_hide_g_ads">Скрыть рекламу Google</string>
-    <string name="piko_pref_wtf_section">Скрыть панель "Кого читать"</string>
-    <string name="piko_pref_cts_section">Скрыть панель "Авторы для вас"</string>
-    <string name="piko_pref_ctj_section">Скрыть панель "Обзор сообществ"</string>
-    <string name="piko_pref_ryb_section">Скрыть панель "Обзор закладок"</string>
-    <string name="piko_pref_pinned_posts_section">Скрыть панель "Закреплено пользователями"</string>
-    <string name="piko_pref_hide_detailed_posts">Скрыть панель "Похожие твиты"</string>
-    <string name="piko_pref_hide_trends">Скрыть продвигаемые тренды</string>
-    <string name="piko_pref_hide_premium_prompt">Реклама премиума</string>
+    <string name="piko_pref_hide_promoted_posts">продвигаемые посты</string>
+    <string name="piko_pref_hide_g_ads">рекламу Google</string>
+    <string name="piko_pref_wtf_section">панель "Кого читать"</string>
+    <string name="piko_pref_cts_section">панель "Авторы для вас"</string>
+    <string name="piko_pref_ctj_section">панель "Обзор сообществ"</string>
+    <string name="piko_pref_ryb_section">панель "Обзор закладок"</string>
+    <string name="piko_pref_pinned_posts_section">панель "Закреплено пользователями"</string>
+    <string name="piko_pref_hide_detailed_posts">панель "Похожие твиты"</string>
+    <string name="piko_pref_hide_trends">продвигаемые тренды</string>
+    <string name="piko_pref_hide_premium_prompt">рекламу премиума</string>
     <string name="piko_pref_del_from_db">Удалить записи из базы данных</string>
     <string name="piko_pref_db_not_found">База данных не найдена</string>
     <string name="piko_pref_db_not_open">База данных не открыта</string>
@@ -42,10 +42,10 @@
 
     <string name="piko_title_misc">Прочее</string>
     <string name="piko_pref_chirp_font">Включить шрифт Chirp</string>
-    <string name="piko_pref_hide_fab">Скрыть плавающую кнопку</string>
-    <string name="piko_pref_hide_fab_menu">Скрыть меню плавающей кнопки</string>
-    <string name="piko_pref_rec_users">Скрыть рекомендуемых пользователей</string>
-    <string name="piko_pref_hide_view_count">Скрыть счетчик просмотров</string>
+    <string name="piko_pref_hide_fab">плавающую кнопку</string>
+    <string name="piko_pref_hide_fab_menu">меню плавающей кнопки</string>
+    <string name="piko_pref_rec_users">рекомендуемых пользователей</string>
+    <string name="piko_pref_hide_view_count">счетчик просмотров</string>
     <string name="piko_pref_custom_share_domain">Кастомный домен ссылки</string>
     <string name="piko_pref_custom_share_domain_desc">Изменить домен ссылки на пост</string>
     <string name="piko_pref_browser_chooser">Выбор браузера</string>
@@ -64,20 +64,20 @@
 
     <string name="piko_title_timeline">Лента</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Отключить автоскролл при запуске</string>
-    <string name="piko_pref_hide_live_threads">Треды в прямом эфире</string>
-    <string name="piko_pref_hide_live_threads_desc">Скрывать баннер прямых эфиров поверх ленты</string>
-    <string name="piko_pref_hide_banner">Баннер новых постов</string>
-    <string name="piko_pref_hide_banner_desc">Скрывать баннер "добавил(а) публикацию" поверх ленты</string>
-    <string name="piko_pref_hide_bmk_timeline">Скрывать иконку закладки в ленте</string>
+    <string name="piko_pref_hide_live_threads">треды в прямом эфире</string>
+    <string name="piko_pref_hide_live_threads_desc">Баннер прямых эфиров поверх ленты</string>
+    <string name="piko_pref_hide_banner">баннер новых постов</string>
+    <string name="piko_pref_hide_banner_desc">Баннер "добавил(а) публикацию" поверх ленты</string>
+    <string name="piko_pref_hide_bmk_timeline">иконку закладки в ленте</string>
     <string name="piko_pref_force_translate">Принудительный перевод</string>
     <string name="piko_pref_force_translate_desc">Кнопка перевода текста во всех постах</string>
-    <string name="piko_pref_hide_quick_promote">Кнопка продвижения</string>
-    <string name="piko_pref_hide_quick_promote_desc">Скрывать кнопку продвижения под своими постами</string>
+    <string name="piko_pref_hide_quick_promote">кнопку продвижения</string>
+    <string name="piko_pref_hide_quick_promote_desc">Кнопка продвижения под своими постами</string>
     <string name="piko_pref_show_poll_result">Показывать результаты опросов</string>
     <string name="piko_pref_show_poll_result_desc">Отображение результатов без голосования</string>
-    <string name="piko_pref_hide_immersive_player">Отключить новый видеоплеер</string>
-    <string name="piko_pref_hide_immersive_player_desc">Отключает переключение видео свайпами</string>
-    <string name="piko_pref_hide_hidden_replies">Скрытые ответы</string>
+    <string name="piko_pref_hide_immersive_player">новый видеоплеер</string>
+    <string name="piko_pref_hide_immersive_player_desc">Переключение видео свайпами</string>
+    <string name="piko_pref_hide_hidden_replies">скрытые ответы</string>
     
     <string name="piko_title_customisation">Кастомизация</string>
     <string name="piko_pref_customisation_profiletabs">Скрыть разделы профиля</string>
@@ -106,6 +106,6 @@
     <string name="piko_pref_included">Примененные</string>
     <string name="piko_pref_excluded">Исключенные</string>
     <string name="piko_pref_app_restart_rec">Рекомендуется перезапуск приложения</string>
-    <string name="piko_pref_remove">Убрать %s</string>
+    <string name="piko_pref_remove">Скрывать %s</string>
     
 </resources>
