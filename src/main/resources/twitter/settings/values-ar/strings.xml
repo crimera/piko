@@ -43,7 +43,6 @@
     <string name="piko_pref_hide_fab">زر الإجراء العائم</string>
     <string name="piko_pref_hide_fab_menu">زر قائمة الإجراء العائمة</string>
     <string name="piko_pref_rec_users">المستخدمين الموصى بهم</string>
-    <string name="piko_pref_comm_notes">ملاحظات المجتمع</string>
     <string name="piko_pref_hide_view_count">عدد المشاهدات</string>
     <string name="piko_pref_custom_share_domain">نطاق المشاركة المخصص</string>
     <string name="piko_pref_custom_share_domain_desc">النطاق الذي سيتم استخدامه عند مشاركة التغريدات</string>

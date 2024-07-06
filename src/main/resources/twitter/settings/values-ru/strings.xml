@@ -36,7 +36,6 @@
     <string name="piko_pref_hide_fab">Скрыть плавающую кнопку</string>
     <string name="piko_pref_hide_fab_menu">Скрыть меню плавающей кнопки</string>
     <string name="piko_pref_rec_users">Скрыть рекомендуемых пользователей</string>
-    <string name="piko_pref_comm_notes">Скрыть контекст к постам</string>
     <string name="piko_pref_hide_view_count">Скрыть счетчик просмотров</string>
     <string name="piko_pref_custom_share_domain">Кастомный домен ссылки</string>
     <string name="piko_pref_custom_share_domain_desc">Изменить домен ссылки на пост</string>
@@ -47,7 +46,6 @@
     <string name="piko_pref_add_flag_title">Добавить флаг</string>
 
     <string name="piko_title_timeline">Лента</string>
-    <string name="piko_pref_hide_for_you">Скрыть ленту "Для вас"</string>
     <string name="piko_pref_hide_live_threads">Скрыть треды в прямом эфире</string>
     <string name="piko_pref_hide_live_threads_desc">Баннер прямых эфиров поверх ленты</string>
     <string name="piko_pref_hide_banner">Скрыть баннер новых постов</string>
@@ -67,14 +65,9 @@
 
     <string name="piko_title_backup">Бэкап и восстановление</string>
     <string name="piko_pref_export">Экспорт настроек</string>
-    <string name="piko_pref_export_flags">Экспорт флагов функций</string>
-    <string name="piko_pref_export_saved">Экспорт завершен</string>
     <string name="piko_pref_export_failed">Сбой: ошибка экспорта настроек</string>
     <string name="piko_pref_export_no_uri">Сбой: не выбрана папка</string>
     <string name="piko_pref_import">Импорт настроек</string>
-    <string name="piko_pref_import_flags">Импорт флагов функций</string>
-    <string name="piko_pref_import_warn">Рекомендуется перезапуск приложения</string>
-    <string name="piko_pref_import_saved">Импорт завершен</string>
     <string name="piko_pref_import_failed">Сбой: ошибка импорта настроек</string>
     <string name="piko_pref_import_no_uri">Сбой: не выбран файл</string>
     

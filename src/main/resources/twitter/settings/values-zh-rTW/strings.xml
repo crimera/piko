@@ -39,7 +39,6 @@
     <string name="piko_pref_hide_fab">隱藏懸浮動作按鈕</string>
     <string name="piko_pref_hide_fab_menu">隱藏懸浮動作選單按鈕</string>
     <string name="piko_pref_rec_users">隱藏「推薦使用者」</string>
-    <string name="piko_pref_comm_notes">隱藏社群筆記</string>
     <string name="piko_pref_hide_view_count">隱藏瀏覽次數</string>
     <string name="piko_pref_custom_share_domain">自訂分享網域</string>
     <string name="piko_pref_custom_share_domain_desc">分享推文時使用的網域</string>
@@ -58,7 +57,6 @@
 
     <string name="piko_title_timeline">時間軸</string>
     <string name="piko_pref_disable_auto_timeline_scroll">啟動應用時停用時間軸自動捲動</string>
-    <string name="piko_pref_hide_for_you">隱藏「為你推薦」分頁</string>
     <string name="piko_pref_hide_live_threads">隱藏直播提醒橫幅</string>
     <string name="piko_pref_hide_live_threads_desc">隱藏畫面頂部的直播通知</string>
     <string name="piko_pref_hide_banner">隱藏新推文提醒</string>
@@ -86,14 +84,9 @@
 
     <string name="piko_title_backup">備份和還原</string>
     <string name="piko_pref_export">匯出偏好設定</string>
-    <string name="piko_pref_export_flags">匯出功能標記</string>
-    <string name="piko_pref_export_saved">已成功匯出</string>
     <string name="piko_pref_export_failed">錯誤：匯出偏好設定失敗</string>
     <string name="piko_pref_export_no_uri">錯誤：未提供匯出路徑</string>
     <string name="piko_pref_import">匯入偏好設定</string>
-    <string name="piko_pref_import_flags">匯入功能標記</string>
-    <string name="piko_pref_import_warn">建議重啟應用程式套用匯入的設定</string>
-    <string name="piko_pref_import_saved">已成功匯入</string>
     <string name="piko_pref_import_failed">錯誤：匯入偏好設定失敗</string>
     <string name="piko_pref_import_no_uri">錯誤：未提供檔案</string>
 
