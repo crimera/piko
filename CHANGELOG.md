@@ -1,3 +1,10 @@
+## [1.32.0-dev.1](https://github.com/crimera/piko/compare/v1.31.2...v1.32.0-dev.1) (2024-07-06)
+
+
+### Features
+
+* **Twitter:** Added `Custom downloader` ([3d5941e](https://github.com/crimera/piko/commit/3d5941e226c1fb9402edeeb138c1c974026e0598))
+
 ## [1.31.2](https://github.com/crimera/piko/compare/v1.31.1...v1.31.2) (2024-06-25)
 
 
