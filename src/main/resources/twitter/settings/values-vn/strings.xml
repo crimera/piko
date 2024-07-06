@@ -39,7 +39,6 @@
     <string name="piko_pref_hide_fab">Ẩn hành động pop-up</string>
     <string name="piko_pref_hide_fab_menu">Ẩn tuỳ chọn hành động pop-up</string>
     <string name="piko_pref_rec_users">Ẩn "Những người dùng dược đề xuất"</string>
-    <string name="piko_pref_comm_notes">Ẩn "Ghi chú cộng đồng"</string>
     <string name="piko_pref_hide_view_count">Ẩn "Số người xem"</string>
     <string name="piko_pref_custom_share_domain">Tuỳ chỉnh tên miền(KHÔNG NÊN ĐỤNG NẾU KHÔNG HIỂU)</string>
     <string name="piko_pref_custom_share_domain_desc">Tên miền sẽ dược sử dụng chia sẻ tweets</string>
@@ -59,7 +58,6 @@
 
     <string name="piko_title_timeline">Dòng thời gian</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Vộ hiệu tự làm mới tweets mỗi khi khởi chạy </string>
-    <string name="piko_pref_hide_for_you">Ẩn tab dành cho bạn</string>
     <string name="piko_pref_hide_live_threads">Ẩn các phiên trực tiếp</string>
     <string name="piko_pref_hide_live_threads_desc">Ẩn những phiên trực tiếp trong dòng thời gian</string>
     <string name="piko_pref_hide_banner">Ẩn banner</string>
@@ -87,14 +85,9 @@
 
     <string name="piko_title_backup">Sao lưu và khôi phục</string>
     <string name="piko_pref_export">Sao lưu các tuỳ chọn mod</string>
-    <string name="piko_pref_export_flags">Sao lưu các cờ tính năng</string>
-    <string name="piko_pref_export_saved">Sao lưu thành công</string>
     <string name="piko_pref_export_failed">Sao lưu các tuỳ chọn mod lỗi</string>
     <string name="piko_pref_export_no_uri">Đã huỷ bởi người dùng</string>
     <string name="piko_pref_import">Khôi phục các tuỳ chọn mod</string>
-    <string name="piko_pref_import_flags">Khôi phục cờ tính năng</string>
-    <string name="piko_pref_import_warn">Nên khởi động lại ứng dụng</string>
-    <string name="piko_pref_import_saved">Khôi phục thành công</string>
     <string name="piko_pref_import_failed">Khôi phục các tính năng mod không thành công</string>
     <string name="piko_pref_import_no_uri">Không có file đã được đề ra</string>
 
