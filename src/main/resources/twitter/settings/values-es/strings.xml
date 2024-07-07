@@ -111,4 +111,5 @@
     <string name="piko_pref_excluded">Excluido</string>
     <string name="piko_pref_app_restart_rec">Se recomienda reiniciar la app</string>
     <string name="piko_pref_remove">Eliminar %s</string>
+    
 </resources>
