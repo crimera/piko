@@ -1,3 +1,10 @@
+## [1.32.0-dev.2](https://github.com/crimera/piko/compare/v1.32.0-dev.1...v1.32.0-dev.2) (2024-07-12)
+
+
+### Bug Fixes
+
+* **Twitter:** Missing download option in immersive view ([6b0aa2c](https://github.com/crimera/piko/commit/6b0aa2c0d8d0f9192630e42abef418a834a95df0))
+
 ## [1.32.0-dev.1](https://github.com/crimera/piko/compare/v1.31.2...v1.32.0-dev.1) (2024-07-06)
 
 
