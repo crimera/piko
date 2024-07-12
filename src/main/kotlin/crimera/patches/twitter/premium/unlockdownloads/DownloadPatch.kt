@@ -1,6 +1,7 @@
 package crimera.patches.twitter.premium.unlockdownloads
 
 import app.revanced.patcher.data.BytecodeContext
+import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
@@ -17,6 +18,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.premium.unlockdownloads.fingerprints.DownloadPatchFingerprint
 import crimera.patches.twitter.premium.unlockdownloads.fingerprints.FIleDownloaderFingerprint
+import crimera.patches.twitter.premium.unlockdownloads.fingerprints.ImmersiveBottomSheetPatchFingerprint
 import crimera.patches.twitter.premium.unlockdownloads.fingerprints.MediaEntityFingerprint
 
 // Credits to @iKirby
@@ -27,7 +29,7 @@ import crimera.patches.twitter.premium.unlockdownloads.fingerprints.MediaEntityF
 )
 @Suppress("unused")
 object DownloadPatch : BytecodePatch(
-    setOf(DownloadPatchFingerprint,FIleDownloaderFingerprint,MediaEntityFingerprint, SettingsStatusLoadFingerprint)
+    setOf(DownloadPatchFingerprint,FIleDownloaderFingerprint,MediaEntityFingerprint, SettingsStatusLoadFingerprint,ImmersiveBottomSheetPatchFingerprint)
 ) {
     override fun execute(context: BytecodeContext) {
         val result = DownloadPatchFingerprint.result
@@ -86,7 +88,18 @@ object DownloadPatch : BytecodePatch(
             const v$r4, true
         """.trimIndent())
 
+        //force add download option in immersive bottomsheet
+        val f4Result = ImmersiveBottomSheetPatchFingerprint.result
+            ?: throw PatchException("ImmersiveBottomSheetPatchFingerprint not found")
 
+        val method4 = f4Result.mutableMethod
+        val instructions4 = method4.getInstructions()
+
+        val last_iput_loc = instructions4.last { it.opcode == Opcode.IPUT_BOOLEAN }.location.index
+        val iput_reg = method4.getInstruction<OneRegisterInstruction>(last_iput_loc).registerA
+        method4.addInstruction(last_iput_loc,"""
+            const v${iput_reg}, 0x1
+        """.trimIndent())
 
         SettingsStatusLoadFingerprint.enableSettings("enableVidDownload")
         //end
