@@ -98,8 +98,8 @@
     <string name="piko_pref_customisation_inlinetabs">Скрыть кнопки под постом</string>
 
     <string name="piko_title_backup">Бэкап и восстановление</string>
-    <string name="piko_pref_export">Экспорт настроек</string>
-    <string name="piko_pref_import">Импорт настроек</string>
+    <string name="piko_pref_export">Экспорт %s</string>
+    <string name="piko_pref_import">Импорт %s</string>
     <string name="piko_pref_success">Успешно</string>
     <string name="piko_pref_export_failed">Сбой: ошибка экспорта %s</string>
     <string name="piko_pref_import_failed">Сбой: ошибка импорта %s</string>
