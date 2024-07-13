@@ -1,3 +1,10 @@
+## [1.32.0-dev.3](https://github.com/crimera/piko/compare/v1.32.0-dev.2...v1.32.0-dev.3) (2024-07-13)
+
+
+### Updates
+
+* Russian translation ([42b68e9](https://github.com/crimera/piko/commit/42b68e96fccca505a60d6eb2682cbfb7f7acfb17))
+
 ## [1.32.0-dev.2](https://github.com/crimera/piko/compare/v1.32.0-dev.1...v1.32.0-dev.2) (2024-07-12)
 
 
