@@ -1,3 +1,20 @@
+## [1.32.0](https://github.com/crimera/piko/compare/v1.31.2...v1.32.0) (2024-07-17)
+
+
+### Bug Fixes
+
+* **Twitter:** Missing download option in immersive view ([6b0aa2c](https://github.com/crimera/piko/commit/6b0aa2c0d8d0f9192630e42abef418a834a95df0))
+
+
+### Features
+
+* **Twitter:** Added `Custom downloader` ([3d5941e](https://github.com/crimera/piko/commit/3d5941e226c1fb9402edeeb138c1c974026e0598))
+
+
+### Updates
+
+* Russian translation ([42b68e9](https://github.com/crimera/piko/commit/42b68e96fccca505a60d6eb2682cbfb7f7acfb17))
+
 ## [1.32.0-dev.3](https://github.com/crimera/piko/compare/v1.32.0-dev.2...v1.32.0-dev.3) (2024-07-13)
 
 
