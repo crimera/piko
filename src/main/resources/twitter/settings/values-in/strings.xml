@@ -2,7 +2,7 @@
 <resources>
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">Aktifkan mode pembaca</string>
-    <string name="piko_pref_reader_mode_desc">Mengaktifkan "mode pembaca" pada thread panjang</string>
+    <string name="piko_pref_reader_mode_desc">Mengaktifkan "mode baca" pada thread panjang</string>
     <string name="piko_pref_undo_posts">Aktifkan batalkan post</string>
     <string name="piko_pref_undo_posts_desc">Mengaktifkan kemampuan untuk membatalkan post sebelum diposting</string>
     <string name="piko_pref_undo_posts_btn">Pengaturan batalkan post</string>
@@ -17,29 +17,33 @@
     <string name="piko_pref_download_folder_desc">Subfolder untuk mengunduh video ([FolderPublik]/[Subfolder])</string>
     <string name="piko_pref_download_media_link_handle">Preferensi pengunduhan video</string>
     <string name="piko_pref_download_media_link_handle_download">Unduh langsung</string>
-    <string name="piko_pref_download_media_link_handle_copy_link">Tautan media salinan langsung</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">Tautan salinan media langsung</string>
     <string name="piko_pref_download_media_link_handle_always_ask">Selalu tanyakan</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Salin tautan media</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Bagikan tautan media</string>
 
     <string name="piko_title_ads">Iklan</string>
-    <string name="piko_pref_hide_promoted_posts">Sembunyikan post yang dipromosikan</string>
-    <string name="piko_pref_hide_g_ads">Sembunyikan iklan Google</string>
-    <string name="piko_pref_wtf_section">Sembunyikan bagian "Siapa yang harus diikuti"</string>
-    <string name="piko_pref_cts_section">Sembunyikan bagian "Kreator yang harus diikuti"</string>
-    <string name="piko_pref_ctj_section">Sembunyikan bagian "Komunitas yang harus diikuti"</string>
-    <string name="piko_pref_ryb_section">Sembunyikan bagian "Revist bookmark Anda"</string>
-    <string name="piko_pref_pinned_posts_section">Sembunyikan bagian "Post yang diposting oleh pengikut"</string>
-    <string name="piko_pref_hide_detailed_posts">Sembunyikan post detail (dalam balasan)</string>
-    <string name="piko_pref_hide_trends">Sembunyikan tren yang dipromosikan</string>
+    <string name="piko_pref_hide_promoted_posts">Post yang dipromosikan</string>
+    <string name="piko_pref_hide_g_ads">Iklan Google</string>
+    <string name="piko_pref_wtf_section">Bagian "Siapa yang harus diikuti"</string>
+    <string name="piko_pref_cts_section">Bagian "Kreator yang harus diikuti"</string>
+    <string name="piko_pref_ctj_section">Bagian "Komunitas yang harus diikuti"</string>
+    <string name="piko_pref_ryb_section">Bagian "Revist bookmark Anda"</string>
+    <string name="piko_pref_pinned_posts_section">Bagian "Post yang diposting oleh pengikut"</string>
+    <string name="piko_pref_hide_detailed_posts">Post detail (dalam balasan)</string>
+    <string name="piko_pref_hide_trends">Tren yang dipromosikan</string>
+    <string name="piko_pref_hide_premium_prompt">Pesan yang diminta</string>
+    <string name="piko_pref_del_from_db">Hapus entri dari database</string>
+    <string name="piko_pref_db_not_found">Database tidak ditemukan</string>
+    <string name="piko_pref_db_not_open">Database tidak dibuka</string>
+    <string name="piko_pref_db_del_items">Item yang dihapus</string>
 
     <string name="piko_title_misc">Lain-lain</string>
     <string name="piko_pref_chirp_font">Aktifkan font chirp</string>
-    <string name="piko_pref_hide_fab">Sembunyikan tombol tindakan mengambang</string>
-    <string name="piko_pref_hide_fab_menu">Sembunyikan menu tombol tindakan mengambang</string>
-    <string name="piko_pref_rec_users">Sembunyikan pengguna yang direkomendasikan</string>
-    <string name="piko_pref_comm_notes">Sembunyikan catatan komunitas</string>
-    <string name="piko_pref_hide_view_count">Sembunyikan jumlah penayangan</string>
+    <string name="piko_pref_hide_fab">Tombol tindakan mengambang</string>
+    <string name="piko_pref_hide_fab_menu">Menu tombol tindakan mengambang</string>
+    <string name="piko_pref_rec_users">Pengguna yang direkomendasikan</string>
+    <string name="piko_pref_hide_view_count">Jumlah penayangan</string>
     <string name="piko_pref_custom_share_domain">Domain berbagi kustom</string>
     <string name="piko_pref_custom_share_domain_desc">Domain yang digunakan saat berbagi tweet</string>
     <string name="piko_pref_browser_chooser">Gunakan pemilih browser</string>
@@ -51,27 +55,28 @@
     <string name="piko_pref_selectable_text">Teks yang dapat dipilih</string>
     <string name="piko_pref_clear_tracking_params">Hapus parameter pelacakan</string>
     <string name="piko_pref_unshorten_link">Tidak ada URL yang dipersingkat</string>
+    <string name="piko_pref_unshorten_link_desc">Singkirkan url pendek t.co</string>
     <string name="piko_pref_round_off_numbers">Bulatkan angka</string>
     <string name="piko_pref_round_off_numbers_desc">Membulatkan angka menjadi K dan M </string>
     <string name="piko_pref_debug_menu">Aktifkan menu debug untuk postingan</string>
 
     <string name="piko_title_timeline">Timeline</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Nonaktifkan gulir timeline otomatis saat peluncuran</string>
-    <string name="piko_pref_hide_for_you">Sembunyikan tab untuk Anda</string>
-    <string name="piko_pref_hide_live_threads">Sembunyikan thread langsung</string>
+    <string name="piko_pref_hide_live_threads">Thread live</string>
     <string name="piko_pref_hide_live_threads_desc">Menyembunyikan bagian live dalam timeline</string>
-    <string name="piko_pref_hide_banner">Sembunyikan banner</string>
-    <string name="piko_pref_hide_banner_desc">Menyembunyikan pil post baru</string>
-    <string name="piko_pref_hide_bmk_timeline">Sembunyikan ikon bookmark dalam timeline</string>
+    <string name="piko_pref_hide_banner">Banner</string>
+    <string name="piko_pref_hide_banner_desc">Pil post baru</string>
+    <string name="piko_pref_hide_bmk_timeline">Ikon bookmark dalam timeline</string>
     <string name="piko_pref_force_translate">Aktifkan paksa terjemahan</string>
     <string name="piko_pref_force_translate_desc">Mendapatkan opsi terjemahan untuk semua post</string>
-    <string name="piko_pref_hide_quick_promote">Sembunyikan tombol promosi</string>
+    <string name="piko_pref_hide_quick_promote">Tombol promosi</string>
     <string name="piko_pref_hide_quick_promote_desc">Menyembunyikan tombol promosi di bawah post mandiri</string>
     <string name="piko_pref_show_poll_result">Tampilkan hasil polling</string>
     <string name="piko_pref_show_poll_result_desc">Melihat hasil polling tanpa melakukan voting</string>
-    <string name="piko_pref_hide_immersive_player">Sembunyikan pemutar imersif</string>
+    <string name="piko_pref_hide_immersive_player">Pemutar imersif</string>
     <string name="piko_pref_hide_immersive_player_desc">Menghapus geser ke atas untuk video lebih lanjut dalam pemutar video</string>
-	
+    <string name="piko_pref_hide_hidden_replies">Balasan tersembunyi</string>
+
     <string name="piko_title_customisation">Kustomisasi</string>
     <string name="piko_pref_customisation_profiletabs">Tab profil untuk disembunyikan</string>
     <string name="piko_pref_customisation_timelinetabs">Tab timeline</string>
@@ -83,16 +88,12 @@
     <string name="piko_pref_customisation_inlinetabs">Item bilah sebaris untuk disembunyikan</string>
 
     <string name="piko_title_backup">Cadangkan dan pulihkan</string>
-    <string name="piko_pref_export">Preferensi ekspor</string>
-    <string name="piko_pref_export_flags">Ekspor fitur flag</string>
-    <string name="piko_pref_export_saved">Berhasil diekspor</string>
-    <string name="piko_pref_export_failed">Kesalahan: Gagal mengekspor preferensi</string>
+    <string name="piko_pref_export">Ekspor %s</string>
+    <string name="piko_pref_import">Impor %s</string>
+    <string name="piko_pref_success">Berhasil</string>
+    <string name="piko_pref_export_failed">Kesalahan: Gagal mengekspor %s</string>
+    <string name="piko_pref_import_failed">Kesalahan: Gagal mengimpor %s</string>
     <string name="piko_pref_export_no_uri">Kesalahan: Tidak ada tujuan yang tersedia</string>
-    <string name="piko_pref_import">Preferensi impor</string>
-    <string name="piko_pref_import_flags">Impor fitur flag</string>
-    <string name="piko_pref_import_warn">Disarankan memulai ulang aplikasi</string>
-    <string name="piko_pref_import_saved">Berhasil diimpor</string>
-    <string name="piko_pref_import_failed">Kesalahan: Gagal mengimpor preferensi</string>
     <string name="piko_pref_import_no_uri">Kesalahan: Tidak ada file yang disediakan</string>
 
     <string name="piko_title_about">Tentang</string>
@@ -102,5 +103,7 @@
     <string name="piko_pref_patches">Patch</string>
     <string name="piko_pref_included">Termasuk</string>
     <string name="piko_pref_excluded">Dikecualikan</string>
+    <string name="piko_pref_app_restart_rec">Disarankan memulai ulang aplikasi</string>
+    <string name="piko_pref_remove">Hapus %s</string>
 
 </resources>

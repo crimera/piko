@@ -24,6 +24,11 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">复制链接</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">分享链接</string>
 
+    <string name="piko_title_native_downloader">原生下载器</string>
+    <string name="piko_pref_native_downloader_alert_title">下载媒体</string>
+    <string name="piko_pref_native_downloader_download_all">下载全部</string>
+    <string name="piko_pref_native_downloader_no_media">未找到媒体</string>
+
     <string name="piko_title_ads">广告</string>
     <string name="piko_pref_hide_promoted_posts">推广帖子</string>
     <string name="piko_pref_hide_g_ads">谷歌广告</string>
@@ -36,8 +41,8 @@
     <string name="piko_pref_hide_trends">推广趋势</string>
     <string name="piko_pref_hide_premium_prompt">订阅 Premium+ 推广</string>
     <string name="piko_pref_del_from_db">从数据库中删除项目</string>
-    <string name="piko_pref_db_not_found">数据库未找到</string>
-    <string name="piko_pref_db_not_open">数据库未打开</string>
+    <string name="piko_pref_db_not_found">未找到数据库</string>
+    <string name="piko_pref_db_not_open">未打开数据库</string>
     <string name="piko_pref_db_del_items">删除的项目</string>
 
     <string name="piko_title_misc">杂项</string>
