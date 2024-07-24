@@ -1,3 +1,145 @@
+## [1.32.0](https://github.com/crimera/piko/compare/v1.31.2...v1.32.0) (2024-07-17)
+
+
+### Bug Fixes
+
+* **Twitter:** Missing download option in immersive view ([6b0aa2c](https://github.com/crimera/piko/commit/6b0aa2c0d8d0f9192630e42abef418a834a95df0))
+
+
+### Features
+
+* **Twitter:** Added `Custom downloader` ([3d5941e](https://github.com/crimera/piko/commit/3d5941e226c1fb9402edeeb138c1c974026e0598))
+
+
+### Updates
+
+* Russian translation ([42b68e9](https://github.com/crimera/piko/commit/42b68e96fccca505a60d6eb2682cbfb7f7acfb17))
+
+## [1.32.0-dev.3](https://github.com/crimera/piko/compare/v1.32.0-dev.2...v1.32.0-dev.3) (2024-07-13)
+
+
+### Updates
+
+* Russian translation ([42b68e9](https://github.com/crimera/piko/commit/42b68e96fccca505a60d6eb2682cbfb7f7acfb17))
+
+## [1.32.0-dev.2](https://github.com/crimera/piko/compare/v1.32.0-dev.1...v1.32.0-dev.2) (2024-07-12)
+
+
+### Bug Fixes
+
+* **Twitter:** Missing download option in immersive view ([6b0aa2c](https://github.com/crimera/piko/commit/6b0aa2c0d8d0f9192630e42abef418a834a95df0))
+
+## [1.32.0-dev.1](https://github.com/crimera/piko/compare/v1.31.2...v1.32.0-dev.1) (2024-07-06)
+
+
+### Features
+
+* **Twitter:** Added `Custom downloader` ([3d5941e](https://github.com/crimera/piko/commit/3d5941e226c1fb9402edeeb138c1c974026e0598))
+
+## [1.31.2](https://github.com/crimera/piko/compare/v1.31.1...v1.31.2) (2024-06-25)
+
+
+### Updates
+
+* Translation updates ([509dfbb](https://github.com/crimera/piko/commit/509dfbb9e92511379406979a19b131a685229fc6))
+
+## [1.31.2-dev.1](https://github.com/crimera/piko/compare/v1.31.1...v1.31.2-dev.1) (2024-06-25)
+
+
+### Updates
+
+* Translation updates ([509dfbb](https://github.com/crimera/piko/commit/509dfbb9e92511379406979a19b131a685229fc6))
+
+## [1.31.1](https://github.com/crimera/piko/compare/v1.31.0...v1.31.1) (2024-06-11)
+
+
+### Updates
+
+* Improved the hooking of the recyclerview methods. also fixes the crash when opening feature flags. ([25e5bc4](https://github.com/crimera/piko/commit/25e5bc422c3893747b8fadd0744833a4ecb7b6ea))
+
+## [1.31.1-dev.1](https://github.com/crimera/piko/compare/v1.31.0...v1.31.1-dev.1) (2024-06-11)
+
+
+### Updates
+
+* Improved the hooking of the recyclerview methods. also fixes the crash when opening feature flags. ([25e5bc4](https://github.com/crimera/piko/commit/25e5bc422c3893747b8fadd0744833a4ecb7b6ea))
+
+## [1.31.0](https://github.com/crimera/piko/compare/v1.30.2...v1.31.0) (2024-06-11)
+
+
+### Bug Fixes
+
+* Fix crash when opening feature flags ([2b1484d](https://github.com/crimera/piko/commit/2b1484d6c291a997283d98358cff98b0195acfed))
+
+
+### Features
+
+* **all:** Added `Export all activities` patch from ReVanced ([7cc405f](https://github.com/crimera/piko/commit/7cc405f7e900b85aaa172e8693cd4ca2e790451d))
+* **Twitter:** Added `Delete from database` patch ([d785660](https://github.com/crimera/piko/commit/d7856602786d3fb9d7a8721f05d80be97bc4fd3b))
+* **Twitter:** Added tab redirects hook (for Bookmark Navbar) ([f01b418](https://github.com/crimera/piko/commit/f01b418fcc13e9fe54d845eab3bea1cd62687f9f))
+
+
+### Updates
+
+* Enable `Customize profile tabs` patch by default ([a8543bf](https://github.com/crimera/piko/commit/a8543bf0d2eebe8a1580870b95c75a890e845ff4))
+* Enable `Hide Live Threads` patch by default ([b9862b5](https://github.com/crimera/piko/commit/b9862b50b97741721448c0ea667769b0024961c9))
+
+
+### Refactors
+
+* **Twitter:** Major string changes ([f22fdf0](https://github.com/crimera/piko/commit/f22fdf086184f71447d2696461d76914dbef731d))
+
+## [1.31.0-dev.6](https://github.com/crimera/piko/compare/v1.31.0-dev.5...v1.31.0-dev.6) (2024-06-11)
+
+
+### Updates
+
+* **Translations:** Update polish translations ([6200d65](https://github.com/crimera/piko/commit/6200d657b5db4040f10ec4f82054ad440b09221c))
+
+## [1.31.0-dev.5](https://github.com/crimera/piko/compare/v1.31.0-dev.4...v1.31.0-dev.5) (2024-06-11)
+
+
+### Bug Fixes
+
+* Fix crash when opening feature flags ([2b1484d](https://github.com/crimera/piko/commit/2b1484d6c291a997283d98358cff98b0195acfed))
+
+
+### Updates
+
+* Enable `Hide Live Threads` patch by default ([b9862b5](https://github.com/crimera/piko/commit/b9862b50b97741721448c0ea667769b0024961c9))
+
+## [1.31.0-dev.4](https://github.com/crimera/piko/compare/v1.31.0-dev.3...v1.31.0-dev.4) (2024-06-09)
+
+
+### Features
+
+* **Twitter:** Added tab redirects hook (for Bookmark Navbar) ([f01b418](https://github.com/crimera/piko/commit/f01b418fcc13e9fe54d845eab3bea1cd62687f9f))
+
+## [1.31.0-dev.3](https://github.com/crimera/piko/compare/v1.31.0-dev.2...v1.31.0-dev.3) (2024-06-06)
+
+
+### Features
+
+* **all:** Added `Export all activities` patch from ReVanced ([7cc405f](https://github.com/crimera/piko/commit/7cc405f7e900b85aaa172e8693cd4ca2e790451d))
+
+## [1.31.0-dev.2](https://github.com/crimera/piko/compare/v1.31.0-dev.1...v1.31.0-dev.2) (2024-06-04)
+
+
+### Refactors
+
+* **Twitter:** Major string changes ([f22fdf0](https://github.com/crimera/piko/commit/f22fdf086184f71447d2696461d76914dbef731d))
+
+## [1.31.0-dev.1](https://github.com/crimera/piko/compare/v1.30.1...v1.31.0-dev.1) (2024-06-02)
+
+
+### Features
+
+* **Twitter:** Added `Delete from database` patch ([d785660](https://github.com/crimera/piko/commit/d7856602786d3fb9d7a8721f05d80be97bc4fd3b))
+
+### Updates
+
+* Enable `Customize profile tabs` patch by default ([a8543bf](https://github.com/crimera/piko/commit/a8543bf0d2eebe8a1580870b95c75a890e845ff4))
+
 ## [1.30.1](https://github.com/crimera/piko/compare/v1.30.0...v1.30.1) (2024-06-01)
 
 

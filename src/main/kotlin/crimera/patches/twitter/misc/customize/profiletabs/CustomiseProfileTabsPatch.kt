@@ -32,7 +32,6 @@ object CustomiseProfileTabsFingerprint:MethodFingerprint(
     name = "Customize profile tabs",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false,
     requiresIntegrations = true
 )
 @Suppress("unused")

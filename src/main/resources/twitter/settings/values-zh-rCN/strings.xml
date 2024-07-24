@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="piko_title_settings">Piko 模组设置</string>
+    <string name="piko_title_settings">piko 设置</string>
     <string name="piko_title_feature_flags">功能标志</string>
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">启用阅读模式</string>
     <string name="piko_pref_reader_mode_desc">在长主题贴中启用阅读模式</string>
     <string name="piko_pref_undo_posts">启用撤销帖子</string>
-    <string name="piko_pref_undo_posts_desc">在发布前启用撤销帖子的功能</string>
+    <string name="piko_pref_undo_posts_desc">在发布前启用撤销帖子功能</string>
     <string name="piko_pref_undo_posts_btn">撤销帖子设置</string>
     <string name="piko_pref_icon_n_navbar_btn">应用图标和自定义导航栏设置</string>
 
@@ -24,57 +24,65 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">复制链接</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">分享链接</string>
 
+    <string name="piko_title_native_downloader">原生下载器</string>
+    <string name="piko_pref_native_downloader_alert_title">下载媒体</string>
+    <string name="piko_pref_native_downloader_download_all">下载全部</string>
+    <string name="piko_pref_native_downloader_no_media">未找到媒体</string>
+
     <string name="piko_title_ads">广告</string>
-    <string name="piko_pref_hide_promoted_posts">隐藏推广帖子</string>
-    <string name="piko_pref_hide_g_ads">隐藏谷歌广告</string>
-    <string name="piko_pref_wtf_section">隐藏推荐关注</string>
-    <string name="piko_pref_cts_section">隐藏创作者推荐</string>
-    <string name="piko_pref_ctj_section">隐藏探索社群</string>
-    <string name="piko_pref_ryb_section">隐藏重新访问你的书签</string>
-    <string name="piko_pref_pinned_posts_section">隐藏已由你关注的人置顶</string>
-    <string name="piko_pref_hide_detailed_posts">隐藏帖子回复中的发现更多</string>
-    <string name="piko_pref_hide_trends">隐藏推广趋势</string>
-    <string name="piko_pref_hide_premium_prompt">隐藏订阅 Premium+ 推广</string>
+    <string name="piko_pref_hide_promoted_posts">推广帖子</string>
+    <string name="piko_pref_hide_g_ads">谷歌广告</string>
+    <string name="piko_pref_wtf_section">推荐关注</string>
+    <string name="piko_pref_cts_section">创作者推荐</string>
+    <string name="piko_pref_ctj_section">探索社群</string>
+    <string name="piko_pref_ryb_section">重新访问你的书签</string>
+    <string name="piko_pref_pinned_posts_section">已由你关注的人置顶</string>
+    <string name="piko_pref_hide_detailed_posts">帖子回复中的发现更多</string>
+    <string name="piko_pref_hide_trends">推广趋势</string>
+    <string name="piko_pref_hide_premium_prompt">订阅 Premium+ 推广</string>
+    <string name="piko_pref_del_from_db">从数据库中删除项目</string>
+    <string name="piko_pref_db_not_found">未找到数据库</string>
+    <string name="piko_pref_db_not_open">未打开数据库</string>
+    <string name="piko_pref_db_del_items">删除的项目</string>
 
     <string name="piko_title_misc">杂项</string>
     <string name="piko_pref_chirp_font">启用 chirp 字体</string>
-    <string name="piko_pref_hide_fab">隐藏发帖按钮</string>
-    <string name="piko_pref_hide_fab_menu">隐藏发帖按钮菜单</string>
-    <string name="piko_pref_rec_users">隐藏推荐用户</string>
-    <string name="piko_pref_comm_notes">隐藏社群附注</string>
-    <string name="piko_pref_hide_view_count">隐藏帖子查看次数</string>
+    <string name="piko_pref_hide_fab">发帖按钮</string>
+    <string name="piko_pref_hide_fab_menu">发帖按钮菜单</string>
+    <string name="piko_pref_rec_users">推荐用户</string>
+    <string name="piko_pref_hide_view_count">帖子查看次数</string>
     <string name="piko_pref_custom_share_domain">自定义分享域名</string>
-    <string name="piko_pref_custom_share_domain_desc">自定义分享推文时使用的域名</string>
+    <string name="piko_pref_custom_share_domain_desc">自定义分享帖子时使用的域名</string>
     <string name="piko_pref_browser_chooser">使用外部浏览器</string>
-    <string name="piko_pref_browser_chooser_desc">使用外部浏览器打开链接，而不是内置浏览器</string>
+    <string name="piko_pref_browser_chooser_desc">使用外部浏览器打开链接</string>
     <string name="piko_pref_feature_flags">功能标志</string>
     <string name="piko_pref_edit_flag_title">编辑标志</string>
     <string name="piko_pref_add_flag_title">添加标志</string>
     <string name="piko_pref_show_sensitive_media">显示敏感媒体</string>
     <string name="piko_pref_selectable_text">可选文本</string>
     <string name="piko_pref_clear_tracking_params">清除跟踪参数</string>
-    <string name="piko_pref_unshorten_link">没有缩短的 URL</string>
+    <string name="piko_pref_unshorten_link">不使用短网址</string>
+    <string name="piko_pref_unshorten_link_desc">移除 t.co 短网址</string>
     <string name="piko_pref_round_off_numbers">数字简化显示</string>
-    <string name="piko_pref_round_off_numbers_desc">将较大数字进行四舍五入，并简化为 K 和 M 单位显示</string>
-    <string name="piko_pref_debug_menu">启用帖子的 Debug 菜单</string>
+    <string name="piko_pref_round_off_numbers_desc">将数字简化为 K 和 M 单位显示</string>
+    <string name="piko_pref_debug_menu">启用帖子 Debug 菜单</string>
 
     <string name="piko_title_timeline">时间线</string>
-    <string name="piko_pref_disable_auto_timeline_scroll">启动时保持时间线位置不变</string>
-    <string name="piko_pref_hide_for_you">隐藏为你推荐</string>
-    <string name="piko_pref_hide_live_threads">隐藏直播空间</string>
-    <string name="piko_pref_hide_live_threads_desc">隐藏顶部直播通知条</string>
-    <string name="piko_pref_hide_banner">隐藏新贴提醒</string>
-    <string name="piko_pref_hide_banner_desc">隐藏弹出的新发布按钮</string>
-    <string name="piko_pref_hide_bmk_timeline">隐藏时间线中的书签图标</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">启动时保持时间线位置</string>
+    <string name="piko_pref_hide_live_threads">直播空间</string>
+    <string name="piko_pref_hide_live_threads_desc">移除顶部直播通知条</string>
+    <string name="piko_pref_hide_banner">新贴提醒</string>
+    <string name="piko_pref_hide_banner_desc">弹出的新帖按钮</string>
+    <string name="piko_pref_hide_bmk_timeline">时间线中书签图标</string>
     <string name="piko_pref_force_translate">强制显示翻译按钮</string>
     <string name="piko_pref_force_translate_desc">在每个帖子中显示翻译按钮</string>
-    <string name="piko_pref_hide_quick_promote">隐藏推广按钮</string>
-    <string name="piko_pref_hide_quick_promote_desc">隐藏自发帖子下的推广按钮</string>
+    <string name="piko_pref_hide_quick_promote">推广按钮</string>
+    <string name="piko_pref_hide_quick_promote_desc">移除自发帖子下的推广按钮</string>
     <string name="piko_pref_show_poll_result">显示投票结果</string>
     <string name="piko_pref_show_poll_result_desc">无需投票即可查看投票结果</string>
-    <string name="piko_pref_hide_immersive_player">隐藏视频滑动切换</string>
-    <string name="piko_pref_hide_immersive_player_desc">在视频播放器中移除向上滑动查看更多视频的功能</string>
-    <string name="piko_pref_hide_hidden_replies">隐藏帖子中的隐藏回复图标</string>
+    <string name="piko_pref_hide_immersive_player">视频滑动切换</string>
+    <string name="piko_pref_hide_immersive_player_desc">移除视频向上滑动查看更多</string>
+    <string name="piko_pref_hide_hidden_replies">帖子隐藏回复</string>
 
     <string name="piko_title_customisation">自定义</string>
     <string name="piko_pref_customisation_profiletabs">隐藏个人资料标签页</string>
@@ -87,17 +95,13 @@
     <string name="piko_pref_customisation_inlinetabs">隐藏互动栏项目</string>
 
     <string name="piko_title_backup">备份和恢复</string>
-    <string name="piko_pref_export">导出配置文件</string>
-    <string name="piko_pref_export_flags">导出功能标志</string>
-    <string name="piko_pref_export_saved">导出成功</string>
-    <string name="piko_pref_export_failed">错误：导出配置失败</string>
-    <string name="piko_pref_export_no_uri">错误：未提供保存位置</string>
-    <string name="piko_pref_import">导入配置文件</string>
-    <string name="piko_pref_import_flags">导入功能标志</string>
-    <string name="piko_pref_import_warn">建议重新启动应用以确保更改生效</string>
-    <string name="piko_pref_import_saved">导入成功</string>
-    <string name="piko_pref_import_failed">错误：导入配置失败</string>
-    <string name="piko_pref_import_no_uri">错误：未提供配置文件</string>
+    <string name="piko_pref_export">导出%s</string>
+    <string name="piko_pref_import">导入%s</string>
+    <string name="piko_pref_success">成功</string>
+    <string name="piko_pref_export_failed">错误：导出%s失败</string>
+    <string name="piko_pref_import_failed">错误：导入%s失败</string>
+    <string name="piko_pref_export_no_uri">错误：未提供目标</string>
+    <string name="piko_pref_import_no_uri">错误：未提供文件</string>
 
     <string name="piko_title_about">关于</string>
     <string name="piko_pref_app_version">App 版本</string>
@@ -106,5 +110,7 @@
     <string name="piko_pref_patches">补丁</string>
     <string name="piko_pref_included">包括</string>
     <string name="piko_pref_excluded">排除</string>
+    <string name="piko_pref_app_restart_rec">建议更改后重新启动应用</string>
+    <string name="piko_pref_remove">移除%s</string>
 
 </resources>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Dont translate these -->
-    <string name="piko_title_settings">Piko mod Settings</string>
+    <string name="piko_title_settings">Piko Settings</string>
     <string name="piko_title_feature_flags">Feature flags</string>
     <string name="piko_title_piko_patches">Piko Patches</string>
     <string name="piko_title_piko_integrations">Piko Integrations</string>

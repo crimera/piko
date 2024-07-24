@@ -39,7 +39,6 @@
     <string name="piko_pref_hide_fab">फ्लोटिंग एक्शन बटन छुपाएं</string>
     <string name="piko_pref_hide_fab_menu">फ्लोटिंग एक्शन बटन मेनू छुपाएं</string>
     <string name="piko_pref_rec_users">सुझावित उपयोगकर्ता छुपाएं</string>
-    <string name="piko_pref_comm_notes">समुदाय नोट्स छुपाएं</string>
     <string name="piko_pref_hide_view_count">दृश्य काउंट छुपाएं</string>
     <string name="piko_pref_custom_share_domain">कस्टम साझा करने का डोमेन</string>
     <string name="piko_pref_custom_share_domain_desc">ट्वीट्स साझा करते समय उपयोग करने के लिए डोमेन</string>
@@ -58,7 +57,6 @@
 
     <string name="piko_title_timeline">टाइमलाइन</string>
     <string name="piko_pref_disable_auto_timeline_scroll">लॉन्च पर ऑटो टाइमलाइन स्क्रॉल को अक्षम करें</string>
-    <string name="piko_pref_hide_for_you">"आपके लिए" टैब छुपाएं</string>
     <string name="piko_pref_hide_live_threads">लाइव थ्रेड्स छुपाएं</string>
     <string name="piko_pref_hide_live_threads_desc">टाइमलाइन में लाइव सेक्शन को छुपाएं</string>
     <string name="piko_pref_hide_banner">बैनर छुपाएं</string>
@@ -86,14 +84,9 @@
 
     <string name="piko_title_backup">बैकअप और बहाली</string>
     <string name="piko_pref_export">प्राथमिकताएँ निर्यात करें</string>
-    <string name="piko_pref_export_flags">विशेषता ध्वज निर्यात करें</string>
-    <string name="piko_pref_export_saved">सफलतापूर्वक निर्यात किया गया</string>
     <string name="piko_pref_export_failed">त्रुटि: प्राथमिकताएँ निर्यात करने में विफल</string>
     <string name="piko_pref_export_no_uri">त्रुटि: कोई गंतव्य नहीं दिया गया</string>
     <string name="piko_pref_import">प्राथमिकताएँ आयात करें</string>
-    <string name="piko_pref_import_flags">विशेषता ध्वज आयात करें</string>
-    <string name="piko_pref_import_warn">ऐप को पुनः आरंभ करना सुझावित है</string>
-    <string name="piko_pref_import_saved">सफलतापूर्वक आयात किया गया</string>
     <string name="piko_pref_import_failed">त्रुटि: प्राथमिकताएँ आयात करने में विफल</string>
     <string name="piko_pref_import_no_uri">त्रुटि: कोई फ़ाइल नहीं दी गई</string>
 
