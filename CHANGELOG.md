@@ -1,3 +1,9 @@
+## [1.32.1-dev.1](https://github.com/crimera/piko/compare/v1.32.0...v1.32.1-dev.1) (2024-07-26)
+
+### Updates
+
+* Add spanish to languages ([e9b8efd](https://github.com/crimera/piko/commit/e9b8efdb3570fa516f06a736f2709d1c166df1bf))
+
 ## [1.32.0](https://github.com/crimera/piko/compare/v1.31.2...v1.32.0) (2024-07-17)
 
 
