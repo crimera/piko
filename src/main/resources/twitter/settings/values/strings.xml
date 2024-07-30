@@ -7,6 +7,8 @@
     <string name="piko_pref_undo_posts_desc">Enables ability to undo posts before posting</string>
     <string name="piko_pref_undo_posts_btn">Undo posts settings</string>
     <string name="piko_pref_icon_n_navbar_btn">App icon and navbar customisation settings</string>
+    <string name="piko_pref_enable_force_pip">Enable PiP mode automatically</string>
+    <string name="piko_pref_enable_force_pip_desc">Enables PiP mode when you close the app</string>
 
     <string name="piko_title_download">Download</string>
     <string name="piko_pref_video_download">Enable video downloading</string>
