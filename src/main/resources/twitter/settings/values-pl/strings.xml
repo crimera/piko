@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="piko_title_premium">Premium</string>
-    <string name="piko_pref_reader_mode">Włącz \'Tryb czytania\'</string>
+    <string name="piko_pref_reader_mode">\'Tryb czytania\'</string>
     <string name="piko_pref_reader_mode_desc">Włącza \'Tryb czytania\' dla długich wątków</string>
-    <string name="piko_pref_undo_posts">Włącz cofanie postów</string>
+    <string name="piko_pref_undo_posts">cofanie postów</string>
     <string name="piko_pref_undo_posts_desc">Umożliwia cofanie postów przed opublikowaniem</string>
     <string name="piko_pref_undo_posts_btn">Ustawienia cofania postów</string>
     <string name="piko_pref_icon_n_navbar_btn">Ustawienia ikony aplikacji i paska nawigacji</string>
+    <string name="piko_pref_enable_force_pip">Automatyczny tryb PiP</string>
+    <string name="piko_pref_enable_force_pip_desc">Włącza tryb PiP (Picture in Picture) po zamknięciu aplikacji</string>
 
     <string name="piko_title_download">Pobieranie</string>
-    <string name="piko_pref_video_download">Włącz możliwość pobierania treści</string>
+    <string name="piko_pref_video_download">możliwość pobierania treści</string>
     <string name="piko_pref_download">Zmień folder do pobierania treści</string>
     <string name="piko_pref_download_path">Główny folder</string>
     <string name="piko_pref_download_path_desc">Główny folder do pobierania treści</string>
@@ -42,9 +44,11 @@
     <string name="piko_pref_db_not_found">Nie znaleziono bazy danych</string>
     <string name="piko_pref_db_not_open">Baza danych nie jest otwarta</string>
     <string name="piko_pref_db_del_items">Usunięte elementy</string>
+    <string name="piko_pref_hide_premium_upsell">nagłówek premium</string>
+    <string name="piko_pref_hide_premium_upsell_desc">Usuwa nagłówek zachęcający do zakupu premium na głównej osi czasu</string>
 
     <string name="piko_title_misc">Różne</string>
-    <string name="piko_pref_chirp_font">Włącz czcionkę Chirp</string>
+    <string name="piko_pref_chirp_font">czcionkę Chirp</string>
     <string name="piko_pref_hide_fab">pływający przycisk akcji</string>
     <string name="piko_pref_hide_fab_menu">pływające menu przycisków akcji</string>
     <string name="piko_pref_rec_users">rekomendowanych użytkowników</string>
@@ -63,7 +67,7 @@
     <string name="piko_pref_unshorten_link_desc">Pozbądź się skróconych adresów URL t.co</string>
     <string name="piko_pref_round_off_numbers">Zaokrąglij liczby</string>
     <string name="piko_pref_round_off_numbers_desc">Zaokrąglaj liczby do K dla tysięcy i M dla milionów</string>
-    <string name="piko_pref_debug_menu">Włącz menu debugowania dla wpisów</string>
+    <string name="piko_pref_debug_menu">menu debugowania dla postów</string>
 
     <string name="piko_title_timeline">Oś czasu</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Wyłącz autoodświeżanie osi</string>
@@ -79,7 +83,9 @@
     <string name="piko_pref_show_poll_result">Pokaż wyniki ankiet</string>
     <string name="piko_pref_show_poll_result_desc">Możesz zobaczyć wyniki ankiet bez głosowania</string>
     <string name="piko_pref_hide_immersive_player">immersyjny tryb odtwarzacza</string>
-    <string name="piko_pref_hide_immersive_player_desc">Wyłącza przesuwanie w górę dla kolejnych filmów</string>
+    <string name="piko_pref_hide_immersive_player_desc">Wyłącza mozliwosć przesuwania w górę dla kolejnych filmów</string>
+    <string name="piko_pref_enable_vid_auto_advance">auto-przewijanie filmów</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Włącza automatyczne przewijanie filmów w trybie immersyjnym</string>
     <string name="piko_pref_hide_hidden_replies">ukryte odpowiedzi</string>
 
     <string name="piko_title_customisation">Dostosowywanie</string>
@@ -110,5 +116,6 @@
     <string name="piko_pref_excluded">Wykluczono</string>
     <string name="piko_pref_app_restart_rec">Zalecany jest restart aplikacji</string>
     <string name="piko_pref_remove">Usuń %s</string>
+    <string name="piko_pref_enable">Włącz %s</string>
 
 </resources>
