@@ -39,6 +39,7 @@ object SettingsResourcePatch: ResourcePatch() {
          */
         //Strings
         val languages = arrayOf(
+            "es",
             "ar",
             "ja",
             "hi",

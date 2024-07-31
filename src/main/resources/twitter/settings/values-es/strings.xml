@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="piko_title_piko_integrations">Integraciones Piko</string>
+    <string name="piko_title_piko_patches">Parches Piko</string>
     <string name="piko_title_settings">Configuración del Mod</string>
     
     <string name="piko_title_premium">Premium</string>

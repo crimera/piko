@@ -1,3 +1,22 @@
+## [1.33.0-dev.1](https://github.com/crimera/piko/compare/v1.32.1-dev.1...v1.33.0-dev.1) (2024-07-30)
+
+### Features
+
+* **Twitter:** Added `Control video auto scroll` patch ([7a21924](https://github.com/crimera/piko/commit/7a21924dc7f30a15feef1797b0416c91de27d1e4))
+* **Twitter:** Added `Enable PiP mode automatically` patch ([59d6b67](https://github.com/crimera/piko/commit/59d6b6723cbff6fa96218fb6210e2cb0b8bc1338))
+* **Twitter:** Added `Remove premium upsell` patch ([37525de](https://github.com/crimera/piko/commit/37525de868c38254cbfd20b58d4fd077b0c14ca2))
+
+### Refactors
+
+* **Twitter:** More strings refactor ([d5a629f](https://github.com/crimera/piko/commit/d5a629f39bc4c15be1914a6ab98034129ed53f64))
+* **Twitter:** Strings refactor ([2db8866](https://github.com/crimera/piko/commit/2db88663e70745ef81024d896ad5204c29b1ba06))
+
+## [1.32.1-dev.1](https://github.com/crimera/piko/compare/v1.32.0...v1.32.1-dev.1) (2024-07-26)
+
+### Updates
+
+* Add spanish to languages ([e9b8efd](https://github.com/crimera/piko/commit/e9b8efdb3570fa516f06a736f2709d1c166df1bf))
+
 ## [1.32.0](https://github.com/crimera/piko/compare/v1.31.2...v1.32.0) (2024-07-17)
 
 
