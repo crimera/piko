@@ -99,9 +99,9 @@
     <string name="piko_pref_customisation_inlinetabs">非表示にするインラインバーの項目</string>
 
     <string name="piko_title_backup">バックアップと復元</string>
-    <string name="piko_pref_export">エクスポート成功</string>
-    <string name="piko_pref_import">インポート成功</string>
-<!--不要(?)    <string name="piko_pref_success">成功</string> -->
+    <string name="piko_pref_export">エクスポート %s</string>
+    <string name="piko_pref_import">インポート %s</string>
+    <string name="piko_pref_success">成功</string>
     <string name="piko_pref_export_failed">エラー: エクスポート失敗</string>
     <string name="piko_pref_import_failed">エラー: インポート失敗</string>
     <string name="piko_pref_export_no_uri">エラー: 宛先が指定されていません</string>
@@ -116,6 +116,6 @@
     <string name="piko_pref_excluded">除外済み</string>
     <string name="piko_pref_app_restart_rec">アプリの再起動を推奨します</string>
     <string name="piko_pref_remove">設定を削除</string>
-    <string name="piko_pref_enable">設定を有効化</string>
+    <string name="piko_pref_enable">設定の有効化</string>
 
 </resources>
