@@ -7,7 +7,9 @@
     <string name="piko_pref_undo_posts_desc">تمكين القدرة على التراجع عن المنشورات قبل النشر</string>
     <string name="piko_pref_undo_posts_btn">إعدادات التراجع عن المنشورات</string>
     <string name="piko_pref_icon_n_navbar_btn">إعدادات تخصيص أيقونة التطبيق وشريط التنقل</string>
-
+    <string name="piko_pref_enable_force_pip">وضع PiP تلقائيًا</string>
+    <string name="piko_pref_enable_force_pip_desc">تمكين وضع صورة داخل صورة عند إغلاق التطبيق/string>
+    
     <string name="piko_title_download">التنزيل</string>
     <string name="piko_pref_video_download">تمكين تنزيل الفيديو</string>
     <string name="piko_pref_download">تغيير دليل التنزيل</string>
@@ -21,6 +23,11 @@
     <string name="piko_pref_download_media_link_handle_always_ask">السؤال دائمًا</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">نسخ رابط الوسائط</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">مشاركة رابط الوسائط</string>
+
+    <string name="piko_title_native_downloader">برنامج التنزيل الأصلي</string>
+    <string name="piko_pref_native_downloader_alert_title">تنزيل الوسائط</string>
+    <string name="piko_pref_native_downloader_download_all">تنزيل الكل</string>
+    <string name="piko_pref_native_downloader_no_media">لم يتم العثور على الوسائط</string>
 
     <string name="piko_title_ads">الإعلانات</string>
     <string name="piko_pref_hide_promoted_posts">منشورات المحتوى المُروَّج</string>
@@ -37,6 +44,8 @@
     <string name="piko_pref_db_not_found">لم يتم العثور على قاعدة البيانات</string>
     <string name="piko_pref_db_not_open">لم يتم فتح قاعدة البيانات</string>
     <string name="piko_pref_db_del_items">عنصر محذوف</string>
+    <string name="piko_pref_hide_premium_upsell">Premium Upsell</string>
+    <string name="piko_pref_hide_premium_upsell_desc">Removes premium upsell in home timeline</string>
 
     <string name="piko_title_misc">إعدادات متنوعة</string>
     <string name="piko_pref_chirp_font">تمكين خط Chirp</string>
@@ -75,6 +84,8 @@
     <string name="piko_pref_show_poll_result_desc">عرض نتائج التصويت دون التصويت</string>
     <string name="piko_pref_hide_immersive_player">Immersive player</string>
     <string name="piko_pref_hide_immersive_player_desc">يزيل التمرير السريع لمزيد من مقاطع الفيديو في مشغل الفيديو</string>
+    <string name="piko_pref_enable_vid_auto_advance">تمرير الفيديو تلقائيًا</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">تمكين التمرير التلقائي للفيديو في العرض الشامل</string>
     <string name="piko_pref_hide_hidden_replies">الردود المخفية</string>
 
     <string name="piko_title_customisation">التخصيص</string>
@@ -105,5 +116,6 @@
     <string name="piko_pref_excluded">مستبعد</string>
     <string name="piko_pref_app_restart_rec">يوصى بإعادة تشغيل التطبيق</string>
     <string name="piko_pref_remove">إزالة %s</string>
+    <string name="piko_pref_enable">تمكين %s</string>
 
 </resources>
