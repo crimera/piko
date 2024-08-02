@@ -1,3 +1,9 @@
+## [1.33.1-dev.1](https://github.com/crimera/piko/compare/v1.33.0...v1.33.1-dev.1) (2024-08-02)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Remove premium upsell` patch ([4df5e32](https://github.com/crimera/piko/commit/4df5e32088eb57702c5f30e20b3c75d2ec11ee87))
+
 ## [1.33.0](https://github.com/crimera/piko/compare/v1.32.0...v1.33.0) (2024-07-31)
 
 ### Features
