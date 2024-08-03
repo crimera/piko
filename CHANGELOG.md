@@ -1,3 +1,9 @@
+## [1.33.1-dev.2](https://github.com/crimera/piko/compare/v1.33.1-dev.1...v1.33.1-dev.2) (2024-08-03)
+
+### Bug Fixes
+
+* **Bring back twitter:** Change x icon to legacy twitter. ([3006f47](https://github.com/crimera/piko/commit/3006f47d973ffde1622ae1544590a11e923c68ab))
+
 ## [1.33.1-dev.1](https://github.com/crimera/piko/compare/v1.33.0...v1.33.1-dev.1) (2024-08-02)
 
 ### Bug Fixes
