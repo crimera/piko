@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="piko_title_piko_integrations">Integraciones Piko</string>
-    <string name="piko_title_piko_patches">Parches Piko</string>
-    <string name="piko_title_settings">Configuración del Mod</string>
-    
     <string name="piko_title_premium">Premium</string>
-    <string name="piko_pref_reader_mode">Habilitar modo de lectura</string>
+    <string name="piko_pref_reader_mode">modo de lectura</string>
     <string name="piko_pref_reader_mode_desc">Habilita el "modo de lectura" en hilos largos</string>
-    <string name="piko_pref_undo_posts">Habilitar deshacer publicaciones</string>
+    <string name="piko_pref_undo_posts">deshacer publicaciones</string>
     <string name="piko_pref_undo_posts_desc">Permite deshacer publicaciones antes de publicar</string>
     <string name="piko_pref_undo_posts_btn">Configuración de deshacer publicaciones</string>
     <string name="piko_pref_icon_n_navbar_btn">Configuración de icono de la app y &#10;barra de navegación</string>
+    <string name="piko_pref_enable_force_pip">modo PiP automáticamente</string>
+    <string name="piko_pref_enable_force_pip_desc">Habilita el modo PiP cuando cierras la aplicación</string>
 
     <string name="piko_title_download">Descargar</string>
-    <string name="piko_pref_video_download">Habilitar descarga de videos</string>
+    <string name="piko_pref_video_download">descarga de videos</string>
     <string name="piko_pref_download">Cambiar directorio de descarga</string>
     <string name="piko_pref_download_path">Carpeta pública</string>
     <string name="piko_pref_download_path_desc">La carpeta pública a utilizar para las descargas de video</string>
@@ -25,6 +23,7 @@
     <string name="piko_pref_download_media_link_handle_always_ask">Preguntar siempre</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Copiar enlace de medios</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Compartir enlace de medios</string>
+
     <string name="piko_title_native_downloader">Descargador nativo</string>
     <string name="piko_pref_native_downloader_alert_title">Descargar medios</string>
     <string name="piko_pref_native_downloader_download_all">Descargar todo</string>
@@ -45,9 +44,11 @@
     <string name="piko_pref_db_not_found">Base de datos no encontrada</string>
     <string name="piko_pref_db_not_open">Base de datos no abierta</string>
     <string name="piko_pref_db_del_items">Elementos eliminados</string>
+    <string name="piko_pref_hide_premium_upsell">Venta de premium</string>
+    <string name="piko_pref_hide_premium_upsell_desc">Elimina la venta de premium en la línea de tiempo</string>
 
     <string name="piko_title_misc">Misceláneo</string>
-    <string name="piko_pref_chirp_font">Habilitar fuente chirp</string>
+    <string name="piko_pref_chirp_font">fuente chirp</string>
     <string name="piko_pref_hide_fab">Botón de acción flotante</string>
     <string name="piko_pref_hide_fab_menu">Botones del menú de acción flotante</string>
     <string name="piko_pref_rec_users">Usuarios recomendados</string>
@@ -83,6 +84,8 @@
     <string name="piko_pref_show_poll_result_desc">Ver resultados de encuestas sin votar</string>
     <string name="piko_pref_hide_immersive_player">Reproductor inmersivo</string>
     <string name="piko_pref_hide_immersive_player_desc">Elimina el deslizamiento hacia arriba para más videos en el reproductor de video</string>
+    <string name="piko_pref_enable_vid_auto_advance">Desplazamiento automático de video</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Habilita el desplazamiento automático de video en vista inmersiva</string>
     <string name="piko_pref_hide_hidden_replies">Respuestas ocultas</string>
 
     <string name="piko_title_customisation">Personalización</string>
@@ -113,5 +116,10 @@
     <string name="piko_pref_excluded">Excluido</string>
     <string name="piko_pref_app_restart_rec">Se recomienda reiniciar la app</string>
     <string name="piko_pref_remove">Eliminar %s</string>
+    <string name="piko_pref_enable">Habilitar %s</string>
+    <!-- Extra -->
+    <string name="piko_title_piko_integrations">Integraciones Piko</string>
+    <string name="piko_title_piko_patches">Parches Piko</string>
+    <string name="piko_title_settings">Configuración del Mod</string>
     
 </resources>
