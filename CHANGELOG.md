@@ -1,3 +1,17 @@
+## [1.34.0-dev.1](https://github.com/crimera/piko/compare/v1.33.1-dev.2...v1.34.0-dev.1) (2024-08-03)
+
+### Bug Fixes
+
+* **Twitter:** `Customize Navigation Bar items` in/from `10.53.0-beta.1` ([e8154fb](https://github.com/crimera/piko/commit/e8154fb0ffa91e6d3ed2812bed3f71a034f3bc01))
+
+### Features
+
+* **Twitter:** Added `Remove main event` patch ([806598d](https://github.com/crimera/piko/commit/806598d7154c538fb238f3d9b186746cb8c956bf))
+
+### Refactors
+
+* **Twitter:** Seperated/Added `Remove superhero event` patch ([d60ee17](https://github.com/crimera/piko/commit/d60ee17294b311bb964e3cc6200465218d7baca3))
+
 ## [1.33.1-dev.2](https://github.com/crimera/piko/compare/v1.33.1-dev.1...v1.33.1-dev.2) (2024-08-03)
 
 ### Bug Fixes
