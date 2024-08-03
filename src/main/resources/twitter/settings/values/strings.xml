@@ -33,6 +33,7 @@
     <string name="piko_pref_hide_promoted_posts">Promoted posts</string>
     <string name="piko_pref_hide_g_ads">Google ads</string>
     <string name="piko_pref_hide_main_event">Main event (Explore)</string>
+    <string name="piko_pref_hide_superhero_event">Superhero event (Explore)</string>
     <string name="piko_pref_wtf_section">"Who to follow" section</string>
     <string name="piko_pref_cts_section">"Creators to subscribe" section</string>
     <string name="piko_pref_ctj_section">"Community to join" section</string>
