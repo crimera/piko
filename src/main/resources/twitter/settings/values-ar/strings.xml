@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="piko_title_premium">Premium</string>
-    <string name="piko_pref_reader_mode">تمكين وضع القارئ</string>
+    <string name="piko_pref_reader_mode">وضع القارئ</string>
     <string name="piko_pref_reader_mode_desc">تمكين "وضع القارئ" على المنشورات الطويلة</string>
-    <string name="piko_pref_undo_posts">تمكين التراجع عن المنشورات</string>
+    <string name="piko_pref_undo_posts">التراجع عن المنشورات</string>
     <string name="piko_pref_undo_posts_desc">تمكين القدرة على التراجع عن المنشورات قبل النشر</string>
     <string name="piko_pref_undo_posts_btn">إعدادات التراجع عن المنشورات</string>
     <string name="piko_pref_icon_n_navbar_btn">إعدادات تخصيص أيقونة التطبيق وشريط التنقل</string>
@@ -48,7 +48,7 @@
     <string name="piko_pref_hide_premium_upsell_desc">Removes premium upsell in home timeline</string>
 
     <string name="piko_title_misc">إعدادات متنوعة</string>
-    <string name="piko_pref_chirp_font">تمكين خط Chirp</string>
+    <string name="piko_pref_chirp_font">خط Chirp</string>
     <string name="piko_pref_hide_fab">زر الإجراء العائم</string>
     <string name="piko_pref_hide_fab_menu">زر قائمة الإجراء العائمة</string>
     <string name="piko_pref_rec_users">المستخدمين الموصى بهم</string>
