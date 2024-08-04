@@ -21,7 +21,6 @@ object CustomiseNavBarFingerprint:MethodFingerprint(
     strings = listOf(
         "tabCustomizationPreferences",
         "communitiesUtils",
-        "exploreImmersiveFeatures",
         "subscriptionsFeatures",
     )
 )
