@@ -1,3 +1,9 @@
+## [1.34.0-dev.2](https://github.com/crimera/piko/compare/v1.34.0-dev.1...v1.34.0-dev.2) (2024-08-05)
+
+### Updates
+
+* **Translations:** Translation updates ([4bf8a8d](https://github.com/crimera/piko/commit/4bf8a8dd954a7013a65ceee9d39521fd445d069d))
+
 ## [1.34.0-dev.1](https://github.com/crimera/piko/compare/v1.33.1-dev.2...v1.34.0-dev.1) (2024-08-03)
 
 ### Bug Fixes
