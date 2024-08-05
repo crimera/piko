@@ -8,7 +8,7 @@
     <string name="piko_pref_undo_posts_btn">Ustawienia cofania postów</string>
     <string name="piko_pref_icon_n_navbar_btn">Ustawienia ikony aplikacji i paska nawigacji</string>
     <string name="piko_pref_enable_force_pip">Automatyczny tryb PiP</string>
-    <string name="piko_pref_enable_force_pip_desc">Włącza tryb PiP (Picture in Picture) po zamknięciu aplikacji</string>
+    <string name="piko_pref_enable_force_pip_desc">Włącza tryb PiP (Obraz w obrazie) po zamknięciu aplikacji</string>
 
     <string name="piko_title_download">Pobieranie</string>
     <string name="piko_pref_video_download">możliwość pobierania treści</string>
@@ -32,6 +32,8 @@
     <string name="piko_title_ads">Reklamy</string>
     <string name="piko_pref_hide_promoted_posts">promowane posty</string>
     <string name="piko_pref_hide_g_ads">reklamy Google</string>
+    <string name="piko_pref_hide_main_event">baner wydarzenia głównego (w wyszukiwarce)</string>
+    <string name="piko_pref_hide_superhero_event">baner reklamowy superhero (w wyszukiwarce)</string>
     <string name="piko_pref_wtf_section">\'Warci obserwowania\'</string>
     <string name="piko_pref_cts_section">\'Twórcy treści polecani dla Ciebie\'</string>
     <string name="piko_pref_ctj_section">\'Dołącz do społeczności\'</string>
