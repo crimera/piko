@@ -1,3 +1,9 @@
+## [1.34.1](https://github.com/crimera/piko/compare/v1.34.0...v1.34.1) (2024-08-06)
+
+### Bug Fixes
+
+* **Twitter:** Fix aapt breakage due to tag mismatch ([730a51c](https://github.com/crimera/piko/commit/730a51c20f464bbe2b680004721161dd5f34dadf))
+
 ## [1.34.0](https://github.com/crimera/piko/compare/v1.33.0...v1.34.0) (2024-08-06)
 
 ### Bug Fixes
