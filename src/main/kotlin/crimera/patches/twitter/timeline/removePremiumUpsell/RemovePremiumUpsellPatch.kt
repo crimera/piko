@@ -1,8 +1,7 @@
 package crimera.patches.twitter.timeline.removePremiumUpsell
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
+import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.fingerprint.MethodFingerprint
 import app.revanced.patcher.patch.BytecodePatch
@@ -10,7 +9,6 @@ import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
@@ -32,7 +30,7 @@ object DisablePremiumUpsellPatch:BytecodePatch(
 ) {
     override fun execute(context: BytecodeContext) {
 
-        val PREF = "${SettingsPatch.PREF_DESCRIPTOR};->removePremiumUpsell(Ljava/lang/String;)Ljava/lang/String;"
+        val PREF = "invoke-static {}, ${SettingsPatch.PREF_DESCRIPTOR};->removePremiumUpsell()Z"
 
         val result = RemovePremiumUpsellPatchFingerprint.result
             ?: throw PatchException("RemovePremiumUpsellPatchFingerprint not found")
@@ -40,13 +38,9 @@ object DisablePremiumUpsellPatch:BytecodePatch(
         val methods = result.mutableMethod
         val instructions = methods.getInstructions()
 
-        val cond_loc = instructions.filter { it.opcode == Opcode.CONST_STRING }[1].location.index + 3
-        val reg = methods.getInstruction<OneRegisterInstruction>(cond_loc).registerA
+        val cond_loc = instructions.first { it.opcode == Opcode.INVOKE_VIRTUAL }.location.index
 
-        methods.addInstructions(cond_loc,"""
-            invoke-static {v$reg}, $PREF
-             move-result-object v$reg
-        """.trimIndent())
+        methods.addInstruction(cond_loc+1,PREF)
 
         SettingsStatusLoadFingerprint.enableSettings("removePremiumUpsell")
     }
