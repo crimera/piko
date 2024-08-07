@@ -1,3 +1,29 @@
+## [1.34.1](https://github.com/crimera/piko/compare/v1.34.0...v1.34.1) (2024-08-06)
+
+### Bug Fixes
+
+* **Twitter:** Fix aapt breakage due to tag mismatch ([730a51c](https://github.com/crimera/piko/commit/730a51c20f464bbe2b680004721161dd5f34dadf))
+
+## [1.34.0](https://github.com/crimera/piko/compare/v1.33.0...v1.34.0) (2024-08-06)
+
+### Bug Fixes
+
+* **Bring back twitter:** Change x icon to legacy twitter. ([3006f47](https://github.com/crimera/piko/commit/3006f47d973ffde1622ae1544590a11e923c68ab))
+* **Twitter:** `Customize Navigation Bar items` in/from `10.53.0-beta.1` ([e8154fb](https://github.com/crimera/piko/commit/e8154fb0ffa91e6d3ed2812bed3f71a034f3bc01))
+* **Twitter:** Fix `Remove premium upsell` patch ([4df5e32](https://github.com/crimera/piko/commit/4df5e32088eb57702c5f30e20b3c75d2ec11ee87))
+
+### Features
+
+* **Twitter:** Added `Remove main event` patch ([806598d](https://github.com/crimera/piko/commit/806598d7154c538fb238f3d9b186746cb8c956bf))
+
+### Updates
+
+* **Translations:** Translation updates ([4bf8a8d](https://github.com/crimera/piko/commit/4bf8a8dd954a7013a65ceee9d39521fd445d069d))
+
+### Refactors
+
+* **Twitter:** Seperated/Added `Remove superhero event` patch ([d60ee17](https://github.com/crimera/piko/commit/d60ee17294b311bb964e3cc6200465218d7baca3))
+
 ## [1.34.0-dev.2](https://github.com/crimera/piko/compare/v1.34.0-dev.1...v1.34.0-dev.2) (2024-08-05)
 
 ### Updates
