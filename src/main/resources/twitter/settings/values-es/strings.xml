@@ -32,6 +32,8 @@
     <string name="piko_title_ads">Anuncios</string>
     <string name="piko_pref_hide_promoted_posts">Publicaciones promocionadas</string>
     <string name="piko_pref_hide_g_ads">Anuncios de Google</string>
+    <string name="piko_pref_hide_main_event">Evento principal (Explorar)</string>
+    <string name="piko_pref_hide_superhero_event">Evento de superhéroes (Explorar)</string>
     <string name="piko_pref_wtf_section">Sección "A quién seguir"</string>
     <string name="piko_pref_cts_section">Sección "Creadores a los que suscribirse"</string>
     <string name="piko_pref_ctj_section">Sección "Comunidad a la que unirse"</string>
