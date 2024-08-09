@@ -1,3 +1,9 @@
+## [1.35.0-dev.1](https://github.com/crimera/piko/compare/v1.34.1...v1.35.0-dev.1) (2024-08-09)
+
+### Features
+
+* **Hook feature flag:** Added ability to search for supported flags. ([28a2c0a](https://github.com/crimera/piko/commit/28a2c0a6ca97fa50711ce44cfa1f20b5147e906f))
+
 ## [1.34.1](https://github.com/crimera/piko/compare/v1.34.0...v1.34.1) (2024-08-06)
 
 ### Bug Fixes
