@@ -5,6 +5,7 @@
               android:padding="10dp"
               android:orientation="vertical">
 
+    <!--TODO: add string to resources-->
     <EditText
             android:hint="Search"
             android:id="@+id/filterEditText"
