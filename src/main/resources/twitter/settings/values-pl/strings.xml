@@ -32,8 +32,9 @@
     <string name="piko_title_ads">Reklamy</string>
     <string name="piko_pref_hide_promoted_posts">promowane posty</string>
     <string name="piko_pref_hide_g_ads">reklamy Google</string>
-    <string name="piko_pref_hide_main_event">baner wydarzenia głównego (w wyszukiwarce)</string>
-    <string name="piko_pref_hide_superhero_event">baner reklamowy superhero (w wyszukiwarce)</string>
+    <string name="piko_pref_hide_main_event">baner wydarzenia głównego (wyszukiwarka)</string>
+    <string name="piko_pref_hide_superhero_event">baner reklamowy superhero (wyszukiwarka)</string>
+    <string name="piko_pref_hide_videos_for_you">filmy dla Ciebie (wyszukiwarka)</string>
     <string name="piko_pref_wtf_section">\'Warci obserwowania\'</string>
     <string name="piko_pref_cts_section">\'Twórcy treści polecani dla Ciebie\'</string>
     <string name="piko_pref_ctj_section">\'Dołącz do społeczności\'</string>
@@ -62,6 +63,7 @@
     <string name="piko_pref_feature_flags">Flagi funkcjonalne</string>
     <string name="piko_pref_edit_flag_title">Edytuj flagę</string>
     <string name="piko_pref_add_flag_title">Dodaj flagę</string>
+    <string name="piko_pref_search_flags">Wyszukaj flagi</string>
     <string name="piko_pref_show_sensitive_media">Wyświetlaj wrażliwe treści</string>
     <string name="piko_pref_selectable_text">Możliwość zaznaczenia tekstu</string>
     <string name="piko_pref_clear_tracking_params">Usuń parametry śledzenia</string>
