@@ -5,8 +5,17 @@ import app.revanced.patcher.patch.ResourcePatch
 import app.revanced.util.ResourceGroup
 import app.revanced.util.copyResources
 
-object FeatureFlagResourcePatch: ResourcePatch() {
+object FeatureFlagResourcePatch : ResourcePatch() {
     override fun execute(context: ResourceContext) {
-        context.copyResources("twitter/settings", ResourceGroup("layout", "feature_flags_view.xml", "item_row.xml"))
+        context.copyResources(
+            "twitter/settings",
+            ResourceGroup(
+                "layout",
+                "feature_flags_view.xml",
+                "item_row.xml",
+                "search_item_row.xml",
+                "search_dialog.xml"
+            )
+        )
     }
 }

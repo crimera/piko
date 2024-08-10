@@ -32,6 +32,8 @@
     <string name="piko_title_ads">Anuncios</string>
     <string name="piko_pref_hide_promoted_posts">Publicaciones promocionadas</string>
     <string name="piko_pref_hide_g_ads">Anuncios de Google</string>
+    <string name="piko_pref_hide_main_event">Evento principal (Explorar)</string>
+    <string name="piko_pref_hide_superhero_event">Evento de superhéroes (Explorar)</string>
     <string name="piko_pref_wtf_section">Sección "A quién seguir"</string>
     <string name="piko_pref_cts_section">Sección "Creadores a los que suscribirse"</string>
     <string name="piko_pref_ctj_section">Sección "Comunidad a la que unirse"</string>
@@ -60,7 +62,8 @@
     <string name="piko_pref_feature_flags">Flags de características</string>
     <string name="piko_pref_edit_flag_title">Editar flag</string>
     <string name="piko_pref_add_flag_title">Añadir flag</string>
-    <string name="piko_pref_show_sensitive_media">Mostrar medios sensibles</string>
+    <string name="piko_pref_search_flags">Buscar flags</string>
+    <string name="piko_pref_show_sensitive_media">Mostrar material delicado</string>
     <string name="piko_pref_selectable_text">Texto seleccionable</string>
     <string name="piko_pref_clear_tracking_params">Limpiar parámetros de seguimiento</string>
     <string name="piko_pref_unshorten_link">No usar URL acortadas</string>
