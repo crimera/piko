@@ -1,3 +1,17 @@
+## [1.35.0-dev.3](https://github.com/crimera/piko/compare/v1.35.0-dev.2...v1.35.0-dev.3) (2024-08-10)
+
+### Bug Fixes
+
+* **Twitter:** fix `Remove videos for you` patch ([b19f943](https://github.com/crimera/piko/commit/b19f943ee8a19ea158e89cc031ae037e43da6e50))
+
+### Features
+
+* **Twitter:** Added `Remove videos for you` patch ([25934a2](https://github.com/crimera/piko/commit/25934a2b58a8eefc05d4313b623580371d964a12))
+
+### Refactors
+
+* **Twitter:** Added quick settings button in side drawer ([c0152e3](https://github.com/crimera/piko/commit/c0152e327e8b2e3fa2ad57d63c35738d4575cc98))
+
 ## [1.35.0-dev.2](https://github.com/crimera/piko/compare/v1.35.0-dev.1...v1.35.0-dev.2) (2024-08-09)
 
 ### Updates
