@@ -62,6 +62,7 @@
     <string name="piko_pref_feature_flags">Feature flags</string>
     <string name="piko_pref_edit_flag_title">Edit flag</string>
     <string name="piko_pref_add_flag_title">Add flag</string>
+    <string name="piko_pref_search_flags">Search flags</string>
     <string name="piko_pref_show_sensitive_media">Show sensitive media</string>
     <string name="piko_pref_selectable_text">Selectable text</string>
     <string name="piko_pref_clear_tracking_params">Clear tracking params</string>
