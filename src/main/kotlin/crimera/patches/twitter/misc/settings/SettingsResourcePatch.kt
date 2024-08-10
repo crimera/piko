@@ -30,6 +30,22 @@ object SettingsResourcePatch: ResourcePatch() {
             parent.appendChild(prefMod)
         }
 
+        //credits aero
+        val sideBarLayout = context["res/layout/main_activity_app_bar.xml"]
+        if (!sideBarLayout.exists()) throw PatchException("settings_root not found")
+
+        context.xmlEditor["res/layout/main_activity_app_bar.xml"].use { editor ->
+            val parent = editor.file.getElementsByTagName("FrameLayout").item(1) as Element
+
+            val sideBtn = editor.file.createElement("app.revanced.integrations.twitter.settings.PikoSettingsButton")
+            sideBtn.setAttribute("android:text", "@string/piko_title_settings")
+            sideBtn.setAttribute("android:layout_width", "@dimen/spaces_card_min_height")
+            sideBtn.setAttribute("android:layout_height", "@dimen/docker_height")
+            sideBtn.setAttribute("android:layout_gravity", "bottom|right")
+
+            parent.appendChild(sideBtn)
+        }
+
         //credits @inotia00
         context.copyXmlNode("twitter/settings", "values/strings.xml", "resources")
         context.copyXmlNode("twitter/settings", "values/arrays.xml", "resources")
