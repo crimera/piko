@@ -1,3 +1,22 @@
+## [1.35.0](https://github.com/crimera/piko/compare/v1.34.1...v1.35.0) (2024-08-10)
+
+### Bug Fixes
+
+* **Twitter:** fix `Remove videos for you` patch ([b19f943](https://github.com/crimera/piko/commit/b19f943ee8a19ea158e89cc031ae037e43da6e50))
+
+### Features
+
+* **Hook feature flag:** Added ability to search for supported flags. ([28a2c0a](https://github.com/crimera/piko/commit/28a2c0a6ca97fa50711ce44cfa1f20b5147e906f))
+* **Twitter:** Added `Remove videos for you` patch ([25934a2](https://github.com/crimera/piko/commit/25934a2b58a8eefc05d4313b623580371d964a12))
+
+### Updates
+
+* **Hook feature flag:** Improve flag matching in search. ([d7f0827](https://github.com/crimera/piko/commit/d7f0827218a9501a0b2e061990ce60a0af18ba0e))
+
+### Refactors
+
+* **Twitter:** Added quick settings button in side drawer ([c0152e3](https://github.com/crimera/piko/commit/c0152e327e8b2e3fa2ad57d63c35738d4575cc98))
+
 ## [1.35.0-dev.3](https://github.com/crimera/piko/compare/v1.35.0-dev.2...v1.35.0-dev.3) (2024-08-10)
 
 ### Bug Fixes
