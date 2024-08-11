@@ -1,3 +1,14 @@
+## [1.36.0-dev.1](https://github.com/crimera/piko/compare/v1.35.0...v1.36.0-dev.1) (2024-08-11)
+
+### Features
+
+* **Twitter:** Added `Customize reply sort filter` patch ([121b8a6](https://github.com/crimera/piko/commit/121b8a6e9345ea462ad9cb06f7b20f863fc08d4a))
+* **Twitter:** Added Remember filter for `Customize reply sort filter` ([24df398](https://github.com/crimera/piko/commit/24df3987e5008aeca52c11a8b20714766cdafff1))
+
+### Updates
+
+* **Twitter:** updated string ([60afc68](https://github.com/crimera/piko/commit/60afc683c4be02ba4d5cdc92879aad2e6755b14b))
+
 ## [1.35.0](https://github.com/crimera/piko/compare/v1.34.1...v1.35.0) (2024-08-10)
 
 ### Bug Fixes
