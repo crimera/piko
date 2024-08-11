@@ -81,6 +81,7 @@
         <item>@string/detail_filter_trending_title</item>
         <item>@string/detail_filter_recent_title</item>
         <item>@string/detail_filter_most_liked_title</item>
+        <item>@string/piko_pref_customisation_reply_sorting_remember</item>
     </string-array>
 
 </resources>

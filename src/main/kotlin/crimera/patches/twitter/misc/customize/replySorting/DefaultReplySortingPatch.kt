@@ -23,6 +23,14 @@ object ReplySortingInvokeClassFinderFingerprint: MethodFingerprint(
     }
 )
 
+object ReplySortingLastSelectedFinderFingerprint: MethodFingerprint(
+    strings = listOf(
+        "controller_data",
+        "reply_sorting_enabled",
+        "reply_sorting"
+    )
+)
+
 
 @Patch(
     name = "Customize reply sort filter",
@@ -32,12 +40,11 @@ object ReplySortingInvokeClassFinderFingerprint: MethodFingerprint(
 )
 @Suppress("unused")
 object DefaultReplySortingPatch:BytecodePatch(
-    setOf(SettingsStatusLoadFingerprint,ReplySortingInvokeClassFinderFingerprint)
+    setOf(SettingsStatusLoadFingerprint,ReplySortingInvokeClassFinderFingerprint,ReplySortingLastSelectedFinderFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
         val result = ReplySortingInvokeClassFinderFingerprint.result
             ?:throw PatchException("ReplySortingInvokeClassFinderFingerprint not found")
-
 
         val replySortingInvokeClass= result.classDef.fields.first().type
         val method = context.findClass(replySortingInvokeClass)!!.mutableClass.directMethods.first()
@@ -52,6 +59,22 @@ object DefaultReplySortingPatch:BytecodePatch(
                 invoke-static{v0}, $rClass->valueOf(Ljava/lang/String;)$rClass
                 move-result-object v$r0
             """.trimIndent())
+
+        val result2 = ReplySortingLastSelectedFinderFingerprint.result
+            ?:throw PatchException("ReplySortingLastSelectedFinderFingerprint not found")
+
+        val method2 = result2.mutableMethod
+        result2.scanResult.stringsScanResult!!.matches.forEach{ match ->
+            val str = match.string
+            if(str.equals("reply_sorting")){
+                var loc = match.index
+                var r = method2.getInstruction<OneRegisterInstruction>(loc-1).registerA
+                method2.addInstructions(loc,"""
+                    invoke-static {v$r},${SettingsPatch.PREF_DESCRIPTOR};->setReplySortFilter(Ljava/lang/String;)V
+                """.trimIndent())
+                return@forEach
+            }
+        }
 
         SettingsStatusLoadFingerprint.enableSettings("defaultReplySortFilter")
 
