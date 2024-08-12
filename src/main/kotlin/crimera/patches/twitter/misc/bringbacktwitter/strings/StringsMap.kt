@@ -4,7 +4,6 @@ object StringsMap {
     val replacementMap = mapOf(
         "values" to en_rGB.values,
         "values-en-rGB" to en_rGB.values,
-        "values-ja" to ja.values,
         "values-ru" to ru.values,
         "values-hi" to hi.values,
         "values-pt-rBR" to pt_rBR.values,
