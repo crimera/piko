@@ -12,7 +12,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
     description = "Delete entries from database(cache)",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false
+    use = true
 )
 object deleteFromDatabasePatch:BytecodePatch(
     setOf(SettingsStatusLoadFingerprint)

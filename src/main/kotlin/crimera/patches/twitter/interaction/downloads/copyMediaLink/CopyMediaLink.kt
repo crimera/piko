@@ -27,7 +27,7 @@ object DownloadCallFingerprint: MethodFingerprint(
     name = "Add ability to copy media link",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     dependencies = [SettingsPatch::class],
-    use = false
+    use = true
 )
 object CopyMediaLink:BytecodePatch(
     setOf(DownloadCallFingerprint, SettingsStatusLoadFingerprint)

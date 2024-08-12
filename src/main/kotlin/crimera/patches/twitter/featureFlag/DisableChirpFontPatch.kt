@@ -11,7 +11,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
 
 @Patch(
     name = "Disable chirp font",
-    use = false,
+    use = true,
     dependencies = [SettingsPatch::class,FeatureFlagPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")]
 )

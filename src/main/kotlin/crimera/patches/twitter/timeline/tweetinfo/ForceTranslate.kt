@@ -12,7 +12,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
     description = "Get translate option for all posts",
     dependencies = [SettingsPatch::class, TweetInfoHook::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false
+    use = true
 )
 object ForceTranslate :BytecodePatch(
     setOf(SettingsStatusLoadFingerprint)
