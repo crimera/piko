@@ -12,7 +12,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
     description = "Hides promote button under self posts",
     dependencies = [SettingsPatch::class, TweetInfoHook::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false
+    use = true
 )
 object HidePromoteButton :BytecodePatch(
     setOf(SettingsStatusLoadFingerprint)

@@ -11,7 +11,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
     name = "Hide Community Notes",
     dependencies = [SettingsPatch::class, TweetInfoHook::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false
+    use = true
 )
 object HideCommunityNotes :BytecodePatch(
     setOf(SettingsStatusLoadFingerprint)

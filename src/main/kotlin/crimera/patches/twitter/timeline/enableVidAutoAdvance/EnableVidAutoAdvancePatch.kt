@@ -23,7 +23,7 @@ object EnableVidAutoAdvancePatchFingerprint: MethodFingerprint(
     description = "Control video auto scroll in immersive view",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     dependencies = [SettingsPatch::class],
-    use = false
+    use = true
 )
 @Suppress("unused")
 class EnableVidAutoAdvancePatch : BytecodePatch(
