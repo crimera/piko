@@ -1,3 +1,9 @@
+## [1.37.0-dev.1](https://github.com/crimera/piko/compare/v1.36.0...v1.37.0-dev.1) (2024-08-13)
+
+### Features
+
+* Enable recent patches by default ([e84f358](https://github.com/crimera/piko/commit/e84f358e494830fdecdc3dd12662b5f5ccd644b3))
+
 ## [1.36.0](https://github.com/crimera/piko/compare/v1.35.0...v1.36.0) (2024-08-12)
 
 ### Features
