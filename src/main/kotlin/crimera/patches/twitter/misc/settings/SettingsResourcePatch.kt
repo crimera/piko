@@ -38,9 +38,14 @@ object SettingsResourcePatch: ResourcePatch() {
             val parent = editor.file.getElementsByTagName("FrameLayout").item(1) as Element
 
             val sideBtn = editor.file.createElement("app.revanced.integrations.twitter.settings.PikoSettingsButton")
-            sideBtn.setAttribute("android:text", "@string/piko_title_settings")
-            sideBtn.setAttribute("android:layout_width", "@dimen/spaces_card_min_height")
+            sideBtn.setAttribute("android:text", "Piko")
+            sideBtn.setAttribute("android:textAllCaps", "false")
+            sideBtn.setAttribute("android:background", "?android:attr/selectableItemBackground")
+            sideBtn.setAttribute("android:drawableLeft", "@drawable/ic_vector_settings_stroke")
             sideBtn.setAttribute("android:layout_height", "@dimen/docker_height")
+            sideBtn.setAttribute("android:layout_width", "wrap_content")
+            sideBtn.setAttribute("android:padding", "10dp")
+            sideBtn.setAttribute("android:layout_marginBottom", "2.3dp")
             sideBtn.setAttribute("android:layout_gravity", "bottom|right")
 
             parent.appendChild(sideBtn)
