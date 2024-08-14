@@ -105,8 +105,8 @@
     <string name="piko_pref_customisation_reply_sorting_remember">前回の選択を記憶</string>
 
     <string name="piko_title_backup">バックアップと復元</string>
-    <string name="piko_pref_export">エクスポート %s</string>
-    <string name="piko_pref_import">インポート %s</string>
+    <string name="piko_pref_export">エクスポート: %s</string>
+    <string name="piko_pref_import">インポート: %s</string>
     <string name="piko_pref_success">成功</string>
     <string name="piko_pref_export_failed">エラー: %sのエクスポートに失敗しました</string>
     <string name="piko_pref_import_failed">エラー: %sのインポートに失敗しました</string>
