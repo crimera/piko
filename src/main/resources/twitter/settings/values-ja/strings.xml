@@ -24,18 +24,21 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">メディアリンクをコピー</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">メディアリンクを共有</string>
 
-    <string name="piko_title_native_downloader">既定のダウンローダー</string>
+    <string name="piko_title_native_downloader">ネイティブダウンローダー</string>
     <string name="piko_pref_native_downloader_alert_title">メディアをダウンロード</string>
     <string name="piko_pref_native_downloader_download_all">すべてダウンロード</string>
     <string name="piko_pref_native_downloader_no_media">メディアが見つかりません</string>
 
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモーションポスト</string>
-    <string name="piko_pref_hide_g_ads">Google の広告</string>
+    <string name="piko_pref_hide_g_ads">Google AdMobの広告</string>
+    <string name="piko_pref_hide_main_event">[話題を検索] タブのメインイベント</string>
+    <string name="piko_pref_hide_superhero_event">[話題を検索] タブのスーパーヒーローイベント</string>
+    <string name="piko_pref_hide_videos_for_you">[話題を検索] タブのおすすめ動画</string>
     <string name="piko_pref_wtf_section">「Who to follow」</string>
     <string name="piko_pref_cts_section">「おすすめクリエイター」</string>
     <string name="piko_pref_ctj_section">「新しいコミュニティを見つける」</string>
-    <string name="piko_pref_ryb_section">「ブックマークを再表示」</string>
+    <string name="piko_pref_ryb_section">「ブックマークに再アクセス」</string>
     <string name="piko_pref_pinned_posts_section">「フォロー中のユーザーが固定」</string>
     <string name="piko_pref_hide_detailed_posts">関連ポスト欄 (返信内)</string>
     <string name="piko_pref_hide_trends">プロモーショントレンド</string>
@@ -55,11 +58,12 @@
     <string name="piko_pref_hide_view_count">閲覧数</string>
     <string name="piko_pref_custom_share_domain">カスタム共有ドメイン</string>
     <string name="piko_pref_custom_share_domain_desc">ポストを共有するときに使用するドメイン</string>
-    <string name="piko_pref_browser_chooser">外部ブラウザを使用</string>
-    <string name="piko_pref_browser_chooser_desc">アプリ内ブラウザではなく、外部ブラウザでリンクを開きます</string>
+    <string name="piko_pref_browser_chooser">ブラウザ選択ダイアログを使用</string>
+    <string name="piko_pref_browser_chooser_desc">アプリ内ブラウザではなく、ブラウザ選択ダイアログでリンクを開きます</string>
     <string name="piko_pref_feature_flags">機能フラグ</string>
     <string name="piko_pref_edit_flag_title">フラグを編集</string>
     <string name="piko_pref_add_flag_title">フラグを追加</string>
+    <string name="piko_pref_search_flags">フラグを検索</string>
     <string name="piko_pref_show_sensitive_media">センシティブなメディアを自動で表示</string>
     <string name="piko_pref_selectable_text">選択可能なテキスト</string>
     <string name="piko_pref_clear_tracking_params">トラッキングパラメータを削除</string>
@@ -67,7 +71,7 @@
     <string name="piko_pref_unshorten_link_desc">t.coの短縮URLを取り除く</string>
     <string name="piko_pref_round_off_numbers">数字を短く表記</string>
     <string name="piko_pref_round_off_numbers_desc">65,536を6.5万のように数字を短く表記します</string>
-    <string name="piko_pref_debug_menu">ポストのデバッグメニューを表示</string>
+    <string name="piko_pref_debug_menu">ポストのデバッグメニュー</string>
 
     <string name="piko_title_timeline">タイムライン</string>
     <string name="piko_pref_disable_auto_timeline_scroll">起動時の自動TLスクロールを無効化</string>
@@ -97,13 +101,15 @@
     <string name="piko_pref_customisation_sidebartabs">非表示にするサイドバーの項目</string>
     <string name="piko_pref_customisation_navbartabs">非表示にするナビゲーションバーの項目</string>
     <string name="piko_pref_customisation_inlinetabs">非表示にするインラインバーの項目</string>
+    <string name="piko_pref_customisation_reply_sorting">デフォルトの返信の並び替え</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">前回の選択を記憶</string>
 
     <string name="piko_title_backup">バックアップと復元</string>
-    <string name="piko_pref_export">エクスポート %s</string>
-    <string name="piko_pref_import">インポート %s</string>
+    <string name="piko_pref_export">エクスポート: %s</string>
+    <string name="piko_pref_import">インポート: %s</string>
     <string name="piko_pref_success">成功</string>
-    <string name="piko_pref_export_failed">エラー: エクスポート失敗</string>
-    <string name="piko_pref_import_failed">エラー: インポート失敗</string>
+    <string name="piko_pref_export_failed">エラー: %sのエクスポートに失敗しました</string>
+    <string name="piko_pref_import_failed">エラー: %sのインポートに失敗しました</string>
     <string name="piko_pref_export_no_uri">エラー: 宛先が指定されていません</string>
     <string name="piko_pref_import_no_uri">エラー: ファイルが提供されていません</string>
 
@@ -115,7 +121,7 @@
     <string name="piko_pref_included">適用済み</string>
     <string name="piko_pref_excluded">除外済み</string>
     <string name="piko_pref_app_restart_rec">アプリの再起動を推奨します</string>
-    <string name="piko_pref_remove">%s を削除</string>
-    <string name="piko_pref_enable">%s を有効化</string>
+    <string name="piko_pref_remove">%sを削除</string>
+    <string name="piko_pref_enable">%sを有効化</string>
 
 </resources>
