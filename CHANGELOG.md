@@ -1,3 +1,9 @@
+## [1.37.0-dev.2](https://github.com/crimera/piko/compare/v1.37.0-dev.1...v1.37.0-dev.2) (2024-08-14)
+
+### Updates
+
+* Improve quick settings appearance ([6dc27b4](https://github.com/crimera/piko/commit/6dc27b4a888d0028e455be1e1b41b83cdd7f7940))
+
 ## [1.37.0-dev.1](https://github.com/crimera/piko/compare/v1.36.0...v1.37.0-dev.1) (2024-08-13)
 
 ### Features
