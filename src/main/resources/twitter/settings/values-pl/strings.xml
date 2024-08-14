@@ -101,6 +101,8 @@
     <string name="piko_pref_customisation_sidebartabs">Elementy do ukrycia w pasku bocznym</string>
     <string name="piko_pref_customisation_navbartabs">Elementy do ukrycia w pasku nawigacyjnym</string>
     <string name="piko_pref_customisation_inlinetabs">Elementy do ukrycia w pasku pod postem</string>
+    <string name="piko_pref_customisation_reply_sorting">Domyślny filtr sortowania odpowiedzi</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">Zapamiętaj ostatnio wybrany</string>
 
     <string name="piko_title_backup">Kopia zapasowa i przywracanie</string>
     <string name="piko_pref_export">Eksportowanie %s</string>
