@@ -101,6 +101,8 @@
     <string name="piko_pref_customisation_sidebartabs">Elementos de la barra lateral a ocultar</string>
     <string name="piko_pref_customisation_navbartabs">Elementos de la barra de navegación a ocultar</string>
     <string name="piko_pref_customisation_inlinetabs">Elementos de la barra en línea a ocultar</string>
+    <string name="piko_pref_customisation_reply_sorting">Filtro de clasificación de respuestas por defecto</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">Previamente seleccionado</string>
 
     <string name="piko_title_backup">Respaldo y restauración</string>
     <string name="piko_pref_export">Exportar %s</string>
