@@ -1,0 +1,76 @@
+name: Notificación a Telegram cuando se modifica strings.xml
+
+# El workflow se activa en el branch 'dev'
+on:
+  push:
+    branches:
+      - dev  # Monitorea la rama 'dev'
+    paths:
+      - src/main/resources/twitter/settings/values/strings.xml  # Monitorea cambios en este archivo
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Chequear el repositorio
+      uses: actions/checkout@v3
+
+    - name: Detectar cambios en strings.xml
+      id: changes
+      run: |
+        git diff HEAD~1 -- src/main/resources/twitter/settings/values/strings.xml > changes.diff
+        if [ -s changes.diff ]; then
+          echo "Archivo modificado"
+        else:
+          echo "No hay cambios en strings.xml"
+          exit 1
+
+    - name: Enviar notificación a Telegram
+      if: success()  # Solo se ejecuta si hay cambios
+      run: |
+        TELEGRAM_TOKEN="name: Notificación a Telegram cuando se modifica strings.xml
+
+# El workflow se activa en el branch 'dev'
+on:
+  push:
+    branches:
+      - dev  # Monitorea la rama 'dev'
+    paths:
+      - src/main/resources/twitter/settings/values/strings.xml  # Monitorea cambios en este archivo
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Chequear el repositorio
+      uses: actions/checkout@v3
+
+    - name: Detectar cambios en strings.xml
+      id: changes
+      run: |
+        git diff HEAD~1 -- src/main/resources/twitter/settings/values/strings.xml > changes.diff
+        if [ -s changes.diff ]; then
+          echo "Archivo modificado"
+        else:
+          echo "No hay cambios en strings.xml"
+          exit 1
+
+    - name: Enviar notificación a Telegram
+      if: success()  # Solo se ejecuta si hay cambios
+      run: |
+        TELEGRAM_TOKEN="7376274245:7376274245:AAEzQfiNo6cx4lNrbfix_eLZ4Nay5duCsRA"
+        CHAT_ID="@Eve_eddys_bot"  # Reemplaza con tu ID de chat de Telegram
+        DIFF=$(cat changes.diff)
+        curl -s -X POST https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage \
+          -d chat_id=${CHAT_ID} \
+          -d text="El archivo strings.xml ha sido modificado:\n\`\`\`\n${DIFF}\n\`\`\`" \
+          -d parse_mode=Markdown
+"
+        CHAT_ID="YOUR_CHAT_ID"  # Reemplaza con tu ID de chat de Telegram
+        DIFF=$(cat changes.diff)
+        curl -s -X POST https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage \
+          -d chat_id=${CHAT_ID} \
+          -d text="El archivo strings.xml ha sido modificado:\n\`\`\`\n${DIFF}\n\`\`\`" \
+          -d parse_mode=Markdown
