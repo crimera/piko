@@ -1,3 +1,14 @@
+## [1.37.0](https://github.com/crimera/piko/compare/v1.36.0...v1.37.0) (2024-08-15)
+
+### Features
+
+* Enable recent patches by default ([e84f358](https://github.com/crimera/piko/commit/e84f358e494830fdecdc3dd12662b5f5ccd644b3))
+* Quick settings button is now optional ([e9e54e5](https://github.com/crimera/piko/commit/e9e54e5e44437b92db9700c363f0abd9117cc325))
+
+### Updates
+
+* Improve quick settings appearance ([6dc27b4](https://github.com/crimera/piko/commit/6dc27b4a888d0028e455be1e1b41b83cdd7f7940))
+
 ## [1.37.0-dev.3](https://github.com/crimera/piko/compare/v1.37.0-dev.2...v1.37.0-dev.3) (2024-08-15)
 
 ### Features
