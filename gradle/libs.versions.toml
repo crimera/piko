@@ -1,11 +1,26 @@
 [versions]
-revanced-patcher = "19.2.0"
-smali = "3.0.7"
-guava = "33.2.1-jre"
+revanced-patcher = "20.0.0-dev.2"
+# Tracking https://github.com/google/smali/issues/64.
+#noinspection GradleDependency
+smali = "3.0.5"
 gson = "2.11.0"
+# 8.3.0 causes java verifier error: https://github.com/ReVanced/revanced-patches/issues/2818.
+#noinspection GradleDependency
+agp = "8.2.2"
+annotation = "1.8.1"
+appcompat = "1.7.0"
+okhttp = "5.0.0-alpha.14"
+retrofit = "2.11.0"
+guava = "33.0.0-jre"
 
 [libraries]
-revanced-patcher = { module = "app.revanced:revanced-patcher", version.ref = "revanced-patcher" }
-smali = { module = "com.android.tools.smali:smali", version.ref = "smali" }
-guava = { module = "com.google.guava:guava", version.ref = "guava" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+
+
+[plugins]
+android-library = { id = "com.android.library", version.ref = "agp" }
