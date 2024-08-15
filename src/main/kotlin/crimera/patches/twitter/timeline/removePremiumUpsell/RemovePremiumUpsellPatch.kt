@@ -22,7 +22,7 @@ object RemovePremiumUpsellPatchFingerprint: MethodFingerprint(
     description = "Removes premium upsell in home timeline",
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     dependencies = [SettingsPatch::class],
-    use = false
+    use = true
 )
 @Suppress("unused")
 object DisablePremiumUpsellPatch:BytecodePatch(

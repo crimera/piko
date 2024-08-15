@@ -36,7 +36,7 @@ object NavBarFixFingerprint: MethodFingerprint(
     name = "Customize Navigation Bar items",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    use = false,
+    use = true,
     requiresIntegrations = true
 )
 @Suppress("unused")

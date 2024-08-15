@@ -28,6 +28,9 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
 
     val drawableIcons = arrayOf(
         "ic_vector_twitter",
+        "ic_vector_home",
+        "ic_vector_twitter_white",
+        "ic_vector_home_stroke",
         "splash_screen_icon"
     ).map { "$it.xml" }.toTypedArray()
 

@@ -18,7 +18,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
     description = "Adds an option to hide Floating action button",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")] ,
-    use = false
+    use = true
 )
 @Suppress("unused")
 class HideFABPatch :BytecodePatch(
