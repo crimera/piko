@@ -42,6 +42,7 @@ object SettingsResourcePatch: ResourcePatch() {
             sideBtn.setAttribute("android:textAllCaps", "false")
             sideBtn.setAttribute("android:background", "?android:attr/selectableItemBackground")
             sideBtn.setAttribute("android:drawableLeft", "@drawable/ic_vector_settings_stroke")
+            sideBtn.setAttribute("android:drawableTint", "?attr/coreColorPrimaryText")
             sideBtn.setAttribute("android:layout_height", "@dimen/docker_height")
             sideBtn.setAttribute("android:layout_width", "wrap_content")
             sideBtn.setAttribute("android:padding", "10dp")
