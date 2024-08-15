@@ -1,3 +1,9 @@
+## [1.37.0-dev.3](https://github.com/crimera/piko/compare/v1.37.0-dev.2...v1.37.0-dev.3) (2024-08-15)
+
+### Features
+
+* Quick settings button is now optional ([e9e54e5](https://github.com/crimera/piko/commit/e9e54e5e44437b92db9700c363f0abd9117cc325))
+
 ## [1.37.0-dev.2](https://github.com/crimera/piko/compare/v1.37.0-dev.1...v1.37.0-dev.2) (2024-08-14)
 
 ### Updates
