@@ -1,32 +1,48 @@
 name: Sync dev to Test
 
-# Este workflow se ejecuta cuando se hace push a la rama "dev"
 on:
   push:
     branches:
-      - dev  # Cambia esto si el nombre de la rama es diferente
+      - dev
 
 jobs:
   sync_branches:
     runs-on: ubuntu-latest
 
     steps:
-      # Configura Git en el entorno de ejecución de la acción
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Importante para traer todas las ramas y poder hacer merge
+          fetch-depth: 0
 
       - name: Set up Git user
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
-      # Merge de la rama "dev" en "Test"
-      - name: Merge dev into Test
+      - name: Try to Merge dev into Test
+        id: merge
         run: |
           git checkout Test
           git merge dev --no-ff --commit -m "Auto-merge dev into Test"
+        continue-on-error: true  # Continúa incluso si hay un error
+
+      # Push de los cambios si el merge fue exitoso
+      - name: Push changes to Test branch
+        if: success()  # Solo se ejecuta si el merge tuvo éxito
+        run: |
+          git push origin Test
+        env:
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+
+      # Enviar notificación si hay conflictos en el merge
+      - name: Notify on Merge Conflict
+        if: failure()  # Solo se ejecuta si el paso de merge falla
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.CHAT_ID }} \
+          -d text="🚨 Conflicto detectado al intentar hacer merge de 'dev' en 'Test'. Requiere intervención manual."
+
 
       # Subir cambios si el merge fue exitoso
       - name: Push changes
