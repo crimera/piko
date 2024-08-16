@@ -42,11 +42,3 @@ jobs:
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
           -d chat_id=${{ secrets.CHAT_ID }} \
           -d text="🚨 Conflicto detectado al intentar hacer merge de 'dev' en 'Test'. Requiere intervención manual."
-
-
-      # Subir cambios si el merge fue exitoso
-      - name: Push changes
-        run: |
-          git push origin Test
-        env:
-          GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}  # Usa el token secreto de GitHub para autenticación
