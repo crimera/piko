@@ -1,0 +1,36 @@
+name: Sync dev to Test
+
+# Este workflow se ejecuta cuando se hace push a la rama "dev"
+on:
+  push:
+    branches:
+      - dev  # Cambia esto si el nombre de la rama es diferente
+
+jobs:
+  sync_branches:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Configura Git en el entorno de ejecución de la acción
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Importante para traer todas las ramas y poder hacer merge
+
+      - name: Set up Git user
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      # Merge de la rama "dev" en "Test"
+      - name: Merge dev into Test
+        run: |
+          git checkout Test
+          git merge dev --no-ff --commit -m "Auto-merge dev into Test"
+
+      # Subir cambios si el merge fue exitoso
+      - name: Push changes
+        run: |
+          git push origin Test
+        env:
+          GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}  # Usa el token secreto de GitHub para autenticación
