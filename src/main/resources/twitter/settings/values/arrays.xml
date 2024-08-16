@@ -40,6 +40,7 @@
         <item>@string/drawer_professional_tools_header_title</item>
         <item>@string/drawer_media_transparency_title</item>
         <item>@string/drawer_imprint_title</item>
+        <item>@string/drawer_settings_title</item>
     </string-array>
 
     <string-array name="piko_array_navbar">

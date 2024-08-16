@@ -74,6 +74,8 @@
     <string name="piko_pref_round_off_numbers">数字简化显示</string>
     <string name="piko_pref_round_off_numbers_desc">将数字简化为 K 和 M 单位显示</string>
     <string name="piko_pref_debug_menu">帖子 Debug 菜单</string>
+    <string name="piko_pref_quick_settings">启用快捷设置</string>
+    <string name="piko_pref_quick_settings_summary">在侧滑栏添加快捷设置按钮</string>
 
     <string name="piko_title_timeline">时间线</string>
     <string name="piko_pref_disable_auto_timeline_scroll">启动时保持时间线位置</string>
@@ -103,6 +105,8 @@
     <string name="piko_pref_customisation_sidebartabs">隐藏侧滑栏项目</string>
     <string name="piko_pref_customisation_navbartabs">隐藏导航栏项目</string>
     <string name="piko_pref_customisation_inlinetabs">隐藏互动栏项目</string>
+    <string name="piko_pref_customisation_reply_sorting">选择默认回复排序</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">上次所选</string>
 
     <string name="piko_title_backup">备份和恢复</string>
     <string name="piko_pref_export">导出%s</string>
