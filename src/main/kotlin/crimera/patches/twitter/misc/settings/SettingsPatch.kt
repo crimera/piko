@@ -17,6 +17,7 @@ import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import crimera.patches.twitter.misc.integrations.IntegrationsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.AuthorizeAppActivity
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
+import crimera.patches.twitter.misc.settings.fingerprints.UrlInterpreterActivity
 
 @Patch(
     description = "Adds settings",
@@ -25,11 +26,12 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 object SettingsPatch : BytecodePatch(
-    setOf(SettingsFingerprint, AuthorizeAppActivity, IntegrationsUtilsFingerprint)
+    setOf(SettingsFingerprint, AuthorizeAppActivity, IntegrationsUtilsFingerprint,UrlInterpreterActivity)
 ) {
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
     private const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
     private const val ACTIVITY_HOOK_CLASS = "Lapp/revanced/integrations/twitter/settings/ActivityHook;"
+    private const val DEEPLINK_HOOK_CLASS = "Lapp/revanced/integrations/twitter/settings/DeepLink;"
     private const val ADD_PREF_DESCRIPTOR =
         "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
 
@@ -90,6 +92,21 @@ object SettingsPatch : BytecodePatch(
                     mutableMethod.getInstructions().first { it.opcode == Opcode.RETURN_VOID })
             )
         } ?: throw PatchException("ProxySettingsActivityFingerprint not found")
+
+        UrlInterpreterActivity.result?.apply {
+            val instructions = mutableMethod.getInstructions()
+            val loc = instructions.first { it.opcode == Opcode.INVOKE_SUPER }.location.index+1
+            mutableMethod.addInstructionsWithLabels(
+                loc, """
+                invoke-static {p0}, $DEEPLINK_HOOK_CLASS->deeplink(Landroid/app/Activity;)Z
+                move-result v0
+                if-nez v0, :deep_link
+                """.trimIndent(),
+                ExternalLabel(
+                    "deep_link",
+                    instructions.first { it.opcode == Opcode.RETURN_VOID })
+            )
+        } ?: throw PatchException("UrlInterpreterActivity not found")
 
         IntegrationsUtilsFingerprint.result!!.mutableMethod.addInstruction(
             0,
