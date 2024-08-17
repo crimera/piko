@@ -1,3 +1,9 @@
+## [1.37.1](https://github.com/crimera/piko/compare/v1.37.0...v1.37.1) (2024-08-17)
+
+### Updates
+
+* **Twitter:** Added hide 'Settings and privacy' in `Customize side bar items` ([cb01885](https://github.com/crimera/piko/commit/cb018852c8af8caaf4b986444208ab00a39eab41))
+
 ## [1.37.1-dev.1](https://github.com/crimera/piko/compare/v1.37.0...v1.37.1-dev.1) (2024-08-16)
 
 ### Updates
