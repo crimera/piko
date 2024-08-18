@@ -7,7 +7,7 @@
         android:layout_height="match_parent"
         android:id="@+id/linearLayout">
 
-    <androidx.recyclerview.widget.RecyclerView
+    <ListView
             android:id="@+id/list"
             android:layout_width="0dp"
             android:layout_height="0dp"
