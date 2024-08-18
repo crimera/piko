@@ -93,6 +93,8 @@
     <string name="piko_pref_enable_vid_auto_advance">auto-przewijanie filmów</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">Włącza automatyczne przewijanie filmów w trybie immersyjnym</string>
     <string name="piko_pref_hide_hidden_replies">ukryte odpowiedzi</string>
+    <string name="piko_pref_force_hd">Wymuś jakość filmów w HD</string>
+    <string name="piko_pref_force_hd_desc">Filmy zawsze uruchamiają się w najwyższej jakości</string>
 
     <string name="piko_title_customisation">Dostosowywanie</string>
     <string name="piko_pref_customisation_profiletabs">Zakładki profilu do ukrycia</string>

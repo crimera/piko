@@ -25,11 +25,7 @@ object FeatureFlagPatch : BytecodePatch(
     setOf(
         FeatureFlagFingerprint,
         IntegrationsUtilsFingerprint,
-        SettingsStatusLoadFingerprint,
-        CustomAdapterFingerprint,
-        GetCountFingerprint,
-        OnCreateViewHolderFingerprint,
-        OnBindViewHolderFingerprint
+        SettingsStatusLoadFingerprint
     )
 ) {
     override fun execute(context: BytecodeContext) {
@@ -52,20 +48,5 @@ object FeatureFlagPatch : BytecodePatch(
         IntegrationsUtilsFingerprint.result!!.mutableMethod.addInstruction(
             1, "${SettingsPatch.FSTS_DESCRIPTOR}->load()V"
         )
-
-        // Change the getCount override method name
-        val customAdapter = CustomAdapterFingerprint.result
-            ?: throw PatchException("getCount Method of CustomAdapter not found")
-
-        customAdapter.mutableMethod.name = GetCountFingerprint.result?.method?.name
-            ?: throw PatchException("getCount Method of RecyclerView not found")
-
-        // onCreateViewHolder
-        customAdapter.mutableClass.methods.first { it.name == "onCreateViewHolder" }.name = OnCreateViewHolderFingerprint.result?.method?.name
-            ?: throw PatchException("onCreateViewHolder Method of RecyclerView not found")
-
-        // onBindViewHolder
-        customAdapter.mutableClass.methods.first { it.name == "onBindViewHolder" }.name = OnBindViewHolderFingerprint.result?.method?.name
-            ?: throw PatchException("onBindViewHolder Method of RecyclerView not found")
     }
 }
