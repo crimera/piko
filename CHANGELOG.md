@@ -1,3 +1,9 @@
+## [1.37.2-dev.1](https://github.com/crimera/piko/compare/v1.37.1...v1.37.2-dev.1) (2024-08-18)
+
+### Bug Fixes
+
+* **Feature Flags:** Use ListView instead of RecyclerView for a more reliable list. ([6f16b7f](https://github.com/crimera/piko/commit/6f16b7f7d61c81e7a21394f74b6e0d0e80ed9a55))
+
 ## [1.37.1](https://github.com/crimera/piko/compare/v1.37.0...v1.37.1) (2024-08-17)
 
 ### Updates
