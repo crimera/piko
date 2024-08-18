@@ -10,7 +10,7 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
 
 @Patch(
     name = "Enable force HD videos",
-    description = "Videos will be played in HD",
+    description = "Videos will be played in highest quality always",
     dependencies = [SettingsPatch::class,VideoEntityPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     requiresIntegrations = true

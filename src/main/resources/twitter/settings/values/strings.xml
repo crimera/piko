@@ -94,7 +94,7 @@
     <string name="piko_pref_enable_vid_auto_advance_desc">Enables video auto scroll in immersive view</string>
     <string name="piko_pref_hide_hidden_replies">hidden replies</string>
     <string name="piko_pref_force_hd">force HD videos</string>
-    <string name="piko_pref_force_hd_desc">Videos will be played in HD</string>
+    <string name="piko_pref_force_hd_desc">Videos will be played in highest quality always</string>
 
     <string name="piko_title_customisation">Customization</string>
     <string name="piko_pref_customisation_profiletabs">Profile tabs to hide</string>
