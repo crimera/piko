@@ -93,6 +93,8 @@
     <string name="piko_pref_enable_vid_auto_advance">Desplazamiento automático de video</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">Habilita el desplazamiento automático de video en vista inmersiva</string>
     <string name="piko_pref_hide_hidden_replies">Respuestas ocultas</string>
+    <string name="piko_pref_force_hd">forzar videos en HD</string>
+    <string name="piko_pref_force_hd_desc">Los videos se reproducirán siempre en la máxima calidad</string>
 
     <string name="piko_title_customisation">Personalización</string>
     <string name="piko_pref_customisation_profiletabs">Pestañas del perfil a ocultar</string>
