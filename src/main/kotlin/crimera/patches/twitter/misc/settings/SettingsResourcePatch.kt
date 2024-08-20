@@ -37,7 +37,7 @@ object SettingsResourcePatch: ResourcePatch() {
         context.xmlEditor["res/layout/main_activity_app_bar.xml"].use { editor ->
             val parent = editor.file.getElementsByTagName("FrameLayout").item(1) as Element
 
-            val sideBtn = editor.file.createElement("app.revanced.integrations.twitter.settings.PikoSettingsButton")
+            val sideBtn = editor.file.createElement("app.revanced.integrations.twitter.settings.widgets.PikoSettingsButton")
             sideBtn.setAttribute("android:text", "Piko")
             sideBtn.setAttribute("android:textAllCaps", "false")
             sideBtn.setAttribute("android:background", "?android:attr/selectableItemBackground")
