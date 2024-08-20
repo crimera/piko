@@ -32,6 +32,9 @@
     <string name="piko_title_ads">الإعلانات</string>
     <string name="piko_pref_hide_promoted_posts">منشورات المحتوى المُروَّج</string>
     <string name="piko_pref_hide_g_ads">إعلانات Google</string>
+    <string name="piko_pref_hide_main_event">الحدث الرئيسي (استكشف)</string>
+    <string name="piko_pref_hide_superhero_event">حدث البطل الخارق (استكشف)</string>
+    <string name="piko_pref_hide_videos_for_you">فيديوهات لك (استكشف)</string>
     <string name="piko_pref_wtf_section">قسم "من يجب متابعته"</string>
     <string name="piko_pref_cts_section">قسم "الاشتراك مع المبدعون"</string>
     <string name="piko_pref_ctj_section">قسم "المجتمع المراد الانضمام إليه"</string>
@@ -45,7 +48,7 @@
     <string name="piko_pref_db_not_open">لم يتم فتح قاعدة البيانات</string>
     <string name="piko_pref_db_del_items">عنصر محذوف</string>
     <string name="piko_pref_hide_premium_upsell">Premium Upsell</string>
-    <string name="piko_pref_hide_premium_upsell_desc">Removes premium upsell in home timeline</string>
+    <string name="piko_pref_hide_premium_upsell_desc">إزالة Premium Upsell في الخط الزمني للصفحة الرئيسية</string>
 
     <string name="piko_title_misc">إعدادات متنوعة</string>
     <string name="piko_pref_chirp_font">خط Chirp</string>
@@ -60,6 +63,7 @@
     <string name="piko_pref_feature_flags">Feature Flags</string>
     <string name="piko_pref_edit_flag_title">Flag تعديل</string>
     <string name="piko_pref_add_flag_title">Flag إضافة</string>
+    <string name="piko_pref_search_flags">Flags بحث</string>
     <string name="piko_pref_show_sensitive_media">عرض الوسائط الحساسة</string>
     <string name="piko_pref_selectable_text">نص قابل للتحديد</string>
     <string name="piko_pref_clear_tracking_params">مسح معلمات التتبع</string>
@@ -67,7 +71,9 @@
     <string name="piko_pref_unshorten_link_desc">تخلص من عناوين URL القصيرة لـ t.co</string>
     <string name="piko_pref_round_off_numbers">Round off Numbers</string>
     <string name="piko_pref_round_off_numbers_desc">إيقاف تصغير الارقام مثل K و M</string>
-    <string name="piko_pref_debug_menu">تمكين قائمة Debug للمنشورات</string>
+    <string name="piko_pref_debug_menu">قائمة Debug للمنشورات</string>
+    <string name="piko_pref_quick_settings">تمكين الإعدادات السريعة</string>
+    <string name="piko_pref_quick_settings_summary">إضافة زر الإعدادات السريعة في الشريط الجانبي</string>
 
     <string name="piko_title_timeline">الخط الزمني</string>
     <string name="piko_pref_disable_auto_timeline_scroll">تعطيل التمرير التلقائي للخط الزمني عند التشغيل</string>
@@ -82,11 +88,13 @@
     <string name="piko_pref_hide_quick_promote_desc">إخفاء زر الترويج أسفل المنشورات الذاتية</string>
     <string name="piko_pref_show_poll_result">عرض نتائج التصويت</string>
     <string name="piko_pref_show_poll_result_desc">عرض نتائج التصويت دون التصويت</string>
-    <string name="piko_pref_hide_immersive_player">Immersive player</string>
+    <string name="piko_pref_hide_immersive_player">Immersive Player</string>
     <string name="piko_pref_hide_immersive_player_desc">يزيل التمرير السريع لمزيد من مقاطع الفيديو في مشغل الفيديو</string>
     <string name="piko_pref_enable_vid_auto_advance">تمرير الفيديو تلقائيًا</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">تمكين التمرير التلقائي للفيديو في العرض الشامل</string>
     <string name="piko_pref_hide_hidden_replies">الردود المخفية</string>
+    <string name="piko_pref_force_hd">فرض جودة HD</string>
+    <string name="piko_pref_force_hd_desc">سيتم تشغيل الفيديوهات بأعلى جودة دائمًا</string>
 
     <string name="piko_title_customisation">التخصيص</string>
     <string name="piko_pref_customisation_profiletabs">إخفاء علامات تبويب الملف الشخصي</string>
@@ -97,6 +105,8 @@
     <string name="piko_pref_customisation_sidebartabs">عناصر الشريط الجانبي المراد إخفاؤها</string>
     <string name="piko_pref_customisation_navbartabs">عناصر شريط التنقل المراد إخفاؤها</string>
     <string name="piko_pref_customisation_inlinetabs">عناصر الشريط المضمنة المراد إخفاؤها</string>
+    <string name="piko_pref_customisation_reply_sorting">مرشح فرز الردود الافتراضية</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">تم اختياره مسبقًا</string>
     
     <string name="piko_title_backup">النسخ الاحتياطي والإستعادة</string>
     <string name="piko_pref_export">تصدير %s</string>
