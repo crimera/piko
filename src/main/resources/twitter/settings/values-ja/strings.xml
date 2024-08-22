@@ -88,7 +88,7 @@
     <string name="piko_pref_enable_vid_auto_advance">動画の自動スクロール</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">イマーシブプレーヤーで自動スクロールを有効化します</string>
     <string name="piko_pref_hide_hidden_replies">「非表示の返信」</string>
-    <string name="piko_pref_force_hd">高画質を強制</string>
+    <string name="piko_pref_force_hd">高画質動画を強制</string>
     <string name="piko_pref_force_hd_desc">動画は常に最高画質で再生されます</string>
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">非表示にするプロフィールタブ</string>
