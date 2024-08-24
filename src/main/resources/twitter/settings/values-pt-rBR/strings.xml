@@ -3,8 +3,8 @@
     <string name="piko_title_settings">Configurações Piko</string>
 	
     <string name="piko_title_premium">Premium</string>
-    <string name="piko_pref_reader_mode">Ativar modo leitor</string>
-    <string name="piko_pref_reader_mode_desc">Ativa o "modo leitor" em threads longos</string>
+    <string name="piko_pref_reader_mode">modo leitor</string>
+    <string name="piko_pref_reader_mode_desc">o "modo leitor" em threads longos</string>
     <string name="piko_pref_undo_posts">Ativar desfazer posts</string>
     <string name="piko_pref_undo_posts_desc">Permite desfazer posts antes de postar</string>
     <string name="piko_pref_undo_posts_btn">Configurações de desfazer posts</string>
@@ -13,7 +13,7 @@
     <string name="piko_pref_enable_force_pip_desc">Ativa o modo PiP quando você fecha o aplicativo</string>
 
     <string name="piko_title_download">Download</string>
-    <string name="piko_pref_video_download">Ativar download de vídeo</string>
+    <string name="piko_pref_video_download">download de vídeo</string>
     <string name="piko_pref_download">Alterar diretório de download</string>
     <string name="piko_pref_download_path">Pasta pública</string>
     <string name="piko_pref_download_path_desc">A pasta pública a ser usada para downloads de vídeo</string>
@@ -36,6 +36,7 @@
     <string name="piko_pref_hide_g_ads">Anúncios do Google</string>
     <string name="piko_pref_hide_main_event">Evento principal (Explorar)</string>
     <string name="piko_pref_hide_superhero_event">Evento de super-herói (Explorar)</string>
+    <string name="piko_pref_hide_videos_for_you">vídeos para você (Explorar)</string>
     <string name="piko_pref_wtf_section">Seção "Quem seguir"</string>
     <string name="piko_pref_cts_section">Seção "Criadores para assinar"</string>
     <string name="piko_pref_ctj_section">Seção "Comunidade para participar"</string>
@@ -61,9 +62,6 @@
     <string name="piko_pref_custom_share_domain_desc">O domínio a ser usado ao compartilhar tweets</string>
     <string name="piko_pref_browser_chooser">Use o seletor de navegador</string>
     <string name="piko_pref_browser_chooser_desc">Abra links com o seletor de navegador em vez de usar o navegador do aplicativo</string>
-    <string name="piko_pref_feature_flags">Feature flags</string>
-    <string name="piko_pref_edit_flag_title">Editar flag</string>
-    <string name="piko_pref_add_flag_title">Adicionar flag</string>
     <string name="piko_pref_show_sensitive_media">Exibir mídia sensível</string>
     <string name="piko_pref_selectable_text">Texto selecionável</string>
     <string name="piko_pref_clear_tracking_params">Limpar parâmetros de rastreamento</string>
@@ -72,6 +70,14 @@
     <string name="piko_pref_round_off_numbers">Arredondar números</string>
     <string name="piko_pref_round_off_numbers_desc">Arredonda o número como K e M</string>
     <string name="piko_pref_debug_menu">menu de depuração para posts</string>
+    <string name="piko_pref_quick_settings">Ativar configurações rápidas</string>
+    <string name="piko_pref_quick_settings_summary">Adiciona um botão de configurações rápidas na barra lateral</string>
+    
+    <string name="piko_title_feature_flags">Feature flags</string>
+    <string name="piko_pref_feature_flags">Adicionar feature flags</string>
+    <string name="piko_pref_edit_flag_title">Editar flag</string>
+    <string name="piko_pref_add_flag_title">Adicionar flag</string>
+    <string name="piko_pref_search_flags">Buscar flags</string>
 
     <string name="piko_title_timeline">Linha do tempo</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Desativar rolagem automática da linha do tempo na inicialização</string>
@@ -91,6 +97,8 @@
     <string name="piko_pref_enable_vid_auto_advance">rolagem automática de vídeo</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">Ativa a rolagem automática do vídeo em visualização imersiva</string>
     <string name="piko_pref_hide_hidden_replies">respostas ocultas</string>
+    <string name="piko_pref_force_hd">forçar vídeos HD</string>
+    <string name="piko_pref_force_hd_desc">Os vídeos serão reproduzidos sempre na mais alta qualidade</string>
 
     <string name="piko_title_customisation">Customização</string>
     <string name="piko_pref_customisation_profiletabs">Guias do perfil para ocultar</string>
@@ -101,6 +109,8 @@
     <string name="piko_pref_customisation_sidebartabs">Itens da barra lateral para ocultar</string>
     <string name="piko_pref_customisation_navbartabs">Itens da barra de navegação para ocultar</string>
     <string name="piko_pref_customisation_inlinetabs">Itens da barra embutida para ocultar</string>
+    <string name="piko_pref_customisation_reply_sorting">Filtro de classificação de resposta padrão</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">Selecionado anteriormente</string>
 
     <string name="piko_title_backup">Backup e restauração</string>
     <string name="piko_pref_export">Exportar %s</string>
@@ -121,5 +131,7 @@
     <string name="piko_pref_app_restart_rec">Recomenda-se reiniciar o aplicativo</string>
     <string name="piko_pref_remove">Remover %s</string>
     <string name="piko_pref_enable">Ativar %s</string>
+    <string name="piko_single_page_settings">Página de configurações única</string>
+    <string name="piko_single_page_settings_desc">Ver configurações em uma única página</string>
 
 </resources>
