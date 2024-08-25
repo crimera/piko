@@ -60,10 +60,6 @@
     <string name="piko_pref_custom_share_domain_desc">النطاق الذي سيتم استخدامه عند مشاركة التغريدات</string>
     <string name="piko_pref_browser_chooser">استخدام منتقي المتصفح</string>
     <string name="piko_pref_browser_chooser_desc">فتح الروابط باستخدام منتقي المتصفح بدلاً من استخدام المتصفح داخل التطبيق</string>
-    <string name="piko_pref_feature_flags">Feature Flags</string>
-    <string name="piko_pref_edit_flag_title">Flag تعديل</string>
-    <string name="piko_pref_add_flag_title">Flag إضافة</string>
-    <string name="piko_pref_search_flags">Flags بحث</string>
     <string name="piko_pref_show_sensitive_media">عرض الوسائط الحساسة</string>
     <string name="piko_pref_selectable_text">نص قابل للتحديد</string>
     <string name="piko_pref_clear_tracking_params">مسح معلمات التتبع</string>
@@ -74,6 +70,12 @@
     <string name="piko_pref_debug_menu">قائمة Debug للمنشورات</string>
     <string name="piko_pref_quick_settings">تمكين الإعدادات السريعة</string>
     <string name="piko_pref_quick_settings_summary">إضافة زر الإعدادات السريعة في الشريط الجانبي</string>
+
+    <string name="piko_title_feature_flags">Feature Flags</string>
+    <string name="piko_pref_feature_flags">Feature Flags إضافة</string>
+    <string name="piko_pref_edit_flag_title">Flag تعديل</string>
+    <string name="piko_pref_add_flag_title">Flag إضافة</string>
+    <string name="piko_pref_search_flags">Flags بحث</string>
 
     <string name="piko_title_timeline">الخط الزمني</string>
     <string name="piko_pref_disable_auto_timeline_scroll">تعطيل التمرير التلقائي للخط الزمني عند التشغيل</string>
@@ -127,5 +129,7 @@
     <string name="piko_pref_app_restart_rec">يوصى بإعادة تشغيل التطبيق</string>
     <string name="piko_pref_remove">إزالة %s</string>
     <string name="piko_pref_enable">تمكين %s</string>
+    <string name="piko_single_page_settings">صفحة الإعدادات الفردية</string>
+    <string name="piko_single_page_settings_desc">عرض الإعدادات في صفحة واحدة</string>
 
 </resources>
