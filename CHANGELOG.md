@@ -1,3 +1,15 @@
+## [1.39.0-dev.1](https://github.com/crimera/piko/compare/v1.38.0...v1.39.0-dev.1) (2024-08-25)
+
+### Features
+
+* **Twitter:** Custom deeplinks ([325a281](https://github.com/crimera/piko/commit/325a281225b1379b310d8ba14629bdbae0b314e5))
+
+### Updates
+
+* **Twitter:** Added strings ([fad9b1a](https://github.com/crimera/piko/commit/fad9b1a9fd79b164c713fe35b61bad8ed3d9373b))
+* **Twitter:** Change Quick Btn path ([7febdf6](https://github.com/crimera/piko/commit/7febdf612212ba61638fd818121c8cc4b9db8ed8))
+* **Twitter:** Updated strings ([3cb159e](https://github.com/crimera/piko/commit/3cb159e57d66e22b7c2f638e5d0b7422a4ef2a10))
+
 ## [1.38.0](https://github.com/crimera/piko/compare/v1.37.1...v1.38.0) (2024-08-20)
 
 ### Bug Fixes
