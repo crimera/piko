@@ -67,7 +67,7 @@
     <string name="piko_pref_quick_settings">サイドバーに設定ボタン追加</string>
     <string name="piko_pref_quick_settings_summary">サイドバーから Piko 設定を直接開くことができるボタンを追加します</string>
     <string name="piko_title_feature_flags">機能フラグ</string>
-    <string name="piko_pref_feature_flags">機能フラグ</string>
+    <string name="piko_pref_feature_flags">機能フラグを追加</string>
     <string name="piko_pref_edit_flag_title">フラグを編集</string>
     <string name="piko_pref_add_flag_title">フラグを追加</string>
     <string name="piko_pref_search_flags">フラグを検索</string>
