@@ -7,6 +7,8 @@
     <string name="piko_pref_undo_posts_desc">開啟在推文發布之前收回推文的能力</string>
     <string name="piko_pref_undo_posts_btn">推文收回設定</string>
     <string name="piko_pref_icon_n_navbar_btn">應用程式圖示和導航欄自訂設定</string>
+    <string name="piko_pref_enable_force_pip">自動開啟子母畫面</string>
+    <string name="piko_pref_enable_force_pip_desc">關閉應用程式時啟用子母畫面模式</string>
 
     <string name="piko_title_download">下載</string>
     <string name="piko_pref_video_download">啟用影片下載</string>
