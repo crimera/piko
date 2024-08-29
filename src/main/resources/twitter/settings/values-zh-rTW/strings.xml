@@ -24,6 +24,11 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">複製多媒體網址</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">分享多媒體網址</string>
 
+    <string name="piko_title_native_downloader">原生下載器</string>
+    <string name="piko_pref_native_downloader_alert_title">下載媒體</string>
+    <string name="piko_pref_native_downloader_download_all">下載全部</string>
+    <string name="piko_pref_native_downloader_no_media">沒有找到媒體</string>
+
     <string name="piko_title_ads">廣告</string>
     <string name="piko_pref_hide_promoted_posts">隱藏「推薦推文」</string>
     <string name="piko_pref_hide_g_ads">隱藏Google 廣告</string>
