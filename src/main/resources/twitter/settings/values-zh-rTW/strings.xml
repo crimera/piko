@@ -32,6 +32,9 @@
     <string name="piko_title_ads">廣告</string>
     <string name="piko_pref_hide_promoted_posts">隱藏「推薦推文」</string>
     <string name="piko_pref_hide_g_ads">隱藏Google 廣告</string>
+    <string name="piko_pref_hide_main_event">主要活動（探索）</string>
+    <string name="piko_pref_hide_superhero_event">Superhero event (探索)</string>
+    <string name="piko_pref_hide_videos_for_you">為您推薦的影片（探索）</string>
     <string name="piko_pref_wtf_section">隱藏「推薦關注者」</string>
     <string name="piko_pref_cts_section">隱藏「訂閱創作者」</string>
     <string name="piko_pref_ctj_section">隱藏「探索新的社群」</string>
@@ -40,8 +43,14 @@
     <string name="piko_pref_hide_detailed_posts">隱藏推文回覆中的「發現更多」</string>
     <string name="piko_pref_hide_trends">隱藏流行趨勢</string>
     <string name="piko_pref_hide_premium_prompt">隱藏「訂閱 Premium」廣告</string>
+    <string name="piko_pref_del_from_db">D從資料庫中刪除項目</string>
+    <string name="piko_pref_db_not_found">Database not found</string>
+    <string name="piko_pref_db_not_open">Database is not opened</string>
+    <string name="piko_pref_db_del_items">Deleted items</string>
+    <string name="piko_pref_hide_premium_upsell">premium upsell</string>
+    <string name="piko_pref_hide_premium_upsell_desc">Removes premium upsell in home timeline</string>
 
-    <string name="piko_title_misc">其他c</string>
+    <string name="piko_title_misc">其他</string>
     <string name="piko_pref_chirp_font">啟用 Chirp 字體</string>
     <string name="piko_pref_hide_fab">隱藏懸浮動作按鈕</string>
     <string name="piko_pref_hide_fab_menu">隱藏懸浮動作選單按鈕</string>
