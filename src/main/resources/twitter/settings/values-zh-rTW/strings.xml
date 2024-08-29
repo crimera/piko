@@ -43,12 +43,12 @@
     <string name="piko_pref_hide_detailed_posts">隱藏推文回覆中的「發現更多」</string>
     <string name="piko_pref_hide_trends">隱藏流行趨勢</string>
     <string name="piko_pref_hide_premium_prompt">隱藏「訂閱 Premium」廣告</string>
-    <string name="piko_pref_del_from_db">D從資料庫中刪除項目</string>
-    <string name="piko_pref_db_not_found">Database not found</string>
-    <string name="piko_pref_db_not_open">Database is not opened</string>
-    <string name="piko_pref_db_del_items">Deleted items</string>
-    <string name="piko_pref_hide_premium_upsell">premium upsell</string>
-    <string name="piko_pref_hide_premium_upsell_desc">Removes premium upsell in home timeline</string>
+    <string name="piko_pref_del_from_db">從資料庫中刪除記錄</string>
+    <string name="piko_pref_db_not_found">找不到資料庫</string>
+    <string name="piko_pref_db_not_open">資料庫未開啟</string>
+    <string name="piko_pref_db_del_items">已刪除的項目</string>
+    <string name="piko_pref_hide_premium_upsell">取得Premium</string>
+    <string name="piko_pref_hide_premium_upsell_desc">移除首頁時間軸中的取得Premium</string>
 
     <string name="piko_title_misc">其他</string>
     <string name="piko_pref_chirp_font">啟用 Chirp 字體</string>
