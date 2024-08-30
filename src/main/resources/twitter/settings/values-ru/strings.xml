@@ -6,15 +6,17 @@
     <string name="piko_title_piko_integrations">Интеграции Piko</string>
     
     <string name="piko_title_premium">Премиум</string>
-    <string name="piko_pref_reader_mode">Включить режим чтения</string>
+    <string name="piko_pref_reader_mode">режим чтения</string>
     <string name="piko_pref_reader_mode_desc">Удобный просмотр длинных постов</string>
-    <string name="piko_pref_undo_posts">Включить отмену постов</string>
+    <string name="piko_pref_undo_posts">отмену постов</string>
     <string name="piko_pref_undo_posts_desc">Возможность отменить пост до истечения таймера</string>
     <string name="piko_pref_undo_posts_btn">Настройки отмены постов</string>
     <string name="piko_pref_icon_n_navbar_btn">Иконка и панель навигации</string>
+    <string name="piko_pref_enable_force_pip">режим картинка-в-картинке</string>
+    <string name="piko_pref_enable_force_pip_desc">Активируется при сворачивании приложения</string>
 
     <string name="piko_title_download">Скачивание</string>
-    <string name="piko_pref_video_download">Включить скачивание видео</string>
+    <string name="piko_pref_video_download">скачивание видео</string>
     <string name="piko_pref_download">Изменить место скачивания</string>
     <string name="piko_pref_download_path">Выбрать папку</string>
     <string name="piko_pref_download_path_desc">Папка для скачивания видео</string>
@@ -47,9 +49,11 @@
     <string name="piko_pref_db_not_found">База данных не найдена</string>
     <string name="piko_pref_db_not_open">База данных не открыта</string>
     <string name="piko_pref_db_del_items">Удаленные записи</string>
+    <string name="piko_pref_hide_premium_upsell">навязывание премиума</string>
+    <string name="piko_pref_hide_premium_upsell_desc">Убирает предложения купить премиум из ленты</string>
 
     <string name="piko_title_misc">Прочее</string>
-    <string name="piko_pref_chirp_font">Включить шрифт Chirp</string>
+    <string name="piko_pref_chirp_font">шрифт Chirp</string>
     <string name="piko_pref_hide_fab">плавающую кнопку</string>
     <string name="piko_pref_hide_fab_menu">меню плавающей кнопки</string>
     <string name="piko_pref_rec_users">рекомендуемых пользователей</string>
@@ -58,9 +62,6 @@
     <string name="piko_pref_custom_share_domain_desc">Изменить домен ссылки на пост</string>
     <string name="piko_pref_browser_chooser">Выбор браузера</string>
     <string name="piko_pref_browser_chooser_desc">Открывать ссылки приложением по умолчанию вместо встроенного браузера</string>
-    <string name="piko_pref_feature_flags">Флаги функций</string>
-    <string name="piko_pref_edit_flag_title">Изменить флаг</string>
-    <string name="piko_pref_add_flag_title">Добавить флаг</string>
     <string name="piko_pref_show_sensitive_media">Показывать деликатный контент</string>
     <string name="piko_pref_selectable_text">Включить копирование текста</string>
     <string name="piko_pref_clear_tracking_params">Удалять UTM-метки из ссылок</string>
@@ -68,10 +69,18 @@
     <string name="piko_pref_unshorten_link_desc">Не использовать t.co в ссылках</string>
     <string name="piko_pref_round_off_numbers">Округление чисел</string>
     <string name="piko_pref_round_off_numbers_desc">Отображать тысячи и миллионы как K и M</string>
-    <string name="piko_pref_debug_menu">Меню отладки для постов</string>
+    <string name="piko_pref_debug_menu">меню отладки для постов</string>
+    <string name="piko_pref_quick_settings">Включить быстрый доступ</string>
+    <string name="piko_pref_quick_settings_summary">Переход в настройки Piko через боковое меню</string>
+
+    <string name="piko_title_feature_flags">Флаги функций</string>
+    <string name="piko_pref_feature_flags">Флаги функций</string>
+    <string name="piko_pref_edit_flag_title">Изменить флаг</string>
+    <string name="piko_pref_add_flag_title">Добавить флаг</string>
+    <string name="piko_pref_search_flags">Поиск флагов</string>
 
     <string name="piko_title_timeline">Лента</string>
-    <string name="piko_pref_disable_auto_timeline_scroll">Отключить автоскролл при запуске</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">Отключить автопрокрутку при запуске</string>
     <string name="piko_pref_hide_live_threads">треды в прямом эфире</string>
     <string name="piko_pref_hide_live_threads_desc">Баннер прямых эфиров поверх ленты</string>
     <string name="piko_pref_hide_banner">баннер новых постов</string>
@@ -85,7 +94,11 @@
     <string name="piko_pref_show_poll_result_desc">Отображение результатов без голосования</string>
     <string name="piko_pref_hide_immersive_player">новый видеоплеер</string>
     <string name="piko_pref_hide_immersive_player_desc">Переключение видео свайпами</string>
-    <string name="piko_pref_hide_hidden_replies">скрытые ответы</string>
+    <string name="piko_pref_enable_vid_auto_advance">автопрокрутку видео</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Автоматически переключать видео в новом видеоплеере</string>
+    <string name="piko_pref_hide_hidden_replies">убранные ответы</string>
+    <string name="piko_pref_force_hd">высокое качество видео</string>
+    <string name="piko_pref_force_hd_desc">Воспроизведение видео только в высоком качестве</string>
     
     <string name="piko_title_customisation">Кастомизация</string>
     <string name="piko_pref_customisation_profiletabs">Скрыть разделы профиля</string>
@@ -96,10 +109,12 @@
     <string name="piko_pref_customisation_sidebartabs">Скрыть разделы боковой панели</string>
     <string name="piko_pref_customisation_navbartabs">Скрыть кнопки меню навигации</string>
     <string name="piko_pref_customisation_inlinetabs">Скрыть кнопки под постом</string>
+    <string name="piko_pref_customisation_reply_sorting">Выбрать сортировку ответов по умолчанию</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">Ранее выбранное</string>
 
     <string name="piko_title_backup">Бэкап и восстановление</string>
-    <string name="piko_pref_export">Экспорт %s</string>
-    <string name="piko_pref_import">Импорт %s</string>
+    <string name="piko_pref_export">Экспортировать %s</string>
+    <string name="piko_pref_import">Импортировать %s</string>
     <string name="piko_pref_success">Успешно</string>
     <string name="piko_pref_export_failed">Сбой: ошибка экспорта %s</string>
     <string name="piko_pref_import_failed">Сбой: ошибка импорта %s</string>
@@ -111,9 +126,12 @@
     <string name="piko_pref_patch_info">Информация о патче</string>
     <string name="piko_pref_version_info">Информация о версии</string>
     <string name="piko_pref_patches">Патчи</string>
-    <string name="piko_pref_included">Примененные</string>
-    <string name="piko_pref_excluded">Исключенные</string>
+    <string name="piko_pref_included">Применен</string>
+    <string name="piko_pref_excluded">Не применен</string>
     <string name="piko_pref_app_restart_rec">Рекомендуется перезапуск приложения</string>
     <string name="piko_pref_remove">Скрывать %s</string>
+    <string name="piko_pref_enable">Включить %s</string>
+    <string name="piko_single_page_settings">Настройки одной страницой</string>
+    <string name="piko_single_page_settings_desc">Показывать настройки на одной странице</string>
     
 </resources>
