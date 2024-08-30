@@ -56,10 +56,6 @@
     <string name="piko_pref_custom_share_domain_desc">ポストを共有するときに使用するドメイン</string>
     <string name="piko_pref_browser_chooser">ブラウザ選択ダイアログを使用</string>
     <string name="piko_pref_browser_chooser_desc">アプリ内ブラウザではなく、ブラウザ選択ダイアログでリンクを開きます</string>
-    <string name="piko_pref_feature_flags">機能フラグ</string>
-    <string name="piko_pref_edit_flag_title">フラグを編集</string>
-    <string name="piko_pref_add_flag_title">フラグを追加</string>
-    <string name="piko_pref_search_flags">フラグを検索</string>
     <string name="piko_pref_show_sensitive_media">センシティブなメディアを自動で表示</string>
     <string name="piko_pref_selectable_text">選択可能なテキスト</string>
     <string name="piko_pref_clear_tracking_params">トラッキングパラメータを削除</string>
@@ -69,7 +65,12 @@
     <string name="piko_pref_round_off_numbers_desc">65,536を6.5万のように数字を短く表記します</string>
     <string name="piko_pref_debug_menu">ポストのデバッグメニュー</string>
     <string name="piko_pref_quick_settings">サイドバーに設定ボタン追加</string>
-    <string name="piko_pref_quick_settings_summary">サイドバーからPiko Settingsを直接開くことができるボタンを追加します</string>
+    <string name="piko_pref_quick_settings_summary">サイドバーから Piko 設定を直接開くことができるボタンを追加します</string>
+    <string name="piko_title_feature_flags">機能フラグ</string>
+    <string name="piko_pref_feature_flags">機能フラグを追加</string>
+    <string name="piko_pref_edit_flag_title">フラグを編集</string>
+    <string name="piko_pref_add_flag_title">フラグを追加</string>
+    <string name="piko_pref_search_flags">フラグを検索</string>
     <string name="piko_title_timeline">タイムライン</string>
     <string name="piko_pref_disable_auto_timeline_scroll">起動時の自動TLスクロールを無効化</string>
     <string name="piko_pref_hide_live_threads">ライブスレッド</string>
@@ -88,7 +89,7 @@
     <string name="piko_pref_enable_vid_auto_advance">動画の自動スクロール</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">イマーシブプレーヤーで自動スクロールを有効化します</string>
     <string name="piko_pref_hide_hidden_replies">「非表示の返信」</string>
-    <string name="piko_pref_force_hd">最高画質を強制</string>
+    <string name="piko_pref_force_hd">最高画質の強制</string>
     <string name="piko_pref_force_hd_desc">動画を常に最高画質で再生します</string>
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">非表示にするプロフィールタブ</string>
@@ -102,8 +103,8 @@
     <string name="piko_pref_customisation_reply_sorting">デフォルトの返信の並び替え</string>
     <string name="piko_pref_customisation_reply_sorting_remember">前回の選択を記憶</string>
     <string name="piko_title_backup">バックアップと復元</string>
-    <string name="piko_pref_export">%sをエクスポート</string>
-    <string name="piko_pref_import">%sをインポート</string>
+    <string name="piko_pref_export">エクスポート: %s</string>
+    <string name="piko_pref_import">インポート: %s</string>
     <string name="piko_pref_success">成功</string>
     <string name="piko_pref_export_failed">エラー: %sのエクスポートに失敗しました</string>
     <string name="piko_pref_import_failed">エラー: %sのインポートに失敗しました</string>
@@ -119,4 +120,6 @@
     <string name="piko_pref_app_restart_rec">アプリの再起動を推奨します</string>
     <string name="piko_pref_remove">%sを削除</string>
     <string name="piko_pref_enable">%sを有効化</string>
+    <string name="piko_single_page_settings">全ての設定を表示</string>
+    <string name="piko_single_page_settings_desc">カテゴリー分けをせずに、1つのページに全ての Piko 設定を表示します</string>
 </resources>
