@@ -127,6 +127,9 @@
     <string name="piko_pref_app_restart_rec">Se recomienda reiniciar la app</string>
     <string name="piko_pref_remove">Eliminar %s</string>
     <string name="piko_pref_enable">Habilitar %s</string>
+    <string name="piko_single_page_settings">Configuración en una página</string>
+    <string name="piko_single_page_settings_desc">Ver todas las configuraciones en una sola página</string>
+    
     <!-- Extra -->
     <string name="piko_title_piko_integrations">Integraciones Piko</string>
     <string name="piko_title_piko_patches">Parches Piko</string>
