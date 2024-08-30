@@ -1,3 +1,9 @@
+## [1.39.1](https://github.com/crimera/piko/compare/v1.39.0...v1.39.1) (2024-08-30)
+
+### Bug Fixes
+
+* Remove duplicate strings ([94c6642](https://github.com/crimera/piko/commit/94c66422e0ced2cbdfd820dfee60cedd2c68e636))
+
 ## [1.39.0](https://github.com/crimera/piko/compare/v1.38.0...v1.39.0) (2024-08-30)
 
 ### Features
