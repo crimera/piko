@@ -3,7 +3,6 @@
     <!-- Dont translate these -->
     <string name="piko_name">Piko</string>
     <string name="piko_title_settings">Piko Settings</string>
-    <string name="piko_title_feature_flags">Feature flags</string>
     <string name="piko_title_piko_patches">Piko Patches</string>
     <string name="piko_title_piko_integrations">Piko Integrations</string>
 </resources>
