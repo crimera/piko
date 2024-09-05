@@ -56,7 +56,7 @@
     <string name="piko_pref_hide_fab_menu">pływające menu przycisków akcji</string>
     <string name="piko_pref_rec_users">rekomendowanych użytkowników</string>
     <string name="piko_pref_hide_view_count">licznik wyświetleń pod postami</string>
-    <string name="piko_pref_custom_share_domain">Własna domena do udostepniania</string>
+    <string name="piko_pref_custom_share_domain">Własna domena do udostępniania</string>
     <string name="piko_pref_custom_share_domain_desc">Domena używana do udostępniania tweetów</string>
     <string name="piko_pref_browser_chooser">Używaj domyślnej przeglądarki</string>
     <string name="piko_pref_browser_chooser_desc">Otwieraj linki w zewnętrznej (domyślnej) przeglądarce</string>
@@ -129,7 +129,7 @@
     <string name="piko_pref_app_restart_rec">Zalecany jest restart aplikacji</string>
     <string name="piko_pref_remove">Usuń %s</string>
     <string name="piko_pref_enable">Włącz %s</string>
-    <string name="piko_single_page_settings">Ustawienia dla pojedyńczej strony</string>
-    <string name="piko_single_page_settings_desc">Widok usatawień dla pojedyńczej strony</string>
+    <string name="piko_single_page_settings">Ustawienia Piko na pojedyńczej stronie</string>
+    <string name="piko_single_page_settings_desc">Wyświetlaj widok wszystkich ustawień Piko na pojedyńczej stronie</string>
 
 </resources>
