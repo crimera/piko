@@ -1,3 +1,9 @@
+## [1.39.2-dev.1](https://github.com/crimera/piko/compare/v1.39.1...v1.39.2-dev.1) (2024-09-05)
+
+### Bug Fixes
+
+* **Twitter:** fix `Control video auto scroll` in 10.57 ([b7ae78c](https://github.com/crimera/piko/commit/b7ae78cd61b2f75d266e3fe3d57c5c21cd798e79))
+
 ## [1.39.1](https://github.com/crimera/piko/compare/v1.39.0...v1.39.1) (2024-08-30)
 
 ### Bug Fixes
