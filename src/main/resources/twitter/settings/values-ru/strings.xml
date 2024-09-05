@@ -36,6 +36,9 @@
     <string name="piko_title_ads">Реклама</string>
     <string name="piko_pref_hide_promoted_posts">продвигаемые посты</string>
     <string name="piko_pref_hide_g_ads">рекламу Google</string>
+    <string name="piko_pref_hide_main_event">главное событие (Обзор)</string>
+    <string name="piko_pref_hide_superhero_event">событие Супергерой (Обзор)</string>
+    <string name="piko_pref_hide_videos_for_you">видео для вас (Обзор)</string>
     <string name="piko_pref_wtf_section">панель "Кого читать"</string>
     <string name="piko_pref_cts_section">панель "Авторы для вас"</string>
     <string name="piko_pref_ctj_section">панель "Обзор сообществ"</string>
@@ -79,7 +82,7 @@
     <string name="piko_pref_search_flags">Поиск флагов</string>
 
     <string name="piko_title_timeline">Лента</string>
-    <string name="piko_pref_disable_auto_timeline_scroll">Отключить автопрокрутку при запуске</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">Отключить автопрокрутку ленты</string>
     <string name="piko_pref_hide_live_threads">треды в прямом эфире</string>
     <string name="piko_pref_hide_live_threads_desc">Баннер прямых эфиров поверх ленты</string>
     <string name="piko_pref_hide_banner">баннер новых постов</string>
@@ -130,7 +133,7 @@
     <string name="piko_pref_app_restart_rec">Рекомендуется перезапуск приложения</string>
     <string name="piko_pref_remove">Скрывать %s</string>
     <string name="piko_pref_enable">Включить %s</string>
-    <string name="piko_single_page_settings">Настройки одной страницой</string>
-    <string name="piko_single_page_settings_desc">Показывать настройки на одной странице</string>
-
+    <string name="piko_single_page_settings">Настройки одной страницей</string>
+    <string name="piko_single_page_settings_desc">Показывать все настройки на одной странице</string>
+    
 </resources>
