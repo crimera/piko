@@ -32,9 +32,9 @@
     <string name="piko_title_ads">Reklamy</string>
     <string name="piko_pref_hide_promoted_posts">promowane posty</string>
     <string name="piko_pref_hide_g_ads">reklamy Google</string>
-    <string name="piko_pref_hide_main_event">baner wydarzenia głównego (wyszukiwarka)</string>
-    <string name="piko_pref_hide_superhero_event">baner reklamowy superhero (wyszukiwarka)</string>
-    <string name="piko_pref_hide_videos_for_you">filmy dla Ciebie (wyszukiwarka)</string>
+    <string name="piko_pref_hide_main_event">baner głównego wydarzenia (lupa)</string>
+    <string name="piko_pref_hide_superhero_event">baner reklamowy superhero (lupa)</string>
+    <string name="piko_pref_hide_videos_for_you">\'Filmy dla Ciebie\' (lupa)</string>
     <string name="piko_pref_wtf_section">\'Warci obserwowania\'</string>
     <string name="piko_pref_cts_section">\'Twórcy treści polecani dla Ciebie\'</string>
     <string name="piko_pref_ctj_section">\'Dołącz do społeczności\'</string>
@@ -42,7 +42,7 @@
     <string name="piko_pref_pinned_posts_section">\'Przypięte posty przez obserwujących\'</string>
     <string name="piko_pref_hide_detailed_posts">\'Odkryj więcej\' (w odpowiedziach)</string>
     <string name="piko_pref_hide_trends">promowane trendy</string>
-    <string name="piko_pref_hide_premium_prompt">banerowe reklamy (np. kup premium)</string>
+    <string name="piko_pref_hide_premium_prompt">banerowe reklamy (kup premium)</string>
     <string name="piko_pref_del_from_db">Usuń wpisy z bazy danych</string>
     <string name="piko_pref_db_not_found">Nie znaleziono bazy danych</string>
     <string name="piko_pref_db_not_open">Baza danych nie jest otwarta</string>
@@ -71,11 +71,11 @@
     <string name="piko_pref_quick_settings">Włącz szybkie ustawienia</string>
     <string name="piko_pref_quick_settings_summary">Dodaje przycisk szybkich ustawień w pasku bocznym</string>
 
-    <string name="piko_title_feature_flags">Flagi funkcji</string>
-    <string name="piko_pref_feature_flags">Dodaj flagi funkcji</string>
+    <string name="piko_title_feature_flags">Flagi</string>
+    <string name="piko_pref_feature_flags">Dodaj flagi</string>
     <string name="piko_pref_edit_flag_title">Edytuj flagi</string>
     <string name="piko_pref_add_flag_title">Dodaj flagę</string>
-    <string name="piko_pref_search_flags">Wyszukaj flagi</string>
+    <string name="piko_pref_search_flags">Wyszukaj flagę</string>
 
     <string name="piko_title_timeline">Oś czasu</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Wyłącz autoodświeżanie osi</string>
@@ -129,7 +129,7 @@
     <string name="piko_pref_app_restart_rec">Zalecany jest restart aplikacji</string>
     <string name="piko_pref_remove">Usuń %s</string>
     <string name="piko_pref_enable">Włącz %s</string>
-    <string name="piko_single_page_settings">Ustawienia Piko na pojedyńczej stronie</string>
-    <string name="piko_single_page_settings_desc">Wyświetlaj widok wszystkich ustawień Piko na pojedyńczej stronie</string>
+    <string name="piko_single_page_settings">Ustawienia Piko na pojedynczej stronie</string>
+    <string name="piko_single_page_settings_desc">Wyświetlaj widok wszystkich ustawień Piko na pojedynczej stronie</string>
 
 </resources>
