@@ -28,7 +28,7 @@
     <string name="piko_pref_wtf_section">Ẩn "Người có thể theo dõi"</string>
     <string name="piko_pref_cts_section">Ẩn "Nhà sáng tạo có thể đăng ký"</string>
     <string name="piko_pref_ctj_section">Ẩn "Cộng đồng có thể tham gia" </string>
-    <string name="piko_pref_ryb_section">Hide "Revist your bookmark" section</string>
+    <string name="piko_pref_ryb_section">Ẩn "Xem lại dấu trang đã lưu" </string>
     <string name="piko_pref_pinned_posts_section">Ẩn "Do người theo dõi bạn ghim"</string>
     <string name="piko_pref_hide_detailed_posts">Hide tweets chi tiết (trong phần trả lời) </string>
     <string name="piko_pref_hide_trends">Ẩn xu hướng mới</string>
@@ -44,13 +44,13 @@
     <string name="piko_pref_custom_share_domain_desc">Tên miền sẽ dược sử dụng chia sẻ tweets</string>
     <string name="piko_pref_browser_chooser">Sử dụng trình duyệt ngoài</string>
     <string name="piko_pref_browser_chooser_desc">Mở các đường link bằng trình duyệt đã chọn thay vi trong app</string>
-    <string name="piko_pref_feature_flags">Cờ tính năng (NÂNG CAO)</string>
-    <string name="piko_pref_edit_flag_title">Sửa cờ tính năng (NÂNG CAO)</string>
-    <string name="piko_pref_add_flag_title">Thêm cờ tính năng (NÂNG CAO)</string>
+    <string name="piko_pref_feature_flags">Tùy chọn nhà phát triển (NÂNG CAO)</string>
+    <string name="piko_pref_edit_flag_title">Sửa các tính năng ẩn (NÂNG CAO)</string>
+    <string name="piko_pref_add_flag_title">Thêm các tính năng ẩn (NÂNG CAO)</string>
     <string name="piko_pref_show_sensitive_media">Hiện thị nội dung nhạy cảm</string>
     <string name="piko_pref_selectable_text">Thêm khả năng lựa chọn văn bản có thể</string>
     <string name="piko_pref_clear_tracking_params">Xoá các trình theo dõi</string>
-    <string name="piko_pref_unshorten_link">Không rút gọn link</string>
+    <string name="piko_pref_unshorten_link">Loại bỏ liên kết rút gọn</string>
     <string name="piko_pref_unshorten_link_desc">Loại bỏ các liên kết rút gọn từ t.co</string>
     <string name="piko_pref_round_off_numbers">Làm tròn số liệu</string>
     <string name="piko_pref_round_off_numbers_desc">Làm tròn các số liệu thành K và M </string>
@@ -60,18 +60,18 @@
     <string name="piko_pref_disable_auto_timeline_scroll">Vộ hiệu tự làm mới tweets mỗi khi khởi chạy </string>
     <string name="piko_pref_hide_live_threads">Ẩn các phiên trực tiếp</string>
     <string name="piko_pref_hide_live_threads_desc">Ẩn những phiên trực tiếp trong dòng thời gian</string>
-    <string name="piko_pref_hide_banner">Ẩn banner</string>
-    <string name="piko_pref_hide_banner_desc">Ẩn 'bài viết mới'</string>
+    <string name="piko_pref_hide_banner">Ẩn banner quảng cáo trong tìm kiếm </string>
+    <string name="piko_pref_hide_banner_desc">Ẩn nút 'bài viết mới'</string>
     <string name="piko_pref_hide_bmk_timeline">Ẩn icon dấu trang trong dòng thời gian</string>
     <string name="piko_pref_force_translate">Buộc kích hoạt dịch thuật</string>
     <string name="piko_pref_force_translate_desc">Mở khoá chức năng dịch thuật trong mọi tweets</string>
     <string name="piko_pref_hide_quick_promote">Ẩn nút quảng bá</string>
     <string name="piko_pref_hide_quick_promote_desc">Ẩn các nút quảng bá trong mọi bài đăng của chính mình</string>
-    <string name="piko_pref_show_poll_result">Hiện thị lượt bình chọn</string>
+    <string name="piko_pref_show_poll_result">Hiện thị lượt bình chọn </string>
     <string name="piko_pref_show_poll_result_desc">Không bình chọn nhưng vẫn xem được lượt bình chọn</string>
     <string name="piko_pref_hide_immersive_player">Loại bỏ tính năng lướt video</string>
     <string name="piko_pref_hide_immersive_player_desc">Loại bỏ tính năng lướt để xem thêm trong trình phát video</string>
-    <string name="piko_pref_hide_hidden_replies">Ẩn các phản hồi bị ẩn</string>
+    <string name="piko_pref_hide_hidden_replies">Ẩn các phản hồi bị gỡ</string>
 
     <string name="piko_title_customisation">Tuỳ chỉnh giao diện</string>
     <string name="piko_pref_customisation_profiletabs">Ẩn các tab hồ sơ</string>
@@ -95,7 +95,7 @@
     <string name="piko_pref_app_version">Thông tin ứng dụng</string>
     <string name="piko_pref_patch_info">Thông tin bản vá</string>
     <string name="piko_pref_version_info">Thông tin phiên bản</string>
-    <string name="piko_pref_patches">Các vá</string>
+    <string name="piko_pref_patches">Các tính năng đã vá</string>
     <string name="piko_pref_included">Bao gồm</string>
     <string name="piko_pref_excluded">Không bao gồm</string>
 

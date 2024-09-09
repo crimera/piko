@@ -1,3 +1,16 @@
+## [1.39.2-dev.2](https://github.com/crimera/piko/compare/v1.39.2-dev.1...v1.39.2-dev.2) (2024-09-09)
+
+### Bug Fixes
+
+* **Twitter:** fix `Enable app icon settings` patch ([c2b6f79](https://github.com/crimera/piko/commit/c2b6f79b5c833c2441432b2511374361318e5507))
+* **Twitter:** fix video entity hook in `10.58` ([e8a833d](https://github.com/crimera/piko/commit/e8a833d2123b92a40caf68b4f6798e822a6d1737))
+
+## [1.39.2-dev.1](https://github.com/crimera/piko/compare/v1.39.1...v1.39.2-dev.1) (2024-09-05)
+
+### Bug Fixes
+
+* **Twitter:** fix `Control video auto scroll` in 10.57 ([b7ae78c](https://github.com/crimera/piko/commit/b7ae78cd61b2f75d266e3fe3d57c5c21cd798e79))
+
 ## [1.39.1](https://github.com/crimera/piko/compare/v1.39.0...v1.39.1) (2024-08-30)
 
 ### Bug Fixes
