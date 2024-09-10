@@ -31,7 +31,7 @@
     <string name="piko_pref_native_downloader_no_media">沒有找到媒體</string>
 
     <string name="piko_title_ads">廣告</string>
-    <string name="piko_pref_hide_promoted_posts">推薦推文」</string>
+    <string name="piko_pref_hide_promoted_posts">推薦推文</string>
     <string name="piko_pref_hide_g_ads">Google 廣告</string>
     <string name="piko_pref_hide_main_event">主要活動（探索頁面）</string>
     <string name="piko_pref_hide_superhero_event">Superhero event （探索頁面）</string>
