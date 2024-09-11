@@ -7,7 +7,7 @@
     <string name="piko_pref_undo_posts_desc">Mengaktifkan kemampuan untuk membatalkan postingan sebelum diposting</string>
     <string name="piko_pref_undo_posts_btn">Pengaturan batalkan postingan</string>
     <string name="piko_pref_icon_n_navbar_btn">Pengaturan kustomisasi ikon aplikasi dan navbar</string>
-    <string name="piko_pref_enable_force_pip">Mode PiP otomatis</string>
+    <string name="piko_pref_enable_force_pip">mode PiP otomatis</string>
     <string name="piko_pref_enable_force_pip_desc">Mengaktifkan mode PiP saat Anda menutup aplikasi</string>
 
     <string name="piko_title_download">Unduhan</string>
@@ -30,19 +30,19 @@
     <string name="piko_pref_native_downloader_no_media">Tidak ada media yang ditemukan</string>
 
     <string name="piko_title_ads">Iklan</string>
-    <string name="piko_pref_hide_promoted_posts">Postingan yang dipromosikan</string>
-    <string name="piko_pref_hide_g_ads">Iklan Google</string>
-    <string name="piko_pref_hide_main_event">Acara utama (Jelajahi)</string>
-    <string name="piko_pref_hide_superhero_event">Acara superhero (Jelajahi)</string>
-    <string name="piko_pref_hide_videos_for_you">video untuk Anda (Jelajahi)</string>
-    <string name="piko_pref_wtf_section">Bagian "Siapa yang harus diikuti"</string>
-    <string name="piko_pref_cts_section">Bagian "Kreator yang harus disubscribe"</string>
-    <string name="piko_pref_ctj_section">Bagian "Komunitas untuk bergabung"</string>
-    <string name="piko_pref_ryb_section">Bagian "Kunjungi kembali bookmark Anda"</string>
-    <string name="piko_pref_pinned_posts_section">Bagian "Postingan yang disematkan oleh pengikut"</string>
-    <string name="piko_pref_hide_detailed_posts">Postingan terperinci (dalam balasan)</string>
-    <string name="piko_pref_hide_trends">Tren yang dipromosikan</string>
-    <string name="piko_pref_hide_premium_prompt">Pesan prompt</string>
+    <string name="piko_pref_hide_promoted_posts">postingan yang dipromosikan</string>
+    <string name="piko_pref_hide_g_ads">iklan Google</string>
+    <string name="piko_pref_hide_main_event">acara utama (jelajahi)</string>
+    <string name="piko_pref_hide_superhero_event">acara superhero (jelajahi)</string>
+    <string name="piko_pref_hide_videos_for_you">video untuk Anda (jelajahi)</string>
+    <string name="piko_pref_wtf_section">bagian "siapa yang harus diikuti"</string>
+    <string name="piko_pref_cts_section">bagian "kreator yang harus disubscribe"</string>
+    <string name="piko_pref_ctj_section">bagian "komunitas untuk bergabung"</string>
+    <string name="piko_pref_ryb_section">bagian "kunjungi kembali bookmark Anda"</string>
+    <string name="piko_pref_pinned_posts_section">bagian "postingan yang disematkan oleh pengikut"</string>
+    <string name="piko_pref_hide_detailed_posts">postingan terperinci (dalam balasan)</string>
+    <string name="piko_pref_hide_trends">tren yang dipromosikan</string>
+    <string name="piko_pref_hide_premium_prompt">pesan prompt</string>
     <string name="piko_pref_del_from_db">Hapus entri dari database</string>
     <string name="piko_pref_db_not_found">Database tidak ditemukan</string>
     <string name="piko_pref_db_not_open">Database tidak dibuka</string>
@@ -85,7 +85,7 @@
     <string name="piko_pref_hide_banner_desc">pill postingan baru</string>
     <string name="piko_pref_hide_bmk_timeline">ikon bookmark di timeline</string>
     <string name="piko_pref_force_translate">Paksa aktifkan terjemahan</string>
-    <string name="piko_pref_force_translate_desc">Dapatkan opsi terjemahan untuk semua postingan</string>
+    <string name="piko_pref_force_translate_desc">Mendapatkan opsi terjemahan untuk semua postingan</string>
     <string name="piko_pref_hide_quick_promote">tombol promosi</string>
     <string name="piko_pref_hide_quick_promote_desc">Menyembunyikan tombol promosi di bawah postingan sendiri</string>
     <string name="piko_pref_show_poll_result">Tampilkan hasil polling</string>
@@ -101,8 +101,8 @@
     <string name="piko_title_customisation">Kustomisasi</string>
     <string name="piko_pref_customisation_profiletabs">Tab profil untuk disembunyikan</string>
     <string name="piko_pref_customisation_timelinetabs">Tab timeline</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">Hapus "Untuk Anda"</string>
-    <string name="piko_pref_customisation_timelinetabs_following">Hapus "Mengikuti"</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">Hapus "untuk Anda"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">Hapus "mengikuti"</string>
     <string name="piko_pref_customisation_timelinetabs_both">Tampilkan keduanya</string>
     <string name="piko_pref_customisation_sidebartabs">Item sidebar untuk disembunyikan</string>
     <string name="piko_pref_customisation_navbartabs">Item navbar untuk disembunyikan</string>
@@ -121,8 +121,8 @@
 
     <string name="piko_title_about">Tentang</string>
     <string name="piko_pref_app_version">Versi aplikasi</string>
-    <string name="piko_pref_patch_info">Informasi Patch</string>
-    <string name="piko_pref_version_info">Informasi Versi</string>
+    <string name="piko_pref_patch_info">Informasi patch</string>
+    <string name="piko_pref_version_info">Informasi versi</string>
     <string name="piko_pref_patches">Patch</string>
     <string name="piko_pref_included">Termasuk</string>
     <string name="piko_pref_excluded">Dikecualikan</string>
