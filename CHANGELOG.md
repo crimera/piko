@@ -1,3 +1,9 @@
+## [1.39.3](https://github.com/crimera/piko/compare/v1.39.2...v1.39.3) (2024-09-11)
+
+### Updates
+
+* **Translations:** Update translations ([9686863](https://github.com/crimera/piko/commit/968686390263fa700488deb5d87085470267c7cf))
+
 ## [1.39.2](https://github.com/crimera/piko/compare/v1.39.1...v1.39.2) (2024-09-09)
 
 ### Bug Fixes
