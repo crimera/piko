@@ -97,6 +97,8 @@
     <string name="piko_pref_hide_hidden_replies">hidden replies</string>
     <string name="piko_pref_force_hd">force HD videos</string>
     <string name="piko_pref_force_hd_desc">Videos will be played in highest quality always</string>
+    <string name="piko_pref_hide_nudge_button">Hide nudge button</string>
+    <string name="piko_pref_hide_nudge_button_desc">Hides follow/subscribe/follow back buttons on posts</string>
 
     <string name="piko_title_customisation">Customization</string>
     <string name="piko_pref_customisation_profiletabs">Profile tabs to hide</string>
