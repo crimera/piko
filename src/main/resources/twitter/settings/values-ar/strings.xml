@@ -97,6 +97,8 @@
     <string name="piko_pref_hide_hidden_replies">الردود المخفية</string>
     <string name="piko_pref_force_hd">فرض جودة HD</string>
     <string name="piko_pref_force_hd_desc">سيتم تشغيل الفيديوهات بأعلى جودة دائمًا</string>
+    <string name="piko_pref_hide_nudge_button">إخفاء زر الدفع</string>
+    <string name="piko_pref_hide_nudge_button_desc">يخفي أزرار المتابعة/الاشتراك/المتابعة مرة أخرى على المنشورات</string>
 
     <string name="piko_title_customisation">التخصيص</string>
     <string name="piko_pref_customisation_profiletabs">إخفاء علامات تبويب الملف الشخصي</string>
