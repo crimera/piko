@@ -101,6 +101,8 @@
     <string name="piko_pref_hide_hidden_replies">убранные ответы</string>
     <string name="piko_pref_force_hd">высокое качество видео</string>
     <string name="piko_pref_force_hd_desc">Воспроизведение видео только в высоком качестве</string>
+    <string name="piko_pref_hide_nudge_button">Скрывать кнопку Читать в постах</string>
+    <string name="piko_pref_hide_nudge_button_desc">Кнопка Читать в постах авторов, на которых вы не подписаны</string>
 
     <string name="piko_title_customisation">Кастомизация</string>
     <string name="piko_pref_customisation_profiletabs">Скрыть разделы профиля</string>
