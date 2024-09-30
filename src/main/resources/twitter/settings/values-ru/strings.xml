@@ -103,6 +103,8 @@
     <string name="piko_pref_force_hd_desc">Воспроизведение видео только в высоком качестве</string>
     <string name="piko_pref_hide_nudge_button">Скрывать кнопку Читать в постах</string>
     <string name="piko_pref_hide_nudge_button_desc">Кнопка Читать в постах авторов, на которых вы не подписаны</string>
+    <string name="piko_pref_hide_social_proof">Скрывать В читаемых у..</string>
+    <string name="piko_pref_hide_social_proof_desc">Панель В читаемых у.. в профилях</string>
 
     <string name="piko_title_customisation">Кастомизация</string>
     <string name="piko_pref_customisation_profiletabs">Скрыть разделы профиля</string>
@@ -113,7 +115,7 @@
     <string name="piko_pref_customisation_sidebartabs">Скрыть разделы боковой панели</string>
     <string name="piko_pref_customisation_navbartabs">Скрыть кнопки меню навигации</string>
     <string name="piko_pref_customisation_inlinetabs">Скрыть кнопки под постом</string>
-    <string name="piko_pref_customisation_reply_sorting">Выбрать сортировку ответов по умолчанию</string>
+    <string name="piko_pref_customisation_reply_sorting">Сортировка ответов по умолчанию</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Ранее выбранное</string>
 
     <string name="piko_title_backup">Бэкап и восстановление</string>
