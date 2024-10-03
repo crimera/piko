@@ -12,13 +12,15 @@ import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction23x
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 object HideNudgeButtonPatchFingerprint : MethodFingerprint(
-    strings = listOf("creator_subscriptions_subscribe_button_tweet_detail_enabled"),
-    customFingerprint = {methodDef, _ ->
-        methodDef.parameters.size == 1 && methodDef.name == "invoke"
+    strings = listOf("viewDelegate", "viewModel"),
+    customFingerprint = {_, classDef ->
+        classDef.type.endsWith("FollowNudgeButtonViewDelegateBinder;")
     }
 )
 
@@ -43,14 +45,16 @@ object HideNudgeButtonPatch:BytecodePatch(
        val method = result.mutableMethod
        val instructions = method.getInstructions()
 
-       val injectLocation = instructions.first { it.opcode == Opcode.IF_NEZ}.location.index
-       val dummyReg = method.getInstruction<OneRegisterInstruction>(injectLocation-1).registerA
+       val dummyRegIndex = instructions.first { it.opcode == Opcode.APUT_OBJECT}.location.index
+       val dummyReg = method.getInstruction<Instruction23x>(dummyRegIndex).registerC
 
-       method.addInstructionsWithLabels(injectLocation-1,"""
+       method.addInstructionsWithLabels(dummyRegIndex+2,"""
            $HOOK_DESCRIPTOR
            move-result v$dummyReg
-           if-nez v$dummyReg, :piko
-       """.trimIndent(), ExternalLabel("piko",instructions.last { it.opcode == Opcode.SGET_OBJECT })
+           if-eqz v$dummyReg, :piko
+           const/16 v$dummyReg, 0x8
+           invoke-virtual {p1, v$dummyReg}, Landroidx/appcompat/widget/AppCompatButton;->setVisibility(I)V
+       """.trimIndent(), ExternalLabel("piko",instructions.first { it.opcode == Opcode.INVOKE_STATIC && it.location.index > dummyRegIndex })
        )
 
       SettingsStatusLoadFingerprint.enableSettings("hideNudgeButton")
