@@ -1,3 +1,13 @@
+## [1.41.0](https://github.com/crimera/piko/compare/v1.40.0...v1.41.0) (2024-10-03)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Hide nudge button` patch ([d7572fe](https://github.com/crimera/piko/commit/d7572feac66d44f0fe669073ee09bc09637adb9a))
+
+### Features
+
+* **Twitter:** Added `Hide followed by context` patch ([261e1d0](https://github.com/crimera/piko/commit/261e1d0156702a4a72105b430d50e59e88795198))
+
 ## [1.41.0-dev.1](https://github.com/crimera/piko/compare/v1.40.0...v1.41.0-dev.1) (2024-09-27)
 
 ### Bug Fixes
