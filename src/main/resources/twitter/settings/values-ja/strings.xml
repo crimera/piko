@@ -91,6 +91,10 @@
     <string name="piko_pref_hide_hidden_replies">「非表示の返信」</string>
     <string name="piko_pref_force_hd">最高画質の強制</string>
     <string name="piko_pref_force_hd_desc">動画を常に最高画質で再生します</string>
+    <string name="piko_pref_hide_nudge_button">「フォローする」ボタンを非表示</string>
+    <string name="piko_pref_hide_nudge_button_desc">ポストから「フォローする」/「サブスクライブ」/「フォローバック」ボタンを非表示にします</string>
+    <string name="piko_pref_hide_social_proof">フォローインジケーターを非表示</string>
+    <string name="piko_pref_hide_social_proof_desc">プロフィールの下部に表示される「〇〇さんにフォローされています」を非表示にします</string>
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">非表示にするプロフィールタブ</string>
     <string name="piko_pref_customisation_timelinetabs">タイムラインのタブ</string>
