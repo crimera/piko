@@ -1,3 +1,80 @@
+## [1.41.0](https://github.com/crimera/piko/compare/v1.40.0...v1.41.0) (2024-10-03)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Hide nudge button` patch ([d7572fe](https://github.com/crimera/piko/commit/d7572feac66d44f0fe669073ee09bc09637adb9a))
+
+### Features
+
+* **Twitter:** Added `Hide followed by context` patch ([261e1d0](https://github.com/crimera/piko/commit/261e1d0156702a4a72105b430d50e59e88795198))
+
+## [1.41.0-dev.1](https://github.com/crimera/piko/compare/v1.40.0...v1.41.0-dev.1) (2024-09-27)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Hide nudge button` patch ([d7572fe](https://github.com/crimera/piko/commit/d7572feac66d44f0fe669073ee09bc09637adb9a))
+
+### Features
+
+* **Twitter:** Added `Hide followed by context` patch ([261e1d0](https://github.com/crimera/piko/commit/261e1d0156702a4a72105b430d50e59e88795198))
+
+## [1.40.0](https://github.com/crimera/piko/compare/v1.39.3...v1.40.0) (2024-09-25)
+
+### Features
+
+* **Twitter:** Added `Hide nudge button` patch ([ad27484](https://github.com/crimera/piko/commit/ad27484f4cc0d727cf07cb4f202c8ddd6b582d67))
+
+## [1.40.0-dev.1](https://github.com/crimera/piko/compare/v1.39.3...v1.40.0-dev.1) (2024-09-25)
+
+### Features
+
+* **Twitter:** Added `Hide nudge button` patch ([ad27484](https://github.com/crimera/piko/commit/ad27484f4cc0d727cf07cb4f202c8ddd6b582d67))
+
+## [1.39.3](https://github.com/crimera/piko/compare/v1.39.2...v1.39.3) (2024-09-11)
+
+### Updates
+
+* **Translations:** Update translations ([9686863](https://github.com/crimera/piko/commit/968686390263fa700488deb5d87085470267c7cf))
+
+## [1.39.2](https://github.com/crimera/piko/compare/v1.39.1...v1.39.2) (2024-09-09)
+
+### Bug Fixes
+
+* **Twitter:** fix `Control video auto scroll` in 10.57 ([b7ae78c](https://github.com/crimera/piko/commit/b7ae78cd61b2f75d266e3fe3d57c5c21cd798e79))
+* **Twitter:** fix `Enable app icon settings` patch ([c2b6f79](https://github.com/crimera/piko/commit/c2b6f79b5c833c2441432b2511374361318e5507))
+* **Twitter:** fix video entity hook in `10.58` ([e8a833d](https://github.com/crimera/piko/commit/e8a833d2123b92a40caf68b4f6798e822a6d1737))
+
+## [1.39.2-dev.2](https://github.com/crimera/piko/compare/v1.39.2-dev.1...v1.39.2-dev.2) (2024-09-09)
+
+### Bug Fixes
+
+* **Twitter:** fix `Enable app icon settings` patch ([c2b6f79](https://github.com/crimera/piko/commit/c2b6f79b5c833c2441432b2511374361318e5507))
+* **Twitter:** fix video entity hook in `10.58` ([e8a833d](https://github.com/crimera/piko/commit/e8a833d2123b92a40caf68b4f6798e822a6d1737))
+
+## [1.39.2-dev.1](https://github.com/crimera/piko/compare/v1.39.1...v1.39.2-dev.1) (2024-09-05)
+
+### Bug Fixes
+
+* **Twitter:** fix `Control video auto scroll` in 10.57 ([b7ae78c](https://github.com/crimera/piko/commit/b7ae78cd61b2f75d266e3fe3d57c5c21cd798e79))
+
+## [1.39.1](https://github.com/crimera/piko/compare/v1.39.0...v1.39.1) (2024-08-30)
+
+### Bug Fixes
+
+* Remove duplicate strings ([94c6642](https://github.com/crimera/piko/commit/94c66422e0ced2cbdfd820dfee60cedd2c68e636))
+
+## [1.39.0](https://github.com/crimera/piko/compare/v1.38.0...v1.39.0) (2024-08-30)
+
+### Features
+
+* **Twitter:** Custom deeplinks ([325a281](https://github.com/crimera/piko/commit/325a281225b1379b310d8ba14629bdbae0b314e5))
+
+### Updates
+
+* **Twitter:** Added strings ([fad9b1a](https://github.com/crimera/piko/commit/fad9b1a9fd79b164c713fe35b61bad8ed3d9373b))
+* **Twitter:** Change Quick Btn path ([7febdf6](https://github.com/crimera/piko/commit/7febdf612212ba61638fd818121c8cc4b9db8ed8))
+* **Twitter:** Updated strings ([3cb159e](https://github.com/crimera/piko/commit/3cb159e57d66e22b7c2f638e5d0b7422a4ef2a10))
+
 ## [1.39.0-dev.1](https://github.com/crimera/piko/compare/v1.38.0...v1.39.0-dev.1) (2024-08-25)
 
 ### Features

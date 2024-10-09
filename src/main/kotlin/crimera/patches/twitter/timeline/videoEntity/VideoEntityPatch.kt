@@ -41,7 +41,7 @@ object VideoEntityPatch:BytecodePatch(
         val clsName = fr.definingClass
         val mName = fr.name
 
-        val cls = context.findClass(clsName)!!.mutableClass
+        val cls = context.findClass { it.type == clsName }!!.mutableClass
         val m2 = cls.methods.find { it.name == mName }
         val i2 = m2!!.getInstructions()
 
