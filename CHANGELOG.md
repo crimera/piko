@@ -1,3 +1,9 @@
+## [1.42.0-dev.1](https://github.com/crimera/piko/compare/v1.41.1-dev.1...v1.42.0-dev.1) (2024-10-13)
+
+### Features
+
+* **Bring back twitter:** Add Japanese ([4eb08b5](https://github.com/crimera/piko/commit/4eb08b554eaf92958e0e159647fc71b35340e2b2))
+
 ## [1.41.1-dev.1](https://github.com/crimera/piko/compare/v1.41.0...v1.41.1-dev.1) (2024-10-09)
 
 ### Updates
