@@ -99,6 +99,8 @@
     <string name="piko_pref_force_hd_desc">Los videos se reproducirán siempre en la máxima calidad</string>
     <string name="piko_pref_hide_nudge_button">Ocultar botón de recordatorio</string>
     <string name="piko_pref_hide_nudge_button_desc">Oculta los botones de seguir/suscribirse/seguir de vuelta en las publicaciones</string>
+    <string name="piko_pref_hide_social_proof">Ocultar seguidores por contexto</string>
+    <string name="piko_pref_hide_social_proof_desc">Oculta seguidores por contexto en los perfiles</string>
 
     <string name="piko_title_customisation">Personalización</string>
     <string name="piko_pref_customisation_profiletabs">Pestañas del perfil a ocultar</string>
