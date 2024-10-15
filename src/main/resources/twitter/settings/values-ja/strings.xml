@@ -37,7 +37,7 @@
     <string name="piko_pref_ctj_section">「新しいコミュニティを見つける」</string>
     <string name="piko_pref_ryb_section">「ブックマークに再アクセス」</string>
     <string name="piko_pref_pinned_posts_section">「フォロー中のユーザーが固定」</string>
-    <string name="piko_pref_hide_detailed_posts">関連ポスト欄 (返信内)</string>
+    <string name="piko_pref_hide_detailed_posts">関連ポスト欄(返信内)</string>
     <string name="piko_pref_hide_trends">プロモーショントレンド</string>
     <string name="piko_pref_hide_premium_prompt">メッセージプロンプト</string>
     <string name="piko_pref_del_from_db">データベースから項目を削除</string>
@@ -47,7 +47,7 @@
     <string name="piko_pref_hide_premium_upsell">プレミアムの広告</string>
     <string name="piko_pref_hide_premium_upsell_desc">タイムラインからプレミアムの広告を削除します</string>
     <string name="piko_title_misc">その他</string>
-    <string name="piko_pref_chirp_font">Chirp フォント</string>
+    <string name="piko_pref_chirp_font">Chirpフォント</string>
     <string name="piko_pref_hide_fab">フローティングアクションボタン (FAB)</string>
     <string name="piko_pref_hide_fab_menu">FABメニューボタン</string>
     <string name="piko_pref_rec_users">おすすめのユーザー</string>
@@ -65,7 +65,7 @@
     <string name="piko_pref_round_off_numbers_desc">65,536を6.5万のように数字を短く表記します</string>
     <string name="piko_pref_debug_menu">ポストのデバッグメニュー</string>
     <string name="piko_pref_quick_settings">サイドバーに設定ボタン追加</string>
-    <string name="piko_pref_quick_settings_summary">サイドバーから Piko 設定を直接開くことができるボタンを追加します</string>
+    <string name="piko_pref_quick_settings_summary">サイドバーからPiko設定を直接開くことができるボタンを追加します</string>
     <string name="piko_title_feature_flags">機能フラグ</string>
     <string name="piko_pref_feature_flags">機能フラグを追加</string>
     <string name="piko_pref_edit_flag_title">フラグを編集</string>
@@ -125,5 +125,5 @@
     <string name="piko_pref_remove">%sを削除</string>
     <string name="piko_pref_enable">%sを有効化</string>
     <string name="piko_single_page_settings">全ての設定を表示</string>
-    <string name="piko_single_page_settings_desc">カテゴリー分けをせずに、1つのページに全ての Piko 設定を表示します</string>
+    <string name="piko_single_page_settings_desc">カテゴリー分けをせずに、1つのページに全てのPiko設定を表示します</string>
 </resources>
