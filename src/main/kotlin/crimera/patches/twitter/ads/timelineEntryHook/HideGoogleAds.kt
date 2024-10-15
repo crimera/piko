@@ -4,6 +4,7 @@ import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
+import crimera.patches.twitter.featureFlag.fingerprints.FeatureFlagLoadFingerprint
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
@@ -14,9 +15,10 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
     use = true
 )
 object HideGoogleAds :BytecodePatch(
-    setOf(SettingsStatusLoadFingerprint)
+    setOf(FeatureFlagLoadFingerprint, SettingsStatusLoadFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
+        FeatureFlagLoadFingerprint.enableSettings("hideGoogleAds")
         SettingsStatusLoadFingerprint.enableSettings("hideGAds")
     }
 }
