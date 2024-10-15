@@ -1,3 +1,9 @@
+## [1.42.0-dev.2](https://github.com/crimera/piko/compare/v1.42.0-dev.1...v1.42.0-dev.2) (2024-10-15)
+
+### Bug Fixes
+
+* **Remove Google Ad:** Include ads in the comments ([79d6e35](https://github.com/crimera/piko/commit/79d6e35144ffc6c81d3bb36499fc2c22e5a089ac))
+
 ## [1.42.0-dev.1](https://github.com/crimera/piko/compare/v1.41.1-dev.1...v1.42.0-dev.1) (2024-10-13)
 
 ### Features
