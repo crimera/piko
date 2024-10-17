@@ -6,40 +6,54 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 
 @Patch(
-    name = "ZFix String Resource",
-    description = "Test modifying string",
-    compatiblePackages = [CompatiblePackage("com.twitter.android")]
+  name = "ZFix String Resource",
+  description = "Test modifying string",
+  compatiblePackages = [CompatiblePackage("com.twitter.android")]
 )
 object FixStringResourcePatch: ResourcePatch() {
-    private inline fun measureExecutionTime(block: () -> Unit): Long {
-        val start = System.currentTimeMillis()
-        block()
-        val end = System.currentTimeMillis()
-        return end - start
+  private inline fun measureExecutionTime(block: () -> Unit): Long {
+    val start = System.currentTimeMillis()
+    block()
+    val end = System.currentTimeMillis()
+    return end - start
+  }
+
+  fun replaceStringInFile(file: File) {
+    val regex = Regex("""(<string\s+name="conference_default_title">)([^<]*)(<\/string>)""")
+    val defaultValue = """"&#120143; Conference"""
+
+    val content = file.readText()
+    val matchResult = regex.find(content)
+    matchResult?.let {
+      val value = it.groups[2]?.value
+      println("Matched value in ${file.name}: $value")
+    } ?: run {
+      println("No match found in ${file.name}.")
     }
 
-    override fun execute(context: ResourceContext) {
-        val duration = measureExecutionTime {
-            val strings = context["res/values/strings.xml"]
-            val content = strings.readText()
-            val regex = Regex("""(<string\s+name="conference_default_title">)([^<]*)(<\/string>)""")
-            val matchResult = regex.find(content)
-            matchResult?.let {
-                val value = it.groups[1]?.value
-                println("Matched value: $value")  // Output: Matched value: gamer
-            } ?: run {
-                println("No match found.")
-            }
+    file.writeText(
+      content.replace(regex) {
+        "${it.groupValues[1]}$defaultValue${it.groupValues[3]}"
+      }
+    )
+  }
 
-            val defaultValue = """"&#120143; Conference"""
+  override fun execute(context: ResourceContext) {
+    val locales = listOf("values", "values-en-rGB")
 
-            strings.writeText(
-                content.replace(regex) {
-                    "${it.groupValues[1]}$defaultValue${it.groupValues[3]}"
-                }
-            )
+    val duration = measureExecutionTime {
+      locales.forEach {
+        locale ->
+        val stringsFile = context["res/$locale/strings.xml"]
+        if (stringsFile.exists()) {
+          println("Processing $locale strings file")
+          replaceStringInFile(stringsFile)
+        } else {
+          println("Strings file for $locale not found")
         }
-
-        println(duration)
+      }
     }
+
+    println(duration)
+  }
 }
