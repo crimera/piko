@@ -6,8 +6,8 @@ import app.revanced.patcher.patch.ResourcePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.util.ResourceGroup
+import app.revanced.util.appendStrings
 import app.revanced.util.copyResources
-import app.revanced.util.copyXmlNode
 import org.w3c.dom.Element
 import java.io.File
 
@@ -80,14 +80,20 @@ object SettingsResourcePatch: ResourcePatch() {
             parent.appendChild(sideBtn)
         }
 
-        //credits @inotia00
-        context.copyXmlNode("twitter/settings", "values/strings.xml", "resources")
-        context.copyXmlNode("twitter/settings", "values/arrays.xml", "resources")
+        val copyingNodes = measureExecutionTime {
+            //credits @inotia00
+            context.appendStrings("twitter/settings", "values/strings.xml")
+            context.appendStrings("twitter/settings", "values/arrays.xml")
+        }
+
+        println("Copying nodes: $copyingNodes ms")
 
         /**
          * create directory for the untranslated language resources
          */
         //Strings
+        var durationOfCopyingNodes: Long = 0L
+        var durationOfCopyingStringResources: Long = 0L
         val languages = arrayOf(
             "es",
             "ar",
@@ -105,27 +111,37 @@ object SettingsResourcePatch: ResourcePatch() {
 
         languages.forEach {
             if (context["res/$it"].exists()) {
-                context.copyXmlNode("twitter/settings", "$it/strings.xml", "resources")
+                durationOfCopyingNodes += measureExecutionTime {
+                    context.appendStrings("twitter/settings", "$it/strings.xml")
+                }
             } else {
-                context["res/$it"].mkdirs()
-                context.copyResources("twitter/settings", ResourceGroup(it, "strings.xml"))
-            }
-        }
-
-        val locales = listOf("values", "values-en-rGB")
-
-        val duration = measureExecutionTime {
-            locales.forEach { locale ->
-                val stringsFile = context["res/$locale/strings.xml"]
-                if (stringsFile.exists()) {
-                    println("Processing $locale strings file")
-                    fixStrings(stringsFile)
-                } else {
-                    println("Strings file for $locale not found")
+                durationOfCopyingStringResources += measureExecutionTime {
+                    context["res/$it"].mkdirs()
+                    context.copyResources("twitter/settings", ResourceGroup(it, "strings.xml"))
                 }
             }
         }
 
-        println(duration)
+        println("""
+            Copying Translation Nodes: $durationOfCopyingNodes ms
+            Copying Translation String Resources : $durationOfCopyingStringResources ms
+            Copying Translations Took: ${durationOfCopyingNodes+durationOfCopyingStringResources} ms
+        """.trimIndent())
+
+//        val locales = listOf("values", "values-en-rGB")
+
+//        val duration = measureExecutionTime {
+//            locales.forEach { locale ->
+//                val stringsFile = context["res/$locale/strings.xml"]
+//                if (stringsFile.exists()) {
+//                    println("Processing $locale strings file")
+//                    fixStrings(stringsFile)
+//                } else {
+//                    println("Strings file for $locale not found")
+//                }
+//            }
+//        }
+//
+//        println("Duration to fix corrupted string: $duration ms")
     }
 }
