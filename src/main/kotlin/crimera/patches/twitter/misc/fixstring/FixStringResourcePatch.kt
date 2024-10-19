@@ -9,7 +9,8 @@ import java.io.File
 @Patch(
   name = "ZFix String Resource",
   description = "Test modifying string",
-  compatiblePackages = [CompatiblePackage("com.twitter.android")]
+  compatiblePackages = [CompatiblePackage("com.twitter.android")],
+  use = false
 )
 object FixStringResourcePatch: ResourcePatch() {
   private inline fun measureExecutionTime(block: () -> Unit): Long {
@@ -19,7 +20,7 @@ object FixStringResourcePatch: ResourcePatch() {
     return end - start
   }
 
-  fun replaceStringInFile(file: File) {
+  private fun fixStrings(file: File) {
     val regex = Regex("""(<string\s+name="conference_default_title">)([^<]*)(<\/string>)""")
     val defaultValue = """"&#120143; Conference"""
 
@@ -48,7 +49,7 @@ object FixStringResourcePatch: ResourcePatch() {
         val stringsFile = context["res/$locale/strings.xml"]
         if (stringsFile.exists()) {
           println("Processing $locale strings file")
-          replaceStringInFile(stringsFile)
+          fixStrings(stringsFile)
         } else {
           println("Strings file for $locale not found")
         }
