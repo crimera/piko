@@ -1,3 +1,9 @@
+## [1.42.1-dev.2](https://github.com/crimera/piko/compare/v1.42.1-dev.1...v1.42.1-dev.2) (2024-10-20)
+
+### Refactors
+
+* **Custom Downloader:** Improve getting of tweet method declarations ([5237e49](https://github.com/crimera/piko/commit/5237e496140cc94fb9beb4a72057d927527dd78b))
+
 ## [1.42.1-dev.1](https://github.com/crimera/piko/compare/v1.42.0...v1.42.1-dev.1) (2024-10-20)
 
 ### Bug Fixes
