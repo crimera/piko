@@ -134,8 +134,7 @@ fun ResourceContext.appendStrings(
     resourceDirectory: String,
     targetResource: String,
 ) {
-    val source = classLoader.getResourceAsStream("$resourceDirectory/$targetResource")
-        ?: throw FileNotFoundException()
+    val source = classLoader.getResourceAsStream("$resourceDirectory/$targetResource") ?: throw FileNotFoundException()
 
     val target = this["res/$targetResource"]
     val targetContent = target.readLines().dropLastWhile { it != "</resources>" }.dropLast(1)
