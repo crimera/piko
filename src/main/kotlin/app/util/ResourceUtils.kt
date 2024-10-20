@@ -5,6 +5,7 @@ import app.revanced.patcher.util.DomFileEditor
 import app.revanced.util.resource.BaseResource
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
+import java.io.FileNotFoundException
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -24,10 +25,9 @@ fun Node.childElementsSequence() = this.childNodes.asSequence().filter { it.node
 /**
  * Performs the given [action] on each child element.
  */
-fun Node.forEachChildElement(action: (Node) -> Unit) =
-    childElementsSequence().forEach {
-        action(it)
-    }
+fun Node.forEachChildElement(action: (Node) -> Unit) = childElementsSequence().forEach {
+    action(it)
+}
 
 /**
  * Recursively traverse the DOM tree starting from the given root node.
@@ -119,18 +119,39 @@ fun String.copyXmlNode(source: DomFileEditor, target: DomFileEditor): AutoClosea
  * @param elementTag The element to copy.
  */
 fun ResourceContext.copyXmlNode(
-    resourceDirectory: String,
-    targetResource: String,
-    elementTag: String
+    resourceDirectory: String, targetResource: String, elementTag: String
 ) {
-    val stringsResourceInputStream =
-        classLoader.getResourceAsStream("$resourceDirectory/$targetResource")!!
+    val stringsResourceInputStream = classLoader.getResourceAsStream("$resourceDirectory/$targetResource")!!
 
     // Copy nodes from the resources node to the real resource node
     elementTag.copyXmlNode(
-        this.xmlEditor[stringsResourceInputStream],
-        this.xmlEditor["res/$targetResource"]
+        this.xmlEditor[stringsResourceInputStream], this.xmlEditor["res/$targetResource"]
     ).close()
+}
+
+
+fun ResourceContext.appendStrings(
+    resourceDirectory: String,
+    targetResource: String,
+) {
+    val source = classLoader.getResourceAsStream("$resourceDirectory/$targetResource") ?: throw FileNotFoundException()
+
+    val target = this["res/$targetResource"]
+    val targetContent = target.readLines().dropLastWhile { it != "</resources>" }.dropLast(1)
+
+    target.bufferedWriter().use { writer ->
+        targetContent.forEach {
+            writer.write(it)
+        }
+
+        source.bufferedReader().useLines { lines ->
+            lines.dropWhile {
+                it != "<resources>"
+            }.drop(1).forEach { line ->
+                writer.write(line)
+            }
+        }
+    }
 }
 
 
