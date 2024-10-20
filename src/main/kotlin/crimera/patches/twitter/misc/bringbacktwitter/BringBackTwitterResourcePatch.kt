@@ -11,7 +11,6 @@ import crimera.patches.twitter.misc.bringbacktwitter.custromstringsupdater.ja
 import crimera.patches.twitter.misc.bringbacktwitter.strings.StringsMap
 import org.w3c.dom.Element
 import java.io.File
-import java.io.FileWriter
 
 @Patch(
     name = "Bring back twitter",
@@ -106,41 +105,28 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         val langs = StringsMap.replacementMap
         for ((key, value) in langs) {
             val stringsFile = context["res/$key/strings.xml"]
-            if(!stringsFile.isFile){
-//                println("$key/strings.xml not found")
-
-                context["res/$key"].mkdirs()
-                FileWriter(stringsFile).use {
-                    it.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
-                }
+            if (stringsFile.exists()) {
+                updateStringsFile(stringsFile, value, context)
             }
-            updateStringsFile(stringsFile, value, context)
         }
     }
 
     private fun updateStringsFile(stringsFile: File, stringsMap: Map<String,String>, context: ResourceContext) {
-        val mutableStringsMap = stringsMap.toMutableMap()
         context.xmlEditor[stringsFile.toString()].use { editor ->
             val document = editor.file
 
+            var replacedCount = 0
             val nodes = document.getElementsByTagName("string")
             for (i in 0 until nodes.length) {
                 val node = nodes.item(i)
                 val name = node.attributes.getNamedItem("name")?.nodeValue ?: continue
-                node.textContent = mutableStringsMap.remove(name) ?: continue
+                node.textContent = stringsMap[name] ?: continue
+                replacedCount++
             }
 
-            // log which keys were not found or failed
-            if (mutableStringsMap.isNotEmpty()) {
-                val parentNode = document.getElementsByTagName("resources").item(0)
-                for ((key, value) in mutableStringsMap) {
-                    val colorElement = document.createElement("string")
-
-                    colorElement.setAttribute("name", key)
-                    colorElement.textContent = value
-
-                    parentNode.appendChild(colorElement)
-                }
+            // log how many keys were not found
+            if (replacedCount < stringsMap.size) {
+                println("${stringsMap.size - replacedCount} keys were not found in ${stringsFile.parentFile.name}/${stringsFile.name}")
             }
         }
     }
