@@ -118,30 +118,28 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         }
     }
 
-    private fun updateStringsFile(stringsFile: File,stringsMap: Map<String,String>, context: ResourceContext) {
+    private fun updateStringsFile(stringsFile: File, stringsMap: Map<String,String>, context: ResourceContext) {
+        val mutableStringsMap = stringsMap.toMutableMap()
         context.xmlEditor[stringsFile.toString()].use { editor ->
             val document = editor.file
 
-            for ((key, value) in stringsMap) {
-                val nodes = document.getElementsByTagName("string")
-                var keyReplaced = false
-                for (i in 0 until nodes.length) {
-                    val node = nodes.item(i)
-                    if (node.attributes.getNamedItem("name")?.nodeValue == key) {
-                        node.textContent = value
-                        keyReplaced = true
-                        break
-                    }
-                }
+            val nodes = document.getElementsByTagName("string")
+            for (i in 0 until nodes.length) {
+                val node = nodes.item(i)
+                val name = node.attributes.getNamedItem("name")?.nodeValue ?: continue
+                node.textContent = mutableStringsMap.remove(name) ?: continue
+            }
 
-                // log which keys were not found or failed
-                if (!keyReplaced) {
+            // log which keys were not found or failed
+            if (mutableStringsMap.isNotEmpty()) {
+                val parentNode = document.getElementsByTagName("resources").item(0)
+                for ((key, value) in mutableStringsMap) {
                     val colorElement = document.createElement("string")
 
                     colorElement.setAttribute("name", key)
                     colorElement.textContent = value
 
-                    document.getElementsByTagName("resources").item(0).appendChild(colorElement)
+                    parentNode.appendChild(colorElement)
                 }
             }
         }
