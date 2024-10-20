@@ -17,7 +17,6 @@ object DownloadCallFingerprint: MethodFingerprint(
     returnType = "V",
     strings = listOf(
         "downloadData",
-        "activity.getString(R.str…nload_permission_request)",
         "isUseSnackbar"
     )
 )
