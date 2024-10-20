@@ -1,3 +1,9 @@
+## [1.42.1-dev.1](https://github.com/crimera/piko/compare/v1.42.0...v1.42.1-dev.1) (2024-10-20)
+
+### Bug Fixes
+
+* **Twitter:** Add support for version 10.64.0-beta.1 ([c81378d](https://github.com/crimera/piko/commit/c81378d80275465acbf9caed5f48235b56395d56))
+
 ## [1.42.0](https://github.com/crimera/piko/compare/v1.41.0...v1.42.0) (2024-10-15)
 
 ### Bug Fixes
