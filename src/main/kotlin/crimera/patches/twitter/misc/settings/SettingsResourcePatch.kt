@@ -14,34 +14,7 @@ import java.io.File
 @Patch(
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
-object SettingsResourcePatch: ResourcePatch() {
-    private inline fun measureExecutionTime(block: () -> Unit): Long {
-        val start = System.currentTimeMillis()
-        block()
-        val end = System.currentTimeMillis()
-        return end - start
-    }
-
-    private fun fixStrings(file: File) {
-        val regex = Regex("""(<string\s+name="conference_default_title">)([^<]*)(<\/string>)""")
-        val defaultValue = """"&#120143; Conference"""
-
-        val content = file.readText()
-        val matchResult = regex.find(content)
-        matchResult?.let {
-            val value = it.groups[2]?.value
-            println("Matched value in ${file.name}: $value")
-        } ?: run {
-            println("No match found in ${file.name}.")
-        }
-
-        file.writeText(
-            content.replace(regex) {
-                "${it.groupValues[1]}$defaultValue${it.groupValues[3]}"
-            }
-        )
-    }
-
+object SettingsResourcePatch : ResourcePatch() {
     override fun execute(context: ResourceContext) {
         val settingsRoot = context["res/xml/settings_root.xml"]
         if (!settingsRoot.exists()) throw PatchException("settings_root not found")
@@ -65,7 +38,8 @@ object SettingsResourcePatch: ResourcePatch() {
         context.xmlEditor["res/layout/main_activity_app_bar.xml"].use { editor ->
             val parent = editor.file.getElementsByTagName("FrameLayout").item(1) as Element
 
-            val sideBtn = editor.file.createElement("app.revanced.integrations.twitter.settings.widgets.PikoSettingsButton")
+            val sideBtn =
+                editor.file.createElement("app.revanced.integrations.twitter.settings.widgets.PikoSettingsButton")
             sideBtn.setAttribute("android:text", "Piko")
             sideBtn.setAttribute("android:textAllCaps", "false")
             sideBtn.setAttribute("android:background", "?android:attr/selectableItemBackground")
@@ -80,68 +54,25 @@ object SettingsResourcePatch: ResourcePatch() {
             parent.appendChild(sideBtn)
         }
 
-        val copyingNodes = measureExecutionTime {
-            //credits @inotia00
-            context.appendStrings("twitter/settings", "values/strings.xml")
-            context.appendStrings("twitter/settings", "values/arrays.xml")
-        }
+        //credits @inotia00
+        context.appendStrings("twitter/settings", "values/strings.xml")
+        context.appendStrings("twitter/settings", "values/arrays.xml")
 
-        println("Copying nodes: $copyingNodes ms")
 
         /**
          * create directory for the untranslated language resources
          */
-        //Strings
-        var durationOfCopyingNodes: Long = 0L
-        var durationOfCopyingStringResources: Long = 0L
         val languages = arrayOf(
-            "es",
-            "ar",
-            "ja",
-            "hi",
-            "in",
-            "zh-rCN",
-            "ru",
-            "pl",
-            "pt-rBR",
-            "v21",
-            "tr",
-            "zh-rTW"
+            "es", "ar", "ja", "hi", "in", "zh-rCN", "ru", "pl", "pt-rBR", "v21", "tr", "zh-rTW"
         ).map { "values-$it" }
 
         languages.forEach {
             if (context["res/$it"].exists()) {
-                durationOfCopyingNodes += measureExecutionTime {
-                    context.appendStrings("twitter/settings", "$it/strings.xml")
-                }
+                context.appendStrings("twitter/settings", "$it/strings.xml")
             } else {
-                durationOfCopyingStringResources += measureExecutionTime {
-                    context["res/$it"].mkdirs()
-                    context.copyResources("twitter/settings", ResourceGroup(it, "strings.xml"))
-                }
+                context["res/$it"].mkdirs()
+                context.copyResources("twitter/settings", ResourceGroup(it, "strings.xml"))
             }
         }
-
-        println("""
-            Copying Translation Nodes: $durationOfCopyingNodes ms
-            Copying Translation String Resources : $durationOfCopyingStringResources ms
-            Copying Translations Took: ${durationOfCopyingNodes+durationOfCopyingStringResources} ms
-        """.trimIndent())
-
-//        val locales = listOf("values", "values-en-rGB")
-
-//        val duration = measureExecutionTime {
-//            locales.forEach { locale ->
-//                val stringsFile = context["res/$locale/strings.xml"]
-//                if (stringsFile.exists()) {
-//                    println("Processing $locale strings file")
-//                    fixStrings(stringsFile)
-//                } else {
-//                    println("Strings file for $locale not found")
-//                }
-//            }
-//        }
-//
-//        println("Duration to fix corrupted string: $duration ms")
     }
 }
