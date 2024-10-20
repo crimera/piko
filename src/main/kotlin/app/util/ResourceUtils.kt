@@ -142,7 +142,7 @@ fun ResourceContext.appendStrings(
 
     target.bufferedWriter().use { writer ->
         targetContent.forEach {
-            writer.write(it+"\n")
+            writer.write(it)
         }
 
         source.bufferedReader().useLines { lines ->

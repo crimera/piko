@@ -9,7 +9,6 @@ import app.revanced.util.ResourceGroup
 import app.revanced.util.appendStrings
 import app.revanced.util.copyResources
 import org.w3c.dom.Element
-import java.io.File
 
 @Patch(
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
@@ -57,7 +56,6 @@ object SettingsResourcePatch : ResourcePatch() {
         //credits @inotia00
         context.appendStrings("twitter/settings", "values/strings.xml")
         context.appendStrings("twitter/settings", "values/arrays.xml")
-
 
         /**
          * create directory for the untranslated language resources
