@@ -1,3 +1,9 @@
+## [1.42.1-dev.3](https://github.com/crimera/piko/compare/v1.42.1-dev.2...v1.42.1-dev.3) (2024-10-20)
+
+### Bug Fixes
+
+* Resource strings getting corrupted, resulting on failure to patch on revanced manager ([#439](https://github.com/crimera/piko/issues/439)) ([1763137](https://github.com/crimera/piko/commit/1763137126b9a95df51fe23ce816853ccf0a8f44))
+
 ## [1.42.1-dev.2](https://github.com/crimera/piko/compare/v1.42.1-dev.1...v1.42.1-dev.2) (2024-10-20)
 
 ### Refactors
