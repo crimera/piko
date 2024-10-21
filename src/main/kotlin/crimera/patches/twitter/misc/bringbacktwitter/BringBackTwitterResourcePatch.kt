@@ -134,7 +134,11 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
                         break
                     } else if (name == "conference_default_title") {
                         // parsing causes the default value to be "corrupted" so we reset it to the default value
-                        val default = node.textContent.replace("&#55349;&#56655;", "&#120143;")
+                        val content = node.textContent
+                        val delimiter = if (content.contains("-")) '-' else ' '
+                        val default = content.split(delimiter).joinToString(delimiter.toString()) {
+                            if (it[0] == '&') "&#120143;" else it
+                        }
                         node.textContent = default
                     }
                 }
