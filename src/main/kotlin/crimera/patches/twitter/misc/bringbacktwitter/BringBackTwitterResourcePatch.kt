@@ -137,7 +137,8 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
                         val content = node.textContent
                         val delimiter = if (content.contains("-")) '-' else ' '
                         val default = content.split(delimiter).joinToString(delimiter.toString()) {
-                            if (it.encodeToByteArray()[0] == (-16).toByte()) "X" else it
+                            // TODO: add support for other languages
+                            if (it.encodeToByteArray()[0] == (-16).toByte()) "Twitter" else it
                         }
                         node.textContent = default
                     }
