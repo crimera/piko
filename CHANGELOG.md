@@ -1,3 +1,9 @@
+## [1.42.1-dev.4](https://github.com/crimera/piko/compare/v1.42.1-dev.3...v1.42.1-dev.4) (2024-10-21)
+
+### Bug Fixes
+
+* **Custom download folder:** Restore compatibility with versions prior to 10.64 ([b88b00b](https://github.com/crimera/piko/commit/b88b00ba97632d62517c0e52a924c453ea022d7a))
+
 ## [1.42.1-dev.3](https://github.com/crimera/piko/compare/v1.42.1-dev.2...v1.42.1-dev.3) (2024-10-20)
 
 ### Bug Fixes
