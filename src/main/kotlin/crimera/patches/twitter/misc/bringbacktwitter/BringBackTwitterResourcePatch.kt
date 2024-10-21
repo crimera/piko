@@ -7,7 +7,6 @@ import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.util.ResourceGroup
 import app.revanced.util.asSequence
 import app.revanced.util.copyResources
-import app.util.fixStrings
 import app.util.measureExecutionTime
 import crimera.patches.twitter.misc.bringbacktwitter.custromstringsupdater.ja
 import crimera.patches.twitter.misc.bringbacktwitter.strings.StringsMap
@@ -30,11 +29,7 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
     ).map { "$it.webp" }.toTypedArray()
 
     val drawableIcons = arrayOf(
-        "ic_vector_twitter",
-        "ic_vector_home",
-        "ic_vector_twitter_white",
-        "ic_vector_home_stroke",
-        "splash_screen_icon"
+        "ic_vector_twitter", "ic_vector_home", "ic_vector_twitter_white", "ic_vector_home_stroke", "splash_screen_icon"
     ).map { "$it.xml" }.toTypedArray()
 
     val sizes = arrayOf(
@@ -58,12 +53,12 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         sizes.map { "drawable-$it" }.plus("drawable").map {
             if (it == "drawable") {
                 ResourceGroup(it, *drawableIcons)
-            } else{
+            } else {
                 ResourceGroup(it, "ic_stat_twitter.webp")
             }
         }.forEach {
             val folderName = context["res/${it.resourceDirectoryName}"]
-            if(folderName.exists()){
+            if (folderName.exists()) {
                 context.copyResources("twitter/bringbacktwitter", it)
             }
         }
@@ -77,7 +72,7 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
             }
         }.forEach {
             val folderName = context["res/${it.resourceDirectoryName}"]
-            if(folderName.exists()) {
+            if (folderName.exists()) {
                 context.copyResources("twitter/bringbacktwitter", it)
             }
         }
@@ -108,20 +103,22 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         val langs = StringsMap.replacementMap
         for ((key, value) in langs) {
             val stringsFile = context["res/$key/strings.xml"]
-            if(!stringsFile.isFile){
-//                println("$key/strings.xml not found")
+            if (!stringsFile.isFile) {
 
                 context["res/$key"].mkdirs()
                 FileWriter(stringsFile).use {
                     it.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
                 }
             }
-            updateStringsFile(stringsFile, value, context)
-//            fixStrings(stringsFile)
+            measureExecutionTime {
+                updateStringsFile(stringsFile, value, context)
+            }.let {
+                println(it)
+            }
         }
     }
 
-    private fun updateStringsFile(stringsFile: File,stringsMap: Map<String,String>, context: ResourceContext) {
+    private fun updateStringsFile(stringsFile: File, stringsMap: Map<String, String>, context: ResourceContext) {
         context.xmlEditor[stringsFile.toString()].use { editor ->
             val document = editor.file
 
@@ -136,7 +133,9 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
                         keyReplaced = true
                         break
                     } else if (name == "conference_default_title") {
-                        node.textContent = "&#120143; Conference"
+                        // parsing causes the default value to be "corrupted" so we reset it to the default value
+                        val default = node.textContent.replace("&#55349;&#56655;", "&#120143;")
+                        node.textContent = default
                     }
                 }
 
