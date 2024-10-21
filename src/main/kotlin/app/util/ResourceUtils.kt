@@ -5,6 +5,7 @@ import app.revanced.patcher.util.DomFileEditor
 import app.revanced.util.resource.BaseResource
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.nio.file.Files
@@ -153,7 +154,6 @@ fun ResourceContext.appendStrings(
         }
     }
 }
-
 
 // /**
 //  * Copies the specified node of the source [Document] to the target [Document].

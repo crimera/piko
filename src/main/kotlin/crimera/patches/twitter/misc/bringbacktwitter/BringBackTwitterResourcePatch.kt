@@ -7,6 +7,8 @@ import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.util.ResourceGroup
 import app.revanced.util.asSequence
 import app.revanced.util.copyResources
+import app.util.fixStrings
+import app.util.measureExecutionTime
 import crimera.patches.twitter.misc.bringbacktwitter.custromstringsupdater.ja
 import crimera.patches.twitter.misc.bringbacktwitter.strings.StringsMap
 import org.w3c.dom.Element
@@ -115,6 +117,7 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
                 }
             }
             updateStringsFile(stringsFile, value, context)
+//            fixStrings(stringsFile)
         }
     }
 
@@ -127,10 +130,13 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
                 var keyReplaced = false
                 for (i in 0 until nodes.length) {
                     val node = nodes.item(i)
-                    if (node.attributes.getNamedItem("name")?.nodeValue == key) {
+                    val name = node.attributes.getNamedItem("name")?.nodeValue
+                    if (name == key) {
                         node.textContent = value
                         keyReplaced = true
                         break
+                    } else if (name == "conference_default_title") {
+                        node.textContent = "&#120143; Conference"
                     }
                 }
 
