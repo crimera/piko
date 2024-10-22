@@ -5,6 +5,7 @@ import app.revanced.patcher.util.DomFileEditor
 import app.revanced.util.resource.BaseResource
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
+import java.io.File
 import java.io.FileNotFoundException
 import java.io.InputStream
 import java.nio.file.Files
@@ -141,19 +142,18 @@ fun ResourceContext.appendStrings(
 
     target.bufferedWriter().use { writer ->
         targetContent.forEach {
-            writer.write(it)
+            writer.write(it+"\n")
         }
 
         source.bufferedReader().useLines { lines ->
             lines.dropWhile {
                 it != "<resources>"
             }.drop(1).forEach { line ->
-                writer.write(line)
+                writer.write(line+"\n")
             }
         }
     }
 }
-
 
 // /**
 //  * Copies the specified node of the source [Document] to the target [Document].
