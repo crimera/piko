@@ -2,6 +2,7 @@ package crimera.patches.twitter.misc.bringbacktwitter.strings
 
 object ru {
     val values = mapOf(
+        "conference_default_title" to "Конференция Твиттере",
         "button_action_add_tweet" to "Добавить твит",
         "button_action_options_tweet" to "Опции",
         "button_action_retweet" to "Ретвитнуть",

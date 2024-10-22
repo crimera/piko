@@ -118,6 +118,9 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         }
     }
 
+    private fun String.startsWithSpecialByte() = encodeToByteArray()[0] == (-16).toByte()
+
+
     private fun updateStringsFile(stringsFile: File, stringsMap: Map<String, String>, context: ResourceContext) {
         context.xmlEditor[stringsFile.toString()].use { editor ->
             val document = editor.file
@@ -132,15 +135,18 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
                         node.textContent = value
                         keyReplaced = true
                         break
-                    } else if (name == "conference_default_title") {
-                        // parsing causes the default value to be "corrupted" so we reset it to the default value
+                    } else if (name == "conference_default_title") {/*
+                         * Parsing causes the default value which contains the
+                         * character 𝕏 to be "corrupted" so we change it to a normal X
+                         */
                         val content = node.textContent
-                        val delimiter = if (content.contains("-")) '-' else ' '
-                        val default = content.split(delimiter).joinToString(delimiter.toString()) {
-                            // TODO: add support for other languages
-                            if (it.encodeToByteArray()[0] == (-16).toByte()) "Twitter" else it
+                        node.textContent = stringsMap[name] ?: run {
+                            println("parsing: ${stringsFile.parent}")
+                            val delimiter = if (content.contains("-")) '-' else ' '
+                            content.split(delimiter).joinToString(delimiter.toString()) {
+                                if (it.startsWithSpecialByte()) "Twitter" else it
+                            }
                         }
-                        node.textContent = default
                     }
                 }
 
