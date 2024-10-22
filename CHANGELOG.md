@@ -1,3 +1,9 @@
+## [1.42.1-dev.5](https://github.com/crimera/piko/compare/v1.42.1-dev.4...v1.42.1-dev.5) (2024-10-22)
+
+### Bug Fixes
+
+* **Bring back twitter:** Change the character "𝕏" into "Twitter". ([#441](https://github.com/crimera/piko/issues/441)) ([c20e16f](https://github.com/crimera/piko/commit/c20e16f80499df75176e9080f156e529f4f7d326))
+
 ## [1.42.1-dev.4](https://github.com/crimera/piko/compare/v1.42.1-dev.3...v1.42.1-dev.4) (2024-10-21)
 
 ### Bug Fixes
