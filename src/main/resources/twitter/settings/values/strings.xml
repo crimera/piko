@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">reader mode</string>
     <string name="piko_pref_reader_mode_desc">Enables "reader mode" on long threads</string>
@@ -10,6 +11,7 @@
     <string name="piko_pref_enable_force_pip">PiP mode automatically</string>
     <string name="piko_pref_enable_force_pip_desc">Enables PiP mode when you close the app</string>
 
+    <!-- Download Settings -->
     <string name="piko_title_download">Download</string>
     <string name="piko_pref_video_download">video downloading</string>
     <string name="piko_pref_download">Change download directory</string>
@@ -24,11 +26,13 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">Copy media link</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Share media link</string>
 
+    <!-- Downloader Options -->
     <string name="piko_title_native_downloader">Native downloader</string>
     <string name="piko_pref_native_downloader_alert_title">Download media</string>
     <string name="piko_pref_native_downloader_download_all">Download all</string>
     <string name="piko_pref_native_downloader_no_media">No media found</string>
 
+    <!-- Ads Settings -->
     <string name="piko_title_ads">Ads</string>
     <string name="piko_pref_hide_promoted_posts">Promoted posts</string>
     <string name="piko_pref_hide_g_ads">Google ads</string>
@@ -50,6 +54,7 @@
     <string name="piko_pref_hide_premium_upsell">premium upsell</string>
     <string name="piko_pref_hide_premium_upsell_desc">Removes premium upsell in home timeline</string>
 
+    <!-- Misc Settings -->
     <string name="piko_title_misc">Misc</string>
     <string name="piko_pref_chirp_font">chirp font</string>
     <string name="piko_pref_hide_fab">floating action button</string>
@@ -71,12 +76,14 @@
     <string name="piko_pref_quick_settings">Enable quick settings</string>
     <string name="piko_pref_quick_settings_summary">Adds a quick settings button at the sidebar</string>
 
+    <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature flags</string>
     <string name="piko_pref_feature_flags">Add feature flags</string>
     <string name="piko_pref_edit_flag_title">Edit flag</string>
     <string name="piko_pref_add_flag_title">Add flag</string>
     <string name="piko_pref_search_flags">Search flags</string>
 
+    <!-- Timeline Settings -->
     <string name="piko_title_timeline">Timeline</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Disable auto timeline scroll on launch</string>
     <string name="piko_pref_hide_live_threads">live threads</string>
@@ -102,6 +109,7 @@
     <string name="piko_pref_hide_social_proof">Hide followed by context</string>
     <string name="piko_pref_hide_social_proof_desc">Hides followed by context under profile</string>
 
+    <!-- Customisation Settings -->
     <string name="piko_title_customisation">Customization</string>
     <string name="piko_pref_customisation_profiletabs">Profile tabs to hide</string>
     <string name="piko_pref_customisation_timelinetabs">Timeline tabs</string>
@@ -114,6 +122,7 @@
     <string name="piko_pref_customisation_reply_sorting">Default reply sorting filter</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Previously selected</string>
 
+    <!-- Backup and Restore -->
     <string name="piko_title_backup">Backup and restore</string>
     <string name="piko_pref_export">Export %s</string>
     <string name="piko_pref_import">Import %s</string>
@@ -123,6 +132,7 @@
     <string name="piko_pref_export_no_uri">Error: No destination provided</string>
     <string name="piko_pref_import_no_uri">Error: No file provided</string>
 
+    <!-- About -->
     <string name="piko_title_about">About</string>
     <string name="piko_pref_app_version">App version</string>
     <string name="piko_pref_patch_info">Patch Information</string>
