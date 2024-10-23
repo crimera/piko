@@ -1,3 +1,9 @@
+## [1.42.1-dev.6](https://github.com/crimera/piko/compare/v1.42.1-dev.5...v1.42.1-dev.6) (2024-10-23)
+
+### Bug Fixes
+
+* **Custom downloader:** Improve fingerprint ([2a2a4a4](https://github.com/crimera/piko/commit/2a2a4a4e2cdc6587c5c3b91bb3888918d7cd720d))
+
 ## [1.42.1-dev.5](https://github.com/crimera/piko/compare/v1.42.1-dev.4...v1.42.1-dev.5) (2024-10-22)
 
 ### Bug Fixes
