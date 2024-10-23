@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Premium Settings -->
     <string name="piko_title_premium">プレミアム</string>
     <string name="piko_pref_reader_mode">リーダーモード</string>
     <string name="piko_pref_reader_mode_desc">長いスレッドで「リーダーモード」を有効化します</string>
@@ -9,6 +10,8 @@
     <string name="piko_pref_icon_n_navbar_btn">アプリアイコンとナビゲーションバーの設定</string>
     <string name="piko_pref_enable_force_pip">自動PiPモード</string>
     <string name="piko_pref_enable_force_pip_desc">アプリを閉じたときに自動でPiPモードを有効化します</string>
+    
+    <!-- Download Settings -->
     <string name="piko_title_download">ダウンロード</string>
     <string name="piko_pref_video_download">動画のダウンロード</string>
     <string name="piko_pref_download">ダウンロードディレクトリを変更</string>
@@ -22,10 +25,14 @@
     <string name="piko_pref_download_media_link_handle_always_ask">毎回尋ねる</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">メディアリンクをコピー</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">メディアリンクを共有</string>
+    
+    <!-- Downloader Options -->
     <string name="piko_title_native_downloader">ネイティブダウンローダー</string>
     <string name="piko_pref_native_downloader_alert_title">メディアをダウンロード</string>
     <string name="piko_pref_native_downloader_download_all">すべてダウンロード</string>
     <string name="piko_pref_native_downloader_no_media">メディアが見つかりません</string>
+    
+    <!-- Ads Settings -->
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモーションポスト</string>
     <string name="piko_pref_hide_g_ads">Google Ads</string>
@@ -46,6 +53,8 @@
     <string name="piko_pref_db_del_items">削除した項目</string>
     <string name="piko_pref_hide_premium_upsell">プレミアムの広告</string>
     <string name="piko_pref_hide_premium_upsell_desc">タイムラインからプレミアムの広告を削除します</string>
+    
+    <!-- Misc Settings -->
     <string name="piko_title_misc">その他</string>
     <string name="piko_pref_chirp_font">Chirpフォント</string>
     <string name="piko_pref_hide_fab">フローティングアクションボタン</string>
@@ -66,11 +75,15 @@
     <string name="piko_pref_debug_menu">ポストのデバッグメニュー</string>
     <string name="piko_pref_quick_settings">サイドバーに設定ボタン追加</string>
     <string name="piko_pref_quick_settings_summary">サイドバーからPiko設定を直接開くことができるボタンを追加します</string>
+    
+    <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">機能フラグ</string>
     <string name="piko_pref_feature_flags">機能フラグを追加</string>
     <string name="piko_pref_edit_flag_title">フラグを編集</string>
     <string name="piko_pref_add_flag_title">フラグを追加</string>
     <string name="piko_pref_search_flags">フラグを検索</string>
+    
+    <!-- Timeline Settings -->
     <string name="piko_title_timeline">タイムライン</string>
     <string name="piko_pref_disable_auto_timeline_scroll">起動時の自動TLスクロールを無効化</string>
     <string name="piko_pref_hide_live_threads">ライブスレッド</string>
@@ -95,6 +108,8 @@
     <string name="piko_pref_hide_nudge_button_desc">ポストから「フォローする」/「サブスクライブ」/「フォローバック」ボタンを非表示にします</string>
     <string name="piko_pref_hide_social_proof">フォローインジケーターを非表示</string>
     <string name="piko_pref_hide_social_proof_desc">プロフィールの下部に表示される「〇〇さんにフォローされています」を非表示にします</string>
+    
+    <!-- Customisation Settings -->
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">非表示にするプロフィールタブ</string>
     <string name="piko_pref_customisation_timelinetabs">タイムラインのタブ</string>
@@ -106,6 +121,8 @@
     <string name="piko_pref_customisation_inlinetabs">非表示にするインラインバーの項目</string>
     <string name="piko_pref_customisation_reply_sorting">デフォルトの返信の並び替え</string>
     <string name="piko_pref_customisation_reply_sorting_remember">前回の選択を記憶</string>
+    
+    <!-- Backup and Restore -->
     <string name="piko_title_backup">バックアップと復元</string>
     <string name="piko_pref_export">エクスポート: %s</string>
     <string name="piko_pref_import">インポート: %s</string>
@@ -114,6 +131,8 @@
     <string name="piko_pref_import_failed">エラー: %s のインポートに失敗しました</string>
     <string name="piko_pref_export_no_uri">エラー: 宛先が指定されていません</string>
     <string name="piko_pref_import_no_uri">エラー: ファイルが提供されていません</string>
+    
+    <!-- About -->
     <string name="piko_title_about">アプリに関する情報</string>
     <string name="piko_pref_app_version">アプリのバージョン</string>
     <string name="piko_pref_patch_info">適用されたパッチに関する情報</string>
