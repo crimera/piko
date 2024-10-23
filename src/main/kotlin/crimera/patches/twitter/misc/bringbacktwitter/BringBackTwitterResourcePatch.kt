@@ -27,11 +27,7 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
     ).map { "$it.webp" }.toTypedArray()
 
     val drawableIcons = arrayOf(
-        "ic_vector_twitter",
-        "ic_vector_home",
-        "ic_vector_twitter_white",
-        "ic_vector_home_stroke",
-        "splash_screen_icon"
+        "ic_vector_twitter", "ic_vector_home", "ic_vector_twitter_white", "ic_vector_home_stroke", "splash_screen_icon"
     ).map { "$it.xml" }.toTypedArray()
 
     val sizes = arrayOf(
@@ -55,12 +51,12 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         sizes.map { "drawable-$it" }.plus("drawable").map {
             if (it == "drawable") {
                 ResourceGroup(it, *drawableIcons)
-            } else{
+            } else {
                 ResourceGroup(it, "ic_stat_twitter.webp")
             }
         }.forEach {
             val folderName = context["res/${it.resourceDirectoryName}"]
-            if(folderName.exists()){
+            if (folderName.exists()) {
                 context.copyResources("twitter/bringbacktwitter", it)
             }
         }
@@ -74,7 +70,7 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
             }
         }.forEach {
             val folderName = context["res/${it.resourceDirectoryName}"]
-            if(folderName.exists()) {
+            if (folderName.exists()) {
                 context.copyResources("twitter/bringbacktwitter", it)
             }
         }
@@ -111,7 +107,10 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         }
     }
 
-    private fun updateStringsFile(stringsFile: File, stringsMap: Map<String,String>, context: ResourceContext) {
+    private fun String.startsWithSpecialByte() = encodeToByteArray()[0] == (-16).toByte()
+
+
+    private fun updateStringsFile(stringsFile: File, stringsMap: Map<String, String>, context: ResourceContext) {
         context.xmlEditor[stringsFile.toString()].use { editor ->
             val document = editor.file
 
@@ -119,7 +118,25 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
             val nodes = document.getElementsByTagName("string")
             for (i in 0 until nodes.length) {
                 val node = nodes.item(i)
-                val name = node.attributes.getNamedItem("name")?.nodeValue ?: continue
+                val name = node.attributes.getNamedItem("name")?.nodeValue
+                if (name == "conference_default_title") {
+                    /*
+                     * Parsing causes the default value which contains the
+                     * character 𝕏 to be "corrupted" so we change it to a normal X
+                     */
+                    val content = node.textContent
+                    val value = stringsMap[name]
+                    if (value != null) {
+                        node.textContent = value
+                        replacedCount++
+                    } else {
+                        val delimiter = if (content.contains("-")) '-' else ' '
+                        node.textContent = content.split(delimiter).joinToString(delimiter.toString()) {
+                            if (it.startsWithSpecialByte()) "Twitter" else it
+                        }
+                    }
+                    continue
+                }
                 node.textContent = stringsMap[name] ?: continue
                 replacedCount++
             }
