@@ -1,3 +1,39 @@
+## [1.42.1-dev.6](https://github.com/crimera/piko/compare/v1.42.1-dev.5...v1.42.1-dev.6) (2024-10-23)
+
+### Bug Fixes
+
+* **Custom downloader:** Improve fingerprint ([2a2a4a4](https://github.com/crimera/piko/commit/2a2a4a4e2cdc6587c5c3b91bb3888918d7cd720d))
+
+## [1.42.1-dev.5](https://github.com/crimera/piko/compare/v1.42.1-dev.4...v1.42.1-dev.5) (2024-10-22)
+
+### Bug Fixes
+
+* **Bring back twitter:** Change the character "𝕏" into "Twitter". ([#441](https://github.com/crimera/piko/issues/441)) ([c20e16f](https://github.com/crimera/piko/commit/c20e16f80499df75176e9080f156e529f4f7d326))
+
+## [1.42.1-dev.4](https://github.com/crimera/piko/compare/v1.42.1-dev.3...v1.42.1-dev.4) (2024-10-21)
+
+### Bug Fixes
+
+* **Custom download folder:** Restore compatibility with versions prior to 10.64 ([b88b00b](https://github.com/crimera/piko/commit/b88b00ba97632d62517c0e52a924c453ea022d7a))
+
+## [1.42.1-dev.3](https://github.com/crimera/piko/compare/v1.42.1-dev.2...v1.42.1-dev.3) (2024-10-20)
+
+### Bug Fixes
+
+* Resource strings getting corrupted, resulting on failure to patch on revanced manager ([#439](https://github.com/crimera/piko/issues/439)) ([1763137](https://github.com/crimera/piko/commit/1763137126b9a95df51fe23ce816853ccf0a8f44))
+
+## [1.42.1-dev.2](https://github.com/crimera/piko/compare/v1.42.1-dev.1...v1.42.1-dev.2) (2024-10-20)
+
+### Refactors
+
+* **Custom Downloader:** Improve getting of tweet method declarations ([5237e49](https://github.com/crimera/piko/commit/5237e496140cc94fb9beb4a72057d927527dd78b))
+
+## [1.42.1-dev.1](https://github.com/crimera/piko/compare/v1.42.0...v1.42.1-dev.1) (2024-10-20)
+
+### Bug Fixes
+
+* **Twitter:** Add support for version 10.64.0-beta.1 ([c81378d](https://github.com/crimera/piko/commit/c81378d80275465acbf9caed5f48235b56395d56))
+
 ## [1.42.0](https://github.com/crimera/piko/compare/v1.41.0...v1.42.0) (2024-10-15)
 
 ### Bug Fixes

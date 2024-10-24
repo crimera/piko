@@ -2,6 +2,7 @@ package crimera.patches.twitter.misc.bringbacktwitter.strings
 
 object en_rGB {
     val values = mapOf(
+        "conference_default_title" to "Twitter Conference",
         "button_action_add_tweet" to "Add a tweet",
         "button_action_options_tweet" to "Tweet options",
         "button_action_retweet" to "Retweet",

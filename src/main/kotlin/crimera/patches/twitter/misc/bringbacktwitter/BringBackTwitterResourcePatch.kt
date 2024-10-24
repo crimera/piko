@@ -7,6 +7,7 @@ import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.util.ResourceGroup
 import app.revanced.util.asSequence
 import app.revanced.util.copyResources
+import app.util.measureExecutionTime
 import crimera.patches.twitter.misc.bringbacktwitter.custromstringsupdater.ja
 import crimera.patches.twitter.misc.bringbacktwitter.strings.StringsMap
 import org.w3c.dom.Element
@@ -28,11 +29,7 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
     ).map { "$it.webp" }.toTypedArray()
 
     val drawableIcons = arrayOf(
-        "ic_vector_twitter",
-        "ic_vector_home",
-        "ic_vector_twitter_white",
-        "ic_vector_home_stroke",
-        "splash_screen_icon"
+        "ic_vector_twitter", "ic_vector_home", "ic_vector_twitter_white", "ic_vector_home_stroke", "splash_screen_icon"
     ).map { "$it.xml" }.toTypedArray()
 
     val sizes = arrayOf(
@@ -56,12 +53,12 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         sizes.map { "drawable-$it" }.plus("drawable").map {
             if (it == "drawable") {
                 ResourceGroup(it, *drawableIcons)
-            } else{
+            } else {
                 ResourceGroup(it, "ic_stat_twitter.webp")
             }
         }.forEach {
             val folderName = context["res/${it.resourceDirectoryName}"]
-            if(folderName.exists()){
+            if (folderName.exists()) {
                 context.copyResources("twitter/bringbacktwitter", it)
             }
         }
@@ -75,7 +72,7 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
             }
         }.forEach {
             val folderName = context["res/${it.resourceDirectoryName}"]
-            if(folderName.exists()) {
+            if (folderName.exists()) {
                 context.copyResources("twitter/bringbacktwitter", it)
             }
         }
@@ -106,19 +103,25 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         val langs = StringsMap.replacementMap
         for ((key, value) in langs) {
             val stringsFile = context["res/$key/strings.xml"]
-            if(!stringsFile.isFile){
-//                println("$key/strings.xml not found")
+            if (!stringsFile.isFile) {
 
                 context["res/$key"].mkdirs()
                 FileWriter(stringsFile).use {
                     it.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
                 }
             }
-            updateStringsFile(stringsFile, value, context)
+            measureExecutionTime {
+                updateStringsFile(stringsFile, value, context)
+            }.let {
+                println(it)
+            }
         }
     }
 
-    private fun updateStringsFile(stringsFile: File,stringsMap: Map<String,String>, context: ResourceContext) {
+    private fun String.startsWithSpecialByte() = encodeToByteArray()[0] == (-16).toByte()
+
+
+    private fun updateStringsFile(stringsFile: File, stringsMap: Map<String, String>, context: ResourceContext) {
         context.xmlEditor[stringsFile.toString()].use { editor ->
             val document = editor.file
 
@@ -127,10 +130,23 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
                 var keyReplaced = false
                 for (i in 0 until nodes.length) {
                     val node = nodes.item(i)
-                    if (node.attributes.getNamedItem("name")?.nodeValue == key) {
+                    val name = node.attributes.getNamedItem("name")?.nodeValue
+                    if (name == key) {
                         node.textContent = value
                         keyReplaced = true
                         break
+                    } else if (name == "conference_default_title") {/*
+                         * Parsing causes the default value which contains the
+                         * character 𝕏 to be "corrupted" so we change it to a normal X
+                         */
+                        val content = node.textContent
+                        node.textContent = stringsMap[name] ?: run {
+                            println("parsing: ${stringsFile.parent}")
+                            val delimiter = if (content.contains("-")) '-' else ' '
+                            content.split(delimiter).joinToString(delimiter.toString()) {
+                                if (it.startsWithSpecialByte()) "Twitter" else it
+                            }
+                        }
                     }
                 }
 

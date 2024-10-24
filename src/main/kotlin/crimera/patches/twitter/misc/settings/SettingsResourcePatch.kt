@@ -6,14 +6,14 @@ import app.revanced.patcher.patch.ResourcePatch
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.util.ResourceGroup
+import app.revanced.util.appendStrings
 import app.revanced.util.copyResources
-import app.revanced.util.copyXmlNode
 import org.w3c.dom.Element
 
 @Patch(
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
-object SettingsResourcePatch: ResourcePatch() {
+object SettingsResourcePatch : ResourcePatch() {
     override fun execute(context: ResourceContext) {
         val settingsRoot = context["res/xml/settings_root.xml"]
         if (!settingsRoot.exists()) throw PatchException("settings_root not found")
@@ -37,7 +37,8 @@ object SettingsResourcePatch: ResourcePatch() {
         context.xmlEditor["res/layout/main_activity_app_bar.xml"].use { editor ->
             val parent = editor.file.getElementsByTagName("FrameLayout").item(1) as Element
 
-            val sideBtn = editor.file.createElement("app.revanced.integrations.twitter.settings.widgets.PikoSettingsButton")
+            val sideBtn =
+                editor.file.createElement("app.revanced.integrations.twitter.settings.widgets.PikoSettingsButton")
             sideBtn.setAttribute("android:text", "Piko")
             sideBtn.setAttribute("android:textAllCaps", "false")
             sideBtn.setAttribute("android:background", "?android:attr/selectableItemBackground")
@@ -53,31 +54,19 @@ object SettingsResourcePatch: ResourcePatch() {
         }
 
         //credits @inotia00
-        context.copyXmlNode("twitter/settings", "values/strings.xml", "resources")
-        context.copyXmlNode("twitter/settings", "values/arrays.xml", "resources")
+        context.appendStrings("twitter/settings", "values/strings.xml")
+        context.appendStrings("twitter/settings", "values/arrays.xml")
 
         /**
          * create directory for the untranslated language resources
          */
-        //Strings
         val languages = arrayOf(
-            "es",
-            "ar",
-            "ja",
-            "hi",
-            "in",
-            "zh-rCN",
-            "ru",
-            "pl",
-            "pt-rBR",
-            "v21",
-            "tr",
-            "zh-rTW"
+            "es", "ar", "ja", "hi", "in", "zh-rCN", "ru", "pl", "pt-rBR", "v21", "tr", "zh-rTW"
         ).map { "values-$it" }
 
         languages.forEach {
             if (context["res/$it"].exists()) {
-                context.copyXmlNode("twitter/settings", "$it/strings.xml", "resources")
+                context.appendStrings("twitter/settings", "$it/strings.xml")
             } else {
                 context["res/$it"].mkdirs()
                 context.copyResources("twitter/settings", ResourceGroup(it, "strings.xml"))
