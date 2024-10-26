@@ -1,3 +1,9 @@
+## [1.42.2-dev.1](https://github.com/crimera/piko/compare/v1.42.1...v1.42.2-dev.1) (2024-10-26)
+
+### Bug Fixes
+
+* Remove debug prints ([33e4d08](https://github.com/crimera/piko/commit/33e4d08a58451217781914953c1ffb711ea8480b))
+
 ## [1.42.1](https://github.com/crimera/piko/compare/v1.42.0...v1.42.1) (2024-10-24)
 
 ### Bug Fixes
