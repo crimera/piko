@@ -2,6 +2,7 @@ package crimera.patches.twitter.misc.shareMenu.hooks
 
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.fingerprint.MethodFingerprint
+import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.Reference
 
@@ -15,6 +16,11 @@ object ShareMenuButtonHooks : MethodFingerprint(
             "SendToTweetViewSandbox",
             "SendToSpacesSandbox",
             "ViewDebugDialog",
+        ),
+    opcodes =
+        listOf(
+            Opcode.NEW_INSTANCE,
+            Opcode.MOVE_OBJECT,
         ),
 ) {
     fun buttonReference(buttonName: String): Reference? {
