@@ -7,8 +7,8 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
-import crimera.patches.twitter.misc.shareMenu.fingerprints.ShareMenuButtonAddFingerprint
-import crimera.patches.twitter.misc.shareMenu.fingerprints.ShareMenuButtonFingerprint
+import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonAddHooks
+import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonHooks
 
 @Patch(
     name = "Enable debug menu for posts",
@@ -16,14 +16,14 @@ import crimera.patches.twitter.misc.shareMenu.fingerprints.ShareMenuButtonFinger
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 object DebugMenu : BytecodePatch(
-    setOf(SettingsStatusLoadFingerprint, ShareMenuButtonFingerprint, ShareMenuButtonAddFingerprint),
+    setOf(SettingsStatusLoadFingerprint, ShareMenuButtonHooks, ShareMenuButtonAddHooks),
 ) {
     override fun execute(context: BytecodeContext) {
         val buttonReference =
-            ShareMenuButtonFingerprint.buttonReference("ViewDebugDialog")
-                ?: throw PatchException("ShareMenuButtonFingerprint not found")
+            ShareMenuButtonHooks.buttonReference("ViewDebugDialog")
+                ?: throw PatchException("ShareMenuButtonHooks not found")
 
-        ShareMenuButtonAddFingerprint.addButton(buttonReference, "enableDebugMenu")
+        ShareMenuButtonAddHooks.addButton(buttonReference, "enableDebugMenu")
 
         SettingsStatusLoadFingerprint.enableSettings("enableDebugMenu")
         // end

@@ -1,4 +1,4 @@
-package crimera.patches.twitter.misc.shareMenu.fingerprints
+package crimera.patches.twitter.misc.shareMenu.hooks
 
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
@@ -11,7 +11,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.Reference
 import crimera.patches.twitter.misc.settings.SettingsPatch
 
-object ShareMenuButtonAddFingerprint : MethodFingerprint(
+object ShareMenuButtonAddHooks : MethodFingerprint(
     returnType = "V",
     strings =
         listOf(
@@ -25,7 +25,7 @@ object ShareMenuButtonAddFingerprint : MethodFingerprint(
         buttonReference: Reference?,
         functionName: String,
     ) {
-        val result = result ?: throw PatchException("ShareMenuButtonAddFingerprint not found")
+        val result = result ?: throw PatchException("ShareMenuButtonAddHooks not found")
 
         val method = result.mutableMethod
         val instructions = method.getInstructions()

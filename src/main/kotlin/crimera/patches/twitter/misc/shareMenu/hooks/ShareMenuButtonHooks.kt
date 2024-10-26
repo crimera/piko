@@ -1,11 +1,11 @@
-package crimera.patches.twitter.misc.shareMenu.fingerprints
+package crimera.patches.twitter.misc.shareMenu.hooks
 
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.fingerprint.MethodFingerprint
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.Reference
 
-object ShareMenuButtonFingerprint : MethodFingerprint(
+object ShareMenuButtonHooks : MethodFingerprint(
     strings =
         listOf(
             "None",
