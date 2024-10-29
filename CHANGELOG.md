@@ -1,3 +1,13 @@
+## [1.43.0](https://github.com/crimera/piko/compare/v1.42.1...v1.43.0) (2024-10-29)
+
+### Bug Fixes
+
+* Remove debug prints ([33e4d08](https://github.com/crimera/piko/commit/33e4d08a58451217781914953c1ffb711ea8480b))
+
+### Features
+
+* **Customize side bar items:** Allow for hiding of the "Jobs" item ([14ce811](https://github.com/crimera/piko/commit/14ce811a7b4d885fa6779524aad0b41034a2d8d0))
+
 ## [1.43.0-dev.1](https://github.com/crimera/piko/compare/v1.42.2-dev.1...v1.43.0-dev.1) (2024-10-26)
 
 ### Features
