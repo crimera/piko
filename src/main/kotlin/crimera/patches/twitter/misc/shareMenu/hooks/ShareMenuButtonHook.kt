@@ -6,7 +6,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.Reference
 
-object ShareMenuButtonHooks : MethodFingerprint(
+object ShareMenuButtonHook : MethodFingerprint(
     strings =
         listOf(
             "None",

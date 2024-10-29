@@ -11,7 +11,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.Reference
 import crimera.patches.twitter.misc.settings.SettingsPatch
 
-object ShareMenuButtonAddHooks : MethodFingerprint(
+object ShareMenuButtonAddHook : MethodFingerprint(
     returnType = "V",
     strings =
         listOf(
@@ -25,7 +25,7 @@ object ShareMenuButtonAddHooks : MethodFingerprint(
         buttonReference: Reference?,
         functionName: String,
     ) {
-        val result = result ?: throw PatchException("ShareMenuButtonAddHooks not found")
+        val result = result ?: throw PatchException("ShareMenuButtonAddHook not found")
 
         val method = result.mutableMethod
         val instructions = method.getInstructions()

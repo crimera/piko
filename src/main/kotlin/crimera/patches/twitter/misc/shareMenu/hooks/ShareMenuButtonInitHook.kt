@@ -13,7 +13,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.Reference
 import crimera.patches.twitter.misc.settings.SettingsPatch
 
-object ShareMenuButtonInitHooks : MethodFingerprint(
+object ShareMenuButtonInitHook : MethodFingerprint(
     strings =
         listOf(
             "Debug",
@@ -25,7 +25,7 @@ object ShareMenuButtonInitHooks : MethodFingerprint(
         matchString: String,
         stringId: String,
     ) {
-        val result = result ?: throw PatchException("ShareMenuButtonInitHooks not found")
+        val result = result ?: throw PatchException("ShareMenuButtonInitHook not found")
         val method = result.mutableMethod
 
         result.scanResult.stringsScanResult!!.matches.forEach { match ->
@@ -50,7 +50,7 @@ object ShareMenuButtonInitHooks : MethodFingerprint(
         buttonReference: Reference,
         iconStr: String,
     ) {
-        val result = result ?: throw PatchException("ShareMenuButtonInitHooks not found")
+        val result = result ?: throw PatchException("ShareMenuButtonInitHook not found")
         val allMethods = result.mutableClass.methods
         val method = allMethods.first { it.returnType == "V" }
         val instructions = method.getInstructions()

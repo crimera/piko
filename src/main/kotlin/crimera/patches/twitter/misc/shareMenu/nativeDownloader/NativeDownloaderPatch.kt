@@ -16,9 +16,9 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.misc.shareMenu.fingerprints.ShareMenuButtonFuncCallFingerprint
-import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonAddHooks
-import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonHooks
-import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonInitHooks
+import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonAddHook
+import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonHook
+import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonInitHook
 
 val MethodFingerprint.exception: PatchException
     get() = PatchException("${this.javaClass.name} is not found")
@@ -34,10 +34,10 @@ val MethodFingerprint.exception: PatchException
 object NativeDownloaderPatch : BytecodePatch(
     setOf(
         ShareMenuButtonFuncCallFingerprint,
-        ShareMenuButtonInitHooks,
+        ShareMenuButtonInitHook,
         SettingsStatusLoadFingerprint,
-        ShareMenuButtonAddHooks,
-        ShareMenuButtonHooks,
+        ShareMenuButtonAddHook,
+        ShareMenuButtonHook,
     ),
 ) {
     override fun execute(context: BytecodeContext) {
@@ -88,16 +88,16 @@ object NativeDownloaderPatch : BytecodePatch(
 
         // show icon always
         val buttonReference =
-            ShareMenuButtonHooks.buttonReference("SendToTweetViewSandbox")
-                ?: throw PatchException("ShareMenuButtonHooks not found")
+            ShareMenuButtonHook.buttonReference("SendToTweetViewSandbox")
+                ?: throw PatchException("ShareMenuButtonHook not found")
 
-        ShareMenuButtonAddHooks.addButton(buttonReference, "enableNativeDownloader")
+        ShareMenuButtonAddHook.addButton(buttonReference, "enableNativeDownloader")
 
         // text func
-        ShareMenuButtonInitHooks.setButtonText("View in Tweet Sandbox", "piko_pref_native_downloader_alert_title")
+        ShareMenuButtonInitHook.setButtonText("View in Tweet Sandbox", "piko_pref_native_downloader_alert_title")
 
         // icon
-        ShareMenuButtonInitHooks.setButtonIcon(buttonReference, "ic_vector_incoming")
+        ShareMenuButtonInitHook.setButtonIcon(buttonReference, "ic_vector_incoming")
 
         SettingsStatusLoadFingerprint.enableSettings("nativeDownloader")
     }
