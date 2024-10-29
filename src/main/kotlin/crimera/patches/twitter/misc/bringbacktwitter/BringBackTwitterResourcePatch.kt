@@ -110,11 +110,7 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
                     it.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
                 }
             }
-            measureExecutionTime {
-                updateStringsFile(stringsFile, value, context)
-            }.let {
-                println(it)
-            }
+            updateStringsFile(stringsFile, value, context)
         }
     }
 
@@ -141,7 +137,6 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
                          */
                         val content = node.textContent
                         node.textContent = stringsMap[name] ?: run {
-                            println("parsing: ${stringsFile.parent}")
                             val delimiter = if (content.contains("-")) '-' else ' '
                             content.split(delimiter).joinToString(delimiter.toString()) {
                                 if (it.startsWithSpecialByte()) "Twitter" else it
