@@ -10,15 +10,15 @@ import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
+import app.revanced.patches.shared.misc.mapping.ResourceMappingPatch
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
+import crimera.patches.twitter.misc.shareMenu.fingerprints.ShareMenuButtonFuncCallFingerprint
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonAddHooks
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonHooks
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonInitHooks
-import crimera.patches.twitter.misc.shareMenu.nativeDownloader.fingerprints.NativeDownloaderPatchFingerprint
 
 val MethodFingerprint.exception: PatchException
     get() = PatchException("${this.javaClass.name} is not found")
@@ -26,14 +26,14 @@ val MethodFingerprint.exception: PatchException
 @Patch(
     name = "Custom downloader",
     description = "",
-    dependencies = [SettingsPatch::class, NativeDownloaderHooksPatch::class],
+    dependencies = [SettingsPatch::class, NativeDownloaderHooksPatch::class, ResourceMappingPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = true,
 )
 @Suppress("unused")
 object NativeDownloaderPatch : BytecodePatch(
     setOf(
-        NativeDownloaderPatchFingerprint,
+        ShareMenuButtonFuncCallFingerprint,
         ShareMenuButtonInitHooks,
         SettingsStatusLoadFingerprint,
         ShareMenuButtonAddHooks,
@@ -42,31 +42,32 @@ object NativeDownloaderPatch : BytecodePatch(
 ) {
     override fun execute(context: BytecodeContext) {
         val result =
-            NativeDownloaderPatchFingerprint.result
-                ?: throw PatchException("NativeDownloaderPatchFingerprint not found")
+            ShareMenuButtonFuncCallFingerprint.result
+                ?: throw PatchException("ShareMenuButtonFuncCallFingerprint not found")
 
         val DD = "${SettingsPatch.PATCHES_DESCRIPTOR}/NativeDownloader;"
-        // one click func
-        var strLoc: Int = 0
-        result.scanResult.stringsScanResult!!.matches.forEach { match ->
-            val str = match.string
-            if (str.contains("tweetview?id=")) {
-                strLoc = match.index
-                return@forEach
-            }
-        }
-        if (strLoc == 0) {
-            throw PatchException("hook not found")
-        }
 
         val method = result.mutableMethod
         val instructions = method.getInstructions()
 
-        // inject func
-        val inv_vir_ran_loc =
-            instructions.filter { it.opcode == Opcode.INVOKE_VIRTUAL_RANGE && it.location.index > strLoc }[0].location.index
-        val inv_vir_ran_reg = method.getInstruction<BuilderInstruction3rc>(inv_vir_ran_loc).startRegister
+        // one click func
+        var strLoc: Int = 0
+        var refReg: Int = 0
+        result.scanResult.stringsScanResult!!.matches.forEach { match ->
+            val str = match.string
+            if (str.contains("click") && refReg == 0) {
+                val movObj = method.getInstruction<TwoRegisterInstruction>(match.index - 1)
+                refReg = movObj.registerA
+            } else if (str.contains("tweetview?id=")) {
+                strLoc = match.index
+                return@forEach
+            }
+        }
+        if (strLoc == 0 || refReg == 0) {
+            throw PatchException("hook not found")
+        }
 
+        // inject func
         val postObj = method.getInstruction<TwoRegisterInstruction>(strLoc + 2)
         val postObjReg = postObj.registerA
         val ctxReg = postObj.registerB
@@ -74,10 +75,11 @@ object NativeDownloaderPatch : BytecodePatch(
         method.addInstructions(
             strLoc + 3,
             """
-            invoke-virtual/range{v$inv_vir_ran_reg .. v$inv_vir_ran_reg}, Ljava/lang/ref/Reference;->get()Ljava/lang/Object;
+            invoke-virtual/range{v$refReg .. v$refReg}, Ljava/lang/ref/Reference;->get()Ljava/lang/Object;
             move-result-object v$ctxReg
             check-cast v$ctxReg, Landroid/app/Activity;
             invoke-static {v$ctxReg, v$postObjReg}, $DD->downloader(Landroid/content/Context;Ljava/lang/Object;)V
+            return-void
             """.trimIndent(),
         )
 
