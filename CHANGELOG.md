@@ -1,3 +1,45 @@
+## [1.43.0](https://github.com/crimera/piko/compare/v1.42.1...v1.43.0) (2024-10-29)
+
+### Bug Fixes
+
+* Remove debug prints ([33e4d08](https://github.com/crimera/piko/commit/33e4d08a58451217781914953c1ffb711ea8480b))
+
+### Features
+
+* **Customize side bar items:** Allow for hiding of the "Jobs" item ([14ce811](https://github.com/crimera/piko/commit/14ce811a7b4d885fa6779524aad0b41034a2d8d0))
+
+## [1.43.0-dev.1](https://github.com/crimera/piko/compare/v1.42.2-dev.1...v1.43.0-dev.1) (2024-10-26)
+
+### Features
+
+* **Customize side bar items:** Allow for hiding of the "Jobs" item ([14ce811](https://github.com/crimera/piko/commit/14ce811a7b4d885fa6779524aad0b41034a2d8d0))
+
+## [1.42.2-dev.1](https://github.com/crimera/piko/compare/v1.42.1...v1.42.2-dev.1) (2024-10-26)
+
+### Bug Fixes
+
+* Remove debug prints ([33e4d08](https://github.com/crimera/piko/commit/33e4d08a58451217781914953c1ffb711ea8480b))
+
+## [1.42.1](https://github.com/crimera/piko/compare/v1.42.0...v1.42.1) (2024-10-24)
+
+### Bug Fixes
+
+* **Bring back twitter:** Change the character "𝕏" into "Twitter". ([#441](https://github.com/crimera/piko/issues/441)) ([c20e16f](https://github.com/crimera/piko/commit/c20e16f80499df75176e9080f156e529f4f7d326))
+* **Custom download folder:** Restore compatibility with versions prior to 10.64 ([b88b00b](https://github.com/crimera/piko/commit/b88b00ba97632d62517c0e52a924c453ea022d7a))
+* **Custom downloader:** Improve fingerprint ([2a2a4a4](https://github.com/crimera/piko/commit/2a2a4a4e2cdc6587c5c3b91bb3888918d7cd720d))
+* Resource strings getting corrupted, resulting on failure to patch on revanced manager ([#439](https://github.com/crimera/piko/issues/439)) ([1763137](https://github.com/crimera/piko/commit/1763137126b9a95df51fe23ce816853ccf0a8f44))
+* **Twitter:** Add support for version 10.64.0-beta.1 ([c81378d](https://github.com/crimera/piko/commit/c81378d80275465acbf9caed5f48235b56395d56))
+
+### Refactors
+
+* **Custom Downloader:** Improve getting of tweet method declarations ([5237e49](https://github.com/crimera/piko/commit/5237e496140cc94fb9beb4a72057d927527dd78b))
+
+## [1.42.1-dev.6](https://github.com/crimera/piko/compare/v1.42.1-dev.5...v1.42.1-dev.6) (2024-10-23)
+
+### Bug Fixes
+
+* **Custom downloader:** Improve fingerprint ([2a2a4a4](https://github.com/crimera/piko/commit/2a2a4a4e2cdc6587c5c3b91bb3888918d7cd720d))
+
 ## [1.42.1-dev.5](https://github.com/crimera/piko/compare/v1.42.1-dev.4...v1.42.1-dev.5) (2024-10-22)
 
 ### Bug Fixes
