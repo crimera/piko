@@ -8,6 +8,7 @@ import app.revanced.util.ResourceGroup
 import app.revanced.util.asSequence
 import app.revanced.util.copyResources
 import crimera.patches.twitter.misc.bringbacktwitter.custromstringsupdater.ja
+import crimera.patches.twitter.misc.bringbacktwitter.custromstringsupdater.pt_rBR
 import crimera.patches.twitter.misc.bringbacktwitter.strings.StringsMap
 import org.w3c.dom.Element
 import java.io.File
@@ -95,6 +96,7 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         // update strings to old ones
         updateStrings(context)
         ja.updateStrings(context)
+        pt_rBR.updateStrings(context)
     }
 
     private fun updateStrings(context: ResourceContext) {

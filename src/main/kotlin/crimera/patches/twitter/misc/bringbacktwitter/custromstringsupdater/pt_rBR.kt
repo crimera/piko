@@ -1,4 +1,7 @@
-package crimera.patches.twitter.misc.bringbacktwitter.strings
+package crimera.patches.twitter.misc.bringbacktwitter.custromstringsupdater
+
+import app.revanced.patcher.data.ResourceContext
+import java.io.FileWriter
 
 object pt_rBR {
     val values = mapOf(
@@ -63,4 +66,40 @@ object pt_rBR {
         "ps__retweeted_on_twitter" to "*%s* retweetou em",
         "tweet_removed_from_your_bookmarks" to "Tweet removido dos seus Itens salvos"
     )
+
+    /*
+     * The official X app doesn't have Brazilian Portuguese string resources.
+     * So, add the strings instead of trying to replace them.
+     */
+    fun updateStrings(context: ResourceContext) {
+        if (!context["res/values-pt"].exists()) {
+            // User might excluded the Portuguese split intentionally when they merged split APKs.
+            // In that case, there is no need to add the pt-rBR strings.
+            return
+        }
+
+        val stringsFile = context["res/values-pt-rBR/strings.xml"]
+
+        // Note: If SettingsPatch was executed prior to this patch, stringsFile will exist.
+        if (!stringsFile.exists()) {
+            context["res/values-pt-rBR"].mkdirs()
+            FileWriter(stringsFile).use {
+                it.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
+            }
+        }
+
+        // Append strings from the map.
+        context.xmlEditor[stringsFile.toString()].use {
+            val document = it.file
+            val parentNode = document.getElementsByTagName("resources").item(0)
+
+            for ((key, value) in values) {
+                val newElement = document.createElement("string")
+                newElement.setAttribute("name", key)
+                newElement.textContent = value
+
+                parentNode.appendChild(newElement)
+            }
+        }
+    }
 }
