@@ -26,10 +26,10 @@ import crimera.patches.twitter.misc.settings.fingerprints.UrlInterpreterActivity
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 object SettingsPatch : BytecodePatch(
-    setOf(SettingsFingerprint, AuthorizeAppActivity, IntegrationsUtilsFingerprint,UrlInterpreterActivity)
+    setOf(SettingsFingerprint, AuthorizeAppActivity, IntegrationsUtilsFingerprint, UrlInterpreterActivity),
 ) {
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
-    private const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
+    const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
     private const val ACTIVITY_HOOK_CLASS = "Lapp/revanced/integrations/twitter/settings/ActivityHook;"
     private const val DEEPLINK_HOOK_CLASS = "Lapp/revanced/integrations/twitter/settings/DeepLink;"
     private const val ADD_PREF_DESCRIPTOR =
@@ -45,26 +45,39 @@ object SettingsPatch : BytecodePatch(
         "invoke-static {}, $ACTIVITY_HOOK_CLASS->startSettingsActivity()V"
 
     override fun execute(context: BytecodeContext) {
-        val result = SettingsFingerprint.result
-            ?: throw PatchException("Fingerprint not found")
+        val result =
+            SettingsFingerprint.result
+                ?: throw PatchException("Fingerprint not found")
 
         val initMethod = result.mutableClass.methods.first()
 
-        val arrayCreation = initMethod.getInstructions()
-            .first { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }.location.index+1
+        val arrayCreation =
+            initMethod
+                .getInstructions()
+                .first { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }
+                .location.index + 1
 
-        initMethod.getInstruction<BuilderInstruction11x>(arrayCreation).registerA.also { reg->
-            initMethod.addInstructions(arrayCreation+1, """
+        initMethod.getInstruction<BuilderInstruction11x>(arrayCreation).registerA.also { reg ->
+            initMethod.addInstructions(
+                arrayCreation + 1,
+                """
                 const-string v1, "pref_mod"
                 invoke-static {v$reg, v1}, $ADD_PREF_DESCRIPTOR
                 move-result-object v$reg
-            """)
+            """,
+            )
         }
 
         val prefCLickedMethod = result.mutableClass.methods.find { it.returnType == "Z" }!!
-        val constIndex = prefCLickedMethod.getInstructions().first{ it.opcode == Opcode.CONST_4 }.location.index
+        val constIndex =
+            prefCLickedMethod
+                .getInstructions()
+                .first { it.opcode == Opcode.CONST_4 }
+                .location.index
 
-        prefCLickedMethod.addInstructionsWithLabels(1, """
+        prefCLickedMethod.addInstructionsWithLabels(
+            1,
+            """
             const-string v1, "pref_mod" 
             invoke-virtual {p1, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
             move-result v2
@@ -77,40 +90,44 @@ object SettingsPatch : BytecodePatch(
             const/4 v3, 0x1
             return v3 
         """,
-            ExternalLabel("cont", prefCLickedMethod.getInstruction(constIndex))
+            ExternalLabel("cont", prefCLickedMethod.getInstruction(constIndex)),
         )
 
         AuthorizeAppActivity.result?.apply {
             mutableMethod.addInstructionsWithLabels(
-                1, """
+                1,
+                """
                 invoke-static {p0}, $ACTIVITY_HOOK_CLASS->create(Landroid/app/Activity;)Z
                 move-result v0
                 if-nez v0, :no_piko_settings_init
                 """.trimIndent(),
                 ExternalLabel(
                     "no_piko_settings_init",
-                    mutableMethod.getInstructions().first { it.opcode == Opcode.RETURN_VOID })
+                    mutableMethod.getInstructions().first { it.opcode == Opcode.RETURN_VOID },
+                ),
             )
         } ?: throw PatchException("ProxySettingsActivityFingerprint not found")
 
         UrlInterpreterActivity.result?.apply {
             val instructions = mutableMethod.getInstructions()
-            val loc = instructions.first { it.opcode == Opcode.INVOKE_SUPER }.location.index+1
+            val loc = instructions.first { it.opcode == Opcode.INVOKE_SUPER }.location.index + 1
             mutableMethod.addInstructionsWithLabels(
-                loc, """
+                loc,
+                """
                 invoke-static {p0}, $DEEPLINK_HOOK_CLASS->deeplink(Landroid/app/Activity;)Z
                 move-result v0
                 if-nez v0, :deep_link
                 """.trimIndent(),
                 ExternalLabel(
                     "deep_link",
-                    instructions.first { it.opcode == Opcode.RETURN_VOID })
+                    instructions.first { it.opcode == Opcode.RETURN_VOID },
+                ),
             )
         } ?: throw PatchException("UrlInterpreterActivity not found")
 
         IntegrationsUtilsFingerprint.result!!.mutableMethod.addInstruction(
             0,
-            "${SSTS_DESCRIPTOR}->load()V"
+            "${SSTS_DESCRIPTOR}->load()V",
         )
     }
 }
