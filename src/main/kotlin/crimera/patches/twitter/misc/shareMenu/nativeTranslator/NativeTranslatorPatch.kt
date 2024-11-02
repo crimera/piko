@@ -97,7 +97,7 @@ object NativeTranslatorPatch : BytecodePatch(
         ShareMenuButtonInitHook.setButtonText("View in Spaces Sandbox", "translate_tweet_show", offset)
 
         // icon
-        ShareMenuButtonInitHook.setButtonIcon(buttonReference, "ic_vector_birdwatch", 0)
+        ShareMenuButtonInitHook.setButtonIcon(buttonReference, "ic_vector_sparkle", 0)
 
         SettingsStatusLoadFingerprint.enableSettings("nativeTranslator")
     }
