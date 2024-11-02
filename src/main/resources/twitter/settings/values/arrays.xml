@@ -85,4 +85,9 @@
         <item>@string/piko_pref_customisation_reply_sorting_remember</item>
     </string-array>
 
+    <string-array name="piko_array_translators">
+        <item>@string/piko_native_translator_google</item>
+        <item>@string/piko_native_translator_google_v2</item>
+    </string-array>
+
 </resources>
