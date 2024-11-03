@@ -24,7 +24,7 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">نسخ رابط الوسائط</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">مشاركة رابط الوسائط</string>
 
-    <string name="piko_title_native_downloader">برنامج التنزيل الأصلي</string>
+    <string name="piko_title_native_downloader">برنامج التنزيل المحلي</string>
     <string name="piko_pref_native_downloader_alert_title">تنزيل الوسائط</string>
     <string name="piko_pref_native_downloader_download_all">تنزيل الكل</string>
     <string name="piko_pref_native_downloader_no_media">لم يتم العثور على الوسائط</string>
@@ -47,8 +47,8 @@
     <string name="piko_pref_db_not_found">لم يتم العثور على قاعدة البيانات</string>
     <string name="piko_pref_db_not_open">لم يتم فتح قاعدة البيانات</string>
     <string name="piko_pref_db_del_items">عنصر محذوف</string>
-    <string name="piko_pref_hide_premium_upsell">Premium Upsell</string>
-    <string name="piko_pref_hide_premium_upsell_desc">إزالة Premium Upsell في الخط الزمني للصفحة الرئيسية</string>
+    <string name="piko_pref_hide_premium_upsell">Premium ترقية</string>
+    <string name="piko_pref_hide_premium_upsell_desc">يزيل ترقية Premium في الخط الزمني للصفحة الرئيسية</string>
 
     <string name="piko_title_misc">إعدادات متنوعة</string>
     <string name="piko_pref_chirp_font">خط Chirp</string>
@@ -99,7 +99,9 @@
     <string name="piko_pref_force_hd_desc">سيتم تشغيل الفيديوهات بأعلى جودة دائمًا</string>
     <string name="piko_pref_hide_nudge_button">إخفاء زر الدفع</string>
     <string name="piko_pref_hide_nudge_button_desc">يخفي أزرار المتابعة/الاشتراك/المتابعة مرة أخرى على المنشورات</string>
-
+    <string name="piko_pref_hide_social_proof">إخفاء سياق مُتابَع بواسطة</string>
+    <string name="piko_pref_hide_social_proof_desc">يخفي سياق مُتابَع بواسطة أسفل الملف الشخصي</string>
+    
     <string name="piko_title_customisation">التخصيص</string>
     <string name="piko_pref_customisation_profiletabs">إخفاء علامات تبويب الملف الشخصي</string>
     <string name="piko_pref_customisation_timelinetabs">علامات تبويب الخط الزمني</string>
@@ -133,5 +135,12 @@
     <string name="piko_pref_enable">تمكين %s</string>
     <string name="piko_single_page_settings">صفحة الإعدادات الفردية</string>
     <string name="piko_single_page_settings_desc">عرض الإعدادات في صفحة واحدة</string>
+
+    <string name="piko_native_translator">تمكين ترجمة المنشور المحلي</string>
+    <string name="piko_native_translator_provider">مقدمي خدمات الترجمة</string>
+    <string name="piko_native_translator_to_lang">ترجم إلى</string>
+    <string name="piko_native_translator_zero_text">لم يتم العثور على نص للترجمة</string>
+    <string name="piko_native_translator_google">Google مترجم</string>
+    <string name="piko_native_translator_google_v2">مترجم Google V2</string>
 
 </resources>
