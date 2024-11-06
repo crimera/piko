@@ -1,3 +1,17 @@
+## [1.44.0](https://github.com/crimera/piko/compare/v1.43.0...v1.44.0) (2024-11-06)
+
+### Features
+
+* **Twitter:** Added `Custom translator` patch ([737fb9e](https://github.com/crimera/piko/commit/737fb9eaa0b8da7f020b93c314f5da60f961e345))
+
+### Refactors
+
+* **Twitter:** Change translator icon ([bf5f027](https://github.com/crimera/piko/commit/bf5f027f80507cf0db5b3dfd208d26b131987eca))
+* **Twitter:** refactor `Custom downloader` patch ([42cc752](https://github.com/crimera/piko/commit/42cc752c599f978f455f84ae9a917f7bb457af98))
+* **Twitter:** Refactor `Custom downloader` patch ([1e966f7](https://github.com/crimera/piko/commit/1e966f7f519b7d947e0b516f8bc0ca0c55c1d623))
+* **Twitter:** Refactor hooks filename ([2daa292](https://github.com/crimera/piko/commit/2daa2922c7225711fd1aa5d0556493e068026e0a))
+* **Twitter:** renamed 'Share menu button' fingerprints to hooks ([395c221](https://github.com/crimera/piko/commit/395c2217fc5f5b18cdc76568c3845140f76940d6))
+
 ## [1.44.0-dev.1](https://github.com/crimera/piko/compare/v1.43.0...v1.44.0-dev.1) (2024-11-02)
 
 ### Features
