@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">\'Tryb czytania\'</string>
     <string name="piko_pref_reader_mode_desc">Włącza \'Tryb czytania\' dla długich wątków</string>
@@ -10,6 +11,7 @@
     <string name="piko_pref_enable_force_pip">Automatyczny tryb PiP</string>
     <string name="piko_pref_enable_force_pip_desc">Włącza tryb PiP (Obraz w obrazie) po zamknięciu aplikacji</string>
 
+     <!-- Download Settings -->
     <string name="piko_title_download">Pobieranie</string>
     <string name="piko_pref_video_download">możliwość pobierania treści</string>
     <string name="piko_pref_download">Zmień folder do pobierania treści</string>
@@ -24,11 +26,13 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">Skopiuj link</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Udostępnij link</string>
 
+    <!-- Downloader Options -->
     <string name="piko_title_native_downloader">Natywne pobieranie</string>
     <string name="piko_pref_native_downloader_alert_title">Pobierz pliki</string>
     <string name="piko_pref_native_downloader_download_all">Pobierz wszystko</string>
     <string name="piko_pref_native_downloader_no_media">Nie znaleziono plików</string>
 
+    <!-- Ads Settings -->
     <string name="piko_title_ads">Reklamy</string>
     <string name="piko_pref_hide_promoted_posts">promowane posty</string>
     <string name="piko_pref_hide_g_ads">reklamy Google</string>
@@ -50,6 +54,7 @@
     <string name="piko_pref_hide_premium_upsell">nagłówek premium</string>
     <string name="piko_pref_hide_premium_upsell_desc">Usuwa nagłówek zachęcający do zakupu premium na głównej osi czasu</string>
 
+    <!-- Misc Settings -->
     <string name="piko_title_misc">Różne</string>
     <string name="piko_pref_chirp_font">czcionkę Chirp</string>
     <string name="piko_pref_hide_fab">pływający przycisk akcji</string>
@@ -71,12 +76,14 @@
     <string name="piko_pref_quick_settings">Włącz szybkie ustawienia</string>
     <string name="piko_pref_quick_settings_summary">Dodaje przycisk szybkich ustawień w pasku bocznym</string>
 
+    <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Flagi</string>
     <string name="piko_pref_feature_flags">Dodaj flagi</string>
     <string name="piko_pref_edit_flag_title">Edytuj flagi</string>
     <string name="piko_pref_add_flag_title">Dodaj flagę</string>
     <string name="piko_pref_search_flags">Wyszukaj flagę</string>
 
+    <!-- Timeline Settings -->
     <string name="piko_title_timeline">Oś czasu</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Wyłącz autoodświeżanie osi</string>
     <string name="piko_pref_hide_live_threads">pokoje \'Na żywo\'</string>
@@ -102,6 +109,7 @@
     <string name="piko_pref_hide_social_proof">Ukryj kontekst \'obserwowany przez\'</string>
     <string name="piko_pref_hide_social_proof_desc">Ukrywa kontekst \'obserwowany przez\' pod profilem</string>
 
+    <!-- Customization Settings -->
     <string name="piko_title_customisation">Dostosowywanie</string>
     <string name="piko_pref_customisation_profiletabs">Zakładki profilu do ukrycia</string>
     <string name="piko_pref_customisation_timelinetabs">Zakładki osi czasu</string>
@@ -114,6 +122,7 @@
     <string name="piko_pref_customisation_reply_sorting">Domyślny filtr sortowania odpowiedzi</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Zapamiętaj ostatnio wybrany</string>
 
+    <!-- Backup and Restore -->
     <string name="piko_title_backup">Kopia zapasowa i przywracanie</string>
     <string name="piko_pref_export">Eksportowanie %s</string>
     <string name="piko_pref_import">Importowanie %s</string>
@@ -123,6 +132,7 @@
     <string name="piko_pref_export_no_uri">Błąd: Nie podano miejsca docelowego</string>
     <string name="piko_pref_import_no_uri">Błąd: Nie podano pliku</string>
 
+    <!-- About -->
     <string name="piko_title_about">Więcej o Piko</string>
     <string name="piko_pref_app_version">Wersja aplikacji</string>
     <string name="piko_pref_patch_info">Informacje o łatkach</string>
@@ -135,5 +145,12 @@
     <string name="piko_pref_enable">Włącz %s</string>
     <string name="piko_single_page_settings">Ustawienia Piko na pojedynczej stronie</string>
     <string name="piko_single_page_settings_desc">Wyświetlaj widok wszystkich ustawień Piko na pojedynczej stronie</string>
+
+    <string name="piko_native_translator">Włącz natywne tłumaczenie postów</string>
+    <string name="piko_native_translator_provider">Dostawcy tłumaczeń</string>
+    <string name="piko_native_translator_to_lang">Przetłumacz na</string>
+    <string name="piko_native_translator_zero_text">Nie znaleziono tekstu do przetłumaczenia</string>
+    <string name="piko_native_translator_google">Tłumacz Google</string>
+    <string name="piko_native_translator_google_v2">Tłumacz Google V2</string>
 
 </resources>
