@@ -1,3 +1,13 @@
+## [1.44.1-dev.1](https://github.com/crimera/piko/compare/v1.44.0...v1.44.1-dev.1) (2024-11-09)
+
+### Bug Fixes
+
+* **Twitter:** Share menu button add hook in/from 10.67 ([a640946](https://github.com/crimera/piko/commit/a640946e7045be359535ed0eead00ec80d2e10c4))
+
+### Refactors
+
+* **Twitter:** refactor values of list preference ([e0e5c5b](https://github.com/crimera/piko/commit/e0e5c5b8639efcd5eecd6476bc59b7f125d5b851))
+
 ## [1.44.0](https://github.com/crimera/piko/compare/v1.43.0...v1.44.0) (2024-11-06)
 
 ### Features
