@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Premium إعدادات -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">وضع القارئ</string>
     <string name="piko_pref_reader_mode_desc">تمكين "وضع القارئ" على المنشورات الطويلة</string>
@@ -9,7 +10,8 @@
     <string name="piko_pref_icon_n_navbar_btn">إعدادات تخصيص أيقونة التطبيق وشريط التنقل</string>
     <string name="piko_pref_enable_force_pip">وضع PiP تلقائيًا</string>
     <string name="piko_pref_enable_force_pip_desc">تمكين وضع صورة داخل صورة عند إغلاق التطبيق</string>
-    
+
+    <!-- إعدادات التنزيل -->
     <string name="piko_title_download">التنزيل</string>
     <string name="piko_pref_video_download">تمكين تنزيل الفيديو</string>
     <string name="piko_pref_download">تغيير دليل التنزيل</string>
@@ -24,11 +26,13 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">نسخ رابط الوسائط</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">مشاركة رابط الوسائط</string>
 
+    <!-- خيارات التنزيل -->
     <string name="piko_title_native_downloader">برنامج التنزيل المحلي</string>
     <string name="piko_pref_native_downloader_alert_title">تنزيل الوسائط</string>
     <string name="piko_pref_native_downloader_download_all">تنزيل الكل</string>
     <string name="piko_pref_native_downloader_no_media">لم يتم العثور على الوسائط</string>
 
+    <!-- إعدادات الإعلانات -->
     <string name="piko_title_ads">الإعلانات</string>
     <string name="piko_pref_hide_promoted_posts">منشورات المحتوى المُروَّج</string>
     <string name="piko_pref_hide_g_ads">إعلانات Google</string>
@@ -50,6 +54,7 @@
     <string name="piko_pref_hide_premium_upsell">Premium ترقية</string>
     <string name="piko_pref_hide_premium_upsell_desc">يزيل ترقية Premium في الخط الزمني للصفحة الرئيسية</string>
 
+    <!-- إعدادات متنوعة -->
     <string name="piko_title_misc">إعدادات متنوعة</string>
     <string name="piko_pref_chirp_font">خط Chirp</string>
     <string name="piko_pref_hide_fab">زر الإجراء العائم</string>
@@ -71,12 +76,14 @@
     <string name="piko_pref_quick_settings">تمكين الإعدادات السريعة</string>
     <string name="piko_pref_quick_settings_summary">إضافة زر الإعدادات السريعة في الشريط الجانبي</string>
 
+    <!-- Feature Flags إعدادات -->
     <string name="piko_title_feature_flags">Feature Flags</string>
     <string name="piko_pref_feature_flags">Feature Flags إضافة</string>
     <string name="piko_pref_edit_flag_title">Flag تعديل</string>
     <string name="piko_pref_add_flag_title">Flag إضافة</string>
     <string name="piko_pref_search_flags">Flags بحث</string>
 
+    <!-- إعدادات الخط الزمني -->
     <string name="piko_title_timeline">الخط الزمني</string>
     <string name="piko_pref_disable_auto_timeline_scroll">تعطيل التمرير التلقائي للخط الزمني عند التشغيل</string>
     <string name="piko_pref_hide_live_threads">المواضيع المباشرة</string>
@@ -101,7 +108,8 @@
     <string name="piko_pref_hide_nudge_button_desc">يخفي أزرار المتابعة/الاشتراك/المتابعة مرة أخرى على المنشورات</string>
     <string name="piko_pref_hide_social_proof">إخفاء سياق مُتابَع بواسطة</string>
     <string name="piko_pref_hide_social_proof_desc">يخفي سياق مُتابَع بواسطة أسفل الملف الشخصي</string>
-    
+
+    <!-- إعدادات التخصيص -->
     <string name="piko_title_customisation">التخصيص</string>
     <string name="piko_pref_customisation_profiletabs">إخفاء علامات تبويب الملف الشخصي</string>
     <string name="piko_pref_customisation_timelinetabs">علامات تبويب الخط الزمني</string>
@@ -113,7 +121,8 @@
     <string name="piko_pref_customisation_inlinetabs">عناصر الشريط المضمنة المراد إخفاؤها</string>
     <string name="piko_pref_customisation_reply_sorting">مرشح فرز الردود الافتراضية</string>
     <string name="piko_pref_customisation_reply_sorting_remember">تم اختياره مسبقًا</string>
-    
+
+    <!-- النسخ الاحتياطي والإستعادة -->
     <string name="piko_title_backup">النسخ الاحتياطي والإستعادة</string>
     <string name="piko_pref_export">تصدير %s</string>
     <string name="piko_pref_import">استيراد %s</string>
@@ -122,7 +131,8 @@
     <string name="piko_pref_import_failed">خطأ: فشل استيراد %s</string>
     <string name="piko_pref_export_no_uri">خطأ: لم يتم توفير وجهة</string>
     <string name="piko_pref_import_no_uri">خطأ: لم يتم تقديم ملف</string>
-    
+
+    <!-- حول -->
     <string name="piko_title_about">حول</string>
     <string name="piko_pref_app_version">إصدار التطبيق</string>
     <string name="piko_pref_patch_info">معلومات التعديل</string>
