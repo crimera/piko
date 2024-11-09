@@ -94,7 +94,7 @@
     <string name="piko_pref_hide_immersive_player">イマーシブプレーヤー</string>
     <string name="piko_pref_hide_immersive_player_desc">動画再生時にスワイプして他の動画を表示する機能を無効化します</string>
     <string name="piko_pref_enable_vid_auto_advance">動画の自動スクロール</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">イマーシブプレーヤーで自動スクロールを有効化します</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">没入型プレーヤーで自動スクロールを有効化します</string>
     <string name="piko_pref_hide_hidden_replies">「非表示の返信」</string>
     <string name="piko_pref_force_hd">最高画質の強制</string>
     <string name="piko_pref_force_hd_desc">動画を常に最高画質で再生します</string>
