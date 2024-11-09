@@ -32,7 +32,7 @@
     <!-- Ads Settings -->
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモーションポスト</string>
-    <string name="piko_pref_hide_g_ads">Google AdMobの広告</string>
+    <string name="piko_pref_hide_g_ads">Google広告</string>
     <string name="piko_pref_hide_main_event">話題を検索(メイン)</string>
     <string name="piko_pref_hide_superhero_event">話題を検索(スーパーヒーロー)</string>
     <string name="piko_pref_hide_videos_for_you">話題を検索(おすすめ動画)</string>
