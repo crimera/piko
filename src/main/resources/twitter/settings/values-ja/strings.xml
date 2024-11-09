@@ -10,41 +10,38 @@
     <string name="piko_pref_icon_n_navbar_btn">アプリアイコンとナビゲーションバーの設定</string>
     <string name="piko_pref_enable_force_pip">自動PiPモード</string>
     <string name="piko_pref_enable_force_pip_desc">アプリを閉じたときに自動でPiPモードを有効化します</string>
-    
     <!-- Download Settings -->
     <string name="piko_title_download">ダウンロード</string>
     <string name="piko_pref_video_download">動画のダウンロード</string>
     <string name="piko_pref_download">ダウンロードディレクトリを変更</string>
     <string name="piko_pref_download_path">パブリックフォルダ</string>
-    <string name="piko_pref_download_path_desc">動画のダウンロードに使用するパブリックフォルダ</string>
+    <string name="piko_pref_download_path_desc">動画のダウンロードに使用するパブリックフォルダを指定できます</string>
     <string name="piko_pref_download_folder">サブフォルダ</string>
-    <string name="piko_pref_download_folder_desc">動画をダウンロードするサブフォルダ ( [パブリックフォルダ] / [サブフォルダ] )</string>
+    <string name="piko_pref_download_folder_desc">動画をダウンロードするサブフォルダを指定できます([パブリックフォルダ]/[サブフォルダ])</string>
     <string name="piko_pref_download_media_link_handle">ダウンロード設定</string>
     <string name="piko_pref_download_media_link_handle_download">直接ダウンロード</string>
     <string name="piko_pref_download_media_link_handle_copy_link">メディアリンクを直接コピー</string>
     <string name="piko_pref_download_media_link_handle_always_ask">毎回尋ねる</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">メディアリンクをコピー</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">メディアリンクを共有</string>
-    
     <!-- Downloader Options -->
     <string name="piko_title_native_downloader">ネイティブダウンローダー</string>
     <string name="piko_pref_native_downloader_alert_title">メディアをダウンロード</string>
     <string name="piko_pref_native_downloader_download_all">すべてダウンロード</string>
     <string name="piko_pref_native_downloader_no_media">メディアが見つかりません</string>
-    
     <!-- Ads Settings -->
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモーションポスト</string>
-    <string name="piko_pref_hide_g_ads">Google Ads</string>
-    <string name="piko_pref_hide_main_event">話題を検索 (メイン)</string>
-    <string name="piko_pref_hide_superhero_event">話題を検索 (スーパーヒーロー)</string>
-    <string name="piko_pref_hide_videos_for_you">話題を検索 (おすすめ動画)</string>
-    <string name="piko_pref_wtf_section">Who to follow</string>
-    <string name="piko_pref_cts_section">おすすめクリエイター</string>
-    <string name="piko_pref_ctj_section">新しいコミュニティを見つける</string>
-    <string name="piko_pref_ryb_section">ブックマークに再アクセス</string>
-    <string name="piko_pref_pinned_posts_section">フォロー中のユーザーが固定</string>
-    <string name="piko_pref_hide_detailed_posts">関連ポスト欄 (返信内)</string>
+    <string name="piko_pref_hide_g_ads">Google AdMobの広告</string>
+    <string name="piko_pref_hide_main_event">[話題を検索] タブのメインイベント</string>
+    <string name="piko_pref_hide_superhero_event">[話題を検索] タブのスーパーヒーローイベント</string>
+    <string name="piko_pref_hide_videos_for_you">[話題を検索] タブのおすすめ動画</string>
+    <string name="piko_pref_wtf_section">「Who to follow」</string>
+    <string name="piko_pref_cts_section">「おすすめクリエイター」</string>
+    <string name="piko_pref_ctj_section">「新しいコミュニティを見つける」</string>
+    <string name="piko_pref_ryb_section">「ブックマークに再アクセス」</string>
+    <string name="piko_pref_pinned_posts_section">「フォロー中のユーザーが固定」</string>
+    <string name="piko_pref_hide_detailed_posts">関連ポスト欄(返信内)</string>
     <string name="piko_pref_hide_trends">プロモーショントレンド</string>
     <string name="piko_pref_hide_premium_prompt">メッセージプロンプト</string>
     <string name="piko_pref_del_from_db">データベースから項目を削除</string>
@@ -53,14 +50,13 @@
     <string name="piko_pref_db_del_items">削除した項目</string>
     <string name="piko_pref_hide_premium_upsell">プレミアムの広告</string>
     <string name="piko_pref_hide_premium_upsell_desc">タイムラインからプレミアムの広告を削除します</string>
-    
     <!-- Misc Settings -->
     <string name="piko_title_misc">その他</string>
     <string name="piko_pref_chirp_font">Chirpフォント</string>
-    <string name="piko_pref_hide_fab">フローティングアクションボタン</string>
-    <string name="piko_pref_hide_fab_menu">フローティングアクションメニュー</string>
+    <string name="piko_pref_hide_fab">フローティングアクションボタン (FAB)</string>
+    <string name="piko_pref_hide_fab_menu">FABメニューボタン</string>
     <string name="piko_pref_rec_users">おすすめのユーザー</string>
-    <string name="piko_pref_hide_view_count">表示回数</string>
+    <string name="piko_pref_hide_view_count">閲覧数</string>
     <string name="piko_pref_custom_share_domain">カスタム共有ドメイン</string>
     <string name="piko_pref_custom_share_domain_desc">ポストを共有するときに使用するドメイン</string>
     <string name="piko_pref_browser_chooser">ブラウザ選択ダイアログを使用</string>
@@ -69,27 +65,25 @@
     <string name="piko_pref_selectable_text">選択可能なテキスト</string>
     <string name="piko_pref_clear_tracking_params">トラッキングパラメータを削除</string>
     <string name="piko_pref_unshorten_link">短縮URLを無効化</string>
-    <string name="piko_pref_unshorten_link_desc">t.coの短縮URLを取り除きます</string>
+    <string name="piko_pref_unshorten_link_desc">t.coの短縮URLを取り除く</string>
     <string name="piko_pref_round_off_numbers">数字を短く表記</string>
     <string name="piko_pref_round_off_numbers_desc">65,536を6.5万のように数字を短く表記します</string>
     <string name="piko_pref_debug_menu">ポストのデバッグメニュー</string>
     <string name="piko_pref_quick_settings">サイドバーに設定ボタン追加</string>
     <string name="piko_pref_quick_settings_summary">サイドバーからPiko設定を直接開くことができるボタンを追加します</string>
-    
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">機能フラグ</string>
     <string name="piko_pref_feature_flags">機能フラグを追加</string>
     <string name="piko_pref_edit_flag_title">フラグを編集</string>
     <string name="piko_pref_add_flag_title">フラグを追加</string>
     <string name="piko_pref_search_flags">フラグを検索</string>
-    
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">タイムライン</string>
     <string name="piko_pref_disable_auto_timeline_scroll">起動時の自動TLスクロールを無効化</string>
     <string name="piko_pref_hide_live_threads">ライブスレッド</string>
     <string name="piko_pref_hide_live_threads_desc">タイムラインからライブセクションを非表示にします</string>
     <string name="piko_pref_hide_banner">バナー</string>
-    <string name="piko_pref_hide_banner_desc">新しい投稿</string>
+    <string name="piko_pref_hide_banner_desc">「新しい投稿」</string>
     <string name="piko_pref_hide_bmk_timeline">TLのブックマークアイコン</string>
     <string name="piko_pref_force_translate">翻訳を強制的に有効化</string>
     <string name="piko_pref_force_translate_desc">すべてのポストで翻訳を利用できるようにします</string>
@@ -97,41 +91,38 @@
     <string name="piko_pref_hide_quick_promote_desc">自身のポストの「プロモーションする」ボタンを削除します</string>
     <string name="piko_pref_show_poll_result">投票結果を表示</string>
     <string name="piko_pref_show_poll_result_desc">投票せずに投票結果を表示できるようにします</string>
-    <string name="piko_pref_hide_immersive_player">没入型プレーヤー</string>
+    <string name="piko_pref_hide_immersive_player">イマーシブプレーヤー</string>
     <string name="piko_pref_hide_immersive_player_desc">動画再生時にスワイプして他の動画を表示する機能を無効化します</string>
     <string name="piko_pref_enable_vid_auto_advance">動画の自動スクロール</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">没入型プレーヤーで自動スクロールを有効化します</string>
-    <string name="piko_pref_hide_hidden_replies">非表示の返信</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">イマーシブプレーヤーで自動スクロールを有効化します</string>
+    <string name="piko_pref_hide_hidden_replies">「非表示の返信」</string>
     <string name="piko_pref_force_hd">最高画質の強制</string>
     <string name="piko_pref_force_hd_desc">動画を常に最高画質で再生します</string>
     <string name="piko_pref_hide_nudge_button">「フォローする」ボタンを非表示</string>
     <string name="piko_pref_hide_nudge_button_desc">ポストから「フォローする」/「サブスクライブ」/「フォローバック」ボタンを非表示にします</string>
     <string name="piko_pref_hide_social_proof">フォローインジケーターを非表示</string>
-    <string name="piko_pref_hide_social_proof_desc">プロフィールの下部に表示される「〇〇さんにフォローされています」を非表示にします</string>
-    
+    <string name="piko_pref_hide_social_proof_desc">プロフィールの下部にある「○○さんにフォローされています」を非表示にします</string>
     <!-- Customization Settings -->
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">非表示にするプロフィールタブ</string>
     <string name="piko_pref_customisation_timelinetabs">タイムラインのタブ</string>
     <string name="piko_pref_customisation_timelinetabs_foryou">「おすすめ」タブを削除</string>
     <string name="piko_pref_customisation_timelinetabs_following">「フォロー中」タブを削除</string>
-    <string name="piko_pref_customisation_timelinetabs_both">どちらも表示</string>
+    <string name="piko_pref_customisation_timelinetabs_both">両方とも表示</string>
     <string name="piko_pref_customisation_sidebartabs">非表示にするサイドバーの項目</string>
     <string name="piko_pref_customisation_navbartabs">非表示にするナビゲーションバーの項目</string>
     <string name="piko_pref_customisation_inlinetabs">非表示にするインラインバーの項目</string>
     <string name="piko_pref_customisation_reply_sorting">デフォルトの返信の並び替え</string>
     <string name="piko_pref_customisation_reply_sorting_remember">前回の選択を記憶</string>
-    
     <!-- Backup and Restore -->
     <string name="piko_title_backup">バックアップと復元</string>
-    <string name="piko_pref_export">エクスポート: %s</string>
-    <string name="piko_pref_import">インポート: %s</string>
+    <string name="piko_pref_export">%sをエクスポート</string>
+    <string name="piko_pref_import">%sをインポート</string>
     <string name="piko_pref_success">成功</string>
-    <string name="piko_pref_export_failed">エラー: %s のエクスポートに失敗しました</string>
-    <string name="piko_pref_import_failed">エラー: %s のインポートに失敗しました</string>
+    <string name="piko_pref_export_failed">エラー: %sのエクスポートに失敗しました</string>
+    <string name="piko_pref_import_failed">エラー: %sのインポートに失敗しました</string>
     <string name="piko_pref_export_no_uri">エラー: 宛先が指定されていません</string>
     <string name="piko_pref_import_no_uri">エラー: ファイルが提供されていません</string>
-    
     <!-- About -->
     <string name="piko_title_about">アプリに関する情報</string>
     <string name="piko_pref_app_version">アプリのバージョン</string>
@@ -141,8 +132,14 @@
     <string name="piko_pref_included">適用済み</string>
     <string name="piko_pref_excluded">除外済み</string>
     <string name="piko_pref_app_restart_rec">アプリの再起動を推奨します</string>
-    <string name="piko_pref_remove">%s を削除</string>
-    <string name="piko_pref_enable">%s を有効化</string>
-    <string name="piko_single_page_settings">すべての設定を表示</string>
-    <string name="piko_single_page_settings_desc">カテゴリー分けをせずに、1つのページにすべてのPiko設定を表示します</string>
+    <string name="piko_pref_remove">%sを削除</string>
+    <string name="piko_pref_enable">%sを有効化</string>
+    <string name="piko_single_page_settings">全ての設定を表示</string>
+    <string name="piko_single_page_settings_desc">カテゴリー分けをせずに、1つのページに全てのPiko設定を表示します</string>
+    <string name="piko_native_translator">共有メニューに翻訳ボタンを追加</string>
+    <string name="piko_native_translator_provider">翻訳プロバイダー</string>
+    <string name="piko_native_translator_to_lang">翻訳先の言語</string>
+    <string name="piko_native_translator_zero_text">翻訳するテキストが見つかりません</string>
+    <string name="piko_native_translator_google">Google翻訳</string>
+    <string name="piko_native_translator_google_v2">Google翻訳 V2</string>
 </resources>
