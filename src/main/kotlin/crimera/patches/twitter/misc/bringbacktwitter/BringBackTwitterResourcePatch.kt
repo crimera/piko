@@ -148,7 +148,7 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
 
             // log how many keys were not found
             if (replacedCount < stringsMap.size) {
-                println("${stringsMap.size - replacedCount} keys were not found in ${stringsFile.parentFile.name}/${stringsFile.name}")
+                println("INFO: [Bring back twitter] ${stringsMap.size - replacedCount} strings were not found in ${stringsFile.parentFile.name}/${stringsFile.name}")
             }
         }
     }
