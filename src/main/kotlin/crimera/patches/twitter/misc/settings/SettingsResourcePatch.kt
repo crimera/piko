@@ -30,7 +30,7 @@ object SettingsResourcePatch : ResourcePatch() {
             parent.appendChild(prefMod)
         }
 
-        //credits aero
+        // credits aero
         val sideBarLayout = context["res/layout/main_activity_app_bar.xml"]
         if (!sideBarLayout.exists()) throw PatchException("settings_root not found")
 
@@ -53,23 +53,39 @@ object SettingsResourcePatch : ResourcePatch() {
             parent.appendChild(sideBtn)
         }
 
-        //credits @inotia00
+        // credits @inotia00
         context.appendStrings("twitter/settings", "values/strings.xml")
         context.appendStrings("twitter/settings", "values/arrays.xml")
 
         /**
          * create directory for the untranslated language resources
          */
-        val languages = arrayOf(
-            "es", "ar", "ja", "hi", "in", "zh-rCN", "ru", "pl", "pt-rBR", "v21", "tr", "zh-rTW"
-        ).map { "values-$it" }
+        val languages =
+            arrayOf(
+                "es",
+                "ar",
+                "ja",
+                "hi",
+                "in",
+                "zh-rCN",
+                "ru",
+                "pl",
+                "pt-rBR",
+                "v21",
+                "tr",
+                "zh-rTW",
+            ).map { "values-$it" }
 
         languages.forEach {
+//            println("res/$it")
             if (context["res/$it"].exists()) {
                 context.appendStrings("twitter/settings", "$it/strings.xml")
             } else {
                 context["res/$it"].mkdirs()
                 context.copyResources("twitter/settings", ResourceGroup(it, "strings.xml"))
+                if (it.contains("v21")) {
+                    context.copyResources("twitter/settings", ResourceGroup(it, "arrays.xml"))
+                }
             }
         }
     }
