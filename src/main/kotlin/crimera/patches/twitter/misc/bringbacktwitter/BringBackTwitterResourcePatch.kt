@@ -123,8 +123,8 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
 
                 if (name == "conference_default_title") {
                     /*
-                     * Parsing causes the string which contains the
-                     * character 𝕏 to be "corrupted", so we change "𝕏" to "Twitter"
+                     * Parsing XML causes the string which contains the
+                     * character "𝕏" to be corrupted, so we change it to "Twitter"
                      */
                     node.textContent = stringsMap[name] ?: run {
                         val content = node.textContent

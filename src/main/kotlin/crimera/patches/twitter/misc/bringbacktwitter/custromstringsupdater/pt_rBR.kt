@@ -73,8 +73,8 @@ object pt_rBR {
      */
     fun updateStrings(context: ResourceContext) {
         if (!context["res/values-pt"].exists()) {
-            // User might excluded the Portuguese split intentionally when they merged split APKs.
-            // In that case, there is no need to add the pt-rBR strings.
+            // User likely intentionally excluded the Portuguese split when merging split APKs.
+            // In this case, there is no need to add the pt-rBR strings.
             return
         }
 
