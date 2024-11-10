@@ -116,7 +116,6 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         context.xmlEditor[stringsFile.toString()].use { editor ->
             val document = editor.file
 
-            var replacedCount = 0
             val nodes = document.getElementsByTagName("string")
             for (i in 0 until nodes.length) {
                 val node = nodes.item(i)
@@ -124,31 +123,20 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
 
                 if (name == "conference_default_title") {
                     /*
-                     * Parsing causes the string which contains the character "𝕏" to be corrupted,
-                     * so we change it to "Twitter"
+                     * Parsing causes the string which contains the
+                     * character 𝕏 to be "corrupted", so we change "𝕏" to "Twitter"
                      */
-                    val value = stringsMap[name]
-                    if (value != null) {
-                        node.textContent = value
-                        replacedCount++
-                    } else {
+                    node.textContent = stringsMap[name] ?: run {
                         val content = node.textContent
                         val delimiter = if (content.contains("-")) '-' else ' '
-                        node.textContent =
-                            content.split(delimiter).joinToString(delimiter.toString()) {
-                                if (it.startsWithSpecialByte()) "Twitter" else it
-                            }
+                        content.split(delimiter).joinToString(delimiter.toString()) {
+                            if (it.startsWithSpecialByte()) "Twitter" else it
+                        }
                     }
                     continue
                 }
 
                 node.textContent = stringsMap[name] ?: continue
-                replacedCount++
-            }
-
-            // log how many keys were not found
-            if (replacedCount < stringsMap.size) {
-                println("INFO: [Bring back twitter] ${stringsMap.size - replacedCount} strings were not found in ${stringsFile.parentFile.name}/${stringsFile.name}")
             }
         }
     }
