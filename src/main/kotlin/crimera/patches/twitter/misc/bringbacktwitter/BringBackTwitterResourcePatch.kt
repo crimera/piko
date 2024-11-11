@@ -7,12 +7,11 @@ import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.util.ResourceGroup
 import app.revanced.util.asSequence
 import app.revanced.util.copyResources
-import app.util.measureExecutionTime
 import crimera.patches.twitter.misc.bringbacktwitter.custromstringsupdater.ja
+import crimera.patches.twitter.misc.bringbacktwitter.custromstringsupdater.pt_rBR
 import crimera.patches.twitter.misc.bringbacktwitter.strings.StringsMap
 import org.w3c.dom.Element
 import java.io.File
-import java.io.FileWriter
 
 @Patch(
     name = "Bring back twitter",
@@ -97,20 +96,16 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         // update strings to old ones
         updateStrings(context)
         ja.updateStrings(context)
+        pt_rBR.updateStrings(context)
     }
 
     private fun updateStrings(context: ResourceContext) {
         val langs = StringsMap.replacementMap
         for ((key, value) in langs) {
             val stringsFile = context["res/$key/strings.xml"]
-            if (!stringsFile.isFile) {
-
-                context["res/$key"].mkdirs()
-                FileWriter(stringsFile).use {
-                    it.write("<?xml version=\"1.0\" encoding=\"utf-8\"?><resources></resources>")
-                }
+            if (stringsFile.exists()) {
+                updateStringsFile(stringsFile, value, context)
             }
-            updateStringsFile(stringsFile, value, context)
         }
     }
 
@@ -121,39 +116,27 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         context.xmlEditor[stringsFile.toString()].use { editor ->
             val document = editor.file
 
-            for ((key, value) in stringsMap) {
-                val nodes = document.getElementsByTagName("string")
-                var keyReplaced = false
-                for (i in 0 until nodes.length) {
-                    val node = nodes.item(i)
-                    val name = node.attributes.getNamedItem("name")?.nodeValue
-                    if (name == key) {
-                        node.textContent = value
-                        keyReplaced = true
-                        break
-                    } else if (name == "conference_default_title") {/*
-                         * Parsing causes the default value which contains the
-                         * character 𝕏 to be "corrupted" so we change it to a normal X
-                         */
+            val nodes = document.getElementsByTagName("string")
+            for (i in 0 until nodes.length) {
+                val node = nodes.item(i)
+                val name = node.attributes.getNamedItem("name")?.nodeValue
+
+                if (name == "conference_default_title") {
+                    /*
+                     * Parsing XML causes the string which contains the
+                     * character "𝕏" to be corrupted, so we change it to "Twitter"
+                     */
+                    node.textContent = stringsMap[name] ?: run {
                         val content = node.textContent
-                        node.textContent = stringsMap[name] ?: run {
-                            val delimiter = if (content.contains("-")) '-' else ' '
-                            content.split(delimiter).joinToString(delimiter.toString()) {
-                                if (it.startsWithSpecialByte()) "Twitter" else it
-                            }
+                        val delimiter = if (content.contains("-")) '-' else ' '
+                        content.split(delimiter).joinToString(delimiter.toString()) {
+                            if (it.startsWithSpecialByte()) "Twitter" else it
                         }
                     }
+                    continue
                 }
 
-                // log which keys were not found or failed
-                if (!keyReplaced) {
-                    val colorElement = document.createElement("string")
-
-                    colorElement.setAttribute("name", key)
-                    colorElement.textContent = value
-
-                    document.getElementsByTagName("resources").item(0).appendChild(colorElement)
-                }
+                node.textContent = stringsMap[name] ?: continue
             }
         }
     }
