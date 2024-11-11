@@ -1,3 +1,9 @@
+## [1.44.1-dev.2](https://github.com/crimera/piko/compare/v1.44.1-dev.1...v1.44.1-dev.2) (2024-11-11)
+
+### Perfomance
+
+* **Bring back twitter:** Optimize string replacement ([#440](https://github.com/crimera/piko/issues/440)) ([7e61023](https://github.com/crimera/piko/commit/7e6102351d9488f89489f87df2ec45d6d0d178d8))
+
 ## [1.44.1-dev.1](https://github.com/crimera/piko/compare/v1.44.0...v1.44.1-dev.1) (2024-11-09)
 
 ### Bug Fixes
