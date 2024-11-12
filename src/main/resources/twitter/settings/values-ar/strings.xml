@@ -121,6 +121,7 @@
     <string name="piko_pref_customisation_inlinetabs">عناصر الشريط المضمنة المراد إخفاؤها</string>
     <string name="piko_pref_customisation_reply_sorting">مرشح فرز الردود الافتراضية</string>
     <string name="piko_pref_customisation_reply_sorting_remember">تم اختياره مسبقًا</string>
+    <string name="piko_pref_customisation_post_font_size">حجم خط المنشور</string>
 
     <!-- النسخ الاحتياطي والإستعادة -->
     <string name="piko_title_backup">النسخ الاحتياطي والإستعادة</string>
