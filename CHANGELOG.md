@@ -1,3 +1,9 @@
+## [1.45.0-dev.1](https://github.com/crimera/piko/compare/v1.44.1-dev.2...v1.45.0-dev.1) (2024-11-12)
+
+### Features
+
+* **Twitter:** Added `Customise post font size` patch ([ea608e0](https://github.com/crimera/piko/commit/ea608e09b7b0775f38ca1914503e1b54dc7b73f9))
+
 ## [1.44.1-dev.2](https://github.com/crimera/piko/compare/v1.44.1-dev.1...v1.44.1-dev.2) (2024-11-11)
 
 ### Perfomance
