@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="piko_title_settings">piko 设置</string>
+    
+    <!-- Premium 设置 -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">阅读模式</string>
     <string name="piko_pref_reader_mode_desc">在长主题贴中启用阅读模式</string>
@@ -10,7 +12,8 @@
     <string name="piko_pref_icon_n_navbar_btn">应用图标和自定义导航栏设置</string>
     <string name="piko_pref_enable_force_pip">自动画中画模式</string>
     <string name="piko_pref_enable_force_pip_desc">观看视频时切换应用自动进入画中画模式</string>
-
+    
+    <!-- 下载设置 -->
     <string name="piko_title_download">下载</string>
     <string name="piko_pref_video_download">启用视频下载</string>
     <string name="piko_pref_download">更改下载目录</string>
@@ -24,12 +27,14 @@
     <string name="piko_pref_download_media_link_handle_always_ask">每次都询问</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">复制链接</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">分享链接</string>
-
+    
+    <!-- 下载器选项 -->
     <string name="piko_title_native_downloader">原生下载器</string>
     <string name="piko_pref_native_downloader_alert_title">下载媒体</string>
     <string name="piko_pref_native_downloader_download_all">下载全部</string>
     <string name="piko_pref_native_downloader_no_media">未找到媒体</string>
-
+    
+    <!-- 广告设置 -->
     <string name="piko_title_ads">广告</string>
     <string name="piko_pref_hide_promoted_posts">推广帖子</string>
     <string name="piko_pref_hide_g_ads">谷歌广告</string>
@@ -51,6 +56,7 @@
     <string name="piko_pref_hide_premium_upsell">获取 Premium</string>
     <string name="piko_pref_hide_premium_upsell_desc">移除主页时间线上获取 Premium 按钮</string>
 
+    <!-- 杂项设置 -->
     <string name="piko_title_misc">杂项</string>
     <string name="piko_pref_chirp_font">\u00A0chirp 字体</string>
     <string name="piko_pref_hide_fab">发帖按钮</string>
@@ -72,12 +78,14 @@
     <string name="piko_pref_quick_settings">启用快捷设置</string>
     <string name="piko_pref_quick_settings_summary">在侧滑栏添加快捷设置按钮</string>
 
+    <!-- 功能标志设置 -->
     <string name="piko_title_feature_flags">功能标志</string>
     <string name="piko_pref_feature_flags">新增功能标志</string>
     <string name="piko_pref_edit_flag_title">编辑标志</string>
     <string name="piko_pref_add_flag_title">添加标志</string>
     <string name="piko_pref_search_flags">搜索标志</string>
 
+    <!-- 时间线设置 -->
     <string name="piko_title_timeline">时间线</string>
     <string name="piko_pref_disable_auto_timeline_scroll">启动时保持时间线位置</string>
     <string name="piko_pref_hide_live_threads">直播空间</string>
@@ -103,6 +111,7 @@
     <string name="piko_pref_hide_social_proof">隐藏共同关注</string>
     <string name="piko_pref_hide_social_proof_desc">隐藏个人资料页你认识的关注者</string>
 
+    <!-- 自定义设置 -->
     <string name="piko_title_customisation">自定义</string>
     <string name="piko_pref_customisation_profiletabs">隐藏个人资料标签页</string>
     <string name="piko_pref_customisation_timelinetabs">隐藏时间线标签页</string>
@@ -115,6 +124,7 @@
     <string name="piko_pref_customisation_reply_sorting">选择默认回复排序</string>
     <string name="piko_pref_customisation_reply_sorting_remember">上次所选</string>
 
+    <!-- 备份和恢复 -->
     <string name="piko_title_backup">备份和恢复</string>
     <string name="piko_pref_export">导出%s</string>
     <string name="piko_pref_import">导入%s</string>
@@ -124,6 +134,7 @@
     <string name="piko_pref_export_no_uri">错误：未提供目标</string>
     <string name="piko_pref_import_no_uri">错误：未提供文件</string>
 
+    <!-- 关于 -->
     <string name="piko_title_about">关于</string>
     <string name="piko_pref_app_version">App 版本</string>
     <string name="piko_pref_patch_info">补丁信息</string>
@@ -136,5 +147,12 @@
     <string name="piko_pref_enable">启用%s</string>
     <string name="piko_single_page_settings">单页设置</string>
     <string name="piko_single_page_settings_desc">在一个页面中显示设置项</string>
+    
+    <string name="piko_native_translator">启用原生帖子翻译</string>
+    <string name="piko_native_translator_provider">翻译服务</string>
+    <string name="piko_native_translator_to_lang">目标语言</string>
+    <string name="piko_native_translator_zero_text">未找到需要翻译的文本</string>
+    <string name="piko_native_translator_google">Google 翻译</string>
+    <string name="piko_native_translator_google_v2">Google 翻译 V2</string>
 
 </resources>

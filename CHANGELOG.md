@@ -1,3 +1,25 @@
+## [1.45.0-dev.1](https://github.com/crimera/piko/compare/v1.44.1-dev.2...v1.45.0-dev.1) (2024-11-12)
+
+### Features
+
+* **Twitter:** Added `Customise post font size` patch ([ea608e0](https://github.com/crimera/piko/commit/ea608e09b7b0775f38ca1914503e1b54dc7b73f9))
+
+## [1.44.1-dev.2](https://github.com/crimera/piko/compare/v1.44.1-dev.1...v1.44.1-dev.2) (2024-11-11)
+
+### Perfomance
+
+* **Bring back twitter:** Optimize string replacement ([#440](https://github.com/crimera/piko/issues/440)) ([7e61023](https://github.com/crimera/piko/commit/7e6102351d9488f89489f87df2ec45d6d0d178d8))
+
+## [1.44.1-dev.1](https://github.com/crimera/piko/compare/v1.44.0...v1.44.1-dev.1) (2024-11-09)
+
+### Bug Fixes
+
+* **Twitter:** Share menu button add hook in/from 10.67 ([a640946](https://github.com/crimera/piko/commit/a640946e7045be359535ed0eead00ec80d2e10c4))
+
+### Refactors
+
+* **Twitter:** refactor values of list preference ([e0e5c5b](https://github.com/crimera/piko/commit/e0e5c5b8639efcd5eecd6476bc59b7f125d5b851))
+
 ## [1.44.0](https://github.com/crimera/piko/compare/v1.43.0...v1.44.0) (2024-11-06)
 
 ### Features

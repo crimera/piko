@@ -18,7 +18,7 @@ object ShareMenuButtonAddHook : MethodFingerprint(
             "3691233323:audiospace",
         ),
     customFingerprint = { methodDef, _ ->
-        methodDef.name == "a"
+        methodDef.name == "a" && methodDef.parameters.size == 4
     },
 ) {
     fun addButton(
