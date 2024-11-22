@@ -114,10 +114,11 @@
     <string name="piko_pref_customisation_inlinetabs">非表示にするインラインバーの項目</string>
     <string name="piko_pref_customisation_reply_sorting">デフォルトの返信の並び替え</string>
     <string name="piko_pref_customisation_reply_sorting_remember">前回の選択を記憶</string>
+    <string name="piko_pref_customisation_post_font_size">ポストのフォントサイズ</string>
     <!-- Backup and Restore -->
     <string name="piko_title_backup">バックアップと復元</string>
-    <string name="piko_pref_export">%sをエクスポート</string>
-    <string name="piko_pref_import">%sをインポート</string>
+    <string name="piko_pref_export">エクスポート: %s</string>
+    <string name="piko_pref_import">インポート: %s</string>
     <string name="piko_pref_success">成功</string>
     <string name="piko_pref_export_failed">エラー: %sのエクスポートに失敗しました</string>
     <string name="piko_pref_import_failed">エラー: %sのインポートに失敗しました</string>
