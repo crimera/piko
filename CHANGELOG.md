@@ -1,3 +1,9 @@
+## [1.45.1-dev.2](https://github.com/crimera/piko/compare/v1.45.1-dev.1...v1.45.1-dev.2) (2024-11-25)
+
+### Refactors
+
+* **Twitter:** Added toggle for `Show sensitive media` patch ([cac4fe7](https://github.com/crimera/piko/commit/cac4fe747640e37dc9155c63f23082c44963c05d))
+
 ## [1.45.1-dev.1](https://github.com/crimera/piko/compare/v1.45.0...v1.45.1-dev.1) (2024-11-24)
 
 ### Bug Fixes
