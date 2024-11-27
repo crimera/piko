@@ -119,6 +119,7 @@
     <string name="piko_pref_customisation_sidebartabs">عناصر الشريط الجانبي المراد إخفاؤها</string>
     <string name="piko_pref_customisation_navbartabs">عناصر شريط التنقل المراد إخفاؤها</string>
     <string name="piko_pref_customisation_inlinetabs">عناصر الشريط المضمنة المراد إخفاؤها</string>
+    <string name="piko_pref_customisation_exploretabs">علامات تبويب استكشاف</string>
     <string name="piko_pref_customisation_reply_sorting">مرشح فرز الردود الافتراضية</string>
     <string name="piko_pref_customisation_reply_sorting_remember">تم اختياره مسبقًا</string>
     <string name="piko_pref_customisation_post_font_size">حجم خط المنشور</string>
