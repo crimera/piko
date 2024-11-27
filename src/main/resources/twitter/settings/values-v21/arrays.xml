@@ -14,6 +14,15 @@
         <item>hide_following</item>
     </string-array>
 
+    <string-array name="piko_array_exploretabs_val">
+        <item>for_you</item>
+        <item>trending</item>
+        <item>fun</item>
+        <item>news</item>
+        <item>sports</item>
+        <item>entertainment</item>
+    </string-array>
+
     <string-array name="piko_array_download_media_handle_val">
         <item>download_media</item>
         <item>copy_media_link</item>
