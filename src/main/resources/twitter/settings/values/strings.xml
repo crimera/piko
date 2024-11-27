@@ -119,6 +119,7 @@
     <string name="piko_pref_customisation_sidebartabs">Side bar items to hide</string>
     <string name="piko_pref_customisation_navbartabs">Navigation bar items to hide</string>
     <string name="piko_pref_customisation_inlinetabs">Inline bar items to hide</string>
+    <string name="piko_pref_customisation_exploretabs">Explore tabs</string>
     <string name="piko_pref_customisation_reply_sorting">Default reply sorting filter</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Previously selected</string>
     <string name="piko_pref_customisation_post_font_size">Post font size</string>
