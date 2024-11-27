@@ -12,6 +12,15 @@
         <item>@string/profile_tab_title_likes</item>
     </string-array>
 
+    <string-array name="piko_array_exploretabs">
+        <item>@string/guide_tab_title_for_you</item>
+        <item>@string/guide_tab_title_trending</item>
+        <item>@string/guide_tab_title_fun</item>
+        <item>@string/guide_tab_title_news</item>
+        <item>@string/guide_tab_title_sports</item>
+        <item>@string/guide_tab_title_entertainment</item>
+    </string-array>
+
     <string-array name="piko_array_timelinetabs">
         <item>@string/piko_pref_customisation_timelinetabs_both</item>
         <item>@string/piko_pref_customisation_timelinetabs_foryou</item>
