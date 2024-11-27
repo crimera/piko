@@ -83,7 +83,7 @@
     <string name="piko_pref_hide_live_threads">ライブスレッド</string>
     <string name="piko_pref_hide_live_threads_desc">タイムラインからライブセクションを非表示にします</string>
     <string name="piko_pref_hide_banner">バナー</string>
-    <string name="piko_pref_hide_banner_desc">「新しい投稿」バナーを非表示にします</string>
+    <string name="piko_pref_hide_banner_desc">「新しい投稿」バナー</string>
     <string name="piko_pref_hide_bmk_timeline">TLのブックマークアイコン</string>
     <string name="piko_pref_force_translate">翻訳を強制的に有効化</string>
     <string name="piko_pref_force_translate_desc">すべてのポストで翻訳を利用できるようにします</string>
