@@ -112,6 +112,7 @@
     <string name="piko_pref_customisation_sidebartabs">非表示にするサイドバーの項目</string>
     <string name="piko_pref_customisation_navbartabs">非表示にするナビゲーションバーの項目</string>
     <string name="piko_pref_customisation_inlinetabs">非表示にするインラインバーの項目</string>
+    <string name="piko_pref_customisation_exploretabs">「検索」タブ</string>
     <string name="piko_pref_customisation_reply_sorting">デフォルトの返信の並び替え</string>
     <string name="piko_pref_customisation_reply_sorting_remember">前回の選択を記憶</string>
     <string name="piko_pref_customisation_post_font_size">ポストのフォントサイズ</string>
