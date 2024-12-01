@@ -1,3 +1,9 @@
+## [1.46.0](https://github.com/crimera/piko/compare/v1.45.1...v1.46.0) (2024-12-01)
+
+### Features
+
+* **Twitter:** Added `Customize explore tabs` patch ([4be6a7f](https://github.com/crimera/piko/commit/4be6a7fe6ace42ca299d2e4bc7f9a963774f3bcd))
+
 ## [1.46.0-dev.1](https://github.com/crimera/piko/compare/v1.45.1...v1.46.0-dev.1) (2024-11-27)
 
 ### Features
