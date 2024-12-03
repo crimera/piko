@@ -41,7 +41,7 @@
         <item>@string/drawer_communities_title</item>
         <item>@string/bookmarks_title</item>
         <item>@string/drawer_lists</item>
-        <item>@string/drawer_top_articles_title</item>
+        <item>@string/news_top_articles_title</item>
         <item>@string/drawer_birdwatch_title</item>
         <item>@string/spaces_grid_tab</item>
         <item>@string/profile_followers</item>
