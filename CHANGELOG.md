@@ -1,3 +1,9 @@
+## [1.46.1](https://github.com/crimera/piko/compare/v1.46.0...v1.46.1) (2024-12-04)
+
+### Refactors
+
+* **Twitter:** Changed `Top Articles ` string ([b590695](https://github.com/crimera/piko/commit/b5906957cb8cda07a40e02008b5ad69ad6389637))
+
 ## [1.46.1-dev.1](https://github.com/crimera/piko/compare/v1.46.0...v1.46.1-dev.1) (2024-12-03)
 
 ### Refactors
