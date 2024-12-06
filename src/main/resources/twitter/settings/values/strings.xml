@@ -53,6 +53,8 @@
     <string name="piko_pref_db_del_items">Deleted items</string>
     <string name="piko_pref_hide_premium_upsell">premium upsell</string>
     <string name="piko_pref_hide_premium_upsell_desc">Removes premium upsell in home timeline</string>
+    <string name="piko_pref_top_people_search">top people in search</string>
+    <string name="piko_pref_top_people_search_desc">Removes people section after search</string>
 
     <!-- Misc Settings -->
     <string name="piko_title_misc">Misc</string>
