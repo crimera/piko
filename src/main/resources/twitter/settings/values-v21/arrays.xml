@@ -50,4 +50,12 @@
         <item>1</item>
     </string-array>
 
+    <string-array name="piko_array_search_type_ahead_val">
+        <item>users</item>
+        <item>topics</item>
+        <item>events</item>
+        <item>lists</item>
+        <item>ordered_section</item>
+    </string-array>
+
 </resources>

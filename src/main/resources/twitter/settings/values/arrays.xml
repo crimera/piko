@@ -100,4 +100,12 @@
         <item>@string/piko_native_translator_google_v2</item>
     </string-array>
 
+    <string-array name="piko_array_search_type_ahead">
+        <item>@string/piko_pref_search_type_ahead_users</item>
+        <item>@string/channel_topics_title</item>
+        <item>@string/piko_pref_search_type_ahead_events</item>
+        <item>@string/search_scope_lists</item>
+        <item>@string/piko_pref_search_type_ahead_ordered_section</item>
+    </string-array>
+
 </resources>
