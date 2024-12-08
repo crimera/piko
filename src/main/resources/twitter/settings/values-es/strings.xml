@@ -119,8 +119,10 @@
     <string name="piko_pref_customisation_sidebartabs">Elementos de la barra lateral a ocultar</string>
     <string name="piko_pref_customisation_navbartabs">Elementos de la barra de navegación a ocultar</string>
     <string name="piko_pref_customisation_inlinetabs">Elementos de la barra en línea a ocultar</string>
+    <string name="piko_pref_customisation_exploretabs">Pestañas de explorar</string>
     <string name="piko_pref_customisation_reply_sorting">Filtro de clasificación de respuestas por defecto</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Previamente seleccionado</string>
+    <string name="piko_pref_customisation_post_font_size">Tamaño de fuente de las publicaciones</string>
 
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Respaldo y restauración</string>
@@ -147,12 +149,12 @@
     <string name="piko_single_page_settings_desc">Ver todas las configuraciones en una sola página</string>
     
     <!-- Traductor -->
-<string name="piko_native_translator">Habilitar traducción nativa de publicaciones</string>
-<string name="piko_native_translator_provider">Proveedores de traducción</string>
-<string name="piko_native_translator_to_lang">Traducir a</string>
-<string name="piko_native_translator_zero_text">No se encontró texto para traducir</string>
-<string name="piko_native_translator_google">Traductor de Google</string>
-<string name="piko_native_translator_google_v2">Traductor de Google V2</string>
+    <string name="piko_native_translator">Habilitar traducción nativa de publicaciones</string>
+    <string name="piko_native_translator_provider">Proveedores de traducción</string>
+    <string name="piko_native_translator_to_lang">Traducir a</string>
+    <string name="piko_native_translator_zero_text">No se encontró texto para traducir</string>
+    <string name="piko_native_translator_google">Traductor de Google</string>
+    <string name="piko_native_translator_google_v2">Traductor de Google V2</string>
 
     <!-- Extra -->
     <string name="piko_title_piko_integrations">Integraciones Piko</string>
