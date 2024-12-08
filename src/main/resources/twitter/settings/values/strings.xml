@@ -113,16 +113,16 @@
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Customization</string>
-    <string name="piko_pref_customisation_profiletabs">Profile tabs to hide</string>
-    <string name="piko_pref_customisation_timelinetabs">Timeline tabs</string>
+    <string name="piko_pref_customisation_profiletabs">Customize profile tabs</string>
+    <string name="piko_pref_customisation_timelinetabs">Customize timeline tabs</string>
     <string name="piko_pref_customisation_timelinetabs_foryou">Remove \"For You\"</string>
     <string name="piko_pref_customisation_timelinetabs_following">Remove \"Following\"</string>
     <string name="piko_pref_customisation_timelinetabs_both">Show both</string>
-    <string name="piko_pref_customisation_sidebartabs">Side bar items to hide</string>
-    <string name="piko_pref_customisation_navbartabs">Navigation bar items to hide</string>
-    <string name="piko_pref_customisation_inlinetabs">Inline bar items to hide</string>
-    <string name="piko_pref_customisation_exploretabs">Explore tabs</string>
-    <string name="piko_pref_customisation_searchtabs">Search tabs</string>
+    <string name="piko_pref_customisation_sidebartabs">Customize side bar items</string>
+    <string name="piko_pref_customisation_navbartabs">Customize navigation bar items</string>
+    <string name="piko_pref_customisation_inlinetabs">Customize inline bar items</string>
+    <string name="piko_pref_customisation_exploretabs">Customize explore tabs</string>
+    <string name="piko_pref_customisation_searchtabs">Customize search tabs</string>
     <string name="piko_pref_customisation_reply_sorting">Default reply sorting filter</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Previously selected</string>
     <string name="piko_pref_customisation_post_font_size">Post font size</string>
