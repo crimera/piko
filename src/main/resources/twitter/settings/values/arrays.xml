@@ -100,4 +100,22 @@
         <item>@string/piko_native_translator_google_v2</item>
     </string-array>
 
+    <string-array name="piko_array_search_type_ahead">
+        <item>@string/piko_pref_search_type_ahead_users</item>
+        <item>@string/channel_topics_title</item>
+        <item>@string/piko_pref_search_type_ahead_events</item>
+        <item>@string/search_scope_lists</item>
+        <item>@string/piko_pref_search_type_ahead_ordered_section</item>
+    </string-array>
+
+    <string-array name="piko_array_searchtabs">
+        <item>@string/search_scope_top</item>
+        <item>@string/search_scope_latest</item>
+        <item>@string/subtitle_people</item>
+        <item>@string/search_filter_videos</item>
+        <item>@string/search_filter_photos</item>
+        <item>@string/search_filter_media</item>
+        <item>@string/search_scope_lists</item>
+    </string-array>
+
 </resources>
