@@ -53,6 +53,8 @@
     <string name="piko_pref_db_del_items">Elementos eliminados</string>
     <string name="piko_pref_hide_premium_upsell">Venta de premium</string>
     <string name="piko_pref_hide_premium_upsell_desc">Elimina la venta de premium en la línea de tiempo</string>
+    <string name="piko_pref_top_people_search">personas destacadas en búsqueda</string>
+    <string name="piko_pref_top_people_search_desc">Elimina la sección de personas después de una búsqueda</string>
 
     <!-- Misc Settings -->
     <string name="piko_title_misc">Misceláneo</string>
@@ -120,9 +122,11 @@
     <string name="piko_pref_customisation_navbartabs">Elementos de la barra de navegación a ocultar</string>
     <string name="piko_pref_customisation_inlinetabs">Elementos de la barra en línea a ocultar</string>
     <string name="piko_pref_customisation_exploretabs">Pestañas de explorar</string>
+    <string name="piko_pref_customisation_searchtabs">Pestañas de búsqueda para ocultar</string>
     <string name="piko_pref_customisation_reply_sorting">Filtro de clasificación de respuestas por defecto</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Previamente seleccionado</string>
     <string name="piko_pref_customisation_post_font_size">Tamaño de fuente de las publicaciones</string>
+    <string name="piko_pref_customisation_search_type_ahead">Sugerencias de búsqueda para ocultar</string>
 
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Respaldo y restauración</string>
@@ -155,6 +159,11 @@
     <string name="piko_native_translator_zero_text">No se encontró texto para traducir</string>
     <string name="piko_native_translator_google">Traductor de Google</string>
     <string name="piko_native_translator_google_v2">Traductor de Google V2</string>
+
+    <!-- Búsqueda -->
+    <string name="piko_pref_search_type_ahead_users">Usuarios</string>
+    <string name="piko_pref_search_type_ahead_events">Eventos</string>
+    <string name="piko_pref_search_type_ahead_ordered_section">Sección ordenada</string>
 
     <!-- Extra -->
     <string name="piko_title_piko_integrations">Integraciones Piko</string>
