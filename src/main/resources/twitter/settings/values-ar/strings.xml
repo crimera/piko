@@ -53,6 +53,8 @@
     <string name="piko_pref_db_del_items">عنصر محذوف</string>
     <string name="piko_pref_hide_premium_upsell">Premium ترقية</string>
     <string name="piko_pref_hide_premium_upsell_desc">يزيل ترقية Premium في الخط الزمني للصفحة الرئيسية</string>
+    <string name="piko_pref_top_people_search">أعلى الأشخاص في البحث</string>
+    <string name="piko_pref_top_people_search_desc">إزالة قسم الأشخاص بعد البحث</string>
 
     <!-- إعدادات متنوعة -->
     <string name="piko_title_misc">إعدادات متنوعة</string>
@@ -111,18 +113,20 @@
 
     <!-- إعدادات التخصيص -->
     <string name="piko_title_customisation">التخصيص</string>
-    <string name="piko_pref_customisation_profiletabs">إخفاء علامات تبويب الملف الشخصي</string>
-    <string name="piko_pref_customisation_timelinetabs">علامات تبويب الخط الزمني</string>
+    <string name="piko_pref_customisation_profiletabs">علامات تبويب الملف الشخصي المراد إخفاؤها</string>
+    <string name="piko_pref_customisation_timelinetabs">علامات تبويب الخط الزمني المراد إخفاؤها</string>
     <string name="piko_pref_customisation_timelinetabs_foryou">إخفاء \"لك\"</string>
     <string name="piko_pref_customisation_timelinetabs_following">إخفاء \"متابعَة\"</string>
     <string name="piko_pref_customisation_timelinetabs_both">عرض كليهما</string>
     <string name="piko_pref_customisation_sidebartabs">عناصر الشريط الجانبي المراد إخفاؤها</string>
     <string name="piko_pref_customisation_navbartabs">عناصر شريط التنقل المراد إخفاؤها</string>
     <string name="piko_pref_customisation_inlinetabs">عناصر الشريط المضمنة المراد إخفاؤها</string>
-    <string name="piko_pref_customisation_exploretabs">علامات تبويب استكشاف</string>
+    <string name="piko_pref_customisation_exploretabs">علامات تبويب استكشاف المراد إخفاؤها</string>
+    <string name="piko_pref_customisation_searchtabs">علامات تبويب البحث المراد إخفاؤها</string>
     <string name="piko_pref_customisation_reply_sorting">مرشح فرز الردود الافتراضية</string>
     <string name="piko_pref_customisation_reply_sorting_remember">تم اختياره مسبقًا</string>
     <string name="piko_pref_customisation_post_font_size">حجم خط المنشور</string>
+    <string name="piko_pref_customisation_search_type_ahead">اقتراحات البحث المراد إخفاؤها</string>
 
     <!-- النسخ الاحتياطي والإستعادة -->
     <string name="piko_title_backup">النسخ الاحتياطي والإستعادة</string>
@@ -154,5 +158,9 @@
     <string name="piko_native_translator_zero_text">لم يتم العثور على نص للترجمة</string>
     <string name="piko_native_translator_google">Google مترجم</string>
     <string name="piko_native_translator_google_v2">مترجم Google V2</string>
+
+    <string name="piko_pref_search_type_ahead_users">المستخدمون</string>
+    <string name="piko_pref_search_type_ahead_events">الأحداث</string>
+    <string name="piko_pref_search_type_ahead_ordered_section">القسم المطلوب</string>
 
 </resources>
