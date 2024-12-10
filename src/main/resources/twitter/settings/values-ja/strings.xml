@@ -9,7 +9,7 @@
     <string name="piko_pref_undo_posts_btn">ポストの取り消しの設定</string>
     <string name="piko_pref_icon_n_navbar_btn">アプリアイコンとナビゲーションバーの設定</string>
     <string name="piko_pref_enable_force_pip">自動PiPモード</string>
-    <string name="piko_pref_enable_force_pip_desc">アプリを閉じたときに自動でPiPモードを有効化します</string>
+    <string name="piko_pref_enable_force_pip_desc">アプリを閉じた際に自動的にPiPモードを有効化します</string>
     <!-- Download Settings -->
     <string name="piko_title_download">ダウンロード</string>
     <string name="piko_pref_video_download">動画のダウンロード</string>
@@ -50,6 +50,8 @@
     <string name="piko_pref_db_del_items">削除した項目</string>
     <string name="piko_pref_hide_premium_upsell">プレミアムの広告</string>
     <string name="piko_pref_hide_premium_upsell_desc">タイムラインからプレミアムの広告を削除します</string>
+    <string name="piko_pref_top_people_search">検索結果からユーザー欄を非表示</string>
+    <string name="piko_pref_top_people_search_desc">検索結果の1番上にある「ユーザー」欄を非表示にします。</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">その他</string>
     <string name="piko_pref_chirp_font">Chirpフォント</string>
@@ -88,7 +90,7 @@
     <string name="piko_pref_force_translate">翻訳を強制的に有効化</string>
     <string name="piko_pref_force_translate_desc">すべてのポストで翻訳を利用できるようにします</string>
     <string name="piko_pref_hide_quick_promote">プロモーションボタン</string>
-    <string name="piko_pref_hide_quick_promote_desc">自身のポストの「プロモーションする」ボタンを削除します</string>
+    <string name="piko_pref_hide_quick_promote_desc">自身のポストから「プロモーションする」ボタンを削除します</string>
     <string name="piko_pref_show_poll_result">投票結果を表示</string>
     <string name="piko_pref_show_poll_result_desc">投票せずに投票結果を表示できるようにします</string>
     <string name="piko_pref_hide_immersive_player">イマーシブプレーヤー</string>
@@ -104,18 +106,20 @@
     <string name="piko_pref_hide_social_proof_desc">プロフィールの下部にある「○○さんにフォローされています」を非表示にします</string>
     <!-- Customization Settings -->
     <string name="piko_title_customisation">カスタマイズ</string>
-    <string name="piko_pref_customisation_profiletabs">非表示にするプロフィールタブ</string>
-    <string name="piko_pref_customisation_timelinetabs">タイムラインのタブ</string>
+    <string name="piko_pref_customisation_profiletabs">プロフィールタブから非表示にする項目</string>
+    <string name="piko_pref_customisation_timelinetabs">タイムラインタブから非表示にする項目</string>
     <string name="piko_pref_customisation_timelinetabs_foryou">「おすすめ」タブを削除</string>
     <string name="piko_pref_customisation_timelinetabs_following">「フォロー中」タブを削除</string>
     <string name="piko_pref_customisation_timelinetabs_both">両方とも表示</string>
-    <string name="piko_pref_customisation_sidebartabs">非表示にするサイドバーの項目</string>
-    <string name="piko_pref_customisation_navbartabs">非表示にするナビゲーションバーの項目</string>
-    <string name="piko_pref_customisation_inlinetabs">非表示にするインラインバーの項目</string>
-    <string name="piko_pref_customisation_exploretabs">[話題を検索] タブ</string>
+    <string name="piko_pref_customisation_sidebartabs">サイドバーから非表示にする項目</string>
+    <string name="piko_pref_customisation_navbartabs">ナビゲーションバーから非表示にする項目</string>
+    <string name="piko_pref_customisation_inlinetabs">インラインバーから非表示にする項目</string>
+    <string name="piko_pref_customisation_exploretabs">[話題を検索]タブから非表示にする項目</string>
+    <string name="piko_pref_customisation_searchtabs">検索結果のタブから非表示にする項目</string>
     <string name="piko_pref_customisation_reply_sorting">デフォルトの返信の並び替え</string>
     <string name="piko_pref_customisation_reply_sorting_remember">前回の選択を記憶</string>
     <string name="piko_pref_customisation_post_font_size">ポストのフォントサイズ</string>
+    <string name="piko_pref_customisation_search_type_ahead">検索候補から非表示にする項目</string>
     <!-- Backup and Restore -->
     <string name="piko_title_backup">バックアップと復元</string>
     <string name="piko_pref_export">エクスポート: %s</string>
@@ -144,4 +148,7 @@
     <string name="piko_native_translator_zero_text">翻訳するテキストが見つかりません</string>
     <string name="piko_native_translator_google">Google翻訳</string>
     <string name="piko_native_translator_google_v2">Google翻訳 V2</string>
+    <string name="piko_pref_search_type_ahead_users">ユーザー</string>
+    <string name="piko_pref_search_type_ahead_events">イベント</string>
+    <string name="piko_pref_search_type_ahead_ordered_section">並び替え</string>
 </resources>
