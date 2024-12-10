@@ -51,7 +51,7 @@
     <string name="piko_pref_hide_premium_upsell">プレミアムの広告</string>
     <string name="piko_pref_hide_premium_upsell_desc">タイムラインからプレミアムの広告を削除します</string>
     <string name="piko_pref_top_people_search">検索結果からユーザー欄を非表示</string>
-    <string name="piko_pref_top_people_search_desc">検索結果の1番上にある「ユーザー」欄を非表示にします。</string>
+    <string name="piko_pref_top_people_search_desc">検索結果の1番上にある「ユーザー」欄を非表示にします</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">その他</string>
     <string name="piko_pref_chirp_font">Chirpフォント</string>
