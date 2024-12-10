@@ -33,9 +33,9 @@
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモーションポスト</string>
     <string name="piko_pref_hide_g_ads">Google広告</string>
-    <string name="piko_pref_hide_main_event">メイン(「話題を検索」タブ)</string>
-    <string name="piko_pref_hide_superhero_event">スーパーヒーロー(「話題を検索」タブ)</string>
-    <string name="piko_pref_hide_videos_for_you">おすすめ動画(「話題を検索」タブ)</string>
+    <string name="piko_pref_hide_main_event">メイン([話題を検索] タブ)</string>
+    <string name="piko_pref_hide_superhero_event">スーパーヒーロー([話題を検索] タブ)</string>
+    <string name="piko_pref_hide_videos_for_you">おすすめ動画([話題を検索] タブ)</string>
     <string name="piko_pref_wtf_section">「Who to follow」</string>
     <string name="piko_pref_cts_section">「おすすめクリエイター」</string>
     <string name="piko_pref_ctj_section">「新しいコミュニティを見つける」</string>
@@ -112,7 +112,7 @@
     <string name="piko_pref_customisation_sidebartabs">非表示にするサイドバーの項目</string>
     <string name="piko_pref_customisation_navbartabs">非表示にするナビゲーションバーの項目</string>
     <string name="piko_pref_customisation_inlinetabs">非表示にするインラインバーの項目</string>
-    <string name="piko_pref_customisation_exploretabs">「話題を検索」タブ</string>
+    <string name="piko_pref_customisation_exploretabs">[話題を検索] タブ</string>
     <string name="piko_pref_customisation_reply_sorting">デフォルトの返信の並び替え</string>
     <string name="piko_pref_customisation_reply_sorting_remember">前回の選択を記憶</string>
     <string name="piko_pref_customisation_post_font_size">ポストのフォントサイズ</string>
