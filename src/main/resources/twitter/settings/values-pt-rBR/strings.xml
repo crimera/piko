@@ -2,16 +2,18 @@
 <resources>
     <string name="piko_title_settings">Configurações Piko</string>
 	
+    <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">modo leitor</string>
-    <string name="piko_pref_reader_mode_desc">o "modo leitor" em threads longos</string>
-    <string name="piko_pref_undo_posts">Ativar desfazer posts</string>
-    <string name="piko_pref_undo_posts_desc">Permite desfazer posts antes de postar</string>
+    <string name="piko_pref_reader_mode_desc">Ativa o "modo leitor" em threads longos</string>
+    <string name="piko_pref_undo_posts">desfazer posts</string>
+    <string name="piko_pref_undo_posts_desc">Ativa a capacidade de desfazer postagens antes de postar</string>
     <string name="piko_pref_undo_posts_btn">Configurações de desfazer posts</string>
     <string name="piko_pref_icon_n_navbar_btn">Configurações de personalização do ícone do aplicativo e da barra de navegação</string>
     <string name="piko_pref_enable_force_pip">modo PiP automáticamente</string>
     <string name="piko_pref_enable_force_pip_desc">Ativa o modo PiP quando você fecha o aplicativo</string>
 
+    <!-- Download Settings -->
     <string name="piko_title_download">Download</string>
     <string name="piko_pref_video_download">download de vídeo</string>
     <string name="piko_pref_download">Alterar diretório de download</string>
@@ -26,11 +28,13 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">Copiar link de mídia</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Compartilhar link de mídia</string>
     
+    <!-- Downloader Options -->
     <string name="piko_title_native_downloader">Downloader nativo</string>
     <string name="piko_pref_native_downloader_alert_title">Baixar mídia</string>
     <string name="piko_pref_native_downloader_download_all">Baixar tudo</string>
     <string name="piko_pref_native_downloader_no_media">Nenhuma mídia encontrada</string>
-
+   
+    <!-- Ads Settings -->
     <string name="piko_title_ads">Anúncios</string>
     <string name="piko_pref_hide_promoted_posts">Posts promovidos</string>
     <string name="piko_pref_hide_g_ads">Anúncios do Google</string>
@@ -51,7 +55,10 @@
     <string name="piko_pref_db_del_items">Itens deletados</string>
     <string name="piko_pref_hide_premium_upsell">premium upsell</string>
     <string name="piko_pref_hide_premium_upsell_desc">Remove upsell premium na linha do tempo inicial</string>
+    <string name="piko_pref_top_people_search">principais pessoas na pesquisa</string>
+    <string name="piko_pref_top_people_search_desc">Remove a seção de pessoas após a pesquisa</string>
 
+    <!-- Misc Settings -->
     <string name="piko_title_misc">Diversos</string>
     <string name="piko_pref_chirp_font">fonte chirp</string>
     <string name="piko_pref_hide_fab">botão de ação flutuante</string>
@@ -73,12 +80,14 @@
     <string name="piko_pref_quick_settings">Ativar configurações rápidas</string>
     <string name="piko_pref_quick_settings_summary">Adiciona um botão de configurações rápidas na barra lateral</string>
     
+    <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature flags</string>
     <string name="piko_pref_feature_flags">Adicionar feature flags</string>
     <string name="piko_pref_edit_flag_title">Editar flag</string>
     <string name="piko_pref_add_flag_title">Adicionar flag</string>
     <string name="piko_pref_search_flags">Buscar flags</string>
 
+    <!-- Timeline Settings -->
     <string name="piko_title_timeline">Linha do tempo</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Desativar rolagem automática da linha do tempo na inicialização</string>
     <string name="piko_pref_hide_live_threads">tópicos ao vivo</string>
@@ -99,19 +108,29 @@
     <string name="piko_pref_hide_hidden_replies">respostas ocultas</string>
     <string name="piko_pref_force_hd">forçar vídeos HD</string>
     <string name="piko_pref_force_hd_desc">Os vídeos serão reproduzidos sempre na mais alta qualidade</string>
+    <string name="piko_pref_hide_nudge_button">Ocultar botão de ação nas postagens</string>
+    <string name="piko_pref_hide_nudge_button_desc">Oculta os botões seguir/inscrever-se/seguir de volta nas postagens</string>
+    <string name="piko_pref_hide_social_proof">Ocultar \"Seguido por\" no perfil </string>
+    <string name="piko_pref_hide_social_proof_desc">Oculta o \"Seguido por\" sob o perfil</string>
 
+    <!-- Customization Settings -->
     <string name="piko_title_customisation">Customização</string>
-    <string name="piko_pref_customisation_profiletabs">Guias do perfil para ocultar</string>
-    <string name="piko_pref_customisation_timelinetabs">Guias da linha do tempo</string>
+    <string name="piko_pref_customisation_profiletabs">Abas do perfil para ocultar</string>
+    <string name="piko_pref_customisation_timelinetabs">Abas da linha do tempo</string>
     <string name="piko_pref_customisation_timelinetabs_foryou">Remover \"Para você\"</string>
     <string name="piko_pref_customisation_timelinetabs_following">Remover \"Seguindo\"</string>
     <string name="piko_pref_customisation_timelinetabs_both">Exibir ambos</string>
     <string name="piko_pref_customisation_sidebartabs">Itens da barra lateral para ocultar</string>
     <string name="piko_pref_customisation_navbartabs">Itens da barra de navegação para ocultar</string>
     <string name="piko_pref_customisation_inlinetabs">Itens da barra embutida para ocultar</string>
+    <string name="piko_pref_customisation_exploretabs">Abas do explorar para ocultar</string>
+    <string name="piko_pref_customisation_searchtabs">Abas de pesquisa para ocultar</string>
     <string name="piko_pref_customisation_reply_sorting">Filtro de classificação de resposta padrão</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Selecionado anteriormente</string>
+    <string name="piko_pref_customisation_post_font_size">Tamanho da fonte da postagem</string>
+    <string name="piko_pref_customisation_search_type_ahead">Sugestões de pesquisa para ocultar</string>
 
+    <!-- Backup and Restore -->
     <string name="piko_title_backup">Backup e restauração</string>
     <string name="piko_pref_export">Exportar %s</string>
     <string name="piko_pref_import">Importar %s</string>
@@ -121,6 +140,7 @@
     <string name="piko_pref_export_no_uri">Erro: Nenhum destino fornecido</string>
     <string name="piko_pref_import_no_uri">Erro: Nenhum arquivo fornecido</string>
 
+    <!-- About -->
     <string name="piko_title_about">Sobre</string>
     <string name="piko_pref_app_version">Versão do aplicativo</string>
     <string name="piko_pref_patch_info">Informações do patch</string>
@@ -133,5 +153,16 @@
     <string name="piko_pref_enable">Ativar %s</string>
     <string name="piko_single_page_settings">Página de configurações única</string>
     <string name="piko_single_page_settings_desc">Ver configurações em uma única página</string>
+    
+    <string name="piko_native_translator">Ativar tradução de postagem nativa</string>
+    <string name="piko_native_translator_provider">Provedores de serviços de tradução</string>
+    <string name="piko_native_translator_to_lang">Traduzir para</string>
+    <string name="piko_native_translator_zero_text">Nenhum texto encontrado para traduzir</string>
+    <string name="piko_native_translator_google">Google tradutor</string>
+    <string name="piko_native_translator_google_v2">Google tradutor V2</string>
+
+    <string name="piko_pref_search_type_ahead_users">Usuários</string>
+    <string name="piko_pref_search_type_ahead_events">Eventos</string>
+    <string name="piko_pref_search_type_ahead_ordered_section">Seção ordenada</string>
 
 </resources>
