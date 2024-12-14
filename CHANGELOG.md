@@ -1,3 +1,16 @@
+## [1.47.0](https://github.com/crimera/piko/compare/v1.46.1...v1.47.0) (2024-12-14)
+
+### Features
+
+* **Twitter:** Added `Customize search suggestions` patch ([aaca565](https://github.com/crimera/piko/commit/aaca565c650d6cf4b2cbb8abf2e206efe9983cb1))
+* **Twitter:** Added `Customize search tab items` patch ([9edc97a](https://github.com/crimera/piko/commit/9edc97a89e61f28a5cd9a419d167a6c51a1a9816))
+* **Twitter:** Added `Remove top people in search` patch ([95b5ef9](https://github.com/crimera/piko/commit/95b5ef902e6f595093b2304e5b2a8189f273389c))
+
+### Refactors
+
+* **Twitter:** Strings in 'Customization' ([c52c2c0](https://github.com/crimera/piko/commit/c52c2c01948bdea5593636a99502d8b5c6c41dca))
+* **Twitter:** Strings in 'Customization' ([a75221b](https://github.com/crimera/piko/commit/a75221b80c1d3223b88890a95ca1610432defbe2))
+
 ## [1.47.0-dev.1](https://github.com/crimera/piko/compare/v1.46.1...v1.47.0-dev.1) (2024-12-09)
 
 ### Features
