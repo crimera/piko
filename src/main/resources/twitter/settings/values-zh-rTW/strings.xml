@@ -7,7 +7,7 @@
     <string name="piko_pref_reader_mode">閱讀模式</string>
     <string name="piko_pref_reader_mode_desc">在長推文開啟「閱讀模式」</string>
     <string name="piko_pref_undo_posts">推文收回</string>
-    <string name="piko_pref_undo_posts_desc">開啟在推文發布之前收回推文的能力</string>
+    <string name="piko_pref_undo_posts_desc">開啟推文在發布前可以收回功能</string>
     <string name="piko_pref_undo_posts_btn">推文收回設定</string>
     <string name="piko_pref_icon_n_navbar_btn">應用程式圖示和導航欄自訂設定</string>
     <string name="piko_pref_enable_force_pip">子母畫面</string>
