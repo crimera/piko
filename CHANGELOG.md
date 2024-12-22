@@ -1,3 +1,9 @@
+## [1.47.1](https://github.com/crimera/piko/compare/v1.47.0...v1.47.1) (2024-12-22)
+
+### Bug Fixes
+
+* Improve getUsername fingerprint ([af617af](https://github.com/crimera/piko/commit/af617af523bfa7df00a232a51364ea9e8ea4d34f))
+
 ## [1.47.1-dev.1](https://github.com/crimera/piko/compare/v1.47.0...v1.47.1-dev.1) (2024-12-22)
 
 ### Bug Fixes
