@@ -67,4 +67,20 @@
         <item>7</item>
         <item>13</item>
     </string-array>
+
+    <string-array name="piko_array_native_download_filename">
+        <item>username_tweetid</item>
+        <item>name_tweetid</item>
+        <item>userid_tweetid</item>
+        <item>tweetid</item>
+        <item>Current timestamp</item>
+    </string-array>
+
+    <string-array name="piko_array_native_download_filename_val">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
 </resources>

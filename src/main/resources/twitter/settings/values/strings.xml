@@ -33,6 +33,7 @@
     <string name="piko_pref_native_downloader_alert_title">Download media</string>
     <string name="piko_pref_native_downloader_download_all">Download all</string>
     <string name="piko_pref_native_downloader_no_media">No media found</string>
+    <string name="piko_pref_native_downloader_filename_title">Save filename pattern</string>
 
     <string name="piko_title_native_translator">Native post translation</string>
     <string name="piko_native_translator_toggle">Enable native post translation</string>
