@@ -1,3 +1,10 @@
+## [1.48.0-dev.1](https://github.com/crimera/piko/compare/v1.47.1-dev.1...v1.48.0-dev.1) (2024-12-22)
+
+### Features
+
+* **Translations:** Updated Traditional Chinese string-zh-rCN.xml ([6cc2373](https://github.com/crimera/piko/commit/6cc2373e417a1ed386a2682f970662e367033b43))
+* **Translations:** Updated Traditional Chinese string-zh-rTW.xml ([6787c28](https://github.com/crimera/piko/commit/6787c28318762382d73f1eb8c6ad9abc4b2ee2e6))
+
 ## [1.47.1-dev.1](https://github.com/crimera/piko/compare/v1.47.0...v1.47.1-dev.1) (2024-12-22)
 
 ### Bug Fixes
