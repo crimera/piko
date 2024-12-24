@@ -26,11 +26,22 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">Copy media link</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Share media link</string>
 
-    <!-- Downloader Options -->
+    <!-- Native -->
+    <string name="piko_title_native">Native features</string>
     <string name="piko_title_native_downloader">Native downloader</string>
+    <string name="piko_title_native_downloader_toggle">Enable native downloader</string>
     <string name="piko_pref_native_downloader_alert_title">Download media</string>
     <string name="piko_pref_native_downloader_download_all">Download all</string>
     <string name="piko_pref_native_downloader_no_media">No media found</string>
+    <string name="piko_pref_native_downloader_filename_title">Save filename pattern</string>
+
+    <string name="piko_title_native_translator">Native post translation</string>
+    <string name="piko_native_translator_toggle">Enable native post translation</string>
+    <string name="piko_native_translator_provider">Translation providers</string>
+    <string name="piko_native_translator_to_lang">Translate to</string>
+    <string name="piko_native_translator_zero_text">No text found to translate</string>
+    <string name="piko_native_translator_google">Google translator</string>
+    <string name="piko_native_translator_google_v2">Google translator V2</string>
 
     <!-- Ads Settings -->
     <string name="piko_title_ads">Ads</string>
@@ -151,13 +162,6 @@
     <string name="piko_pref_enable">Enable %s</string>
     <string name="piko_single_page_settings">Single settings page</string>
     <string name="piko_single_page_settings_desc">View settings in a single page</string>
-
-    <string name="piko_native_translator">Enable native post translation</string>
-    <string name="piko_native_translator_provider">Translation providers</string>
-    <string name="piko_native_translator_to_lang">Translate to</string>
-    <string name="piko_native_translator_zero_text">No text found to translate</string>
-    <string name="piko_native_translator_google">Google translator</string>
-    <string name="piko_native_translator_google_v2">Google translator V2</string>
 
     <string name="piko_pref_search_type_ahead_users">Users</string>
     <string name="piko_pref_search_type_ahead_events">Events</string>
