@@ -1,3 +1,10 @@
+## [1.48.0-dev.2](https://github.com/crimera/piko/compare/v1.48.0-dev.1...v1.48.0-dev.2) (2024-12-24)
+
+### Refactors
+
+* **Twitter:** Added 'Native features' section ([12d2bda](https://github.com/crimera/piko/commit/12d2bdaafd111eee81f22bdafa306c3493754c80))
+* **Twitter:** Added Native download filename customization ([99a10b1](https://github.com/crimera/piko/commit/99a10b1615ffa3fb72df0ad283255e9c837a012f))
+
 ## [1.48.0-dev.1](https://github.com/crimera/piko/compare/v1.47.1-dev.1...v1.48.0-dev.1) (2024-12-22)
 
 ### Features
