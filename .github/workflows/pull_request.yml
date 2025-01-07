@@ -6,6 +6,9 @@ on:
       - dev
   workflow_dispatch:
 
+permissions:
+  pull-requests: write
+
 env:
   TITLE: 'chore: Merge branch `${{ github.head_ref || github.ref_name }}` to `main`'
   BODY: 'This pull request will `${{ github.head_ref || github.ref_name }}` to `main`.'
