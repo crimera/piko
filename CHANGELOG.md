@@ -1,3 +1,15 @@
+## [1.48.0](https://github.com/crimera/piko/compare/v1.47.1...v1.48.0) (2025-01-07)
+
+### Features
+
+* **Translations:** Updated Traditional Chinese string-zh-rCN.xml ([6cc2373](https://github.com/crimera/piko/commit/6cc2373e417a1ed386a2682f970662e367033b43))
+* **Translations:** Updated Traditional Chinese string-zh-rTW.xml ([6787c28](https://github.com/crimera/piko/commit/6787c28318762382d73f1eb8c6ad9abc4b2ee2e6))
+
+### Refactors
+
+* **Twitter:** Added 'Native features' section ([12d2bda](https://github.com/crimera/piko/commit/12d2bdaafd111eee81f22bdafa306c3493754c80))
+* **Twitter:** Added Native download filename customization ([99a10b1](https://github.com/crimera/piko/commit/99a10b1615ffa3fb72df0ad283255e9c837a012f))
+
 ## [1.48.0-dev.2](https://github.com/crimera/piko/compare/v1.48.0-dev.1...v1.48.0-dev.2) (2024-12-24)
 
 ### Refactors
