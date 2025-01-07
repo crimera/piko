@@ -10,6 +10,11 @@ on:
     branches:
       - main
       - dev
+      
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
   release:
@@ -49,12 +54,12 @@ jobs:
 
       - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.REPOSITORY_PUSH_ACCESS }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm exec semantic-release
 
       - name: Run apk build
         run: |          
           curl -X POST https://api.github.com/repos/crimera/piko-builds/dispatches \
           -H 'Accept: application/vnd.github+json' \
-          -H "Authorization: Bearer ${{secrets.ACCESS_TOKEN}}" \
+          -H "Authorization: Bearer ${{ secrets.ACCESS_TOKEN }}" \
           -d '{"event_type": "build"}'
