@@ -1,0 +1,431 @@
+public final class app/revanced/generator/MainKt {
+	public static synthetic fun main ([Ljava/lang/String;)V
+}
+
+public final class app/revanced/patches/shared/misc/extensions/ExtensionsHook {
+	public final fun getFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public final fun invoke (Ljava/lang/String;)V
+}
+
+public final class app/revanced/patches/shared/misc/extensions/SharedExtensionPatchKt {
+	public static final fun extensionsHook (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Lapp/revanced/patches/shared/misc/extensions/ExtensionsHook;
+	public static synthetic fun extensionsHook$default (Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lapp/revanced/patches/shared/misc/extensions/ExtensionsHook;
+	public static final fun sharedExtensionPatch ([Lapp/revanced/patches/shared/misc/extensions/ExtensionsHook;)Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/revanced/patches/shared/misc/mapping/ResourceElement {
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;J)Lapp/revanced/patches/shared/misc/mapping/ResourceElement;
+	public static synthetic fun copy$default (Lapp/revanced/patches/shared/misc/mapping/ResourceElement;Ljava/lang/String;Ljava/lang/String;JILjava/lang/Object;)Lapp/revanced/patches/shared/misc/mapping/ResourceElement;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()J
+	public final fun getName ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class app/revanced/patches/shared/misc/mapping/ResourceMappingPatchKt {
+	public static final fun get (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)J
+	public static final fun getResourceMappingPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+	public static final fun getResourceMappings ()Ljava/util/List;
+}
+
+public final class app/revanced/util/BytecodeUtilsKt {
+	public static final fun containsWideLiteralInstructionValue (Lcom/android/tools/smali/dexlib2/iface/Method;J)Z
+	public static final fun findMutableMethodOf (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableClass;Lcom/android/tools/smali/dexlib2/iface/Method;)Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;
+	public static final fun findOpcodeIndicesReversed (Lcom/android/tools/smali/dexlib2/iface/Method;Lcom/android/tools/smali/dexlib2/Opcode;)Ljava/util/List;
+	public static final fun getException (Lapp/revanced/patcher/Fingerprint;)Lapp/revanced/patcher/patch/PatchException;
+	public static final fun indexOfFirstInstruction (Lcom/android/tools/smali/dexlib2/iface/Method;ILkotlin/jvm/functions/Function1;)I
+	public static final fun indexOfFirstInstruction (Lcom/android/tools/smali/dexlib2/iface/Method;Lkotlin/jvm/functions/Function1;)I
+	public static synthetic fun indexOfFirstInstruction$default (Lcom/android/tools/smali/dexlib2/iface/Method;ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)I
+	public static final fun indexOfFirstInstructionOrThrow (Lcom/android/tools/smali/dexlib2/iface/Method;ILkotlin/jvm/functions/Function1;)I
+	public static synthetic fun indexOfFirstInstructionOrThrow$default (Lcom/android/tools/smali/dexlib2/iface/Method;ILkotlin/jvm/functions/Function1;ILjava/lang/Object;)I
+	public static final fun indexOfFirstWideLiteralInstructionValue (Lcom/android/tools/smali/dexlib2/iface/Method;J)I
+	public static final fun indexOfFirstWideLiteralInstructionValueOrThrow (Lcom/android/tools/smali/dexlib2/iface/Method;J)I
+	public static final fun indexOfIdResource (Lcom/android/tools/smali/dexlib2/iface/Method;Ljava/lang/String;)I
+	public static final fun indexOfIdResourceOrThrow (Lcom/android/tools/smali/dexlib2/iface/Method;Ljava/lang/String;)I
+	public static final fun injectHideViewCall (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;IILjava/lang/String;Ljava/lang/String;)V
+	public static final fun literal (Lapp/revanced/patcher/FingerprintBuilder;Lkotlin/jvm/functions/Function0;)V
+	public static final fun matchOrThrow (Lapp/revanced/patcher/Fingerprint;)Lapp/revanced/patcher/Match;
+	public static final fun returnEarly (Lapp/revanced/patcher/Fingerprint;Z)V
+	public static final fun returnEarly (Ljava/lang/Iterable;Z)V
+	public static final fun returnEarly (Ljava/util/List;Z)V
+	public static synthetic fun returnEarly$default (Lapp/revanced/patcher/Fingerprint;ZILjava/lang/Object;)V
+	public static synthetic fun returnEarly$default (Ljava/lang/Iterable;ZILjava/lang/Object;)V
+	public static synthetic fun returnEarly$default (Ljava/util/List;ZILjava/lang/Object;)V
+	public static final fun transformMethods (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableClass;Lkotlin/jvm/functions/Function1;)V
+	public static final fun traverseClassHierarchy (Lapp/revanced/patcher/patch/BytecodePatchContext;Lapp/revanced/patcher/util/proxy/mutableTypes/MutableClass;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class app/revanced/util/ResourceGroup {
+	public fun <init> (Ljava/lang/String;[Ljava/lang/String;)V
+	public final fun getResourceDirectoryName ()Ljava/lang/String;
+	public final fun getResources ()[Ljava/lang/String;
+}
+
+public final class app/revanced/util/ResourceUtilsKt {
+	public static final fun asSequence (Lorg/w3c/dom/NodeList;)Lkotlin/sequences/Sequence;
+	public static final fun childElementsSequence (Lorg/w3c/dom/Node;)Lkotlin/sequences/Sequence;
+	public static final fun copyResources (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;)V
+	public static final fun copyXmlNode (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun copyXmlNode (Ljava/lang/String;Lapp/revanced/patcher/util/Document;Lapp/revanced/patcher/util/Document;)Ljava/lang/AutoCloseable;
+	public static final fun doRecursively (Lorg/w3c/dom/Node;Lkotlin/jvm/functions/Function1;)V
+	public static final fun forEachChildElement (Lorg/w3c/dom/Node;Lkotlin/jvm/functions/Function1;)V
+	public static final fun iterateXmlNodeChildren (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class app/revanced/util/resource/ArrayResource : app/revanced/util/resource/BaseResource {
+	public static final field Companion Lapp/revanced/util/resource/ArrayResource$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public final fun getItems ()Ljava/util/List;
+	public fun serialize (Lorg/w3c/dom/Document;Lkotlin/jvm/functions/Function1;)Lorg/w3c/dom/Element;
+}
+
+public final class app/revanced/util/resource/ArrayResource$Companion {
+	public final fun fromNode (Lorg/w3c/dom/Node;)Lapp/revanced/util/resource/ArrayResource;
+}
+
+public abstract class app/revanced/util/resource/BaseResource {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getTag ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun serialize (Lorg/w3c/dom/Document;Lkotlin/jvm/functions/Function1;)Lorg/w3c/dom/Element;
+	public static synthetic fun serialize$default (Lapp/revanced/util/resource/BaseResource;Lorg/w3c/dom/Document;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/w3c/dom/Element;
+}
+
+public final class app/revanced/util/resource/StringResource : app/revanced/util/resource/BaseResource {
+	public static final field Companion Lapp/revanced/util/resource/StringResource$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getFormatted ()Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun serialize (Lorg/w3c/dom/Document;Lkotlin/jvm/functions/Function1;)Lorg/w3c/dom/Element;
+}
+
+public final class app/revanced/util/resource/StringResource$Companion {
+	public final fun fromNode (Lorg/w3c/dom/Node;)Lapp/revanced/util/resource/StringResource;
+}
+
+public final class crimera/patches/all/activity/exportall/ExportAllActivitiesPatchKt {
+	public static final fun getExportAllActivitiesPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
+public final class crimera/patches/all/appDowngrading/AppDowngradingPatchKt {
+	public static final fun getAppDowngradingPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/HideAdsKt {
+	public static final fun getHideAds ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/HideCTJKt {
+	public static final fun getHideCTJ ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/HideCTSKt {
+	public static final fun getHideCTS ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/HideDetailedPostsKt {
+	public static final fun getHideDetailedPosts ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/HideGoogleAdsKt {
+	public static final fun getHideGoogleAds ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/HideMainEventKt {
+	public static final fun getHideMainEvent ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/HidePinnedByFollowersKt {
+	public static final fun getHidePinnedByFollowers ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/HidePremiumPromptKt {
+	public static final fun getHidePremiumPrompt ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/HideRevistBmkKt {
+	public static final fun getHideRevistBmk ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/HideSuperHeroEventKt {
+	public static final fun getHideSuperHeroEvent ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/HideVideosForYouKt {
+	public static final fun getHideVideosForYou ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/HideWTFKt {
+	public static final fun getHideWTF ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/TimelineEntryHookPatchKt {
+	public static final fun getTimelineEntryHookPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/timelineEntryHook/TimelineModuleItemHookPatchKt {
+	public static final fun getTimelineModuleItemHookPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/ads/trends/HidePromotedTrendPatchKt {
+	public static final fun getHidePromotedTrendPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/featureFlag/DisableChirpFontPatchKt {
+	public static final fun getDisableChirpFontPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/featureFlag/FeatureFlagPatchKt {
+	public static final fun getFeatureFlagPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/featureFlag/FingerprintsKt {
+	public static final fun enableFeatureFlag (Lapp/revanced/patcher/Match;Ljava/lang/String;)V
+}
+
+public final class crimera/patches/twitter/featureFlag/HideBookmarkInTimelinePatchKt {
+	public static final fun getHideBookmarkInTimelinePatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/featureFlag/HideFABMenuButtonsPatchKt {
+	public static final fun getHideFABMenuButtonsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/featureFlag/HideImmersivePlayerKt {
+	public static final fun getHideImmersivePlayer ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/featureFlag/RemoveViewCountPatchKt {
+	public static final fun getRemoveViewCountPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/interaction/downloads/changedirectory/ChangeDownloadDirPatchKt {
+	public static final fun getChangeDownloadDirPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/interaction/downloads/copyMediaLink/CopyMediaLinkKt {
+	public static final fun getCopyMediaLink ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/link/browserchooser/BrowserChooserPatchKt {
+	public static final fun getBrowserChooserPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/link/cleartrackingparams/ClearTrackingParamsPatchKt {
+	public static final fun getClearTrackingParamsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/link/customsharingdomain/CustomSharingDomainPatchKt {
+	public static final fun getCustomSharingDomainPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/link/unshorten/NoShortenedUrlPatchKt {
+	public static final fun getNoShortenedUrlPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/bringbacktwitter/BringBackTwitterResourcePatchKt {
+	public static final fun getBringBackTwitterResourcePatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
+public final class crimera/patches/twitter/misc/bringbacktwitter/strings/StringsMap {
+	public static final field INSTANCE Lcrimera/patches/twitter/misc/bringbacktwitter/strings/StringsMap;
+	public final fun getReplacementMap ()Ljava/util/Map;
+}
+
+public final class crimera/patches/twitter/misc/bringbacktwitter/strings/en_rGB {
+	public static final field INSTANCE Lcrimera/patches/twitter/misc/bringbacktwitter/strings/en_rGB;
+	public final fun getValues ()Ljava/util/Map;
+}
+
+public final class crimera/patches/twitter/misc/bringbacktwitter/strings/hi {
+	public static final field INSTANCE Lcrimera/patches/twitter/misc/bringbacktwitter/strings/hi;
+	public final fun getValues ()Ljava/util/Map;
+}
+
+public final class crimera/patches/twitter/misc/bringbacktwitter/strings/pt_rBR {
+	public static final field INSTANCE Lcrimera/patches/twitter/misc/bringbacktwitter/strings/pt_rBR;
+	public final fun getValues ()Ljava/util/Map;
+}
+
+public final class crimera/patches/twitter/misc/bringbacktwitter/strings/ru {
+	public static final field INSTANCE Lcrimera/patches/twitter/misc/bringbacktwitter/strings/ru;
+	public final fun getValues ()Ljava/util/Map;
+}
+
+public final class crimera/patches/twitter/misc/bringbacktwitter/strings/tr {
+	public static final field INSTANCE Lcrimera/patches/twitter/misc/bringbacktwitter/strings/tr;
+	public final fun getValues ()Ljava/util/Map;
+}
+
+public final class crimera/patches/twitter/misc/bringbacktwitter/strings/zh_rCN {
+	public static final field INSTANCE Lcrimera/patches/twitter/misc/bringbacktwitter/strings/zh_rCN;
+	public final fun getValues ()Ljava/util/Map;
+}
+
+public final class crimera/patches/twitter/misc/bringbacktwitter/strings/zh_rTW {
+	public static final field INSTANCE Lcrimera/patches/twitter/misc/bringbacktwitter/strings/zh_rTW;
+	public final fun getValues ()Ljava/util/Map;
+}
+
+public final class crimera/patches/twitter/misc/customize/inlinebar/CustomiseInlineBarPatchKt {
+	public static final fun getCustomiseInlineBarPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/customize/navbar/CustomiseNavBarPatchKt {
+	public static final fun getCustomiseNavBarPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/customize/profiletabs/CustomiseProfileTabsPatchKt {
+	public static final fun getCustomiseProfileTabsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/customize/replySorting/DefaultReplySortingPatchKt {
+	public static final fun getDefaultReplySortingPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/customize/sidebar/CustomiseSideBarPatchKt {
+	public static final fun getCustomiseSideBarPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/customize/timelinetabs/CustomiseTimelineTabsPatchKt {
+	public static final fun getCustomiseTimelineTabsFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getCustomiseTimelineTabsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/debugMenu/DebugMenuKt {
+	public static final fun getDebugMenu ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/dynamiccolor/DynamicColorPatchKt {
+	public static final fun getDynamicColorPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
+public final class crimera/patches/twitter/misc/extensions/SharedExtensionPatchKt {
+	public static final fun getSharedExtensionPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/fab/HideFABPatchKt {
+	public static final fun getHideFABPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/nativeDownloader/NativeDownloaderPatchKt {
+	public static final fun getNativeDownloaderPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/recommendedusers/HideRecommendedUsersPatchKt {
+	public static final fun getHideRecommendedUsers ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/roundOffNumbers/RoundOffNumbersPatchKt {
+	public static final fun getRoundOffNumbersPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/selectabletext/SelectableTextPatchKt {
+	public static final fun getSelectableTextPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
+public final class crimera/patches/twitter/misc/sensitivemediasettings/ShowSensitiveMediaPatchKt {
+	public static final fun getSensitiveMediaPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/settings/FingerprintsKt {
+	public static final fun enableSettings (Lapp/revanced/patcher/Match;Ljava/lang/String;)V
+}
+
+public final class crimera/patches/twitter/misc/settings/SettingsPatchKt {
+	public static final field CUSTOMISE_DESCRIPTOR Ljava/lang/String;
+	public static final field FSTS_DESCRIPTOR Ljava/lang/String;
+	public static final field PATCHES_DESCRIPTOR Ljava/lang/String;
+	public static final field PREF_DESCRIPTOR Ljava/lang/String;
+	public static final field SSTS_DESCRIPTOR Ljava/lang/String;
+	public static final fun getSettingsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/settings/SettingsResourcePatchKt {
+	public static final fun getSettingsResourcePatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
+public final class crimera/patches/twitter/premium/customAppIcon/CustomAppIconPatchKt {
+	public static final fun getCustomiseAppIcon ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/premium/customAppIcon/RedirectBMTabKt {
+	public static final fun getRedirectBMTab ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/premium/enableForcePip/EnableForcePipPatchKt {
+	public static final fun getEnableForcePipPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/premium/readermode/EnableReaderModePatchKt {
+	public static final fun getEnableReaderModePatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/premium/undoposts/EnableUndoPostPatchKt {
+	public static final fun getEnableUndoPostPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/premium/unlockdownloads/DownloadPatchKt {
+	public static final fun getDownloadPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/banner/HideBannerPatchKt {
+	public static final fun getHideBannerPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/deleteFromDatabase/DeleteFromDatabasePatchKt {
+	public static final fun getDeleteFromDatabasePatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/disableAutoScroll/DisableAutoScrollPatchKt {
+	public static final fun getDisableAutoScrollPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/enableVidAutoAdvance/EnableVidAutoAdvancePatchKt {
+	public static final fun getEnableVidAutoAdvancePatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/hideHiddenReplies/HideHiddenRepliesPatchKt {
+	public static final fun getHideHiddenRepliesPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/live/FingerprintsKt {
+	public static final fun getHideLiveThreadsFingerprint ()Lapp/revanced/patcher/Fingerprint;
+}
+
+public final class crimera/patches/twitter/timeline/live/HideLiveThreadsPatchKt {
+	public static final fun getHideLiveThreadsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/removePremiumUpsell/RemovePremiumUpsellPatchKt {
+	public static final fun getDisablePremiumUpsellPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/showpollresults/ShowPollResultsPatchKt {
+	public static final fun getShowPollResultsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/tweetinfo/ForceTranslateKt {
+	public static final fun getForceTranslate ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/tweetinfo/HideCommunityNotesKt {
+	public static final fun getHideCommunityNotes ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/tweetinfo/HidePromoteButtonKt {
+	public static final fun getHidePromoteButton ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/tweetinfo/TweetInfoHookKt {
+	public static final fun getTweetInfoHook ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+

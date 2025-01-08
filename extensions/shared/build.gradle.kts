@@ -4,23 +4,26 @@ extension {
 
 android {
     namespace = "app.revanced.extension"
+    compileSdk = 34
+
+    defaultConfig {
+        minSdk = 24
+    }
 
     buildTypes {
         release {
             isMinifyEnabled = true
         }
     }
-
-    defaultConfig {
-        versionCode = 1
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
 dependencies {
-    compileOnly(libs.appcompat)
     compileOnly(libs.annotation)
-    compileOnly(libs.okhttp)
-    compileOnly(libs.retrofit)
+    compileOnly(libs.appcompat)
 
     compileOnly(project(":extensions:shared:stub"))
 }

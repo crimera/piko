@@ -7,7 +7,7 @@ gson = "2.11.0"
 # 8.3.0 causes java verifier error: https://github.com/ReVanced/revanced-patches/issues/2818.
 #noinspection GradleDependency
 agp = "8.2.2"
-annotation = "1.8.1"
+annotation = "1.9.1"
 appcompat = "1.7.0"
 okhttp = "5.0.0-alpha.14"
 retrofit = "2.11.0"
