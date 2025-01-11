@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Premium Settings -->
+    <string name="piko_title_premium">Premium</string>
+    <string name="piko_pref_reader_mode">режим читання</string>
+    <string name="piko_pref_reader_mode_desc">Увімкнути "режим читання" в довгих тредах</string>
+    <string name="piko_pref_undo_posts">Скасування публікацій</string>
+    <string name="piko_pref_undo_posts_desc">Дає час на скасування публікації вже після надсилання</string>
+    <string name="piko_pref_undo_posts_btn">Налаштування скасування публікацій</string>
+    <string name="piko_pref_icon_n_navbar_btn">Налаштування іконки застосунку та панелі навігації</string>
+    <string name="piko_pref_enable_force_pip">Картинка в картинці (PiP)</string>
+    <string name="piko_pref_enable_force_pip_desc">Активувати PiP при згортанні застосунку</string>
+
+    <!-- Download Settings -->
+    <string name="piko_title_download">Завантаження</string>
+    <string name="piko_pref_video_download">завантаження відео</string>
+    <string name="piko_pref_download">Змінити теку завантаження</string>
+    <string name="piko_pref_download_path">Обрати теку</string>
+    <string name="piko_pref_download_path_desc">Тека для завантаження відео</string>
+    <string name="piko_pref_download_folder">Обрати підтеку</string>
+    <string name="piko_pref_download_folder_desc">Підтека для завантаження відео([Тека]/[Підтека])</string>
+    <string name="piko_pref_download_media_link_handle">Метод завантаження</string>
+    <string name="piko_pref_download_media_link_handle_download">Зберегти на пристрій</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">Копіювати пряме посилання</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">Завжди питати</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">Копіювати посилання на медіа</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">Поширити посилання на медіа</string>
+
+    <!-- Native -->
+    <string name="piko_title_native">Нативні функції</string>
+    <string name="piko_title_native_downloader">Вбудований завантажувач</string>
+    <string name="piko_title_native_downloader_toggle">Увімкнути вбудований завантажувач</string>
+    <string name="piko_pref_native_downloader_alert_title">Завантаження медіа</string>
+    <string name="piko_pref_native_downloader_download_all">Завантажити все</string>
+    <string name="piko_pref_native_downloader_no_media">Медіа не знайдено</string>
+    <string name="piko_pref_native_downloader_filename_title">Зберегти шаблон імені файлу</string>
+
+    <string name="piko_title_native_translator">Нативний переклад дописів</string>
+    <string name="piko_native_translator_toggle">Увімкнути нативний переклад дописів</string>
+    <string name="piko_native_translator_provider">Постачальники перекладу</string>
+    <string name="piko_native_translator_to_lang">Перекласти на</string>
+    <string name="piko_native_translator_zero_text">Не знайдено тексту для перекладу</string>
+    <string name="piko_native_translator_google">Google перекладач</string>
+    <string name="piko_native_translator_google_v2">Google перекладач V2</string>
+
+    <!-- Ads Settings -->
+    <string name="piko_title_ads">Реклама</string>
+    <string name="piko_pref_hide_promoted_posts">Рекламовані дописи</string>
+    <string name="piko_pref_hide_g_ads">Google ads</string>
+    <string name="piko_pref_hide_main_event">Main event (Explore)</string>
+    <string name="piko_pref_hide_superhero_event">Superhero event (Explore)</string>
+    <string name="piko_pref_hide_videos_for_you">Відео для вас (Explore)</string>
+    <string name="piko_pref_wtf_section">Секція "Кого читати?"</string>
+    <string name="piko_pref_cts_section">Секція "Рекомендовані для вас творці"</string>
+    <string name="piko_pref_ctj_section">Секція "Пропоновані спільноти"</string>
+    <string name="piko_pref_ryb_section">"Сеція "Перегляньте свої закладки"</string>
+    <string name="piko_pref_pinned_posts_section">Секція "Закріплені пости читачів"</string>
+    <string name="piko_pref_hide_detailed_posts">Дізнавайтеся більше (в реплаях)</string>
+    <string name="piko_pref_hide_trends">Тренди для вас</string>
+    <string name="piko_pref_hide_premium_prompt">Промти повідомлень</string>
+    <string name="piko_pref_del_from_db">Видалити записи з бази даних</string>
+    <string name="piko_pref_db_not_found">База даних не знайдена</string>
+    <string name="piko_pref_db_not_open">База даних не відкрита</string>
+    <string name="piko_pref_db_del_items">Видалені елементи</string>
+    <string name="piko_pref_hide_premium_upsell">Пропонування Premium</string>
+    <string name="piko_pref_hide_premium_upsell_desc">Видаляти пропозиції придбання Premium зі стрічки</string>
+    <string name="piko_pref_top_people_search">Рекомендовані люди в пошуку</string>
+    <string name="piko_pref_top_people_search_desc">Видаляє розділ людей після пошуку</string>
+
+    <!-- Misc Settings -->
+    <string name="piko_title_misc">Інше</string>
+    <string name="piko_pref_chirp_font">шрифт chirp</string>
+    <string name="piko_pref_hide_fab">плаваюча кнопка</string>
+    <string name="piko_pref_hide_fab_menu">меню плаваючої кнопки</string>
+    <string name="piko_pref_rec_users">пропоновані користувачі</string>
+    <string name="piko_pref_hide_view_count">лічильник переглядів</string>
+    <string name="piko_pref_custom_share_domain">Користувацький домен поширення</string>
+    <string name="piko_pref_custom_share_domain_desc">Вибір домену при поширенні допису</string>
+    <string name="piko_pref_browser_chooser">Відкрити з допомогою...</string>
+    <string name="piko_pref_browser_chooser_desc">Відкривати посилання за допомогою вибору браузера замість використання вбудованого браузера</string>
+    <string name="piko_pref_show_sensitive_media">Відображати делікатний контент</string>
+    <string name="piko_pref_selectable_text">Увімк. можливість виділення тексту</string>
+    <string name="piko_pref_clear_tracking_params">Видалити параметри відстеження</string>
+    <string name="piko_pref_unshorten_link">Вимкнути скорочення посилань</string>
+    <string name="piko_pref_unshorten_link_desc">Не використовувати t.co скорочення посилань</string>
+    <string name="piko_pref_round_off_numbers">Округлювати числа</string>
+    <string name="piko_pref_round_off_numbers_desc">Відображати тисячи та мільйони як K та M</string>
+    <string name="piko_pref_debug_menu">налагоджувальне меню для публікацій</string>
+    <string name="piko_pref_quick_settings">Включити швидкі налаштування</string>
+    <string name="piko_pref_quick_settings_summary">Додає налаштування Piko в бокове меню</string>
+
+    <!-- Feature flags Settings -->
+    <string name="piko_title_feature_flags">Флаги (flags) функцій</string>
+    <string name="piko_pref_feature_flags">Додати новий flag</string>
+    <string name="piko_pref_edit_flag_title">Редагувати flag</string>
+    <string name="piko_pref_add_flag_title">Додати flag</string>
+    <string name="piko_pref_search_flags">Пошук по flags</string>
+
+    <!-- Timeline Settings -->
+    <string name="piko_title_timeline">Стрічка</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">Вимкнути автоматичне гортання стрічки</string>
+    <string name="piko_pref_hide_live_threads">треди в прямому ефірі</string>
+    <string name="piko_pref_hide_live_threads_desc">Ховати "В прямому ефірі" в стрічці</string>
+    <string name="piko_pref_hide_banner">банер</string>
+    <string name="piko_pref_hide_banner_desc">Приховати банер "додав(-ла) публікацію"</string>
+    <string name="piko_pref_hide_bmk_timeline">іконку закладки в стрічці</string>
+    <string name="piko_pref_force_translate">Увімкнути примусовий переклад</string>
+    <string name="piko_pref_force_translate_desc">Кнопка перекладу тексту для всіх дописів</string>
+    <string name="piko_pref_hide_quick_promote">кнопка просування</string>
+    <string name="piko_pref_hide_quick_promote_desc">Кнопка просування під своїми дописами</string>
+    <string name="piko_pref_show_poll_result">Показати результати опитування</string>
+    <string name="piko_pref_show_poll_result_desc">Відображає результати опитування без голосування</string>
+    <string name="piko_pref_hide_immersive_player">Імерсивний програвач</string>
+    <string name="piko_pref_hide_immersive_player_desc">Видаляє свайп вгору для додаткових відео у відеопрогравачі</string>
+    <string name="piko_pref_enable_vid_auto_advance">автопрокручування відео</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Автоматичне гортання відео в імерсивному програвачі</string>
+    <string name="piko_pref_hide_hidden_replies">приховані відповіді</string>
+    <string name="piko_pref_force_hd">HD якість відео</string>
+    <string name="piko_pref_force_hd_desc">Програвання відео лише в HD-якості</string>
+    <string name="piko_pref_hide_nudge_button">Сховати кнопку взаємодії</string>
+    <string name="piko_pref_hide_nudge_button_desc">Сховати кнопки Читати/Підписка/Теж читати на дописах</string>
+    <string name="piko_pref_hide_social_proof">Ховати також читають</string>
+    <string name="piko_pref_hide_social_proof_desc">Приховати також читають в профілі</string>
+
+    <!-- Customization Settings -->
+    <string name="piko_title_customisation">Кастомізація</string>
+    <string name="piko_pref_customisation_profiletabs">Приховати розділи в профілі</string>
+    <string name="piko_pref_customisation_timelinetabs">Приховати розділи в Стрічці</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">Приховати стрічку \"Для вас\"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">Приховати стрічку \"Стрічка підписок\"</string>
+    <string name="piko_pref_customisation_timelinetabs_both">Показати обидві</string>
+    <string name="piko_pref_customisation_sidebartabs">Приховати пункти у боковому меню</string>
+    <string name="piko_pref_customisation_navbartabs">Приховати пункти на панелі навігації</string>
+    <string name="piko_pref_customisation_inlinetabs">Приховати кнопки під дописами</string>
+    <string name="piko_pref_customisation_exploretabs">Приховати пункти в Ознайомлення</string>
+    <string name="piko_pref_customisation_searchtabs">Приховати пункти в пошуку</string>
+    <string name="piko_pref_customisation_reply_sorting">Сортувати відповідей за замовчуванням</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">Раніше обрані</string>
+    <string name="piko_pref_customisation_post_font_size">Розмір шрифту у дописів</string>
+    <string name="piko_pref_customisation_search_type_ahead">Приховати пошукові пропозиції</string>
+
+    <!-- Backup and Restore -->
+    <string name="piko_title_backup">Імпорт/Експорт налаштувань</string>
+    <string name="piko_pref_export">Експорт %s</string>
+    <string name="piko_pref_import">Імпорт %s</string>
+    <string name="piko_pref_success">Успішно</string>
+    <string name="piko_pref_export_failed">Збій: помилка экспорта %s</string>
+    <string name="piko_pref_import_failed">Збій: помилка импорта %s</string>
+    <string name="piko_pref_export_no_uri">Збій: тека не обрана</string>
+    <string name="piko_pref_import_no_uri">Збій: файл не обраний</string>
+
+    <!-- About -->
+    <string name="piko_title_about">Про застосунок</string>
+    <string name="piko_pref_app_version">Версія застосунку</string>
+    <string name="piko_pref_patch_info">Інформація про патч</string>
+    <string name="piko_pref_version_info">Інформація про версію</string>
+    <string name="piko_pref_patches">Патчі</string>
+    <string name="piko_pref_included">Застосовано</string>
+    <string name="piko_pref_excluded">Не застосовано</string>
+    <string name="piko_pref_app_restart_rec">Треба перезапустити застосунок</string>
+    <string name="piko_pref_remove">Приховати %s</string>
+    <string name="piko_pref_enable">Увімкнути %s</string>
+    <string name="piko_single_page_settings">Налаштування однією сторінкою</string>
+    <string name="piko_single_page_settings_desc">Відображати всі налаштування однією сторінкою</string>
+	
+	<string name="piko_pref_search_type_ahead_users">Користувачі</string>
+    <string name="piko_pref_search_type_ahead_events">Події</string>
+    <string name="piko_pref_search_type_ahead_ordered_section">Упорядкований розділ</string>
+    
+</resources>
