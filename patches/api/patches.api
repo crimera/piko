@@ -275,6 +275,10 @@ public final class crimera/patches/twitter/misc/bringbacktwitter/strings/zh_rTW 
 	public final fun getValues ()Ljava/util/Map;
 }
 
+public final class crimera/patches/twitter/misc/customize/exploretabs/CustomiseExploreTabsPatchKt {
+	public static final fun getCustomiseExploreTabsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
 public final class crimera/patches/twitter/misc/customize/inlinebar/CustomiseInlineBarPatchKt {
 	public static final fun getCustomiseInlineBarPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
@@ -283,12 +287,20 @@ public final class crimera/patches/twitter/misc/customize/navbar/CustomiseNavBar
 	public static final fun getCustomiseNavBarPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
+public final class crimera/patches/twitter/misc/customize/postFontSize/CustomizePostFontSizeKt {
+	public static final fun getCustomiseExploreTabsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
 public final class crimera/patches/twitter/misc/customize/profiletabs/CustomiseProfileTabsPatchKt {
 	public static final fun getCustomiseProfileTabsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class crimera/patches/twitter/misc/customize/replySorting/DefaultReplySortingPatchKt {
 	public static final fun getDefaultReplySortingPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/customize/searchtabs/CustomiseSearchTabsPatchKt {
+	public static final fun getCustomiseSearchTabsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class crimera/patches/twitter/misc/customize/sidebar/CustomiseSideBarPatchKt {
@@ -300,8 +312,8 @@ public final class crimera/patches/twitter/misc/customize/timelinetabs/Customise
 	public static final fun getCustomiseTimelineTabsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
-public final class crimera/patches/twitter/misc/debugMenu/DebugMenuKt {
-	public static final fun getDebugMenu ()Lapp/revanced/patcher/patch/BytecodePatch;
+public final class crimera/patches/twitter/misc/customize/typeAheadResponse/CustomiseTypeAheadResponsePatchKt {
+	public static final fun getCustomiseTypeAheadResponsePatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class crimera/patches/twitter/misc/dynamiccolor/DynamicColorPatchKt {
@@ -314,10 +326,6 @@ public final class crimera/patches/twitter/misc/extensions/SharedExtensionPatchK
 
 public final class crimera/patches/twitter/misc/fab/HideFABPatchKt {
 	public static final fun getHideFABPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class crimera/patches/twitter/misc/nativeDownloader/NativeDownloaderPatchKt {
-	public static final fun getNativeDownloaderPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class crimera/patches/twitter/misc/recommendedusers/HideRecommendedUsersPatchKt {
@@ -346,11 +354,71 @@ public final class crimera/patches/twitter/misc/settings/SettingsPatchKt {
 	public static final field PATCHES_DESCRIPTOR Ljava/lang/String;
 	public static final field PREF_DESCRIPTOR Ljava/lang/String;
 	public static final field SSTS_DESCRIPTOR Ljava/lang/String;
+	public static final field UTILS_DESCRIPTOR Ljava/lang/String;
 	public static final fun getSettingsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class crimera/patches/twitter/misc/settings/SettingsResourcePatchKt {
 	public static final fun getSettingsResourcePatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
+public final class crimera/patches/twitter/misc/shareMenu/debugMenu/DebugMenuKt {
+	public static final fun getDebugMenuPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/misc/shareMenu/fingerprints/ShareMenuButtonFuncCallFingerprintKt {
+	public static final fun getShareMenuButtonFuncCallFingerprint ()Lapp/revanced/patcher/Fingerprint;
+}
+
+public final class crimera/patches/twitter/misc/shareMenu/hooks/ShareMenuButtonAddHookKt {
+	public static final fun addButton (Lapp/revanced/patcher/Match;Lcom/android/tools/smali/dexlib2/iface/reference/Reference;Ljava/lang/String;)V
+	public static final fun getShareMenuButtonAddHook ()Lapp/revanced/patcher/Fingerprint;
+}
+
+public final class crimera/patches/twitter/misc/shareMenu/hooks/ShareMenuButtonHookKt {
+	public static final fun buttonReference (Lapp/revanced/patcher/Match;Ljava/lang/String;)Lcom/android/tools/smali/dexlib2/iface/reference/Reference;
+	public static final fun getShareMenuButtonHook ()Lapp/revanced/patcher/Fingerprint;
+}
+
+public final class crimera/patches/twitter/misc/shareMenu/hooks/ShareMenuButtonInitHookKt {
+	public static final fun getShareMenuButtonInitHook ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun setButtonIcon (Lapp/revanced/patcher/Match;Lcom/android/tools/smali/dexlib2/iface/reference/Reference;Ljava/lang/String;I)V
+	public static synthetic fun setButtonIcon$default (Lapp/revanced/patcher/Match;Lcom/android/tools/smali/dexlib2/iface/reference/Reference;Ljava/lang/String;IILjava/lang/Object;)V
+	public static final fun setButtonText (Lapp/revanced/patcher/Match;Ljava/lang/String;Ljava/lang/String;I)V
+	public static synthetic fun setButtonText$default (Lapp/revanced/patcher/Match;Ljava/lang/String;Ljava/lang/String;IILjava/lang/Object;)V
+}
+
+public final class crimera/patches/twitter/misc/shareMenu/nativeDownloader/NativeDownloaderHooksPatchKt {
+	public static final fun getGetTweetClassFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getGetTweetIdFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getGetTweetMediaFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getGetTweetProfileNameFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getGetTweetUserIdFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getGetTweetUsernameFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getNativeDownloaderHooksPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+	public static final fun getTweetObjectFingerprint ()Lapp/revanced/patcher/Fingerprint;
+}
+
+public final class crimera/patches/twitter/misc/shareMenu/nativeDownloader/NativeDownloaderPatchKt {
+	public static final fun getNativeDownloaderPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+	public static final fun getOffset ()Z
+	public static final fun setOffset (Z)V
+}
+
+public final class crimera/patches/twitter/misc/shareMenu/nativeTranslator/NativeTranslatorHooksPatchKt {
+	public static final fun getGetLangFldFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getGetLongTextFldFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getGetLongTextMtdFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getGetShortTextMtdFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getGetTweetInfoFldFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getLongTweetObjectFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getNativeTranslatorHooksPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+	public static final fun getShortTweetObjectFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getTweetinfoObjectFingerprint ()Lapp/revanced/patcher/Fingerprint;
+}
+
+public final class crimera/patches/twitter/misc/shareMenu/nativeTranslator/NativeTranslatorPatchKt {
+	public static final fun getNativeTranslatorPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class crimera/patches/twitter/premium/customAppIcon/CustomAppIconPatchKt {
@@ -427,5 +495,9 @@ public final class crimera/patches/twitter/timeline/tweetinfo/HidePromoteButtonK
 
 public final class crimera/patches/twitter/timeline/tweetinfo/TweetInfoHookKt {
 	public static final fun getTweetInfoHook ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/videoEntity/ForceHDPatchKt {
+	public static final fun getForceHDPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
