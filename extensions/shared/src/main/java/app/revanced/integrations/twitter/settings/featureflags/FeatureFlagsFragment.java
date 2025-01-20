@@ -12,8 +12,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import app.revanced.integrations.shared.Utils;
 import app.revanced.integrations.twitter.patches.FeatureSwitchPatch;
 import app.revanced.integrations.twitter.settings.ActivityHook;
@@ -25,6 +23,8 @@ import java.util.ArrayList;
 @SuppressWarnings("deprecation")
 public class FeatureFlagsFragment extends Fragment {
     ArrayList<FeatureFlag> flags;
+    private final String bundleFlagNameKey = "flagName";
+    private final String bundleFlagValueKey = "flagValue";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,43 +49,47 @@ public class FeatureFlagsFragment extends Fragment {
         app.revanced.integrations.twitter.Utils.setStringPref(Settings.MISC_FEATURE_FLAGS.key, FeatureFlag.toStringPref(flags));
     }
 
-    public void modifyFlag(CustomAdapter adapter, int position) {
-        FeatureFlag flag = flags.get(position);
+    public void modifyFlag(FeatureFlagAdapter adapter, int position) {
+        try {
+            FeatureFlag flag = flags.get(position);
 
-        AlertDialog.Builder dia = new AlertDialog.Builder(getContext());
-        dia.setTitle(Utils.getResourceString("piko_pref_edit_flag_title"));
+            AlertDialog.Builder dia = new AlertDialog.Builder(getContext());
+            dia.setTitle(Utils.getResourceString("piko_pref_edit_flag_title"));
 
-        LinearLayout ln = new LinearLayout(getContext());
-        ln.setPadding(50, 50, 50, 50);
+            LinearLayout ln = new LinearLayout(getContext());
+            ln.setPadding(50, 50, 50, 50);
 
-        EditText flagEditText = new EditText(getContext());
-        flagEditText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        flagEditText.setText(flag.getName());
-        ln.addView(flagEditText);
+            EditText flagEditText = new EditText(getContext());
+            flagEditText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            flagEditText.setText(flag.getName());
+            ln.addView(flagEditText);
 
-        dia.setPositiveButton(Utils.getResourceString("save"), (dialogInterface, i) -> {
-            String editTextValue = flagEditText.getText().toString();
-            if (!editTextValue.equals(flag.getName())) {
-                flags.set(position, new FeatureFlag(flagEditText.getText().toString(), flag.getEnabled()));
-                adapter.notifyItemChanged(position);
+            dia.setPositiveButton(Utils.getResourceString("save"), (dialogInterface, i) -> {
+                String editTextValue = flagEditText.getText().toString();
+                if (!editTextValue.equals(flag.getName())) {
+                    flags.set(position, new FeatureFlag(flagEditText.getText().toString(), flag.getEnabled()));
+                    adapter.notifyDataSetChanged();
+                    saveFlags();
+                }
+            });
+
+            dia.setNeutralButton(Utils.getResourceString("remove"), ((dialogInterface, i) -> {
+                flags.remove(position);
+                adapter.notifyDataSetChanged();
                 saveFlags();
-            }
-        });
+            }));
 
-        dia.setNeutralButton(Utils.getResourceString("remove"), ((dialogInterface, i) -> {
-            flags.remove(position);
-            adapter.c.f(position, 1);
-            saveFlags();
-        }));
+            dia.setNegativeButton(Utils.getResourceString("cancel"), null);
 
-        dia.setNegativeButton(Utils.getResourceString("cancel"), null);
+            dia.setView(ln);
 
-        dia.setView(ln);
-
-        dia.create().show();
+            dia.create().show();
+        } catch (Exception exception){
+            app.revanced.integrations.twitter.Utils.toast(exception.toString());
+        }
     }
 
-    private void searchFlagsDialog(CustomAdapter parentAdapter) {
+    private void searchFlagsDialog(FeatureFlagAdapter parentAdapter) {
         AlertDialog.Builder dia = new AlertDialog.Builder(getContext());
         dia.setTitle(Utils.getResourceString("piko_pref_add_flag_title"));
 
@@ -119,14 +123,16 @@ public class FeatureFlagsFragment extends Fragment {
 
         listView.setOnItemClickListener((adapterView, view1, i, l) -> {
             flags.add(new FeatureFlag(adapter.getItem(i), true));
-            parentAdapter.notifyItemChanged(flags.size());
+            parentAdapter.notifyDataSetChanged();
+            saveFlags();
             dialog.dismiss();
         });
 
         dialog.show();
     }
 
-    public void addFlag(CustomAdapter adapter) {
+    public void addFlag(FeatureFlagAdapter adapter, Bundle bundle) {
+        boolean defaultFlagValue = true;
         AlertDialog.Builder dia = new AlertDialog.Builder(getContext());
         dia.setTitle(Utils.getResourceString("piko_pref_add_flag_title"));
 
@@ -134,15 +140,20 @@ public class FeatureFlagsFragment extends Fragment {
         ln.setPadding(50, 50, 50, 50);
 
         EditText flagEditText = new EditText(getContext());
+        // If flag is sent via deepLink.
+        if (bundle.containsKey(bundleFlagNameKey)) { // If flag is sent.
+            flagEditText.setText(bundle.getString(bundleFlagNameKey));
+            defaultFlagValue =  bundle.getBoolean(bundleFlagValueKey, defaultFlagValue);
+        }
         // TODO: add string to resources
         flagEditText.setHint("flag");
         flagEditText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         ln.addView(flagEditText);
-
+        final boolean flagValue = defaultFlagValue;
         dia.setPositiveButton(Utils.getResourceString("save"), (dialogInterface, i) -> {
             String editTextValue = flagEditText.getText().toString();
-            flags.add(new FeatureFlag(editTextValue, true));
-            adapter.notifyItemChanged(flags.size());
+            flags.add(new FeatureFlag(editTextValue, flagValue));
+            adapter.notifyDataSetChanged();
             saveFlags();
         });
 
@@ -160,17 +171,22 @@ public class FeatureFlagsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        Bundle bundle = getArguments(); // Required for deepLink flag addition.
         View view = inflater.inflate(Utils.getResourceIdentifier("feature_flags_view", "layout"), container, false);
         FloatingActionButton floatingActionButton = view.findViewById(Utils.getResourceIdentifier("add_flag", "id"));
 
-        RecyclerView rc = view.findViewById(Utils.getResourceIdentifier("list", "id"));
-        rc.setLayoutManager(new LinearLayoutManager(1));
+        ListView rc = view.findViewById(Utils.getResourceIdentifier("list", "id"));
         rc.setClipToPadding(false);
         rc.setPadding(0, 0, 0, 200);
 
-        CustomAdapter adapter = new CustomAdapter(flags);
+        FeatureFlagAdapter adapter = new FeatureFlagAdapter(getContext(), flags);
 
-        floatingActionButton.setOnClickListener(view1 -> addFlag(adapter));
+        rc.setOnItemClickListener((adapterView, view1, i, l) -> {
+            app.revanced.integrations.twitter.Utils.toast(adapter.getItem(i).getName());
+        });
+
+        floatingActionButton.setOnClickListener(view1 -> addFlag(adapter, bundle));
 
         adapter.setItemClickListener(position -> modifyFlag(adapter, position));
 
@@ -181,6 +197,13 @@ public class FeatureFlagsFragment extends Fragment {
         });
 
         rc.setAdapter(adapter);
+
+        // If flag is sent via deepLink.
+        if (bundle.containsKey(bundleFlagNameKey)) { // If flag is sent.
+            addFlag(adapter, bundle);
+            bundle.remove(bundleFlagNameKey);
+            bundle.remove(bundleFlagValueKey);
+        }
 
         return view;
     }

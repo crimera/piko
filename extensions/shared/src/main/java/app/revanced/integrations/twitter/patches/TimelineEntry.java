@@ -2,12 +2,13 @@ package app.revanced.integrations.twitter.patches;
 
 import com.twitter.model.json.timeline.urt.JsonTimelineEntry;
 import com.twitter.model.json.timeline.urt.JsonTimelineModuleItem;
+import com.twitter.model.json.core.JsonSensitiveMediaWarning;
 
 import app.revanced.integrations.twitter.Pref;
 import app.revanced.integrations.twitter.settings.SettingsStatus;
 
 public class TimelineEntry {
-    private static final boolean hideAds,hideGAds,hideWTF,hideCTS,hideCTJ,hideDetailedPosts,hideRBMK,hidePinnedPosts,hidePremiumPrompt,hideMainEvent,hideSuperheroEvent,hideVideosForYou;
+    private static final boolean hideAds,hideGAds,hideWTF,hideCTS,hideCTJ,hideDetailedPosts,hideRBMK,hidePinnedPosts,hidePremiumPrompt,hideMainEvent,hideSuperheroEvent,hideVideosForYou,showSensitiveMedia,hideTopPeopleSearch;
     static {
         hideAds = (Pref.hideAds() && SettingsStatus.hideAds);
         hideGAds = (Pref.hideGoogleAds() && SettingsStatus.hideGAds);
@@ -21,6 +22,8 @@ public class TimelineEntry {
         hideMainEvent = (Pref.hideMainEvent() && SettingsStatus.hideMainEvent);
         hideSuperheroEvent = (Pref.hideSuperheroEvent() && SettingsStatus.hideSuperheroEvent);
         hideVideosForYou = (Pref.hideVideosForYou() && SettingsStatus.hideVideosForYou);
+        showSensitiveMedia = Pref.showSensitiveMedia();
+        hideTopPeopleSearch = (Pref.hideTopPeopleSearch() && SettingsStatus.hideTopPeopleSearch);
     }
 
 
@@ -31,10 +34,10 @@ public class TimelineEntry {
             if (entryId2.equals("promoted") || ((entryId2.equals("conversationthread") && split.length == 3)) && hideAds) {
                 return true;
             }
-            if (entryId2.equals("superhero") && hideSuperheroEvent) {
+            if ((entryId2.equals("superhero") || entryId2.equals("eventsummary")) && hideSuperheroEvent) {
                 return true;
             }
-            if (entryId2.equals("rtb") && hideGAds) {
+            if (entryId.contains("rtb") && hideGAds) {
                 return true;
             }
             if (entryId2.equals("tweetdetailrelatedtweets") && hideDetailedPosts) {
@@ -58,10 +61,13 @@ public class TimelineEntry {
             if (entryId.startsWith("messageprompt-") && hidePremiumPrompt) {
                 return true;
             }
-            if (entryId.startsWith("main-event-") && hideMainEvent) {
+            if ((entryId.startsWith("main-event-") || entryId2.equals("pivot")) && hideMainEvent) {
                 return true;
             }
             if (entryId2.equals("tweet") && entryId.contains("-tweet-") && hideVideosForYou) {
+                return true;
+            }
+            if (entryId2.equals("toptabsrpusermodule") && hideTopPeopleSearch) {
                 return true;
             }
         }
@@ -90,6 +96,19 @@ public class TimelineEntry {
 
         }
         return jsonTimelineModuleItem;
+    }
+
+    public static JsonSensitiveMediaWarning sensitiveMedia(JsonSensitiveMediaWarning jsonSensitiveMediaWarning) {
+        try {
+            if(showSensitiveMedia){
+                jsonSensitiveMediaWarning.a = false;
+                jsonSensitiveMediaWarning.b = false;
+                jsonSensitiveMediaWarning.c = false;
+            }
+        } catch (Exception unused) {
+
+        }
+        return jsonSensitiveMediaWarning;
     }
 
 //end

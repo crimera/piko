@@ -7,11 +7,40 @@ import java.util.*;
 
 @SuppressWarnings("unused")
 public class Pref {
-    public static boolean ROUND_OFF_NUMBERS;
+    public static boolean ROUND_OFF_NUMBERS,ENABLE_FORCE_HD;
+    public static float POST_FONT_SIZE;
     static{
         ROUND_OFF_NUMBERS = isRoundOffNumbersEnabled();
+        ENABLE_FORCE_HD = enableForceHD();
+        POST_FONT_SIZE = setPostFontSize();
+    }
+    public static float setPostFontSize() {
+        Float fontSize = 0.0f;
+        try{
+            fontSize = Float.valueOf(Utils.getStringPref(Settings.CUSTOM_POST_FONT_SIZE));
+        }catch (Exception ex){
+            fontSize = app.revanced.integrations.shared.Utils.getResourceDimension("font_size_normal");
+        }
+        return fontSize;
+    }
+    public static boolean showSensitiveMedia() {
+        return Utils.getBooleanPerf(Settings.TIMELINE_SHOW_SENSITIVE_MEDIA);
     }
 
+    public static boolean enableNativeDownloader() {
+        return Utils.getBooleanPerf(Settings.VID_NATIVE_DOWNLOADER);
+    }
+
+    public static int natveTranslatorProvider(){
+        return Integer.parseInt(Utils.getStringPref(Settings.NATIVE_TRANSLATOR_PROVIDERS));
+    }
+    public static boolean enableNativeTranslator() {
+        return Utils.getBooleanPerf(Settings.NATIVE_TRANSLATOR);
+    }
+
+    public static String translatorLanguage() {
+        return Utils.getStringPref(Settings.NATIVE_TRANSLATOR_LANG);
+    }
     public static boolean redirect(TabLayout$g g) {return Utils.redirect(g);}
 
     public static boolean isRoundOffNumbersEnabled() {
@@ -181,6 +210,13 @@ public class Pref {
         }
         return bool;
     }
+    public static boolean enableForceHD(){
+        return Utils.getBooleanPerf(Settings.TIMELINE_ENABLE_VID_FORCE_HD);
+    }
+
+    public static boolean hideNudgeButton() {
+        return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_NUDGE_BUTTON);
+    }
 
     public static boolean hidePromotedTrend(Object data) {
         if (data != null && Utils.getBooleanPerf(Settings.ADS_HIDE_PROMOTED_TRENDS)) {
@@ -225,6 +261,10 @@ public class Pref {
         return Utils.getBooleanPerf(Settings.ADS_HIDE_REVISIT_BMK);
     }
 
+    public static boolean hideTopPeopleSearch() {
+        return Utils.getBooleanPerf(Settings.ADS_HIDE_TOP_PEOPLE_SEARCH);
+    }
+
     public static boolean removePremiumUpsell() {return !Utils.getBooleanPerf(Settings.ADS_REMOVE_PREMIUM_UPSELL);
     }
 
@@ -255,6 +295,9 @@ public class Pref {
     public static boolean enableDebugMenu() {
         return Utils.getBooleanPerf(Settings.MISC_DEBUG_MENU);
     }
+    public static boolean hideSocialProof() {
+        return Utils.getBooleanPerf(Settings.MISC_HIDE_SOCIAL_PROOF);
+    }
 
     private static ArrayList getList(String key){
         ArrayList<String> arrayList = new ArrayList<String>();
@@ -273,6 +316,9 @@ public class Pref {
     public static ArrayList customSidebar() {
         return getList(Settings.CUSTOM_SIDEBAR_TABS.key);
     }
+    public static ArrayList customExploreTabs() {
+        return getList(Settings.CUSTOM_EXPLORE_TABS.key);
+    }
 
     public static ArrayList customNavbar() {
         return getList(Settings.CUSTOM_NAVBAR_TABS.key);
@@ -280,6 +326,10 @@ public class Pref {
 
     public static ArrayList inlineBar() {
         return getList(Settings.CUSTOM_INLINE_TABS.key);
+    }
+
+    public static ArrayList searchTabs() {
+        return getList(Settings.CUSTOM_SEARCH_TABS.key);
     }
 
     public static String defaultReplySortFilter() {
@@ -294,6 +344,15 @@ public class Pref {
         sortfilter = sortfilter.length()>0?sortfilter:"Likes";
         Utils.setStringPref(Settings.REPLY_SORTING_LAST_FILTER.key,sortfilter);
     }
+
+    public static ArrayList customSearchTypeAhead() {
+        return getList(Settings.CUSTOM_SEARCH_TYPE_AHEAD.key);
+    }
+
+    public static int nativeDownloaderFileNameType() {
+        return Integer.parseInt(Utils.getStringPref(Settings.VID_NATIVE_DOWNLOADER_FILENAME));
+    }
+
 
     //end
 }
