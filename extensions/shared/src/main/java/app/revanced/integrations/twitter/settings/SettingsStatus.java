@@ -20,6 +20,7 @@ public class SettingsStatus {
     public static boolean browserChooserEnabled = false;
     public static boolean featureFlagsEnabled = false;
     public static boolean forceTranslate = false;
+    public static boolean enableForceHD = false;
     public static boolean hidePromoteButton = false;
     public static boolean roundOffNumbers = false;
     public static boolean enableDebugMenu = false;
@@ -38,6 +39,7 @@ public class SettingsStatus {
     public static boolean hidePremiumPrompt = false;
     public static boolean hideHiddenReplies = false;
     public static boolean removePremiumUpsell = false;
+    public static boolean hideTopPeopleSearch = false;
 
     public static boolean enableReaderMode = false;
     public static boolean enableUndoPosts = false;
@@ -49,11 +51,14 @@ public class SettingsStatus {
 
     public static boolean profileTabCustomisation = false;
     public static boolean timelineTabCustomisation = false;
+    public static boolean exploreTabCustomisation = false;
     public static boolean sideBarCustomisation = false;
     public static boolean navBarCustomisation = false;
     public static boolean inlineBarCustomisation = false;
+    public static boolean searchTabCustomisation = false;
     public static boolean mediaLinkHandle = false;
     public static boolean defaultReplySortFilter = false;
+    public static boolean typeaheadCustomisation = false;
 
     public static boolean selectableText = false;
     public static boolean showSensitiveMedia = false;
@@ -62,7 +67,20 @@ public class SettingsStatus {
     public static boolean unshortenlink = false;
     public static boolean deleteFromDb = false;
     public static boolean nativeDownloader = false;
+    public static boolean nativeTranslator = false;
+    public static boolean hideNudgeButton = false;
+    public static boolean hideSocialProof = false;
+    public static boolean customPostFontSize = false;
 
+    public static void customPostFontSize() {
+        customPostFontSize = true;
+    }
+    public static void hideSocialProof() {
+        hideSocialProof = true;
+    }
+    public static void hideNudgeButton() {
+        hideNudgeButton = true;
+    }
     public static void removePremiumUpsell() {
         removePremiumUpsell = true;
     }
@@ -73,6 +91,9 @@ public class SettingsStatus {
 
     public static void nativeDownloader() {
         nativeDownloader = true;
+    }
+    public static void nativeTranslator() {
+        nativeTranslator = true;
     }
 
     public static void deleteFromDb() {
@@ -180,6 +201,10 @@ public class SettingsStatus {
         hideHiddenReplies = true;
     }
 
+    public static void enableForceHD() {
+        enableForceHD = true;
+    }
+
     public static void hidePromoteButton() {
         hidePromoteButton = true;
     }
@@ -233,6 +258,10 @@ public class SettingsStatus {
         hideRPinnedPosts = true;
     }
 
+    public static void hideTopPeopleSearch() {
+        hideTopPeopleSearch = true;
+    }
+
     public static void hidePromotedTrends() {
         hidePromotedTrend = true;
     }
@@ -265,8 +294,15 @@ public class SettingsStatus {
         timelineTabCustomisation = true;
     }
 
+    public static void exploreTabCustomisation() {
+        exploreTabCustomisation = true;
+    }
+
     public static void sideBarCustomisation() {
         sideBarCustomisation = true;
+    }
+    public static void searchTabCustomisation() {
+        searchTabCustomisation = true;
     }
 
     public static void navBarCustomisation() {
@@ -281,20 +317,28 @@ public class SettingsStatus {
         inlineBarCustomisation = true;
     }
 
+    public static void typeaheadCustomisation() {
+        typeaheadCustomisation = true;
+    }
+
     public static boolean enableTimelineSection() {
-        return ( disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance);
+        return ( showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD);
     }
 
     public static boolean enableMiscSection() {
-        return (roundOffNumbers || enableFontMod || hideRecommendedUsers || hideFAB || hideViewCount || customSharingDomainEnabled || hideFABBtns);
+        return ( hideSocialProof || roundOffNumbers || enableFontMod || hideRecommendedUsers || hideFAB || hideViewCount || customSharingDomainEnabled || hideFABBtns);
     }
 
     public static boolean enableAdsSection() {
-        return (hideAds || hideGAds || hideWTF || hideCTS || hideCTJ || hideDetailedPosts || hideRBMK || hidePromotedTrend || removePremiumUpsell || hideMainEvent || hideSuperheroEvent || hideVideosForYou);
+        return (hideTopPeopleSearch || hideAds || hideGAds || hideWTF || hideCTS || hideCTJ || hideDetailedPosts || hideRBMK || hidePromotedTrend || removePremiumUpsell || hideMainEvent || hideSuperheroEvent || hideVideosForYou);
+    }
+
+    public static boolean enableNativeSection() {
+        return (nativeDownloader || nativeTranslator);
     }
 
     public static boolean enableDownloadSection() {
-        return (nativeDownloader || changeDownloadEnabled || mediaLinkHandle);
+        return (changeDownloadEnabled || mediaLinkHandle);
     }
 
     public static boolean enablePremiumSection() {
@@ -302,7 +346,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableCustomisationSection() {
-        return (inlineBarCustomisation || navBarCustomisation || sideBarCustomisation || profileTabCustomisation || timelineTabCustomisation || defaultReplySortFilter);
+        return (searchTabCustomisation || typeaheadCustomisation || exploreTabCustomisation || customPostFontSize || inlineBarCustomisation || navBarCustomisation || sideBarCustomisation || profileTabCustomisation || timelineTabCustomisation || defaultReplySortFilter);
     }
 
     public static void load() {
