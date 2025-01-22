@@ -86,6 +86,7 @@
         <item>@string/piko_pref_pinned_posts_section</item>
         <item>@string/piko_pref_hide_detailed_posts</item>
         <item>@string/piko_pref_hide_premium_prompt</item>
+        <item>@string/piko_pref_hide_todays_news</item>
     </string-array>
 
     <string-array name="piko_array_reply_sorting">
