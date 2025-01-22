@@ -26,11 +26,23 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">Copiar enlace de medios</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Compartir enlace de medios</string>
 
-    <!-- Downloader Options -->
+    <!-- Native -->
+    <string name="piko_title_native">Funciones nativas</string>
     <string name="piko_title_native_downloader">Descargador nativo</string>
+    <string name="piko_title_native_downloader_toggle">Habilitar descargador nativo</string>
     <string name="piko_pref_native_downloader_alert_title">Descargar medios</string>
     <string name="piko_pref_native_downloader_download_all">Descargar todo</string>
     <string name="piko_pref_native_downloader_no_media">No se encontraron medios</string>
+    <string name="piko_pref_native_downloader_filename_title">Patrón de nombre de archivo para guardar</string>
+
+    <!-- Traductor -->
+    <string name="piko_title_native_translator">Traducción nativa de publicaciones</string>
+    <string name="piko_native_translator_toggle">Habilitar traducción nativa de publicaciones</string>
+    <string name="piko_native_translator_provider">Proveedores de traducción</string>
+    <string name="piko_native_translator_to_lang">Traducir a</string>
+    <string name="piko_native_translator_zero_text">No se encontró texto para traducir</string>
+    <string name="piko_native_translator_google">Traductor de Google</string>
+    <string name="piko_native_translator_google_v2">Traductor de Google V2</string>
 
     <!-- Ads Settings -->
     <string name="piko_title_ads">Anuncios</string>
@@ -152,13 +164,6 @@
     <string name="piko_single_page_settings">Configuración en una página</string>
     <string name="piko_single_page_settings_desc">Ver todas las configuraciones en una sola página</string>
     
-    <!-- Traductor -->
-    <string name="piko_native_translator">Habilitar traducción nativa de publicaciones</string>
-    <string name="piko_native_translator_provider">Proveedores de traducción</string>
-    <string name="piko_native_translator_to_lang">Traducir a</string>
-    <string name="piko_native_translator_zero_text">No se encontró texto para traducir</string>
-    <string name="piko_native_translator_google">Traductor de Google</string>
-    <string name="piko_native_translator_google_v2">Traductor de Google V2</string>
 
     <!-- Búsqueda -->
     <string name="piko_pref_search_type_ahead_users">Usuarios</string>

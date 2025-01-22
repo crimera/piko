@@ -58,6 +58,7 @@
     <string name="piko_pref_hide_detailed_posts">Detailed posts (in replies)</string>
     <string name="piko_pref_hide_trends">Promoted trends</string>
     <string name="piko_pref_hide_premium_prompt">Message prompts</string>
+    <string name="piko_pref_hide_todays_news">Today\'s news</string>
     <string name="piko_pref_del_from_db">Delete entries from database</string>
     <string name="piko_pref_db_not_found">Database not found</string>
     <string name="piko_pref_db_not_open">Database is not opened</string>
