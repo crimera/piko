@@ -133,7 +133,7 @@
     <string name="piko_pref_customisation_navbartabs">Elementy paska nawigacyjnego do ukrycia</string>
     <string name="piko_pref_customisation_inlinetabs">Elementy paska pod postem do ukrycia</string>
     <string name="piko_pref_customisation_exploretabs">Zakładki przeglądania do ukrycia</string>
-    <string name="piko_pref_customisation_searchtabs">Zakładki wyszukiwania do ukrycia<</string>
+    <string name="piko_pref_customisation_searchtabs">Zakładki wyszukiwania do ukrycia</string>
     <string name="piko_pref_customisation_reply_sorting">Domyślny filtr sortowania odpowiedzi</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Ostatnio wybrane</string>
     <string name="piko_pref_customisation_post_font_size">Rozmiar czcionki postów</string>
