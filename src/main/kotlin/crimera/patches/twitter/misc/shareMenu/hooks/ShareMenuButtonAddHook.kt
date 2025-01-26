@@ -8,7 +8,6 @@ import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.reference.Reference
 import crimera.patches.twitter.misc.settings.SettingsPatch
 
 object ShareMenuButtonAddHook : MethodFingerprint(
@@ -22,9 +21,10 @@ object ShareMenuButtonAddHook : MethodFingerprint(
     },
 ) {
     fun addButton(
-        buttonReference: Reference?,
+        buttonReference: String?,
         functionName: String,
     ) {
+        val buttonClass = "Lcom/twitter/model/core/v;"
         val result = result ?: throw PatchException("ShareMenuButtonAddHook not found")
 
         val method = result.mutableMethod
@@ -40,7 +40,7 @@ object ShareMenuButtonAddHook : MethodFingerprint(
             invoke-static{}, ${SettingsPatch.PREF_DESCRIPTOR};->$functionName()Z
             move-result v0
             if-eqz v0, :next
-            sget-object v0, $buttonReference
+            sget-object v0, $buttonClass->$buttonReference:$buttonClass
             invoke-virtual {p3,v0}, $addMethod 
             """.trimIndent(),
             ExternalLabel("next", instructions.first { it.opcode == Opcode.INVOKE_STATIC }),

@@ -16,7 +16,6 @@ import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.misc.shareMenu.fingerprints.ShareMenuButtonFuncCallFingerprint
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonAddHook
-import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonHook
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonInitHook
 import crimera.patches.twitter.misc.shareMenu.nativeDownloader.NativeDownloaderPatch
 
@@ -34,7 +33,6 @@ object NativeTranslatorPatch : BytecodePatch(
         ShareMenuButtonInitHook,
         SettingsStatusLoadFingerprint,
         ShareMenuButtonAddHook,
-        ShareMenuButtonHook,
     ),
 ) {
     override fun execute(context: BytecodeContext) {
@@ -83,11 +81,7 @@ object NativeTranslatorPatch : BytecodePatch(
         )
 
         // show icon always
-        val buttonReference =
-            ShareMenuButtonHook.buttonReference("SendToSpacesSandbox")
-                ?: throw PatchException("ShareMenuButtonHook not found")
-
-        ShareMenuButtonAddHook.addButton(buttonReference, "enableNativeTranslator")
+        ShareMenuButtonAddHook.addButton("SendToSpacesSandbox", "enableNativeTranslator")
 
         // text func
         var offset = 0
@@ -97,7 +91,7 @@ object NativeTranslatorPatch : BytecodePatch(
         ShareMenuButtonInitHook.setButtonText("View in Spaces Sandbox", "translate_tweet_show", offset)
 
         // icon
-        ShareMenuButtonInitHook.setButtonIcon(buttonReference, "ic_vector_sparkle", 0)
+        //     ShareMenuButtonInitHook.setButtonIcon(buttonReference, "ic_vector_sparkle", 0)
 
         SettingsStatusLoadFingerprint.enableSettings("nativeTranslator")
     }
