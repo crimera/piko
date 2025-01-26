@@ -80,8 +80,9 @@ object NativeTranslatorPatch : BytecodePatch(
             """.trimIndent(),
         )
 
+        var buttonReference = "SendToSpacesSandbox"
         // show icon always
-        ShareMenuButtonAddHook.addButton("SendToSpacesSandbox", "enableNativeTranslator")
+        ShareMenuButtonAddHook.addButton(buttonReference, "enableNativeTranslator")
 
         // text func
         var offset = 0
@@ -91,7 +92,7 @@ object NativeTranslatorPatch : BytecodePatch(
         ShareMenuButtonInitHook.setButtonText("View in Spaces Sandbox", "translate_tweet_show", offset)
 
         // icon
-        //     ShareMenuButtonInitHook.setButtonIcon(buttonReference, "ic_vector_sparkle", 0)
+        ShareMenuButtonInitHook.setButtonIcon(buttonReference, "ic_vector_sparkle", 0)
 
         SettingsStatusLoadFingerprint.enableSettings("nativeTranslator")
     }

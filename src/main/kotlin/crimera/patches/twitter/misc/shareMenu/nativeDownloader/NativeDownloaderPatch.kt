@@ -87,13 +87,14 @@ object NativeDownloaderPatch : BytecodePatch(
         method.removeInstruction(filters.location.index - 1)
 
         // show icon always
-        ShareMenuButtonAddHook.addButton("SendToTweetViewSandbox", "enableNativeDownloader")
+        var buttonReference = "SendToTweetViewSandbox"
+        ShareMenuButtonAddHook.addButton(buttonReference, "enableNativeDownloader")
 
         // text func
         ShareMenuButtonInitHook.setButtonText("View in Tweet Sandbox", "piko_pref_native_downloader_alert_title")
 
         // icon
-        //   ShareMenuButtonInitHook.setButtonIcon(buttonReference, "ic_vector_incoming")
+        ShareMenuButtonInitHook.setButtonIcon(buttonReference, "ic_vector_incoming")
 
         SettingsStatusLoadFingerprint.enableSettings("nativeDownloader")
         offset = true
