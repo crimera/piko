@@ -7,6 +7,8 @@ import app.revanced.patcher.fingerprint.MethodFingerprint
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
+import com.android.tools.smali.dexlib2.dexbacked.reference.DexBackedFieldReference
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import crimera.patches.twitter.misc.settings.SettingsPatch
 
@@ -24,7 +26,6 @@ object ShareMenuButtonAddHook : MethodFingerprint(
         buttonReference: String?,
         functionName: String,
     ) {
-        val buttonClass = "Lcom/twitter/model/core/v;"
         val result = result ?: throw PatchException("ShareMenuButtonAddHook not found")
 
         val method = result.mutableMethod
@@ -33,6 +34,16 @@ object ShareMenuButtonAddHook : MethodFingerprint(
         val addMethodIndex = instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL }.location.index
 
         val addMethod = method.getInstruction<ReferenceInstruction>(addMethodIndex).reference.toString()
+
+        val buttonClass =
+            (
+                (
+                    method
+                        .getInstruction<BuilderInstruction21c>(
+                            addMethodIndex - 1,
+                        ).reference
+                )as DexBackedFieldReference
+            ).definingClass
 
         method.addInstructionsWithLabels(
             0,
