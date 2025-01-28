@@ -153,8 +153,7 @@
     <string name="piko_pref_enable">Ativar %s</string>
     <string name="piko_single_page_settings">Página de configurações única</string>
     <string name="piko_single_page_settings_desc">Ver configurações em uma única página</string>
-    
-    <string name="piko_native_translator">Ativar tradução de postagem nativa</string>
+
     <string name="piko_native_translator_provider">Provedores de serviços de tradução</string>
     <string name="piko_native_translator_to_lang">Traduzir para</string>
     <string name="piko_native_translator_zero_text">Nenhum texto encontrado para traduzir</string>
