@@ -1,3 +1,13 @@
+## [1.49.0](https://github.com/crimera/piko/compare/v1.48.0...v1.49.0) (2025-01-28)
+
+### Features
+
+* **Twitter:** Added `Remove Todays news` patch ([8324633](https://github.com/crimera/piko/commit/8324633509fdf61756751fdde67e5752ff3dee5c))
+
+### Refactors
+
+* **Twitter:** refactor strings-pl ([9aacfa1](https://github.com/crimera/piko/commit/9aacfa1baf7ed0301850f30ae8053c101ef8b27b))
+
 ## [1.49.0-dev.1](https://github.com/crimera/piko/compare/v1.48.0...v1.49.0-dev.1) (2025-01-22)
 
 ### Features
