@@ -1,3 +1,16 @@
+## [1.49.1-dev.1](https://github.com/crimera/piko/compare/v1.49.0...v1.49.1-dev.1) (2025-01-28)
+
+### Bug Fixes
+
+* **Twitter:** fix `Custom downloader` patch ([f4d953a](https://github.com/crimera/piko/commit/f4d953a3dc7cb8325e56e515cd38a8ab707d2162))
+* **Twitter:** fix `Custom translator` patch ([8065fa3](https://github.com/crimera/piko/commit/8065fa32019d1d1bd4c9bd116f1774e345203356))
+* **Twitter:** fix `Enable debug menu for posts` patch ([72a72f2](https://github.com/crimera/piko/commit/72a72f2114d0ee9fe2cac0e5eae5b03e196dd6e2))
+
+### Refactors
+
+* **Twitter:** refactor button class Hook ([2bf411a](https://github.com/crimera/piko/commit/2bf411a61fd5181d5266d1496becf7b93f4d0d08))
+* **Twitter:** Removed unused string from pt-BR ([cdb2067](https://github.com/crimera/piko/commit/cdb2067360944309a9156b71bf9776457c44c49a))
+
 ## [1.49.0](https://github.com/crimera/piko/compare/v1.48.0...v1.49.0) (2025-01-28)
 
 ### Features

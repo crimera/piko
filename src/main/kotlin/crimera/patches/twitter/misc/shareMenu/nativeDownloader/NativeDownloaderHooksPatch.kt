@@ -15,6 +15,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
 import com.android.tools.smali.dexlib2.dexbacked.reference.DexBackedMethodReference
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 internal abstract class NativeDownloaderMethodFingerprint(
     private val methodName: String,
@@ -36,6 +37,12 @@ internal object GetTweetUserIdFingerprint : NativeDownloaderMethodFingerprint("g
 
 internal object GetTweetMediaFingerprint : NativeDownloaderMethodFingerprint("getTweetMedia")
 
+internal object GetImageUrlFFingerprint : NativeDownloaderMethodFingerprint("getImageUrlField")
+
+internal object GetVideoUrlFFingerprint : NativeDownloaderMethodFingerprint("getVideoUrlField")
+
+internal object GetVideoCodecFFingerprint : NativeDownloaderMethodFingerprint("getVideoCodecField")
+
 internal object GetUserNameMethodCaller : MethodFingerprint(
     returnType = "V",
     strings =
@@ -44,6 +51,30 @@ internal object GetUserNameMethodCaller : MethodFingerprint(
             "Name",
             "User Name",
         ),
+)
+
+internal object ImageUrlFieldFingeprint : MethodFingerprint(
+    returnType = "V",
+    strings =
+        listOf(
+            "MediaEntity.mediaUrl ",
+        ),
+    customFingerprint = { methodDef, classDef ->
+        classDef.endsWith("TweetMediaView;")
+    },
+)
+
+internal object VideoUrlFieldFingeprint : MethodFingerprint(
+    returnType = "V",
+    strings =
+        listOf(
+            "video/mp4",
+            "video/webm",
+            "application/x-mpegURL",
+        ),
+    customFingerprint = { methodDef, classDef ->
+        methodDef.name == "<clinit>"
+    },
 )
 
 @Patch(
@@ -60,6 +91,11 @@ class NativeDownloaderHooksPatch :
             TweetObjectFingerprint,
             GetTweetProfileNameFingerprint,
             GetTweetUserIdFingerprint,
+            ImageUrlFieldFingeprint,
+            VideoUrlFieldFingeprint,
+            GetImageUrlFFingerprint,
+            GetVideoUrlFFingerprint,
+            GetVideoCodecFFingerprint,
         ),
     ) {
     private fun MutableMethod.changeFirstString(value: String) {
@@ -76,16 +112,24 @@ class NativeDownloaderHooksPatch :
         val getTweetObjectResult = TweetObjectFingerprint.result ?: throw PatchException("bruh")
 
         val tweetObjectClass = getTweetObjectResult.classDef
-        val tweetObjectClassName = tweetObjectClass.toString().removePrefix("L").removeSuffix(";")
-
+        val tweetObjectClassName =
+            tweetObjectClass
+                .toString()
+                .removePrefix("L")
+                .removeSuffix(";")
+                .replace("/", ".")
+        GetTweetClassFingerprint.result?.mutableMethod?.changeFirstString(tweetObjectClassName)
+            ?: throw GetTweetClassFingerprint.exception
+// ------------
         val getIdMethod =
             tweetObjectClass.methods.firstOrNull { mutableMethod ->
                 mutableMethod.name == "getId"
             } ?: throw PatchException("getIdMethod not found")
-
+        GetTweetIdFingerprint.result?.mutableMethod?.changeFirstString(getIdMethod.name)
+            ?: throw GetTweetIdFingerprint.exception
+// ------------
         val getUserNameMethodCaller =
             GetUserNameMethodCaller.result ?: throw PatchException("Could not find UserNameMethodCaller fingerprint")
-
         var getUsernameMethod = ""
         var getProfileNameMethod = ""
         getUserNameMethodCaller.scanResult.stringsScanResult!!.matches.forEach { match ->
@@ -97,13 +141,20 @@ class NativeDownloaderHooksPatch :
                 getUsernameMethod = getUserNameMethodCaller.getMethodName(match.index + 1)
             }
         }
+        GetTweetUsernameFingerprint.result?.mutableMethod?.changeFirstString(getUsernameMethod)
+            ?: throw GetTweetUsernameFingerprint.exception
 
+        GetTweetProfileNameFingerprint.result?.mutableMethod?.changeFirstString(getProfileNameMethod)
+            ?: throw GetTweetProfileNameFingerprint.exception
+// ------------
         val getTweetUserIdMethod =
             getTweetObjectResult.classDef.methods
                 .last {
                     it.returnType.equals("J")
                 }.name
-
+        GetTweetUserIdFingerprint.result?.mutableMethod?.changeFirstString(getTweetUserIdMethod)
+            ?: throw GetTweetUserIdFingerprint.exception
+// ------------
         val getMediaObjectMethod =
             tweetObjectClass.methods.firstOrNull { methodDef ->
                 methodDef.implementation
@@ -118,23 +169,34 @@ class NativeDownloaderHooksPatch :
                         Opcode.RETURN_OBJECT,
                     )
             } ?: throw PatchException("getMediaObject not found")
-
-        GetTweetClassFingerprint.result?.mutableMethod?.changeFirstString(tweetObjectClassName)
-            ?: throw GetTweetClassFingerprint.exception
-
-        GetTweetIdFingerprint.result?.mutableMethod?.changeFirstString(getIdMethod.name)
-            ?: throw GetTweetIdFingerprint.exception
-
-        GetTweetUsernameFingerprint.result?.mutableMethod?.changeFirstString(getUsernameMethod)
-            ?: throw GetTweetUsernameFingerprint.exception
-
-        GetTweetProfileNameFingerprint.result?.mutableMethod?.changeFirstString(getProfileNameMethod)
-            ?: throw GetTweetProfileNameFingerprint.exception
-
-        GetTweetUserIdFingerprint.result?.mutableMethod?.changeFirstString(getTweetUserIdMethod)
-            ?: throw GetTweetUserIdFingerprint.exception
-
         GetTweetMediaFingerprint.result?.mutableMethod?.changeFirstString(getMediaObjectMethod.name)
             ?: throw GetTweetMediaFingerprint.exception
+// ------------
+        ImageUrlFieldFingeprint.result ?.let {
+            it.scanResult.stringsScanResult!!.matches.forEach { match ->
+                if (match.string == "MediaEntity.mediaUrl ") {
+                    var imageUrlFieldName =
+                        (it.mutableMethod.getInstruction<ReferenceInstruction>(match.index + 3).reference as FieldReference).name
+
+                    GetImageUrlFFingerprint.result?.mutableMethod?.changeFirstString(imageUrlFieldName)
+                        ?: throw GetTweetMediaFingerprint.exception
+                }
+            }
+        }
+
+// ------------
+        VideoUrlFieldFingeprint.result ?.let {
+            var strFields =
+                it.classDef.fields.filter {
+                    it.type == "Ljava/lang/String;"
+                }
+
+            GetVideoUrlFFingerprint.result?.mutableMethod?.changeFirstString(strFields[0].name)
+                ?: throw GetVideoUrlFFingerprint.exception
+            GetVideoCodecFFingerprint.result?.mutableMethod?.changeFirstString(strFields[1].name)
+                ?: throw GetVideoCodecFFingerprint.exception
+        }
+
+        // end
     }
 }

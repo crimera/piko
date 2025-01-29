@@ -17,7 +17,6 @@ import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.misc.shareMenu.fingerprints.ShareMenuButtonFuncCallFingerprint
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonAddHook
-import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonHook
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonInitHook
 
 val MethodFingerprint.exception: PatchException
@@ -37,7 +36,6 @@ object NativeDownloaderPatch : BytecodePatch(
         ShareMenuButtonInitHook,
         SettingsStatusLoadFingerprint,
         ShareMenuButtonAddHook,
-        ShareMenuButtonHook,
     ),
 ) {
     var offset: Boolean = false
@@ -89,10 +87,7 @@ object NativeDownloaderPatch : BytecodePatch(
         method.removeInstruction(filters.location.index - 1)
 
         // show icon always
-        val buttonReference =
-            ShareMenuButtonHook.buttonReference("SendToTweetViewSandbox")
-                ?: throw PatchException("ShareMenuButtonHook not found")
-
+        var buttonReference = "SendToTweetViewSandbox"
         ShareMenuButtonAddHook.addButton(buttonReference, "enableNativeDownloader")
 
         // text func
