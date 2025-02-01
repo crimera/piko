@@ -31,7 +31,7 @@ public class DatabasePatch {
 
         builder.setTitle(Utils.strRes("piko_pref_db_del_items"));
         builder.setMessage(result);
-        builder.setNegativeButton(Utils.strRes("edit_birthdate_confirm"), null);
+        builder.setNegativeButton(Utils.strRes("ok"), null);
         builder.show();
     }
 
@@ -49,7 +49,7 @@ public class DatabasePatch {
             checkedItems[which] = isChecked;
             String currentItem = selectedItems.get(which);
         });
-        builder.setPositiveButton(Utils.strRes("edit_birthdate_confirm"), (dialogInterface, i) -> {
+        builder.setPositiveButton(Utils.strRes("ok"), (dialogInterface, i) -> {
             StringBuilder items = removeFromDB(checkedItems);
             if(items.length()!=0) showItemDialog(context,items.toString());
         });

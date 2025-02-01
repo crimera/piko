@@ -12,6 +12,15 @@
         <item>@string/profile_tab_title_likes</item>
     </string-array>
 
+    <string-array name="piko_array_exploretabs">
+        <item>@string/guide_tab_title_for_you</item>
+        <item>@string/guide_tab_title_trending</item>
+        <item>@string/guide_tab_title_fun</item>
+        <item>@string/guide_tab_title_news</item>
+        <item>@string/guide_tab_title_sports</item>
+        <item>@string/guide_tab_title_entertainment</item>
+    </string-array>
+
     <string-array name="piko_array_timelinetabs">
         <item>@string/piko_pref_customisation_timelinetabs_both</item>
         <item>@string/piko_pref_customisation_timelinetabs_foryou</item>
@@ -32,7 +41,7 @@
         <item>@string/drawer_communities_title</item>
         <item>@string/bookmarks_title</item>
         <item>@string/drawer_lists</item>
-        <item>@string/drawer_top_articles_title</item>
+        <item>@string/news_top_articles_title</item>
         <item>@string/drawer_birdwatch_title</item>
         <item>@string/spaces_grid_tab</item>
         <item>@string/profile_followers</item>
@@ -40,6 +49,8 @@
         <item>@string/drawer_professional_tools_header_title</item>
         <item>@string/drawer_media_transparency_title</item>
         <item>@string/drawer_imprint_title</item>
+        <item>@string/drawer_settings_title</item>
+        <item>@string/drawer_jobs_title</item>
     </string-array>
 
     <string-array name="piko_array_navbar">
@@ -75,6 +86,7 @@
         <item>@string/piko_pref_pinned_posts_section</item>
         <item>@string/piko_pref_hide_detailed_posts</item>
         <item>@string/piko_pref_hide_premium_prompt</item>
+        <item>@string/piko_pref_hide_todays_news</item>
     </string-array>
 
     <string-array name="piko_array_reply_sorting">
@@ -82,6 +94,29 @@
         <item>@string/detail_filter_recent_title</item>
         <item>@string/detail_filter_most_liked_title</item>
         <item>@string/piko_pref_customisation_reply_sorting_remember</item>
+    </string-array>
+
+    <string-array name="piko_array_translators">
+        <item>@string/piko_native_translator_google</item>
+        <item>@string/piko_native_translator_google_v2</item>
+    </string-array>
+
+    <string-array name="piko_array_search_type_ahead">
+        <item>@string/piko_pref_search_type_ahead_users</item>
+        <item>@string/channel_topics_title</item>
+        <item>@string/piko_pref_search_type_ahead_events</item>
+        <item>@string/search_scope_lists</item>
+        <item>@string/piko_pref_search_type_ahead_ordered_section</item>
+    </string-array>
+
+    <string-array name="piko_array_searchtabs">
+        <item>@string/search_scope_top</item>
+        <item>@string/search_scope_latest</item>
+        <item>@string/subtitle_people</item>
+        <item>@string/search_filter_videos</item>
+        <item>@string/search_filter_photos</item>
+        <item>@string/search_filter_media</item>
+        <item>@string/search_scope_lists</item>
     </string-array>
 
 </resources>
