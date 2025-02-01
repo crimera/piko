@@ -284,6 +284,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.hideTodaysNews) {
+            addPreference(category,
+                    helper.switchPreference(
+                            strRemoveRes("piko_pref_hide_todays_news"),
+                            "",
+                            Settings.ADS_REMOVE_TODAYS_NEW
+                    )
+            );
+        }
 
         if (SettingsStatus.deleteFromDb) {
             addPreference(category,

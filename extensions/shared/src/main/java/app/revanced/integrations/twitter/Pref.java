@@ -27,6 +27,10 @@ public class Pref {
         return Utils.getBooleanPerf(Settings.TIMELINE_SHOW_SENSITIVE_MEDIA);
     }
 
+    public static boolean hideTodaysNews() {
+        return Utils.getBooleanPerf(Settings.ADS_REMOVE_TODAYS_NEW);
+    }
+
     public static boolean enableNativeDownloader() {
         return Utils.getBooleanPerf(Settings.VID_NATIVE_DOWNLOADER);
     }

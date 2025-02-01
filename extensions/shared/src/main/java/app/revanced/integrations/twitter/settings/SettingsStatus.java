@@ -34,6 +34,7 @@ public class SettingsStatus {
     public static boolean hideCTS = false;
     public static boolean hideCTJ = false;
     public static boolean hideDetailedPosts = false;
+    public static boolean hideTodaysNews = false;
     public static boolean hideRBMK = false;
     public static boolean hideRPinnedPosts = false;
     public static boolean hidePremiumPrompt = false;
@@ -266,6 +267,10 @@ public class SettingsStatus {
         hidePromotedTrend = true;
     }
 
+    public static void hideTodaysNews() {
+        hideTodaysNews = true;
+    }
+
     public static void enableReaderMode() {
         enableReaderMode = true;
     }
@@ -330,7 +335,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableAdsSection() {
-        return (hideTopPeopleSearch || hideAds || hideGAds || hideWTF || hideCTS || hideCTJ || hideDetailedPosts || hideRBMK || hidePromotedTrend || removePremiumUpsell || hideMainEvent || hideSuperheroEvent || hideVideosForYou);
+        return (hideTodaysNews || hideTopPeopleSearch || hideAds || hideGAds || hideWTF || hideCTS || hideCTJ || hideDetailedPosts || hideRBMK || hidePromotedTrend || removePremiumUpsell || hideMainEvent || hideSuperheroEvent || hideVideosForYou);
     }
 
     public static boolean enableNativeSection() {

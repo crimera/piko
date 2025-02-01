@@ -43,6 +43,7 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting ADS_HIDE_TOP_PEOPLE_SEARCH = new BooleanSetting("ads_hide_top_people_search", false);
     public static final BooleanSetting ADS_DEL_FROM_DB = new BooleanSetting("ads_del_from_db", false);
     public static final BooleanSetting ADS_REMOVE_PREMIUM_UPSELL = new BooleanSetting("ads_remove_premium_upsell", true);
+    public static final BooleanSetting ADS_REMOVE_TODAYS_NEW = new BooleanSetting("ads_remove_todays_news", true);
 
     public static final BooleanSetting VID_NATIVE_DOWNLOADER = new BooleanSetting("vid_native_downloader", true);
     public static final StringSetting VID_NATIVE_DOWNLOADER_FILENAME = new StringSetting("vid_native_downloader_filename", "0");

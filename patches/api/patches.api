@@ -159,6 +159,10 @@ public final class crimera/patches/twitter/ads/timelineEntryHook/HideSuperHeroEv
 	public static final fun getHideSuperHeroEvent ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
+public final class crimera/patches/twitter/ads/timelineEntryHook/HideTodaysNewsKt {
+	public static final fun getHideTodaysNews ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
 public final class crimera/patches/twitter/ads/timelineEntryHook/HideVideosForYouKt {
 	public static final fun getHideVideosForYou ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
@@ -499,5 +503,10 @@ public final class crimera/patches/twitter/timeline/tweetinfo/TweetInfoHookKt {
 
 public final class crimera/patches/twitter/timeline/videoEntity/ForceHDPatchKt {
 	public static final fun getForceHDPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class crimera/patches/twitter/timeline/videoEntity/VideoEntityPatchKt {
+	public static final fun getVideoEntityFinderFingerprint ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun getVideoEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
