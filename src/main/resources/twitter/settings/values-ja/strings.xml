@@ -24,11 +24,21 @@
     <string name="piko_pref_download_media_link_handle_always_ask">毎回尋ねる</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">メディアリンクをコピー</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">メディアリンクを共有</string>
-    <!-- Downloader Options -->
+    <!-- Native -->
+    <string name="piko_title_native">ネイティブ機能</string>
     <string name="piko_title_native_downloader">ネイティブダウンローダー</string>
+    <string name="piko_title_native_downloader_toggle">ネイティブダウンローダーを有効化</string>
     <string name="piko_pref_native_downloader_alert_title">メディアをダウンロード</string>
     <string name="piko_pref_native_downloader_download_all">すべてダウンロード</string>
     <string name="piko_pref_native_downloader_no_media">メディアが見つかりません</string>
+    <string name="piko_pref_native_downloader_filename_title">ファイル名のパターンを選択</string>
+    <string name="piko_title_native_translator">翻訳</string>
+    <string name="piko_native_translator_toggle">共有メニューに翻訳ボタンを追加</string>
+    <string name="piko_native_translator_provider">翻訳プロバイダー</string>
+    <string name="piko_native_translator_to_lang">翻訳先の言語</string>
+    <string name="piko_native_translator_zero_text">翻訳するテキストが見つかりません</string>
+    <string name="piko_native_translator_google">Google翻訳</string>
+    <string name="piko_native_translator_google_v2">Google翻訳 V2</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモーションポスト</string>
@@ -44,6 +54,7 @@
     <string name="piko_pref_hide_detailed_posts">関連ポスト欄(返信内)</string>
     <string name="piko_pref_hide_trends">プロモーショントレンド</string>
     <string name="piko_pref_hide_premium_prompt">メッセージプロンプト</string>
+    <string name="piko_pref_hide_todays_news">今日のニュース</string>
     <string name="piko_pref_del_from_db">データベースから項目を削除</string>
     <string name="piko_pref_db_not_found">データベースが見つかりません</string>
     <string name="piko_pref_db_not_open">データベースが開かれていません</string>
@@ -142,12 +153,6 @@
     <string name="piko_pref_enable">%sを有効化</string>
     <string name="piko_single_page_settings">全ての設定を表示</string>
     <string name="piko_single_page_settings_desc">カテゴリー分けをせずに、1つのページに全てのPiko設定を表示します</string>
-    <string name="piko_native_translator">共有メニューに翻訳ボタンを追加</string>
-    <string name="piko_native_translator_provider">翻訳プロバイダー</string>
-    <string name="piko_native_translator_to_lang">翻訳先の言語</string>
-    <string name="piko_native_translator_zero_text">翻訳するテキストが見つかりません</string>
-    <string name="piko_native_translator_google">Google翻訳</string>
-    <string name="piko_native_translator_google_v2">Google翻訳 V2</string>
     <string name="piko_pref_search_type_ahead_users">ユーザー</string>
     <string name="piko_pref_search_type_ahead_events">イベント</string>
     <string name="piko_pref_search_type_ahead_ordered_section">並び替え</string>

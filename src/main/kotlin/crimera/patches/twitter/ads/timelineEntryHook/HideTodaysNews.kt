@@ -1,4 +1,4 @@
-package crimera.patches.twitter.misc.shareMenu.debugMenu
+package crimera.patches.twitter.ads.timelineEntryHook
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.patch.BytecodePatch
@@ -6,20 +6,17 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
-import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonAddHook
 
 @Patch(
-    name = "Enable debug menu for posts",
-    dependencies = [SettingsPatch::class],
+    name = "Remove \"Today's News\"",
+    dependencies = [SettingsPatch::class, TimelineEntryHookPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
+    use = true,
 )
-object DebugMenu : BytecodePatch(
-    setOf(SettingsStatusLoadFingerprint, ShareMenuButtonAddHook),
+object HideTodaysNews : BytecodePatch(
+    setOf(SettingsStatusLoadFingerprint),
 ) {
     override fun execute(context: BytecodeContext) {
-        ShareMenuButtonAddHook.addButton("ViewDebugDialog", "enableDebugMenu")
-
-        SettingsStatusLoadFingerprint.enableSettings("enableDebugMenu")
-        // end
+        SettingsStatusLoadFingerprint.enableSettings("hideTodaysNews")
     }
 }

@@ -26,11 +26,22 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">Skopiuj link</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Udostępnij link</string>
 
-    <!-- Downloader Options -->
+    <!-- Native -->
+    <string name="piko_title_native">Natywne funkcje</string>
     <string name="piko_title_native_downloader">Natywne pobieranie</string>
+    <string name="piko_title_native_downloader_toggle">Włącz natywne pobieranie</string>
     <string name="piko_pref_native_downloader_alert_title">Pobierz pliki</string>
     <string name="piko_pref_native_downloader_download_all">Pobierz wszystko</string>
     <string name="piko_pref_native_downloader_no_media">Nie znaleziono plików</string>
+    <string name="piko_pref_native_downloader_filename_title">Zapisz wzór nazwy pliku</string>
+
+    <string name="piko_title_native_translator">Natywne tłumaczenie postów</string>
+    <string name="piko_native_translator_toggle">Włącz natywne tłumaczenie postów</string>
+    <string name="piko_native_translator_provider">Dostawcy tłumaczeń</string>
+    <string name="piko_native_translator_to_lang">Przetłumacz na</string>
+    <string name="piko_native_translator_zero_text">Nie znaleziono tekstu do przetłumaczenia</string>
+    <string name="piko_native_translator_google">Tłumacz Google</string>
+    <string name="piko_native_translator_google_v2">Tłumacz Google V2</string>
 
     <!-- Ads Settings -->
     <string name="piko_title_ads">Reklamy</string>
@@ -53,6 +64,8 @@
     <string name="piko_pref_db_del_items">Usunięte elementy</string>
     <string name="piko_pref_hide_premium_upsell">nagłówek premium</string>
     <string name="piko_pref_hide_premium_upsell_desc">Usuwa nagłówek zachęcający do zakupu premium na głównej osi czasu</string>
+    <string name="piko_pref_top_people_search">\'Osoby\' w wyszukiwaniu</string>
+    <string name="piko_pref_top_people_search_desc">Usuwa sekcję osób po wyszukiwaniu</string>
 
     <!-- Misc Settings -->
     <string name="piko_title_misc">Różne</string>
@@ -112,15 +125,19 @@
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Dostosowywanie</string>
     <string name="piko_pref_customisation_profiletabs">Zakładki profilu do ukrycia</string>
-    <string name="piko_pref_customisation_timelinetabs">Zakładki osi czasu</string>
+    <string name="piko_pref_customisation_timelinetabs">Zakładki osi czasu do ukrycia</string>
     <string name="piko_pref_customisation_timelinetabs_foryou">Ukryj \'Dla Ciebie\'</string>
     <string name="piko_pref_customisation_timelinetabs_following">Ukryj \'Obserwujesz\'</string>
     <string name="piko_pref_customisation_timelinetabs_both">Wyświetl oba</string>
-    <string name="piko_pref_customisation_sidebartabs">Elementy do ukrycia w pasku bocznym</string>
-    <string name="piko_pref_customisation_navbartabs">Elementy do ukrycia w pasku nawigacyjnym</string>
-    <string name="piko_pref_customisation_inlinetabs">Elementy do ukrycia w pasku pod postem</string>
+    <string name="piko_pref_customisation_sidebartabs">Elementy paska bocznego do ukrycia</string>
+    <string name="piko_pref_customisation_navbartabs">Elementy paska nawigacyjnego do ukrycia</string>
+    <string name="piko_pref_customisation_inlinetabs">Elementy paska pod postem do ukrycia</string>
+    <string name="piko_pref_customisation_exploretabs">Zakładki przeglądania do ukrycia</string>
+    <string name="piko_pref_customisation_searchtabs">Zakładki wyszukiwania do ukrycia</string>
     <string name="piko_pref_customisation_reply_sorting">Domyślny filtr sortowania odpowiedzi</string>
-    <string name="piko_pref_customisation_reply_sorting_remember">Zapamiętaj ostatnio wybrany</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">Ostatnio wybrane</string>
+    <string name="piko_pref_customisation_post_font_size">Rozmiar czcionki postów</string>
+    <string name="piko_pref_customisation_search_type_ahead">Sugestie wyszukiwania do ukrycia</string>
 
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Kopia zapasowa i przywracanie</string>
@@ -146,11 +163,8 @@
     <string name="piko_single_page_settings">Ustawienia Piko na pojedynczej stronie</string>
     <string name="piko_single_page_settings_desc">Wyświetlaj widok wszystkich ustawień Piko na pojedynczej stronie</string>
 
-    <string name="piko_native_translator">Włącz natywne tłumaczenie postów</string>
-    <string name="piko_native_translator_provider">Dostawcy tłumaczeń</string>
-    <string name="piko_native_translator_to_lang">Przetłumacz na</string>
-    <string name="piko_native_translator_zero_text">Nie znaleziono tekstu do przetłumaczenia</string>
-    <string name="piko_native_translator_google">Tłumacz Google</string>
-    <string name="piko_native_translator_google_v2">Tłumacz Google V2</string>
+    <string name="piko_pref_search_type_ahead_users">Użytkownicy</string>
+    <string name="piko_pref_search_type_ahead_events">Wydarzenia</string>
+    <string name="piko_pref_search_type_ahead_ordered_section">Sekcja uporządkowana</string>
 
 </resources>

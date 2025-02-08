@@ -10,7 +10,6 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.reference.Reference
 import crimera.patches.twitter.misc.settings.SettingsPatch
 
 object ShareMenuButtonInitHook : MethodFingerprint(
@@ -48,7 +47,7 @@ object ShareMenuButtonInitHook : MethodFingerprint(
     }
 
     fun setButtonIcon(
-        buttonReference: Reference,
+        buttonReference: String,
         iconStr: String,
         offset: Int = 0,
     ) {
@@ -58,7 +57,7 @@ object ShareMenuButtonInitHook : MethodFingerprint(
         val instructions = method.getInstructions()
         instructions.filter { it.opcode == Opcode.SGET_OBJECT }.forEach { instruction ->
             val ref = (instruction as ReferenceInstruction).reference.toString()
-            if (ref == buttonReference.toString()) {
+            if (ref.contains(buttonReference)) {
                 var index = instruction.location.index + offset
                 index =
                     method
