@@ -8,17 +8,17 @@
     <string name="piko_pref_undo_posts_desc">Umożliwia cofanie postów przed opublikowaniem</string>
     <string name="piko_pref_undo_posts_btn">Ustawienia cofania postów</string>
     <string name="piko_pref_icon_n_navbar_btn">Ustawienia ikony aplikacji i paska nawigacji</string>
-    <string name="piko_pref_enable_force_pip">Automatyczny tryb PiP</string>
+    <string name="piko_pref_enable_force_pip">automatyczny tryb PiP</string>
     <string name="piko_pref_enable_force_pip_desc">Włącza tryb PiP (Obraz w obrazie) po zamknięciu aplikacji</string>
 
      <!-- Download Settings -->
     <string name="piko_title_download">Pobieranie</string>
-    <string name="piko_pref_video_download">możliwość pobierania treści</string>
+    <string name="piko_pref_video_download">Możliwość pobierania treści</string>
     <string name="piko_pref_download">Zmień folder do pobierania treści</string>
     <string name="piko_pref_download_path">Główny folder</string>
     <string name="piko_pref_download_path_desc">Główny folder do pobierania treści</string>
-    <string name="piko_pref_download_folder">Subfolder</string>
-    <string name="piko_pref_download_folder_desc">Subfolder do pobierania treści ([główny folder]/[subfolder])</string>
+    <string name="piko_pref_download_folder">Podfolder</string>
+    <string name="piko_pref_download_folder_desc">Podfolder do pobierania treści ([główny folder]/[podfolder])</string>
     <string name="piko_pref_download_media_link_handle">Preferencje pobierania</string>
     <string name="piko_pref_download_media_link_handle_download">Bezpośrednie pobieranie</string>
     <string name="piko_pref_download_media_link_handle_copy_link">Bezpośrednie kopiowanie linku</string>
@@ -58,6 +58,7 @@
     <string name="piko_pref_hide_detailed_posts">\'Odkryj więcej\' (w odpowiedziach)</string>
     <string name="piko_pref_hide_trends">promowane trendy</string>
     <string name="piko_pref_hide_premium_prompt">banerowe reklamy (kup premium)</string>
+    <string name="piko_pref_hide_todays_news">bieżące wiadomości</string>
     <string name="piko_pref_del_from_db">Usuń wpisy z bazy danych</string>
     <string name="piko_pref_db_not_found">Nie znaleziono bazy danych</string>
     <string name="piko_pref_db_not_open">Baza danych nie jest otwarta</string>
