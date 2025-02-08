@@ -31,7 +31,7 @@
     <string name="piko_pref_native_downloader_alert_title">メディアをダウンロード</string>
     <string name="piko_pref_native_downloader_download_all">すべてダウンロード</string>
     <string name="piko_pref_native_downloader_no_media">メディアが見つかりません</string>
-    <string name="piko_pref_native_downloader_filename_title">ファイル名のパターンを保存</string>
+    <string name="piko_pref_native_downloader_filename_title">ファイル名のパターンを選択</string>
     <string name="piko_title_native_translator">翻訳</string>
     <string name="piko_native_translator_toggle">共有メニューに翻訳ボタンを追加</string>
     <string name="piko_native_translator_provider">翻訳プロバイダー</string>
@@ -54,6 +54,7 @@
     <string name="piko_pref_hide_detailed_posts">関連ポスト欄(返信内)</string>
     <string name="piko_pref_hide_trends">プロモーショントレンド</string>
     <string name="piko_pref_hide_premium_prompt">メッセージプロンプト</string>
+    <string name="piko_pref_hide_todays_news">今日のニュース</string>
     <string name="piko_pref_del_from_db">データベースから項目を削除</string>
     <string name="piko_pref_db_not_found">データベースが見つかりません</string>
     <string name="piko_pref_db_not_open">データベースが開かれていません</string>

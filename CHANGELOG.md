@@ -1,3 +1,9 @@
+## [1.50.0-dev.1](https://github.com/crimera/piko/compare/v1.49.1...v1.50.0-dev.1) (2025-01-31)
+
+### Features
+
+* **Translations:** Update `Japanese` ([039aac3](https://github.com/crimera/piko/commit/039aac304215858769c794684f837719edad9790))
+
 ## [1.49.1](https://github.com/crimera/piko/compare/v1.49.0...v1.49.1) (2025-01-29)
 
 ### Bug Fixes
