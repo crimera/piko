@@ -33,7 +33,7 @@
     <string name="piko_pref_native_downloader_alert_title">تنزيل الوسائط</string>
     <string name="piko_pref_native_downloader_download_all">تنزيل الكل</string>
     <string name="piko_pref_native_downloader_no_media">لم يتم العثور على الوسائط</string>
-    <string name="piko_pref_native_downloader_filename_title">حفظ نمط اسم الملف</string>
+    <string name="piko_pref_native_downloader_filename_title">نمط حفظ اسم الملف</string>
 
     <string name="piko_title_native_translator">المترجم المحلي للمنشورات</string>
     <string name="piko_native_translator_toggle">تمكين ترجمة المنشور المحلي</string>
@@ -58,6 +58,7 @@
     <string name="piko_pref_hide_detailed_posts">المشاركات التفصيلية (في الردود)</string>
     <string name="piko_pref_hide_trends">محتوى الترند المُروَّج</string>
     <string name="piko_pref_hide_premium_prompt">رسالة مطالبات Premium</string>
+    <string name="piko_pref_hide_todays_news">اخبار اليوم</string>
     <string name="piko_pref_del_from_db">حذف الإدخالات من قاعدة البيانات</string>
     <string name="piko_pref_db_not_found">لم يتم العثور على قاعدة البيانات</string>
     <string name="piko_pref_db_not_open">لم يتم فتح قاعدة البيانات</string>
