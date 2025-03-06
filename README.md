@@ -223,7 +223,7 @@ To use these patches in ReVanced Manager, follow the steps below or see image:
 
 <tr>
 <td><code>Enable Reader Mode</code></td>
-<td>Enables \"Reader Mode\" on long threads</td>
+<td>Enables \"Reader Mode\" on long threads. Requires X 10.72.2-release.0 or earlier.</td>
 <td>Premium</td>
 <td> <details><img src="./docs/images/18-reader-mode.webp" alt="18-reader-mode" width="800" height="240"/></details></td>
 </tr>
