@@ -28,6 +28,7 @@
 
     <!-- Native -->
     <string name="piko_title_native">Native features</string>
+    <string name="piko_pref_native_page_desc">These Piko native features are available in the share menu of posts.</string>
     <string name="piko_title_native_downloader">Native downloader</string>
     <string name="piko_title_native_downloader_toggle">Enable native downloader</string>
     <string name="piko_pref_native_downloader_alert_title">Download media</string>
