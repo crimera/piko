@@ -77,8 +77,6 @@
     <string name="piko_pref_hide_view_count">查看次数</string>
     <string name="piko_pref_custom_share_domain">自定义分享域名</string>
     <string name="piko_pref_custom_share_domain_desc">自定义分享帖子时使用的域名</string>
-    <string name="piko_pref_browser_chooser">使用外部浏览器</string>
-    <string name="piko_pref_browser_chooser_desc">使用应用外浏览器打开外部链接</string>
     <string name="piko_pref_show_sensitive_media">显示敏感媒体</string>
     <string name="piko_pref_selectable_text">可选文本</string>
     <string name="piko_pref_clear_tracking_params">清除跟踪参数</string>

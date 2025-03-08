@@ -77,8 +77,6 @@
     <string name="piko_pref_hide_view_count">عدد المشاهدات</string>
     <string name="piko_pref_custom_share_domain">نطاق المشاركة المخصص</string>
     <string name="piko_pref_custom_share_domain_desc">النطاق الذي سيتم استخدامه عند مشاركة التغريدات</string>
-    <string name="piko_pref_browser_chooser">استخدام منتقي المتصفح</string>
-    <string name="piko_pref_browser_chooser_desc">فتح الروابط باستخدام منتقي المتصفح بدلاً من استخدام المتصفح داخل التطبيق</string>
     <string name="piko_pref_show_sensitive_media">عرض الوسائط الحساسة</string>
     <string name="piko_pref_selectable_text">نص قابل للتحديد</string>
     <string name="piko_pref_clear_tracking_params">مسح معلمات التتبع</string>

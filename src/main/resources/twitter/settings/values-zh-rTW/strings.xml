@@ -77,8 +77,6 @@
     <string name="piko_pref_hide_view_count">瀏覽次數</string>
     <string name="piko_pref_custom_share_domain">自訂分享網域</string>
     <string name="piko_pref_custom_share_domain_desc">分享推文時使用的網域</string>
-    <string name="piko_pref_browser_chooser">使用應用程式外瀏覽器</string>
-    <string name="piko_pref_browser_chooser_desc">使用應用程式外瀏覽器開啟外部連結</string>
     <string name="piko_pref_show_sensitive_media">顯示敏感多媒體</string>
     <string name="piko_pref_selectable_text">可選取文字</string>
     <string name="piko_pref_clear_tracking_params">清除追蹤參數</string>

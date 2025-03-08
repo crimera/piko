@@ -77,8 +77,6 @@
     <string name="piko_pref_hide_view_count">view count</string>
     <string name="piko_pref_custom_share_domain">Custom sharing domain</string>
     <string name="piko_pref_custom_share_domain_desc">The domain to use when sharing tweets</string>
-    <string name="piko_pref_browser_chooser">Use browser chooser</string>
-    <string name="piko_pref_browser_chooser_desc">Open links with browser chooser instead of using the in-app browser</string>
     <string name="piko_pref_show_sensitive_media">Show sensitive media</string>
     <string name="piko_pref_selectable_text">Selectable text</string>
     <string name="piko_pref_clear_tracking_params">Clear tracking params</string>

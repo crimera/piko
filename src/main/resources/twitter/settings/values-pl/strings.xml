@@ -77,8 +77,6 @@
     <string name="piko_pref_hide_view_count">licznik wyświetleń pod postami</string>
     <string name="piko_pref_custom_share_domain">Własna domena do udostępniania</string>
     <string name="piko_pref_custom_share_domain_desc">Domena używana do udostępniania tweetów</string>
-    <string name="piko_pref_browser_chooser">Używaj domyślnej przeglądarki</string>
-    <string name="piko_pref_browser_chooser_desc">Otwieraj linki w zewnętrznej (domyślnej) przeglądarce</string>
     <string name="piko_pref_show_sensitive_media">Wyświetlaj wrażliwe treści</string>
     <string name="piko_pref_selectable_text">Możliwość zaznaczenia tekstu</string>
     <string name="piko_pref_clear_tracking_params">Usuń parametry śledzenia</string>
