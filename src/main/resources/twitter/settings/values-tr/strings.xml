@@ -46,8 +46,6 @@
     <string name="piko_pref_hide_view_count">Görüntüleme sayısını gizle</string>
     <string name="piko_pref_custom_share_domain">Özel paylaşım alanı</string>
     <string name="piko_pref_custom_share_domain_desc">Tweet paylaşırken kullanılacak alan adı</string>
-    <string name="piko_pref_browser_chooser">Tarayıcı seçiciyi kullan</string>
-    <string name="piko_pref_browser_chooser_desc">Bağlantıları uygulama içi tarayıcıyı kullanmak yerine tarayıcı seçiciyle açın</string>
     <string name="piko_pref_feature_flags">Özellik bayrakları</string>
     <string name="piko_pref_edit_flag_title">Bayrağı düzenle</string>
     <string name="piko_pref_add_flag_title">Bayrak ekle</string>

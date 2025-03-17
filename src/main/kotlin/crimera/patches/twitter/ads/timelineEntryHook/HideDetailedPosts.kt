@@ -8,8 +8,8 @@ import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
 @Patch(
-    name = "Remove Detailed posts",
-    description = "Removes detailed posts in replies",
+    name = "Remove Detailed posts",  // TODO: Rename when migrating to the new patcher?
+    description = "Removes related posts in replies",
     dependencies = [SettingsPatch::class,TimelineEntryHookPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = true

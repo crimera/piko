@@ -58,8 +58,6 @@
     <string name="piko_pref_hide_view_count">jumlah tampilan</string>
     <string name="piko_pref_custom_share_domain">Domain berbagi khusus</string>
     <string name="piko_pref_custom_share_domain_desc">Domain yang digunakan saat berbagi tweet</string>
-    <string name="piko_pref_browser_chooser">Gunakan pemilih browser</string>
-    <string name="piko_pref_browser_chooser_desc">Membuka tautan dengan pemilih browser alih-alih menggunakan browser dalam aplikasi</string>
     <string name="piko_pref_show_sensitive_media">Tampilkan media sensitif</string>
     <string name="piko_pref_selectable_text">Teks yang dapat dipilih</string>
     <string name="piko_pref_clear_tracking_params">Hapus parameter pelacakan</string>

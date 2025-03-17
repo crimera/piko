@@ -14,7 +14,10 @@
 
 <b>Revanced Cli</b>
 
-🚨 Use [crimera/revanced-integrations](https://github.com/crimera/revanced-integrations) when building.
+🚨 Use [Revanced Cli v4.6.0](https://github.com/ReVanced/revanced-cli/releases/tag/v4.6.0) for building.  
+The latest Cli is not compatible.
+
+Download [crimera/piko](https://github.com/crimera/piko/releases) patches and [crimera/revanced-integrations](https://github.com/crimera/revanced-integrations/releases).
 
 ```sh
 java -jar cli.jar patch \
@@ -27,6 +30,10 @@ java -jar cli.jar patch \
 <details>
 
 <div align="left">
+
+Currently, piko patches are not compatible with the latest version of Revanced Manager.  
+Use [Revanced Manager v1.22.0](https://github.com/ReVanced/revanced-manager/releases/tag/v1.22.0) or [RVX Manager v1.22.2](https://github.com/inotia00/revanced-manager/releases/tag/v1.22.2).
+
 To use these patches in ReVanced Manager, follow the steps below or see image:
 
 1. Set `crimera` as the patches organization.<br>
@@ -223,7 +230,7 @@ To use these patches in ReVanced Manager, follow the steps below or see image:
 
 <tr>
 <td><code>Enable Reader Mode</code></td>
-<td>Enables \"Reader Mode\" on long threads</td>
+<td>Enables \"Reader Mode\" on long threads. Requires X 10.72.2-release.0 or earlier.</td>
 <td>Premium</td>
 <td> <details><img src="./docs/images/18-reader-mode.webp" alt="18-reader-mode" width="800" height="240"/></details></td>
 </tr>

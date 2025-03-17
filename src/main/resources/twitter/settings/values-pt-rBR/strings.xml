@@ -67,8 +67,6 @@
     <string name="piko_pref_hide_view_count">contagem de visualizações</string>
     <string name="piko_pref_custom_share_domain">Domínio de compartilhamento personalizado</string>
     <string name="piko_pref_custom_share_domain_desc">O domínio a ser usado ao compartilhar tweets</string>
-    <string name="piko_pref_browser_chooser">Use o seletor de navegador</string>
-    <string name="piko_pref_browser_chooser_desc">Abra links com o seletor de navegador em vez de usar o navegador do aplicativo</string>
     <string name="piko_pref_show_sensitive_media">Exibir mídia sensível</string>
     <string name="piko_pref_selectable_text">Texto selecionável</string>
     <string name="piko_pref_clear_tracking_params">Limpar parâmetros de rastreamento</string>

@@ -76,8 +76,6 @@
     <string name="piko_pref_hide_view_count">лічильник переглядів</string>
     <string name="piko_pref_custom_share_domain">Користувацький домен поширення</string>
     <string name="piko_pref_custom_share_domain_desc">Вибір домену при поширенні допису</string>
-    <string name="piko_pref_browser_chooser">Відкрити з допомогою...</string>
-    <string name="piko_pref_browser_chooser_desc">Відкривати посилання за допомогою вибору браузера замість використання вбудованого браузера</string>
     <string name="piko_pref_show_sensitive_media">Відображати делікатний контент</string>
     <string name="piko_pref_selectable_text">Увімк. можливість виділення тексту</string>
     <string name="piko_pref_clear_tracking_params">Видалити параметри відстеження</string>
