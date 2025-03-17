@@ -1,3 +1,16 @@
+## [1.51.0-dev.1](https://github.com/crimera/piko/compare/v1.50.0...v1.51.0-dev.1) (2025-03-17)
+
+### Bug Fixes
+
+* **Bring back twitter:** Resource compilation fails on ReVanced Manager ([a364bec](https://github.com/crimera/piko/commit/a364becc7f6f70724c37b9499e79885fb09f0436))
+* **Enable Reader Mode:** Specify the compatible version, show a warning instead of throwing an exception when failed ([b1c52e7](https://github.com/crimera/piko/commit/b1c52e73daabe3222e925ba5d6b866af31a35045))
+* **Remove Detailed posts:** Change the settings label from "detailed" to "related" ([3cf5f9e](https://github.com/crimera/piko/commit/3cf5f9ec9e383deb17919f2b3c5254954502c825))
+* Remove obsolete `Open browser chooser on opening links` patch ([a1e2b76](https://github.com/crimera/piko/commit/a1e2b766a872c3ee2facef1444bfa92ab4236144))
+
+### Features
+
+* **Settings:** Add a description to "Native features" page ([be7aa54](https://github.com/crimera/piko/commit/be7aa5472c9b12ff6207992b21292b4fb4d337cf))
+
 ## [1.50.0](https://github.com/crimera/piko/compare/v1.49.1...v1.50.0) (2025-02-08)
 
 ### Features
