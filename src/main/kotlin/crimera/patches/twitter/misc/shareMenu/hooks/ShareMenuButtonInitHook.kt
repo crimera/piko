@@ -1,80 +1,81 @@
 package crimera.patches.twitter.misc.shareMenu.hooks
 
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.fingerprint.MethodFingerprint
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patches.shared.misc.mapping.ResourceMappingPatch
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
 import crimera.patches.twitter.misc.settings.SettingsPatch
+import crimera.patches.twitter.misc.shareMenu.nativeDownloader.exception
+import crimera.patches.twitter.misc.shareMenu.nativeDownloader.instructionToString
 
 object ShareMenuButtonInitHook : MethodFingerprint(
     strings =
         listOf(
             "Debug",
-            "View in Tweet Sandbox",
-            "View in Spaces Sandbox",
         ),
+    customFingerprint = { _, classDef ->
+        classDef.type.contains("Lcom/twitter/tweet/action/legacy")
+    }
 ) {
-    fun setButtonText(
-        matchString: String,
-        stringId: String,
-        offset: Int = 0,
-    ) {
-        val result = result ?: throw PatchException("ShareMenuButtonInitHook not found")
-        val method = result.mutableMethod
+    fun setButtonText(name: String, stringId: String) {
+        val buttonInitResult = ShareMenuButtonInitHook.result ?: throw ShareMenuButtonInitHook.exception
 
-        result.scanResult.stringsScanResult!!.matches.forEach { match ->
-            val matchStr = match.string
-            if (matchStr == matchString) {
-                val loc = match.index + offset
-                val r = method.getInstruction<OneRegisterInstruction>(loc).registerA
-                method.addInstructions(
-                    loc + 1,
-                    """
-                    const-string v$r, "$stringId"
-                    invoke-static {v$r},${SettingsPatch.UTILS_DESCRIPTOR};->strRes(Ljava/lang/String;)Ljava/lang/String;
-                    move-result-object v$r
-                    """.trimIndent(),
-                )
-                return@forEach
-            }
-        }
+        buttonInitResult.scanResult.stringsScanResult?.let {
+            val match = it.matches.first()
+            val setTextStart = match.index - 1
+            val setTextEnd = match.index + 3
+            val method = buttonInitResult.mutableMethod
+
+            val buttonInitInstructions = method.getInstructions().filterIndexed { index, _ ->
+                index in setTextStart..setTextEnd
+            }.mapIndexed { index, ins ->
+                when (index) {
+                    0 -> instructionToString(ins).replace("ViewDebugDialog", name)
+                    1 -> {
+                        ins as Instruction21c
+                        """
+                            const-string v${ins.registerA}, "$stringId"
+                            invoke-static {v${ins.registerA}},${SettingsPatch.UTILS_DESCRIPTOR};->strRes(Ljava/lang/String;)Ljava/lang/String;
+                            move-result-object v${ins.registerA}
+                        """.trimIndent()
+                    }
+
+                    else -> instructionToString(ins)
+                }
+            }.joinToString("\n")
+
+            method.addInstructions(setTextEnd + 1, buttonInitInstructions)
+
+        } ?: throw PatchException("Could not find \"Debug\" string")
     }
 
     fun setButtonIcon(
-        buttonReference: String,
-        iconStr: String,
-        offset: Int = 0,
+        name: String,
+        iconStr: String
     ) {
         val result = result ?: throw PatchException("ShareMenuButtonInitHook not found")
         val allMethods = result.mutableClass.methods
         val method = allMethods.first { it.returnType == "V" }
-        val instructions = method.getInstructions()
-        instructions.filter { it.opcode == Opcode.SGET_OBJECT }.forEach { instruction ->
-            val ref = (instruction as ReferenceInstruction).reference.toString()
-            if (ref.contains(buttonReference)) {
-                var index = instruction.location.index + offset
-                index =
-                    method
-                        .getInstructions()
-                        .first { it.opcode == Opcode.INVOKE_VIRTUAL && it.location.index > index }
-                        .location.index
-                val r = method.getInstruction<BuilderInstruction35c>(index).registerE
-                val iconId = ResourceMappingPatch["drawable", iconStr]
-                method.addInstructions(
-                    index,
-                    """
-                    const v$r, $iconId
-                    invoke-static {v$r}, Ljava/lang/Integer;->valueOf(I)Ljava/lang/Integer;
-                    move-result-object v$r
-                    """.trimIndent(),
-                )
+
+        val iconAdditionStart =
+            method.getInstructions().first { it.opcode == Opcode.MOVE_RESULT_OBJECT }.location.index + 1
+        val iconAdditionEnd = iconAdditionStart + 4
+
+        val iconId = ResourceMappingPatch["drawable", iconStr]
+
+        val buttonInitInstructions = method.getInstructions().filterIndexed { index, _ ->
+            index in iconAdditionStart..iconAdditionEnd
+        }.mapIndexed { index, ins ->
+            when (index) {
+                0 -> instructionToString(ins).replace(Regex("->(\\w+):"), "->$name:")
+                1 -> "const v2, $iconId"
+                else -> instructionToString(ins)
             }
-        }
+        }.joinToString("\n")
+
+        method.addInstructions(iconAdditionStart, buttonInitInstructions)
     }
 }

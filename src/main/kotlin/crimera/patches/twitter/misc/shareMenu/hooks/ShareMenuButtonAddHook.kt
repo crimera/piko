@@ -1,5 +1,6 @@
 package crimera.patches.twitter.misc.shareMenu.hooks
 
+import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
@@ -10,18 +11,33 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
 import com.android.tools.smali.dexlib2.dexbacked.reference.DexBackedFieldReference
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 import crimera.patches.twitter.misc.settings.SettingsPatch
+import crimera.patches.twitter.misc.shareMenu.nativeDownloader.exception
 
 object ShareMenuButtonAddHook : MethodFingerprint(
     returnType = "V",
-    strings =
-        listOf(
-            "3691233323:audiospace",
-        ),
     customFingerprint = { methodDef, _ ->
-        methodDef.name == "a" && methodDef.parameters.size == 4
+        methodDef.name == "a" && methodDef.parameters.map { it.type }
+            .containsAll(listOf("I", "Lcom/twitter/model/timeline/p1;", "Lcom/twitter/util/collection/d1\$a;"))
     },
 ) {
+    fun registerButton(name: String) {
+        val shareMenuButtonAdd = ShareMenuButtonAddHook.result?.mutableMethod ?: throw ShareMenuButtonAddHook.exception
+
+        val sgetObj = shareMenuButtonAdd.getInstructions().last { it.opcode == Opcode.SGET_OBJECT } as Instruction21c
+        val addToCollection =
+            shareMenuButtonAdd.getInstructions().last { it.opcode == Opcode.INVOKE_VIRTUAL } as Instruction35c
+
+        shareMenuButtonAdd.addInstructions(
+            0, """
+                sget-object v0, ${sgetObj.reference.toString().replace("ViewDebugDialog", name)}
+                invoke-virtual {p2, v0}, ${addToCollection.reference}
+            """.trimIndent()
+        )
+    }
+
     fun addButton(
         buttonReference: String?,
         functionName: String,
@@ -37,13 +53,13 @@ object ShareMenuButtonAddHook : MethodFingerprint(
 
         val buttonClass =
             (
-                (
-                    method
-                        .getInstruction<BuilderInstruction21c>(
-                            addMethodIndex - 1,
-                        ).reference
-                )as DexBackedFieldReference
-            ).definingClass
+                    (
+                            method
+                                .getInstruction<BuilderInstruction21c>(
+                                    addMethodIndex - 1,
+                                ).reference
+                            ) as DexBackedFieldReference
+                    ).definingClass
 
         method.addInstructionsWithLabels(
             0,

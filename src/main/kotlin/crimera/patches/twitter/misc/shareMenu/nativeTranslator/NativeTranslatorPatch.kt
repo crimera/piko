@@ -1,23 +1,21 @@
 package crimera.patches.twitter.misc.shareMenu.nativeTranslator
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
-import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
 import app.revanced.patcher.patch.BytecodePatch
-import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.patches.shared.misc.mapping.ResourceMappingPatch
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22c
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
+import crimera.patches.twitter.misc.shareMenu.fingerprints.ActionEnumsFingerprint
 import crimera.patches.twitter.misc.shareMenu.fingerprints.ShareMenuButtonFuncCallFingerprint
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonAddHook
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonInitHook
-import crimera.patches.twitter.misc.shareMenu.nativeDownloader.NativeDownloaderPatch
 
 @Patch(
     name = "Custom translator",
@@ -33,67 +31,44 @@ object NativeTranslatorPatch : BytecodePatch(
         ShareMenuButtonInitHook,
         SettingsStatusLoadFingerprint,
         ShareMenuButtonAddHook,
+        ActionEnumsFingerprint
     ),
 ) {
     override fun execute(context: BytecodeContext) {
-        val result =
-            ShareMenuButtonFuncCallFingerprint.result
-                ?: throw PatchException("ShareMenuButtonFuncCallFingerprint not found")
+        val actionName = "Translate"
 
-        val DD = "${SettingsPatch.PATCHES_DESCRIPTOR}/translator/NativeTranslator;"
+        // Add action
+        val downloadActionReference = ActionEnumsFingerprint.addAction(actionName, ActionEnumsFingerprint.result!!)
 
-        val method = result.mutableMethod
-        val instructions = method.getInstructions()
+        // Register button
+        ShareMenuButtonAddHook.registerButton(actionName)
+        val viewDebugDialogReference =
+            (ShareMenuButtonAddHook.result?.method?.implementation?.instructions?.last { it.opcode == Opcode.SGET_OBJECT } as Instruction21c).reference
 
-        // one click func
-        var targetIndex: Int = 0
-        var refReg: Int = 0
-        result.scanResult.stringsScanResult!!.matches.forEach { stringMatch ->
-            val str = stringMatch.string
-            if (str.contains("click") && refReg == 0) {
-                val movObj = method.getInstruction<TwoRegisterInstruction>(stringMatch.index - 1)
-                refReg = movObj.registerA
-            } else if (str.contains("spaces?id=")) {
-                targetIndex =
-                    instructions.last { it.location.index < stringMatch.index && it.opcode == Opcode.CHECK_CAST }.location.index + 1
-                return@forEach
-            }
-        }
-        if (targetIndex == 0 || refReg == 0) {
-            throw PatchException("hook not found")
-        }
+        // Set Button Text
+        ShareMenuButtonInitHook.setButtonText(actionName, "translate_tweet_show")
+        ShareMenuButtonInitHook.setButtonIcon(actionName, "ic_vector_sparkle")
 
-        // inject func
-        val postObj = method.getInstruction<BuilderInstruction22c>(targetIndex)
+        val buttonFunc = ShareMenuButtonFuncCallFingerprint.result
+        val buttonFuncMethod = ShareMenuButtonFuncCallFingerprint.result?.mutableMethod
+        val deleteStatusLoc = buttonFunc?.scanResult?.stringsScanResult?.matches!!.first().index
+        val activityRefReg = buttonFuncMethod?.getInstruction<TwoRegisterInstruction>(deleteStatusLoc + 1)?.registerA
+        val timelineRefReg = buttonFuncMethod?.getInstruction<Instruction35c>(deleteStatusLoc - 1)?.registerD
 
-        val postObjReg = postObj.registerA
-        val ctxReg = postObj.registerB
-
-        method.addInstructions(
-            targetIndex + 1,
-            """
-            invoke-virtual/range{v$refReg .. v$refReg}, Ljava/lang/ref/Reference;->get()Ljava/lang/Object;
-            move-result-object v$ctxReg
-            check-cast v$ctxReg, Landroid/app/Activity;
-            invoke-static {v$ctxReg, v$postObjReg}, $DD->translate(Landroid/content/Context;Ljava/lang/Object;)V
-            return-void
-            """.trimIndent(),
+        // Add Button function
+        ShareMenuButtonFuncCallFingerprint.addButtonInstructions(
+            downloadActionReference, """
+                check-cast v$timelineRefReg, Lcom/twitter/model/timeline/n2;
+                iget-object v1, v$timelineRefReg, Lcom/twitter/model/timeline/n2;->k:Lcom/twitter/model/core/e;
+                
+                invoke-virtual/range{v$activityRefReg .. v$activityRefReg}, Ljava/lang/ref/Reference;->get()Ljava/lang/Object;
+                move-result-object v0
+                check-cast v0, Landroid/app/Activity;
+                
+                invoke-static {v0, v1}, ${SettingsPatch.PATCHES_DESCRIPTOR}/translator/NativeTranslator;->translate(Landroid/content/Context;Ljava/lang/Object;)V
+                
+                return-void
+        """.trimIndent(), viewDebugDialogReference
         )
-
-        var buttonReference = "SendToSpacesSandbox"
-        // show icon always
-        ShareMenuButtonAddHook.addButton(buttonReference, "enableNativeTranslator")
-
-        // text func
-        var offset = 0
-        if (NativeDownloaderPatch.offset) {
-            offset = 3
-        }
-        ShareMenuButtonInitHook.setButtonText("View in Spaces Sandbox", "translate_tweet_show", offset)
-
-        // icon
-        ShareMenuButtonInitHook.setButtonIcon(buttonReference, "ic_vector_sparkle", 0)
-
-        SettingsStatusLoadFingerprint.enableSettings("nativeTranslator")
     }
 }
