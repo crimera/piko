@@ -17,9 +17,8 @@ object DebugMenu : BytecodePatch(
     setOf(SettingsStatusLoadFingerprint, ShareMenuButtonAddHook),
 ) {
     override fun execute(context: BytecodeContext) {
-        ShareMenuButtonAddHook.addButton("ViewDebugDialog", "enableDebugMenu")
+        ShareMenuButtonAddHook.registerButton("ViewDebugDialog", "enableDebugMenu")
 
         SettingsStatusLoadFingerprint.enableSettings("enableDebugMenu")
-        // end
     }
 }

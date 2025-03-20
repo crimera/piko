@@ -12,10 +12,11 @@ import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.premium.readermode.fingerprints.EnableReaderMode1Fingerprint
 import crimera.patches.twitter.premium.readermode.fingerprints.EnableReaderMode2Fingerprint
+import java.util.logging.Logger
 
 @Patch(
     name = "Enable Reader Mode",
-    description = "Enables \"Reader Mode\" on long threads",
+    description = "Enables \"Reader Mode\" on long threads. Requires X 10.72.2-release.0 or earlier.",
     dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     requiresIntegrations = true
@@ -25,8 +26,12 @@ object EnableReaderModePatch:BytecodePatch(
     setOf(EnableReaderMode1Fingerprint,EnableReaderMode2Fingerprint, SettingsStatusLoadFingerprint)
 ){
     override fun execute(context: BytecodeContext) {
-        val result1 = EnableReaderMode1Fingerprint.result
-            ?: throw PatchException("EnableReaderMode1Fingerprint not found")
+        val result1 = EnableReaderMode1Fingerprint.result ?: run {
+            // Reader mode was removed in 10.72.3
+            Logger.getLogger("app.revanced.piko")  // The logger name must start with "app.revanced"
+                .warning("\"Enable Reader Mode\" is not supported in this version. Use X 10.72.2 or earlier. Patch not executed.")
+            return
+        }
 
         val PREF = "invoke-static {}, ${SettingsPatch.PREF_DESCRIPTOR};->enableReaderMode()Z"
 

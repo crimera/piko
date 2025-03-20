@@ -21,23 +21,29 @@ import java.io.File
 )
 @Suppress("unused")
 object BringBackTwitterResourcePatch : ResourcePatch() {
-    val mipmapIcons = arrayOf(
-        "ic_launcher_twitter",
-        "ic_launcher_twitter_round",
-        "ic_launcher_twitter_foreground",
-    ).map { "$it.webp" }.toTypedArray()
+    private val mipmapIcons = arrayOf(
+        "ic_launcher_twitter.webp",
+        "ic_launcher_twitter_round.webp",
+        "ic_launcher_twitter_foreground.webp",
+    )
 
-    val drawableIcons = arrayOf(
-        "ic_vector_twitter", "ic_vector_home", "ic_vector_twitter_white", "ic_vector_home_stroke", "splash_screen_icon"
-    ).map { "$it.xml" }.toTypedArray()
+    private val drawableIcons = arrayOf(
+        "ic_vector_twitter.xml",
+        "ic_vector_home.xml",
+        "ic_vector_twitter_white.xml",
+        "ic_vector_home_stroke.xml",
+        "splash_screen_icon.xml"
+    )
 
-    val sizes = arrayOf(
+    private val sizes = arrayOf(
         "xxxhdpi",
         "xxhdpi",
         "xhdpi",
         "hdpi",
         "mdpi",
     )
+
+    private val isRunningOnManager = System.getProperty("java.runtime.name") == "Android Runtime"
 
     override fun execute(context: ResourceContext) {
 
@@ -109,9 +115,6 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
         }
     }
 
-    private fun String.startsWithSpecialByte() = encodeToByteArray()[0] == (-16).toByte()
-
-
     private fun updateStringsFile(stringsFile: File, stringsMap: Map<String, String>, context: ResourceContext) {
         context.xmlEditor[stringsFile.toString()].use { editor ->
             val document = editor.file
@@ -120,24 +123,23 @@ object BringBackTwitterResourcePatch : ResourcePatch() {
             for (i in 0 until nodes.length) {
                 val node = nodes.item(i)
                 val name = node.attributes.getNamedItem("name")?.nodeValue
-
-                if (name == "conference_default_title") {
-                    /*
-                     * Parsing XML causes the string which contains the
-                     * character "𝕏" to be corrupted, so we change it to "Twitter"
-                     */
-                    node.textContent = stringsMap[name] ?: run {
-                        val content = node.textContent
-                        val delimiter = if (content.contains("-")) '-' else ' '
-                        content.split(delimiter).joinToString(delimiter.toString()) {
-                            if (it.startsWithSpecialByte()) "Twitter" else it
-                        }
-                    }
-                    continue
-                }
-
                 node.textContent = stringsMap[name] ?: continue
             }
+        }
+
+        /*
+         * The Java XML API on Android has a bug that converts surrogate pair characters
+         * to invalid numeric character references.
+         * It prevents resource compilation.
+         * Fix the text directly after closing the xmlEditor.
+         */
+        if (isRunningOnManager) {
+            stringsFile.writeText(
+                stringsFile.readText()
+                    .replaceFirst("&#55349;&#56655;", "Twitter") // conference_default_title (Originally "𝕏")
+                    .replaceFirst("&#55357;&#56613;", "🔥") // premium_upsell_offer_last_chance
+                    .replaceFirst("&#55356;&#57217;", "🎁") // premium_upsell_offer_phrase
+            )
         }
     }
 }

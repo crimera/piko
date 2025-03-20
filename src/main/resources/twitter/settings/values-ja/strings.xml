@@ -26,14 +26,15 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">メディアリンクを共有</string>
     <!-- Native -->
     <string name="piko_title_native">ネイティブ機能</string>
+    <string name="piko_pref_native_page_desc">これらのPikoネイティブ機能は、ポストの共有メニューから使用できます。</string>
     <string name="piko_title_native_downloader">ネイティブダウンローダー</string>
     <string name="piko_title_native_downloader_toggle">ネイティブダウンローダーを有効化</string>
     <string name="piko_pref_native_downloader_alert_title">メディアをダウンロード</string>
     <string name="piko_pref_native_downloader_download_all">すべてダウンロード</string>
     <string name="piko_pref_native_downloader_no_media">メディアが見つかりません</string>
     <string name="piko_pref_native_downloader_filename_title">ファイル名のパターンを選択</string>
-    <string name="piko_title_native_translator">翻訳</string>
-    <string name="piko_native_translator_toggle">共有メニューに翻訳ボタンを追加</string>
+    <string name="piko_title_native_translator">ネイティブ翻訳</string>
+    <string name="piko_native_translator_toggle">ネイティブ翻訳機能を有効化</string>
     <string name="piko_native_translator_provider">翻訳プロバイダー</string>
     <string name="piko_native_translator_to_lang">翻訳先の言語</string>
     <string name="piko_native_translator_zero_text">翻訳するテキストが見つかりません</string>
@@ -72,8 +73,6 @@
     <string name="piko_pref_hide_view_count">表示回数</string>
     <string name="piko_pref_custom_share_domain">カスタム共有ドメイン</string>
     <string name="piko_pref_custom_share_domain_desc">ポストを共有するときに使用するドメイン</string>
-    <string name="piko_pref_browser_chooser">ブラウザ選択ダイアログを使用</string>
-    <string name="piko_pref_browser_chooser_desc">アプリ内ブラウザではなく、ブラウザ選択ダイアログでリンクを開きます</string>
     <string name="piko_pref_show_sensitive_media">センシティブなメディアを自動で表示</string>
     <string name="piko_pref_selectable_text">選択可能なテキスト</string>
     <string name="piko_pref_clear_tracking_params">トラッキングパラメータを削除</string>

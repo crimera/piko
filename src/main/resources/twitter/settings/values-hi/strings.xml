@@ -42,8 +42,6 @@
     <string name="piko_pref_hide_view_count">दृश्य काउंट छुपाएं</string>
     <string name="piko_pref_custom_share_domain">कस्टम साझा करने का डोमेन</string>
     <string name="piko_pref_custom_share_domain_desc">ट्वीट्स साझा करते समय उपयोग करने के लिए डोमेन</string>
-    <string name="piko_pref_browser_chooser">ब्राउज़र चुनने का उपयोग करें</string>
-    <string name="piko_pref_browser_chooser_desc">इन-एप्लिकेशन ब्राउज़र का उपयोग करने के बजाय ब्राउज़र चुनने के साथ लिंक खोलें</string>
     <string name="piko_pref_feature_flags">विशेषता ध्वज</string>
     <string name="piko_pref_edit_flag_title">ध्वज संपादित करें</string>
     <string name="piko_pref_add_flag_title">ध्वज जोड़ें</string>

@@ -62,8 +62,6 @@
     <string name="piko_pref_hide_view_count">счетчик просмотров</string>
     <string name="piko_pref_custom_share_domain">Кастомный домен ссылки</string>
     <string name="piko_pref_custom_share_domain_desc">Изменить домен ссылки на пост</string>
-    <string name="piko_pref_browser_chooser">Выбор браузера</string>
-    <string name="piko_pref_browser_chooser_desc">Открывать ссылки приложением по умолчанию вместо встроенного браузера</string>
     <string name="piko_pref_show_sensitive_media">Показывать деликатный контент</string>
     <string name="piko_pref_selectable_text">Включить копирование текста</string>
     <string name="piko_pref_clear_tracking_params">Удалять UTM-метки из ссылок</string>

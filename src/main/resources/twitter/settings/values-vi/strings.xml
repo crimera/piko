@@ -42,8 +42,6 @@
     <string name="piko_pref_hide_view_count">Ẩn "Số người xem"</string>
     <string name="piko_pref_custom_share_domain">Tuỳ chỉnh tên miền(KHÔNG NÊN ĐỤNG NẾU KHÔNG HIỂU)</string>
     <string name="piko_pref_custom_share_domain_desc">Tên miền sẽ dược sử dụng chia sẻ tweets</string>
-    <string name="piko_pref_browser_chooser">Sử dụng trình duyệt ngoài</string>
-    <string name="piko_pref_browser_chooser_desc">Mở các đường link bằng trình duyệt đã chọn thay vi trong app</string>
     <string name="piko_pref_feature_flags">Tùy chọn nhà phát triển (NÂNG CAO)</string>
     <string name="piko_pref_edit_flag_title">Sửa các tính năng ẩn (NÂNG CAO)</string>
     <string name="piko_pref_add_flag_title">Thêm các tính năng ẩn (NÂNG CAO)</string>
