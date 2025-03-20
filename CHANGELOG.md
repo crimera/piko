@@ -1,3 +1,9 @@
+## [1.51.0-dev.4](https://github.com/crimera/piko/compare/v1.51.0-dev.3...v1.51.0-dev.4) (2025-03-20)
+
+### Bug Fixes
+
+* Adding debug menu patch results in a crash ([caf82eb](https://github.com/crimera/piko/commit/caf82ebd95bd113dbd5cacda1deffa9194cb280b))
+
 ## [1.51.0-dev.3](https://github.com/crimera/piko/compare/v1.51.0-dev.2...v1.51.0-dev.3) (2025-03-20)
 
 ### Bug Fixes
