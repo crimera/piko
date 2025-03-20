@@ -180,7 +180,7 @@ object NativeDownloaderPatch : BytecodePatch(
         val downloadActionReference = ActionEnumsFingerprint.addAction(buttonName, ActionEnumsFingerprint.result!!)
 
         // Register button
-        ShareMenuButtonAddHook.registerButton(buttonName)
+        ShareMenuButtonAddHook.registerButton(buttonName, "enableNativeDownloader")
         val viewDebugDialogReference =
             (ShareMenuButtonAddHook.result?.method?.implementation?.instructions?.last { it.opcode == Opcode.SGET_OBJECT } as Instruction21c).reference
 

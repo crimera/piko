@@ -41,7 +41,7 @@ object NativeTranslatorPatch : BytecodePatch(
         val downloadActionReference = ActionEnumsFingerprint.addAction(actionName, ActionEnumsFingerprint.result!!)
 
         // Register button
-        ShareMenuButtonAddHook.registerButton(actionName)
+        ShareMenuButtonAddHook.registerButton(actionName, "enableNativeTranslator")
         val viewDebugDialogReference =
             (ShareMenuButtonAddHook.result?.method?.implementation?.instructions?.last { it.opcode == Opcode.SGET_OBJECT } as Instruction21c).reference
 
