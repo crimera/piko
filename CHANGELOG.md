@@ -1,3 +1,9 @@
+## [1.51.0-dev.2](https://github.com/crimera/piko/compare/v1.51.0-dev.1...v1.51.0-dev.2) (2025-03-20)
+
+### Updates
+
+* Improve adding new buttons in share menu ([16cc3bd](https://github.com/crimera/piko/commit/16cc3bd01c03bfc800d61f0844b455c5d086422a))
+
 ## [1.51.0-dev.1](https://github.com/crimera/piko/compare/v1.50.0...v1.51.0-dev.1) (2025-03-17)
 
 ### Bug Fixes
