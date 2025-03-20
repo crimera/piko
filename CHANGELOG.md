@@ -1,3 +1,9 @@
+## [1.51.0-dev.3](https://github.com/crimera/piko/compare/v1.51.0-dev.2...v1.51.0-dev.3) (2025-03-20)
+
+### Bug Fixes
+
+* Add back settings for the custom sharemenu buttons ([bc7e777](https://github.com/crimera/piko/commit/bc7e777e59091801238d4692823415b0d7d2855b))
+
 ## [1.51.0-dev.2](https://github.com/crimera/piko/compare/v1.51.0-dev.1...v1.51.0-dev.2) (2025-03-20)
 
 ### Updates
