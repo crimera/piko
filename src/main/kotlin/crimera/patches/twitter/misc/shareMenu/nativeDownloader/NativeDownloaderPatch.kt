@@ -208,5 +208,7 @@ object NativeDownloaderPatch : BytecodePatch(
             invoke-static {v0, v1}, ${SettingsPatch.PATCHES_DESCRIPTOR}/NativeDownloader;->downloader(Landroid/content/Context;Ljava/lang/Object;)V
         """.trimIndent(), viewDebugDialogReference
         )
+
+        SettingsStatusLoadFingerprint.enableSettings("nativeDownloader")
     }
 }

@@ -70,5 +70,7 @@ object NativeTranslatorPatch : BytecodePatch(
                 return-void
         """.trimIndent(), viewDebugDialogReference
         )
+
+        SettingsStatusLoadFingerprint.enableSettings("nativeTranslator")
     }
 }
