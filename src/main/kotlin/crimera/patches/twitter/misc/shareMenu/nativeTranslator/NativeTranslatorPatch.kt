@@ -43,7 +43,7 @@ object NativeTranslatorPatch : BytecodePatch(
         // Register button
         ShareMenuButtonAddHook.registerButton(actionName, "enableNativeTranslator")
         val viewDebugDialogReference =
-            (ShareMenuButtonAddHook.result?.method?.implementation?.instructions?.last { it.opcode == Opcode.SGET_OBJECT } as Instruction21c).reference
+            (ShareMenuButtonAddHook.result?.method?.implementation?.instructions?.first { it.opcode == Opcode.SGET_OBJECT } as Instruction21c).reference
 
         // Set Button Text
         ShareMenuButtonInitHook.setButtonText(actionName, "translate_tweet_show")

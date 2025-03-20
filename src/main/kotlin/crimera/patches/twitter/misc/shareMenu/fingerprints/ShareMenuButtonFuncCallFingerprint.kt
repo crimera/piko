@@ -73,9 +73,16 @@ object ShareMenuButtonFuncCallFingerprint : MethodFingerprint(
         var out: BuilderInstruction? = null
         instructions.filter { it.opcode == Opcode.GOTO_16 }.forEach { ins ->
             val sGet = instructions[ins.location.index + 1]
+
             if (sGet.opcode == Opcode.SGET_OBJECT && (sGet as Instruction21c).reference == reference) {
-                val ifNe = instructions[ins.location.index + 3]
-                out = ifNe
+                var index = ins.location.index
+                while (instructions[index].opcode != Opcode.IGET_OBJECT) {
+                    val currentIns = instructions[index]
+                    if (currentIns.opcode == Opcode.IF_NE) {
+                        out = currentIns
+                    }
+                    index += 1
+                }
             }
         }
         return out

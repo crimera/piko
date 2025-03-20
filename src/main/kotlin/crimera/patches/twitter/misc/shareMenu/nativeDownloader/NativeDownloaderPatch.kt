@@ -182,7 +182,7 @@ object NativeDownloaderPatch : BytecodePatch(
         // Register button
         ShareMenuButtonAddHook.registerButton(buttonName, "enableNativeDownloader")
         val viewDebugDialogReference =
-            (ShareMenuButtonAddHook.result?.method?.implementation?.instructions?.last { it.opcode == Opcode.SGET_OBJECT } as Instruction21c).reference
+            (ShareMenuButtonAddHook.result?.method?.implementation?.instructions?.first { it.opcode == Opcode.SGET_OBJECT } as Instruction21c).reference
 
         // Set Button Text
         ShareMenuButtonInitHook.setButtonText(buttonName, "piko_pref_native_downloader_alert_title")
