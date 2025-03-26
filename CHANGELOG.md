@@ -1,3 +1,9 @@
+## [1.51.1](https://github.com/crimera/piko/compare/v1.51.0...v1.51.1) (2025-03-26)
+
+### Bug Fixes
+
+* Add support for 10.83.0 releases ([9344d52](https://github.com/crimera/piko/commit/9344d527d1ec5e0fd812bd835c45304a6619df95))
+
 ## [1.51.1-dev.1](https://github.com/crimera/piko/compare/v1.51.0...v1.51.1-dev.1) (2025-03-20)
 
 ### Bug Fixes
