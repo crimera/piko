@@ -43,6 +43,8 @@ internal object GetVideoUrlFFingerprint : NativeDownloaderMethodFingerprint("get
 
 internal object GetVideoCodecFFingerprint : NativeDownloaderMethodFingerprint("getVideoCodecField")
 
+internal object GetVideoDataClassFingerprint: NativeDownloaderMethodFingerprint("getVideoDataClass")
+
 internal object GetUserNameMethodCaller : MethodFingerprint(
     returnType = "V",
     strings =
@@ -77,6 +79,12 @@ internal object VideoUrlFieldFingeprint : MethodFingerprint(
     },
 )
 
+internal object VideoDataClassFingerprint: MethodFingerprint(
+    strings = listOf(
+        "codecs=\""
+    )
+)
+
 @Patch(
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
@@ -96,6 +104,8 @@ class NativeDownloaderHooksPatch :
             GetImageUrlFFingerprint,
             GetVideoUrlFFingerprint,
             GetVideoCodecFFingerprint,
+            VideoDataClassFingerprint,
+            GetVideoDataClassFingerprint
         ),
     ) {
     private fun MutableMethod.changeFirstString(value: String) {
@@ -198,5 +208,16 @@ class NativeDownloaderHooksPatch :
         }
 
         // end
+
+        VideoDataClassFingerprint.result ?.let {
+            val className =  it.classDef.toString()
+            .removePrefix("L")
+            .removeSuffix(";")
+            .replace("/", ".")
+
+            GetVideoDataClassFingerprint.result?.mutableMethod?.changeFirstString(className)
+                ?: throw GetVideoDataClassFingerprint.exception
+
+        } ?: throw VideoDataClassFingerprint.exception
     }
 }
