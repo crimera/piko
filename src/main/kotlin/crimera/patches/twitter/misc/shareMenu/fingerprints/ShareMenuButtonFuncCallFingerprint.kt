@@ -21,16 +21,17 @@ object ShareMenuButtonFuncCallFingerprint : MethodFingerprint(
             "Delete Status",
             "click",
             "tweet_analytics",
-            "author_moderated_replies_author_enabled"
+            "author_moderated_replies_author_enabled",
+            "conversational_replies_android_pinned_replies_creation_enabled"
         ),
 ) {
 
     fun addButtonInstructions(reference: String, instructions: String, debugDialogReference: Reference) {
-        val buttonFunc = ShareMenuButtonFuncCallFingerprint.result ?: throw ShareMenuButtonFuncCallFingerprint.exception
+        val buttonFunc = result ?: throw ShareMenuButtonFuncCallFingerprint.exception
 
         val buttonFuncMethod = buttonFunc.mutableMethod
 
-        val deleteStatusLoc = buttonFunc.scanResult.stringsScanResult?.matches!!.first().index
+        val deleteStatusLoc = buttonFunc.scanResult.stringsScanResult?.matches!!.first { it.string == "Delete Status" } .index
         val gotoLoc = deleteStatusLoc + 8
 
         val buttonFuncInstructions = buttonFuncMethod.getInstructions()

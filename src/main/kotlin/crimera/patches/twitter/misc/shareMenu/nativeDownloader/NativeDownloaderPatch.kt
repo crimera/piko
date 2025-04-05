@@ -1,7 +1,6 @@
 package crimera.patches.twitter.misc.shareMenu.nativeDownloader
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.fingerprint.MethodFingerprint
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
@@ -19,6 +18,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.*
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.Reference
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.misc.shareMenu.fingerprints.ActionEnumsFingerprint
@@ -191,15 +191,23 @@ object NativeDownloaderPatch : BytecodePatch(
         // Add Button function
         // TODO: handle possible nulls
         val buttonFunc = ShareMenuButtonFuncCallFingerprint.result
-        val buttonFuncMethod = ShareMenuButtonFuncCallFingerprint.result?.mutableMethod
-        val deleteStatusLoc = buttonFunc?.scanResult?.stringsScanResult?.matches!!.first().index
-        val activityRefReg = buttonFuncMethod?.getInstruction<TwoRegisterInstruction>(deleteStatusLoc + 1)?.registerA
-        val timelineRefReg = buttonFuncMethod?.getInstruction<Instruction35c>(deleteStatusLoc - 1)?.registerD
+        val buttonFuncMethod = ShareMenuButtonFuncCallFingerprint.result?.method?.implementation?.instructions?.toList()
+        val deleteStatusLoc =
+            buttonFunc?.scanResult?.stringsScanResult?.matches?.first { it.string == "Delete Status" }?.index
+                ?: throw PatchException("Delete status not found")
+        val conversationalRepliesLoc =
+            buttonFunc.scanResult.stringsScanResult?.matches?.first { it.string == "conversational_replies_android_pinned_replies_creation_enabled" }?.index
+                ?: throw PatchException("conversational_replies_android_pinned_replies_creation_enabled not found")
+        val timelineRef = (buttonFuncMethod?.filterIndexed { i, ins ->
+            i > conversationalRepliesLoc && ins.opcode == Opcode.IGET_OBJECT
+        }?.first() as Instruction22c?) ?: throw PatchException("Failed to find timelineRef")
+        val activityRefReg = (buttonFuncMethod[deleteStatusLoc + 1] as TwoRegisterInstruction).registerA
+        val timelineRefReg = (buttonFuncMethod[deleteStatusLoc - 1] as Instruction35c).registerD
 
         ShareMenuButtonFuncCallFingerprint.addButtonInstructions(
             downloadActionReference, """
-            check-cast v$timelineRefReg, Lcom/twitter/model/timeline/n2;
-            iget-object v1, v$timelineRefReg, Lcom/twitter/model/timeline/n2;->k:Lcom/twitter/model/core/e;
+            check-cast v$timelineRefReg, ${timelineRef.reference.extractDescriptors()[0]}
+            iget-object v1, v$timelineRefReg, ${timelineRef.reference}
             
             invoke-virtual/range{v$activityRefReg .. v$activityRefReg}, Ljava/lang/ref/Reference;->get()Ljava/lang/Object;
             move-result-object v0
@@ -211,4 +219,9 @@ object NativeDownloaderPatch : BytecodePatch(
 
         SettingsStatusLoadFingerprint.enableSettings("nativeDownloader")
     }
+}
+
+fun Reference.extractDescriptors(): List<String> {
+    val regex = Regex("L[^;]+;")
+    return regex.findAll(this.toString()).map { it.value }.toList()
 }
