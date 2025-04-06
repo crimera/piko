@@ -28,6 +28,7 @@
 
     <!-- Native -->
     <string name="piko_title_native">Natywne funkcje</string>
+    <string name="piko_pref_native_page_desc">Natywne funkcje Piko znajdują się w menu udostępniania postów.</string>
     <string name="piko_title_native_downloader">Natywne pobieranie</string>
     <string name="piko_title_native_downloader_toggle">Włącz natywne pobieranie</string>
     <string name="piko_pref_native_downloader_alert_title">Pobierz pliki</string>
