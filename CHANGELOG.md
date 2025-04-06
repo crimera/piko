@@ -1,3 +1,14 @@
+## [1.53.0](https://github.com/crimera/piko/compare/v1.52.0...v1.53.0) (2025-04-06)
+
+### Bug Fixes
+
+* **Twitter - Custom Downloader:** Added VideoDataClass Fingerprint ([99ff271](https://github.com/crimera/piko/commit/99ff271b3fcbf1a6f3666b97c256528435f6501c))
+* **Twitter - Custom Downloader:** Improve fingerprints ([f962310](https://github.com/crimera/piko/commit/f9623106106bd21b9b595983e8db244c8c35e227))
+
+### Features
+
+* **Translations:** Update `Polish` ([d81f93c](https://github.com/crimera/piko/commit/d81f93cff2c31c9fe82ff8e43598ab90e6d899ab))
+
 ## [1.53.0-dev.1](https://github.com/crimera/piko/compare/v1.52.0...v1.53.0-dev.1) (2025-04-06)
 
 ### Bug Fixes
