@@ -84,7 +84,7 @@
     <string name="piko_pref_unshorten_link">URL 줄이기 사용하지 않기</string>
     <string name="piko_pref_unshorten_link_desc">t.co URL 줄이기를 제거할 수 있습니다.</string>
     <string name="piko_pref_round_off_numbers">숫자 반올림</string>
-    <string name="piko_pref_round_off_numbers_desc">숫자를 K와 M으로 반올림할 수 있습니다.</string>
+    <string name="piko_pref_round_off_numbers_desc">숫자를 천 또는 만으로 반올림할 수 있습니다.</string>
     <string name="piko_pref_debug_menu">게시물을 위한 디버그 메뉴</string>
     <string name="piko_pref_quick_settings">빠른 설정 활성화하기</string>
     <string name="piko_pref_quick_settings_summary">사이드 바에서 빠른 설정 버튼을 추가할 수 있습니다.</string>
