@@ -51,11 +51,11 @@
     <string name="piko_pref_hide_main_event">메인 이벤트 (탐색)</string>
     <string name="piko_pref_hide_superhero_event">Superhero 이벤트 (탐색)</string>
     <string name="piko_pref_hide_videos_for_you">나를 위한 동영상 (탐색)</string>
-    <string name="piko_pref_wtf_section">"Who to follow" 영역</string>
-    <string name="piko_pref_cts_section">"구독할 크리에이터" 영역</string>
-    <string name="piko_pref_ctj_section">"새 커뮤니티 찾기" 영역</string>
-    <string name="piko_pref_ryb_section">"북마크 다시 방문" 영역</string>
-    <string name="piko_pref_pinned_posts_section">"팔로우가 고정한 게시물" 영역</string>
+    <string name="piko_pref_wtf_section">\"Who to follow\" 영역</string>
+    <string name="piko_pref_cts_section">\"구독할 크리에이터\" 영역</string>
+    <string name="piko_pref_ctj_section">\"새 커뮤니티 찾기\" 영역</string>
+    <string name="piko_pref_ryb_section">\"북마크 다시 방문\" 영역</string>
+    <string name="piko_pref_pinned_posts_section">\"팔로우가 고정한 게시물\" 영역</string>
     <string name="piko_pref_hide_detailed_posts">관련 게시물 (in 답글)</string>
     <string name="piko_pref_hide_trends">광고 트렌드</string>
     <string name="piko_pref_hide_premium_prompt">메시지 프롬프트</string>
@@ -82,7 +82,7 @@
     <string name="piko_pref_selectable_text">선택 가능한 텍스트</string>
     <string name="piko_pref_clear_tracking_params">추적 매개변수 제거</string>
     <string name="piko_pref_unshorten_link">URL 줄이기 사용하지 않기</string>
-    <string name="piko_pref_unshorten_link_desc">t.co URL 줄이기를 제거합니다.</string>
+    <string name="piko_pref_unshorten_link_desc">t.co URL 줄이기를 제거할 수 있습니다.</string>
     <string name="piko_pref_round_off_numbers">숫자 반올림</string>
     <string name="piko_pref_round_off_numbers_desc">숫자를 K와 M으로 반올림할 수 있습니다.</string>
     <string name="piko_pref_debug_menu">게시물을 위한 디버그 메뉴</string>
