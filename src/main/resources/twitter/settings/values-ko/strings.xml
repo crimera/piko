@@ -48,8 +48,8 @@
     <string name="piko_title_ads">광고</string>
     <string name="piko_pref_hide_promoted_posts">광고 게시물</string>
     <string name="piko_pref_hide_g_ads">Google 광고</string>
-    <string name="piko_pref_hide_main_event">메인 이벤트 (탐색)</string>
-    <string name="piko_pref_hide_superhero_event">Superhero 이벤트 (탐색)</string>
+    <string name="piko_pref_hide_main_event">주요 이벤트 (탐색)</string>
+    <string name="piko_pref_hide_superhero_event">슈퍼히어로 이벤트 (탐색)</string>
     <string name="piko_pref_hide_videos_for_you">나를 위한 동영상 (탐색)</string>
     <string name="piko_pref_wtf_section">\"Who to follow\" 영역</string>
     <string name="piko_pref_cts_section">\"구독할 크리에이터\" 영역</string>
@@ -73,7 +73,7 @@
     <string name="piko_title_misc">기타</string>
     <string name="piko_pref_chirp_font">짹짹이 폰트</string>
     <string name="piko_pref_hide_fab">플로팅 동작 버튼</string>
-    <string name="piko_pref_hide_fab_menu">플로팅 메뉴 버튼</string>
+    <string name="piko_pref_hide_fab_menu">플로팅 동작 메뉴 버튼</string>
     <string name="piko_pref_rec_users">추천 사용자</string>
     <string name="piko_pref_hide_view_count">조회수</string>
     <string name="piko_pref_custom_share_domain">사용자 정의 도메인</string>
