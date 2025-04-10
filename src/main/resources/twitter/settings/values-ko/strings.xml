@@ -42,7 +42,7 @@
     <string name="piko_native_translator_to_lang">번역할 언어</string>
     <string name="piko_native_translator_zero_text">번역할 텍스트를 찾을 수 없습니다.</string>
     <string name="piko_native_translator_google">Google 번역기</string>
-    <string name="piko_native_translator_google_v2">Google 번역기 Ver.2</string>
+    <string name="piko_native_translator_google_v2">Google 번역기 V2</string>
 
     <!-- Ads Settings -->
     <string name="piko_title_ads">광고</string>
@@ -64,8 +64,8 @@
     <string name="piko_pref_db_not_found">데이터베이스를 찾을 수 없습니다.</string>
     <string name="piko_pref_db_not_open">데이터베이스가 열려져 있지 않습니다.</string>
     <string name="piko_pref_db_del_items">제거된 아이템</string>
-    <string name="piko_pref_hide_premium_upsell">Premium 업셀링</string>
-    <string name="piko_pref_hide_premium_upsell_desc">홈 타임라인에서 Premium 업셀링을 제거할 수 있습니다.</string>
+    <string name="piko_pref_hide_premium_upsell">Premium 업그레이드</string>
+    <string name="piko_pref_hide_premium_upsell_desc">홈 타임라인에서 Premium 업그레이드 버튼을 제거할 수 있습니다.</string>
     <string name="piko_pref_top_people_search">검색 상단 사용자</string>
     <string name="piko_pref_top_people_search_desc">검색한 후에 표시되는 사용자 영역을 제거할 수 있습니다.</string>
 
@@ -78,7 +78,7 @@
     <string name="piko_pref_hide_view_count">조회수</string>
     <string name="piko_pref_custom_share_domain">사용자 정의 도메인</string>
     <string name="piko_pref_custom_share_domain_desc">트윗을 공유할 때 사용될 도메인을 지정할 수 있습니다.</string>
-    <string name="piko_pref_show_sensitive_media">민감한 미디어 표시하기</string>
+    <string name="piko_pref_show_sensitive_media">민감한 콘텐츠 표시하기</string>
     <string name="piko_pref_selectable_text">선택 가능한 텍스트</string>
     <string name="piko_pref_clear_tracking_params">추적 매개변수 제거</string>
     <string name="piko_pref_unshorten_link">URL 줄이기 사용하지 않기</string>
