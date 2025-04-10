@@ -74,7 +74,7 @@
     <string name="piko_pref_chirp_font">짹짹이 폰트</string>
     <string name="piko_pref_hide_fab">플로팅 동작 버튼</string>
     <string name="piko_pref_hide_fab_menu">플로팅 동작 메뉴 버튼</string>
-    <string name="piko_pref_rec_users">추천 사용자</string>
+    <string name="piko_pref_rec_users">팔로우 추천</string>
     <string name="piko_pref_hide_view_count">조회수</string>
     <string name="piko_pref_custom_share_domain">사용자 정의 도메인</string>
     <string name="piko_pref_custom_share_domain_desc">트윗을 공유할 때 사용될 도메인을 지정할 수 있습니다.</string>
