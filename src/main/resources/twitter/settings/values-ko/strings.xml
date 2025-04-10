@@ -118,7 +118,7 @@
     <string name="piko_pref_force_hd">HD 동영상 강제</string>
     <string name="piko_pref_force_hd_desc">동영상을 항상 높은 화질로 재생할 수 있습니다.</string>
     <string name="piko_pref_hide_nudge_button">넛지 버튼 숨기기</string>
-    <string name="piko_pref_hide_nudge_button_desc">게시물에서 팔로우하기/구독하기/다시 팔로우하기 버튼을 숨길 수 있습니다.</string>
+    <string name="piko_pref_hide_nudge_button_desc">게시물에서 팔로우하기/구독하기/맞팔로우하기 버튼을 숨길 수 있습니다.</string>
     <string name="piko_pref_hide_social_proof">내가 팔로우하는 사용자 숨기기</string>
     <string name="piko_pref_hide_social_proof_desc">프로필 하단에서 내가 팔로우하는 사용자를 팔로워하는 사람들을 숨길 수 있습니다.</string>
 
