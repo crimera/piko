@@ -59,7 +59,7 @@
     <string name="piko_pref_hide_detailed_posts">관련 게시물 (in 답글)</string>
     <string name="piko_pref_hide_trends">광고 트렌드</string>
     <string name="piko_pref_hide_premium_prompt">메시지 프롬프트</string>
-    <string name="piko_pref_hide_todays_news">오늘의 뉴스</string>
+    <string name="piko_pref_hide_todays_news">Today\'s News</string>
     <string name="piko_pref_del_from_db">데이터베이스에서 엔트리 제거하기</string>
     <string name="piko_pref_db_not_found">데이터베이스를 찾을 수 없습니다.</string>
     <string name="piko_pref_db_not_open">데이터베이스가 열려져 있지 않습니다.</string>
@@ -86,8 +86,8 @@
     <string name="piko_pref_round_off_numbers">숫자 반올림</string>
     <string name="piko_pref_round_off_numbers_desc">숫자를 천 또는 만으로 반올림할 수 있습니다.</string>
     <string name="piko_pref_debug_menu">게시물을 위한 디버그 메뉴</string>
-    <string name="piko_pref_quick_settings">빠른 설정 활성화하기</string>
-    <string name="piko_pref_quick_settings_summary">사이드 바에서 빠른 설정 버튼을 추가할 수 있습니다.</string>
+    <string name="piko_pref_quick_settings">빠른 설정 버튼 활성화하기</string>
+    <string name="piko_pref_quick_settings_summary">사이드 바에서 빠른 Piko 설정 버튼을 추가할 수 있습니다.</string>
 
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">기능 플래그</string>
@@ -102,14 +102,14 @@
     <string name="piko_pref_hide_live_threads">실시간 쓰레드</string>
     <string name="piko_pref_hide_live_threads_desc">타임라인에서 실시간 영역를 숨길 수 있습니다.</string>
     <string name="piko_pref_hide_banner">배너</string>
-    <string name="piko_pref_hide_banner_desc">새로운 게시물 알약을 표시할 수 있습니다.</string>
+    <string name="piko_pref_hide_banner_desc">새로운 게시물 알림 배너를 표시할 수 있습니다.</string>
     <string name="piko_pref_hide_bmk_timeline">타임라인에서 북마크 아이콘</string>
     <string name="piko_pref_force_translate">번역 강제로 활성화하기</string>
     <string name="piko_pref_force_translate_desc">모든 게시물이 번역 옵션을 가질 수 있습니다.</string>
     <string name="piko_pref_hide_quick_promote">프로모션 버튼</string>
     <string name="piko_pref_hide_quick_promote_desc">자체 게시물 아래에 프로모션 버튼을 숨길 수 있습니다.</string>
     <string name="piko_pref_show_poll_result">투표 결과 표시하기</string>
-    <string name="piko_pref_show_poll_result_desc">투표 없이 결과를 볼 수 있습니다.</string>
+    <string name="piko_pref_show_poll_result_desc">투표 없이 투표 결과를 볼 수 있습니다.</string>
     <string name="piko_pref_hide_immersive_player">몰입형 플레이어</string>
     <string name="piko_pref_hide_immersive_player_desc">동영상 플레이어에서 위로 스와이프하여 다음 동영상을 볼 수 없습니다.</string>
     <string name="piko_pref_enable_vid_auto_advance">동영상 자동 스크롤</string>
@@ -120,7 +120,7 @@
     <string name="piko_pref_hide_nudge_button">넛지 버튼 숨기기</string>
     <string name="piko_pref_hide_nudge_button_desc">게시물에서 팔로우하기/구독하기/다시 팔로우하기 버튼을 숨길 수 있습니다.</string>
     <string name="piko_pref_hide_social_proof">내가 팔로우하는 사용자 숨기기</string>
-    <string name="piko_pref_hide_social_proof_desc">프로필 하단에서 내가 팔로우하는 사용자를 숨길 수 있습니다.</string>
+    <string name="piko_pref_hide_social_proof_desc">프로필 하단에서 내가 팔로우하는 사용자를 팔로워하는 사람들을 숨길 수 있습니다.</string>
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">사용자 정의</string>
