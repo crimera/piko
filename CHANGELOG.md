@@ -1,3 +1,9 @@
+## [1.54.0-dev.1](https://github.com/crimera/piko/compare/v1.53.0...v1.54.0-dev.1) (2025-04-14)
+
+### Features
+
+* **Translations:** Korean translation added ([492e631](https://github.com/crimera/piko/commit/492e6312df05d3bdae618e350a929a8b22914c98))
+
 ## [1.53.0](https://github.com/crimera/piko/compare/v1.52.0...v1.53.0) (2025-04-06)
 
 ### Bug Fixes
