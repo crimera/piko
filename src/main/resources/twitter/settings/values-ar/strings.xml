@@ -28,6 +28,7 @@
 
     <!-- محلي -->
     <string name="piko_title_native">الميزات المحلية</string>
+    <string name="piko_pref_native_page_desc">تتوفر ميزات Piko المحلية هذه في قائمة مشاركة المنشورات.</string>
     <string name="piko_title_native_downloader">برنامج التنزيل المحلي</string>
     <string name="piko_title_native_downloader_toggle">تمكين التنزيل المحلي</string>
     <string name="piko_pref_native_downloader_alert_title">تنزيل الوسائط</string>
@@ -63,7 +64,7 @@
     <string name="piko_pref_db_not_found">لم يتم العثور على قاعدة البيانات</string>
     <string name="piko_pref_db_not_open">لم يتم فتح قاعدة البيانات</string>
     <string name="piko_pref_db_del_items">عنصر محذوف</string>
-    <string name="piko_pref_hide_premium_upsell">Premium ترقية</string>
+    <string name="piko_pref_hide_premium_upsell">ترقية Premium</string>
     <string name="piko_pref_hide_premium_upsell_desc">يزيل ترقية Premium في الخط الزمني للصفحة الرئيسية</string>
     <string name="piko_pref_top_people_search">أعلى الأشخاص في البحث</string>
     <string name="piko_pref_top_people_search_desc">إزالة قسم الأشخاص بعد البحث</string>
