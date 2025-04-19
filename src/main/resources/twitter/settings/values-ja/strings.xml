@@ -33,8 +33,8 @@
     <string name="piko_pref_native_downloader_download_all">すべてダウンロード</string>
     <string name="piko_pref_native_downloader_no_media">メディアが見つかりません</string>
     <string name="piko_pref_native_downloader_filename_title">ファイル名のパターンを選択</string>
-    <string name="piko_title_native_translator">ネイティブ翻訳</string>
-    <string name="piko_native_translator_toggle">ネイティブ翻訳機能を有効化</string>
+    <string name="piko_title_native_translator">翻訳</string>
+    <string name="piko_native_translator_toggle">共有メニューに翻訳ボタンを追加</string>
     <string name="piko_native_translator_provider">翻訳プロバイダー</string>
     <string name="piko_native_translator_to_lang">翻訳先の言語</string>
     <string name="piko_native_translator_zero_text">翻訳するテキストが見つかりません</string>
@@ -62,8 +62,8 @@
     <string name="piko_pref_db_del_items">削除した項目</string>
     <string name="piko_pref_hide_premium_upsell">プレミアムの広告</string>
     <string name="piko_pref_hide_premium_upsell_desc">タイムラインからプレミアムの広告を削除します</string>
-    <string name="piko_pref_top_people_search">検索結果からユーザー欄を非表示</string>
-    <string name="piko_pref_top_people_search_desc">検索結果の1番上にある「ユーザー」欄を非表示にします</string>
+    <string name="piko_pref_top_people_search">検索結果からユーザー欄</string>
+    <string name="piko_pref_top_people_search_desc">検索結果の一番上にある「ユーザー」欄を非表示にします</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">その他</string>
     <string name="piko_pref_chirp_font">Chirpフォント</string>
@@ -72,7 +72,7 @@
     <string name="piko_pref_rec_users">おすすめのユーザー</string>
     <string name="piko_pref_hide_view_count">表示回数</string>
     <string name="piko_pref_custom_share_domain">カスタム共有ドメイン</string>
-    <string name="piko_pref_custom_share_domain_desc">ポストを共有するときに使用するドメイン</string>
+    <string name="piko_pref_custom_share_domain_desc">ポストを共有する際に使用するドメイン</string>
     <string name="piko_pref_show_sensitive_media">センシティブなメディアを自動で表示</string>
     <string name="piko_pref_selectable_text">選択可能なテキスト</string>
     <string name="piko_pref_clear_tracking_params">トラッキングパラメータを削除</string>
@@ -103,7 +103,7 @@
     <string name="piko_pref_hide_quick_promote_desc">自身のポストから「プロモーションする」ボタンを削除します</string>
     <string name="piko_pref_show_poll_result">投票結果を表示</string>
     <string name="piko_pref_show_poll_result_desc">投票せずに投票結果を表示できるようにします</string>
-    <string name="piko_pref_hide_immersive_player">イマーシブプレーヤー</string>
+    <string name="piko_pref_hide_immersive_player">没入型プレーヤー</string>
     <string name="piko_pref_hide_immersive_player_desc">動画再生時にスワイプして他の動画を表示する機能を無効化します</string>
     <string name="piko_pref_enable_vid_auto_advance">動画の自動スクロール</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">没入型プレーヤーで自動スクロールを有効化します</string>
