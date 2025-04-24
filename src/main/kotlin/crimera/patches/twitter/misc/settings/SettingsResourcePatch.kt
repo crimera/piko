@@ -73,7 +73,7 @@ object SettingsResourcePatch : ResourcePatch() {
                 "pt-rBR",
                 "ru",
                 "tr",
-                "ua",
+                "uk",
                 "v21",
                 "vi",
                 "zh-rCN",
