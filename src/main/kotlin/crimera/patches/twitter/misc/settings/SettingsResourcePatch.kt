@@ -74,6 +74,7 @@ object SettingsResourcePatch : ResourcePatch() {
                 "v21",
                 "tr",
                 "zh-rTW",
+                "ko",
             ).map { "values-$it" }
 
         languages.forEach {
