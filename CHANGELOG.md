@@ -1,3 +1,9 @@
+## [1.54.0-dev.4](https://github.com/crimera/piko/compare/v1.54.0-dev.3...v1.54.0-dev.4) (2025-04-25)
+
+### Bug Fixes
+
+* **Translations:** Fix unescaped strings in fr and vi ([be94c4c](https://github.com/crimera/piko/commit/be94c4c3b6785a1f9ecfdc1dbad48a4a9885a539))
+
 ## [1.54.0-dev.3](https://github.com/crimera/piko/compare/v1.54.0-dev.2...v1.54.0-dev.3) (2025-04-25)
 
 ### Updates
