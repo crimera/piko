@@ -10,7 +10,6 @@
     <string name="piko_pref_icon_n_navbar_btn">앱 아이콘 및 하단 바 사용자 정의 설정</string>
     <string name="piko_pref_enable_force_pip">PiP 자동 모드</string>
     <string name="piko_pref_enable_force_pip_desc">앱을 닫았을 경우에 PiP 모드를 활성화할 수 있습니다.</string>
-
     <!-- Download Settings -->
     <string name="piko_title_download">다운로드</string>
     <string name="piko_pref_video_download">동영상을 다운받는 중입니다.</string>
@@ -25,7 +24,6 @@
     <string name="piko_pref_download_media_link_handle_always_ask">항상 물어보기</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">미디어 링크 복사하기</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">미디어 링크 공유하기</string>
-
     <!-- Native -->
     <string name="piko_title_native">기본 기능</string>
     <string name="piko_pref_native_page_desc">이 Piko 기본 기능은 게시물 공유 메뉴에서 확인할 수 있습니다.</string>
@@ -35,7 +33,6 @@
     <string name="piko_pref_native_downloader_download_all">모두 다운받기</string>
     <string name="piko_pref_native_downloader_no_media">미디어를 찾을 수 없습니다.</string>
     <string name="piko_pref_native_downloader_filename_title">저장될 파일 이름 형식</string>
-
     <string name="piko_title_native_translator">기본 게시물 번역기</string>
     <string name="piko_native_translator_toggle">기본 게시물 번역기</string>
     <string name="piko_native_translator_provider">번역기 제공자</string>
@@ -43,7 +40,6 @@
     <string name="piko_native_translator_zero_text">번역할 텍스트를 찾을 수 없습니다.</string>
     <string name="piko_native_translator_google">Google 번역기</string>
     <string name="piko_native_translator_google_v2">Google 번역기 V2</string>
-
     <!-- Ads Settings -->
     <string name="piko_title_ads">광고</string>
     <string name="piko_pref_hide_promoted_posts">광고 게시물</string>
@@ -68,7 +64,6 @@
     <string name="piko_pref_hide_premium_upsell_desc">홈 타임라인에서 Premium 업그레이드 버튼을 제거할 수 있습니다.</string>
     <string name="piko_pref_top_people_search">검색 상단 사용자</string>
     <string name="piko_pref_top_people_search_desc">검색한 후에 표시되는 사용자 영역을 제거할 수 있습니다.</string>
-
     <!-- Misc Settings -->
     <string name="piko_title_misc">기타</string>
     <string name="piko_pref_chirp_font">짹짹이 폰트</string>
@@ -88,14 +83,12 @@
     <string name="piko_pref_debug_menu">게시물을 위한 디버그 메뉴</string>
     <string name="piko_pref_quick_settings">빠른 설정 버튼 활성화하기</string>
     <string name="piko_pref_quick_settings_summary">사이드 바에서 빠른 Piko 설정 버튼을 추가할 수 있습니다.</string>
-
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">기능 플래그</string>
     <string name="piko_pref_feature_flags">기능 플래그 추가하기</string>
     <string name="piko_pref_edit_flag_title">플래그 수정하기</string>
     <string name="piko_pref_add_flag_title">플래그 추가하기</string>
     <string name="piko_pref_search_flags">플래그 검색하기</string>
-
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">타임라인</string>
     <string name="piko_pref_disable_auto_timeline_scroll">앱 시작 시 타임라인 자동 스크롤 비활성화하기</string>
@@ -121,7 +114,6 @@
     <string name="piko_pref_hide_nudge_button_desc">게시물에서 팔로우하기/구독하기/맞팔로우하기 버튼을 숨길 수 있습니다.</string>
     <string name="piko_pref_hide_social_proof">내가 팔로우하는 사용자 숨기기</string>
     <string name="piko_pref_hide_social_proof_desc">프로필 하단에서 내가 팔로우하는 사용자를 팔로워하는 사람들을 숨길 수 있습니다.</string>
-
     <!-- Customization Settings -->
     <string name="piko_title_customisation">사용자 정의</string>
     <string name="piko_pref_customisation_profiletabs">프로필 탭 숨기기</string>
@@ -138,7 +130,6 @@
     <string name="piko_pref_customisation_reply_sorting_remember">이전에 선택됨</string>
     <string name="piko_pref_customisation_post_font_size">게시물 폰트 사이즈</string>
     <string name="piko_pref_customisation_search_type_ahead">검색에서 제안 숨기기</string>
-
     <!-- Backup and Restore -->
     <string name="piko_title_backup">백업 &amp; 복원</string>
     <string name="piko_pref_export">%s 내보내기</string>
@@ -148,7 +139,6 @@
     <string name="piko_pref_import_failed">오류: %s 를 가져올 수 없습니다.</string>
     <string name="piko_pref_export_no_uri">오류: 제공된 목적지가 없습니다.</string>
     <string name="piko_pref_import_no_uri">오류: 제공된 파일이 없습니다.</string>
-
     <!-- About -->
     <string name="piko_title_about">정보</string>
     <string name="piko_pref_app_version">앱 버전</string>
@@ -162,9 +152,7 @@
     <string name="piko_pref_enable">%s 활성화하기</string>
     <string name="piko_single_page_settings">하나의 설정 페이지</string>
     <string name="piko_single_page_settings_desc">하나의 페이지에서 설정을 볼 수 있습니다.</string>
-
     <string name="piko_pref_search_type_ahead_users">사용자</string>
     <string name="piko_pref_search_type_ahead_events">이벤트</string>
     <string name="piko_pref_search_type_ahead_ordered_section">정렬된 영역</string>
-
 </resources>
