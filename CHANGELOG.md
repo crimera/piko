@@ -1,3 +1,9 @@
+## [1.54.0-dev.3](https://github.com/crimera/piko/compare/v1.54.0-dev.2...v1.54.0-dev.3) (2025-04-25)
+
+### Updates
+
+* **Translations:** Add French & Korean to Language List ([#567](https://github.com/crimera/piko/issues/567)) ([6e139be](https://github.com/crimera/piko/commit/6e139be56dbc4f754c892d7c8ba2ed28ee8fa67f))
+
 ## [1.54.0-dev.2](https://github.com/crimera/piko/compare/v1.54.0-dev.1...v1.54.0-dev.2) (2025-04-20)
 
 ### Features
