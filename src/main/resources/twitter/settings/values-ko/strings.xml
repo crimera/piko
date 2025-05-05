@@ -79,7 +79,7 @@
     <string name="piko_pref_custom_share_domain">사용자 정의 도메인</string>
     <string name="piko_pref_custom_share_domain_desc">트윗을 공유할 때 사용될 도메인을 지정할 수 있습니다.</string>
     <string name="piko_pref_show_sensitive_media">민감한 콘텐츠 표시하기</string>
-    <string name="piko_pref_selectable_text">길게 탭하여 텍스트 선택하기</string>
+    <string name="piko_pref_selectable_text">길게 탭하여 텍스트 선택</string>
     <string name="piko_pref_clear_tracking_params">추적 매개변수 제거</string>
     <string name="piko_pref_unshorten_link">URL 줄이기 사용하지 않기</string>
     <string name="piko_pref_unshorten_link_desc">t.co URL 줄이기를 제거할 수 있습니다.</string>
@@ -124,7 +124,7 @@
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">사용자 정의</string>
-    <string name="piko_pref_customisation_profiletabs">프로필 탭 숨기기</string>
+    <string name="piko_pref_customisation_profiletabs">프로필에서 탭 숨기기</string>
     <string name="piko_pref_customisation_timelinetabs">타임라인에서 탭 숨기기</string>
     <string name="piko_pref_customisation_timelinetabs_foryou">\"추천\" 탭 제거하기</string>
     <string name="piko_pref_customisation_timelinetabs_following">\"팔로우 중\" 탭 제거하기</string>
@@ -135,7 +135,7 @@
     <string name="piko_pref_customisation_exploretabs">탐색에서 탭 숨기기</string>
     <string name="piko_pref_customisation_searchtabs">검색에서 탭 숨기기</string>
     <string name="piko_pref_customisation_reply_sorting">기본 답글 정렬 필터</string>
-    <string name="piko_pref_customisation_reply_sorting_remember">이전에 선택됨</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">이전에 선택된 정렬</string>
     <string name="piko_pref_customisation_post_font_size">게시물 폰트 사이즈</string>
     <string name="piko_pref_customisation_search_type_ahead">검색에서 제안 숨기기</string>
 
