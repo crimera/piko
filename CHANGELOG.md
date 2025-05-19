@@ -1,3 +1,15 @@
+## [1.54.0-dev.6](https://github.com/crimera/piko/compare/v1.54.0-dev.5...v1.54.0-dev.6) (2025-05-19)
+
+### Features
+
+* **Translations:** Update `Japanese` ([80282f0](https://github.com/crimera/piko/commit/80282f0e4eb3b6f1cde7eb6e30f7d00ba9b26a0c))
+
+## [1.54.0-dev.5](https://github.com/crimera/piko/compare/v1.54.0-dev.4...v1.54.0-dev.5) (2025-05-09)
+
+### Bug Fixes
+
+* **Twitter - copy media link + Custom download folder:** Update fingerprint to work on latest twitter release ([cc8fadb](https://github.com/crimera/piko/commit/cc8fadbac2d31139ae8b9572dd1aeb2565564e75))
+
 ## [1.54.0-dev.4](https://github.com/crimera/piko/compare/v1.54.0-dev.3...v1.54.0-dev.4) (2025-04-25)
 
 ### Bug Fixes
