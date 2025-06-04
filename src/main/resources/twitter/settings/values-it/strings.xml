@@ -90,8 +90,8 @@
     <string name="piko_pref_quick_settings_summary">Aggiunge un pulsante d/'impostazioni rapide nella barra laterale</string>
 
     <!-- Feature flags Settings -->
-    <string name="piko_title_feature_flags">Flag funzionalità</string>
-    <string name="piko_pref_feature_flags">Aggiungi flag funzionalità</string>
+    <string name="piko_title_feature_flags">Flag di funzionalità</string>
+    <string name="piko_pref_feature_flags">Aggiungi flag di funzionalità</string>
     <string name="piko_pref_edit_flag_title">Modifica flag</string>
     <string name="piko_pref_add_flag_title">Aggiungi flag</string>
     <string name="piko_pref_search_flags">Cerca flag</string>
