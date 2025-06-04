@@ -102,10 +102,10 @@
     <string name="piko_pref_hide_live_threads">discussioni in diretta</string>
     <string name="piko_pref_hide_live_threads_desc">Nascondi la sezione dal vivo nella cronologia</string>
     <string name="piko_pref_hide_banner">bandiera</string>
-    <string name="piko_pref_hide_banner_desc">pillola di nuovi post</string>
+    <string name="piko_pref_hide_banner_desc">pillola dei nuovi post</string>
     <string name="piko_pref_hide_bmk_timeline">icona del segnalibro nella cronologia</string>
     <string name="piko_pref_force_translate">Abilitazione forzata del traduttore</string>
-    <string name="piko_pref_force_translate_desc">Ottieni l/'opzione di traduzione per tutti i post</string>
+    <string name="piko_pref_force_translate_desc">Ottieni l/'opzione di traduzione a tutti i post</string>
     <string name="piko_pref_hide_quick_promote">Pulsante promozionale</string>
     <string name="piko_pref_hide_quick_promote_desc">Nasconde il pulsante promozionale sotto i post personali</string>
     <string name="piko_pref_show_poll_result">Mostra risultati del sondaggio</string>
