@@ -11,9 +11,7 @@ import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
 import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction23x
-import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11n
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 
@@ -45,16 +43,17 @@ object HideNudgeButtonPatch:BytecodePatch(
        val method = result.mutableMethod
        val instructions = method.getInstructions()
 
-       val dummyRegIndex = instructions.first { it.opcode == Opcode.APUT_OBJECT}.location.index
-       val dummyReg = method.getInstruction<Instruction23x>(dummyRegIndex).registerC
+       val moveResObjIndex = instructions.filter { it.opcode == Opcode.MOVE_RESULT_OBJECT}[2].location.index
+        val dummyRegIndex = instructions.filter { it.opcode == Opcode.CONST_4}[2].location.index
+       val dummyReg = method.getInstruction<BuilderInstruction11n>(dummyRegIndex).registerA
 
-       method.addInstructionsWithLabels(dummyRegIndex+2,"""
+       method.addInstructionsWithLabels(moveResObjIndex+2,"""
            $HOOK_DESCRIPTOR
            move-result v$dummyReg
            if-eqz v$dummyReg, :piko
            const/16 v$dummyReg, 0x8
            invoke-virtual {p1, v$dummyReg}, Landroidx/appcompat/widget/AppCompatButton;->setVisibility(I)V
-       """.trimIndent(), ExternalLabel("piko",instructions.first { it.opcode == Opcode.INVOKE_STATIC && it.location.index > dummyRegIndex })
+       """.trimIndent(), ExternalLabel("piko",instructions.first { it.opcode == Opcode.INVOKE_STATIC && it.location.index > moveResObjIndex && it.location.index < dummyRegIndex })
        )
 
       SettingsStatusLoadFingerprint.enableSettings("hideNudgeButton")
