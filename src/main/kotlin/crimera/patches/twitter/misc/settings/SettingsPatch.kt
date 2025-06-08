@@ -6,6 +6,7 @@ import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
+import app.revanced.patcher.extensions.InstructionExtensions.removeInstruction
 import app.revanced.patcher.patch.BytecodePatch
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
@@ -14,6 +15,8 @@ import app.revanced.patcher.util.smali.ExternalLabel
 import app.revanced.patches.shared.misc.integrations.fingerprint.IntegrationsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import crimera.patches.twitter.misc.integrations.IntegrationsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.AuthorizeAppActivity
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
@@ -75,9 +78,14 @@ object SettingsPatch : BytecodePatch(
                 .first { it.opcode == Opcode.CONST_4 }
                 .location.index
 
+        val igetObjLoc = prefCLickedMethod.getInstructions().first { it.opcode == Opcode.IGET_OBJECT }.location.index
+        val objFieldName = (prefCLickedMethod.getInstruction<ReferenceInstruction>(igetObjLoc).reference as FieldReference).name
+        prefCLickedMethod.removeInstruction(igetObjLoc)
+
         prefCLickedMethod.addInstructionsWithLabels(
-            1,
+            0,
             """
+            iget-object p1, p1, Landroidx/preference/Preference;->${objFieldName}:Ljava/lang/String;
             const-string v1, "pref_mod" 
             invoke-virtual {p1, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
             move-result v2
