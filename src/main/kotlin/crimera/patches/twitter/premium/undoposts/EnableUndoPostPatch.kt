@@ -49,12 +49,12 @@ object EnableUndoPostPatch :BytecodePatch(
 
 
         val result3 = UndoPost3Fingerprint.result
-            ?: throw PatchException("UndoPost2Fingerprint not found")
+            ?: throw PatchException("UndoPost3Fingerprint not found")
 
         //flag check 3
         val method3 = result3.mutableMethod
-        val loc3 = method3.getInstructions().last{ it.opcode == Opcode.INVOKE_STATIC }.location.index
-        method3.addInstruction(loc3-1,PREF.trimIndent())
+        val loc3 = method3.getInstructions().filter { it.opcode == Opcode.IF_EQZ }[1].location.index
+        method3.addInstruction(loc3,PREF.trimIndent())
 
 
         SettingsStatusLoadFingerprint.enableSettings("enableUndoPosts")
