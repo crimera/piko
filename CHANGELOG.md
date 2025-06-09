@@ -1,3 +1,12 @@
+## [1.54.0-dev.7](https://github.com/crimera/piko/compare/v1.54.0-dev.6...v1.54.0-dev.7) (2025-06-09)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Enable Undo Posts` patch ([883b6cb](https://github.com/crimera/piko/commit/883b6cb92c52d1a475f6663bdf474518280b4da4))
+* **Twitter:** Fix `Hide nudge button` patch ([87ceb49](https://github.com/crimera/piko/commit/87ceb49f841c99012fcbbc315edc1c4657376e37))
+* **Twitter:** Fix Settings crash ([015c5bd](https://github.com/crimera/piko/commit/015c5bdd1247ec6263fa194ca6e580690e13e223))
+* **ui:** adjust monet-light colors to have a white background ([0906e93](https://github.com/crimera/piko/commit/0906e93027747e43becd1d94bca24f54ecc97683))
+
 ## [1.54.0-dev.6](https://github.com/crimera/piko/compare/v1.54.0-dev.5...v1.54.0-dev.6) (2025-05-19)
 
 ### Features
