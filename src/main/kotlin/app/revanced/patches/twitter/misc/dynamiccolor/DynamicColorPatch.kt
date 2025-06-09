@@ -130,8 +130,8 @@ object DynamicColorPatch : ResourcePatch() {
             newStyle.setAttribute("parent", "@style/HorizonColorPaletteLight")
 
             val styleItems = mapOf(
-                "abstractColorCellBackground" to "@android:color/system_neutral2_50",
-                "abstractColorCellBackgroundTranslucent" to "@android:color/system_neutral2_50",
+                "abstractColorCellBackground" to "@android:color/system_neutral2_0",
+                "abstractColorCellBackgroundTranslucent" to "@android:color/system_neutral2_0",
                 "abstractColorDeepGray" to "@color/gray_1000",
                 "abstractColorDivider" to "@android:color/system_accent1_400",
                 "abstractColorFadedGray" to "@color/material_dynamic_primary99",
