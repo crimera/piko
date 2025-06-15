@@ -15,7 +15,6 @@ import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.MethodImplementation
 import com.android.tools.smali.dexlib2.iface.MethodParameter
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
-import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.*
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.Reference
@@ -37,59 +36,39 @@ class InitMethod(
     private val accessFlags: Int,
     private val hiddenApiRestrictions: MutableSet<HiddenApiRestriction>,
     private val parameters: MutableList<out MethodParameter>,
-    private val implementation: MethodImplementation
+    private val implementation: MethodImplementation,
 ) : Method {
-    override fun validateReference() {
-        return validator()
-    }
+    override fun validateReference() = validator()
 
-    override fun compareTo(other: MethodReference): Int {
-        return this.compare(other)
-    }
+    override fun compareTo(other: MethodReference): Int = this.compare(other)
 
-    override fun getDefiningClass(): String {
-        return definingClass
-    }
+    override fun getDefiningClass(): String = definingClass
 
-    override fun getName(): String {
-        return name
-    }
+    override fun getName(): String = name
 
-    override fun getParameterTypes(): MutableList<out CharSequence> {
-        return parameterTypes
-    }
+    override fun getParameterTypes(): MutableList<out CharSequence> = parameterTypes
 
-    override fun getReturnType(): String {
-        return returnType
-    }
+    override fun getReturnType(): String = returnType
 
-    override fun getAnnotations(): MutableSet<out Annotation> {
-        return annotations
-    }
+    override fun getAnnotations(): MutableSet<out Annotation> = annotations
 
-    override fun getAccessFlags(): Int {
-        return accessFlags
-    }
+    override fun getAccessFlags(): Int = accessFlags
 
-    override fun getHiddenApiRestrictions(): MutableSet<HiddenApiRestriction> {
-        return hiddenApiRestrictions
-    }
+    override fun getHiddenApiRestrictions(): MutableSet<HiddenApiRestriction> = hiddenApiRestrictions
 
-    override fun getParameters(): MutableList<out MethodParameter> {
-        return parameters
-    }
+    override fun getParameters(): MutableList<out MethodParameter> = parameters
 
-    override fun getImplementation(): MethodImplementation {
-        return implementation
-    }
+    override fun getImplementation(): MethodImplementation = implementation
 }
 
-fun instructionToString(ins: Instruction): String {
-
-    return when (ins) {
+fun instructionToString(ins: Instruction): String =
+    when (ins) {
         is Instruction21c -> {
-            if (ins.opcode == Opcode.CONST_STRING) "${ins.opcode.name} v${ins.registerA}, \"${ins.reference}\""
-            else "${ins.opcode.name} v${ins.registerA}, ${ins.reference}"
+            if (ins.opcode == Opcode.CONST_STRING) {
+                "${ins.opcode.name} v${ins.registerA}, \"${ins.reference}\""
+            } else {
+                "${ins.opcode.name} v${ins.registerA}, ${ins.reference}"
+            }
         }
 
         is Instruction11n -> {
@@ -99,9 +78,14 @@ fun instructionToString(ins: Instruction): String {
         is Instruction35c -> {
             var regs = ""
 
-            val regMap = mapOf(
-                1 to ins.registerC, 2 to ins.registerD, 3 to ins.registerE
-            )
+            val regMap =
+                mapOf(
+                    1 to ins.registerC,
+                    2 to ins.registerD,
+                    3 to ins.registerE,
+                    4 to ins.registerF,
+                    5 to ins.registerG,
+                )
 
             for (i in 1..ins.registerCount) {
                 regs += "v${regMap[i]}"
@@ -141,7 +125,6 @@ fun instructionToString(ins: Instruction): String {
             throw PatchException("${ins.javaClass} is not supported")
         }
     }
-}
 
 val MethodFingerprint.exception: PatchException
     get() = PatchException("${this.javaClass.name} is not found")
@@ -154,7 +137,7 @@ val MutableList<BuilderInstruction>.indexOfLastFilledNewArrayRange
 
 @Patch(
     name = "Custom downloader",
-    description = "",
+    description = "Requires X 11.0.0-release.0 or higher.",
     dependencies = [SettingsPatch::class, NativeDownloaderHooksPatch::class, ResourceMappingPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = true,
@@ -166,7 +149,7 @@ object NativeDownloaderPatch : BytecodePatch(
         ShareMenuButtonInitHook,
         SettingsStatusLoadFingerprint,
         ShareMenuButtonAddHook,
-        ActionEnumsFingerprint
+        ActionEnumsFingerprint,
     ),
 ) {
     var offset: Boolean = false
@@ -182,7 +165,13 @@ object NativeDownloaderPatch : BytecodePatch(
         // Register button
         ShareMenuButtonAddHook.registerButton(buttonName, "enableNativeDownloader")
         val viewDebugDialogReference =
-            (ShareMenuButtonAddHook.result?.method?.implementation?.instructions?.first { it.opcode == Opcode.SGET_OBJECT } as Instruction21c).reference
+            (
+                ShareMenuButtonAddHook.result
+                    ?.method
+                    ?.implementation
+                    ?.instructions
+                    ?.first { it.opcode == Opcode.SGET_OBJECT } as Instruction21c
+            ).reference
 
         // Set Button Text
         ShareMenuButtonInitHook.setButtonText(buttonName, "piko_pref_native_downloader_alert_title")
@@ -191,30 +180,55 @@ object NativeDownloaderPatch : BytecodePatch(
         // Add Button function
         // TODO: handle possible nulls
         val buttonFunc = ShareMenuButtonFuncCallFingerprint.result
-        val buttonFuncMethod = ShareMenuButtonFuncCallFingerprint.result?.method?.implementation?.instructions?.toList()
+        val buttonFuncMethod =
+            ShareMenuButtonFuncCallFingerprint.result
+                ?.method
+                ?.implementation
+                ?.instructions
+                ?.toList()
         val deleteStatusLoc =
-            buttonFunc?.scanResult?.stringsScanResult?.matches?.first { it.string == "Delete Status" }?.index
+            buttonFunc
+                ?.scanResult
+                ?.stringsScanResult
+                ?.matches
+                ?.first { it.string == "Delete Status" }
+                ?.index
                 ?: throw PatchException("Delete status not found")
+        val OkLoc =
+            buttonFunc
+                ?.scanResult
+                ?.stringsScanResult
+                ?.matches
+                ?.first { it.string == "OK" }
+                ?.index
+                ?: throw PatchException("OK not found")
         val conversationalRepliesLoc =
-            buttonFunc.scanResult.stringsScanResult?.matches?.first { it.string == "conversational_replies_android_pinned_replies_creation_enabled" }?.index
+            buttonFunc.scanResult.stringsScanResult
+                ?.matches
+                ?.first {
+                    it.string ==
+                        "conversational_replies_android_pinned_replies_creation_enabled"
+                }?.index
                 ?: throw PatchException("conversational_replies_android_pinned_replies_creation_enabled not found")
-        val timelineRef = (buttonFuncMethod?.filterIndexed { i, ins ->
-            i > conversationalRepliesLoc && ins.opcode == Opcode.IGET_OBJECT
-        }?.first() as Instruction22c?) ?: throw PatchException("Failed to find timelineRef")
-        val activityRefReg = (buttonFuncMethod[deleteStatusLoc + 1] as TwoRegisterInstruction).registerA
-        val timelineRefReg = (buttonFuncMethod[deleteStatusLoc - 1] as Instruction35c).registerD
+        val timelineRef =
+            (
+                buttonFuncMethod
+                    ?.filterIndexed { i, ins ->
+                        i > conversationalRepliesLoc && ins.opcode == Opcode.IGET_OBJECT
+                    }?.first() as Instruction22c?
+            ) ?: throw PatchException("Failed to find timelineRef")
+        val timelineRefReg = (buttonFuncMethod?.get(deleteStatusLoc - 1) as Instruction35c).registerD
+        val activityRefReg = (buttonFuncMethod[OkLoc - 3] as Instruction35c).registerD
 
         ShareMenuButtonFuncCallFingerprint.addButtonInstructions(
-            downloadActionReference, """
+            downloadActionReference,
+            """
             check-cast v$timelineRefReg, ${timelineRef.reference.extractDescriptors()[0]}
             iget-object v1, v$timelineRefReg, ${timelineRef.reference}
-            
-            invoke-virtual/range{v$activityRefReg .. v$activityRefReg}, Ljava/lang/ref/Reference;->get()Ljava/lang/Object;
-            move-result-object v0
-            check-cast v0, Landroid/app/Activity;
                 
-            invoke-static {v0, v1}, ${SettingsPatch.PATCHES_DESCRIPTOR}/NativeDownloader;->downloader(Landroid/content/Context;Ljava/lang/Object;)V
-        """.trimIndent(), viewDebugDialogReference
+            invoke-static {v$activityRefReg, v1}, ${SettingsPatch.PATCHES_DESCRIPTOR}/NativeDownloader;->downloader(Landroid/content/Context;Ljava/lang/Object;)V
+            """.trimIndent(),
+            viewDebugDialogReference,
         )
 
         SettingsStatusLoadFingerprint.enableSettings("nativeDownloader")
