@@ -1,3 +1,9 @@
+## [1.54.0-dev.8](https://github.com/crimera/piko/compare/v1.54.0-dev.7...v1.54.0-dev.8) (2025-06-15)
+
+### Bug Fixes
+
+* **Twitter:** Fix share menu patches ([ba561be](https://github.com/crimera/piko/commit/ba561be67cf5d854cfff477a3a80b85928a4170a))
+
 ## [1.54.0-dev.7](https://github.com/crimera/piko/compare/v1.54.0-dev.6...v1.54.0-dev.7) (2025-06-09)
 
 ### Bug Fixes
