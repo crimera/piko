@@ -18,32 +18,42 @@ object ShareMenuButtonFuncCallFingerprint : MethodFingerprint(
     returnType = "V",
     strings =
         listOf(
+            "OK",
             "Delete Status",
             "click",
             "tweet_analytics",
             "author_moderated_replies_author_enabled",
-            "conversational_replies_android_pinned_replies_creation_enabled"
+            "conversational_replies_android_pinned_replies_creation_enabled",
         ),
 ) {
-
-    fun addButtonInstructions(reference: String, instructions: String, debugDialogReference: Reference) {
+    fun addButtonInstructions(
+        reference: String,
+        instructions: String,
+        debugDialogReference: Reference,
+    ) {
         val buttonFunc = result ?: throw ShareMenuButtonFuncCallFingerprint.exception
 
         val buttonFuncMethod = buttonFunc.mutableMethod
 
-        val deleteStatusLoc = buttonFunc.scanResult.stringsScanResult?.matches!!.first { it.string == "Delete Status" } .index
+        val deleteStatusLoc =
+            buttonFunc.scanResult.stringsScanResult
+                ?.matches!!
+                .first { it.string == "Delete Status" }
+                .index
         val gotoLoc = deleteStatusLoc + 8
 
         val buttonFuncInstructions = buttonFuncMethod.getInstructions()
 
-        val condRegisters = getButtonEntry(buttonFuncInstructions, debugDialogReference)?.let {
-            it as TwoRegisterInstruction
-            listOf(it.registerA, it.registerB)
-        } ?: throw PatchException("Failed to get button EntryPoint")
+        val condRegisters =
+            getButtonEntry(buttonFuncInstructions, debugDialogReference)?.let {
+                it as TwoRegisterInstruction
+                listOf(it.registerA, it.registerB)
+            } ?: throw PatchException("Failed to get button EntryPoint")
 
         // TODO: timeline n2 and core should be dynamically allocated
         buttonFuncMethod.addInstructionsWithLabels(
-            gotoLoc, """
+            gotoLoc,
+            """
             sget-object v${condRegisters[1]}, $reference
             
             if-ne v${condRegisters[0]}, v${condRegisters[1]}, :nextbtn
@@ -51,7 +61,8 @@ object ShareMenuButtonFuncCallFingerprint : MethodFingerprint(
             $instructions
             
             return-void
-        """.trimIndent(), ExternalLabel("nextbtn", buttonFuncMethod.getInstruction(gotoLoc))
+            """.trimIndent(),
+            ExternalLabel("nextbtn", buttonFuncMethod.getInstruction(gotoLoc)),
         )
 
         getButtonEntry(buttonFuncInstructions, debugDialogReference)?.let {
@@ -60,7 +71,7 @@ object ShareMenuButtonFuncCallFingerprint : MethodFingerprint(
             buttonFuncMethod.addInstructionsWithLabels(
                 loc,
                 "if-ne v${condRegisters[0]}, v${condRegisters[1]}, :downloadbtn",
-                ExternalLabel("downloadbtn", buttonFuncMethod.getInstruction(gotoLoc))
+                ExternalLabel("downloadbtn", buttonFuncMethod.getInstruction(gotoLoc)),
             )
 
             // Remove the previous instruction
@@ -69,7 +80,8 @@ object ShareMenuButtonFuncCallFingerprint : MethodFingerprint(
     }
 
     private fun getButtonEntry(
-        instructions: MutableList<BuilderInstruction>, reference: Reference
+        instructions: MutableList<BuilderInstruction>,
+        reference: Reference,
     ): BuilderInstruction? {
         var out: BuilderInstruction? = null
         instructions.filter { it.opcode == Opcode.GOTO_16 }.forEach { ins ->

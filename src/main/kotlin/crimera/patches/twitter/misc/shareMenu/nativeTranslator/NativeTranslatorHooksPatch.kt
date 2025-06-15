@@ -36,8 +36,8 @@ internal object TweetinfoObjectFingerprint : MethodFingerprint(
             "lang",
             "supplemental_language",
         ),
-    customFingerprint = { methodDef, _ ->
-        methodDef.parameters.size == 2
+    customFingerprint = { methodDef, classDef ->
+        methodDef.parameters.size == 2 && classDef.contains("/tdbh/")
     },
 )
 
@@ -106,7 +106,6 @@ class NativeTranslatorHooksPatch :
                     val ref = (it.mutableMethod.getInstruction<ReferenceInstruction>(match.index + 1).reference as FieldReference)
                     GetLangFldFingerprint.result?.mutableMethod?.changeFirstString(ref.name)
                         ?: throw GetLangFldFingerprint.exception
-
                     GetTweetInfoFldFingerprint.result?.mutableMethod?.changeFirstString(
                         tweetObjectClass.fields
                             .first {
