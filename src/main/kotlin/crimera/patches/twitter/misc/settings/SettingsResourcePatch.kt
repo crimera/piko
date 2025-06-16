@@ -67,7 +67,6 @@ object SettingsResourcePatch : ResourcePatch() {
                 "ja",
                 "hi",
                 "in",
-                "it",
                 "zh-rCN",
                 "ru",
                 "pl",
