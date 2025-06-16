@@ -59,7 +59,7 @@
     <string name="piko_pref_hide_live_threads">Ẩn các phiên trực tiếp</string>
     <string name="piko_pref_hide_live_threads_desc">Ẩn những phiên trực tiếp trong dòng thời gian</string>
     <string name="piko_pref_hide_banner">Ẩn banner quảng cáo trong tìm kiếm </string>
-    <string name="piko_pref_hide_banner_desc">Ẩn nút 'bài viết mới'</string>
+    <string name="piko_pref_hide_banner_desc">Ẩn nút \'bài viết mới\'</string>
     <string name="piko_pref_hide_bmk_timeline">Ẩn icon dấu trang trong dòng thời gian</string>
     <string name="piko_pref_force_translate">Buộc kích hoạt dịch thuật</string>
     <string name="piko_pref_force_translate_desc">Mở khoá chức năng dịch thuật trong mọi tweets</string>

@@ -62,18 +62,24 @@ object SettingsResourcePatch : ResourcePatch() {
          */
         val languages =
             arrayOf(
-                "es",
                 "ar",
-                "ja",
+                "es",
+                "fr",
                 "hi",
                 "in",
+                "ja",
+                "ko",
                 "it",
                 "zh-rCN",
                 "ru",
                 "pl",
                 "pt-rBR",
-                "v21",
+                "ru",
                 "tr",
+                "uk",
+                "v21",
+                "vi",
+                "zh-rCN",
                 "zh-rTW",
             ).map { "values-$it" }
 
