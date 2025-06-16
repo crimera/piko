@@ -1,3 +1,9 @@
+## [1.54.0-dev.9](https://github.com/crimera/piko/compare/v1.54.0-dev.8...v1.54.0-dev.9) (2025-06-16)
+
+### Features
+
+* **Translations:** Add italian translation ([88e22fb](https://github.com/crimera/piko/commit/88e22fbb64eae5b2b185c0c785d75a29bb342458))
+
 ## [1.54.0-dev.8](https://github.com/crimera/piko/compare/v1.54.0-dev.7...v1.54.0-dev.8) (2025-06-15)
 
 ### Bug Fixes
