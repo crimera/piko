@@ -1,3 +1,26 @@
+## [1.54.0](https://github.com/crimera/piko/compare/v1.53.0...v1.54.0) (2025-06-16)
+
+### Bug Fixes
+
+* **Translations:** Fix unescaped strings in fr and vi ([be94c4c](https://github.com/crimera/piko/commit/be94c4c3b6785a1f9ecfdc1dbad48a4a9885a539))
+* **Twitter - copy media link + Custom download folder:** Update fingerprint to work on latest twitter release ([cc8fadb](https://github.com/crimera/piko/commit/cc8fadbac2d31139ae8b9572dd1aeb2565564e75))
+* **Twitter:** Fix `Enable Undo Posts` patch ([883b6cb](https://github.com/crimera/piko/commit/883b6cb92c52d1a475f6663bdf474518280b4da4))
+* **Twitter:** Fix `Hide nudge button` patch ([87ceb49](https://github.com/crimera/piko/commit/87ceb49f841c99012fcbbc315edc1c4657376e37))
+* **Twitter:** Fix Settings crash ([015c5bd](https://github.com/crimera/piko/commit/015c5bdd1247ec6263fa194ca6e580690e13e223))
+* **Twitter:** Fix share menu patches ([ba561be](https://github.com/crimera/piko/commit/ba561be67cf5d854cfff477a3a80b85928a4170a))
+* **ui:** adjust monet-light colors to have a white background ([0906e93](https://github.com/crimera/piko/commit/0906e93027747e43becd1d94bca24f54ecc97683))
+
+### Features
+
+* **Translations:** Add italian translation ([88e22fb](https://github.com/crimera/piko/commit/88e22fbb64eae5b2b185c0c785d75a29bb342458))
+* **Translations:** Korean translation added ([492e631](https://github.com/crimera/piko/commit/492e6312df05d3bdae618e350a929a8b22914c98))
+* **Translations:** Update `Japanese` ([80282f0](https://github.com/crimera/piko/commit/80282f0e4eb3b6f1cde7eb6e30f7d00ba9b26a0c))
+* **Translations:** Update `Japanese` ([a7da7d7](https://github.com/crimera/piko/commit/a7da7d7468203a3244496b4ed692a8d09da18b45))
+
+### Updates
+
+* **Translations:** Add French & Korean to Language List ([#567](https://github.com/crimera/piko/issues/567)) ([6e139be](https://github.com/crimera/piko/commit/6e139be56dbc4f754c892d7c8ba2ed28ee8fa67f))
+
 ## [1.54.0-dev.8](https://github.com/crimera/piko/compare/v1.54.0-dev.7...v1.54.0-dev.8) (2025-06-15)
 
 ### Bug Fixes
