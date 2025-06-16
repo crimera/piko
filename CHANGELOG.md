@@ -1,3 +1,9 @@
+## [1.54.1](https://github.com/crimera/piko/compare/v1.54.0...v1.54.1) (2025-06-16)
+
+### Bug Fixes
+
+* **Twitter:** Fix unescaped characters ([829eedd](https://github.com/crimera/piko/commit/829eedd90eabc13575b49da9cc5551f894787b76))
+
 ## [1.54.0](https://github.com/crimera/piko/compare/v1.53.0...v1.54.0) (2025-06-16)
 
 ### Bug Fixes
