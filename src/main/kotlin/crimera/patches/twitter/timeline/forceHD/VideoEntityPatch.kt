@@ -1,4 +1,4 @@
-package crimera.patches.twitter.timeline.videoEntity
+package crimera.patches.twitter.timeline.forceHD
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
@@ -14,24 +14,26 @@ import com.android.tools.smali.dexlib2.dexbacked.reference.DexBackedMethodRefere
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import crimera.patches.twitter.misc.settings.SettingsPatch
 
-object VideoEntityFinderFingerprint: MethodFingerprint(
-    strings = listOf(
-        "video_configurations_amplify_video_bird_url_android_enabled",
-    ),
-    returnType = "Ljava/lang/String"
+object VideoEntityFinderFingerprint : MethodFingerprint(
+    strings =
+        listOf(
+            "video_configurations_amplify_video_bird_url_android_enabled",
+        ),
+    returnType = "Ljava/lang/String",
 )
 
 @Patch(
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
-    requiresIntegrations = true
+    requiresIntegrations = true,
 )
 @Suppress("unused")
-object VideoEntityPatch:BytecodePatch(
-    setOf(VideoEntityFinderFingerprint)
+object VideoEntityPatch : BytecodePatch(
+    setOf(VideoEntityFinderFingerprint),
 ) {
     override fun execute(context: BytecodeContext) {
-        val result = VideoEntityFinderFingerprint.result
-            ?:throw PatchException("VideoEntityFinderFingerprint not found")
+        val result =
+            VideoEntityFinderFingerprint.result
+                ?: throw PatchException("VideoEntityFinderFingerprint not found")
 
         val m1 = result.mutableMethod
         val i1 = m1.getInstructions()
@@ -46,11 +48,12 @@ object VideoEntityPatch:BytecodePatch(
         val i2 = m2!!.getInstructions()
 
         val iget = i2.find { it.opcode == Opcode.IGET_OBJECT }!!.location.index
-        m2.addInstructions(iget+1,"""
+        m2.addInstructions(
+            iget + 1,
+            """
             invoke-static {p1}, ${SettingsPatch.PATCHES_DESCRIPTOR}/TimelineVideoEntity;->videoEnity(Ljava/util/List;)Ljava/util/List;
             move-result-object p1
-        """.trimIndent())
-
-
+            """.trimIndent(),
+        )
     }
 }
