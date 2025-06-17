@@ -1,3 +1,10 @@
+## [1.54.2](https://github.com/crimera/piko/compare/v1.54.1...v1.54.2) (2025-06-17)
+
+### Bug Fixes
+
+* **Twitter:** fix `Enable force HD videos` patch ([6d8d200](https://github.com/crimera/piko/commit/6d8d200a521375252c675117365e1fb85f701083))
+* **Twitter:** fix `Hide nudge button` patch (again) ([be2cd9d](https://github.com/crimera/piko/commit/be2cd9de0aa2545274369ed0c724ffead77148ee))
+
 ## [1.54.1-dev.2](https://github.com/crimera/piko/compare/v1.54.1-dev.1...v1.54.1-dev.2) (2025-06-16)
 
 ### Bug Fixes
