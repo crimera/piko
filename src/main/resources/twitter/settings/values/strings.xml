@@ -121,6 +121,7 @@
     <string name="piko_pref_hide_nudge_button_desc">Hides follow/subscribe/follow back buttons on posts</string>
     <string name="piko_pref_hide_social_proof">Hide followed by context</string>
     <string name="piko_pref_hide_social_proof_desc">Hides followed by context under profile</string>
+    <string name="piko_pref_hide_community_badge">Hide community badges</string>
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Customization</string>
