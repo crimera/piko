@@ -156,7 +156,7 @@
     <string name="piko_pref_version_info">Informazioni sulla Versione</string>
     <string name="piko_pref_patches">Patches</string>
     <string name="piko_pref_included">Incluso</string>
-    <string name="piko_pref_excluded">Excluso</string>
+    <string name="piko_pref_excluded">Escluso</string>
     <string name="piko_pref_app_restart_rec">Riavvio dell\'app è consigliato</string>
     <string name="piko_pref_remove">Rimuovi %s</string>
     <string name="piko_pref_enable">Abilita %s</string>
