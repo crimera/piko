@@ -1,33 +1,26 @@
 package crimera.patches.twitter.timeline.hideCommunityBadge
 
 import app.revanced.patcher.data.BytecodeContext
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
+import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstructions
-import app.revanced.patcher.extensions.or
 import app.revanced.patcher.fingerprint.MethodFingerprint
 import app.revanced.patcher.patch.BytecodePatch
+import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.annotation.CompatiblePackage
 import app.revanced.patcher.patch.annotation.Patch
-import com.android.tools.smali.dexlib2.AccessFlags
+import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction11x
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
-import crimera.patches.twitter.misc.shareMenu.nativeDownloader.exception
+import crimera.patches.twitter.misc.shareMenu.nativeDownloader.extractDescriptors
 
-object BadgeUIFingerprint : MethodFingerprint(
-    returnType = "Ljava/lang/Object;",
-    customFingerprint = { methodDef, classDef ->
-        classDef.type.contains("/tweetview/core/ui/badge") &&
-            methodDef.name == "invoke"
-    },
-    opcodes =
+object CommModelFingerprint : MethodFingerprint(
+    strings =
         listOf(
-            Opcode.CHECK_CAST,
-            Opcode.INVOKE_STATIC,
-            Opcode.IGET_OBJECT,
+            "actionResults",
+            "role",
         ),
-    accessFlags = AccessFlags.PUBLIC or AccessFlags.FINAL,
 )
 
 @Patch(
@@ -39,27 +32,30 @@ object BadgeUIFingerprint : MethodFingerprint(
 )
 @Suppress("unused")
 object HideCommunityBadge : BytecodePatch(
-    setOf(SettingsStatusLoadFingerprint, BadgeUIFingerprint),
+    setOf(SettingsStatusLoadFingerprint, CommModelFingerprint),
 ) {
     override fun execute(context: BytecodeContext) {
-        val result = BadgeUIFingerprint.result ?: throw BadgeUIFingerprint.exception
+        val result = CommModelFingerprint.result ?: throw PatchException("CommModelFingerprint not found")
 
-        val method = result.mutableMethod
-
-        println(result.classDef)
-
+        val method =
+            result.mutableMethod
         val instructions = method.getInstructions()
 
-        val moveResObj = instructions.first { it.opcode == Opcode.MOVE_RESULT }
-        val moveResIns = moveResObj as Instruction11x
-        val reg = moveResIns.registerA
-        val index = moveResObj.location.index + 1
+        val iputObj = instructions.last { it.opcode == Opcode.IPUT_OBJECT }
+        val iputObjIns = iputObj as Instruction22c
+        val ref = iputObjIns.reference.extractDescriptors()[1]
+        val reg = iputObjIns.registerA
+        val index = iputObj.location.index
 
-        method.addInstruction(
+        method.addInstructionsWithLabels(
             index,
-            "sget-boolean v$reg, ${SettingsPatch.PREF_DESCRIPTOR};->HIDE_COMM_BADGE:Z",
+            """
+            sget-boolean v0, ${SettingsPatch.PREF_DESCRIPTOR};->HIDE_COMM_BADGE:Z
+            if-eqz v0, :piko
+                sget-object v$reg, $ref->NON_MEMBER:$ref  
+            """.trimIndent(),
+            ExternalLabel("piko", iputObj),
         )
-
         SettingsStatusLoadFingerprint.enableSettings("hideCommBadge")
     }
 }
