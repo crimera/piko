@@ -121,6 +121,7 @@
     <string name="piko_pref_hide_nudge_button_desc">Hides follow/subscribe/follow back buttons on posts</string>
     <string name="piko_pref_hide_social_proof">Hide followed by context</string>
     <string name="piko_pref_hide_social_proof_desc">Hides followed by context under profile</string>
+    <string name="piko_pref_hide_community_badge">Hide community badges</string>
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Customization</string>
@@ -138,6 +139,13 @@
     <string name="piko_pref_customisation_reply_sorting_remember">Previously selected</string>
     <string name="piko_pref_customisation_post_font_size">Post font size</string>
     <string name="piko_pref_customisation_search_type_ahead">Search suggestions to hide</string>
+
+    <!-- Logging Settings -->
+    <string name="piko_title_logging">Logging</string>
+    <string name="piko_pref_server_response_logging">Log server response</string>
+    <string name="piko_pref_server_response_logging_desc">Log json responses received from the server in 'Download/Piko'</string>
+    <string name="piko_pref_server_response_logging_file_overwrite">Overwrite response log file</string>
+    <string name="piko_pref_server_response_logging_file_overwrite_desc">Clear existing response log data on launch</string>
 
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Backup and restore</string>
