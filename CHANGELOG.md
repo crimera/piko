@@ -16,6 +16,8 @@
 * **Twitter:** Added `Log server response` patch ([bff4363](https://github.com/crimera/piko/commit/bff4363a56386ec6e1c80f2a57bdc70a28827be6))
 
 ## [1.54.2-dev.1](https://github.com/crimera/piko/compare/v1.54.1...v1.54.2-dev.1) (2025-06-17)
+=======
+## [1.54.2](https://github.com/crimera/piko/compare/v1.54.1...v1.54.2) (2025-06-17)
 
 ### Bug Fixes
 
