@@ -143,7 +143,7 @@
     <!-- Logging Settings -->
     <string name="piko_title_logging">Logging</string>
     <string name="piko_pref_server_response_logging">Log server response</string>
-    <string name="piko_pref_server_response_logging_desc">Log json responses received from the server in 'Download/Piko'</string>
+    <string name="piko_pref_server_response_logging_desc">Log json responses received from the server in \'Download/Piko\'</string>
     <string name="piko_pref_server_response_logging_file_overwrite">Overwrite response log file</string>
     <string name="piko_pref_server_response_logging_file_overwrite_desc">Clear existing response log data on launch</string>
 
