@@ -1,3 +1,9 @@
+## [1.55.0-dev.2](https://github.com/crimera/piko/compare/v1.55.0-dev.1...v1.55.0-dev.2) (2025-07-05)
+
+### Bug Fixes
+
+* **Twitter - Log server response:** Escape single qoutes ([cedbfaf](https://github.com/crimera/piko/commit/cedbfaf77913afb81b0363207a9839ea1624fa63))
+
 ## [1.55.0-dev.1](https://github.com/crimera/piko/compare/v1.54.2-dev.1...v1.55.0-dev.1) (2025-07-03)
 
 ### Bug Fixes
