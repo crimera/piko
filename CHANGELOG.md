@@ -1,3 +1,34 @@
+## [1.55.0](https://github.com/crimera/piko/compare/v1.54.2...v1.55.0) (2025-07-05)
+
+### Bug Fixes
+
+* **Twitter - Log server response:** Escape single qoutes ([cedbfaf](https://github.com/crimera/piko/commit/cedbfaf77913afb81b0363207a9839ea1624fa63))
+* **Twitter:** `Hide community badges` patch ([f539260](https://github.com/crimera/piko/commit/f5392600b3e51a3c32fa3ffb4da5d751da3b8612))
+
+### Features
+
+* **Twitter:** Added `Hide community badges` patch ([57936a1](https://github.com/crimera/piko/commit/57936a167eb23eeb992ca39015149e71e04270c5))
+* **Twitter:** Added `Log server response` patch ([bff4363](https://github.com/crimera/piko/commit/bff4363a56386ec6e1c80f2a57bdc70a28827be6))
+
+## [1.55.0-dev.2](https://github.com/crimera/piko/compare/v1.55.0-dev.1...v1.55.0-dev.2) (2025-07-05)
+
+### Bug Fixes
+
+* **Twitter - Log server response:** Escape single qoutes ([cedbfaf](https://github.com/crimera/piko/commit/cedbfaf77913afb81b0363207a9839ea1624fa63))
+
+## [1.55.0-dev.1](https://github.com/crimera/piko/compare/v1.54.2-dev.1...v1.55.0-dev.1) (2025-07-03)
+
+### Bug Fixes
+
+* **Twitter:** `Hide community badges` patch ([f539260](https://github.com/crimera/piko/commit/f5392600b3e51a3c32fa3ffb4da5d751da3b8612))
+
+### Features
+
+* **Twitter:** Added `Hide community badges` patch ([57936a1](https://github.com/crimera/piko/commit/57936a167eb23eeb992ca39015149e71e04270c5))
+* **Twitter:** Added `Log server response` patch ([bff4363](https://github.com/crimera/piko/commit/bff4363a56386ec6e1c80f2a57bdc70a28827be6))
+
+## [1.54.2-dev.1](https://github.com/crimera/piko/compare/v1.54.1...v1.54.2-dev.1) (2025-06-17)
+=======
 ## [1.54.2](https://github.com/crimera/piko/compare/v1.54.1...v1.54.2) (2025-06-17)
 
 ### Bug Fixes
