@@ -141,7 +141,7 @@
     <string name="piko_pref_customisation_search_type_ahead">Cerca i suggerimenti da nascondere</string>
 
     <!-- Logging Settings -->
-    <string name="piko_title_logging">Registrazione</string>
+    <string name="piko_title_logging">Registro</string>
     <string name="piko_pref_server_response_logging">Risposta del server di registro</string>
     <string name="piko_pref_server_response_logging_desc">Registra le risposte json ricevute dal server in \'Download/Piko\'</string>
     <string name="piko_pref_server_response_logging_file_overwrite">Sovrascrivi il file di registro delle risposte</string>
