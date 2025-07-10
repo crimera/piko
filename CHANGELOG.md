@@ -1,3 +1,9 @@
+## [1.55.1-dev.1](https://github.com/crimera/piko/compare/v1.55.0...v1.55.1-dev.1) (2025-07-10)
+
+### Updates
+
+* **Translations:** Update `Polish` ([#613](https://github.com/crimera/piko/issues/613)) ([b6ea9de](https://github.com/crimera/piko/commit/b6ea9dec045eeb5172fc1d01b1365929e127b4b0))
+
 ## [1.55.0](https://github.com/crimera/piko/compare/v1.54.2...v1.55.0) (2025-07-05)
 
 ### Bug Fixes
