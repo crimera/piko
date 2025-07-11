@@ -121,7 +121,8 @@
     <string name="piko_pref_hide_nudge_button_desc">Nasconde i pulsanti segui/iscriviti/segui di nuovo nei post</string>
     <string name="piko_pref_hide_social_proof">Nascondi i seguiti dal contesto</string>
     <string name="piko_pref_hide_social_proof_desc">Nasconde i seguiti dal contesto sotto ai profili</string>
-
+    <string name="piko_pref_hide_community_badge">Nascondi i badge della community</string>
+    
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Customizzazione</string>
     <string name="piko_pref_customisation_profiletabs">Schede dei profili da nascondere</string>
@@ -139,6 +140,13 @@
     <string name="piko_pref_customisation_post_font_size">Dimensione del carattere del post</string>
     <string name="piko_pref_customisation_search_type_ahead">Cerca i suggerimenti da nascondere</string>
 
+    <!-- Logging Settings -->
+    <string name="piko_title_logging">Registro</string>
+    <string name="piko_pref_server_response_logging">Risposta del server di registro</string>
+    <string name="piko_pref_server_response_logging_desc">Registra le risposte json ricevute dal server in \'Download/Piko\'</string>
+    <string name="piko_pref_server_response_logging_file_overwrite">Sovrascrivi il file di registro delle risposte</string>
+    <string name="piko_pref_server_response_logging_file_overwrite_desc">Cancella i dati del registro delle risposte esistenti all\'avvio</string>
+    
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Backup e ripristino</string>
     <string name="piko_pref_export">Esporta %s</string>
@@ -156,7 +164,7 @@
     <string name="piko_pref_version_info">Informazioni sulla Versione</string>
     <string name="piko_pref_patches">Patches</string>
     <string name="piko_pref_included">Incluso</string>
-    <string name="piko_pref_excluded">Excluso</string>
+    <string name="piko_pref_excluded">Escluso</string>
     <string name="piko_pref_app_restart_rec">Riavvio dell\'app è consigliato</string>
     <string name="piko_pref_remove">Rimuovi %s</string>
     <string name="piko_pref_enable">Abilita %s</string>
