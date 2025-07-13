@@ -1,3 +1,9 @@
+## [1.56.0-dev.1](https://github.com/crimera/piko/compare/v1.55.1-dev.1...v1.56.0-dev.1) (2025-07-13)
+
+### Features
+
+* **Twitter:** Added `Show post source label` patch ([931bc76](https://github.com/crimera/piko/commit/931bc762c3fc03535bf427b3e691f09e76271c85))
+
 ## [1.55.1-dev.1](https://github.com/crimera/piko/compare/v1.55.0...v1.55.1-dev.1) (2025-07-10)
 
 ### Updates
