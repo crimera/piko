@@ -99,6 +99,8 @@
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">Timeline</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Disable auto timeline scroll on launch</string>
+    <string name="piko_pref_show_post_source">Show post source label</string>
+    <string name="piko_pref_show_post_source_desc">There might be a delay while opening a post info and also label will be shown only on public posts</string>
     <string name="piko_pref_hide_live_threads">live threads</string>
     <string name="piko_pref_hide_live_threads_desc">Hides live section in timeline</string>
     <string name="piko_pref_hide_banner">banner</string>
