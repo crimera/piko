@@ -92,6 +92,8 @@
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">タイムライン</string>
     <string name="piko_pref_disable_auto_timeline_scroll">起動時の自動TLスクロールを無効化</string>
+    <string name="piko_pref_show_post_source">ポストのソースラベルを表示</string>
+    <string name="piko_pref_show_post_source_desc">ポストの情報を開く際に遅延が発生する可能性があります。また、ソースラベルは公開の投稿にのみ表示されます</string>
     <string name="piko_pref_hide_live_threads">ライブスレッド</string>
     <string name="piko_pref_hide_live_threads_desc">タイムラインからライブセクションを非表示にします</string>
     <string name="piko_pref_hide_banner">バナー</string>
