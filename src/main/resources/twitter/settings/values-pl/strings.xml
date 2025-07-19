@@ -99,6 +99,8 @@
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">Oś czasu</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Wyłącz autoodświeżanie osi</string>
+    <string name="piko_pref_show_post_source">Pokaż źródło posta</string>
+    <string name="piko_pref_show_post_source_desc">Etykieta źródła będzie widoczna tylko przy publicznych postach (może wystąpić opóźnienie przy otwieraniu informacji o poście)</string>
     <string name="piko_pref_hide_live_threads">pokoje \'Na żywo\'</string>
     <string name="piko_pref_hide_live_threads_desc">Ukrywa sekcję \'Na żywo\' na osi czasu</string>
     <string name="piko_pref_hide_banner">baner powiadomień</string>
