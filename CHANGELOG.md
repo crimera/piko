@@ -1,3 +1,14 @@
+## [1.56.0](https://github.com/crimera/piko/compare/v1.55.0...v1.56.0) (2025-07-22)
+
+### Features
+
+* **Translations:** Update `Polish` ([e49393e](https://github.com/crimera/piko/commit/e49393eefe75118c29575324f5832c7cc3589530))
+* **Twitter:** Added `Show post source label` patch ([931bc76](https://github.com/crimera/piko/commit/931bc762c3fc03535bf427b3e691f09e76271c85))
+
+### Updates
+
+* **Translations:** Update `Polish` ([#613](https://github.com/crimera/piko/issues/613)) ([b6ea9de](https://github.com/crimera/piko/commit/b6ea9dec045eeb5172fc1d01b1365929e127b4b0))
+
 ## [1.56.0-dev.2](https://github.com/crimera/piko/compare/v1.56.0-dev.1...v1.56.0-dev.2) (2025-07-19)
 
 ### Features
