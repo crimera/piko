@@ -99,6 +99,8 @@
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">Oś czasu</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Wyłącz autoodświeżanie osi</string>
+    <string name="piko_pref_show_post_source">Pokaż źródło posta</string>
+    <string name="piko_pref_show_post_source_desc">Etykieta źródła będzie widoczna tylko przy publicznych postach (może wystąpić opóźnienie przy otwieraniu informacji o poście)</string>
     <string name="piko_pref_hide_live_threads">pokoje \'Na żywo\'</string>
     <string name="piko_pref_hide_live_threads_desc">Ukrywa sekcję \'Na żywo\' na osi czasu</string>
     <string name="piko_pref_hide_banner">baner powiadomień</string>
@@ -121,6 +123,7 @@
     <string name="piko_pref_hide_nudge_button_desc">Ukrywa przyciski obserwowania/subskrypcji przy postach</string>
     <string name="piko_pref_hide_social_proof">Ukryj kontekst \'obserwowany przez\'</string>
     <string name="piko_pref_hide_social_proof_desc">Ukrywa kontekst \'obserwowany przez\' pod profilem</string>
+    <string name="piko_pref_hide_community_badge">Ukryj odznaki społeczności</string>
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Dostosowywanie</string>
@@ -138,6 +141,13 @@
     <string name="piko_pref_customisation_reply_sorting_remember">Ostatnio wybrane</string>
     <string name="piko_pref_customisation_post_font_size">Rozmiar czcionki postów</string>
     <string name="piko_pref_customisation_search_type_ahead">Sugestie wyszukiwania do ukrycia</string>
+
+    <!-- Logging Settings -->
+    <string name="piko_title_logging">Logi</string>
+    <string name="piko_pref_server_response_logging">Loguj odpowiedzi serwera</string>
+    <string name="piko_pref_server_response_logging_desc">Zapisuj odpowiedzi JSON otrzymane z serwera w folderze \'Download/Piko\'</string>
+    <string name="piko_pref_server_response_logging_file_overwrite">Nadpisuj plik z logami</string>
+    <string name="piko_pref_server_response_logging_file_overwrite_desc">Usuń istniejące logi przy uruchomieniu</string>
 
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Kopia zapasowa i przywracanie</string>

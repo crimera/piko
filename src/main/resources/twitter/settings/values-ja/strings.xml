@@ -92,6 +92,8 @@
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">タイムライン</string>
     <string name="piko_pref_disable_auto_timeline_scroll">起動時の自動TLスクロールを無効化</string>
+    <string name="piko_pref_show_post_source">ポストのソースラベルを表示</string>
+    <string name="piko_pref_show_post_source_desc">ポストの情報を開く際に遅延が発生する可能性があります。また、ソースラベルは公開の投稿にのみ表示されます</string>
     <string name="piko_pref_hide_live_threads">ライブスレッド</string>
     <string name="piko_pref_hide_live_threads_desc">タイムラインからライブセクションを非表示にします</string>
     <string name="piko_pref_hide_banner">バナー</string>
@@ -114,6 +116,7 @@
     <string name="piko_pref_hide_nudge_button_desc">ポストから [フォローする] / [サブスクライブ] / [フォローバック] ボタンを非表示にします</string>
     <string name="piko_pref_hide_social_proof">フォローインジケーターを非表示</string>
     <string name="piko_pref_hide_social_proof_desc">プロフィールの下部にある「○○さんにフォローされています」を非表示にします</string>
+    <string name="piko_pref_hide_community_badge">コミュニティバッジを非表示</string>
     <!-- Customization Settings -->
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">プロフィールタブから非表示にする項目</string>
@@ -130,6 +133,12 @@
     <string name="piko_pref_customisation_reply_sorting_remember">前回の選択を記憶</string>
     <string name="piko_pref_customisation_post_font_size">ポストのフォントサイズ</string>
     <string name="piko_pref_customisation_search_type_ahead">検索候補から非表示にする項目</string>
+    <!-- Logging Settings -->
+    <string name="piko_title_logging">ログ</string>
+    <string name="piko_pref_server_response_logging">サーバーの応答をログに記録します</string>
+    <string name="piko_pref_server_response_logging_desc">サーバーから受信したJSON応答を「Download/Piko」に記録します</string>
+    <string name="piko_pref_server_response_logging_file_overwrite">応答ログファイルを上書き</string>
+    <string name="piko_pref_server_response_logging_file_overwrite_desc">起動時に既存の応答ログデータを消去します</string>
     <!-- Backup and Restore -->
     <string name="piko_title_backup">バックアップと復元</string>
     <string name="piko_pref_export">エクスポート: %s</string>
