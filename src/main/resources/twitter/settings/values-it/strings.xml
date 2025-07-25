@@ -99,6 +99,8 @@
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">Cronologia</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Disattiva lo scrollimento automatico della cronologia all\'avvio</string>
+    <string name="piko_pref_show_post_source">Show post source label</string>
+    <string name="piko_pref_show_post_source_desc">There might be a delay while opening a post info and also label will be shown only on public posts</string>
     <string name="piko_pref_hide_live_threads">discussioni in diretta</string>
     <string name="piko_pref_hide_live_threads_desc">Nascondi la sezione dal vivo nella cronologia</string>
     <string name="piko_pref_hide_banner">bandiera</string>
