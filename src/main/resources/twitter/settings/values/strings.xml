@@ -177,4 +177,6 @@
     <string name="piko_pref_search_type_ahead_events">Events</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Ordered section</string>
 
+    <string name="piko_settings_supported_links">Open supported links</string>
+
 </resources>
