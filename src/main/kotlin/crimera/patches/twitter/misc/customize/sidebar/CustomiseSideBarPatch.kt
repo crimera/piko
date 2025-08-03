@@ -16,13 +16,15 @@ import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFing
 
 object CustomiseSideBarFingerprint : MethodFingerprint(
     returnType = "Ljava/lang/Object",
-    strings = listOf(
-        "android_global_navigation_top_level_monetization_enabled",
-    ),
+    strings =
+        listOf(
+            "android_global_navigation_top_level_monetization_enabled",
+        ),
     customFingerprint = { it, _ ->
         it.name == "invoke"
-    }
+    },
 )
+
 @Patch(
     name = "Customize side bar items",
     dependencies = [SettingsPatch::class],
@@ -30,26 +32,29 @@ object CustomiseSideBarFingerprint : MethodFingerprint(
 )
 @Suppress("unused")
 object CustomiseSideBarPatch : BytecodePatch(
-    setOf(CustomiseSideBarFingerprint,SettingsStatusLoadFingerprint)
-){
+    setOf(CustomiseSideBarFingerprint, SettingsStatusLoadFingerprint),
+) {
 
     override fun execute(context: BytecodeContext) {
-        val result = CustomiseSideBarFingerprint.result
-            ?: throw PatchException("CustomiseSideBarFingerprint not found")
+        val result =
+            CustomiseSideBarFingerprint.result
+                ?: throw PatchException("CustomiseSideBarFingerprint not found")
 
         val method = result.mutableMethod
 
         val instructions = method.getInstructions()
 
-        val return_obj = instructions.last {  it.opcode == Opcode.RETURN_OBJECT  }.location.index
+        var filledNewArrIndex = instructions.last { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }.location.index
+        val return_obj = instructions.first { it.opcode == Opcode.RETURN_OBJECT && it.location.index > filledNewArrIndex }.location.index
         val r0 = method.getInstruction<OneRegisterInstruction>(return_obj).registerA
 
-        val METHOD = """
+        val METHOD =
+            """
             invoke-static {v$r0}, ${SettingsPatch.CUSTOMISE_DESCRIPTOR};->sideBar(Ljava/util/List;)Ljava/util/List;
             move-result-object v$r0
-        """.trimIndent()
+            """.trimIndent()
 
-        method.addInstructionsWithLabels(return_obj,METHOD)
+        method.addInstructionsWithLabels(return_obj, METHOD)
 
         SettingsStatusLoadFingerprint.enableSettings("sideBarCustomisation")
     }
