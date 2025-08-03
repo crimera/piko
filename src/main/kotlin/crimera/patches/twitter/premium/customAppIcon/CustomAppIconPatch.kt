@@ -24,7 +24,7 @@ object CustomiseAppIconFingerprint : MethodFingerprint(
 
 @Patch(
     name = "Enable app icons",
-    dependencies = [SettingsPatch::class, RedirectBMTab::class],
+    dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = true,
     requiresIntegrations = true,
