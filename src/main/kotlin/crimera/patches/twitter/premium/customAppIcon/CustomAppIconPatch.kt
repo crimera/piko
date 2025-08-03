@@ -19,6 +19,7 @@ object CustomiseAppIconFingerprint : MethodFingerprint(
         listOf(
             "current_app_icon_id",
         ),
+    returnType = "V",
 )
 
 @Patch(
