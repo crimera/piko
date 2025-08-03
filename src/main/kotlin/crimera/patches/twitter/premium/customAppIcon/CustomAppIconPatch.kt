@@ -19,11 +19,12 @@ object CustomiseAppIconFingerprint : MethodFingerprint(
         listOf(
             "current_app_icon_id",
         ),
+    returnType = "V",
 )
 
 @Patch(
     name = "Enable app icons",
-    dependencies = [SettingsPatch::class, RedirectBMTab::class],
+    dependencies = [SettingsPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = true,
     requiresIntegrations = true,
