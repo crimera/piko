@@ -1,3 +1,18 @@
+## [1.57.0](https://github.com/crimera/piko/compare/v1.56.0...v1.57.0) (2025-08-11)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Customize side bar items` patch ([4664f02](https://github.com/crimera/piko/commit/4664f02c065396dc28406fe5b47478eff6b6c4aa))
+* **Twitter:** Fix App icon error toast ([2997b56](https://github.com/crimera/piko/commit/2997b56f13c37681acbf89efcbd12647ee1c5056))
+
+### Features
+
+* **Twitter:** support custom deeplink hosts ([499cc5e](https://github.com/crimera/piko/commit/499cc5ea3e32d3e6d551755df2f94b7dbc3da9af))
+
+### Refactors
+
+* **Twitter:** Move redirect BM to settings patch dependancy ([4dbc491](https://github.com/crimera/piko/commit/4dbc49198ecd3a10d288f8f7cebcbca255aaa9b7))
+
 ## [1.57.0-dev.2](https://github.com/crimera/piko/compare/v1.57.0-dev.1...v1.57.0-dev.2) (2025-08-03)
 
 ### Bug Fixes
