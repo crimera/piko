@@ -21,11 +21,12 @@ import crimera.patches.twitter.misc.integrations.IntegrationsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.AuthorizeAppActivity
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
 import crimera.patches.twitter.misc.settings.fingerprints.UrlInterpreterActivity
+import crimera.patches.twitter.premium.redirectBMNavBar.RedirectBMTab
 
 @Patch(
     description = "Adds settings",
     requiresIntegrations = true,
-    dependencies = [SettingsResourcePatch::class, IntegrationsPatch::class],
+    dependencies = [SettingsResourcePatch::class, IntegrationsPatch::class, RedirectBMTab::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 object SettingsPatch : BytecodePatch(
@@ -78,14 +79,18 @@ object SettingsPatch : BytecodePatch(
                 .first { it.opcode == Opcode.CONST_4 }
                 .location.index
 
-        val igetObjLoc = prefCLickedMethod.getInstructions().first { it.opcode == Opcode.IGET_OBJECT }.location.index
+        val igetObjLoc =
+            prefCLickedMethod
+                .getInstructions()
+                .first { it.opcode == Opcode.IGET_OBJECT }
+                .location.index
         val objFieldName = (prefCLickedMethod.getInstruction<ReferenceInstruction>(igetObjLoc).reference as FieldReference).name
         prefCLickedMethod.removeInstruction(igetObjLoc)
 
         prefCLickedMethod.addInstructionsWithLabels(
             0,
             """
-            iget-object p1, p1, Landroidx/preference/Preference;->${objFieldName}:Ljava/lang/String;
+            iget-object p1, p1, Landroidx/preference/Preference;->$objFieldName:Ljava/lang/String;
             const-string v1, "pref_mod" 
             invoke-virtual {p1, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
             move-result v2
