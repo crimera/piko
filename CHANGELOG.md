@@ -1,3 +1,9 @@
+## [1.57.1](https://github.com/crimera/piko/compare/v1.57.0...v1.57.1) (2025-08-11)
+
+### Bug Fixes
+
+* Unescaped apostrophe ([487e992](https://github.com/crimera/piko/commit/487e99259b772cbf44f09028807db223f464df85))
+
 ## [1.57.1-dev.1](https://github.com/crimera/piko/compare/v1.57.0...v1.57.1-dev.1) (2025-08-11)
 
 ### Bug Fixes
