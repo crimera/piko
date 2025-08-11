@@ -144,7 +144,7 @@
     <!-- Logging Settings -->
     <string name="piko_title_logging">Logging</string>
     <string name="piko_pref_server_response_logging">로그 서버 응답</string>
-    <string name="piko_pref_server_response_logging_desc">서버로부터 받은 JSON 응답을 'Download/Piko\'에서 로그에 기록합니다.</string>
+    <string name="piko_pref_server_response_logging_desc">서버로부터 받은 JSON 응답을 \'Download/Piko\'에서 로그에 기록합니다.</string>
     <string name="piko_pref_server_response_logging_file_overwrite">응답 로그 파일 덮어쓰기</string>
     <string name="piko_pref_server_response_logging_file_overwrite_desc">실행 시 기존 응답 로그 데이터를 지웁니다.</string>
     
