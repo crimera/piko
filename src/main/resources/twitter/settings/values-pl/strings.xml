@@ -11,7 +11,7 @@
     <string name="piko_pref_enable_force_pip">automatyczny tryb PiP</string>
     <string name="piko_pref_enable_force_pip_desc">Włącza tryb PiP (Obraz w obrazie) po zamknięciu aplikacji</string>
 
-     <!-- Download Settings -->
+    <!-- Download Settings -->
     <string name="piko_title_download">Pobieranie</string>
     <string name="piko_pref_video_download">Możliwość pobierania treści</string>
     <string name="piko_pref_download">Zmień folder do pobierania treści</string>
@@ -176,5 +176,7 @@
     <string name="piko_pref_search_type_ahead_users">Użytkownicy</string>
     <string name="piko_pref_search_type_ahead_events">Wydarzenia</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Sekcja uporządkowana</string>
+
+    <string name="piko_settings_supported_links">Otwieraj obsługiwane linki</string>
 
 </resources>
