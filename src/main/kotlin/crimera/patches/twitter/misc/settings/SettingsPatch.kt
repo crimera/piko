@@ -34,15 +34,18 @@ object SettingsPatch : BytecodePatch(
 ) {
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
     const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
-    private const val ACTIVITY_HOOK_CLASS = "Lapp/revanced/integrations/twitter/settings/ActivityHook;"
-    private const val DEEPLINK_HOOK_CLASS = "Lapp/revanced/integrations/twitter/settings/DeepLink;"
+    private const val ACTIVITY_SETTINGS_CLASS = "$INTEGRATIONS_PACKAGE/settings"
+    private const val ACTIVITY_HOOK_CLASS = "$ACTIVITY_SETTINGS_CLASS/ActivityHook;"
+    private const val DEEPLINK_HOOK_CLASS = "$ACTIVITY_SETTINGS_CLASS/DeepLink;"
     private const val ADD_PREF_DESCRIPTOR =
         "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
 
     const val PREF_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Pref"
     const val PATCHES_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/patches"
     const val CUSTOMISE_DESCRIPTOR = "$PATCHES_DESCRIPTOR/customise/Customise"
-    const val SSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/settings/SettingsStatus;"
+    const val READER_MODE_UTILS_DESCRIPTOR = "$ACTIVITY_SETTINGS_CLASS/fragments/readerMode/ReaderModeUtils"
+
+    const val SSTS_DESCRIPTOR = "invoke-static {}, $ACTIVITY_SETTINGS_CLASS/SettingsStatus;"
     const val FSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/patches/FeatureSwitchPatch;"
 
     private const val START_ACTIVITY_DESCRIPTOR =
