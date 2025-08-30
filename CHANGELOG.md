@@ -1,3 +1,9 @@
+## [1.58.0](https://github.com/crimera/piko/compare/v1.57.1...v1.58.0) (2025-08-30)
+
+### Features
+
+* **Translations:** Update `Polish` ([97b3790](https://github.com/crimera/piko/commit/97b379029deba1044436cb5a983335b515e7f959))
+
 ## [1.58.0-dev.1](https://github.com/crimera/piko/compare/v1.57.1...v1.58.0-dev.1) (2025-08-21)
 
 ### Features
