@@ -16,12 +16,14 @@ import crimera.patches.twitter.misc.shareMenu.fingerprints.ActionEnumsFingerprin
 import crimera.patches.twitter.misc.shareMenu.fingerprints.ShareMenuButtonFuncCallFingerprint
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonAddHook
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonInitHook
-import crimera.patches.twitter.misc.shareMenu.nativeDownloader.extractDescriptors
+import crimera.patches.twitter.models.TweetEntityPatch
+import crimera.patches.twitter.models.TweetInfoEntityPatch
+import crimera.patches.twitter.models.extractDescriptors
 
 @Patch(
     name = "Custom translator",
     description = "Requires X 11.0.0-release.0 or higher.",
-    dependencies = [SettingsPatch::class, NativeTranslatorHooksPatch::class, ResourceMappingPatch::class],
+    dependencies = [SettingsPatch::class, TweetEntityPatch::class, TweetInfoEntityPatch::class, ResourceMappingPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = true,
 )
