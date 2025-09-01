@@ -53,6 +53,10 @@
     <string name="piko_native_reader_mode_pref_text_only_mode">Text only mode</string>
     <string name="piko_native_reader_mode_pref_hide_quoted_posts">Hide quoted posts</string>
     <string name="piko_native_reader_mode_pref_no_grok">No Grok analyses</string>
+    <string name="piko_native_reader_mode_copy_post">Copy post link</string>
+    <string name="piko_native_reader_mode_cache_delete">Delete reader mode\'s cache</string>
+    <string name="piko_native_reader_mode_cache_delete_success">Cache deleted successfully</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">Cache deletion failed</string>
 
     <!-- Ads Settings -->
     <string name="piko_title_ads">Ads</string>

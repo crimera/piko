@@ -109,7 +109,7 @@ object NativeTranslatorPatch : BytecodePatch(
             check-cast v$timelineRefReg, ${timelineRef.reference.extractDescriptors()[0]}
             iget-object v1, v$timelineRefReg, ${timelineRef.reference}
             
-            invoke-static {v$activityRefReg, v1}, ${SettingsPatch.PATCHES_DESCRIPTOR}/translator/NativeTranslator;->translate(Landroid/content/Context;Ljava/lang/Object;)V
+            invoke-static {v$activityRefReg, v1}, ${SettingsPatch.NATIVE_DESCRIPTOR}/translator/NativeTranslator;->translate(Landroid/content/Context;Ljava/lang/Object;)V
             """.trimIndent(),
             viewDebugDialogReference,
         )
