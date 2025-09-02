@@ -1,3 +1,14 @@
+## [1.59.0-dev.1](https://github.com/crimera/piko/compare/v1.58.1...v1.59.0-dev.1) (2025-09-02)
+
+### Features
+
+* **Twitter:** Added 'Native reader mode'  patch ([308e1e6](https://github.com/crimera/piko/commit/308e1e6ae392eb6c0b9ade6383957fd2983e68f5))
+
+### Refactors
+
+* **Twitter:** consolidate native features ([79a37af](https://github.com/crimera/piko/commit/79a37afded871a185545afcd1c6a36815ec89b41))
+* **Twitter:** Moved to `models` approach ([4bc56cb](https://github.com/crimera/piko/commit/4bc56cbb3de7147706786e186ebf7f2ea9df15a2))
+
 ## [1.58.1](https://github.com/crimera/piko/compare/v1.58.0...v1.58.1) (2025-09-02)
 
 ### Updates
