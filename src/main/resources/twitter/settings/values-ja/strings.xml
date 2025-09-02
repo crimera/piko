@@ -164,4 +164,5 @@
     <string name="piko_pref_search_type_ahead_users">ユーザー</string>
     <string name="piko_pref_search_type_ahead_events">イベント</string>
     <string name="piko_pref_search_type_ahead_ordered_section">並び替え</string>
+    <string name="piko_settings_supported_links">対応リンクを開く</string>
 </resources>
