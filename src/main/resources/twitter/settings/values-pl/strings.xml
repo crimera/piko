@@ -44,6 +44,20 @@
     <string name="piko_native_translator_google">Tłumacz Google</string>
     <string name="piko_native_translator_google_v2">Tłumacz Google V2</string>
 
+    <string name="piko_title_native_reader_mode">Tryb czytania</string>
+    <string name="piko_native_reader_mode_grok_thread">Przeanalizuj ten wątek</string>
+    <string name="piko_native_reader_mode_grok_author">Więcej o autorze</string>
+    <string name="piko_native_reader_mode_source">Źródło</string>
+    <string name="piko_native_reader_mode_published">Opublikowano</string>
+    <string name="piko_native_reader_mode_total_post">Liczba postów</string>
+    <string name="piko_native_reader_mode_pref_text_only_mode">Tylko tekst</string>
+    <string name="piko_native_reader_mode_pref_hide_quoted_posts">Ukryj cytowane posty</string>
+    <string name="piko_native_reader_mode_pref_no_grok">Bez analizy Groka</string>
+    <string name="piko_native_reader_mode_copy_post">Kopiuj link do posta</string>
+    <string name="piko_native_reader_mode_cache_delete">Usuń pamięć podręczną trybu czytania</string>
+    <string name="piko_native_reader_mode_cache_delete_success">Pamięć podręczna została usunięta</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">Nie udało się usunąć pamięci podręcznej</string>
+
     <!-- Ads Settings -->
     <string name="piko_title_ads">Reklamy</string>
     <string name="piko_pref_hide_promoted_posts">promowane posty</string>

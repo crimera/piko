@@ -16,7 +16,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.misc.shareMenu.nativeDownloader.exception
-import crimera.patches.twitter.misc.shareMenu.nativeDownloader.extractDescriptors
+import crimera.patches.twitter.models.extractDescriptors
 
 object PlayerSupportFingerprint : MethodFingerprint(
     customFingerprint = { methodDef, classDef ->

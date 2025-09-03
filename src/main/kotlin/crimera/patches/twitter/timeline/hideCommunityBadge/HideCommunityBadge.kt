@@ -13,7 +13,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
-import crimera.patches.twitter.misc.shareMenu.nativeDownloader.extractDescriptors
+import crimera.patches.twitter.models.extractDescriptors
 
 object CommModelFingerprint : MethodFingerprint(
     strings =

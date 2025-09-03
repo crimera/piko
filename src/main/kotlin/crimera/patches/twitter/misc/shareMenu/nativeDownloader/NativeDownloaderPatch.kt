@@ -17,13 +17,15 @@ import com.android.tools.smali.dexlib2.iface.MethodParameter
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.*
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.Reference
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
 import crimera.patches.twitter.misc.shareMenu.fingerprints.ActionEnumsFingerprint
 import crimera.patches.twitter.misc.shareMenu.fingerprints.ShareMenuButtonFuncCallFingerprint
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonAddHook
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonInitHook
+import crimera.patches.twitter.models.ExtMediaEntityPatch
+import crimera.patches.twitter.models.TweetEntityPatch
+import crimera.patches.twitter.models.extractDescriptors
 
 class InitMethod(
     private val validator: () -> Unit,
@@ -138,7 +140,7 @@ val MutableList<BuilderInstruction>.indexOfLastFilledNewArrayRange
 @Patch(
     name = "Custom downloader",
     description = "Requires X 11.0.0-release.0 or higher.",
-    dependencies = [SettingsPatch::class, NativeDownloaderHooksPatch::class, ResourceMappingPatch::class],
+    dependencies = [SettingsPatch::class, TweetEntityPatch::class, ExtMediaEntityPatch::class, ResourceMappingPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = true,
 )
@@ -152,7 +154,7 @@ object NativeDownloaderPatch : BytecodePatch(
         ActionEnumsFingerprint,
     ),
 ) {
-    var offset: Boolean = false
+    //  var offset: Boolean = false
 
     override fun execute(context: BytecodeContext) {
         // TODO: make this whole button addition in a new function or a class?
@@ -226,16 +228,11 @@ object NativeDownloaderPatch : BytecodePatch(
             check-cast v$timelineRefReg, ${timelineRef.reference.extractDescriptors()[0]}
             iget-object v1, v$timelineRefReg, ${timelineRef.reference}
                 
-            invoke-static {v$activityRefReg, v1}, ${SettingsPatch.PATCHES_DESCRIPTOR}/NativeDownloader;->downloader(Landroid/content/Context;Ljava/lang/Object;)V
+            invoke-static {v$activityRefReg, v1}, ${SettingsPatch.NATIVE_DESCRIPTOR}/NativeDownloader;->downloader(Landroid/content/Context;Ljava/lang/Object;)V
             """.trimIndent(),
             viewDebugDialogReference,
         )
 
         SettingsStatusLoadFingerprint.enableSettings("nativeDownloader")
     }
-}
-
-fun Reference.extractDescriptors(): List<String> {
-    val regex = Regex("L[^;]+;")
-    return regex.findAll(this.toString()).map { it.value }.toList()
 }
