@@ -30,7 +30,7 @@
     
     <!-- Native -->
     <string name="piko_title_native">Recursos nativos</string>
-    <string name="piko_pref_native_page_desc">Esses recursos nativos do Piko estão disponíveis no menu de compartilhamento das postagens.</strings>
+    <string name="piko_pref_native_page_desc">Esses recursos nativos do Piko estão disponíveis no menu de compartilhamento das postagens.</string>
     <string name="piko_title_native_downloader">Baixador nativo</string>
     <string name="piko_title_native_downloader_toggle">Ativar baixador nativo</string>
     <string name="piko_pref_native_downloader_alert_title">Baixar mídia</string>
