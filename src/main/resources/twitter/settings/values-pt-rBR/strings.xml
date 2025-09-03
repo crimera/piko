@@ -41,7 +41,6 @@
     <string name="piko_title_native_translator">Tradução nativa de post</string>
     <string name="piko_native_translator_toggle">Ativar tradução nativa de post</string>
     <string name="piko_native_translator_provider">Provedores de tradução</string>
-    <string name="piko_native_translator_provider">Provedores de tradução</string>
     <string name="piko_native_translator_to_lang">Traduzir para</string>
     <string name="piko_native_translator_zero_text">Nenhum texto encontrado para traduzir</string>
     <string name="piko_native_translator_google">Tradutor Google</string>
