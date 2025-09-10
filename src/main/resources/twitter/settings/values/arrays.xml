@@ -41,7 +41,7 @@
         <item>@string/x_chat_tab_title</item>
         <item>@string/drawer_direct_messages_title</item>
         <item>@string/drawer_communities_title</item>
-        <item>@string/video_tab_title</item>
+        <item>@string/drafts_empty_video</item>
         <item>@string/bookmarks_title</item>
         <item>@string/drawer_jobs_title</item>
         <item>@string/drawer_lists</item>
