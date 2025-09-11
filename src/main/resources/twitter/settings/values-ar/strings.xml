@@ -44,6 +44,20 @@
     <string name="piko_native_translator_google">Google مترجم</string>
     <string name="piko_native_translator_google_v2">مترجم Google V2</string>
 
+    <string name="piko_title_native_reader_mode">وضع القارئ</string>
+    <string name="piko_native_reader_mode_grok_thread">حلّل هذا الموضوع</string>
+    <string name="piko_native_reader_mode_grok_author">المزيد عن المؤلف</string>
+    <string name="piko_native_reader_mode_source">المصدر</string>
+    <string name="piko_native_reader_mode_published">تاريخ النشر</string>
+    <string name="piko_native_reader_mode_total_post">إجمالي المنشورات</string>
+    <string name="piko_native_reader_mode_pref_text_only_mode">وضع النص فقط</string>
+    <string name="piko_native_reader_mode_pref_hide_quoted_posts">إخفاء المنشورات المقتبسة</string>
+    <string name="piko_native_reader_mode_pref_no_grok">بدون تحليلات Grok</string>
+    <string name="piko_native_reader_mode_copy_post">نسخ رابط المنشور</string>
+    <string name="piko_native_reader_mode_cache_delete">حذف ذاكرة التخزين المؤقت لوضع القارئ</string>
+    <string name="piko_native_reader_mode_cache_delete_success">تم حذف ذاكرة التخزين المؤقت بنجاح</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">فشل حذف ذاكرة التخزين المؤقت</string>
+    
     <!-- إعدادات الإعلانات -->
     <string name="piko_title_ads">الإعلانات</string>
     <string name="piko_pref_hide_promoted_posts">منشورات المحتوى المُروَّج</string>

@@ -15,7 +15,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 import crimera.patches.twitter.misc.settings.SettingsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsStatusLoadFingerprint
-import crimera.patches.twitter.misc.shareMenu.nativeDownloader.extractDescriptors
+import crimera.patches.twitter.models.extractDescriptors
 
 object SourceLabelFingerprint : MethodFingerprint(
     strings = listOf("show_tweet_source_disabled"),

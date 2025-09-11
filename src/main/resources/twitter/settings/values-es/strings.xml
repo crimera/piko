@@ -28,6 +28,7 @@
 
     <!-- Native -->
     <string name="piko_title_native">Funciones nativas</string>
+    <string name="piko_pref_native_page_desc">Estas funciones nativas de Piko están disponibles en el menú compartir de las publicaciones.</string>
     <string name="piko_title_native_downloader">Descargador nativo</string>
     <string name="piko_title_native_downloader_toggle">Habilitar descargador nativo</string>
     <string name="piko_pref_native_downloader_alert_title">Descargar medios</string>
@@ -44,6 +45,21 @@
     <string name="piko_native_translator_google">Traductor de Google</string>
     <string name="piko_native_translator_google_v2">Traductor de Google V2</string>
 
+    <string name="piko_title_native_reader_mode">Modo lectura</string>
+    <string name="piko_native_reader_mode_grok_thread">Analizar este hilo</string>
+    <string name="piko_native_reader_mode_grok_author">Más sobre el autor</string>
+    <string name="piko_native_reader_mode_source">Fuente</string>
+    <string name="piko_native_reader_mode_published">Publicado</string>
+    <string name="piko_native_reader_mode_total_post">Publicaciones totales</string>
+    <string name="piko_native_reader_mode_pref_text_only_mode">Modo solo texto</string>
+    <string name="piko_native_reader_mode_pref_hide_quoted_posts">Ocultar publicaciones citadas</string>
+    <string name="piko_native_reader_mode_pref_no_grok">Sin análisis de Grok</string>
+    <string name="piko_native_reader_mode_copy_post">Copiar enlace de la publicación</string>
+    <string name="piko_native_reader_mode_cache_delete">Eliminar caché del modo lectura</string>
+    <string name="piko_native_reader_mode_cache_delete_success">Caché eliminada correctamente</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">Error al eliminar la caché</string>
+
+
     <!-- Ads Settings -->
     <string name="piko_title_ads">Anuncios</string>
     <string name="piko_pref_hide_promoted_posts">Publicaciones promocionadas</string>
@@ -59,6 +75,7 @@
     <string name="piko_pref_hide_detailed_posts">Publicaciones detalladas (en respuestas)</string>
     <string name="piko_pref_hide_trends">Tendencias promocionadas</string>
     <string name="piko_pref_hide_premium_prompt">Mensajes emergentes</string>
+    <string name="piko_pref_hide_todays_news">Noticias\ de hoy</string>
     <string name="piko_pref_del_from_db">Eliminar entradas de la base de datos</string>
     <string name="piko_pref_db_not_found">Base de datos no encontrada</string>
     <string name="piko_pref_db_not_open">Base de datos no abierta</string>
@@ -98,6 +115,8 @@
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">Cronología</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Deshabilitar desplazamiento automático en la cronología al iniciar</string>
+    <string name="piko_pref_show_post_source">Mostrar etiqueta de origen de la publicación</string>
+    <string name="piko_pref_show_post_source_desc">Puede haber un retraso al abrir la información de la publicación, y la etiqueta solo se mostrará en publicaciones públicas</string>
     <string name="piko_pref_hide_live_threads">Hilos en vivo</string>
     <string name="piko_pref_hide_live_threads_desc">Oculta la sección en vivo en la cronología</string>
     <string name="piko_pref_hide_banner">Banner</string>
@@ -120,6 +139,7 @@
     <string name="piko_pref_hide_nudge_button_desc">Oculta los botones de seguir/suscribirse/seguir de vuelta en las publicaciones</string>
     <string name="piko_pref_hide_social_proof">Ocultar seguidores por contexto</string>
     <string name="piko_pref_hide_social_proof_desc">Oculta seguidores por contexto en los perfiles</string>
+    <string name="piko_pref_hide_community_badge">Ocultar insignias de la comunidad</string>
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Personalización</string>
@@ -137,6 +157,13 @@
     <string name="piko_pref_customisation_reply_sorting_remember">Previamente seleccionado</string>
     <string name="piko_pref_customisation_post_font_size">Tamaño de fuente de las publicaciones</string>
     <string name="piko_pref_customisation_search_type_ahead">Sugerencias de búsqueda para ocultar</string>
+
+    <!-- Logging Settings -->
+    <string name="piko_title_logging">Registros</string>
+    <string name="piko_pref_server_response_logging">Registrar respuesta del servidor</string>
+    <string name="piko_pref_server_response_logging_desc">Registrar respuestas JSON recibidas del servidor en \'Download/Piko\'</string>
+    <string name="piko_pref_server_response_logging_file_overwrite">Sobrescribir archivo de registro de respuestas</string>
+    <string name="piko_pref_server_response_logging_file_overwrite_desc">Borrar los registros existentes al iniciar</string>
 
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Respaldo y restauración</string>
@@ -161,7 +188,6 @@
     <string name="piko_pref_enable">Habilitar %s</string>
     <string name="piko_single_page_settings">Configuración en una página</string>
     <string name="piko_single_page_settings_desc">Ver todas las configuraciones en una sola página</string>
-    
 
     <!-- Búsqueda -->
     <string name="piko_pref_search_type_ahead_users">Usuarios</string>
@@ -172,5 +198,6 @@
     <string name="piko_title_piko_integrations">Integraciones Piko</string>
     <string name="piko_title_piko_patches">Parches Piko</string>
     <string name="piko_title_settings">Configuración del Mod</string>
+    <string name="piko_settings_supported_links">Abrir enlaces compatibles</string>
     
 </resources>

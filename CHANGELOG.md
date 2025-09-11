@@ -1,3 +1,26 @@
+## [1.59.0-dev.3](https://github.com/crimera/piko/compare/v1.59.0-dev.2...v1.59.0-dev.3) (2025-09-11)
+
+### Updates
+
+* **Translations:** New translations for `pt-br` ([850aa0d](https://github.com/crimera/piko/commit/850aa0d17e0cd9a83a9c897be11b45784a82860a))
+
+## [1.59.0-dev.2](https://github.com/crimera/piko/compare/v1.59.0-dev.1...v1.59.0-dev.2) (2025-09-03)
+
+### Updates
+
+* **Translations:** Update `Polish` ([973391d](https://github.com/crimera/piko/commit/973391d6e0cfb1735dbc2102a419b9df783fa8f9))
+
+## [1.59.0-dev.1](https://github.com/crimera/piko/compare/v1.58.1...v1.59.0-dev.1) (2025-09-02)
+
+### Features
+
+* **Twitter:** Added 'Native reader mode'  patch ([308e1e6](https://github.com/crimera/piko/commit/308e1e6ae392eb6c0b9ade6383957fd2983e68f5))
+
+### Refactors
+
+* **Twitter:** consolidate native features ([79a37af](https://github.com/crimera/piko/commit/79a37afded871a185545afcd1c6a36815ec89b41))
+* **Twitter:** Moved to `models` approach ([4bc56cb](https://github.com/crimera/piko/commit/4bc56cbb3de7147706786e186ebf7f2ea9df15a2))
+
 ## [1.58.1](https://github.com/crimera/piko/compare/v1.58.0...v1.58.1) (2025-09-02)
 
 ### Updates

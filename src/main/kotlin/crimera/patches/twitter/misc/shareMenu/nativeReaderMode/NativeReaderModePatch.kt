@@ -1,4 +1,4 @@
-package crimera.patches.twitter.misc.shareMenu.nativeTranslator
+package crimera.patches.twitter.misc.shareMenu.nativeReaderMode
 
 import app.revanced.patcher.data.BytecodeContext
 import app.revanced.patcher.patch.BytecodePatch
@@ -16,19 +16,17 @@ import crimera.patches.twitter.misc.shareMenu.fingerprints.ActionEnumsFingerprin
 import crimera.patches.twitter.misc.shareMenu.fingerprints.ShareMenuButtonFuncCallFingerprint
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonAddHook
 import crimera.patches.twitter.misc.shareMenu.hooks.ShareMenuButtonInitHook
-import crimera.patches.twitter.models.TweetEntityPatch
-import crimera.patches.twitter.models.TweetInfoEntityPatch
 import crimera.patches.twitter.models.extractDescriptors
 
 @Patch(
-    name = "Custom translator",
+    name = "Native reader mode",
     description = "Requires X 11.0.0-release.0 or higher.",
-    dependencies = [SettingsPatch::class, TweetEntityPatch::class, TweetInfoEntityPatch::class, ResourceMappingPatch::class],
+    dependencies = [SettingsPatch::class, ResourceMappingPatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = true,
 )
 @Suppress("unused")
-object NativeTranslatorPatch : BytecodePatch(
+object NativeReaderModePatch : BytecodePatch(
     setOf(
         ShareMenuButtonFuncCallFingerprint,
         ShareMenuButtonInitHook,
@@ -38,13 +36,13 @@ object NativeTranslatorPatch : BytecodePatch(
     ),
 ) {
     override fun execute(context: BytecodeContext) {
-        val actionName = "Translate"
+        val actionName = "ReaderMode"
 
         // Add action
         val downloadActionReference = ActionEnumsFingerprint.addAction(actionName, ActionEnumsFingerprint.result!!)
 
         // Register button
-        ShareMenuButtonAddHook.registerButton(actionName, "enableNativeTranslator")
+        ShareMenuButtonAddHook.registerButton(actionName, "enableNativeReaderMode")
         val viewDebugDialogReference =
             (
                 ShareMenuButtonAddHook.result
@@ -55,8 +53,8 @@ object NativeTranslatorPatch : BytecodePatch(
             ).reference
 
         // Set Button Text
-        ShareMenuButtonInitHook.setButtonText(actionName, "translate_tweet_show")
-        ShareMenuButtonInitHook.setButtonIcon(actionName, "ic_vector_sparkle")
+        ShareMenuButtonInitHook.setButtonText(actionName, "piko_title_native_reader_mode")
+        ShareMenuButtonInitHook.setButtonIcon(actionName, "ic_vector_book_stroke_on")
 
         // TODO: handle possible nulls
         val buttonFunc = ShareMenuButtonFuncCallFingerprint.result
@@ -75,6 +73,8 @@ object NativeTranslatorPatch : BytecodePatch(
                 ?.first { it.string == "Delete Status" }
                 ?.index
                 ?: throw PatchException("Delete status not found")
+
+        @Suppress("ktlint:standard:property-naming")
         val OkLoc =
             buttonFunc
                 ?.scanResult
@@ -83,6 +83,7 @@ object NativeTranslatorPatch : BytecodePatch(
                 ?.first { it.string == "OK" }
                 ?.index
                 ?: throw PatchException("OK not found")
+
         val conversationalRepliesLoc =
             buttonFunc.scanResult.stringsScanResult
                 ?.matches
@@ -91,6 +92,7 @@ object NativeTranslatorPatch : BytecodePatch(
                         "conversational_replies_android_pinned_replies_creation_enabled"
                 }?.index
                 ?: throw PatchException("conversational_replies_android_pinned_replies_creation_enabled not found")
+
         val timelineRef =
             (
                 buttonFuncMethod
@@ -109,11 +111,11 @@ object NativeTranslatorPatch : BytecodePatch(
             check-cast v$timelineRefReg, ${timelineRef.reference.extractDescriptors()[0]}
             iget-object v1, v$timelineRefReg, ${timelineRef.reference}
             
-            invoke-static {v$activityRefReg, v1}, ${SettingsPatch.NATIVE_DESCRIPTOR}/translator/NativeTranslator;->translate(Landroid/content/Context;Ljava/lang/Object;)V
+            invoke-static {v$activityRefReg, v1}, ${SettingsPatch.NATIVE_DESCRIPTOR}/readerMode/ReaderModeUtils;->launchReaderMode(Landroid/content/Context;Ljava/lang/Object;)V
             """.trimIndent(),
             viewDebugDialogReference,
         )
 
-        SettingsStatusLoadFingerprint.enableSettings("nativeTranslator")
+        SettingsStatusLoadFingerprint.enableSettings("nativeReaderMode")
     }
 }
