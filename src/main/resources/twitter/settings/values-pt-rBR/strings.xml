@@ -146,7 +146,7 @@
     <!-- Loggin Settings -->
     <string name="piko_title_logging">Registro</string>
     <string name="piko_pref_server_response_logging">Registrar resposta do servidor</string>
-    <string name="piko_pref_server_response_logging_desc">Registrar respostas JSON recebidas do servidor em 'Download/Piko'</string>
+    <string name="piko_pref_server_response_logging_desc">Registrar respostas JSON recebidas do servidor em \'Download/Piko\'</string>
     <string name="piko_pref_server_response_logging_file_overwrite">Substituir arquivo de registro de respostas</string>
     <string name="piko_pref_server_response_logging_file_overwrite_desc">Limpar os dados de registro de respostas existentes ao iniciar</string>
     
