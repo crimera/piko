@@ -1,3 +1,9 @@
+## [1.59.0-dev.3](https://github.com/crimera/piko/compare/v1.59.0-dev.2...v1.59.0-dev.3) (2025-09-11)
+
+### Updates
+
+* **Translations:** New translations for `pt-br` ([850aa0d](https://github.com/crimera/piko/commit/850aa0d17e0cd9a83a9c897be11b45784a82860a))
+
 ## [1.59.0-dev.2](https://github.com/crimera/piko/compare/v1.59.0-dev.1...v1.59.0-dev.2) (2025-09-03)
 
 ### Updates
