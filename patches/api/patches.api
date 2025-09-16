@@ -302,6 +302,10 @@ public final class app/crimera/utils/UtilsKt {
 	public static final fun getReference (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;I)Lcom/android/tools/smali/dexlib2/iface/reference/Reference;
 }
 
+public final class app/revanced/patches/all/misc/activity/exportall/ExportAllActivitiesPatchKt {
+	public static final fun getExportAllActivitiesPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
 public final class app/revanced/patches/all/misc/resources/AddResourcesPatchKt {
 	public static final fun addResource (Ljava/lang/String;Lapp/revanced/util/resource/BaseResource;)Z
 	public static final fun addResources (Lapp/revanced/patcher/patch/Patch;Lkotlin/jvm/functions/Function1;)Z
@@ -328,6 +332,10 @@ public final class app/revanced/patches/all/misc/transformation/IMethodCall$Defa
 
 public final class app/revanced/patches/all/misc/transformation/TransformInstructionsPatchKt {
 	public static final fun transformInstructionsPatch (Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function2;)Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/revanced/patches/all/misc/versioncode/ChangeVersionCodePatchKt {
+	public static final fun getChangeVersionCodePatch ()Lapp/revanced/patcher/patch/ResourcePatch;
 }
 
 public final class app/revanced/patches/shared/misc/extension/ExtensionHook {
