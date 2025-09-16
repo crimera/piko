@@ -11,6 +11,7 @@
 			--bg-body: white;
 			--text: black;
 			--border: rgba(0, 0, 0, 0.08);
+			--primary-color: #1DA1F2;
 		}
 
 		body.lights-out {
@@ -31,6 +32,10 @@
 			background-color: var(--bg-body);
 			color: var(--text);
 			font-size: 18px;
+		}
+
+		a {
+			color: var(--primary-color);
 		}
 
 		/* Add a subtle divider between posts only (not profile sections) */
@@ -93,11 +98,12 @@
 	</div>
 
 	<script>
+		// Helpers
+		const android = window.Android
+
 		const resultElement = document.getElementById("result");
 
-		// Helpers
-
-		const android = window.Android
+		const primaryColor = android.getColor("system_accent1_200", "android")
 
 		function getThreadInfo() {
 			if (android) {
@@ -167,7 +173,8 @@ ${photos && !textOnlyMode ? photos.map(photo => createPhoto(photo)).join(' ') : 
 
 		const threadInfo = getThreadInfo()
 
-		android.log(threadInfo.thread.author.profileImageUrl)
+		// use dynamic color
+		document.documentElement.style.setProperty('--primary-color', primaryColor);
 
 		//posts
 		const posts = threadInfo.thread.tweets
