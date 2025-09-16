@@ -30,6 +30,7 @@
 			padding: 15px;
 			background-color: var(--bg-body);
 			color: var(--text);
+			font-size: 18px;
 		}
 
 		/* Add a subtle divider between posts only (not profile sections) */
@@ -114,7 +115,7 @@
 
 		function createPhoto(photo) {
 			return `
-<img src="${photo.src}" style="width: 100%; height: auto; border-radius: 15px;">
+<img src="${photo.src}" style="width: 100%; height: auto; border-radius: 15px; margin-bottom: 15px;">
             `
 		}
 
@@ -123,6 +124,8 @@
 			let text = post.text
 			const photos = post.photos
 			const urls = post.urls
+			// TODO: implement the function to get the settings
+			const textOnlyMode = false
 
 			text = text.replace("\n", "<br><br>")
 
@@ -142,7 +145,7 @@
 				<div>
                   <p>${text}</p>
 <div>
-${photos ? photos.map(photo => createPhoto(photo)).join(' ') : ''}
+${photos && !textOnlyMode ? photos.map(photo => createPhoto(photo)).join(' ') : ''}
 				</div>
 			  `;
 		}
