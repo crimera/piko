@@ -125,11 +125,22 @@
             `
 		}
 
+		function createVideo(videos, medias) {
+			return medias.forEach((media, index) => {
+				if (media.type == "video") {
+					android.log("Video found")
+				}
+			}).join(' ');
+		}
+
 		function createPostElement(post) {
 
 			let text = post.text
 			const photos = post.photos
 			const urls = post.urls
+			const video = post.video
+			const media = post.media
+
 			// TODO: implement the function to get the settings
 			const textOnlyMode = false
 
@@ -159,8 +170,8 @@
 			return `
 				<div>
                   <p>${text}</p>
-<div>
 ${photos && !textOnlyMode ? photos.map(photo => createPhoto(photo)).join(' ') : ''}
+${video && !textOnlyMode ? createVideo(video, media) : ''}
 				</div>
 			  `;
 		}
