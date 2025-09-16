@@ -21,7 +21,7 @@ import crimera.patches.twitter.models.extractDescriptors
 @Patch(
     name = "Native reader mode",
     description = "Requires X 11.0.0-release.0 or higher.",
-    dependencies = [SettingsPatch::class, ResourceMappingPatch::class],
+    dependencies = [SettingsPatch::class, ResourceMappingPatch::class, NativeReaderModeResourcePatch::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
     use = true,
 )

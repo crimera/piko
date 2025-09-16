@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Title</title>
+
+	<style>
+		:root {
+			--bg-body: white;
+			--text: black;
+			--border: rgba(0, 0, 0, 0.08);
+		}
+
+		body.lights-out {
+			--bg-body: black;
+			--text: white;
+			--border: rgba(255, 255, 255, 0.08);
+		}
+
+		/* Make the document fill its parent/viewport */
+		html {
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			margin: 0;
+			padding: 15px;
+			background-color: var(--bg-body);
+			color: var(--text);
+		}
+
+		/* Add a subtle divider between posts only (not profile sections) */
+		.post-container>div:not(:last-child) {
+			border-bottom: 1px solid var(--border);
+			margin-bottom: 12px;
+		}
+
+		/* Dark theme variant */
+		body.lights-out .post-container>div:not(:last-child) {
+			border-bottom: 1px solid var(--border);
+		}
+
+		.profile-container {
+			display: flex;
+			flex-basis: column;
+			align-items: center;
+		}
+
+		.profile-image {
+			width: 48px;
+			height: 48px;
+			border-radius: 50%;
+			overflow: hidden;
+			margin-right: 10px;
+		}
+
+		.profile-name {
+			font-size: 16px;
+			font-weight: bold;
+			margin: 0;
+		}
+
+		.profile-handle {
+			font-size: 14px;
+			margin: 0;
+		}
+	</style>
+</head>
+
+<body>
+
+	<p style="padding: 0; margin: 0;" id="result"></p>
+
+	<div class="profile-container">
+		<div class="profile-image">
+			<img id="profile-image" alt="Profile Image" width="48" height="48">
+		</div>
+		<div class="profile-info">
+			<p id="name" class="profile-name">
+				Gareth Wild
+			</p>
+			<p id="username" class="profile-handle">
+				@GarethWild
+			</p>
+		</div>
+	</div>
+
+	<div class="post-container">
+	</div>
+
+	<script>
+		const resultElement = document.getElementById("result");
+
+		// Helpers
+
+		const android = window.Android
+
+		function getThreadInfo() {
+			if (android) {
+				const jsonString = android.getThreadInfo();
+				try {
+					// Parse the JSON string into an object
+					return JSON.parse(jsonString);
+				} catch (e) {
+					android.log("Error parsing JSON: " + e.message);
+				}
+			} else {
+				resultElement.innerText += "AndroidInterface not available";
+			}
+		}
+
+		function createPhoto(photo) {
+			return `
+<img src="${photo.src}" style="width: 100%; height: auto; border-radius: 15px;">
+            `
+		}
+
+		function createPostElement(post) {
+
+			let text = post.text
+			const photos = post.photos
+			const urls = post.urls
+
+			text = text.replace("\n", "<br><br>")
+
+			if (photos) {
+				photos.forEach(photo => {
+					text = text.replace(photo.url, "")
+				})
+			}
+
+			if (urls) {
+				urls.forEach(url => {
+					text = text.replace(url.url, `<a href="${url.expandedUrl}">${url.displayUrl}</a>`)
+				})
+			}
+
+			return `
+				<div>
+                  <p>${text}</p>
+<div>
+${photos ? photos.map(photo => createPhoto(photo)).join(' ') : ''}
+				</div>
+			  `;
+		}
+
+		// Main
+
+		if (android.getTheme() == 1) {
+			document.body.className = "lights-out"
+		}
+
+		const threadInfo = getThreadInfo()
+
+		android.log(threadInfo.thread.author.profileImageUrl)
+
+		//posts
+		const posts = threadInfo.thread.tweets
+		posts.forEach(element => {
+			document.querySelector(".post-container").innerHTML += createPostElement(element);
+		});
+
+		// profile
+		document.getElementById("name").innerText = threadInfo.thread.author.name
+		document.getElementById("username").innerText = "@" + threadInfo.thread.author.username
+		document.getElementById("profile-image").src = threadInfo.thread.author.profileImageUrl
+	</script>
+</body>
+
+</html>
