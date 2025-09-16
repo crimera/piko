@@ -1,7 +1,7 @@
 package app.crimera.patches.twitter.timeline.tweetinfo
 
-import app.crimera.patches.twitter.misc.settings.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.instructions
 import app.revanced.patcher.fingerprint

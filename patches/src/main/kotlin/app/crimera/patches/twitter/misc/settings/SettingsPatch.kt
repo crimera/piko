@@ -1,6 +1,10 @@
 package app.crimera.patches.twitter.misc.settings
 
 import app.crimera.patches.twitter.misc.extension.sharedExtensionPatch
+import app.crimera.utils.Constants.ACTIVITY_HOOK_CLASS
+import app.crimera.utils.Constants.ADD_PREF_DESCRIPTOR
+import app.crimera.utils.Constants.DEEPLINK_HOOK_CLASS
+import app.crimera.utils.Constants.SSTS_DESCRIPTOR
 import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -14,22 +18,6 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-
-private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/extension/twitter"
-const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
-private const val ACTIVITY_SETTINGS_CLASS = "$INTEGRATIONS_PACKAGE/settings"
-private const val ACTIVITY_HOOK_CLASS = "$ACTIVITY_SETTINGS_CLASS/ActivityHook;"
-private const val DEEPLINK_HOOK_CLASS = "$ACTIVITY_SETTINGS_CLASS/DeepLink;"
-private const val ADD_PREF_DESCRIPTOR =
-    "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
-
-const val PREF_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Pref"
-const val PATCHES_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/patches"
-const val CUSTOMISE_DESCRIPTOR = "$PATCHES_DESCRIPTOR/customise/Customise"
-const val NATIVE_DESCRIPTOR = "$PATCHES_DESCRIPTOR/nativeFeatures"
-
-const val SSTS_DESCRIPTOR = "invoke-static {}, $ACTIVITY_SETTINGS_CLASS/SettingsStatus;"
-const val FSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/patches/FeatureSwitchPatch;"
 
 private const val START_ACTIVITY_DESCRIPTOR =
     "invoke-static {}, $ACTIVITY_HOOK_CLASS->startSettingsActivity()V"

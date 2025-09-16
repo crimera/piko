@@ -83,48 +83,6 @@ internal fun inputStreamFromBundledResource(
     resourceFile: String,
 ): InputStream? = classLoader.getResourceAsStream("$sourceResourceDirectory/$resourceFile")
 
-fun ResourcePatchContext.mergeXmlResources(
-    sourceResourceDirectory: String,
-    resourceFile: String,
-    targetResourceFile: String = "res/$resourceFile",
-    tagName: String = "resources",
-) {
-    inputStreamFromBundledResource(sourceResourceDirectory, resourceFile)?.let { inputStream ->
-        tagName
-            .copyXmlNode(
-                document(inputStream),
-                document(targetResourceFile),
-            ).close()
-    } ?: throw PatchException("Could not find $resourceFile in $sourceResourceDirectory")
-}
-
-fun ResourcePatchContext.mergeXmlResources(
-    sourceResourceDirectory: String,
-    vararg resourceGroups: ResourceGroup,
-    tagName: String = "resources",
-) {
-    for (resourceGroup in resourceGroups) {
-        resourceGroup.resources.forEach { resource ->
-            val resourceFile = "${resourceGroup.resourceDirectoryName}/$resource"
-            val targetFile = get("res").resolve(resourceFile)
-
-            // If target file doesn't exist, use copyResources as fallback
-            if (!targetFile.exists()) {
-                copyResources(sourceResourceDirectory, resourceGroup)
-                return@forEach
-            }
-
-            inputStreamFromBundledResource(sourceResourceDirectory, resourceFile)?.let { inputStream ->
-                tagName
-                    .copyXmlNode(
-                        document(inputStream),
-                        document("res/$resourceFile"),
-                    ).close()
-            } ?: throw PatchException("Could not find $resourceFile in $sourceResourceDirectory")
-        }
-    }
-}
-
 /**
  * Resource names mapped to their corresponding resource data.
  * @param resourceDirectoryName The name of the directory of the resource.

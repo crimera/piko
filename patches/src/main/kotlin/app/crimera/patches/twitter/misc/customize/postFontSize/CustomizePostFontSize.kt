@@ -1,7 +1,8 @@
 package app.crimera.patches.twitter.misc.customize.postFontSize
 
-import app.crimera.patches.twitter.misc.settings.*
+import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.instructions

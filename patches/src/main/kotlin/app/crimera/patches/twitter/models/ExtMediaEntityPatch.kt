@@ -1,6 +1,5 @@
-package crimera.patches.twitter.models
+package app.crimera.patches.twitter.models
 
-import app.crimera.patches.twitter.models.*
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.getFieldName
 import app.crimera.utils.getMethodName

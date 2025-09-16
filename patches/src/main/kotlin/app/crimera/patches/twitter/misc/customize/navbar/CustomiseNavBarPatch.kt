@@ -1,9 +1,9 @@
 package app.crimera.patches.twitter.misc.customize.navbar
 
 import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.featureFlagLoadFingerprint
-import app.crimera.patches.twitter.misc.settings.CUSTOMISE_DESCRIPTOR
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.crimera.utils.flagSettings
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions

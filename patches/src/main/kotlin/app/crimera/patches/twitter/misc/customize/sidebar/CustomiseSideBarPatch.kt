@@ -1,7 +1,8 @@
 package app.crimera.patches.twitter.misc.customize.sidebar
 
-import app.crimera.patches.twitter.misc.settings.*
+import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction

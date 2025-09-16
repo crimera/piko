@@ -205,18 +205,19 @@ public final class app/crimera/patches/twitter/misc/selectabletext/SelectableTex
 }
 
 public final class app/crimera/patches/twitter/misc/settings/SettingsPatchKt {
-	public static final field CUSTOMISE_DESCRIPTOR Ljava/lang/String;
-	public static final field FSTS_DESCRIPTOR Ljava/lang/String;
-	public static final field NATIVE_DESCRIPTOR Ljava/lang/String;
-	public static final field PATCHES_DESCRIPTOR Ljava/lang/String;
-	public static final field PREF_DESCRIPTOR Ljava/lang/String;
-	public static final field SSTS_DESCRIPTOR Ljava/lang/String;
-	public static final field UTILS_DESCRIPTOR Ljava/lang/String;
 	public static final fun getSettingsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/models/ExtMediaEntityPatchKt {
+	public static final fun getExtMediaEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/models/TweetEntityPatchKt {
 	public static final fun getTweetEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/models/TweetInfoEntityPatchKt {
+	public static final fun getTweetInfoEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/premium/enableForcePip/EnableForcePipPatchKt {
@@ -301,6 +302,22 @@ public final class app/crimera/patches/twitter/timeline/tweetinfo/HidePromoteBut
 
 public final class app/crimera/patches/twitter/timeline/tweetinfo/TweetInfoHookKt {
 	public static final fun getTweetInfoHook ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/utils/Constants {
+	public static final field ACTIVITY_HOOK_CLASS Ljava/lang/String;
+	public static final field ACTIVITY_SETTINGS_CLASS Ljava/lang/String;
+	public static final field ADD_PREF_DESCRIPTOR Ljava/lang/String;
+	public static final field CUSTOMISE_DESCRIPTOR Ljava/lang/String;
+	public static final field DEEPLINK_HOOK_CLASS Ljava/lang/String;
+	public static final field FSTS_DESCRIPTOR Ljava/lang/String;
+	public static final field INSTANCE Lapp/crimera/utils/Constants;
+	public static final field INTEGRATIONS_PACKAGE Ljava/lang/String;
+	public static final field NATIVE_DESCRIPTOR Ljava/lang/String;
+	public static final field PATCHES_DESCRIPTOR Ljava/lang/String;
+	public static final field PREF_DESCRIPTOR Ljava/lang/String;
+	public static final field SSTS_DESCRIPTOR Ljava/lang/String;
+	public static final field UTILS_DESCRIPTOR Ljava/lang/String;
 }
 
 public final class app/crimera/utils/UtilsKt {
@@ -715,13 +732,5 @@ public final class app/revanced/util/resource/StringResource : app/revanced/util
 
 public final class app/revanced/util/resource/StringResource$Companion {
 	public final fun fromNode (Lorg/w3c/dom/Node;)Lapp/revanced/util/resource/StringResource;
-}
-
-public final class crimera/patches/twitter/models/ExtMediaEntityPatchKt {
-	public static final fun getExtMediaEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class crimera/patches/twitter/models/TweetInfoEntityPatchKt {
-	public static final fun getTweetInfoEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 

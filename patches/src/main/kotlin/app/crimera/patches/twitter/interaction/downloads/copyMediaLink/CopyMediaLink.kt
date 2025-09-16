@@ -1,8 +1,8 @@
 package app.crimera.patches.twitter.interaction.downloads.copyMediaLink
 
-import app.crimera.patches.twitter.misc.settings.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.instructions

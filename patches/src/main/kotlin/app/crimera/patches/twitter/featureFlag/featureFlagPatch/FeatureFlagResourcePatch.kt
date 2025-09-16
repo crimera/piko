@@ -7,7 +7,6 @@ import app.revanced.util.copyResources
 internal val featureFlagResourcePatch =
     resourcePatch {
         execute {
-//            mergeXmlResources("twitter/settings", "$it/arrays.xml")
             copyResources(
                 "twitter/settings",
                 ResourceGroup(
