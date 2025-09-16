@@ -141,6 +141,15 @@
 				})
 			}
 
+			if (post.hashtags) {
+				post.hashtags.forEach(hashtag => {
+					const start = hashtag.indices[0];
+					const end = hashtag.indices[1];
+					const link = `<a href="https://x.com/hashtag/${hashtag.text}">#${hashtag.text}</a>`;
+					text = text.substring(0, start) + link + text.substring(end);
+				});
+			}
+
 			return `
 				<div>
                   <p>${text}</p>
