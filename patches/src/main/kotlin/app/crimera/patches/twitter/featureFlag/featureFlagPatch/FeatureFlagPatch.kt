@@ -1,6 +1,6 @@
-package app.crimera.patches.twitter.featureFlag
+package app.crimera.patches.twitter.featureFlag.featureFlagPatch
 
-import app.crimera.patches.twitter.featureFlag.fingerprints.*
+import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.featureFlagFingerprint
 import app.crimera.patches.twitter.misc.settings.*
 import app.crimera.utils.enableSettings
 import app.revanced.patcher.extensions.InstructionExtensions.addInstruction

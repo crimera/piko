@@ -1,4 +1,4 @@
-package app.crimera.patches.twitter.featureFlag
+package app.crimera.patches.twitter.featureFlag.featureFlagPatch
 
 import app.revanced.patcher.patch.resourcePatch
 import app.revanced.util.ResourceGroup

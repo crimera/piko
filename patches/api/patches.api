@@ -70,10 +70,6 @@ public final class app/crimera/patches/twitter/featureFlag/DisableChirpFontPatch
 	public static final fun getDisableChirpFontPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
-public final class app/crimera/patches/twitter/featureFlag/FeatureFlagPatchKt {
-	public static final fun getFeatureFlagPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
 public final class app/crimera/patches/twitter/featureFlag/HideBookmarkInTimelinePatchKt {
 	public static final fun getHideBookmarkInTimelinePatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
@@ -90,15 +86,19 @@ public final class app/crimera/patches/twitter/featureFlag/RemoveViewCountPatchK
 	public static final fun getRemoveViewCountPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
-public final class app/crimera/patches/twitter/featureFlag/fingerprints/CustomAdapterFingerprintKt {
+public final class app/crimera/patches/twitter/featureFlag/featureFlagPatch/FeatureFlagPatchKt {
+	public static final fun getFeatureFlagPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/featureFlag/featureFlagPatch/fingerprints/CustomAdapterFingerprintKt {
 	public static final fun getCustomAdapterFingerprint ()Lapp/revanced/patcher/Fingerprint;
 }
 
-public final class app/crimera/patches/twitter/featureFlag/fingerprints/FeatureFlagFingerprintKt {
+public final class app/crimera/patches/twitter/featureFlag/featureFlagPatch/fingerprints/FeatureFlagFingerprintKt {
 	public static final fun getFeatureFlagFingerprint ()Lapp/revanced/patcher/Fingerprint;
 }
 
-public final class app/crimera/patches/twitter/featureFlag/fingerprints/FeatureFlagLoadFingerprintKt {
+public final class app/crimera/patches/twitter/featureFlag/featureFlagPatch/fingerprints/FeatureFlagLoadFingerprintKt {
 	public static final fun getFeatureFlagLoadFingerprint ()Lapp/revanced/patcher/Fingerprint;
 }
 
@@ -217,6 +217,18 @@ public final class app/crimera/patches/twitter/misc/settings/SettingsPatchKt {
 
 public final class app/crimera/patches/twitter/models/TweetEntityPatchKt {
 	public static final fun getTweetEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/premium/enableForcePip/EnableForcePipPatchKt {
+	public static final fun getEnableForcePipPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/premium/undoposts/EnableUndoPostPatchKt {
+	public static final fun getEnableUndoPostPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/premium/unlockdownloads/DownloadPatchKt {
+	public static final fun getDownloadPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/timeline/banner/HideBannerPatchKt {

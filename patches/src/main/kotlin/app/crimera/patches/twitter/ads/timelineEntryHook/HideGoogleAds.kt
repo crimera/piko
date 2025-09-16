@@ -1,6 +1,6 @@
 package app.crimera.patches.twitter.ads.timelineEntryHook
 
-import app.crimera.patches.twitter.featureFlag.fingerprints.featureFlagLoadFingerprint
+import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.featureFlagLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.enableSettings
