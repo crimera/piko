@@ -17,7 +17,7 @@
 		body.lights-out {
 			--bg-body: black;
 			--text: white;
-			--border: rgba(255, 255, 255, 0.08);
+			--border: rgba(255, 255, 255, 0.2);
 		}
 
 		/* Make the document fill its parent/viewport */
@@ -37,17 +37,10 @@
 		a {
 			color: var(--primary-color);
 		}
-
-		/* Add a subtle divider between posts only (not profile sections) */
-		.post-container>div:not(:last-child) {
-			border-bottom: 1px solid var(--border);
-			margin-bottom: 12px;
-		}
-
-		/* Dark theme variant */
-		body.lights-out .post-container>div:not(:last-child) {
-			border-bottom: 1px solid var(--border);
-		}
+		
+	.post-container > div:not(:last-child)  {
+    border-bottom: 1px solid var(--border); /* Uses the same border color */
+  }
 
 		.profile-container {
 			display: flex;
@@ -119,18 +112,66 @@
 			}
 		}
 
-		function createPhoto(photo) {
+		function createPhoto(photo, style) {
 			return `
-<img src="${photo.src}" style="width: 100%; height: auto; border-radius: 15px; margin-bottom: 15px;">
+<img src="${photo.src}" style="width: 100%; height: auto; ${style}">
             `
 		}
+		
+		function addToResult(message) {
+		  resultElement.innerText += `${message}`;
+		}
 
-		function createVideo(videos, medias) {
-			return medias.forEach((media, index) => {
-				if (media.type == "video") {
-					android.log("Video found")
-				}
-			}).join(' ');
+		function createVideo(video, medias, style) {
+			return medias.map((media, index) => {
+			 
+			  const url = media.sources[0].url
+			  const posterAttr = media.type == "video" ? `poster="${video.posterUrl}"` : ""
+			  
+				return `
+          <video 
+            controls
+           style="width: 100%; height: auto; ${style};"
+            ${posterAttr}
+            >
+            <source src="${url}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+				`;
+			}).join('\n');
+		}
+		
+		function createQuote(quote) {
+		  const textOnlyMode = false
+		  
+		  const mediaStyles = "border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;"
+		  
+		  const profile = `
+		  <div class="profile-container" style="display: flex; flex-direction: row; gap: 5px;">
+		<div class="profile-image" style="width: 20px; height: 20px; margin-right: 0;">
+			<img src="${quote.author.profileImageUrl}" alt="Profile Image" width="20" height="20">
+		</div>
+
+			<p class="profile-name">
+				${quote.author.name}
+			</p>
+			<p class="profile-handle">
+				@${quote.author.username}
+			</p>
+
+	</div>
+		  `
+		  
+		  return `
+		    <div style="display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border); border-radius: 15px; padding-top: 10px; margin-bottom: 10px;">
+		      <div style="padding-right: 10px; padding-left: 10px;">
+		        ${profile}
+		        <p style="margin-top: 10px; margin-bottom: 10px;">${quote.text}</p>
+		      </div>
+		      ${quote.photos && !textOnlyMode ? quote.photos.map(photo => createPhoto(photo, mediaStyles)).join(' ') : ''}
+		      ${quote.media && !textOnlyMode ? createVideo(quote.video, quote.media, mediaStyles) : ''}
+		    </div>
+		  `
 		}
 
 		function createPostElement(post) {
@@ -144,7 +185,7 @@
 			// TODO: implement the function to get the settings
 			const textOnlyMode = false
 
-			text = text.replace("\n", "<br><br>")
+			text = text.replaceAll("\n", "<br>")
 
 			if (photos) {
 				photos.forEach(photo => {
@@ -166,12 +207,15 @@
 					text = text.substring(0, start) + link + text.substring(end);
 				});
 			}
+			
+			const mediaStyles = "border-radius: 15px; margin-bottom: 10px;"
 
 			return `
 				<div>
-                  <p>${text}</p>
-${photos && !textOnlyMode ? photos.map(photo => createPhoto(photo)).join(' ') : ''}
-${video && !textOnlyMode ? createVideo(video, media) : ''}
+          <p>${text}</p>
+${photos && !textOnlyMode ? photos.map(photo => createPhoto(photo, mediaStyles)).join(' ') : ''}
+${media && !textOnlyMode ? createVideo(video, media, mediaStyles) : ''}
+${post.quoted ? createQuote(post.quoted) : ''}
 				</div>
 			  `;
 		}
