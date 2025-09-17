@@ -11,10 +11,10 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import app.revanced.extension.twitter.model.Video;
-import app.revanced.extension.twitter.model.Media;
-import app.revanced.extension.twitter.model.Tweet;
-import app.revanced.extension.twitter.model.ExtMediaEntities;
+import app.revanced.extension.twitter.entity.Video;
+import app.revanced.extension.twitter.entity.Media;
+import app.revanced.extension.twitter.entity.Tweet;
+import app.revanced.extension.twitter.entity.ExtMediaEntities;
 
 public class NativeDownloader {
     public static String downloadString() {

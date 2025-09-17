@@ -66,6 +66,22 @@ public final class app/crimera/patches/twitter/ads/trends/HidePromotedTrendPatch
 	public static final fun getHidePromotedTrendPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
+public final class app/crimera/patches/twitter/entity/EntityGeneratorKt {
+	public static final fun getEntityGenerator ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/entity/ExtMediaEntityPatchKt {
+	public static final fun getExtMediaEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/entity/TweetEntityPatchKt {
+	public static final fun getTweetEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/entity/TweetInfoEntityPatchKt {
+	public static final fun getTweetInfoEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
 public final class app/crimera/patches/twitter/featureFlag/DisableChirpFontPatchKt {
 	public static final fun getDisableChirpFontPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
@@ -216,16 +232,45 @@ public final class app/crimera/patches/twitter/misc/settings/SettingsPatchKt {
 	public static final fun getSettingsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
-public final class app/crimera/patches/twitter/models/ExtMediaEntityPatchKt {
-	public static final fun getExtMediaEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+public final class app/crimera/patches/twitter/misc/shareMenu/debugMenu/DebugMenuKt {
+	public static final fun getDebugMenu ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
-public final class app/crimera/patches/twitter/models/TweetEntityPatchKt {
-	public static final fun getTweetEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+public final class app/crimera/patches/twitter/misc/shareMenu/fingerprints/ActionEnumsFingerprintKt {
+	public static final fun addAction (Lapp/revanced/patcher/patch/BytecodePatchContext;Ljava/lang/String;)Ljava/lang/String;
+	public static final fun getActionEnumsFingerprint ()Lapp/revanced/patcher/Fingerprint;
 }
 
-public final class app/crimera/patches/twitter/models/TweetInfoEntityPatchKt {
-	public static final fun getTweetInfoEntityPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+public final class app/crimera/patches/twitter/misc/shareMenu/fingerprints/ShareMenuButtonFuncCallFingerprintKt {
+	public static final fun addButtonInstructions (Lapp/revanced/patcher/patch/BytecodePatchContext;Ljava/lang/String;Ljava/lang/String;Lcom/android/tools/smali/dexlib2/iface/reference/Reference;)V
+	public static final fun getShareMenuButtonFuncCallFingerprint ()Lapp/revanced/patcher/Fingerprint;
+}
+
+public final class app/crimera/patches/twitter/misc/shareMenu/hooks/ShareMenuButtonAddHookKt {
+	public static final fun getShareMenuButtonAddHook ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun registerButton (Lapp/revanced/patcher/patch/BytecodePatchContext;Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class app/crimera/patches/twitter/misc/shareMenu/hooks/ShareMenuButtonInitHookKt {
+	public static final fun getShareMenuButtonInitHook ()Lapp/revanced/patcher/Fingerprint;
+	public static final fun setButtonIcon (Lapp/revanced/patcher/patch/BytecodePatchContext;Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun setButtonText (Lapp/revanced/patcher/patch/BytecodePatchContext;Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class app/crimera/patches/twitter/misc/shareMenu/hooks/UtilKt {
+	public static final fun shareMenuButtonInjection (Lapp/revanced/patcher/patch/BytecodePatchContext;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class app/crimera/patches/twitter/misc/shareMenu/nativeDownloader/NativeDownloaderPatchKt {
+	public static final fun getNativeDownloaderPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/misc/shareMenu/nativeReaderMode/NativeReaderModePatchKt {
+	public static final fun getNativeReaderModePatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/misc/shareMenu/nativeTranslator/NativeTranslatorPatchKt {
+	public static final fun getNativeTranslatorModePatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/premium/enableForcePip/EnableForcePipPatchKt {
@@ -328,6 +373,22 @@ public final class app/crimera/utils/Constants {
 	public static final field UTILS_DESCRIPTOR Ljava/lang/String;
 }
 
+public final class app/crimera/utils/InitMethod : com/android/tools/smali/dexlib2/iface/Method {
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/util/Set;ILjava/util/Set;Ljava/util/List;Lcom/android/tools/smali/dexlib2/iface/MethodImplementation;)V
+	public fun compareTo (Lcom/android/tools/smali/dexlib2/iface/reference/MethodReference;)I
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun getAccessFlags ()I
+	public fun getAnnotations ()Ljava/util/Set;
+	public fun getDefiningClass ()Ljava/lang/String;
+	public fun getHiddenApiRestrictions ()Ljava/util/Set;
+	public fun getImplementation ()Lcom/android/tools/smali/dexlib2/iface/MethodImplementation;
+	public fun getName ()Ljava/lang/String;
+	public fun getParameterTypes ()Ljava/util/List;
+	public fun getParameters ()Ljava/util/List;
+	public fun getReturnType ()Ljava/lang/String;
+	public fun validateReference ()V
+}
+
 public final class app/crimera/utils/UtilsKt {
 	public static final fun changeFirstString (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;Ljava/lang/String;)V
 	public static final fun changeStringAt (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;ILjava/lang/String;)V
@@ -335,8 +396,11 @@ public final class app/crimera/utils/UtilsKt {
 	public static final fun extractDescriptors (Lcom/android/tools/smali/dexlib2/iface/reference/Reference;)Ljava/util/List;
 	public static final fun flagSettings (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;Ljava/lang/String;)V
 	public static final fun getFieldName (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;I)Ljava/lang/String;
+	public static final fun getIndexOfLastFilledNewArrayRange (Ljava/util/List;)I
+	public static final fun getIndexOfLastNewInstance (Ljava/util/List;)I
 	public static final fun getMethodName (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;I)Ljava/lang/String;
 	public static final fun getReference (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;I)Lcom/android/tools/smali/dexlib2/iface/reference/Reference;
+	public static final fun instructionToString (Lcom/android/tools/smali/dexlib2/iface/instruction/Instruction;)Ljava/lang/String;
 	public static final fun mergeXmlResources (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;Ljava/lang/String;)V
 	public static synthetic fun mergeXmlResources$default (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;Ljava/lang/String;ILjava/lang/Object;)V
 	public static final fun replaceStringsInFile (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;Ljava/util/Map;)V

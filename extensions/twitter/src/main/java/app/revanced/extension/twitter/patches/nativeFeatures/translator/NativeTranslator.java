@@ -17,7 +17,7 @@ import app.revanced.extension.twitter.patches.nativeFeatures.translator.provider
 import app.revanced.extension.twitter.patches.nativeFeatures.translator.providers.GTranslateV2;
 import app.revanced.extension.twitter.Pref;
 
-import app.revanced.extension.twitter.model.Tweet;
+import app.revanced.extension.twitter.entity.Tweet;
 
 public class NativeTranslator {
 

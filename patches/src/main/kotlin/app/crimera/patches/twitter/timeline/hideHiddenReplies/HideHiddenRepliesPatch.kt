@@ -47,6 +47,6 @@ val hideHiddenRepliesPatch =
                 """.trimIndent(),
             )
 
-            settingsStatusLoadFingerprint.method.enableSettings("navBarCustomisation")
+            settingsStatusLoadFingerprint.method.enableSettings("hideHiddenReplies")
         }
     }

@@ -11,11 +11,20 @@ import app.revanced.patcher.patch.ResourcePatchContext
 import app.revanced.patcher.util.proxy.mutableTypes.MutableMethod
 import app.revanced.util.*
 import app.revanced.util.inputStreamFromBundledResource
+import com.android.tools.smali.dexlib2.HiddenApiRestriction
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.BuilderInstruction
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
 import com.android.tools.smali.dexlib2.dexbacked.reference.DexBackedMethodReference
+import com.android.tools.smali.dexlib2.iface.Annotation
+import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.MethodImplementation
+import com.android.tools.smali.dexlib2.iface.MethodParameter
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.formats.*
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.Reference
 import org.w3c.dom.Element
 
@@ -122,9 +131,9 @@ fun Reference.extractDescriptors(): List<String> {
 
 fun MutableMethod.getReference(index: Int): Reference = getInstruction<ReferenceInstruction>(index).reference
 
-fun MutableMethod.getMethodName(index: Int): String = getInstruction<DexBackedMethodReference>(index).name
+fun MutableMethod.getMethodName(index: Int): String = (getReference(index) as DexBackedMethodReference).name
 
-fun MutableMethod.getFieldName(index: Int): String = getInstruction<FieldReference>(index).name
+fun MutableMethod.getFieldName(index: Int): String = (getReference(index) as FieldReference).name
 
 fun MutableMethod.changeStringAt(
     index: Int,
@@ -138,4 +147,111 @@ fun MutableMethod.changeStringAt(
 
 fun MutableMethod.changeFirstString(value: String) {
     changeStringAt(0, value)
+}
+
+fun instructionToString(ins: Instruction): String =
+    when (ins) {
+        is Instruction21c -> {
+            if (ins.opcode == Opcode.CONST_STRING) {
+                "${ins.opcode.name} v${ins.registerA}, \"${ins.reference}\""
+            } else {
+                "${ins.opcode.name} v${ins.registerA}, ${ins.reference}"
+            }
+        }
+
+        is Instruction11n -> {
+            "${ins.opcode.name} v${ins.registerA}, ${ins.narrowLiteral}"
+        }
+
+        is Instruction35c -> {
+            var regs = ""
+
+            val regMap =
+                mapOf(
+                    1 to ins.registerC,
+                    2 to ins.registerD,
+                    3 to ins.registerE,
+                    4 to ins.registerF,
+                    5 to ins.registerG,
+                )
+
+            for (i in 1..ins.registerCount) {
+                regs += "v${regMap[i]}"
+
+                if (ins.registerCount != i) {
+                    regs += ", "
+                }
+            }
+            "${ins.opcode.name} {$regs}, ${ins.reference}"
+        }
+
+        is Instruction21s -> {
+            "${ins.opcode.name} v${ins.registerA}, ${ins.narrowLiteral}"
+        }
+
+        is Instruction22x -> {
+            "${ins.opcode.name} v${ins.registerA}, v${ins.registerB}"
+        }
+
+        is Instruction3rc -> {
+            "${ins.opcode.name} {v${ins.startRegister} .. v${ins.registerCount - 1}}, ${ins.reference}"
+        }
+
+        is Instruction11x -> {
+            "${ins.opcode.name} v${ins.registerA}"
+        }
+
+        is Instruction10x -> {
+            ins.opcode.name
+        }
+
+        is Instruction31i -> {
+            "${ins.opcode.name} v${ins.registerA}, ${ins.narrowLiteral}"
+        }
+
+        else -> {
+            throw PatchException("${ins.javaClass} is not supported")
+        }
+    }
+
+val MutableList<BuilderInstruction>.indexOfLastNewInstance
+    get() = this.indexOfLast { it.opcode == Opcode.NEW_INSTANCE }
+
+val MutableList<BuilderInstruction>.indexOfLastFilledNewArrayRange
+    get() = this.indexOfLast { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }
+
+class InitMethod(
+    private val validator: () -> Unit,
+    private val compare: (other: MethodReference) -> Int,
+    private val definingClass: String,
+    private val name: String,
+    private val parameterTypes: MutableList<out CharSequence>,
+    private val returnType: String,
+    private val annotations: MutableSet<out Annotation>,
+    private val accessFlags: Int,
+    private val hiddenApiRestrictions: MutableSet<HiddenApiRestriction>,
+    private val parameters: MutableList<out MethodParameter>,
+    private val implementation: MethodImplementation,
+) : Method {
+    override fun validateReference() = validator()
+
+    override fun compareTo(other: MethodReference): Int = this.compare(other)
+
+    override fun getDefiningClass(): String = definingClass
+
+    override fun getName(): String = name
+
+    override fun getParameterTypes(): MutableList<out CharSequence> = parameterTypes
+
+    override fun getReturnType(): String = returnType
+
+    override fun getAnnotations(): MutableSet<out Annotation> = annotations
+
+    override fun getAccessFlags(): Int = accessFlags
+
+    override fun getHiddenApiRestrictions(): MutableSet<HiddenApiRestriction> = hiddenApiRestrictions
+
+    override fun getParameters(): MutableList<out MethodParameter> = parameters
+
+    override fun getImplementation(): MethodImplementation = implementation
 }

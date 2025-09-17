@@ -1,6 +1,6 @@
 package app.revanced.extension.twitter;
 
-import app.revanced.extension.twitter.model.Debug;
+import app.revanced.extension.twitter.entity.Debug;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DownloadManager;

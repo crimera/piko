@@ -21,7 +21,7 @@ import java.net.MalformedURLException;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
-import app.revanced.extension.twitter.model.Tweet;
+import app.revanced.extension.twitter.entity.Tweet;
 import app.revanced.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeTemplate;
 
 public class ReaderModeUtils {
