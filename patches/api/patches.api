@@ -136,6 +136,14 @@ public final class app/crimera/patches/twitter/logging/responseLogging/ResponseL
 	public static final fun getResponseLoggingPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
+public final class app/crimera/patches/twitter/misc/bringbacktwitter/BringBackTwitterPatchKt {
+	public static final fun getBringBackTwitterPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/misc/bringbacktwitter/BringBackTwitterResourceKt {
+	public static final fun getBringBackTwitterResource ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
 public final class app/crimera/patches/twitter/misc/customize/exploretabs/CustomiseExploreTabsPatchKt {
 	public static final fun getCustomiseExploreTabsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
@@ -329,6 +337,10 @@ public final class app/crimera/utils/UtilsKt {
 	public static final fun getFieldName (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;I)Ljava/lang/String;
 	public static final fun getMethodName (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;I)Ljava/lang/String;
 	public static final fun getReference (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;I)Lcom/android/tools/smali/dexlib2/iface/reference/Reference;
+	public static final fun mergeXmlResources (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;Ljava/lang/String;)V
+	public static synthetic fun mergeXmlResources$default (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;Ljava/lang/String;ILjava/lang/Object;)V
+	public static final fun replaceStringsInFile (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;Ljava/util/Map;)V
+	public static final fun replaceXmlResources (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;)V
 }
 
 public final class app/revanced/patches/all/misc/activity/exportall/ExportAllActivitiesPatchKt {
@@ -694,10 +706,6 @@ public final class app/revanced/util/ResourceUtilsKt {
 	public static final fun forEachChildElement (Lorg/w3c/dom/Node;Lkotlin/jvm/functions/Function1;)V
 	public static final fun insertFirst (Lorg/w3c/dom/Node;Lorg/w3c/dom/Node;)V
 	public static final fun iterateXmlNodeChildren (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
-	public static final fun mergeXmlResources (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public static final fun mergeXmlResources (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;Ljava/lang/String;)V
-	public static synthetic fun mergeXmlResources$default (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
-	public static synthetic fun mergeXmlResources$default (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
 public final class app/revanced/util/resource/ArrayResource : app/revanced/util/resource/BaseResource {
