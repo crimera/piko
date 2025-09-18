@@ -58,7 +58,6 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
 
         TreeMap<String,Boolean> flags = new TreeMap();
         flags.put(strEnableRes("piko_pref_video_download"),SettingsStatus.enableVidDownload);
-        flags.put(strEnableRes("piko_pref_reader_mode"),SettingsStatus.enableReaderMode);
         flags.put(strEnableRes("piko_pref_undo_posts"),SettingsStatus.enableUndoPosts);
         flags.put(strRes("app_icon"),SettingsStatus.customAppIcon);
         flags.put(strRes("tab_customization_screen_title"),SettingsStatus.navBarCustomisation);

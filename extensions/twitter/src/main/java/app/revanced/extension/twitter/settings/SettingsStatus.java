@@ -41,7 +41,6 @@ public class SettingsStatus {
     public static boolean removePremiumUpsell = false;
     public static boolean hideTopPeopleSearch = false;
 
-    public static boolean enableReaderMode = false;
     public static boolean enableUndoPosts = false;
     public static boolean customAppIcon = false;
     public static boolean enableForcePip = false;
@@ -282,10 +281,6 @@ public class SettingsStatus {
         hideTodaysNews = true;
     }
 
-    public static void enableReaderMode() {
-        enableReaderMode = true;
-    }
-
     public static void enableUndoPosts() {
         enableUndoPosts = true;
     }
@@ -362,7 +357,7 @@ public class SettingsStatus {
     }
 
     public static boolean enablePremiumSection() {
-        return (enableReaderMode || enableUndoPosts || customAppIcon || enableForcePip);
+        return (enableUndoPosts || customAppIcon || enableForcePip);
     }
 
     public static boolean enableCustomisationSection() {

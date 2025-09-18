@@ -314,10 +314,6 @@ public class Pref {
         return Utils.getBooleanPerf(Settings.ADS_HIDE_PREMIUM_PROMPT);
     }
 
-    public static boolean enableReaderMode() {
-        return Utils.getBooleanPerf(Settings.PREMIUM_READER_MODE);
-    }
-
     public static boolean enableUndoPosts() {
         return Utils.getBooleanPerf(Settings.PREMIUM_UNDO_POSTS);
     }

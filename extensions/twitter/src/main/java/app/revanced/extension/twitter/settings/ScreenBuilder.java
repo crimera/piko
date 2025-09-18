@@ -44,15 +44,6 @@ public class ScreenBuilder {
             if(buildCategory)
                 category = preferenceCategory(strRes("piko_title_premium"));
 
-            if (SettingsStatus.enableReaderMode) {
-                addPreference(category,
-                        helper.switchPreference(
-                                strEnableRes("piko_pref_reader_mode"),
-                                strRes("piko_pref_reader_mode_desc"),
-                                Settings.PREMIUM_READER_MODE
-                        )
-                );
-            }
             if (SettingsStatus.enableUndoPosts) {
                 addPreference(category,
                         helper.switchPreference(
