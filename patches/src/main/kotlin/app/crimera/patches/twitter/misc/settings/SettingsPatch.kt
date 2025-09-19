@@ -1,6 +1,7 @@
 package app.crimera.patches.twitter.misc.settings
 
 import app.crimera.patches.twitter.misc.extension.sharedExtensionPatch
+import app.crimera.patches.twitter.premium.redirectBMNavBar.redirectBMTab
 import app.crimera.utils.Constants.ACTIVITY_HOOK_CLASS
 import app.crimera.utils.Constants.ADD_PREF_DESCRIPTOR
 import app.crimera.utils.Constants.DEEPLINK_HOOK_CLASS
@@ -32,6 +33,7 @@ val settingsPatch =
         dependsOn(
             sharedExtensionPatch,
             settingsResourcePatch,
+            redirectBMTab,
         )
 
         execute {
