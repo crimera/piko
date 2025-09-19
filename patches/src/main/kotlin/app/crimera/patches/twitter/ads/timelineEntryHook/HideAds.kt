@@ -13,6 +13,6 @@ val hideAds =
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
-            settingsStatusLoadFingerprint.method.enableSettings("hideAds")
+            settingsStatusLoadFingerprint.enableSettings("hideAds")
         }
     }

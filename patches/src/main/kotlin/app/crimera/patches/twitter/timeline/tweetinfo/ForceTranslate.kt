@@ -16,6 +16,6 @@ val forceTranslate =
         dependsOn(settingsPatch, tweetInfoHook)
 
         execute {
-            settingsStatusLoadFingerprint.method.enableSettings("forceTranslate")
+            settingsStatusLoadFingerprint.enableSettings("forceTranslate")
         }
     }

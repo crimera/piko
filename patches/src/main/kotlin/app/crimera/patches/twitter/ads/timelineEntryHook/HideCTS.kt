@@ -13,6 +13,6 @@ val hideCTS =
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
-            settingsStatusLoadFingerprint.method.enableSettings("hideCreatorsToSub")
+            settingsStatusLoadFingerprint.enableSettings("hideCreatorsToSub")
         }
     }

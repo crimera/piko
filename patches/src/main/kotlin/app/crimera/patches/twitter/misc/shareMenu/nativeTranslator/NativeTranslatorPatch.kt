@@ -81,6 +81,6 @@ val nativeTranslatorModePatch =
 //                viewDebugDialogReference,
 //            )
 //
-//            settingsStatusLoadFingerprint.method.enableSettings("")
+//            settingsStatusLoadFingerprint.enableSettings("")
         }
     }

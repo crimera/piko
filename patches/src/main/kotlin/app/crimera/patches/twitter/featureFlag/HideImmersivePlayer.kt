@@ -18,8 +18,8 @@ val hideImmersivePlayer =
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 
-            featureFlagLoadFingerprint.method.flagSettings("immersivePlayer")
+            featureFlagLoadFingerprint.flagSettings("immersivePlayer")
 
-            settingsStatusLoadFingerprint.method.enableSettings("hideImmersivePlayer")
+            settingsStatusLoadFingerprint.enableSettings("hideImmersivePlayer")
         }
     }

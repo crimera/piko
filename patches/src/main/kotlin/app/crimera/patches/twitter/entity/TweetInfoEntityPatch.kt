@@ -16,8 +16,8 @@ val tweetInfoEntityPatch =
                 val str = match.string
 
                 if (str == "lang") {
-                    val ref = tweetInfoObjectFingerprint.method.getReference(match.index + 1) as FieldReference
-                    tweetLangFingerprint.method.changeFirstString(ref.name)
+                    val ref = tweetInfoObjectFingerprint.getReference(match.index + 1) as FieldReference
+                    tweetLangFingerprint.changeFirstString(ref.name)
 
                     var infoField =
                         tweetObjectFingerprint.classDef.fields
@@ -25,7 +25,7 @@ val tweetInfoEntityPatch =
                                 it.type ==
                                     ref.definingClass
                             }.name
-                    tweetInfoFingerprint.method.changeFirstString(infoField)
+                    tweetInfoFingerprint.changeFirstString(infoField)
                     return@forEach
                 }
             }

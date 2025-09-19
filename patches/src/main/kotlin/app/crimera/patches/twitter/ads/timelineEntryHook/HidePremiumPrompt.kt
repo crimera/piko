@@ -14,6 +14,6 @@ val hidePremiumPrompt =
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
 
-            settingsStatusLoadFingerprint.method.enableSettings("hidePremiumPrompt")
+            settingsStatusLoadFingerprint.enableSettings("hidePremiumPrompt")
         }
     }

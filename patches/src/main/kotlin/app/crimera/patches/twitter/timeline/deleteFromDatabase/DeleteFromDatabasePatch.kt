@@ -16,6 +16,6 @@ val deleteFromDatabasePatch =
         dependsOn(settingsPatch)
 
         execute {
-            settingsStatusLoadFingerprint.method.enableSettings("deleteFromDb")
+            settingsStatusLoadFingerprint.enableSettings("deleteFromDb")
         }
     }

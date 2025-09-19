@@ -2,13 +2,14 @@ package app.crimera.utils
 
 import app.crimera.utils.Constants.FSTS_DESCRIPTOR
 import app.crimera.utils.Constants.SSTS_DESCRIPTOR
+import app.revanced.patcher.Fingerprint
 import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.instructions
 import app.revanced.patcher.extensions.InstructionExtensions.replaceInstruction
+import app.revanced.patcher.patch.BytecodePatchContext
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.ResourcePatchContext
-import app.revanced.patcher.util.proxy.mutableTypes.MutableMethod
 import app.revanced.util.*
 import app.revanced.util.inputStreamFromBundledResource
 import com.android.tools.smali.dexlib2.HiddenApiRestriction
@@ -110,15 +111,17 @@ fun ResourcePatchContext.replaceStringsInFile(
     file.writeText(content)
 }
 
-fun MutableMethod.enableSettings(functionName: String) {
-    addInstruction(
+context(BytecodePatchContext)
+fun Fingerprint.enableSettings(functionName: String) {
+    method.addInstruction(
         0,
         "$SSTS_DESCRIPTOR->$functionName()V",
     )
 }
 
-fun MutableMethod.flagSettings(functionName: String) {
-    addInstruction(
+context(BytecodePatchContext)
+fun Fingerprint.flagSettings(functionName: String) {
+    method.addInstruction(
         0,
         "$FSTS_DESCRIPTOR->$functionName()V",
     )
@@ -129,23 +132,29 @@ fun Reference.extractDescriptors(): List<String> {
     return regex.findAll(this.toString()).map { it.value }.toList()
 }
 
-fun MutableMethod.getReference(index: Int): Reference = getInstruction<ReferenceInstruction>(index).reference
+context(BytecodePatchContext)
+fun Fingerprint.getReference(index: Int): Reference =
+    method.getInstruction<ReferenceInstruction>(index).reference
 
-fun MutableMethod.getMethodName(index: Int): String = (getReference(index) as DexBackedMethodReference).name
+context(BytecodePatchContext)
+fun Fingerprint.getMethodName(index: Int): String = (getReference(index) as DexBackedMethodReference).name
 
-fun MutableMethod.getFieldName(index: Int): String = (getReference(index) as FieldReference).name
+context(BytecodePatchContext)
+fun Fingerprint.getFieldName(index: Int): String = (getReference(index) as FieldReference).name
 
-fun MutableMethod.changeStringAt(
+context(BytecodePatchContext)
+fun Fingerprint.changeStringAt(
     index: Int,
     value: String,
 ) {
-    instructions.filter { it.opcode == Opcode.CONST_STRING }[index].let { instruction ->
+    method.instructions.filter { it.opcode == Opcode.CONST_STRING }[index].let { instruction ->
         val register = (instruction as BuilderInstruction21c).registerA
-        replaceInstruction(instruction.location.index, "const-string v$register, \"$value\"")
+        method.replaceInstruction(instruction.location.index, "const-string v$register, \"$value\"")
     }
 }
 
-fun MutableMethod.changeFirstString(value: String) {
+context(BytecodePatchContext)
+fun Fingerprint.changeFirstString(value: String) {
     changeStringAt(0, value)
 }
 

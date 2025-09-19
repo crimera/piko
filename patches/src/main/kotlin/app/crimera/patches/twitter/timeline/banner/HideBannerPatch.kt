@@ -49,6 +49,6 @@ val hideBannerPatch =
                 """.trimIndent(),
             )
 
-            settingsStatusLoadFingerprint.method.enableSettings("hideBanner")
+            settingsStatusLoadFingerprint.enableSettings("hideBanner")
         }
     }

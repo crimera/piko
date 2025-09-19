@@ -80,5 +80,5 @@ fun shareMenuButtonInjection(
         viewDebugDialogReference,
     )
 
-    settingsStatusLoadFingerprint.method.enableSettings(statusFunctionName)
+    settingsStatusLoadFingerprint.enableSettings(statusFunctionName)
 }

@@ -16,6 +16,6 @@ val selectableTextPatch =
         dependsOn(settingsPatch, selectableTextResources)
 
         execute {
-            settingsStatusLoadFingerprint.method.enableSettings("selectableText")
+            settingsStatusLoadFingerprint.enableSettings("selectableText")
         }
     }

@@ -77,6 +77,6 @@ val hideViewCountPatch =
                         """.trimIndent(),
                     )
                 }
-            settingsStatusLoadFingerprint.method.enableSettings("defaultReplySortFilter")
+            settingsStatusLoadFingerprint.enableSettings("defaultReplySortFilter")
         }
     }

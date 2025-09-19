@@ -43,6 +43,6 @@ val featureFlagPatch =
                 "$FSTS_DESCRIPTOR->load()V",
             )
 
-            settingsStatusLoadFingerprint.method.enableSettings("enableFeatureFlags")
+            settingsStatusLoadFingerprint.enableSettings("enableFeatureFlags")
         }
     }

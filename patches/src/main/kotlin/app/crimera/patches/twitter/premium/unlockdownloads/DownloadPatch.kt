@@ -136,6 +136,6 @@ val downloadPatch =
                 """.trimIndent(),
             )
 
-            settingsStatusLoadFingerprint.method.enableSettings("enableVidDownload")
+            settingsStatusLoadFingerprint.enableSettings("enableVidDownload")
         }
     }

@@ -67,7 +67,7 @@ val customiseNavBarPatch =
             methods2.removeInstruction(loc2)
             methods2.removeInstruction(loc2)
 
-            settingsStatusLoadFingerprint.method.enableSettings("navBarCustomisation")
-            featureFlagLoadFingerprint.method.flagSettings("navbarFix")
+            settingsStatusLoadFingerprint.enableSettings("navBarCustomisation")
+            featureFlagLoadFingerprint.flagSettings("navbarFix")
         }
     }

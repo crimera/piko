@@ -57,6 +57,6 @@ val forceHDPatch =
                 ExternalLabel("piko", method.getInstruction(index)),
             )
 
-            settingsStatusLoadFingerprint.method.enableSettings("enableForceHD")
+            settingsStatusLoadFingerprint.enableSettings("enableForceHD")
         }
     }

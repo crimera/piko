@@ -13,6 +13,6 @@ val hideTodaysNews =
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
-            settingsStatusLoadFingerprint.method.enableSettings("hideTodaysNews")
+            settingsStatusLoadFingerprint.enableSettings("hideTodaysNews")
         }
     }

@@ -85,6 +85,6 @@ val nativeDownloaderPatch =
 //                viewDebugDialogReference,
 //            )
 //
-//            settingsStatusLoadFingerprint.method.enableSettings("nativeDownloader")
+//            settingsStatusLoadFingerprint.enableSettings("nativeDownloader")
         }
     }

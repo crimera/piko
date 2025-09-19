@@ -390,16 +390,16 @@ public final class app/crimera/utils/InitMethod : com/android/tools/smali/dexlib
 }
 
 public final class app/crimera/utils/UtilsKt {
-	public static final fun changeFirstString (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;Ljava/lang/String;)V
-	public static final fun changeStringAt (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;ILjava/lang/String;)V
-	public static final fun enableSettings (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;Ljava/lang/String;)V
+	public static final fun changeFirstString (Lapp/revanced/patcher/patch/BytecodePatchContext;Lapp/revanced/patcher/Fingerprint;Ljava/lang/String;)V
+	public static final fun changeStringAt (Lapp/revanced/patcher/patch/BytecodePatchContext;Lapp/revanced/patcher/Fingerprint;ILjava/lang/String;)V
+	public static final fun enableSettings (Lapp/revanced/patcher/patch/BytecodePatchContext;Lapp/revanced/patcher/Fingerprint;Ljava/lang/String;)V
 	public static final fun extractDescriptors (Lcom/android/tools/smali/dexlib2/iface/reference/Reference;)Ljava/util/List;
-	public static final fun flagSettings (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;Ljava/lang/String;)V
-	public static final fun getFieldName (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;I)Ljava/lang/String;
+	public static final fun flagSettings (Lapp/revanced/patcher/patch/BytecodePatchContext;Lapp/revanced/patcher/Fingerprint;Ljava/lang/String;)V
+	public static final fun getFieldName (Lapp/revanced/patcher/patch/BytecodePatchContext;Lapp/revanced/patcher/Fingerprint;I)Ljava/lang/String;
 	public static final fun getIndexOfLastFilledNewArrayRange (Ljava/util/List;)I
 	public static final fun getIndexOfLastNewInstance (Ljava/util/List;)I
-	public static final fun getMethodName (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;I)Ljava/lang/String;
-	public static final fun getReference (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;I)Lcom/android/tools/smali/dexlib2/iface/reference/Reference;
+	public static final fun getMethodName (Lapp/revanced/patcher/patch/BytecodePatchContext;Lapp/revanced/patcher/Fingerprint;I)Ljava/lang/String;
+	public static final fun getReference (Lapp/revanced/patcher/patch/BytecodePatchContext;Lapp/revanced/patcher/Fingerprint;I)Lcom/android/tools/smali/dexlib2/iface/reference/Reference;
 	public static final fun instructionToString (Lcom/android/tools/smali/dexlib2/iface/instruction/Instruction;)Ljava/lang/String;
 	public static final fun mergeXmlResources (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;Ljava/lang/String;)V
 	public static synthetic fun mergeXmlResources$default (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;Ljava/lang/String;ILjava/lang/Object;)V

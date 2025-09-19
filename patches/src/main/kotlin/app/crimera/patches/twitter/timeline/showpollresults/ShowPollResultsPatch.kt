@@ -50,6 +50,6 @@ val showPollResultsPatch =
                 """.trimIndent(),
             )
 
-            settingsStatusLoadFingerprint.method.enableSettings("enableShowPollResults")
+            settingsStatusLoadFingerprint.enableSettings("enableShowPollResults")
         }
     }

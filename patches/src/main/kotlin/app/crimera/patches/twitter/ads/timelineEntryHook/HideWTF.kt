@@ -13,6 +13,6 @@ val hideWTF =
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
-            settingsStatusLoadFingerprint.method.enableSettings("hideWhoToFollow")
+            settingsStatusLoadFingerprint.enableSettings("hideWhoToFollow")
         }
     }

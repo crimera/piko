@@ -36,6 +36,6 @@ val customSharingDomainPatch =
                 move-result-object p0
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("enableCustomSharingDomain")
+            settingsStatusLoadFingerprint.enableSettings("enableCustomSharingDomain")
         }
     }

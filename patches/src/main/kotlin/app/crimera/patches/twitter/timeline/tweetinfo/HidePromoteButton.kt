@@ -16,6 +16,6 @@ val hidePromoteButton =
         dependsOn(settingsPatch, tweetInfoHook)
 
         execute {
-            settingsStatusLoadFingerprint.method.enableSettings("hidePromoteButton")
+            settingsStatusLoadFingerprint.enableSettings("hidePromoteButton")
         }
     }

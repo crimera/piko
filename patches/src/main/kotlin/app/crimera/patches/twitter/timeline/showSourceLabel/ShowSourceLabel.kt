@@ -66,6 +66,6 @@ val showSourceLabel =
                 ExternalLabel("piko", igetWide),
             )
 
-            settingsStatusLoadFingerprint.method.enableSettings("showSourceLabel")
+            settingsStatusLoadFingerprint.enableSettings("showSourceLabel")
         }
     }

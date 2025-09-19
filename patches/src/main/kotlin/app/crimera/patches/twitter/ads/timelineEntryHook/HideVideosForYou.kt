@@ -14,6 +14,6 @@ val hideVideosForYou =
         compatibleWith("com.twitter.android")
         dependsOn(timelineModuleItemHookPatch, settingsPatch)
         execute {
-            settingsStatusLoadFingerprint.method.enableSettings("hideVideosForYou")
+            settingsStatusLoadFingerprint.enableSettings("hideVideosForYou")
         }
     }

@@ -87,6 +87,6 @@ val enableUndoPostPatch =
                     .location.index
             method3.addInstruction(loc3, PREF.trimIndent())
 
-            settingsStatusLoadFingerprint.method.enableSettings("enableUndoPosts")
+            settingsStatusLoadFingerprint.enableSettings("enableUndoPosts")
         }
     }

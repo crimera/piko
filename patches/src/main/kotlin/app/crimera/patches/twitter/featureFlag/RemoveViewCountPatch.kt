@@ -19,7 +19,7 @@ val removeViewCountPatch =
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 
-            featureFlagLoadFingerprint.method.flagSettings("viewCount")
-            settingsStatusLoadFingerprint.method.enableSettings("hideViewCount")
+            featureFlagLoadFingerprint.flagSettings("viewCount")
+            settingsStatusLoadFingerprint.enableSettings("hideViewCount")
         }
     }

@@ -46,6 +46,6 @@ val noShortenedUrlPatch =
                 move-result-object p1
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("unshortenlink")
+            settingsStatusLoadFingerprint.enableSettings("unshortenlink")
         }
     }

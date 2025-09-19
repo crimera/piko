@@ -17,7 +17,7 @@ val hideFABMenuButtonsPatch =
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 
-            featureFlagLoadFingerprint.method.flagSettings("fabMenu")
-            settingsStatusLoadFingerprint.method.enableSettings("hideFABBtns")
+            featureFlagLoadFingerprint.flagSettings("fabMenu")
+            settingsStatusLoadFingerprint.enableSettings("hideFABBtns")
         }
     }

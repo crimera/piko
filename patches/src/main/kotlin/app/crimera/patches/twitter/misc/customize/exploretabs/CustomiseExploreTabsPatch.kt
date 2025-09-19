@@ -42,6 +42,6 @@ val customiseExploreTabsPatch =
                 move-result-object v1
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("exploreTabCustomisation")
+            settingsStatusLoadFingerprint.enableSettings("exploreTabCustomisation")
         }
     }

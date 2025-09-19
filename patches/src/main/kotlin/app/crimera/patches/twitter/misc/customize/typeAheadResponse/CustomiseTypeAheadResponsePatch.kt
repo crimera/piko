@@ -41,6 +41,6 @@ val customiseTypeAheadResponsePatch =
             move-result-object p1
             """,
             )
-            settingsStatusLoadFingerprint.method.enableSettings("typeaheadCustomisation")
+            settingsStatusLoadFingerprint.enableSettings("typeaheadCustomisation")
         }
     }

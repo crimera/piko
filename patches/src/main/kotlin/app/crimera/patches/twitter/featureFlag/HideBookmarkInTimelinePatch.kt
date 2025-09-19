@@ -17,7 +17,7 @@ val hideBookmarkInTimelinePatch =
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 
-            featureFlagLoadFingerprint.method.flagSettings("bookmarkInTimeline")
-            settingsStatusLoadFingerprint.method.enableSettings("hideInlineBmk")
+            featureFlagLoadFingerprint.flagSettings("bookmarkInTimeline")
+            settingsStatusLoadFingerprint.enableSettings("hideInlineBmk")
         }
     }

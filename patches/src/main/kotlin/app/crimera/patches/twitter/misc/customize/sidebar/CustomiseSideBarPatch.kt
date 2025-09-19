@@ -50,6 +50,6 @@ val customiseSideBarPatch =
                 """.trimIndent()
 
             method.addInstructionsWithLabels(return_obj, METHOD)
-            settingsStatusLoadFingerprint.method.enableSettings("sideBarCustomisation")
+            settingsStatusLoadFingerprint.enableSettings("sideBarCustomisation")
         }
     }

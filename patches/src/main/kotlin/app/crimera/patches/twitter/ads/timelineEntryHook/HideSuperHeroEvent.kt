@@ -15,6 +15,6 @@ val hideSuperHeroEvent =
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
 
-            settingsStatusLoadFingerprint.method.enableSettings("hideSuperheroEvent")
+            settingsStatusLoadFingerprint.enableSettings("hideSuperheroEvent")
         }
     }

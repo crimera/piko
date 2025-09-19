@@ -52,6 +52,6 @@ val enableVidAutoAdvancePatch =
                 """.trimIndent(),
             )
 
-            settingsStatusLoadFingerprint.method.enableSettings("enableVidAutoAdvance")
+            settingsStatusLoadFingerprint.enableSettings("enableVidAutoAdvance")
         }
     }

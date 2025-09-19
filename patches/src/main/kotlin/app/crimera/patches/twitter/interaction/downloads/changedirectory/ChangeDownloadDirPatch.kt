@@ -54,6 +54,6 @@ val hideViewCountPatch =
                 move-result-object p1
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("enableDownloadFolder")
+            settingsStatusLoadFingerprint.enableSettings("enableDownloadFolder")
         }
     }

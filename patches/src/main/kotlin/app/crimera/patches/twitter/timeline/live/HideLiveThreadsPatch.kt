@@ -49,6 +49,6 @@ val hideLiveThreadsPatch =
                 move-result-object v$reg
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("hideLiveThreads")
+            settingsStatusLoadFingerprint.enableSettings("hideLiveThreads")
         }
     }

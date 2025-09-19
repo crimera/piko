@@ -14,6 +14,6 @@ val hideMainEvent =
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
 
-            settingsStatusLoadFingerprint.method.enableSettings("hideMainEvent")
+            settingsStatusLoadFingerprint.enableSettings("hideMainEvent")
         }
     }

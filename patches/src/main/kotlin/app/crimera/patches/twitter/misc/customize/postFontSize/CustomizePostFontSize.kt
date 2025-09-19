@@ -37,6 +37,6 @@ val customizePostFontSize =
                     .last { it.opcode == Opcode.MOVE_RESULT }
                     .location.index
             method.addInstruction(index + 1, "sget p1, $PREF_DESCRIPTOR;->POST_FONT_SIZE:F")
-            settingsStatusLoadFingerprint.method.enableSettings("customPostFontSize")
+            settingsStatusLoadFingerprint.enableSettings("customPostFontSize")
         }
     }

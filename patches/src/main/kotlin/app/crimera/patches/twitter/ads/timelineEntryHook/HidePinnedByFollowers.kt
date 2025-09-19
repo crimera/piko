@@ -14,6 +14,6 @@ val hidePinnedByFollowers =
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
 
-            settingsStatusLoadFingerprint.method.enableSettings("hideRevistPinnedPost")
+            settingsStatusLoadFingerprint.enableSettings("hideRevistPinnedPost")
         }
     }

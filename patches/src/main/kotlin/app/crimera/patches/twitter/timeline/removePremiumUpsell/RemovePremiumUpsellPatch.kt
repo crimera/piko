@@ -35,6 +35,6 @@ val disablePremiumUpsellPatch =
 
             methods.addInstruction(cond_loc + 1, PREF)
 
-            settingsStatusLoadFingerprint.method.enableSettings("removePremiumUpsell")
+            settingsStatusLoadFingerprint.enableSettings("removePremiumUpsell")
         }
     }

@@ -67,6 +67,6 @@ val customiseTimelineTabsPatch =
                 """.trimIndent(),
                 ExternalLabel("escape", arr),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("timelineTabCustomisation")
+            settingsStatusLoadFingerprint.enableSettings("timelineTabCustomisation")
         }
     }

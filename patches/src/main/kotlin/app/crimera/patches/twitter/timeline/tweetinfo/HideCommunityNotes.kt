@@ -15,6 +15,6 @@ val hideCommunityNotes =
         dependsOn(settingsPatch, tweetInfoHook)
 
         execute {
-            settingsStatusLoadFingerprint.method.enableSettings("hideCommunityNotes")
+            settingsStatusLoadFingerprint.enableSettings("hideCommunityNotes")
         }
     }

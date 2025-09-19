@@ -61,6 +61,6 @@ val hideNudgeButtonPatch =
                 ),
             )
 
-            settingsStatusLoadFingerprint.method.enableSettings("hideNudgeButton")
+            settingsStatusLoadFingerprint.enableSettings("hideNudgeButton")
         }
     }

@@ -42,7 +42,6 @@ public class SettingsStatus {
     public static boolean hideTopPeopleSearch = false;
 
     public static boolean enableUndoPosts = false;
-    public static boolean customAppIcon = false;
     public static boolean enableForcePip = false;
     public static boolean showSourceLabel = false;
     public static boolean hideImmersivePlayer = false;
@@ -285,10 +284,6 @@ public class SettingsStatus {
         enableUndoPosts = true;
     }
 
-    public static void customAppIcon() {
-        customAppIcon = true;
-    }
-
     public static void enableForcePip() {
         enableForcePip = true;
     }
@@ -357,7 +352,7 @@ public class SettingsStatus {
     }
 
     public static boolean enablePremiumSection() {
-        return (enableUndoPosts || customAppIcon || enableForcePip);
+        return (enableUndoPosts || enableForcePip);
     }
 
     public static boolean enableCustomisationSection() {

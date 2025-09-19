@@ -19,12 +19,12 @@ val tweetEntityPatch =
             getUserNameMethodCaller.stringMatches?.forEach { match ->
                 val str = match.string
                 if (str == "Name") {
-                    val methodName = getUserNameMethodCaller.method.getMethodName(match.index + 1)
-                    tweetUsernameFingerprint.method.changeFirstString(methodName)
+                    val methodName = getUserNameMethodCaller.getMethodName(match.index + 1)
+                    tweetUsernameFingerprint.changeFirstString(methodName)
                 }
                 if (str == "User Name") {
-                    val methodName = getUserNameMethodCaller.method.getMethodName(match.index + 1)
-                    tweetProfileNameFingerprint.method.changeFirstString(methodName)
+                    val methodName = getUserNameMethodCaller.getMethodName(match.index + 1)
+                    tweetProfileNameFingerprint.changeFirstString(methodName)
                 }
             }
 
@@ -36,7 +36,7 @@ val tweetEntityPatch =
                     .last {
                         it.returnType == "J"
                     }.name
-            tweetUserIdFingerprint.method.changeFirstString(getTweetUserIdMethod)
+            tweetUserIdFingerprint.changeFirstString(getTweetUserIdMethod)
 // ------------
             val getMediaObjectMethod =
                 tweetObjectMethods.firstOrNull { methodDef ->
@@ -52,13 +52,13 @@ val tweetEntityPatch =
                             Opcode.RETURN_OBJECT,
                         )
                 } ?: throw PatchException("getMediaObject not found")
-            tweetMediaFingerprint.method.changeFirstString(getMediaObjectMethod.name)
+            tweetMediaFingerprint.changeFirstString(getMediaObjectMethod.name)
 
             val extMediaListField =
                 tweetMediaEntityClassFingerprint.classDef.fields
                     .first { it.type.contains("List") }
                     .name
-            tweetMediaFingerprint.method.changeStringAt(1, extMediaListField)
+            tweetMediaFingerprint.changeStringAt(1, extMediaListField)
 
             // ------------
             val getNoteTweetMethod =
@@ -66,20 +66,20 @@ val tweetEntityPatch =
                     .firstOrNull { it.returnType.contains("notetweet") }
                     ?.name
                     ?: throw PatchException("getNoteTweetMethod not found")
-            tweetLongTextFingerprint.method.changeFirstString(getNoteTweetMethod)
+            tweetLongTextFingerprint.changeFirstString(getNoteTweetMethod)
 
             val longTextField =
                 longTweetObjectFingerprint.classDef.fields
                     .first { it.type == "Ljava/lang/String;" }
                     .name
-            tweetLongTextFingerprint.method.changeStringAt(1, longTextField)
+            tweetLongTextFingerprint.changeStringAt(1, longTextField)
 
             val tweetEntityMethod =
                 tweetObjectMethods
                     .lastOrNull { it.returnType.contains("/entity/") }
                     ?.name
                     ?: throw PatchException("getTweetEntityMethod not found")
-            tweetShortTextFingerprint.method.changeFirstString(tweetEntityMethod)
+            tweetShortTextFingerprint.changeFirstString(tweetEntityMethod)
 
 // End
 // ---------------------

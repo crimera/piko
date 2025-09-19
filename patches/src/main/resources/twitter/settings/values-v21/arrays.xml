@@ -83,4 +83,55 @@
         <item>4</item>
         <item>5</item>
     </string-array>
+
+    <string-array name="piko_array_profiletabs_val">
+        <item>tweets</item>
+        <item>tweets_replies</item>
+        <item>affiliated</item>
+        <item>subs</item>
+        <item>highlights</item>
+        <item>articles</item>
+        <item>media</item>
+        <item>likes</item>
+    </string-array>
+
+    <string-array name="piko_array_sidebar_val">
+        <item>Profile</item>
+        <item>Premium</item>
+        <item>Grok</item>
+        <item>Money</item>
+        <item>XChat</item>
+        <item>DMs</item>
+        <item>Communities</item>
+        <item>ExploreImmersive</item>
+        <item>Bookmarks</item>
+        <item>Jobs</item>
+        <item>Lists</item>
+        <item>BirdwatchNotes</item>
+        <item>Spaces</item>
+        <item>@string/video_chat_conference</item>
+        <item>PendingFollowers</item>
+        <item>Monetization</item>
+        <item>Analytics</item>
+        <item>ProfessionalToolsGroup</item>
+        <item>SettingsAndSupportGroup</item>
+        <item>MediaTransparency</item>
+        <item>Imprint</item>
+    </string-array>
+
+    <string-array name="piko_array_navbar_val">
+        <item>HOME</item>
+        <item>GUIDE</item>
+        <item>SPACES</item>
+        <item>COMMUNITIES</item>
+        <item>NOTIFICATIONS</item>
+        <item>CONNECT</item>
+        <item>COMMUNITY_NOTES</item>
+        <item>BOOKMARKS</item>
+        <item>DMS</item>
+        <item>GROK</item>
+        <item>MEDIA_TAB</item>
+    </string-array>
+
+
 </resources>

@@ -14,6 +14,6 @@ val hideTopPeopleSearch =
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
-            settingsStatusLoadFingerprint.method.enableSettings("hideTopPeopleSearch")
+            settingsStatusLoadFingerprint.enableSettings("hideTopPeopleSearch")
         }
     }

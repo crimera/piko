@@ -14,6 +14,6 @@ val hideRevistBmk =
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
 
-            settingsStatusLoadFingerprint.method.enableSettings("hideRevistBookmark")
+            settingsStatusLoadFingerprint.enableSettings("hideRevistBookmark")
         }
     }

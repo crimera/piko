@@ -36,8 +36,8 @@ val responseLoggingPatch =
                 move-result-object p1
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("serverResponseLogging")
+            settingsStatusLoadFingerprint.enableSettings("serverResponseLogging")
 
-            settingsStatusLoadFingerprint.method.enableSettings("serverResponseLoggingOverwriteFile")
+            settingsStatusLoadFingerprint.enableSettings("serverResponseLoggingOverwriteFile")
         }
     }

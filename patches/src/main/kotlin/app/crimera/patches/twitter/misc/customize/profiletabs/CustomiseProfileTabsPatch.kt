@@ -89,6 +89,6 @@ val customiseProfileTabsPatch =
                     ExternalLabel("check1", last_invoke_static),
                 )
             }
-            settingsStatusLoadFingerprint.method.enableSettings("profileTabCustomisation")
+            settingsStatusLoadFingerprint.enableSettings("profileTabCustomisation")
         }
     }

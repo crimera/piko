@@ -24,15 +24,15 @@ val extMediaEntityPatch =
                             it.opcode == Opcode.INVOKE_VIRTUAL &&
                                 it.location.index > match.index
                         }
-                    val methodName = extMediaHighResVideoMethodFinder.method.getMethodName(inst.location.index)
-                    extMediaHighResVideoFingerprint.method.changeFirstString(methodName)
+                    val methodName = extMediaHighResVideoMethodFinder.getMethodName(inst.location.index)
+                    extMediaHighResVideoFingerprint.changeFirstString(methodName)
                     return@forEach
                 }
             }
 
             // ------------
             val imageFieldName =
-                extMediaGetImageMethodFinder.method.getFieldName(
+                extMediaGetImageMethodFinder.getFieldName(
                     extMediaGetImageMethodFinder.method
                         .instructions
                         .last {
@@ -40,7 +40,7 @@ val extMediaEntityPatch =
                                 Opcode.IGET_OBJECT
                         }.location.index,
                 )
-            extMediaGetImageFingerprint.method.changeFirstString(imageFieldName)
+            extMediaGetImageFingerprint.changeFirstString(imageFieldName)
 // ------------
         }
     }

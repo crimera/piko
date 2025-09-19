@@ -14,6 +14,6 @@ val hideDetailedPosts =
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
-            settingsStatusLoadFingerprint.method.enableSettings("hideDetailedPost")
+            settingsStatusLoadFingerprint.enableSettings("hideDetailedPost")
         }
     }

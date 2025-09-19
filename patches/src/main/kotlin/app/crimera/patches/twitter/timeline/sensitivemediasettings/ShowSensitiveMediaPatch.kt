@@ -46,6 +46,6 @@ val sensitiveMediaPatch =
                 move-result-object p1
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("showSensitiveMedia")
+            settingsStatusLoadFingerprint.enableSettings("showSensitiveMedia")
         }
     }

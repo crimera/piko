@@ -72,16 +72,6 @@ public class ScreenBuilder {
                 );
             }
 
-            if (SettingsStatus.customAppIcon) {
-                addPreference(category,
-                        helper.buttonPreference(
-                                strRes("app_icon"),
-                                "",
-                                Settings.PREMIUM_ICONS.key
-                        )
-                );
-            }
-
         if (SettingsStatus.navBarCustomisation) {
             addPreference(category,
                     helper.buttonPreference(

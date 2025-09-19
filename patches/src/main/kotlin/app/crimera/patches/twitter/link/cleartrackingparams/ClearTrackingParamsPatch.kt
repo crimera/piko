@@ -31,6 +31,6 @@ val clearTrackingParamsPatch =
 
             addSessionTokenFingerprint.method.addInstruction(0, "return-object p0")
 
-            settingsStatusLoadFingerprint.method.enableSettings("cleartrackingparams")
+            settingsStatusLoadFingerprint.enableSettings("cleartrackingparams")
         }
     }

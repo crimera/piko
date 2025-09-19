@@ -42,6 +42,6 @@ val customiseInlineBarPatch =
                 """.trimIndent()
 
             method.addInstructions(returnObj_loc, METHOD)
-            settingsStatusLoadFingerprint.method.enableSettings("inlineBarCustomisation")
+            settingsStatusLoadFingerprint.enableSettings("inlineBarCustomisation")
         }
     }

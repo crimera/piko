@@ -17,7 +17,7 @@ val disableChirpFontPatch =
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 
-            featureFlagLoadFingerprint.method.flagSettings("chirpFont")
-            settingsStatusLoadFingerprint.method.enableSettings("enableFont")
+            featureFlagLoadFingerprint.flagSettings("chirpFont")
+            settingsStatusLoadFingerprint.enableSettings("enableFont")
         }
     }

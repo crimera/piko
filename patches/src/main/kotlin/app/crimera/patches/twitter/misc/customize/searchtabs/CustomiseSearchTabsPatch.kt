@@ -46,6 +46,6 @@ val customiseSearchTabsPatch =
                 move-result-object v$r0
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("searchTabCustomisation")
+            settingsStatusLoadFingerprint.enableSettings("searchTabCustomisation")
         }
     }

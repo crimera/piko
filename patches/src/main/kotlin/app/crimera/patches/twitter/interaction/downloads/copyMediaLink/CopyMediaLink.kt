@@ -46,7 +46,7 @@ val copyMediaLink =
             method.removeInstruction(gotoLoc - 1)
             method.addInstruction(gotoLoc - 1, METHOD)
 
-            settingsStatusLoadFingerprint.method.enableSettings("mediaLinkHandle")
+            settingsStatusLoadFingerprint.enableSettings("mediaLinkHandle")
 
             // end func
         }

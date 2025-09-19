@@ -61,6 +61,6 @@ val roundOffNumbersPatch =
                 ExternalLabel("cond", inv_vir),
             )
 
-            settingsStatusLoadFingerprint.method.enableSettings("roundOffNumbers")
+            settingsStatusLoadFingerprint.enableSettings("roundOffNumbers")
         }
     }

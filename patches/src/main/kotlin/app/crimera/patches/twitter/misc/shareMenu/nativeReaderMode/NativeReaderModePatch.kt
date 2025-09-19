@@ -82,6 +82,6 @@ val nativeReaderModePatch =
 //                viewDebugDialogReference,
 //            )
 //
-//            settingsStatusLoadFingerprint.method.enableSettings("nativeReaderMode")
+//            settingsStatusLoadFingerprint.enableSettings("nativeReaderMode")
         }
     }

@@ -41,6 +41,6 @@ val hideRecommendedUsers =
                 return v0
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("disableAutoTimelineScroll")
+            settingsStatusLoadFingerprint.enableSettings("disableAutoTimelineScroll")
         }
     }

@@ -40,6 +40,6 @@ val hideFABPatch =
                 """.trimIndent(),
                 ExternalLabel("cond_1212", constObj),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("hideFAB")
+            settingsStatusLoadFingerprint.enableSettings("hideFAB")
         }
     }

@@ -54,7 +54,7 @@ val hidePromotedTrendPatch =
                 """.trimIndent(),
                 ExternalLabel("cond_1212", return_obj),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("hidePromotedTrends")
+            settingsStatusLoadFingerprint.enableSettings("hidePromotedTrends")
 
             // ends.
         }

@@ -52,6 +52,6 @@ val hideRecommendedUsers =
                 """.trimIndent(),
             )
 
-            settingsStatusLoadFingerprint.method.enableSettings("hideRecommendedUsers")
+            settingsStatusLoadFingerprint.enableSettings("hideRecommendedUsers")
         }
     }

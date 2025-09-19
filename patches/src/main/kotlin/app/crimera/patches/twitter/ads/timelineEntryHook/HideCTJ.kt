@@ -13,6 +13,6 @@ val hideCTJ =
             compatibleWith("com.twitter.android")
             dependsOn(timelineEntryHookPatch)
 
-            settingsStatusLoadFingerprint.method.enableSettings("hideCommToJoin")
+            settingsStatusLoadFingerprint.enableSettings("hideCommToJoin")
         }
     }

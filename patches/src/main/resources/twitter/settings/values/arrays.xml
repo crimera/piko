@@ -45,7 +45,6 @@
         <item>@string/bookmarks_title</item>
         <item>@string/drawer_jobs_title</item>
         <item>@string/drawer_lists</item>
-        <item>@string/news_top_articles_title</item>
         <item>@string/drawer_birdwatch_title</item>
         <item>@string/spaces_grid_tab</item>
         <item>@string/video_chat_conference</item>

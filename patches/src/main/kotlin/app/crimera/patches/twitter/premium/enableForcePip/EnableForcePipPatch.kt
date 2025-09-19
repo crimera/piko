@@ -52,6 +52,6 @@ val enableForcePipPatch =
                     .location.index
             methods2.addInstruction(first_sget_loc + 2, PREF)
 
-            settingsStatusLoadFingerprint.method.enableSettings("enableForcePip")
+            settingsStatusLoadFingerprint.enableSettings("enableForcePip")
         }
     }

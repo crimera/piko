@@ -16,7 +16,7 @@ val hideGoogleAds =
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
 
-            featureFlagLoadFingerprint.method.flagSettings("hideGoogleAds")
-            settingsStatusLoadFingerprint.method.enableSettings("hideGAds")
+            featureFlagLoadFingerprint.flagSettings("hideGoogleAds")
+            settingsStatusLoadFingerprint.enableSettings("hideGAds")
         }
     }

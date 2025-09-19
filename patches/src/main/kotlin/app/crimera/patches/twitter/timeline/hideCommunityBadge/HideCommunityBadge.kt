@@ -50,6 +50,6 @@ val hideCommunityBadge =
                 """.trimIndent(),
                 ExternalLabel("piko", iputObj),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("hideCommBadge")
+            settingsStatusLoadFingerprint.enableSettings("hideCommBadge")
         }
     }

@@ -20,6 +20,6 @@ val debugMenu =
             val buttonEnumClass = actionEnumsFingerprint.classDef.toString()
             val buttonReference = "$buttonEnumClass->ViewDebugDialog:$buttonEnumClass"
             registerButton(buttonReference, "enableDebugMenu")
-            settingsStatusLoadFingerprint.method.enableSettings("enableDebugMenu")
+            settingsStatusLoadFingerprint.enableSettings("enableDebugMenu")
         }
     }

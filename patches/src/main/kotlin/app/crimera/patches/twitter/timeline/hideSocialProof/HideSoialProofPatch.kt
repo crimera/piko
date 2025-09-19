@@ -45,6 +45,6 @@ val hideSocialProofPatch =
                 """.trimIndent(),
                 ExternalLabel("piko", instructions.first { it.opcode == Opcode.CONST_4 }),
             )
-            settingsStatusLoadFingerprint.method.enableSettings("hideSocialProof")
+            settingsStatusLoadFingerprint.enableSettings("hideSocialProof")
         }
     }
