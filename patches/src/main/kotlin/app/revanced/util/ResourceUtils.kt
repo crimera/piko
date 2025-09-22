@@ -3,7 +3,6 @@ package app.revanced.util
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.ResourcePatchContext
 import app.revanced.patcher.util.Document
-import app.revanced.util.resource.BaseResource
 import org.w3c.dom.Attr
 import org.w3c.dom.Element
 import org.w3c.dom.Node
@@ -131,19 +130,6 @@ fun String.copyXmlNode(
         source.close()
         target.close()
     }
-}
-
-/**
- * Add a resource node child.
- *
- * @param resource The resource to add.
- * @param resourceCallback Called when a resource has been processed.
- */
-internal fun Node.addResource(
-    resource: BaseResource,
-    resourceCallback: (BaseResource) -> Unit = { },
-) {
-    appendChild(resource.serialize(ownerDocument, resourceCallback))
 }
 
 internal fun Document.getNode(tagName: String) = getElementsByTagName(tagName).item(0)
