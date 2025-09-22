@@ -23,7 +23,7 @@ internal val disableAutoScrollFingerprint =
 
 // credits to @Ouxyl
 @Suppress("unused")
-val hideRecommendedUsers =
+val disableAutoScrollPatch =
     bytecodePatch(
         name = "Disable auto timeline scroll on launch",
         use = true,

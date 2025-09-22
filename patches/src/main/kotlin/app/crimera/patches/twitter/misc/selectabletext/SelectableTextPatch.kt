@@ -1,17 +1,14 @@
 package app.crimera.patches.twitter.misc.selectabletext
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.utils.enableSettings
+import app.revanced.patcher.patch.bytecodePatch
 import app.revanced.patcher.patch.resourcePatch
 import org.w3c.dom.Element
 
-@Suppress("unused")
-val selectableTextResources =
-    resourcePatch(
-        description = "Makes bio and username selectable",
-    ) {
-        compatibleWith("com.twitter.android")
-        dependsOn(settingsPatch)
-
+private val selectableTextResourcePatch =
+    resourcePatch {
         execute {
             val ids =
                 listOf(
@@ -30,5 +27,20 @@ val selectableTextResources =
                     }
                 }
             }
+        }
+    }
+
+@Suppress("unused")
+val selectableTextPatch =
+    bytecodePatch(
+        name = "Selectable Text",
+        description = "Makes bio and username selectable",
+        use = true,
+    ) {
+        compatibleWith("com.twitter.android")
+        dependsOn(settingsPatch, selectableTextResourcePatch)
+
+        execute {
+            settingsStatusLoadFingerprint.enableSettings("selectableText")
         }
     }

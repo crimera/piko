@@ -14,10 +14,10 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 @Suppress("unused")
-val hideViewCountPatch =
+val changeDownloadDirPatch =
     bytecodePatch(
-        name = "Hide view count",
-        description = "Hides the view count of Posts.",
+        name = "Custom download folder",
+        description = "Change the download directory for video downloads",
         use = true,
     ) {
         compatibleWith("com.twitter.android")

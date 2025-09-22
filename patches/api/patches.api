@@ -119,7 +119,7 @@ public final class app/crimera/patches/twitter/featureFlag/featureFlagPatch/fing
 }
 
 public final class app/crimera/patches/twitter/interaction/downloads/changedirectory/ChangeDownloadDirPatchKt {
-	public static final fun getHideViewCountPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+	public static final fun getChangeDownloadDirPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/interaction/downloads/copyMediaLink/CopyMediaLinkKt {
@@ -181,7 +181,7 @@ public final class app/crimera/patches/twitter/misc/customize/profiletabs/Custom
 }
 
 public final class app/crimera/patches/twitter/misc/customize/replySorting/DefaultReplySortingPatchKt {
-	public static final fun getHideViewCountPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+	public static final fun getDefaultReplySortingPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/misc/customize/searchtabs/CustomiseSearchTabsPatchKt {
@@ -221,10 +221,6 @@ public final class app/crimera/patches/twitter/misc/roundOffNumbers/RoundOffNumb
 }
 
 public final class app/crimera/patches/twitter/misc/selectabletext/SelectableTextPatchKt {
-	public static final fun getSelectableTextResources ()Lapp/revanced/patcher/patch/ResourcePatch;
-}
-
-public final class app/crimera/patches/twitter/misc/selectabletext/SelectableTextResourceKt {
 	public static final fun getSelectableTextPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
@@ -298,7 +294,7 @@ public final class app/crimera/patches/twitter/timeline/deleteFromDatabase/Delet
 }
 
 public final class app/crimera/patches/twitter/timeline/disableAutoScroll/DisableAutoScrollPatchKt {
-	public static final fun getHideRecommendedUsers ()Lapp/revanced/patcher/patch/BytecodePatch;
+	public static final fun getDisableAutoScrollPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/timeline/enableVidAutoAdvance/EnableVidAutoAdvancePatchKt {

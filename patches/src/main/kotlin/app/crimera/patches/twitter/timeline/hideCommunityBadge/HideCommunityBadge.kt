@@ -25,7 +25,6 @@ internal val commModelFingerprint =
 val hideCommunityBadge =
     bytecodePatch(
         name = "Hide community badges",
-        description = "",
         use = true,
     ) {
         compatibleWith("com.twitter.android")

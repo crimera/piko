@@ -33,9 +33,9 @@ internal val replySortingLastSelectedFinderFingerprint =
     }
 
 @Suppress("unused")
-val hideViewCountPatch =
+val defaultReplySortingPatch =
     bytecodePatch(
-        name = "Customize reply sort filter",
+        name = "Customize default reply sorting",
         use = true,
     ) {
         compatibleWith("com.twitter.android")
