@@ -10,7 +10,6 @@ val hidePromoteButton =
     bytecodePatch(
         name = "Hide promote button",
         description = "Hides promote button under self posts",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch, tweetInfoHook)

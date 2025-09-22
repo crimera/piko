@@ -8,7 +8,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hideRevistBmk =
     bytecodePatch(
         name = "Remove \"Revisit Bookmark\" Banner",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)

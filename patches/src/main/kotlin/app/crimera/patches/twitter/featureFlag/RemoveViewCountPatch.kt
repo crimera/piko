@@ -13,7 +13,6 @@ val removeViewCountPatch =
     bytecodePatch(
         name = "Remove view count",
         description = "Removes the view count from the bottom of tweets",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(featureFlagPatch, settingsPatch)

@@ -24,7 +24,6 @@ val noShortenedUrlPatch =
     bytecodePatch(
         name = "No shortened URL",
         description = "Get rid of t.co short urls.",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

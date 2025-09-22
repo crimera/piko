@@ -20,7 +20,6 @@ val disablePremiumUpsellPatch =
     bytecodePatch(
         name = "Remove premium upsell",
         description = "Removes premium upsell in home timeline",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

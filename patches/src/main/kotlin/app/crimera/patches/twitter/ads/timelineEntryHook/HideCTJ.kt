@@ -8,7 +8,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hideCTJ =
     bytecodePatch(
         name = "Remove \"Communities to join\" Banner",
-        use = true,
     ) {
         execute {
             compatibleWith("com.twitter.android")

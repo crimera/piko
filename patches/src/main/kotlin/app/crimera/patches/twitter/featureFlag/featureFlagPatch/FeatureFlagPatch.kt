@@ -16,7 +16,6 @@ import com.android.tools.smali.dexlib2.Opcode
 val featureFlagPatch =
     bytecodePatch(
         name = "Hook feature flag",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(featureFlagResourcePatch, settingsPatch)

@@ -26,7 +26,6 @@ val showSourceLabel =
     bytecodePatch(
         name = "Show post source label",
         description = "Source label will be shown only on public posts",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

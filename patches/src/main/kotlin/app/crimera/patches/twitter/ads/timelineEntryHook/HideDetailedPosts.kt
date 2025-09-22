@@ -9,7 +9,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hideDetailedPosts =
     bytecodePatch(
         name = "Remove Detailed posts",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)

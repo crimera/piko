@@ -28,7 +28,6 @@ val hideRecommendedUsers =
     bytecodePatch(
         name = "Hide Recommended Users",
         description = "Hide recommended users that pops up when you follow someone",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

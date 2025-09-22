@@ -22,7 +22,6 @@ internal val customiseTypeAheadResponseFingerprint =
 val customiseTypeAheadResponsePatch =
     bytecodePatch(
         name = "Customize search suggestions",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

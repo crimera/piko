@@ -22,7 +22,6 @@ val responseLoggingPatch =
     bytecodePatch(
         name = "Log server response",
         description = "Log json responses received from server",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

@@ -10,7 +10,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hideGoogleAds =
     bytecodePatch(
         name = "Remove Google Ads",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)

@@ -35,7 +35,6 @@ internal val navBarFixFingerprint =
 val customiseNavBarPatch =
     bytecodePatch(
         name = "Customize Navigation Bar items",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

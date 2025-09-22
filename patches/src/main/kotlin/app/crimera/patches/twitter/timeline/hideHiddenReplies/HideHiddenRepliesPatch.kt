@@ -25,7 +25,6 @@ internal val hideHiddenRepliesFingerprint =
 val hideHiddenRepliesPatch =
     bytecodePatch(
         name = "Hide hidden replies",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

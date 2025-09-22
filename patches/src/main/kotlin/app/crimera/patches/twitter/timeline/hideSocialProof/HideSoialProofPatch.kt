@@ -24,7 +24,6 @@ val hideSocialProofPatch =
     bytecodePatch(
         name = "Hide followed by context",
         description = "Hides followed by context under profile",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

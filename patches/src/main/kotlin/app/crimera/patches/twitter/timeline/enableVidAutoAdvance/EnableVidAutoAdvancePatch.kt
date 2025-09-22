@@ -23,7 +23,6 @@ val enableVidAutoAdvancePatch =
     bytecodePatch(
         name = "Control video auto scroll",
         description = "Control video auto scroll in immersive view",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

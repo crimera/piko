@@ -11,7 +11,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hideFABMenuButtonsPatch =
     bytecodePatch(
         name = "Hide FAB Menu Buttons",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(featureFlagPatch, settingsPatch)

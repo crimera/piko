@@ -18,7 +18,6 @@ val changeDownloadDirPatch =
     bytecodePatch(
         name = "Custom download folder",
         description = "Change the download directory for video downloads",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

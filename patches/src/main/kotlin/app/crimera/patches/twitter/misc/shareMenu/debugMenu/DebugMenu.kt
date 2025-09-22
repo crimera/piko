@@ -11,7 +11,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val debugMenu =
     bytecodePatch(
         name = "Enable debug menu for posts",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

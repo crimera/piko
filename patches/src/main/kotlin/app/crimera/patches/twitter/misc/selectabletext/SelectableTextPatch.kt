@@ -35,7 +35,6 @@ val selectableTextPatch =
     bytecodePatch(
         name = "Selectable Text",
         description = "Makes bio and username selectable",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch, selectableTextResourcePatch)

@@ -11,7 +11,6 @@ import com.android.tools.smali.dexlib2.Opcode
 val tweetEntityPatch =
     bytecodePatch(
         description = "For tweet entity reflection",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
 

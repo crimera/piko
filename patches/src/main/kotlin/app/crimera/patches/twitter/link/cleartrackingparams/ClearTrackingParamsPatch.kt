@@ -22,7 +22,6 @@ val clearTrackingParamsPatch =
     bytecodePatch(
         name = "Clear tracking params",
         description = "Removes tracking parameters when sharing links",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

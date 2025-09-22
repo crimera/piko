@@ -20,7 +20,6 @@ internal val tweetInfoHookFingerprint =
 val tweetInfoHook =
     bytecodePatch(
         description = "Hooks tweet info item",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

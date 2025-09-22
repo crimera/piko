@@ -8,7 +8,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hidePinnedByFollowers =
     bytecodePatch(
         name = "Remove \"Pinned posts by followers\" Banner",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)

@@ -25,7 +25,6 @@ internal val sensitiveMediaSettingsPatchFingerprint =
 val sensitiveMediaPatch =
     bytecodePatch(
         name = "Show sensitive media",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

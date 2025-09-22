@@ -27,7 +27,6 @@ val hideBannerPatch =
     bytecodePatch(
         name = "Hide Banner",
         description = "Hide new post banner",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

@@ -29,7 +29,6 @@ internal val customiseTimelineTabsFingerprint =
 val customiseTimelineTabsPatch =
     bytecodePatch(
         name = "Customize timeline top bar",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

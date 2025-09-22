@@ -12,7 +12,6 @@ val hideImmersivePlayer =
     bytecodePatch(
         name = "Hide immersive player",
         description = "Removes swipe up for more videos in video player",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(featureFlagPatch, settingsPatch)

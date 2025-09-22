@@ -26,7 +26,6 @@ val downloadCallFingerprint =
 val copyMediaLink =
     bytecodePatch(
         name = "Add ability to copy media link",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

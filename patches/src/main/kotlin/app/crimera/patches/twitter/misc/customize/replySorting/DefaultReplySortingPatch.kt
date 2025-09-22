@@ -36,7 +36,6 @@ internal val replySortingLastSelectedFinderFingerprint =
 val defaultReplySortingPatch =
     bytecodePatch(
         name = "Customize default reply sorting",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

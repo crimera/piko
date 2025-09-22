@@ -24,7 +24,6 @@ val roundOffNumbersPatch =
     bytecodePatch(
         name = "Round off numbers",
         description = "Enable or disable rounding off numbers",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

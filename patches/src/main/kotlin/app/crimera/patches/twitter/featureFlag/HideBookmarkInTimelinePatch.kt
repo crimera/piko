@@ -11,7 +11,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hideBookmarkInTimelinePatch =
     bytecodePatch(
         name = "Hide bookmark icon in timeline",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(featureFlagPatch, settingsPatch)

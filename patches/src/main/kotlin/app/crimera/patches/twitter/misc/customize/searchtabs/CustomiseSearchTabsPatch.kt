@@ -25,7 +25,6 @@ internal val customiseSearchTabsPatchFingerprint =
 val customiseSearchTabsPatch =
     bytecodePatch(
         name = "Customize search tab items",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

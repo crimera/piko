@@ -27,7 +27,6 @@ internal val hideLiveThreadsFingerprint =
 val hideLiveThreadsPatch =
     bytecodePatch(
         name = "Hide Live Threads",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

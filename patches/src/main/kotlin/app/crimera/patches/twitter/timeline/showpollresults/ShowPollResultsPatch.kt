@@ -26,7 +26,6 @@ val showPollResultsPatch =
     bytecodePatch(
         name = "Show poll results",
         description = "Adds an option to show poll results without voting",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

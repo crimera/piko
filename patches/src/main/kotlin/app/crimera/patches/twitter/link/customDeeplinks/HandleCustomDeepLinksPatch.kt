@@ -9,7 +9,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val handleCustomDeepLinksPatch =
     bytecodePatch(
         description = "handle custom deeplink",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

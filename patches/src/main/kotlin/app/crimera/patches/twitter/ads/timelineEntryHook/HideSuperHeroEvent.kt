@@ -9,7 +9,6 @@ val hideSuperHeroEvent =
     bytecodePatch(
         name = "Remove superhero event",
         description = "Removes superhero event from Explore page",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)

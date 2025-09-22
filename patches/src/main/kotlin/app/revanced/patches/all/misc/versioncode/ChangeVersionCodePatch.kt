@@ -12,7 +12,6 @@ val changeVersionCodePatch =
         description =
             "Changes the version code of the app. This will turn off app store updates " +
                 "and allows downgrading an existing app install to an older app version.",
-        use = true,
     ) {
         val versionCode by intOption(
             key = "versionCode",

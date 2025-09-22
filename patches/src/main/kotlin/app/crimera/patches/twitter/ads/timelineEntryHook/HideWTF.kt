@@ -8,7 +8,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hideWTF =
     bytecodePatch(
         name = "Remove \"Who to follow\" Banner",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)

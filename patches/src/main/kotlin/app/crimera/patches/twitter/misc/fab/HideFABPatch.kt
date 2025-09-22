@@ -21,7 +21,6 @@ val hideFABPatch =
     bytecodePatch(
         name = "Hide FAB",
         description = "Adds an option to hide Floating action button",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

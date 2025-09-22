@@ -65,7 +65,6 @@ val downloadPatch =
     bytecodePatch(
         name = "Download patch",
         description = "Unlocks the ability to download videos and gifs from Twitter/X",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

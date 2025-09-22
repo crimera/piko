@@ -23,7 +23,6 @@ internal val customiseNavBarFingerprint =
 val customizePostFontSize =
     bytecodePatch(
         name = "Customise post font size",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

@@ -22,7 +22,6 @@ internal val customiseExploreTabsFingerprint =
 val customiseExploreTabsPatch =
     bytecodePatch(
         name = "Customize explore tabs",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

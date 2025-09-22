@@ -8,7 +8,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hideAds =
     bytecodePatch(
         name = "Remove Ads",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)

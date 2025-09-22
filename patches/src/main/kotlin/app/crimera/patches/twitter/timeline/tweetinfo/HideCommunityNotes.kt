@@ -9,7 +9,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hideCommunityNotes =
     bytecodePatch(
         name = "Hide Community Notes",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch, tweetInfoHook)

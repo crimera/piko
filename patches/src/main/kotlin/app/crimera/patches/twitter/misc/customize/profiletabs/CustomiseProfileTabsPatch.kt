@@ -31,7 +31,6 @@ internal val customiseProfileTabsFingerprint =
 val customiseProfileTabsPatch =
     bytecodePatch(
         name = "Customize profile tabs",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

@@ -10,7 +10,6 @@ val deleteFromDatabasePatch =
     bytecodePatch(
         name = "Delete from database",
         description = "Delete entries from database(cache)",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

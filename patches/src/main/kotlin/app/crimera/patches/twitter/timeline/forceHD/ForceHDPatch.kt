@@ -30,7 +30,6 @@ val forceHDPatch =
     bytecodePatch(
         name = "Enable force HD videos",
         description = "Videos will be played in highest quality always",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

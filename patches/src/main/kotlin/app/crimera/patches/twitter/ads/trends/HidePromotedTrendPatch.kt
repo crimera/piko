@@ -25,7 +25,6 @@ private val hidePromotedTrendFingerprint =
 val hidePromotedTrendPatch =
     bytecodePatch(
         name = "Hide Promoted Trends",
-        use = true,
     ) {
         execute {
             compatibleWith("com.twitter.android")

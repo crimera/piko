@@ -30,7 +30,6 @@ val enableForcePipPatch =
     bytecodePatch(
         name = "Enable PiP mode automatically",
         description = "Enables PiP mode when you close the app",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

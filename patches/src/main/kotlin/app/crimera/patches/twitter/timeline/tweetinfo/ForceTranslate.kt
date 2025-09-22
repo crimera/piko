@@ -10,7 +10,6 @@ val forceTranslate =
     bytecodePatch(
         name = "Force enable translate",
         description = "Get translate option for all posts",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch, tweetInfoHook)

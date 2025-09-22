@@ -22,7 +22,6 @@ internal val customiseInlineBarFingerprint =
 val customiseInlineBarPatch =
     bytecodePatch(
         name = "Customize Inline action Bar items",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

@@ -8,7 +8,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hideTodaysNews =
     bytecodePatch(
         name = "Remove \"Today's News\"",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)

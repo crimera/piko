@@ -8,7 +8,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hidePremiumPrompt =
     bytecodePatch(
         name = "Remove message prompts Banner",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)

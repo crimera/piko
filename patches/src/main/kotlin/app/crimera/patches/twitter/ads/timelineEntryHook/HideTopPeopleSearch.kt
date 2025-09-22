@@ -9,7 +9,6 @@ val hideTopPeopleSearch =
     bytecodePatch(
         name = "Remove top people in search",
         description = "Removes people section after search",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)

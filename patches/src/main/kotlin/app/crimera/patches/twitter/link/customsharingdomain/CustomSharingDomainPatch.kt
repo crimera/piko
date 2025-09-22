@@ -21,7 +21,6 @@ val customSharingDomainPatch =
     bytecodePatch(
         name = "Custom sharing domain",
         description = "Allows for using domains like fxtwitter when sharing tweets/posts.",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

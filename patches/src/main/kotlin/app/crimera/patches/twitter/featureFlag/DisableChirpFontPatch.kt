@@ -11,7 +11,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val disableChirpFontPatch =
     bytecodePatch(
         name = "Disable chirp font",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(featureFlagPatch, settingsPatch)

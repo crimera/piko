@@ -8,7 +8,6 @@ import app.revanced.patcher.patch.bytecodePatch
 val hideMainEvent =
     bytecodePatch(
         name = "Remove main event",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(timelineEntryHookPatch, settingsPatch)

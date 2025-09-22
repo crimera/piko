@@ -51,7 +51,6 @@ val enableUndoPostPatch =
     bytecodePatch(
         name = "Enable Undo Posts",
         description = "Enables ability to undo posts before posting",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

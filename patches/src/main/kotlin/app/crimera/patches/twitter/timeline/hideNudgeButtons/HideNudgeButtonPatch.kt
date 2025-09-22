@@ -27,7 +27,6 @@ val hideNudgeButtonPatch =
     bytecodePatch(
         name = "Hide nudge button",
         description = "Hides follow/subscribe/follow back buttons on posts",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

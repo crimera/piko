@@ -26,7 +26,6 @@ internal val disableAutoScrollFingerprint =
 val disableAutoScrollPatch =
     bytecodePatch(
         name = "Disable auto timeline scroll on launch",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)

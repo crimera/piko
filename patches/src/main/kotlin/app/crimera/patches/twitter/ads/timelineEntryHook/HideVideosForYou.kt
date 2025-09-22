@@ -9,7 +9,6 @@ val hideVideosForYou =
     bytecodePatch(
         name = "Remove videos for you",
         description = "Removes \"videos for you\" from explore",
-        use = true,
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(timelineModuleItemHookPatch, settingsPatch)
