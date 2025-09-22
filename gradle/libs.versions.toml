@@ -7,29 +7,11 @@ smali = "3.0.5"
 #noinspection GradleDependency
 agp = "8.2.2"
 annotation = "1.9.1"
-appcompat = "1.7.0"
-okhttp = "5.0.0-alpha.14"
-retrofit = "2.11.0"
-guava = "33.4.0-jre"
-protobuf-javalite = "4.32.0"
-protoc = "4.32.0"
-protobuf = "0.9.5"
-antlr4 = "4.13.2"
-nanohttpd = "2.3.1"
-apksig = "8.10.1"
+appcompat = "1.7.1"
 
 [libraries]
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
-antlr4 = { module = "org.antlr:antlr4", version.ref = "antlr4" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-nanohttpd = { module = "org.nanohttpd:nanohttpd", version.ref = "nanohttpd" }
-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
-protobuf-javalite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobuf-javalite" }
-protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protoc" }
-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
-guava = { module = "com.google.guava:guava", version.ref = "guava" }
-apksig = { group = "com.android.tools.build", name = "apksig", version.ref = "apksig" }
 
 [plugins]
 android-library = { id = "com.android.library" }
-protobuf = { id = "com.google.protobuf", version.ref = "protobuf" }
