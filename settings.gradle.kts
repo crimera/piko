@@ -34,6 +34,3 @@ settings {
         proguardFiles(rootProject.projectDir.resolve("extensions/proguard-rules.pro").toString())
     }
 }
-
-include(":patches:stub")
-include("dummy")

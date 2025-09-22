@@ -17,9 +17,6 @@ dependencies {
     implementation(libs.guava)
 
     implementation(libs.apksig)
-
-    // Android API stubs defined here.
-    compileOnly(project(":patches:stub"))
 }
 
 tasks {
