@@ -25,10 +25,9 @@ private const val START_ACTIVITY_DESCRIPTOR =
 
 val settingsPatch =
     bytecodePatch(
-        name = "Adds settings",
+        description = "Adds settings",
     ) {
         compatibleWith("com.twitter.android")
-        extendWith("extensions/twitter.rve")
 
         dependsOn(
             sharedExtensionPatch,
