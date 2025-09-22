@@ -415,22 +415,6 @@ public final class app/revanced/patches/all/misc/activity/exportall/ExportAllAct
 	public static final fun getExportAllActivitiesPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
 }
 
-public abstract interface class app/revanced/patches/all/misc/transformation/IMethodCall {
-	public abstract fun getDefinedClassName ()Ljava/lang/String;
-	public abstract fun getMethodName ()Ljava/lang/String;
-	public abstract fun getMethodParams ()[Ljava/lang/String;
-	public abstract fun getReturnType ()Ljava/lang/String;
-	public abstract fun replaceInvokeVirtualWithExtension (Ljava/lang/String;Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;Lcom/android/tools/smali/dexlib2/iface/instruction/formats/Instruction35c;I)V
-}
-
-public final class app/revanced/patches/all/misc/transformation/IMethodCall$DefaultImpls {
-	public static fun replaceInvokeVirtualWithExtension (Lapp/revanced/patches/all/misc/transformation/IMethodCall;Ljava/lang/String;Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;Lcom/android/tools/smali/dexlib2/iface/instruction/formats/Instruction35c;I)V
-}
-
-public final class app/revanced/patches/all/misc/transformation/TransformInstructionsPatchKt {
-	public static final fun transformInstructionsPatch (Lkotlin/jvm/functions/Function4;Lkotlin/jvm/functions/Function2;)Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
 public final class app/revanced/patches/all/misc/versioncode/ChangeVersionCodePatchKt {
 	public static final fun getChangeVersionCodePatch ()Lapp/revanced/patcher/patch/ResourcePatch;
 }
@@ -452,41 +436,6 @@ public final class app/revanced/patches/shared/misc/extension/SharedExtensionPat
 	public static final fun sharedExtensionPatch ([Lapp/revanced/patches/shared/misc/extension/ExtensionHook;)Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
-public final class app/revanced/patches/shared/misc/hex/HexPatchBuilder : java/util/Set, kotlin/jvm/internal/markers/KMappedMarker {
-	public fun <init> ()V
-	public fun add (Lapp/revanced/patches/shared/misc/hex/Replacement;)Z
-	public synthetic fun add (Ljava/lang/Object;)Z
-	public fun addAll (Ljava/util/Collection;)Z
-	public final fun asPatternTo (Ljava/lang/String;Ljava/lang/String;)Lkotlin/Pair;
-	public fun clear ()V
-	public fun contains (Lapp/revanced/patches/shared/misc/hex/Replacement;)Z
-	public final fun contains (Ljava/lang/Object;)Z
-	public fun containsAll (Ljava/util/Collection;)Z
-	public fun getSize ()I
-	public final fun inFile (Lkotlin/Pair;Ljava/lang/String;)V
-	public fun isEmpty ()Z
-	public fun iterator ()Ljava/util/Iterator;
-	public fun remove (Ljava/lang/Object;)Z
-	public fun removeAll (Ljava/util/Collection;)Z
-	public fun retainAll (Ljava/util/Collection;)Z
-	public final fun size ()I
-	public fun toArray ()[Ljava/lang/Object;
-	public fun toArray ([Ljava/lang/Object;)[Ljava/lang/Object;
-}
-
-public final class app/revanced/patches/shared/misc/hex/HexPatchBuilderKt {
-	public static final fun hexPatch (ZLkotlin/jvm/functions/Function0;)Lapp/revanced/patcher/patch/RawResourcePatch;
-	public static final fun hexPatch (ZLkotlin/jvm/functions/Function1;)Lapp/revanced/patcher/patch/RawResourcePatch;
-	public static synthetic fun hexPatch$default (ZLkotlin/jvm/functions/Function0;ILjava/lang/Object;)Lapp/revanced/patcher/patch/RawResourcePatch;
-	public static synthetic fun hexPatch$default (ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lapp/revanced/patcher/patch/RawResourcePatch;
-}
-
-public final class app/revanced/patches/shared/misc/hex/Replacement {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public fun <init> ([B[BLjava/lang/String;)V
-	public final fun getReplacementBytesPadded ()[B
-}
-
 public final class app/revanced/patches/shared/misc/mapping/ResourceElement {
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
@@ -505,10 +454,6 @@ public final class app/revanced/patches/shared/misc/mapping/ResourceMappingPatch
 	public static final fun get (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)J
 	public static final fun getResourceMappingPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
 	public static final fun getResourceMappings ()Ljava/util/List;
-}
-
-public final class app/revanced/patches/shared/misc/string/ReplaceStringPatchKt {
-	public static final fun replaceStringPatch (Ljava/lang/String;Ljava/lang/String;)Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/revanced/util/BytecodeUtilsKt {
