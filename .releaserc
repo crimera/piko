@@ -7,7 +7,9 @@
     }
   ],
   "plugins": [
-    ["@semantic-release/commit-analyzer", {
+    [
+      "@semantic-release/commit-analyzer",
+      {
         "releaseRules": [
           { "type": "fix", "release": "patch" },
           { "type": "feat", "release": "minor" },
@@ -39,10 +41,8 @@
       "@semantic-release/git",
       {
         "assets": [
-          "README.md",
           "CHANGELOG.md",
-          "gradle.properties",
-          "patches.json"
+          "gradle.properties"
         ]
       }
     ],
@@ -51,20 +51,17 @@
       {
         "assets": [
           {
-            "path": "build/libs/*.jar"
-          },
-          {
-            "path": "patches.json"
+            "path": "patches/build/libs/patches-!(*sources*|*javadoc*).rvp?(.asc)"
           }
         ],
-        successComment: false
+        "successComment": false
       }
     ],
     [
       "@saithodev/semantic-release-backmerge",
       {
-        backmergeBranches: [{"from": "main", "to": "dev"}],
-        clearWorkspace: true
+        "backmergeBranches": [{"from": "main", "to": "dev"}],
+        "clearWorkspace": true
       }
     ]
   ]
