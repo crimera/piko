@@ -45,7 +45,6 @@ fun sharedExtensionPatch(vararg hooks: ExtensionHook) =
         }
 
         finalize {
-//            println("here")
             // The hooks are made in finalize to ensure that the context is hooked before any other patches.
             hooks.forEach { hook -> hook(EXTENSION_CLASS_DESCRIPTOR) }
 
