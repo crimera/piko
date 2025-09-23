@@ -12,7 +12,7 @@ import com.android.tools.smali.dexlib2.Opcode
 
 // Credits to @Cradlesofashes
 
-internal val sensitiveMediaSettingsPatchFingerprint =
+private val sensitiveMediaSettingsPatchFingerprint =
     fingerprint {
         returns("Ljava/lang/Object")
 

@@ -8,7 +8,7 @@ import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 
-internal val inpStreamFingerprint =
+private val inpStreamFingerprint =
     fingerprint {
         returns("Ljava/io/InputStream")
         custom { methodDef, classDef ->

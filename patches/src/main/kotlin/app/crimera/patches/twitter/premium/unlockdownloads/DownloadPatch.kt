@@ -17,7 +17,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
-internal val downloadPatchFingerprint =
+private val downloadPatchFingerprint =
     fingerprint {
         opcodes(
             Opcode.IF_EQ,
@@ -32,7 +32,7 @@ internal val downloadPatchFingerprint =
         )
     }
 
-internal val fileDownloaderFingerprint =
+private val fileDownloaderFingerprint =
     fingerprint {
         returns("Z")
 
@@ -42,7 +42,7 @@ internal val fileDownloaderFingerprint =
     }
 
 // credits @revanced
-internal val immersiveBottomSheetPatchFingerprint =
+private val immersiveBottomSheetPatchFingerprint =
     fingerprint {
         returns("V")
 
@@ -51,7 +51,7 @@ internal val immersiveBottomSheetPatchFingerprint =
         accessFlags(AccessFlags.PUBLIC, AccessFlags.CONSTRUCTOR)
     }
 
-internal val mediaEntityFingerprint =
+private val mediaEntityFingerprint =
     fingerprint {
         opcodes(Opcode.IGET_BOOLEAN)
         custom { it, _ ->

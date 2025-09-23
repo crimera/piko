@@ -8,7 +8,7 @@ import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-internal val tweetInfoHookFingerprint =
+private val tweetInfoHookFingerprint =
     fingerprint {
         returns("Ljava/lang/Object")
         custom { it, _ ->

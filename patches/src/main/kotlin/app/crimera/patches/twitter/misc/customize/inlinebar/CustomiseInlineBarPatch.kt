@@ -12,7 +12,7 @@ import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
-internal val customiseInlineBarFingerprint =
+private val customiseInlineBarFingerprint =
     fingerprint {
         returns("Ljava/util/List;")
         strings("bookmarks_in_timelines_enabled")

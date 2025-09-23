@@ -13,7 +13,7 @@ import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
 
-internal val commModelFingerprint =
+private val commModelFingerprint =
     fingerprint {
         strings(
             "actionResults",

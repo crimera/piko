@@ -16,14 +16,14 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
-internal val replySortingInvokeClassFinderFingerprint =
+private val replySortingInvokeClassFinderFingerprint =
     fingerprint {
         custom { it, _ ->
             it.definingClass == "Lcom/twitter/tweetview/focal/ui/replysorting/ReplySortingViewDelegateBinder;"
         }
     }
 
-internal val replySortingLastSelectedFinderFingerprint =
+private val replySortingLastSelectedFinderFingerprint =
     fingerprint {
         strings(
             "controller_data",

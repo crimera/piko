@@ -9,7 +9,7 @@ import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 
 // Credits @Ouxyl
-internal val tabLayoutFingerprint =
+private val tabLayoutFingerprint =
     fingerprint {
 
         custom { it, _ ->

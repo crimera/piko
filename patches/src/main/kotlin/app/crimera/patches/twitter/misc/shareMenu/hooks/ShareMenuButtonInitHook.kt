@@ -11,7 +11,7 @@ import app.revanced.patches.shared.misc.mapping.resourceMappings
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
 
-val shareMenuButtonInitHook =
+internal val shareMenuButtonInitHook =
     fingerprint {
         strings("Debug")
         custom { _, classDef ->

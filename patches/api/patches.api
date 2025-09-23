@@ -106,14 +106,6 @@ public final class app/crimera/patches/twitter/featureFlag/featureFlagPatch/Feat
 	public static final fun getFeatureFlagPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
-public final class app/crimera/patches/twitter/featureFlag/featureFlagPatch/fingerprints/CustomAdapterFingerprintKt {
-	public static final fun getCustomAdapterFingerprint ()Lapp/revanced/patcher/Fingerprint;
-}
-
-public final class app/crimera/patches/twitter/featureFlag/featureFlagPatch/fingerprints/FeatureFlagFingerprintKt {
-	public static final fun getFeatureFlagFingerprint ()Lapp/revanced/patcher/Fingerprint;
-}
-
 public final class app/crimera/patches/twitter/featureFlag/featureFlagPatch/fingerprints/FeatureFlagLoadFingerprintKt {
 	public static final fun getFeatureFlagLoadFingerprint ()Lapp/revanced/patcher/Fingerprint;
 }
@@ -124,7 +116,6 @@ public final class app/crimera/patches/twitter/interaction/downloads/changedirec
 
 public final class app/crimera/patches/twitter/interaction/downloads/copyMediaLink/CopyMediaLinkKt {
 	public static final fun getCopyMediaLink ()Lapp/revanced/patcher/patch/BytecodePatch;
-	public static final fun getDownloadCallFingerprint ()Lapp/revanced/patcher/Fingerprint;
 }
 
 public final class app/crimera/patches/twitter/link/cleartrackingparams/ClearTrackingParamsPatchKt {
@@ -135,12 +126,7 @@ public final class app/crimera/patches/twitter/link/customDeeplinks/HandleCustom
 	public static final fun getHandleCustomDeepLinksPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
-public final class app/crimera/patches/twitter/link/customDeeplinks/fingerprints/UrlInterpreterActivityCreateFingerprintKt {
-	public static final fun getUrlInterpreterActivityCreateFingerprint ()Lapp/revanced/patcher/Fingerprint;
-}
-
 public final class app/crimera/patches/twitter/link/customsharingdomain/CustomSharingDomainPatchKt {
-	public static final fun getCustomSharingDomainFingerprint ()Lapp/revanced/patcher/Fingerprint;
 	public static final fun getCustomSharingDomainPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
@@ -204,10 +190,6 @@ public final class app/crimera/patches/twitter/misc/extension/ExtensionPatchKt {
 	public static final fun getSharedExtensionPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
-public final class app/crimera/patches/twitter/misc/extension/HooksKt {
-	public static final fun getInitHook ()Lapp/revanced/patches/shared/misc/extension/ExtensionHook;
-}
-
 public final class app/crimera/patches/twitter/misc/fab/HideFABPatchKt {
 	public static final fun getHideFABPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
@@ -234,21 +216,17 @@ public final class app/crimera/patches/twitter/misc/shareMenu/debugMenu/DebugMen
 
 public final class app/crimera/patches/twitter/misc/shareMenu/fingerprints/ActionEnumsFingerprintKt {
 	public static final fun addAction (Lapp/revanced/patcher/patch/BytecodePatchContext;Ljava/lang/String;)Ljava/lang/String;
-	public static final fun getActionEnumsFingerprint ()Lapp/revanced/patcher/Fingerprint;
 }
 
 public final class app/crimera/patches/twitter/misc/shareMenu/fingerprints/ShareMenuButtonFuncCallFingerprintKt {
 	public static final fun addButtonInstructions (Lapp/revanced/patcher/patch/BytecodePatchContext;Ljava/lang/String;Ljava/lang/String;Lcom/android/tools/smali/dexlib2/iface/reference/Reference;)V
-	public static final fun getShareMenuButtonFuncCallFingerprint ()Lapp/revanced/patcher/Fingerprint;
 }
 
 public final class app/crimera/patches/twitter/misc/shareMenu/hooks/ShareMenuButtonAddHookKt {
-	public static final fun getShareMenuButtonAddHook ()Lapp/revanced/patcher/Fingerprint;
 	public static final fun registerButton (Lapp/revanced/patcher/patch/BytecodePatchContext;Ljava/lang/String;Ljava/lang/String;)V
 }
 
 public final class app/crimera/patches/twitter/misc/shareMenu/hooks/ShareMenuButtonInitHookKt {
-	public static final fun getShareMenuButtonInitHook ()Lapp/revanced/patcher/Fingerprint;
 	public static final fun setButtonIcon (Lapp/revanced/patcher/patch/BytecodePatchContext;Ljava/lang/String;Ljava/lang/String;)V
 	public static final fun setButtonText (Lapp/revanced/patcher/patch/BytecodePatchContext;Ljava/lang/String;Ljava/lang/String;)V
 }
@@ -417,10 +395,6 @@ public final class app/revanced/patches/all/misc/versioncode/ChangeVersionCodePa
 
 public final class app/revanced/patches/shared/misc/extension/ExtensionHook {
 	public final fun invoke (Lapp/revanced/patcher/patch/BytecodePatchContext;Ljava/lang/String;)V
-}
-
-public final class app/revanced/patches/shared/misc/extension/FingerprintsKt {
-	public static final fun getIntegrationsUtilsFingerprint ()Lapp/revanced/patcher/Fingerprint;
 }
 
 public final class app/revanced/patches/shared/misc/extension/SharedExtensionPatchKt {

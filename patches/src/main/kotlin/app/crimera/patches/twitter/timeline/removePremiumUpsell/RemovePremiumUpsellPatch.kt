@@ -10,7 +10,7 @@ import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-internal val removePremiumUpsellPatchFingerprint =
+private val removePremiumUpsellPatchFingerprint =
     fingerprint {
         strings("subscriptions_upsells_premium_home_nav")
     }

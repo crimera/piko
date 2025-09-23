@@ -15,7 +15,7 @@ import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
-internal val customiseProfileTabsFingerprint =
+private val customiseProfileTabsFingerprint =
     fingerprint {
         returns("Ljava/util/ArrayList;")
         strings(
@@ -56,7 +56,7 @@ val customiseProfileTabsPatch =
             val last_if_nez_loc = instructions.last { it.opcode == Opcode.IF_NEZ }.location.index
             val r2 = method.getInstruction<OneRegisterInstruction>(last_if_nez_loc).registerA
 
-            val op = instructions.get(last_if_nez_loc - 1).opcode
+            val op = instructions[last_if_nez_loc - 1].opcode
 
             if (op == Opcode.CONST_4) { // before 10.43
                 val last_if_eqz = instructions.last { it.opcode == Opcode.IF_EQZ }.location.index

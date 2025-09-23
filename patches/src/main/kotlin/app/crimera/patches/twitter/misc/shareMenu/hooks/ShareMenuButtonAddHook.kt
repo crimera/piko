@@ -9,7 +9,7 @@ import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 
-val shareMenuButtonAddHook =
+internal val shareMenuButtonAddHook =
     fingerprint {
         returns("V")
         custom { methodDef, _ ->

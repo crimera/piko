@@ -13,7 +13,7 @@ internal val revancedUtilsPatchesVersionFingerprint =
         }
     }
 
-val integrationsUtilsFingerprint =
+internal val integrationsUtilsFingerprint =
     fingerprint {
         returns("V")
         custom { method, _ ->

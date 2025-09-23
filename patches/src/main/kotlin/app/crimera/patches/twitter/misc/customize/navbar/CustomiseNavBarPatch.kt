@@ -15,7 +15,7 @@ import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
-internal val customiseNavBarFingerprint =
+private val customiseNavBarFingerprint =
     fingerprint {
         returns("V")
         strings(
@@ -25,7 +25,7 @@ internal val customiseNavBarFingerprint =
         )
     }
 
-internal val navBarFixFingerprint =
+private val navBarFixFingerprint =
     fingerprint {
         returns("Ljava/util/List;")
         strings("subscriptions_feature_1008")

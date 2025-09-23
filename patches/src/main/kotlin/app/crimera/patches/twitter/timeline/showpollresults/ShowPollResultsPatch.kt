@@ -10,7 +10,7 @@ import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-internal val jsonCardInstanceDataFingerprint =
+private val jsonCardInstanceDataFingerprint =
     fingerprint {
         strings(
             "binding_values",

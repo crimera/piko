@@ -13,7 +13,7 @@ import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
-internal val enableVidAutoAdvancePatchFingerprint =
+private val enableVidAutoAdvancePatchFingerprint =
     fingerprint {
         strings("immersive_video_auto_advance_duration_threshold")
     }

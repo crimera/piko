@@ -10,7 +10,7 @@ import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-internal val hideBannerFingerprint =
+private val hideBannerFingerprint =
     fingerprint {
         returns("Z")
         opcodes(

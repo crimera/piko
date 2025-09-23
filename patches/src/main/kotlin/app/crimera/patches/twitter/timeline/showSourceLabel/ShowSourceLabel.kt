@@ -16,7 +16,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction11n
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 
-internal val sourceLabelFingerprint =
+private val sourceLabelFingerprint =
     fingerprint {
         strings("show_tweet_source_disabled")
     }

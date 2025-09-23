@@ -12,7 +12,7 @@ import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
-internal val customiseNavBarFingerprint =
+private val customiseNavBarFingerprint =
     fingerprint {
         returns("Ljava/lang/Object")
         strings("android_global_navigation_top_level_monetization_enabled")

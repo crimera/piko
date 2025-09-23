@@ -13,7 +13,7 @@ import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
 
-internal val hideNudgeButtonPatchFingerprint =
+private val hideNudgeButtonPatchFingerprint =
     fingerprint {
         strings("viewDelegate", "viewModel")
 

@@ -10,7 +10,7 @@ import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-internal val undoPost1Fingerprint =
+private val undoPost1Fingerprint =
     fingerprint {
         opcodes(
             Opcode.MOVE_RESULT_OBJECT,
@@ -24,7 +24,7 @@ internal val undoPost1Fingerprint =
         returns("Z")
     }
 
-internal val undoPost2Fingerprint =
+private val undoPost2Fingerprint =
     fingerprint {
         strings(
             "userPreferences",
@@ -36,7 +36,7 @@ internal val undoPost2Fingerprint =
         returns("Z")
     }
 
-internal val undoPost3Fingerprint =
+private val undoPost3Fingerprint =
     fingerprint {
 
         strings(

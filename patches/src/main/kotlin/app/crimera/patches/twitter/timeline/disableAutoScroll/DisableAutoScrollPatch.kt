@@ -7,7 +7,7 @@ import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 
-internal val disableAutoScrollFingerprint =
+private val disableAutoScrollFingerprint =
     fingerprint {
         strings(
             "applicationManager",

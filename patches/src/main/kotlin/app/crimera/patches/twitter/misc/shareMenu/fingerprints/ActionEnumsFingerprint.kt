@@ -14,7 +14,7 @@ import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
 
-val actionEnumsFingerprint =
+internal val actionEnumsFingerprint =
     fingerprint {
         strings("None", "Favorite", "Retweet")
         custom { _, classDef ->
@@ -45,9 +45,9 @@ fun addAction(name: String): String {
 
     val newArrayPos = oldInitInstructions.indexOfLastFilledNewArrayRange
 
-    var arr = oldInitInstructions.get(newArrayPos) as Instruction3rc
-    var arrStartReg = arr.startRegister
-    var arrEndReg = (arrStartReg + arr.registerCount)
+    val arr = oldInitInstructions[newArrayPos] as Instruction3rc
+    val arrStartReg = arr.startRegister
+    val arrEndReg = (arrStartReg + arr.registerCount)
 
     oldInitInstructions[newArrayPos] =
         """

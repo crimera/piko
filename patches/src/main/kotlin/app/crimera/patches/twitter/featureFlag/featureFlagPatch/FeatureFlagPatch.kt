@@ -1,6 +1,5 @@
 package app.crimera.patches.twitter.featureFlag.featureFlagPatch
 
-import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.featureFlagFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.FSTS_DESCRIPTOR
@@ -9,9 +8,15 @@ import app.crimera.utils.enableSettings
 import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.instructions
+import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 import app.revanced.patches.shared.misc.extension.integrationsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
+
+private val featureFlagFingerprint =
+    fingerprint {
+        strings("feature_switches_configs_crashlytics_enabled")
+    }
 
 val featureFlagPatch =
     bytecodePatch(

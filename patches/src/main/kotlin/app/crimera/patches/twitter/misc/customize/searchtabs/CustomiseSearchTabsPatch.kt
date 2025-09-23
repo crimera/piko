@@ -12,7 +12,7 @@ import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
-internal val customiseSearchTabsPatchFingerprint =
+private val customiseSearchTabsPatchFingerprint =
     fingerprint {
         returns("Ljava/util/List;")
         strings(

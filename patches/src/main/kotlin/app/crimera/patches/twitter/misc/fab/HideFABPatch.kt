@@ -11,7 +11,7 @@ import app.revanced.patcher.patch.bytecodePatch
 import app.revanced.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 
-internal val hideFABFingerprint =
+private val hideFABFingerprint =
     fingerprint {
         strings("android_compose_fab_menu_enabled")
     }

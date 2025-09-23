@@ -6,15 +6,7 @@ import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.AccessFlags
-
-val customSharingDomainFingerprint =
-    fingerprint {
-        accessFlags(AccessFlags.PUBLIC, AccessFlags.FINAL)
-        strings("res.getString(R.string.t…lUsername, id.toString())")
-    }
 
 @Suppress("unused")
 val customSharingDomainPatch =

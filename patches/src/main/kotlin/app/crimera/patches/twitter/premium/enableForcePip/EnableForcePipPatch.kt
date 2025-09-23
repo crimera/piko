@@ -10,7 +10,7 @@ import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-internal val enableForcePip1Fingerprint =
+private val enableForcePip1Fingerprint =
     fingerprint {
         strings(
             "impl",
@@ -19,7 +19,7 @@ internal val enableForcePip1Fingerprint =
         )
     }
 
-internal val enableForcePip2Fingerprint =
+private val enableForcePip2Fingerprint =
     fingerprint {
         returns("Ljava/lang/Object")
         strings("android_immersive_media_player_native_pip_enabled")

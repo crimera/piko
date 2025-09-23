@@ -14,7 +14,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 
-internal val customiseTimelineTabsFingerprint =
+private val customiseTimelineTabsFingerprint =
     fingerprint {
         returns("V")
         strings(

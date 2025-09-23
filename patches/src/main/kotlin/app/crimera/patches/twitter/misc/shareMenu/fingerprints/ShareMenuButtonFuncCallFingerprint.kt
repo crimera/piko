@@ -14,7 +14,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
 import com.android.tools.smali.dexlib2.iface.reference.Reference
 
-val shareMenuButtonFuncCallFingerprint =
+internal val shareMenuButtonFuncCallFingerprint =
     fingerprint {
         returns("V")
         strings(

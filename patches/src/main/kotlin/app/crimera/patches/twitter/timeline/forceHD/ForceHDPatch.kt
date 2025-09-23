@@ -15,7 +15,7 @@ import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
 
-internal val playerSupportFingerprint =
+private val playerSupportFingerprint =
     fingerprint {
         accessFlags(AccessFlags.PUBLIC, AccessFlags.STATIC)
 

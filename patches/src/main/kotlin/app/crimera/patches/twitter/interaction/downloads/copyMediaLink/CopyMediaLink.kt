@@ -12,7 +12,7 @@ import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
-val downloadCallFingerprint =
+internal val downloadCallFingerprint =
     fingerprint {
         accessFlags(AccessFlags.PUBLIC, AccessFlags.FINAL)
         returns("V")

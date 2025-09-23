@@ -12,7 +12,7 @@ import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
-internal val hideHiddenRepliesFingerprint =
+private val hideHiddenRepliesFingerprint =
     fingerprint {
         returns("Ljava/lang/Object;")
 
