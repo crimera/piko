@@ -2,9 +2,8 @@ package app.crimera.patches.twitter.misc.shareMenu.nativeDownloader
 
 import app.crimera.patches.twitter.entity.entityGenerator
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.shareMenu.hooks.*
+import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonInjection
 import app.revanced.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.iface.instruction.formats.*
 
 @Suppress("unused")
 val nativeDownloaderPatch =
