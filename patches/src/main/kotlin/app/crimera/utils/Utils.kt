@@ -64,7 +64,6 @@ fun ResourcePatchContext.replaceXmlResources(
         resourceGroup.resources.forEach { resource ->
             val sourceFile = "${resourceGroup.resourceDirectoryName}/$resource"
             val targetFile = "res/$sourceFile"
-            println(targetFile)
 
             // If target file doesn't exist, use copyResources as fallback
             if (!get("res").resolve(sourceFile).exists()) {
