@@ -14,16 +14,8 @@
 
 <b>Revanced Cli</b>
 
-🚨 Use [Revanced Cli v4.6.0](https://github.com/ReVanced/revanced-cli/releases/tag/v4.6.0) for building.  
-The latest Cli is not compatible.
-
-Download [crimera/piko](https://github.com/crimera/piko/releases) patches and [crimera/revanced-integrations](https://github.com/crimera/revanced-integrations/releases).
-
 ```sh
-java -jar cli.jar patch \
-  -b piko.jar \
-  -m integrations.apk \
-  -o out.apk input.apk
+java -jar cli.jar patch -p piko.rvp input.apk
 ```
 
 <p><b>or Revanced Manager</b>
@@ -31,15 +23,16 @@ java -jar cli.jar patch \
 
 <div align="left">
 
-Currently, piko patches are not compatible with the latest version of Revanced Manager.  
-Use [Revanced Manager v1.22.0](https://github.com/ReVanced/revanced-manager/releases/tag/v1.22.0) or [RVX Manager v1.22.2](https://github.com/inotia00/revanced-manager/releases/tag/v1.22.2).
+<!-- TODO: Once enough time has passed, delete this sentence. -->
+Starting with piko patches v2.0.0, the latest ReVanced Manager and RVX Manager are supported.
 
 To use these patches in ReVanced Manager, follow the steps below or see image:
 
-1. Set `crimera` as the patches organization.<br>
-2. Set `piko` the patches source.<br>
-3. Set `crimera` as integration organization.<br>
-4. Press ok then force stop Revanced Manager before opening it again
+1. Turn on "Use alternative sources" setting.
+2. Open "Alternative sources".
+3. Set `crimera` as the patches organization.<br>
+4. Set `piko` as the patches source.<br>
+5. Press ok then restart Revanced Manager.
 
 <img src="docs/images/manager.png" alt="usage" width="200" />
 </div>
