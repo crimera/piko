@@ -2,68 +2,12 @@ public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideAdsKt {
 	public static final fun getHideAds ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideCTJKt {
-	public static final fun getHideCTJ ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideCTSKt {
-	public static final fun getHideCTS ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideDetailedPostsKt {
-	public static final fun getHideDetailedPosts ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideGoogleAdsKt {
-	public static final fun getHideGoogleAds ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideMainEventKt {
-	public static final fun getHideMainEvent ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HidePinnedByFollowersKt {
-	public static final fun getHidePinnedByFollowers ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HidePremiumPromptKt {
-	public static final fun getHidePremiumPrompt ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideRevistBmkKt {
-	public static final fun getHideRevistBmk ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideSuperHeroEventKt {
-	public static final fun getHideSuperHeroEvent ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideTodaysNewsKt {
-	public static final fun getHideTodaysNews ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideTopPeopleSearchKt {
-	public static final fun getHideTopPeopleSearch ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideVideosForYouKt {
-	public static final fun getHideVideosForYou ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideWTFKt {
-	public static final fun getHideWTF ()Lapp/revanced/patcher/patch/BytecodePatch;
+public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideTimelinePostByCategoryKt {
+	public static final fun getHideTimelinePostByCategory ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/ads/timelineEntryHook/TimelineEntryHookPatchKt {
 	public static final fun getTimelineEntryHookPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/timelineEntryHook/TimelineModuleItemHookPatchKt {
-	public static final fun getTimelineModuleItemHookPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/ads/trends/HidePromotedTrendPatchKt {
-	public static final fun getHidePromotedTrendPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/entity/EntityGeneratorKt {
