@@ -9,10 +9,9 @@ val hideCTJ =
     bytecodePatch(
         name = "Remove \"Communities to join\" Banner",
     ) {
+        compatibleWith("com.twitter.android")
+        dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
-            compatibleWith("com.twitter.android")
-            dependsOn(timelineEntryHookPatch, settingsPatch)
-
             settingsStatusLoadFingerprint.enableSettings("hideCommToJoin")
         }
     }

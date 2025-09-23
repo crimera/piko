@@ -1,5 +1,6 @@
 package app.crimera.patches.twitter.ads.trends
 
+import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
@@ -26,9 +27,9 @@ val hidePromotedTrendPatch =
     bytecodePatch(
         name = "Hide Promoted Trends",
     ) {
+        compatibleWith("com.twitter.android")
+        dependsOn(settingsPatch)
         execute {
-            compatibleWith("com.twitter.android")
-
             val method = hidePromotedTrendFingerprint.method
             val instructions = method.instructions
 
