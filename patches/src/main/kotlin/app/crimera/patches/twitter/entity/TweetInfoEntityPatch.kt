@@ -10,7 +10,6 @@ val tweetInfoEntityPatch =
     bytecodePatch(
         description = "For tweet info entity reflection",
     ) {
-        compatibleWith("com.twitter.android")
         execute {
             tweetInfoObjectFingerprint.stringMatches?.forEach { match ->
                 val str = match.string

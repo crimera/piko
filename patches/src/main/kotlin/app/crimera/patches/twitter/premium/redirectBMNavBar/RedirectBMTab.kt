@@ -22,7 +22,6 @@ val redirectBMTab =
     bytecodePatch(
         description = "Patch required to redirect bookmark folders to bookmark",
     ) {
-        compatibleWith("com.twitter.android")
         execute {
             val method = tabLayoutFingerprint.method
             val instructions = method.instructions

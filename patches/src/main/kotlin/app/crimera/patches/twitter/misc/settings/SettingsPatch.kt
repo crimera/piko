@@ -27,8 +27,6 @@ val settingsPatch =
     bytecodePatch(
         description = "Adds settings",
     ) {
-        compatibleWith("com.twitter.android")
-
         dependsOn(
             sharedExtensionPatch,
             settingsResourcePatch,

@@ -12,8 +12,6 @@ val tweetEntityPatch =
     bytecodePatch(
         description = "For tweet entity reflection",
     ) {
-        compatibleWith("com.twitter.android")
-
         execute {
             getUserNameMethodCaller.stringMatches?.forEach { match ->
                 val str = match.string

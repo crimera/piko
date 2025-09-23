@@ -12,10 +12,7 @@ val extMediaEntityPatch =
     bytecodePatch(
         description = "For extended media entity reflection",
     ) {
-        compatibleWith("com.twitter.android")
-
         execute {
-
             extMediaHighResVideoMethodFinder.stringMatches?.forEach { match ->
                 val str = match.string
                 if (str == "null cannot be cast to non-null type com.twitter.model.dm.attachment.DMMediaAttachment") {

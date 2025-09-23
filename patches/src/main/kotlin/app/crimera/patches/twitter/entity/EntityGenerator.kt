@@ -7,6 +7,5 @@ val entityGenerator =
     bytecodePatch(
         description = "Reflect entity patch generator",
     ) {
-        compatibleWith("com.twitter.android")
         dependsOn(tweetEntityPatch, tweetInfoEntityPatch, extMediaEntityPatch)
     }

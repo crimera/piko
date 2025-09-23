@@ -20,8 +20,6 @@ val timelineModuleItemHookPatch =
         description = "Hooks timeline item",
     ) {
         execute {
-            compatibleWith("com.twitter.android")
-
             val methods = timelineModuleItemHookFingerprint.method
             val instructions = methods.instructions
 

@@ -21,7 +21,6 @@ val tweetInfoHook =
     bytecodePatch(
         description = "Hooks tweet info item",
     ) {
-        compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)
 
         execute {
