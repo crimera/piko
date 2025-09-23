@@ -7,7 +7,6 @@ import app.revanced.patcher.extensions.InstructionExtensions.instructions
 import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-@Suppress("unused")
 val extMediaEntityPatch =
     bytecodePatch(
         description = "For extended media entity reflection",

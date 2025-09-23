@@ -5,7 +5,6 @@ import app.crimera.utils.getReference
 import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
-@Suppress("unused")
 val tweetInfoEntityPatch =
     bytecodePatch(
         description = "For tweet info entity reflection",

@@ -22,7 +22,7 @@ private val hidePromotedTrendFingerprint =
         }
     }
 
-@Suppress("ktlint:standard:property-naming")
+@Suppress("unused")
 val hidePromotedTrendPatch =
     bytecodePatch(
         name = "Hide Promoted Trends",

@@ -17,7 +17,6 @@ private val tabLayoutFingerprint =
         }
     }
 
-@Suppress("unused")
 val redirectBMTab =
     bytecodePatch(
         description = "Patch required to redirect bookmark folders to bookmark",

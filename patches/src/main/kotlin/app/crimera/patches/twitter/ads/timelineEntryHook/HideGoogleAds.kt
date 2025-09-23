@@ -7,6 +7,7 @@ import app.crimera.utils.enableSettings
 import app.crimera.utils.flagSettings
 import app.revanced.patcher.patch.bytecodePatch
 
+@Suppress("unused")
 val hideGoogleAds =
     bytecodePatch(
         name = "Remove Google Ads",

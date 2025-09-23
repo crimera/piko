@@ -8,6 +8,7 @@ import app.crimera.utils.enableSettings
 import app.crimera.utils.flagSettings
 import app.revanced.patcher.patch.bytecodePatch
 
+@Suppress("unused")
 val hideImmersivePlayer =
     bytecodePatch(
         name = "Hide immersive player",

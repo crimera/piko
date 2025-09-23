@@ -5,6 +5,7 @@ import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.enableSettings
 import app.revanced.patcher.patch.bytecodePatch
 
+@Suppress("unused")
 val hideTodaysNews =
     bytecodePatch(
         name = "Remove \"Today's News\"",

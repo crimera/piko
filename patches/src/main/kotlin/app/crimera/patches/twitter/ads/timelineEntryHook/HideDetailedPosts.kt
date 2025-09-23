@@ -6,6 +6,7 @@ import app.crimera.utils.enableSettings
 import app.revanced.patcher.patch.bytecodePatch
 
 // TODO: Rename when migrating to the new patcher?"
+@Suppress("unused")
 val hideDetailedPosts =
     bytecodePatch(
         name = "Remove Detailed posts",

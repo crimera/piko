@@ -7,7 +7,6 @@ import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-@Suppress("unused")
 val tweetEntityPatch =
     bytecodePatch(
         description = "For tweet entity reflection",

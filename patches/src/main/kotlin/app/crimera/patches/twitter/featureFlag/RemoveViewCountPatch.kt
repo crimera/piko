@@ -9,6 +9,7 @@ import app.crimera.utils.flagSettings
 import app.revanced.patcher.patch.bytecodePatch
 
 // Credits to @iKirby
+@Suppress("unused")
 val removeViewCountPatch =
     bytecodePatch(
         name = "Remove view count",

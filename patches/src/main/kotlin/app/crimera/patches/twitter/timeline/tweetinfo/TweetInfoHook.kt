@@ -16,7 +16,6 @@ private val tweetInfoHookFingerprint =
         }
     }
 
-@Suppress("unused")
 val tweetInfoHook =
     bytecodePatch(
         description = "Hooks tweet info item",
