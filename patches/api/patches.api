@@ -139,11 +139,7 @@ public final class app/crimera/patches/twitter/logging/responseLogging/ResponseL
 }
 
 public final class app/crimera/patches/twitter/misc/bringbacktwitter/BringBackTwitterPatchKt {
-	public static final fun getBringBackTwitterPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
-}
-
-public final class app/crimera/patches/twitter/misc/bringbacktwitter/BringBackTwitterResourceKt {
-	public static final fun getBringBackTwitterResource ()Lapp/revanced/patcher/patch/ResourcePatch;
+	public static final fun getBringBackTwitterPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
 }
 
 public final class app/crimera/patches/twitter/misc/customize/exploretabs/CustomiseExploreTabsPatchKt {

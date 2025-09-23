@@ -100,7 +100,7 @@ public class ButtonPref extends Preference {
                         Utils.deleteSharedPrefAB(context, false);
                     } else if (key.equals(Settings.RESET_FLAGS)) {
                         Utils.deleteSharedPrefAB(context, true);
-                    } else if (key.equals(Settings.ADS_DEL_FROM_DB)) {
+                    } else if (key.equals(Settings.ADS_DEL_FROM_DB.key)) {
                         DatabasePatch.showDialog(context);
                     }else if (key.equals(Settings.RESET_READER_MODE_CACHE)) {
                         ReaderModeUtils.clearCache();
