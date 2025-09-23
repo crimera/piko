@@ -252,31 +252,8 @@ public class Pref {
         return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_NUDGE_BUTTON);
     }
 
-    public static boolean hidePromotedTrend(Object data) {
-        if (data != null && Utils.getBooleanPerf(Settings.ADS_HIDE_PROMOTED_TRENDS)) {
-            return true;
-        }
-        return false;
-    }
-
     public static boolean hideAds() {
         return Utils.getBooleanPerf(Settings.ADS_HIDE_PROMOTED_POSTS);
-    }
-
-    public static boolean hideGoogleAds() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_GOOGLE_ADS);
-    }
-
-    public static boolean hideMainEvent() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_MAIN_EVENT);
-    }
-
-    public static boolean hideVideosForYou() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_VIDEOS_FOR_YOU);
-    }
-
-    public static boolean hideSuperheroEvent() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_SUPERHERO_EVENT);
     }
 
     public static boolean hideWTF() {

@@ -23,7 +23,7 @@ public class FeatureSwitchPatch {
         addFlag("af_ui_chirp_enabled", Pref.isChirpFontEnabled());
     }
 
-    private static void hideGoogleAds() { addFlag("ssp_ads_dsp_client_context_enabled", !Pref.hideGoogleAds()); }
+    private static void hideGoogleAds() { addFlag("ssp_ads_dsp_client_context_enabled", !Pref.hideAds()); }
 
     private static void viewCount() {
         addFlag("view_counts_public_visibility_enabled", Pref.hideViewCount());

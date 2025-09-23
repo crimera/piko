@@ -24,14 +24,13 @@
 
     <string name="piko_title_ads">विज्ञापन</string>
     <string name="piko_pref_hide_promoted_posts">प्रोमोट किए गए पोस्ट छुपाएं</string>
-    <string name="piko_pref_hide_g_ads">Google विज्ञापन छुपाएं</string>
     <string name="piko_pref_wtf_section">"किसे फ़ॉलो करें" सेक्शन छुपाएं</string>
     <string name="piko_pref_cts_section">"सब्सक्राइब करने के लिए स्थापक" सेक्शन छुपाएं</string>
     <string name="piko_pref_ctj_section">"ज्वाइन करने के लिए समुदाय" सेक्शन छुपाएं</string>
     <string name="piko_pref_ryb_section">"अपने बुकमार्क को पुनः देखें" सेक्शन छुपाएं</string>
     <string name="piko_pref_pinned_posts_section">"अनुयायियों द्वारा टिप्पणी की गई पोस्ट्स" सेक्शन छुपाएं</string>
     <string name="piko_pref_hide_detailed_posts">विस्तृत पोस्ट छुपाएं (उत्तरों में)</string>
-    <string name="piko_pref_hide_trends">प्रोमोट किए गए प्रवृत्तियों को छुपाएं</string>
+
     <string name="piko_pref_hide_premium_prompt">"प्रीमियम खरीदें" अनुभाग छिपाएँ</string>
 
     <string name="piko_title_misc">विविध</string>

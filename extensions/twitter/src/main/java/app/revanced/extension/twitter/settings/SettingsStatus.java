@@ -7,7 +7,6 @@ public class SettingsStatus {
     public static boolean customSharingDomainEnabled = false;
     public static boolean enableFontMod = false;
     public static boolean hideRecommendedUsers = false;
-    public static boolean hidePromotedTrend = false;
     public static boolean hideCommunityNote = false;
     public static boolean hideFAB = false;
     public static boolean hideFABBtns = false;
@@ -26,9 +25,6 @@ public class SettingsStatus {
 
     public static boolean hideAds = false;
     public static boolean hideGAds = false;
-    public static boolean hideMainEvent = false;
-    public static boolean hideSuperheroEvent = false;
-    public static boolean hideVideosForYou = false;
     public static boolean hideWTF = false;
     public static boolean hideCTS = false;
     public static boolean hideCTJ = false;
@@ -228,22 +224,6 @@ public class SettingsStatus {
         hideAds = true;
     }
 
-    public static void hideGAds() {
-        hideGAds = true;
-    }
-
-    public static void hideMainEvent() {
-        hideMainEvent = true;
-    }
-
-    public static void hideVideosForYou() {
-        hideVideosForYou = true;
-    }
-
-    public static void hideSuperheroEvent() {
-        hideSuperheroEvent = true;
-    }
-
     public static void hideWhoToFollow() {
         hideWTF = true;
     }
@@ -270,10 +250,6 @@ public class SettingsStatus {
 
     public static void hideTopPeopleSearch() {
         hideTopPeopleSearch = true;
-    }
-
-    public static void hidePromotedTrends() {
-        hidePromotedTrend = true;
     }
 
     public static void hideTodaysNews() {
@@ -340,7 +316,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableAdsSection() {
-        return (hideTodaysNews || hideTopPeopleSearch || hideAds || hideGAds || hideWTF || hideCTS || hideCTJ || hideDetailedPosts || hideRBMK || hidePromotedTrend || removePremiumUpsell || hideMainEvent || hideSuperheroEvent || hideVideosForYou);
+        return (hideTodaysNews || hideTopPeopleSearch || hideAds  || hideWTF || hideCTS || hideCTJ || hideDetailedPosts || hideRBMK  || removePremiumUpsell);
     }
 
     public static boolean enableNativeSection() {

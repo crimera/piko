@@ -73,52 +73,54 @@ public class DatabasePatch {
                 for (int i = 0; i < checkedItems.length; i++) {
                     if (checkedItems[i]) {
                         String entry_id_str = "";
+                        String entry_id_str2 = "";
                         switch (i) {
                             case 0: {
                                 entry_id_str = "promoted%";
+                                entry_id_str2 = "rtb%";
                                 break;
                             }
                             case 1: {
-                                entry_id_str = "rtb%";
-                                break;
-                            }
-                            case 2: {
                                 entry_id_str = "who-to-follow%";
                                 break;
                             }
-                            case 3: {
+                            case 2: {
                                 entry_id_str = "who-to-subscribe%";
                                 break;
                             }
-                            case 4: {
+                            case 3: {
                                 entry_id_str = "community-to-join%";
                                 break;
                             }
-                            case 5: {
+                            case 4: {
                                 entry_id_str = "bookmarked%";
                                 break;
                             }
-                            case 6: {
+                            case 5: {
                                 entry_id_str = "pinned-tweets%";
                                 break;
                             }
-                            case 7: {
+                            case 6: {
                                 entry_id_str = "tweetdetailrelatedtweets%";
                                 break;
                             }
-                            case 8: {
+                            case 7: {
                                 entry_id_str = "messageprompt%";
                                 break;
                             }
-                            case 9: {
+                            case 8: {
                                 entry_id_str = "stories%";
                                 break;
                             }
                         }
+                        int deletedRows = 0;
                         if (entry_id_str != "") {
-                            int deletedRows = database.delete("timeline", "entity_id LIKE ?", new String[]{entry_id_str});
-                            result.append("• "+listItems[i]+" = "+String.valueOf(deletedRows)+"\n");
+                            deletedRows = database.delete("timeline", "entity_id LIKE ?", new String[]{entry_id_str});                        }
+                        if (entry_id_str2 != "") {
+                            int deletedRows2 = database.delete("timeline", "entity_id LIKE ?", new String[]{entry_id_str2});
+                            deletedRows+=deletedRows2;
                         }
+                        result.append("• "+listItems[i]+" = "+String.valueOf(deletedRows)+"\n");
                     }
                 }
             } else {

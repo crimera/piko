@@ -47,17 +47,15 @@
     <!-- Ads Settings -->
     <string name="piko_title_ads">광고</string>
     <string name="piko_pref_hide_promoted_posts">광고 게시물</string>
-    <string name="piko_pref_hide_g_ads">Google 광고</string>
-    <string name="piko_pref_hide_main_event">주요 이벤트 (탐색)</string>
-    <string name="piko_pref_hide_superhero_event">슈퍼히어로 이벤트 (탐색)</string>
-    <string name="piko_pref_hide_videos_for_you">나를 위한 동영상 (탐색)</string>
+
+
     <string name="piko_pref_wtf_section">\"Who to follow\" 영역</string>
     <string name="piko_pref_cts_section">\"구독할 크리에이터\" 영역</string>
     <string name="piko_pref_ctj_section">\"새 커뮤니티 찾기\" 영역</string>
     <string name="piko_pref_ryb_section">\"북마크 다시 방문\" 영역</string>
     <string name="piko_pref_pinned_posts_section">\"팔로우가 고정한 게시물\" 영역</string>
     <string name="piko_pref_hide_detailed_posts">관련 게시물 (in 답글)</string>
-    <string name="piko_pref_hide_trends">광고 트렌드</string>
+
     <string name="piko_pref_hide_premium_prompt">메시지 프롬프트</string>
     <string name="piko_pref_hide_todays_news">Today\'s News</string>
     <string name="piko_pref_del_from_db">데이터베이스에서 엔트리 삭제하기</string>

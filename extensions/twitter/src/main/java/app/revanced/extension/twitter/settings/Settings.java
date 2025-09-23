@@ -29,10 +29,6 @@ public class Settings extends BaseSettings {
 
     public static final BooleanSetting ADS_HIDE_PROMOTED_TRENDS = new BooleanSetting("ads_hide_promoted_trends", true);
     public static final BooleanSetting ADS_HIDE_PROMOTED_POSTS = new BooleanSetting("ads_hide_promoted_posts", true);
-    public static final BooleanSetting ADS_HIDE_GOOGLE_ADS = new BooleanSetting("ads_hide_google_ads", true);
-    public static final BooleanSetting ADS_HIDE_MAIN_EVENT = new BooleanSetting("ads_hide_main_event", false);
-    public static final BooleanSetting ADS_HIDE_SUPERHERO_EVENT = new BooleanSetting("ads_hide_superhero_event", true);
-    public static final BooleanSetting ADS_HIDE_VIDEOS_FOR_YOU = new BooleanSetting("ads_hide_videos_for_you", true);
     public static final BooleanSetting ADS_HIDE_WHO_TO_FOLLOW = new BooleanSetting("ads_hide_who_to_follow", true);
     public static final BooleanSetting ADS_HIDE_CREATORS_TO_SUB = new BooleanSetting("ads_hide_creators_to_sub", true);
     public static final BooleanSetting ADS_HIDE_COMM_TO_JOIN = new BooleanSetting("ads_hide_comm_to_join", true);

@@ -24,14 +24,13 @@
 
     <string name="piko_title_ads">Reklamlar</string>
     <string name="piko_pref_hide_promoted_posts">Tanıtılan gönderileri gizle</string>
-    <string name="piko_pref_hide_g_ads">Google reklamlarını gizle</string>
     <string name="piko_pref_wtf_section">”Kimi takip etmeli” bölümünü gizle</string>
     <string name="piko_pref_cts_section">”Abone olacak içerik oluşturucular” bölümünü gizle</string>
     <string name="piko_pref_ctj_section">”Katılılacak topluluk” bölümünü gizle</string>
     <string name="piko_pref_ryb_section">"Yer işaretinizi yeniden gözden geçirin" bölümünü gizle</string>
     <string name="piko_pref_pinned_posts_section">”Takipçilerin sabitlenmiş gönderileri” bölümünü gizle</string>
     <string name="piko_pref_hide_detailed_posts">Ayrıntılı gönderileri gizle (yanıtlarda)</string>
-    <string name="piko_pref_hide_trends">Tanıtılan trendleri gizle</string>
+
     <string name="piko_pref_hide_premium_prompt">Mesaj istemlerini gizle</string>
     <string name="piko_pref_del_from_db">Girişleri veritabanından sil</string>
     <string name="piko_pref_db_not_found">Veritabanı bulunamadı</string>

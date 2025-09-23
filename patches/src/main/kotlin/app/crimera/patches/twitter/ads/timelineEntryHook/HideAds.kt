@@ -38,13 +38,6 @@ val hideAds =
 
             // Google Ads.
             featureFlagLoadFingerprint.flagSettings("hideGoogleAds")
-            settingsStatusLoadFingerprint.enableSettings("hideGAds")
-
-            // Superevent Banner.
-            settingsStatusLoadFingerprint.enableSettings("hideSuperheroEvent")
-
-            // Main event Banner.
-            settingsStatusLoadFingerprint.enableSettings("hideMainEvent")
 
             // Promoted Trends
             val method = hidePromotedTrendFingerprint.method
@@ -58,19 +51,14 @@ val hideAds =
             val loc = last_new_inst + 3
             val reg = method.getInstruction<TwoRegisterInstruction>(loc).registerA
 
-            val HOOK_DESCRIPTOR =
-                "invoke-static {v$reg}, ${Constants.PREF_DESCRIPTOR};->hidePromotedTrend(Ljava/lang/Object;)Z"
-
             method.addInstructionsWithLabels(
                 return_loc,
                 """
-                $HOOK_DESCRIPTOR
-                move-result v$reg
+                sget-boolean v$reg,${Constants.PATCHES_DESCRIPTOR}/TimelineEntry;->hideAds:Z
                 if-eqz v$reg, :cond_1212
                 const v$return_reg, 0x0
                 """.trimIndent(),
                 ExternalLabel("cond_1212", return_obj),
             )
-            settingsStatusLoadFingerprint.enableSettings("hidePromotedTrends")
         }
     }

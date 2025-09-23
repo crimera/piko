@@ -63,14 +63,12 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         flags.put(strRes("piko_pref_download"),SettingsStatus.changeDownloadEnabled);
         flags.put(strRes("piko_pref_download_media_link_handle"),SettingsStatus.mediaLinkHandle);
         flags.put(strRemoveRes("piko_pref_hide_promoted_posts"),SettingsStatus.hideAds);
-        flags.put(strRemoveRes("piko_pref_hide_g_ads"),SettingsStatus.hideGAds);
         flags.put(strRemoveRes("piko_pref_wtf_section"),SettingsStatus.hideWTF);
         flags.put(strRemoveRes("piko_pref_cts_section"),SettingsStatus.hideCTS);
         flags.put(strRemoveRes("piko_pref_ctj_section"),SettingsStatus.hideCTJ);
         flags.put(strRemoveRes("piko_pref_ryb_section"),SettingsStatus.hideRBMK);
         flags.put(strRemoveRes("piko_pref_pinned_posts_section"),SettingsStatus.hideRPinnedPosts);
         flags.put(strRemoveRes("piko_pref_hide_detailed_posts"),SettingsStatus.hideDetailedPosts);
-        flags.put(strRemoveRes("piko_pref_hide_trends"),SettingsStatus.hidePromotedTrend);
         flags.put(strEnableRes("piko_pref_chirp_font"),SettingsStatus.enableFontMod);
         flags.put(strRemoveRes("piko_pref_hide_fab"),SettingsStatus.hideFAB);
         flags.put(strRemoveRes("piko_pref_hide_fab_menu"),SettingsStatus.hideFABBtns);
@@ -108,9 +106,6 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         flags.put(strEnableRes("piko_pref_enable_vid_auto_advance"),SettingsStatus.enableVidAutoAdvance);
         flags.put(strEnableRes("piko_pref_enable_force_pip"),SettingsStatus.enableForcePip);
         flags.put(strRemoveRes("piko_pref_hide_premium_upsell"),SettingsStatus.removePremiumUpsell);
-        flags.put(strRemoveRes("piko_pref_hide_main_event"),SettingsStatus.hideMainEvent);
-        flags.put(strRemoveRes("piko_pref_hide_superhero_event"),SettingsStatus.hideSuperheroEvent);
-        flags.put(strRemoveRes("piko_pref_hide_videos_for_you"),SettingsStatus.hideVideosForYou);
         flags.put(strRes("piko_pref_customisation_reply_sorting"),SettingsStatus.defaultReplySortFilter);
         flags.put(strEnableRes("piko_pref_force_hd"),SettingsStatus.enableForceHD);
         flags.put(strRes("piko_pref_hide_nudge_button"),SettingsStatus.hideNudgeButton);

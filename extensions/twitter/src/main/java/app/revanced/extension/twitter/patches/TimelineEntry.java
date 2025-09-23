@@ -1,17 +1,16 @@
 package app.revanced.extension.twitter.patches;
 
 import com.twitter.model.json.timeline.urt.JsonTimelineEntry;
-import com.twitter.model.json.timeline.urt.JsonTimelineModuleItem;
 import com.twitter.model.json.core.JsonSensitiveMediaWarning;
 
 import app.revanced.extension.twitter.Pref;
 import app.revanced.extension.twitter.settings.SettingsStatus;
 
 public class TimelineEntry {
-    private static final boolean hideAds,hideGAds,hideWTF,hideCTS,hideCTJ,hideDetailedPosts,hideRBMK,hidePinnedPosts,hidePremiumPrompt,hideMainEvent,hideSuperheroEvent,hideVideosForYou,showSensitiveMedia,hideTopPeopleSearch,hideTodaysNews;
+    public static final boolean hideAds;
+    private static final boolean hideWTF,hideCTS,hideCTJ,hideDetailedPosts,hideRBMK,hidePinnedPosts,hidePremiumPrompt,showSensitiveMedia,hideTopPeopleSearch,hideTodaysNews;
     static {
         hideAds = (Pref.hideAds() && SettingsStatus.hideAds);
-        hideGAds = (Pref.hideGoogleAds() && SettingsStatus.hideGAds);
         hideWTF = (Pref.hideWTF() && SettingsStatus.hideWTF);
         hideCTS = (Pref.hideCTS() && SettingsStatus.hideCTS);
         hideCTJ = (Pref.hideCTJ() && SettingsStatus.hideCTJ);
@@ -19,9 +18,6 @@ public class TimelineEntry {
         hideRBMK = (Pref.hideRBMK() && SettingsStatus.hideRBMK);
         hidePinnedPosts = (Pref.hideRPinnedPosts() && SettingsStatus.hideRPinnedPosts);
         hidePremiumPrompt = (Pref.hidePremiumPrompt() && SettingsStatus.hidePremiumPrompt);
-        hideMainEvent = (Pref.hideMainEvent() && SettingsStatus.hideMainEvent);
-        hideSuperheroEvent = (Pref.hideSuperheroEvent() && SettingsStatus.hideSuperheroEvent);
-        hideVideosForYou = (Pref.hideVideosForYou() && SettingsStatus.hideVideosForYou);
         showSensitiveMedia = Pref.showSensitiveMedia();
         hideTopPeopleSearch = (Pref.hideTopPeopleSearch() && SettingsStatus.hideTopPeopleSearch);
         hideTodaysNews = (Pref.hideTodaysNews() && SettingsStatus.hideTodaysNews);
@@ -32,13 +28,13 @@ public class TimelineEntry {
         String[] split = entryId.split("-");
         String entryId2 = split[0];
         if (!entryId2.equals("cursor") && !entryId2.equals("Guide") && !entryId2.startsWith("semantic_core")) {
-            if (entryId.contains("promoted") || ((entryId2.equals("conversationthread") && split.length == 3)) && hideAds) {
+            if ((entryId.contains("promoted") || ((entryId2.equals("conversationthread") && split.length == 3))) && hideAds) {
                 return true;
             }
-            if ((entryId2.equals("superhero") || entryId2.equals("eventsummary")) && hideSuperheroEvent) {
+            if ((entryId2.equals("superhero") || entryId2.equals("eventsummary")) && hideAds) {
                 return true;
             }
-            if (entryId.contains("rtb") && hideGAds) {
+            if (entryId.contains("rtb") && hideAds) {
                 return true;
             }
             if (entryId2.equals("tweetdetailrelatedtweets") && hideDetailedPosts) {
@@ -62,10 +58,7 @@ public class TimelineEntry {
             if (entryId.startsWith("messageprompt-") && hidePremiumPrompt) {
                 return true;
             }
-            if ((entryId.startsWith("main-event-") || entryId2.equals("pivot")) && hideMainEvent) {
-                return true;
-            }
-            if (entryId2.equals("tweet") && entryId.contains("-tweet-") && hideVideosForYou) {
+            if ((entryId.startsWith("main-event-") || entryId2.equals("pivot")) && hideAds) {
                 return true;
             }
             if (entryId2.equals("toptabsrpusermodule") && hideTopPeopleSearch) {
@@ -88,18 +81,6 @@ public class TimelineEntry {
 
         }
         return jsonTimelineEntry;
-    }
-
-    public static JsonTimelineModuleItem checkEntry(JsonTimelineModuleItem jsonTimelineModuleItem) {
-        try {
-            String entryId = jsonTimelineModuleItem.a;
-            if(isEntryIdRemove(entryId)){
-                return null;
-            }
-        } catch (Exception unused) {
-
-        }
-        return jsonTimelineModuleItem;
     }
 
     public static JsonSensitiveMediaWarning sensitiveMedia(JsonSensitiveMediaWarning jsonSensitiveMediaWarning) {

@@ -47,17 +47,15 @@
     <!-- Ads Settings -->
     <string name="piko_title_ads">Annunci</string>
     <string name="piko_pref_hide_promoted_posts">Post sponsorizzati</string>
-    <string name="piko_pref_hide_g_ads">Annunci Google</string>
-    <string name="piko_pref_hide_main_event">Evento principale (Esplora)</string>
-    <string name="piko_pref_hide_superhero_event">Evento supereroe (Esplora)</string>
-    <string name="piko_pref_hide_videos_for_you">video per te (Esplora)</string>
+
+
     <string name="piko_pref_wtf_section">Sezione "Chi seguire"</string>
     <string name="piko_pref_cts_section">Sezione "Creatori da iscrivere"</string>
     <string name="piko_pref_ctj_section">Sezione "Comunità a cui unirsi"</string>
     <string name="piko_pref_ryb_section">Sezione "Rivedi il tuo segnalibro"</string>
     <string name="piko_pref_pinned_posts_section">Sezione "Post fissati dai follower"</string>
     <string name="piko_pref_hide_detailed_posts">Post correlati (nelle risposte)</string>
-    <string name="piko_pref_hide_trends">Tendenze sponsorizzate</string>
+
     <string name="piko_pref_hide_premium_prompt">Richiesta Messaggi</string>
     <string name="piko_pref_hide_todays_news">Annunci di oggi</string>
     <string name="piko_pref_del_from_db">Elimina voci dal database</string>

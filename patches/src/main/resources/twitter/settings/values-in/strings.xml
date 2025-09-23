@@ -31,17 +31,15 @@
 
     <string name="piko_title_ads">Iklan</string>
     <string name="piko_pref_hide_promoted_posts">postingan yang dipromosikan</string>
-    <string name="piko_pref_hide_g_ads">iklan Google</string>
-    <string name="piko_pref_hide_main_event">acara utama (jelajahi)</string>
-    <string name="piko_pref_hide_superhero_event">acara superhero (jelajahi)</string>
-    <string name="piko_pref_hide_videos_for_you">video untuk Anda (jelajahi)</string>
+
+
     <string name="piko_pref_wtf_section">bagian "siapa yang harus diikuti"</string>
     <string name="piko_pref_cts_section">bagian "kreator yang harus disubscribe"</string>
     <string name="piko_pref_ctj_section">bagian "komunitas untuk bergabung"</string>
     <string name="piko_pref_ryb_section">bagian "kunjungi kembali bookmark Anda"</string>
     <string name="piko_pref_pinned_posts_section">bagian "postingan yang disematkan oleh pengikut"</string>
     <string name="piko_pref_hide_detailed_posts">postingan terperinci (dalam balasan)</string>
-    <string name="piko_pref_hide_trends">tren yang dipromosikan</string>
+
     <string name="piko_pref_hide_premium_prompt">pesan prompt</string>
     <string name="piko_pref_del_from_db">Hapus entri dari database</string>
     <string name="piko_pref_db_not_found">Database tidak ditemukan</string>

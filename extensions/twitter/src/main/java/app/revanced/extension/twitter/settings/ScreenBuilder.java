@@ -130,42 +130,6 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.hideGAds) {
-            addPreference(category,
-                    helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_g_ads"),
-                            "",
-                            Settings.ADS_HIDE_GOOGLE_ADS
-                    )
-            );
-        }
-        if (SettingsStatus.hideMainEvent) {
-            addPreference(category,
-                    helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_main_event"),
-                            "",
-                            Settings.ADS_HIDE_MAIN_EVENT
-                    )
-            );
-        }
-        if (SettingsStatus.hideSuperheroEvent) {
-            addPreference(category,
-                    helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_superhero_event"),
-                            "",
-                            Settings.ADS_HIDE_SUPERHERO_EVENT
-                    )
-            );
-        }
-        if (SettingsStatus.hideVideosForYou) {
-            addPreference(category,
-                    helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_videos_for_you"),
-                            "",
-                            Settings.ADS_HIDE_VIDEOS_FOR_YOU
-                    )
-            );
-        }
         if (SettingsStatus.hideWTF) {
             addPreference(category,
                     helper.switchPreference(
@@ -221,16 +185,6 @@ public class ScreenBuilder {
                             strRemoveRes("piko_pref_hide_detailed_posts"),
                             "",
                             Settings.ADS_HIDE_DETAILED_POSTS
-                    )
-            );
-        }
-
-        if (SettingsStatus.hidePromotedTrend) {
-            addPreference(category,
-                    helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_trends"),
-                            "",
-                            Settings.ADS_HIDE_PROMOTED_TRENDS
                     )
             );
         }

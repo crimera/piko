@@ -61,17 +61,12 @@
     <!-- Ads Settings -->
     <string name="piko_title_ads">Ads</string>
     <string name="piko_pref_hide_promoted_posts">Promoted posts</string>
-    <string name="piko_pref_hide_g_ads">Google ads</string>
-    <string name="piko_pref_hide_main_event">Main event (Explore)</string>
-    <string name="piko_pref_hide_superhero_event">Superhero event (Explore)</string>
-    <string name="piko_pref_hide_videos_for_you">videos for you (Explore)</string>
     <string name="piko_pref_wtf_section">"Who to follow" section</string>
     <string name="piko_pref_cts_section">"Creators to subscribe" section</string>
     <string name="piko_pref_ctj_section">"Community to join" section</string>
     <string name="piko_pref_ryb_section">"Revisit your bookmark" section</string>
     <string name="piko_pref_pinned_posts_section">"Pinned posts by followers" section</string>
     <string name="piko_pref_hide_detailed_posts">Related posts (in replies)</string>
-    <string name="piko_pref_hide_trends">Promoted trends</string>
     <string name="piko_pref_hide_premium_prompt">Message prompts</string>
     <string name="piko_pref_hide_todays_news">Today\'s news</string>
     <string name="piko_pref_del_from_db">Delete entries from database</string>
