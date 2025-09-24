@@ -1,3 +1,18 @@
+## [2.0.0-dev.1](https://github.com/crimera/piko/compare/v1.59.0...v2.0.0-dev.1) (2025-09-24)
+
+### ⚠ BREAKING CHANGES
+
+* Various APIs have been changed or removed.
+
+### Bug Fixes
+
+* some patch has compatibleWith and dependsOn in execute block ([dd25a6c](https://github.com/crimera/piko/commit/dd25a6cd43354b8d6f4cb60d7798c539b06a6e50))
+* wrong index number on multiple medias ([d088d03](https://github.com/crimera/piko/commit/d088d03a5dc743e1e50f403d14b71bc59b38571b))
+
+### Features
+
+* Migrate ci ([c737ca8](https://github.com/crimera/piko/commit/c737ca8edef074ff1beff17db7d27e5f26c17dc1))
+
 ## [1.59.0](https://github.com/crimera/piko/compare/v1.58.1...v1.59.0) (2025-09-11)
 
 ### Features
