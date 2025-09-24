@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Don't translate any of these -->
+<resources>
+    <string-array name="piko_array_public_folder">
+        <item>Movies</item>
+        <item>DCIM</item>
+        <item>Pictures</item>
+        <item>Download</item>
+    </string-array>
+
+    <string-array name="piko_array_timelinetabs_val">
+        <item>show_both</item>
+        <item>hide_forYou</item>
+        <item>hide_following</item>
+    </string-array>
+
+    <string-array name="piko_array_exploretabs_val">
+        <item>for_you</item>
+        <item>trending</item>
+        <item>fun</item>
+        <item>news</item>
+        <item>sports</item>
+        <item>entertainment</item>
+    </string-array>
+
+    <string-array name="piko_array_download_media_handle_val">
+        <item>download_media</item>
+        <item>copy_media_link</item>
+        <item>always_ask</item>
+    </string-array>
+
+    <string-array name="piko_array_inlinetabs_val">
+        <item>Reply</item>
+        <item>Retweet</item>
+        <item>Retweet</item>
+        <item>ViewCount</item>
+        <item>AddRemoveBookmarks</item>
+        <item>TwitterShare</item>
+    </string-array>
+
+    <string-array name="piko_array_reply_sorting_val">
+        <item>Relevance</item>
+        <item>Recency</item>
+        <item>Likes</item>
+        <item>LastPostion</item>
+    </string-array>
+
+    <string-array name="piko_array_translators_val">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <string-array name="piko_array_search_type_ahead_val">
+        <item>users</item>
+        <item>topics</item>
+        <item>events</item>
+        <item>lists</item>
+        <item>ordered_section</item>
+    </string-array>
+
+    <string-array name="piko_array_searchtabs_val">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>5</item>
+        <item>3</item>
+        <item>7</item>
+        <item>13</item>
+    </string-array>
+
+    <string-array name="piko_array_native_download_filename">
+        <item>username_tweetid</item>
+        <item>name_tweetid</item>
+        <item>userid_tweetid</item>
+        <item>tweetid</item>
+        <item>Current timestamp</item>
+    </string-array>
+
+    <string-array name="piko_array_native_download_filename_val">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+
+    <string-array name="piko_array_profiletabs_val">
+        <item>tweets</item>
+        <item>tweets_replies</item>
+        <item>affiliated</item>
+        <item>subs</item>
+        <item>highlights</item>
+        <item>articles</item>
+        <item>media</item>
+        <item>likes</item>
+    </string-array>
+
+    <string-array name="piko_array_sidebar_val">
+        <item>Profile</item>
+        <item>Premium</item>
+        <item>Grok</item>
+        <item>Money</item>
+        <item>XChat</item>
+        <item>DMs</item>
+        <item>Communities</item>
+        <item>ExploreImmersive</item>
+        <item>Bookmarks</item>
+        <item>Jobs</item>
+        <item>Lists</item>
+        <item>BirdwatchNotes</item>
+        <item>Spaces</item>
+        <item>@string/video_chat_conference</item>
+        <item>PendingFollowers</item>
+        <item>Monetization</item>
+        <item>Analytics</item>
+        <item>ProfessionalToolsGroup</item>
+        <item>SettingsAndSupportGroup</item>
+        <item>MediaTransparency</item>
+        <item>Imprint</item>
+    </string-array>
+
+    <string-array name="piko_array_navbar_val">
+        <item>HOME</item>
+        <item>GUIDE</item>
+        <item>SPACES</item>
+        <item>COMMUNITIES</item>
+        <item>NOTIFICATIONS</item>
+        <item>CONNECT</item>
+        <item>COMMUNITY_NOTES</item>
+        <item>BOOKMARKS</item>
+        <item>DMS</item>
+        <item>GROK</item>
+        <item>MEDIA_TAB</item>
+    </string-array>
+
+
+</resources>

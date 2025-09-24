@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="piko_title_premium">प्रीमियम</string>
+    <string name="piko_pref_reader_mode">रीडर मोड सक्षम करें</string>
+    <string name="piko_pref_reader_mode_desc">लंबी थ्रेडों पर "रीडर मोड" सक्षम करें</string>
+    <string name="piko_pref_undo_posts">पोस्ट अन्डू करें</string>
+    <string name="piko_pref_undo_posts_desc">पोस्ट करने से पहले पोस्ट को अन्डू करने की क्षमता सक्षम करें</string>
+    <string name="piko_pref_undo_posts_btn">पोस्ट सेटिंग्स को अन्डू करें</string>
+    <string name="piko_pref_icon_n_navbar_btn">एप्लिकेशन आइकन और नैविगेशन बार अनुकूलन सेटिंग्स</string>
+
+    <string name="piko_title_download">डाउनलोड</string>
+    <string name="piko_pref_video_download">वीडियो डाउनलोडिंग सक्षम करें</string>
+    <string name="piko_pref_download">डाउनलोड डायरेक्टरी बदलें</string>
+    <string name="piko_pref_download_path">सार्वजनिक फ़ोल्डर</string>
+    <string name="piko_pref_download_path_desc">वीडियो डाउनलोड करने के लिए उपयोग करने के लिए सार्वजनिक फ़ोल्डर</string>
+    <string name="piko_pref_download_folder">डाउनलोड सबफोल्डर</string>
+    <string name="piko_pref_download_folder_desc">वीडियो डाउनलोड करने के लिए सबफोल्डर ([सार्वजनिक फ़ोल्डर]/[सबफोल्डर])</string>
+    <string name="piko_pref_download_media_link_handle">डाउनलोड प्राथमिकता</string>
+    <string name="piko_pref_download_media_link_handle_download">सीधे डाउनलोड</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">मीडिया लिंक कॉपी करें</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">हमेशा पूछें</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">मीडिया लिंक कॉपी करें</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">मीडिया लिंक शेयर करें</string>
+
+    <string name="piko_title_ads">विज्ञापन</string>
+    <string name="piko_pref_hide_promoted_posts">प्रोमोट किए गए पोस्ट छुपाएं</string>
+    <string name="piko_pref_wtf_section">"किसे फ़ॉलो करें" सेक्शन छुपाएं</string>
+    <string name="piko_pref_cts_section">"सब्सक्राइब करने के लिए स्थापक" सेक्शन छुपाएं</string>
+    <string name="piko_pref_ctj_section">"ज्वाइन करने के लिए समुदाय" सेक्शन छुपाएं</string>
+    <string name="piko_pref_ryb_section">"अपने बुकमार्क को पुनः देखें" सेक्शन छुपाएं</string>
+    <string name="piko_pref_pinned_posts_section">"अनुयायियों द्वारा टिप्पणी की गई पोस्ट्स" सेक्शन छुपाएं</string>
+    <string name="piko_pref_hide_detailed_posts">विस्तृत पोस्ट छुपाएं (उत्तरों में)</string>
+
+    <string name="piko_pref_hide_premium_prompt">"प्रीमियम खरीदें" अनुभाग छिपाएँ</string>
+
+    <string name="piko_title_misc">विविध</string>
+    <string name="piko_pref_chirp_font">चिरप फ़ॉन्ट सक्षम करें</string>
+    <string name="piko_pref_hide_fab">फ्लोटिंग एक्शन बटन छुपाएं</string>
+    <string name="piko_pref_hide_fab_menu">फ्लोटिंग एक्शन बटन मेनू छुपाएं</string>
+    <string name="piko_pref_rec_users">सुझावित उपयोगकर्ता छुपाएं</string>
+    <string name="piko_pref_hide_view_count">दृश्य काउंट छुपाएं</string>
+    <string name="piko_pref_custom_share_domain">कस्टम साझा करने का डोमेन</string>
+    <string name="piko_pref_custom_share_domain_desc">ट्वीट्स साझा करते समय उपयोग करने के लिए डोमेन</string>
+    <string name="piko_pref_feature_flags">विशेषता ध्वज</string>
+    <string name="piko_pref_edit_flag_title">ध्वज संपादित करें</string>
+    <string name="piko_pref_add_flag_title">ध्वज जोड़ें</string>
+    <string name="piko_pref_show_sensitive_media">संवेदनशील मीडिया दिखाएं</string>
+    <string name="piko_pref_selectable_text">चयनीय पाठ</string>
+    <string name="piko_pref_clear_tracking_params">ट्रैकिंग पैरामीटर हटाएं</string>
+    <string name="piko_pref_unshorten_link">संक्षिप्त URL नहीं</string>
+    <string name="piko_pref_round_off_numbers">संख्याओं को पूर्णांकित करें</string>
+    <string name="piko_pref_round_off_numbers_desc">संख्याओं को K और M के रूप में पूर्णांकित करें</string>
+    <string name="piko_pref_debug_menu">ट्वीट्स के लिए डिबग मेनू सक्षम करें</string>
+
+    <string name="piko_title_timeline">टाइमलाइन</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">लॉन्च पर ऑटो टाइमलाइन स्क्रॉल को अक्षम करें</string>
+    <string name="piko_pref_hide_live_threads">लाइव थ्रेड्स छुपाएं</string>
+    <string name="piko_pref_hide_live_threads_desc">टाइमलाइन में लाइव सेक्शन को छुपाएं</string>
+    <string name="piko_pref_hide_banner">बैनर छुपाएं</string>
+    <string name="piko_pref_hide_banner_desc">नई पोस्ट्स पिल को छुपाएं</string>
+    <string name="piko_pref_hide_bmk_timeline">टाइमलाइन में बुकमार्क आइकन छुपाएं</string>
+    <string name="piko_pref_force_translate">अनुवाद को बाध्य करें</string>
+    <string name="piko_pref_force_translate_desc">सभी पोस्ट के लिए अनुवाद विकल्प प्राप्त करें</string>
+    <string name="piko_pref_hide_quick_promote">प्रोमोट बटन छुपाएं</string>
+    <string name="piko_pref_hide_quick_promote_desc">स्वयं के पोस्ट के नीचे प्रोमोट बटन छुपाएं</string>
+    <string name="piko_pref_show_poll_result">पोल परिणाम दिखाएं</string>
+    <string name="piko_pref_show_poll_result_desc">मतदान किए बिना पोल के परिणाम देखें</string>
+    <string name="piko_pref_hide_immersive_player">इमर्सिव प्लेयर छुपाएं</string>
+    <string name="piko_pref_hide_immersive_player_desc">वीडियो प्लेयर में अधिक वीडियो के लिए ऊपर की ओर स्वाइप करें</string>
+    <string name="piko_pref_hide_hidden_replies">छुपे हुए उत्तर छिपाएँ</string>
+
+    <string name="piko_title_customisation">कस्टमाइज़ेशन</string>
+    <string name="piko_pref_customisation_profiletabs">छुपाने के लिए प्रोफ़ाइल टैब</string>
+    <string name="piko_pref_customisation_timelinetabs">टाइमलाइन टैब</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">"आपके लिए" छुपाएं</string>
+    <string name="piko_pref_customisation_timelinetabs_following">"फॉलोइंग" छुपाएं</string>
+    <string name="piko_pref_customisation_timelinetabs_both">दोनों दिखाएं</string>
+    <string name="piko_pref_customisation_sidebartabs">साइडबार आइटम्स छुपाएं</string>
+    <string name="piko_pref_customisation_navbartabs">नेविगेशन बार आइटम्स छुपाएं</string>
+    <string name="piko_pref_customisation_inlinetabs">छुपाने के लिए इनलाइन बार आइटम</string>
+
+    <string name="piko_title_backup">बैकअप और बहाली</string>
+    <string name="piko_pref_export">प्राथमिकताएँ निर्यात करें</string>
+    <string name="piko_pref_export_failed">त्रुटि: प्राथमिकताएँ निर्यात करने में विफल</string>
+    <string name="piko_pref_export_no_uri">त्रुटि: कोई गंतव्य नहीं दिया गया</string>
+    <string name="piko_pref_import">प्राथमिकताएँ आयात करें</string>
+    <string name="piko_pref_import_failed">त्रुटि: प्राथमिकताएँ आयात करने में विफल</string>
+    <string name="piko_pref_import_no_uri">त्रुटि: कोई फ़ाइल नहीं दी गई</string>
+
+    <string name="piko_title_about">के बारे में</string>
+    <string name="piko_pref_app_version">ऐप का संस्करण</string>
+    <string name="piko_pref_patch_info">पैच जानकारी</string>
+    <string name="piko_pref_version_info">संस्करण जानकारी</string>
+    <string name="piko_pref_patches">पैच</string>
+    <string name="piko_pref_included">शामिल किया गया</string>
+    <string name="piko_pref_excluded">छोड़ा गया</string>
+
+</resources>
