@@ -14,6 +14,7 @@ on:
 permissions:
   contents: write
   issues: write
+  packages: write
   pull-requests: write
 
 jobs:
@@ -35,13 +36,7 @@ jobs:
       - name: Build with Gradle
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew generatePatchesFiles clean
-
-      # - name: Upload patches jar
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: patches
-      #     path: build/libs/*.jar
+        run: ./gradlew buildAndroid clean
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -52,14 +47,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          fingerprint: ${{ vars.GPG_FINGERPRINT }}
+
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm exec semantic-release
-
-      - name: Run apk build
-        run: |          
-          curl -X POST https://api.github.com/repos/crimera/piko-builds/dispatches \
-          -H 'Accept: application/vnd.github+json' \
-          -H "Authorization: Bearer ${{ secrets.ACCESS_TOKEN }}" \
-          -d '{"event_type": "build"}'
