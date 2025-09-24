@@ -80,7 +80,7 @@ public class NativeDownloader {
 
             int i = 1;
             for (Media media : mediaData) {
-                Utils.downloadFile(media.url, filename + (index + 1), media.ext);
+                Utils.downloadFile(media.url, filename + i, media.ext);
                 i++;
             }
             dialogInterface.dismiss();
