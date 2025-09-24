@@ -71,55 +71,64 @@ public class DatabasePatch {
             database = SQLiteDatabase.openDatabase(DATABASE_PATH, null, SQLiteDatabase.OPEN_READWRITE);
             if (database != null && database.isOpen()) {
                 for (int i = 0; i < checkedItems.length; i++) {
+                    List<String> keywords = new ArrayList<String>();
                     if (checkedItems[i]) {
-                        String entry_id_str = "";
-                        String entry_id_str2 = "";
                         switch (i) {
                             case 0: {
-                                entry_id_str = "promoted%";
-                                entry_id_str2 = "rtb%";
+                                keywords.add("promoted%");
+                                keywords.add("rtb%");
+                                keywords.add("%promoted%");
                                 break;
                             }
                             case 1: {
-                                entry_id_str = "who-to-follow%";
+                                keywords.add("who-to-follow%");
                                 break;
                             }
                             case 2: {
-                                entry_id_str = "who-to-subscribe%";
+                                keywords.add("who-to-follow%");
+                            //    entry_id_str = "who-to-subscribe%";
                                 break;
                             }
                             case 3: {
-                                entry_id_str = "community-to-join%";
+                                keywords.add("community-to-join%");
+                               // entry_id_str = "community-to-join%";
                                 break;
                             }
                             case 4: {
-                                entry_id_str = "bookmarked%";
+                                keywords.add("bookmarked%");
+                                //entry_id_str = "bookmarked%";
                                 break;
                             }
                             case 5: {
-                                entry_id_str = "pinned-tweets%";
+                                keywords.add("tweets%");
+                                //entry_id_str = "pinned-tweets%";
                                 break;
                             }
                             case 6: {
-                                entry_id_str = "tweetdetailrelatedtweets%";
+                                keywords.add("tweetdetailrelatedtweets%");
+                                //entry_id_str = "tweetdetailrelatedtweets%";
                                 break;
                             }
                             case 7: {
-                                entry_id_str = "messageprompt%";
+                                keywords.add("messageprompt%");
+                                //entry_id_str = "messageprompt%";
                                 break;
                             }
                             case 8: {
-                                entry_id_str = "stories%";
+                                keywords.add("stories%");
+                                //entry_id_str = "stories%";
                                 break;
                             }
                         }
-                        int deletedRows = 0;
-                        if (entry_id_str != "") {
-                            deletedRows = database.delete("timeline", "entity_id LIKE ?", new String[]{entry_id_str});                        }
-                        if (entry_id_str2 != "") {
-                            int deletedRows2 = database.delete("timeline", "entity_id LIKE ?", new String[]{entry_id_str2});
-                            deletedRows+=deletedRows2;
+
+                        StringBuilder selection = new StringBuilder();
+                        String[] selectionArgs = new String[keywords.size()];
+                        for (int ind = 0; ind < keywords.size(); ind++) {
+                            if (ind > 0) selection.append(" OR ");
+                            selection.append("entity_id LIKE ?");
+                            selectionArgs[ind] = "%" + keywords.get(ind) + "%";
                         }
+                        int deletedRows = database.delete("timeline", selection.toString(), selectionArgs);
                         result.append("• "+listItems[i]+" = "+String.valueOf(deletedRows)+"\n");
                     }
                 }

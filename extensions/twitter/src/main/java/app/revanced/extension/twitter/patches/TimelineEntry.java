@@ -2,7 +2,7 @@ package app.revanced.extension.twitter.patches;
 
 import com.twitter.model.json.timeline.urt.JsonTimelineEntry;
 import com.twitter.model.json.core.JsonSensitiveMediaWarning;
-
+import com.twitter.model.json.timeline.urt.JsonTimelineModuleItem;
 import app.revanced.extension.twitter.Pref;
 import app.revanced.extension.twitter.settings.SettingsStatus;
 
@@ -28,7 +28,7 @@ public class TimelineEntry {
         String[] split = entryId.split("-");
         String entryId2 = split[0];
         if (!entryId2.equals("cursor") && !entryId2.equals("Guide") && !entryId2.startsWith("semantic_core")) {
-            if ((entryId.contains("promoted") || ((entryId2.equals("conversationthread") && split.length == 3))) && hideAds) {
+            if (entryId.contains("promoted") || ((entryId2.equals("conversationthread") && split.length == 3)) && hideAds) {
                 return true;
             }
             if ((entryId2.equals("superhero") || entryId2.equals("eventsummary")) && hideAds) {
@@ -81,6 +81,18 @@ public class TimelineEntry {
 
         }
         return jsonTimelineEntry;
+    }
+
+    public static JsonTimelineModuleItem checkEntry(JsonTimelineModuleItem jsonTimelineModuleItem) {
+        try {
+            String entryId = jsonTimelineModuleItem.a;
+            if(isEntryIdRemove(entryId)){
+                return null;
+            }
+        } catch (Exception unused) {
+
+        }
+        return jsonTimelineModuleItem;
     }
 
     public static JsonSensitiveMediaWarning sensitiveMedia(JsonSensitiveMediaWarning jsonSensitiveMediaWarning) {

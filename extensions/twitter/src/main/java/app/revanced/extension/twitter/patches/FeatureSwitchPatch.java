@@ -24,7 +24,6 @@ public class FeatureSwitchPatch {
     }
 
     private static void hideGoogleAds() { addFlag("ssp_ads_dsp_client_context_enabled", !Pref.hideAds()); }
-
     private static void viewCount() {
         addFlag("view_counts_public_visibility_enabled", Pref.hideViewCount());
     }
