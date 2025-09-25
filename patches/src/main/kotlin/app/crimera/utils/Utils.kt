@@ -29,33 +29,6 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.Reference
 import org.w3c.dom.Element
 
-fun ResourcePatchContext.mergeXmlResources(
-    sourceResourceDirectory: String,
-    vararg resourceGroups: ResourceGroup,
-    tagName: String = "resources",
-) {
-    for (resourceGroup in resourceGroups) {
-        resourceGroup.resources.forEach { resource ->
-            val resourceFile = "${resourceGroup.resourceDirectoryName}/$resource"
-            val targetFile = get("res").resolve(resourceFile)
-
-            // If target file doesn't exist, use copyResources as fallback
-            if (!targetFile.exists()) {
-                copyResources(sourceResourceDirectory, resourceGroup)
-                return@forEach
-            }
-
-            inputStreamFromBundledResource(sourceResourceDirectory, resourceFile)?.let { inputStream ->
-                tagName
-                    .copyXmlNode(
-                        document(inputStream),
-                        document("res/$resourceFile"),
-                    ).close()
-            } ?: throw PatchException("Could not find $resourceFile in $sourceResourceDirectory")
-        }
-    }
-}
-
 fun ResourcePatchContext.replaceXmlResources(
     sourceResourceDirectory: String,
     vararg resourceGroups: ResourceGroup,

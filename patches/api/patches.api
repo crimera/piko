@@ -319,8 +319,6 @@ public final class app/crimera/utils/UtilsKt {
 	public static final fun getMethodName (Lapp/revanced/patcher/patch/BytecodePatchContext;Lapp/revanced/patcher/Fingerprint;I)Ljava/lang/String;
 	public static final fun getReference (Lapp/revanced/patcher/patch/BytecodePatchContext;Lapp/revanced/patcher/Fingerprint;I)Lcom/android/tools/smali/dexlib2/iface/reference/Reference;
 	public static final fun instructionToString (Lcom/android/tools/smali/dexlib2/iface/instruction/Instruction;)Ljava/lang/String;
-	public static final fun mergeXmlResources (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;Ljava/lang/String;)V
-	public static synthetic fun mergeXmlResources$default (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;Ljava/lang/String;ILjava/lang/Object;)V
 	public static final fun replaceStringsInFile (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;Ljava/util/Map;)V
 	public static final fun replaceXmlResources (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;)V
 }
