@@ -2,13 +2,12 @@ package app.revanced.extension.twitter.patches.links;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-
-import java.util.List;
+import app.revanced.extension.shared.Utils;
 
 @SuppressWarnings("unused")
 @SuppressLint("DiscouragedApi")
 public class HandleCustomDeepLinksPatch {
-    private static List<String> customLinkHosts = null;
+    private static String[] customLinkHosts = null;
 
     public static void rewriteCustomDeepLinks(Activity activity) {
         var intent = activity.getIntent();
@@ -16,22 +15,21 @@ public class HandleCustomDeepLinksPatch {
         var uri = intent.getData();
         if (uri == null) return;
 
-        if (customLinkHosts == null) {
-            int hostsResourceId = activity.getResources().getIdentifier(
-                    "piko_custom_deeplink_hosts",
-                    "array",
-                    activity.getPackageName());
-            String[] hosts = activity.getResources().getStringArray(hostsResourceId);
+        if (customLinkHosts == null)
+            customLinkHosts = Utils.getResourceStringArray("piko_custom_deeplink_hosts");
 
-            customLinkHosts = List.of(hosts);
+        String host = uri.getHost();
+
+        for (String customHost : customLinkHosts) {
+            if (host.endsWith(customHost)) {
+                // Rewrite host
+                var newUri = uri.buildUpon()
+                        .authority("x.com")
+                        .build();
+
+                intent.setData(newUri);
+                return;
+            }
         }
-
-        if (!customLinkHosts.contains(uri.getHost())) return;
-
-        var newUri = uri.buildUpon()
-                .authority("x.com")
-                .build();
-
-        intent.setData(newUri);
     }
 }
