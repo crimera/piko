@@ -1,3 +1,14 @@
+## [2.0.0-dev.2](https://github.com/crimera/piko/compare/v2.0.0-dev.1...v2.0.0-dev.2) (2025-09-27)
+
+### Bug Fixes
+
+* **Twitter:** Fix remove ads on replies ([8fda05e](https://github.com/crimera/piko/commit/8fda05ec94ffc7a48dfc1eb3a17bb14f6328ca6f))
+* **Universal:** Set version code as int ([ee83df7](https://github.com/crimera/piko/commit/ee83df7f8f18cf4cf2306b0a662a845ed565e106))
+
+### Refactors
+
+* **Twitter:** potential fix for resource compilation failing in manager ([fa0dfac](https://github.com/crimera/piko/commit/fa0dfac2b959ba9a958bb458cc4572f28ff94902))
+
 ## [2.0.0-dev.1](https://github.com/crimera/piko/compare/v1.59.0...v2.0.0-dev.1) (2025-09-24)
 
 ### ⚠ BREAKING CHANGES
