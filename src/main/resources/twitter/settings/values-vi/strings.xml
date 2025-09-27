@@ -141,15 +141,22 @@
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Tuỳ chỉnh giao diện</string>
-    <string name="piko_pref_customisation_profiletabs">Ẩn các tab hồ sơ</string>
-    <string name="piko_pref_customisation_timelinetabs">Tab dòng thời gian</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">Ẩn \"Dành cho bạn\"</string>
-    <string name="piko_pref_customisation_timelinetabs_following">Ẩn \"Đang theo dõi\"</string>
+    <string name="piko_pref_customisation_profiletabs">Ẩn trong profile</string>
+    <string name="piko_pref_customisation_timelinetabs">Ẩn trong dòng thời gian</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">Xóa \"Dành cho bạn\"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">Xóa \"Đang theo dõi\"</string>
     <string name="piko_pref_customisation_timelinetabs_both">Hiện cả hai</string>
-    <string name="piko_pref_customisation_sidebartabs">Ẩn các mục trên thanh bên</string>
-    <string name="piko_pref_customisation_navbartabs">Ẩn các mục trên thanh điều hướng</string>
-    <string name="piko_pref_customisation_inlinetabs">Ẩn các mục trên thanh Inline?</string>
-
+    <string name="piko_pref_customisation_sidebartabs">Ẩn trong cạnh bên</string>
+    <string name="piko_pref_customisation_navbartabs">Ẩn trong thanh điều hướng</string>
+    <string name="piko_pref_customisation_inlinetabs">Inline bar items to hide</string>
+    <string name="piko_pref_customisation_exploretabs">Ẩn trong thanh bài post</string>
+    <string name="piko_pref_customisation_searchtabs">Ẩn trong tìm kiếm</string>
+    <string name="piko_pref_customisation_reply_sorting">Ưu tiện thị trả lời của</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">Theo lựa chọn gần nhất</string>
+    <string name="piko_pref_customisation_post_font_size">Kích thước font chữ trong bài post</string>
+    <string name="piko_pref_customisation_search_type_ahead">Ẩn trong phần gợi ý tìm kiếm</string>
+  
+                                                                                     
     <!-- Logging Settings -->
     <string name="piko_title_logging">Gỡ lỗi</string>
     <string name="piko_pref_server_response_logging">Xuất tệp tin gỡ lỗi</string>
@@ -185,6 +192,5 @@
     <string name="piko_pref_search_type_ahead_ordered_section">Sắp xếp lựa chọn</string>
 
     <string name="piko_settings_supported_links">Mở qua app với những liên kết hỗ trợ</string>
-
 
 </resources>
