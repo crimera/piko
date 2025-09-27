@@ -1,3 +1,72 @@
+## [1.32.0](https://github.com/chemchetchagio/piko/compare/v1.31.0...v1.32.0) (2025-09-27)
+
+### Bug Fixes
+
+* Add back settings for the custom sharemenu buttons ([bc7e777](https://github.com/chemchetchagio/piko/commit/bc7e777e59091801238d4692823415b0d7d2855b))
+* Add support for 10.83.0 releases ([9344d52](https://github.com/chemchetchagio/piko/commit/9344d527d1ec5e0fd812bd835c45304a6619df95))
+* Adding debug menu patch results in a crash ([caf82eb](https://github.com/chemchetchagio/piko/commit/caf82ebd95bd113dbd5cacda1deffa9194cb280b))
+* **Bring back twitter:** Resource compilation fails on ReVanced Manager ([a364bec](https://github.com/chemchetchagio/piko/commit/a364becc7f6f70724c37b9499e79885fb09f0436))
+* **Enable Reader Mode:** Specify the compatible version, show a warning instead of throwing an exception when failed ([b1c52e7](https://github.com/chemchetchagio/piko/commit/b1c52e73daabe3222e925ba5d6b866af31a35045))
+* **Remove Detailed posts:** Change the settings label from "detailed" to "related" ([3cf5f9e](https://github.com/chemchetchagio/piko/commit/3cf5f9ec9e383deb17919f2b3c5254954502c825))
+* Remove obsolete `Open browser chooser on opening links` patch ([a1e2b76](https://github.com/chemchetchagio/piko/commit/a1e2b766a872c3ee2facef1444bfa92ab4236144))
+* **Translations:** Fix unescaped strings in fr and vi ([be94c4c](https://github.com/chemchetchagio/piko/commit/be94c4c3b6785a1f9ecfdc1dbad48a4a9885a539))
+* **Twitter - copy media link + Custom download folder:** Update fingerprint to work on latest twitter release ([cc8fadb](https://github.com/chemchetchagio/piko/commit/cc8fadbac2d31139ae8b9572dd1aeb2565564e75))
+* **Twitter - Custom Downloader:** Added VideoDataClass Fingerprint ([99ff271](https://github.com/chemchetchagio/piko/commit/99ff271b3fcbf1a6f3666b97c256528435f6501c))
+* **Twitter - Custom Downloader:** Improve fingerprints ([f962310](https://github.com/chemchetchagio/piko/commit/f9623106106bd21b9b595983e8db244c8c35e227))
+* **Twitter - Log server response:** Escape single qoutes ([cedbfaf](https://github.com/chemchetchagio/piko/commit/cedbfaf77913afb81b0363207a9839ea1624fa63))
+* **Twitter:** `Hide community badges` patch ([f539260](https://github.com/chemchetchagio/piko/commit/f5392600b3e51a3c32fa3ffb4da5d751da3b8612))
+* **Twitter:** fix `Custom downloader` patch ([f4d953a](https://github.com/chemchetchagio/piko/commit/f4d953a3dc7cb8325e56e515cd38a8ab707d2162))
+* **Twitter:** fix `Custom translator` patch ([8065fa3](https://github.com/chemchetchagio/piko/commit/8065fa32019d1d1bd4c9bd116f1774e345203356))
+* **Twitter:** Fix `Customize side bar items` patch ([4664f02](https://github.com/chemchetchagio/piko/commit/4664f02c065396dc28406fe5b47478eff6b6c4aa))
+* **Twitter:** fix `Enable debug menu for posts` patch ([72a72f2](https://github.com/chemchetchagio/piko/commit/72a72f2114d0ee9fe2cac0e5eae5b03e196dd6e2))
+* **Twitter:** fix `Enable force HD videos` patch ([6d8d200](https://github.com/chemchetchagio/piko/commit/6d8d200a521375252c675117365e1fb85f701083))
+* **Twitter:** Fix `Enable Undo Posts` patch ([883b6cb](https://github.com/chemchetchagio/piko/commit/883b6cb92c52d1a475f6663bdf474518280b4da4))
+* **Twitter:** Fix `Hide nudge button` patch ([87ceb49](https://github.com/chemchetchagio/piko/commit/87ceb49f841c99012fcbbc315edc1c4657376e37))
+* **Twitter:** fix `Hide nudge button` patch (again) ([be2cd9d](https://github.com/chemchetchagio/piko/commit/be2cd9de0aa2545274369ed0c724ffead77148ee))
+* **Twitter:** Fix App icon error toast ([2997b56](https://github.com/chemchetchagio/piko/commit/2997b56f13c37681acbf89efcbd12647ee1c5056))
+* **Twitter:** Fix Settings crash ([015c5bd](https://github.com/chemchetchagio/piko/commit/015c5bdd1247ec6263fa194ca6e580690e13e223))
+* **Twitter:** Fix share menu patches ([ba561be](https://github.com/chemchetchagio/piko/commit/ba561be67cf5d854cfff477a3a80b85928a4170a))
+* **Twitter:** Fix unescaped characters ([829eedd](https://github.com/chemchetchagio/piko/commit/829eedd90eabc13575b49da9cc5551f894787b76))
+* **ui:** adjust monet-light colors to have a white background ([0906e93](https://github.com/chemchetchagio/piko/commit/0906e93027747e43becd1d94bca24f54ecc97683))
+* Unescaped apostrophe ([487e992](https://github.com/chemchetchagio/piko/commit/487e99259b772cbf44f09028807db223f464df85))
+
+### Features
+
+* **Settings:** Add a description to "Native features" page ([be7aa54](https://github.com/chemchetchagio/piko/commit/be7aa5472c9b12ff6207992b21292b4fb4d337cf))
+* **Translations:** Add italian translation ([88e22fb](https://github.com/chemchetchagio/piko/commit/88e22fbb64eae5b2b185c0c785d75a29bb342458))
+* **Translations:** French translation added ([a6f650c](https://github.com/chemchetchagio/piko/commit/a6f650c3cbea3b3964fc4b58962067e16609a848))
+* **Translations:** Korean translation added ([492e631](https://github.com/chemchetchagio/piko/commit/492e6312df05d3bdae618e350a929a8b22914c98))
+* **Translations:** Update `Japanese` ([80282f0](https://github.com/chemchetchagio/piko/commit/80282f0e4eb3b6f1cde7eb6e30f7d00ba9b26a0c))
+* **Translations:** Update `Japanese` ([a7da7d7](https://github.com/chemchetchagio/piko/commit/a7da7d7468203a3244496b4ed692a8d09da18b45))
+* **Translations:** Update `Japanese` ([039aac3](https://github.com/chemchetchagio/piko/commit/039aac304215858769c794684f837719edad9790))
+* **Translations:** Update `Polish` ([97b3790](https://github.com/chemchetchagio/piko/commit/97b379029deba1044436cb5a983335b515e7f959))
+* **Translations:** Update `Polish` ([e49393e](https://github.com/chemchetchagio/piko/commit/e49393eefe75118c29575324f5832c7cc3589530))
+* **Translations:** Update `Polish` ([d81f93c](https://github.com/chemchetchagio/piko/commit/d81f93cff2c31c9fe82ff8e43598ab90e6d899ab))
+* **Twitter:** Added 'Native reader mode'  patch ([308e1e6](https://github.com/chemchetchagio/piko/commit/308e1e6ae392eb6c0b9ade6383957fd2983e68f5))
+* **Twitter:** Added `Hide community badges` patch ([57936a1](https://github.com/chemchetchagio/piko/commit/57936a167eb23eeb992ca39015149e71e04270c5))
+* **Twitter:** Added `Log server response` patch ([bff4363](https://github.com/chemchetchagio/piko/commit/bff4363a56386ec6e1c80f2a57bdc70a28827be6))
+* **Twitter:** Added `Remove Todays news` patch ([8324633](https://github.com/chemchetchagio/piko/commit/8324633509fdf61756751fdde67e5752ff3dee5c))
+* **Twitter:** Added `Show post source label` patch ([931bc76](https://github.com/chemchetchagio/piko/commit/931bc762c3fc03535bf427b3e691f09e76271c85))
+* **Twitter:** support custom deeplink hosts ([499cc5e](https://github.com/chemchetchagio/piko/commit/499cc5ea3e32d3e6d551755df2f94b7dbc3da9af))
+
+### Updates
+
+* Improve adding new buttons in share menu ([16cc3bd](https://github.com/chemchetchagio/piko/commit/16cc3bd01c03bfc800d61f0844b455c5d086422a))
+* **Translations:** Add French & Korean to Language List ([#567](https://github.com/chemchetchagio/piko/issues/567)) ([6e139be](https://github.com/chemchetchagio/piko/commit/6e139be56dbc4f754c892d7c8ba2ed28ee8fa67f))
+* **Translations:** New translations for `pt-br` ([850aa0d](https://github.com/chemchetchagio/piko/commit/850aa0d17e0cd9a83a9c897be11b45784a82860a))
+* **Translations:** Update `Japanese` ([c28d9c7](https://github.com/chemchetchagio/piko/commit/c28d9c7850794cb8aede686201e5d80482c42f1e))
+* **Translations:** Update `Polish` ([973391d](https://github.com/chemchetchagio/piko/commit/973391d6e0cfb1735dbc2102a419b9df783fa8f9))
+* **Translations:** Update `Polish` ([#613](https://github.com/chemchetchagio/piko/issues/613)) ([b6ea9de](https://github.com/chemchetchagio/piko/commit/b6ea9dec045eeb5172fc1d01b1365929e127b4b0))
+
+### Refactors
+
+* **Twitter:** consolidate native features ([79a37af](https://github.com/chemchetchagio/piko/commit/79a37afded871a185545afcd1c6a36815ec89b41))
+* **Twitter:** Move redirect BM to settings patch dependancy ([4dbc491](https://github.com/chemchetchagio/piko/commit/4dbc49198ecd3a10d288f8f7cebcbca255aaa9b7))
+* **Twitter:** Moved to `models` approach ([4bc56cb](https://github.com/chemchetchagio/piko/commit/4bc56cbb3de7147706786e186ebf7f2ea9df15a2))
+* **Twitter:** refactor button class Hook ([2bf411a](https://github.com/chemchetchagio/piko/commit/2bf411a61fd5181d5266d1496becf7b93f4d0d08))
+* **Twitter:** refactor strings-pl ([9aacfa1](https://github.com/chemchetchagio/piko/commit/9aacfa1baf7ed0301850f30ae8053c101ef8b27b))
+* **Twitter:** Removed unused string from pt-BR ([cdb2067](https://github.com/chemchetchagio/piko/commit/cdb2067360944309a9156b71bf9776457c44c49a))
+
 ## [1.59.0](https://github.com/crimera/piko/compare/v1.58.1...v1.59.0) (2025-09-11)
 
 ### Features
