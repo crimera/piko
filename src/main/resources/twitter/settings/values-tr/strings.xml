@@ -1,107 +1,195 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Premium Ayarları -->
     <string name="piko_title_premium">Premium</string>
-    <string name="piko_pref_reader_mode">Okuyucu modunu etkinleştir</string>
-    <string name="piko_pref_reader_mode_desc">Uzun iş parçacıklarında "okuyucu modunu" etkinleştirir</string>
-    <string name="piko_pref_undo_posts">Gönderileri geri almayı etkinleştir</string>
-    <string name="piko_pref_undo_posts_desc">Gönderileri yayınlamadan önce geri alma olanağını etkinleştirir</string>
-    <string name="piko_pref_undo_posts_btn">Gönderi ayarlarını geri al</string>
-    <string name="piko_pref_icon_n_navbar_btn">Uygulama simgesi ve gezinme çubuğu özelleştirme ayarları</string>
+    <string name="piko_pref_reader_mode">Okuyucu Modu</string>
+    <string name="piko_pref_reader_mode_desc">Uzun başlıklarda 'Okuyucu Modu'nu etkinleştirir.</string>
+    <string name="piko_pref_undo_posts">Gönderiyi Geri Al</string>
+    <string name="piko_pref_undo_posts_desc">Gönderiyi paylaşmadan önce geri alma özelliğini etkinleştirir.</string>
+    <string name="piko_pref_undo_posts_btn">Gönderi Geri Alma Ayarları</string>
+    <string name="piko_pref_icon_n_navbar_btn">Uygulama Simgesi ve Gezinti Çubuğu Özelleştirme Ayarları</string>
+    <string name="piko_pref_enable_force_pip">PiP Modu Otomatik</string>
+    <string name="piko_pref_enable_force_pip_desc">Uygulamayı kapattığınızda PiP modunu otomatik olarak etkinleştirir.</string>
 
-    <string name="piko_title_download">İndir</string>
-    <string name="piko_pref_video_download">Video indirmeyi etkinleştir</string>
-    <string name="piko_pref_download">İndirme dizinini değiştir</string>
-    <string name="piko_pref_download_path">Ortak klasör</string>
-    <string name="piko_pref_download_path_desc">Video indirmeleri için kullanılacak ortak klasör</string>
-    <string name="piko_pref_download_folder">Alt klasörü indir</string>
-    <string name="piko_pref_download_folder_desc">Videoların indirileceği alt klasör ([PublicFolder]/[Subfolder])</string>
-    <string name="piko_pref_download_media_link_handle">İndirme tercihi</string>
-    <string name="piko_pref_download_media_link_handle_download">Direkt indirme</string>
-    <string name="piko_pref_download_media_link_handle_copy_link">Direkt kopya medya bağlantısı</string>
-    <string name="piko_pref_download_media_link_handle_always_ask">Her zaman sor</string>
-    <string name="piko_pref_download_media_link_handle_copy_media_link">Medya bağlantısını kopyala</string>
-    <string name="piko_pref_download_media_link_handle_share_media_link">Medya bağlantısını paylaş</string>
+    <!-- İndirme Ayarları -->
+    <string name="piko_title_download">İndirme</string>
+    <string name="piko_pref_video_download">Video İndirme</string>
+    <string name="piko_pref_download">İndirme Klasörünü Değiştir</string>
+    <string name="piko_pref_download_path">Ortak Klasör</string>
+    <string name="piko_pref_download_path_desc">Video indirmeleri için kullanılacak ortak klasör.</string>
+    <string name="piko_pref_download_folder">Alt İndirme Klasörü</string>
+    <string name="piko_pref_download_folder_desc">Videoların indirileceği alt klasör ([OrtakKlasör]/[AltKlasör]).</string>
+    <string name="piko_pref_download_media_link_handle">İndirme Tercihi</string>
+    <string name="piko_pref_download_media_link_handle_download">Doğrudan İndir</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">Medya Linkini Doğrudan Kopyala</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">Her Zaman Sor</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">Medya Linkini Kopyala</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">Medya Linkini Paylaş</string>
 
+    <!-- Yerel Özellikler -->
+    <string name="piko_title_native">Yerel Özellikler</string>
+    <string name="piko_pref_native_page_desc">Bu Piko yerel özellikleri, gönderilerin paylaşım menüsünde kullanılabilir.</string>
+    <string name="piko_title_native_downloader">Yerel İndirici</string>
+    <string name="piko_title_native_downloader_toggle">Yerel İndiriciyi Etkinleştir</string>
+    <string name="piko_pref_native_downloader_alert_title">Medya İndir</string>
+    <string name="piko_pref_native_downloader_download_all">Tümünü İndir</string>
+    <string name="piko_pref_native_downloader_no_media">Medya Bulunamadı</string>
+    <string name="piko_pref_native_downloader_filename_title">Dosya Adı Desenini Kaydet</string>
+
+    <string name="piko_title_native_translator">Yerel Gönderi Çevirisi</string>
+    <string name="piko_native_translator_toggle">Yerel Gönderi Çevirisini Etkinleştir</string>
+    <string name="piko_native_translator_provider">Çeviri Sağlayıcıları</string>
+    <string name="piko_native_translator_to_lang">Şu Dile Çevir</string>
+    <string name="piko_native_translator_zero_text">Çevrilecek metin bulunamadı.</string>
+    <string name="piko_native_translator_google">Google Çevirici</string>
+    <string name="piko_native_translator_google_v2">Google Çevirici V2</string>
+
+    <string name="piko_title_native_reader_mode">Okuyucu Modu</string>
+    <string name="piko_native_reader_mode_grok_thread">Bu Başlığı Analiz Et</string>
+    <string name="piko_native_reader_mode_grok_author">Yazar Hakkında Daha Fazla Bilgi</string>
+    <string name="piko_native_reader_mode_source">Kaynak</string>
+    <string name="piko_native_reader_mode_published">Yayınlanma Tarihi</string>
+    <string name="piko_native_reader_mode_total_post">Toplam Gönderi</string>
+    <string name="piko_native_reader_mode_pref_text_only_mode">Sadece Metin Modu</string>
+    <string name="piko_native_reader_mode_pref_hide_quoted_posts">Alıntılanan Gönderileri Gizle</string>
+    <string name="piko_native_reader_mode_pref_no_grok">Grok Analizi Yok</string>
+    <string name="piko_native_reader_mode_copy_post">Gönderi Linkini Kopyala</string>
+    <string name="piko_native_reader_mode_cache_delete">Okuyucu Modu Önbelleğini Sil</string>
+    <string name="piko_native_reader_mode_cache_delete_success">Önbellek başarıyla silindi.</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">Önbellek silme işlemi başarısız oldu.</string>
+
+    <!-- Reklam Ayarları -->
     <string name="piko_title_ads">Reklamlar</string>
-    <string name="piko_pref_hide_promoted_posts">Tanıtılan gönderileri gizle</string>
-    <string name="piko_pref_hide_g_ads">Google reklamlarını gizle</string>
-    <string name="piko_pref_wtf_section">”Kimi takip etmeli” bölümünü gizle</string>
-    <string name="piko_pref_cts_section">”Abone olacak içerik oluşturucular” bölümünü gizle</string>
-    <string name="piko_pref_ctj_section">”Katılılacak topluluk” bölümünü gizle</string>
-    <string name="piko_pref_ryb_section">"Yer işaretinizi yeniden gözden geçirin" bölümünü gizle</string>
-    <string name="piko_pref_pinned_posts_section">”Takipçilerin sabitlenmiş gönderileri” bölümünü gizle</string>
-    <string name="piko_pref_hide_detailed_posts">Ayrıntılı gönderileri gizle (yanıtlarda)</string>
-    <string name="piko_pref_hide_trends">Tanıtılan trendleri gizle</string>
-    <string name="piko_pref_hide_premium_prompt">Mesaj istemlerini gizle</string>
-    <string name="piko_pref_del_from_db">Girişleri veritabanından sil</string>
-    <string name="piko_pref_db_not_found">Veritabanı bulunamadı</string>
-    <string name="piko_pref_db_not_open">Veritabanı açılmadı</string>
-    <string name="piko_pref_db_del_items">Silinmiş öğeler</string>
+    <string name="piko_pref_hide_promoted_posts">Öne Çıkan Gönderiler</string>
+    <string name="piko_pref_hide_g_ads">Google Reklamları</string>
+    <string name="piko_pref_hide_main_event">Ana Etkinlik (Keşfet)</string>
+    <string name="piko_pref_hide_superhero_event">Süper Kahraman Etkinliği (Keşfet)</string>
+    <string name="piko_pref_hide_videos_for_you">Senin İçin Videolar (Keşfet)</string>
+    <string name="piko_pref_wtf_section">"Kimi Takip Etmeli" Bölümü</string>
+    <string name="piko_pref_cts_section">"Abone Olunacak İçerik Üreticiler" Bölümü</string>
+    <string name="piko_pref_ctj_section">"Katılınacak Topluluk" Bölümü</string>
+    <string name="piko_pref_ryb_section">"Yer İmini Tekrar Ziyaret Et" Bölümü</string>
+    <string name="piko_pref_pinned_posts_section">"Takipçiler Tarafından Sabitlenen Gönderiler" Bölümü</string>
+    <string name="piko_pref_hide_detailed_posts">İlgili Gönderiler (Yanıtlarda)</string>
+    <string name="piko_pref_hide_trends">Öne Çıkan Gündemler</string>
+    <string name="piko_pref_hide_premium_prompt">Mesaj İstemleri</string>
+    <string name="piko_pref_hide_todays_news">Bugünün Haberleri</string>
+    <string name="piko_pref_del_from_db">Veritabanından Girişleri Sil</string>
+    <string name="piko_pref_db_not_found">Veritabanı Bulunamadı</string>
+    <string name="piko_pref_db_not_open">Veritabanı Açılmadı</string>
+    <string name="piko_pref_db_del_items">Silinen Öğeler</string>
+    <string name="piko_pref_hide_premium_upsell">Premium Yükseltme</string>
+    <string name="piko_pref_hide_premium_upsell_desc">Ana zaman akışında premium yükseltmesini kaldırır.</string>
+    <string name="piko_pref_top_people_search">Aramada Öne Çıkan Kişiler</string>
+    <string name="piko_pref_top_people_search_desc">Arama sonrası kişi bölümünü kaldırır.</string>
 
-    <string name="piko_title_misc">Çeşitli</string>
-    <string name="piko_pref_chirp_font">Chirp yazı tipini etkinleştir</string>
-    <string name="piko_pref_hide_fab">Kayan eylem düğmesini gizle</string>
-    <string name="piko_pref_hide_fab_menu">Kayan eylem düğmesi menüsünü gizle</string>
-    <string name="piko_pref_rec_users">Önerilen kullanıcıları gizle</string>
-    <string name="piko_pref_hide_view_count">Görüntüleme sayısını gizle</string>
-    <string name="piko_pref_custom_share_domain">Özel paylaşım alanı</string>
-    <string name="piko_pref_custom_share_domain_desc">Tweet paylaşırken kullanılacak alan adı</string>
-    <string name="piko_pref_feature_flags">Özellik bayrakları</string>
-    <string name="piko_pref_edit_flag_title">Bayrağı düzenle</string>
-    <string name="piko_pref_add_flag_title">Bayrak ekle</string>
-    <string name="piko_pref_show_sensitive_media">Hassas medyayı göster</string>
-    <string name="piko_pref_selectable_text">Seçilebilir metin</string>
-    <string name="piko_pref_clear_tracking_params">İzleme parametrelerini temizle</string>
-    <string name="piko_pref_unshorten_link">Kısaltılmış URL yok</string>
-    <string name="piko_pref_unshorten_link_desc">”t.co kısa url’lerinden kurtulun”</string>
-    <string name="piko_pref_round_off_numbers">Sayıları yuvarlama</string>
-    <string name="piko_pref_round_off_numbers_desc">Sayıyı K ve M olarak yuvarlar</string>
-    <string name="piko_pref_debug_menu">Gönderiler için hata ayıklama menüsünü etkinleştir</string>
+    <!-- Diğer Ayarlar -->
+    <string name="piko_title_misc">Diğer</string>
+    <string name="piko_pref_chirp_font">Chirp Fontu</string>
+    <string name="piko_pref_hide_fab">Yüzen Eylem Düğmesi</string>
+    <string name="piko_pref_hide_fab_menu">Yüzen Eylem Menü Düğmeleri</string>
+    <string name="piko_pref_rec_users">Önerilen Kullanıcılar</string>
+    <string name="piko_pref_hide_view_count">Görüntülenme Sayısı</string>
+    <string name="piko_pref_custom_share_domain">Özel Paylaşım Alanı</string>
+    <string name="piko_pref_custom_share_domain_desc">Tweet paylaşırken kullanılacak alan adı.</string>
+    <string name="piko_pref_show_sensitive_media">Hassas Medyayı Göster</string>
+    <string name="piko_pref_selectable_text">Seçilebilir Metin</string>
+    <string name="piko_pref_clear_tracking_params">Takip Parametrelerini Temizle</string>
+    <string name="piko_pref_unshorten_link">Kısa URL Yok</string>
+    <string name="piko_pref_unshorten_link_desc">t.co kısa bağlantılarından kurtulun.</string>
+    <string name="piko_pref_round_off_numbers">Sayıları Yuvarla</string>
+    <string name="piko_pref_round_off_numbers_desc">Sayıları K ve M olarak yuvarlar.</string>
+    <string name="piko_pref_debug_menu">Gönderiler İçin Hata Ayıklama Menüsü</string>
+    <string name="piko_pref_quick_settings">Hızlı Ayarları Etkinleştir</string>
+    <string name="piko_pref_quick_settings_summary">Yan menüde hızlı ayarlar düğmesi ekler.</string>
 
-    <string name="piko_title_timeline">Zaman çizelgesi</string>
-    <string name="piko_pref_disable_auto_timeline_scroll">Başlatma sırasında otomatik zaman çizelgesi kaydırmayı devre dışı bırak</string>
-    <string name="piko_pref_hide_live_threads">Canlı konuları gizle</string>
-    <string name="piko_pref_hide_live_threads_desc">Zaman çizelgesindeki canlı bölümü gizler</string>
-    <string name="piko_pref_hide_banner">”Banner’ı gizle”</string>
-    <string name="piko_pref_hide_banner_desc">Yeni gönderileri gizle hapı</string>
-    <string name="piko_pref_hide_bmk_timeline">Yer işareti simgesini zaman çizelgesinde gizle</string>
-    <string name="piko_pref_force_translate">Çeviriyi etkinleştirmeye zorla</string>
-    <string name="piko_pref_force_translate_desc">Tüm gönderiler için çeviri seçeneğini edinin</string>
-    <string name="piko_pref_hide_quick_promote">Tanıt düğmesini gizle</string>
-    <string name="piko_pref_hide_quick_promote_desc">Kişisel gönderilerin altındaki tanıtım düğmesini gizler</string>
-    <string name="piko_pref_show_poll_result">Anket sonuçlarını göster</string>
-    <string name="piko_pref_show_poll_result_desc">Oy vermeden anket sonuçlarını görüntüleyin</string>
-    <string name="piko_pref_hide_immersive_player">Sürükleyici oynatıcıyı gizle</string>
-    <string name="piko_pref_hide_immersive_player_desc">Video oynatıcıda daha fazla video için yukarı kaydırmayı kaldırır</string>
-    <string name="piko_pref_hide_hidden_replies">Gizli yanıtları gizle</string>
+    <!-- Özellik Bayrakları Ayarları -->
+    <string name="piko_title_feature_flags">Özellik Bayrakları</string>
+    <string name="piko_pref_feature_flags">Özellik Bayrakları Ekle</string>
+    <string name="piko_pref_edit_flag_title">Bayrağı Düzenle</string>
+    <string name="piko_pref_add_flag_title">Bayrak Ekle</string>
+    <string name="piko_pref_search_flags">Bayrakları Ara</string>
 
-    <string name="piko_title_customisation">Özelleştir</string>
-    <string name="piko_pref_customisation_profiletabs">Gizlenecek profil sekmeleri</string>
-    <string name="piko_pref_customisation_timelinetabs">Zaman çizelgesi sekmeleri</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">\"Sizin İçin\"i gizle</string>
-    <string name="piko_pref_customisation_timelinetabs_following">\"Takip Ediliyor\"u gizle</string>
-    <string name="piko_pref_customisation_timelinetabs_both">Her ikisini de göster</string>
-    <string name="piko_pref_customisation_sidebartabs">Gizlenecek kenar çubuğu öğeleri</string>
-    <string name="piko_pref_customisation_navbartabs">Gizlenecek gezinme çubuğu öğeleri</string>
-    <string name="piko_pref_customisation_inlinetabs">Gizlenecek satır içi çubuk öğeleri</string>
+    <!-- Zaman Akışı Ayarları -->
+    <string name="piko_title_timeline">Zaman Akışı</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">Açılışta Otomatik Zaman Akışı Kaydırmasını Devre Dışı Bırak</string>
+    <string name="piko_pref_show_post_source">Gönderi Kaynağı Etiketini Göster</string>
+    <string name="piko_pref_show_post_source_desc">Gönderi bilgisi açılırken gecikme olabilir ve etiket sadece herkese açık gönderilerde gösterilecektir.</string>
+    <string name="piko_pref_hide_live_threads">Canlı Başlıklar</string>
+    <string name="piko_pref_hide_live_threads_desc">Zaman akışında canlı bölümü gizler.</string>
+    <string name="piko_pref_hide_banner">Afiş</string>
+    <string name="piko_pref_hide_banner_desc">Yeni gönderiler bildirimini gizler.</string>
+    <string name="piko_pref_hide_bmk_timeline">Zaman Akışında Yer İmi Simgesi</string>
+    <string name="piko_pref_force_translate">Çeviriyi Zorla Etkinleştir</string>
+    <string name="piko_pref_force_translate_desc">Tüm gönderiler için çeviri seçeneğini sunar.</string>
+    <string name="piko_pref_hide_quick_promote">Tanıtım Düğmesi</string>
+    <string name="piko_pref_hide_quick_promote_desc">Kendi gönderilerinizdeki tanıtım butonunu gizler.</string>
+    <string name="piko_pref_show_poll_result">Anket Sonuçlarını Göster</string>
+    <string name="piko_pref_show_poll_result_desc">Oylamadan anket sonuçlarını görüntüleyin.</string>
+    <string name="piko_pref_hide_immersive_player">Sürükleyici Oynatıcı</string>
+    <string name="piko_pref_hide_immersive_player_desc">Video oynatıcıda daha fazla video için yukarı kaydırmayı kaldırır.</string>
+    <string name="piko_pref_enable_vid_auto_advance">Video Otomatik Kaydırma</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Sürükleyici modda video otomatik kaydırmayı etkinleştirir.</string>
+    <string name="piko_pref_hide_hidden_replies">Gizli Yanıtlar</string>
+    <string name="piko_pref_force_hd">HD Videoları Zorla</string>
+    <string name="piko_pref_force_hd_desc">Videolar her zaman en yüksek kalitede oynatılır.</string>
+    <string name="piko_pref_hide_nudge_button">Takip Düğmesini Gizle</string>
+    <string name="piko_pref_hide_nudge_button_desc">Gönderilerde takip/abone ol/geri takip düğmelerini gizler.</string>
+    <string name="piko_pref_hide_social_proof">Takip Edenleri Gizle</string>
+    <string name="piko_pref_hide_social_proof_desc">Profildeki 'Takip edenler' bilgisini gizler.</string>
+    <string name="piko_pref_hide_community_badge">Topluluk Rozetlerini Gizle</string>
 
-    <string name="piko_title_backup">Yedekle ve yeniden yükle</string>
-    <string name="piko_pref_export">Dışa aktarma tercihleri</string>
-    <string name="piko_pref_import">Tercihleri içe aktar</string>
-    <string name="piko_pref_success">başarılı</string>
-    <string name="piko_pref_export_failed">Hata: %s dışa aktarılamadı</string>
-    <string name="piko_pref_import_failed">Hata: %s içe aktarılamadı</string>
-    <string name="piko_pref_export_no_uri">Hata: Hedef belirtilmedi</string>
-    <string name="piko_pref_import_no_uri">Hata: Dosya sağlanmadı</string>
+    <!-- Özelleştirme Ayarları -->
+    <string name="piko_title_customisation">Özelleştirme</string>
+    <string name="piko_pref_customisation_profiletabs">Gizlenecek Profil Sekmeleri</string>
+    <string name="piko_pref_customisation_timelinetabs">Gizlenecek Zaman Akışı Sekmeleri</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">"Senin İçin"i Kaldır</string>
+    <string name="piko_pref_customisation_timelinetabs_following">"Takip Edilenler"i Kaldır</string>
+    <string name="piko_pref_customisation_timelinetabs_both">Her İkisini Göster</string>
+    <string name="piko_pref_customisation_sidebartabs">Gizlenecek Yan Menü Öğeleri</string>
+    <string name="piko_pref_customisation_navbartabs">Gizlenecek Gezinme Çubuğu Öğeleri</string>
+    <string name="piko_pref_customisation_inlinetabs">Gizlenecek Satır İçi Çubuk Öğeleri</string>
+    <string name="piko_pref_customisation_exploretabs">Gizlenecek Keşfet Sekmeleri</string>
+    <string name="piko_pref_customisation_searchtabs">Gizlenecek Arama Sekmeleri</string>
+    <string name="piko_pref_customisation_reply_sorting">Varsayılan Yanıt Sıralama Filtresi</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">Önceden Seçilen</string>
+    <string name="piko_pref_customisation_post_font_size">Gönderi Yazı Tipi Boyutu</string>
+    <string name="piko_pref_customisation_search_type_ahead">Gizlenecek Arama Önerileri</string>
 
+    <!-- Günlük Ayarları -->
+    <string name="piko_title_logging">Günlük Tutma</string>
+    <string name="piko_pref_server_response_logging">Sunucu Yanıt Günlüğü</string>
+    <string name="piko_pref_server_response_logging_desc">Sunucudan alınan JSON yanıtlarını 'Download/Piko' klasörüne kaydeder.</string>
+    <string name="piko_pref_server_response_logging_file_overwrite">Yanıt Günlüğü Dosyasını Üzerine Yaz</string>
+    <string name="piko_pref_server_response_logging_file_overwrite_desc">Başlangıçta mevcut yanıt günlük verilerini temizler.</string>
+
+    <!-- Yedekleme ve Geri Yükleme -->
+    <string name="piko_title_backup">Yedekleme ve Geri Yükleme</string>
+    <string name="piko_pref_export">%s Dışa Aktar</string>
+    <string name="piko_pref_import">%s İçe Aktar</string>
+    <string name="piko_pref_success">Başarılı</string>
+    <string name="piko_pref_export_failed">Hata: %s dışa aktarılamadı.</string>
+    <string name="piko_pref_import_failed">Hata: %s içe aktarılamadı.</string>
+    <string name="piko_pref_export_no_uri">Hata: Hiçbir hedef belirtilmedi.</string>
+    <string name="piko_pref_import_no_uri">Hata: Hiçbir dosya belirtilmedi.</string>
+
+    <!-- Hakkında -->
     <string name="piko_title_about">Hakkında</string>
-    <string name="piko_pref_app_version">Uygulama sürümü</string>
-    <string name="piko_pref_patch_info">Yama Bilgileri</string>
+    <string name="piko_pref_app_version">Uygulama Sürümü</string>
+    <string name="piko_pref_patch_info">Yama Bilgisi</string>
     <string name="piko_pref_version_info">Sürüm Bilgisi</string>
     <string name="piko_pref_patches">Yamalar</string>
     <string name="piko_pref_included">Dahil</string>
     <string name="piko_pref_excluded">Hariç</string>
-    <string name="piko_pref_app_restart_rec">Uygulamanın yeniden başlatılması önerilir</string>
-    <string name="piko_pref_remove">%s kaldır</string>
+    <string name="piko_pref_app_restart_rec">Uygulamanın yeniden başlatılması önerilir.</string>
+    <string name="piko_pref_remove">%s Kaldır</string>
+    <string name="piko_pref_enable">%s Etkinleştir</string>
+    <string name="piko_single_page_settings">Tek Sayfa Ayarları</string>
+    <string name="piko_single_page_settings_desc">Ayarları tek bir sayfada görüntüleyin.</string>
 
+    <string name="piko_pref_search_type_ahead_users">Kullanıcılar</string>
+    <string name="piko_pref_search_type_ahead_events">Etkinlikler</string>
+    <string name="piko_pref_search_type_ahead_ordered_section">Sıralı Bölüm</string>
+
+    <string name="piko_settings_supported_links">Desteklenen Linkleri Aç</string>
 </resources>
