@@ -1,9 +1,9 @@
 package app.crimera.patches.twitter.misc.settings
 
-import app.crimera.utils.mergeXmlResources
 import app.revanced.patcher.patch.resourcePatch
 import app.revanced.patches.shared.misc.mapping.resourceMappingPatch
 import app.revanced.util.ResourceGroup
+import app.revanced.util.copyResources
 import org.w3c.dom.Element
 import java.nio.file.Files
 
@@ -43,8 +43,8 @@ internal val settingsResourcePatch =
                 parent.appendChild(sideBtn)
             }
 
-            mergeXmlResources("twitter/settings", ResourceGroup("values", "strings.xml"))
-            mergeXmlResources("twitter/settings", ResourceGroup("values", "arrays.xml"))
+            copyResources("twitter/settings", ResourceGroup("values", "piko_strings.xml"))
+            copyResources("twitter/settings", ResourceGroup("values", "piko_arrays.xml"))
 
             /**
              * create directory for the untranslated language resources
@@ -75,10 +75,10 @@ internal val settingsResourcePatch =
                 if (!vDirectory.isDirectory) {
                     Files.createDirectories(vDirectory.toPath())
                     if (it.contains("v21")) {
-                        mergeXmlResources("twitter/settings", ResourceGroup(it, "arrays.xml"))
+                        copyResources("twitter/settings", ResourceGroup(it, "piko_arrays.xml"))
                     }
                 }
-                mergeXmlResources("twitter/settings", ResourceGroup(it, "strings.xml"))
+                copyResources("twitter/settings", ResourceGroup(it, "piko_strings.xml"))
             }
 
             // execute end

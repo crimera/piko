@@ -31,7 +31,7 @@ val changeVersionCodePatch =
         execute {
             document("AndroidManifest.xml").use { document ->
                 val manifestElement = document.getNode("manifest") as Element
-                manifestElement.setAttribute("android:versionCode", versionCode.toString())
+                manifestElement.setAttribute("android:versionCode", "$versionCode")
             }
         }
     }
