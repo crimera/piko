@@ -70,17 +70,24 @@ fun ResourcePatchContext.replaceXmlResources(
 }
 
 fun ResourcePatchContext.replaceStringsInFile(
-    filePath: String,
+    vararg resourceGroups: ResourceGroup,
     replacements: Map<String, String>,
 ) {
-    val file = get(filePath)
-    var content = file.readText()
+    resourceGroups.forEach { resourceGroup ->
+        resourceGroup.resources.forEach { resource ->
+            val sourcePath = "${resourceGroup.resourceDirectoryName}/$resource"
+            val sourceFile = get("res").resolve(sourcePath)
+            if (sourceFile.exists()) {
+                var content = sourceFile.readText()
 
-    replacements.forEach { (from, to) ->
-        content = content.replace(from, to)
+                replacements.forEach { (from, to) ->
+                    content = content.replace(from, to)
+                }
+
+                sourceFile.writeText(content)
+            }
+        }
     }
-
-    file.writeText(content)
 }
 
 context(BytecodePatchContext)

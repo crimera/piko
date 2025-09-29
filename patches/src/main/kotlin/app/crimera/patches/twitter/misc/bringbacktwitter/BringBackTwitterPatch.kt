@@ -30,27 +30,30 @@ val bringBackTwitterPatch =
 
             // region Change app icons
 
-            val mipmapIcons = arrayOf(
-                "ic_launcher_twitter.webp",
-                "ic_launcher_twitter_round.webp",
-                "ic_launcher_twitter_foreground.webp",
-            )
+            val mipmapIcons =
+                arrayOf(
+                    "ic_launcher_twitter.webp",
+                    "ic_launcher_twitter_round.webp",
+                    "ic_launcher_twitter_foreground.webp",
+                )
 
-            val drawableIcons = arrayOf(
-                "ic_vector_twitter.xml",
-                "ic_vector_home.xml",
-                "ic_vector_twitter_white.xml",
-                "ic_vector_home_stroke.xml",
-                "splash_screen_icon.xml",
-            )
+            val drawableIcons =
+                arrayOf(
+                    "ic_vector_twitter.xml",
+                    "ic_vector_home.xml",
+                    "ic_vector_twitter_white.xml",
+                    "ic_vector_home_stroke.xml",
+                    "splash_screen_icon.xml",
+                )
 
-            val sizes = arrayOf(
-                "xxxhdpi",
-                "xxhdpi",
-                "xhdpi",
-                "hdpi",
-                "mdpi",
-            )
+            val sizes =
+                arrayOf(
+                    "xxxhdpi",
+                    "xxhdpi",
+                    "xhdpi",
+                    "hdpi",
+                    "mdpi",
+                )
 
             // drawable icons
             sizes
@@ -122,14 +125,21 @@ val bringBackTwitterPatch =
                     "tr",
                     "zh-rCN",
                     "zh-rTW",
+                    "",
                 ).map { "values-$it" }
 
             languages.forEach {
-                val vDirectory = get("res").resolve(it)
+                var folderName = it
+                if (folderName.endsWith("-"))
+                    {
+                        folderName = it.replace("-", "")
+                    }
+                val vDirectory = get("res").resolve(folderName)
                 if (!vDirectory.isDirectory) {
                     Files.createDirectories(vDirectory.toPath())
                 }
-                replaceXmlResources(basePath, ResourceGroup(it, "strings.xml"))
+                val resGroup = ResourceGroup(folderName, "strings.xml")
+                replaceXmlResources(basePath, resGroup)
 
                 /*
                  * The Java XML API on Android has a bug that converts surrogate pair characters
@@ -139,12 +149,13 @@ val bringBackTwitterPatch =
                  */
                 if (isRunningOnManager) {
                     replaceStringsInFile(
-                        "res/$it/strings.xml",
-                        mapOf(
-                            "&#55349;&#56655;" to "Twitter",
-                            "&#55357;&#56613;" to "🔥",
-                            "&#55356;&#57217;" to "🎁",
-                        ),
+                        resGroup,
+                        replacements =
+                            mapOf(
+                                "&#55349;&#56655;" to "Twitter",
+                                "&#55357;&#56613;" to "🔥",
+                                "&#55356;&#57217;" to "🎁",
+                            ),
                     )
                 }
             }
@@ -153,17 +164,19 @@ val bringBackTwitterPatch =
              * Instead of defining strings in the map, replaces texts directly.
              * Reason: https://t.me/pikopatches/1/17339
              */
-            setOf(
-                "res/values-ja/strings.xml",
-                "res/values-ja/arrays.xml"
-            ).forEach {
-                replaceStringsInFile(
-                    it,
-                    mapOf(
-                        "X" to "Twitter",
-                        "ポスト" to "ツイート",
-                    ),
-                )
+            if (isRunningOnManager) {
+                setOf(
+                    ResourceGroup("values-ja", "strings.xml", "arrays.xml"),
+                ).forEach {
+                    replaceStringsInFile(
+                        it,
+                        replacements =
+                            mapOf(
+                                "X" to "Twitter",
+                                "ポスト" to "ツイート",
+                            ),
+                    )
+                }
             }
 
             // endregion
