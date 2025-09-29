@@ -43,8 +43,9 @@ internal val settingsResourcePatch =
                 parent.appendChild(sideBtn)
             }
 
-            copyResources("twitter/settings", ResourceGroup("values", "piko_strings.xml"))
-            copyResources("twitter/settings", ResourceGroup("values", "piko_arrays.xml"))
+            val basePath = "twitter/settings/strings"
+
+            copyResources(basePath, ResourceGroup("values", "strings.xml", "arrays.xml"), appendPiko = true)
 
             /**
              * create directory for the untranslated language resources
@@ -75,10 +76,10 @@ internal val settingsResourcePatch =
                 if (!vDirectory.isDirectory) {
                     Files.createDirectories(vDirectory.toPath())
                     if (it.contains("v21")) {
-                        copyResources("twitter/settings", ResourceGroup(it, "piko_arrays.xml"))
+                        copyResources(basePath, ResourceGroup(it, "arrays.xml"), appendPiko = true)
                     }
                 }
-                copyResources("twitter/settings", ResourceGroup(it, "piko_strings.xml"))
+                copyResources(basePath, ResourceGroup(it, "strings.xml"), appendPiko = true)
             }
 
             // execute end
