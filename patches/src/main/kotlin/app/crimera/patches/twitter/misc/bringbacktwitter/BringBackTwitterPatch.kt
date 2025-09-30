@@ -130,10 +130,9 @@ val bringBackTwitterPatch =
 
             languages.forEach {
                 var folderName = it
-                if (folderName.endsWith("-"))
-                    {
-                        folderName = it.replace("-", "")
-                    }
+                if (folderName.endsWith("-")) {
+                    folderName = it.replace("-", "")
+                }
                 val vDirectory = get("res").resolve(folderName)
                 if (!vDirectory.isDirectory) {
                     Files.createDirectories(vDirectory.toPath())
@@ -164,20 +163,15 @@ val bringBackTwitterPatch =
              * Instead of defining strings in the map, replaces texts directly.
              * Reason: https://t.me/pikopatches/1/17339
              */
-            if (isRunningOnManager) {
-                setOf(
-                    ResourceGroup("values-ja", "strings.xml", "arrays.xml"),
-                ).forEach {
-                    replaceStringsInFile(
-                        it,
-                        replacements =
-                            mapOf(
-                                "X" to "Twitter",
-                                "ポスト" to "ツイート",
-                            ),
-                    )
-                }
-            }
+
+            replaceStringsInFile(
+                ResourceGroup("values-ja", "strings.xml", "arrays.xml"),
+                replacements =
+                    mapOf(
+                        "X" to "Twitter",
+                        "ポスト" to "ツイート",
+                    ),
+            )
 
             // endregion
         }
