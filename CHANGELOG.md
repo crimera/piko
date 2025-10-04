@@ -1,3 +1,13 @@
+## [2.0.0-dev.3](https://github.com/crimera/piko/compare/v2.0.0-dev.2...v2.0.0-dev.3) (2025-10-04)
+
+### Refactors
+
+* **Twitter:** Correct ja strings replacement in BBT patch ([ee200a5](https://github.com/crimera/piko/commit/ee200a5c5ae14e1a935903b5de9e7ecf7f03e0f9))
+* **Twitter:** fix `Remove promoted trends` ([0e1d4ed](https://github.com/crimera/piko/commit/0e1d4ed2ac090451172f2bed985310061b987428))
+* **Twitter:** handle piko resources programmatically ([3cc0f07](https://github.com/crimera/piko/commit/3cc0f0715c6ad62c14d6cd13e91f0965886e1534))
+* **Twitter:** refactor `Bring back twitter` patch ([f24cb72](https://github.com/crimera/piko/commit/f24cb72309f648493b209fffb1e7d19bd5c705f6))
+* **Twitter:** remove old comments ([1655283](https://github.com/crimera/piko/commit/165528374dadeab472a5f7d28bc60be12a09bbe0))
+
 ## [2.0.0-dev.2](https://github.com/crimera/piko/compare/v2.0.0-dev.1...v2.0.0-dev.2) (2025-09-27)
 
 ### Bug Fixes
