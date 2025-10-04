@@ -1,7 +1,7 @@
 package app.crimera.patches.twitter.link.customDeeplinks
 
-import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
+import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
+import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
 import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -15,20 +15,14 @@ private val urlInterpreterActivityCreateFingerprint =
         }
     }
 
-@Suppress("unused")
 val handleCustomDeepLinksPatch =
     bytecodePatch(
         description = "handle custom deeplink",
     ) {
-        dependsOn(settingsPatch)
-
         execute {
-
-            val bytecode =
-                """
-                invoke-static {p0}, Lapp/revanced/integrations/twitter/patches/links/HandleCustomDeepLinksPatch;->rewriteCustomDeepLinks(Landroid/app/Activity;)V
-                """.trimIndent()
-
-            urlInterpreterActivityCreateFingerprint.method.addInstructions(0, bytecode)
+            urlInterpreterActivityCreateFingerprint.method.addInstruction(
+                0,
+                "invoke-static {p0}, $PATCHES_DESCRIPTOR/links/HandleCustomDeepLinksPatch;->rewriteCustomDeepLinks(Landroid/app/Activity;)V"
+            )
         }
     }
