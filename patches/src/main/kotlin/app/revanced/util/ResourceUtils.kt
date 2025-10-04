@@ -62,15 +62,20 @@ fun Node.insertFirst(node: Node) {
 fun ResourcePatchContext.copyResources(
     sourceResourceDirectory: String,
     vararg resources: ResourceGroup,
+    appendPiko: Boolean = false,
 ) {
     val targetResourceDirectory = this["res", false]
 
     for (resourceGroup in resources) {
         resourceGroup.resources.forEach { resource ->
-            val resourceFile = "${resourceGroup.resourceDirectoryName}/$resource"
+
+            val resourcePath = "${resourceGroup.resourceDirectoryName}/$resource"
+            var targetPath = resourcePath
+            if (appendPiko) targetPath = "${resourceGroup.resourceDirectoryName}/piko_$resource"
+
             Files.copy(
-                inputStreamFromBundledResource(sourceResourceDirectory, resourceFile)!!,
-                targetResourceDirectory.resolve(resourceFile).toPath(),
+                inputStreamFromBundledResource(sourceResourceDirectory, resourcePath)!!,
+                targetResourceDirectory.resolve(targetPath).toPath(),
                 StandardCopyOption.REPLACE_EXISTING,
             )
         }

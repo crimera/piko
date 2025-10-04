@@ -54,7 +54,8 @@ val hideAds =
             method.addInstructionsWithLabels(
                 return_loc,
                 """
-                sget-boolean v$reg,${Constants.PATCHES_DESCRIPTOR}/TimelineEntry;->hideAds:Z
+                invoke-static {v$reg},${Constants.PATCHES_DESCRIPTOR}/TimelineEntry;->hidePromotedTrend(Ljava/lang/Object;)Z
+                move-result v$reg
                 if-eqz v$reg, :cond_1212
                 const v$return_reg, 0x0
                 """.trimIndent(),

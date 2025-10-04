@@ -319,7 +319,7 @@ public final class app/crimera/utils/UtilsKt {
 	public static final fun getMethodName (Lapp/revanced/patcher/patch/BytecodePatchContext;Lapp/revanced/patcher/Fingerprint;I)Ljava/lang/String;
 	public static final fun getReference (Lapp/revanced/patcher/patch/BytecodePatchContext;Lapp/revanced/patcher/Fingerprint;I)Lcom/android/tools/smali/dexlib2/iface/reference/Reference;
 	public static final fun instructionToString (Lcom/android/tools/smali/dexlib2/iface/instruction/Instruction;)Ljava/lang/String;
-	public static final fun replaceStringsInFile (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;Ljava/util/Map;)V
+	public static final fun replaceStringsInFile (Lapp/revanced/patcher/patch/ResourcePatchContext;[Lapp/revanced/util/ResourceGroup;Ljava/util/Map;)V
 	public static final fun replaceXmlResources (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;)V
 }
 
@@ -445,7 +445,8 @@ public final class app/revanced/util/ResourceGroup {
 public final class app/revanced/util/ResourceUtilsKt {
 	public static final fun asSequence (Lorg/w3c/dom/NodeList;)Lkotlin/sequences/Sequence;
 	public static final fun childElementsSequence (Lorg/w3c/dom/Node;)Lkotlin/sequences/Sequence;
-	public static final fun copyResources (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;)V
+	public static final fun copyResources (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;Z)V
+	public static synthetic fun copyResources$default (Lapp/revanced/patcher/patch/ResourcePatchContext;Ljava/lang/String;[Lapp/revanced/util/ResourceGroup;ZILjava/lang/Object;)V
 	public static final fun copyXmlNode (Ljava/lang/String;Lapp/revanced/patcher/util/Document;Lapp/revanced/patcher/util/Document;)Ljava/lang/AutoCloseable;
 	public static final fun doRecursively (Lorg/w3c/dom/Node;Lkotlin/jvm/functions/Function1;)V
 	public static final fun forEachChildElement (Lorg/w3c/dom/Node;Lkotlin/jvm/functions/Function1;)V
