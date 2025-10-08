@@ -61,15 +61,12 @@
     <!-- إعدادات الإعلانات -->
     <string name="piko_title_ads">الإعلانات</string>
     <string name="piko_pref_hide_promoted_posts">منشورات المحتوى المُروَّج</string>
-
-
     <string name="piko_pref_wtf_section">قسم "من يجب متابعته"</string>
     <string name="piko_pref_cts_section">قسم "الاشتراك مع المبدعون"</string>
     <string name="piko_pref_ctj_section">قسم "المجتمع المراد الانضمام إليه"</string>
     <string name="piko_pref_ryb_section">قسم "إعادة النظر في الإشارة المرجعية الخاصة بك"</string>
     <string name="piko_pref_pinned_posts_section">قسم "مشاركات مثبتة بواسطة المتابَعون"</string>
     <string name="piko_pref_hide_detailed_posts">المشاركات التفصيلية (في الردود)</string>
-
     <string name="piko_pref_hide_premium_prompt">رسالة مطالبات Premium</string>
     <string name="piko_pref_hide_todays_news">اخبار اليوم</string>
     <string name="piko_pref_del_from_db">حذف الإدخالات من قاعدة البيانات</string>
@@ -79,7 +76,7 @@
     <string name="piko_pref_hide_premium_upsell">ترقية Premium</string>
     <string name="piko_pref_hide_premium_upsell_desc">يزيل ترقية Premium في الخط الزمني للصفحة الرئيسية</string>
     <string name="piko_pref_top_people_search">أعلى الأشخاص في البحث</string>
-    <string name="piko_pref_top_people_search_desc">إزالة قسم الأشخاص بعد البحث</string>
+    <string name="piko_pref_top_people_search_desc">يزيل قسم الأشخاص بعد البحث</string>
 
     <!-- إعدادات متنوعة -->
     <string name="piko_title_misc">إعدادات متنوعة</string>
@@ -188,5 +185,7 @@
     <string name="piko_pref_search_type_ahead_users">المستخدمون</string>
     <string name="piko_pref_search_type_ahead_events">الأحداث</string>
     <string name="piko_pref_search_type_ahead_ordered_section">القسم المطلوب</string>
+
+    <string name="piko_settings_supported_links">فتح الروابط المدعومة</string>
 
 </resources>
