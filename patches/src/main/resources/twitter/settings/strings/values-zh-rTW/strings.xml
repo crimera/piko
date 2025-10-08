@@ -169,9 +169,9 @@
     <!-- 關於 -->
     <string name="piko_title_about">關於</string>
     <string name="piko_pref_app_version">應用程式版本</string>
-    <string name="piko_pref_patch_info">修改補丁資訊</string>
+    <string name="piko_pref_patch_info">修補資訊</string>
     <string name="piko_pref_version_info">版本資訊</string>
-    <string name="piko_pref_patches">修改補丁</string>
+    <string name="piko_pref_patches">補丁</string>
     <string name="piko_pref_included">包含</string>
     <string name="piko_pref_excluded">排除</string>
     <string name="piko_pref_app_restart_rec">建議重新啟動應用程式</string>
