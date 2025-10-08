@@ -125,6 +125,7 @@ val bringBackTwitterPatch =
                     "tr",
                     "zh-rCN",
                     "zh-rTW",
+                    "pl",
                     "",
                 ).map { "values-$it" }
 
