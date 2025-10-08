@@ -1,3 +1,9 @@
+## [2.0.0-dev.4](https://github.com/crimera/piko/compare/v2.0.0-dev.3...v2.0.0-dev.4) (2025-10-08)
+
+### Updates
+
+* **Translations:** Update `Polish` ([43da4b5](https://github.com/crimera/piko/commit/43da4b5ebc4b12d155d8f81495bbd6a09b1f44ad))
+
 ## [2.0.0-dev.3](https://github.com/crimera/piko/compare/v2.0.0-dev.2...v2.0.0-dev.3) (2025-10-04)
 
 ### Refactors
