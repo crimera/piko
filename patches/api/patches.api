@@ -368,6 +368,10 @@ public final class app/revanced/patches/shared/misc/mapping/ResourceMappingPatch
 	public static final fun getResourceMappings ()Ljava/util/List;
 }
 
+public final class app/revanced/patches/twitter/DynamicColorPatchKt {
+	public static final fun getDynamicColorPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
 public final class app/revanced/util/BytecodeUtilsKt {
 	public static final fun addInstructionsAtControlFlowLabel (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;ILjava/lang/String;)V
 	public static final fun addInstructionsAtControlFlowLabel (Lapp/revanced/patcher/util/proxy/mutableTypes/MutableMethod;ILjava/lang/String;[Lapp/revanced/patcher/util/smali/ExternalLabel;)V
