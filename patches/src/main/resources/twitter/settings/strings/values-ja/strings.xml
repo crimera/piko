@@ -40,18 +40,28 @@
     <string name="piko_native_translator_zero_text">翻訳するテキストが見つかりません</string>
     <string name="piko_native_translator_google">Google翻訳</string>
     <string name="piko_native_translator_google_v2">Google翻訳 V2</string>
+    <string name="piko_title_native_reader_mode">リーダーモード</string>
+    <string name="piko_native_reader_mode_grok_thread">このスレッドを分析</string>
+    <string name="piko_native_reader_mode_grok_author">投稿者についての詳細</string>
+    <string name="piko_native_reader_mode_source">ソース</string>
+    <string name="piko_native_reader_mode_published">公開済み</string>
+    <string name="piko_native_reader_mode_total_post">総ポスト数</string>
+    <string name="piko_native_reader_mode_pref_text_only_mode">テキストのみモード</string>
+    <string name="piko_native_reader_mode_pref_hide_quoted_posts">引用ポストを非表示</string>
+    <string name="piko_native_reader_mode_pref_no_grok">No Grok analyses</string>
+    <string name="piko_native_reader_mode_copy_post">ポストのリンクをコピー</string>
+    <string name="piko_native_reader_mode_cache_delete">リーダーモードのキャッシュを削除</string>
+    <string name="piko_native_reader_mode_cache_delete_success">キャッシュを削除しました</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">キャッシュを削除できませんでした</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモーションポスト</string>
-
-
     <string name="piko_pref_wtf_section">「おすすめユーザー」</string>
     <string name="piko_pref_cts_section">「おすすめクリエイター」</string>
     <string name="piko_pref_ctj_section">「新しいコミュニティを見つける」</string>
     <string name="piko_pref_ryb_section">「ブックマークに再アクセス」</string>
     <string name="piko_pref_pinned_posts_section">「フォロー中のユーザーが固定」</string>
     <string name="piko_pref_hide_detailed_posts">関連ポスト欄(返信内)</string>
-
     <string name="piko_pref_hide_premium_prompt">メッセージプロンプト</string>
     <string name="piko_pref_hide_todays_news">今日のニュース</string>
     <string name="piko_pref_del_from_db">データベースから項目を削除</string>
