@@ -40,6 +40,19 @@
     <string name="piko_native_translator_zero_text">翻訳するテキストが見つかりません</string>
     <string name="piko_native_translator_google">Google翻訳</string>
     <string name="piko_native_translator_google_v2">Google翻訳 V2</string>
+    <string name="piko_title_native_reader_mode">リーダーモード</string>
+    <string name="piko_native_reader_mode_grok_thread">このスレッドを分析</string>
+    <string name="piko_native_reader_mode_grok_author">投稿者についての詳細</string>
+    <string name="piko_native_reader_mode_source">ソース</string>
+    <string name="piko_native_reader_mode_published">公開済み</string>
+    <string name="piko_native_reader_mode_total_post">総ポスト数</string>
+    <string name="piko_native_reader_mode_pref_text_only_mode">テキストのみモード</string>
+    <string name="piko_native_reader_mode_pref_hide_quoted_posts">引用ポストを非表示</string>
+    <string name="piko_native_reader_mode_pref_no_grok">No Grok analyses</string>
+    <string name="piko_native_reader_mode_copy_post">ポストのリンクをコピー</string>
+    <string name="piko_native_reader_mode_cache_delete">リーダーモードのキャッシュを削除</string>
+    <string name="piko_native_reader_mode_cache_delete_success">キャッシュを削除しました</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">キャッシュを削除できませんでした</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモーションポスト</string>
