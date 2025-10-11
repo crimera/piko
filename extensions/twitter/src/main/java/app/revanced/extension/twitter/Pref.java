@@ -107,10 +107,8 @@ public class Pref {
         }
         return 3;
     }
-
-    public static String getSharingLink(String link) {
-        String domain = Utils.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
-        return link.replaceFirst("x|twitter", domain);
+    public static String customSharingDomain() {
+        return Utils.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
     }
 
     public static ArrayList hideRecommendedUsers(ArrayList users) {

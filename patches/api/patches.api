@@ -66,6 +66,10 @@ public final class app/crimera/patches/twitter/link/cleartrackingparams/ClearTra
 	public static final fun getClearTrackingParamsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
+public final class app/crimera/patches/twitter/link/customDeeplinks/CustomDeepLinksPatchKt {
+	public static final fun getCustomDeepLinksPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
 public final class app/crimera/patches/twitter/link/customDeeplinks/HandleCustomDeepLinksPatchKt {
 	public static final fun getHandleCustomDeepLinksPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
