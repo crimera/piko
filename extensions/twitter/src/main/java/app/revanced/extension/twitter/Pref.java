@@ -16,6 +16,20 @@ public class Pref {
         HIDE_COMM_BADGE = hideCommBadge();
         SHOW_SRC_LBL = showSourceLabel();
     }
+
+    public static String getLatestChangelogVersion(){
+        return Utils.getStringPref(Settings.LAST_CHANGELOG_VERSION);
+    }
+    public static void setLatestChangelogVersion(String version){
+        Utils.setStringPref(Settings.LAST_CHANGELOG_VERSION.key,version);
+    }
+    public static String getChangelog(){
+        return Utils.getStringPref(Settings.LAST_CHANGELOG);
+    }
+    public static void setChangelog(String msg){
+        Utils.setStringPref(Settings.LAST_CHANGELOG.key,msg);
+    }
+
     public static float setPostFontSize() {
         Float fontSize = 0.0f;
         try{

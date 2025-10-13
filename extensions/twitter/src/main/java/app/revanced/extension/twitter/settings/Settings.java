@@ -84,6 +84,9 @@ public class Settings extends BaseSettings {
     public static final StringSetting CUSTOM_SEARCH_TYPE_AHEAD = new StringSetting("customisation_search_type_ahead", "");
     public static final StringSetting CUSTOM_POST_FONT_SIZE = new StringSetting("customisation_post_font_size", String.valueOf(Utils.getResourceDimension("font_size_normal")));
 
+    public static final StringSetting LAST_CHANGELOG_VERSION = new StringSetting("last_changelog_version", "0");
+    public static final StringSetting LAST_CHANGELOG = new StringSetting("last_changelog", "0");
+
     public static final BooleanSetting LOG_RES = new BooleanSetting("logging_response", false);
     public static final BooleanSetting LOG_RES_OVRD = new BooleanSetting("logging_response_overwrite_file", false);
 

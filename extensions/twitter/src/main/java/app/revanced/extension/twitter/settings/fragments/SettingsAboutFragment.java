@@ -15,6 +15,7 @@ import app.revanced.extension.shared.StringRef;
 import app.revanced.extension.twitter.settings.Settings;
 import app.revanced.extension.twitter.settings.ActivityHook;
 import app.revanced.extension.twitter.settings.SettingsStatus;
+import app.revanced.extension.twitter.patches.Changelogs;
 
 @SuppressWarnings("deprecation")
 public class SettingsAboutFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener {
@@ -46,6 +47,13 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
                         strRes("piko_title_piko_patches"),
                         Utils.getPatchesReleaseVersion(),
                         strRes("piko_title_piko_patches")
+                )
+        );
+        verPref.addPreference(
+                buttonPreference(
+                        strRes("piko_changelogs_title"),
+                        "",
+                        strRes("piko_changelogs_title")
                 )
         );
         verPref.addPreference(
@@ -118,6 +126,7 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         flags.put(strRemoveRes("piko_pref_hide_todays_news"),SettingsStatus.hideTodaysNews);
         flags.put(strRemoveRes("piko_pref_server_response_logging"),SettingsStatus.serverResponseLogging);
         flags.put(strRes("piko_pref_show_post_source"),SettingsStatus.showSourceLabel);
+        flags.put(strEnableRes("piko_changelogs_title"),SettingsStatus.showChangelogsPatchEnabled);
 
         LegacyTwitterPreferenceCategory patPref = preferenceCategory(strRes("piko_pref_patches"), screen);
 
@@ -176,7 +185,8 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
             Utils.showToastShort(strRes("copied_to_clipboard")+": "+ summary);
         }else if (key.equals(strRes("piko_settings_supported_links"))){
             app.revanced.extension.twitter.Utils.openDefaultLinks();
-
+        }else if (key.equals(strRes("piko_changelogs_title"))){
+            Changelogs.showChangelogDialog(context);
         }
 
         return true;

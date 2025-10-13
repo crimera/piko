@@ -191,6 +191,10 @@ public final class app/crimera/patches/twitter/misc/shareMenu/nativeTranslator/N
 	public static final fun getNativeTranslatorModePatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
+public final class app/crimera/patches/twitter/misc/showchangelogs/ShowChangelogsPatchKt {
+	public static final fun getChangelogsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
 public final class app/crimera/patches/twitter/premium/enableForcePip/EnableForcePipPatchKt {
 	public static final fun getEnableForcePipPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }

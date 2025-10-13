@@ -173,6 +173,7 @@
     <string name="piko_pref_app_version">App version</string>
     <string name="piko_pref_patch_info">Patch Information</string>
     <string name="piko_pref_version_info">Version Information</string>
+    <string name="piko_changelogs_title">Changelogs</string>
     <string name="piko_pref_patches">Patches</string>
     <string name="piko_pref_included">Included</string>
     <string name="piko_pref_excluded">Excluded</string>
