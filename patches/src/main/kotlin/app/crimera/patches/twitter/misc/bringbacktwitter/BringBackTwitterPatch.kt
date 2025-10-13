@@ -135,11 +135,12 @@ val bringBackTwitterPatch =
                 arrayOf(
                     "en-rGB",
                     "hi",
+                    "pl",
+                    "pt-rBr",
                     "ru",
                     "tr",
                     "zh-rCN",
                     "zh-rTW",
-                    "pl",
                     "",
                 ).map { "values-$it" }
 
