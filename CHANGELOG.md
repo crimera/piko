@@ -1,3 +1,26 @@
+## [2.0.0-dev.5](https://github.com/crimera/piko/compare/v2.0.0-dev.4...v2.0.0-dev.5) (2025-10-13)
+
+### Bug Fixes
+
+* **Twitter:** Correct Db clear keyword ([ca71ea7](https://github.com/crimera/piko/commit/ca71ea73a2957e1c64e1e2ed02b64311287bfaa0))
+* **Twitter:** Fix `Native reader mode` patch in 10.28 and above ([800da14](https://github.com/crimera/piko/commit/800da149f4179044296d265ff4de9e7b2737e9b8))
+* **Twitter:** Fixed host name issue due to `Custom sharing domain` patch ([3b26c84](https://github.com/crimera/piko/commit/3b26c84a902200f687cd327fb83281301e653dc1))
+
+### Features
+
+* **Twitter:** Added `Show changelogs` patch ([4b3adf7](https://github.com/crimera/piko/commit/4b3adf7a5e8966bc800d41b947349fb36345d5f4))
+
+### Updates
+
+* **Translation:** Added `pl` to Bring Back Twitter resource list ([44a5436](https://github.com/crimera/piko/commit/44a5436eabe9e9493984e9413ccbc74592eb8280))
+* **Translation:** Added `pt-rBr` to `Bring Back Twitter` Patch ([9e33933](https://github.com/crimera/piko/commit/9e33933279bb80a40532a382726c9ddff53d43a2))
+* **Translation:** Added `zh-rHK` ([58a2f4f](https://github.com/crimera/piko/commit/58a2f4fdb64d86a61ed27ad5bf632d260738688c))
+* **Translation:** Fix `Vietnamese` strings ([3d1e213](https://github.com/crimera/piko/commit/3d1e213a6691216946ae703ea1ef239e56db584c))
+* **Translation:** Update `Japanese` ([6c22ae2](https://github.com/crimera/piko/commit/6c22ae255149a057680ad85f6a59ce829100bb65))
+* **Translation:** Update `Vietnamese` ([9343e0e](https://github.com/crimera/piko/commit/9343e0e5c750566b4a86ff72de84050950c9551a))
+* **Translation:** Update Traditional Chinese ([9f4d654](https://github.com/crimera/piko/commit/9f4d654f3bf91d7e68adf0b426c02feed32d3eed))
+* **Twitter:** Set Splashscreen color to blue in `Bring back twitter` patch ([fbb9a09](https://github.com/crimera/piko/commit/fbb9a093dabe0634792f6b342489ed06d75f6bc6))
+
 ## [2.0.0-dev.4](https://github.com/crimera/piko/compare/v2.0.0-dev.3...v2.0.0-dev.4) (2025-10-08)
 
 ### Updates
