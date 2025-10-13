@@ -85,7 +85,7 @@ public class DatabasePatch {
                                 break;
                             }
                             case 2: {
-                                keywords.add("who-to-follow%");
+                                keywords.add("who-to-subscribe%");
                             //    entry_id_str = "who-to-subscribe%";
                                 break;
                             }
