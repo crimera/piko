@@ -48,7 +48,7 @@
     <string name="piko_native_reader_mode_total_post">総ポスト数</string>
     <string name="piko_native_reader_mode_pref_text_only_mode">テキストのみモード</string>
     <string name="piko_native_reader_mode_pref_hide_quoted_posts">引用ポストを非表示</string>
-    <string name="piko_native_reader_mode_pref_no_grok">No Grok analyses</string>
+    <string name="piko_native_reader_mode_pref_no_grok">Grok分析を無効化</string>
     <string name="piko_native_reader_mode_copy_post">ポストのリンクをコピー</string>
     <string name="piko_native_reader_mode_cache_delete">リーダーモードのキャッシュを削除</string>
     <string name="piko_native_reader_mode_cache_delete_success">キャッシュを削除しました</string>
@@ -161,6 +161,7 @@
     <string name="piko_pref_app_version">アプリのバージョン</string>
     <string name="piko_pref_patch_info">適用されたパッチに関する情報</string>
     <string name="piko_pref_version_info">バージョン情報</string>
+    <string name="piko_changelogs_title">変更履歴</string>
     <string name="piko_pref_patches">パッチ</string>
     <string name="piko_pref_included">適用済み</string>
     <string name="piko_pref_excluded">除外済み</string>
