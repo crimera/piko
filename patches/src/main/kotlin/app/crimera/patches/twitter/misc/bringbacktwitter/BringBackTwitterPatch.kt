@@ -6,6 +6,7 @@ import app.revanced.patcher.patch.resourcePatch
 import app.revanced.util.ResourceGroup
 import app.revanced.util.asSequence
 import app.revanced.util.copyResources
+import app.revanced.util.findElementByAttributeValueOrThrow
 import org.w3c.dom.Element
 import java.nio.file.Files
 
@@ -85,15 +86,15 @@ val bringBackTwitterPatch =
             // endregion
 
             // region Bring back twitter blue
-
+            val twitterBlueColor = "@color/twitter_blue"
             document("res/layout/ocf_twitter_logo.xml").use {
                 val imageView = it.getElementsByTagName("ImageView").item(0) as Element
-                imageView.setAttribute("app:tint", "@color/twitter_blue")
+                imageView.setAttribute("app:tint", twitterBlueColor)
             }
 
             document("res/layout/channels_toolbar_main.xml").use {
                 val imageView = it.getElementsByTagName("ImageView").item(0) as Element
-                imageView.setAttribute("app:tint", "@color/twitter_blue")
+                imageView.setAttribute("app:tint", twitterBlueColor)
             }
 
             document("res/values/colors.xml").use {
@@ -102,10 +103,23 @@ val bringBackTwitterPatch =
                     .asSequence()
                     .find { color ->
                         (color as Element).getAttribute("name") == "ic_launcher_background"
-                    }?.textContent = "@color/twitter_blue"
+                    }?.textContent = twitterBlueColor
             }
 
-            // endregion
+            // Splashscreen to blue
+            document("res/values/styles.xml").use { document ->
+                val styleElement = document.childNodes.findElementByAttributeValueOrThrow(
+                    "name",
+                    "Theme.LaunchScreen"
+                )
+
+                val itemElement = styleElement.childNodes.findElementByAttributeValueOrThrow(
+                    "name",
+                    "windowSplashScreenBackground"
+                )
+                itemElement.textContent = twitterBlueColor
+            }
+                // endregion
 
             // region Change strings
 
@@ -121,11 +135,12 @@ val bringBackTwitterPatch =
                 arrayOf(
                     "en-rGB",
                     "hi",
+                    "pl",
+                    "pt-rBr",
                     "ru",
                     "tr",
                     "zh-rCN",
                     "zh-rTW",
-                    "pl",
                     "",
                 ).map { "values-$it" }
 

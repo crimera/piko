@@ -30,7 +30,7 @@ val noShortenedUrlPatch =
 
         execute {
             val METHOD_REFERENCE =
-                "$PATCHES_DESCRIPTOR/links/UnshortenUrlsPatch;->" +
+                "$PATCHES_DESCRIPTOR/links/Urls;->" +
                     "unshort(Lcom/twitter/model/json/core/JsonUrlEntity;)Lcom/twitter/model/json/core/JsonUrlEntity;"
 
             val methods = jsonObjectMapperFingerprint.method

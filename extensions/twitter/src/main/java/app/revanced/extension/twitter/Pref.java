@@ -16,6 +16,20 @@ public class Pref {
         HIDE_COMM_BADGE = hideCommBadge();
         SHOW_SRC_LBL = showSourceLabel();
     }
+
+    public static String getLatestChangelogVersion(){
+        return Utils.getStringPref(Settings.LAST_CHANGELOG_VERSION);
+    }
+    public static void setLatestChangelogVersion(String version){
+        Utils.setStringPref(Settings.LAST_CHANGELOG_VERSION.key,version);
+    }
+    public static String getChangelog(){
+        return Utils.getStringPref(Settings.LAST_CHANGELOG);
+    }
+    public static void setChangelog(String msg){
+        Utils.setStringPref(Settings.LAST_CHANGELOG.key,msg);
+    }
+
     public static float setPostFontSize() {
         Float fontSize = 0.0f;
         try{
@@ -107,10 +121,8 @@ public class Pref {
         }
         return 3;
     }
-
-    public static String getSharingLink(String link) {
-        String domain = Utils.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
-        return link.replaceFirst("x|twitter", domain);
+    public static String customSharingDomain() {
+        return Utils.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
     }
 
     public static ArrayList hideRecommendedUsers(ArrayList users) {

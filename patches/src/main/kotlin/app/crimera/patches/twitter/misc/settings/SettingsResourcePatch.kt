@@ -69,6 +69,7 @@ internal val settingsResourcePatch =
                     "vi",
                     "zh-rCN",
                     "zh-rTW",
+                    "zh-rHK",
                 ).map { "values-$it" }
 
             languages.forEach {

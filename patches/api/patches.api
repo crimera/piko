@@ -66,6 +66,10 @@ public final class app/crimera/patches/twitter/link/cleartrackingparams/ClearTra
 	public static final fun getClearTrackingParamsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
+public final class app/crimera/patches/twitter/link/customDeeplinks/CustomDeepLinksPatchKt {
+	public static final fun getCustomDeepLinksPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
 public final class app/crimera/patches/twitter/link/customDeeplinks/HandleCustomDeepLinksPatchKt {
 	public static final fun getHandleCustomDeepLinksPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
@@ -185,6 +189,10 @@ public final class app/crimera/patches/twitter/misc/shareMenu/nativeReaderMode/N
 
 public final class app/crimera/patches/twitter/misc/shareMenu/nativeTranslator/NativeTranslatorPatchKt {
 	public static final fun getNativeTranslatorModePatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/misc/showchangelogs/ShowChangelogsPatchKt {
+	public static final fun getChangelogsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/premium/enableForcePip/EnableForcePipPatchKt {
@@ -362,6 +370,10 @@ public final class app/revanced/patches/shared/misc/mapping/ResourceMappingPatch
 	public static final fun get (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)J
 	public static final fun getResourceMappingPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
 	public static final fun getResourceMappings ()Ljava/util/List;
+}
+
+public final class app/revanced/patches/twitter/DynamicColorPatchKt {
+	public static final fun getDynamicColorPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
 }
 
 public final class app/revanced/util/BytecodeUtilsKt {

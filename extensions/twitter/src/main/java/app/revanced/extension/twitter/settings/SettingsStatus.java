@@ -3,6 +3,9 @@ package app.revanced.extension.twitter.settings;
 import app.revanced.extension.twitter.patches.FeatureSwitchPatch;
 
 public class SettingsStatus {
+
+    public static boolean showChangelogsPatchEnabled = false;
+
     public static boolean changeDownloadEnabled = false;
     public static boolean customSharingDomainEnabled = false;
     public static boolean enableFontMod = false;
@@ -70,6 +73,9 @@ public class SettingsStatus {
     public static boolean serverResponseLogging = false;
     public static boolean serverResponseLoggingOverwriteFile = false;
 
+    public static void showChangelogsPatchEnabled() {
+        showChangelogsPatchEnabled = true;
+    }
     public static void serverResponseLogging() {
         serverResponseLogging = true;
     }

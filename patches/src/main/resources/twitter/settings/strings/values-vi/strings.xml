@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">Kích hoạt chế độ đọc</string>
     <string name="piko_pref_reader_mode_desc">Kích hoạt chế độ đọc ở tweets dài</string>
@@ -7,14 +8,17 @@
     <string name="piko_pref_undo_posts_desc">Cho phép hoàn tác tweets trước khi đăng</string>
     <string name="piko_pref_undo_posts_btn">Tuỳ chọn hoàn tác tweets</string>
     <string name="piko_pref_icon_n_navbar_btn">Tuỳ chỉnh icon app và thanh điều hướng</string>
+    <string name="piko_pref_enable_force_pip">Kích hoạt PIP tự động</string>
+    <string name="piko_pref_enable_force_pip_desc">Kích hoạt PIP khi bạn đóng ứng dụng</string>
 
+    <!-- Download Settings -->
     <string name="piko_title_download">Tải xuống</string>
     <string name="piko_pref_video_download">Kích hoạt tải xuống video</string>
     <string name="piko_pref_download">Thay đổi đường dẫn tải xuống</string>
     <string name="piko_pref_download_path">Vị trí lưu file tải về</string>
     <string name="piko_pref_download_path_desc">Vị trí mà file sẽ được lưu vào</string>
-    <string name="piko_pref_download_folder">Tài về trong thư mục con</string>
-    <string name="piko_pref_download_folder_desc">Tên thư mục con sẽ tạo và lưu file tải xuống vào ([thư mục chung]/[thư mục con])</string>
+    <string name="piko_pref_download_folder">Vị trị lưu tệp tin</string>
+    <string name="piko_pref_download_folder_desc">Dặt nơi lưu trữ tệp tin khi được tải xuống</string>
     <string name="piko_pref_download_media_link_handle">Cài đặt tải xuống</string>
     <string name="piko_pref_download_media_link_handle_download">Tải xuống trực tiếp</string>
     <string name="piko_pref_download_media_link_handle_copy_link">Trực tiếp sao chép liên kết video</string>
@@ -22,6 +26,39 @@
     <string name="piko_pref_download_media_link_handle_copy_media_link">Sao chép liên kết của video</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Chia sẻ liên kết của video</string>
 
+    <!-- Native -->
+    <string name="piko_title_native">Tính năng native</string>
+    <string name="piko_pref_native_page_desc">Những tính năng native này xuất hiện ở bảng chia sẻ của một bài post</string>
+    <string name="piko_title_native_downloader">Tải xuống</string>
+    <string name="piko_title_native_downloader_toggle">Kích hoạt tính năng tải xuống</string>
+    <string name="piko_pref_native_downloader_alert_title">Tải xuống phương tiện</string>
+    <string name="piko_pref_native_downloader_download_all">Tải xuống tất cả phương tiện</string>
+    <string name="piko_pref_native_downloader_no_media">Không tìm thấy phương tiện nào</string>
+    <string name="piko_pref_native_downloader_filename_title">Tên file tải về</string>
+
+    <string name="piko_title_native_translator">Dịch thuật bài viết</string>
+    <string name="piko_native_translator_toggle">Kích hoạt tính năng dịch thuật bài viết</string>
+    <string name="piko_native_translator_provider">Dơn vị dịch thuật</string>
+    <string name="piko_native_translator_to_lang">Dịch sang</string>
+    <string name="piko_native_translator_zero_text">Không tìm thấy văn bản nào để dịch</string>
+    <string name="piko_native_translator_google">Google dịch</string>
+    <string name="piko_native_translator_google_v2">Google dịch V2</string>
+
+    <string name="piko_title_native_reader_mode">Chế độ đọc</string>
+    <string name="piko_native_reader_mode_grok_thread">Tóm tắt bài viết này</string>
+    <string name="piko_native_reader_mode_grok_author">Thông tin thêm về tác giả</string>
+    <string name="piko_native_reader_mode_source">Nguồn</string>
+    <string name="piko_native_reader_mode_published">Đã xuất bản</string>
+    <string name="piko_native_reader_mode_total_post">Tổng bài post</string>
+    <string name="piko_native_reader_mode_pref_text_only_mode">Chế độ chỉ chữ</string>
+    <string name="piko_native_reader_mode_pref_hide_quoted_posts">Ẩn nhưng quoted post</string>
+    <string name="piko_native_reader_mode_pref_no_grok">Không dùng Grok để tóm tắt</string>
+    <string name="piko_native_reader_mode_copy_post">Sao chép liên kết post</string>
+    <string name="piko_native_reader_mode_cache_delete">Xóa bộ nhớ đệm của chế độ đọc</string>
+    <string name="piko_native_reader_mode_cache_delete_success">Dọn bộ nhớ đệm thành công</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">Dọn bộ nhớ đệm thất bại</string>
+    
+    <!-- Ads Settings -->
     <string name="piko_title_ads">Quảng cáo</string>
     <string name="piko_pref_hide_promoted_posts">Ẩn tweets được tài trợ</string>
     <string name="piko_pref_wtf_section">Ẩn "Người có thể theo dõi"</string>
@@ -30,31 +67,49 @@
     <string name="piko_pref_ryb_section">Ẩn "Xem lại dấu trang đã lưu" </string>
     <string name="piko_pref_pinned_posts_section">Ẩn "Do người theo dõi bạn ghim"</string>
     <string name="piko_pref_hide_detailed_posts">Hide tweets chi tiết (trong phần trả lời) </string>
-
     <string name="piko_pref_hide_premium_prompt">Ẩn lời nhắc tin nhắn</string>
-
+    <string name="piko_pref_hide_todays_news">Ẩn tin tức hôm nay</string>
+    <string name="piko_pref_del_from_db">Xóa dữ liệu từ database</string>
+    <string name="piko_pref_db_not_found">Không tìm thấy database</string>
+    <string name="piko_pref_db_not_open">Database chưa được mở</string>
+    <string name="piko_pref_db_del_items">Tệp tin đã xóa</string>
+    <string name="piko_pref_hide_premium_upsell">Xóa nút mua premium</string>
+    <string name="piko_pref_hide_premium_upsell_desc">Xóa nút mua premium ở dòng thời gian</string>
+    <string name="piko_pref_top_people_search">Xóa người được tìm kiếm nhiều nhất ở tìm kiếm</string>
+    <string name="piko_pref_top_people_search_desc">Ẩn người được tìm kiếm nhiều ở tìm kiếm</string>
+    
+    <!-- Misc Settings -->
     <string name="piko_title_misc">Tuỳ chọn</string>
-    <string name="piko_pref_chirp_font">Sử dụng font chirp</string>
-    <string name="piko_pref_hide_fab">Ẩn hành động pop-up</string>
-    <string name="piko_pref_hide_fab_menu">Ẩn tuỳ chọn hành động pop-up</string>
-    <string name="piko_pref_rec_users">Ẩn "Những người dùng dược đề xuất"</string>
-    <string name="piko_pref_hide_view_count">Ẩn "Số người xem"</string>
-    <string name="piko_pref_custom_share_domain">Tuỳ chỉnh tên miền(KHÔNG NÊN ĐỤNG NẾU KHÔNG HIỂU)</string>
-    <string name="piko_pref_custom_share_domain_desc">Tên miền sẽ dược sử dụng chia sẻ tweets</string>
-    <string name="piko_pref_feature_flags">Tùy chọn nhà phát triển (NÂNG CAO)</string>
-    <string name="piko_pref_edit_flag_title">Sửa các tính năng ẩn (NÂNG CAO)</string>
-    <string name="piko_pref_add_flag_title">Thêm các tính năng ẩn (NÂNG CAO)</string>
-    <string name="piko_pref_show_sensitive_media">Hiện thị nội dung nhạy cảm</string>
-    <string name="piko_pref_selectable_text">Thêm khả năng lựa chọn văn bản có thể</string>
-    <string name="piko_pref_clear_tracking_params">Xoá các trình theo dõi</string>
-    <string name="piko_pref_unshorten_link">Loại bỏ liên kết rút gọn</string>
-    <string name="piko_pref_unshorten_link_desc">Loại bỏ các liên kết rút gọn từ t.co</string>
-    <string name="piko_pref_round_off_numbers">Làm tròn số liệu</string>
-    <string name="piko_pref_round_off_numbers_desc">Làm tròn các số liệu thành K và M </string>
-    <string name="piko_pref_debug_menu">Kích hoạt chế độ gỡ lỗi cho tweets</string>
+    <string name="piko_pref_chirp_font">Sử dụng chirp font</string>
+    <string name="piko_pref_hide_fab">Xóa bỏ hành động nổi</string>
+    <string name="piko_pref_hide_fab_menu">Xóa bỏ nút hành động nổi</string>
+    <string name="piko_pref_rec_users">Xóa gợi ý người dùng</string>
+    <string name="piko_pref_hide_view_count">Xóa lượt người xem</string>
+    <string name="piko_pref_custom_share_domain">Thay đổi tên miền khi</string>
+    <string name="piko_pref_custom_share_domain_desc">Giúp thay đổi tên miền khi chia sẻ post</string>
+    <string name="piko_pref_show_sensitive_media">Hiên thị NSFW</string>
+    <string name="piko_pref_selectable_text">Bật khả nặng chọn lựa văn bản</string>
+    <string name="piko_pref_clear_tracking_params">Xóa bỏ biến theo dõi trong liên kết</string>
+    <string name="piko_pref_unshorten_link">Không sử dụng liên kết rút gọn</string>
+    <string name="piko_pref_unshorten_link_desc">Không sử dụng tên miền t.co khi chia sẻ</string>
+    <string name="piko_pref_round_off_numbers">Làm tròn số</string>
+    <string name="piko_pref_round_off_numbers_desc">Làm tròn số ở hệ K và M</string>
+    <string name="piko_pref_debug_menu">Xem gỡ lỗi ở trong post</string>
+    <string name="piko_pref_quick_settings">Thêm cài đặt patch nhanh</string>
+    <string name="piko_pref_quick_settings_summary">Thêm nút vào cài đặt của patch nhanh ở cạnh bên</string>
 
+    <!-- Feature flags Settings -->
+    <string name="piko_title_feature_flags">Cờ tính năng</string>
+    <string name="piko_pref_feature_flags">Thêm cờ tính năng</string>
+    <string name="piko_pref_edit_flag_title">Sửa cờ tính năng</string>
+    <string name="piko_pref_add_flag_title">Thêm cờ tính năng</string>
+    <string name="piko_pref_search_flags">TÌm cờ tính năng</string>
+    
+    <!-- Timeline Settings -->
     <string name="piko_title_timeline">Dòng thời gian</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Vộ hiệu tự làm mới tweets mỗi khi khởi chạy </string>
+    <string name="piko_pref_show_post_source">Xem nguồn gốc của post</string>
+    <string name="piko_pref_show_post_source_desc">LƯU Ý!?!?!?: SẼ CÓ SỰ DELAY VÀ LOGO CHỈ XUẤT HIỆN Ở NHỮNG POST CÔNG KHAI</string>
     <string name="piko_pref_hide_live_threads">Ẩn các phiên trực tiếp</string>
     <string name="piko_pref_hide_live_threads_desc">Ẩn những phiên trực tiếp trong dòng thời gian</string>
     <string name="piko_pref_hide_banner">Ẩn banner quảng cáo trong tìm kiếm </string>
@@ -68,18 +123,43 @@
     <string name="piko_pref_show_poll_result_desc">Không bình chọn nhưng vẫn xem được lượt bình chọn</string>
     <string name="piko_pref_hide_immersive_player">Loại bỏ tính năng lướt video</string>
     <string name="piko_pref_hide_immersive_player_desc">Loại bỏ tính năng lướt để xem thêm trong trình phát video</string>
+    <string name="piko_pref_enable_vid_auto_advance">Tự động cuộn video</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Tự động cuộn video khi kết thúc trong chế độ toàn màn hình</string>
+    <string name="piko_pref_force_hd">Buộc video chất lượng cao</string>
+    <string name="piko_pref_force_hd_desc">Videos sẽ được phát lại ở chất lượng cao nhất</string>
+    <string name="piko_pref_hide_nudge_button">Ẩn nút theo dõi</string>
+    <string name="piko_pref_hide_nudge_button_desc">Ẩn những nút Theo dõi/Dăng kí/Theo dõi lại trong post</string>
+    <string name="piko_pref_hide_social_proof">Ẩn nội dung không liên quan</string>
+    <string name="piko_pref_hide_social_proof_desc">Ẩn những nội dụng không liên quan trong post</string>
+    <string name="piko_pref_hide_community_badge">Ẩn huy hiệu cộng đồng</string>
     <string name="piko_pref_hide_hidden_replies">Ẩn các phản hồi bị gỡ</string>
 
+    <!-- Customization Settings -->
     <string name="piko_title_customisation">Tuỳ chỉnh giao diện</string>
-    <string name="piko_pref_customisation_profiletabs">Ẩn các tab hồ sơ</string>
-    <string name="piko_pref_customisation_timelinetabs">Tab dòng thời gian</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">Ẩn \"Dành cho bạn\"</string>
-    <string name="piko_pref_customisation_timelinetabs_following">Ẩn \"Đang theo dõi\"</string>
+    <string name="piko_pref_customisation_profiletabs">Ẩn trong profile</string>
+    <string name="piko_pref_customisation_timelinetabs">Ẩn trong dòng thời gian</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">Xóa \"Dành cho bạn\"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">Xóa \"Đang theo dõi\"</string>
     <string name="piko_pref_customisation_timelinetabs_both">Hiện cả hai</string>
-    <string name="piko_pref_customisation_sidebartabs">Ẩn các mục trên thanh bên</string>
-    <string name="piko_pref_customisation_navbartabs">Ẩn các mục trên thanh điều hướng</string>
-    <string name="piko_pref_customisation_inlinetabs">Ẩn các mục trên thanh Inline?</string>
-
+    <string name="piko_pref_customisation_sidebartabs">Ẩn trong cạnh bên</string>
+    <string name="piko_pref_customisation_navbartabs">Ẩn trong thanh điều hướng</string>
+    <string name="piko_pref_customisation_inlinetabs">Inline bar items to hide</string>
+    <string name="piko_pref_customisation_exploretabs">Ẩn trong thanh bài post</string>
+    <string name="piko_pref_customisation_searchtabs">Ẩn trong tìm kiếm</string>
+    <string name="piko_pref_customisation_reply_sorting">Ưu tiện thị trả lời của</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">Theo lựa chọn gần nhất</string>
+    <string name="piko_pref_customisation_post_font_size">Kích thước font chữ trong bài post</string>
+    <string name="piko_pref_customisation_search_type_ahead">Ẩn trong phần gợi ý tìm kiếm</string>
+  
+                                                                                     
+    <!-- Logging Settings -->
+    <string name="piko_title_logging">Gỡ lỗi</string>
+    <string name="piko_pref_server_response_logging">Xuất tệp tin gỡ lỗi</string>
+    <string name="piko_pref_server_response_logging_desc">Tệp tin gỡ lỗi sẽ được xả ra tại \'Download/Piko\'</string>
+    <string name="piko_pref_server_response_logging_file_overwrite">Ghi đè tệp tin gỡ lỗi</string>
+    <string name="piko_pref_server_response_logging_file_overwrite_desc">Xóa những dữ liệu trong file gỡ lỗi trong mỗi lần khởi động ứng dụng</string>
+    
+    <!-- Backup and Restore -->
     <string name="piko_title_backup">Sao lưu và khôi phục</string>
     <string name="piko_pref_export">Sao lưu các tuỳ chọn mod</string>
     <string name="piko_pref_export_failed">Sao lưu các tuỳ chọn mod lỗi</string>
@@ -88,6 +168,7 @@
     <string name="piko_pref_import_failed">Khôi phục các tính năng mod không thành công</string>
     <string name="piko_pref_import_no_uri">Không có file đã được đề ra</string>
 
+    <!-- About -->
     <string name="piko_title_about">Thông tin</string>
     <string name="piko_pref_app_version">Thông tin ứng dụng</string>
     <string name="piko_pref_patch_info">Thông tin bản vá</string>
@@ -95,5 +176,16 @@
     <string name="piko_pref_patches">Các tính năng đã vá</string>
     <string name="piko_pref_included">Bao gồm</string>
     <string name="piko_pref_excluded">Không bao gồm</string>
+    <string name="piko_pref_app_restart_rec">App restart is recommended</string>
+    <string name="piko_pref_remove">Gỡ %s</string>
+    <string name="piko_pref_enable">Kích hoạt %s</string>
+    <string name="piko_single_page_settings">Cài đặt trên 1 trang</string>
+    <string name="piko_single_page_settings_desc">Xem các cài đặt của patch chỉ 1 trang duy nhất</string>
+
+    <string name="piko_pref_search_type_ahead_users">Người dùng</string>
+    <string name="piko_pref_search_type_ahead_events">Sự kiện</string>
+    <string name="piko_pref_search_type_ahead_ordered_section">Sắp xếp lựa chọn</string>
+
+    <string name="piko_settings_supported_links">Mở qua app với những liên kết hỗ trợ</string>
 
 </resources>
