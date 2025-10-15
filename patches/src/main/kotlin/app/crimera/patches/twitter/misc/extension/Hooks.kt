@@ -4,7 +4,7 @@ import app.revanced.patches.shared.misc.extension.extensionHook
 
 internal val initHook =
     extensionHook {
-        strings("builderClass")
+        strings("Failed to start application for test.")
         custom { method, _ ->
             method.name == "onCreate"
         }
