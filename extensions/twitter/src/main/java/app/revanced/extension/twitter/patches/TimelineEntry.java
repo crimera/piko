@@ -5,6 +5,10 @@ import com.twitter.model.json.core.JsonSensitiveMediaWarning;
 import com.twitter.model.json.timeline.urt.JsonTimelineModuleItem;
 import app.revanced.extension.twitter.Pref;
 import app.revanced.extension.twitter.settings.SettingsStatus;
+import app.revanced.extension.twitter.entity.Video;
+import java.util.List;
+import java.util.ArrayList;
+import app.revanced.extension.twitter.Utils;
 
 public class TimelineEntry {
     public static final boolean hideAds;
@@ -22,7 +26,6 @@ public class TimelineEntry {
         hideTopPeopleSearch = (Pref.hideTopPeopleSearch() && SettingsStatus.hideTopPeopleSearch);
         hideTodaysNews = (Pref.hideTodaysNews() && SettingsStatus.hideTodaysNews);
     }
-
 
     private static boolean isEntryIdRemove(String entryId) {
         String[] split = entryId.split("-");
@@ -70,7 +73,6 @@ public class TimelineEntry {
         }
         return false;
     }
-
     public static JsonTimelineEntry checkEntry(JsonTimelineEntry jsonTimelineEntry) {
         try {
             String entryId = jsonTimelineEntry.a;
@@ -82,7 +84,6 @@ public class TimelineEntry {
         }
         return jsonTimelineEntry;
     }
-
     public static JsonTimelineModuleItem checkEntry(JsonTimelineModuleItem jsonTimelineModuleItem) {
         try {
             String entryId = jsonTimelineModuleItem.a;
@@ -94,7 +95,6 @@ public class TimelineEntry {
         }
         return jsonTimelineModuleItem;
     }
-
     public static JsonSensitiveMediaWarning sensitiveMedia(JsonSensitiveMediaWarning jsonSensitiveMediaWarning) {
         try {
             if(showSensitiveMedia){
@@ -107,12 +107,40 @@ public class TimelineEntry {
         }
         return jsonSensitiveMediaWarning;
     }
-
     public static boolean hidePromotedTrend(Object data) {
         if (data != null && hideAds) {
             return true;
         }
         return false;
+    }
+
+    public static List timelineVideos(List videoEnities){
+        int maxBitrate = 0;
+        Object maxVideoObject = null;
+        try{
+            if(Pref.ENABLE_FORCE_HD) {
+                for (Object vidObj : videoEnities) {
+                    Video vid = new Video(vidObj);
+                    String mediaExt = vid.getExtension();
+                    if (!(mediaExt.equals("mp4"))) continue;
+
+                    int bitrate = vid.getBitrate();
+                    if(bitrate<maxBitrate) continue;
+                    maxBitrate = bitrate;
+                    maxVideoObject = vidObj;
+                }
+                if (maxVideoObject != null) {
+                    ArrayList result = new ArrayList();
+                    result.add(maxVideoObject);
+                    return result;
+                }
+            }
+
+        }catch(Exception ex){
+            Utils.logger(ex);
+        }
+
+        return videoEnities;
     }
 
 //end
