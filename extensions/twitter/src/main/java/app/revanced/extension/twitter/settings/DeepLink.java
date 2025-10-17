@@ -65,6 +65,8 @@ public class DeepLink {
                     key = Settings.MISC_SECTION;
                 } else if (lastSegment.equals("customise") || lastSegment.equals("customize")) {
                     key = Settings.CUSTOMISE_SECTION;
+                } else if (lastSegment.equals("font")) {
+                    key = Settings.FONT_SECTION;
                 } else if (lastSegment.equals("timeline")) {
                     key = Settings.TIMELINE_SECTION;
                 } else if (lastSegment.equals("pref")) {

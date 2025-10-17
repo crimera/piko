@@ -618,6 +618,62 @@ public class ScreenBuilder {
         );
     }
 
+    public void buildFontSection(boolean buildCategory){
+        if (!(SettingsStatus.fontSection())) return;
+
+        LegacyTwitterPreferenceCategory category = null;
+        if(buildCategory)
+            category = preferenceCategory(strRes("piko_title_font"));
+
+        if(SettingsStatus.customFont) {
+            addPreference(category,
+                    helper.buttonPreference(
+                            strRes("piko_pref_add_font"),
+                            strRes("piko_pref_add_font_desc"),
+                            Settings.ADD_FONT,
+                            "ic_vector_exiting",
+                            null
+                    )
+            );
+
+
+            addPreference(category,
+                    helper.buttonPreference(
+                            strRes("piko_pref_delete_font"),
+                            "",
+                            Settings.DELETE_FONT,
+                            "ic_vector_trashcan_stroke",
+                            "#DE0025"
+                    )
+            );
+        }
+        if(SettingsStatus.customEmojiFont) {
+            addPreference(category,
+                    helper.buttonPreference(
+                            strRes("piko_pref_add_emoji_font"),
+                            strRes("piko_pref_add_font_desc"),
+                            Settings.ADD_EMOJI_FONT,
+                            "ic_vector_exiting",
+                            null
+                    )
+            );
+
+
+            addPreference(category,
+                    helper.buttonPreference(
+                            strRes("piko_pref_delete_emoji_font"),
+                            "",
+                            Settings.DELETE_EMOJI_FONT,
+                            "ic_vector_trashcan_stroke",
+                            "#DE0025"
+                    )
+            );
+        }
+
+
+
+    }
+
     public void buildTimelineSection(boolean buildCategory){
 
         if (!(SettingsStatus.enableTimelineSection())) return;
@@ -812,6 +868,7 @@ public class ScreenBuilder {
         }
 
     }
+
     public void buildExportSection(boolean buildCategory){
         LegacyTwitterPreferenceCategory category = null;
         if(buildCategory)
@@ -934,6 +991,17 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.fontSection()) {
+            addPreference(
+                    helper.buttonPreference(
+                            strRes("piko_title_font"),
+                            "",
+                            Settings.FONT_SECTION,
+                            "ic_vector_fleets_entry",null
+                    )
+            );
+        }
+
         if (SettingsStatus.enableTimelineSection()) {
             addPreference(
                     helper.buttonPreference(

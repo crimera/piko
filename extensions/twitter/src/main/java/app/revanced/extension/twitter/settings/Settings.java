@@ -98,6 +98,10 @@ public class Settings extends BaseSettings {
     public static final String RESET_PREF = "reset_pref";
     public static final String RESET_FLAGS = "reset_flags";
     public static final String FEATURE_FLAGS = "feature_flags";
+    public static final String ADD_FONT = "add_font";
+    public static final String DELETE_FONT = "delete_font";
+    public static final String ADD_EMOJI_FONT = "add_emoji_font";
+    public static final String DELETE_EMOJI_FONT = "delete_emoji_font";
     public static final String RESET_READER_MODE_CACHE = "reader_mode_cache";
 
     public static final String PREMIUM_SECTION = "premium_section";
@@ -106,6 +110,7 @@ public class Settings extends BaseSettings {
     public static final String ADS_SECTION = "ads_section";
     public static final String MISC_SECTION = "misc_section";
     public static final String CUSTOMISE_SECTION = "custommise_section";
+    public static final String FONT_SECTION = "font_section";
     public static final String TIMELINE_SECTION = "timeline_section";
     public static final String LOGGING_SECTION = "logging_section";
     public static final String BACKUP_SECTION = "backup_section";

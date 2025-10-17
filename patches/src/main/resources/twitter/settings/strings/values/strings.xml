@@ -151,6 +151,19 @@
     <string name="piko_pref_customisation_post_font_size">Post font size</string>
     <string name="piko_pref_customisation_search_type_ahead">Search suggestions to hide</string>
 
+    <!-- Font Settings -->
+    <string name="piko_title_font">Font style</string>
+    <string name="piko_pref_add_font">Add font</string>
+    <string name="piko_pref_add_font_desc">Make sure the fnt type is .ttf or .otf</string>
+    <string name="piko_pref_delete_font">Delete font</string>
+    <string name="piko_pref_add_emoji_font">Add emoji font</string>
+    <string name="piko_pref_delete_emoji_font">Delete emoji font</string>
+    <string name="piko_pref_add_font_success">Font added successfully</string>
+    <string name="piko_pref_add_font_fail">Font addition failed</string>
+    <string name="piko_pref_delete_font_success">Font deleted successfully</string>
+    <string name="piko_pref_delete_font_fail">Font deletion failed</string>
+    <string name="piko_pref_delete_font_warn">No custom font found to delete</string>
+
     <!-- Logging Settings -->
     <string name="piko_title_logging">Logging</string>
     <string name="piko_pref_server_response_logging">Log server response</string>

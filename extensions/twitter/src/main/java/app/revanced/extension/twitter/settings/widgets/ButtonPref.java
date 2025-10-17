@@ -18,6 +18,8 @@ import app.revanced.extension.twitter.settings.Settings;
 import app.revanced.extension.twitter.settings.fragments.BackupPrefFragment;
 import app.revanced.extension.twitter.settings.fragments.RestorePrefFragment;
 import app.revanced.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeUtils;
+import app.revanced.extension.twitter.patches.customise.font.FontPickerFragment;
+import app.revanced.extension.twitter.patches.customise.font.UpdateFont;
 
 
 public class ButtonPref extends Preference {
@@ -91,9 +93,18 @@ public class ButtonPref extends Preference {
                     } else if (key.equals(Settings.IMPORT_FLAGS)) {
                         bundle.putBoolean("featureFlag", true);
                         fragment = new RestorePrefFragment();
+                    } else if (key.equals(Settings.ADD_FONT)) {
+                        bundle.putBoolean("isEmojiFont", false);
+                        fragment = new FontPickerFragment();
+                    } else if (key.equals(Settings.DELETE_FONT)) {
+                        UpdateFont.deleteFont(false);
+                    } else if (key.equals(Settings.ADD_EMOJI_FONT)) {
+                        bundle.putBoolean("isEmojiFont", true);
+                        fragment = new FontPickerFragment();
+                    } else if (key.equals(Settings.DELETE_EMOJI_FONT)) {
+                        UpdateFont.deleteFont(true);
                     } else if (key.equals(Settings.PREMIUM_UNDO_POSTS.key)) {
                         Utils.startUndoPostActivity();
-
                     }  else if (key.equals(Settings.PREMIUM_NAVBAR.key)) {
                         Utils.openUrl("https://www.x.com/settings/custom_navigation");
                     } else if (key.equals(Settings.RESET_PREF)) {

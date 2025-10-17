@@ -73,6 +73,9 @@ public class SettingsStatus {
     public static boolean serverResponseLogging = false;
     public static boolean serverResponseLoggingOverwriteFile = false;
 
+    public static boolean customFont = false;
+    public static boolean customEmojiFont = false;
+
     public static void showChangelogsPatchEnabled() {
         showChangelogsPatchEnabled = true;
     }
@@ -312,6 +315,12 @@ public class SettingsStatus {
     public static void typeaheadCustomisation() {
         typeaheadCustomisation = true;
     }
+    public static void customFont() {
+        customFont = true;
+    }
+    public static void customEmojiFont() {
+        customEmojiFont = true;
+    }
 
     public static boolean enableTimelineSection() {
         return ( showSourceLabel || hideCommBadge || showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD);
@@ -342,6 +351,10 @@ public class SettingsStatus {
     }
     public static boolean loggingSection() {
         return (serverResponseLogging || serverResponseLoggingOverwriteFile);
+    }
+
+    public static boolean fontSection() {
+        return (customFont || customEmojiFont);
     }
 
     public static void load() {

@@ -50,6 +50,8 @@ public class PageFragment extends PreferenceFragment {
             screenBuilder.buildMiscSection(false);
         }else if (activity_name.equals(Settings.CUSTOMISE_SECTION)) {
             screenBuilder.buildCustomiseSection(false);
+        }else if (activity_name.equals(Settings.FONT_SECTION)) {
+            screenBuilder.buildFontSection(false);
         }else if (activity_name.equals(Settings.TIMELINE_SECTION)) {
             screenBuilder.buildTimelineSection(false);
         }else if (activity_name.equals(Settings.BACKUP_SECTION)) {
