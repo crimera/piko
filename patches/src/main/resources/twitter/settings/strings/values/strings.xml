@@ -154,7 +154,7 @@
     <!-- Font Settings -->
     <string name="piko_title_font">Font style</string>
     <string name="piko_pref_add_font">Add font</string>
-    <string name="piko_pref_add_font_desc">Make sure the fnt type is .ttf or .otf</string>
+    <string name="piko_pref_add_font_desc">Make sure the font is of type .ttf or .otf</string>
     <string name="piko_pref_delete_font">Delete font</string>
     <string name="piko_pref_add_emoji_font">Add emoji font</string>
     <string name="piko_pref_delete_emoji_font">Delete emoji font</string>
