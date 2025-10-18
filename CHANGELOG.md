@@ -1,3 +1,19 @@
+## [2.0.0-dev.6](https://github.com/crimera/piko/compare/v2.0.0-dev.5...v2.0.0-dev.6) (2025-10-18)
+
+### Bug Fixes
+
+* **Dynamic color:** Reflect piko's original changes ([0c91cad](https://github.com/crimera/piko/commit/0c91cad6d4112a02735edc5776a136e9f7c88271))
+* **Twitter:** fix `Enable force HD videos` patch ([23f2859](https://github.com/crimera/piko/commit/23f285974c8c12a117b81c794a64e94e6f33e531))
+* **Twitter:** Update `extensions` hook ([bf20765](https://github.com/crimera/piko/commit/bf2076592f49c11337acedf0d90e8a9d2d8d4ba4))
+
+### Features
+
+* **Twitter:** Added `Customise font` patch ([e02d7db](https://github.com/crimera/piko/commit/e02d7dbd884ac4daf7c113d44575d085ba792989))
+
+### Updates
+
+* **Translations:** Update `Polish` ([0983e57](https://github.com/crimera/piko/commit/0983e5723e0b6ea1a171aeefe774f64bb3993edf))
+
 ## [2.0.0-dev.5](https://github.com/crimera/piko/compare/v2.0.0-dev.4...v2.0.0-dev.5) (2025-10-14)
 
 ### Bug Fixes
