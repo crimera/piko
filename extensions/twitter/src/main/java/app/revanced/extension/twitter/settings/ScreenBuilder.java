@@ -631,7 +631,7 @@ public class ScreenBuilder {
                             strRes("piko_pref_add_font"),
                             strRes("piko_pref_add_font_desc"),
                             Settings.ADD_FONT,
-                            "ic_vector_exiting",
+                            "ic_vector_pencil_stroke",
                             null
                     )
             );
@@ -653,7 +653,7 @@ public class ScreenBuilder {
                             strRes("piko_pref_add_emoji_font"),
                             strRes("piko_pref_add_font_desc"),
                             Settings.ADD_EMOJI_FONT,
-                            "ic_vector_exiting",
+                            "ic_vector_live_heart_stroke",
                             null
                     )
             );
@@ -997,7 +997,7 @@ public class ScreenBuilder {
                             strRes("piko_title_font"),
                             "",
                             Settings.FONT_SECTION,
-                            "ic_vector_fleets_entry",null
+                            "ic_vector_at",null
                     )
             );
         }

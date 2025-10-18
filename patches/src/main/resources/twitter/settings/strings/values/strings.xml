@@ -162,7 +162,7 @@
     <string name="piko_pref_add_font_fail">Font addition failed</string>
     <string name="piko_pref_delete_font_success">Font deleted successfully</string>
     <string name="piko_pref_delete_font_fail">Font deletion failed</string>
-    <string name="piko_pref_delete_font_warn">No custom font found to delete</string>
+    <string name="piko_pref_delete_font_warn">No custom font found to be deleted</string>
 
     <!-- Logging Settings -->
     <string name="piko_title_logging">Logging</string>

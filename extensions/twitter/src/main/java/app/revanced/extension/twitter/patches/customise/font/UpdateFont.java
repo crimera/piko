@@ -76,7 +76,6 @@ public class UpdateFont {
         if (fontFile.exists()) {
             if (fontFile.delete()) {
                 Utils.toast(StringRef.str("piko_pref_delete_font_success"));
-                Utils.showRestartAppDialog(context);
             } else {
                 Utils.toast(StringRef.str("piko_pref_delete_font_fail"));
             }
