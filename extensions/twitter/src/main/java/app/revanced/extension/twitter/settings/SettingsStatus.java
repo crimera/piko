@@ -1,5 +1,6 @@
 package app.revanced.extension.twitter.settings;
 
+import android.os.Build;
 import app.revanced.extension.twitter.patches.FeatureSwitchPatch;
 
 public class SettingsStatus {
@@ -354,7 +355,7 @@ public class SettingsStatus {
     }
 
     public static boolean fontSection() {
-        return (customFont || customEmojiFont);
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && (customFont || customEmojiFont));
     }
 
     public static void load() {

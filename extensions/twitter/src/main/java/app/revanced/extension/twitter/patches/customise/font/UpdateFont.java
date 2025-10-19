@@ -1,19 +1,9 @@
 package app.revanced.extension.twitter.patches.customise.font;
 
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
+import android.os.Build;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-
-import android.app.Fragment;
 import app.revanced.extension.twitter.Utils;
 import app.revanced.extension.shared.StringRef;
-import app.revanced.extension.twitter.settings.Settings;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -22,9 +12,8 @@ import android.text.SpannableString;
 import android.text.style.TypefaceSpan;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import app.revanced.extension.twitter.Utils;
 import java.io.File;
-import app.revanced.extension.shared.StringRef;
+
 import app.revanced.extension.twitter.settings.SettingsStatus;
 
 public class UpdateFont {
@@ -87,7 +76,7 @@ public class UpdateFont {
     public static Spannable process(CharSequence input) {
         if(input == null) return null;
         SpannableString ss = new SpannableString(input);
-        if (!(textTypeface == null)) {
+        if (textTypeface != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             if(isCustomFontEnabled) {
                 ss.setSpan(
                     new TypefaceSpan(textTypeface),
