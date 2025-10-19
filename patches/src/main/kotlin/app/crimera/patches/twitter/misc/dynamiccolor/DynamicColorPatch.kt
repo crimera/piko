@@ -1,6 +1,5 @@
 package app.crimera.patches.twitter.misc.dynamiccolor
 
-import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.resourcePatch
 import java.io.FileWriter
 import java.nio.file.Files
@@ -14,16 +13,13 @@ val dynamicColorPatch = resourcePatch(
     compatibleWith("com.twitter.android")
 
     execute {
-        val resDirectory = get("res")
-        if (!resDirectory.isDirectory) throw PatchException("The res folder can not be found.")
-
-        val valuesV31Directory = resDirectory.resolve("values-v31")
-        if (!valuesV31Directory.isDirectory) Files.createDirectories(valuesV31Directory.toPath())
-
-        val valuesNightV31Directory = resDirectory.resolve("values-night-v31")
-        if (!valuesNightV31Directory.isDirectory) Files.createDirectories(valuesNightV31Directory.toPath())
+        // For backward compatibility, add colors and styles into v31 res dir (A12+).
+        val valuesV31Directory = get("res/values-v31")
+        val valuesNightV31Directory = get("res/values-night-v31")
 
         listOf(valuesV31Directory, valuesNightV31Directory).forEach { it ->
+            if (!it.isDirectory) Files.createDirectory(it.toPath())
+
             val colorsXml = it.resolve("colors.xml")
             val stylesXml = it.resolve("styles.xml")
 
@@ -40,6 +36,7 @@ val dynamicColorPatch = resourcePatch(
         }
 
         document("res/values-v31/colors.xml").use { document ->
+            val resourcesElement = document.documentElement
             mapOf(
                 "ps__twitter_blue" to "@color/twitter_blue",
                 "ps__twitter_blue_pressed" to "@color/twitter_blue_fill_pressed",
@@ -55,11 +52,12 @@ val dynamicColorPatch = resourcePatch(
                 colorElement.setAttribute("name", k)
                 colorElement.textContent = v
 
-                document.getElementsByTagName("resources").item(0).appendChild(colorElement)
+                resourcesElement.appendChild(colorElement)
             }
         }
 
         document("res/values-night-v31/colors.xml").use { document ->
+            val resourcesElement = document.documentElement
             mapOf(
                 "twitter_blue" to "@android:color/system_accent1_200",
                 "twitter_blue_fill_pressed" to "@android:color/system_accent1_300",
@@ -73,12 +71,10 @@ val dynamicColorPatch = resourcePatch(
                 colorElement.setAttribute("name", k)
                 colorElement.textContent = v
 
-                document.getElementsByTagName("resources").item(0).appendChild(colorElement)
+                resourcesElement.appendChild(colorElement)
             }
         }
 
-        /** fun fullMaterialDesign() { **/
-        // backward compatible, creates style into v31 res dir (A12+)
         // replace parts of DimTheme with user's material 3 neutral palette
         document("res/values-night-v31/styles.xml").use { document ->
             val newStyle = document.createElement("style")
@@ -110,7 +106,7 @@ val dynamicColorPatch = resourcePatch(
                 newStyle.appendChild(styleElement)
             }
 
-            document.getElementsByTagName("resources").item(0).appendChild(newStyle)
+            document.documentElement.appendChild(newStyle)
         }
 
         // monet theme in light mode
@@ -144,7 +140,7 @@ val dynamicColorPatch = resourcePatch(
                 newStyle.appendChild(styleElement)
             }
 
-            document.getElementsByTagName("resources").item(0).appendChild(newStyle)
+            document.documentElement.appendChild(newStyle)
         }
     }
 }
