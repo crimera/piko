@@ -28,6 +28,8 @@ val changeVersionCodePatch =
             required = true,
         ) { versionCode -> versionCode!! >= 1 }
 
+        compatibleWith("com.twitter.android")
+
         execute {
             document("AndroidManifest.xml").use { document ->
                 val manifestElement = document.getNode("manifest") as Element
