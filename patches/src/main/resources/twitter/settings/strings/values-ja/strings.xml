@@ -141,6 +141,18 @@
     <string name="piko_pref_customisation_reply_sorting_remember">前回の選択を記憶</string>
     <string name="piko_pref_customisation_post_font_size">ポストのフォントサイズ</string>
     <string name="piko_pref_customisation_search_type_ahead">検索候補から非表示にする項目</string>
+    <!-- Font Settings -->
+    <string name="piko_title_font">フォントスタイル</string>
+    <string name="piko_pref_add_font">フォントを追加</string>
+    <string name="piko_pref_add_font_desc">フォントの種類が「.ttf」または「.otf」であることを確認してください</string>
+    <string name="piko_pref_delete_font">フォントを削除</string>
+    <string name="piko_pref_add_emoji_font">絵文字フォントを追加</string>
+    <string name="piko_pref_delete_emoji_font">絵文字フォントを削除</string>
+    <string name="piko_pref_add_font_success">フォントを追加しました</string>
+    <string name="piko_pref_add_font_fail">フォントを追加できませんでした</string>
+    <string name="piko_pref_delete_font_success">フォントを削除しました</string>
+    <string name="piko_pref_delete_font_fail">フォントを削除できませんでした</string>
+    <string name="piko_pref_delete_font_warn">削除するカスタムフォントが見つかりません</string>
     <!-- Logging Settings -->
     <string name="piko_title_logging">ログ</string>
     <string name="piko_pref_server_response_logging">サーバーの応答をログに記録</string>
