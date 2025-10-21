@@ -44,19 +44,19 @@
     <string name="piko_native_translator_google">Google traduttore</string>
     <string name="piko_native_translator_google_v2">Google traduttore V2</string>
 
-    <string name="piko_title_native_reader_mode">Reader mode</string>
-    <string name="piko_native_reader_mode_grok_thread">Analyse this thread</string>
-    <string name="piko_native_reader_mode_grok_author">More about the author</string>
-    <string name="piko_native_reader_mode_source">Source</string>
-    <string name="piko_native_reader_mode_published">Published</string>
-    <string name="piko_native_reader_mode_total_post">Total Posts</string>
-    <string name="piko_native_reader_mode_pref_text_only_mode">Text only mode</string>
-    <string name="piko_native_reader_mode_pref_hide_quoted_posts">Hide quoted posts</string>
-    <string name="piko_native_reader_mode_pref_no_grok">No Grok analyses</string>
-    <string name="piko_native_reader_mode_copy_post">Copy post link</string>
-    <string name="piko_native_reader_mode_cache_delete">Delete reader mode\'s cache</string>
-    <string name="piko_native_reader_mode_cache_delete_success">Cache deleted successfully</string>
-    <string name="piko_native_reader_mode_cache_delete_failed">Cache deletion failed</string>
+    <string name="piko_title_native_reader_mode">Modalità lettura</string>
+    <string name="piko_native_reader_mode_grok_thread">Analizza questo thread</string>
+    <string name="piko_native_reader_mode_grok_author">Più a proposito dell/'autore</string>
+    <string name="piko_native_reader_mode_source">Sorgente</string>
+    <string name="piko_native_reader_mode_published">Pubblicato</string>
+    <string name="piko_native_reader_mode_total_post">Post totali</string>
+    <string name="piko_native_reader_mode_pref_text_only_mode">Modalità solo testo</string>
+    <string name="piko_native_reader_mode_pref_hide_quoted_posts">Nascondi i post citati</string>
+    <string name="piko_native_reader_mode_pref_no_grok">No analisi Grok</string>
+    <string name="piko_native_reader_mode_copy_post">Copia link post</string>
+    <string name="piko_native_reader_mode_cache_delete">Elimina la cache della modalità lettura</string>
+    <string name="piko_native_reader_mode_cache_delete_success">Cache eliminata con successo</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">Eliminazione della cache fallita</string>
     
     <!-- Ads Settings -->
     <string name="piko_title_ads">Annunci</string>
@@ -191,6 +191,6 @@
     <string name="piko_pref_search_type_ahead_events">Eventi</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Sezione ordinata</string>
 
-    <string name="piko_settings_supported_links">Open supported links</string>
+    <string name="piko_settings_supported_links">Apri i link supportati</string>
     
 </resources>
