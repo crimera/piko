@@ -44,6 +44,20 @@
     <string name="piko_native_translator_google">Google translator</string>
     <string name="piko_native_translator_google_v2">Google translator V2</string>
 
+    <string name="piko_title_native_reader_mode">Reader mode</string>
+    <string name="piko_native_reader_mode_grok_thread">Analyse this thread</string>
+    <string name="piko_native_reader_mode_grok_author">More about the author</string>
+    <string name="piko_native_reader_mode_source">Source</string>
+    <string name="piko_native_reader_mode_published">Published</string>
+    <string name="piko_native_reader_mode_total_post">Total Posts</string>
+    <string name="piko_native_reader_mode_pref_text_only_mode">Text only mode</string>
+    <string name="piko_native_reader_mode_pref_hide_quoted_posts">Hide quoted posts</string>
+    <string name="piko_native_reader_mode_pref_no_grok">No Grok analyses</string>
+    <string name="piko_native_reader_mode_copy_post">Copy post link</string>
+    <string name="piko_native_reader_mode_cache_delete">Delete reader mode\'s cache</string>
+    <string name="piko_native_reader_mode_cache_delete_success">Cache deleted successfully</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">Cache deletion failed</string>
+
     <!-- Ads Settings -->
     <string name="piko_title_ads">Ads</string>
     <string name="piko_pref_hide_promoted_posts">Promoted posts</string>
@@ -176,5 +190,7 @@
     <string name="piko_pref_search_type_ahead_users">Users</string>
     <string name="piko_pref_search_type_ahead_events">Events</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Ordered section</string>
+
+    <string name="piko_settings_supported_links">Open supported links</string>
 
 </resources>

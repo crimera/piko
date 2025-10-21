@@ -1,3 +1,110 @@
+## [1.59.0](https://github.com/crimera/piko/compare/v1.58.1...v1.59.0) (2025-09-11)
+
+### Features
+
+* **Twitter:** Added 'Native reader mode'  patch ([308e1e6](https://github.com/crimera/piko/commit/308e1e6ae392eb6c0b9ade6383957fd2983e68f5))
+
+### Updates
+
+* **Translations:** New translations for `pt-br` ([850aa0d](https://github.com/crimera/piko/commit/850aa0d17e0cd9a83a9c897be11b45784a82860a))
+* **Translations:** Update `Polish` ([973391d](https://github.com/crimera/piko/commit/973391d6e0cfb1735dbc2102a419b9df783fa8f9))
+
+### Refactors
+
+* **Twitter:** consolidate native features ([79a37af](https://github.com/crimera/piko/commit/79a37afded871a185545afcd1c6a36815ec89b41))
+* **Twitter:** Moved to `models` approach ([4bc56cb](https://github.com/crimera/piko/commit/4bc56cbb3de7147706786e186ebf7f2ea9df15a2))
+
+## [1.59.0-dev.3](https://github.com/crimera/piko/compare/v1.59.0-dev.2...v1.59.0-dev.3) (2025-09-11)
+
+### Updates
+
+* **Translations:** New translations for `pt-br` ([850aa0d](https://github.com/crimera/piko/commit/850aa0d17e0cd9a83a9c897be11b45784a82860a))
+
+## [1.59.0-dev.2](https://github.com/crimera/piko/compare/v1.59.0-dev.1...v1.59.0-dev.2) (2025-09-03)
+
+### Updates
+
+* **Translations:** Update `Polish` ([973391d](https://github.com/crimera/piko/commit/973391d6e0cfb1735dbc2102a419b9df783fa8f9))
+
+## [1.59.0-dev.1](https://github.com/crimera/piko/compare/v1.58.1...v1.59.0-dev.1) (2025-09-02)
+
+### Features
+
+* **Twitter:** Added 'Native reader mode'  patch ([308e1e6](https://github.com/crimera/piko/commit/308e1e6ae392eb6c0b9ade6383957fd2983e68f5))
+
+### Refactors
+
+* **Twitter:** consolidate native features ([79a37af](https://github.com/crimera/piko/commit/79a37afded871a185545afcd1c6a36815ec89b41))
+* **Twitter:** Moved to `models` approach ([4bc56cb](https://github.com/crimera/piko/commit/4bc56cbb3de7147706786e186ebf7f2ea9df15a2))
+
+## [1.58.1](https://github.com/crimera/piko/compare/v1.58.0...v1.58.1) (2025-09-02)
+
+### Updates
+
+* **Translations:** Update `Japanese` ([c28d9c7](https://github.com/crimera/piko/commit/c28d9c7850794cb8aede686201e5d80482c42f1e))
+
+## [1.58.1-dev.1](https://github.com/crimera/piko/compare/v1.58.0...v1.58.1-dev.1) (2025-09-01)
+
+### Updates
+
+* **Translations:** Update `Japanese` ([c28d9c7](https://github.com/crimera/piko/commit/c28d9c7850794cb8aede686201e5d80482c42f1e))
+
+## [1.58.0](https://github.com/crimera/piko/compare/v1.57.1...v1.58.0) (2025-08-30)
+
+### Features
+
+* **Translations:** Update `Polish` ([97b3790](https://github.com/crimera/piko/commit/97b379029deba1044436cb5a983335b515e7f959))
+
+## [1.58.0-dev.1](https://github.com/crimera/piko/compare/v1.57.1...v1.58.0-dev.1) (2025-08-21)
+
+### Features
+
+* **Translations:** Update `Polish` ([97b3790](https://github.com/crimera/piko/commit/97b379029deba1044436cb5a983335b515e7f959))
+
+## [1.57.1](https://github.com/crimera/piko/compare/v1.57.0...v1.57.1) (2025-08-11)
+
+### Bug Fixes
+
+* Unescaped apostrophe ([487e992](https://github.com/crimera/piko/commit/487e99259b772cbf44f09028807db223f464df85))
+
+## [1.57.1-dev.1](https://github.com/crimera/piko/compare/v1.57.0...v1.57.1-dev.1) (2025-08-11)
+
+### Bug Fixes
+
+* Unescaped apostrophe ([487e992](https://github.com/crimera/piko/commit/487e99259b772cbf44f09028807db223f464df85))
+
+## [1.57.0](https://github.com/crimera/piko/compare/v1.56.0...v1.57.0) (2025-08-11)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Customize side bar items` patch ([4664f02](https://github.com/crimera/piko/commit/4664f02c065396dc28406fe5b47478eff6b6c4aa))
+* **Twitter:** Fix App icon error toast ([2997b56](https://github.com/crimera/piko/commit/2997b56f13c37681acbf89efcbd12647ee1c5056))
+
+### Features
+
+* **Twitter:** support custom deeplink hosts ([499cc5e](https://github.com/crimera/piko/commit/499cc5ea3e32d3e6d551755df2f94b7dbc3da9af))
+
+### Refactors
+
+* **Twitter:** Move redirect BM to settings patch dependancy ([4dbc491](https://github.com/crimera/piko/commit/4dbc49198ecd3a10d288f8f7cebcbca255aaa9b7))
+
+## [1.57.0-dev.2](https://github.com/crimera/piko/compare/v1.57.0-dev.1...v1.57.0-dev.2) (2025-08-03)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Customize side bar items` patch ([4664f02](https://github.com/crimera/piko/commit/4664f02c065396dc28406fe5b47478eff6b6c4aa))
+* **Twitter:** Fix App icon error toast ([2997b56](https://github.com/crimera/piko/commit/2997b56f13c37681acbf89efcbd12647ee1c5056))
+
+### Refactors
+
+* **Twitter:** Move redirect BM to settings patch dependancy ([4dbc491](https://github.com/crimera/piko/commit/4dbc49198ecd3a10d288f8f7cebcbca255aaa9b7))
+
+## [1.57.0-dev.1](https://github.com/crimera/piko/compare/v1.56.0...v1.57.0-dev.1) (2025-07-26)
+
+### Features
+
+* **Twitter:** support custom deeplink hosts ([499cc5e](https://github.com/crimera/piko/commit/499cc5ea3e32d3e6d551755df2f94b7dbc3da9af))
+
 ## [1.56.0](https://github.com/crimera/piko/compare/v1.55.0...v1.56.0) (2025-07-22)
 
 ### Features

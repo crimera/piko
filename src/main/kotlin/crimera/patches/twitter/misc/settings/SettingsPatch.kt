@@ -21,11 +21,12 @@ import crimera.patches.twitter.misc.integrations.IntegrationsPatch
 import crimera.patches.twitter.misc.settings.fingerprints.AuthorizeAppActivity
 import crimera.patches.twitter.misc.settings.fingerprints.SettingsFingerprint
 import crimera.patches.twitter.misc.settings.fingerprints.UrlInterpreterActivity
+import crimera.patches.twitter.premium.redirectBMNavBar.RedirectBMTab
 
 @Patch(
     description = "Adds settings",
     requiresIntegrations = true,
-    dependencies = [SettingsResourcePatch::class, IntegrationsPatch::class],
+    dependencies = [SettingsResourcePatch::class, IntegrationsPatch::class, RedirectBMTab::class],
     compatiblePackages = [CompatiblePackage("com.twitter.android")],
 )
 object SettingsPatch : BytecodePatch(
@@ -33,15 +34,18 @@ object SettingsPatch : BytecodePatch(
 ) {
     private const val INTEGRATIONS_PACKAGE = "Lapp/revanced/integrations/twitter"
     const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
-    private const val ACTIVITY_HOOK_CLASS = "Lapp/revanced/integrations/twitter/settings/ActivityHook;"
-    private const val DEEPLINK_HOOK_CLASS = "Lapp/revanced/integrations/twitter/settings/DeepLink;"
+    private const val ACTIVITY_SETTINGS_CLASS = "$INTEGRATIONS_PACKAGE/settings"
+    private const val ACTIVITY_HOOK_CLASS = "$ACTIVITY_SETTINGS_CLASS/ActivityHook;"
+    private const val DEEPLINK_HOOK_CLASS = "$ACTIVITY_SETTINGS_CLASS/DeepLink;"
     private const val ADD_PREF_DESCRIPTOR =
         "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
 
     const val PREF_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Pref"
     const val PATCHES_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/patches"
     const val CUSTOMISE_DESCRIPTOR = "$PATCHES_DESCRIPTOR/customise/Customise"
-    const val SSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/settings/SettingsStatus;"
+    const val NATIVE_DESCRIPTOR = "$PATCHES_DESCRIPTOR/nativeFeatures"
+
+    const val SSTS_DESCRIPTOR = "invoke-static {}, $ACTIVITY_SETTINGS_CLASS/SettingsStatus;"
     const val FSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/patches/FeatureSwitchPatch;"
 
     private const val START_ACTIVITY_DESCRIPTOR =
@@ -78,14 +82,18 @@ object SettingsPatch : BytecodePatch(
                 .first { it.opcode == Opcode.CONST_4 }
                 .location.index
 
-        val igetObjLoc = prefCLickedMethod.getInstructions().first { it.opcode == Opcode.IGET_OBJECT }.location.index
+        val igetObjLoc =
+            prefCLickedMethod
+                .getInstructions()
+                .first { it.opcode == Opcode.IGET_OBJECT }
+                .location.index
         val objFieldName = (prefCLickedMethod.getInstruction<ReferenceInstruction>(igetObjLoc).reference as FieldReference).name
         prefCLickedMethod.removeInstruction(igetObjLoc)
 
         prefCLickedMethod.addInstructionsWithLabels(
             0,
             """
-            iget-object p1, p1, Landroidx/preference/Preference;->${objFieldName}:Ljava/lang/String;
+            iget-object p1, p1, Landroidx/preference/Preference;->$objFieldName:Ljava/lang/String;
             const-string v1, "pref_mod" 
             invoke-virtual {p1, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
             move-result v2

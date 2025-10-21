@@ -99,6 +99,8 @@
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">타임라인</string>
     <string name="piko_pref_disable_auto_timeline_scroll">앱 시작 시 타임라인 자동 스크롤 비활성화하기</string>
+    <string name="piko_pref_show_post_source">게시물 소스 라벨 표시하기</string>
+    <string name="piko_pref_show_post_source_desc">게시물 정보를 여는 동안에 지연이 발생할 수 있으며, 공개 게시물에만 라벨이 표시될 수 있습니다.</string>
     <string name="piko_pref_hide_live_threads">실시간 쓰레드</string>
     <string name="piko_pref_hide_live_threads_desc">타임라인에서 실시간 영역를 숨길 수 있습니다.</string>
     <string name="piko_pref_hide_banner">배너</string>
@@ -139,6 +141,13 @@
     <string name="piko_pref_customisation_post_font_size">게시물 폰트 사이즈</string>
     <string name="piko_pref_customisation_search_type_ahead">검색에서 제안 숨기기</string>
 
+    <!-- Logging Settings -->
+    <string name="piko_title_logging">Logging</string>
+    <string name="piko_pref_server_response_logging">로그 서버 응답</string>
+    <string name="piko_pref_server_response_logging_desc">서버로부터 받은 JSON 응답을 \'Download/Piko\'에서 로그에 기록합니다.</string>
+    <string name="piko_pref_server_response_logging_file_overwrite">응답 로그 파일 덮어쓰기</string>
+    <string name="piko_pref_server_response_logging_file_overwrite_desc">실행 시 기존 응답 로그 데이터를 지웁니다.</string>
+    
     <!-- Backup and Restore -->
     <string name="piko_title_backup">백업 &amp; 복원</string>
     <string name="piko_pref_export">내보내기: %s</string>
@@ -166,5 +175,7 @@
     <string name="piko_pref_search_type_ahead_users">사용자</string>
     <string name="piko_pref_search_type_ahead_events">이벤트</string>
     <string name="piko_pref_search_type_ahead_ordered_section">정렬된 영역</string>
+
+    <string name="piko_settings_supported_links">지원되는 링크 열기</string>
 
 </resources>
