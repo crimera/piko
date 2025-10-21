@@ -1,3 +1,51 @@
+## [1.54.0](https://github.com/speedlorenzo12/piko-it/compare/v1.53.0...v1.54.0) (2025-10-21)
+
+### Bug Fixes
+
+* **Translations:** Fix unescaped strings in fr and vi ([be94c4c](https://github.com/speedlorenzo12/piko-it/commit/be94c4c3b6785a1f9ecfdc1dbad48a4a9885a539))
+* **Twitter - copy media link + Custom download folder:** Update fingerprint to work on latest twitter release ([cc8fadb](https://github.com/speedlorenzo12/piko-it/commit/cc8fadbac2d31139ae8b9572dd1aeb2565564e75))
+* **Twitter - Log server response:** Escape single qoutes ([cedbfaf](https://github.com/speedlorenzo12/piko-it/commit/cedbfaf77913afb81b0363207a9839ea1624fa63))
+* **Twitter:** `Hide community badges` patch ([f539260](https://github.com/speedlorenzo12/piko-it/commit/f5392600b3e51a3c32fa3ffb4da5d751da3b8612))
+* **Twitter:** Fix `Customize side bar items` patch ([4664f02](https://github.com/speedlorenzo12/piko-it/commit/4664f02c065396dc28406fe5b47478eff6b6c4aa))
+* **Twitter:** fix `Enable force HD videos` patch ([6d8d200](https://github.com/speedlorenzo12/piko-it/commit/6d8d200a521375252c675117365e1fb85f701083))
+* **Twitter:** Fix `Enable Undo Posts` patch ([883b6cb](https://github.com/speedlorenzo12/piko-it/commit/883b6cb92c52d1a475f6663bdf474518280b4da4))
+* **Twitter:** Fix `Hide nudge button` patch ([87ceb49](https://github.com/speedlorenzo12/piko-it/commit/87ceb49f841c99012fcbbc315edc1c4657376e37))
+* **Twitter:** fix `Hide nudge button` patch (again) ([be2cd9d](https://github.com/speedlorenzo12/piko-it/commit/be2cd9de0aa2545274369ed0c724ffead77148ee))
+* **Twitter:** Fix App icon error toast ([2997b56](https://github.com/speedlorenzo12/piko-it/commit/2997b56f13c37681acbf89efcbd12647ee1c5056))
+* **Twitter:** Fix Settings crash ([015c5bd](https://github.com/speedlorenzo12/piko-it/commit/015c5bdd1247ec6263fa194ca6e580690e13e223))
+* **Twitter:** Fix share menu patches ([ba561be](https://github.com/speedlorenzo12/piko-it/commit/ba561be67cf5d854cfff477a3a80b85928a4170a))
+* **Twitter:** Fix unescaped characters ([829eedd](https://github.com/speedlorenzo12/piko-it/commit/829eedd90eabc13575b49da9cc5551f894787b76))
+* **ui:** adjust monet-light colors to have a white background ([0906e93](https://github.com/speedlorenzo12/piko-it/commit/0906e93027747e43becd1d94bca24f54ecc97683))
+* Unescaped apostrophe ([487e992](https://github.com/speedlorenzo12/piko-it/commit/487e99259b772cbf44f09028807db223f464df85))
+
+### Features
+
+* **Translations:** Add italian translation ([88e22fb](https://github.com/speedlorenzo12/piko-it/commit/88e22fbb64eae5b2b185c0c785d75a29bb342458))
+* **Translations:** Korean translation added ([492e631](https://github.com/speedlorenzo12/piko-it/commit/492e6312df05d3bdae618e350a929a8b22914c98))
+* **Translations:** Update `Japanese` ([80282f0](https://github.com/speedlorenzo12/piko-it/commit/80282f0e4eb3b6f1cde7eb6e30f7d00ba9b26a0c))
+* **Translations:** Update `Japanese` ([a7da7d7](https://github.com/speedlorenzo12/piko-it/commit/a7da7d7468203a3244496b4ed692a8d09da18b45))
+* **Translations:** Update `Polish` ([97b3790](https://github.com/speedlorenzo12/piko-it/commit/97b379029deba1044436cb5a983335b515e7f959))
+* **Translations:** Update `Polish` ([e49393e](https://github.com/speedlorenzo12/piko-it/commit/e49393eefe75118c29575324f5832c7cc3589530))
+* **Twitter:** Added 'Native reader mode'  patch ([308e1e6](https://github.com/speedlorenzo12/piko-it/commit/308e1e6ae392eb6c0b9ade6383957fd2983e68f5))
+* **Twitter:** Added `Hide community badges` patch ([57936a1](https://github.com/speedlorenzo12/piko-it/commit/57936a167eb23eeb992ca39015149e71e04270c5))
+* **Twitter:** Added `Log server response` patch ([bff4363](https://github.com/speedlorenzo12/piko-it/commit/bff4363a56386ec6e1c80f2a57bdc70a28827be6))
+* **Twitter:** Added `Show post source label` patch ([931bc76](https://github.com/speedlorenzo12/piko-it/commit/931bc762c3fc03535bf427b3e691f09e76271c85))
+* **Twitter:** support custom deeplink hosts ([499cc5e](https://github.com/speedlorenzo12/piko-it/commit/499cc5ea3e32d3e6d551755df2f94b7dbc3da9af))
+
+### Updates
+
+* **Translations:** Add French & Korean to Language List ([#567](https://github.com/speedlorenzo12/piko-it/issues/567)) ([6e139be](https://github.com/speedlorenzo12/piko-it/commit/6e139be56dbc4f754c892d7c8ba2ed28ee8fa67f))
+* **Translations:** New translations for `pt-br` ([850aa0d](https://github.com/speedlorenzo12/piko-it/commit/850aa0d17e0cd9a83a9c897be11b45784a82860a))
+* **Translations:** Update `Japanese` ([c28d9c7](https://github.com/speedlorenzo12/piko-it/commit/c28d9c7850794cb8aede686201e5d80482c42f1e))
+* **Translations:** Update `Polish` ([973391d](https://github.com/speedlorenzo12/piko-it/commit/973391d6e0cfb1735dbc2102a419b9df783fa8f9))
+* **Translations:** Update `Polish` ([#613](https://github.com/speedlorenzo12/piko-it/issues/613)) ([b6ea9de](https://github.com/speedlorenzo12/piko-it/commit/b6ea9dec045eeb5172fc1d01b1365929e127b4b0))
+
+### Refactors
+
+* **Twitter:** consolidate native features ([79a37af](https://github.com/speedlorenzo12/piko-it/commit/79a37afded871a185545afcd1c6a36815ec89b41))
+* **Twitter:** Move redirect BM to settings patch dependancy ([4dbc491](https://github.com/speedlorenzo12/piko-it/commit/4dbc49198ecd3a10d288f8f7cebcbca255aaa9b7))
+* **Twitter:** Moved to `models` approach ([4bc56cb](https://github.com/speedlorenzo12/piko-it/commit/4bc56cbb3de7147706786e186ebf7f2ea9df15a2))
+
 ## [1.59.0](https://github.com/crimera/piko/compare/v1.58.1...v1.59.0) (2025-09-11)
 
 ### Features
