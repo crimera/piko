@@ -152,6 +152,19 @@
 	<string name="piko_pref_customisation_reply_sorting_remember">Selecionado anteriormente</string>
 	<string name="piko_pref_customisation_post_font_size">Tamanho da fonte das postagens</string>
 	<string name="piko_pref_customisation_search_type_ahead">Sugestões de pesquisa para ocultar</string>
+
+	 <!-- Font Settings -->
+    <string name="piko_title_font">Estilo da fonte</string>
+    <string name="piko_pref_add_font">Adicionar fonte</string>
+    <string name="piko_pref_add_font_desc">Certifique-se de que o tipo da fonte é .ttf ou .otf</string>
+    <string name="piko_pref_delete_font">Apagar fonte</string>
+    <string name="piko_pref_add_emoji_font">Adicionar fonte de emoji</string>
+    <string name="piko_pref_delete_emoji_font">Apagar fonte de emoji</string>
+    <string name="piko_pref_add_font_success">Fonte adicionada com sucesso</string>
+    <string name="piko_pref_add_font_fail">Falha ao adicionar fonte</string>
+    <string name="piko_pref_delete_font_success">Fonte apagada com sucesso</string>
+    <string name="piko_pref_delete_font_fail">Falha ao apagar fonte</string>
+    <string name="piko_pref_delete_font_warn">Nenhuma fonte custumizada encontrada para ser apagada</string>
 	
 	<!--  Loggin Settings  -->
 	<string name="piko_title_logging">Registro</string>
@@ -175,6 +188,7 @@
 	<string name="piko_pref_app_version">Versão do aplicativo</string>
 	<string name="piko_pref_patch_info">Informações do patch</string>
 	<string name="piko_pref_version_info">Informações da versão</string>
+	<string name="piko_changelogs_title">Registro de alterações</string>
 	<string name="piko_pref_patches">Patches</string>
 	<string name="piko_pref_included">Incluído</string>
 	<string name="piko_pref_excluded">Excluído</string>
