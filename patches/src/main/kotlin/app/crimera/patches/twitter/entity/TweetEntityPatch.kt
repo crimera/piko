@@ -72,7 +72,7 @@ val tweetEntityPatch =
 
             val tweetEntityMethod =
                 tweetObjectMethods
-                    .lastOrNull { it.returnType.contains("/entity/") }
+                    .lastOrNull { it.returnType.contains("/entity/") && !(it.returnType.contains("/unifiedcard/")) }
                     ?.name
                     ?: throw PatchException("getTweetEntityMethod not found")
             tweetShortTextFingerprint.changeFirstString(tweetEntityMethod)
