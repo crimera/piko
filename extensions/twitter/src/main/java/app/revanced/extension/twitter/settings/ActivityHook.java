@@ -100,7 +100,7 @@ public class ActivityHook {
         }else if (activity_name.equals(Settings.CUSTOMISE_SECTION)) {
             toolbarText = "piko_title_customisation";
         }else if (activity_name.equals(Settings.FONT_SECTION)) {
-            toolbarText = "piko_title_customisation";
+            toolbarText = "piko_title_font";
         }else if (activity_name.equals(Settings.TIMELINE_SECTION)) {
             toolbarText = "piko_title_timeline";
         }else if (activity_name.equals(Settings.BACKUP_SECTION)) {
