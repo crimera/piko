@@ -44,19 +44,19 @@
     <string name="piko_native_translator_google">Google traduttore</string>
     <string name="piko_native_translator_google_v2">Google traduttore V2</string>
 
-    <string name="piko_title_native_reader_mode">Reader mode</string>
-    <string name="piko_native_reader_mode_grok_thread">Analyse this thread</string>
-    <string name="piko_native_reader_mode_grok_author">More about the author</string>
-    <string name="piko_native_reader_mode_source">Source</string>
-    <string name="piko_native_reader_mode_published">Published</string>
-    <string name="piko_native_reader_mode_total_post">Total Posts</string>
-    <string name="piko_native_reader_mode_pref_text_only_mode">Text only mode</string>
-    <string name="piko_native_reader_mode_pref_hide_quoted_posts">Hide quoted posts</string>
-    <string name="piko_native_reader_mode_pref_no_grok">No Grok analyses</string>
-    <string name="piko_native_reader_mode_copy_post">Copy post link</string>
-    <string name="piko_native_reader_mode_cache_delete">Delete reader mode\'s cache</string>
-    <string name="piko_native_reader_mode_cache_delete_success">Cache deleted successfully</string>
-    <string name="piko_native_reader_mode_cache_delete_failed">Cache deletion failed</string>
+    <string name="piko_title_native_reader_mode">Modalità lettura</string>
+    <string name="piko_native_reader_mode_grok_thread">Analizza questo thread</string>
+    <string name="piko_native_reader_mode_grok_author">Più a proposito dell/'autore</string>
+    <string name="piko_native_reader_mode_source">Sorgente</string>
+    <string name="piko_native_reader_mode_published">Pubblicato</string>
+    <string name="piko_native_reader_mode_total_post">Post totali</string>
+    <string name="piko_native_reader_mode_pref_text_only_mode">Modalità solo testo</string>
+    <string name="piko_native_reader_mode_pref_hide_quoted_posts">Nascondi i post citati</string>
+    <string name="piko_native_reader_mode_pref_no_grok">No analisi Grok</string>
+    <string name="piko_native_reader_mode_copy_post">Copia link post</string>
+    <string name="piko_native_reader_mode_cache_delete">Elimina la cache della modalità lettura</string>
+    <string name="piko_native_reader_mode_cache_delete_success">Cache eliminata con successo</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">Eliminazione della cache fallita</string>
     
     <!-- Ads Settings -->
     <string name="piko_title_ads">Annunci</string>
@@ -97,10 +97,10 @@
     <string name="piko_pref_debug_menu">menu debug per i posts</string>
     <string name="piko_pref_quick_settings">Abilita impostazioni rapide</string>
     <string name="piko_pref_quick_settings_summary">Aggiunge un pulsante d\'impostazioni rapide nella barra laterale</string>
-    <string name="piko_pref_pause_search_suggestion">Pause search suggestions</string>
-    <string name="piko_pref_pause_search_suggestion_desc">Search suggestions will not be saved locally</string>
-    <string name="piko_pref_search_suggestion">search suggestions</string>
-    <string name="piko_pref_search_suggestion_desc">Hide/Remove search suggestion in explore section</string>
+    <string name="piko_pref_pause_search_suggestion">Metti in pausa i suggerimenti di ricerca</string>
+    <string name="piko_pref_pause_search_suggestion_desc">I suggerimenti di ricerca non verranno salvati localmente</string>
+    <string name="piko_pref_search_suggestion">suggerimenti di ricerca</string>
+    <string name="piko_pref_search_suggestion_desc">Nascondi/Rimuovi il suggerimento di ricerca nella sezione Esplora</string>
 
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Flag di funzionalità</string>
@@ -112,8 +112,8 @@
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">Cronologia</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Disattiva lo scrollimento automatico della cronologia all\'avvio</string>
-    <string name="piko_pref_show_post_source">Show post source label</string> asasa
-    <string name="piko_pref_show_post_source_desc">There might be a delay while opening a post info and also label will be shown only on public posts</string>
+    <string name="piko_pref_show_post_source">Mostra etichetta della sorgente del post</string>
+    <string name="piko_pref_show_post_source_desc">Potrebbe verificarsi un ritardo durante l/'apertura delle informazioni di un post e inoltre l/'etichetta verrà mostrata solo nei post pubblici</string>
     <string name="piko_pref_hide_live_threads">discussioni in diretta</string>
     <string name="piko_pref_hide_live_threads_desc">Nascondi la sezione dal vivo nella cronologia</string>
     <string name="piko_pref_hide_banner">bandiera</string>
@@ -156,17 +156,17 @@
     <string name="piko_pref_customisation_search_type_ahead">Cerca i suggerimenti da nascondere</string>
 
     <!-- Font Settings -->
-    <string name="piko_title_font">Font style</string>
-    <string name="piko_pref_add_font">Add font</string>
-    <string name="piko_pref_add_font_desc">Make sure the font is of type .ttf or .otf</string>
-    <string name="piko_pref_delete_font">Delete font</string>
-    <string name="piko_pref_add_emoji_font">Add emoji font</string>
-    <string name="piko_pref_delete_emoji_font">Delete emoji font</string>
-    <string name="piko_pref_add_font_success">Font added successfully</string>
-    <string name="piko_pref_add_font_fail">Font addition failed</string>
-    <string name="piko_pref_delete_font_success">Font deleted successfully</string>
-    <string name="piko_pref_delete_font_fail">Font deletion failed</string>
-    <string name="piko_pref_delete_font_warn">No custom font found to be deleted</string>
+    <string name="piko_title_font">Stile font</string>
+    <string name="piko_pref_add_font">Aggiungi font</string>
+    <string name="piko_pref_add_font_desc">Assicurati che il font è di tipo .ttf o .otf</string>
+    <string name="piko_pref_delete_font">Elimina font</string>
+    <string name="piko_pref_add_emoji_font">Aggiungi font emoji</string>
+    <string name="piko_pref_delete_emoji_font">Elimina font emoji</string>
+    <string name="piko_pref_add_font_success">Font Aggiunto con successo</string>
+    <string name="piko_pref_add_font_fail">Aggiunta del Font fallito</string>
+    <string name="piko_pref_delete_font_success">Font eliminato con successo</string>
+    <string name="piko_pref_delete_font_fail">Eliminazione del Font fallito</string>
+    <string name="piko_pref_delete_font_warn">Nessun font personalizzato trovato da essere eliminato</string>
     
     <!-- Logging Settings -->
     <string name="piko_title_logging">Registro</string>
@@ -190,8 +190,8 @@
     <string name="piko_pref_app_version">Versione app</string>
     <string name="piko_pref_patch_info">Informazioni sulle Patch</string>
     <string name="piko_pref_version_info">Informazioni sulla Versione</string>
-    <string name="piko_changelogs_title">Changelogs</string> asas
-    <string name="piko_pref_patches">Patches</string>
+    <string name="piko_changelogs_title">Registro delle modifiche</string>
+    <string name="piko_pref_patches">Le patch</string>
     <string name="piko_pref_included">Incluso</string>
     <string name="piko_pref_excluded">Escluso</string>
     <string name="piko_pref_app_restart_rec">Riavvio dell\'app è consigliato</string>
@@ -204,6 +204,6 @@
     <string name="piko_pref_search_type_ahead_events">Eventi</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Sezione ordinata</string>
 
-    <string name="piko_settings_supported_links">Open supported links</string>
-
+    <string name="piko_settings_supported_links">Apri i link supportati</string>
+    
 </resources>
