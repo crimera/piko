@@ -372,6 +372,14 @@ public class Pref {
         return Integer.parseInt(Utils.getStringPref(Settings.VID_NATIVE_DOWNLOADER_FILENAME));
     }
 
+    public static boolean RemoveSearchSuggestions() {
+        return Utils.getBooleanPerf(Settings.MISC_HIDE_SEARCH_SUGGESTIONS);
+    }
+
+    public static boolean pauseSearchSuggestions() {
+        return Utils.getBooleanPerf(Settings.MISC_PAUSE_SEARCH_SUGGESTIONS);
+    }
+
 
     //end
 }
