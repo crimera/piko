@@ -445,6 +445,26 @@ public class ScreenBuilder {
             );
         }
 
+        if (SettingsStatus.removeSearchSuggestions) {
+            addPreference(category,
+                    helper.switchPreference(
+                            strRemoveRes("piko_pref_search_suggestion"),
+                            strRes("piko_pref_search_suggestion_desc"),
+                            Settings.MISC_HIDE_SEARCH_SUGGESTIONS
+                    )
+            );
+        }
+
+        if (SettingsStatus.pauseSearchSuggestions) {
+            addPreference(category,
+                    helper.switchPreference(
+                            strRes("piko_pref_pause_search_suggestion"),
+                            strRes("piko_pref_pause_search_suggestion_desc"),
+                            Settings.MISC_PAUSE_SEARCH_SUGGESTIONS
+                    )
+            );
+        }
+
     }
 
     public void buildFeatureFlagsSection(boolean buildCategory){
