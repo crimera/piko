@@ -153,7 +153,7 @@
 
     <!-- Font Settings -->
     <string name="piko_title_font">Styl czcionki</string>
-    <string name="piko_pref_add_font">Dodaj czcionkę<</string>
+    <string name="piko_pref_add_font">Dodaj czcionkę</string>
     <string name="piko_pref_add_font_desc">Upewnij się, że czcionka jest w formacie .ttf lub .otf</string>
     <string name="piko_pref_delete_font">Usuń czcionkę</string>
     <string name="piko_pref_add_emoji_font">Dodaj czcionkę emoji</string>
