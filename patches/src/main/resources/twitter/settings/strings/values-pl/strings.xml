@@ -97,6 +97,10 @@
     <string name="piko_pref_debug_menu">menu debugowania dla wpisów</string>
     <string name="piko_pref_quick_settings">Włącz szybkie ustawienia</string>
     <string name="piko_pref_quick_settings_summary">Dodaje przycisk szybkich ustawień w pasku bocznym</string>
+    <string name="piko_pref_pause_search_suggestion">Wstrzymaj sugestie wyszukiwania</string>
+    <string name="piko_pref_pause_search_suggestion_desc">Sugestie wyszukiwania nie będą zapisywane lokalnie</string>
+    <string name="piko_pref_search_suggestion">sugestie wyszukiwania</string>
+    <string name="piko_pref_search_suggestion_desc">Ukryj/Usuń sugestie wyszukiwania w sekcji przeglądania</string>
 
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Flagi</string>
