@@ -1,5 +1,6 @@
 package app.revanced.extension.twitter.settings;
 
+import android.os.Build;
 import app.revanced.extension.twitter.patches.FeatureSwitchPatch;
 
 public class SettingsStatus {
@@ -75,6 +76,16 @@ public class SettingsStatus {
 
     public static boolean customFont = false;
     public static boolean customEmojiFont = false;
+
+    public static boolean removeSearchSuggestions = false;
+    public static void removeSearchSuggestions() {
+        removeSearchSuggestions = true;
+    }
+
+    public static boolean pauseSearchSuggestions = false;
+    public static void pauseSearchSuggestions() {
+        pauseSearchSuggestions = true;
+    }
 
     public static void showChangelogsPatchEnabled() {
         showChangelogsPatchEnabled = true;
@@ -327,7 +338,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableMiscSection() {
-        return ( hideSocialProof || roundOffNumbers || enableFontMod || hideRecommendedUsers || hideFAB || hideViewCount || customSharingDomainEnabled || hideFABBtns);
+        return ( pauseSearchSuggestions || removeSearchSuggestions || hideSocialProof || roundOffNumbers || enableFontMod || hideRecommendedUsers || hideFAB || hideViewCount || customSharingDomainEnabled || hideFABBtns);
     }
 
     public static boolean enableAdsSection() {
@@ -354,7 +365,7 @@ public class SettingsStatus {
     }
 
     public static boolean fontSection() {
-        return (customFont || customEmojiFont);
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && (customFont || customEmojiFont));
     }
 
     public static void load() {

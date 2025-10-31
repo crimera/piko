@@ -97,6 +97,10 @@
     <string name="piko_pref_debug_menu">debug menu for posts</string>
     <string name="piko_pref_quick_settings">Enable quick settings</string>
     <string name="piko_pref_quick_settings_summary">Adds a quick settings button at the sidebar</string>
+    <string name="piko_pref_pause_search_suggestion">Pause search suggestions</string>
+    <string name="piko_pref_pause_search_suggestion_desc">Search suggestions will not be saved locally</string>
+    <string name="piko_pref_search_suggestion">search suggestions</string>
+    <string name="piko_pref_search_suggestion_desc">Hide/Remove search suggestion in explore section</string>
 
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature flags</string>

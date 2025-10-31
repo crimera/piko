@@ -1,3 +1,28 @@
+## [2.0.0-dev.7](https://github.com/crimera/piko/compare/v2.0.0-dev.6...v2.0.0-dev.7) (2025-10-26)
+
+### Bug Fixes
+
+* **Custom font:** Fix crash on Android 8 by restricting the functionality to Android 9+ ([000539b](https://github.com/crimera/piko/commit/000539b8b67d97b83efdf4eab2d311e9b492f167))
+* **Twitter:** Fix font section header ([a7a7b2e](https://github.com/crimera/piko/commit/a7a7b2e719293102b45e202505eeb032f81d06c0))
+
+### Features
+
+* **Change version code:** Add compatibleWith to make it a non-universal patch ([3664dbf](https://github.com/crimera/piko/commit/3664dbf560b9dc61cc90de4e6f53f54d86f528b0))
+* **Settings:** Allow preference titles to be multiple lines ([3075555](https://github.com/crimera/piko/commit/3075555611163ff67c073afd887d7fff4aeb45a7))
+* **Twitter:** Added `Pause search suggestions` patch ([ddbdcfe](https://github.com/crimera/piko/commit/ddbdcfeda9418e83e4206101c9847e866e6a23a4))
+* **Twitter:** Added `Remove search suggestions` patch ([dd8e67b](https://github.com/crimera/piko/commit/dd8e67b3a634036e308a2a99844c7c966f69890b))
+
+### Updates
+
+* **Translation:** Updated `Brazilian Portuguese` strings ([a53f3a0](https://github.com/crimera/piko/commit/a53f3a020eaf3b88570bda8dcb01c9968873c9e2))
+* **Translation:** Updated `Japanese` strings ([373e275](https://github.com/crimera/piko/commit/373e275683c7c2ee83053751be851c9757f48ff8))
+* **Translation:** Updated `Polish` strings ([b6773c3](https://github.com/crimera/piko/commit/b6773c34549239a5580761faad5067f5a33c522c))
+
+### Refactors
+
+* **Dynamic color:** Do not get elements repeatedly in XML operation ([3417fe1](https://github.com/crimera/piko/commit/3417fe15d2d558b042a44a06e9c21a1523d12540))
+* **Twitter:** refactor fingerprint for tweet short text ([c00264a](https://github.com/crimera/piko/commit/c00264aebbe4717e61dd08b0998ff814f92ba3bd))
+
 ## [2.0.0-dev.6](https://github.com/crimera/piko/compare/v2.0.0-dev.5...v2.0.0-dev.6) (2025-10-18)
 
 ### Bug Fixes

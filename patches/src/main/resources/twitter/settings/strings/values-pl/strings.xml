@@ -151,6 +151,19 @@
     <string name="piko_pref_customisation_post_font_size">Rozmiar czcionki wpisów</string>
     <string name="piko_pref_customisation_search_type_ahead">Sugestie wyszukiwania do ukrycia</string>
 
+    <!-- Font Settings -->
+    <string name="piko_title_font">Styl czcionki</string>
+    <string name="piko_pref_add_font">Dodaj czcionkę</string>
+    <string name="piko_pref_add_font_desc">Upewnij się, że czcionka jest w formacie .ttf lub .otf</string>
+    <string name="piko_pref_delete_font">Usuń czcionkę</string>
+    <string name="piko_pref_add_emoji_font">Dodaj czcionkę emoji</string>
+    <string name="piko_pref_delete_emoji_font">Usuń czcionkę emoji</string>
+    <string name="piko_pref_add_font_success">Czcionka została pomyślnie dodana</string>
+    <string name="piko_pref_add_font_fail">Nie udało się dodać czcionki</string>
+    <string name="piko_pref_delete_font_success">Czcionka została pomyślnie usunięta</string>
+    <string name="piko_pref_delete_font_fail">Nie udało się usunąć czcionki</string>
+    <string name="piko_pref_delete_font_warn">Nie znaleziono czcionki do usunięcia</string>
+
     <!-- Logging Settings -->
     <string name="piko_title_logging">Logi</string>
     <string name="piko_pref_server_response_logging">Loguj odpowiedzi serwera</string>

@@ -37,9 +37,7 @@ val customDeepLinksPatch = resourcePatch(
 
     execute {
         document("AndroidManifest.xml").use { document ->
-            val activities = document.getElementsByTagName("activity")
-
-            val deeplinkActivity = activities.asSequence()
+            val deeplinkActivity = document.getElementsByTagName("activity").asSequence()
                 .find {
                     val name = it.attributes.getNamedItem("android:name").nodeValue
                     name == "com.twitter.deeplink.implementation.UrlInterpreterActivity"
@@ -80,8 +78,6 @@ val customDeepLinksPatch = resourcePatch(
         }
 
         document("res/values/arrays.xml").use { document ->
-            val resources = document.getElementsByTagName("resources").asSequence().single()
-
             val array = document.createElement("string-array").apply {
                 setAttribute("name", "piko_custom_deeplink_hosts")
                 for (customHost in customLinkHosts!!) {
@@ -91,7 +87,7 @@ val customDeepLinksPatch = resourcePatch(
                 }
             }
 
-            resources.appendChild(array)
+            document.documentElement.appendChild(array)
         }
     }
 }
