@@ -13,34 +13,34 @@ public class Debug {
         this.obj = obj;
     }
 
-    protected Class<?> getObjClass() throws ClassNotFoundException {
+    public Class<?> getObjClass() throws ClassNotFoundException {
         return this.obj.getClass();
     }
 
-    protected Object getField(Class cls, Object clsObj, String fieldName) throws Exception {
+    public Object getField(Class cls, Object clsObj, String fieldName) throws Exception {
         Field field = cls.getDeclaredField(fieldName);
         field.setAccessible(true);
         return (Object) field.get(clsObj);
     }
 
-    protected Object getField(Object clsObj, String fieldName) throws Exception {
+    public Object getField(Object clsObj, String fieldName) throws Exception {
         return getField(clsObj.getClass(), clsObj, fieldName);
     }
 
-    protected Object getField(String fieldName) throws Exception {
+    public Object getField(String fieldName) throws Exception {
         return getField(this.obj, fieldName);
     }
 
-    protected Object getMethod(Object clsObj, String methodName) throws Exception {
+    public Object getMethod(Object clsObj, String methodName) throws Exception {
         return clsObj.getClass().getDeclaredMethod(methodName).invoke(clsObj);
     }
 
-    protected Object getMethod(String methodName) throws Exception {
+    public Object getMethod(String methodName) throws Exception {
         return this.getMethod(this.obj, methodName);
     }
 
     /*** THE BELOW FUNCTIONS SHOULD BE USED ONLY WHILE DEVELOPMENT ***/
-    protected String describeFields() throws Exception {
+    public String describeFields() throws Exception {
         String line = "----------------------------";
         StringBuilder sb = new StringBuilder();
         Class<?> cls = this.getObjClass();
@@ -67,7 +67,7 @@ public class Debug {
         return sb.toString();
     }
 
-    protected String describeMethods() throws Exception {
+    public String describeMethods() throws Exception {
         String line = "----------------------------";
         StringBuilder sb = new StringBuilder();
         Class<?> cls = this.getObjClass();

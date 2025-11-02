@@ -133,5 +133,12 @@
         <item>MEDIA_TAB</item>
     </string-array>
 
+    <string-array name="piko_array_notificationtabs_val">
+        <item>all</item>
+        <item>mentions</item>
+        <item>super_followers</item>
+        <item>verified</item>
+    </string-array>
+
 
 </resources>

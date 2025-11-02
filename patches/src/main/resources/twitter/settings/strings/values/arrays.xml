@@ -122,4 +122,11 @@
         <item>@string/search_scope_lists</item>
     </string-array>
 
+    <string-array name="piko_array_notificationtabs">
+        <item>@string/vit_notifications_tab_all</item>
+        <item>@string/vit_notifications_tab_mentions</item>
+        <item>@string/vit_notifications_tab_super_followers</item>
+        <item>@string/vit_notifications_tab_verified</item>
+    </string-array>
+
 </resources>

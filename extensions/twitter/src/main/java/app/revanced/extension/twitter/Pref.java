@@ -351,6 +351,10 @@ public class Pref {
         return getList(Settings.CUSTOM_SEARCH_TABS.key);
     }
 
+    public static ArrayList notificationTabs() {
+        return getList(Settings.CUSTOM_NOTIFICATION_TABS.key);
+    }
+
     public static String defaultReplySortFilter() {
         String sortfilter = Utils.getStringPref(Settings.CUSTOM_DEF_REPLY_SORTING);
         if(sortfilter.equals("LastPostion")){

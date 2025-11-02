@@ -592,6 +592,16 @@ public class ScreenBuilder {
             );
         }
 
+        if (SettingsStatus.notificationTabCustomisation) {
+            addPreference(category,
+                    helper.multiSelectListPref(
+                            strRes("piko_pref_customisation_notificationtabs"),
+                            strRes("piko_pref_app_restart_rec"),
+                            Settings.CUSTOM_NOTIFICATION_TABS
+                    )
+            );
+        }
+
         if (SettingsStatus.defaultReplySortFilter) {
            addPreference(category,
                     helper.listPreference(

@@ -77,16 +77,6 @@ public class SettingsStatus {
     public static boolean customFont = false;
     public static boolean customEmojiFont = false;
 
-    public static boolean removeSearchSuggestions = false;
-    public static void removeSearchSuggestions() {
-        removeSearchSuggestions = true;
-    }
-
-    public static boolean pauseSearchSuggestions = false;
-    public static void pauseSearchSuggestions() {
-        pauseSearchSuggestions = true;
-    }
-
     public static void showChangelogsPatchEnabled() {
         showChangelogsPatchEnabled = true;
     }
@@ -333,6 +323,21 @@ public class SettingsStatus {
         customEmojiFont = true;
     }
 
+    public static boolean removeSearchSuggestions = false;
+    public static void removeSearchSuggestions() {
+        removeSearchSuggestions = true;
+    }
+
+    public static boolean pauseSearchSuggestions = false;
+    public static void pauseSearchSuggestions() {
+        pauseSearchSuggestions = true;
+    }
+
+    public static boolean notificationTabCustomisation = false;
+    public static void notificationTabCustomisation() {
+        notificationTabCustomisation = true;
+    }
+
     public static boolean enableTimelineSection() {
         return ( showSourceLabel || hideCommBadge || showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD);
     }
@@ -358,7 +363,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableCustomisationSection() {
-        return (searchTabCustomisation || typeaheadCustomisation || exploreTabCustomisation || customPostFontSize || inlineBarCustomisation || navBarCustomisation || sideBarCustomisation || profileTabCustomisation || timelineTabCustomisation || defaultReplySortFilter);
+        return (notificationTabCustomisation || searchTabCustomisation || typeaheadCustomisation || exploreTabCustomisation || customPostFontSize || inlineBarCustomisation || navBarCustomisation || sideBarCustomisation || profileTabCustomisation || timelineTabCustomisation || defaultReplySortFilter);
     }
     public static boolean loggingSection() {
         return (serverResponseLogging || serverResponseLoggingOverwriteFile);

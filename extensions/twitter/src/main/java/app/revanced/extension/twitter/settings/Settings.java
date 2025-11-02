@@ -81,6 +81,7 @@ public class Settings extends BaseSettings {
     public static final StringSetting CUSTOM_NAVBAR_TABS = new StringSetting("customisation_navbar_tabs", "");
     public static final StringSetting CUSTOM_INLINE_TABS = new StringSetting("customisation_inlinebar_tabs", "");
     public static final StringSetting CUSTOM_SEARCH_TABS = new StringSetting("customisation_search_tabs", "");
+    public static final StringSetting CUSTOM_NOTIFICATION_TABS = new StringSetting("customisation_notification_tabs", "");
     public static final StringSetting CUSTOM_DEF_REPLY_SORTING = new StringSetting("customisation_def_reply_sorting", "Relevance");
     public static final StringSetting REPLY_SORTING_LAST_FILTER = new StringSetting("reply_sorting_last_filter", "Relevance");
     public static final StringSetting CUSTOM_SEARCH_TYPE_AHEAD = new StringSetting("customisation_search_type_ahead", "");

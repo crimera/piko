@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import app.revanced.extension.twitter.Pref;
 import app.revanced.extension.twitter.Utils;
 import com.twitter.model.json.search.JsonTypeaheadResponse;
-
+import app.revanced.extension.twitter.entity.Debug;
 public class Customise {
 
     private static void logger(Object j){
@@ -188,6 +188,35 @@ public class Customise {
                 }
             }
             return list2;
+        }catch (Exception e){
+            logger(e);
+        }
+        return inp;
+    }
+
+    public static List notificationTabs(List inp){
+        try{
+            String uriKey = "twitter://notifications/";
+            ArrayList choices = Pref.notificationTabs();
+
+            if(choices.isEmpty()) return inp;
+
+            List list2 = new ArrayList<>(inp);
+            Iterator itr = inp.iterator();
+
+            while (itr.hasNext()) {
+                Object obj = itr.next();
+                Debug cls = new Debug(obj);
+
+                Object itemStr = cls.getField("a");
+                itemStr = String.valueOf(itemStr).replace(uriKey,"");
+                if(choices.contains(itemStr)){
+                    list2.remove(obj);
+                }
+
+            }
+            return list2;
+
         }catch (Exception e){
             logger(e);
         }

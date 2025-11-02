@@ -43,19 +43,15 @@ public class MultiSelectListPref extends MultiSelectListPreference {
         CharSequence[] entriesValues = new CharSequence[]{};
         if (key == Settings.CUSTOM_PROFILE_TABS.key) {
             entries = Utils.getResourceStringArray("piko_array_profiletabs");
-//            entriesValues = new CharSequence[]{"tweets", "tweets_replies", "affiliated", "subs", "highlights", "articles", "media", "likes"};
             entriesValues = Utils.getResourceStringArray("piko_array_profiletabs_val");
         }else if (key == Settings.CUSTOM_SIDEBAR_TABS.key) {
             entries = Utils.getResourceStringArray("piko_array_sidebar");
-//            entriesValues = new CharSequence[]{"Profile","Premium", "Grok","DMs","Communities","Bookmarks","Lists","TopArticles","BirdwatchNotes","Spaces","PendingFollowers","Monetization","ProfessionalToolsGroup","MediaTransparency","Imprint","SettingsAndSupportGroup","Jobs"};
             entriesValues = Utils.getResourceStringArray("piko_array_sidebar_val");
         }else if (key == Settings.CUSTOM_NAVBAR_TABS.key) {
             entries = Utils.getResourceStringArray("piko_array_navbar");
-//            entriesValues = new CharSequence[]{"HOME","GUIDE", "SPACES","COMMUNITIES","NOTIFICATIONS","CONNECT","COMMUNITY_NOTES","BOOKMARKS","DMS","GROK","MEDIA_TAB"};
             entriesValues = Utils.getResourceStringArray("piko_array_navbar_val");
         }else if (key == Settings.CUSTOM_INLINE_TABS.key) {
             entries = Utils.getResourceStringArray("piko_array_inlinetabs");
-//            entriesValues = new CharSequence[]{"Reply","Retweet", "Favorite","ViewCount","AddRemoveBookmarks", "TwitterShare"};
             entriesValues = Utils.getResourceStringArray("piko_array_inlinetabs_val");
         }else if (key == Settings.CUSTOM_EXPLORE_TABS.key) {
             entries = Utils.getResourceStringArray("piko_array_exploretabs");
@@ -66,6 +62,9 @@ public class MultiSelectListPref extends MultiSelectListPreference {
         }else if (key == Settings.CUSTOM_SEARCH_TABS.key) {
             entries = Utils.getResourceStringArray("piko_array_searchtabs");
             entriesValues = Utils.getResourceStringArray("piko_array_searchtabs_val");
+        }else if (key == Settings.CUSTOM_NOTIFICATION_TABS.key) {
+            entries = Utils.getResourceStringArray("piko_array_notificationtabs");
+            entriesValues = Utils.getResourceStringArray("piko_array_notificationtabs_val");
         }
         setEntries(entries);
         setEntryValues(entriesValues);
