@@ -39,6 +39,7 @@
         <item>@string/grok_tab_title</item>
         <item>@string/drawer_money_title</item>
         <item>@string/x_chat_tab_title</item>
+        <item>@string/drawer_notifications_title</item>
         <item>@string/drawer_direct_messages_title</item>
         <item>@string/drawer_communities_title</item>
         <item>@string/drafts_empty_video</item>
