@@ -77,6 +77,16 @@ public class SettingsStatus {
     public static boolean customFont = false;
     public static boolean customEmojiFont = false;
 
+    public static boolean removeSearchSuggestions = false;
+    public static void removeSearchSuggestions() {
+        removeSearchSuggestions = true;
+    }
+
+    public static boolean pauseSearchSuggestions = false;
+    public static void pauseSearchSuggestions() {
+        pauseSearchSuggestions = true;
+    }
+
     public static void showChangelogsPatchEnabled() {
         showChangelogsPatchEnabled = true;
     }
