@@ -1,3 +1,34 @@
+## [2.0.0-dev.8](https://github.com/crimera/piko/compare/v2.0.0-dev.7...v2.0.0-dev.8) (2025-11-02)
+
+### Bug Fixes
+
+* **Custom font:** Fix crash on Android 8 by restricting the functionality to Android 9+ ([477f634](https://github.com/crimera/piko/commit/477f6345a062bc3605dd343d290734074483a61c))
+* **Twitter:** Added missing `notifications` item on hide sidebar elements ([39816e9](https://github.com/crimera/piko/commit/39816e91f85bad367494231e07c8ff1c0d9b58ce))
+* **Twitter:** Fix `Extension hook` ([6fb52f7](https://github.com/crimera/piko/commit/6fb52f7307b596988ee8b4286717b378d3c2ca4d))
+* **Twitter:** Fix font section header ([35e9b2b](https://github.com/crimera/piko/commit/35e9b2beb9efdb8d624455714c99cebbffed574e))
+
+### Features
+
+* **Change version code:** Add compatibleWith to make it a non-universal patch ([c684cbc](https://github.com/crimera/piko/commit/c684cbc04017549ef247438764d6f10828912c7b))
+* **Settings:** Allow preference titles to be multiple lines ([5581330](https://github.com/crimera/piko/commit/558133068396d532837c53347288fa42a7fb47f6))
+* **Twitter:** Added `Customize notification tabs` patch ([2e902e9](https://github.com/crimera/piko/commit/2e902e92b8cc56e757235cf47bbd6a52151b8c17))
+* **Twitter:** Added `Pause search suggestions` patch ([a5f3d8e](https://github.com/crimera/piko/commit/a5f3d8e87b19b61223b4959cdccb68630ceeea4e))
+* **Twitter:** Added `Remove search suggestions` patch ([33fa525](https://github.com/crimera/piko/commit/33fa5257b2d0ff0ce5423db6df733202e705aac0))
+
+### Updates
+
+* **Translation:** `Japanese` strings ([2f91899](https://github.com/crimera/piko/commit/2f91899580b5cf1e7eaec93ef780c27111a83865))
+* **Translations:** Update `Italian` strings ([837edf9](https://github.com/crimera/piko/commit/837edf922f1d6c2319e51a5a80907f13245fa8ca))
+* **Translations:** Update `Polish` ([1bcacaa](https://github.com/crimera/piko/commit/1bcacaa634e1ccd08ee7b3968c8761b789f2e5d6))
+* **Translations:** Updated `Japanese` strings ([cd5a888](https://github.com/crimera/piko/commit/cd5a8880c9265bf070f2f0793db9a11c741bf22c))
+* **Translation:** Updated `Brazilian Portuguese` strings ([bb448a1](https://github.com/crimera/piko/commit/bb448a1367b692f267cd176e0d9daab547088667))
+* **Translation:** Updated `Polish` strings ([4ba908b](https://github.com/crimera/piko/commit/4ba908b54e24f8fc78a884bdeb19aa59f0dff0c0))
+
+### Refactors
+
+* **Dynamic color:** Do not get elements repeatedly in XML operation ([cc41d35](https://github.com/crimera/piko/commit/cc41d3525a6a1588f857a0b602e8a5208cec0fd3))
+* **Twitter:** refactor fingerprint for tweet short text ([062aeb3](https://github.com/crimera/piko/commit/062aeb3b4902185a041b73689bad56e8636b951b))
+
 ## [2.0.0-dev.7](https://github.com/crimera/piko/compare/v2.0.0-dev.6...v2.0.0-dev.7) (2025-10-26)
 
 ### Bug Fixes
