@@ -46,7 +46,7 @@
 
     <string name="piko_title_native_reader_mode">Modalità lettura</string>
     <string name="piko_native_reader_mode_grok_thread">Analizza questo thread</string>
-    <string name="piko_native_reader_mode_grok_author">Più a proposito dell/'autore</string>
+    <string name="piko_native_reader_mode_grok_author">Più a proposito del\'autore</string>
     <string name="piko_native_reader_mode_source">Sorgente</string>
     <string name="piko_native_reader_mode_published">Pubblicato</string>
     <string name="piko_native_reader_mode_total_post">Post totali</string>
@@ -113,7 +113,7 @@
     <string name="piko_title_timeline">Cronologia</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Disattiva lo scrollimento automatico della cronologia all\'avvio</string>
     <string name="piko_pref_show_post_source">Mostra etichetta della sorgente del post</string>
-    <string name="piko_pref_show_post_source_desc">Potrebbe verificarsi un ritardo durante l/'apertura delle informazioni di un post e inoltre l/'etichetta verrà mostrata solo nei post pubblici</string>
+    <string name="piko_pref_show_post_source_desc">Potrebbe verificarsi un ritardo durante \'apertura delle informazioni di un post e inoltre \'etichetta verrà mostrata solo nei post pubblici</string>
     <string name="piko_pref_hide_live_threads">discussioni in diretta</string>
     <string name="piko_pref_hide_live_threads_desc">Nascondi la sezione dal vivo nella cronologia</string>
     <string name="piko_pref_hide_banner">bandiera</string>
