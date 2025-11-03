@@ -16,6 +16,7 @@ import app.revanced.extension.twitter.settings.fragments.*;
 import app.revanced.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeFragment;
 import app.revanced.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeUtils;
 import static app.revanced.extension.shared.Utils.context;
+import app.revanced.extension.twitter.patches.customise.appIcon.IconSelectorFragment;
 @SuppressWarnings("deprecation")
 public class ActivityHook {
     public static Toolbar toolbar;
@@ -53,11 +54,12 @@ public class ActivityHook {
 
         if (activity_name.equals(EXTRA_PIKO_SETTINGS)) {
             fragment = new SettingsFragment();
-        } else if (activity_name .equals( Settings.FEATURE_FLAGS) ){
+        } else if (activity_name.equals( Settings.FEATURE_FLAGS) ){
             fragment = new FeatureFlagsFragment();
-        } else if (activity_name .equals( Settings.PATCH_INFO)) {
-            fragment = new SettingsAboutFragment();
-        }else if (activity_name .equals( Settings.READER_MODE_KEY) ){
+        } else if (activity_name.equals( Settings.PATCH_INFO)) {
+           // fragment = new SettingsAboutFragment();
+            fragment = new IconSelectorFragment();
+        }else if (activity_name.equals( Settings.READER_MODE_KEY) ){
             fragment = new ReaderModeFragment();
         }  else {
             fragment = new PageFragment();

@@ -94,12 +94,28 @@ public final class app/crimera/patches/twitter/misc/customize/exploretabs/Custom
 	public static final fun getCustomiseExploreTabsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
+public final class app/crimera/patches/twitter/misc/customize/font/CustomEmojiFontKt {
+	public static final fun getCustomEmojiFont ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/misc/customize/font/CustomFontKt {
+	public static final fun getCustomFont ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/misc/customize/font/CustomiseFontHookKt {
+	public static final fun getCustomFontHook ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
 public final class app/crimera/patches/twitter/misc/customize/inlinebar/CustomiseInlineBarPatchKt {
 	public static final fun getCustomiseInlineBarPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/misc/customize/navbar/CustomiseNavBarPatchKt {
 	public static final fun getCustomiseNavBarPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/misc/customize/notificationtabs/CustomiseNotificationTabsPatchKt {
+	public static final fun getCustomiseNotificationTabsPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/misc/customize/postFontSize/CustomizePostFontSizeKt {
@@ -130,6 +146,10 @@ public final class app/crimera/patches/twitter/misc/customize/typeAheadResponse/
 	public static final fun getCustomiseTypeAheadResponsePatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
+public final class app/crimera/patches/twitter/misc/dynamiccolor/DynamicColorPatchKt {
+	public static final fun getDynamicColorPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
 public final class app/crimera/patches/twitter/misc/extension/ExtensionPatchKt {
 	public static final fun getSharedExtensionPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
@@ -144,6 +164,14 @@ public final class app/crimera/patches/twitter/misc/recommendedusers/HideRecomme
 
 public final class app/crimera/patches/twitter/misc/roundOffNumbers/RoundOffNumbersPatchKt {
 	public static final fun getRoundOffNumbersPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/misc/searchsuggestions/PauseSearchSuggestionsPatchKt {
+	public static final fun getPauseSearchSuggestion ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/misc/searchsuggestions/RemoveSearchSuggestionsPatchKt {
+	public static final fun getRemoveSearchSuggestions ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/misc/selectabletext/SelectableTextPatchKt {
@@ -370,10 +398,6 @@ public final class app/revanced/patches/shared/misc/mapping/ResourceMappingPatch
 	public static final fun get (Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)J
 	public static final fun getResourceMappingPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
 	public static final fun getResourceMappings ()Ljava/util/List;
-}
-
-public final class app/revanced/patches/twitter/DynamicColorPatchKt {
-	public static final fun getDynamicColorPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
 }
 
 public final class app/revanced/util/BytecodeUtilsKt {
