@@ -10,32 +10,29 @@
     <string name="piko_pref_icon_n_navbar_btn">앱 아이콘 및 하단 바 사용자 정의 설정</string>
     <string name="piko_pref_enable_force_pip">PiP 자동 모드</string>
     <string name="piko_pref_enable_force_pip_desc">앱을 닫았을 경우에 PiP 모드를 활성화할 수 있습니다.</string>
-
     <!-- Download Settings -->
-    <string name="piko_title_download">다운받기</string>
-    <string name="piko_pref_video_download">동영상 다운받기</string>
-    <string name="piko_pref_download">다운받기 디렉토리 변경하기</string>
+    <string name="piko_title_download">다운로드</string>
+    <string name="piko_pref_video_download">동영상 다운로드</string>
+    <string name="piko_pref_download">다운로드 디렉토리 변경하기</string>
     <string name="piko_pref_download_path">공용 폴더</string>
     <string name="piko_pref_download_path_desc">동영상을 다운받을 공용 폴더을 지정할 수 있습니다.</string>
-    <string name="piko_pref_download_folder">다운받기 하위 폴더</string>
+    <string name="piko_pref_download_folder">다운로드 하위 폴더</string>
     <string name="piko_pref_download_folder_desc">동영상을 다운받을 하위 폴더([공용 폴더]/[하위 폴더])를 지정할 수 있습니다.</string>
-    <string name="piko_pref_download_media_link_handle">다운받기 환경설정</string>
-    <string name="piko_pref_download_media_link_handle_download">바로 다운받기</string>
+    <string name="piko_pref_download_media_link_handle">다운로드 환경설정</string>
+    <string name="piko_pref_download_media_link_handle_download">바로 다운로드</string>
     <string name="piko_pref_download_media_link_handle_copy_link">바로 미디어 링크 복사하기</string>
     <string name="piko_pref_download_media_link_handle_always_ask">항상 물어보기</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">미디어 링크 복사하기</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">미디어 링크 공유하기</string>
-
     <!-- Native -->
     <string name="piko_title_native">기본 기능</string>
     <string name="piko_pref_native_page_desc">이 Piko 기본 기능은 게시물 공유 메뉴에서 확인할 수 있습니다.</string>
     <string name="piko_title_native_downloader">기본 다운로더</string>
-    <string name="piko_title_native_downloader_toggle">기본 다운받기를 활성화할 수 있습니다.</string>
-    <string name="piko_pref_native_downloader_alert_title">미디어 다운받기</string>
-    <string name="piko_pref_native_downloader_download_all">모두 다운받기</string>
+    <string name="piko_title_native_downloader_toggle">기본 다운로드를 활성화할 수 있습니다.</string>
+    <string name="piko_pref_native_downloader_alert_title">미디어 다운로드</string>
+    <string name="piko_pref_native_downloader_download_all">모두 다운로드</string>
     <string name="piko_pref_native_downloader_no_media">미디어를 찾을 수 없습니다.</string>
     <string name="piko_pref_native_downloader_filename_title">저장될 파일 이름 형식</string>
-
     <string name="piko_title_native_translator">기본 게시물 번역기</string>
     <string name="piko_native_translator_toggle">기본 게시물 번역기</string>
     <string name="piko_native_translator_provider">번역기 제공자</string>
@@ -43,19 +40,28 @@
     <string name="piko_native_translator_zero_text">번역할 텍스트를 찾을 수 없습니다.</string>
     <string name="piko_native_translator_google">Google 번역기</string>
     <string name="piko_native_translator_google_v2">Google 번역기 V2</string>
-
+    <string name="piko_title_native_reader_mode">읽기 모드</string>
+    <string name="piko_native_reader_mode_grok_thread">이 쓰레드 분석하기</string>
+    <string name="piko_native_reader_mode_grok_author">작성자 정보 더 보기</string>
+    <string name="piko_native_reader_mode_source">출처</string>
+    <string name="piko_native_reader_mode_published">게시 일자</string>
+    <string name="piko_native_reader_mode_total_post">총 게시물</string>
+    <string name="piko_native_reader_mode_pref_text_only_mode">텍스트 전용 모드</string>
+    <string name="piko_native_reader_mode_pref_hide_quoted_posts">인용 게시물 숨기기</string>
+    <string name="piko_native_reader_mode_pref_no_grok">Grok 분석 사용하지 않기</string>
+    <string name="piko_native_reader_mode_copy_post">게시물 링크 복사하기</string>
+    <string name="piko_native_reader_mode_cache_delete">읽기 모드 캐시 삭제하기</string>
+    <string name="piko_native_reader_mode_cache_delete_success">캐시를 성공적으로 삭제하였습니다.</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">캐시를 삭제할 수 없습니다.</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">광고</string>
     <string name="piko_pref_hide_promoted_posts">광고 게시물</string>
-
-
     <string name="piko_pref_wtf_section">\"Who to follow\" 영역</string>
     <string name="piko_pref_cts_section">\"구독할 크리에이터\" 영역</string>
     <string name="piko_pref_ctj_section">\"새 커뮤니티 찾기\" 영역</string>
     <string name="piko_pref_ryb_section">\"북마크 다시 방문\" 영역</string>
     <string name="piko_pref_pinned_posts_section">\"팔로우가 고정한 게시물\" 영역</string>
     <string name="piko_pref_hide_detailed_posts">관련 게시물 (in 답글)</string>
-
     <string name="piko_pref_hide_premium_prompt">메시지 프롬프트</string>
     <string name="piko_pref_hide_todays_news">Today\'s News</string>
     <string name="piko_pref_del_from_db">데이터베이스에서 엔트리 삭제하기</string>
@@ -66,7 +72,6 @@
     <string name="piko_pref_hide_premium_upsell_desc">홈 타임라인에서 Premium 업그레이드 버튼을 삭제할 수 있습니다.</string>
     <string name="piko_pref_top_people_search">검색 상단 사용자 영역</string>
     <string name="piko_pref_top_people_search_desc">검색한 후에 표시되는 사용자 영역을 삭제할 수 있습니다.</string>
-
     <!-- Misc Settings -->
     <string name="piko_title_misc">기타</string>
     <string name="piko_pref_chirp_font">짹짹이 폰트</string>
@@ -86,14 +91,16 @@
     <string name="piko_pref_debug_menu">게시물을 위한 디버그 메뉴</string>
     <string name="piko_pref_quick_settings">빠른 설정 버튼 활성화하기</string>
     <string name="piko_pref_quick_settings_summary">사이드 바에서 빠른 Piko 설정 버튼을 추가할 수 있습니다.</string>
-
+    <string name="piko_pref_pause_search_suggestion">검색어 추천 일시 중지</string>
+    <string name="piko_pref_pause_search_suggestion_desc">검색어 추천은 로컬에 저장되지 않습니다.</string>
+    <string name="piko_pref_search_suggestion">검색어 추천</string>
+    <string name="piko_pref_search_suggestion_desc">탐색 영역에서 검색어 추천을 숨기거나 삭제할 수 있습니다.</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">기능 플래그</string>
-    <string name="piko_pref_feature_flags">기능 플래그 추가하기</string>
+    <string name="piko_pref_feature_flags">추가하기: 기능 플래그</string>
     <string name="piko_pref_edit_flag_title">플래그 수정하기</string>
     <string name="piko_pref_add_flag_title">플래그 추가하기</string>
     <string name="piko_pref_search_flags">플래그 검색하기</string>
-
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">타임라인</string>
     <string name="piko_pref_disable_auto_timeline_scroll">앱 시작 시 타임라인 자동 스크롤 비활성화하기</string>
@@ -121,7 +128,7 @@
     <string name="piko_pref_hide_nudge_button_desc">게시물에서 팔로우하기/구독하기/맞팔로우하기 버튼을 숨길 수 있습니다.</string>
     <string name="piko_pref_hide_social_proof">내가 팔로우하는 사용자 영역 숨기기</string>
     <string name="piko_pref_hide_social_proof_desc">프로필 하단에서 내가 팔로우하는 사용자를 팔로워하는 사람들 영역을 숨길 수 있습니다.</string>
-
+    <string name="piko_pref_hide_community_badge">커뮤니티 배지 숨기기</string>
     <!-- Customization Settings -->
     <string name="piko_title_customisation">사용자 정의</string>
     <string name="piko_pref_customisation_profiletabs">프로필에서 탭 숨기기</string>
@@ -134,18 +141,29 @@
     <string name="piko_pref_customisation_inlinetabs">인라인 바에서 아이템 숨기기</string>
     <string name="piko_pref_customisation_exploretabs">탐색에서 탭 숨기기</string>
     <string name="piko_pref_customisation_searchtabs">검색에서 탭 숨기기</string>
+    <string name="piko_pref_customisation_notificationtabs">알림에서 탭 숨기기</string>
     <string name="piko_pref_customisation_reply_sorting">기본 답글 정렬 필터</string>
     <string name="piko_pref_customisation_reply_sorting_remember">이전에 선택된 정렬</string>
     <string name="piko_pref_customisation_post_font_size">게시물 폰트 사이즈</string>
     <string name="piko_pref_customisation_search_type_ahead">검색에서 제안 숨기기</string>
-
+    <!-- Font Settings -->
+    <string name="piko_title_font">폰트 스타일</string>
+    <string name="piko_pref_add_font">추가하기: 폰트</string>
+    <string name="piko_pref_add_font_desc">폰트 확장자가 .ttf 또는 .otf 인지 확인하세요.</string>
+    <string name="piko_pref_delete_font">삭제하기: 폰트</string>
+    <string name="piko_pref_add_emoji_font">추가하기: 이모지 폰트</string>
+    <string name="piko_pref_delete_emoji_font">삭제하기: 이모지 폰트</string>
+    <string name="piko_pref_add_font_success">폰트를 성공적으로 추가하였습니다.</string>
+    <string name="piko_pref_add_font_fail">폰트를 추가할 수 없습니다.</string>
+    <string name="piko_pref_delete_font_success">폰트를 성공적으로 삭제하였습니다.</string>
+    <string name="piko_pref_delete_font_fail">폰트를 삭제할 수 없습니다.</string>
+    <string name="piko_pref_delete_font_warn">삭제할 사용자 정의 폰트가 없습니다.</string>
     <!-- Logging Settings -->
     <string name="piko_title_logging">Logging</string>
     <string name="piko_pref_server_response_logging">로그 서버 응답</string>
     <string name="piko_pref_server_response_logging_desc">서버로부터 받은 JSON 응답을 \'Download/Piko\'에서 로그에 기록합니다.</string>
     <string name="piko_pref_server_response_logging_file_overwrite">응답 로그 파일 덮어쓰기</string>
     <string name="piko_pref_server_response_logging_file_overwrite_desc">실행 시 기존 응답 로그 데이터를 지웁니다.</string>
-    
     <!-- Backup and Restore -->
     <string name="piko_title_backup">백업 &amp; 복원</string>
     <string name="piko_pref_export">내보내기: %s</string>
@@ -155,12 +173,12 @@
     <string name="piko_pref_import_failed">오류: %s 를 가져올 수 없습니다.</string>
     <string name="piko_pref_export_no_uri">오류: 제공된 목적지가 없습니다.</string>
     <string name="piko_pref_import_no_uri">오류: 제공된 파일이 없습니다.</string>
-
     <!-- About -->
     <string name="piko_title_about">정보</string>
     <string name="piko_pref_app_version">앱 버전</string>
     <string name="piko_pref_patch_info">패치 정보</string>
     <string name="piko_pref_version_info">버전 정보</string>
+    <string name="piko_changelogs_title">변경 사항</string>
     <string name="piko_pref_patches">패치</string>
     <string name="piko_pref_included">포함된 패치</string>
     <string name="piko_pref_excluded">제외된 패치</string>
@@ -169,11 +187,9 @@
     <string name="piko_pref_enable">%s 활성화하기</string>
     <string name="piko_single_page_settings">하나의 Piko 설정 페이지</string>
     <string name="piko_single_page_settings_desc">하나의 페이지에서 Piko 전체 설정을 볼 수 있습니다.</string>
-
     <string name="piko_pref_search_type_ahead_users">사용자</string>
     <string name="piko_pref_search_type_ahead_events">이벤트</string>
     <string name="piko_pref_search_type_ahead_ordered_section">정렬된 영역</string>
-
     <string name="piko_settings_supported_links">지원되는 링크 열기</string>
-
 </resources>
+        
