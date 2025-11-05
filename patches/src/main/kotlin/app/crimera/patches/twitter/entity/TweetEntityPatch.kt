@@ -16,11 +16,11 @@ val tweetEntityPatch =
                 val str = match.string
                 if (str == "Name") {
                     val methodName = getUserNameMethodCaller.getMethodName(match.index + 1)
-                    tweetUsernameFingerprint.changeFirstString(methodName)
+                    tweetProfileNameFingerprint.changeFirstString(methodName)
                 }
                 if (str == "User Name") {
                     val methodName = getUserNameMethodCaller.getMethodName(match.index + 1)
-                    tweetProfileNameFingerprint.changeFirstString(methodName)
+                    tweetUsernameFingerprint.changeFirstString(methodName)
                 }
             }
 
