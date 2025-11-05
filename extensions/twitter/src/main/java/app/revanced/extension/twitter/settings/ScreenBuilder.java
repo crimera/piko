@@ -631,6 +631,16 @@ public class ScreenBuilder {
                     ));
         }
 
+        if (SettingsStatus.appIconCustomisation) {
+            addPreference(category,
+                    helper.buttonPreference(
+                            strRes("piko_pref_customisation_change_app_icon"),
+                            "",
+                            Settings.CHANGE_APP_ICON
+                    )
+            );
+        }
+
         addPreference(category,
                 helper.switchPreference(
                         strRes("piko_pref_quick_settings"),

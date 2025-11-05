@@ -46,7 +46,7 @@ internal val mipmapAnydpiFiles =
         "ic_seasonal_womansday.xml",
     )
 
-internal val mipmapxxhdpiFiles =
+internal val iconBackgroundFiles =
     arrayOf(
         "ic_seasonal_anzac_background.webp",
         "ic_seasonal_autumn_2021_background.webp",
@@ -91,24 +91,160 @@ internal val mipmapxxhdpiFiles =
 data class IconConfig(
     val name: String,
     val iconResource: String,
-    val roundIconResource: String,
 )
 
 val iconsListForManifest =
     listOf(
         IconConfig(
             name = "com.twitter.subscriptions.appicon.implementation.icon100",
-            iconResource = "@mipmap/ic_seasonal_anzac",
-            roundIconResource = "@mipmap/ic_seasonal_anzac",
+            iconResource = "@mipmap/ic_seasonal_autumn_2021",
         ),
         IconConfig(
             name = "com.twitter.subscriptions.appicon.implementation.icon101",
-            iconResource = "@mipmap/ic_seasonal_autumn_2021",
-            roundIconResource = "@mipmap/ic_seasonal_autumn_2021",
+            iconResource = "@mipmap/ic_seasonal_autumn_2022",
         ),
         IconConfig(
             name = "com.twitter.subscriptions.appicon.implementation.icon102",
-            iconResource = "@mipmap/ic_seasonal_autumn_2022",
-            roundIconResource = "@mipmap/ic_seasonal_autumn_2022",
+            iconResource = "@mipmap/ic_seasonal_south_spring_2021",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon103",
+            iconResource = "@mipmap/ic_seasonal_south_spring_2022",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon104",
+            iconResource = "@mipmap/ic_seasonal_winter_1",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon105",
+            iconResource = "@mipmap/ic_seasonal_winter_2",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon106",
+            iconResource = "@mipmap/ic_seasonal_summer_1",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon107",
+            iconResource = "@mipmap/ic_seasonal_summer_2",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon108",
+            iconResource = "@mipmap/ic_seasonal_beijing_olympics_1",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon109",
+            iconResource = "@mipmap/ic_seasonal_beijing_olympics_2",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon110",
+            iconResource = "@mipmap/ic_seasonal_daytona",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon111",
+            iconResource = "@mipmap/ic_seasonal_formulaone",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon112",
+            iconResource = "@mipmap/ic_seasonal_kentucky_derby",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon113",
+            iconResource = "@mipmap/ic_seasonal_mlb",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon114",
+            iconResource = "@mipmap/ic_seasonal_nba",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon115",
+            iconResource = "@mipmap/ic_seasonal_nba_2",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon116",
+            iconResource = "@mipmap/ic_seasonal_ncaa",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon117",
+            iconResource = "@mipmap/ic_seasonal_masters",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon118",
+            iconResource = "@mipmap/ic_seasonal_mothers_day",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon119",
+            iconResource = "@mipmap/ic_seasonal_womansday",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon120",
+            iconResource = "@mipmap/ic_seasonal_halloween_2021",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon121",
+            iconResource = "@mipmap/ic_seasonal_halloween_2022",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon122",
+            iconResource = "@mipmap/ic_seasonal_holi",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon123",
+            iconResource = "@mipmap/ic_seasonal_stpatricks_day",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon124",
+            iconResource = "@mipmap/ic_seasonal_easter",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon125",
+            iconResource = "@mipmap/ic_seasonal_anzac",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon126",
+            iconResource = "@mipmap/ic_seasonal_ramadan",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon127",
+            iconResource = "@mipmap/ic_seasonal_black_history",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon128",
+            iconResource = "@mipmap/ic_seasonal_eurovisionfinal",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon129",
+            iconResource = "@mipmap/ic_seasonal_lunar_new_year_1",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon130",
+            iconResource = "@mipmap/ic_seasonal_lunar_new_year_2",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon131",
+            iconResource = "@mipmap/ic_seasonal_may_the_fourth",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon132",
+            iconResource = "@mipmap/ic_seasonal_barbie",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon133",
+            iconResource = "@mipmap/ic_seasonal_thanksgiving_1",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon134",
+            iconResource = "@mipmap/ic_seasonal_thanksgiving_2",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon135",
+            iconResource = "@mipmap/ic_seasonal_pridesouthern",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon136",
+            iconResource = "@mipmap/ic_seasonal_newzealand_pride_1",
+        ),
+        IconConfig(
+            name = "com.twitter.subscriptions.appicon.implementation.icon137",
+            iconResource = "@mipmap/ic_seasonal_newzealand_pride_2",
         ),
     )

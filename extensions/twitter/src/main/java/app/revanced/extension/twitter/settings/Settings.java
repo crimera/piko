@@ -106,6 +106,7 @@ public class Settings extends BaseSettings {
     public static final String ADD_EMOJI_FONT = "add_emoji_font";
     public static final String DELETE_EMOJI_FONT = "delete_emoji_font";
     public static final String RESET_READER_MODE_CACHE = "reader_mode_cache";
+    public static final String CHANGE_APP_ICON = "change_app_icon";
 
     public static final String PREMIUM_SECTION = "premium_section";
     public static final String DOWNLOAD_SECTION = "download_section";

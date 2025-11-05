@@ -337,6 +337,11 @@ public class SettingsStatus {
         notificationTabCustomisation = true;
     }
 
+    public static boolean appIconCustomisation = false;
+    public static void appIconCustomisation() {
+        appIconCustomisation = true;
+    }
+
     public static boolean enableTimelineSection() {
         return ( showSourceLabel || hideCommBadge || showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD);
     }
@@ -362,7 +367,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableCustomisationSection() {
-        return (notificationTabCustomisation || searchTabCustomisation || typeaheadCustomisation || exploreTabCustomisation || customPostFontSize || inlineBarCustomisation || navBarCustomisation || sideBarCustomisation || profileTabCustomisation || timelineTabCustomisation || defaultReplySortFilter);
+        return (appIconCustomisation || notificationTabCustomisation || searchTabCustomisation || typeaheadCustomisation || exploreTabCustomisation || customPostFontSize || inlineBarCustomisation || navBarCustomisation || sideBarCustomisation || profileTabCustomisation || timelineTabCustomisation || defaultReplySortFilter);
     }
     public static boolean loggingSection() {
         return (serverResponseLogging || serverResponseLoggingOverwriteFile);

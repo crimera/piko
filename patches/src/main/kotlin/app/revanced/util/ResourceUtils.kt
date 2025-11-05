@@ -7,7 +7,6 @@ import org.w3c.dom.Attr
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
-import java.io.File
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -177,22 +176,3 @@ internal fun Element.copyAttributesFrom(oldContainer: Element) {
         setAttribute(attr.name, attr.value)
     }
 }
-
-/**
- * Get all files with the specified extension from a bundled resource directory.
- *
- * @param sourceDir The source resource directory path (e.g., "twitter/appicons/mipmap-anydpi")
- * @param extension The file extension to filter by (e.g., "xml")
- * @return Array of file names, or empty array if directory not found
- */
-fun getResourceFiles(
-    sourceDir: String,
-    extension: String,
-): Array<String> =
-    classLoader
-        .getResource(sourceDir)
-        ?.toURI()
-        ?.let { File(it).listFiles { file -> file.extension == extension } }
-        ?.map { it.name }
-        ?.toTypedArray()
-        ?: emptyArray()

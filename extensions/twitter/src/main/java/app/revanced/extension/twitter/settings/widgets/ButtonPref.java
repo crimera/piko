@@ -20,7 +20,7 @@ import app.revanced.extension.twitter.settings.fragments.RestorePrefFragment;
 import app.revanced.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeUtils;
 import app.revanced.extension.twitter.patches.customise.font.FontPickerFragment;
 import app.revanced.extension.twitter.patches.customise.font.UpdateFont;
-
+import app.revanced.extension.twitter.patches.customise.appIcon.IconSelectorFragment;
 
 public class ButtonPref extends Preference {
     private final Context context;
@@ -113,8 +113,10 @@ public class ButtonPref extends Preference {
                         Utils.deleteSharedPrefAB(context, true);
                     } else if (key.equals(Settings.ADS_DEL_FROM_DB.key)) {
                         DatabasePatch.showDialog(context);
-                    }else if (key.equals(Settings.RESET_READER_MODE_CACHE)) {
+                    } else if (key.equals(Settings.RESET_READER_MODE_CACHE)) {
                         ReaderModeUtils.clearCache();
+                    } else if (key.equals(Settings.CHANGE_APP_ICON)) {
+                        fragment = new IconSelectorFragment();
                     } else {
                         ActivityHook.startActivity(key);
                     }

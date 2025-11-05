@@ -155,6 +155,7 @@
     <string name="piko_pref_customisation_reply_sorting_remember">Previously selected</string>
     <string name="piko_pref_customisation_post_font_size">Post font size</string>
     <string name="piko_pref_customisation_search_type_ahead">Search suggestions to hide</string>
+    <string name="piko_pref_customisation_change_app_icon">Change app icon</string>
 
     <!-- Font Settings -->
     <string name="piko_title_font">Font style</string>
