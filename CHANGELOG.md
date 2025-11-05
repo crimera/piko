@@ -1,3 +1,9 @@
+## [2.0.0-dev.9](https://github.com/crimera/piko/compare/v2.0.0-dev.8...v2.0.0-dev.9) (2025-11-05)
+
+### Bug Fixes
+
+* **entity:** swap username and display name method mappings in TweetEntityPatch ([b946ebf](https://github.com/crimera/piko/commit/b946ebff8b59081ad3c53eb9ed108c3695dfe5fa))
+
 ## [2.0.0-dev.8](https://github.com/crimera/piko/compare/v2.0.0-dev.7...v2.0.0-dev.8) (2025-11-02)
 
 ### Bug Fixes
