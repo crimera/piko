@@ -5,6 +5,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,33 +52,37 @@ public class IconSelectorFragment extends Fragment {
             headerText.setText(section.header);
             iconListContainer.addView(headerView);
 
+            List<IconOption> iconList = section.icons;
+
             // Inflate each icon item
-            for (final IconOption option : section.icons) {
-                View item = inflater.inflate(Utils.getResourceIdentifier("icon_item", "layout"), iconListContainer, false);
+            if ( iconList!= null) {
+                for (final IconOption option : iconList) {
+                    View item = inflater.inflate(Utils.getResourceIdentifier("icon_item", "layout"), iconListContainer, false);
 
-                ImageView iconImage = item.findViewById(Utils.getResourceIdentifier("icon_image", "id"));
-                TextView iconName = item.findViewById(Utils.getResourceIdentifier("icon_name", "id"));
-                RadioButton radioButton = item.findViewById(Utils.getResourceIdentifier("radio_button", "id"));
+                    ImageView iconImage = item.findViewById(Utils.getResourceIdentifier("icon_image", "id"));
+                    TextView iconName = item.findViewById(Utils.getResourceIdentifier("icon_name", "id"));
+                    RadioButton radioButton = item.findViewById(Utils.getResourceIdentifier("radio_button", "id"));
 
-                iconImage.setImageResource(option.iconResId);
-                iconName.setText(option.name);
+                    iconImage.setImageResource(option.iconResId);
+                    iconName.setText(option.name);
 
-                // Keep reference to every radio button
-                allRadioButtons.add(radioButton);
+                    // Keep reference to every radio button
+                    allRadioButtons.add(radioButton);
 
-                if (option.componentName.equals(currentIcon)) {
-                    prevSelectedIcon = option;
-                    radioButton.setChecked(true);
-                    lastChecked = radioButton;
+                    if (option.componentName.equals(currentIcon)) {
+                        prevSelectedIcon = option;
+                        radioButton.setChecked(true);
+                        lastChecked = radioButton;
+                    }
+
+                    // Handle click on entire row
+                    item.setOnClickListener(v -> selectIcon(option, radioButton));
+
+                    // Handle direct click on radio
+                    radioButton.setOnClickListener(v -> selectIcon(option, radioButton));
+
+                    iconListContainer.addView(item);
                 }
-
-                // Handle click on entire row
-                item.setOnClickListener(v -> selectIcon(option, radioButton));
-
-                // Handle direct click on radio
-                radioButton.setOnClickListener(v -> selectIcon(option, radioButton));
-
-                iconListContainer.addView(item);
             }
         }
 
@@ -84,10 +90,6 @@ public class IconSelectorFragment extends Fragment {
     }
 
     private void selectIcon(IconOption option, RadioButton clickedButton) {
-        // Uncheck all others
-//        for (RadioButton rb : allRadioButtons) {
-//            rb.setChecked(false);
-//        }
         if (lastChecked != null) lastChecked.setChecked(false);
         clickedButton.setChecked(true);
 
@@ -97,12 +99,13 @@ public class IconSelectorFragment extends Fragment {
     }
 
     private void saveSelectedIcon(String componentName) {
+        app.revanced.extension.twitter.Utils.logger("Saved: "+componentName);
         prefs.edit().putString(KEY_SELECTED_ICON, componentName).apply();
     }
 
     private List<IconSection> getIconSections() {
         List<IconSection> sections = new ArrayList<>();
-//        sections.add(new IconSection(StringRef.str("piko_app_icon_thanks"), null));
+        sections.add(new IconSection(StringRef.str("piko_app_icon_thanks"), null));
 
         List<IconOption> legacy = new ArrayList<>();
         legacy.add(new IconOption(StringRef.str("piko_app_icon_name_default"), Utils.getResourceIdentifier("ic_launcher_twitter", "mipmap"), "com.twitter.android.StartActivity"));
@@ -161,6 +164,27 @@ public class IconSelectorFragment extends Fragment {
         return sections;
     }
 
+    private void killAllLauncherIcons(Context context){
+        PackageManager pm = context.getPackageManager();
+
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        intent.setPackage(context.getPackageName());
+
+        List<ResolveInfo> infos = pm.queryIntentActivities(intent, 0);
+
+        for (ResolveInfo info : infos) {
+            String component = info.activityInfo.name;
+            pm.setComponentEnabledSetting(
+                    new ComponentName(context, component),
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP
+            );
+
+            app.revanced.extension.twitter.Utils.logger("Killed: " + component);
+        }
+    }
+
     private void changeAppIcon(String newComponentName) {
         Context ctx = Utils.getContext();
         if (ctx == null) return;
@@ -176,26 +200,9 @@ public class IconSelectorFragment extends Fragment {
         app.revanced.extension.twitter.Utils.logger("Killed: "+cmp);
 
         String defCmp = "com.twitter.android.StartActivity";
-        pm.setComponentEnabledSetting(
-                new ComponentName(pkg,defCmp),
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP
-        );
-        app.revanced.extension.twitter.Utils.logger("Killed: "+defCmp);
-
-
         // If the icon is "default" remove all icons. This is a measure taken in case multiple icons are created.
         if (newComponentName.equals(defCmp)) {
-            for (IconSection section : iconSections) {
-                for (IconOption option : section.icons) {
-                    pm.setComponentEnabledSetting(
-                            new ComponentName(pkg, option.componentName),
-                            PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                            PackageManager.DONT_KILL_APP
-                    );
-                    app.revanced.extension.twitter.Utils.logger("Killed: " + option.componentName);
-                }
-            }
+            killAllLauncherIcons(ctx);
         }
 
         pm.setComponentEnabledSetting(
