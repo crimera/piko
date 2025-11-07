@@ -20,17 +20,12 @@ val appIconResourcePatch =
             )
 
             val sourceDir = "twitter/appicons"
-
-            copyResources(
-                sourceDir,
-                ResourceGroup("mipmap-anydpi", *mipmapAnydpiFiles),
-            )
-
             copyResources(
                 sourceDir,
                 ResourceGroup("mipmap-xxhdpi", *iconBackgroundFiles),
             )
 
+            var iconStartCount = 0
             document("AndroidManifest.xml").use { document ->
                 val applicationNode = document.getElementsByTagName("application").item(0)
                 val startActivityElement =
@@ -41,7 +36,19 @@ val appIconResourcePatch =
 
                 var insertAfter = startActivityElement
 
-                iconsListForManifest.forEach { icon ->
+                iconNames.forEach { iconName ->
+                    val xmlName = "$iconName.xml"
+                    copyResources(
+                        sourceDir,
+                        ResourceGroup("mipmap-anydpi", xmlName),
+                    )
+
+                    val icon =
+                        IconConfig(
+                            name = "app.revanced.extension.twitter.appicon$iconStartCount",
+                            iconResource = "@mipmap/$iconName",
+                        )
+                    iconStartCount++
                     // Check if this specific alias already exists
                     val existingAlias =
                         applicationNode.childNodes.findElementByAttributeValue(
