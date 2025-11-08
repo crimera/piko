@@ -48,6 +48,7 @@ val appIconResourcePatch =
                             name = "app.revanced.extension.twitter.appicon$iconStartCount",
                             iconResource = "@mipmap/$iconName",
                         )
+
                     iconStartCount++
                     // Check if this specific alias already exists
                     val existingAlias =

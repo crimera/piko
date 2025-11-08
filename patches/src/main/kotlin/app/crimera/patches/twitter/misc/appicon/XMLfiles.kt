@@ -45,6 +45,30 @@ internal val iconNames =
         "ic_seasonal_pridesouthern",
         "ic_seasonal_newzealand_pride_1",
         "ic_seasonal_newzealand_pride_2",
+        "ic_app_icon_7",
+        "ic_app_icon_8",
+        "ic_app_icon_10",
+        "ic_app_icon_11",
+        "ic_app_icon_12",
+        "ic_app_icon_13",
+        "ic_app_icon_14",
+        "ic_app_icon_15",
+        "ic_app_icon_16",
+        "ic_app_icon_17",
+        "ic_seasonal_autumn_southern",
+        "ic_seasonal_canada_day",
+        "ic_seasonal_canada_indigenous",
+        "ic_seasonal_commonwealth",
+        "ic_seasonal_earth_hour",
+        "ic_seasonal_euro",
+        "ic_seasonal_independence_day",
+        "ic_seasonal_juneteenth",
+        "ic_seasonal_naidoc",
+        "ic_seasonal_nba_finals",
+        "ic_seasonal_pride_month",
+        "ic_seasonal_stanley_cup",
+        "ic_seasonal_summer",
+        "ic_seasonal_winter",
     )
 
 internal val iconBackgroundFiles =
@@ -87,199 +111,28 @@ internal val iconBackgroundFiles =
         "ic_seasonal_winter_1_background.webp",
         "ic_seasonal_winter_2_background.webp",
         "ic_seasonal_womansday_background.webp",
+        "bg_app_icon_7.webp",
+        "bg_app_icon_8.webp",
+        "bg_app_icon_10.webp",
+        "bg_app_icon_11.webp",
+        "bg_app_icon_12.webp",
+        "bg_app_icon_13.webp",
+        "bg_app_icon_14.webp",
+        "bg_app_icon_15.webp",
+        "bg_app_icon_16.webp",
+        "bg_app_icon_17.webp",
+        "ic_seasonal_autumn_southern_background.webp",
+        "ic_seasonal_canada_day_background.webp",
+        "ic_seasonal_canada_indigenous_background.webp",
+        "ic_seasonal_commonwealth_background.webp",
+        "ic_seasonal_earth_hour_background.webp",
+        "ic_seasonal_euro_background.webp",
+        "ic_seasonal_independence_day_background.webp",
+        "ic_seasonal_juneteenth_background.webp",
+        "ic_seasonal_naidoc_background.webp",
+        "ic_seasonal_nba_finals_background.webp",
+        "ic_seasonal_pride_month_background.webp",
+        "ic_seasonal_stanley_cup_background.webp",
+        "ic_seasonal_summer_background.webp",
+        "ic_seasonal_winter_background.webp",
     )
-
-//    listOf(
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon100",
-//            iconResource = "@mipmap/ic_seasonal_autumn_2021",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon101",
-//            iconResource = "@mipmap/ic_seasonal_autumn_2022",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon102",
-//            iconResource = "@mipmap/ic_seasonal_south_spring_2021",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon103",
-//            iconResource = "@mipmap/ic_seasonal_south_spring_2022",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon104",
-//            iconResource = "@mipmap/ic_seasonal_winter_1",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon105",
-//            iconResource = "@mipmap/ic_seasonal_winter_2",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon106",
-//            iconResource = "@mipmap/ic_seasonal_summer_1",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon107",
-//            iconResource = "@mipmap/ic_seasonal_summer_2",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon108",
-//            iconResource = "@mipmap/ic_seasonal_beijing_olympics_1",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon109",
-//            iconResource = "@mipmap/ic_seasonal_beijing_olympics_2",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon110",
-//            iconResource = "@mipmap/ic_seasonal_daytona",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon111",
-//            iconResource = "@mipmap/ic_seasonal_formulaone",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon112",
-//            iconResource = "@mipmap/ic_seasonal_kentucky_derby",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon113",
-//            iconResource = "@mipmap/ic_seasonal_mlb",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon114",
-//            iconResource = "@mipmap/ic_seasonal_nba",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon115",
-//            iconResource = "@mipmap/ic_seasonal_nba_2",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon116",
-//            iconResource = "@mipmap/ic_seasonal_ncaa",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon117",
-//            iconResource = "@mipmap/ic_seasonal_masters",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon118",
-//            iconResource = "@mipmap/ic_seasonal_mothers_day",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon119",
-//            iconResource = "@mipmap/ic_seasonal_womansday",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon120",
-//            iconResource = "@mipmap/ic_seasonal_halloween_2021",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon121",
-//            iconResource = "@mipmap/ic_seasonal_halloween_2022",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon122",
-//            iconResource = "@mipmap/ic_seasonal_holi",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon123",
-//            iconResource = "@mipmap/ic_seasonal_stpatricks_day",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon124",
-//            iconResource = "@mipmap/ic_seasonal_easter",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon125",
-//            iconResource = "@mipmap/ic_seasonal_anzac",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon126",
-//            iconResource = "@mipmap/ic_seasonal_ramadan",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon127",
-//            iconResource = "@mipmap/ic_seasonal_black_history",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon128",
-//            iconResource = "@mipmap/ic_seasonal_eurovisionfinal",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon129",
-//            iconResource = "@mipmap/ic_seasonal_lunar_new_year_1",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon130",
-//            iconResource = "@mipmap/ic_seasonal_lunar_new_year_2",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon131",
-//            iconResource = "@mipmap/ic_seasonal_may_the_fourth",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon132",
-//            iconResource = "@mipmap/ic_seasonal_barbie",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon133",
-//            iconResource = "@mipmap/ic_seasonal_thanksgiving_1",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon134",
-//            iconResource = "@mipmap/ic_seasonal_thanksgiving_2",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon135",
-//            iconResource = "@mipmap/ic_seasonal_pridesouthern",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon136",
-//            iconResource = "@mipmap/ic_seasonal_newzealand_pride_1",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon137",
-//            iconResource = "@mipmap/ic_seasonal_newzealand_pride_2",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon138",
-//            iconResource = "@mipmap/ic_seasonal_newzealand_pride_1",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon139",
-//            iconResource = "@mipmap/ic_seasonal_newzealand_pride_2",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon140",
-//            iconResource = "@mipmap/ic_seasonal_newzealand_pride_1",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon142",
-//            iconResource = "@mipmap/ic_seasonal_newzealand_pride_2",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon143",
-//            iconResource = "@mipmap/ic_seasonal_newzealand_pride_1",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon144",
-//            iconResource = "@mipmap/ic_seasonal_newzealand_pride_2",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon145",
-//            iconResource = "@mipmap/ic_seasonal_newzealand_pride_1",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon146",
-//            iconResource = "@mipmap/ic_seasonal_newzealand_pride_2",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon148",
-//            iconResource = "@mipmap/ic_seasonal_newzealand_pride_1",
-//        ),
-//        IconConfig(
-//            name = "app.revanced.extension.twitter.appicon137",
-//            iconResource = "@mipmap/ic_seasonal_newzealand_pride_2",
-//        ),
-//    )

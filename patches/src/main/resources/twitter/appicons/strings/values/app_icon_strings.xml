@@ -9,9 +9,16 @@
     <string name="piko_app_icon_category_sports">Sports</string>
     <string name="piko_app_icon_category_cultural_and_celebrations">Cultural and Celebrations</string>
     <string name="piko_app_icon_category_pride">Pride</string>
+    <string name="piko_app_icon_category_misc">Misc</string>
+    <string name="piko_app_icon_category_space">Space</string>
 
     <!-- Icon names -->
     <string name="piko_app_icon_name_default">Default</string>
+
+    <string name="piko_app_icon_name_earth">Earth</string>
+    <string name="piko_app_icon_name_moon">Moon</string>
+    <string name="piko_app_icon_name_mars">Mars</string>
+    <string name="piko_app_icon_name_stars">Stars</string>
 
     <string name="piko_app_icon_name_autumn_2021">Autumn 2021</string>
     <string name="piko_app_icon_name_autumn_2022">Autumn 2022</string>
@@ -21,6 +28,9 @@
     <string name="piko_app_icon_name_winter_2">Winter 2</string>
     <string name="piko_app_icon_name_summer_1">Summer 1</string>
     <string name="piko_app_icon_name_summer_2">Summer 2</string>
+    <string name="piko_app_icon_name_autumn_southern">Autumn Southern</string>
+    <string name="piko_app_icon_name_summer">Summer</string>
+    <string name="piko_app_icon_name_winter">Winter</string>
 
     <string name="piko_app_icon_name_beijing_olympics_1">Beijing Olympics 1</string>
     <string name="piko_app_icon_name_beijing_olympics_2">Beijing Olympics 2</string>
@@ -32,6 +42,9 @@
     <string name="piko_app_icon_name_nba_2">NBA 2</string>
     <string name="piko_app_icon_name_ncaa">NCAA</string>
     <string name="piko_app_icon_name_masters">Masters</string>
+    <string name="piko_app_icon_name_nba_finals">NBA Finals</string>
+    <string name="piko_app_icon_name_stanley_cup">Stanley Cup</string>
+    <string name="piko_app_icon_name_commonwealth">Commonwealth</string>
 
     <string name="piko_app_icon_name_mothers_day">Mother\'s Day</string>
     <string name="piko_app_icon_name_womansday">Woman\'s Day</string>
@@ -50,10 +63,21 @@
     <string name="piko_app_icon_name_barbie">Barbie</string>
     <string name="piko_app_icon_name_thanksgiving_1">Thanksgiving 1</string>
     <string name="piko_app_icon_name_thanksgiving_2">Thanksgiving 2</string>
+    <string name="piko_app_icon_name_canada_day">Canada Day</string>
+    <string name="piko_app_icon_name_canada_indigenous">Canada Indigenous</string>
+    <string name="piko_app_icon_name_earth_hour">Earth Hour</string>
+    <string name="piko_app_icon_name_euro">Euro</string>
+    <string name="piko_app_icon_name_independence_day">Independence Day</string>
+    <string name="piko_app_icon_name_juneteenth">Juneteenth</string>
+    <string name="piko_app_icon_name_naidoc">Naidoc</string>
 
     <string name="piko_app_icon_name_pridesouthern">Pride Southern</string>
     <string name="piko_app_icon_name_newzealand_pride_1">New Zealand Pride 1</string>
     <string name="piko_app_icon_name_newzealand_pride_2">New Zealand Pride 2</string>
+    <string name="piko_app_icon_name_pride_month">Pride Month</string>
 
+    <string name="piko_app_icon_name_fancy">Fancy</string>
+    <string name="piko_app_icon_name_broken">Broken</string>
+    <string name="piko_app_icon_name_cyber">Cyber</string>
 
 </resources>
