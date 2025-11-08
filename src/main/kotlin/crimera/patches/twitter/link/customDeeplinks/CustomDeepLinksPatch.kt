@@ -27,7 +27,7 @@ object CustomDeepLinksPatch : ResourcePatch() {
             required = true,
             default = arrayOf( // @formatter:off
                 // Some of these are absolutely unhinged, but it's all the more reason to skip opening it in a browser
-                "vxtwitter.com", "m.vxtwitter.com", "g.vxtwitter.com", "t.vxtwitter.com", "o.vxtwitter.com", "mobile.vxtwitter.com",
+                "vxtwitter.com", "m.vxtwitter.com", "g.vxtwitter.com", "t.vxtwitter.com", "o.vxtwitter.com", "l.vxtwitter.com", "old.vxtwitter.com", "mobile.vxtwitter.com",
                 "fixvx.com", "m.fixvx.com", "g.fixvx.com", "t.fixvx.com", "o.fixvx.com", "mobile.fixvx.com",
                 "fxtwitter.com", "m.fxtwitter.com", "g.fxtwitter.com", "t.fxtwitter.com", "o.fxtwitter.com",
                 "fixupx.com", "m.fxtwitter.com", "g.fxtwitter.com", "t.fxtwitter.com", "o.fixupx.com",
