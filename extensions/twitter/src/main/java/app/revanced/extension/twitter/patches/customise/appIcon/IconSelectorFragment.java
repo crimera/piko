@@ -153,6 +153,9 @@ public class IconSelectorFragment extends Fragment {
         cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_earth_hour"), Utils.getResourceIdentifier("ic_seasonal_earth_hour", "mipmap"), "app.revanced.extension.twitter.appicon52"));
         cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_halloween_2021"), Utils.getResourceIdentifier("ic_seasonal_halloween_2021", "mipmap"), "app.revanced.extension.twitter.appicon20"));
         cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_halloween_2022"), Utils.getResourceIdentifier("ic_seasonal_halloween_2022", "mipmap"), "app.revanced.extension.twitter.appicon21"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_halloween_2024_1"), Utils.getResourceIdentifier("ic_app_icon_15", "mipmap"), "app.revanced.extension.twitter.appicon45"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_halloween_2024_2"), Utils.getResourceIdentifier("ic_app_icon_16", "mipmap"), "app.revanced.extension.twitter.appicon46"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_halloween_2024_3"), Utils.getResourceIdentifier("ic_app_icon_17", "mipmap"), "app.revanced.extension.twitter.appicon47"));
         cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_holi"), Utils.getResourceIdentifier("ic_seasonal_holi", "mipmap"), "app.revanced.extension.twitter.appicon22"));
         cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_stpatricks_day"), Utils.getResourceIdentifier("ic_seasonal_stpatricks_day", "mipmap"), "app.revanced.extension.twitter.appicon23"));
         cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_easter"), Utils.getResourceIdentifier("ic_seasonal_easter", "mipmap"), "app.revanced.extension.twitter.appicon24"));
@@ -170,8 +173,18 @@ public class IconSelectorFragment extends Fragment {
         cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_barbie"), Utils.getResourceIdentifier("ic_seasonal_barbie", "mipmap"), "app.revanced.extension.twitter.appicon32"));
         cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_thanksgiving_1"), Utils.getResourceIdentifier("ic_seasonal_thanksgiving_1", "mipmap"), "app.revanced.extension.twitter.appicon33"));
         cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_thanksgiving_2"), Utils.getResourceIdentifier("ic_seasonal_thanksgiving_2", "mipmap"), "app.revanced.extension.twitter.appicon34"));
-        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_juneteenth"), Utils.getResourceIdentifier("ic_seasonal_juneteenth", "mipmap"), "app.revanced.extension.twitter.appicon55"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_thanksgiving_2024_1"), Utils.getResourceIdentifier("ic_app_icon_18", "mipmap"), "app.revanced.extension.twitter.appicon67"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_thanksgiving_2024_2"), Utils.getResourceIdentifier("ic_app_icon_19", "mipmap"), "app.revanced.extension.twitter.appicon68"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_thanksgiving_2024_3"), Utils.getResourceIdentifier("ic_app_icon_20", "mipmap"), "app.revanced.extension.twitter.appicon69"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_thanksgiving_2024_4"), Utils.getResourceIdentifier("ic_app_icon_21", "mipmap"), "app.revanced.extension.twitter.appicon70"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_thanksgiving_2024_5"), Utils.getResourceIdentifier("ic_app_icon_22", "mipmap"), "app.revanced.extension.twitter.appicon71"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_thanksgiving_2024_6"), Utils.getResourceIdentifier("ic_app_icon_23", "mipmap"), "app.revanced.extension.twitter.appicon72"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_juneteenth"), Utils.getResourceIdentifier("ic_seasonal_juneteenth", "mipmap"), "app.revanced.extension.twitter.appicon71"));
         cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_naidoc"), Utils.getResourceIdentifier("ic_seasonal_naidoc", "mipmap"), "app.revanced.extension.twitter.appicon56"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_christmas_2024_1"), Utils.getResourceIdentifier("ic_app_icon_24", "mipmap"), "app.revanced.extension.twitter.appicon73"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_christmas_2024_2"), Utils.getResourceIdentifier("ic_app_icon_25", "mipmap"), "app.revanced.extension.twitter.appicon74"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_christmas_2024_3"), Utils.getResourceIdentifier("ic_app_icon_26", "mipmap"), "app.revanced.extension.twitter.appicon75"));
+        cultural_and_celebrations.add(new IconOption(StringRef.str("piko_app_icon_name_christmas_2024_4"), Utils.getResourceIdentifier("ic_app_icon_27", "mipmap"), "app.revanced.extension.twitter.appicon76"));
         sections.add(new IconSection(StringRef.str("piko_app_icon_category_cultural_and_celebrations"), cultural_and_celebrations));
 
         List<IconOption> pride = new ArrayList<>();
@@ -185,6 +198,12 @@ public class IconSelectorFragment extends Fragment {
         misc.add(new IconOption(StringRef.str("piko_app_icon_name_broken"), Utils.getResourceIdentifier("ic_app_icon_7", "mipmap"), "app.revanced.extension.twitter.appicon38"));
         misc.add(new IconOption(StringRef.str("piko_app_icon_name_fancy"), Utils.getResourceIdentifier("ic_app_icon_8", "mipmap"), "app.revanced.extension.twitter.appicon39"));
         misc.add(new IconOption(StringRef.str("piko_app_icon_name_cyber"), Utils.getResourceIdentifier("ic_app_icon_14", "mipmap"), "app.revanced.extension.twitter.appicon44"));
+        misc.add(new IconOption(StringRef.str("piko_app_icon_name_soft_pastel_pink"), Utils.getResourceIdentifier("ic_app_icon_2", "mipmap"), "app.revanced.extension.twitter.appicon62"));
+        misc.add(new IconOption(StringRef.str("piko_app_icon_name_electric_indigo"), Utils.getResourceIdentifier("ic_app_icon_3", "mipmap"), "app.revanced.extension.twitter.appicon63"));
+        misc.add(new IconOption(StringRef.str("piko_app_icon_name_neon_pink"), Utils.getResourceIdentifier("ic_app_icon_4", "mipmap"), "app.revanced.extension.twitter.appicon64"));
+        misc.add(new IconOption(StringRef.str("piko_app_icon_name_tropical_teal"), Utils.getResourceIdentifier("ic_app_icon_5", "mipmap"), "app.revanced.extension.twitter.appicon65"));
+        misc.add(new IconOption(StringRef.str("piko_app_icon_name_vivid_orange"), Utils.getResourceIdentifier("ic_app_icon_6", "mipmap"), "app.revanced.extension.twitter.appicon66"));
+
         sections.add(new IconSection(StringRef.str("piko_app_icon_category_misc"), misc));
 
         return sections;

@@ -5,6 +5,7 @@ import app.revanced.util.ResourceGroup
 import app.revanced.util.copyResources
 import app.revanced.util.findElementByAttributeValue
 import app.revanced.util.findElementByAttributeValueOrThrow
+import org.w3c.dom.Element
 
 val appIconResourcePatch =
     resourcePatch {
@@ -22,12 +23,30 @@ val appIconResourcePatch =
             val sourceDir = "twitter/appicons"
             copyResources(
                 sourceDir,
+                ResourceGroup("values", "piko_app_icon_colors.xml"),
+            )
+
+            val imagesDir = "$sourceDir/icons"
+            copyResources(
+                "$imagesDir/background",
                 ResourceGroup("mipmap-xxhdpi", *iconBackgroundFiles),
             )
 
             var iconStartCount = 0
             document("AndroidManifest.xml").use { document ->
                 val applicationNode = document.getElementsByTagName("application").item(0)
+                val appLabel = (applicationNode as Element).getAttribute("android:label")
+
+                var foregroundFolderName = "x"
+                if (appLabel.lowercase().contains("twitter")) {
+                    foregroundFolderName = "twitter"
+                }
+
+                copyResources(
+                    "$imagesDir/foreground/$foregroundFolderName",
+                    ResourceGroup("mipmap-xxhdpi", *iconForegroundFiles),
+                )
+
                 val startActivityElement =
                     applicationNode.childNodes.findElementByAttributeValueOrThrow(
                         "android:name",

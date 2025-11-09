@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="piko_app_icon_thanks">Thanks to @NeoFreeBird for iOS app icons</string>
+    <string name="piko_app_icon_thanks">Thanks to @NeoFreeBird app icons from iOS</string>
     <string name="piko_app_icon_piko_exclusive">(Piko exclusive)</string>
 
     <!-- Category -->
@@ -50,6 +50,9 @@
     <string name="piko_app_icon_name_womansday">Woman\'s Day</string>
     <string name="piko_app_icon_name_halloween_2021">Halloween 2021</string>
     <string name="piko_app_icon_name_halloween_2022">Halloween 2022</string>
+    <string name="piko_app_icon_name_halloween_2024_1">Halloween 2024 1</string>
+    <string name="piko_app_icon_name_halloween_2024_2">Halloween 2024 2</string>
+    <string name="piko_app_icon_name_halloween_2024_3">Halloween 2024 3</string>
     <string name="piko_app_icon_name_holi">Holi</string>
     <string name="piko_app_icon_name_stpatricks_day">St Patrick\'s Day</string>
     <string name="piko_app_icon_name_easter">Easter</string>
@@ -63,6 +66,12 @@
     <string name="piko_app_icon_name_barbie">Barbie</string>
     <string name="piko_app_icon_name_thanksgiving_1">Thanksgiving 1</string>
     <string name="piko_app_icon_name_thanksgiving_2">Thanksgiving 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_1">Thanksgiving 2024 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_2">Thanksgiving 2024 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_3">Thanksgiving 2024 3</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_4">Thanksgiving 2024 4</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_5">Thanksgiving 2024 5</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_6">Thanksgiving 2024 6</string>
     <string name="piko_app_icon_name_canada_day">Canada Day</string>
     <string name="piko_app_icon_name_canada_indigenous">Canada Indigenous</string>
     <string name="piko_app_icon_name_earth_hour">Earth Hour</string>
@@ -70,6 +79,10 @@
     <string name="piko_app_icon_name_independence_day">Independence Day</string>
     <string name="piko_app_icon_name_juneteenth">Juneteenth</string>
     <string name="piko_app_icon_name_naidoc">Naidoc</string>
+    <string name="piko_app_icon_name_christmas_2024_1">Christmas 2024 1</string>
+    <string name="piko_app_icon_name_christmas_2024_2">Christmas 2024 2</string>
+    <string name="piko_app_icon_name_christmas_2024_3">Christmas 2024 3</string>
+    <string name="piko_app_icon_name_christmas_2024_4">Christmas 2024 4</string>
 
     <string name="piko_app_icon_name_pridesouthern">Pride Southern</string>
     <string name="piko_app_icon_name_newzealand_pride_1">New Zealand Pride 1</string>
@@ -79,5 +92,10 @@
     <string name="piko_app_icon_name_fancy">Fancy</string>
     <string name="piko_app_icon_name_broken">Broken</string>
     <string name="piko_app_icon_name_cyber">Cyber</string>
+    <string name="piko_app_icon_name_soft_pastel_pink">Soft Pastel Pink</string>
+    <string name="piko_app_icon_name_electric_indigo">Electric Indigo</string>
+    <string name="piko_app_icon_name_neon_pink">Neon Pink</string>
+    <string name="piko_app_icon_name_tropical_teal">Tropical Teal</string>
+    <string name="piko_app_icon_name_vivid_orange">Vivid Orange</string>
 
 </resources>

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon
   xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/piko_app_icon_neon_pink_color" />
+    <background android:drawable="@color/piko_app_icon_pastel_pink_color" />
     <foreground android:drawable="@mipmap/ic_launcher_twitter_foreground" />
 </adaptive-icon>
-

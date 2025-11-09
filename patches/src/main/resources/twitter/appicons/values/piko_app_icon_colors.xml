@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="piko_app_icon_white_color">#ffffff</color>
+    <color name="piko_app_icon_pastel_pink_color">#fffb9fa8</color>
+    <color name="piko_app_icon_electric_indigo_color">#ff7856ff</color>
+    <color name="piko_app_icon_neon_pink_color">#fff91880</color>
+    <color name="piko_app_icon_tropical_teal_color">#ff31c88e</color>
+    <color name="piko_app_icon_vivid_orange_color">#ffff7a00</color>
+</resources>

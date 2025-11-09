@@ -69,6 +69,21 @@ internal val iconNames =
         "ic_seasonal_stanley_cup",
         "ic_seasonal_summer",
         "ic_seasonal_winter",
+        "ic_app_icon_2",
+        "ic_app_icon_3",
+        "ic_app_icon_4",
+        "ic_app_icon_5",
+        "ic_app_icon_6",
+        "ic_app_icon_18",
+        "ic_app_icon_20",
+        "ic_app_icon_19",
+        "ic_app_icon_21",
+        "ic_app_icon_22",
+        "ic_app_icon_23",
+        "ic_app_icon_24",
+        "ic_app_icon_25",
+        "ic_app_icon_26",
+        "ic_app_icon_27",
     )
 
 internal val iconBackgroundFiles =
@@ -76,7 +91,6 @@ internal val iconBackgroundFiles =
         "ic_seasonal_anzac_background.webp",
         "ic_seasonal_autumn_2021_background.webp",
         "ic_seasonal_autumn_2022_background.webp",
-        "ic_seasonal_barbie_background.webp",
         "ic_seasonal_beijing_olympics_1_background.webp",
         "ic_seasonal_beijing_olympics_2_background.webp",
         "ic_seasonal_black_history_background.webp",
@@ -135,4 +149,24 @@ internal val iconBackgroundFiles =
         "ic_seasonal_stanley_cup_background.webp",
         "ic_seasonal_summer_background.webp",
         "ic_seasonal_winter_background.webp",
+        "bg_thanksgiving_18.webp",
+        "bg_thanksgiving_19.webp",
+        "bg_thanksgiving_20.webp",
+        "bg_thanksgiving_21.webp",
+        "bg_thanksgiving_22.webp",
+        "bg_thanksgiving_23.webp",
+        "christmas_2.webp",
+        "christmas_3.webp",
+        "christmas_4.webp",
+    )
+
+internal val iconForegroundFiles =
+    arrayOf(
+        "christmas_1_fg.webp",
+        "christmas_2_fg.webp",
+        "christmas_3_fg.webp",
+        "christmas_4_fg.webp",
+        "fg_thanksgiving.webp",
+        "jp_ny_1_fg.webp",
+        "jp_ny_2_fg.webp",
     )
