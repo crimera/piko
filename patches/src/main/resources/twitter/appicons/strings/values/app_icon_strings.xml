@@ -14,6 +14,12 @@
 
     <!-- Icon names -->
     <string name="piko_app_icon_name_default">Default</string>
+    <string name="piko_app_icon_name_legacy_icon_1">Legacy Icon 1</string>
+    <string name="piko_app_icon_name_legacy_icon_2">Legacy Icon 2</string>
+    <string name="piko_app_icon_name_legacy_icon_3">Legacy Icon 3</string>
+    <string name="piko_app_icon_name_legacy_icon_4">Legacy Icon 4</string>
+    <string name="piko_app_icon_name_legacy_blue">Legacy Blue</string>
+    <string name="piko_app_icon_name_twitter_blue">Twitter Blue</string>
 
     <string name="piko_app_icon_name_earth">Earth</string>
     <string name="piko_app_icon_name_moon">Moon</string>
@@ -62,6 +68,8 @@
     <string name="piko_app_icon_name_eurovisionfinal">Euro Vision Final</string>
     <string name="piko_app_icon_name_lunar_new_year_1">Lunar New Year 1</string>
     <string name="piko_app_icon_name_lunar_new_year_2">Lunar New Year 2</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_1">Japanese New Year 2024 1</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_2">Japanese New Year 2024 2</string>
     <string name="piko_app_icon_name_may_the_fourth">May The Fourth</string>
     <string name="piko_app_icon_name_barbie">Barbie</string>
     <string name="piko_app_icon_name_thanksgiving_1">Thanksgiving 1</string>

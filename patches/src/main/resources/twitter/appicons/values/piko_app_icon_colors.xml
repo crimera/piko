@@ -6,4 +6,6 @@
     <color name="piko_app_icon_neon_pink_color">#fff91880</color>
     <color name="piko_app_icon_tropical_teal_color">#ff31c88e</color>
     <color name="piko_app_icon_vivid_orange_color">#ffff7a00</color>
+    <color name="piko_app_icon_legacy_twitter_blue_color">#58abed</color>
+    <color name="piko_app_icon_twitter_blue_color">#1f9bf1</color>
 </resources>

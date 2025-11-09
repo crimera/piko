@@ -86,6 +86,27 @@ public final class app/crimera/patches/twitter/logging/responseLogging/ResponseL
 	public static final fun getResponseLoggingPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
+public final class app/crimera/patches/twitter/misc/appicon/AppIconPatchKt {
+	public static final fun getAppIconPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/misc/appicon/AppIconResourcePatchKt {
+	public static final fun getAppIconResourcePatch ()Lapp/revanced/patcher/patch/ResourcePatch;
+}
+
+public final class app/crimera/patches/twitter/misc/appicon/IconConfig {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lapp/crimera/patches/twitter/misc/appicon/IconConfig;
+	public static synthetic fun copy$default (Lapp/crimera/patches/twitter/misc/appicon/IconConfig;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lapp/crimera/patches/twitter/misc/appicon/IconConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIconResource ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class app/crimera/patches/twitter/misc/bringbacktwitter/BringBackTwitterPatchKt {
 	public static final fun getBringBackTwitterPatch ()Lapp/revanced/patcher/patch/ResourcePatch;
 }

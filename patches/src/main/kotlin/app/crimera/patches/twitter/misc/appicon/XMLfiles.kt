@@ -84,6 +84,14 @@ internal val iconNames =
         "ic_app_icon_25",
         "ic_app_icon_26",
         "ic_app_icon_27",
+        "ic_app_icon_28",
+        "ic_app_icon_29",
+        "ic_app_icon_legacy_blue",
+        "ic_app_icon_blue",
+        "ic_app_icon_legacy_icon_1",
+        "ic_app_icon_legacy_icon_2",
+        "ic_app_icon_legacy_icon_3",
+        "ic_app_icon_legacy_icon_4",
     )
 
 internal val iconBackgroundFiles =
@@ -158,6 +166,11 @@ internal val iconBackgroundFiles =
         "christmas_2.webp",
         "christmas_3.webp",
         "christmas_4.webp",
+        "jp_ny_1_bg.webp",
+        "jp_ny_2_bg.webp",
+        "ic_legacy_icon_1_bg.webp",
+        "ic_legacy_icon_3_bg.webp",
+        "ic_legacy_icon_4_bg.webp",
     )
 
 internal val iconForegroundFiles =
@@ -169,4 +182,7 @@ internal val iconForegroundFiles =
         "fg_thanksgiving.webp",
         "jp_ny_1_fg.webp",
         "jp_ny_2_fg.webp",
+        "legacy_twitter_icon.webp",
+        "twitter_icon.webp",
+        "twitter_icon_1.webp",
     )
