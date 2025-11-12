@@ -112,6 +112,8 @@ public class ActivityHook {
             toolbarText = "piko_title_logging";
         }else if (activity_name.equals(Settings.READER_MODE_KEY)) {
             toolbarText = "piko_title_native_reader_mode";
+        }else if (activity_name.equals(Settings.READER_MODE_KEY)) {
+            toolbarText = "piko_title_native_reader_mode";
         }
         return Utils.getResourceString(toolbarText);
     }
