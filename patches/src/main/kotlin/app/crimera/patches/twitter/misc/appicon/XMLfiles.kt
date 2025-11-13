@@ -193,4 +193,5 @@ internal val iconForegroundFiles =
         "legacy_twitter_icon.webp",
         "twitter_icon.webp",
         "twitter_icon_1.webp",
+        "ic_app_icon_barbie_foreground.webp",
     )

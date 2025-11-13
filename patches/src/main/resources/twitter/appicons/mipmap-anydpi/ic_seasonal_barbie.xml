@@ -2,6 +2,6 @@
 <adaptive-icon
   xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/piko_app_icon_neon_pink_color" />
-    <foreground android:drawable="@mipmap/ic_launcher_twitter_foreground" />
+    <foreground android:drawable="@mipmap/ic_app_icon_barbie_foreground" />
 </adaptive-icon>
 
