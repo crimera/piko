@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="piko_app_icon_thanks">Thanks to @NeoFreeBird app icons from iOS</string>
+    <string name="piko_app_icon_thanks">Thanks to @NeoFreeBird for app icons from iOS</string>
     <string name="piko_app_icon_piko_exclusive">(Piko exclusive)</string>
 
     <!-- Category -->
