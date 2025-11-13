@@ -1,3 +1,18 @@
+## [2.0.0-dev.10](https://github.com/crimera/piko/compare/v2.0.0-dev.9...v2.0.0-dev.10) (2025-11-13)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Show post source label` patch ([42efbe2](https://github.com/crimera/piko/commit/42efbe23f17b44259fbc597f1ec72b0456bece15))
+
+### Features
+
+* **Twitter:** Added `Change app icon` patch ([efbd6f7](https://github.com/crimera/piko/commit/efbd6f708357d0256104e31748a035d92acee8f4))
+
+### Updates
+
+* **Translations:** Update `Polish` ([15cf2b1](https://github.com/crimera/piko/commit/15cf2b1b1f61b87adde8cd27e59f83d0bba2f1d7))
+* **Translations:** Update Korean ([b1edad5](https://github.com/crimera/piko/commit/b1edad5c433e9d6f06010fe438e995ab02da6f2b))
+
 ## [2.0.0-dev.9](https://github.com/crimera/piko/compare/v2.0.0-dev.8...v2.0.0-dev.9) (2025-11-05)
 
 ### Bug Fixes
