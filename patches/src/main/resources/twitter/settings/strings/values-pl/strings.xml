@@ -150,6 +150,7 @@
     <string name="piko_pref_customisation_inlinetabs">Elementy paska pod wpisem do ukrycia</string>
     <string name="piko_pref_customisation_exploretabs">Zakładki przeglądania do ukrycia</string>
     <string name="piko_pref_customisation_searchtabs">Zakładki wyszukiwania do ukrycia</string>
+    <string name="piko_pref_customisation_notificationtabs">Zakładki powiadomień do ukrycia</string>
     <string name="piko_pref_customisation_reply_sorting">Domyślny filtr sortowania odpowiedzi</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Ostatnio wybrane</string>
     <string name="piko_pref_customisation_post_font_size">Rozmiar czcionki wpisów</string>
