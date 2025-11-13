@@ -114,6 +114,8 @@ public class ActivityHook {
             toolbarText = "piko_title_native_reader_mode";
         }else if (activity_name.equals(Settings.READER_MODE_KEY)) {
             toolbarText = "piko_title_native_reader_mode";
+        }else if (activity_name.equals(Settings.CHANGE_APP_ICON)) {
+            toolbarText = "piko_pref_customisation_change_app_icon";
         }
         return Utils.getResourceString(toolbarText);
     }
