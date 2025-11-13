@@ -22,7 +22,9 @@ public class IconListBuilder {
         list.add(RowItem.icon("piko_app_icon_name_earth","ic_app_icon_10","40"));
         list.add(RowItem.icon("piko_app_icon_name_earth","ic_app_icon_11","41"));
         list.add(RowItem.icon("piko_app_icon_name_mars","ic_app_icon_12","42"));
+        list.add(RowItem.exclusiveIcon("piko_app_icon_name_sun","ic_app_icon_sun","86"));
         list.add(RowItem.icon("piko_app_icon_name_stars","ic_app_icon_13","43"));
+        list.add(RowItem.exclusiveIcon("piko_app_icon_name_milky_way","ic_app_icon_milkyway","85"));
 
         list.add(RowItem.header("piko_app_icon_category_seasonal_event"));
         list.add(RowItem.icon("piko_app_icon_name_autumn_2021","ic_seasonal_autumn_2021","0"));
@@ -91,6 +93,10 @@ public class IconListBuilder {
         list.add(RowItem.icon("piko_app_icon_name_christmas_2024_2","ic_app_icon_25","74"));
         list.add(RowItem.icon("piko_app_icon_name_christmas_2024_3","ic_app_icon_26","75"));
         list.add(RowItem.icon("piko_app_icon_name_christmas_2024_4","ic_app_icon_27","76"));
+
+        list.add(RowItem.header("piko_app_icon_category_movies_n_series"));
+        list.add(RowItem.exclusiveIcon("piko_app_icon_name_upsidedown","ic_app_icon_upsidedown","87"));
+        list.add(RowItem.exclusiveIcon("piko_app_icon_name_games_chamber","ic_app_icon_games_chamber","88"));
 
         list.add(RowItem.header("piko_app_icon_category_pride"));
         list.add(RowItem.icon("piko_app_icon_name_pridesouthern","ic_seasonal_pridesouthern","35"));

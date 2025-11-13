@@ -11,6 +11,7 @@
     <string name="piko_app_icon_category_pride">Pride</string>
     <string name="piko_app_icon_category_misc">Misc</string>
     <string name="piko_app_icon_category_space">Space</string>
+    <string name="piko_app_icon_category_movies_n_series">Movies and Series</string>
 
     <!-- Icon names -->
     <string name="piko_app_icon_name_default">Default</string>
@@ -24,7 +25,9 @@
     <string name="piko_app_icon_name_earth">Earth</string>
     <string name="piko_app_icon_name_moon">Moon</string>
     <string name="piko_app_icon_name_mars">Mars</string>
+    <string name="piko_app_icon_name_sun">Sun</string>
     <string name="piko_app_icon_name_stars">Stars</string>
+    <string name="piko_app_icon_name_milky_way">Milky Way</string>
 
     <string name="piko_app_icon_name_autumn_2021">Autumn 2021</string>
     <string name="piko_app_icon_name_autumn_2022">Autumn 2022</string>
@@ -91,6 +94,9 @@
     <string name="piko_app_icon_name_christmas_2024_2">Christmas 2024 2</string>
     <string name="piko_app_icon_name_christmas_2024_3">Christmas 2024 3</string>
     <string name="piko_app_icon_name_christmas_2024_4">Christmas 2024 4</string>
+
+    <string name="piko_app_icon_name_upsidedown">Upside Down</string>
+    <string name="piko_app_icon_name_games_chamber">Games Chamber</string>
 
     <string name="piko_app_icon_name_pridesouthern">Pride Southern</string>
     <string name="piko_app_icon_name_newzealand_pride_1">New Zealand Pride 1</string>

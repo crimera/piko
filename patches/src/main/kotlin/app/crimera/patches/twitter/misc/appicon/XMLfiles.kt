@@ -92,6 +92,10 @@ internal val iconNames =
         "ic_app_icon_legacy_icon_2",
         "ic_app_icon_legacy_icon_3",
         "ic_app_icon_legacy_icon_4",
+        "ic_app_icon_milkyway",
+        "ic_app_icon_sun",
+        "ic_app_icon_upsidedown",
+        "ic_app_icon_games_chamber",
     )
 
 internal val iconBackgroundFiles =
@@ -171,6 +175,10 @@ internal val iconBackgroundFiles =
         "ic_legacy_icon_1_bg.webp",
         "ic_legacy_icon_3_bg.webp",
         "ic_legacy_icon_4_bg.webp",
+        "ic_milkyway_bg.webp",
+        "ic_sun_bg.webp",
+        "ic_upsidedown_bg.webp",
+        "ic_games_chamber_bg.webp",
     )
 
 internal val iconForegroundFiles =

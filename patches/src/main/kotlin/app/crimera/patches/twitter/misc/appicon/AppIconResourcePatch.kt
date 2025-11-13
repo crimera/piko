@@ -25,7 +25,7 @@ val appIconResourcePatch =
                 ResourceGroup("values", "piko_app_icon_colors.xml"),
             )
 
-            val imagesDir = "$sourceDir/icons"
+            val imagesDir = "$sourceDir/images"
             copyResources(
                 "$imagesDir/background",
                 ResourceGroup("mipmap-xxhdpi", *iconBackgroundFiles),
