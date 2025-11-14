@@ -19,8 +19,8 @@
     <string name="piko_pref_download_folder">다운로드 하위 폴더</string>
     <string name="piko_pref_download_folder_desc">동영상을 다운받을 하위 폴더([공용 폴더]/[하위 폴더])를 지정할 수 있습니다.</string>
     <string name="piko_pref_download_media_link_handle">다운로드 환경설정</string>
-    <string name="piko_pref_download_media_link_handle_download">바로 다운로드</string>
-    <string name="piko_pref_download_media_link_handle_copy_link">바로 미디어 링크 복사하기</string>
+    <string name="piko_pref_download_media_link_handle_download">직접 다운로드</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">직접 미디어 링크 복사하기</string>
     <string name="piko_pref_download_media_link_handle_always_ask">항상 물어보기</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">미디어 링크 복사하기</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">미디어 링크 공유하기</string>
@@ -28,7 +28,7 @@
     <string name="piko_title_native">기본 기능</string>
     <string name="piko_pref_native_page_desc">이 Piko 기본 기능은 게시물 공유 메뉴에서 확인할 수 있습니다.</string>
     <string name="piko_title_native_downloader">기본 다운로더</string>
-    <string name="piko_title_native_downloader_toggle">기본 다운로드를 활성화할 수 있습니다.</string>
+    <string name="piko_title_native_downloader_toggle">기본 다운로더</string>
     <string name="piko_pref_native_downloader_alert_title">미디어 다운로드</string>
     <string name="piko_pref_native_downloader_download_all">모두 다운로드</string>
     <string name="piko_pref_native_downloader_no_media">미디어를 찾을 수 없습니다.</string>
@@ -146,6 +146,7 @@
     <string name="piko_pref_customisation_reply_sorting_remember">이전에 선택된 정렬</string>
     <string name="piko_pref_customisation_post_font_size">게시물 폰트 사이즈</string>
     <string name="piko_pref_customisation_search_type_ahead">검색에서 제안 숨기기</string>
+    <string name="piko_pref_customisation_change_app_icon">앱 아이콘 변경하기</string>
     <!-- Font Settings -->
     <string name="piko_title_font">폰트 스타일</string>
     <string name="piko_pref_add_font">추가하기: 폰트</string>
@@ -192,4 +193,3 @@
     <string name="piko_pref_search_type_ahead_ordered_section">정렬된 영역</string>
     <string name="piko_settings_supported_links">지원되는 링크 열기</string>
 </resources>
-        
