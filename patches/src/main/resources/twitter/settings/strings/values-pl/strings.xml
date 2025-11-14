@@ -155,6 +155,7 @@
     <string name="piko_pref_customisation_reply_sorting_remember">Ostatnio wybrane</string>
     <string name="piko_pref_customisation_post_font_size">Rozmiar czcionki wpisów</string>
     <string name="piko_pref_customisation_search_type_ahead">Sugestie wyszukiwania do ukrycia</string>
+    <string name="piko_pref_customisation_change_app_icon">Zmień ikonę aplikacji</string>
 
     <!-- Font Settings -->
     <string name="piko_title_font">Styl czcionki</string>
@@ -198,8 +199,8 @@
     <string name="piko_pref_app_restart_rec">Zalecany jest restart aplikacji</string>
     <string name="piko_pref_remove">Usuń %s</string>
     <string name="piko_pref_enable">Włącz %s</string>
-    <string name="piko_single_page_settings">Ustawienia Piko na pojedynczej stronie</string>
-    <string name="piko_single_page_settings_desc">Wyświetlaj widok wszystkich ustawień Piko na pojedynczej stronie</string>
+    <string name="piko_single_page_settings">Ustawienia na pojedynczej stronie</string>
+    <string name="piko_single_page_settings_desc">Wyświetlaj ustawienia na pojedynczej stronie</string>
 
     <string name="piko_pref_search_type_ahead_users">Użytkownicy</string>
     <string name="piko_pref_search_type_ahead_events">Wydarzenia</string>
