@@ -20,7 +20,7 @@ public class IconListBuilder {
 
         list.add(RowItem.header("piko_app_icon_category_space"));
         list.add(RowItem.icon("piko_app_icon_name_earth","ic_app_icon_10","40"));
-        list.add(RowItem.icon("piko_app_icon_name_earth","ic_app_icon_11","41"));
+        list.add(RowItem.icon("piko_app_icon_name_moon","ic_app_icon_11","41"));
         list.add(RowItem.icon("piko_app_icon_name_mars","ic_app_icon_12","42"));
         list.add(RowItem.exclusiveIcon("piko_app_icon_name_sun","ic_app_icon_sun","86"));
         list.add(RowItem.icon("piko_app_icon_name_stars","ic_app_icon_13","43"));
