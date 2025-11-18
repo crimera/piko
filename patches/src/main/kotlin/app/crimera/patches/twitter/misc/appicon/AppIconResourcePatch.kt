@@ -5,6 +5,7 @@ import app.revanced.util.ResourceGroup
 import app.revanced.util.copyResources
 import app.revanced.util.findElementByAttributeValue
 import app.revanced.util.findElementByAttributeValueOrThrow
+import java.nio.file.Files
 
 val appIconResourcePatch =
     resourcePatch {
@@ -119,5 +120,19 @@ val appIconResourcePatch =
 
             val stringsDir = "$sourceDir/strings"
             copyResources(stringsDir, ResourceGroup("values", "app_icon_strings.xml"), appendPiko = true)
+
+            val languages =
+                arrayOf(
+                    "ko",
+                    "pl",
+                ).map { "values-$it" }
+
+            languages.forEach {
+                val vDirectory = get("res").resolve(it)
+                if (!vDirectory.isDirectory) {
+                    Files.createDirectories(vDirectory.toPath())
+                }
+                copyResources(stringsDir, ResourceGroup(it, "app_icon_strings.xml"), appendPiko = true)
+            }
         }
     }
