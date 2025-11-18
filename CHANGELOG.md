@@ -1,3 +1,16 @@
+## [2.0.0-dev.11](https://github.com/crimera/piko/compare/v2.0.0-dev.10...v2.0.0-dev.11) (2025-11-18)
+
+### Bug Fixes
+
+* **Twitter:** Corrected Moon app icon string ([60d0ede](https://github.com/crimera/piko/commit/60d0eded80fd32dbc7f1a1c229ed0c86da31efd5))
+* **Twitter:** Fix font import bug. ([c8ea53c](https://github.com/crimera/piko/commit/c8ea53c8a50d3854911aec5dd2205661eba54ed5))
+
+### Updates
+
+* **Translations:** Update `Korean` strings ([6bdf0cc](https://github.com/crimera/piko/commit/6bdf0ccb08e426b23d51abb9fe9f4907214030d3))
+* **Translations:** Update `Polish` ([2347537](https://github.com/crimera/piko/commit/23475370b2f9edaaf76f00d85b9fdbb3a4fcbffb))
+* **Twitter:** Include translations for app icon strings ([edad4a6](https://github.com/crimera/piko/commit/edad4a6438cf49a6226b02d94f4f41ccae31e683))
+
 ## [2.0.0-dev.10](https://github.com/crimera/piko/compare/v2.0.0-dev.9...v2.0.0-dev.10) (2025-11-13)
 
 ### Bug Fixes
