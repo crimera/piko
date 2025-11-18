@@ -5,28 +5,44 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import java.io.File;
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
-
 import android.app.Fragment;
 import app.revanced.extension.twitter.Utils;
 import app.revanced.extension.shared.StringRef;
-import app.revanced.extension.twitter.settings.Settings;
+
 
 public class FontPickerFragment extends Fragment {
     private static final int PICK_FONT_FILE_REQUEST_CODE = 1;
     private static boolean isEmojiFont = false;
+    private static Context context = app.revanced.extension.shared.Utils.getContext();
 
-    public boolean isAFontFile(Uri uri){
+    // Hail ChatGPT
+    private boolean hasValidFontHeader(Uri uri){
         try{
-            String path = uri.getPath();
-            int cut = path.lastIndexOf('/');
-            if (cut != -1) {
-                String ext = path.substring(cut + 1).toLowerCase();
-                return ext.endsWith(".ttf") || ext.endsWith(".otf");
+            InputStream inputStream = this.context.getContentResolver().openInputStream(uri);
+            if (inputStream == null) return false;
+
+            byte[] header = new byte[4];
+            int read = inputStream.read(header);
+            inputStream.close();
+
+            if (read < 4) return false;
+
+            String magic = new String(header, "ISO-8859-1");
+
+            // Valid signatures
+            if (magic.equals("OTTO")) return true;        // OpenType CFF
+            if (magic.equals("true")) return true;        // Apple TrueType
+            if (magic.equals("ttcf")) return true;        // TrueType Collection
+
+            // 00 01 00 00 (TrueType)
+            if ((header[0] == 0x00 &&
+                    header[1] == 0x01 &&
+                    header[2] == 0x00 &&
+                    header[3] == 0x00)) {
+                return true;
             }
         }catch (Exception e){
             Utils.logger(e);
@@ -34,12 +50,11 @@ public class FontPickerFragment extends Fragment {
         return false;
     }
 
-    public boolean copyFont(Uri uri){
+    private boolean copyFont(Uri uri){
         try {
-            Context context = app.revanced.extension.shared.Utils.getContext();
-            InputStream inputStream = context.getContentResolver().openInputStream(uri);
             String filename = this.isEmojiFont ? UpdateFont.EMOJI_FONT_FILE_NAME : UpdateFont.FONT_FILE_NAME;
-            File outFile = new File(context.getFilesDir(), filename);
+            File outFile = new File(this.context.getFilesDir(), filename);
+            InputStream inputStream = this.context.getContentResolver().openInputStream(uri);
             OutputStream outputStream = new FileOutputStream(outFile);
 
             byte[] buffer = new byte[1024];
@@ -64,9 +79,8 @@ public class FontPickerFragment extends Fragment {
         if (requestCode == PICK_FONT_FILE_REQUEST_CODE && resultCode == -1) {
             if (intent != null) {
                 Uri uri = intent.getData();
-                if (isAFontFile(uri)) {
-                    boolean check = copyFont(uri);
-                    if(check){
+                if (hasValidFontHeader(uri)) {
+                    if(copyFont(uri)){
                         toast(StringRef.str("piko_pref_add_font_success"));
                         Utils.showRestartAppDialog(getActivity());
                     }else{
