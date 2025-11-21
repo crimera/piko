@@ -97,6 +97,10 @@
     <string name="piko_pref_debug_menu">قائمة Debug للمنشورات</string>
     <string name="piko_pref_quick_settings">تمكين الإعدادات السريعة</string>
     <string name="piko_pref_quick_settings_summary">إضافة زر الإعدادات السريعة في الشريط الجانبي</string>
+    <string name="piko_pref_pause_search_suggestion">إيقاف اقتراحات البحث</string>
+    <string name="piko_pref_pause_search_suggestion_desc">لن يتم حفظ اقتراحات البحث محليًا</string>
+    <string name="piko_pref_search_suggestion">اقتراحات البحث</string>
+    <string name="piko_pref_search_suggestion_desc">إخفاء/إزالة اقتراحات البحث في قسم استكشف</string>
 
     <!-- Feature Flags إعدادات -->
     <string name="piko_title_feature_flags">Feature Flags</string>
@@ -146,11 +150,26 @@
     <string name="piko_pref_customisation_inlinetabs">عناصر الشريط المضمنة المراد إخفاؤها</string>
     <string name="piko_pref_customisation_exploretabs">علامات تبويب استكشف المراد إخفاؤها</string>
     <string name="piko_pref_customisation_searchtabs">علامات تبويب البحث المراد إخفاؤها</string>
+    <string name="piko_pref_customisation_notificationtabs">علامات تبويب تنبيهات المراد إخفاؤها</string>
     <string name="piko_pref_customisation_reply_sorting">مرشح فرز الردود الافتراضية</string>
     <string name="piko_pref_customisation_reply_sorting_remember">تم اختياره مسبقًا</string>
     <string name="piko_pref_customisation_post_font_size">حجم خط المنشور</string>
     <string name="piko_pref_customisation_search_type_ahead">اقتراحات البحث المراد إخفاؤها</string>
+    <string name="piko_pref_customisation_change_app_icon">تغيير أيقونة التطبيق</string>
 
+  <!-- إعدادات الخط-->
+    <string name="piko_title_font">نمط الخط</string>
+    <string name="piko_pref_add_font">إضافة خط</string>
+    <string name="piko_pref_add_font_desc">تأكد أن الخط من نوع .ttf أو .otf</string>
+    <string name="piko_pref_delete_font">حذف الخط</string>
+    <string name="piko_pref_add_emoji_font">إضافة خط رموز إيموجي</string>
+    <string name="piko_pref_delete_emoji_font">حذف خط رموز إيموجي</string>
+    <string name="piko_pref_add_font_success">تم إضافة الخط بنجاح</string>
+    <string name="piko_pref_add_font_fail">فشل في إضافة الخط</string>
+    <string name="piko_pref_delete_font_success">تم حذف الخط بنجاح</string>
+    <string name="piko_pref_delete_font_fail">فشل في حذف الخط</string>
+    <string name="piko_pref_delete_font_warn">لم يتم العثور على أي خط مخصص ليتم حذفه</string>
+    
     <!-- Logging إعدادات -->
     <string name="piko_title_logging">Logging</string>
     <string name="piko_pref_server_response_logging">سجل استجابة الخادم</string>
@@ -173,8 +192,9 @@
     <string name="piko_pref_app_version">إصدار التطبيق</string>
     <string name="piko_pref_patch_info">معلومات التعديل</string>
     <string name="piko_pref_version_info">معلومات الإصدار</string>
+    <string name="piko_changelogs_title">سجل التغييرات</string>
     <string name="piko_pref_patches">التعديلات</string>
-    <string name="piko_pref_included">متضمن</string>
+    <string name="piko_pref_included">مضمّن</string>
     <string name="piko_pref_excluded">مستبعد</string>
     <string name="piko_pref_app_restart_rec">يوصى بإعادة تشغيل التطبيق</string>
     <string name="piko_pref_remove">إزالة %s</string>
