@@ -192,6 +192,7 @@ public class Utils {
 
     public static String getAll(boolean no_flags) {
         JSONObject prefs = sp.getAll();
+        prefs.remove(Settings.LAST_CHANGELOG.key);
         if (no_flags) {
             prefs.remove(Settings.MISC_FEATURE_FLAGS.key);
             prefs.remove(Settings.MISC_FEATURE_FLAGS_SEARCH.key);
@@ -226,15 +227,13 @@ public class Utils {
                 } else if (value instanceof String) {
                     setStringPref(key, (String) value);
                 } else if (value instanceof JSONArray) {
-                    int index = 0;
+                    JSONArray jsonArray = (JSONArray) value;
+                    if(jsonArray.length()<1) continue;
+
                     Set<String> strings = new HashSet<>();
 
-                    if (!(((JSONArray) value).get(0) instanceof String)) {
-                        continue;
-                    }
-
-                    for (int i = 0; i < ((JSONArray) value).length(); i++) {
-                        strings.add(((JSONArray) value).getString(i));
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        strings.add(jsonArray.getString(i));
                     }
 
                     setSetPerf(key, strings);
