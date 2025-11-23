@@ -101,6 +101,7 @@
         <item>Grok</item>
         <item>Money</item>
         <item>XChat</item>
+        <item>XLite</item>
         <item>Notifications</item>
         <item>DMs</item>
         <item>Communities</item>
@@ -110,7 +111,7 @@
         <item>Lists</item>
         <item>BirdwatchNotes</item>
         <item>Spaces</item>
-        <item>@string/video_chat_conference</item>
+        <item>Conferences</item>
         <item>PendingFollowers</item>
         <item>Monetization</item>
         <item>Analytics</item>

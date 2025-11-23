@@ -39,6 +39,7 @@
         <item>@string/grok_tab_title</item>
         <item>@string/drawer_money_title</item>
         <item>@string/x_chat_tab_title</item>
+        <item>@string/x_lite_drawer_item_title</item>
         <item>@string/drawer_notifications_title</item>
         <item>@string/drawer_direct_messages_title</item>
         <item>@string/drawer_communities_title</item>
@@ -48,7 +49,7 @@
         <item>@string/drawer_lists</item>
         <item>@string/drawer_birdwatch_title</item>
         <item>@string/spaces_grid_tab</item>
-        <item>@string/video_chat_conference</item>
+        <item>@string/conference_tab_title</item>
         <item>@string/profile_followers</item>
         <item>@string/monetization_drawer_menu_title</item>
         <item>@string/subscriptions_drawer_menu_group_analytics</item>
