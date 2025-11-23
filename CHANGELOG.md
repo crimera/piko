@@ -1,3 +1,17 @@
+## [2.0.0-dev.12](https://github.com/crimera/piko/compare/v2.0.0-dev.11...v2.0.0-dev.12) (2025-11-23)
+
+### Bug Fixes
+
+* **Twitter:** Fixed preference import ([4623b93](https://github.com/crimera/piko/commit/4623b93b68b18f42d0b8c435d4089f903ddfe4fd))
+
+### Updates
+
+* spanish translation to new strings ([28dbebd](https://github.com/crimera/piko/commit/28dbebd3508bbb8601ac3e706cb081aed69e224a))
+* **Translations:** <Arabic> ([9ae0f3a](https://github.com/crimera/piko/commit/9ae0f3ad2f5a4d1ff7bdcb2f9d9c56ed909520d5))
+* **Translations:** Updated `Arabic` strings [#735](https://github.com/crimera/piko/issues/735) ([61a05c6](https://github.com/crimera/piko/commit/61a05c64c3f40f906980c3e99b89a4c68b280184))
+* **Translations:** Updated `Spanish` strings [#732](https://github.com/crimera/piko/issues/732) ([8137cd5](https://github.com/crimera/piko/commit/8137cd5da6ddf57d6088ddbdcb9640e77682b40f))
+* **Twitter:** Updated side bar elements to hide ([45f93a1](https://github.com/crimera/piko/commit/45f93a1d6aeaddbf06011cea05abc8f79ba25b12))
+
 ## [2.0.0-dev.11](https://github.com/crimera/piko/compare/v2.0.0-dev.10...v2.0.0-dev.11) (2025-11-18)
 
 ### Bug Fixes
