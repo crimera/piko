@@ -17,7 +17,7 @@
     <string name="shortcut_retweet_tweet">Retweet</string>
     <string name="social_you_retweeted">You retweeted</string>
     <string name="composer_hint_self_thread">Add another tweet</string>
-    <string name="confirm_delete_shared_tweet_description">Are you sure you want:remove this tweet?</string>
+    <string name="confirm_delete_shared_tweet_description">Are you sure you want to remove this tweet?</string>
     <string name="confirm_delete_shared_tweet_title">Remove tweet</string>
     <string name="conversation_control_reply_restricted_dialog_title">Tweet not sent</string>
     <string name="conversation_control_reply_restricted_error">Tweet not sent. Replies are restricted.</string>
@@ -53,11 +53,11 @@
     <string name="view_tweet_text">View tweet</string>
     <string name="quote_label_subtitle">Add a comment, photo, or GIF before you share this tweet</string>
     <string name="retweet_label_subtitle">Share this tweet with your followers</string>
-    <string name="tweet_added_to_your_bookmarks">Tweet added:your Bookmarks</string>
+    <string name="tweet_added_to_your_bookmarks">Tweet added to your Bookmarks</string>
     <string name="tweet_author">Tweet author</string>
     <string name="tweets_retweeted_accessibility_description">Tweeted by %s</string>
     <string name="tweets_topic_accessibility_description">Tweet from topic %s</string>
-    <string name="tweets_unauthorized_error">Sorry, you’re not authorized:view these tweets.</string>
+    <string name="tweets_unauthorized_error">Sorry, you’re not authorized to view these tweets.</string>
     <string name="ps__posted_on_twitter">*%s* tweeted on</string>
     <string name="ps__retweeted_on_twitter">*%s* retweeted on</string>
     <string name="tweet_removed_from_your_bookmarks">Tweet removed from your Bookmarks</string>
