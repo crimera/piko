@@ -109,7 +109,7 @@
     <string name="piko_pref_hide_live_threads">실시간 쓰레드</string>
     <string name="piko_pref_hide_live_threads_desc">타임라인에서 실시간 영역를 숨길 수 있습니다.</string>
     <string name="piko_pref_hide_banner">배너</string>
-    <string name="piko_pref_hide_banner_desc">새 게시물 알림 배너를 표시할 수 있습니다.</string>
+    <string name="piko_pref_hide_banner_desc">새 게시물 알림 배너를 삭제할 수 있습니다.</string>
     <string name="piko_pref_hide_bmk_timeline">타임라인에서 북마크 아이콘</string>
     <string name="piko_pref_force_translate">번역 강제로 활성화하기</string>
     <string name="piko_pref_force_translate_desc">모든 게시물이 번역 옵션을 가질 수 있습니다.</string>
