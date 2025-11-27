@@ -71,6 +71,8 @@
         <item>@string/drawer_direct_messages_title</item>
         <item>@string/grok_tab_title</item>
         <item>@string/product_media_label</item>
+        <item>@string/x_chat_tab_title</item>
+        <item>@string/conference_tab_title</item>
     </string-array>
 
     <string-array name="piko_array_inlinetabs">

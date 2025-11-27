@@ -133,6 +133,8 @@
         <item>DMS</item>
         <item>GROK</item>
         <item>MEDIA_TAB</item>
+        <item>X_CHAT</item>
+        <item>CONFERENCES</item>
     </string-array>
 
     <string-array name="piko_array_notificationtabs_val">
