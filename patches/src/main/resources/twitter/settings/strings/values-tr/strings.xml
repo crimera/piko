@@ -173,7 +173,7 @@
     <!-- Günlük (Logging) Ayarları -->
     <string name="piko_title_logging">Günlük kaydı</string>
     <string name="piko_pref_server_response_logging">Sunucu yanıtını kaydet</string>
-    <string name="piko_pref_server_response_logging_desc">Sunucudan alınan JSON yanıtlarını 'Download/Piko' içine kaydeder</string>
+    <string name="piko_pref_server_response_logging_desc">Sunucudan alınan JSON yanıtlarını \'Download/Piko\' içine kaydeder</string>
     <string name="piko_pref_server_response_logging_file_overwrite">Yanıt kayıt dosyasını üzerine yaz</string>
     <string name="piko_pref_server_response_logging_file_overwrite_desc">Başlangıçta mevcut yanıt kayıt verilerini temizle</string>
 
