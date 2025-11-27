@@ -108,18 +108,20 @@ val bringBackTwitterPatch =
 
             // Splashscreen to blue
             document("res/values/styles.xml").use { document ->
-                val styleElement = document.childNodes.findElementByAttributeValueOrThrow(
-                    "name",
-                    "Theme.LaunchScreen"
-                )
+                val styleElement =
+                    document.childNodes.findElementByAttributeValueOrThrow(
+                        "name",
+                        "Theme.LaunchScreen",
+                    )
 
-                val itemElement = styleElement.childNodes.findElementByAttributeValueOrThrow(
-                    "name",
-                    "windowSplashScreenBackground"
-                )
+                val itemElement =
+                    styleElement.childNodes.findElementByAttributeValueOrThrow(
+                        "name",
+                        "windowSplashScreenBackground",
+                    )
                 itemElement.textContent = twitterBlueColor
             }
-                // endregion
+            // endregion
 
             // region Change strings
 
@@ -170,6 +172,8 @@ val bringBackTwitterPatch =
                                 "&#55349;&#56655;" to "Twitter",
                                 "&#55357;&#56613;" to "🔥",
                                 "&#55356;&#57217;" to "🎁",
+                                "&#55356;&#57225;" to "🎉",
+                                "&#9200;" to "⏰",
                             ),
                     )
                 }
