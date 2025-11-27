@@ -1,3 +1,20 @@
+## [2.0.0-dev.13](https://github.com/crimera/piko/compare/v2.0.0-dev.12...v2.0.0-dev.13) (2025-11-27)
+
+### Features
+
+* **Twitter:** Added `Hide badges from navigation bar icons` patch ([1d98886](https://github.com/crimera/piko/commit/1d988863d06418e270d2821e366a5fdf1f3c0d47))
+
+### Updates
+
+* **Translations:** Update Korean ([23f1f25](https://github.com/crimera/piko/commit/23f1f25895787b168bce81ec6e6a66742b2b5ee1))
+* **Translations:** Updated `Turkish` ([ae0df82](https://github.com/crimera/piko/commit/ae0df82a1601bd6588bd9f5db0f4071c83f428f2))
+* **Twitter:** Added more elements to hide from navigation bar ([8e6706c](https://github.com/crimera/piko/commit/8e6706c8578dbe86e97315da1da48b228071378d))
+
+### Refactors
+
+* **Bring Back Twitter:** Added more numeric character  <-> emoji pairs ([5534c57](https://github.com/crimera/piko/commit/5534c5726d216148b07a5ad8dab29c88dd40fa7f))
+* **Bring Back Twitter:** Refactor English strings ([18b68b3](https://github.com/crimera/piko/commit/18b68b3014ed69017207bcaced90a228f6791e90))
+
 ## [2.0.0-dev.12](https://github.com/crimera/piko/compare/v2.0.0-dev.11...v2.0.0-dev.12) (2025-11-23)
 
 ### Bug Fixes
