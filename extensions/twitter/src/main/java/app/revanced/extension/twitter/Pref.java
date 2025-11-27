@@ -384,6 +384,10 @@ public class Pref {
         return Utils.getBooleanPerf(Settings.MISC_PAUSE_SEARCH_SUGGESTIONS);
     }
 
+    public static int navbarBadgeCount(int count){
+        return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_NAVBAR_BADGE) ? 0 : count;
+    }
+
 
     //end
 }

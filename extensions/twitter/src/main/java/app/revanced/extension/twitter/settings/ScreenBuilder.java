@@ -880,6 +880,16 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.hideNavbarBadge) {
+            addPreference(category,
+                    helper.switchPreference(
+                            strRes("piko_pref_hide_badge_nav_bar"),
+                            strRes("piko_pref_hide_badge_nav_bar_desc"),
+                            Settings.TIMELINE_HIDE_NAVBAR_BADGE
+                    )
+            );
+        }
+
     }
 
     public void buildLoggingSection(boolean buildCategory) {
