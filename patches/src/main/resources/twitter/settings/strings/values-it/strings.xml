@@ -137,7 +137,9 @@
     <string name="piko_pref_hide_social_proof">Nascondi i seguiti dal contesto</string>
     <string name="piko_pref_hide_social_proof_desc">Nasconde i seguiti dal contesto sotto ai profili</string>
     <string name="piko_pref_hide_community_badge">Nascondi i badge della community</string>
-    
+    <string name="piko_pref_hide_badge_nav_bar">Nascondi i badge nella barra di navigazione</string>
+    <string name="piko_pref_hide_badge_nav_bar_desc">Nasconde i nudge delle notifiche e i conteggi dalle icone della barra di navigazione</string>
+
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Customizzazione</string>
     <string name="piko_pref_customisation_profiletabs">Schede dei profili da nascondere</string>
@@ -150,10 +152,12 @@
     <string name="piko_pref_customisation_inlinetabs">Elementi della barra in linea da nascondere</string>
     <string name="piko_pref_customisation_exploretabs">Schede di esplora da nascondere</string>
     <string name="piko_pref_customisation_searchtabs">Schede di cerca da nascondere</string>
+    <string name="piko_pref_customisation_notificationtabs">Schede di notifica da nascondere</string>
     <string name="piko_pref_customisation_reply_sorting">Filtro di ordinamento delle risposte predefinito</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Selezionato precedentemente</string>
     <string name="piko_pref_customisation_post_font_size">Dimensione del carattere del post</string>
     <string name="piko_pref_customisation_search_type_ahead">Cerca i suggerimenti da nascondere</string>
+    <string name="piko_pref_customisation_change_app_icon">Cambia icona dell\'app</string>
 
     <!-- Font Settings -->
     <string name="piko_title_font">Stile font</string>
