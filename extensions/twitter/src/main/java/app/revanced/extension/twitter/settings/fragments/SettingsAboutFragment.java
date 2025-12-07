@@ -127,6 +127,12 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         flags.put(strRemoveRes("piko_pref_server_response_logging"),SettingsStatus.serverResponseLogging);
         flags.put(strRes("piko_pref_show_post_source"),SettingsStatus.showSourceLabel);
         flags.put(strEnableRes("piko_changelogs_title"),SettingsStatus.showChangelogsPatchEnabled);
+        flags.put(strEnableRes("piko_changelogs_title"),SettingsStatus.showChangelogsPatchEnabled);
+        flags.put(strRes("piko_pref_pause_search_suggestion"),SettingsStatus.pauseSearchSuggestions);
+        flags.put(strRes("piko_pref_search_suggestion"),SettingsStatus.removeSearchSuggestions);
+        flags.put(strRes("piko_pref_customisation_change_app_icon"),SettingsStatus.appIconCustomisation);
+        flags.put(strRes("piko_pref_hide_badge_nav_bar"),SettingsStatus.hideNavbarBadge);
+        flags.put(strRes("piko_pref_hide_post_inline_metrics"),SettingsStatus.hidePostMetrics);
 
         LegacyTwitterPreferenceCategory patPref = preferenceCategory(strRes("piko_pref_patches"), screen);
 
