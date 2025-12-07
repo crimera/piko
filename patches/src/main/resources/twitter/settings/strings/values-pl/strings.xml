@@ -137,6 +137,8 @@
     <string name="piko_pref_hide_social_proof">Ukryj kontekst \"Obserwowany(-a) przez\"</string>
     <string name="piko_pref_hide_social_proof_desc">Ukrywa kontekst \"Obserwowany(-a) przez\" pod profilem</string>
     <string name="piko_pref_hide_community_badge">Ukryj odznaki społeczności</string>
+    <string name="piko_pref_hide_badge_nav_bar">Ukryj odznaki na pasku nawigacji</string>
+    <string name="piko_pref_hide_badge_nav_bar_desc">Ukrywa wskaźniki i liczniki powiadomień na ikonach paska nawigacji</string>
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Dostosowywanie</string>
