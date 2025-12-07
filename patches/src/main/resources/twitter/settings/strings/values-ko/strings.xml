@@ -131,6 +131,11 @@
     <string name="piko_pref_hide_community_badge">커뮤니티 배지 숨기기</string>
     <string name="piko_pref_hide_badge_nav_bar">하단 바에서 배지 숨기기</string>
     <string name="piko_pref_hide_badge_nav_bar_desc">하단 바 아이콘에서 알림 넛지와 카운트를 숨길 수 있습니다.</string>
+    <string name="piko_pref_hide_post_inline_metrics">게시물 인라인 보기 지표 숨기기</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">인라인 보기에서 좋아요, 리포스트 등의 수를 숨깁니다</string>
+    <string name="piko_pref_hide_post_detailed_metrics">게시물 상세 보기 지표 숨기기</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">상세 보기에서 좋아요, 리포스트 등의 수를 숨깁니다</string>
+
     <!-- Customization Settings -->
     <string name="piko_title_customisation">사용자 정의</string>
     <string name="piko_pref_customisation_profiletabs">프로필에서 탭 숨기기</string>

@@ -118,6 +118,10 @@
     <string name="piko_pref_hide_nudge_button_desc">隐藏帖子上的关注/订阅/回关按钮</string>
     <string name="piko_pref_hide_social_proof">隐藏社交关系</string>
     <string name="piko_pref_hide_social_proof_desc">隐藏他人主页上的谁关注了此账号</string>
+    <string name="piko_pref_hide_post_inline_metrics">隐藏帖子内联视图指标</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">在内联视图中隐藏点赞、转发等数量</string>
+    <string name="piko_pref_hide_post_detailed_metrics">隐藏帖子详细视图指标</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">在详细视图中隐藏点赞、转发等数量</string>
 
     <!-- 自定义设置 -->
     <string name="piko_title_customisation">自定义</string>

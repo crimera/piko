@@ -137,6 +137,10 @@
     <string name="piko_pref_hide_social_proof">إخفاء سياق مُتابَع بواسطة</string>
     <string name="piko_pref_hide_social_proof_desc">يخفي سياق مُتابَع بواسطة أسفل الملف الشخصي</string>
     <string name="piko_pref_hide_community_badge">إخفاء شارات المجتمع</string>
+    <string name="piko_pref_hide_post_inline_metrics">إخفاء مقاييس عرض المنشور المضمن</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">يخفي عدد الإعجابات وإعادة النشر وغيرها في العرض المضمن</string>
+    <string name="piko_pref_hide_post_detailed_metrics">إخفاء مقاييس عرض المنشور التفصيلي</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">يخفي عدد الإعجابات وإعادة النشر وغيرها في العرض التفصيلي</string>
 
     <!-- إعدادات التخصيص -->
     <string name="piko_title_customisation">التخصيص</string>

@@ -68,6 +68,10 @@
     <string name="piko_pref_hide_immersive_player">इमर्सिव प्लेयर छुपाएं</string>
     <string name="piko_pref_hide_immersive_player_desc">वीडियो प्लेयर में अधिक वीडियो के लिए ऊपर की ओर स्वाइप करें</string>
     <string name="piko_pref_hide_hidden_replies">छुपे हुए उत्तर छिपाएँ</string>
+    <string name="piko_pref_hide_post_inline_metrics">पोस्ट इनलाइन दृश्य मेट्रिक्स छिपाएँ</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">इनलाइन दृश्य में लाइक, रीपोस्ट आदि की संख्या छिपाता है</string>
+    <string name="piko_pref_hide_post_detailed_metrics">पोस्ट विस्तृत दृश्य मेट्रिक्स छिपाएँ</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">विस्तृत दृश्य में लाइक, रीपोस्ट आदि की संख्या छिपाता है</string>
 
     <string name="piko_title_customisation">कस्टमाइज़ेशन</string>
     <string name="piko_pref_customisation_profiletabs">छुपाने के लिए प्रोफ़ाइल टैब</string>

@@ -138,6 +138,10 @@
     <string name="piko_pref_hide_social_proof">Ocultar seguidores por contexto</string>
     <string name="piko_pref_hide_social_proof_desc">Oculta seguidores por contexto en los perfiles</string>
     <string name="piko_pref_hide_community_badge">Ocultar insignias de la comunidad</string>
+    <string name="piko_pref_hide_post_inline_metrics">Ocultar métricas de vista en línea de la publicación</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">Oculta los recuentos de me gusta, reposts, etc. en la vista en línea</string>
+    <string name="piko_pref_hide_post_detailed_metrics">Ocultar métricas de vista detallada de la publicación</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">Oculta los recuentos de me gusta, reposts, etc. en la vista detallada</string>
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Personalización</string>

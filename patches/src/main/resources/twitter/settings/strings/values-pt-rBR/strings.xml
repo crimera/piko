@@ -135,7 +135,11 @@
 	<string name="piko_pref_hide_social_proof">Ocultar "Seguido por"</string>
 	<string name="piko_pref_hide_social_proof_desc">Oculta o contexto "Seguido por" no perfil</string>
 	<string name="piko_pref_hide_community_badge">Ocultar badges da comunidade</string>
-	
+	<string name="piko_pref_hide_post_inline_metrics">Ocultar métricas da visualização inline da postagem</string>
+	<string name="piko_pref_hide_post_inline_metrics_desc">Oculta as contagens de curtidas, repostagens etc. na visualização inline</string>
+	<string name="piko_pref_hide_post_detailed_metrics">Ocultar métricas da visualização detalhada da postagem</string>
+	<string name="piko_pref_hide_post_detailed_metrics_desc">Oculta as contagens de curtidas, repostagens etc. na visualização detalhada</string>
+
 	<!--  Customization Settings  -->
 	<string name="piko_title_customisation">Personalização</string>
 	<string name="piko_pref_customisation_profiletabs">Abas do perfil para ocultar</string>

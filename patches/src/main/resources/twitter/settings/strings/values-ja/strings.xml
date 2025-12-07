@@ -131,6 +131,11 @@
     <string name="piko_pref_hide_community_badge">コミュニティバッジを非表示</string>
     <string name="piko_pref_hide_badge_nav_bar">ナビゲーションバーからバッジを非表示</string>
     <string name="piko_pref_hide_badge_nav_bar_desc">ナビゲーションバーのアイコンから通知のナッジとカウントを非表示にします</string>
+    <string name="piko_pref_hide_post_inline_metrics">投稿のインライン表示メトリクスを非表示にする</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">インライン表示で、いいね数・リポスト数などを非表示にします</string>
+    <string name="piko_pref_hide_post_detailed_metrics">投稿の詳細表示メトリクスを非表示にする</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">詳細表示で、いいね数・リポスト数などを非表示にします</string>
+
     <!-- Customization Settings -->
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">プロフィールタブから非表示にする項目</string>

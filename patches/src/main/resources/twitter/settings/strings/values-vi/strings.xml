@@ -133,6 +133,10 @@
     <string name="piko_pref_hide_social_proof_desc">Ẩn những nội dụng không liên quan trong post</string>
     <string name="piko_pref_hide_community_badge">Ẩn huy hiệu cộng đồng</string>
     <string name="piko_pref_hide_hidden_replies">Ẩn các phản hồi bị gỡ</string>
+    <string name="piko_pref_hide_post_inline_metrics">Ẩn số liệu chế độ xem nội tuyến của bài đăng</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">Ẩn số lượt thích, đăng lại, v.v. trong chế độ xem nội tuyến</string>
+    <string name="piko_pref_hide_post_detailed_metrics">Ẩn số liệu chế độ xem chi tiết của bài đăng</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">Ẩn số lượt thích, đăng lại, v.v. trong chế độ xem chi tiết</string>
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Tuỳ chỉnh giao diện</string>

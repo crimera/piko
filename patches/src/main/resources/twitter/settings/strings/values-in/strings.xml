@@ -93,6 +93,10 @@
     <string name="piko_pref_hide_hidden_replies">balasan tersembunyi</string>
     <string name="piko_pref_force_hd">paksa video HD</string>
     <string name="piko_pref_force_hd_desc">Video akan selalu diputar dalam kualitas tertinggi</string>
+    <string name="piko_pref_hide_post_inline_metrics">Sembunyikan metrik tampilan inline posting</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">Menyembunyikan jumlah suka, repost, dll. pada tampilan inline</string>
+    <string name="piko_pref_hide_post_detailed_metrics">Sembunyikan metrik tampilan detail posting</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">Menyembunyikan jumlah suka, repost, dll. pada tampilan detail</string>
 
     <string name="piko_title_customisation">Kustomisasi</string>
     <string name="piko_pref_customisation_profiletabs">Tab profil untuk disembunyikan</string>

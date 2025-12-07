@@ -137,6 +137,10 @@
     <string name="piko_pref_hide_social_proof">Takip edenler bilgisini gizle</string>
     <string name="piko_pref_hide_social_proof_desc">Profildeki "şunlar takip ediyor" bilgisini gizler</string>
     <string name="piko_pref_hide_community_badge">Topluluk rozetlerini gizle</string>
+    <string name="piko_pref_hide_post_inline_metrics">Gönderi satır içi görünüm metriklerini gizle</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">Gönderi satır içi görünüm metriklerini gizle</string>
+    <string name="piko_pref_hide_post_detailed_metrics">Gönderi ayrıntılı görünüm metriklerini gizle</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">Ayrıntılı görünümde beğeni, yeniden paylaşım vb. sayıları gizler</string>
 
     <!-- Özelleştirme Ayarları -->
     <string name="piko_title_customisation">Özelleştirme</string>

@@ -119,6 +119,10 @@
     <string name="piko_pref_hide_nudge_button_desc">Masque les boutons suivre/s\'abonner/suivre en retour sur les publications</string>
     <string name="piko_pref_hide_social_proof">Masquer le contexte "Suivi par"</string>
     <string name="piko_pref_hide_social_proof_desc">Masque le contexte "Suivi par" sous le profil</string>
+    <string name="piko_pref_hide_post_inline_metrics">Masquer les métriques de la vue intégrée de la publication</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">Masque les nombres de mentions J’aime, republications, etc. dans la vue intégrée</string>
+    <string name="piko_pref_hide_post_detailed_metrics">Masquer les métriques de la vue détaillée de la publication</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">Masque les nombres de mentions J’aime, republications, etc. dans la vue détaillée</string>
 
 	<!-- Customization Settings -->
     <string name="piko_title_customisation">Personnalisation</string>

@@ -139,6 +139,10 @@
     <string name="piko_pref_hide_community_badge">Nascondi i badge della community</string>
     <string name="piko_pref_hide_badge_nav_bar">Nascondi i badge nella barra di navigazione</string>
     <string name="piko_pref_hide_badge_nav_bar_desc">Nasconde i nudge delle notifiche e i conteggi dalle icone della barra di navigazione</string>
+    <string name="piko_pref_hide_post_inline_metrics">Nascondi metriche della visualizzazione in linea del post</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">Nasconde il conteggio di mi piace, repost, ecc. nella visualizzazione in linea</string>
+    <string name="piko_pref_hide_post_detailed_metrics">Nascondi metriche della visualizzazione dettagliata del post</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">Nasconde il conteggio di mi piace, repost, ecc. nella visualizzazione dettagliata</string>
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Customizzazione</string>

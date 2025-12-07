@@ -117,6 +117,10 @@
     <string name="piko_pref_hide_nudge_button_desc">Сховати кнопки Читати/Підписка/Теж читати на дописах</string>
     <string name="piko_pref_hide_social_proof">Ховати також читають</string>
     <string name="piko_pref_hide_social_proof_desc">Приховати також читають в профілі</string>
+    <string name="piko_pref_hide_post_inline_metrics">Приховати метрики вбудованого перегляду допису</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">Приховує кількість вподобань, репостів тощо у вбудованому перегляді</string>
+    <string name="piko_pref_hide_post_detailed_metrics">Приховати метрики детального перегляду допису</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">Приховує кількість вподобань, репостів тощо у детальному перегляді</string>
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Персоналізація</string>

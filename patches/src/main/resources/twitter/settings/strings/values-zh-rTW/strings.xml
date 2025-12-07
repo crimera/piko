@@ -131,6 +131,10 @@
     <string name="piko_pref_hide_social_proof">隱藏社交關係</string>
     <string name="piko_pref_hide_social_proof_desc">隱藏他人主頁上的被你跟隨的人跟隨</string>
     <string name="piko_pref_hide_community_badge">隱藏社群管理員徽章</string>
+    <string name="piko_pref_hide_post_inline_metrics">隱藏貼文內嵌檢視指標</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">在內嵌檢視中隱藏按讚、轉發等數量</string>
+    <string name="piko_pref_hide_post_detailed_metrics">隱藏貼文詳細檢視指標</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">在詳細檢視中隱藏按讚、轉發等數量</string>
 
     <!-- 自訂設定 -->
     <string name="piko_title_customisation">客製化</string>

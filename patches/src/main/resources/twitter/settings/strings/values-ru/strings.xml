@@ -101,6 +101,10 @@
     <string name="piko_pref_hide_nudge_button_desc">Кнопка Читать в постах авторов, на которых вы не подписаны</string>
     <string name="piko_pref_hide_social_proof">Скрывать В читаемых у..</string>
     <string name="piko_pref_hide_social_proof_desc">Панель В читаемых у.. в профилях</string>
+    <string name="piko_pref_hide_post_inline_metrics">Скрыть метрики встроенного просмотра поста</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">Скрывает количество лайков, репостов и т. д. во встроенном просмотре</string>
+    <string name="piko_pref_hide_post_detailed_metrics">Скрыть метрики детального просмотра поста</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">Скрывает количество лайков, репостов и т. д. в детальном просмотре</string>
 
     <string name="piko_title_customisation">Кастомизация</string>
     <string name="piko_pref_customisation_profiletabs">Скрыть разделы профиля</string>
