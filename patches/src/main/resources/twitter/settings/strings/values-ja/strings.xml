@@ -129,6 +129,8 @@
     <string name="piko_pref_hide_social_proof">フォローインジケーターを非表示</string>
     <string name="piko_pref_hide_social_proof_desc">プロフィールの下部にある「○○さんにフォローされています」を非表示にします</string>
     <string name="piko_pref_hide_community_badge">コミュニティバッジを非表示</string>
+    <string name="piko_pref_hide_badge_nav_bar">ナビゲーションバーからバッジを非表示</string>
+    <string name="piko_pref_hide_badge_nav_bar_desc">ナビゲーションバーのアイコンから通知のナッジとカウントを非表示にします</string>
     <!-- Customization Settings -->
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">プロフィールタブから非表示にする項目</string>
@@ -141,10 +143,12 @@
     <string name="piko_pref_customisation_inlinetabs">インラインバーから非表示にする項目</string>
     <string name="piko_pref_customisation_exploretabs">[話題を検索] タブから非表示にする項目</string>
     <string name="piko_pref_customisation_searchtabs">検索結果のタブから非表示にする項目</string>
+    <string name="piko_pref_customisation_notificationtabs">非表示にする通知タブ</string>
     <string name="piko_pref_customisation_reply_sorting">デフォルトの返信の並び替え</string>
     <string name="piko_pref_customisation_reply_sorting_remember">前回の選択を記憶</string>
     <string name="piko_pref_customisation_post_font_size">ポストのフォントサイズ</string>
     <string name="piko_pref_customisation_search_type_ahead">検索候補から非表示にする項目</string>
+    <string name="piko_pref_customisation_change_app_icon">アプリアイコンを変更</string>
     <!-- Font Settings -->
     <string name="piko_title_font">フォントスタイル</string>
     <string name="piko_pref_add_font">フォントを追加</string>
