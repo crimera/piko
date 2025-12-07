@@ -1,3 +1,18 @@
+## [2.0.0-dev.14](https://github.com/crimera/piko/compare/v2.0.0-dev.13...v2.0.0-dev.14) (2025-12-07)
+
+### Features
+
+* **Twitter:** Added `Hide post metrics` patch ([81627c2](https://github.com/crimera/piko/commit/81627c2e75abb98a5b42da42187b7d9918a0b46b))
+
+### Updates
+
+* **Translations:** `Japanese` strings ([09b42d3](https://github.com/crimera/piko/commit/09b42d3fc0ce1199cdd2b4ec0904132ff2a5dc05))
+* **Translations:** Update `Polish` ([36011a6](https://github.com/crimera/piko/commit/36011a6677013e744f6227bdd1a7eb3550293f43))
+* **Translations:** Update `Polish` strings ([e32b911](https://github.com/crimera/piko/commit/e32b91113dc1b9dedea73cc606a6fd3bbf4f9a9d))
+* **Translations:** Update Korean ([89820de](https://github.com/crimera/piko/commit/89820de1be72efe1af24826a5b57bf43f30dd37c))
+* **Translations:** Updated `Italian` ([071835c](https://github.com/crimera/piko/commit/071835c37ceae0f7e5b5e8e396e91327f9ae01ba))
+* **Twitter:** Updated missing patch names in `About section` ([fed6cee](https://github.com/crimera/piko/commit/fed6ceedd21501d06ad1e3a562135f5f65a335c2))
+
 ## [2.0.0-dev.13](https://github.com/crimera/piko/compare/v2.0.0-dev.12...v2.0.0-dev.13) (2025-11-27)
 
 ### Features
