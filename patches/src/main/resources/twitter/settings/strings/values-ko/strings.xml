@@ -129,6 +129,8 @@
     <string name="piko_pref_hide_social_proof">내가 팔로우하는 사용자 영역 숨기기</string>
     <string name="piko_pref_hide_social_proof_desc">프로필 하단에서 내가 팔로우하는 사용자를 팔로워하는 사람들 영역을 숨길 수 있습니다.</string>
     <string name="piko_pref_hide_community_badge">커뮤니티 배지 숨기기</string>
+    <string name="piko_pref_hide_badge_nav_bar">하단 바에서 배지 숨기기</string>
+    <string name="piko_pref_hide_badge_nav_bar_desc">하단 바 아이콘에서 알림 넛지와 카운트를 숨길 수 있습니다.</string>
     <!-- Customization Settings -->
     <string name="piko_title_customisation">사용자 정의</string>
     <string name="piko_pref_customisation_profiletabs">프로필에서 탭 숨기기</string>
