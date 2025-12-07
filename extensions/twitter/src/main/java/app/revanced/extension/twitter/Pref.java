@@ -7,7 +7,7 @@ import java.util.*;
 
 @SuppressWarnings("unused")
 public class Pref {
-    public static boolean ROUND_OFF_NUMBERS,ENABLE_FORCE_HD, HIDE_COMM_BADGE,SHOW_SRC_LBL;
+    public static boolean HIDE_DETAILED_METRICS,HIDE_INLINE_METRICS,ROUND_OFF_NUMBERS,ENABLE_FORCE_HD, HIDE_COMM_BADGE,SHOW_SRC_LBL;
     public static float POST_FONT_SIZE;
     static{
         ROUND_OFF_NUMBERS = isRoundOffNumbersEnabled();
@@ -15,6 +15,8 @@ public class Pref {
         POST_FONT_SIZE = setPostFontSize();
         HIDE_COMM_BADGE = hideCommBadge();
         SHOW_SRC_LBL = showSourceLabel();
+        HIDE_INLINE_METRICS = hidePostInlineMetrics();
+        HIDE_DETAILED_METRICS = hidePostDetailedMetrics();
     }
 
     public static String getLatestChangelogVersion(){
@@ -388,6 +390,13 @@ public class Pref {
         return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_NAVBAR_BADGE) ? 0 : count;
     }
 
+    public static boolean hidePostInlineMetrics(){
+        return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_POST_INLINE_METRICS);
+    }
+
+    public static boolean hidePostDetailedMetrics(){
+        return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_POST_DETAILED_METRICS);
+    }
 
     //end
 }

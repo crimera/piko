@@ -890,6 +890,24 @@ public class ScreenBuilder {
             );
         }
 
+        if (SettingsStatus.hidePostMetrics) {
+            addPreference(category,
+                    helper.switchPreference(
+                            strRes("piko_pref_hide_post_inline_metrics"),
+                            strRes("piko_pref_hide_post_inline_metrics_desc"),
+                            Settings.TIMELINE_HIDE_POST_INLINE_METRICS
+                    )
+            );
+
+            addPreference(category,
+                    helper.switchPreference(
+                            strRes("piko_pref_hide_post_detailed_metrics"),
+                            strRes("piko_pref_hide_post_detailed_metrics_desc"),
+                            Settings.TIMELINE_HIDE_POST_DETAILED_METRICS
+                    )
+            );
+        }
+
     }
 
     public void buildLoggingSection(boolean buildCategory) {
