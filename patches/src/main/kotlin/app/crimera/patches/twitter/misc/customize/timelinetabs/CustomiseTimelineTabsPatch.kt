@@ -4,6 +4,7 @@ import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
+import app.revanced.patcher.Fingerprint
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.extensions.InstructionExtensions.instructions
@@ -14,7 +15,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 
-private val customiseTimelineTabsFingerprint =
+private val customiseTimelineTabsLegacyFingerprint =
     fingerprint {
         returns("V")
         strings(
@@ -23,6 +24,19 @@ private val customiseTimelineTabsFingerprint =
             "releaseCompletable",
         )
         opcodes(Opcode.CONST_16)
+    }
+
+private val customiseTimelineTabsNewerFingerprint =
+    fingerprint {
+        returns("Ljava/lang/Object;")
+        parameters("Ljava/lang/Object;")
+        strings(
+            "cursor",
+            "it",
+        )
+        custom { method, classDef ->
+            method.name == "invoke" && classDef.type.contains("text/selection")
+        }
     }
 
 @Suppress("unused")
@@ -34,38 +48,46 @@ val customiseTimelineTabsPatch =
         dependsOn(settingsPatch)
 
         execute {
+            fun Fingerprint.invoke() {
+                val c =
+                    method.instructions
+                        .filter { it.opcode == Opcode.CONST_16 }[1]
+                        .location.index
+                val v4 = method.getInstruction<OneRegisterInstruction>(c).registerA
+                val v5 = method.getInstruction<OneRegisterInstruction>(c + 1).registerA
 
-            val method = customiseTimelineTabsFingerprint.method
-            val instructions = method.instructions
+                val arr = method.instructions.first { it.opcode == Opcode.FILLED_NEW_ARRAY }
+                val arrLoc = arr.location.index
+                val r = method.getInstruction<Instruction35c>(arrLoc)
+                val r3 = r.registerC
+                val r11 = r.registerD
 
-            val c = instructions.filter { it.opcode == Opcode.CONST_16 }[1].location.index
-            val v4 = method.getInstruction<OneRegisterInstruction>(c).registerA
-            val v5 = method.getInstruction<OneRegisterInstruction>(c + 1).registerA
+                method.addInstructionsWithLabels(
+                    arrLoc,
+                    """
+                    invoke-static {}, $PREF_DESCRIPTOR;->timelineTab()I
+                    move-result v$v4
+                    
+                    const/16 v$v5, 0x1
+                    if-ne v$v4,v$v5, :no
+                    move-object v$r3,v$r11
+                    goto :escape
+                    :no
+                    const/16 v$v5, 0x2
+                    if-ne v$v4,v$v5, :escape
+                    move-object v$r11,v$r3
+                    goto :escape
+                    """.trimIndent(),
+                    ExternalLabel("escape", arr),
+                )
+                settingsStatusLoadFingerprint.enableSettings("timelineTabCustomisation")
+            }
 
-            val arr = instructions.first { it.opcode == Opcode.FILLED_NEW_ARRAY }
-            val arrLoc = arr.location.index
-            val r = method.getInstruction<Instruction35c>(arrLoc)
-            val r3 = r.registerC
-            val r11 = r.registerD
-
-            method.addInstructionsWithLabels(
-                arrLoc,
-                """
-                invoke-static {}, $PREF_DESCRIPTOR;->timelineTab()I
-                move-result v$v4
-                
-                const/16 v$v5, 0x1
-                if-ne v$v4,v$v5, :no
-                move-object v$r3,v$r11
-                goto :escape
-                :no
-                const/16 v$v5, 0x2
-                if-ne v$v4,v$v5, :escape
-                move-object v$r11,v$r3
-                goto :escape
-                """.trimIndent(),
-                ExternalLabel("escape", arr),
-            )
-            settingsStatusLoadFingerprint.enableSettings("timelineTabCustomisation")
+            try {
+                customiseTimelineTabsLegacyFingerprint.invoke()
+            } catch (_: Exception) {
+                // Fallback - since 11.46.xx
+                customiseTimelineTabsNewerFingerprint.invoke()
+            }
         }
     }
