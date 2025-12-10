@@ -139,10 +139,10 @@
     <string name="piko_pref_hide_community_badge">Ukryj odznaki społeczności</string>
     <string name="piko_pref_hide_badge_nav_bar">Ukryj odznaki na pasku nawigacji</string>
     <string name="piko_pref_hide_badge_nav_bar_desc">Ukrywa wskaźniki i liczniki powiadomień na ikonach paska nawigacji</string>
-    <string name="piko_pref_hide_post_inline_metrics">Ukryj metryki widoku inline posta</string>
-    <string name="piko_pref_hide_post_inline_metrics_desc">Ukrywa liczbę polubień, repostów itd. w widoku inline</string>
-    <string name="piko_pref_hide_post_detailed_metrics">Ukryj metryki szczegółowego widoku posta</string>
-    <string name="piko_pref_hide_post_detailed_metrics_desc">Ukrywa liczbę polubień, repostów itd. w widoku szczegółowym</string>
+    <string name="piko_pref_hide_post_inline_metrics">Ukryj liczniki na listach wpisów</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">Ukrywa liczbę polubień, podań dalej itp. podczas przeglądania wpisów</string>
+    <string name="piko_pref_hide_post_detailed_metrics">Ukryj liczniki w widoku szczegółowym</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">Ukrywa liczbę polubień, podań dalej itp. po otwarciu wpisu</string>
 
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Dostosowywanie</string>
