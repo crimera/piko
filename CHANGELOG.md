@@ -1,3 +1,9 @@
+## [2.0.0-dev.16](https://github.com/crimera/piko/compare/v2.0.0-dev.15...v2.0.0-dev.16) (2025-12-10)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Native reader mode` deeplink ([24be415](https://github.com/crimera/piko/commit/24be4154d5a17a2c065dc8cff66b4087a165090a))
+
 ## [2.0.0-dev.15](https://github.com/crimera/piko/compare/v2.0.0-dev.14...v2.0.0-dev.15) (2025-12-10)
 
 ### Bug Fixes
