@@ -92,8 +92,8 @@
     <string name="piko_pref_clear_tracking_params">مسح معلمات التتبع</string>
     <string name="piko_pref_unshorten_link">لا عنوان URL مختصر</string>
     <string name="piko_pref_unshorten_link_desc">تخلص من عناوين URL القصيرة لـ t.co</string>
-    <string name="piko_pref_round_off_numbers">Round off Numbers</string>
-    <string name="piko_pref_round_off_numbers_desc">إيقاف تصغير الارقام مثل K و M</string>
+    <string name="piko_pref_round_off_numbers">اختصار الأرقام</string>
+    <string name="piko_pref_round_off_numbers_desc">عرض الأرقام بصيغة K و M</string>
     <string name="piko_pref_debug_menu">قائمة Debug للمنشورات</string>
     <string name="piko_pref_quick_settings">تمكين الإعدادات السريعة</string>
     <string name="piko_pref_quick_settings_summary">إضافة زر الإعدادات السريعة في الشريط الجانبي</string>
@@ -137,9 +137,11 @@
     <string name="piko_pref_hide_social_proof">إخفاء سياق مُتابَع بواسطة</string>
     <string name="piko_pref_hide_social_proof_desc">يخفي سياق مُتابَع بواسطة أسفل الملف الشخصي</string>
     <string name="piko_pref_hide_community_badge">إخفاء شارات المجتمع</string>
-    <string name="piko_pref_hide_post_inline_metrics">إخفاء مقاييس عرض المنشور المضمن</string>
-    <string name="piko_pref_hide_post_inline_metrics_desc">يخفي عدد الإعجابات وإعادة النشر وغيرها في العرض المضمن</string>
-    <string name="piko_pref_hide_post_detailed_metrics">إخفاء مقاييس عرض المنشور التفصيلي</string>
+    <string name="piko_pref_hide_badge_nav_bar">إخفاء الشارات في شريط التنقل</string>
+    <string name="piko_pref_hide_badge_nav_bar_desc">يخفي إشارات التنبيهات والعدادات من أيقونات شريط التنقل</string>
+    <string name="piko_pref_hide_post_inline_metrics">إخفاء إحصائيات عرض المنشور المدمج</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">يخفي عدد الإعجابات وإعادة النشر وغيرها في العرض المدمج</string>
+    <string name="piko_pref_hide_post_detailed_metrics">إخفاء إحصائيات عرض المنشور التفصيلي</string>
     <string name="piko_pref_hide_post_detailed_metrics_desc">يخفي عدد الإعجابات وإعادة النشر وغيرها في العرض التفصيلي</string>
 
     <!-- إعدادات التخصيص -->
