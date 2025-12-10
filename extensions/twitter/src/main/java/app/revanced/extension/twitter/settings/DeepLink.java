@@ -19,7 +19,7 @@ public class DeepLink {
 
             if(deeplinkSegments.size() < 2) return false;
 
-            if(!(deeplinkSegments.get(0).equals("i"))) return false;
+            if(!(deeplinkSegments.get(0).equals("i") || deeplinkSegments.get(0).equals("r"))) return false;
 
             String mainPath = deeplinkSegments.get(1).toLowerCase();
             String lastSegment = deeplink.getLastPathSegment();
@@ -45,7 +45,7 @@ public class DeepLink {
                     return true;
 
                 }
-            }else if(mainPath.equals("status")){
+            }else if(mainPath.equals("status") && deeplinkSegments.get(0).equals("r")){
                 String tweetId = deeplinkSegments.get(2);
                 ActivityHook.startReaderMode(tweetId);
                 return true;

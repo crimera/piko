@@ -464,7 +464,7 @@ public class ReaderModeTemplate {
   public static String generateHtml(String tweetId,String content) {
     String script =  "<script type=\"text/javascript\">" +
           "function copyText() {" +
-          "   var textToCopy = 'https://x.com/i/status/"+tweetId+"';" +
+          "   var textToCopy = 'https://x.com/r/status/"+tweetId+"';" +
           "   Android.copyText(textToCopy);" +  // Call Android interface method
           "}" +
           "</script>"+
