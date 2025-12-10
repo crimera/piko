@@ -1,3 +1,16 @@
+## [2.0.0-dev.15](https://github.com/crimera/piko/compare/v2.0.0-dev.14...v2.0.0-dev.15) (2025-12-10)
+
+### Bug Fixes
+
+* **Twitter:** Fix unescaped strings ([41405a7](https://github.com/crimera/piko/commit/41405a75e50141e902aaac74f5fad9a2fcb06422))
+
+### Updates
+
+* **Translations:** Update `Polish` ([f353663](https://github.com/crimera/piko/commit/f353663e2bcdffde840f0cb2097a69071206df23))
+* **Translations:** Update Arabic ([a4f3df8](https://github.com/crimera/piko/commit/a4f3df857d4b82253bcae1cd268d5ec05d8d5b54))
+* **Translations:** Update Korean ([a67efa4](https://github.com/crimera/piko/commit/a67efa42283b9ca42a43990cf3b0718384f8f527))
+* **Twitter:** Update `Customize timeline top bar` fingerprint ([38b706f](https://github.com/crimera/piko/commit/38b706fd3b866425284aa1e4a423f99c684f545c))
+
 ## [2.0.0-dev.14](https://github.com/crimera/piko/compare/v2.0.0-dev.13...v2.0.0-dev.14) (2025-12-07)
 
 ### Features
