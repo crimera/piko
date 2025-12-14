@@ -398,5 +398,8 @@ public class Pref {
         return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_POST_DETAILED_METRICS);
     }
 
+    public static boolean disUnifyXChatSystem(){
+        return !Utils.getBooleanPerf(Settings.MISC_DISUNIFY_XCHAT_SYSTEM);
+    }
     //end
 }

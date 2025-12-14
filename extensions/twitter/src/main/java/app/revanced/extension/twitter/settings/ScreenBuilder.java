@@ -465,6 +465,17 @@ public class ScreenBuilder {
             );
         }
 
+
+        if (SettingsStatus.disUnifyXChatSystem) {
+            addPreference(category,
+                    helper.switchPreference(
+                            strRes("piko_disunify_xchat_system"),
+                            strRes("piko_disunify_xchat_system_desc"),
+                            Settings.MISC_DISUNIFY_XCHAT_SYSTEM
+                    )
+            );
+        }
+
     }
 
     public void buildFeatureFlagsSection(boolean buildCategory){

@@ -24,6 +24,7 @@ internal val shareMenuButtonFuncCallFingerprint =
             "tweet_analytics",
             "author_moderated_replies_author_enabled",
             "conversational_replies_android_pinned_replies_creation_enabled",
+            "share_menu_click",
         )
     }
 
