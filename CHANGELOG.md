@@ -1,3 +1,13 @@
+## [2.0.0-dev.17](https://github.com/crimera/piko/compare/v2.0.0-dev.16...v2.0.0-dev.17) (2025-12-14)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Customize timeline top bar` fingerprint (again) ([189dfdd](https://github.com/crimera/piko/commit/189dfdd9e02de3869ed331d0258f4e83da309299))
+
+### Features
+
+* **Twitter:** Added `Disunify xchat system` patch ([1fa9b7b](https://github.com/crimera/piko/commit/1fa9b7bb949152f536e95d801ded61ead21caac1))
+
 ## [2.0.0-dev.16](https://github.com/crimera/piko/compare/v2.0.0-dev.15...v2.0.0-dev.16) (2025-12-10)
 
 ### Bug Fixes
