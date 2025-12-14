@@ -31,11 +31,10 @@ private val customiseTimelineTabsNewerFingerprint =
         returns("Ljava/lang/Object;")
         parameters("Ljava/lang/Object;")
         strings(
-            "cursor",
             "it",
         )
         custom { method, classDef ->
-            method.name == "invoke" && classDef.type.contains("text/selection")
+            method.name == "invoke" && classDef.type.contains("/tabbed/pinnedtimelines")
         }
     }
 
