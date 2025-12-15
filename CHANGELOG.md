@@ -1,3 +1,14 @@
+## [2.0.0-dev.18](https://github.com/crimera/piko/compare/v2.0.0-dev.17...v2.0.0-dev.18) (2025-12-15)
+
+### Bug Fixes
+
+* **Twitter:** `Disunify xchat system` patch ([ad767b1](https://github.com/crimera/piko/commit/ad767b10afcc01c83450988816a60cf32d8fc195))
+* **Twitter:** Fix `Customize timeline top bar` logic ([642d092](https://github.com/crimera/piko/commit/642d0927a4819743a40d662db5c70cc3a4ff76d2))
+
+### Updates
+
+* **Translations:** Update `Polish` ([8302efe](https://github.com/crimera/piko/commit/8302efea73fa46b72e00eb0acd388af4a1e6376a))
+
 ## [2.0.0-dev.17](https://github.com/crimera/piko/compare/v2.0.0-dev.16...v2.0.0-dev.17) (2025-12-14)
 
 ### Bug Fixes
