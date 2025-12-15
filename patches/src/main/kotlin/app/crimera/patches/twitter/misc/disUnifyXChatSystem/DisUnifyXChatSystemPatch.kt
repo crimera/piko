@@ -9,7 +9,6 @@ import app.revanced.patcher.extensions.InstructionExtensions.instructions
 import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 import app.revanced.patcher.util.smali.ExternalLabel
-import com.android.tools.smali.dexlib2.Opcode
 
 internal val xchatSubSystemUserCheckFingerprint =
     fingerprint {
@@ -30,6 +29,7 @@ val disUnifyXchatSystemPatch =
         dependsOn(settingsPatch)
 
         execute {
+            val strIndx = xchatSubSystemUserCheckFingerprint.stringMatches!!.first { it.string == "userId" }.index
             xchatSubSystemUserCheckFingerprint.method.apply {
                 addInstructionsWithLabels(
                     0,
@@ -39,7 +39,7 @@ val disUnifyXchatSystemPatch =
                     if-nez v0, :piko
                     return v0
                     """.trimIndent(),
-                    ExternalLabel("piko", instructions.first { it.opcode == Opcode.CONST_STRING }),
+                    ExternalLabel("piko", instructions[strIndx]),
                 )
                 settingsStatusLoadFingerprint.enableSettings("disUnifyXChatSystem")
             }
