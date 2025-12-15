@@ -101,6 +101,8 @@
     <string name="piko_pref_pause_search_suggestion_desc">Sugestie wyszukiwania nie będą zapisywane lokalnie</string>
     <string name="piko_pref_search_suggestion">sugestie wyszukiwania</string>
     <string name="piko_pref_search_suggestion_desc">Ukryj/Usuń sugestie wyszukiwania w sekcji przeglądania</string>
+    <string name="piko_disunify_xchat_system">Rozdziel system XChat</string>
+    <string name="piko_disunify_xchat_system_desc">Przywraca klasyczne funkcje, takie jak wiadomości i menu udostępniania</string>
 
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Flagi</string>
