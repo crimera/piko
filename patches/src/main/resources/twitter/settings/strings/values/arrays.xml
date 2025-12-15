@@ -50,6 +50,7 @@
         <item>@string/drawer_birdwatch_title</item>
         <item>@string/spaces_grid_tab</item>
         <item>@string/conference_tab_title</item>
+        <item>@string/creator_studio_drawer_menu_title</item>
         <item>@string/profile_followers</item>
         <item>@string/monetization_drawer_menu_title</item>
         <item>@string/subscriptions_drawer_menu_group_analytics</item>
