@@ -11,6 +11,8 @@ import app.revanced.patcher.extensions.InstructionExtensions.instructions
 import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 import app.revanced.patcher.util.smali.ExternalLabel
+import app.revanced.util.indexOfFirstInstruction
+import app.revanced.util.indexOfFirstLiteralInstruction
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
@@ -48,15 +50,13 @@ val customiseTimelineTabsPatch =
 
         execute {
             fun Fingerprint.invoke() {
-                val c =
-                    method.instructions
-                        .filter { it.opcode == Opcode.CONST_16 }[1]
-                        .location.index
+                var c11 = method.indexOfFirstLiteralInstruction(0x11L)
+
+                val c = method.indexOfFirstInstruction(c11, Opcode.CONST_16)
                 val v4 = method.getInstruction<OneRegisterInstruction>(c).registerA
                 val v5 = method.getInstruction<OneRegisterInstruction>(c + 1).registerA
 
-                val arr = method.instructions.first { it.opcode == Opcode.FILLED_NEW_ARRAY }
-                val arrLoc = arr.location.index
+                val arrLoc = method.indexOfFirstInstruction(c11, Opcode.FILLED_NEW_ARRAY)
                 val r = method.getInstruction<Instruction35c>(arrLoc)
                 val r3 = r.registerC
                 val r11 = r.registerD
@@ -77,7 +77,7 @@ val customiseTimelineTabsPatch =
                     move-object v$r11,v$r3
                     goto :escape
                     """.trimIndent(),
-                    ExternalLabel("escape", arr),
+                    ExternalLabel("escape", method.instructions[arrLoc]),
                 )
                 settingsStatusLoadFingerprint.enableSettings("timelineTabCustomisation")
             }
