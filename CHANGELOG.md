@@ -1,3 +1,9 @@
+## [2.0.0-dev.19](https://github.com/crimera/piko/compare/v2.0.0-dev.18...v2.0.0-dev.19) (2025-12-27)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Custom download folder` in/from 11.51.xx ([c885395](https://github.com/crimera/piko/commit/c885395fce086f1f6791722cc615b671a6c69027))
+
 ## [2.0.0-dev.18](https://github.com/crimera/piko/compare/v2.0.0-dev.17...v2.0.0-dev.18) (2025-12-15)
 
 ### Bug Fixes
