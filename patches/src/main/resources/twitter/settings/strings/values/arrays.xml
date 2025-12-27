@@ -36,21 +36,21 @@
     <string-array name="piko_array_sidebar">
         <item>@string/drawer_profile_title</item>
         <item>@string/subscriptions_drawer_menu_title</item>
-        <item>@string/grok_tab_title</item>
-        <item>@string/drawer_money_title</item>
-        <item>@string/x_chat_tab_title</item>
-        <item>@string/x_lite_drawer_item_title</item>
+        <item>@string/piko_array_grok</item>
+        <item>@string/piko_array_money</item>
+        <item>@string/piko_array_xchat</item>
+        <item>@string/piko_array_x_lite</item>
         <item>@string/drawer_notifications_title</item>
         <item>@string/drawer_direct_messages_title</item>
         <item>@string/drawer_communities_title</item>
         <item>@string/drafts_empty_video</item>
         <item>@string/bookmarks_title</item>
-        <item>@string/drawer_jobs_title</item>
+        <item>@string/piko_array_jobs</item>
         <item>@string/drawer_lists</item>
         <item>@string/drawer_birdwatch_title</item>
         <item>@string/spaces_grid_tab</item>
-        <item>@string/conference_tab_title</item>
-        <item>@string/creator_studio_drawer_menu_title</item>
+        <item>@string/piko_array_conference</item>
+        <item>@string/piko_array_creator_studio</item>
         <item>@string/profile_followers</item>
         <item>@string/monetization_drawer_menu_title</item>
         <item>@string/subscriptions_drawer_menu_group_analytics</item>
@@ -70,10 +70,10 @@
         <item>@string/drawer_birdwatch_title</item>
         <item>@string/bookmarks_title</item>
         <item>@string/drawer_direct_messages_title</item>
-        <item>@string/grok_tab_title</item>
-        <item>@string/product_media_label</item>
-        <item>@string/x_chat_tab_title</item>
-        <item>@string/conference_tab_title</item>
+        <item>@string/piko_array_grok</item>
+        <item>@string/piko_array_media</item>
+        <item>@string/piko_array_xchat</item>
+        <item>@string/piko_array_conference</item>
     </string-array>
 
     <string-array name="piko_array_inlinetabs">

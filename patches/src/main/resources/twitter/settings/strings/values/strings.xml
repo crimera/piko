@@ -216,4 +216,14 @@
 
     <string name="piko_settings_supported_links">Open supported links</string>
 
+    <!-- For arrays-->
+    <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_money">Money</string>
+    <string name="piko_array_xchat">X Chat</string>
+    <string name="piko_array_x_lite">New X Android</string>
+    <string name="piko_array_conference">Conference</string>
+    <string name="piko_array_creator_studio">Creator studio</string>
+    <string name="piko_array_jobs">Jobs</string>
+    <string name="piko_array_media">Media</string>
+
 </resources>
