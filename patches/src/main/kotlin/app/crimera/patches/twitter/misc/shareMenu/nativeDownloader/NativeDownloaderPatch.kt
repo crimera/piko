@@ -8,7 +8,7 @@ import app.revanced.patcher.patch.bytecodePatch
 @Suppress("unused")
 val nativeDownloaderPatch =
     bytecodePatch(
-        name = "Custom downloader",
+        name = "Native downloader",
         description = "Requires X 11.0.0-release.0 or higher.",
     ) {
         compatibleWith("com.twitter.android")
