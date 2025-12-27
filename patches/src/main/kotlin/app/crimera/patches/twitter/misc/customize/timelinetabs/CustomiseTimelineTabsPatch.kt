@@ -11,6 +11,7 @@ import app.revanced.patcher.extensions.InstructionExtensions.instructions
 import app.revanced.patcher.fingerprint
 import app.revanced.patcher.patch.bytecodePatch
 import app.revanced.patcher.util.smali.ExternalLabel
+import app.revanced.util.containsLiteralInstruction
 import app.revanced.util.indexOfFirstInstruction
 import app.revanced.util.indexOfFirstLiteralInstruction
 import com.android.tools.smali.dexlib2.Opcode
@@ -35,8 +36,11 @@ private val customiseTimelineTabsNewerFingerprint =
         strings(
             "it",
         )
-        custom { method, classDef ->
-            method.name == "invoke" && classDef.type.contains("/tabbed/pinnedtimelines")
+
+        custom { method, _ ->
+            method.name == "invoke" &&
+                method.containsLiteralInstruction(0x11L) &&
+                method.containsLiteralInstruction(0x22L)
         }
     }
 
