@@ -19,7 +19,7 @@ val nativeDownloaderPatch =
             val prefFunctionName = "enableNativeDownloader"
             val stringId = "piko_pref_native_downloader_alert_title"
             val iconId = "ic_vector_incoming"
-            val functionReference = "/NativeDownloader;->downloader"
+            val functionReference = "/downloader/NativeDownloader;->downloader"
             val statusFunctionName = "nativeDownloader"
             shareMenuButtonInjection(actionName, prefFunctionName, stringId, iconId, functionReference, statusFunctionName)
         }

@@ -1,4 +1,4 @@
-package app.revanced.extension.twitter.patches.nativeFeatures;
+package app.revanced.extension.twitter.patches.nativeFeatures.downloader;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -94,9 +94,7 @@ public class NativeDownloader {
         try {
             Tweet tweet = new Tweet(tweetObj);
             ArrayList<Media> media = tweet.getMedias();
-            for(Media m:media){
-                Utils.logger(m);
-            }
+
             assert media != null;
             if (media.isEmpty()) {
                 Utils.toast(Utils.strRes("piko_pref_native_downloader_no_media"));
