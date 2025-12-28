@@ -56,6 +56,7 @@ public final class app/crimera/patches/twitter/featureFlag/featureFlagPatch/fing
 
 public final class app/crimera/patches/twitter/interaction/downloads/changedirectory/ChangeDownloadDirPatchKt {
 	public static final fun getChangeDownloadDirPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+	public static final fun getDownloadPathFingerprint ()Lapp/revanced/patcher/Fingerprint;
 }
 
 public final class app/crimera/patches/twitter/interaction/downloads/copyMediaLink/CopyMediaLinkKt {
@@ -165,6 +166,10 @@ public final class app/crimera/patches/twitter/misc/customize/timelinetabs/Custo
 
 public final class app/crimera/patches/twitter/misc/customize/typeAheadResponse/CustomiseTypeAheadResponsePatchKt {
 	public static final fun getCustomiseTypeAheadResponsePatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/misc/disUnifyXChatSystem/DisUnifyXChatSystemPatchKt {
+	public static final fun getDisUnifyXchatSystemPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/misc/dynamiccolor/DynamicColorPatchKt {
@@ -288,8 +293,16 @@ public final class app/crimera/patches/twitter/timeline/hideHiddenReplies/HideHi
 	public static final fun getHideHiddenRepliesPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
+public final class app/crimera/patches/twitter/timeline/hideNavbarBadges/HideNavBarBadgesKt {
+	public static final fun getHideNavBarBadgesPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
 public final class app/crimera/patches/twitter/timeline/hideNudgeButtons/HideNudgeButtonPatchKt {
 	public static final fun getHideNudgeButtonPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
+public final class app/crimera/patches/twitter/timeline/hidePostMetrics/HidePostMetricsKt {
+	public static final fun getHidePostMetrics ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
 public final class app/crimera/patches/twitter/timeline/hideSocialProof/HideSoialProofPatchKt {

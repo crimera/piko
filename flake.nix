@@ -33,18 +33,29 @@
       });
     in
     {
-      devShells = forAllSystems ({ pkgs, androidSdk }: {
-        default = pkgs.mkShell {
-          packages = with pkgs; [
-            jdk17
-            androidSdk
-          ];
+      devShells = forAllSystems ({ pkgs, androidSdk }:
+        let
+          build = pkgs.writeShellScriptBin "build" ''
+            ./gradlew patches:apiDump; ./gradlew patches:build "$@"
+          '';
+          build-android = pkgs.writeShellScriptBin "build-android" ''
+            ./gradlew patches:apiDump; ./gradlew patches:buildAndroid "$@"
+          '';
+        in
+        {
+          default = pkgs.mkShell {
+            packages = with pkgs; [
+              jdk17
+              androidSdk
+              build
+              build-android
+            ];
 
-          ANDROID_HOME = "${androidSdk}/share/android-sdk";
-          ANDROID_SDK_ROOT = "${androidSdk}/share/android-sdk";
-          JAVA_HOME = pkgs.jdk17.home;
-        };
-      });
+            ANDROID_HOME = "${androidSdk}/share/android-sdk";
+            ANDROID_SDK_ROOT = "${androidSdk}/share/android-sdk";
+            JAVA_HOME = pkgs.jdk17.home;
+          };
+        });
     };
 }
 
