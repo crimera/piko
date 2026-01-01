@@ -19,7 +19,7 @@ public class DownloadPatch {
         Log.d(TAG, "obj1 type: " + (obj1 != null ? obj1.getClass().getName() : "null"));
         Log.d(TAG, "vpz type: " + (vpz != null ? vpz.getClass().getName() : "null"));
         Log.d(TAG, "context type: " + (context != null ? context.getClass().getName() : "null"));
-        printObjectFields(obj1, "", 3);
+        printObjectFields(obj1, "", 4);
         try {
             // Print contents of A08, A09 and A0A fields
             // printListContents(vpz, "A08");
@@ -41,7 +41,7 @@ public class DownloadPatch {
             // Reorder: move Download above Report
             reorderDownloadAboveReport(vpz);
 
-            printCollectionContents(vpz.getClass().getField("A08").get(vpz), "    ");
+            // printCollectionContents(vpz.getClass().getField("A08").get(vpz), "    ");
                
         } catch (Exception e) {
             Log.d(TAG, "An error occured", e);
