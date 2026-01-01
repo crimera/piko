@@ -17,6 +17,8 @@ public class DownloadPatch {
      */
     public static void addDownloadButton(Context context, Object vpz) {
         Log.d(TAG, "called the download button");
+        Log.d(TAG, "context type: " + (context != null ? context.getClass().getName() : "null"));
+        Log.d(TAG, "vpz type: " + (vpz != null ? vpz.getClass().getName() : "null"));
         try {
             // Print contents of A08, A09 and A0A fields
             printListContents(vpz, "A08");
@@ -36,8 +38,7 @@ public class DownloadPatch {
                .invoke(vpz, context, clickListener, "Download", 0x7f08217b, false);
                
         } catch (Exception e) {
-        		Log.d(TAG, "An error occured");
-            e.printStackTrace();
+            Log.d(TAG, "An error occured", e);
         }
 		}
     
