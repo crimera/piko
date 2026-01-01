@@ -30,7 +30,7 @@ val downloadPatch = bytecodePatch(
                     invoke-virtual/range {v18 .. v18}, Landroidx/fragment/app/Fragment;->requireContext()Landroid/content/Context;
                     move-result-object v12
 
-                    invoke-static {v12, v9}, $EXTENSION_CLASS->addDownloadButton(Landroid/content/Context;Ljava/lang/Object;)V
+                    invoke-static {v5, v9, v12}, $EXTENSION_CLASS->addDownloadButton(Ljava/lang/Object;Ljava/lang/Object;Landroid/content/Context;)V
                 """.trimIndent(),
             )
         }
