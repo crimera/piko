@@ -31,6 +31,7 @@ public class DownloadPatch {
                .invoke(vpz, context, clickListener, "Download", 0x7f08217b, false);
                
         } catch (Exception e) {
+        		Log.d(TAG, "An error occured");
             e.printStackTrace();
         }
 		}
