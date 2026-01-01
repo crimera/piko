@@ -166,7 +166,6 @@ public class DownloadPatch {
                 ? obj.getClass().getSuperclass().getDeclaredFields() 
                 : new java.lang.reflect.Field[0];
             
-            // Combine declared fields and superclass fields
             java.util.List<java.lang.reflect.Field> allFields = new java.util.ArrayList<>();
             for (java.lang.reflect.Field f : fields) {
                 allFields.add(f);
@@ -179,10 +178,25 @@ public class DownloadPatch {
                 field.setAccessible(true);
                 Object fieldValue = field.get(obj);
                 
-                // Print string fields
                 if (fieldValue instanceof String) {
                     String stringValue = (String) fieldValue;
                     Log.d(TAG, indent + "  " + field.getName() + " (String): \"" + stringValue + "\"");
+                } else if (fieldValue instanceof Integer) {
+                    Log.d(TAG, indent + "  " + field.getName() + " (int): " + fieldValue);
+                } else if (fieldValue instanceof Long) {
+                    Log.d(TAG, indent + "  " + field.getName() + " (long): " + fieldValue);
+                } else if (fieldValue instanceof Float) {
+                    Log.d(TAG, indent + "  " + field.getName() + " (float): " + fieldValue);
+                } else if (fieldValue instanceof Double) {
+                    Log.d(TAG, indent + "  " + field.getName() + " (double): " + fieldValue);
+                } else if (fieldValue instanceof Boolean) {
+                    Log.d(TAG, indent + "  " + field.getName() + " (boolean): " + fieldValue);
+                } else if (fieldValue instanceof Byte) {
+                    Log.d(TAG, indent + "  " + field.getName() + " (byte): " + fieldValue);
+                } else if (fieldValue instanceof Short) {
+                    Log.d(TAG, indent + "  " + field.getName() + " (short): " + fieldValue);
+                } else if (fieldValue instanceof Character) {
+                    Log.d(TAG, indent + "  " + field.getName() + " (char): " + fieldValue);
                 }
             }
         } catch (Exception e) {
