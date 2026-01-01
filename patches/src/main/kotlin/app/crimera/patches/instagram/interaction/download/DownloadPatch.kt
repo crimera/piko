@@ -14,7 +14,7 @@ val downloadPatch = bytecodePatch(
 ) {
     dependsOn(sharedExtensionPatch)
 
-    compatibleWith("com.instagram.android")
+    compatibleWith("com.instagram.android"("410.1.0.63.71"))
 
     execute {
         feedBottomSheet.method.apply {
