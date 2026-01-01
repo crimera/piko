@@ -41,7 +41,7 @@ public class DownloadPatch {
             // Reorder: move Download above Report
             reorderDownloadAboveReport(vpz);
 
-            printListContents(vpz, "A08");
+            printCollectionContents(vpz.getClass().getField("A08").get(vpz), "    ");
                
         } catch (Exception e) {
             Log.d(TAG, "An error occured", e);
@@ -108,39 +108,36 @@ public class DownloadPatch {
         return null;
     }
     
-    private static void printListContents(Object vpz, String fieldName) {
+    private static void printCollectionContents(Object collection, String prefix) {
         try {
-            java.lang.reflect.Field field = vpz.getClass().getField(fieldName);
-            Object fieldValue = field.get(vpz);
-            
-            Log.d(TAG, "=== Contents of VpZ." + fieldName + " ===");
-            Log.d(TAG, "Field type: " + (fieldValue != null ? fieldValue.getClass().getName() : "null"));
-            
-            if (fieldValue instanceof java.util.List) {
-                java.util.List<?> list = (java.util.List<?>) fieldValue;
+            Log.d(TAG, "=== Contents of collection ===");
+            Log.d(TAG, "Collection type: " + (collection != null ? collection.getClass().getName() : "null"));
+
+            if (collection instanceof java.util.List) {
+                java.util.List<?> list = (java.util.List<?>) collection;
                 Log.d(TAG, "List size: " + list.size());
-                
+
                 for (int i = 0; i < list.size(); i++) {
                     Object item = list.get(i);
                     Log.d(TAG, "  [" + i + "]");
                     printObjectFields(item, "    ");
                 }
-            } else if (fieldValue instanceof java.util.Collection) {
-                java.util.Collection<?> collection = (java.util.Collection<?>) fieldValue;
-                Log.d(TAG, "Collection size: " + collection.size());
-                
+            } else if (collection instanceof java.util.Collection) {
+                java.util.Collection<?> coll = (java.util.Collection<?>) collection;
+                Log.d(TAG, "Collection size: " + coll.size());
+
                 int i = 0;
-                for (Object item : collection) {
+                for (Object item : coll) {
                     Log.d(TAG, "  [" + i + "]");
                     printObjectFields(item, "    ");
                     i++;
                 }
             } else {
-                Log.d(TAG, "Value: " + (fieldValue != null ? fieldValue.toString() : "null"));
+                Log.d(TAG, "Value: " + (collection != null ? collection.toString() : "null"));
             }
-            Log.d(TAG, "=== End of VpZ." + fieldName + " ===");
+            Log.d(TAG, "=== End of collection ===");
         } catch (Exception e) {
-            Log.e(TAG, "Error printing contents of " + fieldName, e);
+            Log.e(TAG, "Error printing collection contents", e);
         }
     }
     
