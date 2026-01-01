@@ -3,6 +3,7 @@ package app.revanced.extension.instagram.patches;
 import android.content.Context;
 import android.view.View;
 import android.util.Log;
+import app.revanced.extension.shared.ObjectBrowser;
 
 public class DownloadPatch {
 
@@ -19,7 +20,11 @@ public class DownloadPatch {
         Log.d(TAG, "obj1 type: " + (obj1 != null ? obj1.getClass().getName() : "null"));
         Log.d(TAG, "vpz type: " + (vpz != null ? vpz.getClass().getName() : "null"));
         Log.d(TAG, "context type: " + (context != null ? context.getClass().getName() : "null"));
-        printObjectFields(obj1, "", 4);
+
+        if (obj1 != null && context != null) {
+            ObjectBrowser.browseObject(context, obj1);
+        }
+
         try {
             // Print contents of A08, A09 and A0A fields
             // printListContents(vpz, "A08");
