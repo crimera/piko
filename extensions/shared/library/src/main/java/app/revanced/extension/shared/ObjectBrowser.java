@@ -25,10 +25,17 @@ public class ObjectBrowser {
             return;
         }
 
-        String title = obj.getClass().getSimpleName();
-        if (title == null || title.isEmpty()) {
-            title = obj.getClass().getName();
+        String title = getClassName(obj.getClass());
+        showFieldsDialog(context, obj, title);
+    }
+
+    private static void browseObject(Context context, Object obj, String path) {
+        if (context == null || obj == null) {
+            Utils.showToastShort("Cannot browse null object");
+            return;
         }
+
+        String title = path + "." + getClassName(obj.getClass());
         showFieldsDialog(context, obj, title);
     }
 
@@ -45,7 +52,7 @@ public class ObjectBrowser {
         for (Field field : fields) {
             try {
                 field.setAccessible(true);
-                View row = createFieldRow(context, field, obj);
+                View row = createFieldRow(context, field, obj, title);
                 container.addView(row);
             } catch (Exception e) {
                 TextView errorRow = new TextView(context);
@@ -59,7 +66,7 @@ public class ObjectBrowser {
         builder.show();
     }
 
-    private static View createFieldRow(Context context, Field field, Object obj) {
+    private static View createFieldRow(Context context, Field field, Object obj, String parentPath) {
         TextView textView = new TextView(context);
         textView.setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -78,6 +85,7 @@ public class ObjectBrowser {
 
         final Object finalFieldValue = fieldValue;
         final String finalFieldName = fieldName;
+        final String fieldPath = parentPath + "." + fieldName;
 
         String typeName = getTypeName(field);
         String displayValue = getDisplayValue(fieldValue);
@@ -105,7 +113,7 @@ public class ObjectBrowser {
             int length = Array.getLength(finalFieldValue);
             textView.setText(fieldName + " - " + arrayTypeName + "[] (" + length + ") →");
             textView.setTextColor(0xFF64B5F6);
-            textView.setOnClickListener(v -> showArrayDialog(context, finalFieldValue, finalFieldName));
+            textView.setOnClickListener(v -> showArrayDialog(context, finalFieldValue, fieldPath));
             return textView;
         }
 
@@ -114,23 +122,20 @@ public class ObjectBrowser {
             List<?> list = (List<?>) finalFieldValue;
             textView.setText(fieldName + " - List<" + itemType + "> (" + list.size() + ") →");
             textView.setTextColor(0xFF81C784);
-            textView.setOnClickListener(v -> showListDialog(context, list, finalFieldName));
+            textView.setOnClickListener(v -> showListDialog(context, list, fieldPath));
             return textView;
         }
 
-        String className = fieldType.getSimpleName();
-        if (className == null || className.isEmpty()) {
-            className = fieldType.getName();
-        }
+        String className = getClassName(fieldType);
         textView.setText(fieldName + " - " + className + " →");
         textView.setTextColor(0xFFFFB74D);
-        textView.setOnClickListener(v -> browseObject(context, finalFieldValue));
+        textView.setOnClickListener(v -> browseObject(context, finalFieldValue, fieldPath));
         return textView;
     }
 
-    private static void showListDialog(Context context, List<?> list, String fieldName) {
+    private static void showListDialog(Context context, List<?> list, String parentPath) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(fieldName + " (List)");
+        builder.setTitle(parentPath + " (List)");
 
         ScrollView scrollView = new ScrollView(context);
         LinearLayout container = new LinearLayout(context);
@@ -146,6 +151,8 @@ public class ObjectBrowser {
             ));
             textView.setPadding(dpToPx(16), dpToPx(12), dpToPx(16), dpToPx(12));
 
+            String itemPath = parentPath + "[" + i + "]";
+
             if (item == null) {
                 textView.setText("[" + i + "] - null");
                 textView.setTextColor(0xFF888888);
@@ -160,9 +167,9 @@ public class ObjectBrowser {
                     Utils.showToastShort("Copied: " + finalValue);
                 });
             } else {
-                textView.setText("[" + i + "] - " + item.getClass().getSimpleName() + " →");
+                textView.setText("[" + i + "] - " + getClassName(item.getClass()) + " →");
                 textView.setTextColor(0xFFFFB74D);
-                textView.setOnClickListener(v -> browseObject(context, item));
+                textView.setOnClickListener(v -> browseObject(context, item, itemPath));
             }
             container.addView(textView);
         }
@@ -172,9 +179,9 @@ public class ObjectBrowser {
         builder.show();
     }
 
-    private static void showArrayDialog(Context context, Object array, String fieldName) {
+    private static void showArrayDialog(Context context, Object array, String parentPath) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(fieldName + " (Array)");
+        builder.setTitle(parentPath + " (Array)");
 
         ScrollView scrollView = new ScrollView(context);
         LinearLayout container = new LinearLayout(context);
@@ -193,6 +200,8 @@ public class ObjectBrowser {
             ));
             textView.setPadding(dpToPx(16), dpToPx(12), dpToPx(16), dpToPx(12));
 
+            String itemPath = parentPath + "[" + i + "]";
+
             if (item == null) {
                 textView.setText("[" + i + "] - null");
                 textView.setTextColor(0xFF888888);
@@ -207,9 +216,9 @@ public class ObjectBrowser {
                     Utils.showToastShort("Copied: " + finalValue);
                 });
             } else {
-                textView.setText("[" + i + "] - " + item.getClass().getSimpleName() + " →");
+                textView.setText("[" + i + "] - " + getClassName(item.getClass()) + " →");
                 textView.setTextColor(0xFFFFB74D);
-                textView.setOnClickListener(v -> browseObject(context, item));
+                textView.setOnClickListener(v -> browseObject(context, item, itemPath));
             }
             container.addView(textView);
         }
@@ -232,6 +241,18 @@ public class ObjectBrowser {
                 || type == Character.class;
     }
 
+    private static String getClassName(Class<?> clazz) {
+        String name = clazz.getSimpleName();
+        if (name == null || name.isEmpty()) {
+            name = clazz.getName();
+            int lastDot = name.lastIndexOf('.');
+            if (lastDot >= 0) {
+                name = name.substring(lastDot + 1);
+            }
+        }
+        return name;
+    }
+
     private static String getTypeName(Field field) {
         Type genericType = field.getGenericType();
         if (genericType instanceof ParameterizedType) {
@@ -241,13 +262,18 @@ public class ObjectBrowser {
                 StringBuilder sb = new StringBuilder("List<");
                 for (int i = 0; i < typeArgs.length; i++) {
                     if (i > 0) sb.append(", ");
-                    sb.append(typeArgs[i].getTypeName());
+                    String argName = typeArgs[i].getTypeName();
+                    int lastDot = argName.lastIndexOf('.');
+                    if (lastDot >= 0) {
+                        argName = argName.substring(lastDot + 1);
+                    }
+                    sb.append(argName);
                 }
                 sb.append(">");
                 return sb.toString();
             }
         }
-        return field.getType().getSimpleName();
+        return getClassName(field.getType());
     }
 
     private static String getListItemTypeName(Field field) {
@@ -258,7 +284,10 @@ public class ObjectBrowser {
             if (typeArgs.length > 0) {
                 String name = typeArgs[0].getTypeName();
                 int lastDot = name.lastIndexOf('.');
-                return lastDot > 0 ? name.substring(lastDot + 1) : name;
+                if (lastDot > 0) {
+                    return name.substring(lastDot + 1);
+                }
+                return name;
             }
         }
         return "?";
