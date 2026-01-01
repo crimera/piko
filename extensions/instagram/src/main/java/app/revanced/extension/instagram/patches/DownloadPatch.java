@@ -19,7 +19,7 @@ public class DownloadPatch {
         Log.d(TAG, "obj1 type: " + (obj1 != null ? obj1.getClass().getName() : "null"));
         Log.d(TAG, "vpz type: " + (vpz != null ? vpz.getClass().getName() : "null"));
         Log.d(TAG, "context type: " + (context != null ? context.getClass().getName() : "null"));
-        printObjectFields(obj1, "", 1);
+        printObjectFields(obj1, "", 3);
         try {
             // Print contents of A08, A09 and A0A fields
             // printListContents(vpz, "A08");
