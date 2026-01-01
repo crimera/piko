@@ -36,12 +36,74 @@ public class DownloadPatch {
                           String.class, int.class, boolean.class)
                .invoke(vpz, context, clickListener, "Download", 0x7f08217b, false);
 
+            // Reorder: move Download above Report
+            reorderDownloadAboveReport(vpz);
 
             printListContents(vpz, "A08");
                
         } catch (Exception e) {
             Log.d(TAG, "An error occured", e);
         }
+    }
+    
+    /**
+     * Reorders the menu items so that "Download" appears above "Report"
+     */
+    private static void reorderDownloadAboveReport(Object vpz) {
+        try {
+            java.lang.reflect.Field field = vpz.getClass().getField("A08");
+            Object fieldValue = field.get(vpz);
+            
+            if (!(fieldValue instanceof java.util.List)) {
+                return;
+            }
+            
+            java.util.List<Object> list = (java.util.List<Object>) fieldValue;
+            
+            int reportIndex = -1;
+            int downloadIndex = -1;
+            Object downloadItem = null;
+            
+            // Find Report and Download indices
+            for (int i = 0; i < list.size(); i++) {
+                Object item = list.get(i);
+                String label = getItemLabel(item);
+                
+                if ("Report".equals(label)) {
+                    reportIndex = i;
+                } else if ("Download".equals(label)) {
+                    downloadIndex = i;
+                    downloadItem = item;
+                }
+            }
+            
+            Log.d(TAG, "Report index: " + reportIndex + ", Download index: " + downloadIndex);
+            
+            // If both found and Download is after Report, move it
+            if (reportIndex >= 0 && downloadIndex >= 0 && downloadItem != null && downloadIndex > reportIndex) {
+                list.remove(downloadIndex);
+                list.add(reportIndex, downloadItem);
+                Log.d(TAG, "Moved Download to index " + reportIndex);
+            }
+            
+        } catch (Exception e) {
+            Log.e(TAG, "Error reordering menu items", e);
+        }
+    }
+    
+    /**
+     * Gets the label (A08 field) from a menu item
+     */
+    private static String getItemLabel(Object item) {
+        try {
+            java.lang.reflect.Field labelField = item.getClass().getField("A08");
+            Object label = labelField.get(item);
+            if (label instanceof String) {
+                return (String) label;
+            }
+        } catch (Exception ignored) {
+        }
+        return null;
     }
     
     private static void printListContents(Object vpz, String fieldName) {
