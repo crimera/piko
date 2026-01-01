@@ -1,9 +1,9 @@
 package app.crimera.patches.instagram.interaction.download
 
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.instructions
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.revanced.patcher.patch.bytecodePatch
+import app.revanced.util.addInstructionsAtControlFlowLabel
 import com.android.tools.smali.dexlib2.Opcode
 
 private const val EXTENSION_CLASS = "Lapp/revanced/extension/instagram/patches/DownloadPatch;"
@@ -24,8 +24,8 @@ val downloadPatch = bytecodePatch(
                 .location
                 .index
 
-            addInstructions(
-                loc + 1,
+            addInstructionsAtControlFlowLabel(
+                loc,
                 """
                     invoke-virtual/range {v18 .. v18}, Landroidx/fragment/app/Fragment;->requireContext()Landroid/content/Context;
                     move-result-object v12
