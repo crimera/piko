@@ -19,7 +19,7 @@ public class DownloadPatch {
         Log.d(TAG, "obj1 type: " + (obj1 != null ? obj1.getClass().getName() : "null"));
         Log.d(TAG, "vpz type: " + (vpz != null ? vpz.getClass().getName() : "null"));
         Log.d(TAG, "context type: " + (context != null ? context.getClass().getName() : "null"));
-        printObjectFields(obj1, "");
+        printObjectFields(obj1, "", 1);
         try {
             // Print contents of A08, A09 and A0A fields
             // printListContents(vpz, "A08");
@@ -120,7 +120,7 @@ public class DownloadPatch {
                 for (int i = 0; i < list.size(); i++) {
                     Object item = list.get(i);
                     Log.d(TAG, "  [" + i + "]");
-                    printObjectFields(item, "    ");
+                    printObjectFields(item, "    ", 0);
                 }
             } else if (collection instanceof java.util.Collection) {
                 java.util.Collection<?> coll = (java.util.Collection<?>) collection;
@@ -129,7 +129,7 @@ public class DownloadPatch {
                 int i = 0;
                 for (Object item : coll) {
                     Log.d(TAG, "  [" + i + "]");
-                    printObjectFields(item, "    ");
+                    printObjectFields(item, "    ", 0);
                     i++;
                 }
             } else {
@@ -148,7 +148,7 @@ public class DownloadPatch {
      * @param obj The object to print fields from
      * @param prefix Optional prefix string to add before each log line (e.g., "    " for indentation)
      */
-    public static void printObjectFields(Object obj, String prefix) {
+    public static void printObjectFields(Object obj, String prefix, int maxDepth) {
         if (obj == null) {
             Log.d(TAG, (prefix != null ? prefix : "") + "null");
             return;
@@ -174,7 +174,7 @@ public class DownloadPatch {
             for (java.lang.reflect.Field field : allFields) {
                 field.setAccessible(true);
                 Object fieldValue = field.get(obj);
-                
+
                 if (fieldValue instanceof String) {
                     String stringValue = (String) fieldValue;
                     Log.d(TAG, indent + "  " + field.getName() + " (String): \"" + stringValue + "\"");
@@ -194,6 +194,14 @@ public class DownloadPatch {
                     Log.d(TAG, indent + "  " + field.getName() + " (short): " + fieldValue);
                 } else if (fieldValue instanceof Character) {
                     Log.d(TAG, indent + "  " + field.getName() + " (char): " + fieldValue);
+                } else if (fieldValue instanceof java.util.List) {
+                    java.util.List<?> list = (java.util.List<?>) fieldValue;
+                    Log.d(TAG, indent + "  " + field.getName() + " (List): size=" + list.size());
+                } else if (fieldValue != null) {
+                    Log.d(TAG, indent + "  " + field.getName() + " (" + fieldValue.getClass().getSimpleName() + "): <object>");
+                    if (maxDepth > 0) {
+                        printObjectFields(fieldValue, indent + "    ", maxDepth - 1);
+                    }
                 }
             }
         } catch (Exception e) {
