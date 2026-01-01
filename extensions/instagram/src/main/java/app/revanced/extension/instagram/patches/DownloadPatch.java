@@ -55,8 +55,8 @@ public class DownloadPatch {
                 
                 for (int i = 0; i < list.size(); i++) {
                     Object item = list.get(i);
-                    Log.d(TAG, "  [" + i + "] " + (item != null ? item.toString() : "null") + 
-                          " (type: " + (item != null ? item.getClass().getName() : "null") + ")");
+                    Log.d(TAG, "  [" + i + "]");
+                    printObjectFields(item, "    ");
                 }
             } else if (fieldValue instanceof java.util.Collection) {
                 java.util.Collection<?> collection = (java.util.Collection<?>) fieldValue;
@@ -64,8 +64,8 @@ public class DownloadPatch {
                 
                 int i = 0;
                 for (Object item : collection) {
-                    Log.d(TAG, "  [" + i + "] " + (item != null ? item.toString() : "null") + 
-                          " (type: " + (item != null ? item.getClass().getName() : "null") + ")");
+                    Log.d(TAG, "  [" + i + "]");
+                    printObjectFields(item, "    ");
                     i++;
                 }
             } else {
@@ -76,4 +76,51 @@ public class DownloadPatch {
             Log.e(TAG, "Error printing contents of " + fieldName, e);
         }
     }
+    
+    /**
+     * Prints all String fields of an object using reflection.
+     * This is a reusable function that can be used to inspect any object's String fields.
+     * 
+     * @param obj The object to print fields from
+     * @param prefix Optional prefix string to add before each log line (e.g., "    " for indentation)
+     */
+    public static void printObjectFields(Object obj, String prefix) {
+        if (obj == null) {
+            Log.d(TAG, (prefix != null ? prefix : "") + "null");
+            return;
+        }
+        
+        String indent = prefix != null ? prefix : "";
+        Log.d(TAG, indent + "Object type: " + obj.getClass().getName());
+        
+        try {
+            java.lang.reflect.Field[] fields = obj.getClass().getDeclaredFields();
+            java.lang.reflect.Field[] superFields = obj.getClass().getSuperclass() != null 
+                ? obj.getClass().getSuperclass().getDeclaredFields() 
+                : new java.lang.reflect.Field[0];
+            
+            // Combine declared fields and superclass fields
+            java.util.List<java.lang.reflect.Field> allFields = new java.util.ArrayList<>();
+            for (java.lang.reflect.Field f : fields) {
+                allFields.add(f);
+            }
+            for (java.lang.reflect.Field f : superFields) {
+                allFields.add(f);
+            }
+            
+            for (java.lang.reflect.Field field : allFields) {
+                field.setAccessible(true);
+                Object fieldValue = field.get(obj);
+                
+                // Print string fields
+                if (fieldValue instanceof String) {
+                    String stringValue = (String) fieldValue;
+                    Log.d(TAG, indent + "  " + field.getName() + " (String): \"" + stringValue + "\"");
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, indent + "Error reading fields: " + e.getMessage());
+        }
+    }
+    
 }
