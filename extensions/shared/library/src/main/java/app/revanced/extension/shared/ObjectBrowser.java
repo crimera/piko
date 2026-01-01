@@ -3,8 +3,11 @@ package app.revanced.extension.shared;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -13,11 +16,24 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class ObjectBrowser {
 
     private static final int MAX_DISPLAY_LENGTH = 50;
+
+    private static class SearchableRow {
+        View view;
+        String searchText;
+
+        SearchableRow(View view, String searchText) {
+            this.view = view;
+            this.searchText = searchText;
+        }
+    }
 
     public static void browseObject(Context context, Object obj) {
         if (context == null || obj == null) {
@@ -43,16 +59,35 @@ public class ObjectBrowser {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
 
+        LinearLayout mainContainer = new LinearLayout(context);
+        mainContainer.setOrientation(LinearLayout.VERTICAL);
+
+        EditText searchBox = new EditText(context);
+        searchBox.setHint("Search fields...");
+        LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        searchParams.setMargins(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8));
+        searchBox.setLayoutParams(searchParams);
+        mainContainer.addView(searchBox);
+
         ScrollView scrollView = new ScrollView(context);
         LinearLayout container = new LinearLayout(context);
         container.setOrientation(LinearLayout.VERTICAL);
         scrollView.addView(container);
 
         Field[] fields = obj.getClass().getDeclaredFields();
-        for (Field field : fields) {
+        List<Field> sortedFields = sortFieldsByNullLast(fields, obj);
+
+        List<SearchableRow> searchableRows = new ArrayList<>();
+
+        for (Field field : sortedFields) {
             try {
                 field.setAccessible(true);
                 View row = createFieldRow(context, field, obj, title);
+                String searchText = buildSearchText(field, obj);
+                searchableRows.add(new SearchableRow(row, searchText));
                 container.addView(row);
             } catch (Exception e) {
                 TextView errorRow = new TextView(context);
@@ -61,7 +96,25 @@ public class ObjectBrowser {
             }
         }
 
-        builder.setView(scrollView);
+        searchBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String query = s.toString().toLowerCase().trim();
+                for (SearchableRow row : searchableRows) {
+                    boolean visible = query.isEmpty() || row.searchText.contains(query);
+                    row.view.setVisibility(visible ? View.VISIBLE : View.GONE);
+                }
+            }
+        });
+
+        mainContainer.addView(scrollView);
+        builder.setView(mainContainer);
         builder.setNeutralButton("Close", null);
         builder.show();
     }
@@ -137,10 +190,25 @@ public class ObjectBrowser {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(parentPath + " (List)");
 
+        LinearLayout mainContainer = new LinearLayout(context);
+        mainContainer.setOrientation(LinearLayout.VERTICAL);
+
+        EditText searchBox = new EditText(context);
+        searchBox.setHint("Search items...");
+        LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        searchParams.setMargins(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8));
+        searchBox.setLayoutParams(searchParams);
+        mainContainer.addView(searchBox);
+
         ScrollView scrollView = new ScrollView(context);
         LinearLayout container = new LinearLayout(context);
         container.setOrientation(LinearLayout.VERTICAL);
         scrollView.addView(container);
+
+        List<SearchableRow> searchableRows = new ArrayList<>();
 
         for (int i = 0; i < list.size(); i++) {
             Object item = list.get(i);
@@ -156,11 +224,13 @@ public class ObjectBrowser {
             if (item == null) {
                 textView.setText("[" + i + "] - null");
                 textView.setTextColor(0xFF888888);
+                searchableRows.add(new SearchableRow(textView, "[" + i + "] null"));
             } else if (isPrimitiveOrWrapper(item.getClass())) {
                 String value = getDisplayValue(item);
                 textView.setText("[" + i + "] - " + item.getClass().getSimpleName() + ": " + value);
                 textView.setTextColor(0xFFCCCCCC);
                 textView.setTypeface(Typeface.MONOSPACE);
+                searchableRows.add(new SearchableRow(textView, "[" + i + "] " + String.valueOf(item).toLowerCase()));
                 final String finalValue = String.valueOf(item);
                 textView.setOnClickListener(v -> {
                     Utils.setClipboard(finalValue);
@@ -169,12 +239,31 @@ public class ObjectBrowser {
             } else {
                 textView.setText("[" + i + "] - " + getClassName(item.getClass()) + " →");
                 textView.setTextColor(0xFFFFB74D);
+                searchableRows.add(new SearchableRow(textView, "[" + i + "] " + getClassName(item.getClass()).toLowerCase()));
                 textView.setOnClickListener(v -> browseObject(context, item, itemPath));
             }
             container.addView(textView);
         }
 
-        builder.setView(scrollView);
+        searchBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String query = s.toString().toLowerCase().trim();
+                for (SearchableRow row : searchableRows) {
+                    boolean visible = query.isEmpty() || row.searchText.contains(query);
+                    row.view.setVisibility(visible ? View.VISIBLE : View.GONE);
+                }
+            }
+        });
+
+        mainContainer.addView(scrollView);
+        builder.setView(mainContainer);
         builder.setNeutralButton("Close", null);
         builder.show();
     }
@@ -183,6 +272,19 @@ public class ObjectBrowser {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(parentPath + " (Array)");
 
+        LinearLayout mainContainer = new LinearLayout(context);
+        mainContainer.setOrientation(LinearLayout.VERTICAL);
+
+        EditText searchBox = new EditText(context);
+        searchBox.setHint("Search items...");
+        LinearLayout.LayoutParams searchParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        searchParams.setMargins(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8));
+        searchBox.setLayoutParams(searchParams);
+        mainContainer.addView(searchBox);
+
         ScrollView scrollView = new ScrollView(context);
         LinearLayout container = new LinearLayout(context);
         container.setOrientation(LinearLayout.VERTICAL);
@@ -190,6 +292,8 @@ public class ObjectBrowser {
 
         int length = Array.getLength(array);
         Class<?> componentType = array.getClass().getComponentType();
+
+        List<SearchableRow> searchableRows = new ArrayList<>();
 
         for (int i = 0; i < length; i++) {
             Object item = Array.get(array, i);
@@ -205,11 +309,13 @@ public class ObjectBrowser {
             if (item == null) {
                 textView.setText("[" + i + "] - null");
                 textView.setTextColor(0xFF888888);
+                searchableRows.add(new SearchableRow(textView, "[" + i + "] null"));
             } else if (isPrimitiveOrWrapper(item.getClass())) {
                 String value = getDisplayValue(item);
                 textView.setText("[" + i + "] - " + item.getClass().getSimpleName() + ": " + value);
                 textView.setTextColor(0xFFCCCCCC);
                 textView.setTypeface(Typeface.MONOSPACE);
+                searchableRows.add(new SearchableRow(textView, "[" + i + "] " + String.valueOf(item).toLowerCase()));
                 final String finalValue = String.valueOf(item);
                 textView.setOnClickListener(v -> {
                     Utils.setClipboard(finalValue);
@@ -218,14 +324,67 @@ public class ObjectBrowser {
             } else {
                 textView.setText("[" + i + "] - " + getClassName(item.getClass()) + " →");
                 textView.setTextColor(0xFFFFB74D);
+                searchableRows.add(new SearchableRow(textView, "[" + i + "] " + getClassName(item.getClass()).toLowerCase()));
                 textView.setOnClickListener(v -> browseObject(context, item, itemPath));
             }
             container.addView(textView);
         }
 
-        builder.setView(scrollView);
+        searchBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String query = s.toString().toLowerCase().trim();
+                for (SearchableRow row : searchableRows) {
+                    boolean visible = query.isEmpty() || row.searchText.contains(query);
+                    row.view.setVisibility(visible ? View.VISIBLE : View.GONE);
+                }
+            }
+        });
+
+        mainContainer.addView(scrollView);
+        builder.setView(mainContainer);
         builder.setNeutralButton("Close", null);
         builder.show();
+    }
+
+    private static List<Field> sortFieldsByNullLast(Field[] fields, Object obj) {
+        List<Field> list = new ArrayList<>(Arrays.asList(fields));
+        Collections.sort(list, (f1, f2) -> {
+            Object v1 = getFieldValueSafe(f1, obj);
+            Object v2 = getFieldValueSafe(f2, obj);
+            if (v1 == null && v2 != null) return 1;
+            if (v1 != null && v2 == null) return -1;
+            return 0;
+        });
+        return list;
+    }
+
+    private static Object getFieldValueSafe(Field field, Object obj) {
+        try {
+            field.setAccessible(true);
+            return field.get(obj);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static String buildSearchText(Field field, Object obj) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(field.getName().toLowerCase());
+        try {
+            field.setAccessible(true);
+            Object value = field.get(obj);
+            if (value != null) {
+                sb.append(" ").append(String.valueOf(value).toLowerCase());
+            }
+        } catch (Exception ignored) {}
+        return sb.toString();
     }
 
     private static boolean isPrimitiveOrWrapper(Class<?> type) {
