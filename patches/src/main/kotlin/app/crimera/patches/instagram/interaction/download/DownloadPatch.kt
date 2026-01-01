@@ -19,8 +19,9 @@ val downloadPatch = bytecodePatch(
 
     execute {
         feedBottomSheet.method.apply {
-            val targetInst = instructions.last { it.opcode == Opcode.INVOKE_STATIC }
-            val loc = targetInst.location.index
+            val targetInst = instructions.last { it.opcode == Opcode.RETURN_VOID }
+            // val loc = targetInst.location.index
+						val loc = instructions.filter { it.opcode == Opcode.GOTO }[2].location.index + 3
 
             addInstructionsWithLabels(
                 loc,
