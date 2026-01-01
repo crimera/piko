@@ -49,6 +49,10 @@
               androidSdk
               build
               build-android
+
+              frida-tools
+              jadx
+              apktool
             ];
 
             ANDROID_HOME = "${androidSdk}/share/android-sdk";
