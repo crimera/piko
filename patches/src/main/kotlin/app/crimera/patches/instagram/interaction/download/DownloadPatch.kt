@@ -12,7 +12,7 @@ val downloadPatch = bytecodePatch(
     name = "Download patch",
     description = "Adds the ability to download media",
 ) {
-		dependsOn(sharedExtensionPatch)
+    dependsOn(sharedExtensionPatch)
 
     compatibleWith("com.instagram.android")
 
@@ -25,16 +25,12 @@ val downloadPatch = bytecodePatch(
                 .index
 
             addInstructions(
-                loc+1,
+                loc + 1,
                 """
-	                invoke-virtual/range {v18 .. v18}, Landroidx/fragment/app/Fragment;->requireContext()Landroid/content/Context;
-                move-result-object v12
+                    invoke-virtual/range {v18 .. v18}, Landroidx/fragment/app/Fragment;->requireContext()Landroid/content/Context;
+                    move-result-object v12
 
-                invoke-static {v12, v9}, $EXTENSION_CLASS->addDownloadButton(Landroid/content/Context;Ljava/lang/Object;)V
-
-                const-string v1, "Testing"
-                move-object/from16 v2, p0
-                invoke-static {v2, v1}, $EXTENSION_CLASS->printObjectFields(Ljava/lang/Object;Ljava/lang/String;)V
+                    invoke-static {v12, v9}, $EXTENSION_CLASS->addDownloadButton(Landroid/content/Context;Ljava/lang/Object;)V
                 """.trimIndent(),
             )
         }
