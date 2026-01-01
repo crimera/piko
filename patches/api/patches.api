@@ -2,6 +2,10 @@ public final class app/crimera/patches/instagram/interaction/download/DownloadPa
 	public static final fun getDownloadPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
 }
 
+public final class app/crimera/patches/instagram/misc/extension/SharedExtensionPatchKt {
+	public static final fun getSharedExtensionPatch ()Lapp/revanced/patcher/patch/BytecodePatch;
+}
+
 public final class app/crimera/patches/twitter/ads/timelineEntryHook/HideAdsKt {
 	public static final fun getHideAds ()Lapp/revanced/patcher/patch/BytecodePatch;
 }

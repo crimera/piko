@@ -18,10 +18,19 @@ val downloadPatch = bytecodePatch(
 
     execute {
         feedBottomSheet.method.apply {
+
+            val loc = instructions
+                .last { it.opcode == Opcode.INVOKE_STATIC }
+                .location
+                .index
+
             addInstructions(
-                0,
+                loc+1,
                 """
-                invoke-static {}, $EXTENSION_CLASS->addDownloadButton()V
+								invoke-virtual/range {v18 .. v18}, Landroidx/fragment/app/Fragment;->requireContext()Landroid/content/Context;
+    move-result-object v12
+
+                invoke-static {v9, v12}, $EXTENSION_CLASS->addDownloadButton(Landroid/content/Context;Ljava/lang/Object;)V
                 """.trimIndent(),
             )
         }
