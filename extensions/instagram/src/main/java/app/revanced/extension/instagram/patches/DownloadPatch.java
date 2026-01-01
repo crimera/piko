@@ -14,10 +14,12 @@ public class DownloadPatch {
      * @param context  - Android context (from Fragment.requireContext())
      * @param vpz      - The VpZ bottom sheet builder (LX/VpZ)
      */
-    public static void addDownloadButton(Context context, Object vpz) {
+    public static void addDownloadButton(Object obj1, Object vpz, Context context) {
         Log.d(TAG, "called the download button");
-        Log.d(TAG, "context type: " + (context != null ? context.getClass().getName() : "null"));
+        Log.d(TAG, "obj1 type: " + (obj1 != null ? obj1.getClass().getName() : "null"));
         Log.d(TAG, "vpz type: " + (vpz != null ? vpz.getClass().getName() : "null"));
+        Log.d(TAG, "context type: " + (context != null ? context.getClass().getName() : "null"));
+        printObjectFields(obj1, "");
         try {
             // Print contents of A08, A09 and A0A fields
             // printListContents(vpz, "A08");
