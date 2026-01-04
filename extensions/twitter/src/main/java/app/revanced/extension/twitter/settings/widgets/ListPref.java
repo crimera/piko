@@ -73,6 +73,9 @@ public class ListPref extends ListPreference {
         }else if (key == Settings.VID_NATIVE_DOWNLOADER_FILENAME.key) {
             entries = Utils.getResourceStringArray("piko_array_native_download_filename");
             entriesValues = Utils.getResourceStringArray("piko_array_native_download_filename_val");
+        }else if (key == Settings.NATIVE_READER_MODE_THEME.key) {
+            entries = Utils.getResourceStringArray("piko_array_readermode_themes");
+            entriesValues = Utils.getResourceStringArray("piko_array_readermode_themes_val");
         }
 
         setEntries(entries);

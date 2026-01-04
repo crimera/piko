@@ -134,4 +134,11 @@
         <item>@string/vit_notifications_tab_verified</item>
     </string-array>
 
+    <string-array name="piko_array_readermode_themes">
+        <item>@string/settings_dark_mode_system</item>
+        <item>@string/piko_array_light_mode</item>
+        <item>@string/theme_dim_title</item>
+        <item>@string/dark_mode</item>
+    </string-array>
+
 </resources>

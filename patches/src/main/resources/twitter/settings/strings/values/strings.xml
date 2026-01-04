@@ -226,4 +226,6 @@
     <string name="piko_array_jobs">Jobs</string>
     <string name="piko_array_media">Media</string>
 
+    <string name="piko_array_light_mode">Light mode</string>
+
 </resources>

@@ -319,16 +319,15 @@ public class Utils {
         }
     }
 
-    public static int getTheme() {
-        // 0 = light, 1 = dark, 2 = dim
-        int theme = 0;
+    public static String getTheme() {
+        String theme = "light";
         String three_state_night_mode = defsp.getString("three_state_night_mode", String.valueOf(theme));
         if (!(three_state_night_mode.equals("0"))) {
             String dark_mode_appr = defsp.getString("dark_mode_appearance", "lights_out");
             if (dark_mode_appr.equals("lights_out"))
-                theme = 1;
+                theme = "dark";
             else if (dark_mode_appr.equals("dim"))
-                theme = 2;
+                theme = "dim";
         }
         return theme;
     }

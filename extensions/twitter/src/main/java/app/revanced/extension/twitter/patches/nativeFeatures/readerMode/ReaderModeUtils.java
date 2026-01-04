@@ -23,6 +23,7 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import app.revanced.extension.twitter.entity.Tweet;
 import app.revanced.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeTemplate;
+import app.revanced.extension.twitter.Pref;
 
 public class ReaderModeUtils {
 
@@ -188,23 +189,18 @@ public class ReaderModeUtils {
         return null;
     }
 
-    public static String buildHtml(String tweetId) {
-        // 0 = light, 1 = dark, 2 = dim
-        String html = "";
-        String defThemeClass = "{themeClassName}";
-        String themeClass = defThemeClass;
-        int theme = Utils.getTheme();
-        switch(theme){
-            case 1:{
-                themeClass = "dark";
-                break;
-            }case 2:{
-                themeClass = "dim";
-                break;
-            }default:{
-                themeClass = defThemeClass;
-            }
+    private static String getReaderModeTheme(){
+        String themeClass = Pref.getNativeReaderTheme();
+
+        if(themeClass.equals("system")){
+            themeClass = Utils.getTheme();
         }
+        return themeClass;
+    }
+
+    public static String buildHtml(String tweetId) {
+        String html = "";
+
         try {
             html = readCacheFile(tweetId);
             if (html == null) {
@@ -219,7 +215,8 @@ public class ReaderModeUtils {
         } catch (Exception e) {
             html = ReaderModeTemplate.generateHtml(e.getMessage());
         }
-        html = html.replace(defThemeClass, themeClass);
+
+        html = html.replace("{themeClassName}", getReaderModeTheme());
         return html;
     }
 

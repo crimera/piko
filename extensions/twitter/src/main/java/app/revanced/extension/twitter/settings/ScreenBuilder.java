@@ -340,6 +340,13 @@ public class ScreenBuilder {
                     )
             );
             addPreference(category,
+                    helper.listPreference(
+                            strRes("community_theme_settings_title"),
+                            "",
+                            Settings.NATIVE_READER_MODE_THEME
+                    )
+            );
+            addPreference(category,
                     helper.buttonPreference(
                             strRes("piko_native_reader_mode_cache_delete"),
                             "",

@@ -145,5 +145,11 @@
         <item>verified</item>
     </string-array>
 
+    <string-array name="piko_array_readermode_themes_val">
+        <item>system</item>
+        <item>light</item>
+        <item>dim</item>
+        <item>dark</item>
+    </string-array>
 
 </resources>

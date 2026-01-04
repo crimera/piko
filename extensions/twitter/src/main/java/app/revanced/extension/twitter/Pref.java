@@ -88,6 +88,10 @@ public class Pref {
         return Utils.getBooleanPerf(Settings.NATIVE_READER_MODE_NO_GROK);
     }
 
+    public static String getNativeReaderTheme() {
+        return Utils.getStringPref(Settings.NATIVE_READER_MODE_THEME);
+    }
+
     public static String translatorLanguage() {
         return Utils.getStringPref(Settings.NATIVE_TRANSLATOR_LANG);
     }
