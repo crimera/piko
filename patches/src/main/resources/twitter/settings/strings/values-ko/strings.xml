@@ -67,7 +67,7 @@
     <string name="piko_pref_del_from_db">데이터베이스에서 엔트리 삭제하기</string>
     <string name="piko_pref_db_not_found">데이터베이스를 찾을 수 없습니다.</string>
     <string name="piko_pref_db_not_open">데이터베이스가 열려져 있지 않습니다.</string>
-    <string name="piko_pref_db_del_items">삭제된 아이템</string>
+    <string name="piko_pref_db_del_items">삭제된 항목</string>
     <string name="piko_pref_hide_premium_upsell">Premium 업그레이드</string>
     <string name="piko_pref_hide_premium_upsell_desc">홈 타임라인에서 Premium 업그레이드 버튼을 삭제할 수 있습니다.</string>
     <string name="piko_pref_top_people_search">검색 상단 사용자 영역</string>
@@ -95,6 +95,8 @@
     <string name="piko_pref_pause_search_suggestion_desc">검색어 추천은 로컬에 저장되지 않습니다.</string>
     <string name="piko_pref_search_suggestion">검색어 추천</string>
     <string name="piko_pref_search_suggestion_desc">탐색 영역에서 검색어 추천을 숨기거나 삭제할 수 있습니다.</string>
+    <string name="piko_disunify_xchat_system">Disunify xchat 시스템</string>
+    <string name="piko_disunify_xchat_system_desc">메시지 및 공유 시트와 같은 기존 기능을 복원할 수 있습니다.</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">기능 플래그</string>
     <string name="piko_pref_feature_flags">추가하기: 기능 플래그</string>
@@ -126,32 +128,32 @@
     <string name="piko_pref_force_hd_desc">동영상을 항상 높은 화질로 재생할 수 있습니다.</string>
     <string name="piko_pref_hide_nudge_button">넛지 버튼 숨기기</string>
     <string name="piko_pref_hide_nudge_button_desc">게시물에서 팔로우하기/구독하기/맞팔로우하기 버튼을 숨길 수 있습니다.</string>
-    <string name="piko_pref_hide_social_proof">내가 팔로우하는 사용자 영역 숨기기</string>
-    <string name="piko_pref_hide_social_proof_desc">프로필 하단에서 내가 팔로우하는 사용자를 팔로워하는 사람들 영역을 숨길 수 있습니다.</string>
+    <string name="piko_pref_hide_social_proof">내가 아는 팔로워 영역 숨기기</string>
+    <string name="piko_pref_hide_social_proof_desc">프로필 하단에서 내가 아는 팔로워 영역을 숨길 수 있습니다.</string>
     <string name="piko_pref_hide_community_badge">커뮤니티 배지 숨기기</string>
     <string name="piko_pref_hide_badge_nav_bar">하단 바에서 배지 숨기기</string>
     <string name="piko_pref_hide_badge_nav_bar_desc">하단 바 아이콘에서 알림 넛지와 카운트를 숨길 수 있습니다.</string>
-    <string name="piko_pref_hide_post_inline_metrics">게시물 타임라인에서 개수 지표 숨기기</string>
-    <string name="piko_pref_hide_post_inline_metrics_desc">게시물 타임라인에서 \"마음에 들어요\", \"재게시물\" 등의 개수 지표를 숨길 수 있습니다.</string>
+    <string name="piko_pref_hide_post_inline_metrics">타임라인 게시물에서 개수 지표 숨기기</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">타임라인 게시물에서 \"마음에 들어요\", \"재게시물\" 등의 개수 지표를 숨길 수 있습니다.</string>
     <string name="piko_pref_hide_post_detailed_metrics">게시물 자세히 보기에서 개수 지표 숨기기</string>
     <string name="piko_pref_hide_post_detailed_metrics_desc">게시물 자세히 보기에서 \"마음에 들어요\", \"재게시물\" 등의 개수 지표를 숨길 수 있습니다.</string>
     <!-- Customization Settings -->
     <string name="piko_title_customisation">사용자 정의</string>
-    <string name="piko_pref_customisation_profiletabs">프로필에서 탭 숨기기</string>
-    <string name="piko_pref_customisation_timelinetabs">타임라인에서 탭 숨기기</string>
+    <string name="piko_pref_customisation_profiletabs">숨겨질 프로필 탭</string>
+    <string name="piko_pref_customisation_timelinetabs">숨겨질 타임라인 탭</string>
     <string name="piko_pref_customisation_timelinetabs_foryou">\"추천\" 탭 삭제하기</string>
     <string name="piko_pref_customisation_timelinetabs_following">\"팔로우 중\" 탭 삭제하기</string>
     <string name="piko_pref_customisation_timelinetabs_both">둘 다 표시하기</string>
-    <string name="piko_pref_customisation_sidebartabs">사이드 바에서 아이템 숨기기</string>
-    <string name="piko_pref_customisation_navbartabs">하단 바에서 아이템 숨기기</string>
-    <string name="piko_pref_customisation_inlinetabs">인라인 바에서 아이템 숨기기</string>
-    <string name="piko_pref_customisation_exploretabs">탐색에서 탭 숨기기</string>
-    <string name="piko_pref_customisation_searchtabs">검색에서 탭 숨기기</string>
-    <string name="piko_pref_customisation_notificationtabs">알림에서 탭 숨기기</string>
+    <string name="piko_pref_customisation_sidebartabs">숨겨질 사이드 바 항목</string>
+    <string name="piko_pref_customisation_navbartabs">숨겨질 하단 바 항목</string>
+    <string name="piko_pref_customisation_inlinetabs">숨겨질 타임라인 게시물 항목</string>
+    <string name="piko_pref_customisation_exploretabs">숨겨질 탑색 탭</string>
+    <string name="piko_pref_customisation_searchtabs">숨겨질 검색 탭</string>
+    <string name="piko_pref_customisation_notificationtabs">숨겨질 알림 탭</string>
     <string name="piko_pref_customisation_reply_sorting">기본 답글 정렬 필터</string>
     <string name="piko_pref_customisation_reply_sorting_remember">이전에 선택된 정렬</string>
     <string name="piko_pref_customisation_post_font_size">게시물 폰트 사이즈</string>
-    <string name="piko_pref_customisation_search_type_ahead">검색에서 제안 숨기기</string>
+    <string name="piko_pref_customisation_search_type_ahead">숨겨질 검색어 추천</string>
     <string name="piko_pref_customisation_change_app_icon">앱 아이콘 변경하기</string>
     <!-- Font Settings -->
     <string name="piko_title_font">폰트 스타일</string>
@@ -198,4 +200,13 @@
     <string name="piko_pref_search_type_ahead_events">이벤트</string>
     <string name="piko_pref_search_type_ahead_ordered_section">정렬된 영역</string>
     <string name="piko_settings_supported_links">지원되는 링크 열기</string>
+    <!-- For arrays-->
+    <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_money">Money</string>
+    <string name="piko_array_xchat">Chat</string>
+    <string name="piko_array_x_lite">새 X Android</string>
+    <string name="piko_array_conference">회의</string>
+    <string name="piko_array_creator_studio">크리에이터 스튜디오</string>
+    <string name="piko_array_jobs">채용 정보</string>
+    <string name="piko_array_media">미디어</string>
 </resources>
