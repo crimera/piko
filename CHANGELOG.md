@@ -1,3 +1,19 @@
+## [2.0.0-dev.20](https://github.com/crimera/piko/compare/v2.0.0-dev.19...v2.0.0-dev.20) (2026-01-04)
+
+### Bug Fixes
+
+* **Twitter:** revert `semantic-release` version ([b50c530](https://github.com/crimera/piko/commit/b50c5301139ea1b972b6ccd507c929896219ff26))
+
+### Updates
+
+* **Translations:** Update `Polish` ([6f5e2e9](https://github.com/crimera/piko/commit/6f5e2e9d384868aacba878e6565a3eeb14282154))
+* **Translations:** Update Korean ([f337585](https://github.com/crimera/piko/commit/f337585a3672f9b77f0da4fb76bb240cf84a8fdb))
+* **Twitter:** `Custom sharing domain` : added support for new share sheet ([a27675a](https://github.com/crimera/piko/commit/a27675a2b6324623e3ec09236fe6be2a51b2a22a))
+
+### Refactors
+
+* **Twitter:** refactor native reader theme system. ([2ab5f35](https://github.com/crimera/piko/commit/2ab5f355103a3c65ddbfde63259da9eec90cc10b))
+
 ## [2.0.0-dev.19](https://github.com/crimera/piko/compare/v2.0.0-dev.18...v2.0.0-dev.19) (2025-12-27)
 
 ### Bug Fixes
