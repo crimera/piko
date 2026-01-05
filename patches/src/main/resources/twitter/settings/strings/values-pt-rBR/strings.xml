@@ -104,7 +104,7 @@
     <string name="piko_pref_search_suggestion">sugestões de pesquisa</string>
     <string name="piko_pref_search_suggestion_desc">Ocultar/Remover as sugestões de pesquisa na seção explorar</string>
     <string name="piko_disunify_xchat_system">Desunificar sistema do xchat</string>
-    <string name="piko_disunify_xchat_system_desc">Traz de volta recursos antigos como mensagens e menu  de compartilhamento</string>
+    <string name="piko_disunify_xchat_system_desc">Traz de volta recursos antigos como mensagens e menu de compartilhamento</string>
 	
 	<!--  Feature flags Settings  -->
 	<string name="piko_title_feature_flags">Feature flags</string>
