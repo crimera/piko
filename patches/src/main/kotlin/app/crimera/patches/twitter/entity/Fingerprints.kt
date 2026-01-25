@@ -42,6 +42,12 @@ internal val getUserNameMethodCaller =
 internal val tweetMediaEntityClassFingerprint = fingerprint { strings("EntityList{mEntities=") }
 
 internal val longTweetObjectFingerprint = fingerprint { strings("NoteTweet(id=", ", text=") }
+internal val quotedViewSetAccessibilityFingerprint =
+    fingerprint {
+        custom { method, classDef ->
+            method.name == "setAccessibility" && classDef.type.endsWith("com/twitter/tweetview/core/QuoteView;")
+        }
+    }
 
 // --------------- Extended Media Entity
 internal val extMediaHighResVideoMethodFinder =

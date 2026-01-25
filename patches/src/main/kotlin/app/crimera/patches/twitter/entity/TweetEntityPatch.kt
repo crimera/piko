@@ -3,8 +3,10 @@ package app.crimera.patches.twitter.entity
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
 import app.crimera.utils.getMethodName
+import app.revanced.patcher.extensions.InstructionExtensions.instructions
 import app.revanced.patcher.patch.PatchException
 import app.revanced.patcher.patch.bytecodePatch
+import app.revanced.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
 
 val tweetEntityPatch =
@@ -70,12 +72,13 @@ val tweetEntityPatch =
                     .name
             tweetLongTextFingerprint.changeStringAt(1, longTextField)
 
-            val tweetEntityMethod =
-                tweetObjectMethods
-                    .lastOrNull { it.returnType.contains("/entity/") && !(it.returnType.contains("/unifiedcard/")) }
-                    ?.name
-                    ?: throw PatchException("getTweetEntityMethod not found")
-            tweetShortTextFingerprint.changeFirstString(tweetEntityMethod)
+            quotedViewSetAccessibilityFingerprint.method.apply {
+                val newInstanceIndex = indexOfFirstInstruction(Opcode.NEW_INSTANCE)
+                val invokeVirtualRangeInst =
+                    instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL_RANGE && it.location.index < newInstanceIndex }
+                tweetShortTextFingerprint
+                    .changeFirstString(quotedViewSetAccessibilityFingerprint.getMethodName(invokeVirtualRangeInst.location.index))
+            }
 
 // End
 // ---------------------
