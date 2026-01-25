@@ -226,4 +226,6 @@
     <string name="piko_array_jobs">Oferty pracy</string>
     <string name="piko_array_media">Multimedia</string>
 
+    <string name="piko_array_light_mode">Tryb jasny</string>
+
 </resources>
