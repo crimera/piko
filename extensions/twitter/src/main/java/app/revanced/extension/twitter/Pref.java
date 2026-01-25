@@ -208,15 +208,18 @@ public class Pref {
         return !Utils.getBooleanPerf(Settings.TIMELINE_HIDE_BANNER);
     }
 
-    public static int timelineTab() {
-        String val = Utils.getStringPref(Settings.CUSTOM_TIMELINE_TABS);
-        if(val.equals("hide_forYou")){
-            return 1;
+    public static int timelineTab(int tabId) {
+        if(tabId == 11 || tabId == 12){
+            String val = Utils.getStringPref(Settings.CUSTOM_TIMELINE_TABS);
+            // If you want to hide forYou send followin tab Id and vice-versa.
+            if(val.equals("hide_forYou")){
+                return 12;
+            }
+            if (val.equals("hide_following")){
+                return 11;
+            }
         }
-        if (val.equals("hide_following")){
-            return 2;
-        }
-        return 0;
+        return tabId;
     }
 
     public static boolean enableForceTranslate() {
