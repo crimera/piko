@@ -1,3 +1,15 @@
+## [2.0.0-dev.21](https://github.com/crimera/piko/compare/v2.0.0-dev.20...v2.0.0-dev.21) (2026-01-25)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Customize timeline top bar` patch ([2aa2a36](https://github.com/crimera/piko/commit/2aa2a3644956f588c46e9b3f08a94a2def9908d7))
+* **Twitter:** Fix tweet short text extraction for `Custom translator` patch ([18becfb](https://github.com/crimera/piko/commit/18becfb31e68e05d571bd8651ba7ebfe7ecba3d1))
+
+### Updates
+
+* **Translations:** Update `Brazilian Portuguese` ([bbe2af9](https://github.com/crimera/piko/commit/bbe2af9a81b62d23885ecbbe93464b7abeabb73f))
+* **Translations:** Update `Polish` ([beba988](https://github.com/crimera/piko/commit/beba988141027bf05066f3b740ff8b7a72f43221))
+
 ## [2.0.0-dev.20](https://github.com/crimera/piko/compare/v2.0.0-dev.19...v2.0.0-dev.20) (2026-01-04)
 
 ### Bug Fixes
