@@ -1,3 +1,9 @@
+## [2.0.0-dev.22](https://github.com/crimera/piko/compare/v2.0.0-dev.21...v2.0.0-dev.22) (2026-01-27)
+
+### Bug Fixes
+
+* **Twitter:** Fix `Customize timeline top bar` patch - update tab ids ([c1d66c4](https://github.com/crimera/piko/commit/c1d66c42a56854f67633a07fb50d866c70ae096c))
+
 ## [2.0.0-dev.21](https://github.com/crimera/piko/compare/v2.0.0-dev.20...v2.0.0-dev.21) (2026-01-25)
 
 ### Bug Fixes
