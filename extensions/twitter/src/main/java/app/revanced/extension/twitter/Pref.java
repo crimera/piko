@@ -209,14 +209,14 @@ public class Pref {
     }
 
     public static int timelineTab(int tabId) {
-        if(tabId == 11 || tabId == 12){
+        if(tabId == 17 || tabId == 34){
             String val = Utils.getStringPref(Settings.CUSTOM_TIMELINE_TABS);
             // If you want to hide forYou send followin tab Id and vice-versa.
             if(val.equals("hide_forYou")){
-                return 12;
+                return 34;
             }
             if (val.equals("hide_following")){
-                return 11;
+                return 17;
             }
         }
         return tabId;
