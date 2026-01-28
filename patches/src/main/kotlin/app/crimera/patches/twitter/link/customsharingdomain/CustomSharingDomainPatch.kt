@@ -5,6 +5,7 @@ import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.enableSettings
+import app.revanced.patcher.Fingerprint
 import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
 import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
 import app.revanced.patcher.fingerprint
@@ -19,6 +20,15 @@ internal val newShareSheetLinkFingerprint =
         )
     }
 
+internal val newShareSheetLinkFingerprint2 =
+    fingerprint {
+        strings(
+            TARGET_STRING,
+            "https://x.com/i/trending/",
+            "https://x.com/i/lists/",
+        )
+    }
+
 @Suppress("unused")
 val customSharingDomainPatch =
     bytecodePatch(
@@ -29,30 +39,37 @@ val customSharingDomainPatch =
         dependsOn(settingsPatch)
         execute {
             val methodInvoke = "$PATCHES_DESCRIPTOR/links/Urls;->changeDomain(Ljava/lang/String;)Ljava/lang/String;"
-            addSessionTokenFingerprint.method.addInstructions(
-                0,
+            val dummyReg = "#reg"
+            val callStatement =
                 """
-                invoke-static {p0}, $methodInvoke
-                move-result-object p0
-                """.trimIndent(),
-            )
-            settingsStatusLoadFingerprint.enableSettings("enableCustomSharingDomain")
+                invoke-static {$dummyReg}, $methodInvoke
+                move-result-object $dummyReg
+                """.trimIndent()
 
-            try {
-                // Should be applied only post 11.48.xx in new share sheet.
-                newShareSheetLinkFingerprint.method.apply {
-                    val strIndx = newShareSheetLinkFingerprint.stringMatches!!.first { it.string == TARGET_STRING }.index
+            fun Fingerprint.addCustomDomainFunctionCall() {
+                method.apply {
+                    val strIndx = stringMatches!!.first { it.string == TARGET_STRING }.index
                     val reg = getInstruction<OneRegisterInstruction>(strIndx).registerA
 
                     addInstructions(
                         strIndx + 1,
-                        """
-                        invoke-static {v$reg}, $methodInvoke
-                        move-result-object v$reg
-                        """.trimIndent(),
+                        callStatement.replace(dummyReg, "v$reg"),
                     )
                 }
+            }
+
+            addSessionTokenFingerprint.method.addInstructions(
+                0,
+                callStatement.replace(dummyReg, "p0"),
+            )
+
+            try {
+                // Should be applied only post 11.48.xx in new share sheet.
+                newShareSheetLinkFingerprint.addCustomDomainFunctionCall()
+                newShareSheetLinkFingerprint2.addCustomDomainFunctionCall()
             } catch (_: Exception) {
             }
+
+            settingsStatusLoadFingerprint.enableSettings("enableCustomSharingDomain")
         }
     }
