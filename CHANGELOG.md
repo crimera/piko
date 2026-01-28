@@ -1,3 +1,9 @@
+## [2.0.0-dev.23](https://github.com/crimera/piko/compare/v2.0.0-dev.22...v2.0.0-dev.23) (2026-01-28)
+
+### Updates
+
+* **Twitter:** update `Custom sharing domain` patch in xchat share sheet ([4726ddb](https://github.com/crimera/piko/commit/4726ddb247468435ad22266cb148a4ea62ab3421))
+
 ## [2.0.0-dev.22](https://github.com/crimera/piko/compare/v2.0.0-dev.21...v2.0.0-dev.22) (2026-01-27)
 
 ### Bug Fixes
