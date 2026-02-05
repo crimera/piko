@@ -203,11 +203,11 @@
     <!-- For arrays-->
     <string name="piko_array_grok">Grok</string>
     <string name="piko_array_money">Money</string>
-    <string name="piko_array_xchat">X Chat</string>
+    <string name="piko_array_xchat">チャット</string>
     <string name="piko_array_x_lite">New X Android</string>
     <string name="piko_array_conference">Conference</string>
-    <string name="piko_array_creator_studio">Creator studio</string>
-    <string name="piko_array_jobs">仕事</string>
+    <string name="piko_array_creator_studio">クリエイタースタジオ</string>
+    <string name="piko_array_jobs">Jobs</string>
     <string name="piko_array_media">メディア</string>
     <string name="piko_array_light_mode">ライトモード</string>
 </resources>
