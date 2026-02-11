@@ -95,6 +95,8 @@
     <string name="piko_pref_pause_search_suggestion_desc">検索候補はローカルに保存されません</string>
     <string name="piko_pref_search_suggestion">検索候補</string>
     <string name="piko_pref_search_suggestion_desc">[話題を検索] タブの検索候補を非表示または削除します</string>
+    <string name="piko_disunify_xchat_system">xchatシステムを無効化</string>
+    <string name="piko_disunify_xchat_system_desc">メッセージや共有シートなどの従来の機能を復活させます</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">機能フラグ</string>
     <string name="piko_pref_feature_flags">機能フラグを追加</string>
@@ -131,11 +133,10 @@
     <string name="piko_pref_hide_community_badge">コミュニティバッジを非表示</string>
     <string name="piko_pref_hide_badge_nav_bar">ナビゲーションバーからバッジを非表示</string>
     <string name="piko_pref_hide_badge_nav_bar_desc">ナビゲーションバーのアイコンから通知のナッジとカウントを非表示にします</string>
-    <string name="piko_pref_hide_post_inline_metrics">投稿のインライン表示メトリクスを非表示にする</string>
-    <string name="piko_pref_hide_post_inline_metrics_desc">インライン表示で、いいね数・リポスト数などを非表示にします</string>
-    <string name="piko_pref_hide_post_detailed_metrics">投稿の詳細表示メトリクスを非表示にする</string>
-    <string name="piko_pref_hide_post_detailed_metrics_desc">詳細表示で、いいね数・リポスト数などを非表示にします</string>
-
+    <string name="piko_pref_hide_post_inline_metrics">ポストのインラインビュー指標を非表示</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">インラインビューで「いいね」や「リポスト」などのカウントを非表示にします</string>
+    <string name="piko_pref_hide_post_detailed_metrics">ポストの詳細な閲覧指標を非表示</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">詳細表示での「いいね」や「リポスト」などのカウントを非表示にします</string>
     <!-- Customization Settings -->
     <string name="piko_title_customisation">カスタマイズ</string>
     <string name="piko_pref_customisation_profiletabs">プロフィールタブから非表示にする項目</string>
@@ -199,4 +200,14 @@
     <string name="piko_pref_search_type_ahead_events">イベント</string>
     <string name="piko_pref_search_type_ahead_ordered_section">並び替え</string>
     <string name="piko_settings_supported_links">対応リンクを開く</string>
+    <!-- For arrays-->
+    <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_money">Money</string>
+    <string name="piko_array_xchat">チャット</string>
+    <string name="piko_array_x_lite">New X Android</string>
+    <string name="piko_array_conference">Conference</string>
+    <string name="piko_array_creator_studio">クリエイタースタジオ</string>
+    <string name="piko_array_jobs">Jobs</string>
+    <string name="piko_array_media">メディア</string>
+    <string name="piko_array_light_mode">ライトモード</string>
 </resources>
