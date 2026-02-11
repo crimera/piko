@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="piko_app_icon_thanks">Podziękowania dla @NeoFreeBird za ikony aplikacji z iOS</string>
+    <string name="piko_app_icon_piko_exclusive">(Tylko w Piko)</string>
+
+    <!-- Category -->
+    <string name="piko_app_icon_category_legacy">Klasyczne</string>
+    <string name="piko_app_icon_category_seasonal_event">Wydarzenia sezonowe</string>
+    <string name="piko_app_icon_category_sports">Sport</string>
+    <string name="piko_app_icon_category_cultural_and_celebrations">Kultura i uroczystości</string>
+    <string name="piko_app_icon_category_pride">Duma</string>
+    <string name="piko_app_icon_category_misc">Różne</string>
+    <string name="piko_app_icon_category_space">Kosmos</string>
+    <string name="piko_app_icon_category_movies_n_series">Filmy i seriale</string>
+
+    <!-- Icon names -->
+    <string name="piko_app_icon_name_default">Domyślna</string>
+    <string name="piko_app_icon_name_legacy_icon_1">Klasyczna ikona 1</string>
+    <string name="piko_app_icon_name_legacy_icon_2">Klasyczna ikona 2</string>
+    <string name="piko_app_icon_name_legacy_icon_3">Klasyczna ikona 3</string>
+    <string name="piko_app_icon_name_legacy_icon_4">Klasyczna ikona 4</string>
+    <string name="piko_app_icon_name_legacy_blue">Klasyczny niebieski</string>
+    <string name="piko_app_icon_name_twitter_blue">Twitter Blue</string>
+
+    <string name="piko_app_icon_name_earth">Ziemia</string>
+    <string name="piko_app_icon_name_moon">Księżyc</string>
+    <string name="piko_app_icon_name_mars">Mars</string>
+    <string name="piko_app_icon_name_sun">Słońce</string>
+    <string name="piko_app_icon_name_stars">Gwiazdy</string>
+    <string name="piko_app_icon_name_milky_way">Droga Mleczna</string>
+
+    <string name="piko_app_icon_name_autumn_2021">Jesień 2021</string>
+    <string name="piko_app_icon_name_autumn_2022">Jesień 2022</string>
+    <string name="piko_app_icon_name_south_spring_2021">Wiosna Południowa 2021</string>
+    <string name="piko_app_icon_name_south_spring_2022">Wiosna Południowa 2022</string>
+    <string name="piko_app_icon_name_winter_1">Zima 1</string>
+    <string name="piko_app_icon_name_winter_2">Zima 2</string>
+    <string name="piko_app_icon_name_summer_1">Lato 1</string>
+    <string name="piko_app_icon_name_summer_2">Lato 2</string>
+    <string name="piko_app_icon_name_autumn_southern">Jesień Południowa</string>
+    <string name="piko_app_icon_name_summer">Lato</string>
+    <string name="piko_app_icon_name_winter">Zima</string>
+
+    <string name="piko_app_icon_name_beijing_olympics_1">Olimpiada w Pekinie 1</string>
+    <string name="piko_app_icon_name_beijing_olympics_2">Olimpiada w Pekinie 2</string>
+    <string name="piko_app_icon_name_daytona">Daytona</string>
+    <string name="piko_app_icon_name_formulaone">Formuła 1</string>
+    <string name="piko_app_icon_name_kentucky_derby">Kentucky Derby</string>
+    <string name="piko_app_icon_name_mlb">MLB</string>
+    <string name="piko_app_icon_name_nba">NBA</string>
+    <string name="piko_app_icon_name_nba_2">NBA 2</string>
+    <string name="piko_app_icon_name_ncaa">NCAA</string>
+    <string name="piko_app_icon_name_masters">Masters</string>
+    <string name="piko_app_icon_name_nba_finals">Finały NBA</string>
+    <string name="piko_app_icon_name_stanley_cup">Puchar Stanleya</string>
+    <string name="piko_app_icon_name_commonwealth">Igrzyska Wspólnoty Narodów</string>
+
+    <string name="piko_app_icon_name_mothers_day">Dzień Matki</string>
+    <string name="piko_app_icon_name_womansday">Dzień Kobiet</string>
+    <string name="piko_app_icon_name_halloween_2021">Halloween 2021</string>
+    <string name="piko_app_icon_name_halloween_2022">Halloween 2022</string>
+    <string name="piko_app_icon_name_halloween_2024_1">Halloween 2024 1</string>
+    <string name="piko_app_icon_name_halloween_2024_2">Halloween 2024 2</string>
+    <string name="piko_app_icon_name_halloween_2024_3">Halloween 2024 3</string>
+    <string name="piko_app_icon_name_holi">Święto Kolorów</string>
+    <string name="piko_app_icon_name_stpatricks_day">Dzień św. Patryka</string>
+    <string name="piko_app_icon_name_easter">Wielkanoc</string>
+    <string name="piko_app_icon_name_anzac">Anzac</string>
+    <string name="piko_app_icon_name_ramadan">Ramadan</string>
+    <string name="piko_app_icon_name_black_history">Miesiąc Czarnej Historii</string>
+    <string name="piko_app_icon_name_eurovisionfinal">Finał Eurowizji</string>
+    <string name="piko_app_icon_name_lunar_new_year_1">Księżycowy Nowy Rok 1</string>
+    <string name="piko_app_icon_name_lunar_new_year_2">Księżycowy Nowy Rok 2</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_1">Japoński Nowy Rok 2024 1</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_2">Japoński Nowy Rok 2024 2</string>
+    <string name="piko_app_icon_name_may_the_fourth">Dzień Gwiezdnych Wojen</string>
+    <string name="piko_app_icon_name_barbie">Barbie</string>
+    <string name="piko_app_icon_name_thanksgiving_1">Święto Dziękczynienia 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2">Święto Dziękczynienia 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_1">Święto Dziękczynienia 2024 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_2">Święto Dziękczynienia 2024 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_3">Święto Dziękczynienia 2024 3</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_4">Święto Dziękczynienia 2024 4</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_5">Święto Dziękczynienia 2024 5</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_6">Święto Dziękczynienia 2024 6</string>
+    <string name="piko_app_icon_name_canada_day">Dzień Kanady</string>
+    <string name="piko_app_icon_name_canada_indigenous">Rdzenni Kanadyjczycy</string>
+    <string name="piko_app_icon_name_earth_hour">Godzina dla Ziemi</string>
+    <string name="piko_app_icon_name_euro">Euro</string>
+    <string name="piko_app_icon_name_independence_day">Dzień Niepodległości</string>
+    <string name="piko_app_icon_name_juneteenth">Dzień Wyzwolenia</string>
+    <string name="piko_app_icon_name_naidoc">Naidoc</string>
+    <string name="piko_app_icon_name_christmas_2024_1">Boże Narodzenie 2024 1</string>
+    <string name="piko_app_icon_name_christmas_2024_2">Boże Narodzenie 2024 2</string>
+    <string name="piko_app_icon_name_christmas_2024_3">Boże Narodzenie 2024 3</string>
+    <string name="piko_app_icon_name_christmas_2024_4">Boże Narodzenie 2024 4</string>
+
+    <string name="piko_app_icon_name_upsidedown">Druga strona</string>
+    <string name="piko_app_icon_name_games_chamber">Komnata Tajemnic</string>
+
+    <string name="piko_app_icon_name_pridesouthern">Duma Południowa</string>
+    <string name="piko_app_icon_name_newzealand_pride_1">Duma Nowej Zelandii 1</string>
+    <string name="piko_app_icon_name_newzealand_pride_2">Duma Nowej Zelandii 2</string>
+    <string name="piko_app_icon_name_pride_month">Miesiąc Dumy</string>
+
+    <string name="piko_app_icon_name_fancy">Elegancka</string>
+    <string name="piko_app_icon_name_broken">Pęknięta</string>
+    <string name="piko_app_icon_name_cyber">Cyber</string>
+    <string name="piko_app_icon_name_soft_pastel_pink">Pastelowy róż</string>
+    <string name="piko_app_icon_name_electric_indigo">Elektryczne indygo</string>
+    <string name="piko_app_icon_name_neon_pink">Neonowy róż</string>
+    <string name="piko_app_icon_name_tropical_teal">Tropikalny morski</string>
+    <string name="piko_app_icon_name_vivid_orange">Jaskrawy pomarańcz</string>
+
+</resources>

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Don't translate any of these -->
+<resources>
+    <string-array name="piko_array_profiletabs">
+        <item>@string/profile_tab_title_timeline</item>
+        <item>@string/profile_tab_title_timeline_tweets_and_replies_sentence_case</item>
+        <item>@string/profile_tab_title_affiliates</item>
+        <item>@string/profile_tab_title_timeline_super_follow_tweets</item>
+        <item>@string/profile_tab_title_highlights</item>
+        <item>@string/profile_tab_title_articles</item>
+        <item>@string/profile_tab_title_media</item>
+        <item>@string/profile_tab_title_likes</item>
+    </string-array>
+
+    <string-array name="piko_array_exploretabs">
+        <item>@string/guide_tab_title_for_you</item>
+        <item>@string/guide_tab_title_trending</item>
+        <item>@string/guide_tab_title_fun</item>
+        <item>@string/guide_tab_title_news</item>
+        <item>@string/guide_tab_title_sports</item>
+        <item>@string/guide_tab_title_entertainment</item>
+    </string-array>
+
+    <string-array name="piko_array_timelinetabs">
+        <item>@string/piko_pref_customisation_timelinetabs_both</item>
+        <item>@string/piko_pref_customisation_timelinetabs_foryou</item>
+        <item>@string/piko_pref_customisation_timelinetabs_following</item>
+    </string-array>
+
+    <string-array name="piko_array_download_media_handle">
+        <item>@string/piko_pref_download_media_link_handle_download</item>
+        <item>@string/piko_pref_download_media_link_handle_copy_link</item>
+        <item>@string/piko_pref_download_media_link_handle_always_ask</item>
+    </string-array>
+
+    <string-array name="piko_array_sidebar">
+        <item>@string/drawer_profile_title</item>
+        <item>@string/subscriptions_drawer_menu_title</item>
+        <item>@string/piko_array_grok</item>
+        <item>@string/piko_array_money</item>
+        <item>@string/piko_array_xchat</item>
+        <item>@string/piko_array_x_lite</item>
+        <item>@string/drawer_notifications_title</item>
+        <item>@string/drawer_direct_messages_title</item>
+        <item>@string/drawer_communities_title</item>
+        <item>@string/drafts_empty_video</item>
+        <item>@string/bookmarks_title</item>
+        <item>@string/piko_array_jobs</item>
+        <item>@string/drawer_lists</item>
+        <item>@string/drawer_birdwatch_title</item>
+        <item>@string/spaces_grid_tab</item>
+        <item>@string/piko_array_conference</item>
+        <item>@string/piko_array_creator_studio</item>
+        <item>@string/profile_followers</item>
+        <item>@string/monetization_drawer_menu_title</item>
+        <item>@string/subscriptions_drawer_menu_group_analytics</item>
+        <item>@string/drawer_professional_tools_header_title</item>
+        <item>@string/drawer_settings_title</item>
+        <item>@string/drawer_media_transparency_title</item>
+        <item>@string/drawer_imprint_title</item>
+    </string-array>
+
+    <string-array name="piko_array_navbar">
+        <item>@string/tab_home_title</item>
+        <item>@string/tab_explore_title</item>
+        <item>@string/spaces_grid_tab</item>
+        <item>@string/tab_communities</item>
+        <item>@string/notifications_grid_tab</item>
+        <item>@string/people_discovery_title</item>
+        <item>@string/drawer_birdwatch_title</item>
+        <item>@string/bookmarks_title</item>
+        <item>@string/drawer_direct_messages_title</item>
+        <item>@string/piko_array_grok</item>
+        <item>@string/piko_array_media</item>
+        <item>@string/piko_array_xchat</item>
+        <item>@string/piko_array_conference</item>
+    </string-array>
+
+    <string-array name="piko_array_inlinetabs">
+        <item>@string/replies</item>
+        <item>@string/tweets_retweet</item>
+        <item>@string/button_action_like</item>
+        <item>@string/view_count_dialog_title</item>
+        <item>@string/bookmarks_title</item>
+        <item>@string/button_action_share</item>
+    </string-array>
+
+    <string-array name="piko_array_ads_hooks">
+        <item>@string/piko_pref_hide_promoted_posts</item>
+        <item>@string/piko_pref_wtf_section</item>
+        <item>@string/piko_pref_cts_section</item>
+        <item>@string/piko_pref_ctj_section</item>
+        <item>@string/piko_pref_ryb_section</item>
+        <item>@string/piko_pref_pinned_posts_section</item>
+        <item>@string/piko_pref_hide_detailed_posts</item>
+        <item>@string/piko_pref_hide_premium_prompt</item>
+        <item>@string/piko_pref_hide_todays_news</item>
+    </string-array>
+
+    <string-array name="piko_array_reply_sorting">
+        <item>@string/detail_filter_trending_title</item>
+        <item>@string/detail_filter_recent_title</item>
+        <item>@string/detail_filter_most_liked_title</item>
+        <item>@string/piko_pref_customisation_reply_sorting_remember</item>
+    </string-array>
+
+    <string-array name="piko_array_translators">
+        <item>@string/piko_native_translator_google</item>
+        <item>@string/piko_native_translator_google_v2</item>
+    </string-array>
+
+    <string-array name="piko_array_search_type_ahead">
+        <item>@string/piko_pref_search_type_ahead_users</item>
+        <item>@string/channel_topics_title</item>
+        <item>@string/piko_pref_search_type_ahead_events</item>
+        <item>@string/search_scope_lists</item>
+        <item>@string/piko_pref_search_type_ahead_ordered_section</item>
+    </string-array>
+
+    <string-array name="piko_array_searchtabs">
+        <item>@string/search_scope_top</item>
+        <item>@string/search_scope_latest</item>
+        <item>@string/subtitle_people</item>
+        <item>@string/search_filter_videos</item>
+        <item>@string/search_filter_photos</item>
+        <item>@string/search_filter_media</item>
+        <item>@string/search_scope_lists</item>
+    </string-array>
+
+    <string-array name="piko_array_notificationtabs">
+        <item>@string/vit_notifications_tab_all</item>
+        <item>@string/vit_notifications_tab_mentions</item>
+        <item>@string/vit_notifications_tab_super_followers</item>
+        <item>@string/vit_notifications_tab_verified</item>
+    </string-array>
+
+    <string-array name="piko_array_readermode_themes">
+        <item>@string/settings_dark_mode_system</item>
+        <item>@string/piko_array_light_mode</item>
+        <item>@string/theme_dim_title</item>
+        <item>@string/dark_mode</item>
+    </string-array>
+
+</resources>

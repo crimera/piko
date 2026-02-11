@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="piko_app_icon_thanks">iOS 앱 아이콘을 제공해 주신 @NeoFreeBird 님께 감사드립니다.</string>
+    <string name="piko_app_icon_piko_exclusive">(Piko exclusive)</string>
+    <!-- Category -->
+    <string name="piko_app_icon_category_legacy">기존</string>
+    <string name="piko_app_icon_category_seasonal_event">계절 행사</string>
+    <string name="piko_app_icon_category_sports">스포츠</string>
+    <string name="piko_app_icon_category_cultural_and_celebrations">문화 및 기념행사</string>
+    <string name="piko_app_icon_category_pride">Pride</string>
+    <string name="piko_app_icon_category_misc">기타</string>
+    <string name="piko_app_icon_category_space">우주</string>
+    <string name="piko_app_icon_category_movies_n_series">영화 및 시리즈</string>
+
+</resources>

@@ -1,0 +1,397 @@
+package app.revanced.extension.twitter.settings;
+
+import android.os.Build;
+import app.revanced.extension.twitter.patches.FeatureSwitchPatch;
+
+public class SettingsStatus {
+
+    public static boolean showChangelogsPatchEnabled = false;
+
+    public static boolean changeDownloadEnabled = false;
+    public static boolean customSharingDomainEnabled = false;
+    public static boolean enableFontMod = false;
+    public static boolean hideRecommendedUsers = false;
+    public static boolean hideCommunityNote = false;
+    public static boolean hideFAB = false;
+    public static boolean hideFABBtns = false;
+    public static boolean hideViewCount = false;
+    public static boolean hideInlineBmk = false;
+    public static boolean disableAutoTimelineScroll = false;
+    public static boolean hideLiveThreads = false;
+    public static boolean hideBanner = false;
+    public static boolean showPollResultsEnabled = false;
+    public static boolean featureFlagsEnabled = false;
+    public static boolean forceTranslate = false;
+    public static boolean enableForceHD = false;
+    public static boolean hidePromoteButton = false;
+    public static boolean roundOffNumbers = false;
+    public static boolean enableDebugMenu = false;
+
+    public static boolean hideAds = false;
+    public static boolean hideGAds = false;
+    public static boolean hideWTF = false;
+    public static boolean hideCTS = false;
+    public static boolean hideCTJ = false;
+    public static boolean hideDetailedPosts = false;
+    public static boolean hideTodaysNews = false;
+    public static boolean hideRBMK = false;
+    public static boolean hideRPinnedPosts = false;
+    public static boolean hidePremiumPrompt = false;
+    public static boolean hideHiddenReplies = false;
+    public static boolean removePremiumUpsell = false;
+    public static boolean hideTopPeopleSearch = false;
+
+    public static boolean enableUndoPosts = false;
+    public static boolean enableForcePip = false;
+    public static boolean showSourceLabel = false;
+    public static boolean hideImmersivePlayer = false;
+    public static boolean enableVidAutoAdvance = false;
+
+    public static boolean profileTabCustomisation = false;
+    public static boolean timelineTabCustomisation = false;
+    public static boolean exploreTabCustomisation = false;
+    public static boolean sideBarCustomisation = false;
+    public static boolean navBarCustomisation = false;
+    public static boolean inlineBarCustomisation = false;
+    public static boolean searchTabCustomisation = false;
+    public static boolean mediaLinkHandle = false;
+    public static boolean defaultReplySortFilter = false;
+    public static boolean typeaheadCustomisation = false;
+
+    public static boolean selectableText = false;
+    public static boolean showSensitiveMedia = false;
+    public static boolean enableVidDownload = false;
+    public static boolean cleartrackingparams = false;
+    public static boolean unshortenlink = false;
+    public static boolean deleteFromDb = false;
+    public static boolean nativeDownloader = false;
+    public static boolean nativeTranslator = false;
+    public static boolean nativeReaderMode = false;
+    public static boolean hideNudgeButton = false;
+    public static boolean hideSocialProof = false;
+    public static boolean customPostFontSize = false;
+    public static boolean hideCommBadge = false;
+    public static boolean serverResponseLogging = false;
+    public static boolean serverResponseLoggingOverwriteFile = false;
+
+    public static boolean customFont = false;
+    public static boolean customEmojiFont = false;
+    public static void showChangelogsPatchEnabled() {
+        showChangelogsPatchEnabled = true;
+    }
+    public static void serverResponseLogging() {
+        serverResponseLogging = true;
+    }
+    public static void serverResponseLoggingOverwriteFile() {
+        serverResponseLoggingOverwriteFile = true;
+    }
+    public static void hideCommBadge() {
+        hideCommBadge = true;
+    }
+    public static void customPostFontSize() {
+        customPostFontSize = true;
+    }
+    public static void hideSocialProof() {
+        hideSocialProof = true;
+    }
+    public static void hideNudgeButton() {
+        hideNudgeButton = true;
+    }
+    public static void removePremiumUpsell() {
+        removePremiumUpsell = true;
+    }
+
+    public static void enableVidAutoAdvance() {
+        enableVidAutoAdvance = true;
+    }
+
+    public static void nativeDownloader() {
+        nativeDownloader = true;
+    }
+    public static void nativeTranslator() {
+        nativeTranslator = true;
+    }
+
+    public static void nativeReaderMode() {
+        nativeReaderMode = true;
+    }
+    public static void deleteFromDb() {
+        deleteFromDb = true;
+    }
+
+    public static void cleartrackingparams() {
+        cleartrackingparams = true;
+    }
+
+    public static void unshortenlink() {
+        unshortenlink = true;
+    }
+
+    public static void enableVidDownload() {
+        enableVidDownload = true;
+    }
+
+    public static void showSensitiveMedia() {
+        showSensitiveMedia = true;
+    }
+
+    public static void selectableText() {
+        selectableText = true;
+    }
+
+    public static void enableDownloadFolder() {
+        changeDownloadEnabled = true;
+    }
+
+    public static void mediaLinkHandle() {
+        mediaLinkHandle = true;
+    }
+
+    public static void enableCustomSharingDomain() {
+        customSharingDomainEnabled = true;
+    }
+
+    public static void enableFont() {
+        enableFontMod = true;
+    }
+
+    public static void roundOffNumbers() {
+        roundOffNumbers = true;
+    }
+
+    public static void enableFeatureFlags() {
+        featureFlagsEnabled = true;
+        FeatureSwitchPatch.getFeatureFlagSearchItems();
+    }
+
+    public static void hideRecommendedUsers() {
+        hideRecommendedUsers = true;
+    }
+
+    public static void hideCommunityNotes() {
+        hideCommunityNote = true;
+    }
+
+    public static void hideFAB() {
+        hideFAB = true;
+    }
+
+    public static void hideFABBtns() {
+        hideFABBtns = true;
+    }
+
+    public static void hideViewCount() {
+        hideViewCount = true;
+    }
+
+    public static void hideInlineBmk() {
+        hideInlineBmk = true;
+    }
+
+    public static void disableAutoTimelineScroll() {
+        disableAutoTimelineScroll = true;
+    }
+
+    public static void hideLiveThreads() {
+        hideLiveThreads = true;
+    }
+
+    public static void hideBanner() {
+        hideBanner = true;
+    }
+
+    public static void hidePremiumPrompt() {
+        hidePremiumPrompt = true;
+    }
+
+    public static void enableShowPollResults() {
+        showPollResultsEnabled = true;
+    }
+
+    public static void forceTranslate() {
+        forceTranslate = true;
+    }
+
+    public static void hideHiddenReplies() {
+        hideHiddenReplies = true;
+    }
+
+    public static void enableForceHD() {
+        enableForceHD = true;
+    }
+
+    public static void hidePromoteButton() {
+        hidePromoteButton = true;
+    }
+
+    public static void enableDebugMenu() {
+        enableDebugMenu = true;
+    }
+
+
+    public static void hideAds() {
+        hideAds = true;
+    }
+
+    public static void hideWhoToFollow() {
+        hideWTF = true;
+    }
+
+    public static void hideCreatorsToSub() {
+        hideCTS = true;
+    }
+
+    public static void hideCommToJoin() {
+        hideCTJ = true;
+    }
+
+    public static void hideDetailedPost() {
+        hideDetailedPosts = true;
+    }
+
+    public static void hideRevistBookmark() {
+        hideRBMK = true;
+    }
+
+    public static void hideRevistPinnedPost() {
+        hideRPinnedPosts = true;
+    }
+
+    public static void hideTopPeopleSearch() {
+        hideTopPeopleSearch = true;
+    }
+
+    public static void hideTodaysNews() {
+        hideTodaysNews = true;
+    }
+
+    public static void enableUndoPosts() {
+        enableUndoPosts = true;
+    }
+
+    public static void enableForcePip() {
+        enableForcePip = true;
+    }
+
+    public static void showSourceLabel() {
+        showSourceLabel = true;
+    }
+
+    public static void hideImmersivePlayer() {
+        hideImmersivePlayer = true;
+    }
+
+    public static void profileTabCustomisation() {
+        profileTabCustomisation = true;
+    }
+
+    public static void timelineTabCustomisation() {
+        timelineTabCustomisation = true;
+    }
+
+    public static void exploreTabCustomisation() {
+        exploreTabCustomisation = true;
+    }
+
+    public static void sideBarCustomisation() {
+        sideBarCustomisation = true;
+    }
+    public static void searchTabCustomisation() {
+        searchTabCustomisation = true;
+    }
+
+    public static void navBarCustomisation() {
+        navBarCustomisation = true;
+    }
+
+    public static void defaultReplySortFilter() {
+        defaultReplySortFilter = true;
+    }
+
+    public static void inlineBarCustomisation() {
+        inlineBarCustomisation = true;
+    }
+
+    public static void typeaheadCustomisation() {
+        typeaheadCustomisation = true;
+    }
+    public static void customFont() {
+        customFont = true;
+    }
+    public static void customEmojiFont() {
+        customEmojiFont = true;
+    }
+
+    public static boolean removeSearchSuggestions = false;
+    public static void removeSearchSuggestions() {
+        removeSearchSuggestions = true;
+    }
+
+    public static boolean pauseSearchSuggestions = false;
+    public static void pauseSearchSuggestions() {
+        pauseSearchSuggestions = true;
+    }
+
+    public static boolean notificationTabCustomisation = false;
+    public static void notificationTabCustomisation() {
+        notificationTabCustomisation = true;
+    }
+
+    public static boolean appIconCustomisation = false;
+    public static void appIconCustomisation() {
+        appIconCustomisation = true;
+    }
+
+    public static boolean hideNavbarBadge = false;
+    public static void hideNavbarBadge() {
+        hideNavbarBadge = true;
+    }
+
+    public static boolean hidePostMetrics = false;
+    public static void hidePostMetrics() {
+        hidePostMetrics = true;
+    }
+
+    public static boolean disUnifyXChatSystem = false;
+    public static void disUnifyXChatSystem() {
+        disUnifyXChatSystem = true;
+    }
+
+    public static boolean enableTimelineSection() {
+        return ( hidePostMetrics || hideNavbarBadge || showSourceLabel || hideCommBadge || showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD);
+    }
+
+    public static boolean enableMiscSection() {
+        return ( disUnifyXChatSystem || pauseSearchSuggestions || removeSearchSuggestions || hideSocialProof || roundOffNumbers || enableFontMod || hideRecommendedUsers || hideFAB || hideViewCount || customSharingDomainEnabled || hideFABBtns);
+    }
+
+    public static boolean enableAdsSection() {
+        return (hideTodaysNews || hideTopPeopleSearch || hideAds  || hideWTF || hideCTS || hideCTJ || hideDetailedPosts || hideRBMK  || removePremiumUpsell);
+    }
+
+    public static boolean enableNativeSection() {
+        return (nativeDownloader || nativeTranslator || nativeReaderMode);
+    }
+
+    public static boolean enableDownloadSection() {
+        return (changeDownloadEnabled || mediaLinkHandle);
+    }
+
+    public static boolean enablePremiumSection() {
+        return (enableUndoPosts || enableForcePip);
+    }
+
+    public static boolean enableCustomisationSection() {
+        return (appIconCustomisation || notificationTabCustomisation || searchTabCustomisation || typeaheadCustomisation || exploreTabCustomisation || customPostFontSize || inlineBarCustomisation || navBarCustomisation || sideBarCustomisation || profileTabCustomisation || timelineTabCustomisation || defaultReplySortFilter);
+    }
+    public static boolean loggingSection() {
+        return (serverResponseLogging || serverResponseLoggingOverwriteFile);
+    }
+
+    public static boolean fontSection() {
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && (customFont || customEmojiFont));
+    }
+
+    public static void load() {
+    }
+}

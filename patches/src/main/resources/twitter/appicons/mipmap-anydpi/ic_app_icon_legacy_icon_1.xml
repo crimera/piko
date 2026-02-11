@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@mipmap/ic_legacy_icon_1_bg" />
+    <foreground android:drawable="@mipmap/legacy_twitter_icon" />
+</adaptive-icon>
