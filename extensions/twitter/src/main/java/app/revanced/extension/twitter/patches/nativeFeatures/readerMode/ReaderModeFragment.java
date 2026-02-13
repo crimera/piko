@@ -8,12 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.ProgressBar;
 import app.revanced.extension.shared.Utils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import android.app.Fragment;
-import android.graphics.Bitmap;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -28,8 +26,8 @@ public class ReaderModeFragment extends Fragment {
     private String tweetId;
 
      // JavaScript interface class
-    public class WebAppInterface {
-        Context mContext;
+    public static class WebAppInterface {
+        final Context mContext;
 
         WebAppInterface(Context context) {
             mContext = context;

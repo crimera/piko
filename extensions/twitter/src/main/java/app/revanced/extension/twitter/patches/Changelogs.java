@@ -6,9 +6,9 @@ import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
 import android.app.Activity;
-import app.revanced.extension.twitter.settings.Settings;
+
 import app.revanced.extension.shared.requests.Requester;
-import java.io.IOException;
+
 import java.net.HttpURLConnection;
 import org.json.JSONObject;
 import app.revanced.extension.shared.Utils;
@@ -19,7 +19,7 @@ import static android.text.Html.FROM_HTML_MODE_COMPACT;
 import app.revanced.extension.shared.StringRef;
 
 public class Changelogs {
-    private static String CHANGELOG_PROVIDER = "https://api.github.com/repos/crimera/piko/releases/tags";
+    private static final String CHANGELOG_PROVIDER = "https://api.github.com/repos/crimera/piko/releases/tags";
     private static String patchVersion, latestChangelogVersion;
     static{
         latestChangelogVersion = Pref.getLatestChangelogVersion();

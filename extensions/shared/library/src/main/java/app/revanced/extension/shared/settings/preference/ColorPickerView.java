@@ -232,7 +232,6 @@ public class ColorPickerView extends View {
         );
 
         // Create a linear gradient for the value (brightness) from white to black (vertical).
-        //noinspection ExtractMethodRecommender
         LinearGradient valShader = new LinearGradient(
                 saturationValueRect.left, saturationValueRect.top,
                 saturationValueRect.left, saturationValueRect.bottom,

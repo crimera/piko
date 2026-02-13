@@ -1,17 +1,13 @@
 package app.revanced.extension.twitter.settings.fragments;
 
-import app.revanced.extension.shared.StringRef;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.*;
 import androidx.annotation.Nullable;
-import app.revanced.extension.shared.Utils;
+
 import app.revanced.extension.twitter.settings.widgets.Helper;
 import app.revanced.extension.twitter.settings.ScreenBuilder;
 import app.revanced.extension.twitter.settings.Settings;
-import app.revanced.extension.twitter.settings.ActivityHook;
-import app.revanced.extension.twitter.settings.SettingsStatus;
-//import android.content.Intent;
 
 @SuppressWarnings("deprecation")
 public class PageFragment extends PreferenceFragment {

@@ -3,16 +3,14 @@ package app.revanced.extension.twitter.settings.fragments;
 import android.text.*;
 import android.text.style.ForegroundColorSpan;
 import android.graphics.Color;
-import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.*;
-import androidx.annotation.Nullable;
+
 import app.revanced.extension.shared.Utils;
 import com.twitter.ui.widget.LegacyTwitterPreferenceCategory;
 import java.util.*;
 import app.revanced.extension.shared.StringRef;
-import app.revanced.extension.twitter.settings.Settings;
 import app.revanced.extension.twitter.settings.ActivityHook;
 import app.revanced.extension.twitter.settings.SettingsStatus;
 import app.revanced.extension.twitter.patches.Changelogs;

@@ -18,7 +18,7 @@ public class IconListAdapter extends BaseAdapter {
 
     private final List<RowItem> rows;
     private final LayoutInflater inflater;
-    private String selectedComponent;
+    private final String selectedComponent;
     private final OnIconSelectListener listener;
 
     public interface OnIconSelectListener {

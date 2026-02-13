@@ -5,9 +5,8 @@ import android.os.Bundle;
 import android.view.*;
 import android.widget.ListView;
 import java.util.List;
-import app.revanced.extension.twitter.settings.Settings;
+
 import app.revanced.extension.shared.Utils;
-import app.revanced.extension.shared.StringRef;
 
 public class IconSelectorFragment extends Fragment {
 

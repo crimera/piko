@@ -1,13 +1,12 @@
 package app.revanced.extension.twitter.entity;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import app.revanced.extension.twitter.Utils;
 
 public class Debug {
-    protected Object obj;
+    protected final Object obj;
 
     public Debug(Object obj) {
         this.obj = obj;

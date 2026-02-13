@@ -1,18 +1,15 @@
 package app.revanced.extension.twitter.patches.loggers;
 
-import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
-import android.os.Environment;
 
 import app.revanced.extension.twitter.Pref;
 import app.revanced.extension.twitter.Utils;
 
 public class ResponseLogger {
-    private static boolean LOG_RES;
+    private static final boolean LOG_RES;
     static{
         LOG_RES = Pref.serverResponseLogging();
         if(Pref.serverResponseLoggingOverwriteFile()){

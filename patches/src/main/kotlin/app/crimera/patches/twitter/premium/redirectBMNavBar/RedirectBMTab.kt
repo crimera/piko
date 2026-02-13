@@ -9,7 +9,7 @@ import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 
 // Credits @Ouxyl
-private object tabLayoutFingerprint : Fingerprint(
+private object TabLayoutFingerprint : Fingerprint(
     definingClass = "Lcom/google/android/material/tabs/TabLayout;",
     name = "q"
 )
@@ -19,7 +19,7 @@ val redirectBMTab =
         description = "Patch required to redirect bookmark folders to bookmark",
     ) {
         execute {
-            val method = tabLayoutFingerprint.method
+            val method = TabLayoutFingerprint.method
             val instructions = method.instructions
 
             val first_line = instructions.first { it.opcode == Opcode.IGET_OBJECT }

@@ -1,8 +1,5 @@
 package app.revanced.extension.twitter.entity;
-import app.revanced.extension.twitter.Utils;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+
 import app.revanced.extension.twitter.entity.Video;
 import app.revanced.extension.twitter.entity.Media;
 import app.revanced.extension.twitter.Utils;
@@ -10,7 +7,7 @@ import app.revanced.extension.twitter.Utils;
 // Lcom/twitter/model/core/entity/b0;
 public class ExtMediaEntities extends Debug{
 
-    private Object obj;
+    private final Object obj;
 
     public ExtMediaEntities(Object obj) {
         super(obj);

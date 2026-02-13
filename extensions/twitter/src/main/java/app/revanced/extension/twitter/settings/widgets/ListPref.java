@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 import app.revanced.extension.twitter.settings.Settings;
 import app.revanced.extension.shared.Utils;
 import android.preference.Preference;
-import java.util.Locale;
+
 import app.revanced.extension.twitter.patches.nativeFeatures.translator.Constants;
 //import java.util.*;
 

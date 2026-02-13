@@ -13,7 +13,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.LinearLayout;
-import androidx.annotation.RequiresApi;
+
 import app.revanced.extension.shared.StringRef;
 import app.revanced.extension.shared.settings.BooleanSetting;
 import app.revanced.extension.shared.settings.StringSetting;
@@ -24,7 +24,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.FileOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -33,8 +32,6 @@ import java.util.Set;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.IOException;
-
-import java.lang.StackTraceElement;
 
 @SuppressWarnings("unused")
 public class Utils {
@@ -321,7 +318,7 @@ public class Utils {
 
     public static String getTheme() {
         String theme = "light";
-        String three_state_night_mode = defsp.getString("three_state_night_mode", String.valueOf(theme));
+        String three_state_night_mode = defsp.getString("three_state_night_mode", theme);
         if (!(three_state_night_mode.equals("0"))) {
             String dark_mode_appr = defsp.getString("dark_mode_appearance", "lights_out");
             if (dark_mode_appr.equals("lights_out"))
@@ -392,7 +389,7 @@ public class Utils {
 
     public static void logger(Object e) {
         String logName = "piko";
-        Log.d(logName, String.valueOf(e)+"\n");
+        Log.d(logName, e +"\n");
         if (e instanceof Exception) {
             Exception ex = (Exception) e;
         StackTraceElement[] stackTraceElements = ex.getStackTrace();

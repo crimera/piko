@@ -1,23 +1,20 @@
 package app.revanced.extension.twitter.settings;
 
 import app.revanced.extension.shared.StringRef;
-import android.app.Fragment;
+
 import android.content.Context;
-import android.os.Bundle;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
-import androidx.annotation.Nullable;
-import app.revanced.extension.shared.Utils;
-import app.revanced.extension.shared.settings.StringSetting;
+
 import com.twitter.ui.widget.LegacyTwitterPreferenceCategory;
-import android.view.View;
+
 import app.revanced.extension.twitter.settings.widgets.*;
 import androidx.annotation.Nullable;
 import app.revanced.extension.twitter.Pref;
 public class ScreenBuilder {
-    private Context context;
-    private PreferenceScreen screen;
-    private Helper helper;
+    private final Context context;
+    private final PreferenceScreen screen;
+    private final Helper helper;
 
     public ScreenBuilder(Context context,PreferenceScreen screen,Helper helper){
         this.context = context;
@@ -40,37 +37,37 @@ public class ScreenBuilder {
 
         if (!(SettingsStatus.enablePremiumSection())) return;
             
-            LegacyTwitterPreferenceCategory category = null;
-            if(buildCategory)
-                category = preferenceCategory(strRes("piko_title_premium"));
+        LegacyTwitterPreferenceCategory category = null;
+        if(buildCategory)
+            category = preferenceCategory(strRes("piko_title_premium"));
 
-            if (SettingsStatus.enableUndoPosts) {
+        if (SettingsStatus.enableUndoPosts) {
+            addPreference(category,
+                    helper.switchPreference(
+                            strEnableRes("piko_pref_undo_posts"),
+                            strRes("piko_pref_undo_posts_desc"),
+                            Settings.PREMIUM_UNDO_POSTS
+                    )
+            );
+
+            if (SettingsStatus.enableForcePip) {
                 addPreference(category,
                         helper.switchPreference(
-                                strEnableRes("piko_pref_undo_posts"),
-                                strRes("piko_pref_undo_posts_desc"),
-                                Settings.PREMIUM_UNDO_POSTS
-                        )
-                );
-
-                if (SettingsStatus.enableForcePip) {
-                    addPreference(category,
-                            helper.switchPreference(
-                                    strEnableRes("piko_pref_enable_force_pip"),
-                                    strRes("piko_pref_enable_force_pip_desc"),
-                                    Settings.PREMIUM_ENABLE_FORCE_PIP
-                            )
-                    );
-                }
-
-                addPreference(category,
-                        helper.buttonPreference(
-                                strRes("piko_pref_undo_posts_btn"),
-                                "",
-                                Settings.PREMIUM_UNDO_POSTS.key
+                                strEnableRes("piko_pref_enable_force_pip"),
+                                strRes("piko_pref_enable_force_pip_desc"),
+                                Settings.PREMIUM_ENABLE_FORCE_PIP
                         )
                 );
             }
+
+            addPreference(category,
+                    helper.buttonPreference(
+                            strRes("piko_pref_undo_posts_btn"),
+                            "",
+                            Settings.PREMIUM_UNDO_POSTS.key
+                    )
+            );
+        }
 
         if (SettingsStatus.navBarCustomisation) {
             addPreference(category,
@@ -87,31 +84,30 @@ public class ScreenBuilder {
     public void buildDownloadSection(boolean buildCategory){
         if (!(SettingsStatus.enableDownloadSection())) return;
             
-            LegacyTwitterPreferenceCategory category = null;
-                if(buildCategory)
-                    category = preferenceCategory(strRes("piko_title_download"));
-            if (SettingsStatus.changeDownloadEnabled) {
-                addPreference(category,helper.listPreference(
-                        strRes("piko_pref_download_path"),
-                        strRes("piko_pref_download_path_desc"),
-                        Settings.VID_PUBLIC_FOLDER
-                ));
-                addPreference(category,helper.editTextPreference(
-                        strRes("piko_pref_download_folder"),
-                        strRes("piko_pref_download_folder_desc"),
-                        Settings.VID_SUBFOLDER
-                ));
-            }
-            if (SettingsStatus.mediaLinkHandle) {
-                addPreference(category,
-                        helper.listPreference(
-                                strRes("piko_pref_download_media_link_handle"),
-                                "",
-                                Settings.VID_MEDIA_HANDLE
-                        )
-                );
-            }
-        
+        LegacyTwitterPreferenceCategory category = null;
+        if(buildCategory)
+            category = preferenceCategory(strRes("piko_title_download"));
+        if (SettingsStatus.changeDownloadEnabled) {
+            addPreference(category,helper.listPreference(
+                    strRes("piko_pref_download_path"),
+                    strRes("piko_pref_download_path_desc"),
+                    Settings.VID_PUBLIC_FOLDER
+            ));
+            addPreference(category,helper.editTextPreference(
+                    strRes("piko_pref_download_folder"),
+                    strRes("piko_pref_download_folder_desc"),
+                    Settings.VID_SUBFOLDER
+            ));
+        }
+        if (SettingsStatus.mediaLinkHandle) {
+            addPreference(category,
+                    helper.listPreference(
+                            strRes("piko_pref_download_media_link_handle"),
+                            "",
+                            Settings.VID_MEDIA_HANDLE
+                    )
+            );
+        }
     }
 
     public void buildAdsSection(boolean buildCategory){

@@ -1,14 +1,11 @@
 package app.revanced.extension.twitter.entity;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import app.revanced.extension.twitter.entity.Debug;
 import app.revanced.extension.twitter.Utils;
 
 // Lcom/twitter/media/av/model/b0;
 public class Video extends Debug {
-    private Object obj;
+    private final Object obj;
 
     public Video(Object obj) {
         super(obj);
