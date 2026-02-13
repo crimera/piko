@@ -39,8 +39,6 @@ To use these patches in Morphe Manager, follow these steps:
 3. Select "Other apps" on the Morphe Manager home screen
 4. Provide the original APKM file
 5. Wait for patching to complete, install
-
-<img src="docs/images/manager.png" alt="usage" width="200" />
 </div>
 
 </details>
