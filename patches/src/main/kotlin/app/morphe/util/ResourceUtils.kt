@@ -1,6 +1,6 @@
 /*
  * Copyright 2025 Morphe.
- * https://github.com/morpheapp/morphe-patches
+ * https://github.com/MorpheApp/morphe-patches/blob/95e285b9aaa3195fe49fe5326a416043348989e6/patches/src/main/kotlin/app/morphe/util/ResourceUtils.kt
  *
  * File-Specific License Notice (GPLv3 Section 7 Additional Permission).
  *
@@ -112,7 +112,7 @@ fun ResourcePatchContext.copyResources(
         resourceGroup.resources.forEach { resource ->
 
             val resourcePath = "${resourceGroup.resourceDirectoryName}/$resource"
-            var targetPath = "${resourceGroup.resourceDirectoryName}/$resourcePrefix$resource"
+            val targetPath = "${resourceGroup.resourceDirectoryName}/$resourcePrefix$resource"
 
             Files.copy(
                 inputStreamFromBundledResource(sourceResourceDirectory, resourcePath)!!,

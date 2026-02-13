@@ -1,6 +1,6 @@
 /*
  * Copyright 2025 Morphe.
- * https://github.com/morpheapp/morphe-patches
+ * https://github.com/MorpheApp/morphe-patches/blob/95e285b9aaa3195fe49fe5326a416043348989e6/patches/src/main/kotlin/app/morphe/util/PatchListGenerator.kt
  *
  * File-Specific License Notice (GPLv3 Section 7 Additional Permission).
  *

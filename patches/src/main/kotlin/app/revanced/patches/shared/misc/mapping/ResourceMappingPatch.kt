@@ -1,6 +1,6 @@
 /*
  * Copyright 2025 Morphe.
- * https://github.com/morpheapp/morphe-patches
+ * https://github.com/MorpheApp/morphe-patches/blob/0736833d29ed8481e1119f7f4bb2ba70342418c5/patches/src/main/kotlin/app/morphe/patches/shared/misc/mapping/ResourceMappingPatch.kt
  *
  * File-Specific License Notice (GPLv3 Section 7 Additional Permission).
  *
