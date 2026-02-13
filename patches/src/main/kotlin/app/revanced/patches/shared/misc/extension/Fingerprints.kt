@@ -1,6 +1,6 @@
 package app.revanced.patches.shared.misc.extension
 
-import app.revanced.patcher.fingerprint
+import app.morphe.patcher.fingerprint
 import com.android.tools.smali.dexlib2.AccessFlags
 
 internal val revancedUtilsPatchesVersionFingerprint =

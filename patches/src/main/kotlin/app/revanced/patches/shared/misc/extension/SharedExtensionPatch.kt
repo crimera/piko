@@ -1,13 +1,13 @@
 package app.revanced.patches.shared.misc.extension
 
-import app.revanced.patcher.Fingerprint
-import app.revanced.patcher.FingerprintBuilder
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.BytecodePatchContext
-import app.revanced.patcher.patch.PatchException
-import app.revanced.patcher.patch.bytecodePatch
-import app.revanced.util.returnEarly
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.FingerprintBuilder
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.fingerprint
+import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.returnEarly
 import com.android.tools.smali.dexlib2.iface.Method
 import java.net.URLDecoder
 import java.util.jar.JarFile
@@ -25,7 +25,7 @@ fun sharedExtensionPatch(
 ) = bytecodePatch {
     dependsOn(sharedExtensionPatch(*hooks))
 
-    extendWith("extensions/$extensionName.rve")
+    extendWith("extensions/$extensionName.mpe")
 }
 
 /**
@@ -36,11 +36,12 @@ fun sharedExtensionPatch(
  */
 fun sharedExtensionPatch(vararg hooks: ExtensionHook) =
     bytecodePatch {
-        extendWith("extensions/shared.rve")
+        extendWith("extensions/shared.mpe")
 
         execute {
-            if (classes.none { EXTENSION_CLASS_DESCRIPTOR == it.type }) {
-                throw PatchException("Shared extension is not available. This patch can not succeed without it.")
+            if (classDefByOrNull(EXTENSION_CLASS_DESCRIPTOR) == null) {
+                throw PatchException("Shared extension class is not found. " +
+                        "This patch can not succeed without it.")
             }
         }
 

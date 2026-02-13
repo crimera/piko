@@ -3,8 +3,8 @@ package app.crimera.patches.twitter.misc.selectabletext
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.patch.bytecodePatch
-import app.revanced.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.resourcePatch
 import org.w3c.dom.Element
 
 private val selectableTextResourcePatch =

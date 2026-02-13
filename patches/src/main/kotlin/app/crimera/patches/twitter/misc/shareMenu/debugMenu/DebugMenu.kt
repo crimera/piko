@@ -5,7 +5,7 @@ import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.actionEnumsFingerprint
 import app.crimera.patches.twitter.misc.shareMenu.hooks.registerButton
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
 val debugMenu =

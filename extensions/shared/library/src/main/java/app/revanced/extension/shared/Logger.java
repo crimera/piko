@@ -16,7 +16,7 @@ import app.revanced.extension.shared.settings.BaseSettings;
 import app.revanced.extension.shared.settings.preference.LogBufferManager;
 
 /**
- * ReVanced specific logger.  Logging is done to standard device log (accessible thru ADB),
+ * Morphe specific logger.  Logging is done to standard device log (accessible thru ADB),
  * and additionally accessible thru {@link LogBufferManager}.
  *
  * All methods are thread safe, and are safe to call even
@@ -45,7 +45,7 @@ public class Logger {
     /**
      * Log tag prefix. Only used for system logging.
      */
-    private static final String REVANCED_LOG_TAG_PREFIX = "revanced: ";
+    private static final String MORPHE_LOG_TAG_PREFIX = "morphe: ";
 
     private static final String LOGGER_CLASS_NAME = Logger.class.getName();
 
@@ -78,7 +78,7 @@ public class Logger {
     /**
      * Internal method to handle logging to Android Log and {@link LogBufferManager}.
      * Appends the log message, stack trace (if enabled), and exception (if present) to logBuffer
-     * with class name but without 'revanced:' prefix.
+     * with class name but without 'morphe:' prefix.
      *
      * @param logLevel          The log level.
      * @param message           Log message object.
@@ -114,11 +114,11 @@ public class Logger {
             logText += stackTrace.substring(loggerBegins);
         }
 
-        // Do not include "revanced:" prefix in clipboard logs.
+        // Do not include "morphe:" prefix in clipboard logs.
         String managerToastString = className + ": " + logText;
         LogBufferManager.appendToLogBuffer(managerToastString);
 
-        String logTag = REVANCED_LOG_TAG_PREFIX + className;
+        String logTag = MORPHE_LOG_TAG_PREFIX + className;
         switch (logLevel) {
             case DEBUG:
                 if (ex == null) Log.d(logTag, logText);

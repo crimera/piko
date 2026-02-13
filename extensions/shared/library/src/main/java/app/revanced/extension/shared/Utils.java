@@ -67,7 +67,6 @@ import java.util.regex.Pattern;
 import app.revanced.extension.shared.settings.AppLanguage;
 import app.revanced.extension.shared.settings.BaseSettings;
 import app.revanced.extension.shared.settings.BooleanSetting;
-import app.revanced.extension.shared.settings.preference.ReVancedAboutPreference;
 
 public class Utils {
 
@@ -1392,13 +1391,6 @@ public class Utils {
         for (Pair<String, Preference> pair : preferences) {
             int order = index++;
             Preference pref = pair.second;
-
-            // Move any screens, intents, and the one off About preference to the top.
-            if (pref instanceof PreferenceScreen || pref instanceof ReVancedAboutPreference
-                    || pref.getIntent() != null) {
-                // Any arbitrary large number.
-                order -= 1000;
-            }
 
             pref.setOrder(order);
         }

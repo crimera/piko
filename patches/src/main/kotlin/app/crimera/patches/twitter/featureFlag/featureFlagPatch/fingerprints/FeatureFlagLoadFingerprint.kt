@@ -1,6 +1,6 @@
 package app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints
 
-import app.revanced.patcher.fingerprint
+import app.morphe.patcher.fingerprint
 
 val featureFlagLoadFingerprint =
     fingerprint {

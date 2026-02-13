@@ -1,6 +1,6 @@
 package app.crimera.patches.twitter.misc.settings
 
-import app.revanced.patcher.fingerprint
+import app.morphe.patcher.fingerprint
 
 internal val authorizeAppActivity =
     fingerprint {

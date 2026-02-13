@@ -14,7 +14,7 @@ import app.revanced.extension.shared.settings.BaseSettings;
 /**
  * Manages a buffer for storing debug logs from {@link Logger}.
  * Stores just under 1MB of the most recent log data.
- *
+ * <p>
  * All methods are thread-safe.
  */
 public final class LogBufferManager {
@@ -42,7 +42,7 @@ public final class LogBufferManager {
         logBuffer.addLast(message);
         int newSize = logBufferByteSize.addAndGet(message.length());
 
-        // Remove oldest entries if over the log size limits.
+        // Remove the oldest entries if over the log size limits.
         while (newSize > BUFFER_MAX_BYTES || logBuffer.size() > BUFFER_MAX_SIZE) {
             String removed = logBuffer.pollFirst();
             if (removed == null) {
@@ -61,25 +61,25 @@ public final class LogBufferManager {
     public static void exportToClipboard() {
         try {
             if (!BaseSettings.DEBUG.get()) {
-                Utils.showToastShort(str("revanced_debug_logs_disabled"));
+                Utils.showToastShort(str("morphe_debug_logs_disabled"));
                 return;
             }
 
             if (logBuffer.isEmpty()) {
-                Utils.showToastShort(str("revanced_debug_logs_none_found"));
+                Utils.showToastShort(str("morphe_debug_logs_none_found"));
                 clearLogBufferData(); // Clear toast log entry that was just created.
                 return;
             }
 
             // Most (but not all) Android 13+ devices always show a "copied to clipboard" toast
             // and there is no way to programmatically detect if a toast will show or not.
-            // Show a toast even if using Android 13+, but show ReVanced toast first (before copying to clipboard).
-            Utils.showToastShort(str("revanced_debug_logs_copied_to_clipboard"));
+            // Show a toast even if using Android 13+, but show Morphe toast first (before copying to clipboard).
+            Utils.showToastShort(str("morphe_debug_logs_copied_to_clipboard"));
 
             Utils.setClipboard(String.join("\n", logBuffer));
         } catch (Exception ex) {
             // Handle security exception if clipboard access is denied.
-            String errorMessage = String.format(str("revanced_debug_logs_failed_to_export"), ex.getMessage());
+            String errorMessage = String.format(str("morphe_debug_logs_failed_to_export"), ex.getMessage());
             Utils.showToastLong(errorMessage);
             Logger.printDebug(() -> errorMessage, ex);
         }
@@ -88,7 +88,7 @@ public final class LogBufferManager {
     private static void clearLogBufferData() {
         // Cannot simply clear the log buffer because there is no
         // write lock for both the deque and the atomic int.
-        // Instead pop off log entries and decrement the size one by one.
+        // Instead, pop off log entries and decrement the size one by one.
         while (!logBuffer.isEmpty()) {
             String removed = logBuffer.pollFirst();
             if (removed != null) {
@@ -102,12 +102,12 @@ public final class LogBufferManager {
      */
     public static void clearLogBuffer() {
         if (!BaseSettings.DEBUG.get()) {
-            Utils.showToastShort(str("revanced_debug_logs_disabled"));
+            Utils.showToastShort(str("morphe_debug_logs_disabled"));
             return;
         }
 
         // Show toast before clearing, otherwise toast log will still remain.
-        Utils.showToastShort(str("revanced_debug_logs_clear_toast"));
+        Utils.showToastShort(str("morphe_debug_logs_clear_toast"));
         clearLogBufferData();
     }
 }

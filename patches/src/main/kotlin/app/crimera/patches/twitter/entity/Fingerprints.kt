@@ -1,6 +1,6 @@
 package app.crimera.patches.twitter.entity
 
-import app.revanced.patcher.fingerprint
+import app.morphe.patcher.fingerprint
 
 internal fun entityMethodFingerprint(
     className: String,

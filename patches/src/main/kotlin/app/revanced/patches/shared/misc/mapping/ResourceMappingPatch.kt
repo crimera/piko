@@ -1,7 +1,7 @@
 package app.revanced.patches.shared.misc.mapping
 
-import app.revanced.patcher.patch.PatchException
-import app.revanced.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.resourcePatch
 import org.w3c.dom.Element
 import java.util.*
 import java.util.concurrent.Executors

@@ -2,7 +2,7 @@ package app.crimera.patches.twitter.entity
 
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.getReference
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 val tweetInfoEntityPatch =

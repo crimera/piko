@@ -6,14 +6,15 @@ import app.crimera.utils.Constants.ACTIVITY_HOOK_CLASS
 import app.crimera.utils.Constants.ADD_PREF_DESCRIPTOR
 import app.crimera.utils.Constants.DEEPLINK_HOOK_CLASS
 import app.crimera.utils.Constants.SSTS_DESCRIPTOR
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.extensions.InstructionExtensions.removeInstruction
-import app.revanced.patcher.patch.bytecodePatch
-import app.revanced.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
+import app.revanced.patches.all.misc.versioncode.changeVersionCodePatch
 import app.revanced.patches.shared.misc.extension.integrationsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
@@ -31,6 +32,7 @@ val settingsPatch =
             sharedExtensionPatch,
             settingsResourcePatch,
             redirectBMTab,
+            changeVersionCodePatch
         )
 
         execute {

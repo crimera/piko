@@ -1,6 +1,6 @@
 package app.crimera.patches.twitter.entity
 
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.bytecodePatch
 
 val entityGenerator =
     bytecodePatch(

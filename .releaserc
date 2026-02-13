@@ -8,42 +8,39 @@
   ],
   "plugins": [
     [
-      "@semantic-release/commit-analyzer",
-      {
+      "@semantic-release/commit-analyzer", {
         "releaseRules": [
-          { "type": "fix", "release": "patch" },
-          { "type": "feat", "release": "minor" },
-          { "type": "update", "release": "patch" },
-          { "type": "refactor", "release": "patch" },
-          { "type": "perf", "release": "patch" },
           { "type": "build", "scope": "Needs bump", "release": "patch" }
         ]
       }
     ],
+    "@semantic-release/release-notes-generator",
     [
-      "@semantic-release/release-notes-generator",
-      {
-      	"preset": "conventionalcommits",
-        "presetConfig": {
-          "types": [
-            { type: "fix", section: "Bug Fixes", hidden: false },
-            { type: "feat", section: "Features", hidden: false },
-            { type: "update", section: "Updates", hidden: false },
-            { type: "refactor", section: "Refactors", hidden: false },
-            { type: "perf", section: "Perfomance", hidden: false },
-          ]
+      "@MorpheApp/changelog", {
+        "releaseJson": {
+          "path": "patches-bundle.json",
+          "downloadUrlTemplate": "https://github.com/${owner}/${repo}/releases/download/v${version}/patches-${version}.mpp",
+          "signatureUrlTemplate": "https://github.com/${owner}/${repo}/releases/download/v${version}/patches-${version}.mpp.asc"
         }
       }
     ],
-    "@semantic-release/changelog",
     "gradle-semantic-release-plugin",
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "jq '.version=\"${nextRelease.version}\"' patches-list.json > patches-list.json.tmp && mv patches-list.json.tmp patches-list.json"
+      }
+    ],
     [
       "@semantic-release/git",
       {
         "assets": [
           "CHANGELOG.md",
-          "gradle.properties"
-        ]
+          "gradle.properties",
+          "patches-bundle.json",
+          "patches-list.json"
+        ],
+        "message": "chore: Release v${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
     [
@@ -51,7 +48,7 @@
       {
         "assets": [
           {
-            "path": "patches/build/libs/patches-!(*sources*|*javadoc*).rvp?(.asc)"
+            "path": "patches/build/libs/patches-!(*sources*|*javadoc*).mpp?(.asc)"
           }
         ],
         "successComment": false

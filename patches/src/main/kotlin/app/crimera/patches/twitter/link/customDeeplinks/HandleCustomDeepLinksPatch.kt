@@ -1,9 +1,9 @@
 package app.crimera.patches.twitter.link.customDeeplinks
 
 import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.fingerprint
+import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.AccessFlags
 
 private val urlInterpreterActivityCreateFingerprint =

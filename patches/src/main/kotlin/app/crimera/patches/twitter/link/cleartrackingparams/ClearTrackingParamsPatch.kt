@@ -3,9 +3,9 @@ package app.crimera.patches.twitter.link.cleartrackingparams
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.fingerprint
+import app.morphe.patcher.patch.bytecodePatch
 
 // https://github.com/FrozenAlex/revanced-patches-new
 internal val addSessionTokenFingerprint =
