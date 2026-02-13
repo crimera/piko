@@ -1,22 +1,22 @@
 package app.crimera.patches.twitter.misc.customize.exploretabs
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
 import app.crimera.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-private val customiseExploreTabsFingerprint =
-    fingerprint {
-        opcodes(Opcode.NEW_INSTANCE)
-        custom { it, _ ->
-            it.definingClass.endsWith("JsonPageTabs;")
-        }
-    }
+private object CustomiseExploreTabsFingerprint : Fingerprint(
+    definingClass = "JsonPageTabs;",
+    filters = listOf(
+        opcode(Opcode.NEW_INSTANCE)
+    )
+)
 
 @Suppress("unused")
 val customiseExploreTabsPatch =
@@ -28,7 +28,7 @@ val customiseExploreTabsPatch =
 
         execute {
 
-            val method = customiseExploreTabsFingerprint.method
+            val method = CustomiseExploreTabsFingerprint.method
 
             val instructions = method.instructions
 
@@ -41,6 +41,6 @@ val customiseExploreTabsPatch =
                 move-result-object v1
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.enableSettings("exploreTabCustomisation")
+            SettingsStatusLoadFingerprint.enableSettings("exploreTabCustomisation")
         }
     }

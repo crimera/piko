@@ -1,25 +1,27 @@
 package app.crimera.patches.twitter.timeline.showSourceLabel
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.crimera.utils.extractDescriptors
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction11n
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 
-private val sourceLabelFingerprint =
-    fingerprint {
-        strings("show_tweet_source_disabled")
-    }
+private object SourceLabelFingerprint : Fingerprint(
+    filters = listOf(
+        string("show_tweet_source_disabled")
+    )
+)
 
 @Suppress("unused")
 val showSourceLabel =
@@ -31,7 +33,7 @@ val showSourceLabel =
         dependsOn(settingsPatch)
 
         execute {
-            sourceLabelFingerprint.method.apply {
+            SourceLabelFingerprint.method.apply {
 
                 val igetWide = instructions.first { it.opcode == Opcode.IGET_WIDE }
                 val igetWideIns = igetWide as Instruction22c
@@ -62,7 +64,7 @@ val showSourceLabel =
                     ExternalLabel("piko", igetWide),
                 )
 
-                settingsStatusLoadFingerprint.enableSettings("showSourceLabel")
+                SettingsStatusLoadFingerprint.enableSettings("showSourceLabel")
             }
         }
     }

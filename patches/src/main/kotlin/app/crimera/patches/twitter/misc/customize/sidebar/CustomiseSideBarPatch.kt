@@ -1,25 +1,22 @@
 package app.crimera.patches.twitter.misc.customize.sidebar
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
 import app.crimera.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
-private val customiseNavBarFingerprint =
-    fingerprint {
-        returns("Ljava/lang/Object")
-        strings("android_global_navigation_top_level_monetization_enabled")
-        custom { it, _ ->
-            it.name == "invoke"
-        }
-    }
+private object customiseNavBarFingerprint : Fingerprint(
+    name = "invoke",
+    returnType = "Ljava/lang/Object",
+    strings = listOf("android_global_navigation_top_level_monetization_enabled")
+)
 
 @Suppress("unused")
 val customiseSideBarPatch =
@@ -49,6 +46,6 @@ val customiseSideBarPatch =
                 """.trimIndent()
 
             method.addInstructionsWithLabels(return_obj, METHOD)
-            settingsStatusLoadFingerprint.enableSettings("sideBarCustomisation")
+            SettingsStatusLoadFingerprint.enableSettings("sideBarCustomisation")
         }
     }

@@ -1,26 +1,23 @@
 package app.crimera.patches.twitter.timeline.banner
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-private val hideBannerFingerprint =
-    fingerprint {
-        returns("Z")
-        opcodes(
-            Opcode.RETURN,
-        )
-
-        custom { it, _ ->
-            it.definingClass == "Lcom/twitter/timeline/newtweetsbanner/BaseNewTweetsBannerPresenter;"
-        }
-    }
+private object HideBannerFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/timeline/newtweetsbanner/BaseNewTweetsBannerPresenter;",
+    returnType = "Z",
+    filters = listOf(
+        opcode(Opcode.RETURN)
+    )
+)
 
 @Suppress("unused")
 val hideBannerPatch =
@@ -32,7 +29,7 @@ val hideBannerPatch =
         dependsOn(settingsPatch)
 
         execute {
-            val method = hideBannerFingerprint.method
+            val method = HideBannerFingerprint.method
             val instuctions = method.instructions
 
             val loc = instuctions.first { it.opcode == Opcode.IF_NEZ }.location.index
@@ -48,6 +45,6 @@ val hideBannerPatch =
                 """.trimIndent(),
             )
 
-            settingsStatusLoadFingerprint.enableSettings("hideBanner")
+            SettingsStatusLoadFingerprint.enableSettings("hideBanner")
         }
     }

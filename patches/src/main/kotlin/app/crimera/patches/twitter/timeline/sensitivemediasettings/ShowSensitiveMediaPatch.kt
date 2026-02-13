@@ -1,25 +1,22 @@
 package app.crimera.patches.twitter.timeline.sensitivemediasettings
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
 // Credits to @Cradlesofashes
 
-private val sensitiveMediaSettingsPatchFingerprint =
-    fingerprint {
-        returns("Ljava/lang/Object")
-
-        custom { it, _ ->
-            it.definingClass == "Lcom/twitter/model/json/core/JsonSensitiveMediaWarning\$\$JsonObjectMapper;" && it.name == "parse"
-        }
-    }
+private object sensitiveMediaSettingsPatchFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/model/json/core/JsonSensitiveMediaWarning\$\$JsonObjectMapper;",
+    name = "parse",
+    returnType = "Ljava/lang/Object",
+)
 
 @Suppress("unused")
 val sensitiveMediaPatch =
@@ -44,6 +41,6 @@ val sensitiveMediaPatch =
                 move-result-object p1
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.enableSettings("showSensitiveMedia")
+            SettingsStatusLoadFingerprint.enableSettings("showSensitiveMedia")
         }
     }

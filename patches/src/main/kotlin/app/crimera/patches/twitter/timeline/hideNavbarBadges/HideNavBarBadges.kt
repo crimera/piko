@@ -1,19 +1,17 @@
 package app.crimera.patches.twitter.timeline.hideNavbarBadges
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants
 import app.crimera.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
 
-private val setBadgeNumberFingerprint =
-    fingerprint {
-        custom { methodDef, classDef ->
-            classDef.type.endsWith("BadgeableTabView;") && methodDef.name == "setBadgeNumber"
-        }
-    }
+private object setBadgeNumberFingerprint : Fingerprint(
+    definingClass = "/BadgeableTabView;",
+    name = "setBadgeNumber"
+)
 
 @Suppress("unused")
 val hideNavBarBadgesPatch =
@@ -33,7 +31,7 @@ val hideNavBarBadgesPatch =
                     move-result p1
                     """.trimIndent(),
                 )
-                settingsStatusLoadFingerprint.enableSettings("hideNavbarBadge")
+                SettingsStatusLoadFingerprint.enableSettings("hideNavbarBadge")
             }
         }
     }

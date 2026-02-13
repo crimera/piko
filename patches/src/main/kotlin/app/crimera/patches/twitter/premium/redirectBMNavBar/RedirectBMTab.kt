@@ -1,21 +1,18 @@
 package app.crimera.patches.twitter.premium.redirectBMNavBar
 
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 
 // Credits @Ouxyl
-private val tabLayoutFingerprint =
-    fingerprint {
-
-        custom { it, _ ->
-            it.definingClass == "Lcom/google/android/material/tabs/TabLayout;" && it.name == "q"
-        }
-    }
+private object tabLayoutFingerprint : Fingerprint(
+    definingClass = "Lcom/google/android/material/tabs/TabLayout;",
+    name = "q"
+)
 
 val redirectBMTab =
     bytecodePatch(

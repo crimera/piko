@@ -14,27 +14,27 @@ val tweetEntityPatch =
         description = "For tweet entity reflection",
     ) {
         execute {
-            getUserNameMethodCaller.stringMatches?.forEach { match ->
+            GetUserNameMethodCaller.stringMatches?.forEach { match ->
                 val str = match.string
                 if (str == "Name") {
-                    val methodName = getUserNameMethodCaller.getMethodName(match.index + 1)
-                    tweetProfileNameFingerprint.changeFirstString(methodName)
+                    val methodName = GetUserNameMethodCaller.getMethodName(match.index + 1)
+                    TweetProfileNameFingerprint.changeFirstString(methodName)
                 }
                 if (str == "User Name") {
-                    val methodName = getUserNameMethodCaller.getMethodName(match.index + 1)
-                    tweetUsernameFingerprint.changeFirstString(methodName)
+                    val methodName = GetUserNameMethodCaller.getMethodName(match.index + 1)
+                    TweetUsernameFingerprint.changeFirstString(methodName)
                 }
             }
 
 // ------------
-            val tweetObjectMethods = tweetObjectFingerprint.classDef.methods
+            val tweetObjectMethods = TweetObjectFingerprint.classDef.methods
 
             val getTweetUserIdMethod =
                 tweetObjectMethods
                     .last {
                         it.returnType == "J"
                     }.name
-            tweetUserIdFingerprint.changeFirstString(getTweetUserIdMethod)
+            TweetUserIdFingerprint.changeFirstString(getTweetUserIdMethod)
 // ------------
             val getMediaObjectMethod =
                 tweetObjectMethods.firstOrNull { methodDef ->
@@ -50,13 +50,13 @@ val tweetEntityPatch =
                             Opcode.RETURN_OBJECT,
                         )
                 } ?: throw PatchException("getMediaObject not found")
-            tweetMediaFingerprint.changeFirstString(getMediaObjectMethod.name)
+            TweetMediaFingerprint.changeFirstString(getMediaObjectMethod.name)
 
             val extMediaListField =
-                tweetMediaEntityClassFingerprint.classDef.fields
+                TweetMediaEntityClassFingerprint.classDef.fields
                     .first { it.type.contains("List") }
                     .name
-            tweetMediaFingerprint.changeStringAt(1, extMediaListField)
+            TweetMediaFingerprint.changeStringAt(1, extMediaListField)
 
             // ------------
             val getNoteTweetMethod =
@@ -64,20 +64,20 @@ val tweetEntityPatch =
                     .firstOrNull { it.returnType.contains("notetweet") }
                     ?.name
                     ?: throw PatchException("getNoteTweetMethod not found")
-            tweetLongTextFingerprint.changeFirstString(getNoteTweetMethod)
+            TweetLongTextFingerprint.changeFirstString(getNoteTweetMethod)
 
             val longTextField =
-                longTweetObjectFingerprint.classDef.fields
+                LongTweetObjectFingerprint.classDef.fields
                     .first { it.type == "Ljava/lang/String;" }
                     .name
-            tweetLongTextFingerprint.changeStringAt(1, longTextField)
+            TweetLongTextFingerprint.changeStringAt(1, longTextField)
 
-            quotedViewSetAccessibilityFingerprint.method.apply {
+            QuotedViewSetAccessibilityFingerprint.method.apply {
                 val newInstanceIndex = indexOfFirstInstruction(Opcode.NEW_INSTANCE)
                 val invokeVirtualRangeInst =
                     instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL_RANGE && it.location.index < newInstanceIndex }
-                tweetShortTextFingerprint
-                    .changeFirstString(quotedViewSetAccessibilityFingerprint.getMethodName(invokeVirtualRangeInst.location.index))
+                TweetShortTextFingerprint
+                    .changeFirstString(QuotedViewSetAccessibilityFingerprint.getMethodName(invokeVirtualRangeInst.location.index))
             }
 
 // End

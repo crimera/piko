@@ -1,15 +1,14 @@
 package app.crimera.patches.twitter.misc.customize.replySorting
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -17,21 +16,17 @@ import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
-private val replySortingInvokeClassFinderFingerprint =
-    fingerprint {
-        custom { it, _ ->
-            it.definingClass == "Lcom/twitter/tweetview/focal/ui/replysorting/ReplySortingViewDelegateBinder;"
-        }
-    }
+private object ReplySortingInvokeClassFinderFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/tweetview/focal/ui/replysorting/ReplySortingViewDelegateBinder;"
+)
 
-private val replySortingLastSelectedFinderFingerprint =
-    fingerprint {
-        strings(
-            "controller_data",
-            "reply_sorting_enabled",
-            "reply_sorting",
-        )
-    }
+private object replySortingLastSelectedFinderFingerprint : Fingerprint(
+    strings = listOf(
+        "controller_data",
+        "reply_sorting_enabled",
+        "reply_sorting",
+    )
+)
 
 @Suppress("unused")
 val defaultReplySortingPatch =
@@ -43,7 +38,7 @@ val defaultReplySortingPatch =
 
         execute {
             val replySortingInvokeClass =
-                replySortingInvokeClassFinderFingerprint.classDef.fields
+                ReplySortingInvokeClassFinderFingerprint.classDef.fields
                     .first()
                     .type
             val method = mutableClassDefBy(replySortingInvokeClass).methods.first()
@@ -77,6 +72,6 @@ val defaultReplySortingPatch =
                         """.trimIndent(),
                     )
                 }
-            settingsStatusLoadFingerprint.enableSettings("defaultReplySortFilter")
+            SettingsStatusLoadFingerprint.enableSettings("defaultReplySortFilter")
         }
     }

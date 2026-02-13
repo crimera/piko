@@ -1,6 +1,6 @@
 package app.crimera.patches.twitter.misc.shareMenu.hooks
 
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.addAction
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.addButtonInstructions
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.shareMenuButtonFuncCallFingerprint
@@ -25,7 +25,7 @@ fun shareMenuButtonInjection(
 ) {
     val viewDebugDialogReference =
         (
-            shareMenuButtonAddHook
+            ShareMenuButtonAddHook
                 .method
                 .implementation
                 ?.instructions
@@ -80,5 +80,5 @@ fun shareMenuButtonInjection(
         viewDebugDialogReference,
     )
 
-    settingsStatusLoadFingerprint.enableSettings(statusFunctionName)
+    SettingsStatusLoadFingerprint.enableSettings(statusFunctionName)
 }

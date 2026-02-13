@@ -1,22 +1,24 @@
 package app.crimera.patches.twitter.featureFlag.featureFlagPatch
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.FSTS_DESCRIPTOR
 import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
-import app.revanced.patches.shared.misc.extension.integrationsUtilsFingerprint
+import app.morphe.patcher.string
+import app.revanced.patches.shared.misc.extension.ExtensionsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 
-private val featureFlagFingerprint =
-    fingerprint {
-        strings("feature_switches_configs_crashlytics_enabled")
-    }
+private object FeatureFlagFingerprint : Fingerprint(
+    filters = listOf(
+        string("feature_switches_configs_crashlytics_enabled")
+    )
+)
 
 val featureFlagPatch =
     bytecodePatch(
@@ -26,7 +28,7 @@ val featureFlagPatch =
         dependsOn(featureFlagResourcePatch, settingsPatch)
         execute {
 
-            val methods = featureFlagFingerprint.classDef.methods
+            val methods = FeatureFlagFingerprint.classDef.methods
             val booleanMethod = methods.first { it.returnType == "Z" && it.parameters == listOf("Ljava/lang/String;", "Z") }
 
             val METHOD =
@@ -42,11 +44,11 @@ val featureFlagPatch =
 
             booleanMethod.addInstructions(loc + 1, METHOD)
 
-            integrationsUtilsFingerprint.method.addInstruction(
+            ExtensionsUtilsFingerprint.method.addInstruction(
                 1,
                 "$FSTS_DESCRIPTOR->load()V",
             )
 
-            settingsStatusLoadFingerprint.enableSettings("enableFeatureFlags")
+            SettingsStatusLoadFingerprint.enableSettings("enableFeatureFlags")
         }
     }

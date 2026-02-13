@@ -1,26 +1,23 @@
 package app.crimera.patches.twitter.misc.searchsuggestions
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 
-private val searchSuggestionFingerprint =
-    fingerprint {
-        returns("Ljava/util/Collection;")
-        custom { _, classDef ->
-            classDef.contains("/search/provider/")
-        }
-        strings(
-            "type",
-            "query_id",
-        )
-    }
+private object SearchSuggestionFingerprint : Fingerprint(
+    definingClass = "/search/provider/",
+    returnType = "Ljava/util/Collection;",
+    strings = listOf(
+        "type",
+        "query_id",
+    )
+)
 
 @Suppress("unused")
 val RemoveSearchSuggestions =
@@ -33,7 +30,7 @@ val RemoveSearchSuggestions =
 
         execute {
 
-            searchSuggestionFingerprint.method.apply {
+            SearchSuggestionFingerprint.method.apply {
 
                 val firstInstruction = getInstruction(0)
 
@@ -49,7 +46,7 @@ val RemoveSearchSuggestions =
                     ExternalLabel("cond_1212", firstInstruction),
                 )
 
-                settingsStatusLoadFingerprint.enableSettings("removeSearchSuggestions")
+                SettingsStatusLoadFingerprint.enableSettings("removeSearchSuggestions")
             }
         }
     }

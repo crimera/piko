@@ -12,31 +12,31 @@ val extMediaEntityPatch =
         description = "For extended media entity reflection",
     ) {
         execute {
-            extMediaHighResVideoMethodFinder.stringMatches?.forEach { match ->
+            ExtMediaHighResVideoMethodFinder.stringMatches?.forEach { match ->
                 val str = match.string
                 if (str == "null cannot be cast to non-null type com.twitter.model.dm.attachment.DMMediaAttachment") {
                     val inst =
-                        extMediaHighResVideoMethodFinder.method.instructions.first {
+                        ExtMediaHighResVideoMethodFinder.method.instructions.first {
                             it.opcode == Opcode.INVOKE_VIRTUAL &&
                                 it.location.index > match.index
                         }
-                    val methodName = extMediaHighResVideoMethodFinder.getMethodName(inst.location.index)
-                    extMediaHighResVideoFingerprint.changeFirstString(methodName)
+                    val methodName = ExtMediaHighResVideoMethodFinder.getMethodName(inst.location.index)
+                    ExtMediaHighResVideoFingerprint.changeFirstString(methodName)
                     return@forEach
                 }
             }
 
             // ------------
             val imageFieldName =
-                extMediaGetImageMethodFinder.getFieldName(
-                    extMediaGetImageMethodFinder.method
+                ExtMediaGetImageMethodFinder.getFieldName(
+                    ExtMediaGetImageMethodFinder.method
                         .instructions
                         .last {
                             it.opcode ==
                                 Opcode.IGET_OBJECT
                         }.location.index,
                 )
-            extMediaGetImageFingerprint.changeFirstString(imageFieldName)
+            ExtMediaGetImageFingerprint.changeFirstString(imageFieldName)
 // ------------
         }
     }

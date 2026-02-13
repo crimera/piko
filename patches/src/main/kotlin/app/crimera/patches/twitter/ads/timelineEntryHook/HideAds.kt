@@ -1,28 +1,25 @@
 package app.crimera.patches.twitter.ads.timelineEntryHook
 
 import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.featureFlagLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants
 import app.crimera.utils.enableSettings
 import app.crimera.utils.flagSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
-private val hidePromotedTrendFingerprint =
-    fingerprint {
-        returns("Ljava/lang/Object")
-        custom { it, _ ->
-            it.definingClass == "Lcom/twitter/model/json/timeline/urt/JsonTimelineTrend;"
-        }
-    }
+private object HidePromotedTrendFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/model/json/timeline/urt/JsonTimelineTrend;",
+    returnType = "Ljava/lang/Object",
+)
 
 @Suppress("unused")
 val hideAds =
@@ -34,13 +31,13 @@ val hideAds =
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
             // Normal Ads.
-            settingsStatusLoadFingerprint.enableSettings("hideAds")
+            SettingsStatusLoadFingerprint.enableSettings("hideAds")
 
             // Google Ads.
             featureFlagLoadFingerprint.flagSettings("hideGoogleAds")
 
             // Promoted Trends
-            val method = hidePromotedTrendFingerprint.method
+            val method = HidePromotedTrendFingerprint.method
             val instructions = method.instructions
 
             val return_obj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }

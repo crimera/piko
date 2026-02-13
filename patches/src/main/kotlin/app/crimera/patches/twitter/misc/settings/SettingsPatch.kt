@@ -15,7 +15,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.revanced.patches.all.misc.versioncode.changeVersionCodePatch
-import app.revanced.patches.shared.misc.extension.integrationsUtilsFingerprint
+import app.revanced.patches.shared.misc.extension.ExtensionsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
@@ -36,7 +36,7 @@ val settingsPatch =
         )
 
         execute {
-            val methods = settingsFingerprint.classDef.methods
+            val methods = SettingsFingerprint.classDef.methods
             val initMethod = methods.first()
             val arrayCreation =
                 initMethod
@@ -89,7 +89,7 @@ val settingsPatch =
                 ExternalLabel("cont", prefCLickedMethod.getInstruction(constIndex)),
             )
 
-            val authAppMethod = authorizeAppActivity.method
+            val authAppMethod = AuthorizeAppActivity.method
             authAppMethod.addInstructionsWithLabels(
                 1,
                 """
@@ -103,7 +103,7 @@ val settingsPatch =
                 ),
             )
 
-            val urlInterActMethod = urlInterpreterActivity.method
+            val urlInterActMethod = UrlInterpreterActivity.method
             val instructions = urlInterActMethod.instructions
             val loc = instructions.first { it.opcode == Opcode.INVOKE_SUPER }.location.index + 1
             urlInterActMethod.addInstructionsWithLabels(
@@ -119,7 +119,7 @@ val settingsPatch =
                 ),
             )
 
-            integrationsUtilsFingerprint.method.addInstruction(
+            ExtensionsUtilsFingerprint.method.addInstruction(
                 0,
                 "$SSTS_DESCRIPTOR->load()V",
             )

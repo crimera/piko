@@ -1,23 +1,20 @@
 package app.crimera.patches.twitter.timeline.hideSocialProof
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 
-private val hideSocialProofPatchFingerprint =
-    fingerprint {
-
-        custom { methodDef, classDef ->
-            classDef.type.endsWith("SocialProofView;") && methodDef.name == "setSocialProofData"
-        }
-    }
+private object HideSocialProofPatchFingerprint : Fingerprint(
+    definingClass = "SocialProofView;",
+    name = "setSocialProofData"
+)
 
 @Suppress("unused")
 val hideSocialProofPatch =
@@ -31,7 +28,7 @@ val hideSocialProofPatch =
         execute {
             val HOOK_DESCRIPTOR =
                 "invoke-static {}, $PREF_DESCRIPTOR;->hideSocialProof()Z"
-            val method = hideSocialProofPatchFingerprint.method
+            val method = HideSocialProofPatchFingerprint.method
             val instructions = method.instructions
 
             method.addInstructionsWithLabels(
@@ -44,6 +41,6 @@ val hideSocialProofPatch =
                 """.trimIndent(),
                 ExternalLabel("piko", instructions.first { it.opcode == Opcode.CONST_4 }),
             )
-            settingsStatusLoadFingerprint.enableSettings("hideSocialProof")
+            SettingsStatusLoadFingerprint.enableSettings("hideSocialProof")
         }
     }

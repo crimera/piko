@@ -1,7 +1,7 @@
 package app.crimera.patches.twitter.timeline.deleteFromDatabase
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
 
@@ -15,6 +15,6 @@ val deleteFromDatabasePatch =
         dependsOn(settingsPatch)
 
         execute {
-            settingsStatusLoadFingerprint.enableSettings("deleteFromDb")
+            SettingsStatusLoadFingerprint.enableSettings("deleteFromDb")
         }
     }

@@ -1,22 +1,20 @@
 package app.crimera.patches.twitter.misc.customize.typeAheadResponse
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
 import app.crimera.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-private val customiseTypeAheadResponseFingerprint =
-    fingerprint {
-        returns("Ljava/lang/Object")
-        custom { methodDef, _ ->
-            methodDef.name == "parse" && methodDef.definingClass.endsWith("JsonTypeaheadResponse\$\$JsonObjectMapper;")
-        }
-    }
+private object CustomiseTypeAheadResponseFingerprint : Fingerprint(
+    definingClass = "JsonTypeaheadResponse\$\$JsonObjectMapper;",
+    name = "parse",
+    returnType = "Ljava/lang/Object"
+)
 
 @Suppress("unused")
 val customiseTypeAheadResponsePatch =
@@ -27,7 +25,7 @@ val customiseTypeAheadResponsePatch =
         dependsOn(settingsPatch)
 
         execute {
-            val method = customiseTypeAheadResponseFingerprint.method
+            val method = CustomiseTypeAheadResponseFingerprint.method
 
             val instructions = method.instructions
 
@@ -40,6 +38,6 @@ val customiseTypeAheadResponsePatch =
             move-result-object p1
             """,
             )
-            settingsStatusLoadFingerprint.enableSettings("typeaheadCustomisation")
+            SettingsStatusLoadFingerprint.enableSettings("typeaheadCustomisation")
         }
     }

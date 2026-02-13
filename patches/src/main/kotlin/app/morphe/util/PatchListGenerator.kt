@@ -27,7 +27,7 @@
  *
  * All other terms of the Morphe Patches LICENSE, including Section 7c
  * (Project Name Restriction) and the GPLv3 itself, remain fully
-  * applicable to this file.
+ * applicable to this file.
  */
 
 package app.morphe.util

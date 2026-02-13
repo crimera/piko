@@ -1,25 +1,24 @@
 package app.crimera.patches.twitter.misc.customize.searchtabs
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
 import app.crimera.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
-private val customiseSearchTabsPatchFingerprint =
-    fingerprint {
-        returns("Ljava/util/List;")
-        strings(
-            "search_features_media_tab_enabled",
-            "search_features_lists_search_enabled",
-        )
-    }
+private object CustomiseSearchTabsPatchFingerprint : Fingerprint(
+    returnType = "Ljava/util/List;",
+    strings = listOf(
+        "search_features_media_tab_enabled",
+        "search_features_lists_search_enabled",
+    )
+)
 
 @Suppress("unused")
 val customiseSearchTabsPatch =
@@ -31,7 +30,7 @@ val customiseSearchTabsPatch =
 
         execute {
 
-            val method = customiseSearchTabsPatchFingerprint.method
+            val method = CustomiseSearchTabsPatchFingerprint.method
             val instructions = method.instructions
 
             val returnObj_loc = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
@@ -45,6 +44,6 @@ val customiseSearchTabsPatch =
                 move-result-object v$r0
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.enableSettings("searchTabCustomisation")
+            SettingsStatusLoadFingerprint.enableSettings("searchTabCustomisation")
         }
     }

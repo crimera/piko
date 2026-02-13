@@ -1,7 +1,7 @@
 package app.crimera.patches.twitter.misc.selectabletext
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
@@ -40,6 +40,6 @@ val selectableTextPatch =
         dependsOn(settingsPatch, selectableTextResourcePatch)
 
         execute {
-            settingsStatusLoadFingerprint.enableSettings("selectableText")
+            SettingsStatusLoadFingerprint.enableSettings("selectableText")
         }
     }

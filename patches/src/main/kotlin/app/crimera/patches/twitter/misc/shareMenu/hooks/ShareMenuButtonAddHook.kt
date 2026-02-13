@@ -1,31 +1,30 @@
 package app.crimera.patches.twitter.misc.shareMenu.hooks
 
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 
-internal val shareMenuButtonAddHook =
-    fingerprint {
-        returns("V")
-        custom { methodDef, _ ->
-            val params = methodDef.parameters.joinToString("") { it.type }
-            methodDef.name == "a" &&
+internal object ShareMenuButtonAddHook : Fingerprint(
+    returnType = "V",
+    custom = { methodDef, _ ->
+        val params = methodDef.parameters.joinToString("") { it.type }
+        methodDef.name == "a" &&
                 params.contains("com/twitter/model/timeline") &&
                 params.contains("com/twitter/util/collection")
-        }
     }
+)
 
 context(BytecodePatchContext)
 fun registerButton(
     buttonActionReference: String,
     functionName: String,
 ) {
-    val shareMenuButtonAdd = shareMenuButtonAddHook.method
+    val shareMenuButtonAdd = ShareMenuButtonAddHook.method
     val lastParamIndex = shareMenuButtonAdd.parameters.lastIndex
 
     // TODO: handle nulls
