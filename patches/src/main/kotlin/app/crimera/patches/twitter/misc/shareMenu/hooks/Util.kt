@@ -7,8 +7,8 @@ import app.crimera.patches.twitter.misc.shareMenu.fingerprints.shareMenuButtonFu
 import app.crimera.utils.Constants
 import app.crimera.utils.enableSettings
 import app.crimera.utils.extractDescriptors
-import app.revanced.patcher.patch.BytecodePatchContext
-import app.revanced.patcher.patch.PatchException
+import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.PatchException
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
