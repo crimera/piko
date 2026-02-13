@@ -44,8 +44,7 @@ import java.nio.file.StandardCopyOption
 
 private val classLoader = object {}.javaClass.classLoader
 
-// Note: Piko specific change
-internal val PIKO_RESOURCE_PREFIX = "piko_"
+internal val PIKO_RESOURCE_PREFIX = "piko_" // Note: Piko specific change
 
 /**
  * Removes a node from its parent.
@@ -216,14 +215,4 @@ internal fun Element.copyAttributesFrom(oldContainer: Element) {
     }
 }
 
-/**
- * @return The play store services version.
- */
-internal fun ResourcePatchContext.findPlayStoreServicesVersion(): Int =
-    document("res/values/integers.xml").use { document ->
-        document.documentElement.childNodes.findElementByAttributeValueOrThrow(
-            "name",
-            "google_play_services_version",
-        ).textContent.toInt()
-    }
 
