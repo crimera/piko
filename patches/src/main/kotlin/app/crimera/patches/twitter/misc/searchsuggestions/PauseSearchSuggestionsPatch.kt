@@ -1,17 +1,16 @@
 package app.crimera.patches.twitter.misc.searchsuggestions
 
-import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 
-private object searchDbInsertFingerprint : Fingerprint(
+private object SearchDbInsertFingerprint : Fingerprint(
     strings = listOf(
         "search_queries",
         "findSearchQuery: ",
@@ -30,7 +29,7 @@ val pauseSearchSuggestion =
 
         execute {
 
-            searchDbInsertFingerprint.method.apply {
+            SearchDbInsertFingerprint.method.apply {
 
                 val firstInstruction = getInstruction(0)
 

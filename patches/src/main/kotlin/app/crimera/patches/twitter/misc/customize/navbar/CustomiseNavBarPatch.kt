@@ -1,6 +1,6 @@
 package app.crimera.patches.twitter.misc.customize.navbar
 
-import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.featureFlagLoadFingerprint
+import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.FeatureFlagLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
@@ -68,6 +68,6 @@ val customiseNavBarPatch =
             methods2.removeInstruction(loc2)
 
             SettingsStatusLoadFingerprint.enableSettings("navBarCustomisation")
-            featureFlagLoadFingerprint.flagSettings("navbarFix")
+            FeatureFlagLoadFingerprint.flagSettings("navbarFix")
         }
     }

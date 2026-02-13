@@ -1,7 +1,7 @@
 package app.crimera.patches.twitter.featureFlag
 
 import app.crimera.patches.twitter.featureFlag.featureFlagPatch.featureFlagPatch
-import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.featureFlagLoadFingerprint
+import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.FeatureFlagLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.utils.enableSettings
@@ -18,7 +18,7 @@ val hideImmersivePlayer =
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 
-            featureFlagLoadFingerprint.flagSettings("immersivePlayer")
+            FeatureFlagLoadFingerprint.flagSettings("immersivePlayer")
 
             SettingsStatusLoadFingerprint.enableSettings("hideImmersivePlayer")
         }

@@ -1,9 +1,7 @@
 package app.revanced.patches.shared.misc.extension
 
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.FingerprintBuilder
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -114,9 +112,3 @@ fun extensionHook(
     contextRegisterResolver: BytecodePatchContext.(Method) -> String = { "p0" },
     fingerprint: Fingerprint,
 ) = ExtensionHook(fingerprint, insertIndexResolver, contextRegisterResolver)
-
-fun extensionHook(
-    insertIndexResolver: BytecodePatchContext.(Method) -> Int = { 0 },
-    contextRegisterResolver: BytecodePatchContext.(Method) -> String = { "p0" },
-    fingerprintBuilderBlock: FingerprintBuilder.() -> Unit,
-) = extensionHook(insertIndexResolver, contextRegisterResolver, fingerprint(block = fingerprintBuilderBlock))

@@ -8,11 +8,11 @@ import org.w3c.dom.Element
 @Suppress("unused")
 val changeVersionCodePatch =
     resourcePatch(
-//        name = "Change version code",
+        name = "Change version code",
         description =
             "Changes the version code of the app. This will turn off app store updates " +
                 "and allows downgrading an existing app install to an older app version.",
-        use = true
+        use = true // Default on
     ) {
         val versionCode by intOption(
             key = "versionCode",

@@ -32,7 +32,6 @@ val settingsPatch =
             sharedExtensionPatch,
             settingsResourcePatch,
             redirectBMTab,
-            changeVersionCodePatch
         )
 
         execute {

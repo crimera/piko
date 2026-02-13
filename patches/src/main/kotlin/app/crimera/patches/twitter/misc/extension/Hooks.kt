@@ -1,10 +1,13 @@
 package app.crimera.patches.twitter.misc.extension
 
+import app.morphe.patcher.Fingerprint
 import app.revanced.patches.shared.misc.extension.extensionHook
 
-internal val initHook =
-    extensionHook {
-        custom { method, classDef ->
-            method.name == "onCreate" && classDef.superclass!!.contains("Landroid/app/Application;")
+internal val initHook = extensionHook(
+    fingerprint = Fingerprint(
+        name = "onCreate",
+        custom = { _, classDef ->
+            classDef.superclass!!.contains("Landroid/app/Application;")
         }
-    }
+    )
+)

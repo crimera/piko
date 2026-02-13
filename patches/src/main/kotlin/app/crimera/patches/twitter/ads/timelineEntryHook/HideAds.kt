@@ -1,6 +1,6 @@
 package app.crimera.patches.twitter.ads.timelineEntryHook
 
-import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.featureFlagLoadFingerprint
+import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.FeatureFlagLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.utils.Constants
@@ -34,7 +34,7 @@ val hideAds =
             SettingsStatusLoadFingerprint.enableSettings("hideAds")
 
             // Google Ads.
-            featureFlagLoadFingerprint.flagSettings("hideGoogleAds")
+            FeatureFlagLoadFingerprint.flagSettings("hideGoogleAds")
 
             // Promoted Trends
             val method = HidePromotedTrendFingerprint.method
