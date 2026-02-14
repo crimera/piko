@@ -10,7 +10,7 @@ import app.revanced.extension.twitter.Utils;
 
 public class TweetInfoAPI {
     private static JSONObject responseObj = null;
-    private static JSONObject cache = new JSONObject();
+    private static final JSONObject cache = new JSONObject();
     // Lock is used so that getTweetSource waits till request is fetched.
     private static final Object lock = new Object();
 

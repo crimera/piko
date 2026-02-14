@@ -1,63 +1,53 @@
 package app.crimera.patches.twitter.premium.unlockdownloads
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.extensions.InstructionExtensions.removeInstruction
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
-import app.revanced.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.OpcodesFilter
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
-private val downloadPatchFingerprint =
-    fingerprint {
-        opcodes(
-            Opcode.IF_EQ,
-            Opcode.SGET_OBJECT,
-            Opcode.GOTO_16,
-            Opcode.NEW_INSTANCE,
-        )
+private object DownloadPatchFingerprint : Fingerprint(
+    filters = OpcodesFilter.opcodesToFilters(
+        Opcode.IF_EQ,
+        Opcode.SGET_OBJECT,
+        Opcode.GOTO_16,
+        Opcode.NEW_INSTANCE,
+    ),
+    strings = listOf(
+        "mediaEntity",
+        "media_options_sheet",
+    )
+)
 
-        strings(
-            "mediaEntity",
-            "media_options_sheet",
-        )
-    }
-
-private val fileDownloaderFingerprint =
-    fingerprint {
-        returns("Z")
-
-        strings("mediaEntity", "url")
-
-        opcodes(Opcode.IF_EQZ)
-    }
+private object FileDownloaderFingerprint : Fingerprint(
+    returnType = "Z",
+    filters = OpcodesFilter.opcodesToFilters(Opcode.IF_EQZ),
+    strings = listOf("mediaEntity", "url")
+)
 
 // credits @revanced
-private val immersiveBottomSheetPatchFingerprint =
-    fingerprint {
-        returns("V")
+private object ImmersiveBottomSheetPatchFingerprint : Fingerprint(
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.CONSTRUCTOR),
+    returnType = "V",
+    strings = listOf("captionsState")
+)
 
-        strings("captionsState")
-
-        accessFlags(AccessFlags.PUBLIC, AccessFlags.CONSTRUCTOR)
-    }
-
-private val mediaEntityFingerprint =
-    fingerprint {
-        opcodes(Opcode.IGET_BOOLEAN)
-        custom { it, _ ->
-            it.definingClass == "Lcom/twitter/model/json/core/JsonMediaEntity;"
-        }
-    }
+private object MediaEntityFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/model/json/core/JsonMediaEntity;",
+    filters = OpcodesFilter.opcodesToFilters(Opcode.IGET_BOOLEAN)
+)
 
 // Credits to @iKirby
 @Suppress("unused")
@@ -71,7 +61,7 @@ val downloadPatch =
 
         execute {
 
-            val method = downloadPatchFingerprint.method
+            val method = DownloadPatchFingerprint.method
             val instructions = method.instructions
 
             val first_if_loc = instructions.first { it.opcode == Opcode.IF_EQ }.location.index
@@ -96,7 +86,7 @@ val downloadPatch =
                 method.removeInstruction(this)
             }
 
-            val method2 = fileDownloaderFingerprint.method
+            val method2 = FileDownloaderFingerprint.method
             val instructions2 = method2.instructions
             val first_if2_loc = instructions2.first { it.opcode == Opcode.IF_EQZ }.location.index
             val r3 = method2.getInstruction<OneRegisterInstruction>(first_if2_loc).registerA
@@ -110,7 +100,7 @@ val downloadPatch =
             )
 
             // force video downloadable
-            val method3 = mediaEntityFingerprint.method
+            val method3 = MediaEntityFingerprint.method
             val instructions3 = method3.instructions
             val loc = instructions3.last { it.opcode == Opcode.IGET_BOOLEAN }.location.index
             val r4 = method3.getInstruction<TwoRegisterInstruction>(loc).registerA
@@ -123,7 +113,7 @@ val downloadPatch =
             )
 
             // force add download option in immersive bottomsheet
-            val method4 = immersiveBottomSheetPatchFingerprint.method
+            val method4 = ImmersiveBottomSheetPatchFingerprint.method
             val instructions4 = method4.instructions
 
             val last_iput_loc = instructions4.last { it.opcode == Opcode.IPUT_BOOLEAN }.location.index
@@ -135,6 +125,6 @@ val downloadPatch =
                 """.trimIndent(),
             )
 
-            settingsStatusLoadFingerprint.enableSettings("enableVidDownload")
+            SettingsStatusLoadFingerprint.enableSettings("enableVidDownload")
         }
     }

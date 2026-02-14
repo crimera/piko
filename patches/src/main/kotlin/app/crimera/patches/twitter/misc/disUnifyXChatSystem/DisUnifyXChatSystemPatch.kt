@@ -1,23 +1,22 @@
 package app.crimera.patches.twitter.misc.disUnifyXChatSystem
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
-import app.revanced.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
 
-internal val xchatSubSystemUserCheckFingerprint =
-    fingerprint {
-        returns("Z")
-        strings(
-            "userId",
-            "xchat_unified_tab_min_snowflake_user_id",
-        )
-    }
+internal object XchatSubSystemUserCheckFingerprint : Fingerprint(
+    returnType = "Z",
+    strings = listOf(
+        "userId",
+        "xchat_unified_tab_min_snowflake_user_id"
+    )
+)
 
 @Suppress("unused")
 val disUnifyXchatSystemPatch =
@@ -29,8 +28,8 @@ val disUnifyXchatSystemPatch =
         dependsOn(settingsPatch)
 
         execute {
-            val strIndx = xchatSubSystemUserCheckFingerprint.stringMatches!!.first { it.string == "userId" }.index
-            xchatSubSystemUserCheckFingerprint.method.apply {
+            val strIndx = XchatSubSystemUserCheckFingerprint.stringMatches!!.first { it.string == "userId" }.index
+            XchatSubSystemUserCheckFingerprint.method.apply {
                 addInstructionsWithLabels(
                     0,
                     """
@@ -41,7 +40,7 @@ val disUnifyXchatSystemPatch =
                     """.trimIndent(),
                     ExternalLabel("piko", instructions[strIndx]),
                 )
-                settingsStatusLoadFingerprint.enableSettings("disUnifyXChatSystem")
+                SettingsStatusLoadFingerprint.enableSettings("disUnifyXChatSystem")
             }
         }
     }

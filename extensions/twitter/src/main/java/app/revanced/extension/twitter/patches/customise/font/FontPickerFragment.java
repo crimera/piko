@@ -16,7 +16,7 @@ import app.revanced.extension.shared.StringRef;
 public class FontPickerFragment extends Fragment {
     private static final int PICK_FONT_FILE_REQUEST_CODE = 1;
     private static boolean isEmojiFont = false;
-    private static Context context = app.revanced.extension.shared.Utils.getContext();
+    private static final Context context = app.revanced.extension.shared.Utils.getContext();
 
     // Hail ChatGPT
     private boolean hasValidFontHeader(Uri uri){

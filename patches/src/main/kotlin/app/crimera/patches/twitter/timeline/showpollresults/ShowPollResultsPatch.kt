@@ -1,25 +1,23 @@
 package app.crimera.patches.twitter.timeline.showpollresults
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
-private val jsonCardInstanceDataFingerprint =
-    fingerprint {
-        strings(
-            "binding_values",
-        )
-
-        custom { methodDef, classDef ->
-            methodDef.name == "parseField" && classDef.type.endsWith("JsonCardInstanceData\$\$JsonObjectMapper;")
-        }
-    }
+private object JsonCardInstanceDataFingerprint : Fingerprint(
+    definingClass = "JsonCardInstanceData\$\$JsonObjectMapper;",
+    name = "parseField",
+    filters = listOf(
+        string("binding_values")
+    )
+)
 
 @Suppress("unused")
 val showPollResultsPatch =
@@ -31,7 +29,7 @@ val showPollResultsPatch =
         dependsOn(settingsPatch)
 
         execute {
-            val method = jsonCardInstanceDataFingerprint.method
+            val method = JsonCardInstanceDataFingerprint.method
 
             val loc =
                 method.instructions
@@ -49,6 +47,6 @@ val showPollResultsPatch =
                 """.trimIndent(),
             )
 
-            settingsStatusLoadFingerprint.enableSettings("enableShowPollResults")
+            SettingsStatusLoadFingerprint.enableSettings("enableShowPollResults")
         }
     }

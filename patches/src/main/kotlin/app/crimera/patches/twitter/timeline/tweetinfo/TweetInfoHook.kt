@@ -2,19 +2,17 @@ package app.crimera.patches.twitter.timeline.tweetinfo
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-private val tweetInfoHookFingerprint =
-    fingerprint {
-        returns("Ljava/lang/Object")
-        custom { it, _ ->
-            it.definingClass == "Lcom/twitter/api/model/json/core/JsonApiTweet\$\$JsonObjectMapper;" && it.name == "parse"
-        }
-    }
+private object TweetInfoHookFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/api/model/json/core/JsonApiTweet\$\$JsonObjectMapper;",
+    name = "parse",
+    returnType = "Ljava/lang/Object",
+)
 
 val tweetInfoHook =
     bytecodePatch(
@@ -25,7 +23,7 @@ val tweetInfoHook =
         execute {
             val TWEETINFO_ENTRY_DESCRIPTOR = "$PATCHES_DESCRIPTOR/TweetInfo"
 
-            val methods = tweetInfoHookFingerprint.method
+            val methods = TweetInfoHookFingerprint.method
             val instructions = methods.instructions
 
             val returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index

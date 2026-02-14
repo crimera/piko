@@ -1,14 +1,6 @@
 package app.revanced.extension.twitter.patches.nativeFeatures.translator;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.widget.LinearLayout;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import app.revanced.extension.twitter.Utils;
 import app.revanced.extension.shared.StringRef;

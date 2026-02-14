@@ -1,26 +1,18 @@
 package app.revanced.extension.twitter.patches.nativeFeatures.readerMode;
 
 import android.content.Context;
-import java.lang.reflect.InvocationTargetException;
+
 import app.revanced.extension.twitter.settings.ActivityHook;
 import app.revanced.extension.twitter.Utils;
-import app.revanced.extension.twitter.Pref;
 import app.revanced.extension.shared.StringRef;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.FileOutputStream;
-import android.os.Environment;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.io.IOException;
-import java.net.MalformedURLException;
 
 import org.json.JSONObject;
-import org.json.JSONArray;
+
 import app.revanced.extension.twitter.entity.Tweet;
 import app.revanced.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeTemplate;
 import app.revanced.extension.twitter.Pref;
@@ -80,9 +72,9 @@ public class ReaderModeUtils {
     }
 
     private static String preferenceJS() {
-        Boolean textOnlyMode = Pref.hideNativeReaderPostTextOnlyMode();
-        Boolean hideQuotedPosts = Pref.hideNativeReaderHideQuotedPosts();
-        Boolean noGrok = Pref.hideNativeReaderNoGrok();
+        final boolean textOnlyMode = Pref.hideNativeReaderPostTextOnlyMode();
+        final boolean hideQuotedPosts = Pref.hideNativeReaderHideQuotedPosts();
+        final boolean noGrok = Pref.hideNativeReaderNoGrok();
 
         return "if(" + hideQuotedPosts + "){\n" +
                 "var nodes = document.querySelectorAll(\".quoted-section\");\n" +

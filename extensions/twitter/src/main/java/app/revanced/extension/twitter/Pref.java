@@ -7,8 +7,8 @@ import java.util.*;
 
 @SuppressWarnings("unused")
 public class Pref {
-    public static boolean HIDE_DETAILED_METRICS,HIDE_INLINE_METRICS,ROUND_OFF_NUMBERS,ENABLE_FORCE_HD, HIDE_COMM_BADGE,SHOW_SRC_LBL;
-    public static float POST_FONT_SIZE;
+    public static final boolean HIDE_DETAILED_METRICS,HIDE_INLINE_METRICS,ROUND_OFF_NUMBERS,ENABLE_FORCE_HD, HIDE_COMM_BADGE,SHOW_SRC_LBL;
+    public static final float POST_FONT_SIZE;
     static{
         ROUND_OFF_NUMBERS = isRoundOffNumbersEnabled();
         ENABLE_FORCE_HD = enableForceHD();
@@ -33,7 +33,7 @@ public class Pref {
     }
 
     public static float setPostFontSize() {
-        Float fontSize = 0.0f;
+        float fontSize;
         try{
             fontSize = Float.valueOf(Utils.getStringPref(Settings.CUSTOM_POST_FONT_SIZE));
         }catch (Exception ex){

@@ -13,9 +13,9 @@ import android.widget.TextView;
 import app.revanced.extension.shared.Utils;
 
 public class DialogBox extends Dialog {
-    private String header;
-    private String mainText;
-    private Context context;
+    private final String header;
+    private final String mainText;
+    private final Context context;
 
     public DialogBox(Context context, String header,String mainText) {
         super(context);

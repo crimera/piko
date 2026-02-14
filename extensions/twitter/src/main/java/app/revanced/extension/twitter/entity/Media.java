@@ -4,9 +4,9 @@ import app.revanced.extension.twitter.Utils;
 
 public class Media {
     // 0-img, 1-video
-    public int type;
-    public String url;
-    public String ext;
+    public final int type;
+    public final String url;
+    public final String ext;
 
     public Media(int type, String url, String ext) {
         this.type = type;

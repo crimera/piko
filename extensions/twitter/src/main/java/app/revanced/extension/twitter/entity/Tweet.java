@@ -1,21 +1,16 @@
 package app.revanced.extension.twitter.entity;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import app.revanced.extension.twitter.entity.ExtMediaEntities;
-import app.revanced.extension.twitter.entity.Video;
 import app.revanced.extension.twitter.entity.TweetInfo;
 import app.revanced.extension.twitter.entity.Debug;
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.*;
 import app.revanced.extension.twitter.Utils;
 
 // All comments based of 11.14.beta-0
 // Lcom/twitter/model/core/entity/e;
 public class Tweet extends Debug {
-    private Object obj;
+    private final Object obj;
 
     public Tweet(Object obj) {
         super(obj);

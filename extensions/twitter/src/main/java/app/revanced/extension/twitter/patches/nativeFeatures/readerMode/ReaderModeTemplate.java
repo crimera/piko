@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-import app.revanced.extension.twitter.Utils;
 import app.revanced.extension.shared.StringRef;
 
 import org.json.JSONObject;
@@ -448,14 +447,14 @@ public class ReaderModeTemplate {
 
   public static String generateHtml(JSONObject threads) throws Exception {
 
-    String content = "";
+    StringBuilder content = new StringBuilder();
     JSONObject thread = threads.getJSONObject("thread");
     String tweetId = thread.getString("id");
     String title = getHTMLTitle(thread);
     JSONArray tweets = thread.getJSONArray("tweets");
     for (int i = 0; i < tweets.length(); i++) {
       JSONObject tweet = tweets.getJSONObject(i);
-      content += getHTMLTweet(tweet, false);
+      content.append(getHTMLTweet(tweet, false));
     }
     String footer = getHTMLFooter(thread);
     return generateHtml(tweetId,title + "\n" + content + "\n" + footer);

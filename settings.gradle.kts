@@ -12,7 +12,7 @@ pluginManagement {
         google()
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/revanced/registry")
+            url = uri("https://maven.pkg.github.com/MorpheApp/registry")
             credentials {
                 username = providers.gradleProperty("gpr.user").getOrElse(System.getenv("GITHUB_ACTOR"))
                 password = providers.gradleProperty("gpr.key").getOrElse(System.getenv("GITHUB_TOKEN"))
@@ -22,7 +22,7 @@ pluginManagement {
 }
 
 plugins {
-    id("app.revanced.patches") version "1.0.0-dev.7"
+    id("app.morphe.patches") version "1.1.1"
 }
 
 settings {

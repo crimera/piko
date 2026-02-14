@@ -2,11 +2,11 @@ package app.crimera.patches.twitter.misc.bringbacktwitter
 
 import app.crimera.utils.replaceStringsInFile
 import app.crimera.utils.replaceXmlResources
-import app.revanced.patcher.patch.resourcePatch
-import app.revanced.util.ResourceGroup
-import app.revanced.util.asSequence
-import app.revanced.util.copyResources
-import app.revanced.util.findElementByAttributeValueOrThrow
+import app.morphe.patcher.patch.resourcePatch
+import app.morphe.util.ResourceGroup
+import app.morphe.util.asSequence
+import app.morphe.util.copyResources
+import app.morphe.util.findElementByAttributeValueOrThrow
 import org.w3c.dom.Element
 import java.nio.file.Files
 

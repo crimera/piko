@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import app.revanced.extension.shared.Utils;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class FeatureFlagAdapter extends BaseAdapter {
         this.list = list;
     }
 
-    private class ViewHolder {
+    private static class ViewHolder {
         TextView textView;
         Switch enabled;
     }

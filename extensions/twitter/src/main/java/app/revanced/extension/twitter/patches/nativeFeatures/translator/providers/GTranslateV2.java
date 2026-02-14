@@ -7,7 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import org.json.JSONArray;
+
 import org.json.JSONObject;
 import app.revanced.extension.shared.StringRef;
 

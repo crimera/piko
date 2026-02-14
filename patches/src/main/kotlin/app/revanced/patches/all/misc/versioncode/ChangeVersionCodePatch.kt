@@ -1,8 +1,8 @@
 package app.revanced.patches.all.misc.versioncode
 
-import app.revanced.patcher.patch.intOption
-import app.revanced.patcher.patch.resourcePatch
-import app.revanced.util.getNode
+import app.morphe.patcher.patch.intOption
+import app.morphe.patcher.patch.resourcePatch
+import app.morphe.util.getNode
 import org.w3c.dom.Element
 
 @Suppress("unused")
@@ -12,6 +12,7 @@ val changeVersionCodePatch =
         description =
             "Changes the version code of the app. This will turn off app store updates " +
                 "and allows downgrading an existing app install to an older app version.",
+        use = true // Default on
     ) {
         val versionCode by intOption(
             key = "versionCode",

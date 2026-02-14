@@ -4,7 +4,7 @@
     <img src="https://socialify.git.ci/crimera/piko/image?forks=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Auto" alt="piko" width="640" height="320" />
 </p>
 <h1 align="center">
-    Revanced patches focused on Twitter/X <br>
+    Morphe patches focused on Twitter/X <br>
     <a href ="https://t.me/pikopatches">
         <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/>
     </a>
@@ -12,29 +12,33 @@
 
 <summary><h2>🕹️ Usage</h2></summary>
 
-<b>Revanced Cli</b>
+<b>Morphe Cli</b>
 
 ```sh
-java -jar cli.jar patch -p piko.rvp input.apk
+java -jar cli.jar patch -p piko.mpp input.apkm
 ```
 
-<p><b>or Revanced Manager</b>
+<p><b>or Morphe Manager</b>
 <details>
 
 <div align="left">
 
 <!-- TODO: Once enough time has passed, delete this sentence. -->
-Starting with piko patches v2.0.0, the latest ReVanced Manager and RVX Manager are supported.
+Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software).
 
-To use these patches in ReVanced Manager, follow the steps below or see image:
+To use these patches in Morphe Manager, follow these steps:
 
-1. Turn on "Use alternative sources" setting.
-2. Open "Alternative sources".
-3. Set `crimera` as the patches organization.<br>
-4. Set `piko` as the patches source.<br>
-5. Press ok then restart Revanced Manager.
+#### Add Piko patches as a patch source 
+1. Tap patch sources (lower left button)
+2. Tap `+` button
+3. Paste this repo url: `https://github.com/crimera/piko`
 
-<img src="docs/images/manager.png" alt="usage" width="200" />
+#### Patching Twitter/X with Morphe
+1. Download an original unpatched X APKM from a reputable source such as [APKMirror.com](https://www.apkmirror.com/apk/x-corp/twitter/)
+2. Do _not_ unsplit or otherwise change the APKM. Morphe natively patches APKM/XAPK app bundles.
+3. Select "Other apps" on the Morphe Manager home screen
+4. Provide the original APKM file
+5. Wait for patching to complete, install
 </div>
 
 </details>
@@ -276,7 +280,7 @@ To use these patches in ReVanced Manager, follow the steps below or see image:
 
 
 <summary><h2>🛠️ Building</h2></summary>
-To build ReVanced Patches, you can follow the <a href="https://github.com/ReVanced/revanced-documentation">ReVanced documentation</a>.
+To build Piko Patches, you can follow the <a href="https://github.com/MorpheApp/morphe-documentation">Morphe documentation</a>.
 
 
 <summary><h2>✨Stargazers over time</h2></summary>

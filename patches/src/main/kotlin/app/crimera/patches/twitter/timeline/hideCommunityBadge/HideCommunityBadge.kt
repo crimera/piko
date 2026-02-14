@@ -1,25 +1,24 @@
 package app.crimera.patches.twitter.timeline.hideCommunityBadge
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.crimera.utils.extractDescriptors
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
-import app.revanced.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
 
-private val commModelFingerprint =
-    fingerprint {
-        strings(
-            "actionResults",
-            "role",
-        )
-    }
+private object CommModelFingerprint : Fingerprint(
+    strings = listOf(
+        "actionResults",
+        "role",
+    )
+)
 
 @Suppress("unused")
 val hideCommunityBadge =
@@ -30,7 +29,7 @@ val hideCommunityBadge =
         dependsOn(settingsPatch)
 
         execute {
-            val method = commModelFingerprint.method
+            val method = CommModelFingerprint.method
             val instructions = method.instructions
 
             val iputObj = instructions.last { it.opcode == Opcode.IPUT_OBJECT }
@@ -48,6 +47,6 @@ val hideCommunityBadge =
                 """.trimIndent(),
                 ExternalLabel("piko", iputObj),
             )
-            settingsStatusLoadFingerprint.enableSettings("hideCommBadge")
+            SettingsStatusLoadFingerprint.enableSettings("hideCommBadge")
         }
     }

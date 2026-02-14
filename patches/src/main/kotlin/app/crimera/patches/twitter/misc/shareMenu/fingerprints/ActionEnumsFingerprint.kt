@@ -4,35 +4,32 @@ import app.crimera.utils.InitMethod
 import app.crimera.utils.indexOfLastFilledNewArrayRange
 import app.crimera.utils.indexOfLastNewInstance
 import app.crimera.utils.instructionToString
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.BytecodePatchContext
-import app.revanced.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
-import app.revanced.patcher.util.proxy.mutableTypes.MutableMethod
-import app.revanced.patcher.util.smali.toInstruction
-import app.revanced.patcher.util.smali.toInstructions
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
+import app.morphe.patcher.util.smali.toInstruction
+import app.morphe.patcher.util.smali.toInstructions
 import com.android.tools.smali.dexlib2.builder.MethodImplementationBuilder
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
 
-internal val actionEnumsFingerprint =
-    fingerprint {
-        strings("None", "Favorite", "Retweet")
-        custom { _, classDef ->
-            classDef.type.contains("Lcom/twitter/model/core")
-        }
-    }
+internal object ActionEnumsFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/model/core",
+    strings = listOf("None", "Favorite", "Retweet")
+)
 
 context(BytecodePatchContext)
 fun addAction(name: String): String {
     val field =
-        actionEnumsFingerprint.classDef.fields
+        ActionEnumsFingerprint.classDef.fields
             .last()
             .toMutable()
     field.name = name
-    actionEnumsFingerprint.classDef.fields.add(field)
+    ActionEnumsFingerprint.classDef.fields.add(field)
 
     // TODO: handle nulls
-    val oldInit = actionEnumsFingerprint.classDef.methods.first { it.name == "<clinit>" }
+    val oldInit = ActionEnumsFingerprint.classDef.methods.first { it.name == "<clinit>" }
 
     val oldInitInstructions = oldInit.implementation!!.instructions.toMutableList()
 
@@ -97,7 +94,7 @@ fun addAction(name: String): String {
             implementation = newInitImplementation.methodImplementation,
         )
 
-    val actionsEnumClass = actionEnumsFingerprint.classDef
+    val actionsEnumClass = ActionEnumsFingerprint.classDef
     actionsEnumClass.methods.removeIf { it.name == "<clinit>" }
     actionsEnumClass.methods.add(MutableMethod(newInit))
     return fieldCall

@@ -5,16 +5,14 @@ import android.content.Context;
 import android.widget.LinearLayout;
 import app.revanced.extension.twitter.Utils;
 import app.revanced.extension.twitter.Pref;
-import java.lang.reflect.Field;
+
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import app.revanced.extension.twitter.entity.Video;
+
 import app.revanced.extension.twitter.entity.Media;
 import app.revanced.extension.twitter.entity.Tweet;
-import app.revanced.extension.twitter.entity.ExtMediaEntities;
 
 public class NativeDownloader {
     public static String downloadString() {

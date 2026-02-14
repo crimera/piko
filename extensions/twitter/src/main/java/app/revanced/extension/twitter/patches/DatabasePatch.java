@@ -12,7 +12,7 @@ import android.widget.LinearLayout;
 
 
 public class DatabasePatch {
-    private static Context ctx = app.revanced.extension.shared.Utils.getContext();
+    private static final Context ctx = app.revanced.extension.shared.Utils.getContext();
     private static final String[] listItems = app.revanced.extension.shared.Utils.getResourceStringArray("piko_array_ads_hooks");
 
     private static void logger(Object j){
@@ -129,7 +129,7 @@ public class DatabasePatch {
                             selectionArgs[ind] = "%" + keywords.get(ind) + "%";
                         }
                         int deletedRows = database.delete("timeline", selection.toString(), selectionArgs);
-                        result.append("• "+listItems[i]+" = "+String.valueOf(deletedRows)+"\n");
+                        result.append("• ").append(listItems[i]).append(" = ").append(deletedRows).append("\n");
                     }
                 }
             } else {

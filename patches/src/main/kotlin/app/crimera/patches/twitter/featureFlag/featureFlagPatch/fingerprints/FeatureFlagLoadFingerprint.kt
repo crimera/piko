@@ -1,11 +1,8 @@
 package app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints
 
-import app.revanced.patcher.fingerprint
+import app.morphe.patcher.Fingerprint
 
-val featureFlagLoadFingerprint =
-    fingerprint {
-        custom { methodDef, _ ->
-            methodDef.definingClass.endsWith("Lapp/revanced/extension/twitter/patches/FeatureSwitchPatch;") &&
-                methodDef.name == "load"
-        }
-    }
+internal object FeatureFlagLoadFingerprint : Fingerprint(
+    definingClass = "Lapp/revanced/extension/twitter/patches/FeatureSwitchPatch;",
+    name = "load"
+)

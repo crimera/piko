@@ -1,8 +1,8 @@
 package app.crimera.patches.twitter.misc.shareMenu.nativeReaderMode
 
-import app.revanced.patcher.patch.resourcePatch
-import app.revanced.util.ResourceGroup
-import app.revanced.util.copyResources
+import app.morphe.patcher.patch.resourcePatch
+import app.morphe.util.ResourceGroup
+import app.morphe.util.copyResources
 
 internal val nativeReaderModeResourcePatch =
     resourcePatch {

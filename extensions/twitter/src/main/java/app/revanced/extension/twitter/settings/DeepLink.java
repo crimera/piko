@@ -6,7 +6,6 @@ import java.util.List;
 import android.net.Uri;
 import  app.revanced.extension.twitter.Utils;
 
-@SuppressWarnings("deprecation")
 public class DeepLink {
     private static final String bundleFlagNameKey = "flagName";
     private static final String bundleFlagValueKey = "flagValue";

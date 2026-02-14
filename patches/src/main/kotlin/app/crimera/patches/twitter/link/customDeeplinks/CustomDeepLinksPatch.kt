@@ -1,9 +1,9 @@
 package app.crimera.patches.twitter.link.customDeeplinks
 
-import app.revanced.patcher.patch.PatchException
-import app.revanced.patcher.patch.resourcePatch
-import app.revanced.patcher.patch.stringsOption
-import app.revanced.util.asSequence
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.stringsOption
+import app.morphe.util.asSequence
 
 @Suppress("unused")
 val customDeepLinksPatch = resourcePatch(

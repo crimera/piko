@@ -1,11 +1,11 @@
 package app.crimera.patches.twitter.misc.shareMenu.debugMenu
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
-import app.crimera.patches.twitter.misc.shareMenu.fingerprints.actionEnumsFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.shareMenu.fingerprints.ActionEnumsFingerprint
 import app.crimera.patches.twitter.misc.shareMenu.hooks.registerButton
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
 val debugMenu =
@@ -16,9 +16,9 @@ val debugMenu =
         dependsOn(settingsPatch)
 
         execute {
-            val buttonEnumClass = actionEnumsFingerprint.classDef.toString()
+            val buttonEnumClass = ActionEnumsFingerprint.classDef.toString()
             val buttonReference = "$buttonEnumClass->ViewDebugDialog:$buttonEnumClass"
             registerButton(buttonReference, "enableDebugMenu")
-            settingsStatusLoadFingerprint.enableSettings("enableDebugMenu")
+            SettingsStatusLoadFingerprint.enableSettings("enableDebugMenu")
         }
     }

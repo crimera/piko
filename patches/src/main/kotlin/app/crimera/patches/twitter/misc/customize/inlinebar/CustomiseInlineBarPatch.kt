@@ -1,22 +1,24 @@
 package app.crimera.patches.twitter.misc.customize.inlinebar
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
-private val customiseInlineBarFingerprint =
-    fingerprint {
-        returns("Ljava/util/List;")
-        strings("bookmarks_in_timelines_enabled")
-    }
+private object CustomiseInlineBarFingerprint : Fingerprint(
+    returnType = "Ljava/util/List;",
+    filters = listOf(
+        string("bookmarks_in_timelines_enabled")
+    )
+)
 
 @Suppress("unused")
 val customiseInlineBarPatch =
@@ -28,7 +30,7 @@ val customiseInlineBarPatch =
 
         execute {
 
-            val method = customiseInlineBarFingerprint.method
+            val method = CustomiseInlineBarFingerprint.method
             val instructions = method.instructions
 
             val returnObj_loc = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
@@ -41,6 +43,6 @@ val customiseInlineBarPatch =
                 """.trimIndent()
 
             method.addInstructions(returnObj_loc, METHOD)
-            settingsStatusLoadFingerprint.enableSettings("inlineBarCustomisation")
+            SettingsStatusLoadFingerprint.enableSettings("inlineBarCustomisation")
         }
     }

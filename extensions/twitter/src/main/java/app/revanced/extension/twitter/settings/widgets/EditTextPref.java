@@ -3,7 +3,6 @@ package app.revanced.extension.twitter.settings.widgets;
 import android.content.Context;
 import android.preference.EditTextPreference;
 import android.util.AttributeSet;
-import app.revanced.extension.twitter.Utils;
 import android.preference.Preference;
 import android.text.InputType;
 

@@ -1,24 +1,23 @@
 package app.crimera.patches.twitter.interaction.downloads.changedirectory
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
-import app.revanced.util.indexOfFirstInstruction
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 internal const val targetString = "parse(...)"
-val downloadPathFingerprint =
-    fingerprint {
-        returns("V")
-        strings(targetString, "guessFileName(...)", "setNotificationVisibility(...)")
-    }
+internal object DownloadPathFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf(targetString, "guessFileName(...)", "setNotificationVisibility(...)")
+)
 
 @Suppress("unused")
 val changeDownloadDirPatch =
@@ -36,8 +35,8 @@ val changeDownloadDirPatch =
             val PUBLICFOLDER_DESCRIPTOR =
                 "invoke-static {}, $PREF_DESCRIPTOR;->getPublicFolder()Ljava/lang/String;"
 
-            downloadPathFingerprint.method.apply {
-                val targetStringIndex = downloadPathFingerprint.stringMatches!!.find { it.string == targetString }!!.index
+            DownloadPathFingerprint.method.apply {
+                val targetStringIndex = DownloadPathFingerprint.stringMatches.find { it.string == targetString }!!.index
                 val moveResObjIndex = indexOfFirstInstruction(targetStringIndex, Opcode.MOVE_RESULT_OBJECT)
                 val fileNameReg = getInstruction<OneRegisterInstruction>(moveResObjIndex).registerA
 
@@ -57,7 +56,7 @@ val changeDownloadDirPatch =
                     move-result-object v$fileNameReg
                     """.trimIndent(),
                 )
-                settingsStatusLoadFingerprint.enableSettings("enableDownloadFolder")
+                SettingsStatusLoadFingerprint.enableSettings("enableDownloadFolder")
             }
         }
     }

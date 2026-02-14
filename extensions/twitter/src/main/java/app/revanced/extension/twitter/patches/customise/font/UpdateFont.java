@@ -22,10 +22,10 @@ public class UpdateFont {
 
     private static Typeface textTypeface;
     private static Typeface emojiTypeface;
-    private static Context context;
-    private static boolean isCustomFontEnabled;
-    private static boolean isCustomEmojiFontEnabled;
-    private static Pattern emojiPattern;
+    private static final Context context;
+    private static final boolean isCustomFontEnabled;
+    private static final boolean isCustomEmojiFontEnabled;
+    private static final Pattern emojiPattern;
 
     static {
         context = app.revanced.extension.shared.Utils.getContext();

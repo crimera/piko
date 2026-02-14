@@ -1,6 +1,5 @@
 package app.revanced.extension.twitter.patches.customise;
 
-import android.util.*;
 import java.util.*;
 import java.lang.reflect.Field;
 import app.revanced.extension.twitter.Pref;

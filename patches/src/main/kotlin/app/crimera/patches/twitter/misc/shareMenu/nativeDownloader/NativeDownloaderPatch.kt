@@ -3,7 +3,7 @@ package app.crimera.patches.twitter.misc.shareMenu.nativeDownloader
 import app.crimera.patches.twitter.entity.entityGenerator
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonInjection
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
 val nativeDownloaderPatch =

@@ -25,7 +25,7 @@ class FeatureFlagSearchAdapter extends BaseAdapter {
         this.list = new ArrayList<>(Arrays.asList(list));
     }
 
-    private class ViewHolder {
+    private static class ViewHolder {
         TextView textView;
     }
 

@@ -1,16 +1,14 @@
 package app.revanced.extension.twitter.patches.links;
 
 import com.twitter.model.json.core.JsonUrlEntity;
-import com.twitter.model.json.card.JsonCardInstanceData;
+
 import app.revanced.extension.twitter.Pref;
 import app.revanced.extension.twitter.settings.SettingsStatus;
 import app.revanced.extension.twitter.Utils;
 import java.net.URL;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 public class Urls {
-    private static boolean unShortUrl;
+    private static final boolean unShortUrl;
     static {
         unShortUrl = SettingsStatus.unshortenlink && Pref.unShortUrl();
     }
