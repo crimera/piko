@@ -1,3 +1,15 @@
+# [3.0.0-dev.1](https://github.com/crimera/piko/compare/v2.0.0...v3.0.0-dev.1) (2026-02-14)
+
+
+### Features
+
+* Change to Morphe patcher 1.1.1 ([31eb19e](https://github.com/crimera/piko/commit/31eb19e05f5dae9c4531db3c33dd8bc966b7b515))
+
+
+### BREAKING CHANGES
+
+* Old ReVanced CLI and Manager no longer work
+
 ## [2.0.0](https://github.com/crimera/piko/compare/v1.59.0...v2.0.0) (2026-02-11)
 
 ### ⚠ BREAKING CHANGES

@@ -1,0 +1,7 @@
+{
+  "created_at": "2026-02-14T22:12:08",
+  "description": "# [3.0.0-dev.1](https://github.com/crimera/piko/compare/v2.0.0...v3.0.0-dev.1) (2026-02-14)\n\n\n### Features\n\n* Change to Morphe patcher 1.1.1 ([31eb19e](https://github.com/crimera/piko/commit/31eb19e05f5dae9c4531db3c33dd8bc966b7b515))\n\n\n### BREAKING CHANGES\n\n* Old ReVanced CLI and Manager no longer work",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.1/patches-3.0.0-dev.1.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.1/patches-3.0.0-dev.1.mpp.asc",
+  "version": "3.0.0-dev.1"
+}

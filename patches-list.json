@@ -1,0 +1,853 @@
+{
+  "version": "3.0.0-dev.1",
+  "patches": [
+    {
+      "name": "Add ability to copy media link",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Bring back twitter",
+      "description": "Bring back old twitter logo and name",
+      "use": false,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Change app icon",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Change version code",
+      "description": "Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": [
+        {
+          "key": "versionCode",
+          "title": "Version code",
+          "description": "The version code to use. Using the highest value turns off app store updates and allows downgrading an existing app install to an older app version.",
+          "required": true,
+          "type": "kotlin.Int",
+          "default": 2147483647,
+          "values": {
+            "Lowest": 1,
+            "Highest": 2147483647
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clear tracking params",
+      "description": "Removes tracking parameters when sharing links",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Control video auto scroll",
+      "description": "Control video auto scroll in immersive view",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Custom download folder",
+      "description": "Change the download directory for video downloads",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Custom emoji font",
+      "description": "Customise emoji font style",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Custom font",
+      "description": "Customise font style",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Custom sharing domain",
+      "description": "Allows for using domains like fxtwitter when sharing tweets/posts.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Custom translator",
+      "description": "Requires X 11.0.0-release.0 or higher.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Customise post font size",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Customize Inline action Bar items",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Customize Navigation Bar items",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Customize default reply sorting",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Customize explore tabs",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Customize notification tabs",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Customize profile tabs",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Customize search suggestions",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Customize search tab items",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Customize side bar items",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Customize timeline top bar",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Delete from database",
+      "description": "Delete entries from database(cache)",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Disable auto timeline scroll on launch",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Disable chirp font",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Disunify xchat system",
+      "description": "Bring back legacy features like messages and share sheet.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Download patch",
+      "description": "Unlocks the ability to download videos and gifs from Twitter/X",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Dynamic color",
+      "description": "Replaces the default Twitter Blue with the user's Material You palette.",
+      "use": false,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Enable PiP mode automatically",
+      "description": "Enables PiP mode when you close the app",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Enable Undo Posts",
+      "description": "Enables ability to undo posts before posting",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Enable debug menu for posts",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Enable force HD videos",
+      "description": "Videos will be played in highest quality always",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Export all activities",
+      "description": "Makes all app activities exportable.",
+      "use": false,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
+      "name": "Force enable translate",
+      "description": "Get translate option for all posts",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Handle custom twitter links",
+      "description": "Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. These will have to be manually enabled under the \"Open by default\" section in the app info!",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": [
+        {
+          "key": "customLinkHosts",
+          "title": "Custom sharing domains",
+          "description": "The custom sharing domains to register to be opened in Twitter",
+          "required": true,
+          "type": "kotlin.collections.List<kotlin.String>",
+          "default": [
+            "vxtwitter.com",
+            "fixvx.com",
+            "fxtwitter.com",
+            "fixupx.com",
+            "twittpr.com",
+            "hitlerx.com",
+            "girlcockx.com",
+            "stupidpenisx.com",
+            "cunnyx.com",
+            "autistic.kids"
+          ],
+          "values": null
+        }
+      ]
+    },
+    {
+      "name": "Hide Banner",
+      "description": "Hide new post banner",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide Community Notes",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide FAB",
+      "description": "Adds an option to hide Floating action button",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide FAB Menu Buttons",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide Live Threads",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide Recommended Users",
+      "description": "Hide recommended users that pops up when you follow someone",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide badges from navigation bar icons",
+      "description": "Hides notification nudges & counts from navigation bar icons",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide bookmark icon in timeline",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide community badges",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide followed by context",
+      "description": "Hides followed by context under profile",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide hidden replies",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide immersive player",
+      "description": "Removes swipe up for more videos in video player",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide nudge button",
+      "description": "Hides follow/subscribe/follow back buttons on posts",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide post metrics",
+      "description": "Hides like, reposts etc counts.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide promote button",
+      "description": "Hides promote button under self posts",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide timeline posts by category",
+      "description": "Hides different post category like who to follow, news today etc from timeline.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hook feature flag",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "ResourcePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Log server response",
+      "description": "Log json responses received from server",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Native downloader",
+      "description": "Requires X 11.0.0-release.0 or higher.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Native reader mode",
+      "description": "Requires X 11.0.0-release.0 or higher.",
+      "use": true,
+      "dependencies": [
+        "ResourcePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "No shortened URL",
+      "description": "Get rid of t.co short urls.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Pause search suggestions",
+      "description": "Search suggestions will not be saved locally",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Remove Ads",
+      "description": "Removed promoted posts, trends and google ads",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Remove premium upsell",
+      "description": "Removes premium upsell in home timeline",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Remove search suggestions",
+      "description": "Hide/Remove search suggestion in explore section",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Remove view count",
+      "description": "Removes the view count from the bottom of tweets",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Round off numbers",
+      "description": "Enable or disable rounding off numbers",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Selectable Text",
+      "description": "Makes bio and username selectable",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Show changelogs",
+      "description": "Shows changelogs when new a patch is installed.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Show poll results",
+      "description": "Adds an option to show poll results without voting",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Show post source label",
+      "description": "Source label will be shown only on public posts",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Show sensitive media",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    }
+  ]
+}
