@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0
 
       - name: Cache Gradle
-        uses: burrunan/gradle-cache-action@v1
+        uses: burrunan/gradle-cache-action@v3
 
       - name: Build with Gradle
         env:
