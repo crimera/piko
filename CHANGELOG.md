@@ -1,3 +1,10 @@
+# [3.0.0-dev.2](https://github.com/crimera/piko/compare/v3.0.0-dev.1...v3.0.0-dev.2) (2026-02-17)
+
+
+### Bug Fixes
+
+* **Twitter:** Fix `Custom sharing domain` not overriding new share sheet ([fd446fa](https://github.com/crimera/piko/commit/fd446fad33d7ceaf98666cbefde1f03e2315c55f))
+
 # [3.0.0-dev.1](https://github.com/crimera/piko/compare/v2.0.0...v3.0.0-dev.1) (2026-02-14)
 
 
