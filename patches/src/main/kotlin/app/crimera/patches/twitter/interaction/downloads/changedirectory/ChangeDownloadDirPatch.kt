@@ -8,15 +8,19 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstInstruction
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
-internal const val targetString = "parse(...)"
 internal object DownloadPathFingerprint : Fingerprint(
     returnType = "V",
-    strings = listOf(targetString, "guessFileName(...)", "setNotificationVisibility(...)")
+    filters = listOf(
+        string("parse(...)"),
+        opcode(Opcode.MOVE_RESULT_OBJECT)
+    ),
+    strings = listOf("guessFileName(...)", "setNotificationVisibility(...)")
 )
 
 @Suppress("unused")
@@ -36,8 +40,7 @@ val changeDownloadDirPatch =
                 "invoke-static {}, $PREF_DESCRIPTOR;->getPublicFolder()Ljava/lang/String;"
 
             DownloadPathFingerprint.method.apply {
-                val targetStringIndex = DownloadPathFingerprint.stringMatches.find { it.string == targetString }!!.index
-                val moveResObjIndex = indexOfFirstInstruction(targetStringIndex, Opcode.MOVE_RESULT_OBJECT)
+                val moveResObjIndex = DownloadPathFingerprint.instructionMatches[1].index
                 val fileNameReg = getInstruction<OneRegisterInstruction>(moveResObjIndex).registerA
 
                 val insertAt =

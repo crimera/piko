@@ -111,6 +111,6 @@ internal object TweetInfoObjectFingerprint : Fingerprint(
 )
 
 internal object TweetLangFingerprint : Fingerprint(
-    definingClass = "Lapp/revanced/extension/twitter/entity/TweetInfo",
+    definingClass = "Lapp/revanced/extension/twitter/entity/TweetInfo;",
     name = "getLang"
 )

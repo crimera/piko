@@ -9,6 +9,12 @@ import app.morphe.patcher.patch.bytecodePatch
 
 // https://github.com/FrozenAlex/revanced-patches-new
 internal object AddSessionTokenFingerprint : Fingerprint(
+    parameters = listOf(
+        "Ljava/lang/String;",
+        "L",
+        "Ljava/lang/String;"
+    ),
+    returnType = "Ljava/lang/String;",
     strings = listOf(
         "<this>",
         "shareParam",
