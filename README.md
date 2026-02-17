@@ -15,7 +15,7 @@
 <b>Morphe Cli</b>
 
 ```sh
-java -jar cli.jar patch -p piko.mpp input.apkm
+java -jar cli.jar patch --patches piko.mpp input.apkm
 ```
 
 <p><b>or Morphe Manager</b>
@@ -31,7 +31,8 @@ To use these patches in Morphe Manager, follow these steps:
 #### Add Piko patches as a patch source 
 1. Tap patch sources (lower left button)
 2. Tap `+` button
-3. Paste this repo url: `https://github.com/crimera/piko`
+3<!-- TODO: After first 3.0.0 stable is released, change this step to use https://github.com/crimera/piko
+4Paste this repo url: `https://github.com/crimera/piko/blob/dev/patches-bundle.json`
 
 #### Patching Twitter/X with Morphe
 1. Download an original unpatched X APKM from a reputable source such as [APKMirror.com](https://www.apkmirror.com/apk/x-corp/twitter/)

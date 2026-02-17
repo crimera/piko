@@ -1,8 +1,8 @@
 package app.crimera.patches.twitter.link.customsharingdomain
 
 import app.crimera.patches.twitter.link.cleartrackingparams.AddSessionTokenFingerprint
-import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.Fingerprint
@@ -22,9 +22,11 @@ internal object NewShareSheetLinkFingerprint : Fingerprint(
 
 internal object NewShareSheetLinkFingerprint2 : Fingerprint(
     filters = listOf(
-        string(TARGET_STRING),
-        string("https://x.com/i/trending/"),
-        string("https://x.com/i/lists/"),
+        string(TARGET_STRING)
+    ),
+    strings = listOf(
+        "https://x.com/i/trending/",
+        "https://x.com/i/lists/"
     )
 )
 
@@ -62,12 +64,12 @@ val customSharingDomainPatch =
                 callStatement.replace(dummyReg, "p0"),
             )
 
-            try {
-                // Should be applied only post 11.48.xx in new share sheet.
-                NewShareSheetLinkFingerprint.addCustomDomainFunctionCall()
-                NewShareSheetLinkFingerprint2.addCustomDomainFunctionCall()
-            } catch (_: Exception) {
-            }
+//            try {
+            // Should be applied only post 11.48.xx in new share sheet.
+            NewShareSheetLinkFingerprint.addCustomDomainFunctionCall()
+            NewShareSheetLinkFingerprint2.addCustomDomainFunctionCall()
+//            } catch (_: Exception) {
+//            }
 
             SettingsStatusLoadFingerprint.enableSettings("enableCustomSharingDomain")
         }

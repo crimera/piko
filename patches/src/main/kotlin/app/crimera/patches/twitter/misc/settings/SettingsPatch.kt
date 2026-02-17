@@ -6,12 +6,14 @@ import app.crimera.utils.Constants.ACTIVITY_HOOK_CLASS
 import app.crimera.utils.Constants.ADD_PREF_DESCRIPTOR
 import app.crimera.utils.Constants.DEEPLINK_HOOK_CLASS
 import app.crimera.utils.Constants.SSTS_DESCRIPTOR
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.revanced.patches.all.misc.versioncode.changeVersionCodePatch
@@ -36,7 +38,7 @@ val settingsPatch =
 
         execute {
             val methods = SettingsFingerprint.classDef.methods
-            val initMethod = methods.first()
+            val initMethod = SettingsFingerprint.method
             val arrayCreation =
                 initMethod
                     .instructions
@@ -54,12 +56,16 @@ val settingsPatch =
                 )
             }
 
-            val prefCLickedMethod = methods.find { it.returnType == "Z" }!!
-            val constIndex =
-                prefCLickedMethod
-                    .instructions
-                    .first { it.opcode == Opcode.CONST_4 }
-                    .location.index
+            val prefCLickedFingerprint = Fingerprint(
+                returnType = "Z",
+                parameters = listOf("Landroidx/preference/Preference;"),
+                filters = listOf(
+                    opcode(Opcode.CONST_4)
+                )
+            ).match(SettingsFingerprint.classDef)
+
+            val prefCLickedMethod = prefCLickedFingerprint.method
+            val constIndex = prefCLickedFingerprint.instructionMatches.first().index
 
             val igetObjLoc =
                 prefCLickedMethod

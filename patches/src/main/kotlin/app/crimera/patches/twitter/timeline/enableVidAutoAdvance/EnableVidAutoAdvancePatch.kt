@@ -7,14 +7,17 @@ import app.crimera.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 private object EnableVidAutoAdvancePatchFingerprint : Fingerprint(
-    strings = listOf("immersive_video_auto_advance_duration_threshold")
+    filters = listOf(
+        string("immersive_video_auto_advance_duration_threshold"),
+        opcode(Opcode.MOVE_RESULT)
+    )
 )
 
 @Suppress("unused")
@@ -27,21 +30,10 @@ val enableVidAutoAdvancePatch =
         dependsOn(settingsPatch)
 
         execute {
-            var strLoc: Int = 0
-            EnableVidAutoAdvancePatchFingerprint.stringMatches.forEach { match ->
-                val str = match.string
-                if (str.contains("immersive_video_auto_advance_duration_threshold")) {
-                    strLoc = match.index
-                    return@forEach
-                }
-            }
-            if (strLoc == 0) {
-                throw PatchException("hook not found")
-            }
-
             val method = EnableVidAutoAdvancePatchFingerprint.method
-            val instructions = method.instructions
-            val loc = instructions.first { it.opcode == Opcode.MOVE_RESULT && it.location.index > strLoc }.location.index
+            val matches = EnableVidAutoAdvancePatchFingerprint.instructionMatches
+            var strLoc: Int = matches.first().index
+            val loc = matches[1].index
             val reg = method.getInstruction<OneRegisterInstruction>(loc).registerA
             method.addInstruction(
                 loc,
