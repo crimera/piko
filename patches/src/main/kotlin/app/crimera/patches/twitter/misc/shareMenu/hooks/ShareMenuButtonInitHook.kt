@@ -7,17 +7,18 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.string
+import app.morphe.shared.misc.mapping.ResourceType
+import app.morphe.shared.misc.mapping.getResourceId
 import app.morphe.util.indexOfFirstInstructionOrThrow
-import app.revanced.patches.shared.misc.mapping.ResourceType
-import app.revanced.patches.shared.misc.mapping.getResourceId
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
 
 internal object ShareMenuButtonInitHook : Fingerprint(
     definingClass = "Lcom/twitter/tweet/action/legacy",
-    filters = listOf(
-        string("Debug")
-    )
+    filters =
+        listOf(
+            string("Debug"),
+        ),
 )
 
 context(BytecodePatchContext)

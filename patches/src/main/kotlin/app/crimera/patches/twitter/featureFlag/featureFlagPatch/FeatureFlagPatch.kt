@@ -11,13 +11,14 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.revanced.patches.shared.misc.extension.ExtensionsUtilsFingerprint
+import app.morphe.shared.misc.extension.ExtensionsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 
 private object FeatureFlagFingerprint : Fingerprint(
-    filters = listOf(
-        string("feature_switches_configs_crashlytics_enabled")
-    )
+    filters =
+        listOf(
+            string("feature_switches_configs_crashlytics_enabled"),
+        ),
 )
 
 val featureFlagPatch =

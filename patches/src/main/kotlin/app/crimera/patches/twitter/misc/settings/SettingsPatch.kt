@@ -16,8 +16,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.revanced.patches.all.misc.versioncode.changeVersionCodePatch
-import app.revanced.patches.shared.misc.extension.ExtensionsUtilsFingerprint
+import app.morphe.shared.misc.extension.ExtensionsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
@@ -56,13 +55,15 @@ val settingsPatch =
                 )
             }
 
-            val prefCLickedFingerprint = Fingerprint(
-                returnType = "Z",
-                parameters = listOf("Landroidx/preference/Preference;"),
-                filters = listOf(
-                    opcode(Opcode.CONST_4)
-                )
-            ).match(SettingsFingerprint.classDef)
+            val prefCLickedFingerprint =
+                Fingerprint(
+                    returnType = "Z",
+                    parameters = listOf("Landroidx/preference/Preference;"),
+                    filters =
+                        listOf(
+                            opcode(Opcode.CONST_4),
+                        ),
+                ).match(SettingsFingerprint.classDef)
 
             val prefCLickedMethod = prefCLickedFingerprint.method
             val constIndex = prefCLickedFingerprint.instructionMatches.first().index

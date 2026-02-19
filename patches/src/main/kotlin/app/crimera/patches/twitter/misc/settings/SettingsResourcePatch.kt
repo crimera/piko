@@ -1,10 +1,10 @@
 package app.crimera.patches.twitter.misc.settings
 
 import app.morphe.patcher.patch.resourcePatch
+import app.morphe.shared.misc.mapping.resourceMappingPatch
 import app.morphe.util.PIKO_RESOURCE_PREFIX
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
-import app.revanced.patches.shared.misc.mapping.resourceMappingPatch
 import org.w3c.dom.Element
 import java.nio.file.Files
 

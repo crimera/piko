@@ -1,4 +1,4 @@
-package app.revanced.patches.shared.misc.extension
+package app.morphe.shared.misc.extension
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction

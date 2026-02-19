@@ -30,7 +30,7 @@
  * applicable to this file.
  */
 
-package app.revanced.patches.shared.misc.mapping
+package app.morphe.shared.misc.mapping
 
 import app.morphe.patcher.InstructionLocation
 import app.morphe.patcher.LiteralFilter
@@ -48,7 +48,9 @@ import kotlin.text.startsWith
 import kotlin.text.substring
 import kotlin.text.toLong
 
-enum class ResourceType(val value: String) {
+enum class ResourceType(
+    val value: String,
+) {
     ANIM("anim"),
     ANIMATOR("animator"),
     ARRAY("array"),
@@ -73,21 +75,31 @@ enum class ResourceType(val value: String) {
     STYLEABLE("styleable"),
     TRANSITION("transition"),
     VALUES("values"),
-    XML("xml");
+    XML("xml"),
+    ;
 
     companion object {
         private val VALUE_MAP: Map<String, ResourceType> = entries.associateBy { it.value }
 
-        fun fromValue(value: String) = VALUE_MAP[value]
-            ?: throw kotlin.IllegalArgumentException("Unknown resource type: $value")
+        fun fromValue(value: String) =
+            VALUE_MAP[value]
+                ?: throw kotlin.IllegalArgumentException("Unknown resource type: $value")
     }
 }
 
-data class ResourceElement(val type: ResourceType, val name: String, val id: Long)
+data class ResourceElement(
+    val type: ResourceType,
+    val name: String,
+    val id: Long,
+)
 
 private lateinit var resourceMappings: MutableMap<String, ResourceElement>
 
-private fun setResourceId(type: ResourceType, name: String, id: Long) {
+private fun setResourceId(
+    type: ResourceType,
+    name: String,
+    id: Long,
+) {
     resourceMappings[type.value + name] = ResourceElement(type, name, id)
 }
 
@@ -95,7 +107,10 @@ private fun setResourceId(type: ResourceType, name: String, id: Long) {
  * @return A resource id of the given resource type and name.
  * @throws PatchException if the resource is not found.
  */
-fun getResourceId(type: ResourceType, name: String) = resourceMappings[type.value + name]?.id
+fun getResourceId(
+    type: ResourceType,
+    name: String,
+) = resourceMappings[type.value + name]?.id
     ?: throw PatchException("Could not find resource type: $type name: $name")
 
 /**
@@ -106,7 +121,10 @@ fun getResourceElements() = Collections.unmodifiableCollection(resourceMappings.
 /**
  * @return If the resource exists.
  */
-fun hasResourceId(type: ResourceType, name: String) = resourceMappings[type.value + name] != null
+fun hasResourceId(
+    type: ResourceType,
+    name: String,
+) = resourceMappings[type.value + name] != null
 
 /**
  * Identical to [LiteralFilter] except uses a decoded resource literal value.
@@ -117,31 +135,31 @@ fun hasResourceId(type: ResourceType, name: String) = resourceMappings[type.valu
 fun resourceLiteral(
     type: ResourceType,
     name: String,
-    location : InstructionLocation = InstructionLocation.MatchAfterAnywhere()
+    location: InstructionLocation = InstructionLocation.MatchAfterAnywhere(),
 ) = literal({ getResourceId(type, name) }, null, location)
 
+val resourceMappingPatch =
+    resourcePatch {
+        execute {
+            // Use a stream of the file, since no modifications are done
+            // and using a File parameter causes the file to be re-wrote when closed.
+            document(get("res/values/public.xml").inputStream()).use { document ->
+                val resources = document.documentElement.childNodes
+                val resourcesLength = resources.length
+                resourceMappings = kotlin.collections.HashMap(2 * resourcesLength)
 
-val resourceMappingPatch = resourcePatch {
-    execute {
-        // Use a stream of the file, since no modifications are done
-        // and using a File parameter causes the file to be re-wrote when closed.
-        document(get("res/values/public.xml").inputStream()).use { document ->
-            val resources = document.documentElement.childNodes
-            val resourcesLength = resources.length
-            resourceMappings = kotlin.collections.HashMap(2 * resourcesLength)
+                for (i in 0 until resourcesLength) {
+                    val node = resources.item(i) as? Element ?: continue
+                    if (node.nodeName != "public") continue
 
-            for (i in 0 until resourcesLength) {
-                val node = resources.item(i) as? Element ?: continue
-                if (node.nodeName != "public") continue
+                    val nameAttribute = node.getAttribute("name")
+                    if (nameAttribute.startsWith("APKTOOL")) continue
 
-                val nameAttribute = node.getAttribute("name")
-                if (nameAttribute.startsWith("APKTOOL")) continue
+                    val typeAttribute = node.getAttribute("type")
+                    val id = node.getAttribute("id").substring(2).toLong(16)
 
-                val typeAttribute = node.getAttribute("type")
-                val id = node.getAttribute("id").substring(2).toLong(16)
-
-                setResourceId(ResourceType.fromValue(typeAttribute), nameAttribute, id)
+                    setResourceId(ResourceType.fromValue(typeAttribute), nameAttribute, id)
+                }
             }
         }
     }
-}
