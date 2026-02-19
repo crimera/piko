@@ -59,7 +59,7 @@ val appIconResourcePatch =
 
                     val icon =
                         IconConfig(
-                            name = "app.revanced.extension.twitter.appicon$iconStartCount",
+                            name = "app.morphe.extension.twitter.appicon$iconStartCount",
                             iconResource = "@mipmap/$iconName",
                         )
 
@@ -123,7 +123,7 @@ val appIconResourcePatch =
             copyResources(
                 stringsDir,
                 ResourceGroup("values", "app_icon_strings.xml"),
-                resourcePrefix = PIKO_RESOURCE_PREFIX
+                resourcePrefix = PIKO_RESOURCE_PREFIX,
             )
 
             val languages =
@@ -140,7 +140,7 @@ val appIconResourcePatch =
                 copyResources(
                     stringsDir,
                     ResourceGroup(it, "app_icon_strings.xml"),
-                    resourcePrefix = PIKO_RESOURCE_PREFIX
+                    resourcePrefix = PIKO_RESOURCE_PREFIX,
                 )
             }
         }

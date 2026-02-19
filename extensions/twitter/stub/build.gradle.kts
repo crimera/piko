@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "app.revanced.extension"
+    namespace = "app.morphe.extension"
     compileSdk = 34
 
     defaultConfig {

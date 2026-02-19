@@ -10,7 +10,7 @@ import com.android.tools.smali.dexlib2.iface.Method
 import java.net.URLDecoder
 import java.util.jar.JarFile
 
-internal const val EXTENSION_CLASS_DESCRIPTOR = "Lapp/revanced/extension/shared/Utils;"
+internal const val EXTENSION_CLASS_DESCRIPTOR = "Lapp/morphe/extension/shared/Utils;"
 
 /**
  * A patch to extend with an extension shared with multiple patches.
@@ -38,8 +38,10 @@ fun sharedExtensionPatch(vararg hooks: ExtensionHook) =
 
         execute {
             if (classDefByOrNull(EXTENSION_CLASS_DESCRIPTOR) == null) {
-                throw PatchException("Shared extension class is not found. " +
-                        "This patch can not succeed without it.")
+                throw PatchException(
+                    "Shared extension class is not found. " +
+                        "This patch can not succeed without it.",
+                )
             }
         }
 

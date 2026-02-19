@@ -5,23 +5,24 @@ import app.morphe.patcher.string
 
 internal object AuthorizeAppActivity : Fingerprint(
     definingClass = "Lcom/twitter/android/AuthorizeAppActivity;",
-    name = "onCreate"
+    name = "onCreate",
 )
 
 internal object SettingsFingerprint : Fingerprint(
     name = "<clinit>",
     returnType = "V",
-    filters = listOf(
-        string("pref_proxy")
-    )
+    filters =
+        listOf(
+            string("pref_proxy"),
+        ),
 )
 
 internal object SettingsStatusLoadFingerprint : Fingerprint(
-    definingClass = "Lapp/revanced/extension/twitter/settings/SettingsStatus;",
-    name = "load"
+    definingClass = "Lapp/morphe/extension/twitter/settings/SettingsStatus;",
+    name = "load",
 )
 
 internal object UrlInterpreterActivity : Fingerprint(
     definingClass = "Lcom/twitter/deeplink/implementation/UrlInterpreterActivity;",
-    name = "onCreate"
+    name = "onCreate",
 )

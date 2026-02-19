@@ -2,9 +2,9 @@ package app.crimera.patches.twitter.misc.settings
 
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.util.PIKO_RESOURCE_PREFIX
-import app.revanced.patches.shared.misc.mapping.resourceMappingPatch
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
+import app.revanced.patches.shared.misc.mapping.resourceMappingPatch
 import org.w3c.dom.Element
 import java.nio.file.Files
 
@@ -29,7 +29,7 @@ internal val settingsResourcePatch =
                 val parent = editor.getElementsByTagName("FrameLayout").item(1) as Element
 
                 val sideBtn =
-                    editor.createElement("app.revanced.extension.twitter.settings.widgets.PikoSettingsButton")
+                    editor.createElement("app.morphe.extension.twitter.settings.widgets.PikoSettingsButton")
                 sideBtn.setAttribute("android:text", "Piko")
                 sideBtn.setAttribute("android:textAllCaps", "false")
                 sideBtn.setAttribute("android:background", "?android:attr/selectableItemBackground")
@@ -49,7 +49,7 @@ internal val settingsResourcePatch =
             copyResources(
                 basePath,
                 ResourceGroup("values", "strings.xml", "arrays.xml"),
-                resourcePrefix = PIKO_RESOURCE_PREFIX
+                resourcePrefix = PIKO_RESOURCE_PREFIX,
             )
 
             /**
@@ -85,14 +85,14 @@ internal val settingsResourcePatch =
                         copyResources(
                             basePath,
                             ResourceGroup(it, "arrays.xml"),
-                            resourcePrefix = PIKO_RESOURCE_PREFIX
+                            resourcePrefix = PIKO_RESOURCE_PREFIX,
                         )
                     }
                 }
                 copyResources(
                     basePath,
                     ResourceGroup(it, "strings.xml"),
-                    resourcePrefix = PIKO_RESOURCE_PREFIX
+                    resourcePrefix = PIKO_RESOURCE_PREFIX,
                 )
             }
 
