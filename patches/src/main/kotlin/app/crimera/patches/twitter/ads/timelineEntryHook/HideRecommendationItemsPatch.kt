@@ -16,10 +16,10 @@ import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
-val hideTimelinePostByCategory =
+val hideRecommendationItemsPatch =
     bytecodePatch(
-        name = "Hide timeline posts by category",
-        description = "Hides different post category like who to follow, news today etc from timeline.",
+        name = "Hide recommendation items",
+        description = "Adds options to hide recommendation items such as \"Who to follow\" and \"Today's news\" in timeline, search, and replies.",
     ) {
         compatibleWith(COMPATIBILITY_X)
         dependsOn(timelineEntryHookPatch, settingsPatch)
