@@ -26,12 +26,13 @@ public class GTranslateV2 implements Translate {
 
     /**
      * Translate the given query to the specified language
+     * @param tweetId Tweet Id in long
      * @param query The text to translate
      * @param toLang Target language code
      * @param callback Callback to handle translation result
      */
     @Override
-    public void translate(final String query, final String toLang, final TranslationCallback callback) {
+    public void translate(final Long tweetId, final String query, final String toLang, final TranslationCallback callback) {
         new AsyncTask<Void, Void, String>() {
             private Exception error = null;
 

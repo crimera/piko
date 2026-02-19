@@ -9,7 +9,7 @@ public interface Translate{
      * @param toLang Target language code
      * @param callback Callback to handle translation result
      */
-    void translate(String query, String toLang, TranslationCallback callback);
+    void translate(Long tweetId, String query, String toLang, TranslationCallback callback);
 
     // Returns  provider name
     String getProviderName();

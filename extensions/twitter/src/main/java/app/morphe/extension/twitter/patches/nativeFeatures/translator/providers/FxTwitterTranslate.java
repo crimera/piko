@@ -5,22 +5,23 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import org.json.JSONArray;
+
 import org.json.JSONObject;
 import app.morphe.extension.shared.StringRef;
 
-public class GTranslate implements Translate {
-    private static final String BASE_URL = "https://translate.googleapis.com/translate_a/single";
-    private static final String HOST = "translate.google.com";
-    private static final String USER_AGENT = "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:56.0) Gecko/20100101 Firefox/56.0";
-    private static final String ACCEPT = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+/*
+* Credits:  https://github.com/FxEmbed/FxEmbed
+*/
+public class FxTwitterTranslate implements Translate {
+    private static final String BASE_URL = "https://api.fxtwitter.com/piko/status/";
+    private String PROVIDER_NAME = "FxTwitter";
 
     @Override
     public String getProviderName(){
-        return "Google translator";
+        return this.PROVIDER_NAME;
     }
+
     /**
      * Translate the given query to the specified language
      * @param tweetId Tweet Id in long
@@ -36,12 +37,9 @@ public class GTranslate implements Translate {
             @Override
             protected String doInBackground(Void... voids) {
                 try {
-                    // Encode the query for URL
-                    String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString());
 
                     // Construct the full URL
-                    String fullUrl = String.format("%s?client=gtx&sl=auto&tl=%s&dj=1&dt=t&dt=bd&source=popup5&q=%s",
-                            BASE_URL, toLang, encodedQuery);
+                    String fullUrl = BASE_URL+String.valueOf(tweetId)+"/"+toLang;
 
                     // Create connection
                     URL url = new URL(fullUrl);
@@ -49,9 +47,6 @@ public class GTranslate implements Translate {
 
                     // Set request headers
                     connection.setRequestMethod("GET");
-                    connection.setRequestProperty("Host", HOST);
-                    connection.setRequestProperty("User-Agent", USER_AGENT);
-                    connection.setRequestProperty("Accept", ACCEPT);
 
                     // Read the response
                     BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -82,24 +77,22 @@ public class GTranslate implements Translate {
     }
 
     /**
-     * Parse the Google Translate JSON response
+     * Parse the JSON response
      * @param jsonResponse Raw JSON response from Google Translate
      * @return Translated text
      */
     private String parseTranslationResponse(String jsonResponse) {
         try {
             JSONObject jsonObject = new JSONObject(jsonResponse);
-            JSONArray sentences = jsonObject.getJSONArray("sentences");
-
-            StringBuilder translatedText = new StringBuilder();
-            for (int i = 0; i < sentences.length(); i++) {
-                JSONObject sentence = sentences.getJSONObject(i);
-                if (sentence.has("trans")) {
-                    translatedText.append(sentence.getString("trans"));
+            if (jsonObject.has("tweet")) {
+                JSONObject tweetObj = jsonObject.getJSONObject("tweet");
+                if (tweetObj.has("translation")) {
+                    JSONObject translationObj = tweetObj.getJSONObject("translation");
+                    this.PROVIDER_NAME = translationObj.getString("provider");
+                    return translationObj.getString("text");
                 }
             }
-
-            return translatedText.toString();
+            throw new Exception("Translation failed.");
         } catch (Exception e) {
             return StringRef.str("translate_tweet_error") +": "+ e.getMessage();
         }

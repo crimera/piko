@@ -43,6 +43,7 @@
     <string name="piko_native_translator_zero_text">No text found to translate</string>
     <string name="piko_native_translator_google">Google translator</string>
     <string name="piko_native_translator_google_v2">Google translator V2</string>
+    <string name="piko_native_translator_fxtwitter">FxTwitter API</string>
 
     <string name="piko_title_native_reader_mode">Reader mode</string>
     <string name="piko_native_reader_mode_grok_thread">Analyse this thread</string>
