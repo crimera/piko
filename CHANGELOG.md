@@ -1,3 +1,10 @@
+# [3.0.0-dev.3](https://github.com/crimera/piko/compare/v3.0.0-dev.2...v3.0.0-dev.3) (2026-02-19)
+
+
+### Features
+
+* **Twitter:** Added new source for `Native translator` ([6945434](https://github.com/crimera/piko/commit/69454343db3550ebba427d29ecbf1c0614cc94ec))
+
 # [3.0.0-dev.2](https://github.com/crimera/piko/compare/v3.0.0-dev.1...v3.0.0-dev.2) (2026-02-17)
 
 
