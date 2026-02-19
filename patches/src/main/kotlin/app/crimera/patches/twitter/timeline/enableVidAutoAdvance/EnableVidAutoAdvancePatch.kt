@@ -6,12 +6,10 @@ import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 private object EnableVidAutoAdvancePatchFingerprint : Fingerprint(
     filters = listOf(
@@ -32,9 +30,7 @@ val enableVidAutoAdvancePatch =
         execute {
             val method = EnableVidAutoAdvancePatchFingerprint.method
             val matches = EnableVidAutoAdvancePatchFingerprint.instructionMatches
-            var strLoc: Int = matches.first().index
             val loc = matches[1].index
-            val reg = method.getInstruction<OneRegisterInstruction>(loc).registerA
             method.addInstruction(
                 loc,
                 """

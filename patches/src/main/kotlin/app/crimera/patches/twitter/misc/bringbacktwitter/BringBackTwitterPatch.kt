@@ -125,7 +125,6 @@ val bringBackTwitterPatch =
 
             // region Change strings
 
-            val isRunningOnManager = System.getProperty("java.runtime.name") == "Android Runtime"
             val basePath = "twitter/bringbacktwitter/strings"
 
             replaceXmlResources(basePath, ResourceGroup("values", "strings.xml"))
@@ -157,33 +156,12 @@ val bringBackTwitterPatch =
                 }
                 val resGroup = ResourceGroup(folderName, "strings.xml")
                 replaceXmlResources(basePath, resGroup)
-
-                /*
-                 * The Java XML API on Android has a bug that converts surrogate pair characters
-                 * to invalid numeric character references.
-                 * It prevents resource compilation.
-                 * Fix the text directly after closing the xmlEditor.
-                 */
-                if (isRunningOnManager) {
-                    replaceStringsInFile(
-                        resGroup,
-                        replacements =
-                            mapOf(
-                                "&#55349;&#56655;" to "Twitter",
-                                "&#55357;&#56613;" to "🔥",
-                                "&#55356;&#57217;" to "🎁",
-                                "&#55356;&#57225;" to "🎉",
-                                "&#9200;" to "⏰",
-                            ),
-                    )
-                }
             }
 
             /*
              * Instead of defining strings in the map, replaces texts directly.
              * Reason: https://t.me/pikopatches/1/17339
              */
-
             replaceStringsInFile(
                 ResourceGroup("values-ja", "strings.xml", "arrays.xml"),
                 replacements =
