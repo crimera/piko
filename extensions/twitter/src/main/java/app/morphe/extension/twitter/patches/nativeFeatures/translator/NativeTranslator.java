@@ -17,16 +17,10 @@ public class NativeTranslator {
         try{
         String text = "";
         Tweet tweet = new Tweet(tweetObj);
-        try {
-            text = tweet.getText();
-        }catch (Exception e){
-            text = e.toString();
-        }
+        text = tweet.getText();
         // If text is empty.
         if(text == ""){
-            String translatedText = StringRef.str("piko_native_translator_zero_text");
-            DialogBox dialogBox = new DialogBox(activity,"",translatedText);
-            dialogBox.show();
+            Utils.logger(StringRef.str("piko_native_translator_zero_text"));
             return;
         }
 
@@ -35,9 +29,7 @@ public class NativeTranslator {
 
         // If both the tweet language and requested language are same.
         if(tweetLang.toLowerCase() == toLang.toLowerCase()){
-            String translatedText = StringRef.str("translate_tweet_same_language",toLang);
-            DialogBox dialogBox = new DialogBox(activity,"",translatedText);
-            dialogBox.show();
+            Utils.logger(StringRef.str("translate_tweet_same_language",toLang));
             return;
         }
         int providerCode = Pref.natveTranslatorProvider();
@@ -66,9 +58,11 @@ public class NativeTranslator {
             @Override
             public void onError(Exception e) {
                 // Handle translation error
-                Utils.toast("Translation failed: " + e.getMessage());
+                Utils.logger("Translation failed: " + e.getMessage());
             }
         });
-    }catch (Exception ex){Utils.logger(ex);}
+    }catch (Exception ex){
+            Utils.logger(ex);
+        }
     }
 }

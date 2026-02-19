@@ -93,11 +93,9 @@ public class Tweet extends Debug {
             if (text == null) {
                 text = this.getShortText();
             }
-            if (text.length() > 0) {
-                int mediaIndex = text.indexOf("pic.x.com");
-                if (mediaIndex > 0)
-                    text = text.substring(0, mediaIndex);
-            }
+            // Replaces text to empty if the text contains only media link.
+            text = text.replaceAll("^pic\\.x\\.com/\\S+$", "");
+
         } catch (Exception e) {
             Utils.logger(e);
             text = e.getMessage();
