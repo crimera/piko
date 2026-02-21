@@ -24,6 +24,8 @@ public class ViewUtils {
         int width = clipRect != null ? clipRect.width() : view.getWidth();
         int height = clipRect != null ? clipRect.height() : view.getHeight();
         
+        app.morphe.extension.twitter.Utils.logger("Rendering bitmap: " + width + "x" + height + (clipRect != null ? " (clipping applied)" : ""));
+        
         Bitmap bitmap = Bitmap.createBitmap(Math.max(1, width), Math.max(1, height), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(resolveBackgroundColor(view));

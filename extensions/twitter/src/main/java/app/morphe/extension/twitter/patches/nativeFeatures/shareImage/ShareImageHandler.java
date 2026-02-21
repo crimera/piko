@@ -43,6 +43,12 @@ public class ShareImageHandler {
                 target = new CaptureTarget(rootView, null);
             }
 
+            Utils.logger("Targeting view: " + target.view.getClass().getName() + " (" + target.view.getWidth() + "x" + target.view.getHeight() + ")");
+            if (target.clipRect != null) {
+                Utils.logger("Clip rect applied: " + target.clipRect.toShortString());
+            }
+            dumpViewTree(activity, target.view, 0);
+
             Bitmap bitmap;
             try {
                 ViewUtils.setScrollbarsVisible(target.view, false);
@@ -153,7 +159,10 @@ public class ShareImageHandler {
 
     private static int getBottomWithoutDivider(Activity activity, View v) {
         int h = v.getHeight();
-        int adjusted = findBottomDivider(activity, v, h, dp(activity, 24));
+        int adjusted = findBottomDivider(activity, v, dp(activity, 24));
+        if (adjusted < h) {
+            Utils.logger("Divider found via heuristics at: " + adjusted + " (Total: " + h + ")");
+        }
         
         if (v instanceof ViewGroup) {
             int actionId = activity.getResources().getIdentifier("tweet_inline_actions", "id", activity.getPackageName());
@@ -161,10 +170,12 @@ public class ShareImageHandler {
                 View actions = v.findViewById(actionId);
                 if (actions != null && actions.getVisibility() == View.VISIBLE) {
                     int relBot = getRelativeBottom(actions, v);
-                    // If we suspect a border inside the action bar, crop 1dp into it.
-                    // This is safe because action icons (reply/like) usually have internal padding.
                     if (relBot > 0 && relBot <= h) {
-                        return Math.min(adjusted, relBot - dp(activity, 1));
+                        int anchorAdjusted = Math.min(adjusted, relBot - dp(activity, 1));
+                        if (anchorAdjusted < adjusted) {
+                            Utils.logger("Cropping at Action Bar anchor: " + anchorAdjusted + " (Prev: " + adjusted + ")");
+                        }
+                        return anchorAdjusted;
                     }
                 }
             }
@@ -182,16 +193,13 @@ public class ShareImageHandler {
         return bottom;
     }
 
-    private static int findBottomDivider(Activity activity, View v, int rootHeight, int threshold) {
-        // Calculate v's bottom relative to the root capture view
-        int vRelativeBottom = getRelativeBottom(v, null); // We'll need to pass the root...
-        // Let's rethink. Simple is better.
+    private static int findBottomDivider(Activity activity, View v, int threshold) {
         return findBottomDividerInternal(activity, v, threshold);
     }
 
     private static int findBottomDividerInternal(Activity activity, View v, int threshold) {
         int h = v.getHeight();
-        if (v.getVisibility() != View.VISIBLE) return h;
+        if (v.getVisibility() != View.VISIBLE || h <= 0) return h;
 
         // 1. Check heuristics on this view
         try {
@@ -199,25 +207,41 @@ public class ShareImageHandler {
             String idName = (id != View.NO_ID && id != 0) ? activity.getResources().getResourceEntryName(id).toLowerCase() : "";
             String className = v.getClass().getName();
             
-            boolean isThin = h > 0 && h <= dp(activity, 6);
-            boolean hasKeyword = idName.contains("divider") || idName.contains("separator") || idName.contains("line") 
+            boolean isThin = h <= dp(activity, 6);
+            boolean hasKeyword = idName.contains("divider") || idName.contains("separator") 
+                || (idName.contains("line") && !idName.contains("inline"))
                 || idName.contains("border") || idName.contains("gap") || idName.contains("spacer") || idName.contains("bottom")
                 || className.contains("Divider") || className.contains("Separator");
 
-            if (isThin || hasKeyword) return 0;
+            if (hasKeyword || isThin) {
+                // Large views with 'line' or 'bottom' are usually not dividers (e.g. tweet_inline_actions)
+                if (h > dp(activity, 12) && !idName.contains("divider") && !idName.contains("separator")) {
+                    // Skip large non-explicit dividers
+                } else {
+                    Utils.logger("Divider detected: ID=" + idName + ", Class=" + className + ", Height=" + h);
+                    return 0;
+                }
+            }
         } catch (Exception ignored) {}
 
         // 2. Recurse into children at the bottom
         if (v instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) v;
             int bestBottom = h;
+            boolean foundInChild = false;
+            
             for (int i = group.getChildCount() - 1; i >= 0; i--) {
                 View child = group.getChildAt(i);
+                if (child.getVisibility() != View.VISIBLE) continue;
+                
+                // Only check children near the bottom
                 if (child.getBottom() < h - threshold) continue;
                 
                 int result = findBottomDividerInternal(activity, child, threshold);
                 if (result < child.getHeight()) {
-                    bestBottom = Math.min(bestBottom, child.getTop() + result);
+                    int absoluteDividerPos = child.getTop() + result;
+                    bestBottom = Math.min(bestBottom, absoluteDividerPos);
+                    foundInChild = true;
                 }
             }
             return bestBottom;
@@ -362,6 +386,29 @@ public class ShareImageHandler {
 
     private static int dp(Activity a, int dp) {
         return Math.round(dp * a.getResources().getDisplayMetrics().density);
+    }
+
+    private static void dumpViewTree(Activity activity, View v, int depth) {
+        if (v == null || v.getVisibility() != View.VISIBLE || depth > 20) return;
+        
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < depth; i++) sb.append("| ");
+        
+        int id = v.getId();
+        String idName = (id != View.NO_ID && id != 0) ? activity.getResources().getResourceEntryName(id) : "";
+        String className = v.getClass().getSimpleName();
+        
+        sb.append(String.format("%s %dx%d @%d,%d %s", 
+            className, v.getWidth(), v.getHeight(), v.getLeft(), v.getTop(), idName.isEmpty() ? "" : "#" + idName));
+        
+        Utils.logger(sb.toString());
+        
+        if (v instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) v;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                dumpViewTree(activity, group.getChildAt(i), depth + 1);
+            }
+        }
     }
 
     private static class CaptureTarget {
