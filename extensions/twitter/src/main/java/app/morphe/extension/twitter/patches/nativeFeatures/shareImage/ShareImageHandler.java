@@ -161,9 +161,10 @@ public class ShareImageHandler {
 
     private static int getBottomWithoutDivider(Activity activity, View target) {
         int h = target.getHeight();
-        int bestBottom = h;
 
-        // 1. Check for known bottom anchors (Aggressive cropping)
+        // 1. Aggressive Anchor Cropping
+        // We look for the action bar or stats container. If found, we crop 1dp INSIDE them
+        // to absolutely guarantee no gray separator slop from the parent container.
         String[] anchors = {"tweet_inline_actions", "stats_container"};
         for (String name : anchors) {
             int id = activity.getResources().getIdentifier(name, "id", activity.getPackageName());
@@ -171,25 +172,47 @@ public class ShareImageHandler {
             View anchor = target.findViewById(id);
             if (anchor != null && anchor.getVisibility() == View.VISIBLE) {
                 int relBot = getRelativeBottom(anchor, target);
-                if (relBot > 0 && relBot <= h) {
-                    // Aggressive 1dp crop to remove any persistent gray separator slop
-                    int crop = relBot - dp(activity, 1);
-                    if (crop < bestBottom) {
-                        Utils.logger("Bottom anchored to #" + name + " at " + crop);
-                        bestBottom = crop;
-                    }
+                int crop = relBot - dp(activity, 1);
+                if (crop > 0 && crop < h) {
+                    Utils.logger("Bottom anchored to #" + name + " at " + crop);
+                    return crop;
                 }
             }
         }
 
-        // 2. Fallback to heuristic divider detection
-        int heuristic = findBottomDivider(activity, target, dp(activity, 24));
-        if (heuristic < bestBottom) {
-            Utils.logger("Bottom refined by heuristics: " + heuristic);
-            bestBottom = heuristic;
+        // 2. Linear "Slop" Reduction
+        // If no anchors are found, we simply iterate through immediate children from bottom to top.
+        // Any thin view (<= 4dp) at the bottom is treated as a divider or "slop" and removed.
+        if (target instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) target;
+            int currentBot = h;
+            for (int i = group.getChildCount() - 1; i >= 0; i--) {
+                View child = group.getChildAt(i);
+                if (child.getVisibility() != View.VISIBLE) continue;
+
+                // If child is thin, crop it and move up
+                if (child.getHeight() <= dp(activity, 4)) {
+                    currentBot = child.getTop();
+                    Utils.logger("Reduced slop bar: #" + getResourceName(activity, child));
+                } else {
+                    // First "real" content found, stop reduction
+                    break;
+                }
+            }
+            return currentBot;
         }
 
-        return bestBottom;
+        return h;
+    }
+
+    private static String getResourceName(Context context, View v) {
+        try {
+            int id = v.getId();
+            if (id == View.NO_ID || id == 0) return v.getClass().getSimpleName();
+            return context.getResources().getResourceEntryName(id);
+        } catch (Exception e) {
+            return "unknown";
+        }
     }
 
     private static int getRelativeBottom(View child, View parent) {
@@ -200,49 +223,6 @@ public class ShareImageHandler {
             current = (current.getParent() instanceof View) ? (View) current.getParent() : null;
         }
         return bottom;
-    }
-
-    private static int findBottomDivider(Activity activity, View v, int threshold) {
-        return findBottomDividerInternal(activity, v, threshold);
-    }
-
-    private static int findBottomDividerInternal(Activity activity, View v, int threshold) {
-        int h = v.getHeight();
-        if (v.getVisibility() != View.VISIBLE || h <= 0) return h;
-
-        // Check for explicit dividers or thin lines
-        try {
-            int id = v.getId();
-            String idName = (id != View.NO_ID && id != 0) ? activity.getResources().getResourceEntryName(id).toLowerCase() : "";
-            
-            if (idName.contains("divider") || idName.contains("separator")) {
-                Utils.logger("Divider detected: #" + idName + " (" + h + "px)");
-                return 0;
-            }
-            
-            if (h <= dp(activity, 3) && (idName.contains("border") || idName.contains("line"))) {
-                Utils.logger("Thin line detected: #" + idName + " (" + h + "px)");
-                return 0;
-            }
-        } catch (Exception ignored) {}
-
-        // Recurse into children ending at the bottom
-        if (v instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) v;
-            int bestBottom = h;
-            for (int i = group.getChildCount() - 1; i >= 0; i--) {
-                View child = group.getChildAt(i);
-                if (child.getVisibility() != View.VISIBLE || child.getBottom() < h - threshold) continue;
-                
-                int res = findBottomDividerInternal(activity, child, threshold);
-                if (res < child.getHeight()) {
-                    bestBottom = Math.min(bestBottom, child.getTop() + res);
-                }
-            }
-            return bestBottom;
-        }
-
-        return h;
     }
 
     private static boolean isTweetDetailScreen(Activity activity) {
