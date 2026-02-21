@@ -274,6 +274,17 @@ public class ShareImageHandler {
         int top = startView.getTop();
         int bottom = endView.getBottom();
 
+        int replySortingId = resolveId(activity, "reply_sorting");
+        if (replySortingId != 0) {
+            android.view.View replySorting = endView.findViewById(replySortingId);
+            if (replySorting != null && replySorting.getVisibility() == android.view.View.VISIBLE) {
+                int candidateBottom = endView.getTop() + replySorting.getTop();
+                if (candidateBottom > top) {
+                    bottom = Math.min(bottom, candidateBottom);
+                }
+            }
+        }
+
         if (bottom <= top) return null;
 
         return new Rect(0, top, container.getWidth(), bottom);
