@@ -22,15 +22,18 @@ public class ViewUtils {
     public static Bitmap viewToBitmap(View view, Rect clipRect) {
         if (view == null) return null;
 
+        // Force measurement if view has no size
         if (view.getWidth() <= 0 || view.getHeight() <= 0) {
             view.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
                          View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
             view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
         }
 
-        Rect clamped = clamp(clipRect, view);
-        int width = clamped != null ? clamped.width() : view.getWidth();
-        int height = clamped != null ? clamped.height() : view.getHeight();
+        // Use clipRect for dimensions if provided, otherwise use view bounds.
+        // We do NOT clamp to [0, width/height] because clipRect may target 
+        // children that are partially scrolled off-screen (negative coordinates).
+        int width = (clipRect != null) ? clipRect.width() : view.getWidth();
+        int height = (clipRect != null) ? clipRect.height() : view.getHeight();
 
         if (width <= 0 || height <= 0) return null;
 
@@ -43,7 +46,7 @@ public class ViewUtils {
         }
 
         Utils.logger(String.format("Rendering bitmap: %dx%d%s", 
-            width, height, clamped != null ? " (clipping applied)" : ""));
+            width, height, clipRect != null ? " (clipping applied)" : ""));
         
         Bitmap bitmap = null;
         try {
@@ -55,8 +58,10 @@ public class ViewUtils {
                 canvas.scale(scale, scale);
             }
 
-            if (clamped != null) {
-                canvas.translate(-clamped.left, -clamped.top);
+            if (clipRect != null) {
+                // Translate the canvas so that the top-left of the capture 
+                // matches the top-left of the clipRect in the view's coordinate space.
+                canvas.translate(-clipRect.left, -clipRect.top);
             }
             
             view.draw(canvas);
@@ -66,17 +71,14 @@ public class ViewUtils {
                 bitmap.recycle();
                 bitmap = null;
             }
+        } catch (Exception e) {
+            Utils.logger("Error rendering bitmap: " + e.getMessage());
+            if (bitmap != null) {
+                bitmap.recycle();
+                bitmap = null;
+            }
         }
         return bitmap;
-    }
-
-    private static Rect clamp(Rect r, View v) {
-        if (r == null) return null;
-        int left = Math.max(0, r.left);
-        int top = Math.max(0, r.top);
-        int right = Math.min(v.getWidth(), r.right);
-        int bottom = Math.min(v.getHeight(), r.bottom);
-        return (right > left && bottom > top) ? new Rect(left, top, right, bottom) : null;
     }
 
     private static int resolveBackgroundColor(View view) {

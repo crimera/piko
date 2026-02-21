@@ -164,8 +164,6 @@ public class ShareImageHandler {
 
         Object tag = view.getTag();
         if (tag instanceof Long && tag.equals(targetId)) return view;
-        
-        // Exact string match only to avoid false positives
         if (tag instanceof String && tag.equals(targetId.toString())) return view;
 
         if (!(view instanceof ViewGroup)) return null;
@@ -185,22 +183,20 @@ public class ShareImageHandler {
         if (tweetRow == null) tweetRow = tweetView;
 
         if (isTweetDetailScreen(activity)) {
-            ViewGroup threadContainer = findThreadContainer(tweetRow);
-            if (threadContainer != null) {
-                Rect threadBounds = computeThreadBounds(activity, threadContainer, tweetRow);
-                if (threadBounds != null) return new CaptureTarget(threadContainer, threadBounds);
-            }
+            ViewGroup thread = findThreadContainer(tweetRow);
+            Rect bounds = (thread != null) ? computeThreadBounds(activity, thread, tweetRow) : null;
+            if (bounds != null) return new CaptureTarget(thread, bounds);
         }
 
         View expanded = expandToTweetContainer(activity, rootView, tweetRow);
-        View target = expanded != null ? expanded : tweetRow;
+        View target = (expanded != null) ? expanded : tweetRow;
         
         int adjustedBottom = getBottomWithoutDivider(activity, target);
-        if (adjustedBottom < target.getHeight()) {
-            return new CaptureTarget(target, new Rect(0, 0, target.getWidth(), adjustedBottom));
+        if (adjustedBottom >= target.getHeight()) {
+            return new CaptureTarget(target, null);
         }
 
-        return new CaptureTarget(target, null);
+        return new CaptureTarget(target, new Rect(0, 0, target.getWidth(), adjustedBottom));
     }
 
     private static int getBottomWithoutDivider(Activity activity, View target) {
@@ -327,7 +323,7 @@ public class ShareImageHandler {
             bottom = Math.min(bottom, container.getChildAt(endIdx).getTop() + sortView.getTop());
         }
 
-        return bottom > top ? new Rect(0, top, container.getWidth(), bottom) : null;
+        return (bottom > top) ? new Rect(0, top, container.getWidth(), bottom) : null;
     }
 
     private static boolean hasVisible(View v, int id) {
@@ -417,8 +413,7 @@ public class ShareImageHandler {
         
         Utils.logger(sb.toString());
         
-        if (v instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) v;
+        if (v instanceof ViewGroup group) {
             for (int i = 0; i < group.getChildCount(); i++) {
                 dumpViewTree(activity, group.getChildAt(i), depth + 1);
             }
