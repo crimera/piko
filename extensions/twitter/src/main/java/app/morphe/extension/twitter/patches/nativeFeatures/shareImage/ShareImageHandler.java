@@ -1,28 +1,37 @@
 package app.morphe.extension.twitter.patches.nativeFeatures.shareImage;
 
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
-import android.widget.ScrollView;
 
 import app.morphe.extension.twitter.Utils;
 import app.morphe.extension.twitter.entity.Tweet;
 import app.morphe.extension.twitter.utils.ViewUtils;
 
 import java.io.OutputStream;
+import java.util.List;
 
 public class ShareImageHandler {
+
+    private static final String ID_INLINE_ACTIONS = "tweet_inline_actions";
+    private static final String ID_STATS_CONTAINER = "stats_container";
+    private static final String ID_OUTER_ROW = "outer_layout_row_view_tweet";
 
     public static void shareAsImage(Context context, Object tweetObj) {
         if (!(context instanceof Activity)) {
@@ -30,28 +39,33 @@ public class ShareImageHandler {
             return;
         }
 
+        Activity activity = (Activity) context;
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            activity.runOnUiThread(() -> shareAsImage(activity, tweetObj));
+            return;
+        }
+
         try {
-            Activity activity = (Activity) context;
             Tweet tweet = new Tweet(tweetObj);
             Utils.toast("Capturing tweet...");
             
             View rootView = activity.getWindow().getDecorView().getRootView();
-            View tweetView = searchViewTree(rootView, tweet.getTweetId());
+            View tweetView = searchViewTree(rootView, tweet.getTweetId(), 0);
             CaptureTarget target = resolveCaptureTarget(activity, rootView, tweetView);
 
-            if (target == null) {
-                target = new CaptureTarget(rootView, null);
-            }
+            if (target == null) target = new CaptureTarget(rootView, null);
 
-            float density = activity.getResources().getDisplayMetrics().density;
-            Utils.logger(String.format("Capture: Tweet %d | Density %.1f", tweet.getTweetId(), density));
+            Utils.logger(String.format("Capture: Tweet %d | Density %.1f", 
+                tweet.getTweetId(), activity.getResources().getDisplayMetrics().density));
             Utils.logger("Target: " + target.view.getClass().getSimpleName() + " " + target.view.getWidth() + "x" + target.view.getHeight());
+            
             if (target.clipRect != null) {
                 Utils.logger("Clip: " + target.clipRect.toShortString());
             }
+            
             dumpViewTree(activity, target.view, 0);
 
-            Bitmap bitmap;
+            Bitmap bitmap = null;
             try {
                 ViewUtils.setScrollbarsVisible(target.view, false);
                 bitmap = ViewUtils.viewToBitmap(target.view, target.clipRect);
@@ -59,6 +73,11 @@ public class ShareImageHandler {
                 ViewUtils.setScrollbarsVisible(target.view, true);
             }
             
+            if (bitmap == null) {
+                Utils.toast("Failed to capture image");
+                return;
+            }
+
             shareImage(activity, bitmap, "tweet_" + tweet.getTweetId());
         } catch (Exception e) {
             Utils.logger(e);
@@ -91,7 +110,9 @@ public class ShareImageHandler {
             if (uri == null) return;
 
             try (OutputStream os = resolver.openOutputStream(uri)) {
-                if (os != null) ViewUtils.saveBitmap(bitmap, os);
+                ViewUtils.saveBitmap(bitmap, os);
+            } finally {
+                bitmap.recycle();
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -105,7 +126,20 @@ public class ShareImageHandler {
                     .putExtra(Intent.EXTRA_STREAM, uri)
                     .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            activity.startActivity(Intent.createChooser(intent, "Share Tweet Image"));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                intent.setClipData(ClipData.newRawUri("image", uri));
+            }
+
+            Intent chooser = Intent.createChooser(intent, "Share Tweet Image");
+            
+            // Grant URI permission to all resolved activities
+            PackageManager pm = activity.getPackageManager();
+            List<ResolveInfo> resInfoList = pm.queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY);
+            for (ResolveInfo resolveInfo : resInfoList) {
+                activity.grantUriPermission(resolveInfo.activityInfo.packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+
+            activity.startActivity(chooser);
         } catch (Exception e) {
             Utils.logger(e);
         }
@@ -114,22 +148,32 @@ public class ShareImageHandler {
     private static void cleanupOldFiles(Context context) {
         try {
             long cutoff = (System.currentTimeMillis() - (24 * 60 * 60 * 1000)) / 1000;
-            String selection = MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ? AND " + MediaStore.MediaColumns.DATE_ADDED + " < ?";
-            context.getContentResolver().delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection, new String[]{"Pictures/Piko/%", String.valueOf(cutoff)});
+            String selection = MediaStore.MediaColumns.DATE_ADDED + " < ?";
+            String[] args = new String[]{String.valueOf(cutoff)};
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                selection += " AND " + MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ?";
+                args = new String[]{String.valueOf(cutoff), "Pictures/Piko/%"};
+            }
+            context.getContentResolver().delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection, args);
         } catch (Exception ignored) {}
     }
 
-    private static View searchViewTree(View view, Long targetId) {
+    private static View searchViewTree(View view, Long targetId, int depth) {
+        if (view == null || depth > 50) return null;
+
         Object tag = view.getTag();
         if (tag instanceof Long && tag.equals(targetId)) return view;
-        if (tag != null && tag.toString().contains(targetId.toString())) return view;
+        
+        // Exact string match only to avoid false positives
+        if (tag instanceof String && tag.equals(targetId.toString())) return view;
 
-        if (view instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) view;
-            for (int i = 0; i < group.getChildCount(); i++) {
-                View result = searchViewTree(group.getChildAt(i), targetId);
-                if (result != null) return result;
-            }
+        if (!(view instanceof ViewGroup)) return null;
+        
+        ViewGroup group = (ViewGroup) view;
+        for (int i = 0; i < group.getChildCount(); i++) {
+            View result = searchViewTree(group.getChildAt(i), targetId, depth + 1);
+            if (result != null) return result;
         }
         return null;
     }
@@ -163,32 +207,31 @@ public class ShareImageHandler {
         int h = target.getHeight();
 
         // 1. Anchor-based cropping (Priority)
-        for (String name : new String[]{"tweet_inline_actions", "stats_container"}) {
+        for (String name : new String[]{ID_INLINE_ACTIONS, ID_STATS_CONTAINER}) {
             View anchor = findViewById(target, name);
-            if (anchor != null && anchor.getVisibility() == View.VISIBLE) {
-                int crop = getRelativeBottom(anchor, target) - dp(activity, 1);
-                if (crop > 0 && crop < h) {
-                    Utils.logger("Cropped at #" + name);
-                    return crop;
-                }
+            if (anchor == null || anchor.getVisibility() != View.VISIBLE) continue;
+            
+            int crop = getRelativeBottom(anchor, target) - dp(activity, 1);
+            if (crop > 0 && crop < h) {
+                Utils.logger("Cropped at #" + name);
+                return crop;
             }
         }
 
         // 2. Linear slop removal (Iterative)
-        if (target instanceof ViewGroup) {
-            ViewGroup g = (ViewGroup) target;
-            int bot = h;
-            for (int i = g.getChildCount() - 1; i >= 0; i--) {
-                View v = g.getChildAt(i);
-                if (v.getVisibility() != View.VISIBLE) continue;
-                if (v.getHeight() <= dp(activity, 4) && v.getBottom() >= bot - dp(activity, 1)) {
-                    bot = v.getTop();
-                    Utils.logger("Removed slop: " + v.getClass().getSimpleName());
-                } else break;
-            }
-            return bot;
+        if (!(target instanceof ViewGroup)) return h;
+        
+        ViewGroup g = (ViewGroup) target;
+        int bot = h;
+        for (int i = g.getChildCount() - 1; i >= 0; i--) {
+            View v = g.getChildAt(i);
+            if (v.getVisibility() != View.VISIBLE) continue;
+            if (v.getHeight() <= dp(activity, 4) && v.getBottom() >= bot - dp(activity, 1)) {
+                bot = v.getTop();
+                Utils.logger("Removed slop: " + v.getClass().getSimpleName());
+            } else break;
         }
-        return h;
+        return bot;
     }
 
     private static View findViewById(View root, String name) {
@@ -198,33 +241,39 @@ public class ShareImageHandler {
 
     private static int getRelativeBottom(View child, View parent) {
         int bottom = child.getBottom();
-        for (View v = getParent(child); v != null && v != parent; v = getParent(v)) {
-            bottom += v.getTop();
+        View current = getParent(child);
+        while (current != null && current != parent) {
+            bottom += current.getTop();
+            current = getParent(current);
         }
         return bottom;
     }
 
     private static boolean isTweetDetailScreen(Activity activity) {
         View root = activity.getWindow().getDecorView();
-        for (String s : new String[]{"persistent_reply", "stats_container"}) {
+        for (String s : new String[]{"persistent_reply", ID_STATS_CONTAINER}) {
             if (hasVisible(root, s)) return true;
         }
         return false;
     }
 
     private static View findTweetRowContainer(Activity activity, View view) {
-        int rowId = app.morphe.extension.shared.Utils.getResourceIdentifier("outer_layout_row_view_tweet", "id");
+        int rowId = app.morphe.extension.shared.Utils.getResourceIdentifier(ID_OUTER_ROW, "id");
         View ancestor = rowId != 0 ? findAncestorById(view, rowId) : null;
         return ancestor != null ? ancestor : findAncestorByTweetView(view);
     }
 
     private static View findAncestorById(View view, int id) {
-        for (View v = view; v != null; v = getParent(v)) if (v.getId() == id) return v;
+        for (View v = view; v != null; v = getParent(v)) {
+            if (v.getId() == id) return v;
+        }
         return null;
     }
 
     private static View findAncestorByTweetView(View view) {
-        for (View v = view; v != null; v = getParent(v)) if (isTweetView(v)) return v;
+        for (View v = view; v != null; v = getParent(v)) {
+            if (isTweetView(v)) return v;
+        }
         return null;
     }
 
@@ -235,7 +284,7 @@ public class ShareImageHandler {
 
     private static ViewGroup findThreadContainer(View view) {
         for (View v = view; v != null; v = getParent(v)) {
-            if (v instanceof ViewGroup && (v instanceof ListView || v.getClass().getName().contains("RecyclerView"))) {
+            if (v instanceof ListView || v.getClass().getName().contains("RecyclerView")) {
                 return (ViewGroup) v;
             }
         }
@@ -258,7 +307,7 @@ public class ShareImageHandler {
         }
 
         int endIdx = targetIdx;
-        if (!hasVisible(tweetRow, app.morphe.extension.shared.Utils.getResourceIdentifier("tweet_reply_context", "id"))) {
+        if (!hasVisible(tweetRow, "tweet_reply_context")) {
             while (endIdx < container.getChildCount() - 1 && isTweetItem(container.getChildAt(endIdx + 1)) && (hasVisible(container.getChildAt(endIdx + 1), topId) || hasVisible(container.getChildAt(endIdx), botId))) {
                 endIdx++;
             }
@@ -273,8 +322,7 @@ public class ShareImageHandler {
             bottom = lastView.getTop() + adjustedLastBottom;
         }
 
-        int sortId = app.morphe.extension.shared.Utils.getResourceIdentifier("reply_sorting", "id");
-        View sortView = sortId != 0 ? container.getChildAt(endIdx).findViewById(sortId) : null;
+        View sortView = findViewById(container.getChildAt(endIdx), "reply_sorting");
         if (sortView != null && sortView.getVisibility() == View.VISIBLE) {
             bottom = Math.min(bottom, container.getChildAt(endIdx).getTop() + sortView.getTop());
         }
@@ -294,28 +342,36 @@ public class ShareImageHandler {
     }
 
     private static int indexOfChild(ViewGroup parent, View child) {
-        for (int i = 0; i < parent.getChildCount(); i++) if (parent.getChildAt(i) == child) return i;
+        for (int i = 0; i < parent.getChildCount(); i++) {
+            if (parent.getChildAt(i) == child) return i;
+        }
         return -1;
     }
 
     private static View findItemRoot(ViewGroup container, View view) {
         View v = view;
-        while (getParent(v) != null && getParent(v) != container) v = getParent(v);
+        while (getParent(v) != null && getParent(v) != container) {
+            v = getParent(v);
+        }
         return getParent(v) == container ? v : null;
     }
 
     private static boolean isTweetItem(View v) {
         if (v == null) return false;
         if (isTweetView(v)) return true;
-        if (v instanceof ViewGroup) {
-            ViewGroup g = (ViewGroup) v;
-            for (int i = 0; i < g.getChildCount(); i++) if (isTweetItem(g.getChildAt(i))) return true;
+        if (!(v instanceof ViewGroup)) return false;
+        
+        ViewGroup g = (ViewGroup) v;
+        for (int i = 0; i < g.getChildCount(); i++) {
+            if (isTweetItem(g.getChildAt(i))) return true;
         }
         return false;
     }
 
     private static View getParent(View v) {
-        return (v != null && v.getParent() instanceof View) ? (View) v.getParent() : null;
+        if (v == null) return null;
+        Object p = v.getParent();
+        return (p instanceof View) ? (View) p : null;
     }
 
     private static View expandToTweetContainer(Activity activity, View root, View tweetView) {
@@ -337,7 +393,7 @@ public class ShareImageHandler {
     }
 
     private static boolean isScroll(View v) {
-        return v instanceof ScrollView || v instanceof ListView || v.getClass().getName().contains("RecyclerView") || v.getClass().getName().contains("NestedScrollView");
+        return v instanceof android.widget.ScrollView || v instanceof android.widget.ListView || v.getClass().getName().contains("RecyclerView") || v.getClass().getName().contains("NestedScrollView");
     }
 
     private static int dp(Activity a, int dp) {
@@ -347,16 +403,16 @@ public class ShareImageHandler {
     private static void dumpViewTree(Activity activity, View v, int depth) {
         if (v == null || v.getVisibility() != View.VISIBLE || depth > 20) return;
         
+        String idName = "";
+        try {
+            int id = v.getId();
+            if (id != View.NO_ID && id != 0) idName = activity.getResources().getResourceEntryName(id);
+        } catch (Resources.NotFoundException ignored) {}
+        
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < depth; i++) sb.append("| ");
-        
-        int id = v.getId();
-        String idName = (id != View.NO_ID && id != 0) ? activity.getResources().getResourceEntryName(id) : "";
-        String className = v.getClass().getSimpleName();
-        
-        // Compact format: Class [WxH] @L,T #ID
         sb.append(String.format("%s [%dx%d] @%d,%d%s", 
-            className, v.getWidth(), v.getHeight(), v.getLeft(), v.getTop(), 
+            v.getClass().getSimpleName(), v.getWidth(), v.getHeight(), v.getLeft(), v.getTop(), 
             idName.isEmpty() ? "" : " #" + idName));
         
         Utils.logger(sb.toString());
@@ -370,7 +426,7 @@ public class ShareImageHandler {
     }
 
     private static class CaptureTarget {
-        View view; Rect clipRect;
+        final View view; final Rect clipRect;
         CaptureTarget(View v, Rect r) { view = v; clipRect = r; }
     }
 }
