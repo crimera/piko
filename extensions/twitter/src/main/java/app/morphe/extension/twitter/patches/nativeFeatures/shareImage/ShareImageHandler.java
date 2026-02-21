@@ -43,7 +43,14 @@ public class ShareImageHandler {
                 target = new CaptureTarget(rootView, null);
             }
 
-            Bitmap bitmap = ViewUtils.viewToBitmap(target.view, target.clipRect);
+            Bitmap bitmap;
+            try {
+                ViewUtils.setScrollbarsVisible(target.view, false);
+                bitmap = ViewUtils.viewToBitmap(target.view, target.clipRect);
+            } finally {
+                ViewUtils.setScrollbarsVisible(target.view, true);
+            }
+            
             shareImage(activity, bitmap, "tweet_" + tweet.getTweetId());
         } catch (Exception e) {
             Utils.logger(e);

@@ -51,4 +51,15 @@ public class ViewUtils {
     public static void saveBitmap(Bitmap bitmap, OutputStream os) throws Exception {
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
     }
+
+    public static void setScrollbarsVisible(View view, boolean visible) {
+        view.setVerticalScrollBarEnabled(visible);
+        view.setHorizontalScrollBarEnabled(visible);
+        if (view instanceof android.view.ViewGroup) {
+            android.view.ViewGroup group = (android.view.ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                setScrollbarsVisible(group.getChildAt(i), visible);
+            }
+        }
+    }
 }
