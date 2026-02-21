@@ -60,18 +60,91 @@ public class ShareImageHandler {
                 ? ViewUtils.viewToBitmap(captureTarget.view)
                 : ViewUtils.viewToBitmap(captureTarget.view, captureTarget.clipRect);
 
-            // Save to file
-            File outputFile = new File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                "Piko/" + "tweet_" + tweet.getTweetId() + ".png"
-            );
-
-            ViewUtils.saveBitmap(bitmap, outputFile);
-            Utils.toast("Saved to Downloads/Piko");
+            // Share via MediaStore
+            shareImage(activity, bitmap, "tweet_" + tweet.getTweetId());
 
         } catch (Exception e) {
             Utils.logger(e);
             Utils.toast("Share failed: " + e.getMessage());
+        }
+    }
+
+    private static void shareImage(Activity activity, Bitmap bitmap, String filename) {
+        try {
+            cleanupOldFiles(activity);
+
+            android.content.ContentResolver resolver = activity.getContentResolver();
+            String displayName = filename + ".png";
+
+            // Delete existing file if it exists to "overwrite"
+            try {
+                String selection = android.provider.MediaStore.MediaColumns.DISPLAY_NAME + " = ? AND " +
+                                   android.provider.MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ?";
+                String[] selectionArgs = new String[]{displayName, "Pictures/Piko_Shared/%"};
+                resolver.delete(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection, selectionArgs);
+            } catch (Exception e) {
+                // Ignore if not found
+            }
+
+            android.content.ContentValues contentValues = new android.content.ContentValues();
+            contentValues.put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, displayName);
+            contentValues.put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "image/png");
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                contentValues.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_PICTURES + "/Piko_Shared");
+                contentValues.put(android.provider.MediaStore.MediaColumns.IS_PENDING, 1);
+            }
+
+            android.net.Uri uri = resolver.insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+
+            if (uri == null) {
+                Utils.toast("Failed to create MediaStore entry");
+                return;
+            }
+
+            try (java.io.OutputStream os = resolver.openOutputStream(uri)) {
+                if (os != null) {
+                    bitmap.compress(Bitmap.Config.ARGB_8888.equals(bitmap.getConfig()) ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG, 100, os);
+                }
+            }
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                contentValues.clear();
+                contentValues.put(android.provider.MediaStore.MediaColumns.IS_PENDING, 0);
+                resolver.update(uri, contentValues, null, null);
+            }
+
+            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_SEND);
+            intent.setType("image/png");
+            intent.putExtra(android.content.Intent.EXTRA_STREAM, uri);
+            intent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            activity.startActivity(android.content.Intent.createChooser(intent, "Share Tweet Image"));
+
+        } catch (Exception e) {
+            Utils.logger(e);
+            Utils.toast("Failed to share: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Delete files in Piko_Shared older than 24 hours
+     */
+    private static void cleanupOldFiles(android.content.Context context) {
+        try {
+            long cutoff = (System.currentTimeMillis() - (24 * 60 * 60 * 1000)) / 1000;
+            android.content.ContentResolver resolver = context.getContentResolver();
+
+            String selection = android.provider.MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ? AND " +
+                               android.provider.MediaStore.MediaColumns.DATE_ADDED + " < ?";
+            String[] selectionArgs = new String[]{"Pictures/Piko_Shared/%", String.valueOf(cutoff)};
+
+            int deleted = resolver.delete(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection, selectionArgs);
+            if (deleted > 0) {
+                Utils.logger("Cleaned up " + deleted + " old share files");
+            }
+        } catch (Exception e) {
+            // Fail silently
         }
     }
 
