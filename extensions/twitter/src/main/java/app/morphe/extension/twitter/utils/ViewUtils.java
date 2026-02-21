@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,10 +33,28 @@ public class ViewUtils {
         );
 
         Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(Color.WHITE);  // Background
+        canvas.drawColor(resolveBackgroundColor(view));
         view.draw(canvas);
 
         return bitmap;
+    }
+
+    private static int resolveBackgroundColor(View view) {
+        int color = extractBackgroundColor(view.getBackground());
+        if (color != Color.TRANSPARENT) return color;
+
+        View root = view.getRootView();
+        color = root != null ? extractBackgroundColor(root.getBackground()) : Color.TRANSPARENT;
+        if (color != Color.TRANSPARENT) return color;
+
+        return Color.WHITE;
+    }
+
+    private static int extractBackgroundColor(Drawable drawable) {
+        if (drawable instanceof ColorDrawable) {
+            return ((ColorDrawable) drawable).getColor();
+        }
+        return Color.TRANSPARENT;
     }
 
     /**
@@ -61,7 +81,7 @@ public class ViewUtils {
         );
 
         Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(Color.WHITE);
+        canvas.drawColor(resolveBackgroundColor(view));
         canvas.translate(-clipRect.left, -clipRect.top);
         view.draw(canvas);
 
