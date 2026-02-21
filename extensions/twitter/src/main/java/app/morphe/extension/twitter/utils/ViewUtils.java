@@ -3,6 +3,7 @@ package app.morphe.extension.twitter.utils;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.view.View;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,6 +32,37 @@ public class ViewUtils {
 
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(Color.WHITE);  // Background
+        view.draw(canvas);
+
+        return bitmap;
+    }
+
+    /**
+     * Convert a portion of a View to Bitmap using a clip rect in the view's coordinates.
+     */
+    public static Bitmap viewToBitmap(View view, Rect clipRect) {
+        if (clipRect == null) return viewToBitmap(view);
+
+        if (view.getWidth() <= 0 || view.getHeight() <= 0) {
+            view.measure(
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            );
+            view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
+        }
+
+        int width = Math.max(1, clipRect.width());
+        int height = Math.max(1, clipRect.height());
+
+        Bitmap bitmap = Bitmap.createBitmap(
+            width,
+            height,
+            Bitmap.Config.ARGB_8888
+        );
+
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawColor(Color.WHITE);
+        canvas.translate(-clipRect.left, -clipRect.top);
         view.draw(canvas);
 
         return bitmap;
