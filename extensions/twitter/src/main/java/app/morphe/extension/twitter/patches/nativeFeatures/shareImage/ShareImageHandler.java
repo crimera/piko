@@ -144,7 +144,7 @@ public class ShareImageHandler {
         if (isTweetDetailScreen(activity)) {
             android.view.ViewGroup threadContainer = findThreadContainer(tweetRow);
             if (threadContainer != null) {
-                Rect threadBounds = computeThreadBounds(threadContainer, tweetRow);
+                Rect threadBounds = computeThreadBounds(activity, threadContainer, tweetRow);
                 if (threadBounds != null) {
                     return new CaptureTarget(threadContainer, threadBounds);
                 }
@@ -225,6 +225,7 @@ public class ShareImageHandler {
     }
 
     private static Rect computeThreadBounds(
+        Activity activity,
         android.view.ViewGroup container,
         android.view.View tweetRow
     ) {
@@ -234,10 +235,20 @@ public class ShareImageHandler {
         int targetIndex = indexOfChild(container, itemRoot);
         if (targetIndex < 0) return null;
 
+        int topConnectorId = resolveId(activity, "tweet_connector_top");
+        int bottomConnectorId = resolveId(activity, "tweet_connector_bottom");
+
         int startIndex = targetIndex;
         while (startIndex > 0) {
+            android.view.View current = container.getChildAt(startIndex);
             android.view.View previous = container.getChildAt(startIndex - 1);
             if (!isTweetItem(previous)) break;
+
+            boolean connected =
+                hasVisibleConnector(current, topConnectorId)
+                    || hasVisibleConnector(previous, bottomConnectorId);
+
+            if (!connected) break;
             startIndex--;
         }
 
@@ -250,6 +261,12 @@ public class ShareImageHandler {
         if (bottom <= top) return null;
 
         return new Rect(0, top, container.getWidth(), bottom);
+    }
+
+    private static boolean hasVisibleConnector(android.view.View view, int id) {
+        if (id == 0) return false;
+        android.view.View connector = view.findViewById(id);
+        return connector != null && connector.getVisibility() == android.view.View.VISIBLE;
     }
 
     private static int indexOfChild(android.view.ViewGroup container, android.view.View child) {
