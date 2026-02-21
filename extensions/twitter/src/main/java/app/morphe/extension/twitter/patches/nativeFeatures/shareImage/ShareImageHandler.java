@@ -153,19 +153,18 @@ public class ShareImageHandler {
 
     private static int getBottomWithoutDivider(Activity activity, View v) {
         int h = v.getHeight();
-        int adjusted = findBottomDivider(activity, v, h, dp(activity, 15));
+        int adjusted = findBottomDivider(activity, v, h, dp(activity, 24));
         
-        // Fallback: Anchor to the last action bar if divider not found or seems too low
         if (v instanceof ViewGroup) {
             int actionId = activity.getResources().getIdentifier("tweet_inline_actions", "id", activity.getPackageName());
             if (actionId != 0) {
                 View actions = v.findViewById(actionId);
-                // If we found actions, and there's space below them, it's almost certainly a divider
                 if (actions != null && actions.getVisibility() == View.VISIBLE) {
-                    int actionsBottom = actions.getBottom();
-                    if (actionsBottom < h - dp(activity, 2)) {
-                        // Return the higher of the found divider or the action bar + 1dp
-                        return Math.min(adjusted, actionsBottom + dp(activity, 1));
+                    int relBot = getRelativeBottom(actions, v);
+                    // If we suspect a border inside the action bar, crop 1dp into it.
+                    // This is safe because action icons (reply/like) usually have internal padding.
+                    if (relBot > 0 && relBot <= h) {
+                        return Math.min(adjusted, relBot - dp(activity, 1));
                     }
                 }
             }
@@ -173,16 +172,34 @@ public class ShareImageHandler {
         return adjusted;
     }
 
-    private static int findBottomDivider(Activity activity, View v, int parentHeight, int threshold) {
-        if (v.getVisibility() != View.VISIBLE || v.getBottom() < parentHeight - threshold) return v.getHeight();
+    private static int getRelativeBottom(View child, View parent) {
+        int bottom = child.getBottom();
+        View current = (View) child.getParent();
+        while (current != null && current != parent) {
+            bottom += current.getTop();
+            current = (current.getParent() instanceof View) ? (View) current.getParent() : null;
+        }
+        return bottom;
+    }
 
-        // 1. Thin views or specific keywords
+    private static int findBottomDivider(Activity activity, View v, int rootHeight, int threshold) {
+        // Calculate v's bottom relative to the root capture view
+        int vRelativeBottom = getRelativeBottom(v, null); // We'll need to pass the root...
+        // Let's rethink. Simple is better.
+        return findBottomDividerInternal(activity, v, threshold);
+    }
+
+    private static int findBottomDividerInternal(Activity activity, View v, int threshold) {
+        int h = v.getHeight();
+        if (v.getVisibility() != View.VISIBLE) return h;
+
+        // 1. Check heuristics on this view
         try {
             int id = v.getId();
             String idName = (id != View.NO_ID && id != 0) ? activity.getResources().getResourceEntryName(id).toLowerCase() : "";
             String className = v.getClass().getName();
             
-            boolean isThin = v.getHeight() > 0 && v.getHeight() <= dp(activity, 6);
+            boolean isThin = h > 0 && h <= dp(activity, 6);
             boolean hasKeyword = idName.contains("divider") || idName.contains("separator") || idName.contains("line") 
                 || idName.contains("border") || idName.contains("gap") || idName.contains("spacer") || idName.contains("bottom")
                 || className.contains("Divider") || className.contains("Separator");
@@ -190,13 +207,15 @@ public class ShareImageHandler {
             if (isThin || hasKeyword) return 0;
         } catch (Exception ignored) {}
 
-        // 2. Recurse
+        // 2. Recurse into children at the bottom
         if (v instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) v;
-            int bestBottom = v.getHeight();
+            int bestBottom = h;
             for (int i = group.getChildCount() - 1; i >= 0; i--) {
                 View child = group.getChildAt(i);
-                int result = findBottomDivider(activity, child, v.getHeight(), threshold);
+                if (child.getBottom() < h - threshold) continue;
+                
+                int result = findBottomDividerInternal(activity, child, threshold);
                 if (result < child.getHeight()) {
                     bestBottom = Math.min(bestBottom, child.getTop() + result);
                 }
@@ -204,13 +223,13 @@ public class ShareImageHandler {
             return bestBottom;
         }
 
-        return v.getHeight();
+        return h;
     }
 
     private static boolean isTweetDetailScreen(Activity activity) {
-        return findViewById(activity, "root_coordinator_layout") != null
-            || findViewById(activity, "fragment_container") != null
-            || findViewById(activity, "persistent_reply") != null;
+        return findViewById(activity, "persistent_reply") != null
+            || findViewById(activity, "tweet_inline_actions_top_divider") != null
+            || findViewById(activity, "stats_container") != null;
     }
 
     private static View findViewById(Activity activity, String name) {
