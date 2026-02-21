@@ -67,6 +67,7 @@ public class SettingsStatus {
     public static boolean nativeDownloader = false;
     public static boolean nativeTranslator = false;
     public static boolean nativeReaderMode = false;
+    public static boolean shareImage = false;
     public static boolean hideNudgeButton = false;
     public static boolean hideSocialProof = false;
     public static boolean customPostFontSize = false;
@@ -114,6 +115,9 @@ public class SettingsStatus {
 
     public static void nativeReaderMode() {
         nativeReaderMode = true;
+    }
+    public static void shareImage() {
+        shareImage = true;
     }
     public static void deleteFromDb() {
         deleteFromDb = true;
@@ -370,7 +374,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableNativeSection() {
-        return (nativeDownloader || nativeTranslator || nativeReaderMode);
+        return (nativeDownloader || nativeTranslator || nativeReaderMode || shareImage);
     }
 
     public static boolean enableDownloadSection() {

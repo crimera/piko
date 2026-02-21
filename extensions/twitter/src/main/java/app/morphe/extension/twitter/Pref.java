@@ -77,6 +77,9 @@ public class Pref {
     public static boolean enableNativeReaderMode() {
         return Utils.getBooleanPerf(Settings.NATIVE_READER_MODE);
     }
+    public static boolean enableShareImage() {
+        return Utils.getBooleanPerf(Settings.SHARE_IMAGE_ENABLED);
+    }
     public static boolean hideNativeReaderPostTextOnlyMode() {
         return Utils.getBooleanPerf(Settings.NATIVE_READER_MODE_TEXT_ONLY_MODE);
     }
