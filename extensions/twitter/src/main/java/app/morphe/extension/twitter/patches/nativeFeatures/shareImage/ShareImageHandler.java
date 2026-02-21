@@ -253,17 +253,19 @@ public class ShareImageHandler {
         }
 
         int endIndex = targetIndex;
-        while (endIndex < container.getChildCount() - 1) {
-            android.view.View current = container.getChildAt(endIndex);
-            android.view.View next = container.getChildAt(endIndex + 1);
-            if (!isTweetItem(next)) break;
+        if (!hasVisibleReplyContext(activity, tweetRow)) {
+            while (endIndex < container.getChildCount() - 1) {
+                android.view.View current = container.getChildAt(endIndex);
+                android.view.View next = container.getChildAt(endIndex + 1);
+                if (!isTweetItem(next)) break;
 
-            boolean connected =
-                hasVisibleConnector(next, topConnectorId)
-                    || hasVisibleConnector(current, bottomConnectorId);
+                boolean connected =
+                    hasVisibleConnector(next, topConnectorId)
+                        || hasVisibleConnector(current, bottomConnectorId);
 
-            if (!connected) break;
-            endIndex++;
+                if (!connected) break;
+                endIndex++;
+            }
         }
 
         android.view.View startView = container.getChildAt(startIndex);
@@ -281,6 +283,13 @@ public class ShareImageHandler {
         if (id == 0) return false;
         android.view.View connector = view.findViewById(id);
         return connector != null && connector.getVisibility() == android.view.View.VISIBLE;
+    }
+
+    private static boolean hasVisibleReplyContext(Activity activity, android.view.View view) {
+        int replyContextId = resolveId(activity, "tweet_reply_context");
+        if (replyContextId == 0) return false;
+        android.view.View replyContext = view.findViewById(replyContextId);
+        return replyContext != null && replyContext.getVisibility() == android.view.View.VISIBLE;
     }
 
     private static int indexOfChild(android.view.ViewGroup container, android.view.View child) {
