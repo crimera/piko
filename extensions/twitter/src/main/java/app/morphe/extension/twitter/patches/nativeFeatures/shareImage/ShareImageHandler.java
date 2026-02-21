@@ -43,9 +43,11 @@ public class ShareImageHandler {
                 target = new CaptureTarget(rootView, null);
             }
 
-            Utils.logger("Targeting view: " + target.view.getClass().getName() + " (" + target.view.getWidth() + "x" + target.view.getHeight() + ")");
+            float density = activity.getResources().getDisplayMetrics().density;
+            Utils.logger(String.format("Capture: Tweet %d | Density %.1f", tweet.getTweetId(), density));
+            Utils.logger("Target: " + target.view.getClass().getSimpleName() + " " + target.view.getWidth() + "x" + target.view.getHeight());
             if (target.clipRect != null) {
-                Utils.logger("Clip rect applied: " + target.clipRect.toShortString());
+                Utils.logger("Clip: " + target.clipRect.toShortString());
             }
             dumpViewTree(activity, target.view, 0);
 
@@ -157,30 +159,37 @@ public class ShareImageHandler {
         return new CaptureTarget(target, null);
     }
 
-    private static int getBottomWithoutDivider(Activity activity, View v) {
-        int h = v.getHeight();
-        int adjusted = findBottomDivider(activity, v, dp(activity, 24));
-        if (adjusted < h) {
-            Utils.logger("Divider found via heuristics at: " + adjusted + " (Total: " + h + ")");
-        }
-        
-        if (v instanceof ViewGroup) {
-            int actionId = activity.getResources().getIdentifier("tweet_inline_actions", "id", activity.getPackageName());
-            if (actionId != 0) {
-                View actions = v.findViewById(actionId);
-                if (actions != null && actions.getVisibility() == View.VISIBLE) {
-                    int relBot = getRelativeBottom(actions, v);
-                    if (relBot > 0 && relBot <= h) {
-                        int anchorAdjusted = Math.min(adjusted, relBot - dp(activity, 1));
-                        if (anchorAdjusted < adjusted) {
-                            Utils.logger("Cropping at Action Bar anchor: " + anchorAdjusted + " (Prev: " + adjusted + ")");
-                        }
-                        return anchorAdjusted;
+    private static int getBottomWithoutDivider(Activity activity, View target) {
+        int h = target.getHeight();
+        int bestBottom = h;
+
+        // 1. Check for known bottom anchors (Aggressive cropping)
+        String[] anchors = {"tweet_inline_actions", "stats_container"};
+        for (String name : anchors) {
+            int id = activity.getResources().getIdentifier(name, "id", activity.getPackageName());
+            if (id == 0) continue;
+            View anchor = target.findViewById(id);
+            if (anchor != null && anchor.getVisibility() == View.VISIBLE) {
+                int relBot = getRelativeBottom(anchor, target);
+                if (relBot > 0 && relBot <= h) {
+                    // Aggressive 1dp crop to remove any persistent gray separator slop
+                    int crop = relBot - dp(activity, 1);
+                    if (crop < bestBottom) {
+                        Utils.logger("Bottom anchored to #" + name + " at " + crop);
+                        bestBottom = crop;
                     }
                 }
             }
         }
-        return adjusted;
+
+        // 2. Fallback to heuristic divider detection
+        int heuristic = findBottomDivider(activity, target, dp(activity, 24));
+        if (heuristic < bestBottom) {
+            Utils.logger("Bottom refined by heuristics: " + heuristic);
+            bestBottom = heuristic;
+        }
+
+        return bestBottom;
     }
 
     private static int getRelativeBottom(View child, View parent) {
@@ -201,47 +210,33 @@ public class ShareImageHandler {
         int h = v.getHeight();
         if (v.getVisibility() != View.VISIBLE || h <= 0) return h;
 
-        // 1. Check heuristics on this view
+        // Check for explicit dividers or thin lines
         try {
             int id = v.getId();
             String idName = (id != View.NO_ID && id != 0) ? activity.getResources().getResourceEntryName(id).toLowerCase() : "";
-            String className = v.getClass().getName();
             
-            boolean isThin = h <= dp(activity, 6);
-            boolean hasKeyword = idName.contains("divider") || idName.contains("separator") 
-                || (idName.contains("line") && !idName.contains("inline"))
-                || idName.contains("border") || idName.contains("gap") || idName.contains("spacer") || idName.contains("bottom")
-                || className.contains("Divider") || className.contains("Separator");
-
-            if (hasKeyword || isThin) {
-                // Large views with 'line' or 'bottom' are usually not dividers (e.g. tweet_inline_actions)
-                if (h > dp(activity, 12) && !idName.contains("divider") && !idName.contains("separator")) {
-                    // Skip large non-explicit dividers
-                } else {
-                    Utils.logger("Divider detected: ID=" + idName + ", Class=" + className + ", Height=" + h);
-                    return 0;
-                }
+            if (idName.contains("divider") || idName.contains("separator")) {
+                Utils.logger("Divider detected: #" + idName + " (" + h + "px)");
+                return 0;
+            }
+            
+            if (h <= dp(activity, 3) && (idName.contains("border") || idName.contains("line"))) {
+                Utils.logger("Thin line detected: #" + idName + " (" + h + "px)");
+                return 0;
             }
         } catch (Exception ignored) {}
 
-        // 2. Recurse into children at the bottom
+        // Recurse into children ending at the bottom
         if (v instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) v;
             int bestBottom = h;
-            boolean foundInChild = false;
-            
             for (int i = group.getChildCount() - 1; i >= 0; i--) {
                 View child = group.getChildAt(i);
-                if (child.getVisibility() != View.VISIBLE) continue;
+                if (child.getVisibility() != View.VISIBLE || child.getBottom() < h - threshold) continue;
                 
-                // Only check children near the bottom
-                if (child.getBottom() < h - threshold) continue;
-                
-                int result = findBottomDividerInternal(activity, child, threshold);
-                if (result < child.getHeight()) {
-                    int absoluteDividerPos = child.getTop() + result;
-                    bestBottom = Math.min(bestBottom, absoluteDividerPos);
-                    foundInChild = true;
+                int res = findBottomDividerInternal(activity, child, threshold);
+                if (res < child.getHeight()) {
+                    bestBottom = Math.min(bestBottom, child.getTop() + res);
                 }
             }
             return bestBottom;
@@ -251,9 +246,12 @@ public class ShareImageHandler {
     }
 
     private static boolean isTweetDetailScreen(Activity activity) {
-        return findViewById(activity, "persistent_reply") != null
-            || findViewById(activity, "tweet_inline_actions_top_divider") != null
-            || findViewById(activity, "stats_container") != null;
+        String[] ids = {"persistent_reply", "tweet_inline_actions_top_divider", "stats_container"};
+        for (String s : ids) {
+            int id = activity.getResources().getIdentifier(s, "id", activity.getPackageName());
+            if (id != 0 && activity.findViewById(id) != null) return true;
+        }
+        return false;
     }
 
     private static View findViewById(Activity activity, String name) {
@@ -398,8 +396,10 @@ public class ShareImageHandler {
         String idName = (id != View.NO_ID && id != 0) ? activity.getResources().getResourceEntryName(id) : "";
         String className = v.getClass().getSimpleName();
         
-        sb.append(String.format("%s %dx%d @%d,%d %s", 
-            className, v.getWidth(), v.getHeight(), v.getLeft(), v.getTop(), idName.isEmpty() ? "" : "#" + idName));
+        // Compact format: Class [WxH] @L,T #ID
+        sb.append(String.format("%s [%dx%d] @%d,%d%s", 
+            className, v.getWidth(), v.getHeight(), v.getLeft(), v.getTop(), 
+            idName.isEmpty() ? "" : " #" + idName));
         
         Utils.logger(sb.toString());
         
