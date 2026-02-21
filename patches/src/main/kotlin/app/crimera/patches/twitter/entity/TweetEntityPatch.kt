@@ -8,47 +8,47 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
+import com.android.tools.smali.dexlib2.dexbacked.reference.DexBackedMethodReference
 
 val tweetEntityPatch =
     bytecodePatch(
         description = "For tweet entity reflection",
     ) {
         execute {
-            GetUserNameMethodCaller.stringMatches?.forEach { match ->
-                val str = match.string
-                if (str == "Name") {
-                    val methodName = GetUserNameMethodCaller.getMethodName(match.index + 1)
-                    TweetProfileNameFingerprint.changeFirstString(methodName)
-                }
-                if (str == "User Name") {
-                    val methodName = GetUserNameMethodCaller.getMethodName(match.index + 1)
-                    TweetUsernameFingerprint.changeFirstString(methodName)
+            TweetActionsHandlerFingerprint.run {
+                // matches content_auther
+                stringMatches.firstOrNull()?.let { match ->
+                    val getOriginalUserNameMethod =
+                        (method.instructions[match.index + 1] as BuilderInstruction3rc).reference as DexBackedMethodReference
+                    TweetUsernameFingerprint.changeFirstString(getOriginalUserNameMethod.name)
+
+                    val method = TweetOriginalNameFingerprint(getOriginalUserNameMethod.definingClass).getMethodName(0)
+                    TweetProfileNameFingerprint.changeFirstString(method)
                 }
             }
 
-// ------------
             val tweetObjectMethods = TweetObjectFingerprint.classDef.methods
 
             val getTweetUserIdMethod =
                 tweetObjectMethods
-                    .last {
-                        it.returnType == "J"
-                    }.name
+                    .last { it.returnType == "J" }
+                    .name
             TweetUserIdFingerprint.changeFirstString(getTweetUserIdMethod)
-// ------------
+
             val getMediaObjectMethod =
                 tweetObjectMethods.firstOrNull { methodDef ->
                     methodDef.implementation
                         ?.instructions
                         ?.map { it.opcode }
                         ?.toList() ==
-                        listOf(
-                            Opcode.IGET_OBJECT,
-                            Opcode.IGET_OBJECT,
-                            Opcode.IGET_OBJECT,
-                            Opcode.IGET_OBJECT,
-                            Opcode.RETURN_OBJECT,
-                        )
+                            listOf(
+                                Opcode.IGET_OBJECT,
+                                Opcode.IGET_OBJECT,
+                                Opcode.IGET_OBJECT,
+                                Opcode.IGET_OBJECT,
+                                Opcode.RETURN_OBJECT,
+                            )
                 } ?: throw PatchException("getMediaObject not found")
             TweetMediaFingerprint.changeFirstString(getMediaObjectMethod.name)
 
@@ -58,7 +58,6 @@ val tweetEntityPatch =
                     .name
             TweetMediaFingerprint.changeStringAt(1, extMediaListField)
 
-            // ------------
             val getNoteTweetMethod =
                 tweetObjectMethods
                     .firstOrNull { it.returnType.contains("notetweet") }
@@ -77,10 +76,11 @@ val tweetEntityPatch =
                 val invokeVirtualRangeInst =
                     instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL_RANGE && it.location.index < newInstanceIndex }
                 TweetShortTextFingerprint
-                    .changeFirstString(QuotedViewSetAccessibilityFingerprint.getMethodName(invokeVirtualRangeInst.location.index))
+                    .changeFirstString(
+                        QuotedViewSetAccessibilityFingerprint.getMethodName(
+                            invokeVirtualRangeInst.location.index
+                        )
+                    )
             }
-
-// End
-// ---------------------
         }
     }

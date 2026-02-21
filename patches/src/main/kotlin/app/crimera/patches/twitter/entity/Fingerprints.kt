@@ -1,7 +1,11 @@
 package app.crimera.patches.twitter.entity
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 
 private const val ENTITY_TWEET_DEFINING_CLASS = "Lapp/morphe/extension/twitter/entity/Tweet"
 
@@ -48,14 +52,20 @@ internal object TweetShortTextFingerprint : Fingerprint(
     name = "getShortText",
 )
 
-internal object GetUserNameMethodCaller : Fingerprint(
-    returnType = "V",
-    strings =
-        listOf(
-            "Ref_ID (Tweet ID)",
-            "Name",
-            "User Name",
-        ),
+internal object TweetActionsHandlerFingerprint: Fingerprint(
+   strings = listOf("content_author")
+)
+
+internal class TweetOriginalNameFingerprint(definingClass: String) : Fingerprint(
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
+    returnType = "Ljava/lang/String;",
+    parameters = emptyList(),
+    definingClass = definingClass,
+    filters = listOf(
+        methodCall(definingClass = "this", returnType = "Ljava/lang/String;"),
+        methodCall(definingClass = "this", returnType = "Ljava/lang/String;"),
+        opcode(Opcode.RETURN_OBJECT)
+    ),
 )
 
 internal object TweetMediaEntityClassFingerprint : Fingerprint(
