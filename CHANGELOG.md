@@ -1,3 +1,10 @@
+# [3.0.0-dev.4](https://github.com/crimera/piko/compare/v3.0.0-dev.3...v3.0.0-dev.4) (2026-02-21)
+
+
+### Bug Fixes
+
+* Use the original poster's username/name for retweet posts. ([1a1f818](https://github.com/crimera/piko/commit/1a1f818779d9c4359ca0574ff2bef1e6db525582))
+
 # [3.0.0-dev.3](https://github.com/crimera/piko/compare/v3.0.0-dev.2...v3.0.0-dev.3) (2026-02-19)
 
 
