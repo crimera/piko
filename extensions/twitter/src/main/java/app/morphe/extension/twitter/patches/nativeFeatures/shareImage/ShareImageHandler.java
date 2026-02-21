@@ -164,7 +164,7 @@ public class ShareImageHandler {
 
         // 1. Anchor-based cropping (Priority)
         for (String name : new String[]{"tweet_inline_actions", "stats_container"}) {
-            View anchor = findViewById(activity, target, name);
+            View anchor = findViewById(target, name);
             if (anchor != null && anchor.getVisibility() == View.VISIBLE) {
                 int crop = getRelativeBottom(anchor, target) - dp(activity, 1);
                 if (crop > 0 && crop < h) {
@@ -191,31 +191,29 @@ public class ShareImageHandler {
         return h;
     }
 
-    private static View findViewById(Activity activity, View root, String name) {
-        int id = activity.getResources().getIdentifier(name, "id", activity.getPackageName());
+    private static View findViewById(View root, String name) {
+        int id = app.morphe.extension.shared.Utils.getResourceIdentifier(name, "id");
         return id != 0 ? root.findViewById(id) : null;
     }
 
     private static int getRelativeBottom(View child, View parent) {
         int bottom = child.getBottom();
-        for (View v = getParent(v(child)); v != null && v != parent; v = getParent(v)) {
+        for (View v = getParent(child); v != null && v != parent; v = getParent(v)) {
             bottom += v.getTop();
         }
         return bottom;
     }
 
-    private static View v(View v) { return v; }
-
     private static boolean isTweetDetailScreen(Activity activity) {
+        View root = activity.getWindow().getDecorView();
         for (String s : new String[]{"persistent_reply", "stats_container"}) {
-            int id = activity.getResources().getIdentifier(s, "id", activity.getPackageName());
-            if (id != 0 && activity.findViewById(id) != null) return true;
+            if (hasVisible(root, s)) return true;
         }
         return false;
     }
 
     private static View findTweetRowContainer(Activity activity, View view) {
-        int rowId = activity.getResources().getIdentifier("outer_layout_row_view_tweet", "id", activity.getPackageName());
+        int rowId = app.morphe.extension.shared.Utils.getResourceIdentifier("outer_layout_row_view_tweet", "id");
         View ancestor = rowId != 0 ? findAncestorById(view, rowId) : null;
         return ancestor != null ? ancestor : findAncestorByTweetView(view);
     }
@@ -251,8 +249,8 @@ public class ShareImageHandler {
         int targetIdx = indexOfChild(container, itemRoot);
         if (targetIdx < 0) return null;
 
-        int topId = activity.getResources().getIdentifier("tweet_connector_top", "id", activity.getPackageName());
-        int botId = activity.getResources().getIdentifier("tweet_connector_bottom", "id", activity.getPackageName());
+        int topId = app.morphe.extension.shared.Utils.getResourceIdentifier("tweet_connector_top", "id");
+        int botId = app.morphe.extension.shared.Utils.getResourceIdentifier("tweet_connector_bottom", "id");
 
         int startIdx = targetIdx;
         while (startIdx > 0 && isTweetItem(container.getChildAt(startIdx - 1)) && (hasVisible(container.getChildAt(startIdx), topId) || hasVisible(container.getChildAt(startIdx - 1), botId))) {
@@ -260,7 +258,7 @@ public class ShareImageHandler {
         }
 
         int endIdx = targetIdx;
-        if (!hasVisible(tweetRow, activity.getResources().getIdentifier("tweet_reply_context", "id", activity.getPackageName()))) {
+        if (!hasVisible(tweetRow, app.morphe.extension.shared.Utils.getResourceIdentifier("tweet_reply_context", "id"))) {
             while (endIdx < container.getChildCount() - 1 && isTweetItem(container.getChildAt(endIdx + 1)) && (hasVisible(container.getChildAt(endIdx + 1), topId) || hasVisible(container.getChildAt(endIdx), botId))) {
                 endIdx++;
             }
@@ -275,7 +273,7 @@ public class ShareImageHandler {
             bottom = lastView.getTop() + adjustedLastBottom;
         }
 
-        int sortId = activity.getResources().getIdentifier("reply_sorting", "id", activity.getPackageName());
+        int sortId = app.morphe.extension.shared.Utils.getResourceIdentifier("reply_sorting", "id");
         View sortView = sortId != 0 ? container.getChildAt(endIdx).findViewById(sortId) : null;
         if (sortView != null && sortView.getVisibility() == View.VISIBLE) {
             bottom = Math.min(bottom, container.getChildAt(endIdx).getTop() + sortView.getTop());
@@ -287,6 +285,11 @@ public class ShareImageHandler {
     private static boolean hasVisible(View v, int id) {
         if (id == 0) return false;
         View child = v.findViewById(id);
+        return child != null && child.getVisibility() == View.VISIBLE;
+    }
+
+    private static boolean hasVisible(View v, String name) {
+        View child = findViewById(v, name);
         return child != null && child.getVisibility() == View.VISIBLE;
     }
 
