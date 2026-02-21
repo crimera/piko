@@ -134,7 +134,30 @@ public class ShareImageHandler {
         }
 
         View expanded = expandToTweetContainer(activity, rootView, tweetRow);
-        return new CaptureTarget(expanded != null ? expanded : tweetRow, null);
+        View target = expanded != null ? expanded : tweetRow;
+        
+        int adjustedBottom = getBottomWithoutDivider(activity, target);
+        if (adjustedBottom < target.getHeight()) {
+            return new CaptureTarget(target, new Rect(0, 0, target.getWidth(), adjustedBottom));
+        }
+
+        return new CaptureTarget(target, null);
+    }
+
+    private static int getBottomWithoutDivider(Activity activity, View v) {
+        int originalBottom = v.getHeight();
+        String[] dividerIds = {"divider", "separator", "row_divider", "bottom_separator"};
+        
+        for (String idName : dividerIds) {
+            int id = activity.getResources().getIdentifier(idName, "id", activity.getPackageName());
+            if (id == 0) continue;
+            
+            View divider = v.findViewById(id);
+            if (divider != null && divider.getVisibility() == View.VISIBLE && divider.getBottom() >= originalBottom - dp(activity, 4)) {
+                return Math.min(originalBottom, divider.getTop());
+            }
+        }
+        return originalBottom;
     }
 
     private static boolean isTweetDetailScreen(Activity activity) {
@@ -201,7 +224,13 @@ public class ShareImageHandler {
         }
 
         int top = container.getChildAt(startIdx).getTop();
-        int bottom = container.getChildAt(endIdx).getBottom();
+        View lastView = container.getChildAt(endIdx);
+        int bottom = lastView.getBottom();
+
+        int adjustedLastBottom = getBottomWithoutDivider(activity, lastView);
+        if (adjustedLastBottom < lastView.getHeight()) {
+            bottom = lastView.getTop() + adjustedLastBottom;
+        }
 
         int sortId = activity.getResources().getIdentifier("reply_sorting", "id", activity.getPackageName());
         View sortView = sortId != 0 ? container.getChildAt(endIdx).findViewById(sortId) : null;
