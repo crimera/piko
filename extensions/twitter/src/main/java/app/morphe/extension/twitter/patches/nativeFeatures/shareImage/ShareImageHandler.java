@@ -7,7 +7,6 @@ import android.os.Environment;
 
 import app.morphe.extension.twitter.Utils;
 import app.morphe.extension.twitter.entity.Tweet;
-import app.morphe.extension.twitter.entity.Media;
 import app.morphe.extension.twitter.utils.ViewUtils;
 
 import java.io.File;
@@ -31,42 +30,13 @@ public class ShareImageHandler {
         try {
             Tweet tweet = new Tweet(tweetObj);
 
-            // Strategy 1: Share tweet media directly (if exists)
-            ArrayList<Media> mediaList = tweet.getMedias();
-            if (!mediaList.isEmpty()) {
-                shareMediaDirect(activity, tweet, mediaList);
-                return;
-            }
-
-            // Strategy 2: Render tweet view to image
+            // Render tweet view to image
             Utils.toast("Capturing tweet view...");
             shareTweetAsRenderedImage(activity, tweet);
 
         } catch (Exception e) {
             Utils.logger(e);
             Utils.toast("Error: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Share existing media from tweet (simplest approach)
-     */
-    private static void shareMediaDirect(Activity activity, Tweet tweet, ArrayList<Media> mediaList) {
-        try {
-            Media media = mediaList.get(0);
-
-            // Download to temp file
-            String fileName = "tweet_" + tweet.getTweetId();
-            File mediaFile = new File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                "Piko_Temp/" + fileName + "." + media.ext
-            );
-
-            Utils.downloadFile(media.url, mediaFile.getAbsolutePath(), media.ext);
-            Utils.toast("Saved to Downloads/Piko_Temp");
-
-        } catch (Exception e) {
-            Utils.logger(e);
         }
     }
 
