@@ -252,11 +252,25 @@ public class ShareImageHandler {
             startIndex--;
         }
 
+        int endIndex = targetIndex;
+        while (endIndex < container.getChildCount() - 1) {
+            android.view.View current = container.getChildAt(endIndex);
+            android.view.View next = container.getChildAt(endIndex + 1);
+            if (!isTweetItem(next)) break;
+
+            boolean connected =
+                hasVisibleConnector(next, topConnectorId)
+                    || hasVisibleConnector(current, bottomConnectorId);
+
+            if (!connected) break;
+            endIndex++;
+        }
+
         android.view.View startView = container.getChildAt(startIndex);
-        android.view.View targetView = container.getChildAt(targetIndex);
+        android.view.View endView = container.getChildAt(endIndex);
 
         int top = startView.getTop();
-        int bottom = targetView.getBottom();
+        int bottom = endView.getBottom();
 
         if (bottom <= top) return null;
 
