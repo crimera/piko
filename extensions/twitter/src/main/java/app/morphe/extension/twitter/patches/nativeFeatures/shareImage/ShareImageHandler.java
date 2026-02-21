@@ -80,7 +80,7 @@ public class ShareImageHandler {
             try {
                 String selection = android.provider.MediaStore.MediaColumns.DISPLAY_NAME + " = ? AND " +
                                    android.provider.MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ?";
-                String[] selectionArgs = new String[]{displayName, "Pictures/Twitter/%"};
+                String[] selectionArgs = new String[]{displayName, "Pictures/Piko/%"};
                 resolver.delete(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection, selectionArgs);
             } catch (Exception e) {
                 // Ignore if not found
@@ -91,7 +91,7 @@ public class ShareImageHandler {
             contentValues.put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "image/png");
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                contentValues.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_PICTURES + "/Twitter");
+                contentValues.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_PICTURES + "/Piko");
                 contentValues.put(android.provider.MediaStore.MediaColumns.IS_PENDING, 1);
             }
 
@@ -121,9 +121,6 @@ public class ShareImageHandler {
 
             activity.startActivity(android.content.Intent.createChooser(intent, "Share Tweet Image"));
 
-            // Register a hook to delete the file when the user returns to the app
-            registerDeletionHook(activity, uri);
-
         } catch (Exception e) {
             Utils.logger(e);
             Utils.toast("Failed to share: " + e.getMessage());
@@ -131,44 +128,7 @@ public class ShareImageHandler {
     }
 
     /**
-     * Registers a one-time lifecycle listener to delete the shared file when the user returns to the activity.
-     */
-    private static void registerDeletionHook(final Activity activity, final android.net.Uri uri) {
-        final android.app.Application app = activity.getApplication();
-        app.registerActivityLifecycleCallbacks(new android.app.Application.ActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityResumed(android.app.Activity resumedActivity) {
-                if (resumedActivity == activity) {
-                    // User is back, delete the temporary share file
-                    try {
-                        activity.getContentResolver().delete(uri, null, null);
-                    } catch (Exception e) {
-                        // Ignore deletion errors
-                    }
-                    app.unregisterActivityLifecycleCallbacks(this);
-                }
-            }
-
-            @Override public void onActivityCreated(android.app.Activity a, android.os.Bundle b) {}
-            @Override public void onActivityStarted(android.app.Activity a) {}
-            @Override public void onActivityPaused(android.app.Activity a) {}
-            @Override public void onActivityStopped(android.app.Activity a) {}
-            @Override public void onActivitySaveInstanceState(android.app.Activity a, android.os.Bundle b) {}
-            @Override
-            public void onActivityDestroyed(android.app.Activity destroyedActivity) {
-                if (destroyedActivity == activity) {
-                    // Cleanup if the activity is destroyed before we resume
-                    try {
-                        activity.getContentResolver().delete(uri, null, null);
-                    } catch (Exception e) {}
-                    app.unregisterActivityLifecycleCallbacks(this);
-                }
-            }
-        });
-    }
-
-    /**
-     * Delete files in Piko_Shared older than 24 hours
+     * Delete files in Piko folder older than 24 hours
      */
     private static void cleanupOldFiles(android.content.Context context) {
         try {
@@ -177,7 +137,7 @@ public class ShareImageHandler {
 
             String selection = android.provider.MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ? AND " +
                                android.provider.MediaStore.MediaColumns.DATE_ADDED + " < ?";
-            String[] selectionArgs = new String[]{"Pictures/Twitter/%", String.valueOf(cutoff)};
+            String[] selectionArgs = new String[]{"Pictures/Piko/%", String.valueOf(cutoff)};
 
             int deleted = resolver.delete(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection, selectionArgs);
             if (deleted > 0) {
@@ -189,7 +149,7 @@ public class ShareImageHandler {
     }
 
     /**
-     * Find tweet view in view hierarchy by traversing tree
+     * Find tweet view in hierarchy
      * Returns null if not found
      */
     private static android.view.View findTweetViewInHierarchy(
