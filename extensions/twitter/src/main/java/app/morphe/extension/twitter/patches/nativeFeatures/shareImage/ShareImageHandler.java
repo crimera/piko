@@ -162,81 +162,56 @@ public class ShareImageHandler {
     private static int getBottomWithoutDivider(Activity activity, View target) {
         int h = target.getHeight();
 
-        // 1. Aggressive Anchor Cropping
-        // We look for the action bar or stats container. If found, we crop 1dp INSIDE them
-        // to absolutely guarantee no gray separator slop from the parent container.
-        String[] anchors = {"tweet_inline_actions", "stats_container"};
-        for (String name : anchors) {
-            int id = activity.getResources().getIdentifier(name, "id", activity.getPackageName());
-            if (id == 0) continue;
-            View anchor = target.findViewById(id);
+        // 1. Anchor-based cropping (Priority)
+        for (String name : new String[]{"tweet_inline_actions", "stats_container"}) {
+            View anchor = findViewById(activity, target, name);
             if (anchor != null && anchor.getVisibility() == View.VISIBLE) {
-                int relBot = getRelativeBottom(anchor, target);
-                int crop = relBot - dp(activity, 1);
+                int crop = getRelativeBottom(anchor, target) - dp(activity, 1);
                 if (crop > 0 && crop < h) {
-                    Utils.logger("Bottom anchored to #" + name + " at " + crop);
+                    Utils.logger("Cropped at #" + name);
                     return crop;
                 }
             }
         }
 
-        // 2. Linear "Slop" Reduction
-        // If no anchors are found, we simply iterate through immediate children from bottom to top.
-        // Any thin view (<= 4dp) at the bottom is treated as a divider or "slop" and removed.
+        // 2. Linear slop removal (Iterative)
         if (target instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) target;
-            int currentBot = h;
-            for (int i = group.getChildCount() - 1; i >= 0; i--) {
-                View child = group.getChildAt(i);
-                if (child.getVisibility() != View.VISIBLE) continue;
-
-                // If child is thin, crop it and move up
-                if (child.getHeight() <= dp(activity, 4)) {
-                    currentBot = child.getTop();
-                    Utils.logger("Reduced slop bar: #" + getResourceName(activity, child));
-                } else {
-                    // First "real" content found, stop reduction
-                    break;
-                }
+            ViewGroup g = (ViewGroup) target;
+            int bot = h;
+            for (int i = g.getChildCount() - 1; i >= 0; i--) {
+                View v = g.getChildAt(i);
+                if (v.getVisibility() != View.VISIBLE) continue;
+                if (v.getHeight() <= dp(activity, 4) && v.getBottom() >= bot - dp(activity, 1)) {
+                    bot = v.getTop();
+                    Utils.logger("Removed slop: " + v.getClass().getSimpleName());
+                } else break;
             }
-            return currentBot;
+            return bot;
         }
-
         return h;
     }
 
-    private static String getResourceName(Context context, View v) {
-        try {
-            int id = v.getId();
-            if (id == View.NO_ID || id == 0) return v.getClass().getSimpleName();
-            return context.getResources().getResourceEntryName(id);
-        } catch (Exception e) {
-            return "unknown";
-        }
+    private static View findViewById(Activity activity, View root, String name) {
+        int id = activity.getResources().getIdentifier(name, "id", activity.getPackageName());
+        return id != 0 ? root.findViewById(id) : null;
     }
 
     private static int getRelativeBottom(View child, View parent) {
         int bottom = child.getBottom();
-        View current = (View) child.getParent();
-        while (current != null && current != parent) {
-            bottom += current.getTop();
-            current = (current.getParent() instanceof View) ? (View) current.getParent() : null;
+        for (View v = getParent(v(child)); v != null && v != parent; v = getParent(v)) {
+            bottom += v.getTop();
         }
         return bottom;
     }
 
+    private static View v(View v) { return v; }
+
     private static boolean isTweetDetailScreen(Activity activity) {
-        String[] ids = {"persistent_reply", "tweet_inline_actions_top_divider", "stats_container"};
-        for (String s : ids) {
+        for (String s : new String[]{"persistent_reply", "stats_container"}) {
             int id = activity.getResources().getIdentifier(s, "id", activity.getPackageName());
             if (id != 0 && activity.findViewById(id) != null) return true;
         }
         return false;
-    }
-
-    private static View findViewById(Activity activity, String name) {
-        int id = activity.getResources().getIdentifier(name, "id", activity.getPackageName());
-        return id != 0 ? activity.findViewById(id) : null;
     }
 
     private static View findTweetRowContainer(Activity activity, View view) {
@@ -337,7 +312,7 @@ public class ShareImageHandler {
     }
 
     private static View getParent(View v) {
-        return (v.getParent() instanceof View) ? (View) v.getParent() : null;
+        return (v != null && v.getParent() instanceof View) ? (View) v.getParent() : null;
     }
 
     private static View expandToTweetContainer(Activity activity, View root, View tweetView) {
