@@ -1,20 +1,22 @@
 package app.crimera.patches.twitter.misc.fab
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
-import app.revanced.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 
-private val hideFABFingerprint =
-    fingerprint {
-        strings("android_compose_fab_menu_enabled")
-    }
+private object HideFABFingerprint : Fingerprint(
+    filters = listOf(
+        string("android_compose_fab_menu_enabled")
+    )
+)
 
 @Suppress("unused")
 val hideFABPatch =
@@ -26,7 +28,7 @@ val hideFABPatch =
         dependsOn(settingsPatch)
 
         execute {
-            val method = hideFABFingerprint.method
+            val method = HideFABFingerprint.method
             val instructions = method.instructions
             val constObj = instructions.last { it.opcode == Opcode.CONST_4 }
 
@@ -39,6 +41,6 @@ val hideFABPatch =
                 """.trimIndent(),
                 ExternalLabel("cond_1212", constObj),
             )
-            settingsStatusLoadFingerprint.enableSettings("hideFAB")
+            SettingsStatusLoadFingerprint.enableSettings("hideFAB")
         }
     }

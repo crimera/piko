@@ -1,23 +1,20 @@
 package app.crimera.patches.twitter.link.unshorten
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-private val jsonObjectMapperFingerprint =
-    fingerprint {
-        returns("Ljava/lang/Object")
-        custom { methodDef, _ ->
-            methodDef.name.contains("parse") &&
-                methodDef.definingClass == "Lcom/twitter/model/json/core/JsonUrlEntity\$\$JsonObjectMapper;"
-        }
-    }
+private object JsonObjectMapperFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/model/json/core/JsonUrlEntity\$\$JsonObjectMapper;",
+    name = "parse",
+    returnType = "Ljava/lang/Object",
+)
 
 @Suppress("unused")
 val noShortenedUrlPatch =
@@ -33,7 +30,7 @@ val noShortenedUrlPatch =
                 "$PATCHES_DESCRIPTOR/links/Urls;->" +
                     "unshort(Lcom/twitter/model/json/core/JsonUrlEntity;)Lcom/twitter/model/json/core/JsonUrlEntity;"
 
-            val methods = jsonObjectMapperFingerprint.method
+            val methods = JsonObjectMapperFingerprint.method
             val instructions = methods.instructions
 
             val returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
@@ -45,6 +42,6 @@ val noShortenedUrlPatch =
                 move-result-object p1
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.enableSettings("unshortenlink")
+            SettingsStatusLoadFingerprint.enableSettings("unshortenlink")
         }
     }

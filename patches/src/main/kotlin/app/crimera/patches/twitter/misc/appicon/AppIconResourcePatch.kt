@@ -1,10 +1,11 @@
 package app.crimera.patches.twitter.misc.appicon
 
-import app.revanced.patcher.patch.resourcePatch
-import app.revanced.util.ResourceGroup
-import app.revanced.util.copyResources
-import app.revanced.util.findElementByAttributeValue
-import app.revanced.util.findElementByAttributeValueOrThrow
+import app.morphe.patcher.patch.resourcePatch
+import app.morphe.util.PIKO_RESOURCE_PREFIX
+import app.morphe.util.ResourceGroup
+import app.morphe.util.copyResources
+import app.morphe.util.findElementByAttributeValue
+import app.morphe.util.findElementByAttributeValueOrThrow
 import java.nio.file.Files
 
 val appIconResourcePatch =
@@ -58,7 +59,7 @@ val appIconResourcePatch =
 
                     val icon =
                         IconConfig(
-                            name = "app.revanced.extension.twitter.appicon$iconStartCount",
+                            name = "app.morphe.extension.twitter.appicon$iconStartCount",
                             iconResource = "@mipmap/$iconName",
                         )
 
@@ -119,7 +120,11 @@ val appIconResourcePatch =
             }
 
             val stringsDir = "$sourceDir/strings"
-            copyResources(stringsDir, ResourceGroup("values", "app_icon_strings.xml"), appendPiko = true)
+            copyResources(
+                stringsDir,
+                ResourceGroup("values", "app_icon_strings.xml"),
+                resourcePrefix = PIKO_RESOURCE_PREFIX,
+            )
 
             val languages =
                 arrayOf(
@@ -132,7 +137,11 @@ val appIconResourcePatch =
                 if (!vDirectory.isDirectory) {
                     Files.createDirectories(vDirectory.toPath())
                 }
-                copyResources(stringsDir, ResourceGroup(it, "app_icon_strings.xml"), appendPiko = true)
+                copyResources(
+                    stringsDir,
+                    ResourceGroup(it, "app_icon_strings.xml"),
+                    resourcePrefix = PIKO_RESOURCE_PREFIX,
+                )
             }
         }
     }

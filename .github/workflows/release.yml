@@ -6,38 +6,38 @@ on:
     branches:
       - main
       - dev
-      
-permissions:
-  contents: write
-  issues: write
-  packages: write
-  pull-requests: write
 
 jobs:
   release:
     name: Release
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
         with:
-          # Make sure the release step uses its own credentials:
-          # https://github.com/cycjimmy/semantic-release-action#private-packages
-          persist-credentials: false
-          fetch-depth: 0
+          distribution: 'temurin'
+          java-version: '17'
 
       - name: Cache Gradle
         uses: burrunan/gradle-cache-action@v3
 
-      - name: Build with Gradle
+      - name: Build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew buildAndroid clean
+        run: ./gradlew :patches:buildAndroid generatePatchesList clean
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "lts/*"
+          node-version: 'lts/*'
           cache: 'npm'
 
       - name: Install dependencies
@@ -51,6 +51,20 @@ jobs:
           fingerprint: ${{ vars.GPG_FINGERPRINT }}
 
       - name: Release
+        uses: cycjimmy/semantic-release-action@v5
+        id: release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm exec semantic-release
+
+      - name: Attest
+        if: steps.release.outputs.new_release_published == 'true'
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-name: 'Piko Patches ${{ steps.release.outputs.new_release_git_tag }}'
+          subject-path: patches/build/libs/patches-*.mpp
+
+      - name: Purge jsDelivr Cache
+        run: |
+          for file in patches-bundle.json patches-list.json; do
+            curl -i "https://purge.jsdelivr.net/gh/${{ github.repository }}@${{ github.ref_name }}/$file"
+          done

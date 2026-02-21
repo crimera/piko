@@ -2,33 +2,35 @@ package app.crimera.patches.twitter.misc.shareMenu.hooks
 
 import app.crimera.utils.Constants.UTILS_DESCRIPTOR
 import app.crimera.utils.instructionToString
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.BytecodePatchContext
-import app.revanced.patches.shared.misc.mapping.get
-import app.revanced.patches.shared.misc.mapping.resourceMappings
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.string
+import app.morphe.shared.misc.mapping.ResourceType
+import app.morphe.shared.misc.mapping.getResourceId
+import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
 
-internal val shareMenuButtonInitHook =
-    fingerprint {
-        strings("Debug")
-        custom { _, classDef ->
-            classDef.type.contains("Lcom/twitter/tweet/action/legacy")
-        }
-    }
+internal object ShareMenuButtonInitHook : Fingerprint(
+    definingClass = "Lcom/twitter/tweet/action/legacy",
+    filters =
+        listOf(
+            string("Debug"),
+        ),
+)
 
 context(BytecodePatchContext)
 fun setButtonText(
     name: String,
     stringId: String,
 ) {
-    shareMenuButtonInitHook.stringMatches.let {
-        val match = it!!.first()
-        val setTextStart = match.index - 1
-        val setTextEnd = match.index + 3
-        val method = shareMenuButtonInitHook.method
+    ShareMenuButtonInitHook.instructionMatches.first().let {
+        val match = it.index
+        val setTextStart = match - 1
+        val setTextEnd = match + 3
+        val method = ShareMenuButtonInitHook.method
         val buttonInitInstructions =
             method.instructions
                 .filterIndexed { index, _ ->
@@ -58,17 +60,13 @@ fun setButtonIcon(
     name: String,
     iconStr: String,
 ) {
-    val allMethods = shareMenuButtonInitHook.classDef.methods
+    val allMethods = ShareMenuButtonInitHook.classDef.methods
     val method = allMethods.first { it.returnType == "V" }
 
-    val iconAdditionStart =
-        method
-            .instructions
-            .first { it.opcode == Opcode.MOVE_RESULT_OBJECT }
-            .location.index + 1
+    val iconAdditionStart = method.indexOfFirstInstructionOrThrow(Opcode.MOVE_RESULT_OBJECT) + 1
     val iconAdditionEnd = iconAdditionStart + 4
 
-    val iconId = resourceMappings["drawable", iconStr]
+    val iconId = getResourceId(ResourceType.DRAWABLE, iconStr)
 
     val buttonInitInstructions =
         method

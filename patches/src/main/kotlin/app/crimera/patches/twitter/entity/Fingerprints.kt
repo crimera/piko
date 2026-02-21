@@ -1,86 +1,132 @@
 package app.crimera.patches.twitter.entity
 
-import app.revanced.patcher.fingerprint
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 
-internal fun entityMethodFingerprint(
-    className: String,
-    methodName: String,
-) = fingerprint {
-    custom { method, classDef ->
-        method.name == methodName &&
-            classDef.type == "Lapp/revanced/extension/twitter/entity/$className;"
-    }
-}
+private const val ENTITY_TWEET_DEFINING_CLASS = "Lapp/morphe/extension/twitter/entity/Tweet"
 
 // --------------- Tweet
-internal val tweetObjectFingerprint = fingerprint { strings("https://x.com/%1\$s/status/%2\$d") }
+internal object TweetObjectFingerprint : Fingerprint(
+    filters =
+        listOf(
+            string("https://x.com/%1\$s/status/%2\$d"),
+        ),
+)
 
-internal val tweetUsernameFingerprint = entityMethodFingerprint("Tweet", "getTweetUsername")
+internal object TweetUsernameFingerprint : Fingerprint(
+    definingClass = ENTITY_TWEET_DEFINING_CLASS,
+    name = "getTweetUsername",
+)
 
-internal val tweetProfileNameFingerprint = entityMethodFingerprint("Tweet", "getTweetProfileName")
+internal object TweetProfileNameFingerprint : Fingerprint(
+    definingClass = ENTITY_TWEET_DEFINING_CLASS,
+    name = "getTweetProfileName",
+)
 
-internal val tweetUserIdFingerprint = entityMethodFingerprint("Tweet", "getTweetUserId")
+internal object TweetUserIdFingerprint : Fingerprint(
+    definingClass = ENTITY_TWEET_DEFINING_CLASS,
+    name = "getTweetUserId",
+)
 
-internal val tweetMediaFingerprint = entityMethodFingerprint("Tweet", "getMedias")
+internal object TweetMediaFingerprint : Fingerprint(
+    definingClass = ENTITY_TWEET_DEFINING_CLASS,
+    name = "getMedias",
+)
 
-internal val tweetInfoFingerprint = entityMethodFingerprint("Tweet", "getTweetInfo")
+internal object TweetInfoFingerprint : Fingerprint(
+    definingClass = ENTITY_TWEET_DEFINING_CLASS,
+    name = "getTweetInfo",
+)
 
-internal val tweetLongTextFingerprint = entityMethodFingerprint("Tweet", "getLongText")
+internal object TweetLongTextFingerprint : Fingerprint(
+    definingClass = ENTITY_TWEET_DEFINING_CLASS,
+    name = "getLongText",
+)
 
-internal val tweetShortTextFingerprint = entityMethodFingerprint("Tweet", "getShortText")
+internal object TweetShortTextFingerprint : Fingerprint(
+    definingClass = ENTITY_TWEET_DEFINING_CLASS,
+    name = "getShortText",
+)
 
-internal val getUserNameMethodCaller =
-    fingerprint {
-        returns("V")
-        strings(
-            "Ref_ID (Tweet ID)",
-            "Name",
-            "User Name",
-        )
-    }
+internal object TweetActionsHandlerFingerprint: Fingerprint(
+   strings = listOf("content_author")
+)
 
-internal val tweetMediaEntityClassFingerprint = fingerprint { strings("EntityList{mEntities=") }
+internal class TweetOriginalNameFingerprint(definingClass: String) : Fingerprint(
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
+    returnType = "Ljava/lang/String;",
+    parameters = emptyList(),
+    definingClass = definingClass,
+    filters = listOf(
+        methodCall(definingClass = "this", returnType = "Ljava/lang/String;"),
+        methodCall(definingClass = "this", returnType = "Ljava/lang/String;"),
+        opcode(Opcode.RETURN_OBJECT)
+    ),
+)
 
-internal val longTweetObjectFingerprint = fingerprint { strings("NoteTweet(id=", ", text=") }
-internal val quotedViewSetAccessibilityFingerprint =
-    fingerprint {
-        custom { method, classDef ->
-            method.name == "setAccessibility" && classDef.type.endsWith("com/twitter/tweetview/core/QuoteView;")
-        }
-    }
+internal object TweetMediaEntityClassFingerprint : Fingerprint(
+    strings = listOf("EntityList{mEntities="),
+)
+
+internal object LongTweetObjectFingerprint : Fingerprint(
+    strings =
+        listOf(
+            "NoteTweet(id=",
+            ", text=",
+        ),
+)
+
+internal object QuotedViewSetAccessibilityFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/tweetview/core/QuoteView;",
+    name = "setAccessibility",
+)
 
 // --------------- Extended Media Entity
-internal val extMediaHighResVideoMethodFinder =
-    fingerprint {
-        strings(
+internal object ExtMediaHighResVideoMethodFinder : Fingerprint(
+    strings =
+        listOf(
             "long_press_menu",
             "null cannot be cast to non-null type com.twitter.model.dm.attachment.DMMediaAttachment",
-        )
-    }
+        ),
+)
 
-internal val extMediaHighResVideoFingerprint = entityMethodFingerprint("ExtMediaEntities", "getHighResVideo")
+internal object ExtMediaHighResVideoFingerprint : Fingerprint(
+    definingClass = "Lapp/morphe/extension/twitter/entity/ExtMediaEntities",
+    name = "getHighResVideo",
+)
 
-internal val extMediaGetImageMethodFinder =
-    fingerprint {
-        strings("type", "id")
-        custom { _, classDef ->
-            classDef.toString().contains("Lcom/twitter/model/json/unifiedcard/JsonAppStoreData;")
-        }
-    }
+internal object ExtMediaGetImageFingerprint : Fingerprint(
+    definingClass = "Lapp/morphe/extension/twitter/entity/ExtMediaEntities",
+    name = "getImageUrl",
+)
 
-internal val extMediaGetImageFingerprint = entityMethodFingerprint("ExtMediaEntities", "getImageUrl")
+internal object ExtMediaGetImageMethodFinder : Fingerprint(
+    definingClass = "Lcom/twitter/model/json/unifiedcard/JsonAppStoreData;",
+    strings =
+        listOf(
+            "type",
+            "id",
+        ),
+)
 
 // --------------- TweetInfo
-internal val tweetInfoObjectFingerprint =
-    fingerprint {
-        strings(
+internal object TweetInfoObjectFingerprint : Fingerprint(
+    strings =
+        listOf(
             "flags",
             "lang",
             "supplemental_language",
-        )
-        custom { methodDef, classDef ->
-            methodDef.parameters.size == 2 && classDef.contains("/tdbh/")
-        }
-    }
+        ),
+    custom = { methodDef, classDef ->
+        methodDef.parameters.size == 2 && classDef.contains("/tdbh/")
+    },
+)
 
-internal val tweetLangFingerprint = entityMethodFingerprint("TweetInfo", "getLang")
+internal object TweetLangFingerprint : Fingerprint(
+    definingClass = "Lapp/morphe/extension/twitter/entity/TweetInfo;",
+    name = "getLang",
+)

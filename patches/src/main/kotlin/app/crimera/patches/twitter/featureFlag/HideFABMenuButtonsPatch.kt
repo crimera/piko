@@ -1,12 +1,12 @@
 package app.crimera.patches.twitter.featureFlag
 
 import app.crimera.patches.twitter.featureFlag.featureFlagPatch.featureFlagPatch
-import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.featureFlagLoadFingerprint
+import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.FeatureFlagLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.utils.enableSettings
 import app.crimera.utils.flagSettings
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
 val hideFABMenuButtonsPatch =
@@ -17,7 +17,7 @@ val hideFABMenuButtonsPatch =
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 
-            featureFlagLoadFingerprint.flagSettings("fabMenu")
-            settingsStatusLoadFingerprint.enableSettings("hideFABBtns")
+            FeatureFlagLoadFingerprint.flagSettings("fabMenu")
+            SettingsStatusLoadFingerprint.enableSettings("hideFABBtns")
         }
     }

@@ -1,6 +1,6 @@
 package app.crimera.patches.twitter.misc.dynamiccolor
 
-import app.revanced.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.resourcePatch
 import java.io.FileWriter
 import java.nio.file.Files
 

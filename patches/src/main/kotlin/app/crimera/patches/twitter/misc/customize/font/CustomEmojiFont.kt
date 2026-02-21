@@ -1,9 +1,9 @@
 package app.crimera.patches.twitter.misc.customize.font
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
 val customEmojiFont =
@@ -15,6 +15,6 @@ val customEmojiFont =
         dependsOn(customFontHook, settingsPatch)
 
         execute {
-            settingsStatusLoadFingerprint.enableSettings("customEmojiFont")
+            SettingsStatusLoadFingerprint.enableSettings("customEmojiFont")
         }
     }

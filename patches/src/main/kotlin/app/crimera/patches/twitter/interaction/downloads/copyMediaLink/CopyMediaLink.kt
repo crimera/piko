@@ -1,26 +1,29 @@
 package app.crimera.patches.twitter.interaction.downloads.copyMediaLink
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstruction
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.extensions.InstructionExtensions.removeInstruction
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
+import app.morphe.patcher.opcode
+import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
-internal val downloadCallFingerprint =
-    fingerprint {
-        accessFlags(AccessFlags.PUBLIC, AccessFlags.FINAL)
-        returns("V")
-        strings(
-            "getString(...)",
-            "isUseSnackbar",
-        )
-    }
+internal object DownloadCallFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/downloader/",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
+    returnType = "V",
+    filters = listOf(
+        opcode(Opcode.GOTO),
+    ),
+    strings = listOf(
+        "getString(...)",
+        "isUseSnackbar",
+    )
+)
 
 @Suppress("unused")
 val copyMediaLink =
@@ -31,11 +34,9 @@ val copyMediaLink =
         dependsOn(settingsPatch)
 
         execute {
-            val method = downloadCallFingerprint.method
+            val method = DownloadCallFingerprint.method
 
-            val instructions = method.instructions
-
-            val gotoLoc = instructions.first { it.opcode == Opcode.GOTO }.location.index
+            val gotoLoc = DownloadCallFingerprint.instructionMatches.first().index
 
             val METHOD =
                 """
@@ -45,7 +46,7 @@ val copyMediaLink =
             method.removeInstruction(gotoLoc - 1)
             method.addInstruction(gotoLoc - 1, METHOD)
 
-            settingsStatusLoadFingerprint.enableSettings("mediaLinkHandle")
+            SettingsStatusLoadFingerprint.enableSettings("mediaLinkHandle")
 
             // end func
         }

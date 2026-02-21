@@ -1,6 +1,6 @@
 package app.revanced.patches.all.misc.activity.exportall
 
-import app.revanced.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.resourcePatch
 
 @Suppress("unused")
 val exportAllActivitiesPatch =

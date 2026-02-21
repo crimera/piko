@@ -1,20 +1,20 @@
 package app.crimera.patches.twitter.misc.customize.timelinetabs
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 
-private val customiseTimelineTabsFingerprint =
-    fingerprint {
-        parameters("I", "I")
-        strings(
-            "null cannot be cast to non-null type android.app.Activity",
-        )
-    }
+private object CustomiseTimelineTabsFingerprint : Fingerprint(
+    parameters = listOf("I", "I"),
+    filters = listOf(
+        string("null cannot be cast to non-null type android.app.Activity")
+    )
+)
 
 @Suppress("unused")
 val customiseTimelineTabsPatch =
@@ -25,7 +25,7 @@ val customiseTimelineTabsPatch =
         dependsOn(settingsPatch)
 
         execute {
-            customiseTimelineTabsFingerprint.method.apply {
+            CustomiseTimelineTabsFingerprint.method.apply {
                 addInstructions(
                     0,
                     """
@@ -34,7 +34,7 @@ val customiseTimelineTabsPatch =
                     """.trimIndent(),
                 )
 
-                settingsStatusLoadFingerprint.enableSettings("timelineTabCustomisation")
+                SettingsStatusLoadFingerprint.enableSettings("timelineTabCustomisation")
             }
         }
     }
