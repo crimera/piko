@@ -351,6 +351,18 @@ public class ScreenBuilder {
             );
 
         }
+
+        category = preferenceCategory(strRes("piko_share_image_title"));
+
+        if (SettingsStatus.shareImage) {
+            addPreference(category,
+                    helper.switchPreference(
+                            strRes("piko_share_image_title"),
+                            "",
+                            Settings.SHARE_IMAGE_ENABLED
+                    )
+            );
+        }
     }
 
     public void buildMiscSection(boolean buildCategory){
