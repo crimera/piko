@@ -142,7 +142,7 @@ public class ShareImageHandler {
             int width = candidate.getWidth();
             int height = candidate.getHeight();
 
-            if (width >= minWidth && height >= minHeight && height <= maxHeight) {
+            if (!isScrollContainer(candidate) && width >= minWidth && height >= minHeight && height <= maxHeight) {
                 int area = width * height;
                 if (area > bestArea) {
                     best = candidate;
@@ -150,15 +150,20 @@ public class ShareImageHandler {
                 }
             }
 
-            if (!(candidate.getParent() instanceof android.view.View)) {
-                break;
+            android.view.View parent = null;
+            if (candidate.getParent() instanceof android.view.View) {
+                parent = (android.view.View) candidate.getParent();
             }
-            candidate = (android.view.View) candidate.getParent();
+
+            if (parent == null) break;
+            if (isScrollContainer(parent)) break;
+
+            candidate = parent;
         }
 
         if (best != null) return best;
 
-        if (candidate != null) {
+        if (candidate != null && !isScrollContainer(candidate)) {
             int width = candidate.getWidth();
             int height = candidate.getHeight();
             if (width >= minWidth && height >= minHeight && height <= maxHeight) {
@@ -167,6 +172,14 @@ public class ShareImageHandler {
         }
 
         return null;
+    }
+
+    private static boolean isScrollContainer(android.view.View view) {
+        if (view instanceof android.widget.ScrollView) return true;
+        if (view instanceof android.widget.ListView) return true;
+
+        String name = view.getClass().getName();
+        return name.contains("RecyclerView") || name.contains("NestedScrollView");
     }
 
     private static int dpToPx(Activity activity, int dp) {
