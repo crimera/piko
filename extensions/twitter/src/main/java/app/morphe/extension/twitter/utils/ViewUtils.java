@@ -7,112 +7,48 @@ import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 
 public class ViewUtils {
 
-    /**
-     * Convert any Android View to Bitmap
-     * Works with: LinearLayout, ConstraintLayout, CardView, etc
-     */
     public static Bitmap viewToBitmap(View view) {
+        return viewToBitmap(view, null);
+    }
+
+    public static Bitmap viewToBitmap(View view, Rect clipRect) {
         if (view.getWidth() <= 0 || view.getHeight() <= 0) {
-            // Force layout if not measured yet
-            view.measure(
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-            );
+            view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
             view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
         }
 
-        Bitmap bitmap = Bitmap.createBitmap(
-            view.getWidth(),
-            view.getHeight(),
-            Bitmap.Config.ARGB_8888
-        );
-
+        int width = clipRect != null ? clipRect.width() : view.getWidth();
+        int height = clipRect != null ? clipRect.height() : view.getHeight();
+        
+        Bitmap bitmap = Bitmap.createBitmap(Math.max(1, width), Math.max(1, height), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(resolveBackgroundColor(view));
+        
+        if (clipRect != null) {
+            canvas.translate(-clipRect.left, -clipRect.top);
+        }
+        
         view.draw(canvas);
-
         return bitmap;
     }
 
     private static int resolveBackgroundColor(View view) {
-        int color = extractBackgroundColor(view.getBackground());
-        if (color != Color.TRANSPARENT) return color;
+        Drawable background = view.getBackground();
+        if (background instanceof ColorDrawable) return ((ColorDrawable) background).getColor();
 
         View root = view.getRootView();
-        color = root != null ? extractBackgroundColor(root.getBackground()) : Color.TRANSPARENT;
-        if (color != Color.TRANSPARENT) return color;
+        if (root != null && root.getBackground() instanceof ColorDrawable) {
+            return ((ColorDrawable) root.getBackground()).getColor();
+        }
 
         return Color.WHITE;
     }
 
-    private static int extractBackgroundColor(Drawable drawable) {
-        if (drawable instanceof ColorDrawable) {
-            return ((ColorDrawable) drawable).getColor();
-        }
-        return Color.TRANSPARENT;
-    }
-
-    /**
-     * Convert a portion of a View to Bitmap using a clip rect in the view's coordinates.
-     */
-    public static Bitmap viewToBitmap(View view, Rect clipRect) {
-        if (clipRect == null) return viewToBitmap(view);
-
-        if (view.getWidth() <= 0 || view.getHeight() <= 0) {
-            view.measure(
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-            );
-            view.layout(0, 0, view.getMeasuredWidth(), view.getMeasuredHeight());
-        }
-
-        int width = Math.max(1, clipRect.width());
-        int height = Math.max(1, clipRect.height());
-
-        Bitmap bitmap = Bitmap.createBitmap(
-            width,
-            height,
-            Bitmap.Config.ARGB_8888
-        );
-
-        Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(resolveBackgroundColor(view));
-        canvas.translate(-clipRect.left, -clipRect.top);
-        view.draw(canvas);
-
-        return bitmap;
-    }
-
-    /**
-     * Save Bitmap to PNG file
-     */
-    public static File saveBitmap(Bitmap bitmap, File outputFile) throws Exception {
-        outputFile.getParentFile().mkdirs();
-
-        FileOutputStream fos = new FileOutputStream(outputFile);
-        bitmap.compress(Bitmap.CompressFormat.PNG, 95, fos);
-        fos.flush();
-        fos.close();
-
-        return outputFile;
-    }
-
-    /**
-     * Save Bitmap to JPEG (smaller file)
-     */
-    public static File saveBitmapJpeg(Bitmap bitmap, File outputFile, int quality) throws Exception {
-        outputFile.getParentFile().mkdirs();
-
-        FileOutputStream fos = new FileOutputStream(outputFile);
-        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, fos);
-        fos.flush();
-        fos.close();
-
-        return outputFile;
+    public static void saveBitmap(Bitmap bitmap, OutputStream os) throws Exception {
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
     }
 }

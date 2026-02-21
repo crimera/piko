@@ -1,233 +1,140 @@
 package app.morphe.extension.twitter.patches.nativeFeatures.shareImage;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListView;
+import android.widget.ScrollView;
 
 import app.morphe.extension.twitter.Utils;
 import app.morphe.extension.twitter.entity.Tweet;
 import app.morphe.extension.twitter.utils.ViewUtils;
 
-import java.io.File;
+import java.io.OutputStream;
 
 public class ShareImageHandler {
 
-    /**
-     * Main entry point called from patched code
-     * Receives Context (Activity) and tweet object
-     */
     public static void shareAsImage(Context context, Object tweetObj) {
         if (!(context instanceof Activity)) {
             Utils.toast("Invalid context");
             return;
         }
 
-        Activity activity = (Activity) context;
-
         try {
+            Activity activity = (Activity) context;
             Tweet tweet = new Tweet(tweetObj);
+            Utils.toast("Capturing tweet...");
+            
+            View rootView = activity.getWindow().getDecorView().getRootView();
+            View tweetView = searchViewTree(rootView, tweet.getTweetId());
+            CaptureTarget target = resolveCaptureTarget(activity, rootView, tweetView);
 
-            // Render tweet view to image
-            Utils.toast("Capturing tweet view...");
-            shareTweetAsRenderedImage(activity, tweet);
+            if (target == null) {
+                target = new CaptureTarget(rootView, null);
+            }
 
+            Bitmap bitmap = ViewUtils.viewToBitmap(target.view, target.clipRect);
+            shareImage(activity, bitmap, "tweet_" + tweet.getTweetId());
         } catch (Exception e) {
             Utils.logger(e);
             Utils.toast("Error: " + e.getMessage());
         }
     }
 
-    /**
-     * Render tweet as image and share
-     * This attempts to find and capture the tweet view in the UI tree
-     */
-    private static void shareTweetAsRenderedImage(Activity activity, Tweet tweet) {
-        try {
-            // Get root view
-            android.view.View rootView = activity.getWindow().getDecorView().getRootView();
-
-            android.view.View tweetView = findTweetViewInHierarchy(rootView, tweet);
-            CaptureTarget captureTarget = resolveCaptureTarget(activity, rootView, tweetView);
-
-            if (captureTarget == null) {
-                Utils.toast("Tweet view not found, capturing screen...");
-                captureTarget = new CaptureTarget(rootView, null);
-            }
-
-            Bitmap bitmap = captureTarget.clipRect == null
-                ? ViewUtils.viewToBitmap(captureTarget.view)
-                : ViewUtils.viewToBitmap(captureTarget.view, captureTarget.clipRect);
-
-            // Share via MediaStore
-            shareImage(activity, bitmap, "tweet_" + tweet.getTweetId());
-
-        } catch (Exception e) {
-            Utils.logger(e);
-            Utils.toast("Share failed: " + e.getMessage());
-        }
-    }
-
     private static void shareImage(Activity activity, Bitmap bitmap, String filename) {
         try {
             cleanupOldFiles(activity);
-
-            android.content.ContentResolver resolver = activity.getContentResolver();
+            ContentResolver resolver = activity.getContentResolver();
             String displayName = filename + ".png";
 
-            // Delete existing file if it exists to "overwrite"
+            // Overwrite existing
             try {
-                String selection = android.provider.MediaStore.MediaColumns.DISPLAY_NAME + " = ? AND " +
-                                   android.provider.MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ?";
-                String[] selectionArgs = new String[]{displayName, "Pictures/Piko/%"};
-                resolver.delete(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection, selectionArgs);
-            } catch (Exception e) {
-                // Ignore if not found
+                String selection = MediaStore.MediaColumns.DISPLAY_NAME + " = ? AND " + MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ?";
+                resolver.delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection, new String[]{displayName, "Pictures/Piko/%"});
+            } catch (Exception ignored) {}
+
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
+            values.put(MediaStore.MediaColumns.MIME_TYPE, "image/png");
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Piko");
+                values.put(MediaStore.MediaColumns.IS_PENDING, 1);
             }
 
-            android.content.ContentValues contentValues = new android.content.ContentValues();
-            contentValues.put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, displayName);
-            contentValues.put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "image/png");
+            Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            if (uri == null) return;
 
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                contentValues.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, android.os.Environment.DIRECTORY_PICTURES + "/Piko");
-                contentValues.put(android.provider.MediaStore.MediaColumns.IS_PENDING, 1);
+            try (OutputStream os = resolver.openOutputStream(uri)) {
+                if (os != null) ViewUtils.saveBitmap(bitmap, os);
             }
 
-            android.net.Uri uri = resolver.insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
-
-            if (uri == null) {
-                Utils.toast("Failed to create MediaStore entry");
-                return;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.clear();
+                values.put(MediaStore.MediaColumns.IS_PENDING, 0);
+                resolver.update(uri, values, null, null);
             }
 
-            try (java.io.OutputStream os = resolver.openOutputStream(uri)) {
-                if (os != null) {
-                    bitmap.compress(Bitmap.Config.ARGB_8888.equals(bitmap.getConfig()) ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG, 100, os);
-                }
-            }
+            Intent intent = new Intent(Intent.ACTION_SEND)
+                    .setType("image/png")
+                    .putExtra(Intent.EXTRA_STREAM, uri)
+                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                contentValues.clear();
-                contentValues.put(android.provider.MediaStore.MediaColumns.IS_PENDING, 0);
-                resolver.update(uri, contentValues, null, null);
-            }
-
-            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_SEND);
-            intent.setType("image/png");
-            intent.putExtra(android.content.Intent.EXTRA_STREAM, uri);
-            intent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            activity.startActivity(android.content.Intent.createChooser(intent, "Share Tweet Image"));
-
+            activity.startActivity(Intent.createChooser(intent, "Share Tweet Image"));
         } catch (Exception e) {
             Utils.logger(e);
-            Utils.toast("Failed to share: " + e.getMessage());
         }
     }
 
-    /**
-     * Delete files in Piko folder older than 24 hours
-     */
-    private static void cleanupOldFiles(android.content.Context context) {
+    private static void cleanupOldFiles(Context context) {
         try {
             long cutoff = (System.currentTimeMillis() - (24 * 60 * 60 * 1000)) / 1000;
-            android.content.ContentResolver resolver = context.getContentResolver();
-
-            String selection = android.provider.MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ? AND " +
-                               android.provider.MediaStore.MediaColumns.DATE_ADDED + " < ?";
-            String[] selectionArgs = new String[]{"Pictures/Piko/%", String.valueOf(cutoff)};
-
-            int deleted = resolver.delete(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection, selectionArgs);
-            if (deleted > 0) {
-                Utils.logger("Cleaned up " + deleted + " old share files");
-            }
-        } catch (Exception e) {
-            // Fail silently
-        }
+            String selection = MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ? AND " + MediaStore.MediaColumns.DATE_ADDED + " < ?";
+            context.getContentResolver().delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection, new String[]{"Pictures/Piko/%", String.valueOf(cutoff)});
+        } catch (Exception ignored) {}
     }
 
-    /**
-     * Find tweet view in hierarchy
-     * Returns null if not found
-     */
-    private static android.view.View findTweetViewInHierarchy(
-            android.view.View root,
-            Tweet tweet) {
+    private static View searchViewTree(View view, Long targetId) {
+        Object tag = view.getTag();
+        if (tag instanceof Long && tag.equals(targetId)) return view;
+        if (tag != null && tag.toString().contains(targetId.toString())) return view;
 
-        try {
-            Long tweetId = tweet.getTweetId();
-            return searchViewTree(root, tweetId);
-        } catch (Exception e) {
-            Utils.logger(e);
-            return null;
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                View result = searchViewTree(group.getChildAt(i), targetId);
+                if (result != null) return result;
+            }
         }
-    }
-
-    /**
-     * Recursive search through ViewGroup hierarchy
-     */
-    private static android.view.View searchViewTree(android.view.View view, Long targetId) {
-        try {
-            // Check if this view has tweet ID tag
-            Object tag = view.getTag();
-            if (tag instanceof Long && ((Long) tag).equals(targetId)) {
-                return view;
-            }
-            if (tag instanceof String && tag.toString().contains(targetId.toString())) {
-                return view;
-            }
-
-            // Recursively search children
-            if (view instanceof android.view.ViewGroup) {
-                android.view.ViewGroup group = (android.view.ViewGroup) view;
-                for (int i = 0; i < group.getChildCount(); i++) {
-                    android.view.View result = searchViewTree(group.getChildAt(i), targetId);
-                    if (result != null) return result;
-                }
-            }
-        } catch (Exception e) {
-            // Silently continue
-        }
-
         return null;
     }
 
-    private static final class CaptureTarget {
-        private final android.view.View view;
-        private final Rect clipRect;
-
-        private CaptureTarget(android.view.View view, Rect clipRect) {
-            this.view = view;
-            this.clipRect = clipRect;
-        }
-    }
-
-    private static CaptureTarget resolveCaptureTarget(
-        Activity activity,
-        android.view.View rootView,
-        android.view.View tweetView
-    ) {
+    private static CaptureTarget resolveCaptureTarget(Activity activity, View rootView, View tweetView) {
         if (tweetView == null) return null;
 
-        android.view.View tweetRow = findTweetRowContainer(activity, tweetView);
+        View tweetRow = findTweetRowContainer(activity, tweetView);
         if (tweetRow == null) tweetRow = tweetView;
 
         if (isTweetDetailScreen(activity)) {
-            android.view.ViewGroup threadContainer = findThreadContainer(tweetRow);
+            ViewGroup threadContainer = findThreadContainer(tweetRow);
             if (threadContainer != null) {
                 Rect threadBounds = computeThreadBounds(activity, threadContainer, tweetRow);
-                if (threadBounds != null) {
-                    return new CaptureTarget(threadContainer, threadBounds);
-                }
+                if (threadBounds != null) return new CaptureTarget(threadContainer, threadBounds);
             }
         }
 
-        android.view.View expanded = expandToTweetContainer(activity, rootView, tweetRow);
-        if (expanded != null) return new CaptureTarget(expanded, null);
-
-        return new CaptureTarget(tweetRow, null);
+        View expanded = expandToTweetContainer(activity, rootView, tweetRow);
+        return new CaptureTarget(expanded != null ? expanded : tweetRow, null);
     }
 
     private static boolean isTweetDetailScreen(Activity activity) {
@@ -236,248 +143,134 @@ public class ShareImageHandler {
             || findViewById(activity, "persistent_reply") != null;
     }
 
-    private static android.view.View findViewById(Activity activity, String name) {
-        int id = resolveId(activity, name);
-        if (id == 0) return null;
-        return activity.findViewById(id);
+    private static View findViewById(Activity activity, String name) {
+        int id = activity.getResources().getIdentifier(name, "id", activity.getPackageName());
+        return id != 0 ? activity.findViewById(id) : null;
     }
 
-    private static int resolveId(Activity activity, String name) {
-        return activity.getResources().getIdentifier(name, "id", activity.getPackageName());
+    private static View findTweetRowContainer(Activity activity, View view) {
+        int rowId = activity.getResources().getIdentifier("outer_layout_row_view_tweet", "id", activity.getPackageName());
+        View ancestor = rowId != 0 ? findAncestorById(view, rowId) : null;
+        return ancestor != null ? ancestor : findAncestorByTweetView(view);
     }
 
-    private static android.view.View findTweetRowContainer(Activity activity, android.view.View view) {
-        int rowId = resolveId(activity, "outer_layout_row_view_tweet");
-        if (rowId != 0) {
-            android.view.View byId = findAncestorById(view, rowId);
-            if (byId != null) return byId;
-        }
-
-        return findAncestorByTweetView(view);
-    }
-
-    private static android.view.View findAncestorById(android.view.View view, int id) {
-        android.view.View current = view;
-        while (current != null) {
-            if (current.getId() == id) return current;
-            current = getParentView(current);
-        }
+    private static View findAncestorById(View view, int id) {
+        for (View v = view; v != null; v = getParent(v)) if (v.getId() == id) return v;
         return null;
     }
 
-    private static android.view.View findAncestorByTweetView(android.view.View view) {
-        android.view.View current = view;
-        while (current != null) {
-            if (isTweetView(current)) return current;
-            current = getParentView(current);
-        }
+    private static View findAncestorByTweetView(View view) {
+        for (View v = view; v != null; v = getParent(v)) if (isTweetView(v)) return v;
         return null;
     }
 
-    private static boolean isTweetView(android.view.View view) {
-        String name = view.getClass().getName();
-        if (name.contains("TweetViewContentHostContainer")) return false;
-        return name.endsWith("TweetView") || name.endsWith("LinearLayoutTweetView") || name.contains(".TweetView");
+    private static boolean isTweetView(View v) {
+        String name = v.getClass().getName();
+        return !name.contains("TweetViewContentHostContainer") && (name.endsWith("TweetView") || name.contains(".TweetView"));
     }
 
-    private static android.view.ViewGroup findThreadContainer(android.view.View view) {
-        android.view.View current = view;
-        while (current != null) {
-            if (current instanceof android.view.ViewGroup && isThreadContainer(current)) {
-                return (android.view.ViewGroup) current;
+    private static ViewGroup findThreadContainer(View view) {
+        for (View v = view; v != null; v = getParent(v)) {
+            if (v instanceof ViewGroup && (v instanceof ListView || v.getClass().getName().contains("RecyclerView"))) {
+                return (ViewGroup) v;
             }
-            current = getParentView(current);
         }
         return null;
     }
 
-    private static boolean isThreadContainer(android.view.View view) {
-        if (view instanceof android.widget.ListView) return true;
-        String name = view.getClass().getName();
-        return name.contains("RecyclerView");
-    }
-
-    private static Rect computeThreadBounds(
-        Activity activity,
-        android.view.ViewGroup container,
-        android.view.View tweetRow
-    ) {
-        android.view.View itemRoot = findItemRoot(container, tweetRow);
+    private static Rect computeThreadBounds(Activity activity, ViewGroup container, View tweetRow) {
+        View itemRoot = findItemRoot(container, tweetRow);
         if (itemRoot == null) return null;
 
-        int targetIndex = indexOfChild(container, itemRoot);
-        if (targetIndex < 0) return null;
+        int targetIdx = indexOfChild(container, itemRoot);
+        if (targetIdx < 0) return null;
 
-        int topConnectorId = resolveId(activity, "tweet_connector_top");
-        int bottomConnectorId = resolveId(activity, "tweet_connector_bottom");
+        int topId = activity.getResources().getIdentifier("tweet_connector_top", "id", activity.getPackageName());
+        int botId = activity.getResources().getIdentifier("tweet_connector_bottom", "id", activity.getPackageName());
 
-        int startIndex = targetIndex;
-        while (startIndex > 0) {
-            android.view.View current = container.getChildAt(startIndex);
-            android.view.View previous = container.getChildAt(startIndex - 1);
-            if (!isTweetItem(previous)) break;
-
-            boolean connected =
-                hasVisibleConnector(current, topConnectorId)
-                    || hasVisibleConnector(previous, bottomConnectorId);
-
-            if (!connected) break;
-            startIndex--;
+        int startIdx = targetIdx;
+        while (startIdx > 0 && isTweetItem(container.getChildAt(startIdx - 1)) && (hasVisible(container.getChildAt(startIdx), topId) || hasVisible(container.getChildAt(startIdx - 1), botId))) {
+            startIdx--;
         }
 
-        int endIndex = targetIndex;
-        if (!hasVisibleReplyContext(activity, tweetRow)) {
-            while (endIndex < container.getChildCount() - 1) {
-                android.view.View current = container.getChildAt(endIndex);
-                android.view.View next = container.getChildAt(endIndex + 1);
-                if (!isTweetItem(next)) break;
-
-                boolean connected =
-                    hasVisibleConnector(next, topConnectorId)
-                        || hasVisibleConnector(current, bottomConnectorId);
-
-                if (!connected) break;
-                endIndex++;
+        int endIdx = targetIdx;
+        if (!hasVisible(tweetRow, activity.getResources().getIdentifier("tweet_reply_context", "id", activity.getPackageName()))) {
+            while (endIdx < container.getChildCount() - 1 && isTweetItem(container.getChildAt(endIdx + 1)) && (hasVisible(container.getChildAt(endIdx + 1), topId) || hasVisible(container.getChildAt(endIdx), botId))) {
+                endIdx++;
             }
         }
 
-        android.view.View startView = container.getChildAt(startIndex);
-        android.view.View endView = container.getChildAt(endIndex);
+        int top = container.getChildAt(startIdx).getTop();
+        int bottom = container.getChildAt(endIdx).getBottom();
 
-        int top = startView.getTop();
-        int bottom = endView.getBottom();
-
-        int replySortingId = resolveId(activity, "reply_sorting");
-        if (replySortingId != 0) {
-            android.view.View replySorting = endView.findViewById(replySortingId);
-            if (replySorting != null && replySorting.getVisibility() == android.view.View.VISIBLE) {
-                int candidateBottom = endView.getTop() + replySorting.getTop();
-                if (candidateBottom > top) {
-                    bottom = Math.min(bottom, candidateBottom);
-                }
-            }
+        int sortId = activity.getResources().getIdentifier("reply_sorting", "id", activity.getPackageName());
+        View sortView = sortId != 0 ? container.getChildAt(endIdx).findViewById(sortId) : null;
+        if (sortView != null && sortView.getVisibility() == View.VISIBLE) {
+            bottom = Math.min(bottom, container.getChildAt(endIdx).getTop() + sortView.getTop());
         }
 
-        if (bottom <= top) return null;
-
-        return new Rect(0, top, container.getWidth(), bottom);
+        return bottom > top ? new Rect(0, top, container.getWidth(), bottom) : null;
     }
 
-    private static boolean hasVisibleConnector(android.view.View view, int id) {
+    private static boolean hasVisible(View v, int id) {
         if (id == 0) return false;
-        android.view.View connector = view.findViewById(id);
-        return connector != null && connector.getVisibility() == android.view.View.VISIBLE;
+        View child = v.findViewById(id);
+        return child != null && child.getVisibility() == View.VISIBLE;
     }
 
-    private static boolean hasVisibleReplyContext(Activity activity, android.view.View view) {
-        int replyContextId = resolveId(activity, "tweet_reply_context");
-        if (replyContextId == 0) return false;
-        android.view.View replyContext = view.findViewById(replyContextId);
-        return replyContext != null && replyContext.getVisibility() == android.view.View.VISIBLE;
-    }
-
-    private static int indexOfChild(android.view.ViewGroup container, android.view.View child) {
-        for (int i = 0; i < container.getChildCount(); i++) {
-            if (container.getChildAt(i) == child) return i;
-        }
+    private static int indexOfChild(ViewGroup parent, View child) {
+        for (int i = 0; i < parent.getChildCount(); i++) if (parent.getChildAt(i) == child) return i;
         return -1;
     }
 
-    private static android.view.View findItemRoot(android.view.ViewGroup container, android.view.View view) {
-        android.view.View current = view;
-        android.view.View parent = getParentView(current);
-        while (parent != null && parent != container) {
-            current = parent;
-            parent = getParentView(current);
-        }
-        return parent == container ? current : null;
+    private static View findItemRoot(ViewGroup container, View view) {
+        View v = view;
+        while (getParent(v) != null && getParent(v) != container) v = getParent(v);
+        return getParent(v) == container ? v : null;
     }
 
-    private static boolean isTweetItem(android.view.View view) {
-        if (view == null) return false;
-        if (isTweetView(view)) return true;
-        return containsTweetView(view);
-    }
-
-    private static boolean containsTweetView(android.view.View view) {
-        if (isTweetView(view)) return true;
-        if (!(view instanceof android.view.ViewGroup)) return false;
-
-        android.view.ViewGroup group = (android.view.ViewGroup) view;
-        for (int i = 0; i < group.getChildCount(); i++) {
-            if (containsTweetView(group.getChildAt(i))) return true;
+    private static boolean isTweetItem(View v) {
+        if (v == null) return false;
+        if (isTweetView(v)) return true;
+        if (v instanceof ViewGroup) {
+            ViewGroup g = (ViewGroup) v;
+            for (int i = 0; i < g.getChildCount(); i++) if (isTweetItem(g.getChildAt(i))) return true;
         }
         return false;
     }
 
-    private static android.view.View getParentView(android.view.View view) {
-        if (view.getParent() instanceof android.view.View) {
-            return (android.view.View) view.getParent();
-        }
-        return null;
+    private static View getParent(View v) {
+        return (v.getParent() instanceof View) ? (View) v.getParent() : null;
     }
 
-    private static android.view.View expandToTweetContainer(
-        Activity activity,
-        android.view.View rootView,
-        android.view.View tweetView
-    ) {
+    private static View expandToTweetContainer(Activity activity, View root, View tweetView) {
         if (tweetView == null) return null;
+        int minW = dp(activity, 240), minH = dp(activity, 200), maxH = (int) (activity.getResources().getDisplayMetrics().heightPixels * 0.9f);
+        View best = null;
+        int maxArea = 0;
 
-        int minWidth = dpToPx(activity, 240);
-        int minHeight = dpToPx(activity, 200);
-        int maxHeight = Math.round(activity.getResources().getDisplayMetrics().heightPixels * 0.9f);
-
-        android.view.View candidate = tweetView;
-        android.view.View best = null;
-        int bestArea = 0;
-
-        while (candidate != null && candidate != rootView) {
-            int width = candidate.getWidth();
-            int height = candidate.getHeight();
-
-            if (!isScrollContainer(candidate) && width >= minWidth && height >= minHeight && height <= maxHeight) {
-                int area = width * height;
-                if (area > bestArea) {
-                    best = candidate;
-                    bestArea = area;
+        for (View v = tweetView; v != null && v != root && !isScroll(v); v = getParent(v)) {
+            if (v.getWidth() >= minW && v.getHeight() >= minH && v.getHeight() <= maxH) {
+                int area = v.getWidth() * v.getHeight();
+                if (area > maxArea) {
+                    best = v;
+                    maxArea = area;
                 }
             }
-
-            android.view.View parent = null;
-            if (candidate.getParent() instanceof android.view.View) {
-                parent = (android.view.View) candidate.getParent();
-            }
-
-            if (parent == null) break;
-            if (isScrollContainer(parent)) break;
-
-            candidate = parent;
         }
-
-        if (best != null) return best;
-
-        if (candidate != null && !isScrollContainer(candidate)) {
-            int width = candidate.getWidth();
-            int height = candidate.getHeight();
-            if (width >= minWidth && height >= minHeight && height <= maxHeight) {
-                return candidate;
-            }
-        }
-
-        return null;
+        return best;
     }
 
-    private static boolean isScrollContainer(android.view.View view) {
-        if (view instanceof android.widget.ScrollView) return true;
-        if (view instanceof android.widget.ListView) return true;
-
-        String name = view.getClass().getName();
-        return name.contains("RecyclerView") || name.contains("NestedScrollView");
+    private static boolean isScroll(View v) {
+        return v instanceof ScrollView || v instanceof ListView || v.getClass().getName().contains("RecyclerView") || v.getClass().getName().contains("NestedScrollView");
     }
 
-    private static int dpToPx(Activity activity, int dp) {
-        return Math.round(dp * activity.getResources().getDisplayMetrics().density);
+    private static int dp(Activity a, int dp) {
+        return Math.round(dp * a.getResources().getDisplayMetrics().density);
     }
 
+    private static class CaptureTarget {
+        View view; Rect clipRect;
+        CaptureTarget(View v, Rect r) { view = v; clipRect = r; }
+    }
 }
