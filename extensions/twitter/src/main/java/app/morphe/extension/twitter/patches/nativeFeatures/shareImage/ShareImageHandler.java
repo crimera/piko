@@ -132,20 +132,38 @@ public class ShareImageHandler {
 
         int minWidth = dpToPx(activity, 240);
         int minHeight = dpToPx(activity, 200);
+        int maxHeight = Math.round(activity.getResources().getDisplayMetrics().heightPixels * 0.9f);
+
         android.view.View candidate = tweetView;
+        android.view.View best = null;
+        int bestArea = 0;
 
         while (candidate != null && candidate != rootView) {
-            if (candidate.getWidth() >= minWidth && candidate.getHeight() >= minHeight) {
-                return candidate;
+            int width = candidate.getWidth();
+            int height = candidate.getHeight();
+
+            if (width >= minWidth && height >= minHeight && height <= maxHeight) {
+                int area = width * height;
+                if (area > bestArea) {
+                    best = candidate;
+                    bestArea = area;
+                }
             }
+
             if (!(candidate.getParent() instanceof android.view.View)) {
                 break;
             }
             candidate = (android.view.View) candidate.getParent();
         }
 
-        if (candidate != null && candidate.getWidth() >= minWidth && candidate.getHeight() >= minHeight) {
-            return candidate;
+        if (best != null) return best;
+
+        if (candidate != null) {
+            int width = candidate.getWidth();
+            int height = candidate.getHeight();
+            if (width >= minWidth && height >= minHeight && height <= maxHeight) {
+                return candidate;
+            }
         }
 
         return null;
