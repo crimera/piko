@@ -6,7 +6,14 @@ public class SettingsStatus {
         enableDeveloperOptions = true;
     }
 
+    public static boolean disableAds = false;
+    public static void disableAds() {
+        disableAds = true;
+    }
 
+    public static boolean adsSection() {
+        return disableAds;
+    }
     public static boolean developerOptionsSection() {
         return enableDeveloperOptions;
     }
