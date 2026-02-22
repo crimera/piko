@@ -37,6 +37,20 @@ public class ScreenBuilder {
         return preferenceCategory;
     }
 
+    public void buildAdsSection(){
+        if (!(SettingsStatus.adsSection())) return;
+
+        PreferenceCategory category = category = addCategory(Strings.CATEGORY_ADS);
+        if (SettingsStatus.disableAds) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_ADS,
+                            "",
+                            Settings.DISABLE_ADS
+                    )
+            );
+        }
+    }
     public void buildDeveloperSection(){
         if (!(SettingsStatus.developerOptionsSection())) return;
 
