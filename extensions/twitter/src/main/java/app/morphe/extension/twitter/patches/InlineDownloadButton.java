@@ -111,7 +111,8 @@ public class InlineDownloadButton {
                                     for (int k = 0; k < vgg.getChildCount(); k++) {
                                         View c3 = vgg.getChildAt(k);
                                         if (c3 instanceof ImageView && c3.getVisibility() == View.VISIBLE) {
-                                            iconPadding = c3.getPaddingLeft();
+                                            // The padding is actually on the FrameLayout container (c2), not the ImageView
+                                            iconPadding = c2.getPaddingLeft();
                                             scaleType = ((ImageView) c3).getScaleType();
                                             break;
                                         }
@@ -180,6 +181,7 @@ public class InlineDownloadButton {
                                         int p = c2.getPaddingLeft();
                                         downloadBtn.setPadding(p, p, p, p);
                                         downloadBtn.setScaleType(((ImageView) c2).getScaleType());
+                                        changed = true;
                                     }
                                     break;
                                 } else if (c2 instanceof ViewGroup) {
@@ -187,10 +189,11 @@ public class InlineDownloadButton {
                                     for (int k = 0; k < vgg.getChildCount(); k++) {
                                         View c3 = vgg.getChildAt(k);
                                         if (c3 instanceof ImageView && c3.getVisibility() == View.VISIBLE) {
-                                            if (downloadBtn.getPaddingLeft() != c3.getPaddingLeft()) {
-                                                int p = c3.getPaddingLeft();
+                                            if (downloadBtn.getPaddingLeft() != c2.getPaddingLeft()) {
+                                                int p = c2.getPaddingLeft();
                                                 downloadBtn.setPadding(p, p, p, p);
                                                 downloadBtn.setScaleType(((ImageView) c3).getScaleType());
+                                                changed = true;
                                             }
                                             break;
                                         }
