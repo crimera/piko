@@ -6,6 +6,7 @@ import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.enableSettings
 import app.crimera.utils.getFieldName
+import app.crimera.utils.getReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -15,8 +16,6 @@ import com.android.tools.smali.dexlib2.Opcode
 
 /**
  * Fingerprint that directly matches onFinishInflate() in InlineActionBar.
- * Uses custom filter to match by method name since class is NOT obfuscated.
- * Using Fingerprint.method guarantees a mutable/patchable method reference.
  */
 private object OnFinishInflateFingerprint : Fingerprint(
     definingClass = "Lcom/twitter/ui/tweet/inlineactions/InlineActionBar;",
@@ -28,7 +27,6 @@ private object OnFinishInflateFingerprint : Fingerprint(
 /**
  * Fingerprint for the internal setTweet implementation method.
  * Contains the stable string "file:///android_asset/default_heart_v3.json".
- * The first IPUT_OBJECT instruction stores the tweet into the obfuscated field.
  */
 private object SetTweetFingerprint : Fingerprint(
     definingClass = "Lcom/twitter/ui/tweet/inlineactions/InlineActionBar;",
@@ -37,11 +35,23 @@ private object SetTweetFingerprint : Fingerprint(
 )
 
 /**
- * Fingerprint for the extension's getTweetFieldName() method.
- * Contains placeholder "mTweet" which gets replaced at patch time.
+ * Fingerprint for InlineActionView's setIconDrawable method (decompiled: b(Drawable, ImageView)).
+ * This method calls drawable.mutate(), then reads mIconDrawableColorStateList,
+ * then calls drawable.setTintList(). The constructor has a stable string we can target.
  */
+private object InlineActionViewConstructorFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/ui/tweet/inlineactions/InlineActionView;",
+    strings = listOf("hal_android_lottie_render_mode"),
+)
+
+/** Placeholder in extension: getTweetFieldName() returns "mTweet" */
 private object InlineDownloadTweetFieldFingerprint : Fingerprint(
     strings = listOf("mTweet"),
+)
+
+/** Placeholder in extension: getIconColorFieldName() returns "mIconDrawableColorStateList" */
+private object InlineDownloadIconColorFieldFingerprint : Fingerprint(
+    strings = listOf("mIconDrawableColorStateList"),
 )
 
 @Suppress("unused")
@@ -52,7 +62,7 @@ val inlineDownloadButtonPatch = bytecodePatch(
     dependsOn(settingsPatch)
 
     execute {
-        // --- Step 1: Hook onFinishInflate via Fingerprint.method (guaranteed mutable) ---
+        // --- Step 1: Hook onFinishInflate ---
         val onFinishInflateMethod = OnFinishInflateFingerprint.method
 
         val returnIndex = onFinishInflateMethod.instructions
@@ -63,13 +73,30 @@ val inlineDownloadButtonPatch = bytecodePatch(
             "invoke-static {p0}, $PATCHES_DESCRIPTOR/InlineDownloadButton;->onFinishInflate(Landroid/view/ViewGroup;)V"
         )
 
-        // --- Step 2: Resolve the obfuscated mTweet field name via fingerprint ---
+        // --- Step 2: Resolve obfuscated mTweet field name ---
         val setTweetMethod = SetTweetFingerprint.method
         val iputIndex = setTweetMethod.indexOfFirstInstruction(Opcode.IPUT_OBJECT)
         val tweetFieldName = SetTweetFingerprint.getFieldName(iputIndex)
-
-        // Replace "mTweet" placeholder in extension code with the real field name
         InlineDownloadTweetFieldFingerprint.changeFirstString(tweetFieldName)
+
+        // --- Step 3: Resolve obfuscated mIconDrawableColorStateList field name ---
+        // The constructor assigns this field via iput-object ... ColorStateList
+        // Find the iput-object for the ColorStateList field in InlineActionView
+        val constructorMethod = InlineActionViewConstructorFingerprint.method
+        // Use getReference to check field type
+        val colorFieldIndex = constructorMethod.instructions.indexOfFirst { inst ->
+            if (inst.opcode != Opcode.IPUT_OBJECT) return@indexOfFirst false
+            try {
+                val fieldRef = InlineActionViewConstructorFingerprint.getReference(
+                    constructorMethod.instructions.indexOf(inst)
+                ) as com.android.tools.smali.dexlib2.iface.reference.FieldReference
+                fieldRef.type == "Landroid/content/res/ColorStateList;"
+            } catch (e: Exception) {
+                false
+            }
+        }
+        val iconColorFieldName = InlineActionViewConstructorFingerprint.getFieldName(colorFieldIndex)
+        InlineDownloadIconColorFieldFingerprint.changeFirstString(iconColorFieldName)
 
         SettingsStatusLoadFingerprint.enableSettings("inlineDownloadButton")
     }

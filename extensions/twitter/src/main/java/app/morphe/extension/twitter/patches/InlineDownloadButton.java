@@ -18,11 +18,19 @@ public class InlineDownloadButton {
     private static final String TAG = "InlineDownloadButton";
 
     /**
-     * Returns the obfuscated field name for mTweet.
+     * Returns the obfuscated field name for mTweet in InlineActionBar.
      * "mTweet" is replaced at patch time via changeFirstString().
      */
     private static String getTweetFieldName() {
         return "mTweet";
+    }
+
+    /**
+     * Returns the obfuscated field name for mIconDrawableColorStateList in InlineActionView.
+     * "mIconDrawableColorStateList" is replaced at patch time via changeFirstString().
+     */
+    private static String getIconColorFieldName() {
+        return "mIconDrawableColorStateList";
     }
 
     /**
@@ -31,43 +39,6 @@ public class InlineDownloadButton {
      */
     public static void onFinishInflate(ViewGroup inlineActionBar) {
         inlineActionBar.post(() -> wrapWithDownloadButton(inlineActionBar));
-    }
-
-    /**
-     * Extract the mIconDrawableColorStateList from an InlineActionView.
-     * This is the ColorStateList used to tint icon drawables — applied via
-     * Drawable.setTintList(), NOT ImageView.setImageTintList().
-     */
-    private static ColorStateList getIconColorFromChild(View child) {
-        // Try the non-obfuscated field name first (dogfood/debug builds)
-        try {
-            Field f = child.getClass().getDeclaredField("mIconDrawableColorStateList");
-            f.setAccessible(true);
-            ColorStateList csl = (ColorStateList) f.get(child);
-            android.util.Log.e(TAG, "mIconDrawableColorStateList found (non-obfuscated): 0x"
-                    + Integer.toHexString(csl != null ? csl.getDefaultColor() : 0));
-            return csl;
-        } catch (NoSuchFieldException ignored) {}
-        catch (Exception e) {
-            android.util.Log.e(TAG, "mIconDrawableColorStateList access error: " + e);
-        }
-
-        // Obfuscated: scan for ColorStateList fields
-        for (Field f : child.getClass().getDeclaredFields()) {
-            if (f.getType() == ColorStateList.class) {
-                try {
-                    f.setAccessible(true);
-                    ColorStateList csl = (ColorStateList) f.get(child);
-                    if (csl != null) {
-                        android.util.Log.e(TAG, "found ColorStateList in field '"
-                                + f.getName() + "': 0x"
-                                + Integer.toHexString(csl.getDefaultColor()));
-                        return csl;
-                    }
-                } catch (Exception ignored) {}
-            }
-        }
-        return null;
     }
 
     private static void wrapWithDownloadButton(ViewGroup inlineActionBar) {
@@ -112,26 +83,31 @@ public class InlineDownloadButton {
             downloadBtn.setFocusable(true);
             downloadBtn.setId(View.generateViewId());
 
-            // 6. Match icon tint — read mIconDrawableColorStateList from a child
-            //    InlineActionView, then apply it to our drawable via setTintList()
+            // 6. Match icon tint from InlineActionView's mIconDrawableColorStateList
+            //    Field name resolved at patch time via fingerprint
+            String colorFieldName = getIconColorFieldName();
             ColorStateList iconColor = null;
             for (int i = 0; i < inlineActionBar.getChildCount(); i++) {
                 View child = inlineActionBar.getChildAt(i);
-                iconColor = getIconColorFromChild(child);
-                if (iconColor != null) break;
+                try {
+                    Field f = child.getClass().getDeclaredField(colorFieldName);
+                    f.setAccessible(true);
+                    iconColor = (ColorStateList) f.get(child);
+                    if (iconColor != null) break;
+                } catch (NoSuchFieldException ignored) {
+                } catch (Exception e) {
+                    android.util.Log.e(TAG, "tint field access error: " + e);
+                }
             }
 
             if (iconColor != null) {
+                // Apply tint the same way InlineActionView does: via Drawable.setTintList()
                 Drawable drawable = downloadBtn.getDrawable();
                 if (drawable != null) {
                     drawable = drawable.mutate();
                     drawable.setTintList(iconColor);
                     downloadBtn.setImageDrawable(drawable);
                 }
-                android.util.Log.e(TAG, "tint applied via drawable.setTintList: 0x"
-                        + Integer.toHexString(iconColor.getDefaultColor()));
-            } else {
-                android.util.Log.e(TAG, "no icon color found from any child!");
             }
 
             // 7. Size: match inline action button dimensions
