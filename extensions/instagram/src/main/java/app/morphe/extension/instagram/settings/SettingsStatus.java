@@ -5,17 +5,22 @@ public class SettingsStatus {
     public static void enableDeveloperOptions() {
         enableDeveloperOptions = true;
     }
+    public static boolean developerOptionsSection() {
+        return enableDeveloperOptions;
+    }
 
+    //Ads Section
     public static boolean disableAds = false;
     public static void disableAds() {
         disableAds = true;
     }
 
-    public static boolean adsSection() {
-        return disableAds;
+    public static boolean hideSuggestedContent = false;
+    public static void hideSuggestedContent() {
+        hideSuggestedContent = true;
     }
-    public static boolean developerOptionsSection() {
-        return enableDeveloperOptions;
+    public static boolean adsSection() {
+        return (disableAds || hideSuggestedContent);
     }
 
     public static void load() {

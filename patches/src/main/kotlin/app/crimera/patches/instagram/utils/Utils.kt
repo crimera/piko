@@ -8,6 +8,6 @@ context(BytecodePatchContext)
 fun enableSettings(functionName: String) {
     SettingsStatusLoadFingerprint.method.addInstruction(
         0,
-        "${Constants.SSTS_DESCRIPTOR}->$functionName()V",
+        Constants.SSTS_DESCRIPTOR.format(functionName),
     )
 }

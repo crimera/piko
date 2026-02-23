@@ -50,6 +50,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.hideSuggestedContent) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.HIDE_SUGEESTED_CONTENT,
+                            Strings.HIDE_SUGEESTED_CONTENT_DESC,
+                            Settings.HIDE_SUGGESTED_CONTENT
+                    )
+            );
+        }
     }
     public void buildDeveloperSection(){
         if (!(SettingsStatus.developerOptionsSection())) return;
