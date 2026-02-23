@@ -69,6 +69,9 @@ public class InlineDownloadButton {
             int iconId = Utils.getResourceIdentifier("ic_vector_incoming", "drawable");
             if (iconId != 0) {
                 downloadBtn.setImageResource(iconId);
+                android.util.Log.e(TAG, "icon loaded: " + iconId);
+            } else {
+                android.util.Log.e(TAG, "icon NOT found!");
             }
             downloadBtn.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             downloadBtn.setClickable(true);
@@ -79,24 +82,51 @@ public class InlineDownloadButton {
             ColorStateList tint = null;
             for (int i = 0; i < inlineActionBar.getChildCount(); i++) {
                 View child = inlineActionBar.getChildAt(i);
-                if (child.getVisibility() != View.VISIBLE) continue;
+                android.util.Log.e(TAG, "child[" + i + "]: " + child.getClass().getSimpleName()
+                        + " visible=" + (child.getVisibility() == View.VISIBLE)
+                        + " w=" + child.getWidth() + " h=" + child.getHeight());
                 try {
                     ImageView existingIcon = (ImageView) child.getClass()
                             .getMethod("getIconView").invoke(child);
-                    if (existingIcon != null && existingIcon.getImageTintList() != null) {
-                        tint = existingIcon.getImageTintList();
-                        break;
+                    if (existingIcon != null) {
+                        ColorStateList childTint = existingIcon.getImageTintList();
+                        int currentColor = existingIcon.getImageTintList() != null
+                                ? existingIcon.getImageTintList().getDefaultColor() : -1;
+                        android.util.Log.e(TAG, "  iconView tintList=" + childTint
+                                + " defaultColor=0x" + Integer.toHexString(currentColor)
+                                + " drawable=" + existingIcon.getDrawable());
+                        if (childTint != null && tint == null) {
+                            tint = childTint;
+                        }
                     }
-                } catch (Exception ignored) {}
-            }
-            if (tint != null) {
-                downloadBtn.setImageTintList(tint);
+                } catch (Exception e) {
+                    android.util.Log.e(TAG, "  getIconView failed: " + e.getMessage());
+                }
             }
 
-            // Size: use a small fixed size matching inline icon dimensions
-            // Inline action icons are typically 20dp with 14dp padding = 48dp touch target
+            if (tint != null) {
+                downloadBtn.setImageTintList(tint);
+                android.util.Log.e(TAG, "applied tint: defaultColor=0x"
+                        + Integer.toHexString(tint.getDefaultColor()));
+            } else {
+                // Fallback: resolve colorControlNormal from theme
+                android.util.Log.e(TAG, "no tint from children, trying theme attr");
+                TypedValue tv = new TypedValue();
+                boolean resolved = inlineActionBar.getContext().getTheme()
+                        .resolveAttribute(android.R.attr.colorControlNormal, tv, true);
+                if (resolved) {
+                    int color = inlineActionBar.getContext().getColor(tv.resourceId);
+                    downloadBtn.setImageTintList(ColorStateList.valueOf(color));
+                    android.util.Log.e(TAG, "fallback tint from colorControlNormal: 0x"
+                            + Integer.toHexString(color));
+                } else {
+                    android.util.Log.e(TAG, "colorControlNormal not resolved!");
+                }
+            }
+
+            // Size: match inline action button dimensions
             float density = inlineActionBar.getResources().getDisplayMetrics().density;
-            int touchTarget = (int) (36 * density); // slightly smaller than action buttons
+            int touchTarget = (int) (36 * density);
             int padding = (int) (8 * density);
             downloadBtn.setPadding(padding, padding, padding, padding);
 
@@ -130,8 +160,11 @@ public class InlineDownloadButton {
             // 7. Insert wrapper at same position with original layout params
             parent.addView(wrapper, index, originalLp);
 
+            android.util.Log.e(TAG, "done! wrapper added at index=" + index);
+
         } catch (Exception e) {
             android.util.Log.e(TAG, "wrap failed: " + e);
+            e.printStackTrace();
         }
     }
 }
