@@ -1,7 +1,7 @@
 package app.morphe.extension.twitter.patches;
 
 import android.content.res.ColorStateList;
-import android.util.TypedValue;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -31,6 +31,43 @@ public class InlineDownloadButton {
      */
     public static void onFinishInflate(ViewGroup inlineActionBar) {
         inlineActionBar.post(() -> wrapWithDownloadButton(inlineActionBar));
+    }
+
+    /**
+     * Extract the mIconDrawableColorStateList from an InlineActionView.
+     * This is the ColorStateList used to tint icon drawables — applied via
+     * Drawable.setTintList(), NOT ImageView.setImageTintList().
+     */
+    private static ColorStateList getIconColorFromChild(View child) {
+        // Try the non-obfuscated field name first (dogfood/debug builds)
+        try {
+            Field f = child.getClass().getDeclaredField("mIconDrawableColorStateList");
+            f.setAccessible(true);
+            ColorStateList csl = (ColorStateList) f.get(child);
+            android.util.Log.e(TAG, "mIconDrawableColorStateList found (non-obfuscated): 0x"
+                    + Integer.toHexString(csl != null ? csl.getDefaultColor() : 0));
+            return csl;
+        } catch (NoSuchFieldException ignored) {}
+        catch (Exception e) {
+            android.util.Log.e(TAG, "mIconDrawableColorStateList access error: " + e);
+        }
+
+        // Obfuscated: scan for ColorStateList fields
+        for (Field f : child.getClass().getDeclaredFields()) {
+            if (f.getType() == ColorStateList.class) {
+                try {
+                    f.setAccessible(true);
+                    ColorStateList csl = (ColorStateList) f.get(child);
+                    if (csl != null) {
+                        android.util.Log.e(TAG, "found ColorStateList in field '"
+                                + f.getName() + "': 0x"
+                                + Integer.toHexString(csl.getDefaultColor()));
+                        return csl;
+                    }
+                } catch (Exception ignored) {}
+            }
+        }
+        return null;
     }
 
     private static void wrapWithDownloadButton(ViewGroup inlineActionBar) {
@@ -64,67 +101,40 @@ public class InlineDownloadButton {
                     0, ViewGroup.LayoutParams.MATCH_PARENT, 1.0f);
             wrapper.addView(inlineActionBar, barLp);
 
-            // 5. Create download button — match the native icon style
+            // 5. Create download button
             ImageView downloadBtn = new ImageView(inlineActionBar.getContext());
             int iconId = Utils.getResourceIdentifier("ic_vector_incoming", "drawable");
             if (iconId != 0) {
                 downloadBtn.setImageResource(iconId);
-                android.util.Log.e(TAG, "icon loaded: " + iconId);
-            } else {
-                android.util.Log.e(TAG, "icon NOT found!");
             }
             downloadBtn.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
             downloadBtn.setClickable(true);
             downloadBtn.setFocusable(true);
             downloadBtn.setId(View.generateViewId());
 
-            // Match icon tint from existing action button icons
-            ColorStateList tint = null;
+            // 6. Match icon tint — read mIconDrawableColorStateList from a child
+            //    InlineActionView, then apply it to our drawable via setTintList()
+            ColorStateList iconColor = null;
             for (int i = 0; i < inlineActionBar.getChildCount(); i++) {
                 View child = inlineActionBar.getChildAt(i);
-                android.util.Log.e(TAG, "child[" + i + "]: " + child.getClass().getSimpleName()
-                        + " visible=" + (child.getVisibility() == View.VISIBLE)
-                        + " w=" + child.getWidth() + " h=" + child.getHeight());
-                try {
-                    ImageView existingIcon = (ImageView) child.getClass()
-                            .getMethod("getIconView").invoke(child);
-                    if (existingIcon != null) {
-                        ColorStateList childTint = existingIcon.getImageTintList();
-                        int currentColor = existingIcon.getImageTintList() != null
-                                ? existingIcon.getImageTintList().getDefaultColor() : -1;
-                        android.util.Log.e(TAG, "  iconView tintList=" + childTint
-                                + " defaultColor=0x" + Integer.toHexString(currentColor)
-                                + " drawable=" + existingIcon.getDrawable());
-                        if (childTint != null && tint == null) {
-                            tint = childTint;
-                        }
-                    }
-                } catch (Exception e) {
-                    android.util.Log.e(TAG, "  getIconView failed: " + e.getMessage());
-                }
+                iconColor = getIconColorFromChild(child);
+                if (iconColor != null) break;
             }
 
-            if (tint != null) {
-                downloadBtn.setImageTintList(tint);
-                android.util.Log.e(TAG, "applied tint: defaultColor=0x"
-                        + Integer.toHexString(tint.getDefaultColor()));
+            if (iconColor != null) {
+                Drawable drawable = downloadBtn.getDrawable();
+                if (drawable != null) {
+                    drawable = drawable.mutate();
+                    drawable.setTintList(iconColor);
+                    downloadBtn.setImageDrawable(drawable);
+                }
+                android.util.Log.e(TAG, "tint applied via drawable.setTintList: 0x"
+                        + Integer.toHexString(iconColor.getDefaultColor()));
             } else {
-                // Fallback: resolve colorControlNormal from theme
-                android.util.Log.e(TAG, "no tint from children, trying theme attr");
-                TypedValue tv = new TypedValue();
-                boolean resolved = inlineActionBar.getContext().getTheme()
-                        .resolveAttribute(android.R.attr.colorControlNormal, tv, true);
-                if (resolved) {
-                    int color = inlineActionBar.getContext().getColor(tv.resourceId);
-                    downloadBtn.setImageTintList(ColorStateList.valueOf(color));
-                    android.util.Log.e(TAG, "fallback tint from colorControlNormal: 0x"
-                            + Integer.toHexString(color));
-                } else {
-                    android.util.Log.e(TAG, "colorControlNormal not resolved!");
-                }
+                android.util.Log.e(TAG, "no icon color found from any child!");
             }
 
-            // Size: match inline action button dimensions
+            // 7. Size: match inline action button dimensions
             float density = inlineActionBar.getResources().getDisplayMetrics().density;
             int touchTarget = (int) (36 * density);
             int padding = (int) (8 * density);
@@ -135,7 +145,7 @@ public class InlineDownloadButton {
             btnLp.gravity = android.view.Gravity.CENTER_VERTICAL;
             wrapper.addView(downloadBtn, btnLp);
 
-            // 6. Click handler
+            // 8. Click handler
             downloadBtn.setOnClickListener(v -> {
                 try {
                     Field tweetField = inlineActionBar.getClass()
@@ -157,14 +167,11 @@ public class InlineDownloadButton {
                 }
             });
 
-            // 7. Insert wrapper at same position with original layout params
+            // 9. Insert wrapper at same position with original layout params
             parent.addView(wrapper, index, originalLp);
-
-            android.util.Log.e(TAG, "done! wrapper added at index=" + index);
 
         } catch (Exception e) {
             android.util.Log.e(TAG, "wrap failed: " + e);
-            e.printStackTrace();
         }
     }
 }
