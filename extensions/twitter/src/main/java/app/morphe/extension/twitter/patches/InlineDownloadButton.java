@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
@@ -41,6 +42,46 @@ public class InlineDownloadButton {
      */
     public static void onFinishInflate(ViewGroup inlineActionBar) {
         inlineActionBar.post(() -> wrapWithDownloadButton(inlineActionBar));
+    }
+
+    private static boolean isFocalTweet(ViewGroup inlineActionBar) {
+        try {
+            Field field = inlineActionBar.getClass().getDeclaredField("mRenderHints");
+            field.setAccessible(true);
+            Object renderHints = field.get(inlineActionBar);
+            if (renderHints == null) return false;
+
+            Field focalField = renderHints.getClass().getDeclaredField("isFocalTweet");
+            focalField.setAccessible(true);
+            Object value = focalField.get(renderHints);
+            if (value instanceof Boolean) {
+                return (Boolean) value;
+            }
+        } catch (Exception ignored) {
+        }
+        return false;
+    }
+
+    private static int getActionCount(ViewGroup inlineActionBar) {
+        try {
+            Field field = inlineActionBar.getClass().getDeclaredField("mActionTypes");
+            field.setAccessible(true);
+            Object value = field.get(inlineActionBar);
+            if (value instanceof List) {
+                int count = ((List<?>) value).size();
+                return Math.max(1, count);
+            }
+        } catch (Exception ignored) {
+        }
+
+        int count = 0;
+        for (int i = 0; i < inlineActionBar.getChildCount(); i++) {
+            View child = inlineActionBar.getChildAt(i);
+            if (child.getVisibility() == View.VISIBLE) {
+                count++;
+            }
+        }
+        return Math.max(1, count);
     }
 
     private static View getLastVisibleChild(ViewGroup inlineActionBar) {
@@ -122,8 +163,11 @@ public class InlineDownloadButton {
             wrapper.setTag("piko_download_wrapper");
             wrapper.setGravity(Gravity.CENTER_VERTICAL);
 
+            boolean distributeEvenly = isFocalTweet(inlineActionBar);
+            int actionCount = distributeEvenly ? getActionCount(inlineActionBar) : 1;
+
             LinearLayout.LayoutParams barLp = new LinearLayout.LayoutParams(
-                    0, ViewGroup.LayoutParams.MATCH_PARENT, 1.0f);
+                    0, ViewGroup.LayoutParams.MATCH_PARENT, actionCount);
             wrapper.addView(inlineActionBar, barLp);
 
             FrameLayout downloadContainer = new FrameLayout(inlineActionBar.getContext());
@@ -164,12 +208,32 @@ public class InlineDownloadButton {
                 }
             }
 
-            LinearLayout.LayoutParams downloadLp = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            LinearLayout.LayoutParams downloadLp;
+            if (distributeEvenly) {
+                downloadLp = new LinearLayout.LayoutParams(
+                        0, ViewGroup.LayoutParams.MATCH_PARENT, 1.0f);
+            } else {
+                downloadLp = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            }
             wrapper.addView(downloadContainer, downloadLp);
 
             wrapper.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                 try {
+                    if (distributeEvenly) {
+                        int targetCount = getActionCount(inlineActionBar);
+                        if (barLp.weight != targetCount) {
+                            barLp.weight = targetCount;
+                            inlineActionBar.setLayoutParams(barLp);
+                        }
+
+                        if (downloadLp.width != 0 || downloadLp.weight != 1.0f) {
+                            downloadLp.width = 0;
+                            downloadLp.weight = 1.0f;
+                            downloadContainer.setLayoutParams(downloadLp);
+                        }
+                    }
+
                     syncButtonStyle(inlineActionBar, downloadContainer, downloadIcon);
                 } catch (Exception ignored) {
                 }
