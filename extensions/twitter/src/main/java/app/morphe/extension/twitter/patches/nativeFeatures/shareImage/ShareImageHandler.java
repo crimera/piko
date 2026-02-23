@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.twitter.entity.Tweet;
 import app.morphe.extension.twitter.utils.ViewUtils;
 
@@ -158,6 +159,7 @@ public class ShareImageHandler {
     }
 
     private static void cleanupOldFiles(Context context) {
+        if (!Pref.shareImageAutoCleanup()) return;
         try {
             long cutoff = (System.currentTimeMillis() - (24 * 60 * 60 * 1000)) / 1000;
             String selection = MediaStore.MediaColumns.DATE_ADDED + " < ?";
