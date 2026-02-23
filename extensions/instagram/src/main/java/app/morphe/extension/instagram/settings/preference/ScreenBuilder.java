@@ -73,6 +73,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.removeBuildExpirePopup) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.REMOVE_BUILD_EXPIRE_POPUP,
+                            Strings.REMOVE_BUILD_EXPIRE_POPUP_DESC,
+                            Settings.REMOVE_BUILD_EXPIRE_POPUP
+                    )
+            );
+        }
     }
 
     public void linksSection(){
