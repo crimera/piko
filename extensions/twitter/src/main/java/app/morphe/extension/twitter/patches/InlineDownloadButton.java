@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import java.lang.reflect.Field;
-import java.util.List;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
@@ -44,14 +43,22 @@ public class InlineDownloadButton {
         inlineActionBar.post(() -> wrapWithDownloadButton(inlineActionBar));
     }
 
+    private static String getRenderHintsFieldName() {
+        return "mRenderHints";
+    }
+
+    private static String getRenderHintsFocalFieldName() {
+        return "isFocalTweet";
+    }
+
     private static boolean isFocalTweet(ViewGroup inlineActionBar) {
         try {
-            Field field = inlineActionBar.getClass().getDeclaredField("mRenderHints");
+            Field field = inlineActionBar.getClass().getDeclaredField(getRenderHintsFieldName());
             field.setAccessible(true);
             Object renderHints = field.get(inlineActionBar);
             if (renderHints == null) return false;
 
-            Field focalField = renderHints.getClass().getDeclaredField("isFocalTweet");
+            Field focalField = renderHints.getClass().getDeclaredField(getRenderHintsFocalFieldName());
             focalField.setAccessible(true);
             Object value = focalField.get(renderHints);
             if (value instanceof Boolean) {
@@ -63,17 +70,6 @@ public class InlineDownloadButton {
     }
 
     private static int getActionCount(ViewGroup inlineActionBar) {
-        try {
-            Field field = inlineActionBar.getClass().getDeclaredField("mActionTypes");
-            field.setAccessible(true);
-            Object value = field.get(inlineActionBar);
-            if (value instanceof List) {
-                int count = ((List<?>) value).size();
-                return Math.max(1, count);
-            }
-        } catch (Exception ignored) {
-        }
-
         int count = 0;
         for (int i = 0; i < inlineActionBar.getChildCount(); i++) {
             View child = inlineActionBar.getChildAt(i);

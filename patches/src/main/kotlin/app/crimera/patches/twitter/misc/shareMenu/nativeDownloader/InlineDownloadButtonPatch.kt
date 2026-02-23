@@ -10,9 +10,12 @@ import app.crimera.utils.getReference
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 /**
  * Fingerprint that directly matches onFinishInflate() in InlineActionBar.
@@ -53,6 +56,17 @@ private object InlineDownloadTweetFieldFingerprint : Fingerprint(
 private object InlineDownloadIconColorFieldFingerprint : Fingerprint(
     strings = listOf("mIconDrawableColorStateList"),
 )
+
+/** Placeholder in extension: getRenderHintsFieldName() returns "mRenderHints" */
+private object InlineDownloadRenderHintsFieldFingerprint : Fingerprint(
+    strings = listOf("mRenderHints"),
+)
+
+/** Placeholder in extension: getRenderHintsFocalFieldName() returns "isFocalTweet" */
+private object InlineDownloadRenderHintsFocalFieldFingerprint : Fingerprint(
+    strings = listOf("isFocalTweet"),
+)
+
 
 @Suppress("unused")
 val inlineDownloadButtonPatch = bytecodePatch(
@@ -97,6 +111,47 @@ val inlineDownloadButtonPatch = bytecodePatch(
         }
         val iconColorFieldName = InlineActionViewConstructorFingerprint.getFieldName(colorFieldIndex)
         InlineDownloadIconColorFieldFingerprint.changeFirstString(iconColorFieldName)
+
+        // --- Step 4: Resolve obfuscated mRenderHints field name ---
+        val inlineActionBarClass = classDefByOrNull("Lcom/twitter/ui/tweet/inlineactions/InlineActionBar;")
+            ?: throw PatchException("InlineActionBar class not found")
+
+        val renderHintsField = inlineActionBarClass.fields.firstOrNull { field ->
+            if (!field.type.startsWith("Lcom/twitter/ui/tweet/inlineactions/")) return@firstOrNull false
+            val candidateClass = classDefByOrNull(field.type) ?: return@firstOrNull false
+            val hasConstructor = candidateClass.methods.any { method ->
+                method.name == "<init>" && method.parameterTypes.size == 6 &&
+                    method.parameterTypes.all { it == "Z" }
+            }
+            val booleanFieldCount = candidateClass.fields.count { it.type == "Z" }
+            hasConstructor && booleanFieldCount >= 6
+        } ?: throw PatchException("RenderHints field not found on InlineActionBar")
+
+        val renderHintsFieldName = renderHintsField.name
+        val renderHintsType = renderHintsField.type
+        InlineDownloadRenderHintsFieldFingerprint.changeFirstString(renderHintsFieldName)
+
+        // --- Step 5: Resolve obfuscated RenderHints.isFocalTweet field name ---
+        val renderHintsClass = classDefByOrNull(renderHintsType)
+            ?: throw PatchException("RenderHints class not found: $renderHintsType")
+
+        val constructor = renderHintsClass.methods.firstOrNull { method ->
+            method.name == "<init>" && method.parameterTypes.size == 6 &&
+                method.parameterTypes.all { it == "Z" }
+        } ?: throw PatchException("RenderHints constructor not found")
+
+        val iputBooleanIndexes = constructor.implementation?.instructions
+            ?.withIndex()
+            ?.filter { it.value.opcode == Opcode.IPUT_BOOLEAN }
+            ?: emptyList()
+
+        if (iputBooleanIndexes.size < 5) {
+            throw PatchException("RenderHints constructor missing boolean field writes")
+        }
+
+        val focalFieldIndex = iputBooleanIndexes[4].index
+        val focalFieldRef = (constructor.implementation!!.instructions.elementAt(focalFieldIndex) as ReferenceInstruction).reference as FieldReference
+        InlineDownloadRenderHintsFocalFieldFingerprint.changeFirstString(focalFieldRef.name)
 
         SettingsStatusLoadFingerprint.enableSettings("inlineDownloadButton")
     }
