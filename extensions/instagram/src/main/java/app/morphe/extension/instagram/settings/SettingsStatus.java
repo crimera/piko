@@ -23,6 +23,14 @@ public class SettingsStatus {
         return (disableAds || hideSuggestedContent);
     }
 
+    public static boolean openLinksExternally = false;
+    public static void openLinksExternally() {
+        openLinksExternally = true;
+    }
+    public static boolean linksSection() {
+        return openLinksExternally;
+    }
+
     public static void load() {
     }
 }

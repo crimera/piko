@@ -10,9 +10,10 @@ object Constants {
     const val PREF_CALL_DESCRIPTOR = "invoke-static {}, $PREF_DESCRIPTOR"
 
     const val PATCHES_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/patches"
-    const val BLOCK_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Block"
-    const val JSONPARSER_CHECK_DESCRIPTOR = """invoke-static {v%s}, $BLOCK_DESCRIPTOR;->replaceJsonParserKey(Ljava/lang/String;)Ljava/lang/String;
+    const val JSONPARSER_CHECK_DESCRIPTOR = """invoke-static {v%s}, $PATCHES_DESCRIPTOR/Block;->replaceJsonParserKey(Ljava/lang/String;)Ljava/lang/String;
         move-result-object v%s"""
+
+    const val LINKS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Links;"
 
     const val ACTIVITY_SETTINGS_STATUS_CLASS = "$ACTIVITY_SETTINGS_CLASS/SettingsStatus;"
     const val SSTS_DESCRIPTOR = "invoke-static {}, $ACTIVITY_SETTINGS_STATUS_CLASS->%s()V"

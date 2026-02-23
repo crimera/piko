@@ -12,4 +12,8 @@ public class Strings{
     public static final String CATEGORY_DEV_OPTIONS = "Developer options";
     public static final String ENABLE_DEV_OPTIONS = "Enable developer options";
 
+    public static final String CATEGORY_LINKS = "Links";
+    public static final String OPEN_LINKS_EXTERNALLY = "Open links externally";
+    public static final String OPEN_LINKS_EXTERNALLY_DESC = "Open links in external browser instead of in-app browser";
+
 }

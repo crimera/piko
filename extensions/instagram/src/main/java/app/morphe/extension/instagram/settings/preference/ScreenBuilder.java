@@ -74,5 +74,20 @@ public class ScreenBuilder {
             );
         }
     }
+
+    public void linksSection(){
+        if (!(SettingsStatus.linksSection())) return;
+
+        PreferenceCategory category = category = addCategory(Strings.CATEGORY_LINKS);
+        if (SettingsStatus.openLinksExternally) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.OPEN_LINKS_EXTERNALLY,
+                            Strings.OPEN_LINKS_EXTERNALLY_DESC,
+                            Settings.OPEN_LINKS_EXTERNALLY
+                    )
+            );
+        }
+    }
     //end
 }

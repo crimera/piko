@@ -30,6 +30,7 @@ public class SettingsFragment extends PreferenceFragment {
         ScreenBuilder screenBuilder = new ScreenBuilder(context, screen, helper);
 
         screenBuilder.buildAdsSection();
+        screenBuilder.linksSection();
         screenBuilder.buildDeveloperSection();
 
         setPreferenceScreen(screen);
