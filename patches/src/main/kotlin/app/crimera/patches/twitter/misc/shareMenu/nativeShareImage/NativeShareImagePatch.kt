@@ -8,7 +8,7 @@ import app.morphe.patcher.patch.bytecodePatch
 @Suppress("unused")
 val nativeShareImagePatch =
     bytecodePatch(
-        name = "Share as Image",
+        name = "Share Tweet as Image",
         description = "Share tweets as rendered image. Requires X 11.0.0-release.0 or higher.",
     ) {
         compatibleWith("com.twitter.android")
