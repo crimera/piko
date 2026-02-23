@@ -5,8 +5,12 @@ public class SettingsStatus {
     public static void enableDeveloperOptions() {
         enableDeveloperOptions = true;
     }
+    public static boolean removeBuildExpirePopup = false;
+    public static void removeBuildExpirePopup() {
+        removeBuildExpirePopup = true;
+    }
     public static boolean developerOptionsSection() {
-        return enableDeveloperOptions;
+        return (enableDeveloperOptions || removeBuildExpirePopup);
     }
 
     //Ads Section
