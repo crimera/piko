@@ -83,25 +83,55 @@ public class InlineDownloadButton {
             downloadBtn.setFocusable(true);
             downloadBtn.setId(View.generateViewId());
 
-            // 6. Match icon tint from InlineActionView's mIconDrawableColorStateList
-            //    Field name resolved at patch time via fingerprint
+            // 6. Match icon tint, size, and layout from an existing InlineActionView
             String colorFieldName = getIconColorFieldName();
             ColorStateList iconColor = null;
+            int childWidth = 0;
+            int childHeight = 0;
+            int iconPadding = 0;
+            ImageView.ScaleType scaleType = ImageView.ScaleType.CENTER_INSIDE;
+
             for (int i = 0; i < inlineActionBar.getChildCount(); i++) {
                 View child = inlineActionBar.getChildAt(i);
-                try {
-                    Field f = child.getClass().getDeclaredField(colorFieldName);
-                    f.setAccessible(true);
-                    iconColor = (ColorStateList) f.get(child);
-                    if (iconColor != null) break;
-                } catch (NoSuchFieldException ignored) {
-                } catch (Exception e) {
-                    android.util.Log.e(TAG, "tint field access error: " + e);
+                if (child.getVisibility() == View.VISIBLE && child.getWidth() > 0) {
+                    if (childWidth == 0) {
+                        childWidth = child.getWidth();
+                        childHeight = child.getHeight();
+                        // Try to find the internal ImageView to copy its padding/scale
+                        if (child instanceof ViewGroup) {
+                            ViewGroup vg = (ViewGroup) child;
+                            for (int j = 0; j < vg.getChildCount(); j++) {
+                                View c2 = vg.getChildAt(j);
+                                if (c2 instanceof ImageView && c2.getVisibility() == View.VISIBLE) {
+                                    iconPadding = c2.getPaddingLeft(); // Assume symmetric
+                                    scaleType = ((ImageView) c2).getScaleType();
+                                    break;
+                                } else if (c2 instanceof ViewGroup) {
+                                    ViewGroup vgg = (ViewGroup) c2;
+                                    for (int k = 0; k < vgg.getChildCount(); k++) {
+                                        View c3 = vgg.getChildAt(k);
+                                        if (c3 instanceof ImageView && c3.getVisibility() == View.VISIBLE) {
+                                            iconPadding = c3.getPaddingLeft();
+                                            scaleType = ((ImageView) c3).getScaleType();
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (iconColor == null) {
+                        try {
+                            Field f = child.getClass().getDeclaredField(colorFieldName);
+                            f.setAccessible(true);
+                            iconColor = (ColorStateList) f.get(child);
+                        } catch (Exception ignored) {}
+                    }
                 }
             }
 
             if (iconColor != null) {
-                // Apply tint the same way InlineActionView does: via Drawable.setTintList()
                 Drawable drawable = downloadBtn.getDrawable();
                 if (drawable != null) {
                     drawable = drawable.mutate();
@@ -110,14 +140,16 @@ public class InlineDownloadButton {
                 }
             }
 
-            // 7. Size: match inline action button dimensions
+            // 7. Dynamic sizing based on the measured sibling
             float density = inlineActionBar.getResources().getDisplayMetrics().density;
-            int touchTarget = (int) (36 * density);
-            int padding = (int) (8 * density);
+            int touchTargetW = childWidth > 0 ? childWidth : (int) (48 * density);
+            int touchTargetH = childHeight > 0 ? childHeight : ViewGroup.LayoutParams.MATCH_PARENT;
+            int padding = iconPadding > 0 ? iconPadding : (int) (12 * density); // Fallback to 12dp
+
+            downloadBtn.setScaleType(scaleType);
             downloadBtn.setPadding(padding, padding, padding, padding);
 
-            LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(
-                    touchTarget, ViewGroup.LayoutParams.MATCH_PARENT);
+            LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(touchTargetW, touchTargetH);
             btnLp.gravity = android.view.Gravity.CENTER_VERTICAL;
             wrapper.addView(downloadBtn, btnLp);
 
