@@ -140,18 +140,71 @@ public class InlineDownloadButton {
                 }
             }
 
-            // 7. Dynamic sizing based on the measured sibling
-            float density = inlineActionBar.getResources().getDisplayMetrics().density;
-            int touchTargetW = childWidth > 0 ? childWidth : (int) (48 * density);
-            int touchTargetH = childHeight > 0 ? childHeight : ViewGroup.LayoutParams.MATCH_PARENT;
-            int padding = iconPadding > 0 ? iconPadding : (int) (12 * density); // Fallback to 12dp
+            // 7. Sync layout dynamically with the InlineActionBar's last icon
+            // InlineActionBar does custom measuring and distributes width evenly.
+            // To be pixel-perfect, we need to match the size and spacing of its last child
+            // exactly whenever it lays out.
 
-            downloadBtn.setScaleType(scaleType);
-            downloadBtn.setPadding(padding, padding, padding, padding);
+            downloadBtn.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            wrapper.addView(downloadBtn, new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-            LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(touchTargetW, touchTargetH);
-            btnLp.gravity = android.view.Gravity.CENTER_VERTICAL;
-            wrapper.addView(downloadBtn, btnLp);
+            wrapper.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                try {
+                    View lastVisibleChild = null;
+                    for (int i = inlineActionBar.getChildCount() - 1; i >= 0; i--) {
+                        View child = inlineActionBar.getChildAt(i);
+                        if (child.getVisibility() == View.VISIBLE && child.getWidth() > 0) {
+                            lastVisibleChild = child;
+                            break;
+                        }
+                    }
+
+                    if (lastVisibleChild != null) {
+                        ViewGroup.LayoutParams btnLp = downloadBtn.getLayoutParams();
+                        boolean changed = false;
+
+                        // Match width of the native button exactly
+                        if (btnLp.width != lastVisibleChild.getWidth()) {
+                            btnLp.width = lastVisibleChild.getWidth();
+                            changed = true;
+                        }
+
+                        // Extract internal ImageView to match padding/scaling exactly
+                        if (lastVisibleChild instanceof ViewGroup) {
+                            ViewGroup vg = (ViewGroup) lastVisibleChild;
+                            for (int j = 0; j < vg.getChildCount(); j++) {
+                                View c2 = vg.getChildAt(j);
+                                if (c2 instanceof ImageView && c2.getVisibility() == View.VISIBLE) {
+                                    if (downloadBtn.getPaddingLeft() != c2.getPaddingLeft()) {
+                                        int p = c2.getPaddingLeft();
+                                        downloadBtn.setPadding(p, p, p, p);
+                                        downloadBtn.setScaleType(((ImageView) c2).getScaleType());
+                                    }
+                                    break;
+                                } else if (c2 instanceof ViewGroup) {
+                                    ViewGroup vgg = (ViewGroup) c2;
+                                    for (int k = 0; k < vgg.getChildCount(); k++) {
+                                        View c3 = vgg.getChildAt(k);
+                                        if (c3 instanceof ImageView && c3.getVisibility() == View.VISIBLE) {
+                                            if (downloadBtn.getPaddingLeft() != c3.getPaddingLeft()) {
+                                                int p = c3.getPaddingLeft();
+                                                downloadBtn.setPadding(p, p, p, p);
+                                                downloadBtn.setScaleType(((ImageView) c3).getScaleType());
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (changed) {
+                            downloadBtn.setLayoutParams(btnLp);
+                        }
+                    }
+                } catch (Exception ignored) {}
+            });
 
             // 8. Click handler
             downloadBtn.setOnClickListener(v -> {
