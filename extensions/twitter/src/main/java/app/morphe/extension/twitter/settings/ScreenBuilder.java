@@ -352,9 +352,9 @@ public class ScreenBuilder {
 
         }
 
-        category = preferenceCategory(strRes("piko_share_image_title"));
-
         if (SettingsStatus.shareImage) {
+					  category = preferenceCategory(strRes("piko_share_image_title"));
+
             addPreference(category,
                     helper.switchPreference(
                             strRes("piko_share_image_toggle"),
