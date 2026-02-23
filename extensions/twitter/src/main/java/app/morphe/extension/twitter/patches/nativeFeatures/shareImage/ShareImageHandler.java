@@ -25,13 +25,17 @@ import app.morphe.extension.twitter.entity.Tweet;
 import app.morphe.extension.twitter.utils.ViewUtils;
 
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ShareImageHandler {
 
     private static final String ID_INLINE_ACTIONS = "tweet_inline_actions";
     private static final String ID_STATS_CONTAINER = "stats_container";
     private static final String ID_OUTER_ROW = "outer_layout_row_view_tweet";
+    private static final String[] CROP_ANCHORS = new String[]{ID_INLINE_ACTIONS, ID_STATS_CONTAINER};
+    private static final Map<String, Integer> RESOURCE_IDS = new HashMap<>();
 
     public static void shareAsImage(Context context, Object tweetObj) {
         if (!(context instanceof Activity)) {
@@ -51,19 +55,27 @@ public class ShareImageHandler {
             
             View rootView = activity.getWindow().getDecorView().getRootView();
             View tweetView = searchViewTree(rootView, tweet.getTweetId(), 0);
+            if (tweetView == null) {
+                Utils.toast("Tweet view not found");
+                return;
+            }
             CaptureTarget target = resolveCaptureTarget(activity, rootView, tweetView);
 
-            if (target == null) target = new CaptureTarget(rootView, null);
+            if (target == null) target = new CaptureTarget(tweetView, null);
 
-            Utils.logger(String.format("Capture: Tweet %d | Density %.1f", 
-                tweet.getTweetId(), activity.getResources().getDisplayMetrics().density));
-            Utils.logger("Target: " + target.view.getClass().getSimpleName() + " " + target.view.getWidth() + "x" + target.view.getHeight());
-            
-            if (target.clipRect != null) {
-                Utils.logger("Clip: " + target.clipRect.toShortString());
+            if (ViewUtils.DEBUG) {
+                Utils.logger(String.format("Capture: Tweet %d | Density %.1f", 
+                    tweet.getTweetId(), activity.getResources().getDisplayMetrics().density));
+                Utils.logger("Target: " + target.view.getClass().getSimpleName() + " " + target.view.getWidth() + "x" + target.view.getHeight());
+                
+                if (target.clipRect != null) {
+                    Utils.logger("Clip: " + target.clipRect.toShortString());
+                }
             }
             
-            dumpViewTree(activity, target.view, 0);
+            if (ViewUtils.DEBUG) {
+                dumpViewTree(activity, target.view, 0);
+            }
 
             Bitmap bitmap = null;
             try {
@@ -134,7 +146,7 @@ public class ShareImageHandler {
             
             // Grant URI permission to all resolved activities
             PackageManager pm = activity.getPackageManager();
-            List<ResolveInfo> resInfoList = pm.queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY);
+            List<ResolveInfo> resInfoList = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
             for (ResolveInfo resolveInfo : resInfoList) {
                 activity.grantUriPermission(resolveInfo.activityInfo.packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
@@ -154,6 +166,9 @@ public class ShareImageHandler {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 selection += " AND " + MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ?";
                 args = new String[]{String.valueOf(cutoff), "Pictures/Piko/%"};
+            } else {
+                selection += " AND " + MediaStore.MediaColumns.DATA + " LIKE ?";
+                args = new String[]{String.valueOf(cutoff), "%/Pictures/Piko/%"};
             }
             context.getContentResolver().delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection, args);
         } catch (Exception ignored) {}
@@ -203,13 +218,15 @@ public class ShareImageHandler {
         int h = target.getHeight();
 
         // 1. Anchor-based cropping (Priority)
-        for (String name : new String[]{ID_INLINE_ACTIONS, ID_STATS_CONTAINER}) {
+        for (String name : CROP_ANCHORS) {
             View anchor = findViewById(target, name);
             if (anchor == null || anchor.getVisibility() != View.VISIBLE) continue;
             
             int crop = getRelativeBottom(anchor, target) - dp(activity, 1);
             if (crop > 0 && crop < h) {
-                Utils.logger("Cropped at #" + name);
+                if (ViewUtils.DEBUG) {
+                    Utils.logger("Cropped at #" + name);
+                }
                 return crop;
             }
         }
@@ -224,15 +241,25 @@ public class ShareImageHandler {
             if (v.getVisibility() != View.VISIBLE) continue;
             if (v.getHeight() <= dp(activity, 4) && v.getBottom() >= bot - dp(activity, 1)) {
                 bot = v.getTop();
-                Utils.logger("Removed slop: " + v.getClass().getSimpleName());
+                if (ViewUtils.DEBUG) {
+                    Utils.logger("Removed slop: " + v.getClass().getSimpleName());
+                }
             } else break;
         }
         return bot;
     }
 
     private static View findViewById(View root, String name) {
-        int id = app.morphe.extension.shared.Utils.getResourceIdentifier(name, "id");
+        int id = getId(name);
         return id != 0 ? root.findViewById(id) : null;
+    }
+
+    private static int getId(String name) {
+        Integer cached = RESOURCE_IDS.get(name);
+        if (cached != null) return cached;
+        int id = app.morphe.extension.shared.Utils.getResourceIdentifier(name, "id");
+        RESOURCE_IDS.put(name, id);
+        return id;
     }
 
     private static int getRelativeBottom(View child, View parent) {
@@ -254,7 +281,7 @@ public class ShareImageHandler {
     }
 
     private static View findTweetRowContainer(Activity activity, View view) {
-        int rowId = app.morphe.extension.shared.Utils.getResourceIdentifier(ID_OUTER_ROW, "id");
+        int rowId = getId(ID_OUTER_ROW);
         View ancestor = rowId != 0 ? findAncestorById(view, rowId) : null;
         return ancestor != null ? ancestor : findAncestorByTweetView(view);
     }
@@ -294,8 +321,8 @@ public class ShareImageHandler {
         int targetIdx = indexOfChild(container, itemRoot);
         if (targetIdx < 0) return null;
 
-        int topId = app.morphe.extension.shared.Utils.getResourceIdentifier("tweet_connector_top", "id");
-        int botId = app.morphe.extension.shared.Utils.getResourceIdentifier("tweet_connector_bottom", "id");
+        int topId = getId("tweet_connector_top");
+        int botId = getId("tweet_connector_bottom");
 
         int startIdx = targetIdx;
         while (startIdx > 0 && isTweetItem(container.getChildAt(startIdx - 1)) && (hasVisible(container.getChildAt(startIdx), topId) || hasVisible(container.getChildAt(startIdx - 1), botId))) {

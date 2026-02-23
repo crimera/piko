@@ -13,6 +13,7 @@ import java.io.OutputStream;
 
 public class ViewUtils {
 
+    public static final boolean DEBUG = false;
     private static final int MAX_PIXELS = 40_000_000; // ~40MP safety limit
 
     public static Bitmap viewToBitmap(View view) {
@@ -42,11 +43,15 @@ public class ViewUtils {
             scale = (float) Math.sqrt((double) MAX_PIXELS / ((long) width * height));
             width = Math.round(width * scale);
             height = Math.round(height * scale);
-            Utils.logger("Scaling down bitmap to " + width + "x" + height + " (scale: " + scale + ")");
+            if (DEBUG) {
+                Utils.logger("Scaling down bitmap to " + width + "x" + height + " (scale: " + scale + ")");
+            }
         }
 
-        Utils.logger(String.format("Rendering bitmap: %dx%d%s", 
-            width, height, clipRect != null ? " (clipping applied)" : ""));
+        if (DEBUG) {
+            Utils.logger(String.format("Rendering bitmap: %dx%d%s", 
+                width, height, clipRect != null ? " (clipping applied)" : ""));
+        }
         
         Bitmap bitmap = null;
         try {

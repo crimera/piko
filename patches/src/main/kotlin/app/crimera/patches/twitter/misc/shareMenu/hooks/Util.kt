@@ -42,31 +42,40 @@ fun shareMenuButtonInjection(
     setButtonText(actionName, stringId)
     setButtonIcon(actionName, iconId)
 
-    // TODO: handle possible nulls
     val buttonFuncMethod =
         shareMenuButtonFuncCallFingerprint.method
             .implementation
             ?.instructions
             ?.toList()
-    val deleteStatusLoc = shareMenuButtonFuncCallFingerprint.stringMatches?.first { it.string == "Delete Status" }?.index!!
-    val OkLoc = shareMenuButtonFuncCallFingerprint.stringMatches?.first { it.string == "OK" }?.index!!
+            ?: throw PatchException("Failed to resolve share menu instructions")
+    val deleteStatusLoc =
+        shareMenuButtonFuncCallFingerprint.stringMatches
+            ?.firstOrNull { it.string == "Delete Status" }
+            ?.index
+            ?: throw PatchException("Failed to find Delete Status string")
+    val okLoc =
+        shareMenuButtonFuncCallFingerprint.stringMatches
+            ?.firstOrNull { it.string == "OK" }
+            ?.index
+            ?: throw PatchException("Failed to find OK string")
     val conversationalRepliesLoc =
         shareMenuButtonFuncCallFingerprint.stringMatches
-            ?.first {
+            ?.firstOrNull {
                 it.string ==
                     "conversational_replies_android_pinned_replies_creation_enabled"
             }?.index
+            ?: throw PatchException("Failed to find conversational replies string")
 
     val timelineRef =
         (
             buttonFuncMethod
-                ?.filterIndexed { i, ins ->
-                    i > conversationalRepliesLoc!! && ins.opcode == Opcode.IGET_OBJECT
-                }?.first() as Instruction22c?
+                .filterIndexed { i, ins ->
+                    i > conversationalRepliesLoc && ins.opcode == Opcode.IGET_OBJECT
+                }.firstOrNull() as Instruction22c?
         ) ?: throw PatchException("Failed to find timelineRef")
-    val timelineRefReg = (buttonFuncMethod?.get(deleteStatusLoc - 1) as Instruction35c).registerD
+    val timelineRefReg = (buttonFuncMethod[deleteStatusLoc - 1] as Instruction35c).registerD
 
-    val activityRefReg = (buttonFuncMethod[OkLoc - 3] as Instruction35c).registerD
+    val activityRefReg = (buttonFuncMethod[okLoc - 3] as Instruction35c).registerD
 
     // Add Button function
     addButtonInstructions(
