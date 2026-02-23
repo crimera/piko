@@ -2,8 +2,10 @@ package app.morphe.extension.twitter.patches;
 
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -41,6 +43,62 @@ public class InlineDownloadButton {
         inlineActionBar.post(() -> wrapWithDownloadButton(inlineActionBar));
     }
 
+    private static View getLastVisibleChild(ViewGroup inlineActionBar) {
+        for (int i = inlineActionBar.getChildCount() - 1; i >= 0; i--) {
+            View child = inlineActionBar.getChildAt(i);
+            if (child.getVisibility() == View.VISIBLE && child.getWidth() > 0) {
+                return child;
+            }
+        }
+        return null;
+    }
+
+    private static void syncButtonStyle(ViewGroup inlineActionBar, FrameLayout downloadContainer, ImageView downloadIcon) {
+        View lastVisibleChild = getLastVisibleChild(inlineActionBar);
+        if (!(lastVisibleChild instanceof ViewGroup)) return;
+
+        ViewGroup referenceGroup = (ViewGroup) lastVisibleChild;
+        for (int i = 0; i < referenceGroup.getChildCount(); i++) {
+            View child = referenceGroup.getChildAt(i);
+            if (child instanceof ViewGroup) {
+                ViewGroup container = (ViewGroup) child;
+                for (int j = 0; j < container.getChildCount(); j++) {
+                    View iconChild = container.getChildAt(j);
+                    if (iconChild instanceof ImageView && iconChild.getVisibility() == View.VISIBLE) {
+                        applyIconContainerStyle(container, (ImageView) iconChild, downloadContainer, downloadIcon);
+                        return;
+                    } else if (iconChild instanceof ViewGroup) {
+                        ViewGroup nested = (ViewGroup) iconChild;
+                        for (int k = 0; k < nested.getChildCount(); k++) {
+                            View nestedIcon = nested.getChildAt(k);
+                            if (nestedIcon instanceof ImageView && nestedIcon.getVisibility() == View.VISIBLE) {
+                                applyIconContainerStyle(container, (ImageView) nestedIcon, downloadContainer, downloadIcon);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static void applyIconContainerStyle(ViewGroup referenceContainer, ImageView referenceIcon,
+                                                FrameLayout downloadContainer, ImageView downloadIcon) {
+        downloadContainer.setPadding(
+                referenceContainer.getPaddingLeft(),
+                referenceContainer.getPaddingTop(),
+                referenceContainer.getPaddingRight(),
+                referenceContainer.getPaddingBottom());
+        downloadIcon.setScaleType(referenceIcon.getScaleType());
+
+        ViewGroup.LayoutParams iconLp = referenceIcon.getLayoutParams();
+        FrameLayout.LayoutParams downloadIconLp = new FrameLayout.LayoutParams(
+                iconLp != null ? iconLp.width : ViewGroup.LayoutParams.WRAP_CONTENT,
+                iconLp != null ? iconLp.height : ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER);
+        downloadIcon.setLayoutParams(downloadIconLp);
+    }
+
     private static void wrapWithDownloadButton(ViewGroup inlineActionBar) {
         // Don't wrap twice (RecyclerView recycling)
         if (inlineActionBar.getParent() instanceof LinearLayout) {
@@ -54,163 +112,70 @@ public class InlineDownloadButton {
         if (parent == null) return;
 
         try {
-            // 1. Remember position and layout params
             int index = parent.indexOfChild(inlineActionBar);
             ViewGroup.LayoutParams originalLp = inlineActionBar.getLayoutParams();
 
-            // 2. Remove InlineActionBar from parent
             parent.removeView(inlineActionBar);
 
-            // 3. Create horizontal wrapper
             LinearLayout wrapper = new LinearLayout(inlineActionBar.getContext());
             wrapper.setOrientation(LinearLayout.HORIZONTAL);
             wrapper.setTag("piko_download_wrapper");
-            wrapper.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            wrapper.setGravity(Gravity.CENTER_VERTICAL);
 
-            // 4. Add InlineActionBar back — it keeps its original behavior
             LinearLayout.LayoutParams barLp = new LinearLayout.LayoutParams(
                     0, ViewGroup.LayoutParams.MATCH_PARENT, 1.0f);
             wrapper.addView(inlineActionBar, barLp);
 
-            // 5. Create download button
-            ImageView downloadBtn = new ImageView(inlineActionBar.getContext());
+            FrameLayout downloadContainer = new FrameLayout(inlineActionBar.getContext());
+            ImageView downloadIcon = new ImageView(inlineActionBar.getContext());
             int iconId = Utils.getResourceIdentifier("ic_vector_incoming", "drawable");
             if (iconId != 0) {
-                downloadBtn.setImageResource(iconId);
+                downloadIcon.setImageResource(iconId);
             }
-            downloadBtn.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            downloadBtn.setClickable(true);
-            downloadBtn.setFocusable(true);
-            downloadBtn.setId(View.generateViewId());
+            downloadIcon.setScaleType(ImageView.ScaleType.CENTER);
+            downloadContainer.addView(downloadIcon, new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+            downloadContainer.setClickable(true);
+            downloadContainer.setFocusable(true);
+            downloadContainer.setId(View.generateViewId());
 
-            // 6. Match icon tint, size, and layout from an existing InlineActionView
             String colorFieldName = getIconColorFieldName();
             ColorStateList iconColor = null;
-            int childWidth = 0;
-            int childHeight = 0;
-            int iconPadding = 0;
-            ImageView.ScaleType scaleType = ImageView.ScaleType.CENTER_INSIDE;
-
             for (int i = 0; i < inlineActionBar.getChildCount(); i++) {
                 View child = inlineActionBar.getChildAt(i);
-                if (child.getVisibility() == View.VISIBLE && child.getWidth() > 0) {
-                    if (childWidth == 0) {
-                        childWidth = child.getWidth();
-                        childHeight = child.getHeight();
-                        // Try to find the internal ImageView to copy its padding/scale
-                        if (child instanceof ViewGroup) {
-                            ViewGroup vg = (ViewGroup) child;
-                            for (int j = 0; j < vg.getChildCount(); j++) {
-                                View c2 = vg.getChildAt(j);
-                                if (c2 instanceof ImageView && c2.getVisibility() == View.VISIBLE) {
-                                    iconPadding = c2.getPaddingLeft(); // Assume symmetric
-                                    scaleType = ((ImageView) c2).getScaleType();
-                                    break;
-                                } else if (c2 instanceof ViewGroup) {
-                                    ViewGroup vgg = (ViewGroup) c2;
-                                    for (int k = 0; k < vgg.getChildCount(); k++) {
-                                        View c3 = vgg.getChildAt(k);
-                                        if (c3 instanceof ImageView && c3.getVisibility() == View.VISIBLE) {
-                                            // The padding is actually on the FrameLayout container (c2), not the ImageView
-                                            iconPadding = c2.getPaddingLeft();
-                                            scaleType = ((ImageView) c3).getScaleType();
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (iconColor == null) {
-                        try {
-                            Field f = child.getClass().getDeclaredField(colorFieldName);
-                            f.setAccessible(true);
-                            iconColor = (ColorStateList) f.get(child);
-                        } catch (Exception ignored) {}
+                if (child.getVisibility() == View.VISIBLE && iconColor == null) {
+                    try {
+                        Field f = child.getClass().getDeclaredField(colorFieldName);
+                        f.setAccessible(true);
+                        iconColor = (ColorStateList) f.get(child);
+                    } catch (Exception ignored) {
                     }
                 }
             }
 
+            syncButtonStyle(inlineActionBar, downloadContainer, downloadIcon);
+
             if (iconColor != null) {
-                Drawable drawable = downloadBtn.getDrawable();
+                Drawable drawable = downloadIcon.getDrawable();
                 if (drawable != null) {
                     drawable = drawable.mutate();
                     drawable.setTintList(iconColor);
-                    downloadBtn.setImageDrawable(drawable);
+                    downloadIcon.setImageDrawable(drawable);
                 }
             }
 
-            // 7. Sync layout dynamically with the InlineActionBar's last icon
-            // InlineActionBar does custom measuring and distributes width evenly.
-            // To be pixel-perfect, we need to match the size and spacing of its last child
-            // exactly whenever it lays out.
-
-            downloadBtn.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            wrapper.addView(downloadBtn, new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT));
+            LinearLayout.LayoutParams downloadLp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            wrapper.addView(downloadContainer, downloadLp);
 
             wrapper.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                 try {
-                    View lastVisibleChild = null;
-                    for (int i = inlineActionBar.getChildCount() - 1; i >= 0; i--) {
-                        View child = inlineActionBar.getChildAt(i);
-                        if (child.getVisibility() == View.VISIBLE && child.getWidth() > 0) {
-                            lastVisibleChild = child;
-                            break;
-                        }
-                    }
-
-                    if (lastVisibleChild != null) {
-                        ViewGroup.LayoutParams btnLp = downloadBtn.getLayoutParams();
-                        boolean changed = false;
-
-                        // Match width of the native button exactly
-                        if (btnLp.width != lastVisibleChild.getWidth()) {
-                            btnLp.width = lastVisibleChild.getWidth();
-                            changed = true;
-                        }
-
-                        // Extract internal ImageView to match padding/scaling exactly
-                        if (lastVisibleChild instanceof ViewGroup) {
-                            ViewGroup vg = (ViewGroup) lastVisibleChild;
-                            for (int j = 0; j < vg.getChildCount(); j++) {
-                                View c2 = vg.getChildAt(j);
-                                if (c2 instanceof ImageView && c2.getVisibility() == View.VISIBLE) {
-                                    if (downloadBtn.getPaddingLeft() != c2.getPaddingLeft()) {
-                                        int p = c2.getPaddingLeft();
-                                        downloadBtn.setPadding(p, p, p, p);
-                                        downloadBtn.setScaleType(((ImageView) c2).getScaleType());
-                                        changed = true;
-                                    }
-                                    break;
-                                } else if (c2 instanceof ViewGroup) {
-                                    ViewGroup vgg = (ViewGroup) c2;
-                                    for (int k = 0; k < vgg.getChildCount(); k++) {
-                                        View c3 = vgg.getChildAt(k);
-                                        if (c3 instanceof ImageView && c3.getVisibility() == View.VISIBLE) {
-                                            if (downloadBtn.getPaddingLeft() != c2.getPaddingLeft()) {
-                                                int p = c2.getPaddingLeft();
-                                                downloadBtn.setPadding(p, p, p, p);
-                                                downloadBtn.setScaleType(((ImageView) c3).getScaleType());
-                                                changed = true;
-                                            }
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (changed) {
-                            downloadBtn.setLayoutParams(btnLp);
-                        }
-                    }
-                } catch (Exception ignored) {}
+                    syncButtonStyle(inlineActionBar, downloadContainer, downloadIcon);
+                } catch (Exception ignored) {
+                }
             });
 
-            // 8. Click handler
-            downloadBtn.setOnClickListener(v -> {
+            downloadContainer.setOnClickListener(v -> {
                 try {
                     Field tweetField = inlineActionBar.getClass()
                             .getDeclaredField(getTweetFieldName());
@@ -230,7 +195,6 @@ public class InlineDownloadButton {
                 }
             });
 
-            // 9. Insert wrapper at same position with original layout params
             parent.addView(wrapper, index, originalLp);
 
         } catch (Exception e) {
