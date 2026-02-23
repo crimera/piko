@@ -1,4 +1,4 @@
-package app.crimera.patches.twitter.premium.unlockdownloads
+package app.crimera.patches.twitter.misc.shareMenu.nativeDownloader
 
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
