@@ -77,6 +77,10 @@ public class SettingsStatus {
 
     public static boolean customFont = false;
     public static boolean customEmojiFont = false;
+    public static boolean inlineDownloadButton = false;
+    public static void inlineDownloadButton() {
+        inlineDownloadButton = true;
+    }
     public static void showChangelogsPatchEnabled() {
         showChangelogsPatchEnabled = true;
     }
