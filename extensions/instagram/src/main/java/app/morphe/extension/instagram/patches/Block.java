@@ -1,0 +1,27 @@
+package app.morphe.extension.instagram.patches;
+
+import java.util.List;
+import java.util.Arrays;
+
+import app.morphe.extension.instagram.utils.Pref;
+import app.morphe.extension.instagram.utils.Utils;
+import app.morphe.extension.instagram.constants.Strings;
+
+public class Block {
+    private static boolean DISABLE_SUGGESTED_CONTENT;
+    private static List<String> SUGGESTED_CONTENT_KEY = Arrays.asList("clips_netego","stories_netego","in_feed_survey","bloks_netego","suggested_igd_channels","suggested_top_accounts","suggested_users");
+    static {
+        DISABLE_SUGGESTED_CONTENT = Pref.hideSuggestedContent();
+    }
+
+    // Returns an invalid string, such that json parsing fails for the key.
+    public static String replaceJsonParserKey(String key){
+        boolean condition = false;
+
+        if(DISABLE_SUGGESTED_CONTENT){
+            if(SUGGESTED_CONTENT_KEY.contains(key)) condition = true;
+        }
+
+        return condition?Strings.PIKO:key;
+    }
+}

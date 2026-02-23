@@ -63,7 +63,7 @@ val settingsPatch =
 
             ExtensionsUtilsFingerprint.method.addInstruction(
                 0,
-                "$SSTS_DESCRIPTOR->load()V",
+                SSTS_DESCRIPTOR.format("load"),
             )
         }
     }
