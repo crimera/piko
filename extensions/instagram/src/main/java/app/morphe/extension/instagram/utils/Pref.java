@@ -10,6 +10,10 @@ public class Pref {
 
     public static boolean hideSuggestedContent(){return SharedPref.getBooleanPerf(Settings.HIDE_SUGGESTED_CONTENT);}
 
+    public static boolean openLinksExternally(){
+        return SharedPref.getBooleanPerf(Settings.OPEN_LINKS_EXTERNALLY);
+    }
+
     public static boolean enableDevOptions(){
         return SharedPref.getBooleanPerf(Settings.DEVELOPER_OPTIONS);
     }
