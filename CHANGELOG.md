@@ -1,3 +1,10 @@
+# [3.0.0-dev.5](https://github.com/crimera/piko/compare/v3.0.0-dev.4...v3.0.0-dev.5) (2026-02-23)
+
+
+### Features
+
+* **Twitter:** Add `Share Tweet as Image` ([e8d6321](https://github.com/crimera/piko/commit/e8d6321cbb9d22d91702dfab583255dca0b7d99c))
+
 # [3.0.0-dev.4](https://github.com/crimera/piko/compare/v3.0.0-dev.3...v3.0.0-dev.4) (2026-02-21)
 
 
