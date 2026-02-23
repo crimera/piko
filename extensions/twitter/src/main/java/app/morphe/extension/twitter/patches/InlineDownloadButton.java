@@ -222,9 +222,8 @@ public class InlineDownloadButton {
                         return;
                     }
 
-                    String info = tweet.toString();
-                    Utils.showToastShort("Download: " +
-                            info.substring(0, Math.min(80, info.length())));
+                    app.morphe.extension.twitter.patches.nativeFeatures.downloader.NativeDownloader.downloader(
+                            inlineActionBar.getContext(), tweet);
 
                 } catch (Exception e) {
                     Logger.printException(() -> "InlineDownloadButton: click error", e);
