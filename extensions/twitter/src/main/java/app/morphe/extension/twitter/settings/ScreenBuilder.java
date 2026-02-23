@@ -351,6 +351,26 @@ public class ScreenBuilder {
             );
 
         }
+
+        category = preferenceCategory(strRes("piko_share_image_title"));
+
+        if (SettingsStatus.shareImage) {
+            addPreference(category,
+                    helper.switchPreference(
+                            strRes("piko_share_image_toggle"),
+                            "",
+                            Settings.SHARE_IMAGE_ENABLED
+                    )
+            );
+
+            addPreference(category,
+                    helper.switchPreference(
+                            strRes("piko_share_image_autocleanup"),
+                            strRes("piko_share_image_autocleanup_desc"),
+                            Settings.SHARE_IMAGE_AUTOCLEANUP
+                    )
+            );
+        }
     }
 
     public void buildMiscSection(boolean buildCategory){
