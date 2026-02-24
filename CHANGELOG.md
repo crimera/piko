@@ -1,3 +1,11 @@
+# [3.0.0-dev.6](https://github.com/crimera/piko/compare/v3.0.0-dev.5...v3.0.0-dev.6) (2026-02-23)
+
+
+### Bug Fixes
+
+* **Twitter - Share Tweet as Image:** Add the patch in the about page ([00fa95e](https://github.com/crimera/piko/commit/00fa95e307e5a3130d6d216bcdc183312d6a0cc4))
+* **Twitter - Share Tweet as Image:** Category title showing up even if patch was disabled ([e03d22e](https://github.com/crimera/piko/commit/e03d22e6d229b746020d0780e4ffdab0ec5ea0a8))
+
 # [3.0.0-dev.5](https://github.com/crimera/piko/compare/v3.0.0-dev.4...v3.0.0-dev.5) (2026-02-23)
 
 

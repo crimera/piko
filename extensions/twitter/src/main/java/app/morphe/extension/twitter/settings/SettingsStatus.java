@@ -64,6 +64,7 @@ public class SettingsStatus {
     public static boolean cleartrackingparams = false;
     public static boolean unshortenlink = false;
     public static boolean deleteFromDb = false;
+    public static boolean browseObject = false;
     public static boolean nativeDownloader = false;
     public static boolean nativeTranslator = false;
     public static boolean nativeReaderMode = false;
@@ -122,6 +123,9 @@ public class SettingsStatus {
     }
     public static void shareImage() {
         shareImage = true;
+    }
+    public static void browseObject() {
+        browseObject = true;
     }
     public static void deleteFromDb() {
         deleteFromDb = true;
@@ -378,7 +382,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableNativeSection() {
-        return (nativeDownloader || nativeTranslator || nativeReaderMode || shareImage);
+        return (nativeDownloader || nativeTranslator || nativeReaderMode || shareImage || browseObject);
     }
 
     public static boolean enableDownloadSection() {

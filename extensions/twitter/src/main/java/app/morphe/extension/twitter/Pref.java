@@ -67,6 +67,10 @@ public class Pref {
         return Utils.getBooleanPerf(Settings.VID_NATIVE_DOWNLOADER);
     }
 
+    public static boolean browseObject() {
+        return Utils.getBooleanPerf(Settings.BROWSE_OBJECT);
+    }
+
     public static int natveTranslatorProvider(){
         return Integer.parseInt(Utils.getStringPref(Settings.NATIVE_TRANSLATOR_PROVIDERS));
     }
