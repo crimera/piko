@@ -1,3 +1,10 @@
+# [3.0.0-dev.7](https://github.com/crimera/piko/compare/v3.0.0-dev.6...v3.0.0-dev.7) (2026-02-24)
+
+
+### Features
+
+* Add `Browse tweet object` patch ([2e05c33](https://github.com/crimera/piko/commit/2e05c334ee32ba6075249bb873f13ba6d822d77e))
+
 # [3.0.0-dev.6](https://github.com/crimera/piko/compare/v3.0.0-dev.5...v3.0.0-dev.6) (2026-02-23)
 
 
