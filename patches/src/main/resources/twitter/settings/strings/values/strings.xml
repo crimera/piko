@@ -35,6 +35,7 @@
     <string name="piko_pref_native_downloader_download_all">Download all</string>
     <string name="piko_pref_native_downloader_no_media">No media found</string>
     <string name="piko_pref_native_downloader_filename_title">Save filename pattern</string>
+    <string name="piko_browse_object_title">Browse tweet object</string>
     <string name="piko_share_image_title">Share Tweet as Image</string>
     <string name="piko_share_image_toggle">Enable Share Tweet as Image</string>
     <string name="piko_share_image_autocleanup">Auto-cleanup captures</string>
