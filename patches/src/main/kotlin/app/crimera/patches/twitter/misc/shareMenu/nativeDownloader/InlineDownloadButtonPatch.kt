@@ -70,7 +70,7 @@ private object InlineDownloadRenderHintsFocalFieldFingerprint : Fingerprint(
 
 @Suppress("unused")
 val inlineDownloadButtonPatch = bytecodePatch(
-    name = "Inline download button",
+    description = "Adds an inline 'Download' button to the tweet inline action bar and registers the extension hook.",
 ) {
     compatibleWith("com.twitter.android")
     dependsOn(settingsPatch)
