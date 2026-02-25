@@ -2,7 +2,7 @@
 <resources>
     <string name="piko_title_premium">प्रीमियम</string>
     <string name="piko_pref_reader_mode">रीडर मोड सक्षम करें</string>
-    <string name="piko_pref_reader_mode_desc">लंबी थ्रेडों पर "रीडर म\" सक्षम करें</string>
+    <string name="piko_pref_reader_mode_desc">लंबी थ्रेडों पर \"रीडर म सक्षम करें</string>
     <string name="piko_pref_undo_posts">पोस्ट अन्डू करें</string>
     <string name="piko_pref_undo_posts_desc">पोस्ट करने से पहले पोस्ट को अन्डू करने की क्षमता सक्षम करें</string>
     <string name="piko_pref_undo_posts_btn">पोस्ट सेटिंग्स को अन्डू करें</string>
@@ -24,14 +24,14 @@
 
     <string name="piko_title_ads">विज्ञापन</string>
     <string name="piko_pref_hide_promoted_posts">प्रोमोट किए गए पोस्ट छुपाएं</string>
-    <string name="piko_pref_wtf_section">"किसे फ़ॉलो कर\" सेक्शन छुपाएं</string>
-    <string name="piko_pref_cts_section">"सब्सक्राइब करने के लिए स्था\" सेक्शन छुपाएं</string>
-    <string name="piko_pref_ctj_section">"ज्वाइन करने के लिए समुद\" सेक्शन छुपाएं</string>
-    <string name="piko_pref_ryb_section">"अपने बुकमार्क को पुनः देख\" सेक्शन छुपाएं</string>
-    <string name="piko_pref_pinned_posts_section">"अनुयायियों द्वारा टिप्पणी की गई पोस्ट\" सेक्शन छुपाएं</string>
+    <string name="piko_pref_wtf_section">\"किसे फ़ॉलो कर\" सेक्शन छुपाएं</string>
+    <string name="piko_pref_cts_section">\"सब्सक्राइब करने के लिए स्था\" सेक्शन छुपाएं</string>
+    <string name="piko_pref_ctj_section">\"ज्वाइन करने के लिए समुद\" सेक्शन छुपाएं</string>
+    <string name="piko_pref_ryb_section">\"अपने बुकमार्क को पुनः देख\" सेक्शन छुपाएं</string>
+    <string name="piko_pref_pinned_posts_section">\"अनुयायियों द्वारा टिप्पणी की गई पोस्ट\" सेक्शन छुपाएं</string>
     <string name="piko_pref_hide_detailed_posts">विस्तृत पोस्ट छुपाएं (उत्तरों में)</string>
 
-    <string name="piko_pref_hide_premium_prompt">"प्रीमियम खरीद\" अनुभाग छिपाएँ</string>
+    <string name="piko_pref_hide_premium_prompt">\"प्रीमियम खरीद\" अनुभाग छिपाएँ</string>
 
     <string name="piko_title_misc">विविध</string>
     <string name="piko_pref_chirp_font">चिरप फ़ॉन्ट सक्षम करें</string>
@@ -76,8 +76,8 @@
     <string name="piko_title_customisation">कस्टमाइज़ेशन</string>
     <string name="piko_pref_customisation_profiletabs">छुपाने के लिए प्रोफ़ाइल टैब</string>
     <string name="piko_pref_customisation_timelinetabs">टाइमलाइन टैब</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">"आपके ल\" छुपाएं</string>
-    <string name="piko_pref_customisation_timelinetabs_following">"फॉलोइ\" छुपाएं</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">\"आपके ल\" छुपाएं</string>
+    <string name="piko_pref_customisation_timelinetabs_following">\"फॉलोइ\" छुपाएं</string>
     <string name="piko_pref_customisation_timelinetabs_both">दोनों दिखाएं</string>
     <string name="piko_pref_customisation_sidebartabs">साइडबार आइटम्स छुपाएं</string>
     <string name="piko_pref_customisation_navbartabs">नेविगेशन बार आइटम्स छुपाएं</string>
@@ -155,7 +155,7 @@
     <string name="tweet_added_to_your_bookmarks">>ट्वीट को आपके बुकमार्क में जोड़ा गया</string>
     <string name="tweet_author">>ट्वीट का लेखक</string>
     <string name="tweets_retweeted_accessibility_description">%s द्वारा रीट्वीट</string>
-    <string name="tweets_topic_accessibility_description">>विषय के ट्वीट "\"</string>
+    <string name="tweets_topic_accessibility_description">>विषय के ट्वीट \"</string>
     <string name="tweets_unauthorized_error">क्षमा करें, आप इन ट्वीट्स को देखने के लिए अधिकृत नहीं हैं|</string>
     <string name="ps__posted_on_twitter">*%s* ने इस पर पोस्ट किया</string>
     <string name="ps__retweeted_on_twitter">*%s* ने इस पर रीट्वीट किया</string>
