@@ -39,6 +39,7 @@ val settingsPatch =
         )
 
         execute {
+            addAppResources("shared")
             addAppResources("twitter")
 
             val initMethod = SettingsFingerprint.method

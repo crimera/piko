@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Don't translate these -->
-    <string name="piko_name" translatable="false">Piko</string>
-    <string name="piko_title_settings" translatable="false">Piko Settings</string>
-    <string name="piko_title_piko_patches" translatable="false">Piko Patches</string>
-    <string name="piko_title_piko_integrations" translatable="false">Piko Integrations</string>
-
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">reader mode</string>
