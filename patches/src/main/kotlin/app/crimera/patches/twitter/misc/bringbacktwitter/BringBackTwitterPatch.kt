@@ -1,14 +1,14 @@
 package app.crimera.patches.twitter.misc.bringbacktwitter
 
 import app.crimera.utils.replaceStringsInFile
-import app.crimera.utils.replaceXmlResources
 import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patches.all.misc.resources.addAppResources
+import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.ResourceGroup
 import app.morphe.util.asSequence
 import app.morphe.util.copyResources
 import app.morphe.util.findElementByAttributeValueOrThrow
 import org.w3c.dom.Element
-import java.nio.file.Files
 
 @Suppress("unused")
 val bringBackTwitterPatch =
@@ -19,7 +19,11 @@ val bringBackTwitterPatch =
     ) {
         compatibleWith("com.twitter.android")
 
+        dependsOn(addResourcesPatch)
+
         execute {
+            addAppResources("twitter-bring-back")
+
             // region Change app name
 
             document("AndroidManifest.xml").use { document ->
@@ -122,41 +126,6 @@ val bringBackTwitterPatch =
                 itemElement.textContent = twitterBlueColor
             }
             // endregion
-
-            // region Change strings
-
-            val basePath = "twitter/bringbacktwitter/strings"
-
-            replaceXmlResources(basePath, ResourceGroup("values", "strings.xml"))
-
-            /**
-             * create directory for the untranslated language resources
-             */
-            val languages =
-                arrayOf(
-                    "en-rGB",
-                    "hi",
-                    "pl",
-                    "pt-rBr",
-                    "ru",
-                    "tr",
-                    "zh-rCN",
-                    "zh-rTW",
-                    "",
-                ).map { "values-$it" }
-
-            languages.forEach {
-                var folderName = it
-                if (folderName.endsWith("-")) {
-                    folderName = it.replace("-", "")
-                }
-                val vDirectory = get("res").resolve(folderName)
-                if (!vDirectory.isDirectory) {
-                    Files.createDirectories(vDirectory.toPath())
-                }
-                val resGroup = ResourceGroup(folderName, "strings.xml")
-                replaceXmlResources(basePath, resGroup)
-            }
 
             /*
              * Instead of defining strings in the map, replaces texts directly.

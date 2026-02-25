@@ -1,0 +1,20 @@
+project_id_env: "CROWDIN_PROJECT_ID"
+api_token_env: "CROWDIN_PERSONAL_TOKEN"
+
+preserve_hierarchy: true
+
+files:
+    - source: patches/src/main/resources/addresources/values/shared/strings.xml
+      translation: patches/src/main/resources/addresources/values-%android_code%/shared/strings.xml
+      dest: '/Patches/Shared.xml'
+      skip_untranslated_strings: true
+
+    - source: patches/src/main/resources/addresources/values/twitter/strings.xml
+      translation: patches/src/main/resources/addresources/values-%android_code%/twitter/strings.xml
+      dest: '/Patches/Twitter.xml'
+      skip_untranslated_strings: true
+
+    - source: patches/src/main/resources/addresources/values/twitter-bring-back/strings.xml
+      translation: patches/src/main/resources/addresources/values-%android_code%/twitter-bring-back/strings.xml
+      dest: '/Patches/Twitter-bring-back.xml'
+      skip_untranslated_strings: true

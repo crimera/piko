@@ -1,12 +1,16 @@
 /*
  * Copyright 2025 Morphe.
- * https://github.com/MorpheApp/morphe-patches/blob/95e285b9aaa3195fe49fe5326a416043348989e6/patches/src/main/kotlin/app/morphe/util/BytecodeUtils.kt
+ * https://github.com/MorpheApp/morphe-patches
  *
- * File-Specific License Notice (GPLv3 Section 7 Additional Permission).
+ * Original code hard forked from:
+ * https://github.com/ReVanced/revanced-patches/blob/724e6d61b2ecd868c1a9a37d465a688e83a74799/patches/src/main/kotlin/app/revanced/util/BytecodeUtils.kt
+ *
+ * File-Specific License Notice (GPLv3 Section 7 Terms)
  *
  * This file is part of the Morphe patches project and is licensed under
  * the GNU General Public License version 3 (GPLv3), with the Additional
- * Terms under Section 7 described in the Morphe patches LICENSE file.
+ * Terms under Section 7 described in the Morphe patches
+ * LICENSE file: https://github.com/MorpheApp/morphe-patches/blob/main/NOTICE
  *
  * https://www.gnu.org/licenses/gpl-3.0.html
  *
@@ -32,6 +36,7 @@
 
 package app.morphe.util
 
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionFilter
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -42,9 +47,13 @@ import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
+import app.morphe.patcher.util.proxy.mutableTypes.MutableField
+import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.shared.misc.mapping.ResourceType
+import app.morphe.shared.misc.mapping.getResourceId
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.Opcode.CONST_STRING
@@ -66,6 +75,7 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.Reference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.immutable.ImmutableField
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethod
 import com.android.tools.smali.dexlib2.immutable.ImmutableMethodImplementation
 import com.android.tools.smali.dexlib2.util.MethodUtil
@@ -193,7 +203,7 @@ fun MutableMethod.injectHideViewCall(
 
 /**
  * Inserts instructions at a given index, using the existing control flow label at that index.
- * Inserted instructions can have it's own control flow labels as well.
+ * Inserted instructions can have its own control flow labels as well.
  *
  * Effectively this changes the code from:
  * :label
@@ -221,6 +231,37 @@ fun MutableMethod.addInstructionsAtControlFlowLabel(
 
     // Original instruction is now after the inserted patch instructions,
     // and the original control flow label is on the first instruction of the patch code.
+}
+
+/**
+ * Get the index of the first instruction with the id of the given resource id name.
+ *
+ * Requires [resourceMappingPatch] as a dependency.
+ *
+ * @param resourceName the name of the resource to find the id for.
+ * @return the index of the first instruction with the id of the given resource name, or -1 if not found.
+ * @throws PatchException if the resource cannot be found.
+ * @see [indexOfFirstResourceIdOrThrow], [indexOfFirstLiteralInstructionReversed]
+ */
+fun Method.indexOfFirstResourceId(resourceName: String): Int {
+    return indexOfFirstLiteralInstruction(getResourceId(ResourceType.ID, resourceName))
+}
+
+/**
+ * Get the index of the first instruction with the id of the given resource name or throw a [PatchException].
+ *
+ * Requires [resourceMappingPatch] as a dependency.
+ *
+ * @throws [PatchException] if the resource is not found, or the method does not contain the resource id literal value.
+ * @see [indexOfFirstResourceId], [indexOfFirstLiteralInstructionReversedOrThrow]
+ */
+fun Method.indexOfFirstResourceIdOrThrow(resourceName: String): Int {
+    val index = indexOfFirstResourceId(resourceName)
+    if (index < 0) {
+        throw PatchException("Found resource id for: '$resourceName' but method does not contain the id: $this")
+    }
+
+    return index
 }
 
 /**
@@ -401,6 +442,16 @@ fun BytecodePatchContext.traverseClassHierarchy(targetClass: MutableClass, callb
  * @see ReferenceInstruction
  */
 inline fun <reified T : Reference> Instruction.getReference() = (this as? ReferenceInstruction)?.reference as? T
+
+/**
+ * @return The mutable method for this method call reference.
+ */
+context(BytecodePatchContext)
+fun MethodReference.getMutableMethod(): MutableMethod {
+    return mutableClassDefBy(this.definingClass).methods.first { classMethod ->
+        MethodUtil.methodSignaturesMatch(classMethod, this@getMutableMethod)
+    }
+}
 
 /**
  * @return The index of the first opcode specified, or -1 if not found.
@@ -1232,6 +1283,71 @@ private fun MutableMethod.overrideReturnValue(value: String, returnLate: Boolean
     }
 }
 
+/**
+ * Remove the given AccessFlags from the field.
+ */
+internal fun MutableField.removeFlags(vararg flags: AccessFlags) {
+    val bitField = flags.map { it.value }.reduce { acc, flag -> acc and flag }
+    this.accessFlags = this.accessFlags and bitField.inv()
+}
+
+internal fun BytecodePatchContext.addStaticFieldToExtension(
+    className: String,
+    methodName: String,
+    fieldName: String,
+    objectClass: String,
+    smaliInstructions: String
+) {
+    val mutableClass = mutableClassDefBy(className)
+    val objectCall = "$mutableClass->$fieldName:$objectClass"
+
+    mutableClass.apply {
+        methods.first { method -> method.name == methodName }.apply {
+            staticFields.add(
+                ImmutableField(
+                    definingClass,
+                    fieldName,
+                    objectClass,
+                    AccessFlags.PUBLIC.value or AccessFlags.STATIC.value,
+                    null,
+                    annotations,
+                    null
+                ).toMutable()
+            )
+
+            addInstructionsWithLabels(
+                0,
+                """
+                    sget-object v0, $objectCall
+                """ + smaliInstructions
+            )
+        }
+    }
+}
+
+context(BytecodePatchContext)
+internal fun setExtensionIsPatchIncluded(patchExtensionClassType: String) {
+    val methodName = "isPatchIncluded"
+    val returnType = "Z"
+
+    val fingerprint = Fingerprint(
+        definingClass = patchExtensionClassType,
+        name = methodName,
+        returnType = returnType,
+        parameters = listOf(),
+        custom = { method, _ ->
+            AccessFlags.STATIC.isSet(method.accessFlags)
+        }
+    )
+
+    if (fingerprint.methodOrNull == null) {
+        throw PatchException(
+            "Could not find required extension method: $patchExtensionClassType->$methodName()$returnType"
+        )
+    }
+
+    fingerprint.method.returnEarly(true)
+}
 
 /**
  * Set the custom condition for this fingerprint to check for a literal value.
