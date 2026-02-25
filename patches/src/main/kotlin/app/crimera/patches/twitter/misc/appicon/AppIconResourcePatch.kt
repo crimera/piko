@@ -20,10 +20,6 @@ val appIconResourcePatch =
             )
 
             val sourceDir = "twitter/appicons"
-            copyResources(
-                sourceDir,
-                ResourceGroup("values", "piko_app_icon_colors.xml"),
-            )
 
             val imagesDir = "$sourceDir/images"
             copyResources(
