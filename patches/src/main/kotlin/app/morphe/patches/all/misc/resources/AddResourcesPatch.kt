@@ -52,7 +52,7 @@ internal val locales = listOf(
     AppLocale("ar-rSA", "ar"),
     AppLocale("es-rES", "es"),
     AppLocale("fr-rFR", "fr"),
-//    AppLocale("hi-rIN", "hi"), // FIXME. Uncomment after patcher fixes strings.xml after decoding
+    AppLocale("hi-rIN", "hi"),
     AppLocale("in-rID", "in"),
     AppLocale("it-rIT", "it"),
     AppLocale("ja-rJP", "ja"),
@@ -93,8 +93,10 @@ internal class AppLocale(
 }
 
 private enum class BundledResourceType {
-    STRINGS,
-    ARRAYS;
+    // Add more resource xml files as needed.
+    ARRAYS,
+    COLORS,
+    STRINGS;
 
     override fun toString(): String {
         return super.toString().lowercase(Locale.US)
@@ -216,8 +218,9 @@ internal val addResourcesPatch = resourcePatch(
 
         appsToInclude.forEach { app ->
             locales.forEach { locale ->
-                addResourcesFromFile(app, locale, BundledResourceType.STRINGS)
-                addResourcesFromFile(app, locale, BundledResourceType.ARRAYS)
+                BundledResourceType.entries.forEach { type ->
+                    addResourcesFromFile(app, locale, type)
+                }
             }
         }
     }
