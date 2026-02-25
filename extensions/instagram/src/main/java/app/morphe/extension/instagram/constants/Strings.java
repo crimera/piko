@@ -19,4 +19,8 @@ public class Strings{
     public static final String OPEN_LINKS_EXTERNALLY = "Open links externally";
     public static final String OPEN_LINKS_EXTERNALLY_DESC = "Open links in external browser instead of in-app browser";
 
+    public static final String CATEGORY_MISC = "Misc";
+    public static final String DISABLE_ANALYTICS = "Disable analytics";
+    public static final String DISABLE_ANALYTICS_DESC = "Block analytics that are sent to Instagram/Facebook servers";
+
 }

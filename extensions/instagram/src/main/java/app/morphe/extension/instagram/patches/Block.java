@@ -6,12 +6,13 @@ import java.util.Arrays;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.utils.Utils;
 import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.settings.SettingsStatus;
 
 public class Block {
     private static boolean DISABLE_SUGGESTED_CONTENT;
     private static List<String> SUGGESTED_CONTENT_KEY = Arrays.asList("clips_netego","stories_netego","in_feed_survey","bloks_netego","suggested_igd_channels","suggested_top_accounts","suggested_users");
     static {
-        DISABLE_SUGGESTED_CONTENT = Pref.hideSuggestedContent();
+        DISABLE_SUGGESTED_CONTENT = Pref.hideSuggestedContent() && SettingsStatus.hideSuggestedContent;
     }
 
     // Returns an invalid string, such that json parsing fails for the key.
