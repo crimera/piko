@@ -49,7 +49,9 @@ internal fun main(args: Array<String>) {
     val exceptions = mutableListOf<Exception>()
 
     arrayOf(
+        "shared",
         "twitter",
+        "twitter-bring-back",
         // Add more apps as created.
     ).forEach { appId ->
         locales.forEach { locale ->
