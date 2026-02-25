@@ -20,5 +20,9 @@ public class Pref {
 
     public static long buildAge(){
         return SharedPref.getBooleanPerf(Settings.REMOVE_BUILD_EXPIRE_POPUP) ? 0:86400000 ;}
+
+    public static boolean disableAnalytics(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_ANALYTICS);
+    }
     //end
 }

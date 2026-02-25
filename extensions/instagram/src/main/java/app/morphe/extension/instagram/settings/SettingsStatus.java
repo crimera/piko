@@ -1,6 +1,7 @@
 package app.morphe.extension.instagram.settings;
 
 public class SettingsStatus {
+    // Developer section.
     public static boolean enableDeveloperOptions = false;
     public static void enableDeveloperOptions() {
         enableDeveloperOptions = true;
@@ -13,7 +14,7 @@ public class SettingsStatus {
         return (enableDeveloperOptions || removeBuildExpirePopup);
     }
 
-    //Ads Section
+    //Ads section.
     public static boolean disableAds = false;
     public static void disableAds() {
         disableAds = true;
@@ -27,6 +28,7 @@ public class SettingsStatus {
         return (disableAds || hideSuggestedContent);
     }
 
+    //Links section.
     public static boolean openLinksExternally = false;
     public static void openLinksExternally() {
         openLinksExternally = true;
@@ -35,6 +37,14 @@ public class SettingsStatus {
         return openLinksExternally;
     }
 
+    //Misc section.
+    public static boolean disableAnalytics = false;
+    public static void disableAnalytics() {
+        disableAnalytics = true;
+    }
+    public static boolean miscSection() {
+        return disableAnalytics;
+    }
     public static void load() {
     }
 }

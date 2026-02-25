@@ -60,6 +60,7 @@ public class ScreenBuilder {
             );
         }
     }
+
     public void buildDeveloperSection(){
         if (!(SettingsStatus.developerOptionsSection())) return;
 
@@ -94,6 +95,21 @@ public class ScreenBuilder {
                             Strings.OPEN_LINKS_EXTERNALLY,
                             Strings.OPEN_LINKS_EXTERNALLY_DESC,
                             Settings.OPEN_LINKS_EXTERNALLY
+                    )
+            );
+        }
+    }
+
+    public void buildMiscSection() {
+        if (!(SettingsStatus.miscSection())) return;
+
+        PreferenceCategory category = category = addCategory(Strings.CATEGORY_MISC);
+        if (SettingsStatus.disableAnalytics) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_ANALYTICS,
+                            Strings.DISABLE_ANALYTICS_DESC,
+                            Settings.DISABLE_ANALYTICS
                     )
             );
         }
