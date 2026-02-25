@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-02-24T16:07:29",
-  "description": "# [3.0.0-dev.7](https://github.com/crimera/piko/compare/v3.0.0-dev.6...v3.0.0-dev.7) (2026-02-24)\n\n\n### Features\n\n* Add `Browse tweet object` patch ([2e05c33](https://github.com/crimera/piko/commit/2e05c334ee32ba6075249bb873f13ba6d822d77e))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.7/patches-3.0.0-dev.7.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.7/patches-3.0.0-dev.7.mpp.asc",
-  "version": "3.0.0-dev.7"
+  "created_at": "2026-02-25T18:28:10",
+  "description": "# [3.0.0-dev.8](https://github.com/crimera/piko/compare/v3.0.0-dev.7...v3.0.0-dev.8) (2026-02-25)\n\n\n### Bug Fixes\n\n* webview resource id ([fd544a9](https://github.com/crimera/piko/commit/fd544a9a0796f4f9fffb8c9b876069cfb1e43bc8))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.8/patches-3.0.0-dev.8.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.8/patches-3.0.0-dev.8.mpp.asc",
+  "version": "3.0.0-dev.8"
 }

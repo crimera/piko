@@ -1,3 +1,10 @@
+# [3.0.0-dev.8](https://github.com/crimera/piko/compare/v3.0.0-dev.7...v3.0.0-dev.8) (2026-02-25)
+
+
+### Bug Fixes
+
+* webview resource id ([fd544a9](https://github.com/crimera/piko/commit/fd544a9a0796f4f9fffb8c9b876069cfb1e43bc8))
+
 # [3.0.0-dev.7](https://github.com/crimera/piko/compare/v3.0.0-dev.6...v3.0.0-dev.7) (2026-02-24)
 
 

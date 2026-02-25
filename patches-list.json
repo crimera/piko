@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0-dev.7",
+  "version": "3.0.0-dev.8",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -17,7 +17,9 @@
       "name": "Bring back twitter",
       "description": "Bring back old twitter logo and name",
       "use": false,
-      "dependencies": [],
+      "dependencies": [
+        "ResourcePatch"
+      ],
       "compatiblePackages": {
         "com.twitter.android": null
       },
@@ -416,7 +418,9 @@
       "description": "Makes all app activities exportable.",
       "use": false,
       "dependencies": [],
-      "compatiblePackages": null,
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
       "options": []
     },
     {
