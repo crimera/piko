@@ -16,6 +16,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.patches.all.misc.resources.addAppResources
+import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.shared.misc.extension.ExtensionsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
@@ -33,10 +35,12 @@ val settingsPatch =
             sharedExtensionPatch,
             settingsResourcePatch,
             redirectBMTab,
+            addResourcesPatch
         )
 
         execute {
-            val methods = SettingsFingerprint.classDef.methods
+            addAppResources("twitter")
+
             val initMethod = SettingsFingerprint.method
             val arrayCreation =
                 initMethod

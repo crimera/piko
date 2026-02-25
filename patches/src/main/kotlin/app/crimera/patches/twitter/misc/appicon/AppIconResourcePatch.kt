@@ -1,12 +1,10 @@
 package app.crimera.patches.twitter.misc.appicon
 
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.util.PIKO_RESOURCE_PREFIX
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
 import app.morphe.util.findElementByAttributeValue
 import app.morphe.util.findElementByAttributeValueOrThrow
-import java.nio.file.Files
 
 val appIconResourcePatch =
     resourcePatch {
@@ -117,31 +115,6 @@ val appIconResourcePatch =
                         insertAfter = activityAlias
                     }
                 }
-            }
-
-            val stringsDir = "$sourceDir/strings"
-            copyResources(
-                stringsDir,
-                ResourceGroup("values", "app_icon_strings.xml"),
-                resourcePrefix = PIKO_RESOURCE_PREFIX,
-            )
-
-            val languages =
-                arrayOf(
-                    "ko",
-                    "pl",
-                ).map { "values-$it" }
-
-            languages.forEach {
-                val vDirectory = get("res").resolve(it)
-                if (!vDirectory.isDirectory) {
-                    Files.createDirectories(vDirectory.toPath())
-                }
-                copyResources(
-                    stringsDir,
-                    ResourceGroup(it, "app_icon_strings.xml"),
-                    resourcePrefix = PIKO_RESOURCE_PREFIX,
-                )
             }
         }
     }

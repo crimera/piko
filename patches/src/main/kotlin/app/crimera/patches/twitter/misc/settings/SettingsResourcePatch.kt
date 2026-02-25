@@ -2,11 +2,7 @@ package app.crimera.patches.twitter.misc.settings
 
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.shared.misc.mapping.resourceMappingPatch
-import app.morphe.util.PIKO_RESOURCE_PREFIX
-import app.morphe.util.ResourceGroup
-import app.morphe.util.copyResources
 import org.w3c.dom.Element
-import java.nio.file.Files
 
 internal val settingsResourcePatch =
     resourcePatch {
@@ -43,59 +39,5 @@ internal val settingsResourcePatch =
 
                 parent.appendChild(sideBtn)
             }
-
-            val basePath = "twitter/settings/strings"
-
-            copyResources(
-                basePath,
-                ResourceGroup("values", "strings.xml", "arrays.xml"),
-                resourcePrefix = PIKO_RESOURCE_PREFIX,
-            )
-
-            /**
-             * create directory for the untranslated language resources
-             */
-            val languages =
-                arrayOf(
-                    "ar",
-                    "es",
-                    "fr",
-                    "hi",
-                    "in",
-                    "ja",
-                    "ko",
-                    "it",
-                    "pl",
-                    "pt-rBR",
-                    "ru",
-                    "tr",
-                    "uk",
-                    "v21",
-                    "vi",
-                    "zh-rCN",
-                    "zh-rTW",
-                    "zh-rHK",
-                ).map { "values-$it" }
-
-            languages.forEach {
-                val vDirectory = get("res").resolve(it)
-                if (!vDirectory.isDirectory) {
-                    Files.createDirectories(vDirectory.toPath())
-                    if (it.contains("v21")) {
-                        copyResources(
-                            basePath,
-                            ResourceGroup(it, "arrays.xml"),
-                            resourcePrefix = PIKO_RESOURCE_PREFIX,
-                        )
-                    }
-                }
-                copyResources(
-                    basePath,
-                    ResourceGroup(it, "strings.xml"),
-                    resourcePrefix = PIKO_RESOURCE_PREFIX,
-                )
-            }
-
-            // execute end
         }
     }
