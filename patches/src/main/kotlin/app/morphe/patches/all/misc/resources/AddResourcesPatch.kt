@@ -61,6 +61,7 @@ internal val locales = listOf(
     AppLocale("pt-rBR", "pt"),
     AppLocale("ru-rRU", "ru"),
     AppLocale("zh-rCN", "zh-rCN"),
+    AppLocale("zh-rHK", "zh-rHK"),
     AppLocale("zh-rTW", "zh-rTW"),
 )
 
