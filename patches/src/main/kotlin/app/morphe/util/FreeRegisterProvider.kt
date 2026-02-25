@@ -1,12 +1,13 @@
 /*
  * Copyright 2025 Morphe.
- * https://github.com/MorpheApp/morphe-patches/blob/95e285b9aaa3195fe49fe5326a416043348989e6/patches/src/main/kotlin/app/morphe/util/FreeRegisterProvider.kt
+ * https://github.com/MorpheApp/morphe-patches
  *
- * File-Specific License Notice (GPLv3 Section 7 Additional Permission).
+ * File-Specific License Notice (GPLv3 Section 7 Terms)
  *
  * This file is part of the Morphe patches project and is licensed under
  * the GNU General Public License version 3 (GPLv3), with the Additional
- * Terms under Section 7 described in the Morphe patches LICENSE file.
+ * Terms under Section 7 described in the Morphe patches
+ * LICENSE file: https://github.com/MorpheApp/morphe-patches/blob/main/NOTICE
  *
  * https://www.gnu.org/licenses/gpl-3.0.html
  *
@@ -53,21 +54,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstructio
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import java.util.EnumSet
 import java.util.LinkedList
-import kotlin.collections.count
-import kotlin.collections.distinct
-import kotlin.collections.first
-import kotlin.collections.indexOfFirst
-import kotlin.collections.intersect
-import kotlin.collections.isNotEmpty
-import kotlin.collections.minus
-import kotlin.collections.plus
-import kotlin.collections.set
-import kotlin.collections.sortedWith
-import kotlin.collections.toList
-import kotlin.collections.toMutableSet
-import kotlin.collections.toSet
-import kotlin.let
-import kotlin.ranges.until
 
 /**
  * Finds free registers at a specific index in a method.
@@ -136,7 +122,7 @@ class FreeRegisterProvider internal constructor(
      */
     fun getFreeRegister(): Int {
         if (freeRegisters.isEmpty()) {
-            throw kotlin.IllegalStateException("No free registers available")
+            throw IllegalStateException("No free registers available")
         }
         val register = freeRegisters.removeFirst()
         allocatedFreeRegisters.add(register)
@@ -320,10 +306,8 @@ private fun Method.findFreeRegisters(
 
     if (freeRegisters.isEmpty()) {
         // Should only happen if a switch statement is encountered before enough free registers are found.
-        throw kotlin.IllegalArgumentException(
-            "Could not find a free register from startIndex: " +
-                    "$startIndex excluding: $registersToExclude"
-        )
+        throw IllegalArgumentException("Could not find a free register from startIndex: " +
+                "$startIndex excluding: $registersToExclude")
     }
 
     if (logFreeRegisterSearch) println("Final free registers found: $freeRegisters")
@@ -393,10 +377,8 @@ private fun Method.findFreeRegistersInternal(
             // If it appears only once, it's write-only (the write).
             // If it appears more than once, it's also read.
             if (occurrences <= 1) {
-                if (logFreeRegisterSearch) println(
-                    "Found free register at $i: $writeRegister " +
-                            "opcode: " + instruction.opcode + " reference: " + (instruction.getReference())
-                )
+                if (logFreeRegisterSearch) println("Found free register at $i: $writeRegister " +
+                        "opcode: " + instruction.opcode + " reference: " + (instruction.getReference()))
                 freeRegisters.add(writeRegister)
                 // If the requested number of free registers is found and this is not a branch,
                 // then no additional searching is needed.
@@ -472,7 +454,7 @@ private fun Method.findFreeRegistersInternal(
     // A return or branch instruction will be encountered before all instructions can be iterated.
     // Some methods have switch payload instructions after the last actual instruction,
     // but these cannot be reached thru normal control flow.
-    throw kotlin.IllegalArgumentException("Start index is outside normal control flow: $startIndex")
+    throw IllegalArgumentException("Start index is outside normal control flow: $startIndex")
 }
 
 private fun Method.buildInstructionOffsetArray(): IntArray {
@@ -515,7 +497,7 @@ private fun Method.getBranchTargetInstructionIndex(
     index: Int,
     offsetArray: IntArray
 ): Int {
-    check(index > 0 && index < offsetArray.size) {
+    check (index >0 && index < offsetArray.size) {
         "Invalid index: $index"
     }
     val currentOffset = offsetArray[index]
@@ -532,7 +514,7 @@ private fun Method.getBranchTargetInstructionIndex(
         // These need special handling - they jump to payloads
         // which then have their own target lists.
         // PACKED_SWITCH, SPARSE_SWITCH -> // TODO?
-        else -> throw kotlin.IllegalStateException("Unsupported opcode: ${instruction.opcode}")
+        else -> throw IllegalStateException("Unsupported opcode: ${instruction.opcode}")
     }
 }
 
@@ -556,9 +538,8 @@ private fun Method.findInstructionIndexByOffset(
     // Should never happen.
     // Code has been tested on hundreds of random methods on all instruction indices,
     // but maybe some weird code exists that this has overlooked.
-    throw kotlin.IllegalArgumentException(
-        "Could not find exact instruction offset for method: " +
-                "$this at offset: $targetOffset. Please file a bug report in the Morphe patches repo"
+    throw IllegalArgumentException("Could not find exact instruction offset for method: " +
+            "$this at offset: $targetOffset. Please file a bug report in the Morphe patches repo"
     )
 }
 
@@ -595,7 +576,7 @@ val Instruction.writeRegister: Int?
             return null
         }
         if (this !is OneRegisterInstruction) {
-            throw kotlin.IllegalStateException("Not a write instruction: $this")
+            throw IllegalStateException("Not a write instruction: $this")
         }
         return registerA
     }
@@ -615,8 +596,8 @@ internal val Instruction.isUnconditionalBranchInstruction: Boolean
     get() = this.opcode in unconditionalBranchOpcodes
 
 /**
-* @return If this instruction is a switch opcode.
-*/
+ * @return If this instruction is a switch opcode.
+ */
 internal val Instruction.isSwitchInstruction: Boolean
     get() = this.opcode in switchOpcodes
 
