@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0-dev.6",
+  "version": "3.0.0-dev.7",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -18,6 +18,19 @@
       "description": "Bring back old twitter logo and name",
       "use": false,
       "dependencies": [],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Browse tweet object",
+      "description": "Adds an option to browse the tweet object in the share menu.",
+      "use": false,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
       "compatiblePackages": {
         "com.twitter.android": null
       },
