@@ -11,9 +11,10 @@ import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 
 public class Links {
-    private static boolean DISABLE_ANALYTICS;
+    private static boolean DISABLE_ANALYTICS,VIEW_STORIES_ANONYMOUSLY;
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
+        VIEW_STORIES_ANONYMOUSLY = Pref.viewStoriesAnonymously() && SettingsStatus.viewStoriesAnonymously;
     }
 
 
@@ -52,10 +53,13 @@ public class Links {
                 String host = uri.getHost();
                 String path = uri.getPath();
 
-                if (DISABLE_ANALYTICS) {
-                    shouldBlockUri = (host.contains("graph.instagram.com") || host.contains("graph.facebook.com") || path.contains("/logging_client_events"));
+                if (host.contains("graph.instagram.com") || host.contains("graph.facebook.com") || path.contains("/logging_client_events")){
+                    shouldBlockUri = DISABLE_ANALYTICS;
+                }else if(path.contains("/api/v2/media/seen/")){
+                    shouldBlockUri = VIEW_STORIES_ANONYMOUSLY;
                 }
             }
+
 
         } catch (Exception ex) {
             Logger.printException(() -> "intercept URI failed: ", ex);

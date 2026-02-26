@@ -84,6 +84,22 @@ public class ScreenBuilder {
             );
         }
     }
+    public void ghostSection(){
+        if (!(SettingsStatus.ghostSection())) return;
+
+        PreferenceCategory category = category = addCategory(Strings.CATEGORY_GHOST);
+
+        if (SettingsStatus.viewStoriesAnonymously) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.VIEW_STORIES_ANONYMOUSLY,
+                            "",
+                            Settings.VIEW_STORIES_ANONYMOUSLY
+                    )
+            );
+        }
+
+    }
 
     public void linksSection(){
         if (!(SettingsStatus.linksSection())) return;
