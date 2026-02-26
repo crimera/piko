@@ -98,6 +98,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.viewLiveAnonymously) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.VIEW_LIVE_ANONYMOUSLY,
+                            "",
+                            Settings.VIEW_LIVE_ANONYMOUSLY
+                    )
+            );
+        }
 
     }
 

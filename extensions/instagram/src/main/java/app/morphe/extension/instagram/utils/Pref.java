@@ -16,6 +16,9 @@ public class Pref {
     public static boolean viewStoriesAnonymously(){
         return SharedPref.getBooleanPerf(Settings.VIEW_STORIES_ANONYMOUSLY);
     }
+    public static boolean viewLiveAnonymously(){
+        return SharedPref.getBooleanPerf(Settings.VIEW_LIVE_ANONYMOUSLY);
+    }
 
     public static boolean enableDevOptions(){
         return SharedPref.getBooleanPerf(Settings.DEVELOPER_OPTIONS);

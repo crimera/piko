@@ -11,10 +11,11 @@ import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 
 public class Links {
-    private static boolean DISABLE_ANALYTICS,VIEW_STORIES_ANONYMOUSLY;
+    private static boolean DISABLE_ANALYTICS,VIEW_STORIES_ANONYMOUSLY,VIEW_LIVE_ANONYMOUSLY;
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
         VIEW_STORIES_ANONYMOUSLY = Pref.viewStoriesAnonymously() && SettingsStatus.viewStoriesAnonymously;
+        VIEW_LIVE_ANONYMOUSLY = Pref.viewLiveAnonymously() && SettingsStatus.viewLiveAnonymously;
     }
 
 
@@ -57,6 +58,8 @@ public class Links {
                     shouldBlockUri = DISABLE_ANALYTICS;
                 }else if(path.contains("/api/v2/media/seen/")){
                     shouldBlockUri = VIEW_STORIES_ANONYMOUSLY;
+                }else if(path.contains("/heartbeat_and_get_viewer_count/")){
+                    shouldBlockUri = VIEW_LIVE_ANONYMOUSLY;
                 }
             }
 
