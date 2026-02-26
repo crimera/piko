@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-02-25T18:28:10",
-  "description": "# [3.0.0-dev.8](https://github.com/crimera/piko/compare/v3.0.0-dev.7...v3.0.0-dev.8) (2026-02-25)\n\n\n### Bug Fixes\n\n* webview resource id ([fd544a9](https://github.com/crimera/piko/commit/fd544a9a0796f4f9fffb8c9b876069cfb1e43bc8))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.8/patches-3.0.0-dev.8.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.8/patches-3.0.0-dev.8.mpp.asc",
-  "version": "3.0.0-dev.8"
+  "created_at": "2026-02-26T06:07:55",
+  "description": "# [3.0.0-dev.9](https://github.com/crimera/piko/compare/v3.0.0-dev.8...v3.0.0-dev.9) (2026-02-26)\n\n\n### Bug Fixes\n\n* fix webview resource id ([6c1c81d](https://github.com/crimera/piko/commit/6c1c81d057f3bee73ed8fb53cc95665b89e9c973))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.9/patches-3.0.0-dev.9.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.9/patches-3.0.0-dev.9.mpp.asc",
+  "version": "3.0.0-dev.9"
 }
