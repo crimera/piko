@@ -23,6 +23,13 @@ public class Strings{
     public static final String VIEW_STORIES_ANONYMOUSLY = "View stories anonymously";
     public static final String VIEW_LIVE_ANONYMOUSLY = "View live anonymously";
 
+    public static final String CATEGORY_DISTRACTION_FREE = "Distraction free";
+    public static final String DISABLE_STORIES = "Disable stories";
+    public static final String DISABLE_FEED = "Disable feed";
+    public static final String DISABLE_REELS = "Disable reels";
+    public static final String DISABLE_EXPLORE = "Disable explore";
+    public static final String DISABLE_COMMENTS = "Disable comments";
+
     public static final String CATEGORY_MISC = "Misc";
     public static final String DISABLE_ANALYTICS = "Disable analytics";
     public static final String DISABLE_ANALYTICS_DESC = "Block analytics that are sent to Instagram/Facebook servers";

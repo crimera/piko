@@ -125,6 +125,58 @@ public class ScreenBuilder {
         }
     }
 
+    public void distractionFreeSection(){
+        if (!(SettingsStatus.distractionFreeSection())) return;
+
+        PreferenceCategory category = category = addCategory(Strings.CATEGORY_DISTRACTION_FREE);
+
+        if (SettingsStatus.disableStories) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_STORIES,
+                            "",
+                            Settings.DISABLE_STORIES
+                    )
+            );
+        }
+        if (SettingsStatus.disableFeed) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_FEED,
+                            "",
+                            Settings.DISABLE_FEED
+                    )
+            );
+        }
+        if (SettingsStatus.disableReels) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_REELS,
+                            "",
+                            Settings.DISABLE_REELS
+                    )
+            );
+        }
+        if (SettingsStatus.disableExplore) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_EXPLORE,
+                            "",
+                            Settings.DISABLE_EXPLORE
+                    )
+            );
+        }
+        if (SettingsStatus.disableComments) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_COMMENTS,
+                            "",
+                            Settings.DISABLE_COMMENTS
+                    )
+            );
+        }
+    }
+
     public void buildMiscSection() {
         if (!(SettingsStatus.miscSection())) return;
 

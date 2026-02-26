@@ -50,6 +50,31 @@ public class SettingsStatus {
         return (viewStoriesAnonymously || viewLiveAnonymously);
     }
 
+
+    public static boolean disableStories = false;
+    public static void disableStories() {
+        disableStories = true;
+    }
+    public static boolean disableFeed = false;
+    public static void disableFeed() {
+        disableFeed = true;
+    }
+    public static boolean disableReels = false;
+    public static void disableReels() {
+        disableReels = true;
+    }
+    public static boolean disableExplore = false;
+    public static void disableExplore() {
+        disableExplore = true;
+    }
+    public static boolean disableComments = false;
+    public static void disableComments() {
+        disableComments = true;
+    }
+    public static boolean distractionFreeSection() {
+        return (disableStories || disableFeed || disableReels || disableExplore || disableComments);
+    }
+
     //Misc section.
     public static boolean disableAnalytics = false;
     public static void disableAnalytics() {

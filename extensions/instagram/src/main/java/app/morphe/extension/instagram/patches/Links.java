@@ -11,11 +11,16 @@ import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 
 public class Links {
-    private static boolean DISABLE_ANALYTICS,VIEW_STORIES_ANONYMOUSLY,VIEW_LIVE_ANONYMOUSLY;
+    private static boolean DISABLE_ANALYTICS,VIEW_STORIES_ANONYMOUSLY,VIEW_LIVE_ANONYMOUSLY,DISABLE_STORIES,DISABLE_FEED,DISABLE_REELS,DISABLE_EXPLORE,DISABLE_COMMENTS;
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
         VIEW_STORIES_ANONYMOUSLY = Pref.viewStoriesAnonymously() && SettingsStatus.viewStoriesAnonymously;
         VIEW_LIVE_ANONYMOUSLY = Pref.viewLiveAnonymously() && SettingsStatus.viewLiveAnonymously;
+        DISABLE_STORIES = Pref.disableStories() && SettingsStatus.disableStories;
+        DISABLE_FEED = Pref.disableFeed() && SettingsStatus.disableFeed;
+        DISABLE_REELS = Pref.disableReels() && SettingsStatus.disableReels;
+        DISABLE_EXPLORE = Pref.disableExplore() && SettingsStatus.disableExplore;
+        DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
     }
 
 
@@ -47,22 +52,42 @@ public class Links {
 
     // Thanks to InstaEclipse and other mods.
     public static URI interceptUri(URI uri){
-        boolean shouldBlockUri = false;
+       boolean shouldBlockUri = false;
         try {
             if (uri != null && uri.getPath() != null) {
-
                 String host = uri.getHost();
                 String path = uri.getPath();
 
-                if (host.contains("graph.instagram.com") || host.contains("graph.facebook.com") || path.contains("/logging_client_events")){
+                if (host.contains("graph.instagram.com")
+                        || host.contains("graph.facebook.com")
+                        || path.contains("/logging_client_events")) {
                     shouldBlockUri = DISABLE_ANALYTICS;
-                }else if(path.contains("/api/v2/media/seen/")){
+                } else if (path.contains("/api/v2/media/seen/")) {
                     shouldBlockUri = VIEW_STORIES_ANONYMOUSLY;
-                }else if(path.contains("/heartbeat_and_get_viewer_count/")){
+                } else if (path.contains("/heartbeat_and_get_viewer_count/")) {
                     shouldBlockUri = VIEW_LIVE_ANONYMOUSLY;
+                } else if (path.contains("/feed/reels_tray/")
+                        || path.contains("feed/get_latest_reel_media/")
+                        || path.contains("direct_v2/pending_inbox/?visual_message")
+                        || path.contains("stories/hallpass/")
+                        || path.contains("/api/v1/feed/reels_media_stream/")) {
+                    shouldBlockUri = DISABLE_STORIES;
+                } else if (path.endsWith("/feed/timeline/")) {
+                    shouldBlockUri = DISABLE_FEED;
+                } else if (path.endsWith("/qp/batch_fetch/")
+                        || path.contains("api/v1/clips")
+                        || path.contains("clips")
+                        || path.contains("mixed_media")
+                        || path.contains("mixed_media/discover/stream/")) {
+                    shouldBlockUri = DISABLE_REELS;
+                } else if (path.contains("/discover/topical_explore")
+                        || path.contains("/discover/topical_explore_stream")
+                        || (host.contains("i.instagram.com") && path.contains("/api/v1/fbsearch/top_serp/"))) {
+                    shouldBlockUri = DISABLE_EXPLORE;
+                } else if (path.contains("/api/v1/media/") && path.contains("comments/")) {
+                    shouldBlockUri = DISABLE_COMMENTS;
                 }
             }
-
 
         } catch (Exception ex) {
             Logger.printException(() -> "intercept URI failed: ", ex);

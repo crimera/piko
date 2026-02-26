@@ -13,11 +13,28 @@ public class Pref {
     public static boolean openLinksExternally(){
         return SharedPref.getBooleanPerf(Settings.OPEN_LINKS_EXTERNALLY);
     }
+
     public static boolean viewStoriesAnonymously(){
         return SharedPref.getBooleanPerf(Settings.VIEW_STORIES_ANONYMOUSLY);
     }
     public static boolean viewLiveAnonymously(){
         return SharedPref.getBooleanPerf(Settings.VIEW_LIVE_ANONYMOUSLY);
+    }
+
+    public static boolean disableStories(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_STORIES);
+    }
+    public static boolean disableReels(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_REELS);
+    }
+    public static boolean disableFeed(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_FEED);
+    }
+    public static boolean disableExplore(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_EXPLORE);
+    }
+    public static boolean disableComments(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_COMMENTS);
     }
 
     public static boolean enableDevOptions(){
