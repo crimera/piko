@@ -21,6 +21,7 @@ public class Strings{
 
     public static final String CATEGORY_GHOST = "Ghost";
     public static final String VIEW_STORIES_ANONYMOUSLY = "View stories anonymously";
+    public static final String VIEW_LIVE_ANONYMOUSLY = "View live anonymously";
 
     public static final String CATEGORY_MISC = "Misc";
     public static final String DISABLE_ANALYTICS = "Disable analytics";
