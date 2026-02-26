@@ -37,6 +37,15 @@ public class SettingsStatus {
         return openLinksExternally;
     }
 
+
+    public static boolean viewStoriesAnonymously = false;
+    public static void viewStoriesAnonymously() {
+        viewStoriesAnonymously = true;
+    }
+    public static boolean ghostSection() {
+        return viewStoriesAnonymously;
+    }
+
     //Misc section.
     public static boolean disableAnalytics = false;
     public static void disableAnalytics() {
