@@ -24,7 +24,7 @@ tasks {
         dependsOn(compileKotlin)
 
         classpath = sourceSets["main"].runtimeClasspath
-        mainClass.set("app.morphe.util.resource.CheckStringResourcesKt")
+        mainClass.set("app.morphe.util.resource.CheckStringKt")
     }
 
     register<JavaExec>("generatePatchesList") {
