@@ -95,6 +95,8 @@ public class Tweet extends Debug {
             }
             // Replaces text to empty if the text contains only media link.
             text = text.replaceAll("^pic\\.x\\.com/\\S+$", "");
+            // Replaces links.
+            text = text.replaceAll("https?://t\\.co/\\S+", "");
 
         } catch (Exception e) {
             Utils.logger(e);
