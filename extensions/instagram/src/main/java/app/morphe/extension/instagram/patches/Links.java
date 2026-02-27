@@ -42,7 +42,8 @@ public class Links {
                 // https://l.instagram.com/?u=<actual url>&e=<tracking id>
                 String actualUrl = Uri.parse(url).getQueryParameter("u");
                 if (actualUrl != null) {
-                    openLink(actualUrl);
+                    String sanitizedUrl = sanitizeUrl(actualUrl);
+                    openLink(sanitizedUrl);
                     return true;
                 }
             }
@@ -102,6 +103,20 @@ public class Links {
         if(shouldBlockUri) {
             throw new IOException("Block uri");
         }
+    }
+
+    public static String sanitizeUrl(String url){
+        try{
+            return url.replaceAll("([&?])igsh=[^&]*", "")
+                    .replaceAll("([&?])utm_source=[^&]*", "")
+                    .replaceAll("([&?])utm_medium=[^&]*", "")
+                    .replaceAll("([&?])utm_content=[^&]*", "")
+                    .replaceAll("([&?])fbclid=[^&]*", "")
+                    .replaceAll("([&?])si=[^&]*", "");
+        } catch (Exception e) {
+            Logger.printException(() -> "sanitizeUrl failed: ", e);
+        }
+        return url;
     }
 
 }

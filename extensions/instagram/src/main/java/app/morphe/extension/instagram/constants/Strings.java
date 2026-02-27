@@ -18,6 +18,7 @@ public class Strings{
     public static final String CATEGORY_LINKS = "Links";
     public static final String OPEN_LINKS_EXTERNALLY = "Open links externally";
     public static final String OPEN_LINKS_EXTERNALLY_DESC = "Open links in external browser instead of in-app browser";
+    public static final String SANITIZE_SHARE_LINKS = "Sanitize share links";
 
     public static final String CATEGORY_GHOST = "Ghost";
     public static final String VIEW_STORIES_ANONYMOUSLY = "View stories anonymously";
