@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.content.Context;
 import android.content.Intent;
 import java.net.URI;
+import java.io.IOException;
 
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
@@ -50,8 +51,8 @@ public class Links {
         return false;
     }
 
-    // Thanks to InstaEclipse and other mods.
-    public static URI interceptUri(URI uri){
+    // Thanks to InstaEclipse and InstaMoon.
+    public static void interceptUri(URI uri) throws IOException{
        boolean shouldBlockUri = false;
         try {
             if (uri != null && uri.getPath() != null) {
@@ -82,7 +83,8 @@ public class Links {
                     shouldBlockUri = DISABLE_REELS;
                 } else if (path.contains("/discover/topical_explore")
                         || path.contains("/discover/topical_explore_stream")
-                        || (host.contains("i.instagram.com") && path.contains("/api/v1/fbsearch/top_serp/"))) {
+                        || (host.contains("i.instagram.com") && path.contains("/fbsearch/recent_searches/"))
+                        || (host.contains("i.instagram.com") && path.contains("/fbsearch/top_serp/"))) {
                     shouldBlockUri = DISABLE_EXPLORE;
                 } else if (path.contains("/api/v1/media/") && path.contains("comments/")) {
                     shouldBlockUri = DISABLE_COMMENTS;
@@ -92,8 +94,10 @@ public class Links {
         } catch (Exception ex) {
             Logger.printException(() -> "intercept URI failed: ", ex);
         }
-        // returns dummy 404 uri if the uri needs to be blocked.
-        return shouldBlockUri ? URI.create("https://127.0.0.1/piko") : uri;
+        // Exception is hanndled at call.
+        if(shouldBlockUri) {
+            throw new IOException("Block uri");
+        }
     }
 
 }
