@@ -77,12 +77,12 @@ public class SettingsStatus {
 
     //Misc section.
     public static boolean disableAnalytics = false;
-    public static void disableAnalytics() {
-        disableAnalytics = true;
+    public static void disableAnalytics() {disableAnalytics = true;}
+    public static boolean disableDiscoverPeople = false;
+    public static void disableDiscoverPeople() {
+        disableDiscoverPeople = true;
     }
-    public static boolean miscSection() {
-        return disableAnalytics;
-    }
+    public static boolean miscSection() {return (disableAnalytics || disableDiscoverPeople);}
     public static void load() {
     }
 }
