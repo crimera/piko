@@ -35,7 +35,7 @@
     <string name="piko_share_image_title">分享截圖推文</string>
     <string name="piko_share_image_toggle">啟用分享截圖</string>
     <string name="piko_share_image_autocleanup">自動清理截圖</string>
-    <string name="piko_share_image_autocleanup_desc">啟用後將刪除 24 小時前的圖片</string>
+    <string name="piko_share_image_autocleanup_desc">啟用後將刪除 24 小時前的截圖</string>
 
     <string name="piko_title_native_translator">原生推文翻譯</string>
     <string name="piko_native_translator_toggle">啟用原生推文翻譯</string>
