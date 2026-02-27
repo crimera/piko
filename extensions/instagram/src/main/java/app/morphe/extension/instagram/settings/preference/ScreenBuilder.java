@@ -123,6 +123,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.sanitizeShareLinks) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.SANITIZE_SHARE_LINKS,
+                            "",
+                            Settings.SANITIZE_SHARE_LINKS
+                    )
+            );
+        }
     }
 
     public void distractionFreeSection(){

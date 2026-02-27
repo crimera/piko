@@ -33,8 +33,10 @@ public class SettingsStatus {
     public static void openLinksExternally() {
         openLinksExternally = true;
     }
+    public static boolean sanitizeShareLinks = false;
+    public static void sanitizeShareLinks() {sanitizeShareLinks = true;}
     public static boolean linksSection() {
-        return openLinksExternally;
+        return (openLinksExternally || sanitizeShareLinks);
     }
 
 

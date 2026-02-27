@@ -11,7 +11,7 @@ public class Pref {
     public static boolean hideSuggestedContent(){return SharedPref.getBooleanPerf(Settings.HIDE_SUGGESTED_CONTENT);}
 
     public static boolean openLinksExternally(){return SharedPref.getBooleanPerf(Settings.OPEN_LINKS_EXTERNALLY);}
-
+    public static boolean sanitizeShareLinks(){return SharedPref.getBooleanPerf(Settings.SANITIZE_SHARE_LINKS);}
     public static boolean viewStoriesAnonymously(){return SharedPref.getBooleanPerf(Settings.VIEW_STORIES_ANONYMOUSLY);}
     public static boolean viewLiveAnonymously(){
         return SharedPref.getBooleanPerf(Settings.VIEW_LIVE_ANONYMOUSLY);
