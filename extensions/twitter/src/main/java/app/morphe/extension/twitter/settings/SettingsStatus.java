@@ -383,6 +383,11 @@ public class SettingsStatus {
         disUnifyXChatSystem = true;
     }
 
+    public static boolean exportLoginToken = false;
+    public static void exportLoginToken() {
+        exportLoginToken = true;
+    }
+
     public static boolean enableTimelineSection() {
         return ( hidePostMetrics || hideNavbarBadge || showSourceLabel || hideCommBadge || showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD);
     }

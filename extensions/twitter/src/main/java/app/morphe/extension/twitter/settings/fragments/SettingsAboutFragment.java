@@ -146,7 +146,7 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         flags.put(strRes("piko_pref_hide_post_inline_metrics"),SettingsStatus.hidePostMetrics);
         flags.put(strRes("piko_disunify_xchat_system"),SettingsStatus.disUnifyXChatSystem);
         flags.put(strRes("piko_legacy_share_link"),SettingsStatus.legacyShareLink);
-
+        flags.put(strRes("piko_pref_export_login_token"),SettingsStatus.exportLoginToken);
 
         LegacyTwitterPreferenceCategory patPref = preferenceCategory(strRes("piko_pref_patches"), screen);
 
