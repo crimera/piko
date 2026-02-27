@@ -12,7 +12,7 @@ import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 
 public class Links {
-    private static boolean DISABLE_ANALYTICS,VIEW_STORIES_ANONYMOUSLY,VIEW_LIVE_ANONYMOUSLY,DISABLE_STORIES,DISABLE_FEED,DISABLE_REELS,DISABLE_EXPLORE,DISABLE_COMMENTS;
+    private static boolean DISABLE_ANALYTICS,VIEW_STORIES_ANONYMOUSLY,VIEW_LIVE_ANONYMOUSLY,DISABLE_STORIES,DISABLE_FEED,DISABLE_REELS,DISABLE_EXPLORE,DISABLE_COMMENTS,DISABLE_DISCOVER_PEOPLE;
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
         VIEW_STORIES_ANONYMOUSLY = Pref.viewStoriesAnonymously() && SettingsStatus.viewStoriesAnonymously;
@@ -22,6 +22,7 @@ public class Links {
         DISABLE_REELS = Pref.disableReels() && SettingsStatus.disableReels;
         DISABLE_EXPLORE = Pref.disableExplore() && SettingsStatus.disableExplore;
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
+        DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
     }
 
 
@@ -88,7 +89,10 @@ public class Links {
                     shouldBlockUri = DISABLE_EXPLORE;
                 } else if (path.contains("/api/v1/media/") && path.contains("comments/")) {
                     shouldBlockUri = DISABLE_COMMENTS;
+                } else if (path.contains("/discover/ayml/")) {
+                    shouldBlockUri = DISABLE_DISCOVER_PEOPLE;
                 }
+
             }
 
         } catch (Exception ex) {

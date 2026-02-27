@@ -10,13 +10,9 @@ public class Pref {
 
     public static boolean hideSuggestedContent(){return SharedPref.getBooleanPerf(Settings.HIDE_SUGGESTED_CONTENT);}
 
-    public static boolean openLinksExternally(){
-        return SharedPref.getBooleanPerf(Settings.OPEN_LINKS_EXTERNALLY);
-    }
+    public static boolean openLinksExternally(){return SharedPref.getBooleanPerf(Settings.OPEN_LINKS_EXTERNALLY);}
 
-    public static boolean viewStoriesAnonymously(){
-        return SharedPref.getBooleanPerf(Settings.VIEW_STORIES_ANONYMOUSLY);
-    }
+    public static boolean viewStoriesAnonymously(){return SharedPref.getBooleanPerf(Settings.VIEW_STORIES_ANONYMOUSLY);}
     public static boolean viewLiveAnonymously(){
         return SharedPref.getBooleanPerf(Settings.VIEW_LIVE_ANONYMOUSLY);
     }
@@ -46,6 +42,9 @@ public class Pref {
 
     public static boolean disableAnalytics(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_ANALYTICS);
+    }
+    public static boolean disableDiscoverPeople(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_DISCOVER_PEOPLE);
     }
     //end
 }

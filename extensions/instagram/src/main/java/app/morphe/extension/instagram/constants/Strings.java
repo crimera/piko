@@ -33,5 +33,7 @@ public class Strings{
     public static final String CATEGORY_MISC = "Misc";
     public static final String DISABLE_ANALYTICS = "Disable analytics";
     public static final String DISABLE_ANALYTICS_DESC = "Block analytics that are sent to Instagram/Facebook servers";
+    public static final String DISABLE_DISCOVER_PEOPLE = "Disable discover people";
+    public static final String DISABLE_DISCOVER_PEOPLE_DESC = "Disables discover people section on user profile";
 
 }

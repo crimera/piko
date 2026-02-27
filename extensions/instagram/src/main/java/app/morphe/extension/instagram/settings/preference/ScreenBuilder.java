@@ -190,6 +190,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.disableDiscoverPeople) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_DISCOVER_PEOPLE,
+                            Strings.DISABLE_DISCOVER_PEOPLE_DESC,
+                            Settings.DISABLE_DISCOVER_PEOPLE
+                    )
+            );
+        }
     }
     //end
 }
