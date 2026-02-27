@@ -1029,6 +1029,26 @@ public class ScreenBuilder {
                 )
         );
 
+       if (SettingsStatus.exportLoginToken) {
+           addPreference(category,
+                   helper.buttonPreference(
+                           StringRef.str("piko_pref_export_login_token"),
+                           "",
+                           Settings.EXPORT_LOGIN_TOKEN,
+                           "ic_vector_passkey",
+                           null
+                   )
+           );
+           addPreference(category,
+                   helper.buttonPreference(
+                           StringRef.str("piko_pref_force_remove_account"),
+                           StringRef.str("piko_pref_force_remove_account_desc"),
+                           Settings.FORCE_REMOVE_ACCOUNT,
+                           "ic_vector_passkey",
+                           null
+                   )
+           );
+       }
     }
 
     public void buildPikoSection(boolean buildCategory){
