@@ -26,11 +26,12 @@ val interceptUriPatch = bytecodePatch(
         TigonServiceLayerStartRequestFingerprint.method.apply {
             val firstIfEqzIndex = indexOfFirstInstruction(Opcode.IF_EQZ)
 
-            val uriRegister = getInstruction(firstIfEqzIndex+1).registersUsed[0]
+            val getUriObjectInstruction = instructions.last { it.opcode == Opcode.IGET_OBJECT && it.location.index < firstIfEqzIndex }
 
-            addInstructions(firstIfEqzIndex+1,"""
-                invoke-static/range { v$uriRegister .. v$uriRegister }, ${Constants.LINKS_DESCRIPTOR}->interceptUri(Ljava/net/URI;)Ljava/net/URI;
-                move-result-object v$uriRegister
+            val uriRegister = getUriObjectInstruction.registersUsed[0]
+
+            addInstructions(getUriObjectInstruction.location.index+1,"""
+                invoke-static/range { v$uriRegister .. v$uriRegister }, ${Constants.LINKS_DESCRIPTOR}->interceptUri(Ljava/net/URI;)V
             """.trimIndent())
         }
     }
