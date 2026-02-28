@@ -52,7 +52,7 @@ public class RestorePrefFragment extends Fragment {
 
         }
         if(sts){
-            toast(StringRef.str("piko_pref_import",StringRef.str("piko_pref_success")));
+            toast(StringRef.str("piko_pref_import_success"));
         }
         else{
             toast(StringRef.str("piko_pref_import_failed",prefTag));

@@ -2,18 +2,16 @@
 <resources>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
-    <string name="piko_pref_reader_mode">reader mode</string>
-    <string name="piko_pref_reader_mode_desc">Enables \"reader mode\" on long threads</string>
-    <string name="piko_pref_undo_posts">undo posts</string>
+    <string name="piko_pref_undo_posts">Enable undo posts</string>
     <string name="piko_pref_undo_posts_desc">Enables ability to undo posts before posting</string>
     <string name="piko_pref_undo_posts_btn">Undo posts settings</string>
     <string name="piko_pref_icon_n_navbar_btn">App icon and navbar customisation settings</string>
-    <string name="piko_pref_enable_force_pip">PiP mode automatically</string>
+    <string name="piko_pref_enable_force_pip">Force PiP mode</string>
     <string name="piko_pref_enable_force_pip_desc">Enables PiP mode when you close the app</string>
 
     <!-- Download Settings -->
     <string name="piko_title_download">Download</string>
-    <string name="piko_pref_video_download">video downloading</string>
+    <string name="piko_pref_video_download">Video downloading</string>
     <string name="piko_pref_download">Change download directory</string>
     <string name="piko_pref_download_path">Public folder</string>
     <string name="piko_pref_download_path_desc">The public folder to use for video downloads</string>
@@ -36,6 +34,7 @@
     <string name="piko_pref_native_downloader_no_media">No media found</string>
     <string name="piko_pref_native_downloader_filename_title">Save filename pattern</string>
     <string name="piko_browse_object_title">Browse tweet object</string>
+    <string name="piko_browse_object_toggle">Enable Browse tweet object</string>
     <string name="piko_share_image_title">Share Tweet as Image</string>
     <string name="piko_share_image_toggle">Enable Share Tweet as Image</string>
     <string name="piko_share_image_autocleanup">Auto-cleanup captures</string>
@@ -66,31 +65,31 @@
 
     <!-- Ads Settings -->
     <string name="piko_title_ads">Ads</string>
-    <string name="piko_pref_hide_promoted_posts">Promoted posts</string>
-    <string name="piko_pref_wtf_section">\"Who to follow\" section</string>
-    <string name="piko_pref_cts_section">\"Creators to subscribe\" section</string>
-    <string name="piko_pref_ctj_section">\"Community to join\" section</string>
-    <string name="piko_pref_ryb_section">\"Revisit your bookmark\" section</string>
-    <string name="piko_pref_pinned_posts_section">\"Pinned posts by followers\" section</string>
-    <string name="piko_pref_hide_detailed_posts">Related posts (in replies)</string>
-    <string name="piko_pref_hide_premium_prompt">Message prompts</string>
-    <string name="piko_pref_hide_todays_news">Today\'s news</string>
+    <string name="piko_pref_hide_promoted_posts">Hide promoted posts</string>
+    <string name="piko_pref_wtf_section">Hide \"Who to follow\" section</string>
+    <string name="piko_pref_cts_section">Hide \"Creators to subscribe\" section</string>
+    <string name="piko_pref_ctj_section">Hide \"Community to join\" section</string>
+    <string name="piko_pref_ryb_section">Hide \"Revisit your bookmark\" section</string>
+    <string name="piko_pref_pinned_posts_section">Hide \"Pinned posts by followers\" section</string>
+    <string name="piko_pref_hide_detailed_posts">Hide related posts (in replies)</string>
+    <string name="piko_pref_hide_premium_prompt">Hide message prompts</string>
+    <string name="piko_pref_hide_todays_news">Hide today\'s news</string>
     <string name="piko_pref_del_from_db">Delete entries from database</string>
     <string name="piko_pref_db_not_found">Database not found</string>
     <string name="piko_pref_db_not_open">Database is not opened</string>
     <string name="piko_pref_db_del_items">Deleted items</string>
-    <string name="piko_pref_hide_premium_upsell">premium upsell</string>
-    <string name="piko_pref_hide_premium_upsell_desc">Removes premium upsell in home timeline</string>
-    <string name="piko_pref_top_people_search">top people in search</string>
-    <string name="piko_pref_top_people_search_desc">Removes people section after search</string>
+    <string name="piko_pref_hide_premium_upsell">Hide premium upsell</string>
+    <string name="piko_pref_hide_premium_upsell_desc">Hides premium upsell in home timeline</string>
+    <string name="piko_pref_top_people_search">Hide top people in search</string>
+    <string name="piko_pref_top_people_search_desc">Hides people section after search</string>
 
     <!-- Misc Settings -->
     <string name="piko_title_misc">Misc</string>
-    <string name="piko_pref_chirp_font">chirp font</string>
-    <string name="piko_pref_hide_fab">floating action button</string>
-    <string name="piko_pref_hide_fab_menu">floating action menu buttons</string>
-    <string name="piko_pref_rec_users">recommended users</string>
-    <string name="piko_pref_hide_view_count">view count</string>
+    <string name="piko_pref_chirp_font">Enable chirp font</string>
+    <string name="piko_pref_hide_fab">Hide floating action button</string>
+    <string name="piko_pref_hide_fab_menu">Hide floating action menu buttons</string>
+    <string name="piko_pref_rec_users">Hide recommended users</string>
+    <string name="piko_pref_hide_view_count">Hide view count</string>
     <string name="piko_pref_custom_share_domain">Custom sharing domain</string>
     <string name="piko_pref_custom_share_domain_desc">The domain to use when sharing tweets</string>
     <string name="piko_pref_show_sensitive_media">Show sensitive media</string>
@@ -100,13 +99,14 @@
     <string name="piko_pref_unshorten_link_desc">Get rid of t.co short urls</string>
     <string name="piko_pref_round_off_numbers">Round off numbers</string>
     <string name="piko_pref_round_off_numbers_desc">Rounds off number as K and M </string>
-    <string name="piko_pref_debug_menu">debug menu for posts</string>
+    <string name="piko_pref_debug_menu">Enable debug menu for posts</string>.
+    <string name="piko_pref_hide_community_notes">Hide Community Notes</string>
     <string name="piko_pref_quick_settings">Enable quick settings</string>
     <string name="piko_pref_quick_settings_summary">Adds a quick settings button at the sidebar</string>
     <string name="piko_pref_pause_search_suggestion">Pause search suggestions</string>
     <string name="piko_pref_pause_search_suggestion_desc">Search suggestions will not be saved locally</string>
-    <string name="piko_pref_search_suggestion">search suggestions</string>
-    <string name="piko_pref_search_suggestion_desc">Hide/Remove search suggestion in explore section</string>
+    <string name="piko_pref_search_suggestion">Hide search suggestions</string>
+    <string name="piko_pref_search_suggestion_desc">Hides search suggestion in explore section</string>
     <string name="piko_disunify_xchat_system">Disunify xchat system</string>
     <string name="piko_disunify_xchat_system_desc">Bring back legacy features like messages and share sheet</string>
 
@@ -116,29 +116,32 @@
     <string name="piko_pref_edit_flag_title">Edit flag</string>
     <string name="piko_pref_add_flag_title">Add flag</string>
     <string name="piko_pref_search_flags">Search flags</string>
+    <string name="piko_pref_import_flags">Import flags</string>
+    <string name="piko_pref_export_flags">Export flags</string>
+    <string name="piko_pref_reset_flags">Reset flags</string>
 
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">Timeline</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Disable auto timeline scroll on launch</string>
     <string name="piko_pref_show_post_source">Show post source label</string>
     <string name="piko_pref_show_post_source_desc">There might be a delay while opening a post info and also label will be shown only on public posts</string>
-    <string name="piko_pref_hide_live_threads">live threads</string>
+    <string name="piko_pref_hide_live_threads">Hide live threads</string>
     <string name="piko_pref_hide_live_threads_desc">Hides live section in timeline</string>
-    <string name="piko_pref_hide_banner">banner</string>
-    <string name="piko_pref_hide_banner_desc">new posts pill</string>
-    <string name="piko_pref_hide_bmk_timeline">bookmark icon in timeline</string>
+    <string name="piko_pref_hide_banner">Hide banner</string>
+    <string name="piko_pref_hide_banner_desc">Hides new posts pill</string>
+    <string name="piko_pref_hide_bmk_timeline">Hide bookmark icon in timeline</string>
     <string name="piko_pref_force_translate">Force enable translate</string>
     <string name="piko_pref_force_translate_desc">Get translate option for all posts</string>
-    <string name="piko_pref_hide_quick_promote">promote button</string>
+    <string name="piko_pref_hide_quick_promote">Hide promote button</string>
     <string name="piko_pref_hide_quick_promote_desc">Hides promote button under self posts</string>
     <string name="piko_pref_show_poll_result">Show poll results</string>
     <string name="piko_pref_show_poll_result_desc">View poll results without voting</string>
-    <string name="piko_pref_hide_immersive_player">immersive player</string>
+    <string name="piko_pref_hide_immersive_player">Hide immersive player</string>
     <string name="piko_pref_hide_immersive_player_desc">Removes swipe up for more videos in video player</string>
-    <string name="piko_pref_enable_vid_auto_advance">video auto scroll</string>
+    <string name="piko_pref_enable_vid_auto_advance">Enable video auto scroll</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">Enables video auto scroll in immersive view</string>
-    <string name="piko_pref_hide_hidden_replies">hidden replies</string>
-    <string name="piko_pref_force_hd">force HD videos</string>
+    <string name="piko_pref_hide_hidden_replies">Hide hidden replies</string>
+    <string name="piko_pref_force_hd">Force HD videos</string>
     <string name="piko_pref_force_hd_desc">Videos will be played in the highest quality always</string>
     <string name="piko_pref_hide_nudge_button">Hide nudge button</string>
     <string name="piko_pref_hide_nudge_button_desc">Hides follow/subscribe/follow back buttons on posts</string>
@@ -193,9 +196,11 @@
 
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Backup and restore</string>
-    <string name="piko_pref_export">Export %s</string>
-    <string name="piko_pref_import">Import %s</string>
-    <string name="piko_pref_success">successful</string>
+    <string name="piko_pref_import_settings">Import Piko settings</string>
+    <string name="piko_pref_export_settings">Export Piko settings</string>
+    <string name="piko_pref_reset_settings">Reset Piko settings</string>
+    <string name="piko_pref_export_success">Export successful</string>
+    <string name="piko_pref_import_success">Import successful</string>
     <string name="piko_pref_export_failed">Error: Exporting %s failed</string>
     <string name="piko_pref_import_failed">Error: Importing %s failed</string>
     <string name="piko_pref_export_no_uri">Error: No destination provided</string>
@@ -211,8 +216,6 @@
     <string name="piko_pref_included">Included</string>
     <string name="piko_pref_excluded">Excluded</string>
     <string name="piko_pref_app_restart_rec">App restart is recommended</string>
-    <string name="piko_pref_remove">Remove %s</string>
-    <string name="piko_pref_enable">Enable %s</string>
     <string name="piko_single_page_settings">Single settings page</string>
     <string name="piko_single_page_settings_desc">View settings in a single page</string>
 
@@ -222,6 +225,10 @@
 
     <string name="piko_settings_supported_links">Open supported links</string>
 
+    <!-- For delete dialog -->
+    <string name="piko_dialog_delete_title">Delete</string>
+    <string name="piko_dialog_delete_message">Delete %s?</string>
+    
     <!-- For arrays-->
     <string name="piko_array_grok">Grok</string>
     <string name="piko_array_money">Money</string>

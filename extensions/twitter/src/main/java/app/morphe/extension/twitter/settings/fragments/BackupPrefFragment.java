@@ -35,7 +35,7 @@ public class BackupPrefFragment extends Fragment {
             OutputStream openOutputStream = getActivity().getContentResolver().openOutputStream(uri);
             openOutputStream.write(bytes);
             openOutputStream.close();
-            toast(StringRef.str("piko_pref_export",StringRef.str("piko_pref_success")));
+            toast(StringRef.str("piko_pref_export_success"));
         } catch (IOException e) {
             toast(StringRef.str("piko_pref_export_failed",prefTag));
         }
