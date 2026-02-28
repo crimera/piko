@@ -208,6 +208,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.followBackIndicator) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.FOLLOW_BACK_INDICATOR,
+                            "",
+                            Settings.FOLLOW_BACK_INDICATOR
+                    )
+            );
+        }
     }
     //end
 }

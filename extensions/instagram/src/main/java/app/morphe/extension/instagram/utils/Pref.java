@@ -46,5 +46,8 @@ public class Pref {
     public static boolean disableDiscoverPeople(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_DISCOVER_PEOPLE);
     }
+    public static boolean followBackIndicator(){
+        return SharedPref.getBooleanPerf(Settings.FOLLOW_BACK_INDICATOR);
+    }
     //end
 }

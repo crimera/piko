@@ -1,0 +1,26 @@
+package app.crimera.patches.instagram.entity.userfriendshipstatus
+
+import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
+import app.morphe.patcher.Fingerprint
+import com.android.tools.smali.dexlib2.AccessFlags
+
+internal const val EXTENSION_CLASS = "$ENTITY_CLASS/UserFriendshipStatus;"
+
+internal object NametagResultCardViewSetButtonMethodFingerprint: Fingerprint(
+    returnType = "V",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
+    custom  = { method, classDef ->
+        classDef.type.endsWith("NametagResultCardView;") && method.parameters.size == 3
+    }
+)
+
+
+internal object GetHelperClassExtensionFingerprint: Fingerprint(
+    definingClass = EXTENSION_CLASS,
+    name = "getHelperClass"
+)
+
+internal object GetFollowBackStatusFingerprint: Fingerprint(
+    definingClass = EXTENSION_CLASS,
+    name = "getFollowBackStatus"
+)
