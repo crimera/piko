@@ -16,5 +16,6 @@ object Constants {
     const val LINKS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Links;"
 
     const val ACTIVITY_SETTINGS_STATUS_CLASS = "$ACTIVITY_SETTINGS_CLASS/SettingsStatus;"
+    const val ENTITY_CLASS = "$INTEGRATIONS_PACKAGE/entity"
     const val SSTS_DESCRIPTOR = "invoke-static {}, $ACTIVITY_SETTINGS_STATUS_CLASS->%s()V"
 }

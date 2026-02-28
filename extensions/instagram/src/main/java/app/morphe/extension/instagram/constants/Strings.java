@@ -36,5 +36,8 @@ public class Strings{
     public static final String DISABLE_ANALYTICS_DESC = "Block analytics that are sent to Instagram/Facebook servers";
     public static final String DISABLE_DISCOVER_PEOPLE = "Disable discover people";
     public static final String DISABLE_DISCOVER_PEOPLE_DESC = "Disables discover people section on user profile";
+    public static final String FOLLOW_BACK_INDICATOR = "Enable follow back indicator";
+    public static final String FBI_FOLLOWS_YOU = "Follows you";
+    public static final String FBI_DOESNT_FOLLOWS_YOU = "Does not follow you";
 
 }

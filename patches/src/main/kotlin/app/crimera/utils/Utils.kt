@@ -100,6 +100,28 @@ fun ResourcePatchContext.replaceStringsInFile(
     }
 }
 
+data class MethodFieldMetadata(
+    val name: String,
+    val definingClass: String,
+    val returnType: String
+)
+
+fun classNameToExtension(className: String): String = className.removePrefix("L").replace("/", ".").removeSuffix(";")
+
+fun Instruction.methodExtractor(): MethodFieldMetadata {
+    val ref = getReference<MethodReference>()
+    val defMethodClassName = classNameToExtension(ref!!.definingClass)
+    val returnTypeClassName = classNameToExtension(ref.returnType)
+    return MethodFieldMetadata(ref.name,defMethodClassName,returnTypeClassName)
+}
+fun Instruction.fieldExtractor(): MethodFieldMetadata {
+    val ref = getReference<FieldReference>()
+    val defMethodClassName = classNameToExtension(ref!!.definingClass)
+    val fieldTypeClassName = classNameToExtension(ref.type)
+    return MethodFieldMetadata(ref.name,defMethodClassName,fieldTypeClassName)
+}
+
+
 context(BytecodePatchContext)
 fun Fingerprint.enableSettings(functionName: String) {
     method.addInstruction(

@@ -19,4 +19,6 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting DISABLE_REELS = new BooleanSetting("disable_reels", false);
     public static final BooleanSetting DISABLE_EXPLORE = new BooleanSetting("disable_explore", false);
     public static final BooleanSetting DISABLE_COMMENTS = new BooleanSetting("disable_comments", false);
+    public static final BooleanSetting FOLLOW_BACK_INDICATOR = new BooleanSetting("follow_back_indicator", true);
+
 }
