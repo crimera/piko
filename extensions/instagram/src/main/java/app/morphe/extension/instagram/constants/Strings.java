@@ -42,4 +42,7 @@ public class Strings{
     public static final String VIEW_STORY_MENTIONS = "View story mentions";
     public static final String VSM_TITLE = "Story mentions";
     public static final String VSM_NO_MENTIONS = "No mentions on this story";
+    public static final String DISABLE_STORY_FLIPPING = "Disable story flipping";
+    public static final String DISABLE_STORY_FLIPPING_DESC = "Disable automatic flipping/moving to next story";
+    public static final String DISABLE_VIDEO_AUTOPLAY = "Disable video autoplay";
 }

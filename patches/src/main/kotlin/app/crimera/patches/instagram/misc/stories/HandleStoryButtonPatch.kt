@@ -81,10 +81,10 @@ val handleStoryButtonPatch = bytecodePatch(
                     iget-object v4, v1, ${classDef.type}->$userSessionFieldName:$userSession
                     invoke-static {v0,v2,v3,v4}, $STORY_BUTTON_EXTENSION_CLASS->storyButtonAction($charSequence Landroid/content/Context;Ljava/lang/Object;$userSession)Z
                     move-result v0
-                    if-eqz v0, :revanced
+                    if-eqz v0, :piko
                     return-void
                 """.trimIndent(),
-                ExternalLabel("revanced", getInstruction(0))
+                ExternalLabel("piko", getInstruction(0))
             )
         }
 
