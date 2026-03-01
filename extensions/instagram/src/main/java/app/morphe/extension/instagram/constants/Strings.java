@@ -39,5 +39,7 @@ public class Strings{
     public static final String FOLLOW_BACK_INDICATOR = "Enable follow back indicator";
     public static final String FBI_FOLLOWS_YOU = "Follows you";
     public static final String FBI_DOESNT_FOLLOWS_YOU = "Does not follow you";
-
+    public static final String VIEW_STORY_MENTIONS = "View story mentions";
+    public static final String VSM_TITLE = "Story mentions";
+    public static final String VSM_NO_MENTIONS = "No mentions on this story";
 }

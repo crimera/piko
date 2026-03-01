@@ -88,7 +88,11 @@ public class SettingsStatus {
     public static void followBackIndicator() {
         followBackIndicator = true;
     }
-    public static boolean miscSection() {return (disableAnalytics || disableDiscoverPeople || followBackIndicator);}
+    public static boolean viewStoryMentions = false;
+    public static void viewStoryMentions() {
+        viewStoryMentions = true;
+    }
+    public static boolean miscSection() {return (disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions);}
     public static void load() {
     }
 }

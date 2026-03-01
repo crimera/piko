@@ -217,6 +217,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.viewStoryMentions) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.VIEW_STORY_MENTIONS,
+                            "",
+                            Settings.VIEW_STORY_MENTIONS
+                    )
+            );
+        }
     }
     //end
 }

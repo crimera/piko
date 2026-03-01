@@ -49,5 +49,8 @@ public class Pref {
     public static boolean followBackIndicator(){
         return SharedPref.getBooleanPerf(Settings.FOLLOW_BACK_INDICATOR);
     }
+    public static boolean viewStoryMentions(){
+        return SharedPref.getBooleanPerf(Settings.VIEW_STORY_MENTIONS);
+    }
     //end
 }

@@ -48,7 +48,7 @@ public class Entity {
             Method method = clazz.getDeclaredMethod(methodName, paramTypes);
             method.setAccessible(true);
 
-            return method.invoke(null, params);
+            return method.invoke(clsObj, params);
         }
 
     }
