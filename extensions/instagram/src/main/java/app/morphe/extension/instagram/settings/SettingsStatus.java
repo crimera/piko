@@ -85,14 +85,16 @@ public class SettingsStatus {
         disableDiscoverPeople = true;
     }
     public static boolean followBackIndicator = false;
-    public static void followBackIndicator() {
-        followBackIndicator = true;
-    }
+    public static void followBackIndicator() {followBackIndicator = true;}
     public static boolean viewStoryMentions = false;
     public static void viewStoryMentions() {
         viewStoryMentions = true;
     }
-    public static boolean miscSection() {return (disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions);}
+    public static boolean disableStoryFlipping = false;
+    public static void disableStoryFlipping() {
+        disableStoryFlipping = true;
+    }
+    public static boolean miscSection() {return (disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping);}
     public static void load() {
     }
 }

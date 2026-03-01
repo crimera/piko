@@ -226,6 +226,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.disableStoryFlipping) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_STORY_FLIPPING,
+                            Strings.DISABLE_STORY_FLIPPING_DESC,
+                            Settings.DISABLE_STORY_FLIPPING
+                    )
+            );
+        }
     }
     //end
 }
