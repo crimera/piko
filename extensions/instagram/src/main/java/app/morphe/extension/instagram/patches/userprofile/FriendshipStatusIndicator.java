@@ -52,7 +52,7 @@ public class FriendshipStatusIndicator {
 
 
     public static void indicators(UserSession userSession, Object profileInfoObject, Object badgeObject){
-        if(Pref.followBackIndicator()) {
+        if(Pref.followBackIndicator() && SettingsStatus.followBackIndicator) {
             try {
                 String loggedInUserId = userSession.getUserId();
                 Object viewingProfileUserObject = getViewingProfileUserObject(profileInfoObject);
