@@ -1,13 +1,10 @@
 package app.crimera.patches.twitter.misc.bringbacktwitter
 
 import app.crimera.utils.replaceStringsInFile
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.patches.all.misc.resources.addAppResources
-import app.morphe.patches.all.misc.resources.addResourcesPatch
-import app.morphe.util.ResourceGroup
-import app.morphe.util.asSequence
-import app.morphe.util.copyResources
-import app.morphe.util.findElementByAttributeValueOrThrow
+import app.morphe.patches.all.misc.resources.locales
+import app.morphe.util.*
 import org.w3c.dom.Element
 
 @Suppress("unused")
@@ -19,11 +16,7 @@ val bringBackTwitterPatch =
     ) {
         compatibleWith("com.twitter.android")
 
-        dependsOn(addResourcesPatch)
-
         execute {
-            addAppResources("twitter-bring-back")
-
             // region Change app name
 
             document("AndroidManifest.xml").use { document ->
@@ -127,7 +120,37 @@ val bringBackTwitterPatch =
             }
             // endregion
 
+            // region Change strings
+
+            locales.forEach { locale ->
+                val srcSubPath = "${locale.getSrcLocaleFolderName()}/strings.xml"
+                val destPath = "res/${locale.getDestLocaleFolderName()}/strings.xml"
+                if (!get(destPath).exists()) {
+                    // Split apk for this language is missing, ignoring.
+                    return@forEach
+                }
+
+                // Load replacement values from the source resource, and construct a replacement map.
+                val replacementMap = HashMap<String, String>()
+                val srcStream = inputStreamFromBundledResource("twitter/bringbacktwitter/strings", srcSubPath)
+                    ?: throw PatchException("Could not find $srcSubPath")
+                document(srcStream).use { srcDoc ->
+                    srcDoc.documentElement.forEachChildElement {
+                        replacementMap[it.getAttribute("name")] = it.textContent
+                    }
+                }
+                if (replacementMap.isEmpty()) return@forEach
+
+                // Apply replacements to the destination resource.
+                document(destPath).use { destDoc ->
+                    destDoc.documentElement.forEachChildElement {
+                        it.textContent = replacementMap[it.getAttribute("name")] ?: return@forEachChildElement
+                    }
+                }
+            }
+
             /*
+             * Special handling for Japanese.
              * Instead of defining strings in the map, replaces texts directly.
              * Reason: https://t.me/pikopatches/1/17339
              */

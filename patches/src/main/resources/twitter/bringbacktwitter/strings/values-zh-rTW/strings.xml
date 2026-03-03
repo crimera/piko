@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Bring back Twitter -->
     <string name="button_action_add_tweet">加入推文</string>
     <string name="button_action_options_tweet">推文選項</string>
     <string name="button_action_retweet">轉推</string>

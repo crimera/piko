@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Bring back Twitter -->
     <string name="button_action_add_tweet">Bir tweet ekle</string>
     <string name="button_action_options_tweet">Tweet seçenekleri</string>
     <string name="button_action_retweet">Retweet</string>

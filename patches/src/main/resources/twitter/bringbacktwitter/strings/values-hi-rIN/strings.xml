@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Bring back Twitter -->
     <string name="button_action_add_tweet">एक ट्वीट जोड़ें</string>
     <string name="button_action_options_tweet">ट्वीट विकल्प</string>
     <string name="button_action_retweet">रीट्वीट</string>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Bring back Twitter -->
     <string name="conference_default_title">Twitter Conference</string>
     <string name="button_action_add_tweet">Add a tweet</string>
     <string name="button_action_options_tweet">Tweet options</string>

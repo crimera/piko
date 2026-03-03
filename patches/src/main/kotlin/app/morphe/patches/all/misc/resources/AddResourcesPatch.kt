@@ -43,8 +43,6 @@ import app.morphe.patches.all.misc.resources.StringResourceSanitizer.sanitizeAnd
 import app.morphe.util.forEachChildElement
 import app.morphe.util.getNode
 import app.morphe.util.inputStreamFromBundledResource
-import org.w3c.dom.Element
-import org.w3c.dom.Node
 import java.util.Locale
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -204,28 +202,6 @@ internal val addResourcesPatch = resourcePatch(
                                             "$srcFolderName resource: $resourceName"
                                 }
                                 return@forEachChildElement
-                            }
-
-                            // Remove existing resources with the same name.
-                            // ARSCLib doesn't check for duplicates and uses the last added,
-                            // but Apktool crashes if duplicates exist.
-                            val srcAttrName = srcNode.getAttribute("name")
-                            if (srcAttrName.isNotEmpty()) {
-                                val childNodes = destResourceNode.childNodes
-                                val tagName = srcNode.tagName
-
-                                for (i in 0 until childNodes.length) {
-                                    val node = childNodes.item(i)
-
-                                    if (node != null &&
-                                        node.nodeType == Node.ELEMENT_NODE &&
-                                        node.nodeName == tagName &&
-                                        (node as Element).getAttribute("name") == srcAttrName
-                                    ) {
-                                        destResourceNode.removeChild(node)
-                                        break
-                                    }
-                                }
                             }
 
                             val importedSrcNode = destDoc.importNode(srcNode, true)

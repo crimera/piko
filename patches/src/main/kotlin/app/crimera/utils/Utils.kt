@@ -11,7 +11,6 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.ResourcePatchContext
 import app.morphe.util.*
-import app.morphe.util.inputStreamFromBundledResource
 import com.android.tools.smali.dexlib2.HiddenApiRestriction
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.BuilderInstruction
@@ -27,47 +26,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.formats.*
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.Reference
-import org.w3c.dom.Element
-
-fun ResourcePatchContext.replaceXmlResources(
-    sourceResourceDirectory: String,
-    vararg resourceGroups: ResourceGroup,
-) {
-    resourceGroups.forEach { resourceGroup ->
-        resourceGroup.resources.forEach { resource ->
-            val sourceFile = "${resourceGroup.resourceDirectoryName}/$resource"
-            val targetFile = "res/$sourceFile"
-
-            // If target file doesn't exist, use copyResources as fallback
-            if (!get("res").resolve(sourceFile).exists()) {
-                copyResources(sourceResourceDirectory, resourceGroup)
-                return@forEach
-            }
-
-            // Load replacement values from the source resource
-            val replacementDoc = document(inputStreamFromBundledResource(sourceResourceDirectory, sourceFile)!!)
-
-            // Apply replacements to the target resource
-            document(targetFile).use { targetDoc ->
-                val replacementNodes = replacementDoc.getElementsByTagName("string")
-                val targetNodes = targetDoc.getElementsByTagName("string")
-
-                // Single loop: iterate through replacement strings and apply them directly
-                for (i in 0 until replacementNodes.length) {
-                    val replacementNode = replacementNodes.item(i) as Element
-                    val stringName = replacementNode.getAttribute("name")
-                    val replacementValue = replacementNode.textContent
-
-                    // Find and replace the corresponding element in target document
-                    val targetElement = targetNodes.findElementByAttributeValue("name", stringName)
-                    targetElement?.textContent = replacementValue
-                }
-            }
-
-            replacementDoc.close()
-        }
-    }
-}
 
 fun ResourcePatchContext.replaceStringsInFile(
     vararg resourceGroups: ResourceGroup,
