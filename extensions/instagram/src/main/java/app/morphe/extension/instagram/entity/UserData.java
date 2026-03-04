@@ -31,4 +31,12 @@ public class UserData extends Entity {
         }
     }
 
+    public String getUserId() throws Exception {
+        return (String)super.getMethod(this.obj,"getId");
+    }
+
+    public UserFriendshipStatus getUserFriendshipStatus() throws Exception {
+        return new UserFriendshipStatus(this.obj);
+    }
+
 }
