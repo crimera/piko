@@ -6,9 +6,7 @@ import com.android.tools.smali.dexlib2.Opcode
 
 internal val TARGET_STRING_ARRAY =  arrayOf(
     "permalink",
-    "story_item_to_share_url",
     "profile_to_share_url",
-    "live_to_share_url",
 )
 internal object PermalinkResponseJsonParserFingerprint: Fingerprint(
     strings = listOf(TARGET_STRING_ARRAY[0]),
@@ -17,23 +15,19 @@ internal object PermalinkResponseJsonParserFingerprint: Fingerprint(
     },
 )
 
-internal object StoryUrlResponseJsonParserFingerprint: Fingerprint(
+internal object ProfileUrlResponseJsonParserFingerprint: Fingerprint(
     strings = listOf(TARGET_STRING_ARRAY[1]),
     custom = { methodDef, _->
         methodDef.name.lowercase().contains("parsefromjson")
     },
 )
 
-internal object ProfileUrlResponseJsonParserFingerprint: Fingerprint(
-    strings = listOf(TARGET_STRING_ARRAY[2]),
-    custom = { methodDef, _->
-        methodDef.name.lowercase().contains("parsefromjson")
-    },
+internal object StoryUrlResponseImplFingerprint: Fingerprint(
+    returnType = "Ljava/lang/String;",
+    definingClass = "Lcom/instagram/request/StoryItemUrlResponseImpl;",
 )
 
-internal object LiveUrlResponseJsonParserFingerprint: Fingerprint(
-    strings = listOf(TARGET_STRING_ARRAY[3]),
-    custom = { methodDef, _->
-        methodDef.name.lowercase().contains("parsefromjson")
-    },
+internal object LiveUrlResponseImplFingerprint: Fingerprint(
+    returnType = "Ljava/lang/String;",
+    definingClass = "Lcom/instagram/request/LiveItemLinkUrlResponseImpl;",
 )
