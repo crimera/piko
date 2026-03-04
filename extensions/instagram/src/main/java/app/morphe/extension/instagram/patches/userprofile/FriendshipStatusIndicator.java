@@ -9,8 +9,9 @@ import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.utils.Utils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
-import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.UserFriendshipStatus;
+import app.morphe.extension.instagram.entity.UserData;
+import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.constants.Strings;
 
@@ -21,18 +22,6 @@ public class FriendshipStatusIndicator {
     private static Object getViewingProfileUserObject(Object classObject)throws Exception{
         Entity entity = new Entity(classObject);
         return entity.getField("fieldName");
-    }
-
-    /**
-     * Given user object, this function returns user's id.
-     *
-     * @param userObject The viewing profile user object.
-     * @return The user ID as string.
-     * @throws Exception If an exception occurs during the method invocation.
-     **/
-    private static String getViewingProfileUserId(Object userObject) throws Exception {
-        Entity entity = new Entity(userObject);
-        return (String) entity.getMethod("getId");
     }
 
     /**
@@ -56,12 +45,13 @@ public class FriendshipStatusIndicator {
             try {
                 String loggedInUserId = userSession.getUserId();
                 Object viewingProfileUserObject = getViewingProfileUserObject(profileInfoObject);
-                String viewingProfileUserId = getViewingProfileUserId(viewingProfileUserObject);
+                UserData viewingUserData = new UserData(viewingProfileUserObject);
+                String viewingProfileUserId = viewingUserData.getUserId();
 
                 // If the logged in user id is same as viewing profile, then no need to display the badge.
                 if (loggedInUserId.equals(viewingProfileUserId)) return;
 
-                UserFriendshipStatus userFriendshipStatus = new UserFriendshipStatus(viewingProfileUserObject);
+                UserFriendshipStatus userFriendshipStatus = viewingUserData.getUserFriendshipStatus();
                 Boolean followed_by = userFriendshipStatus.getFollowBackStatus();
                 String indicatorText = followed_by ? Strings.FBI_FOLLOWS_YOU : Strings.FBI_DOESNT_FOLLOWS_YOU;
                 setInternalBadgeText(badgeObject, indicatorText);
