@@ -1,8 +1,8 @@
 package app.crimera.patches.instagram.misc.stories
 
-import app.crimera.patches.instagram.misc.stories.viewstorymention.GetMediaObjectFromReelItemExtensionFingerprint
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
-import app.crimera.utils.changeFirstString
+import app.crimera.utils.MethodFieldMetadata
+import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -36,8 +36,11 @@ val handleStoryButtonPatch = bytecodePatch(
 
         val STORY_BUTTON_EXTENSION_CLASS = "${PATCHES_DESCRIPTOR}/story/StoryButton;"
 
+        var mediaObjectFromReelItemFieldExtraction: MethodFieldMetadata;
         // Add button on story bottom sheet.
         AddStoryButtonFingerprint.method.apply {
+
+            mediaObjectFromReelItemFieldExtraction = instructions.filter { it.opcode == Opcode.IGET_OBJECT }[1].fieldExtractor()
             // The last invoke-virtual instruction is arrayList.add().
             val lastInvokeVirtualRegisters = instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL }.registersUsed
             val arrayListRegister = lastInvokeVirtualRegisters[0]
@@ -78,6 +81,7 @@ val handleStoryButtonPatch = bytecodePatch(
                     
                     iget-object v2, v1, ${classDef.type}->$appActivityFieldName:$appActivity
                     iget-object v3, v1, ${classDef.type}->$reelItemFieldName:$reelItemClassName
+                    iget-object v3, v3, $reelItemClassName->${mediaObjectFromReelItemFieldExtraction.name}:${extensionToClassName(mediaObjectFromReelItemFieldExtraction.returnType)}
                     iget-object v4, v1, ${classDef.type}->$userSessionFieldName:$userSession
                     invoke-static {v0,v2,v3,v4}, $STORY_BUTTON_EXTENSION_CLASS->storyButtonAction($charSequence Landroid/content/Context;Ljava/lang/Object;$userSession)Z
                     move-result v0
