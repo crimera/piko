@@ -107,6 +107,7 @@ data class MethodFieldMetadata(
 )
 
 fun classNameToExtension(className: String): String = className.removePrefix("L").replace("/", ".").removeSuffix(";")
+fun extensionToClassName(className: String): String =  "L" + className.replace(".", "/") + ";"
 
 fun Instruction.methodExtractor(): MethodFieldMetadata {
     val ref = getReference<MethodReference>()

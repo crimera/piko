@@ -26,10 +26,6 @@ val viewStoryMentionsPatch =
 
         execute {
 
-            AddStoryButtonFingerprint.method.apply {
-                val mediaObjectFieldName = instructions.filter { it.opcode == Opcode.IGET_OBJECT }[1].fieldExtractor().name
-                GetMediaObjectFromReelItemExtensionFingerprint.changeFirstString(mediaObjectFieldName)
-            }
             enableSettings("viewStoryMentions")
         }
     }

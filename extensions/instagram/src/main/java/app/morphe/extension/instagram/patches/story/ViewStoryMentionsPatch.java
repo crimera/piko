@@ -20,13 +20,8 @@ import app.morphe.extension.instagram.constants.Strings;
 
 public class ViewStoryMentionsPatch {
 
-    private static Object getMediaObjectFromReelItem(Object classObject)throws Exception{
-        return new Entity(classObject).getField("fieldname");
-    }
-
-    public static void viewMentions(Context ctx, Object reelItemObject){
+    public static void viewMentions(Context ctx, Object mediaObject){
         try {
-            Object mediaObject = ViewStoryMentionsPatch.getMediaObjectFromReelItem(reelItemObject);
             HashSet<Object> mentionSet = new MediaData(mediaObject).getMentionSet();
             showCopyDialog(ctx,mentionSet);
         } catch (Exception ex){
