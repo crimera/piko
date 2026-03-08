@@ -151,8 +151,8 @@
     <string name="piko_title_customisation">自訂設定</string>
     <string name="piko_pref_customisation_profiletabs">隱藏個人資料頁標籤</string>
     <string name="piko_pref_customisation_timelinetabs">隱藏時間軸標籤</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">隱藏 \「為你推薦」"</string>
-    <string name="piko_pref_customisation_timelinetabs_following">隱藏 \「正在跟隨」"</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">隱藏 \「為你推薦</string>
+    <string name="piko_pref_customisation_timelinetabs_following">隱藏 \「正在跟隨</string>
     <string name="piko_pref_customisation_timelinetabs_both">兩個都顯示</string>
     <string name="piko_pref_customisation_sidebartabs">隱藏側邊欄項目</string>
     <string name="piko_pref_customisation_navbartabs">隱藏導航欄項目</string>
