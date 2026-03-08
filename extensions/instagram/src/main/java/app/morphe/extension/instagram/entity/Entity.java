@@ -10,6 +10,7 @@ public class Entity {
     public Entity(Object obj) {
         this.obj = obj;
     }
+    public Entity() { this.obj = null;}
 
     public Class<?> getObjClass() throws ClassNotFoundException {
         return this.obj.getClass();
@@ -48,7 +49,7 @@ public class Entity {
             Method method = clazz.getDeclaredMethod(methodName, paramTypes);
             method.setAccessible(true);
 
-            return method.invoke(clsObj, params);
+            return method.invoke(null, params);
         }
 
     }

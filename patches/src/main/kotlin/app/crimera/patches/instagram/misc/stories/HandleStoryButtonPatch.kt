@@ -60,17 +60,14 @@ val handleStoryButtonPatch = bytecodePatch(
             val classDef = OnCLickStoryButtonFingerprint.classDef
             val reelItemClassName = "Lcom/instagram/model/reels/ReelItem;"
             val appActivity = "Landroid/app/Activity;"
-            val userSession = "Lcom/instagram/common/session/UserSession;"
             val charSequence = "Ljava/lang/CharSequence;"
 
             val classFields = classDef.fields
             val reelItemFieldName  = classFields.first { it.type == reelItemClassName }.name
             val appActivityFieldName  = classFields.first { it.type == appActivity }.name
-            val userSessionFieldName  = classFields.first { it.type == userSession }.name
 
             val characterSequenceParameterIndex = OnCLickStoryButtonFingerprint.method.parameters.indexOfLast { it.type == charSequence }
             val selfClassParameterIndex = OnCLickStoryButtonFingerprint.method.parameters.indexOfLast { it.type == classDef.type }
-
 
             // Hard coding registries as it's going to be the first line in the method.
             addInstructionsWithLabels(
@@ -82,8 +79,7 @@ val handleStoryButtonPatch = bytecodePatch(
                     iget-object v2, v1, ${classDef.type}->$appActivityFieldName:$appActivity
                     iget-object v3, v1, ${classDef.type}->$reelItemFieldName:$reelItemClassName
                     iget-object v3, v3, $reelItemClassName->${mediaObjectFromReelItemFieldExtraction.name}:${extensionToClassName(mediaObjectFromReelItemFieldExtraction.returnType)}
-                    iget-object v4, v1, ${classDef.type}->$userSessionFieldName:$userSession
-                    invoke-static {v0,v2,v3,v4}, $STORY_BUTTON_EXTENSION_CLASS->storyButtonAction($charSequence Landroid/content/Context;Ljava/lang/Object;$userSession)Z
+                    invoke-static {v0,v2,v3}, $STORY_BUTTON_EXTENSION_CLASS->storyButtonAction($charSequence Landroid/content/Context;Ljava/lang/Object;)Z
                     move-result v0
                     if-eqz v0, :piko
                     return-void

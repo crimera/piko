@@ -55,5 +55,17 @@ public class Pref {
     public static boolean viewStoryMentions(){
         return SharedPref.getBooleanPerf(Settings.VIEW_STORY_MENTIONS);
     }
+
+
+    public static boolean enableDownload(){
+        return SharedPref.getBooleanPerf(Settings.ENABLE_DOWNLOAD);
+    }
+    public static boolean enableDirectDownload(){
+        return SharedPref.getBooleanPerf(Settings.ENABLE_DIRECT_DOWNLOAD);
+    }
+    public static boolean downloadUsernameFolder(){
+        return SharedPref.getBooleanPerf(Settings.DOWNLOAD_USERNAME_FOLDER);
+    }
+
     //end
 }

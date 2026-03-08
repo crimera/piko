@@ -34,6 +34,7 @@ public class SettingsFragment extends PreferenceFragment {
         screenBuilder.linksSection();
         screenBuilder.distractionFreeSection();
         screenBuilder.buildMiscSection();
+        screenBuilder.buildDownloadSection();
         screenBuilder.buildDeveloperSection();
 
         setPreferenceScreen(screen);
