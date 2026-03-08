@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0-dev.9",
+  "version": "3.0.0-dev.10",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -333,7 +333,7 @@
     {
       "name": "Disunify xchat system",
       "description": "Bring back legacy features like messages and share sheet.",
-      "use": true,
+      "use": false,
       "dependencies": [
         "BytecodePatch"
       ],

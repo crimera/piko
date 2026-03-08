@@ -1,3 +1,10 @@
+# [3.0.0-dev.10](https://github.com/crimera/piko/compare/v3.0.0-dev.9...v3.0.0-dev.10) (2026-03-08)
+
+
+### Bug Fixes
+
+* **Twitter:** fix high resolution video extraction ([3ecf524](https://github.com/crimera/piko/commit/3ecf52427de28e7ec1e876a81201e07a73081d39))
+
 # [3.0.0-dev.9](https://github.com/crimera/piko/compare/v3.0.0-dev.8...v3.0.0-dev.9) (2026-02-26)
 
 
