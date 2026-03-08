@@ -23,6 +23,7 @@ val disUnifyXchatSystemPatch =
     bytecodePatch(
         name = "Disunify xchat system",
         description = "Bring back legacy features like messages and share sheet.",
+        use = false
     ) {
         compatibleWith("com.twitter.android")
         dependsOn(settingsPatch)
