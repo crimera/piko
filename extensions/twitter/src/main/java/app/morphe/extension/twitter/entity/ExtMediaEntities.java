@@ -1,5 +1,7 @@
 package app.morphe.extension.twitter.entity;
 
+import java.util.List;
+
 import app.morphe.extension.twitter.entity.Video;
 import app.morphe.extension.twitter.entity.Media;
 import app.morphe.extension.twitter.Utils;
@@ -27,9 +29,26 @@ public class ExtMediaEntities extends Debug{
     }
 
     public Video getHighResVideo() throws Exception {
-        // d() Lcom/twitter/model/core/entity/b0;
-        Object data = super.getMethod("highResVideoMethod");
-        return data!=null ?new Video(data):null;
+        Object mediaVideoInfoEntityObject = super.getField("fieldname");
+        if(mediaVideoInfoEntityObject==null) return null;
+
+        Debug mediaVideoInfoEntity = new Debug(mediaVideoInfoEntityObject);
+
+        Object videoVariantObject = mediaVideoInfoEntity.getField("c");
+        if(videoVariantObject==null) return null;
+
+        List videoVariant = (List) videoVariantObject;
+        int maxBitrate = 0;
+        Video maxBitrateVideo = null;
+        for(Object videoObject : videoVariant){
+            Video video = new Video(videoObject);
+            int bitrate = video.getBitrate();
+            if(bitrate > maxBitrate){
+                maxBitrateVideo = video;
+            }
+        }
+
+        return maxBitrateVideo!=null ?maxBitrateVideo:null;
     }
 
     public Media getMedia() throws Exception {

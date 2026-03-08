@@ -86,12 +86,12 @@ internal object QuotedViewSetAccessibilityFingerprint : Fingerprint(
 )
 
 // --------------- Extended Media Entity
-internal object ExtMediaHighResVideoMethodFinder : Fingerprint(
-    strings =
-        listOf(
-            "long_press_menu",
-            "null cannot be cast to non-null type com.twitter.model.dm.attachment.DMMediaAttachment",
-        ),
+internal object GetSensitiveMediaCategoriesMethodFingerprint : Fingerprint(
+    name = "getSensitiveMediaCategories",
+    accessFlags = listOf(AccessFlags.FINAL, AccessFlags.PUBLIC),
+    custom = { _, classDef ->
+        classDef.contains("Lcom/twitter/model/core/entity/")
+    },
 )
 
 internal object ExtMediaHighResVideoFingerprint : Fingerprint(
