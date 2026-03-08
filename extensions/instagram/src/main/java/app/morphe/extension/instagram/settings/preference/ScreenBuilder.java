@@ -236,5 +236,36 @@ public class ScreenBuilder {
             );
         }
     }
+
+    public void buildDownloadSection(){
+        if (!(SettingsStatus.downloadMedia)) return;
+
+        PreferenceCategory category = category = addCategory(Strings.CATEGORY_DOWNLOAD_MEDIA);
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.ENABLE_DOWNLOAD,
+                        "",
+                        Settings.ENABLE_DOWNLOAD
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.ENABLE_DIRECT_DOWNLOAD,
+                        Strings.ENABLE_DIRECT_DOWNLOAD_DESC,
+                        Settings.ENABLE_DIRECT_DOWNLOAD
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.DOWNLOAD_USERNAME_FOLDER,
+                        Strings.DOWNLOAD_USERNAME_FOLDER_DESC,
+                        Settings.DOWNLOAD_USERNAME_FOLDER
+                )
+        );
+    }
+
     //end
 }

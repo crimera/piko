@@ -95,6 +95,11 @@ public class SettingsStatus {
         disableStoryFlipping = true;
     }
     public static boolean miscSection() {return (disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping);}
+
+    //Download section.
+    public static boolean downloadMedia = false;
+    public static void downloadMedia() {downloadMedia = true;}
+
     public static void load() {
     }
 }

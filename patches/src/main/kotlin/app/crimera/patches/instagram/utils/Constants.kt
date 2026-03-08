@@ -14,6 +14,7 @@ object Constants {
         move-result-object v%s"""
 
     const val LINKS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Links;"
+    const val DOWNLOAD_DESCRIPTOR = "$PATCHES_DESCRIPTOR/download"
 
     const val ACTIVITY_SETTINGS_STATUS_CLASS = "$ACTIVITY_SETTINGS_CLASS/SettingsStatus;"
     const val ENTITY_CLASS = "$INTEGRATIONS_PACKAGE/entity"

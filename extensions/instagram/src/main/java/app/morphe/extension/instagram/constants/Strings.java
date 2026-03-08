@@ -45,4 +45,21 @@ public class Strings{
     public static final String DISABLE_STORY_FLIPPING = "Disable story flipping";
     public static final String DISABLE_STORY_FLIPPING_DESC = "Disable automatic flipping/moving to next story";
     public static final String DISABLE_VIDEO_AUTOPLAY = "Disable video autoplay";
+
+    public static final String CATEGORY_DOWNLOAD_MEDIA = "Download media";
+    public static final String ENABLE_DOWNLOAD = "Enable download";
+    public static final String ENABLE_DIRECT_DOWNLOAD = "Enable direct download";
+    public static final String ENABLE_DIRECT_DOWNLOAD_DESC = "Downloads the current viewing media without asking for options";
+    public static final String DOWNLOAD_USERNAME_FOLDER = "Split media by username";
+    public static final String DOWNLOAD_USERNAME_FOLDER_DESC = "Creates subfolders based on username";
+    public static final String DOWNLOAD_CURRENT_MEDIA = "Download current media";
+    public static final String DOWNLOAD_AS_IMAGE = "Download as image";
+    public static final String DOWNLOAD_OPTIONS = "Download options";
+    public static final String COPY_MEDIA_LINK = "Copy media link";
+    public static final String COPIED_MEDIA_LINK = "Copied media link";
+    public static final String DOWNLOAD_ALL = "Download all";
+    public static final String DOWNLOADING_MEDIA = "Downloading : ";
+    public static final String DOWNLOADED_MEDIA = "Downloaded : ";
+    public static final String MEDIA_EXISTS = "Media exits";
+    public static final String DOWNLOAD_FAILED_MEDIA = "Download failed : ";
 }
