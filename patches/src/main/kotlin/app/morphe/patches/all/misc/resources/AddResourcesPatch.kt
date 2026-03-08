@@ -32,7 +32,7 @@
  */
 
 /**
- * Piko changes made:
+ * Piko changes:
  * - Changed locale languages
  */
 
@@ -46,7 +46,6 @@ import app.morphe.util.inputStreamFromBundledResource
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import java.util.Locale
-import java.util.logging.Level
 import java.util.logging.Logger
 
 internal val locales = listOf(
@@ -96,7 +95,7 @@ internal class AppLocale(
 }
 
 private enum class BundledResourceType {
-    // Add more resource xml files as needed.
+    // Add more resource XML files as needed.
     ARRAYS,
     COLORS,
     STRINGS;
@@ -123,7 +122,7 @@ internal val addResourcesPatch = resourcePatch(
 
 
     finalize {
-        fun getLogger(): Logger = Logger.getLogger(AppLocale.javaClass.name)
+        val logger by lazy { Logger.getLogger(AppLocale.javaClass.name) }
 
         fun addResourcesFromFile(
             appId: String,
@@ -151,8 +150,8 @@ internal val addResourcesPatch = resourcePatch(
                 val destFile = this@finalize[destSubPath]
                 if (!destFile.exists()) {
                     if (locale.isBuiltInLanguage) {
-                        getLogger().warning {
-                                    "Provided app does not contain all region localizations. " +
+                        logger.warning {
+                            "Provided app does not contain all region localizations. " +
                                     "Locale: $locale does not exist in provided app file: $destSubPath"
                         }
                     }
@@ -166,6 +165,21 @@ internal val addResourcesPatch = resourcePatch(
 
                 document(destSubPath).use { destDoc ->
                     val destResourceNode = destDoc.getNode("resources")
+
+                    // Build lookup table once per destination file.
+                    val children = destResourceNode.childNodes
+                    val existingNodes = HashMap<Pair<String, String>, Node>(
+                        2 * children.length, 0.5f
+                    )
+
+                    for (i in 0 until children.length) {
+                        val node = children.item(i)
+                        if (node.nodeType == Node.ELEMENT_NODE) {
+                            val el = node as Element
+                            val key = el.tagName to el.getAttribute("name")
+                            existingNodes[key] = el
+                        }
+                    }
 
                     document(srcStream).use { srcDoc ->
                         // Check for bad localized files with duplicate strings.
@@ -187,7 +201,7 @@ internal val addResourcesPatch = resourcePatch(
                             }
 
                             if (!localeStringsAdded.add(resourceName)) {
-                                getLogger().warning(
+                                logger.warning(
                                     "Duplicate string resource is declared: $srcFolderName " +
                                             "resource: $resourceName"
                                 )
@@ -198,38 +212,22 @@ internal val addResourcesPatch = resourcePatch(
                                 // Duplicate check already handled above.
                                 defaultResourcesAdded.add(resourceName)
                             } else if (!defaultResourcesAdded.contains(resourceName)) {
-                                // TODO: Enable when patcher/CLI supports debug/dev logging.
-                                if (false) getLogger().log(Level.INFO) {
-                                    "Ignoring removed default resource for locale (Issue will be fixed after next Crowdin sync): " +
+                                logger.fine {
+                                    "Ignoring removed default resource for locale " +
+                                            "(Issue will be fixed after next Crowdin sync): " +
                                             "$srcFolderName resource: $resourceName"
                                 }
                                 return@forEachChildElement
                             }
 
-                            // Remove existing resources with the same name.
-                            // ARSCLib doesn't check for duplicates and uses the last added,
-                            // but Apktool crashes if duplicates exist.
-                            val srcAttrName = srcNode.getAttribute("name")
-                            if (srcAttrName.isNotEmpty()) {
-                                val childNodes = destResourceNode.childNodes
-                                val tagName = srcNode.tagName
-
-                                for (i in 0 until childNodes.length) {
-                                    val node = childNodes.item(i)
-
-                                    if (node != null &&
-                                        node.nodeType == Node.ELEMENT_NODE &&
-                                        node.nodeName == tagName &&
-                                        (node as Element).getAttribute("name") == srcAttrName
-                                    ) {
-                                        destResourceNode.removeChild(node)
-                                        break
-                                    }
-                                }
+                            val key = srcNode.tagName to resourceName
+                            existingNodes[key]?.let { existing ->
+                                destResourceNode.removeChild(existing)
                             }
 
-                            val importedSrcNode = destDoc.importNode(srcNode, true)
-                            destResourceNode.appendChild(importedSrcNode)
+                            // Import and append
+                            val imported = destDoc.importNode(srcNode, true)
+                            destResourceNode.appendChild(imported)
                         }
                     }
                 }
