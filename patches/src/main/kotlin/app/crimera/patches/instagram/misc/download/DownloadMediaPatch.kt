@@ -43,12 +43,7 @@ val downloadMediaPatch = bytecodePatch(
         val addingReelButtonMethodName = AddingReelButtonMethodFingerprint.method.name
         AddReelButtonExtensionFingerprint.changeFirstString(addingReelButtonMethodName)
 
-        val currentViewingMediaFieldData: MethodFieldMetadata
-        ViewedImpressionFingerprint.method.apply {
-            val strIndex = ViewedImpressionFingerprint.stringMatches[0].index
-
-            currentViewingMediaFieldData = instructions[indexOfFirstInstruction(strIndex, Opcode.IGET)].fieldExtractor()
-        }
+        val currentViewingMediaFieldData = EditMediaInfoFragmentFingerprint.method.instructions.last { it.opcode == Opcode.IGET }.fieldExtractor()
 
         AddFeedButtonFingerprint.method.apply {
             instructions.filter{it.opcode == Opcode.RETURN_OBJECT }.forEach {
