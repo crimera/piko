@@ -357,7 +357,7 @@ Here you can export the login token for the account you\'re currently logged in 
 This is useful in the following cases:\n
 - If you already have a device logged in and want to log in on another device\n
 - If you want to reinstall Piko\n
-- If you want to log in using a cloned app\n
+- If you want to log into a cloned APK\n
 - If you have another rooted device and can log in normally\n
 Exported tokens can be imported from the login screen.  To import additional accounts, select \"Create a new account\" instead of \"Add an existing account\".\n
 \n
@@ -365,7 +365,7 @@ Exported tokens can be imported from the login screen.  To import additional acc
 \n
 X for Android stores the tokens and information of the currently logged-in account in the Android system\'s AccountManager.
 This information continues to work even if you clear the app data.
-This is why the account remains even after clearing the app data for X.\n
+This is why X still be logged in even after clearing the app data.\n
 Therefore, you can restore this information and log in on other devices.\n
 \n
 <big>WARNING</big>\n
