@@ -16,9 +16,12 @@ internal object AddFeedButtonFingerprint : Fingerprint(
 internal object FeedButtonOnClickFingerprint : Fingerprint(
     strings = listOf("click_media_option","Required value was null.")
 )
-internal object ViewedImpressionFingerprint : Fingerprint(
+internal object EditMediaInfoFragmentFingerprint : Fingerprint(
+    definingClass = "Linstagram/features/creation/fragment/EditMediaInfoFragment;",
     returnType = "V",
-    strings = listOf("viewed_impression","instagram_organic_viewed_impression")
+    parameters = listOf(),
+    strings = listOf("Required value was null."),
+
 )
 internal object AddReelButtonFingerprint : Fingerprint(
     strings = listOf("ClipsOrganicMediaItemViewMoreOptionsController")
