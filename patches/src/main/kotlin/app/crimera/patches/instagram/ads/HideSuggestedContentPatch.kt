@@ -21,8 +21,10 @@ internal object FeedItemParseFromJsonFingerprint : Fingerprint(
             "suggested_igd_channels",
             "suggested_top_accounts",
             "suggested_users",
-            "FeedItem",
         ),
+    custom = {methodDef,_->
+        methodDef.name.lowercase().contains("parsefromjson")
+    }
 )
 
 @Suppress("unused")
