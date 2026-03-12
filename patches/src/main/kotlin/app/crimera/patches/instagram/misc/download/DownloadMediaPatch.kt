@@ -46,20 +46,33 @@ val downloadMediaPatch = bytecodePatch(
         val currentViewingMediaFieldData = EditMediaInfoFragmentFingerprint.method.instructions.last { it.opcode == Opcode.IGET }.fieldExtractor()
 
         AddFeedButtonFingerprint.method.apply {
-            instructions.filter{it.opcode == Opcode.RETURN_OBJECT }.forEach {
-                val index = it.location.index
-                val nextInstruction = getInstruction( index + 1 )
-                if(nextInstruction.opcode == Opcode.NEW_INSTANCE){
-                    val arrayListRegister = nextInstruction.registersUsed[0]
-                    val checkCastIndex = indexOfFirstInstruction(index, Opcode.CHECK_CAST)
-                    val checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
+            var arrayListRegister = -1
+            var checkCastRegister = -1
+            var checkCastIndex = -1
 
-                    addInstructions(checkCastIndex+1,"""
-                        invoke-static {v$checkCastRegister,v$arrayListRegister},$FEED_BUTTON_DESCRIPTOR->addFeedButton(Ljava/lang/Object;Ljava/util/ArrayList;)V
-                    """.trimIndent())
-
-                    return@apply
+            if(getInstruction(0).opcode == Opcode.INVOKE_STATIC){
+                arrayListRegister = getInstruction(1).registersUsed[0]
+                checkCastIndex = indexOfFirstInstruction(Opcode.CHECK_CAST)
+                checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
+            }else {
+                instructions.filter { it.opcode == Opcode.RETURN_OBJECT }.forEach {
+                    val index = it.location.index
+                    val nextInstruction = getInstruction(index + 1)
+                    if (nextInstruction.opcode == Opcode.NEW_INSTANCE) {
+                        arrayListRegister = nextInstruction.registersUsed[0]
+                        checkCastIndex = indexOfFirstInstruction(index, Opcode.CHECK_CAST)
+                        checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
+                        return@apply
+                    }
                 }
+            }
+
+            if(arrayListRegister!= -1 && checkCastRegister!=-1 && checkCastIndex!=-1){
+                addInstructions(
+                    checkCastIndex + 1, """
+                        invoke-static {v$checkCastRegister,v$arrayListRegister},$FEED_BUTTON_DESCRIPTOR->addFeedButton(Ljava/lang/Object;Ljava/util/ArrayList;)V
+                    """.trimIndent()
+                )
             }
         }
 
