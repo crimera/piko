@@ -11,7 +11,7 @@ internal val TARGET_STRING_ARRAY =  arrayOf(
 internal object PermalinkResponseJsonParserFingerprint: Fingerprint(
     strings = listOf(TARGET_STRING_ARRAY[0]),
     custom = { methodDef, _->
-        methodDef.name.lowercase().contains("parsefromjson") && methodDef.implementation?.instructions?.count { it.opcode == Opcode.CONST_STRING } == 1
+        methodDef.name.lowercase().contains("parsefromjson") && methodDef.implementation?.instructions?.filter { it.opcode == Opcode.CONST_STRING }!!.size < 3
     },
 )
 
