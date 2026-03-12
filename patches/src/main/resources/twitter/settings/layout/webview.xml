@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WebView
     android:layout_gravity="center_horizontal"
-    android:id="@id/webview"
+    android:id="@+id/webview"
     android:paddingLeft="10.0dip"
     android:paddingTop="5.0dip"
     android:paddingRight="10.0dip"

@@ -1,12 +1,20 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.misc.appicon
 
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.util.PIKO_RESOURCE_PREFIX
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
 import app.morphe.util.findElementByAttributeValue
 import app.morphe.util.findElementByAttributeValueOrThrow
-import java.nio.file.Files
 
 val appIconResourcePatch =
     resourcePatch {
@@ -22,10 +30,6 @@ val appIconResourcePatch =
             )
 
             val sourceDir = "twitter/appicons"
-            copyResources(
-                sourceDir,
-                ResourceGroup("values", "piko_app_icon_colors.xml"),
-            )
 
             val imagesDir = "$sourceDir/images"
             copyResources(
@@ -117,31 +121,6 @@ val appIconResourcePatch =
                         insertAfter = activityAlias
                     }
                 }
-            }
-
-            val stringsDir = "$sourceDir/strings"
-            copyResources(
-                stringsDir,
-                ResourceGroup("values", "app_icon_strings.xml"),
-                resourcePrefix = PIKO_RESOURCE_PREFIX,
-            )
-
-            val languages =
-                arrayOf(
-                    "ko",
-                    "pl",
-                ).map { "values-$it" }
-
-            languages.forEach {
-                val vDirectory = get("res").resolve(it)
-                if (!vDirectory.isDirectory) {
-                    Files.createDirectories(vDirectory.toPath())
-                }
-                copyResources(
-                    stringsDir,
-                    ResourceGroup(it, "app_icon_strings.xml"),
-                    resourcePrefix = PIKO_RESOURCE_PREFIX,
-                )
             }
         }
     }

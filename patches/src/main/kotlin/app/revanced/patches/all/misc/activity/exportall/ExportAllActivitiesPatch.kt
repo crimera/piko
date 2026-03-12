@@ -9,6 +9,8 @@ val exportAllActivitiesPatch =
         description = "Makes all app activities exportable.",
         use = false,
     ) {
+        compatibleWith("com.twitter.android")
+
         execute {
             val exportedFlag = "android:exported"
 

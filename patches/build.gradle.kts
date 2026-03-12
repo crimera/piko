@@ -18,6 +18,15 @@ dependencies {
 }
 
 tasks {
+    register<JavaExec>("checkStringResources") {
+        description = "Checks resource strings for invalid formatting"
+
+        dependsOn(compileKotlin)
+
+        classpath = sourceSets["main"].runtimeClasspath
+        mainClass.set("app.morphe.util.resource.CheckStringKt")
+    }
+
     register<JavaExec>("generatePatchesList") {
         description = "Build patch with patch list"
 

@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.entity
 
 import app.morphe.patcher.Fingerprint
@@ -86,12 +96,12 @@ internal object QuotedViewSetAccessibilityFingerprint : Fingerprint(
 )
 
 // --------------- Extended Media Entity
-internal object ExtMediaHighResVideoMethodFinder : Fingerprint(
-    strings =
-        listOf(
-            "long_press_menu",
-            "null cannot be cast to non-null type com.twitter.model.dm.attachment.DMMediaAttachment",
-        ),
+internal object GetSensitiveMediaCategoriesMethodFingerprint : Fingerprint(
+    name = "getSensitiveMediaCategories",
+    accessFlags = listOf(AccessFlags.FINAL, AccessFlags.PUBLIC),
+    custom = { _, classDef ->
+        classDef.contains("Lcom/twitter/model/core/entity/")
+    },
 )
 
 internal object ExtMediaHighResVideoFingerprint : Fingerprint(

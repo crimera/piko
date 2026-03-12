@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-02-24T16:07:29",
-  "description": "# [3.0.0-dev.7](https://github.com/crimera/piko/compare/v3.0.0-dev.6...v3.0.0-dev.7) (2026-02-24)\n\n\n### Features\n\n* Add `Browse tweet object` patch ([2e05c33](https://github.com/crimera/piko/commit/2e05c334ee32ba6075249bb873f13ba6d822d77e))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.7/patches-3.0.0-dev.7.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.7/patches-3.0.0-dev.7.mpp.asc",
-  "version": "3.0.0-dev.7"
+  "created_at": "2026-03-08T18:15:23",
+  "description": "# [3.0.0-dev.10](https://github.com/crimera/piko/compare/v3.0.0-dev.9...v3.0.0-dev.10) (2026-03-08)\n\n\n### Bug Fixes\n\n* **Twitter:** fix high resolution video extraction ([3ecf524](https://github.com/crimera/piko/commit/3ecf52427de28e7ec1e876a81201e07a73081d39))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.10/patches-3.0.0-dev.10.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.10/patches-3.0.0-dev.10.mpp.asc",
+  "version": "3.0.0-dev.10"
 }

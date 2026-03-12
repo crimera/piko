@@ -1,12 +1,16 @@
 /*
  * Copyright 2025 Morphe.
- * https://github.com/MorpheApp/morphe-patches/blob/95e285b9aaa3195fe49fe5326a416043348989e6/patches/src/main/kotlin/app/morphe/util/ResourceUtils.kt
+ * https://github.com/MorpheApp/morphe-patches
  *
- * File-Specific License Notice (GPLv3 Section 7 Additional Permission).
+ * Original code hard forked from:
+ * https://github.com/ReVanced/revanced-patches/blob/bd2a939a72e0106b14bd67f46bec646b53a0a0d4/patches/src/main/kotlin/app/revanced/util/ResourceUtils.kt
+ *
+ * File-Specific License Notice (GPLv3 Section 7 Terms)
  *
  * This file is part of the Morphe patches project and is licensed under
  * the GNU General Public License version 3 (GPLv3), with the Additional
- * Terms under Section 7 described in the Morphe patches LICENSE file.
+ * Terms under Section 7 described in the Morphe patches
+ * LICENSE file: https://github.com/MorpheApp/morphe-patches/blob/main/NOTICE
  *
  * https://www.gnu.org/licenses/gpl-3.0.html
  *
@@ -29,6 +33,7 @@
  * (Project Name Restriction) and the GPLv3 itself, remain fully
  * applicable to this file.
  */
+
 package app.morphe.util
 
 import app.morphe.patcher.patch.PatchException
@@ -43,8 +48,6 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
 private val classLoader = object {}.javaClass.classLoader
-
-internal val PIKO_RESOURCE_PREFIX = "piko_" // Note: Piko specific change
 
 /**
  * Removes a node from its parent.
@@ -103,19 +106,25 @@ fun Node.insertFirst(node: Node) {
 fun ResourcePatchContext.copyResources(
     sourceResourceDirectory: String,
     vararg resources: ResourceGroup,
-    resourcePrefix: String = "" // NOTE: Piko specific change
 ) {
     val targetResourceDirectory = this["res", false]
 
     for (resourceGroup in resources) {
         resourceGroup.resources.forEach { resource ->
+            // Create the target directory if it doesn't exist.
+            Files.createDirectories(
+                targetResourceDirectory.resolve(resourceGroup.resourceDirectoryName).toPath()
+            )
 
-            val resourcePath = "${resourceGroup.resourceDirectoryName}/$resource"
-            val targetPath = "${resourceGroup.resourceDirectoryName}/$resourcePrefix$resource"
-
+            val resourceFile = "${resourceGroup.resourceDirectoryName}/$resource"
+            val stream = inputStreamFromBundledResource(sourceResourceDirectory, resourceFile)
+            if (stream == null) {
+                throw IllegalArgumentException("Could not find resource: $resourceFile " +
+                        "in directory: $sourceResourceDirectory")
+            }
             Files.copy(
-                inputStreamFromBundledResource(sourceResourceDirectory, resourcePath)!!,
-                targetResourceDirectory.resolve(targetPath).toPath(),
+                stream,
+                targetResourceDirectory.resolve(resourceFile).toPath(),
                 StandardCopyOption.REPLACE_EXISTING,
             )
         }
@@ -136,8 +145,8 @@ class ResourceGroup(val resourceDirectoryName: String, vararg val resources: Str
 
 /**
  * Iterate through the children of a node by its tag.
- * @param resource The xml resource.
- * @param targetTag The target xml node.
+ * @param resource The XML resource.
+ * @param targetTag The target XML node.
  * @param callback The callback to call when iterating over the nodes.
  */
 fun ResourcePatchContext.iterateXmlNodeChildren(
@@ -215,4 +224,8 @@ internal fun Element.copyAttributesFrom(oldContainer: Element) {
     }
 }
 
+internal fun String.trimIndentMultiline() =
+    this.split("\n")
+        .joinToString("\n") { it.trimIndent() } // Remove the leading whitespace from each line.
+        .trimIndent() // Remove the leading newline.
 

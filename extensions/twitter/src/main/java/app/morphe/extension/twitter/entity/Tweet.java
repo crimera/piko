@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.entity;
 
 import app.morphe.extension.twitter.entity.ExtMediaEntities;
@@ -95,6 +105,8 @@ public class Tweet extends Debug {
             }
             // Replaces text to empty if the text contains only media link.
             text = text.replaceAll("^pic\\.x\\.com/\\S+$", "");
+            // Replaces links.
+            text = text.replaceAll("https?://t\\.co/\\S+", "");
 
         } catch (Exception e) {
             Utils.logger(e);
