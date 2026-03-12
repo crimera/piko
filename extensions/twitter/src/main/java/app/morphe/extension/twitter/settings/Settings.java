@@ -45,6 +45,7 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting ADS_REMOVE_TODAYS_NEW = new BooleanSetting("ads_remove_todays_news", true);
 
     public static final BooleanSetting VID_NATIVE_DOWNLOADER = new BooleanSetting("vid_native_downloader", true);
+    public static final BooleanSetting VID_INLINE_DOWNLOAD_BUTTON = new BooleanSetting("vid_inline_download_button", true);
     public static final BooleanSetting BROWSE_OBJECT = new BooleanSetting("browse_object", true);
     public static final StringSetting VID_NATIVE_DOWNLOADER_FILENAME = new StringSetting("vid_native_downloader_filename", "0");
     public static final BooleanSetting NATIVE_TRANSLATOR = new BooleanSetting("native_translator", true);

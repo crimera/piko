@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.twitter.Pref;
 
 @SuppressWarnings("unused")
 public class InlineDownloadButton {
@@ -40,6 +41,8 @@ public class InlineDownloadButton {
      * Defers the actual work to post() so the view is fully attached.
      */
     public static void onFinishInflate(ViewGroup inlineActionBar) {
+        if (!Pref.enableNativeDownloader()) return;
+        if (!Pref.enableInlineDownloadButton()) return;
         inlineActionBar.post(() -> wrapWithDownloadButton(inlineActionBar));
     }
 

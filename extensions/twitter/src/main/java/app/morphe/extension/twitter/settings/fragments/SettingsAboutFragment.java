@@ -108,6 +108,7 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         flags.put(strRes("piko_pref_del_from_db"),SettingsStatus.deleteFromDb);
         flags.put(strRes("piko_pref_video_download"),SettingsStatus.enableVidDownload);
         flags.put(strRes("piko_title_native_downloader"),SettingsStatus.nativeDownloader);
+        flags.put(strRes("piko_pref_native_downloader_inline_button"),SettingsStatus.inlineDownloadButton);
         flags.put(strRes("piko_share_image_title"),SettingsStatus.shareImage);
         flags.put(strRes("piko_browse_object_title"),SettingsStatus.browseObject);
         flags.put(strRes("piko_title_native_reader_mode"),SettingsStatus.nativeReaderMode);
