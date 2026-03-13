@@ -378,7 +378,7 @@ Please also be careful of your clipboard or exported files."</string>
     <string name="piko_login_token_import_token_button_text">Login through token json</string>
     <string name="piko_login_token_import_from_text">Import from text</string>
     <string name="piko_login_token_import_from_file">Import from file</string>
-    <string name="piko_login_token_import_success_restart_required">Restart the app for changes to accounts to take effect</string>
+    <string name="piko_login_token_import_success_restart_required">Please restart the app</string>
     <string name="piko_login_token_import_failed_missing_info">Error: Missing username or token or secret</string>
     <string name="piko_login_token_import_failed_already_exist">Failed to add account (may already exist)</string>
     <string name="piko_login_token_remove_account_button_text">Remove account</string>

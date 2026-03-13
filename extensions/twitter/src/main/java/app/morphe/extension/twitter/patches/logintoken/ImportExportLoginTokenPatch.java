@@ -110,7 +110,7 @@ public class ImportExportLoginTokenPatch {
             TextView pikoTextView = view.findViewById(Utils.getResourceIdentifier(view.getContext(), "import_token_text", "id"));
             pikoTextView.setTextColor(Utils.getResourceColor("twitter_blue"));
             pikoTextView.setOnClickListener(v -> {
-                if (view.getContext() instanceof Activity activity) {
+                if (v.getContext() instanceof Activity activity) {
                     new ImportLoginTokenDialogFragment().show(activity.getFragmentManager(), null);
                 } else {
                     Logger.printException(() -> "Failed to open import dialog");

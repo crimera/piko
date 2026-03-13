@@ -90,7 +90,7 @@ public class ExportLoginTokenFragment extends Fragment {
             });
         } else {
             // Remove account button
-            descriptionView.setText(Utils.getResourceIdentifier( "piko_login_token_remove_screen_description", "string"));
+            descriptionView.setText(Utils.getResourceIdentifier("piko_login_token_remove_screen_description", "string"));
             button1.setText(StringRef.str("piko_login_token_remove_account_button_text"));
             button1.setOnClickListener(v -> {
                 /*
@@ -105,7 +105,6 @@ public class ExportLoginTokenFragment extends Fragment {
                 new AlertDialog.Builder(getContext())
                         .setTitle(StringRef.str("piko_pref_success"))
                         .setMessage(StringRef.str("piko_login_token_import_success_restart_required"))
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> Utils.restartApp(getContext()))
                         .show();
             });
             button2.setVisibility(View.GONE);
