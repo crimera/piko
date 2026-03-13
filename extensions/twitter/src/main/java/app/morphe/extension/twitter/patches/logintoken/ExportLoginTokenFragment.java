@@ -110,7 +110,7 @@ public class ExportLoginTokenFragment extends Fragment {
                             Account account = (Account) spinner.getSelectedItem();
                             accountManager.setAuthToken(account, "com.twitter.android.oauth.token", "a");
                             accountManager.setAuthToken(account, "com.twitter.android.oauth.token.secret", "a");
-                            // Restart dialog
+                            // Show a non-closable dialog to prompt user to restart the app
                             new AlertDialog.Builder(getContext())
                                     .setTitle(StringRef.str("piko_pref_success"))
                                     .setMessage(StringRef.str("piko_login_token_import_success_restart_required"))
