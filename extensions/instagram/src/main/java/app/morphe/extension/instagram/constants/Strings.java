@@ -45,6 +45,8 @@ public class Strings{
     public static final String DISABLE_STORY_FLIPPING = "Disable story flipping";
     public static final String DISABLE_STORY_FLIPPING_DESC = "Disable automatic flipping/moving to next story";
     public static final String DISABLE_VIDEO_AUTOPLAY = "Disable video autoplay";
+    public static final String CUSTOMISE_STORY_TIMESTAMP = "Customise story timestamp";
+    public static final String CUSTOMISE_STORY_TIMESTAMP_DESC = "Customise the timestamp that shows when the story was posted";
 
     public static final String CATEGORY_DOWNLOAD_MEDIA = "Download media";
     public static final String ENABLE_DOWNLOAD = "Enable download";

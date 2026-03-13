@@ -6,6 +6,7 @@ import app.morphe.extension.shared.settings.preference.SharedPrefCategory;
 import app.morphe.extension.instagram.constants.Strings;
 
 import app.morphe.extension.shared.settings.BooleanSetting;
+import app.morphe.extension.shared.settings.StringSetting;
 
 public class SharedPref {
 
@@ -24,6 +25,24 @@ public class SharedPref {
             Utils.showToastShort(ex.toString());
         }
         return false;
+    }
+
+    public static Boolean setStringPref(String key, String val) {
+        try {
+            sp.saveString(key, val);
+            return true;
+        } catch (Exception ex) {
+            Utils.showToastShort(ex.toString());
+        }
+        return false;
+    }
+
+    public static String getStringPref(StringSetting setting) {
+        String value = sp.getString(setting.key, setting.defaultValue);
+        if (value.isBlank()) {
+            return setting.defaultValue;
+        }
+        return value;
     }
 
 
