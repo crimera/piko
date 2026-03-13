@@ -359,7 +359,7 @@ This is useful in the following cases:\n
 - If you want to reinstall Piko\n
 - If you want to log into a cloned APK\n
 - If you have another rooted device and can log in normally\n
-Exported tokens can be imported from the login screen.  To import additional accounts, select \"Create a new account\" instead of \"Add an existing account\".\n
+Tokens will be exported in JSON format. It can be used in the login screen.  To import additional accounts, select \"Create a new account\" instead of \"Add an existing account\".\n
 \n
 <big>How it works</big>\n
 \n
@@ -375,7 +375,7 @@ Please also be careful of your clipboard or exported files."</string>
     <string name="piko_login_token_select_account">Select an account:</string>
     <string name="piko_login_token_export_copy_to_clipboard">Copy to clipboard</string>
     <string name="piko_login_token_export_save_to_file">Save to file</string>
-    <string name="piko_login_token_import_token_button_text">Import piko account</string>
+    <string name="piko_login_token_import_token_button_text">Login through token json</string>
     <string name="piko_login_token_import_from_text">Import from text</string>
     <string name="piko_login_token_import_from_file">Import from file</string>
     <string name="piko_login_token_import_success_restart_required">Restart the app for changes to accounts to take effect</string>
