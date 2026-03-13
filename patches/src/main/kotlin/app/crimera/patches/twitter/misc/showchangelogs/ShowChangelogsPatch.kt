@@ -19,7 +19,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.patch.bytecodePatch
 
 private object MainActivityFingerprint : Fingerprint(
-    definingClass = "/main/MainActivity;"
+    definingClass = "Lcom/twitter/app/main/MainActivity;"
 )
 
 @Suppress("unused")
