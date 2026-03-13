@@ -108,12 +108,13 @@ public class ExportLoginTokenFragment extends Fragment {
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                             // Set dummy token
                             Account account = (Account) spinner.getSelectedItem();
-                            accountManager.setAuthToken(account, "com.twitter.android.oauth.token", "");
-                            accountManager.setAuthToken(account, "com.twitter.android.oauth.token.secret", "");
+                            accountManager.setAuthToken(account, "com.twitter.android.oauth.token", "a");
+                            accountManager.setAuthToken(account, "com.twitter.android.oauth.token.secret", "a");
                             // Restart dialog
                             new AlertDialog.Builder(getContext())
                                     .setTitle(StringRef.str("piko_pref_success"))
                                     .setMessage(StringRef.str("piko_login_token_import_success_restart_required"))
+                                    .setCancelable(false)
                                     .show();
                         })
                         .show();
