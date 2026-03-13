@@ -92,19 +92,30 @@ public class ExportLoginTokenFragment extends Fragment {
             // Remove account button
             descriptionView.setText(Utils.getResourceIdentifier("piko_login_token_remove_screen_description", "string"));
             button1.setText(StringRef.str("piko_login_token_remove_account_button_text"));
+
+            /*
+             * A button to remove account from the app.
+             * To remove the account, set a dummy auth token and intentionally trigger
+             * the automatic logout logic due to an error.
+             * removeAccount() cannot be used here as it sends a logout request to the server.
+             * removeAccountExplicitly() also cannot be used because it leaves unnecessary data in the app data.
+             */
             button1.setOnClickListener(v -> {
-                /*
-                 * To remove the account, set a dummy auth token and intentionally trigger
-                 * the automatic logout logic due to an error.
-                 * removeAccount() cannot be used here as it sends a logout request to the server.
-                 * removeAccountExplicitly() also cannot be used because it leaves unnecessary data in the app data.
-                 */
-                Account account = (Account) spinner.getSelectedItem();
-                accountManager.setAuthToken(account, "com.twitter.android.oauth.token", "");
-                accountManager.setAuthToken(account, "com.twitter.android.oauth.token.secret", "");
+                // Show a confirmation dialog first
                 new AlertDialog.Builder(getContext())
-                        .setTitle(StringRef.str("piko_pref_success"))
-                        .setMessage(StringRef.str("piko_login_token_import_success_restart_required"))
+                        .setMessage(StringRef.str("piko_login_token_remove_account_confirm_text"))
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            // Set dummy token
+                            Account account = (Account) spinner.getSelectedItem();
+                            accountManager.setAuthToken(account, "com.twitter.android.oauth.token", "");
+                            accountManager.setAuthToken(account, "com.twitter.android.oauth.token.secret", "");
+                            // Restart dialog
+                            new AlertDialog.Builder(getContext())
+                                    .setTitle(StringRef.str("piko_pref_success"))
+                                    .setMessage(StringRef.str("piko_login_token_import_success_restart_required"))
+                                    .show();
+                        })
                         .show();
             });
             button2.setVisibility(View.GONE);

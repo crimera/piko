@@ -387,5 +387,6 @@ When you perform this, a notification \"You were logged out due to an error.\" w
 
 If you uninstall the app, you do not need to use this feature because the accounts in the app will not be logged out."</string>
     <string name="piko_login_token_hint_remove_single_account">Hint: It looks like you only have one account logged in, so you can simply reinstall the app to remove the account without logging out.</string>
+    <string name="piko_login_token_remove_account_confirm_text">Are you sure you want to remove this account from the app? Make sure you have exported the token or imported it to another app.</string>
 
 </resources>
