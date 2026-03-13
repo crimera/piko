@@ -235,6 +235,16 @@ public class ScreenBuilder {
                     )
             );
         }
+
+        if (SettingsStatus.customiseStoryTimestamp) {
+            addPreference(category,
+                    helper.listPreference(
+                            Strings.CUSTOMISE_STORY_TIMESTAMP,
+                            Strings.CUSTOMISE_STORY_TIMESTAMP_DESC,
+                            Settings.CUSTOMISE_STORY_TIMESTAMP
+                    )
+            );
+        }
     }
 
     public void buildDownloadSection(){

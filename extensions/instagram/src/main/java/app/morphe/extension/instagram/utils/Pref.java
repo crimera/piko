@@ -55,6 +55,9 @@ public class Pref {
     public static boolean viewStoryMentions(){
         return SharedPref.getBooleanPerf(Settings.VIEW_STORY_MENTIONS);
     }
+    public static String customiseStoryTimestamp(){
+        return SharedPref.getStringPref(Settings.CUSTOMISE_STORY_TIMESTAMP);
+    }
 
 
     public static boolean enableDownload(){

@@ -94,7 +94,11 @@ public class SettingsStatus {
     public static void disableStoryFlipping() {
         disableStoryFlipping = true;
     }
-    public static boolean miscSection() {return (disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping);}
+    public static boolean customiseStoryTimestamp = false;
+    public static void customiseStoryTimestamp() {
+        customiseStoryTimestamp = true;
+    }
+    public static boolean miscSection() {return (customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping);}
 
     //Download section.
     public static boolean downloadMedia = false;

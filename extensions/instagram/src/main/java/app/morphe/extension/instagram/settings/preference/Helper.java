@@ -5,7 +5,9 @@ import android.preference.Preference;
 
 import app.morphe.extension.instagram.utils.SharedPref;
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
+import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.shared.settings.BooleanSetting;
+import app.morphe.extension.shared.settings.StringSetting;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
@@ -27,6 +29,18 @@ public class Helper {
         return preference;
     }
 
+    public Preference listPreference(String title, String summary, StringSetting setting) {
+        ListPref preference = new ListPref(context);
+        String key = setting.key;
+        preference.setTitle(title);
+        preference.setDialogTitle(title);
+        preference.setSummary(summary);
+        preference.setKey(key);
+        preference.setDefaultValue(setting.defaultValue);
+        preference.setSingleLineTitle(false);
+        return preference;
+    }
+
 
     public void setValue(Preference preference, Object newValue) {
         String key = preference.getKey();
@@ -36,6 +50,8 @@ public class Helper {
 
                 if (newValClass.equals("Boolean")) {
                     SharedPref.setBooleanPerf(key, (Boolean) newValue);
+                } else if (newValClass.equals("String")) {
+                    SharedPref.setStringPref(key, (String) newValue);
                 }
             }
 
