@@ -52,14 +52,14 @@ public class DownloadUtils {
                 try {
                     // Doing like this because options are dynamic.
                     String selectedOption = options.get(which);
-                    String downloadFileName = mediaInfo.getDownloadFilename();
-
 
                     if (selectedOption.equals(Strings.DOWNLOAD_CURRENT_MEDIA)) {
                         downloadMediaAt(context,mediaInfo,position);
 
                     } else if (selectedOption.equals(Strings.DOWNLOAD_AS_IMAGE)) {
                         String username = mediaInfo.getUserData().getUsername();
+
+                        String downloadFileName = mediaInfo.getDownloadFilename(true);
                         downloadFile(context, currentMediaData.getPhotoLink(), username, downloadFileName);
 
                     } else if (selectedOption.equals(Strings.COPY_MEDIA_LINK)) {
@@ -90,7 +90,7 @@ public class DownloadUtils {
     public static void downloadMediaAt(Context context, MediaData mediaInfo, int position) throws Exception{
         MediaData currentMediaData = mediaInfo.getMediaAt(position);
         String username = mediaInfo.getUserData().getUsername();
-        String downloadFileName = currentMediaData.getDownloadFilename();
+        String downloadFileName = currentMediaData.getDownloadFilename(false);
 
         downloadFile(context, currentMediaData.getMediaLink(), username, downloadFileName);
     }
