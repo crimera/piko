@@ -26,8 +26,10 @@ public class MediaData extends Entity {
         return (String) super.getMethod("methodName");
     }
 
-    public String getDownloadFilename() throws  Exception {
+    // Sometimes I want to forcefully generate file name as an image while saving the video/media as an image file.
+    public String getDownloadFilename(boolean forceAsImage) throws Exception {
         String extension = this.isVideo() ? ".mp4" : ".jpg";
+        extension = forceAsImage ? ".jpg" : extension;
         String mediaPkId = this.getMediaPkId();
         return mediaPkId+extension;
 

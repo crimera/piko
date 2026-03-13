@@ -48,15 +48,16 @@ val mediaDataPatch = bytecodePatch(
         }
 
         FanClubContentPreviewInteractorImplFingerprint.method.apply {
-            var strIndex = FanClubContentPreviewInteractorImplFingerprint.stringMatches[0].index
-
-            val userDataMethodName = instructions[indexOfFirstInstruction(strIndex, Opcode.INVOKE_INTERFACE)].methodExtractor().name
-            GetUserDataExtensionFingerprint.changeFirstString(userDataMethodName)
-
-            strIndex = FanClubContentPreviewInteractorImplFingerprint.stringMatches[1].index
+            val strIndex = FanClubContentPreviewInteractorImplFingerprint.stringMatches[1].index
 
             val mediaPkIdMethodName = instructions[indexOfFirstInstruction(strIndex, Opcode.INVOKE_VIRTUAL)].methodExtractor().name
             GetMediaPkIdExtensionFingerprint.changeFirstString(mediaPkIdMethodName)
+        }
+
+        DirectShareTargetRelatedFingerprint.method.apply {
+            val firstConst = indexOfFirstInstruction(Opcode.CONST_4)
+            val userDataMethodName = instructions[indexOfFirstInstruction(firstConst, Opcode.INVOKE_INTERFACE)].methodExtractor().name
+            GetUserDataExtensionFingerprint.changeFirstString(userDataMethodName)
         }
     }
 }
