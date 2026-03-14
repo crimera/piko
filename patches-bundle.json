@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-03-08T18:15:23",
-  "description": "# [3.0.0-dev.10](https://github.com/crimera/piko/compare/v3.0.0-dev.9...v3.0.0-dev.10) (2026-03-08)\n\n\n### Bug Fixes\n\n* **Twitter:** fix high resolution video extraction ([3ecf524](https://github.com/crimera/piko/commit/3ecf52427de28e7ec1e876a81201e07a73081d39))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.10/patches-3.0.0-dev.10.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.10/patches-3.0.0-dev.10.mpp.asc",
-  "version": "3.0.0-dev.10"
+  "created_at": "2026-03-14T08:54:47",
+  "description": "# [3.0.0-dev.11](https://github.com/crimera/piko/compare/v3.0.0-dev.10...v3.0.0-dev.11) (2026-03-14)\n\n\n### Bug Fixes\n\n* **Twitter:** Fix image link on post text ([5745621](https://github.com/crimera/piko/commit/57456212d2135fab771a158ebb18bcc26d8256fe))\n\n\n### Features\n\n* **Twitter:** Added `Legacy share links` patch ([3b986b0](https://github.com/crimera/piko/commit/3b986b09d40195c0b0a6cc1eefef79a91a475673))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.11/patches-3.0.0-dev.11.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.11/patches-3.0.0-dev.11.mpp.asc",
+  "version": "3.0.0-dev.11"
 }

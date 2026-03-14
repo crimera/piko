@@ -1,0 +1,31 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
+package app.crimera.patches.twitter.link.legacyShareLinks
+
+import app.crimera.patches.twitter.link.handlemodernsharesheetlinks.handleModernShareSheetLinks
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.utils.enableSettings
+import app.morphe.patcher.patch.bytecodePatch
+
+@Suppress("unused")
+val legacyShareLinksPatch =
+    bytecodePatch(
+        name = "Legacy share links",
+        description = "Brings back username on post share links. Works post 11.4x.xx",
+    ) {
+        compatibleWith("com.twitter.android")
+        dependsOn(settingsPatch, handleModernShareSheetLinks)
+        execute {
+
+            SettingsStatusLoadFingerprint.enableSettings("legacyShareLink")
+        }
+    }
