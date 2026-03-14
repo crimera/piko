@@ -1,10 +1,12 @@
 package app.morphe.extension.twitter.patches;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -14,36 +16,20 @@ import java.lang.reflect.Field;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.twitter.Pref;
+import app.morphe.extension.twitter.patches.nativeFeatures.downloader.NativeDownloader;
 
 @SuppressWarnings("unused")
 public class InlineDownloadButton {
 
-    private static final String TAG = "InlineDownloadButton";
+    private static final String WRAPPER_TAG = "piko_download_wrapper";
 
-    /**
-     * Returns the obfuscated field name for mTweet in InlineActionBar.
-     * "mTweet" is replaced at patch time via changeFirstString().
-     */
+    // Placeholders rewritten at patch time.
     private static String getTweetFieldName() {
         return "mTweet";
     }
 
-    /**
-     * Returns the obfuscated field name for mIconDrawableColorStateList in InlineActionView.
-     * "mIconDrawableColorStateList" is replaced at patch time via changeFirstString().
-     */
     private static String getIconColorFieldName() {
         return "mIconDrawableColorStateList";
-    }
-
-    /**
-     * Called from patched onFinishInflate() of InlineActionBar.
-     * Defers the actual work to post() so the view is fully attached.
-     */
-    public static void onFinishInflate(ViewGroup inlineActionBar) {
-        if (!Pref.enableNativeDownloader()) return;
-        if (!Pref.enableInlineDownloadButton()) return;
-        inlineActionBar.post(() -> wrapWithDownloadButton(inlineActionBar));
     }
 
     private static String getRenderHintsFieldName() {
@@ -54,22 +40,26 @@ public class InlineDownloadButton {
         return "isFocalTweet";
     }
 
+    public static void onFinishInflate(ViewGroup inlineActionBar) {
+        if (!Pref.enableNativeDownloader()) return;
+        if (!Pref.enableInlineDownloadButton()) return;
+        inlineActionBar.post(() -> wrapWithDownloadButton(inlineActionBar));
+    }
+
+    private static Object readField(Object target, String fieldName) throws ReflectiveOperationException {
+        Field field = target.getClass().getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.get(target);
+    }
+
     private static boolean isFocalTweet(ViewGroup inlineActionBar) {
         try {
-            Field field = inlineActionBar.getClass().getDeclaredField(getRenderHintsFieldName());
-            field.setAccessible(true);
-            Object renderHints = field.get(inlineActionBar);
+            Object renderHints = readField(inlineActionBar, getRenderHintsFieldName());
             if (renderHints == null) return false;
-
-            Field focalField = renderHints.getClass().getDeclaredField(getRenderHintsFocalFieldName());
-            focalField.setAccessible(true);
-            Object value = focalField.get(renderHints);
-            if (value instanceof Boolean) {
-                return (Boolean) value;
-            }
+            return Boolean.TRUE.equals(readField(renderHints, getRenderHintsFocalFieldName()));
         } catch (Exception ignored) {
+            return false;
         }
-        return false;
     }
 
     private static int getActionCount(ViewGroup inlineActionBar) {
@@ -100,30 +90,27 @@ public class InlineDownloadButton {
         ViewGroup referenceGroup = (ViewGroup) lastVisibleChild;
         for (int i = 0; i < referenceGroup.getChildCount(); i++) {
             View child = referenceGroup.getChildAt(i);
-            if (child instanceof ViewGroup) {
-                ViewGroup container = (ViewGroup) child;
-                for (int j = 0; j < container.getChildCount(); j++) {
-                    View iconChild = container.getChildAt(j);
-                    if (iconChild instanceof ImageView && iconChild.getVisibility() == View.VISIBLE) {
-                        applyIconContainerStyle(container, (ImageView) iconChild, downloadContainer, downloadIcon);
-                        return;
-                    } else if (iconChild instanceof ViewGroup) {
-                        ViewGroup nested = (ViewGroup) iconChild;
-                        for (int k = 0; k < nested.getChildCount(); k++) {
-                            View nestedIcon = nested.getChildAt(k);
-                            if (nestedIcon instanceof ImageView && nestedIcon.getVisibility() == View.VISIBLE) {
-                                applyIconContainerStyle(container, (ImageView) nestedIcon, downloadContainer, downloadIcon);
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
+            if (!(child instanceof ViewGroup)) continue;
+
+            ViewGroup container = (ViewGroup) child;
+            ImageView referenceIcon = Utils.getChildView(
+                    container,
+                    true,
+                    view -> view instanceof ImageView && view.getVisibility() == View.VISIBLE
+            );
+            if (referenceIcon == null) continue;
+
+            applyIconContainerStyle(container, referenceIcon, downloadContainer, downloadIcon);
+            return;
         }
     }
 
-    private static void applyIconContainerStyle(ViewGroup referenceContainer, ImageView referenceIcon,
-                                                FrameLayout downloadContainer, ImageView downloadIcon) {
+    private static void applyIconContainerStyle(
+            ViewGroup referenceContainer,
+            ImageView referenceIcon,
+            FrameLayout downloadContainer,
+            ImageView downloadIcon
+    ) {
         downloadContainer.setPadding(
                 referenceContainer.getPaddingLeft(),
                 referenceContainer.getPaddingTop(),
@@ -131,137 +118,132 @@ public class InlineDownloadButton {
                 referenceContainer.getPaddingBottom());
         downloadIcon.setScaleType(referenceIcon.getScaleType());
 
-        ViewGroup.LayoutParams iconLp = referenceIcon.getLayoutParams();
-        FrameLayout.LayoutParams downloadIconLp = new FrameLayout.LayoutParams(
-                iconLp != null ? iconLp.width : ViewGroup.LayoutParams.WRAP_CONTENT,
-                iconLp != null ? iconLp.height : ViewGroup.LayoutParams.WRAP_CONTENT,
+        ViewGroup.LayoutParams iconLayoutParams = referenceIcon.getLayoutParams();
+        FrameLayout.LayoutParams downloadIconLayoutParams = new FrameLayout.LayoutParams(
+                iconLayoutParams != null ? iconLayoutParams.width : ViewGroup.LayoutParams.WRAP_CONTENT,
+                iconLayoutParams != null ? iconLayoutParams.height : ViewGroup.LayoutParams.WRAP_CONTENT,
                 Gravity.CENTER);
-        downloadIcon.setLayoutParams(downloadIconLp);
+        downloadIcon.setLayoutParams(downloadIconLayoutParams);
+    }
+
+    private static ColorStateList resolveIconColor(ViewGroup inlineActionBar) {
+        String colorFieldName = getIconColorFieldName();
+        for (int i = 0; i < inlineActionBar.getChildCount(); i++) {
+            View child = inlineActionBar.getChildAt(i);
+            if (child.getVisibility() != View.VISIBLE) continue;
+
+            try {
+                Object value = readField(child, colorFieldName);
+                if (value instanceof ColorStateList) {
+                    return (ColorStateList) value;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        return null;
     }
 
     private static void wrapWithDownloadButton(ViewGroup inlineActionBar) {
-        // Don't wrap twice (RecyclerView recycling)
-        if (inlineActionBar.getParent() instanceof LinearLayout) {
-            LinearLayout existingWrapper = (LinearLayout) inlineActionBar.getParent();
-            if ("piko_download_wrapper".equals(existingWrapper.getTag())) {
+        ViewParent currentParent = inlineActionBar.getParent();
+        if (currentParent instanceof LinearLayout) {
+            LinearLayout existingWrapper = (LinearLayout) currentParent;
+            if (WRAPPER_TAG.equals(existingWrapper.getTag())) {
                 return;
             }
         }
+        if (!(currentParent instanceof ViewGroup)) return;
 
-        ViewGroup parent = (ViewGroup) inlineActionBar.getParent();
-        if (parent == null) return;
+        ViewGroup parent = (ViewGroup) currentParent;
 
         try {
             int index = parent.indexOfChild(inlineActionBar);
-            ViewGroup.LayoutParams originalLp = inlineActionBar.getLayoutParams();
+            ViewGroup.LayoutParams originalLayoutParams = inlineActionBar.getLayoutParams();
+            Context context = inlineActionBar.getContext();
 
             parent.removeView(inlineActionBar);
 
-            LinearLayout wrapper = new LinearLayout(inlineActionBar.getContext());
+            LinearLayout wrapper = new LinearLayout(context);
             wrapper.setOrientation(LinearLayout.HORIZONTAL);
-            wrapper.setTag("piko_download_wrapper");
+            wrapper.setTag(WRAPPER_TAG);
             wrapper.setGravity(Gravity.CENTER_VERTICAL);
 
             boolean distributeEvenly = isFocalTweet(inlineActionBar);
             int actionCount = distributeEvenly ? getActionCount(inlineActionBar) : 1;
 
-            LinearLayout.LayoutParams barLp = new LinearLayout.LayoutParams(
-                    0, ViewGroup.LayoutParams.MATCH_PARENT, actionCount);
-            wrapper.addView(inlineActionBar, barLp);
+            LinearLayout.LayoutParams barLayoutParams = new LinearLayout.LayoutParams(
+                    0,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    actionCount);
+            wrapper.addView(inlineActionBar, barLayoutParams);
 
-            FrameLayout downloadContainer = new FrameLayout(inlineActionBar.getContext());
-            ImageView downloadIcon = new ImageView(inlineActionBar.getContext());
+            FrameLayout downloadContainer = new FrameLayout(context);
+            downloadContainer.setClickable(true);
+            downloadContainer.setFocusable(true);
+            downloadContainer.setContentDescription(NativeDownloader.downloadString());
+
+            ImageView downloadIcon = new ImageView(context);
             int iconId = Utils.getResourceIdentifier("ic_vector_incoming", "drawable");
             if (iconId != 0) {
                 downloadIcon.setImageResource(iconId);
             }
             downloadIcon.setScaleType(ImageView.ScaleType.CENTER);
             downloadContainer.addView(downloadIcon, new FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER));
-            downloadContainer.setClickable(true);
-            downloadContainer.setFocusable(true);
-            downloadContainer.setId(View.generateViewId());
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    Gravity.CENTER));
 
-            String colorFieldName = getIconColorFieldName();
-            ColorStateList iconColor = null;
-            for (int i = 0; i < inlineActionBar.getChildCount(); i++) {
-                View child = inlineActionBar.getChildAt(i);
-                if (child.getVisibility() == View.VISIBLE && iconColor == null) {
-                    try {
-                        Field f = child.getClass().getDeclaredField(colorFieldName);
-                        f.setAccessible(true);
-                        iconColor = (ColorStateList) f.get(child);
-                    } catch (Exception ignored) {
-                    }
-                }
-            }
-
+            ColorStateList iconColor = resolveIconColor(inlineActionBar);
             syncButtonStyle(inlineActionBar, downloadContainer, downloadIcon);
 
             if (iconColor != null) {
                 Drawable drawable = downloadIcon.getDrawable();
                 if (drawable != null) {
-                    drawable = drawable.mutate();
-                    drawable.setTintList(iconColor);
-                    downloadIcon.setImageDrawable(drawable);
+                    Drawable tintedDrawable = drawable.mutate();
+                    tintedDrawable.setTintList(iconColor);
+                    downloadIcon.setImageDrawable(tintedDrawable);
                 }
             }
 
-            LinearLayout.LayoutParams downloadLp;
-            if (distributeEvenly) {
-                downloadLp = new LinearLayout.LayoutParams(
-                        0, ViewGroup.LayoutParams.MATCH_PARENT, 1.0f);
-            } else {
-                downloadLp = new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            }
-            wrapper.addView(downloadContainer, downloadLp);
+            LinearLayout.LayoutParams downloadLayoutParams = distributeEvenly
+                    ? new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1.0f)
+                    : new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            wrapper.addView(downloadContainer, downloadLayoutParams);
 
             wrapper.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                try {
-                    if (distributeEvenly) {
-                        int targetCount = getActionCount(inlineActionBar);
-                        if (barLp.weight != targetCount) {
-                            barLp.weight = targetCount;
-                            inlineActionBar.setLayoutParams(barLp);
-                        }
-
-                        if (downloadLp.width != 0 || downloadLp.weight != 1.0f) {
-                            downloadLp.width = 0;
-                            downloadLp.weight = 1.0f;
-                            downloadContainer.setLayoutParams(downloadLp);
-                        }
+                if (distributeEvenly) {
+                    int targetCount = getActionCount(inlineActionBar);
+                    if (barLayoutParams.weight != targetCount) {
+                        barLayoutParams.weight = targetCount;
+                        inlineActionBar.setLayoutParams(barLayoutParams);
                     }
 
-                    syncButtonStyle(inlineActionBar, downloadContainer, downloadIcon);
-                } catch (Exception ignored) {
+                    if (downloadLayoutParams.width != 0 || downloadLayoutParams.weight != 1.0f) {
+                        downloadLayoutParams.width = 0;
+                        downloadLayoutParams.weight = 1.0f;
+                        downloadContainer.setLayoutParams(downloadLayoutParams);
+                    }
                 }
+
+                syncButtonStyle(inlineActionBar, downloadContainer, downloadIcon);
             });
 
             downloadContainer.setOnClickListener(v -> {
                 try {
-                    Field tweetField = inlineActionBar.getClass()
-                            .getDeclaredField(getTweetFieldName());
-                    tweetField.setAccessible(true);
-                    Object tweet = tweetField.get(inlineActionBar);
-
+                    Object tweet = readField(inlineActionBar, getTweetFieldName());
                     if (tweet == null) {
                         Utils.showToastShort("No tweet data");
                         return;
                     }
 
-                    app.morphe.extension.twitter.patches.nativeFeatures.downloader.NativeDownloader.downloader(
-                            inlineActionBar.getContext(), tweet);
-
+                    NativeDownloader.downloader(context, tweet);
                 } catch (Exception e) {
-                    Logger.printException(() -> "InlineDownloadButton: click error", e);
+                    Logger.printException(() -> "click error", e);
                 }
             });
 
-            parent.addView(wrapper, index, originalLp);
-
+            parent.addView(wrapper, index, originalLayoutParams);
         } catch (Exception e) {
-            android.util.Log.e(TAG, "wrap failed: " + e);
+            Logger.printException(() -> "wrap failed", e);
         }
     }
 }
