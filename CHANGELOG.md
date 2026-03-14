@@ -1,3 +1,15 @@
+# [3.0.0-dev.11](https://github.com/crimera/piko/compare/v3.0.0-dev.10...v3.0.0-dev.11) (2026-03-14)
+
+
+### Bug Fixes
+
+* **Twitter:** Fix image link on post text ([5745621](https://github.com/crimera/piko/commit/57456212d2135fab771a158ebb18bcc26d8256fe))
+
+
+### Features
+
+* **Twitter:** Added `Legacy share links` patch ([3b986b0](https://github.com/crimera/piko/commit/3b986b09d40195c0b0a6cc1eefef79a91a475673))
+
 # [3.0.0-dev.10](https://github.com/crimera/piko/compare/v3.0.0-dev.9...v3.0.0-dev.10) (2026-03-08)
 
 

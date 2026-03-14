@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0-dev.10",
+  "version": "3.0.0-dev.11",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -141,6 +141,7 @@
       "description": "Allows for using domains like fxtwitter when sharing tweets/posts.",
       "use": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": {
@@ -673,6 +674,19 @@
       "use": true,
       "dependencies": [
         "ResourcePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Legacy share links",
+      "description": "Brings back username on post share links. Works post 11.4x.xx",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": {
