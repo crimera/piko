@@ -12,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
@@ -22,6 +24,7 @@ import app.morphe.extension.twitter.patches.nativeFeatures.downloader.NativeDown
 public class InlineDownloadButton {
 
     private static final String WRAPPER_TAG = "piko_download_wrapper";
+    private static final Map<Class<?>, Map<String, Field>> FIELD_CACHE = new ConcurrentHashMap<>();
 
     // Placeholders rewritten at patch time.
     private static String getTweetFieldName() {
@@ -46,10 +49,19 @@ public class InlineDownloadButton {
         inlineActionBar.post(() -> wrapWithDownloadButton(inlineActionBar));
     }
 
+    private static Field getField(Class<?> targetClass, String fieldName) throws NoSuchFieldException {
+        Map<String, Field> classFields = FIELD_CACHE.computeIfAbsent(targetClass, ignored -> new ConcurrentHashMap<>());
+        Field field = classFields.get(fieldName);
+        if (field != null) return field;
+
+        Field declaredField = targetClass.getDeclaredField(fieldName);
+        declaredField.setAccessible(true);
+        classFields.put(fieldName, declaredField);
+        return declaredField;
+    }
+
     private static Object readField(Object target, String fieldName) throws ReflectiveOperationException {
-        Field field = target.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        return field.get(target);
+        return getField(target.getClass(), fieldName).get(target);
     }
 
     private static boolean isFocalTweet(ViewGroup inlineActionBar) {
@@ -111,17 +123,42 @@ public class InlineDownloadButton {
             FrameLayout downloadContainer,
             ImageView downloadIcon
     ) {
-        downloadContainer.setPadding(
-                referenceContainer.getPaddingLeft(),
-                referenceContainer.getPaddingTop(),
-                referenceContainer.getPaddingRight(),
-                referenceContainer.getPaddingBottom());
-        downloadIcon.setScaleType(referenceIcon.getScaleType());
+        if (downloadContainer.getPaddingLeft() != referenceContainer.getPaddingLeft()
+                || downloadContainer.getPaddingTop() != referenceContainer.getPaddingTop()
+                || downloadContainer.getPaddingRight() != referenceContainer.getPaddingRight()
+                || downloadContainer.getPaddingBottom() != referenceContainer.getPaddingBottom()) {
+            downloadContainer.setPadding(
+                    referenceContainer.getPaddingLeft(),
+                    referenceContainer.getPaddingTop(),
+                    referenceContainer.getPaddingRight(),
+                    referenceContainer.getPaddingBottom());
+        }
 
-        ViewGroup.LayoutParams iconLayoutParams = referenceIcon.getLayoutParams();
+        if (downloadIcon.getScaleType() != referenceIcon.getScaleType()) {
+            downloadIcon.setScaleType(referenceIcon.getScaleType());
+        }
+
+        ViewGroup.LayoutParams referenceLayoutParams = referenceIcon.getLayoutParams();
+        int targetWidth = referenceLayoutParams != null
+                ? referenceLayoutParams.width
+                : ViewGroup.LayoutParams.WRAP_CONTENT;
+        int targetHeight = referenceLayoutParams != null
+                ? referenceLayoutParams.height
+                : ViewGroup.LayoutParams.WRAP_CONTENT;
+
+        ViewGroup.LayoutParams currentLayoutParams = downloadIcon.getLayoutParams();
+        if (currentLayoutParams instanceof FrameLayout.LayoutParams) {
+            FrameLayout.LayoutParams currentFrameLayoutParams = (FrameLayout.LayoutParams) currentLayoutParams;
+            if (currentFrameLayoutParams.width == targetWidth
+                    && currentFrameLayoutParams.height == targetHeight
+                    && currentFrameLayoutParams.gravity == Gravity.CENTER) {
+                return;
+            }
+        }
+
         FrameLayout.LayoutParams downloadIconLayoutParams = new FrameLayout.LayoutParams(
-                iconLayoutParams != null ? iconLayoutParams.width : ViewGroup.LayoutParams.WRAP_CONTENT,
-                iconLayoutParams != null ? iconLayoutParams.height : ViewGroup.LayoutParams.WRAP_CONTENT,
+                targetWidth,
+                targetHeight,
                 Gravity.CENTER);
         downloadIcon.setLayoutParams(downloadIconLayoutParams);
     }
@@ -141,6 +178,29 @@ public class InlineDownloadButton {
             }
         }
         return null;
+    }
+
+    private static void updateFocalLayoutWeights(
+            ViewGroup inlineActionBar,
+            FrameLayout downloadContainer,
+            LinearLayout.LayoutParams barLayoutParams,
+            LinearLayout.LayoutParams downloadLayoutParams,
+            int[] lastActionCount
+    ) {
+        int targetCount = getActionCount(inlineActionBar);
+        if (lastActionCount[0] == targetCount) return;
+        lastActionCount[0] = targetCount;
+
+        if (barLayoutParams.weight != targetCount) {
+            barLayoutParams.weight = targetCount;
+            inlineActionBar.setLayoutParams(barLayoutParams);
+        }
+
+        if (downloadLayoutParams.width != 0 || downloadLayoutParams.weight != 1.0f) {
+            downloadLayoutParams.width = 0;
+            downloadLayoutParams.weight = 1.0f;
+            downloadContainer.setLayoutParams(downloadLayoutParams);
+        }
     }
 
     private static void wrapWithDownloadButton(ViewGroup inlineActionBar) {
@@ -193,8 +253,6 @@ public class InlineDownloadButton {
                     Gravity.CENTER));
 
             ColorStateList iconColor = resolveIconColor(inlineActionBar);
-            syncButtonStyle(inlineActionBar, downloadContainer, downloadIcon);
-
             if (iconColor != null) {
                 Drawable drawable = downloadIcon.getDrawable();
                 if (drawable != null) {
@@ -209,23 +267,16 @@ public class InlineDownloadButton {
                     : new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
             wrapper.addView(downloadContainer, downloadLayoutParams);
 
-            wrapper.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                if (distributeEvenly) {
-                    int targetCount = getActionCount(inlineActionBar);
-                    if (barLayoutParams.weight != targetCount) {
-                        barLayoutParams.weight = targetCount;
-                        inlineActionBar.setLayoutParams(barLayoutParams);
-                    }
-
-                    if (downloadLayoutParams.width != 0 || downloadLayoutParams.weight != 1.0f) {
-                        downloadLayoutParams.width = 0;
-                        downloadLayoutParams.weight = 1.0f;
-                        downloadContainer.setLayoutParams(downloadLayoutParams);
-                    }
-                }
-
-                syncButtonStyle(inlineActionBar, downloadContainer, downloadIcon);
-            });
+            if (distributeEvenly) {
+                int[] lastActionCount = {actionCount};
+                wrapper.addOnLayoutChangeListener((v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
+                        updateFocalLayoutWeights(
+                                inlineActionBar,
+                                downloadContainer,
+                                barLayoutParams,
+                                downloadLayoutParams,
+                                lastActionCount));
+            }
 
             downloadContainer.setOnClickListener(v -> {
                 try {
@@ -242,6 +293,7 @@ public class InlineDownloadButton {
             });
 
             parent.addView(wrapper, index, originalLayoutParams);
+            wrapper.post(() -> syncButtonStyle(inlineActionBar, downloadContainer, downloadIcon));
         } catch (Exception e) {
             Logger.printException(() -> "wrap failed", e);
         }
