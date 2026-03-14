@@ -36,6 +36,7 @@ public class SettingsStatus {
     public static boolean hidePromoteButton = false;
     public static boolean roundOffNumbers = false;
     public static boolean enableDebugMenu = false;
+    public static boolean legacyShareLink = false;
 
     public static boolean hideAds = false;
     public static boolean hideGAds = false;
@@ -244,6 +245,9 @@ public class SettingsStatus {
 
     public static void enableDebugMenu() {
         enableDebugMenu = true;
+    }
+    public static void legacyShareLink() {
+        legacyShareLink = true;
     }
 
 
