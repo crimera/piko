@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0-dev.11",
+  "version": "3.0.0-dev.12",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -711,6 +711,7 @@
       "description": "Requires X 11.0.0-release.0 or higher.",
       "use": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
