@@ -133,3 +133,5 @@ bin/
 *.bak
 
 /local.properties
+
+.direnv
