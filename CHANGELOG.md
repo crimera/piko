@@ -1,3 +1,10 @@
+# [3.0.0-dev.13](https://github.com/crimera/piko/compare/v3.0.0-dev.12...v3.0.0-dev.13) (2026-03-15)
+
+
+### Bug Fixes
+
+* **Twitter - Dynamic Color:** update border and icon tint colors ([fcd1aa3](https://github.com/crimera/piko/commit/fcd1aa33fecb0eaaa76b0168d78a56c074874e36))
+
 # [3.0.0-dev.12](https://github.com/crimera/piko/compare/v3.0.0-dev.11...v3.0.0-dev.12) (2026-03-15)
 
 
