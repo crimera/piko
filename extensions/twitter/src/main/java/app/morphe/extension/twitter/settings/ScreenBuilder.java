@@ -266,6 +266,16 @@ public class ScreenBuilder {
                     )
             );
 
+            if (SettingsStatus.inlineDownloadButton) {
+                addPreference(category,
+                        helper.switchPreference(
+                                strRes("piko_pref_native_downloader_inline_button"),
+                                strRes("piko_pref_native_downloader_inline_button_desc"),
+                                Settings.VID_INLINE_DOWNLOAD_BUTTON
+                        )
+                );
+            }
+
             addPreference(category,helper.listPreference(
                     strRes("piko_pref_download_path"),
                     strRes("piko_pref_download_path_desc"),

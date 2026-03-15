@@ -31,6 +31,8 @@
     <string name="piko_pref_native_page_desc">These Piko native features are available in the share menu of posts.</string>
     <string name="piko_title_native_downloader">Native downloader</string>
     <string name="piko_title_native_downloader_toggle">Enable native downloader</string>
+    <string name="piko_pref_native_downloader_inline_button">Show download button inline</string>
+    <string name="piko_pref_native_downloader_inline_button_desc">Adds a download button directly to the post action bar</string>
     <string name="piko_pref_native_downloader_alert_title">Download media</string>
     <string name="piko_pref_native_downloader_download_all">Download all</string>
     <string name="piko_pref_native_downloader_no_media">No media found</string>

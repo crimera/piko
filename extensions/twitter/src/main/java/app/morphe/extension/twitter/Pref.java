@@ -77,6 +77,10 @@ public class Pref {
         return Utils.getBooleanPerf(Settings.VID_NATIVE_DOWNLOADER);
     }
 
+    public static boolean enableInlineDownloadButton() {
+        return Utils.getBooleanPerf(Settings.VID_INLINE_DOWNLOAD_BUTTON);
+    }
+
     public static boolean browseObject() {
         return Utils.getBooleanPerf(Settings.BROWSE_OBJECT);
     }

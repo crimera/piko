@@ -22,7 +22,7 @@ val nativeDownloaderPatch =
         description = "Requires X 11.0.0-release.0 or higher.",
     ) {
         compatibleWith("com.twitter.android")
-        dependsOn(settingsPatch, entityGenerator)
+        dependsOn(settingsPatch, entityGenerator, inlineDownloadButtonPatch)
 
         execute {
             val actionName = "Download"
