@@ -202,6 +202,9 @@
     <string name="piko_pref_import_failed">Error: Importing %s failed</string>
     <string name="piko_pref_export_no_uri">Error: No destination provided</string>
     <string name="piko_pref_import_no_uri">Error: No file provided</string>
+    <string name="piko_pref_export_login_token">Export login token</string>
+    <string name="piko_pref_force_remove_account">Force remove account</string>
+    <string name="piko_pref_force_remove_account_desc">Removes an account from the app without uninstalling or logging out</string>
 
     <!-- About -->
     <string name="piko_title_about">About</string>
@@ -348,5 +351,44 @@
     <string name="piko_app_icon_name_neon_pink">Neon Pink</string>
     <string name="piko_app_icon_name_tropical_teal">Tropical Teal</string>
     <string name="piko_app_icon_name_vivid_orange">Vivid Orange</string>
+
+    <!-- Import / export login tokens -->
+    <string name="piko_login_token_export_screen_description">"<big>About this feature</big>\n
+\n
+Here you can export the login token for the account you\'re currently logged in to piko.\n
+This is useful in the following cases:\n
+- If you already have a device logged in and want to log in on another device\n
+- If you want to reinstall Piko\n
+- If you want to log into a cloned APK\n
+- If you have another rooted device and can log in normally\n
+Tokens will be exported in JSON format. It can be used in the login screen.  To import additional accounts, select \"Create a new account\" instead of \"Add an existing account\".\n
+\n
+<big>How it works</big>\n
+\n
+X for Android stores the tokens and information of the currently logged-in account in the Android system\'s AccountManager.
+This information continues to work even if you clear the app data.
+This is why X still be logged in even after clearing the app data.\n
+Therefore, you can restore this information and log in on other devices.\n
+\n
+<big>WARNING</big>\n
+\n
+Exported tokens are highly confidential information. Never share it with anyone! If a third party obtains this token, they can freely access your account until you log out. \n
+Please also be careful of your clipboard or exported files."</string>
+    <string name="piko_login_token_select_account">Select an account:</string>
+    <string name="piko_login_token_export_copy_to_clipboard">Copy to clipboard</string>
+    <string name="piko_login_token_export_save_to_file">Save to file</string>
+    <string name="piko_login_token_import_token_button_text">Login through token json</string>
+    <string name="piko_login_token_import_from_text">Import from text</string>
+    <string name="piko_login_token_import_from_file">Import from file</string>
+    <string name="piko_login_token_import_success_restart_required">Please restart the app</string>
+    <string name="piko_login_token_import_failed_missing_info">Error: Missing username or token or secret</string>
+    <string name="piko_login_token_import_failed_already_exist">Failed to add account (may already exist)</string>
+    <string name="piko_login_token_remove_account_button_text">Remove account</string>
+    <string name="piko_login_token_remove_screen_description">"Removes an account from the app without uninstalling the app, or logging out the session token.
+When you perform this, a notification \"You were logged out due to an error.\" will appear. This is expected behavior, so ignore the error.
+
+If you uninstall the app, you do not need to use this feature because the accounts in the app will not be logged out."</string>
+    <string name="piko_login_token_hint_remove_single_account">Hint: It looks like you only have one account logged in, so you can simply reinstall the app to remove the account without logging out.</string>
+    <string name="piko_login_token_remove_account_confirm_text">Are you sure you want to remove this account from the app? Make sure you have exported the token or imported it to another app.</string>
 
 </resources>

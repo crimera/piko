@@ -23,6 +23,7 @@ import android.preference.Preference;
 import android.util.AttributeSet;
 import app.morphe.extension.twitter.Utils;
 import app.morphe.extension.twitter.patches.DatabasePatch;
+import app.morphe.extension.twitter.patches.logintoken.ExportLoginTokenFragment;
 import app.morphe.extension.twitter.settings.ActivityHook;
 import app.morphe.extension.twitter.settings.Settings;
 import app.morphe.extension.twitter.settings.fragments.BackupPrefFragment;
@@ -127,6 +128,12 @@ public class ButtonPref extends Preference {
                         ReaderModeUtils.clearCache();
                     } else if (key.equals(Settings.CHANGE_APP_ICON)) {
                         fragment = new IconSelectorFragment();
+                    } else if (key.equals(Settings.EXPORT_LOGIN_TOKEN)) {
+                        bundle.putBoolean("isRemoveAccount", false);
+                        fragment = new ExportLoginTokenFragment();
+                    } else if (key.equals(Settings.FORCE_REMOVE_ACCOUNT)) {
+                        bundle.putBoolean("isRemoveAccount", true);
+                        fragment = new ExportLoginTokenFragment();
                     } else {
                         ActivityHook.startActivity(key);
                     }
