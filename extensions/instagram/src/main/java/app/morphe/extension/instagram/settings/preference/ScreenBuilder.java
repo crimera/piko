@@ -148,24 +148,6 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.disableFeed) {
-            addPreference(category,
-                    helper.switchPreference(
-                            Strings.DISABLE_FEED,
-                            "",
-                            Settings.DISABLE_FEED
-                    )
-            );
-        }
-        if (SettingsStatus.disableReels) {
-            addPreference(category,
-                    helper.switchPreference(
-                            Strings.DISABLE_REELS,
-                            "",
-                            Settings.DISABLE_REELS
-                    )
-            );
-        }
         if (SettingsStatus.disableExplore) {
             addPreference(category,
                     helper.switchPreference(
