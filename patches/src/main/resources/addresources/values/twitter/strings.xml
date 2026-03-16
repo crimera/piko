@@ -111,6 +111,7 @@
     <string name="piko_pref_search_suggestion_desc">Hide/Remove search suggestion in explore section</string>
     <string name="piko_disunify_xchat_system">Disunify xchat system</string>
     <string name="piko_disunify_xchat_system_desc">Bring back legacy features like messages and share sheet</string>
+    <string name="piko_legacy_share_link">Legacy share links</string>
 
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature flags</string>
