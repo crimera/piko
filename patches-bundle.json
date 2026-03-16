@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-03-15T09:27:49",
-  "description": "# [3.0.0-dev.13](https://github.com/crimera/piko/compare/v3.0.0-dev.12...v3.0.0-dev.13) (2026-03-15)\n\n\n### Bug Fixes\n\n* **Twitter - Dynamic Color:** update border and icon tint colors ([fcd1aa3](https://github.com/crimera/piko/commit/fcd1aa33fecb0eaaa76b0168d78a56c074874e36))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.13/patches-3.0.0-dev.13.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.13/patches-3.0.0-dev.13.mpp.asc",
-  "version": "3.0.0-dev.13"
+  "created_at": "2026-03-16T18:19:51",
+  "description": "# [3.0.0-dev.14](https://github.com/crimera/piko/compare/v3.0.0-dev.13...v3.0.0-dev.14) (2026-03-16)\n\n\n### Bug Fixes\n\n* **Twitter:** high resolution video entity fingerprint ([2025afb](https://github.com/crimera/piko/commit/2025afb553fe5c7b72410286aecfaafc4b009d6b))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.14/patches-3.0.0-dev.14.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.14/patches-3.0.0-dev.14.mpp.asc",
+  "version": "3.0.0-dev.14"
 }

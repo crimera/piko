@@ -1,3 +1,10 @@
+# [3.0.0-dev.14](https://github.com/crimera/piko/compare/v3.0.0-dev.13...v3.0.0-dev.14) (2026-03-16)
+
+
+### Bug Fixes
+
+* **Twitter:** high resolution video entity fingerprint ([2025afb](https://github.com/crimera/piko/commit/2025afb553fe5c7b72410286aecfaafc4b009d6b))
+
 # [3.0.0-dev.13](https://github.com/crimera/piko/compare/v3.0.0-dev.12...v3.0.0-dev.13) (2026-03-15)
 
 
