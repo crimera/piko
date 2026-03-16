@@ -148,6 +148,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.hideStoriesTray) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.HIDE_STORIES_TRAY,
+                            Strings.HIDE_STORIES_TRAY_DESC,
+                            Settings.HIDE_STORIES_TRAY
+                    )
+            );
+        }
         if (SettingsStatus.disableExplore) {
             addPreference(category,
                     helper.switchPreference(
