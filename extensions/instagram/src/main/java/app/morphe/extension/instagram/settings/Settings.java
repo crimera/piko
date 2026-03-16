@@ -16,6 +16,7 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting VIEW_STORIES_ANONYMOUSLY = new BooleanSetting("view_stories_anonymously", false);
     public static final BooleanSetting VIEW_LIVE_ANONYMOUSLY = new BooleanSetting("view_live_anonymously", false);
     public static final BooleanSetting DISABLE_STORIES = new BooleanSetting("disable_stories", false);
+    public static final BooleanSetting HIDE_STORIES_TRAY = new BooleanSetting("hide_stories_tray", true);
     public static final BooleanSetting DISABLE_EXPLORE = new BooleanSetting("disable_explore", false);
     public static final BooleanSetting DISABLE_COMMENTS = new BooleanSetting("disable_comments", false);
     public static final BooleanSetting FOLLOW_BACK_INDICATOR = new BooleanSetting("follow_back_indicator", true);

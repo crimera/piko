@@ -28,6 +28,8 @@ public class Strings{
     public static final String DISABLE_STORIES = "Disable stories";
     public static final String DISABLE_EXPLORE = "Disable explore";
     public static final String DISABLE_COMMENTS = "Disable comments";
+    public static final String HIDE_STORIES_TRAY = "Hide stories tray";
+    public static final String HIDE_STORIES_TRAY_DESC = "Hide stories tray from main feed";
 
     public static final String CATEGORY_MISC = "Misc";
     public static final String DISABLE_ANALYTICS = "Disable analytics";

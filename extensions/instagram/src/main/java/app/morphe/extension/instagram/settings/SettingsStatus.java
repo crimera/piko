@@ -65,8 +65,12 @@ public class SettingsStatus {
     public static void disableComments() {
         disableComments = true;
     }
+    public static boolean hideStoriesTray = false;
+    public static void hideStoriesTray() {
+        hideStoriesTray = true;
+    }
     public static boolean distractionFreeSection() {
-        return (disableStories || disableExplore || disableComments);
+        return (disableStories || disableExplore || disableComments || hideStoriesTray);
     }
 
     //Misc section.
