@@ -96,11 +96,11 @@ internal object QuotedViewSetAccessibilityFingerprint : Fingerprint(
 )
 
 // --------------- Extended Media Entity
-internal object GetSensitiveMediaCategoriesMethodFingerprint : Fingerprint(
-    name = "getSensitiveMediaCategories",
-    accessFlags = listOf(AccessFlags.FINAL, AccessFlags.PUBLIC),
+internal object MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint : Fingerprint(
+    returnType = "Z",
+    strings = listOf("mediaEntity"),
     custom = { _, classDef ->
-        classDef.contains("Lcom/twitter/model/core/entity/")
+        classDef.startsWith("Lcom/twitter/tweetview/core/ui/mediaoptionssheet/")
     },
 )
 
