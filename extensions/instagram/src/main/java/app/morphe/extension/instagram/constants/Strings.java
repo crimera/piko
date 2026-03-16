@@ -26,8 +26,6 @@ public class Strings{
 
     public static final String CATEGORY_DISTRACTION_FREE = "Distraction free";
     public static final String DISABLE_STORIES = "Disable stories";
-    public static final String DISABLE_FEED = "Disable feed";
-    public static final String DISABLE_REELS = "Disable reels";
     public static final String DISABLE_EXPLORE = "Disable explore";
     public static final String DISABLE_COMMENTS = "Disable comments";
 

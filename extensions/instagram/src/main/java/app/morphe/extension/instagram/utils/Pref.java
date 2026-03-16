@@ -20,12 +20,6 @@ public class Pref {
     public static boolean disableStories(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_STORIES);
     }
-    public static boolean disableReels(){
-        return SharedPref.getBooleanPerf(Settings.DISABLE_REELS);
-    }
-    public static boolean disableFeed(){
-        return SharedPref.getBooleanPerf(Settings.DISABLE_FEED);
-    }
     public static boolean disableExplore(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_EXPLORE);
     }

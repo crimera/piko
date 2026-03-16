@@ -57,14 +57,6 @@ public class SettingsStatus {
     public static void disableStories() {
         disableStories = true;
     }
-    public static boolean disableFeed = false;
-    public static void disableFeed() {
-        disableFeed = true;
-    }
-    public static boolean disableReels = false;
-    public static void disableReels() {
-        disableReels = true;
-    }
     public static boolean disableExplore = false;
     public static void disableExplore() {
         disableExplore = true;
@@ -74,7 +66,7 @@ public class SettingsStatus {
         disableComments = true;
     }
     public static boolean distractionFreeSection() {
-        return (disableStories || disableFeed || disableReels || disableExplore || disableComments);
+        return (disableStories || disableExplore || disableComments);
     }
 
     //Misc section.

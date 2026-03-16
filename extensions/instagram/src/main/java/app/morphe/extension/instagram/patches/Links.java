@@ -12,14 +12,12 @@ import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 
 public class Links {
-    private static boolean DISABLE_ANALYTICS,VIEW_STORIES_ANONYMOUSLY,VIEW_LIVE_ANONYMOUSLY,DISABLE_STORIES,DISABLE_FEED,DISABLE_REELS,DISABLE_EXPLORE,DISABLE_COMMENTS,DISABLE_DISCOVER_PEOPLE;
+    private static boolean DISABLE_ANALYTICS,VIEW_STORIES_ANONYMOUSLY,VIEW_LIVE_ANONYMOUSLY,DISABLE_STORIES,DISABLE_EXPLORE,DISABLE_COMMENTS,DISABLE_DISCOVER_PEOPLE;
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
         VIEW_STORIES_ANONYMOUSLY = Pref.viewStoriesAnonymously() && SettingsStatus.viewStoriesAnonymously;
         VIEW_LIVE_ANONYMOUSLY = Pref.viewLiveAnonymously() && SettingsStatus.viewLiveAnonymously;
         DISABLE_STORIES = Pref.disableStories() && SettingsStatus.disableStories;
-        DISABLE_FEED = Pref.disableFeed() && SettingsStatus.disableFeed;
-        DISABLE_REELS = Pref.disableReels() && SettingsStatus.disableReels;
         DISABLE_EXPLORE = Pref.disableExplore() && SettingsStatus.disableExplore;
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
         DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
@@ -75,14 +73,6 @@ public class Links {
                         || path.contains("stories/hallpass/")
                         || path.contains("/api/v1/feed/reels_media_stream/")) {
                     shouldBlockUri = DISABLE_STORIES;
-                } else if (path.endsWith("/feed/timeline/")) {
-                    shouldBlockUri = DISABLE_FEED;
-                } else if (path.endsWith("/qp/batch_fetch/")
-                        || path.contains("api/v1/clips")
-                        || path.contains("clips")
-                        || path.contains("mixed_media")
-                        || path.contains("mixed_media/discover/stream/")) {
-                    shouldBlockUri = DISABLE_REELS;
                 } else if (path.contains("/discover/topical_explore")
                         || path.contains("/discover/topical_explore_stream")
                         || (host.contains("i.instagram.com") && path.contains("/fbsearch/recent_searches/"))
