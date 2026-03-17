@@ -1,3 +1,10 @@
+# [3.0.0-dev.15](https://github.com/crimera/piko/compare/v3.0.0-dev.14...v3.0.0-dev.15) (2026-03-17)
+
+
+### Bug Fixes
+
+* **i18n:** complete and improve French translation for dev/v3 ([8497136](https://github.com/crimera/piko/commit/8497136d42582c801922087161e22f7ed0076021))
+
 # [3.0.0-dev.14](https://github.com/crimera/piko/compare/v3.0.0-dev.13...v3.0.0-dev.14) (2026-03-16)
 
 
