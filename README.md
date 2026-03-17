@@ -31,7 +31,7 @@ To use these patches in Morphe Manager, follow these steps:
 #### Add Piko patches as a patch source 
 1. Tap patch sources (lower left button)
 2. Tap `+` button
-3.  <!-- TODO: After first 3.0.0 stable is released, change this step to use https://github.com/crimera/piko --> Paste this repo url: https://github.com/crimera/piko/blob/dev/patches-bundle.json
+3. Paste this repo url: `https://github.com/crimera/piko` 
 
 #### Patching Twitter/X with Morphe
 1. Download an original unpatched X APKM from a reputable source such as [APKMirror.com](https://www.apkmirror.com/apk/x-corp/twitter/)
@@ -50,228 +50,354 @@ To use these patches in Morphe Manager, follow these steps:
 <tr>
 <th>Patch Name</th>
 <th>Patch Description</th>
-<th>Category</th>
-<th>Image</th>
 </tr>
 </thead>
 
 <tbody>
 
 <tr>
-<td><code>Remove Ads</code></td>
-<td>Removes promoted posts in timeline and replies</td>
-<td>Ads</td>
-<td> <details><img src="./docs/images/1-ad-block.webp" alt="1-ad-block" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Remove Google Ads</code></td>
-<td>Removes Google ads in timeline and replies</td>
-<td>Ads</td>
-<td> <details><img src="./docs/images/5-g-ads-block.webp" alt="5-g-ads-block" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Remove "Who to follow" Banner</code></td>
-<td>Removes "Who to follow" block in timeline</td>
-<td>Ads</td>
-<td> <details><img src="./docs/images/8-who-to-follow.webp" alt="8-who-to-follow" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Remove "Communities to join" Banner</code></td>
-<td>Removes "Communities to join" block in timeline</td>
-<td>Ads</td>
-<td> <details><img src="./docs/images/2-comm-to-join.webp" alt="2-comm-to-join" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Remove "Creators to subscribe" Banner</code></td>
-<td>Removes "Creators to subscribe" block in timeline</td>
-<td>Ads</td>
-<td> <details><img src="./docs/images/3-creator-to-sub.webp" alt="3-creator-to-sub" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Remove "Pinned posts by followers" Banner</code></td>
-<td>Removes "Pinned posts by followers" block in timeline</td>
-<td>Ads</td>
-<td> <details><img src="./docs/images/6-pinned-by-followers.webp" alt="6-pinned-by-followers" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Remove "Revisit Bookmark" Banner</code></td>
-<td>Removes "Revisit your bookmark" block in timeline</td>
-<td>Ads</td>
-<td> <details><img src="./docs/images/7-revisit-your-bmk.webp" alt="7-revisit-your-bmk" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Remove Detailed posts</code></td>
-<td>Removes "Discover more" Banner in threads</td>
-<td>Ads</td>
-<td> <details><img src="./docs/images/4-discover-more.webp" alt="4-discover-more" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Hide Promoted Trends</code></td>
-<td>Removes Hide Promoted Trends in explore</td>
-<td>Ads</td>
-<td> <details><img src="./docs/images/9-promoted-trends.webp" alt="9-promoted-trends" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Custom download folder</code></td>
-<td>Change the download directory for video downloads</td>
-<td>Downloads</td>
-<td></td>
-</tr>
-
-<tr>
-<td><code>Clear tracking params</code></td>
-<td>Removes tracking parameters when sharing links</td>
-<td>Link</td>
-<td></td>
-</tr>
-
-<tr>
-<td><code>No shortened URL</code></td>
-<td>Get rid of t.co short urls</td>
-<td>Link</td>
+<td><code>Add ability to copy media link</code></td>
 <td></td>
 </tr>
 
 <tr>
 <td><code>Bring back twitter</code></td>
 <td>Bring back old twitter logo and name</td>
-<td>Misc</td>
+</tr>
+
+<tr>
+<td><code>Browse tweet object</code></td>
+<td>Adds an option to browse the tweet object in the share menu.</td>
+</tr>
+
+<tr>
+<td><code>Change app icon</code></td>
+<td>Ability to change app icons from a wide collection</td>
+</tr>
+
+<tr>
+<td><code>Change version code</code></td>
+<td>Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version.</td>
+</tr>
+
+<tr>
+<td><code>Clear tracking params</code></td>
+<td>Removes tracking parameters when sharing links</td>
+</tr>
+
+<tr>
+<td><code>Control video auto scroll</code></td>
+<td>Control video auto scroll in immersive view</td>
+</tr>
+
+<tr>
+<td><code>Custom download folder</code></td>
+<td>Change the download directory for video downloads</td>
+</tr>
+
+<tr>
+<td><code>Custom emoji font</code></td>
+<td>Customise emoji font style</td>
+</tr>
+
+<tr>
+<td><code>Custom font</code></td>
+<td>Customise font style</td>
+</tr>
+
+<tr>
+<td><code>Custom sharing domain</code></td>
+<td>Allows for using domains like fxtwitter when sharing tweets/posts.</td>
+</tr>
+
+<tr>
+<td><code>Custom translator</code></td>
+<td>A custom translator with multiple providers.</td>
+</tr>
+
+<tr>
+<td><code>Customise post font size</code></td>
+<td></td>
+</tr>
+
+<tr>
+<td><code>Customize Inline action Bar items</code></td>
+<td></td>
+</tr>
+
+<tr>
+<td><code>Customize Navigation Bar items</code></td>
+<td></td>
+</tr>
+
+<tr>
+<td><code>Customize default reply sorting</code></td>
+<td></td>
+</tr>
+
+<tr>
+<td><code>Customize explore tabs</code></td>
+<td></td>
+</tr>
+
+<tr>
+<td><code>Customize notification tabs</code></td>
+<td></td>
+</tr>
+
+<tr>
+<td><code>Customize profile tabs</code></td>
+<td></td>
+</tr>
+
+<tr>
+<td><code>Customize search suggestions</code></td>
+<td></td>
+</tr>
+
+<tr>
+<td><code>Customize search tab items</code></td>
+<td></td>
+</tr>
+
+<tr>
+<td><code>Customize side bar items</code></td>
+<td></td>
+</tr>
+
+<tr>
+<td><code>Customize timeline top bar</code></td>
+<td></td>
+</tr>
+
+<tr>
+<td><code>Delete from database</code></td>
+<td>Delete entries from database(cache)</td>
+</tr>
+
+<tr>
+<td><code>Disable auto timeline scroll on launch</code></td>
 <td></td>
 </tr>
 
 <tr>
 <td><code>Disable chirp font</code></td>
-<td>Disable chirp font (X's default font)</td>
-<td>Misc</td>
 <td></td>
 </tr>
 
 <tr>
-<td><code>Hide FAB</code></td>
-<td>Hides Floating Action Button</td>
-<td>Misc</td>
-<td> <details><img src="./docs/images/10-hide-fab.webp" alt="10-hide-fab" width="800" height="240"/></details></td>
+<td><code>Disunify xchat system</code></td>
+<td>Bring back legacy features like messages and share sheet.</td>
 </tr>
 
 <tr>
-<td><code>Hide FAB Menu Buttons</code></td>
-<td>Hides Floating Action Button menu buttons</td>
-<td>Misc</td>
-<td> <details><img src="./docs/images/24-hide-fab-btns.webp" alt="24-hide-fab-btns" width="800" height="240"/></details></td>
+<td><code>Download patch</code></td>
+<td>Unlocks the ability to download videos and gifs from Twitter/X</td>
 </tr>
 
 <tr>
-<td><code>Hide Community Notes</code></td>
-<td></td>
-<td>Misc</td>
-<td> <details><img src="./docs/images/11-hide-comm-notes.webp" alt="11-hide-comm-notes" width="800" height="240"/></details></td>
+<td><code>Dynamic color</code></td>
+<td>Replaces the default Twitter Blue with the user's Material You palette.</td>
 </tr>
 
 <tr>
-<td><code>Hide Recommended Users</code></td>
-<td>Hide recommended users that pops up when you follow someone</td>
-<td>Misc</td>
-<td> <details><img src="./docs/images/12-recc-users.webp" alt="12-recc-users" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Selectable Text</code></td>
-<td>Makes bio and username selectable</td>
-<td>Misc</td>
-<td> <details><img src="./docs/images/13-selectable-text.webp" alt="13-selectable-text" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Show sensitive media</code></td>
-<td></td>
-<td>Misc</td>
-<td> <details><img src="./docs/images/14-show-sen-media.webp" alt="14-show-sen-media" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Adds settings</code></td>
-<td>Adds mod settings</td>
-<td>Misc</td>
-<td> <details><img src="./docs/images/15-mod-settings.webp" alt="15-mod-settings" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Remove view count</code></td>
-<td>Removes the view count from the bottom of tweets</td>
-<td>Misc</td>
-<td> <details><img src="./docs/images/16-hide-view-count.webp" alt="16-hide-view-count" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Hook feature flag</code></td>
-<td>Allows for adding custom feature flags</td>
-<td>Misc</td>
-<td></td>
-</tr>
-
-<tr>
-<td><code>Enable custom app icon and nav icon settings</code></td>
-<td></td>
-<td>Premium</td>
-<td> <details><img src="./docs/images/17-customize-icon-n-navbar.webp" alt="17-customize-icon-n-navbar" width="800" height="240"/></details></td>
-</tr>
-
-<tr>
-<td><code>Enable Reader Mode</code></td>
-<td>Enables \"Reader Mode\" on long threads. Requires X 10.72.2-release.0 or earlier.</td>
-<td>Premium</td>
-<td> <details><img src="./docs/images/18-reader-mode.webp" alt="18-reader-mode" width="800" height="240"/></details></td>
+<td><code>Enable PiP mode automatically</code></td>
+<td>Enables PiP mode when you close the app</td>
 </tr>
 
 <tr>
 <td><code>Enable Undo Posts</code></td>
 <td>Enables ability to undo posts before posting</td>
-<td>Premium</td>
-<td> <details><img src="./docs/images/19-undo-mode.webp" alt="19-undo-mode" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
-<td><code>Download patch</code></td>
-<td>Unlocks the ability to download videos and gifs</td>
-<td>Premium</td>
-<td> <details><img src="./docs/images/20-download-media.webp" alt="20-download-media" width="800" height="240"/></details></td>
+<td><code>Enable debug menu for posts</code></td>
+<td>Debug tool used to explore post details.</td>
+</tr>
+
+<tr>
+<td><code>Enable force HD videos</code></td>
+<td>Videos will be played in highest quality always</td>
+</tr>
+
+<tr>
+<td><code>Force enable translate</code></td>
+<td>Get translate option for all posts</td>
+</tr>
+
+<tr>
+<td><code>Handle custom twitter links</code></td>
+<td>Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. These will have to be manually enabled under the "Open by default" section in the app info!</td>
 </tr>
 
 <tr>
 <td><code>Hide Banner</code></td>
 <td>Hide new post banner</td>
-<td>Timeline</td>
-<td> <details><img src="./docs/images/21-hide-banner.webp" alt="21-hide-banner" width="800" height="240"/></details></td>
 </tr>
 
 <tr>
-<td><code>Hide For You</code></td>
-<td>Hides For You tab from timeline</td>
-<td>Timeline</td>
-<td> <details><img src="./docs/images/22-hide-foryou.webp" alt="22-hide-foryou" width="800" height="240"/></details></td>
+<td><code>Hide Community Notes</code></td>
+<td></td>
+</tr>
+
+<tr>
+<td><code>Hide FAB</code></td>
+<td>Adds an option to hide Floating action button</td>
+</tr>
+
+<tr>
+<td><code>Hide FAB Menu Buttons</code></td>
+<td>Hides options from floating action button.</td>
 </tr>
 
 <tr>
 <td><code>Hide Live Threads</code></td>
-<td>Hide Live section</td>
-<td>Timeline</td>
-<td> <details><img src="./docs/images/23-hide-live-threads.webp" alt="23-hide-live-threads" width="800" height="240"/></details></td>
+<td>Hides live, spaces section from home timeline.</td>
+</tr>
+
+<tr>
+<td><code>Hide Recommended Users</code></td>
+<td>Hide recommended users that pops up when you follow someone</td>
+</tr>
+
+<tr>
+<td><code>Hide badges from navigation bar icons</code></td>
+<td>Hides notification nudges & counts from navigation bar icons</td>
 </tr>
 
 <tr>
 <td><code>Hide bookmark icon in timeline</code></td>
+<td>Hide the bookmark icon from tweet inline action.</td>
+</tr>
+
+<tr>
+<td><code>Hide community badges</code></td>
 <td></td>
-<td>Timeline</td>
+</tr>
+
+<tr>
+<td><code>Hide followed by context</code></td>
+<td>Hides followed by context under profile</td>
+</tr>
+
+<tr>
+<td><code>Hide hidden replies</code></td>
 <td></td>
+</tr>
+
+<tr>
+<td><code>Hide immersive player</code></td>
+<td>Removes swipe up for more videos in video player</td>
+</tr>
+
+<tr>
+<td><code>Hide nudge button</code></td>
+<td>Hides follow/subscribe/follow back buttons on posts</td>
+</tr>
+
+<tr>
+<td><code>Hide post metrics</code></td>
+<td>Hides like, reposts etc counts.</td>
+</tr>
+
+<tr>
+<td><code>Hide promote button</code></td>
+<td>Hides promote button under self posts</td>
+</tr>
+
+<tr>
+<td><code>Hide timeline posts by category</code></td>
+<td>Hides different post category like who to follow, news today etc from timeline.</td>
+</tr>
+
+<tr>
+<td><code>Hook feature flag</code></td>
+<td>Toggle feature flags to enable development features.</td>
+</tr>
+
+<tr>
+<td><code>Legacy share links</code></td>
+<td>Brings back username on post share links. Works post 11.4x.xx</td>
+</tr>
+
+<tr>
+<td><code>Log server response</code></td>
+<td>Log json responses received from server</td>
+</tr>
+
+<tr>
+<td><code>Native downloader</code></td>
+<td>Adds a native media downloader</td>
+</tr>
+
+<tr>
+<td><code>Native reader mode</code></td>
+<td>Option to view threads in reader mode.</td>
+</tr>
+
+<tr>
+<td><code>No shortened URL</code></td>
+<td>Get rid of t.co short urls.</td>
+</tr>
+
+<tr>
+<td><code>Pause search suggestions</code></td>
+<td>Search suggestions will not be saved locally</td>
+</tr>
+
+<tr>
+<td><code>Remove Ads</code></td>
+<td>Removed promoted posts, trends and google ads</td>
+</tr>
+
+<tr>
+<td><code>Remove premium upsell</code></td>
+<td>Removes premium upsell in home timeline</td>
+</tr>
+
+<tr>
+<td><code>Remove search suggestions</code></td>
+<td>Hide/Remove search suggestion in explore section</td>
+</tr>
+
+<tr>
+<td><code>Remove view count</code></td>
+<td>Removes the view count from the bottom of tweets</td>
+</tr>
+
+<tr>
+<td><code>Round off numbers</code></td>
+<td>Enable or disable rounding off numbers</td>
+</tr>
+
+<tr>
+<td><code>Selectable Text</code></td>
+<td>Makes bio and username selectable</td>
+</tr>
+
+<tr>
+<td><code>Share Tweet as Image</code></td>
+<td>Share tweets as rendered image. Requires X 11.0.0-release.0 or higher.</td>
+</tr>
+
+<tr>
+<td><code>Show changelogs</code></td>
+<td>Shows changelogs when new a patch is installed.</td>
+</tr>
+
+<tr>
+<td><code>Show poll results</code></td>
+<td>Adds an option to show poll results without voting</td>
+</tr>
+
+<tr>
+<td><code>Show post source label</code></td>
+<td>Source label will be shown only on public posts</td>
+</tr>
+
+<tr>
+<td><code>Show sensitive media</code></td>
+<td>Disables the sensitive media banner</td>
 </tr>
 
 </tbody>
