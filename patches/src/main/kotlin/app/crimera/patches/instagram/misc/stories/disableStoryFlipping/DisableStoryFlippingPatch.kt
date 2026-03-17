@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.instagram.misc.stories.disableStoryFlipping
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
@@ -9,12 +19,11 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 
-
-internal object StoryFlippingMethodFingerprint: Fingerprint(
+internal object StoryFlippingMethodFingerprint : Fingerprint(
     returnType = "V",
     definingClass = "Linstagram/features/stories/fragment/ReelViewerFragment;",
     strings = listOf("userSession"),
-    parameters = listOf("Ljava/lang/Object;")
+    parameters = listOf("Ljava/lang/Object;"),
 )
 
 @Suppress("unused")
@@ -29,13 +38,15 @@ val disableStoryFlippingPatch =
 
         execute {
             StoryFlippingMethodFingerprint.method.apply {
-                addInstructionsWithLabels(0,"""
+                addInstructionsWithLabels(
+                    0,
+                    """
                     ${PREF_CALL_DESCRIPTOR}->disableStoryFlipping()Z
                     move-result v0
                     if-eqz v0, :piko
                     return-void
-                """.trimIndent(),
-                    ExternalLabel("piko", getInstruction(0))
+                    """.trimIndent(),
+                    ExternalLabel("piko", getInstruction(0)),
                 )
             }
             enableSettings("disableStoryFlipping")

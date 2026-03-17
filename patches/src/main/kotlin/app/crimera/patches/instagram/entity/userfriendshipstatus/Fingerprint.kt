@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.instagram.entity.userfriendshipstatus
 
 import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
@@ -6,21 +16,20 @@ import com.android.tools.smali.dexlib2.AccessFlags
 
 internal const val EXTENSION_CLASS = "$ENTITY_CLASS/UserFriendshipStatus;"
 
-internal object NametagResultCardViewSetButtonMethodFingerprint: Fingerprint(
+internal object NametagResultCardViewSetButtonMethodFingerprint : Fingerprint(
     returnType = "V",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
-    custom  = { method, classDef ->
+    custom = { method, classDef ->
         classDef.type.endsWith("NametagResultCardView;") && method.parameters.size == 3
-    }
+    },
 )
 
-
-internal object GetHelperClassExtensionFingerprint: Fingerprint(
+internal object GetHelperClassExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS,
-    name = "getHelperClass"
+    name = "getHelperClass",
 )
 
-internal object GetFollowBackStatusFingerprint: Fingerprint(
+internal object GetFollowBackStatusFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS,
-    name = "getFollowBackStatus"
+    name = "getFollowBackStatus",
 )
