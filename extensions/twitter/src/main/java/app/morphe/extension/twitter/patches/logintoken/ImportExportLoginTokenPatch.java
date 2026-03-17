@@ -88,10 +88,18 @@ public class ImportExportLoginTokenPatch {
             accountManager.setAuthToken(account, "com.twitter.android.oauth.token", token);
             accountManager.setAuthToken(account, "com.twitter.android.oauth.token.secret", secret);
 
-            // Show a non-closable dialog to prompt user to restart the app
+            // Show a dialog to prompt user to reopen the app.
+            // Closing the activity is enough to reflect the added account.
+            // Since the app begins some process immediately after an account is added,
+            // we do not use Utils.restartApp() which calls System.exit(0) for safety.
             new AlertDialog.Builder(context)
                     .setTitle(StringRef.str("piko_pref_success"))
                     .setMessage(StringRef.str("piko_login_token_import_success_restart_required"))
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        if (context instanceof Activity activity)
+                            activity.finish();
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
                     .setCancelable(false)
                     .show();
         } catch (JSONException e) {

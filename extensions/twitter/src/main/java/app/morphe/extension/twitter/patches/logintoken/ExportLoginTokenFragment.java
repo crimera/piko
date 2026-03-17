@@ -89,31 +89,36 @@ public class ExportLoginTokenFragment extends Fragment {
                 startActivityForResult(intent, CREATE_FILE_REQUEST_CODE);
             });
         } else {
-            // Remove account button
+            // Set by resource identifier to preserve formatting tags
             descriptionView.setText(Utils.getResourceIdentifier("piko_login_token_remove_screen_description", "string"));
-            button1.setText(StringRef.str("piko_login_token_remove_account_button_text"));
 
             /*
-             * A button to remove account from the app.
-             * To remove the account, set a dummy auth token and intentionally trigger
-             * the automatic logout logic due to an error.
+             * Show a button to remove account from the app.
+             *
+             * To remove the account, set a dummy auth token and intentionally trigger the automatic logout logic due to an error.
              * removeAccount() cannot be used here as it sends a logout request to the server.
              * removeAccountExplicitly() also cannot be used because it leaves unnecessary data in the app data.
+             *
+             * We cannot set an empty string as the token. This will result in an incomplete state without triggering automatic logout.
+             * If this happens, you can simply log out from the settings because the logout request will fail because the token is invalid.
              */
+            button1.setText(StringRef.str("piko_login_token_remove_account_button_text"));
             button1.setOnClickListener(v -> {
                 // Show a confirmation dialog first
                 new AlertDialog.Builder(getContext())
                         .setMessage(StringRef.str("piko_login_token_remove_account_confirm_text"))
                         .setNegativeButton(android.R.string.cancel, null)
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                            // Set dummy token
+                            // Set dummy tokens
                             Account account = (Account) spinner.getSelectedItem();
                             accountManager.setAuthToken(account, "com.twitter.android.oauth.token", "a");
                             accountManager.setAuthToken(account, "com.twitter.android.oauth.token.secret", "a");
-                            // Show a non-closable dialog to prompt user to restart the app
+                            // Show restart dialog
                             new AlertDialog.Builder(getContext())
                                     .setTitle(StringRef.str("piko_pref_success"))
                                     .setMessage(StringRef.str("piko_login_token_import_success_restart_required"))
+                                    .setPositiveButton(android.R.string.ok, (dialog1, which1) -> Utils.restartApp(getContext()))
+                                    .setNegativeButton(android.R.string.cancel, null)
                                     .setCancelable(false)
                                     .show();
                         })
