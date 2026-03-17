@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.instagram.entity.dialogbox
 
 import app.crimera.patches.instagram.utils.Constants
@@ -25,47 +35,47 @@ internal object ShowDialogHelperFingerprint : Fingerprint(
 
 internal object OpenNativePhotoPickerFingerprint : Fingerprint(
     name = "openNativePhotoPicker",
-    definingClass = "Lcom/instagram/react/modules/product/IgReactMediaPickerNativeModule;"
+    definingClass = "Lcom/instagram/react/modules/product/IgReactMediaPickerNativeModule;",
 )
 
 internal object ConstructorExtensionFingerprint : Fingerprint(
-    name =  "<init>",
-    definingClass = EXTENSION_CLASS_DESCRIPTOR
+    name = "<init>",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
 internal object AddDialogMenuItemsExtensionFingerprint : Fingerprint(
     name = "addDialogMenuItems",
-    definingClass = EXTENSION_CLASS_DESCRIPTOR
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
 internal object GetDialogExtensionFingerprint : Fingerprint(
     name = "getDialog",
-    definingClass = EXTENSION_CLASS_DESCRIPTOR
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
 internal object SetCancelableExtensionFingerprint : Fingerprint(
     name = "setCancelable",
-    definingClass = EXTENSION_CLASS_DESCRIPTOR
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
 internal object SetCanceledOnTouchOutsideExtensionFingerprint : Fingerprint(
     name = "setCanceledOnTouchOutside",
-    definingClass = EXTENSION_CLASS_DESCRIPTOR
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
 internal object SetMessageExtensionFingerprint : Fingerprint(
     name = "setMessage",
-    definingClass = EXTENSION_CLASS_DESCRIPTOR
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
 internal object SetNegativeButtonExtensionFingerprint : Fingerprint(
     name = "setNegativeButton",
-    definingClass = EXTENSION_CLASS_DESCRIPTOR
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
 internal object SetOnDismissListenerExtensionFingerprint : Fingerprint(
     name = "setOnDismissListener",
-    definingClass = EXTENSION_CLASS_DESCRIPTOR
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
 internal object SetPositiveButtonExtensionFingerprint : Fingerprint(
@@ -75,7 +85,7 @@ internal object SetPositiveButtonExtensionFingerprint : Fingerprint(
 
 internal object SetTitleExtensionFingerprint : Fingerprint(
     name = "setTitle",
-    definingClass = EXTENSION_CLASS_DESCRIPTOR
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
 internal val TARGET_FINGERPRINT_ARRAY =

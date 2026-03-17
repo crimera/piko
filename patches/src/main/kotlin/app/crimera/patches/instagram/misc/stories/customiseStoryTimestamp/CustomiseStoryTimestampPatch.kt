@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.instagram.misc.stories.customiseStoryTimestamp
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
@@ -12,11 +22,10 @@ import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
-
-internal object ReelItemTimestampFormatMethodFingerprint: Fingerprint(
+internal object ReelItemTimestampFormatMethodFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     definingClass = "Lcom/instagram/model/reels/ReelItem;",
-    parameters = listOf("Landroid/content/Context;")
+    parameters = listOf("Landroid/content/Context;"),
 )
 
 @Suppress("unused")
@@ -37,15 +46,18 @@ val customiseStoryTimestampPatch =
                 val dummyRegister = longToDoubleRegisters[0]
                 val postedTimestampRegister = longToDoubleRegisters[1]
 
-                addInstructionsWithLabels(longToDoubleIndex,"""
+                addInstructionsWithLabels(
+                    longToDoubleIndex,
+                    """
                     invoke-static {v$postedTimestampRegister, v1 }, ${PATCHES_DESCRIPTOR}/story/StoryTimestamp;->customiseStoryTimestamp(J)Ljava/lang/String;
                     move-result-object v$dummyRegister
                     if-eqz v$dummyRegister, :piko
                     return-object v$dummyRegister
-                """.trimIndent(), ExternalLabel("piko",longToDoubleInstruction))
+                    """.trimIndent(),
+                    ExternalLabel("piko", longToDoubleInstruction),
+                )
 
                 enableSettings("customiseStoryTimestamp")
             }
-
         }
     }

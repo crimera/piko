@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.instagram.ads
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
@@ -22,9 +32,9 @@ internal object FeedItemParseFromJsonFingerprint : Fingerprint(
             "suggested_top_accounts",
             "suggested_users",
         ),
-    custom = {methodDef,_->
+    custom = { methodDef, _ ->
         methodDef.name.lowercase().contains("parsefromjson")
-    }
+    },
 )
 
 @Suppress("unused")
@@ -47,10 +57,13 @@ val hideSuggestedContentPatch =
                     }
                 val index = moveResultObjectInstruction.location.index
                 val register = moveResultObjectInstruction.registersUsed[0]
-                
-                addInstructions(index+1,"""
+
+                addInstructions(
+                    index + 1,
+                    """
                     ${Constants.JSONPARSER_CHECK_DESCRIPTOR.format(register,register)}
-                """.trimIndent())
+                    """.trimIndent(),
+                )
 
                 enableSettings("hideSuggestedContent")
             }

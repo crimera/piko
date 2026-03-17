@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.instagram.entity.dialogbox
 
 import app.crimera.utils.changeFirstString
@@ -10,40 +20,46 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
 
-val instagramDialogBoxPatch = bytecodePatch(
-    description = "This patch is used for decoding obfuscated code of the native box of Instagram",
-) {
-    compatibleWith("com.instagram.android")
+val instagramDialogBoxPatch =
+    bytecodePatch(
+        description = "This patch is used for decoding obfuscated code of the native box of Instagram",
+    ) {
+        compatibleWith("com.instagram.android")
 
-    execute {
+        execute {
 
-        ConstructorExtensionFingerprint.changeFirstString(
-            classNameToExtension( GetDialogFingerprint.classDef.type)
-        )
+            ConstructorExtensionFingerprint.changeFirstString(
+                classNameToExtension(GetDialogFingerprint.classDef.type),
+            )
 
-        GetDialogExtensionFingerprint.changeFirstString(GetDialogFingerprint.method.name)
+            GetDialogExtensionFingerprint.changeFirstString(GetDialogFingerprint.method.name)
 
-        ShowDialogHelperFingerprint.method.apply {
-            SetTitleExtensionFingerprint.changeFirstString(instructions.first { it.opcode == Opcode.IPUT_OBJECT }.fieldExtractor().name)
+            ShowDialogHelperFingerprint.method.apply {
+                SetTitleExtensionFingerprint.changeFirstString(instructions.first { it.opcode == Opcode.IPUT_OBJECT }.fieldExtractor().name)
 
-            val firstStringIndex = ShowDialogHelperFingerprint.stringMatches.first().index
-            val targetInvokeVirtualInstruction = instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL && it.location.index < firstStringIndex }
-            SetMessageExtensionFingerprint.changeFirstString(targetInvokeVirtualInstruction.methodExtractor().name)
+                val firstStringIndex = ShowDialogHelperFingerprint.stringMatches.first().index
+                val targetInvokeVirtualInstruction =
+                    instructions.last {
+                        it.opcode == Opcode.INVOKE_VIRTUAL &&
+                            it.location.index < firstStringIndex
+                    }
+                SetMessageExtensionFingerprint.changeFirstString(targetInvokeVirtualInstruction.methodExtractor().name)
 
-            val lastBeforeInvokeVirtualIndex = getInstruction(instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL}.location.index - 1)
-            SetOnDismissListenerExtensionFingerprint.changeFirstString(lastBeforeInvokeVirtualIndex.methodExtractor().name)
+                val lastBeforeInvokeVirtualIndex =
+                    getInstruction(instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL }.location.index - 1)
+                SetOnDismissListenerExtensionFingerprint.changeFirstString(lastBeforeInvokeVirtualIndex.methodExtractor().name)
 
-            TARGET_STRING_ARRAY.forEachIndexed { index, targetString ->
-                val stringIndex = ShowDialogHelperFingerprint.stringMatches.first { match -> match.string == targetString }.index
-                val targetInvokeVirtualInstruction = getInstruction(indexOfFirstInstruction(stringIndex,Opcode.INVOKE_VIRTUAL))
-                TARGET_FINGERPRINT_ARRAY[index].changeFirstString(targetInvokeVirtualInstruction.methodExtractor().name)
+                TARGET_STRING_ARRAY.forEachIndexed { index, targetString ->
+                    val stringIndex = ShowDialogHelperFingerprint.stringMatches.first { match -> match.string == targetString }.index
+                    val targetInvokeVirtualInstruction = getInstruction(indexOfFirstInstruction(stringIndex, Opcode.INVOKE_VIRTUAL))
+                    TARGET_FINGERPRINT_ARRAY[index].changeFirstString(targetInvokeVirtualInstruction.methodExtractor().name)
+                }
+            }
+
+            OpenNativePhotoPickerFingerprint.method.apply {
+                val lastBeforeInvokeVirtualIndex =
+                    getInstruction(instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL }.location.index - 1)
+                AddDialogMenuItemsExtensionFingerprint.changeFirstString(lastBeforeInvokeVirtualIndex.methodExtractor().name)
             }
         }
-
-        OpenNativePhotoPickerFingerprint.method.apply {
-            val lastBeforeInvokeVirtualIndex = getInstruction(instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL}.location.index - 1)
-            AddDialogMenuItemsExtensionFingerprint.changeFirstString(lastBeforeInvokeVirtualIndex.methodExtractor().name)
-        }
-
     }
-}
