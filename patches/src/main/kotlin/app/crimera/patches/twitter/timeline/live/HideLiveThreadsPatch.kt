@@ -1,27 +1,34 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.timeline.live
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.opcode
+import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
-private val hideLiveThreadsFingerprint =
-    fingerprint {
-        opcodes(
-            Opcode.IGET_OBJECT,
-        )
-
-        custom { it, _ ->
-            it.definingClass == "Lcom/twitter/fleets/api/json/JsonFleetsTimelineResponse;"
-        }
-    }
+private object HideLiveThreadsFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/fleets/api/json/JsonFleetsTimelineResponse;",
+    filters = listOf(
+        opcode(Opcode.IGET_OBJECT)
+    )
+)
 
 @Suppress("unused")
 val hideLiveThreadsPatch =
@@ -32,7 +39,7 @@ val hideLiveThreadsPatch =
         dependsOn(settingsPatch)
 
         execute {
-            val method = hideLiveThreadsFingerprint.method
+            val method = HideLiveThreadsFingerprint.method
             val instructions = method.instructions
 
             val loc = instructions.first { it.opcode == Opcode.IGET_OBJECT }.location.index
@@ -48,6 +55,6 @@ val hideLiveThreadsPatch =
                 move-result-object v$reg
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.enableSettings("hideLiveThreads")
+            SettingsStatusLoadFingerprint.enableSettings("hideLiveThreads")
         }
     }

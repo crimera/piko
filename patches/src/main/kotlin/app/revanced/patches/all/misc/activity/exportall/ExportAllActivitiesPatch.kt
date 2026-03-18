@@ -1,6 +1,6 @@
 package app.revanced.patches.all.misc.activity.exportall
 
-import app.revanced.patcher.patch.resourcePatch
+import app.morphe.patcher.patch.resourcePatch
 
 @Suppress("unused")
 val exportAllActivitiesPatch =
@@ -9,6 +9,8 @@ val exportAllActivitiesPatch =
         description = "Makes all app activities exportable.",
         use = false,
     ) {
+        compatibleWith("com.twitter.android")
+
         execute {
             val exportedFlag = "android:exported"
 

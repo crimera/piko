@@ -1,17 +1,15 @@
 [versions]
-revanced-patcher = "21.0.0"
-# Tracking https://github.com/google/smali/issues/64.
+morphe-patcher = "1.1.1"
 #noinspection GradleDependency
-smali = "3.0.5"
-# 8.3.0 causes java verifier error: https://github.com/ReVanced/revanced-patches/issues/2818.
-#noinspection GradleDependency
-agp = "8.2.2"
+smali = "b6365a84f4"
+gson = "2.13.2"
 annotation = "1.9.1"
 appcompat = "1.7.1"
 
 [libraries]
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 [plugins]
 android-library = { id = "com.android.library" }

@@ -1,23 +1,39 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.misc.roundOffNumbers
 
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
-import app.revanced.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.shared.misc.mapping.ResourceType
+import app.morphe.shared.misc.mapping.resourceLiteral
 import com.android.tools.smali.dexlib2.Opcode
 
-private val roundOffNumbersFingerprint =
-    fingerprint {
-        strings(
-            "%.1f",
-            " ",
+private object RoundOffNumbersFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    filters = listOf(
+        resourceLiteral(ResourceType.INTEGER,"abbr_number_divider_billions"),
+        resourceLiteral(ResourceType.INTEGER,"abbr_number_divider_millions"),
+        resourceLiteral(ResourceType.INTEGER,"abbr_number_divider_thousands"),
+        resourceLiteral(ResourceType.STRING, "abbr_number_unit_billions"),
+        resourceLiteral(ResourceType.STRING, "abbr_number_unit_millions"),
+        resourceLiteral(ResourceType.STRING, "abbr_number_unit_thousands"),
         )
-    }
+)
 
 @Suppress("unused")
 val roundOffNumbersPatch =
@@ -29,37 +45,23 @@ val roundOffNumbersPatch =
         dependsOn(settingsPatch)
 
         execute {
+            RoundOffNumbersFingerprint.method.apply {
+                val move_res_obj = instructions.first { it.opcode == Opcode.MOVE_RESULT_OBJECT }.location.index
+                val inv_vir = instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL }
+                val sget_obj = instructions.first { it.opcode == Opcode.SGET_OBJECT }
 
-            val methods = roundOffNumbersFingerprint.classDef.methods
+                addInstructionsWithLabels(
+                    move_res_obj + 1,
+                    """
+                        sget-boolean v1, $PREF_DESCRIPTOR;->ROUND_OFF_NUMBERS:Z
+                        if-nez v1, :cond
+                        goto :here
+                        """.trimIndent(),
+                    ExternalLabel("here", sget_obj),
+                    ExternalLabel("cond", inv_vir),
+                )
 
-            val method =
-                methods.first {
-                    it.parameters ==
-                        listOf(
-                            "Landroid/content/res/Resources;",
-                            "D",
-                        ) &&
-                        it.returnType == "Ljava/lang/String;"
-                }
-            val instructions = method.instructions
-
-            val M = "sget-boolean v1, $PREF_DESCRIPTOR;->ROUND_OFF_NUMBERS:Z"
-
-            val move_res_obj = instructions.first { it.opcode == Opcode.MOVE_RESULT_OBJECT }.location.index
-            val inv_vir = instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL }
-            val sget_obj = instructions.first { it.opcode == Opcode.SGET_OBJECT }
-
-            method.addInstructionsWithLabels(
-                move_res_obj + 1,
-                """
-                $M
-                if-nez v1, :cond
-                goto :here
-                """.trimIndent(),
-                ExternalLabel("here", sget_obj),
-                ExternalLabel("cond", inv_vir),
-            )
-
-            settingsStatusLoadFingerprint.enableSettings("roundOffNumbers")
+                SettingsStatusLoadFingerprint.enableSettings("roundOffNumbers")
+            }
         }
     }

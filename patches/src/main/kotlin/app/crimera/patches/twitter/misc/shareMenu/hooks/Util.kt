@@ -1,14 +1,24 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.misc.shareMenu.hooks
 
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.addAction
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.addButtonInstructions
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.shareMenuButtonFuncCallFingerprint
 import app.crimera.utils.Constants
 import app.crimera.utils.enableSettings
 import app.crimera.utils.extractDescriptors
-import app.revanced.patcher.patch.BytecodePatchContext
-import app.revanced.patcher.patch.PatchException
+import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.PatchException
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
@@ -25,7 +35,7 @@ fun shareMenuButtonInjection(
 ) {
     val viewDebugDialogReference =
         (
-            shareMenuButtonAddHook
+            ShareMenuButtonAddHook
                 .method
                 .implementation
                 ?.instructions
@@ -42,31 +52,40 @@ fun shareMenuButtonInjection(
     setButtonText(actionName, stringId)
     setButtonIcon(actionName, iconId)
 
-    // TODO: handle possible nulls
     val buttonFuncMethod =
         shareMenuButtonFuncCallFingerprint.method
             .implementation
             ?.instructions
             ?.toList()
-    val deleteStatusLoc = shareMenuButtonFuncCallFingerprint.stringMatches?.first { it.string == "Delete Status" }?.index!!
-    val OkLoc = shareMenuButtonFuncCallFingerprint.stringMatches?.first { it.string == "OK" }?.index!!
+            ?: throw PatchException("Failed to resolve share menu instructions")
+    val deleteStatusLoc =
+        shareMenuButtonFuncCallFingerprint.stringMatches
+            ?.firstOrNull { it.string == "Delete Status" }
+            ?.index
+            ?: throw PatchException("Failed to find Delete Status string")
+    val okLoc =
+        shareMenuButtonFuncCallFingerprint.stringMatches
+            ?.firstOrNull { it.string == "OK" }
+            ?.index
+            ?: throw PatchException("Failed to find OK string")
     val conversationalRepliesLoc =
         shareMenuButtonFuncCallFingerprint.stringMatches
-            ?.first {
+            ?.firstOrNull {
                 it.string ==
                     "conversational_replies_android_pinned_replies_creation_enabled"
             }?.index
+            ?: throw PatchException("Failed to find conversational replies string")
 
     val timelineRef =
         (
             buttonFuncMethod
-                ?.filterIndexed { i, ins ->
-                    i > conversationalRepliesLoc!! && ins.opcode == Opcode.IGET_OBJECT
-                }?.first() as Instruction22c?
+                .filterIndexed { i, ins ->
+                    i > conversationalRepliesLoc && ins.opcode == Opcode.IGET_OBJECT
+                }.firstOrNull() as Instruction22c?
         ) ?: throw PatchException("Failed to find timelineRef")
-    val timelineRefReg = (buttonFuncMethod?.get(deleteStatusLoc - 1) as Instruction35c).registerD
+    val timelineRefReg = (buttonFuncMethod[deleteStatusLoc - 1] as Instruction35c).registerD
 
-    val activityRefReg = (buttonFuncMethod[OkLoc - 3] as Instruction35c).registerD
+    val activityRefReg = (buttonFuncMethod[okLoc - 3] as Instruction35c).registerD
 
     // Add Button function
     addButtonInstructions(
@@ -80,5 +99,5 @@ fun shareMenuButtonInjection(
         viewDebugDialogReference,
     )
 
-    settingsStatusLoadFingerprint.enableSettings(statusFunctionName)
+    SettingsStatusLoadFingerprint.enableSettings(statusFunctionName)
 }

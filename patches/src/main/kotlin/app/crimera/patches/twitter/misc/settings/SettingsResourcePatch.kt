@@ -1,11 +1,18 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.misc.settings
 
-import app.revanced.patcher.patch.resourcePatch
-import app.revanced.patches.shared.misc.mapping.resourceMappingPatch
-import app.revanced.util.ResourceGroup
-import app.revanced.util.copyResources
+import app.morphe.patcher.patch.resourcePatch
+import app.morphe.shared.misc.mapping.resourceMappingPatch
 import org.w3c.dom.Element
-import java.nio.file.Files
 
 internal val settingsResourcePatch =
     resourcePatch {
@@ -28,7 +35,7 @@ internal val settingsResourcePatch =
                 val parent = editor.getElementsByTagName("FrameLayout").item(1) as Element
 
                 val sideBtn =
-                    editor.createElement("app.revanced.extension.twitter.settings.widgets.PikoSettingsButton")
+                    editor.createElement("app.morphe.extension.twitter.settings.widgets.PikoSettingsButton")
                 sideBtn.setAttribute("android:text", "Piko")
                 sideBtn.setAttribute("android:textAllCaps", "false")
                 sideBtn.setAttribute("android:background", "?android:attr/selectableItemBackground")
@@ -42,47 +49,5 @@ internal val settingsResourcePatch =
 
                 parent.appendChild(sideBtn)
             }
-
-            val basePath = "twitter/settings/strings"
-
-            copyResources(basePath, ResourceGroup("values", "strings.xml", "arrays.xml"), appendPiko = true)
-
-            /**
-             * create directory for the untranslated language resources
-             */
-            val languages =
-                arrayOf(
-                    "ar",
-                    "es",
-                    "fr",
-                    "hi",
-                    "in",
-                    "ja",
-                    "ko",
-                    "it",
-                    "pl",
-                    "pt-rBR",
-                    "ru",
-                    "tr",
-                    "uk",
-                    "v21",
-                    "vi",
-                    "zh-rCN",
-                    "zh-rTW",
-                    "zh-rHK",
-                ).map { "values-$it" }
-
-            languages.forEach {
-                val vDirectory = get("res").resolve(it)
-                if (!vDirectory.isDirectory) {
-                    Files.createDirectories(vDirectory.toPath())
-                    if (it.contains("v21")) {
-                        copyResources(basePath, ResourceGroup(it, "arrays.xml"), appendPiko = true)
-                    }
-                }
-                copyResources(basePath, ResourceGroup(it, "strings.xml"), appendPiko = true)
-            }
-
-            // execute end
         }
     }

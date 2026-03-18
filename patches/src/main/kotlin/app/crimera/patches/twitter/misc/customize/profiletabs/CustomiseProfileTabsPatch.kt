@@ -1,31 +1,40 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.misc.customize.profiletabs
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.revanced.patcher.extensions.InstructionExtensions.getInstruction
-import app.revanced.patcher.extensions.InstructionExtensions.instructions
-import app.revanced.patcher.extensions.InstructionExtensions.removeInstruction
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
-import app.revanced.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
-private val customiseProfileTabsFingerprint =
-    fingerprint {
-        returns("Ljava/util/ArrayList;")
-        strings(
-            "fragment_page_number",
-            "arg_is_unlimited_timeline",
-            "statuses_count",
-            "tweets",
-            "blue_business_affiliates_list_consumption_ui_enabled",
-        )
-    }
+private object CustomiseProfileTabsFingerprint : Fingerprint(
+    returnType = "Ljava/util/ArrayList;",
+    strings = listOf(
+        "fragment_page_number",
+        "arg_is_unlimited_timeline",
+        "statuses_count",
+        "tweets",
+        "blue_business_affiliates_list_consumption_ui_enabled",
+    )
+)
 
 @Suppress("unused")
 val customiseProfileTabsPatch =
@@ -37,7 +46,7 @@ val customiseProfileTabsPatch =
 
         execute {
 
-            val method = customiseProfileTabsFingerprint.method
+            val method = CustomiseProfileTabsFingerprint.method
             val instructions = method.instructions
 
             val returnObj_loc = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
@@ -88,6 +97,6 @@ val customiseProfileTabsPatch =
                     ExternalLabel("check1", last_invoke_static),
                 )
             }
-            settingsStatusLoadFingerprint.enableSettings("profileTabCustomisation")
+            SettingsStatusLoadFingerprint.enableSettings("profileTabCustomisation")
         }
     }

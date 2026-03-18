@@ -1,14 +1,24 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.misc.bringbacktwitter
 
 import app.crimera.utils.replaceStringsInFile
-import app.crimera.utils.replaceXmlResources
-import app.revanced.patcher.patch.resourcePatch
-import app.revanced.util.ResourceGroup
-import app.revanced.util.asSequence
-import app.revanced.util.copyResources
-import app.revanced.util.findElementByAttributeValueOrThrow
+import app.morphe.patcher.patch.resourcePatch
+import app.morphe.patches.all.misc.resources.addAppResources
+import app.morphe.patches.all.misc.resources.addResourcesPatch
+import app.morphe.util.ResourceGroup
+import app.morphe.util.asSequence
+import app.morphe.util.copyResources
+import app.morphe.util.findElementByAttributeValueOrThrow
 import org.w3c.dom.Element
-import java.nio.file.Files
 
 @Suppress("unused")
 val bringBackTwitterPatch =
@@ -19,7 +29,11 @@ val bringBackTwitterPatch =
     ) {
         compatibleWith("com.twitter.android")
 
+        dependsOn(addResourcesPatch)
+
         execute {
+            addAppResources("twitter-bring-back")
+
             // region Change app name
 
             document("AndroidManifest.xml").use { document ->
@@ -123,67 +137,10 @@ val bringBackTwitterPatch =
             }
             // endregion
 
-            // region Change strings
-
-            val isRunningOnManager = System.getProperty("java.runtime.name") == "Android Runtime"
-            val basePath = "twitter/bringbacktwitter/strings"
-
-            replaceXmlResources(basePath, ResourceGroup("values", "strings.xml"))
-
-            /**
-             * create directory for the untranslated language resources
-             */
-            val languages =
-                arrayOf(
-                    "en-rGB",
-                    "hi",
-                    "pl",
-                    "pt-rBr",
-                    "ru",
-                    "tr",
-                    "zh-rCN",
-                    "zh-rTW",
-                    "",
-                ).map { "values-$it" }
-
-            languages.forEach {
-                var folderName = it
-                if (folderName.endsWith("-")) {
-                    folderName = it.replace("-", "")
-                }
-                val vDirectory = get("res").resolve(folderName)
-                if (!vDirectory.isDirectory) {
-                    Files.createDirectories(vDirectory.toPath())
-                }
-                val resGroup = ResourceGroup(folderName, "strings.xml")
-                replaceXmlResources(basePath, resGroup)
-
-                /*
-                 * The Java XML API on Android has a bug that converts surrogate pair characters
-                 * to invalid numeric character references.
-                 * It prevents resource compilation.
-                 * Fix the text directly after closing the xmlEditor.
-                 */
-                if (isRunningOnManager) {
-                    replaceStringsInFile(
-                        resGroup,
-                        replacements =
-                            mapOf(
-                                "&#55349;&#56655;" to "Twitter",
-                                "&#55357;&#56613;" to "🔥",
-                                "&#55356;&#57217;" to "🎁",
-                                "&#55356;&#57225;" to "🎉",
-                                "&#9200;" to "⏰",
-                            ),
-                    )
-                }
-            }
-
             /*
              * Instead of defining strings in the map, replaces texts directly.
              * Reason: https://t.me/pikopatches/1/17339
              */
-
             replaceStringsInFile(
                 ResourceGroup("values-ja", "strings.xml", "arrays.xml"),
                 replacements =

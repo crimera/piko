@@ -1,0 +1,7 @@
+{
+  "created_at": "2026-03-17T17:36:09",
+  "description": "# [3.0.0-dev.15](https://github.com/crimera/piko/compare/v3.0.0-dev.14...v3.0.0-dev.15) (2026-03-17)\n\n\n### Bug Fixes\n\n* **i18n:** complete and improve French translation for dev/v3 ([8497136](https://github.com/crimera/piko/commit/8497136d42582c801922087161e22f7ed0076021))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.15/patches-3.0.0-dev.15.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.0.0-dev.15/patches-3.0.0-dev.15.mpp.asc",
+  "version": "3.0.0-dev.15"
+}

@@ -1,3 +1,119 @@
+# [3.0.0-dev.15](https://github.com/crimera/piko/compare/v3.0.0-dev.14...v3.0.0-dev.15) (2026-03-17)
+
+
+### Bug Fixes
+
+* **i18n:** complete and improve French translation for dev/v3 ([8497136](https://github.com/crimera/piko/commit/8497136d42582c801922087161e22f7ed0076021))
+
+# [3.0.0-dev.14](https://github.com/crimera/piko/compare/v3.0.0-dev.13...v3.0.0-dev.14) (2026-03-16)
+
+
+### Bug Fixes
+
+* **Twitter:** high resolution video entity fingerprint ([2025afb](https://github.com/crimera/piko/commit/2025afb553fe5c7b72410286aecfaafc4b009d6b))
+
+# [3.0.0-dev.13](https://github.com/crimera/piko/compare/v3.0.0-dev.12...v3.0.0-dev.13) (2026-03-15)
+
+
+### Bug Fixes
+
+* **Twitter - Dynamic Color:** update border and icon tint colors ([fcd1aa3](https://github.com/crimera/piko/commit/fcd1aa33fecb0eaaa76b0168d78a56c074874e36))
+
+# [3.0.0-dev.12](https://github.com/crimera/piko/compare/v3.0.0-dev.11...v3.0.0-dev.12) (2026-03-15)
+
+
+### Features
+
+* **Twitter:** Add download media button in tweet inline action items ([#806](https://github.com/crimera/piko/issues/806)) ([d79c6e8](https://github.com/crimera/piko/commit/d79c6e8efe89e46482d7143f50f4eacda07628ca))
+
+# [3.0.0-dev.11](https://github.com/crimera/piko/compare/v3.0.0-dev.10...v3.0.0-dev.11) (2026-03-14)
+
+
+### Bug Fixes
+
+* **Twitter:** Fix image link on post text ([5745621](https://github.com/crimera/piko/commit/57456212d2135fab771a158ebb18bcc26d8256fe))
+
+
+### Features
+
+* **Twitter:** Added `Legacy share links` patch ([3b986b0](https://github.com/crimera/piko/commit/3b986b09d40195c0b0a6cc1eefef79a91a475673))
+
+# [3.0.0-dev.10](https://github.com/crimera/piko/compare/v3.0.0-dev.9...v3.0.0-dev.10) (2026-03-08)
+
+
+### Bug Fixes
+
+* **Twitter:** fix high resolution video extraction ([3ecf524](https://github.com/crimera/piko/commit/3ecf52427de28e7ec1e876a81201e07a73081d39))
+
+# [3.0.0-dev.9](https://github.com/crimera/piko/compare/v3.0.0-dev.8...v3.0.0-dev.9) (2026-02-26)
+
+
+### Bug Fixes
+
+* fix webview resource id ([6c1c81d](https://github.com/crimera/piko/commit/6c1c81d057f3bee73ed8fb53cc95665b89e9c973))
+
+# [3.0.0-dev.8](https://github.com/crimera/piko/compare/v3.0.0-dev.7...v3.0.0-dev.8) (2026-02-25)
+
+
+### Bug Fixes
+
+* webview resource id ([fd544a9](https://github.com/crimera/piko/commit/fd544a9a0796f4f9fffb8c9b876069cfb1e43bc8))
+
+# [3.0.0-dev.7](https://github.com/crimera/piko/compare/v3.0.0-dev.6...v3.0.0-dev.7) (2026-02-24)
+
+
+### Features
+
+* Add `Browse tweet object` patch ([2e05c33](https://github.com/crimera/piko/commit/2e05c334ee32ba6075249bb873f13ba6d822d77e))
+
+# [3.0.0-dev.6](https://github.com/crimera/piko/compare/v3.0.0-dev.5...v3.0.0-dev.6) (2026-02-23)
+
+
+### Bug Fixes
+
+* **Twitter - Share Tweet as Image:** Add the patch in the about page ([00fa95e](https://github.com/crimera/piko/commit/00fa95e307e5a3130d6d216bcdc183312d6a0cc4))
+* **Twitter - Share Tweet as Image:** Category title showing up even if patch was disabled ([e03d22e](https://github.com/crimera/piko/commit/e03d22e6d229b746020d0780e4ffdab0ec5ea0a8))
+
+# [3.0.0-dev.5](https://github.com/crimera/piko/compare/v3.0.0-dev.4...v3.0.0-dev.5) (2026-02-23)
+
+
+### Features
+
+* **Twitter:** Add `Share Tweet as Image` ([e8d6321](https://github.com/crimera/piko/commit/e8d6321cbb9d22d91702dfab583255dca0b7d99c))
+
+# [3.0.0-dev.4](https://github.com/crimera/piko/compare/v3.0.0-dev.3...v3.0.0-dev.4) (2026-02-21)
+
+
+### Bug Fixes
+
+* Use the original poster's username/name for retweet posts. ([1a1f818](https://github.com/crimera/piko/commit/1a1f818779d9c4359ca0574ff2bef1e6db525582))
+
+# [3.0.0-dev.3](https://github.com/crimera/piko/compare/v3.0.0-dev.2...v3.0.0-dev.3) (2026-02-19)
+
+
+### Features
+
+* **Twitter:** Added new source for `Native translator` ([6945434](https://github.com/crimera/piko/commit/69454343db3550ebba427d29ecbf1c0614cc94ec))
+
+# [3.0.0-dev.2](https://github.com/crimera/piko/compare/v3.0.0-dev.1...v3.0.0-dev.2) (2026-02-17)
+
+
+### Bug Fixes
+
+* **Twitter:** Fix `Custom sharing domain` not overriding new share sheet ([fd446fa](https://github.com/crimera/piko/commit/fd446fad33d7ceaf98666cbefde1f03e2315c55f))
+
+# [3.0.0-dev.1](https://github.com/crimera/piko/compare/v2.0.0...v3.0.0-dev.1) (2026-02-14)
+
+
+### Features
+
+* Change to Morphe patcher 1.1.1 ([31eb19e](https://github.com/crimera/piko/commit/31eb19e05f5dae9c4531db3c33dd8bc966b7b515))
+
+
+### BREAKING CHANGES
+
+* Old ReVanced CLI and Manager no longer work
+
 ## [2.0.0](https://github.com/crimera/piko/compare/v1.59.0...v2.0.0) (2026-02-11)
 
 ### ⚠ BREAKING CHANGES

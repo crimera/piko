@@ -1,25 +1,33 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.timeline.disableAutoScroll
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.settingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.utils.enableSettings
-import app.revanced.patcher.extensions.InstructionExtensions.addInstructions
-import app.revanced.patcher.fingerprint
-import app.revanced.patcher.patch.bytecodePatch
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.patch.bytecodePatch
 
-private val disableAutoScrollFingerprint =
-    fingerprint {
-        strings(
-            "applicationManager",
-            "releaseCompletable",
-            "preferences",
-            "twSystemClock",
-            "launchTracker",
-            "cold_start_launch_time_millis",
-        )
-
-        returns("V")
-    }
+private object DisableAutoScrollFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf(
+        "applicationManager",
+        "releaseCompletable",
+        "preferences",
+        "twSystemClock",
+        "launchTracker",
+        "cold_start_launch_time_millis",
+    )
+)
 
 // credits to @Ouxyl
 @Suppress("unused")
@@ -31,7 +39,7 @@ val disableAutoScrollPatch =
         dependsOn(settingsPatch)
 
         execute {
-            val method = disableAutoScrollFingerprint.classDef.methods.last()
+            val method = DisableAutoScrollFingerprint.classDef.methods.last()
 
             method.addInstructions(
                 0,
@@ -40,6 +48,6 @@ val disableAutoScrollPatch =
                 return v0
                 """.trimIndent(),
             )
-            settingsStatusLoadFingerprint.enableSettings("disableAutoTimelineScroll")
+            SettingsStatusLoadFingerprint.enableSettings("disableAutoTimelineScroll")
         }
     }

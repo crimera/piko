@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Premium Settings -->
+    <string name="piko_title_premium">Premium</string>
+    <string name="piko_pref_reader_mode">tryb czytnika</string>
+    <string name="piko_pref_reader_mode_desc">Włącza tryb czytnika dla długich wątków</string>
+    <string name="piko_pref_undo_posts">cofanie wpisów</string>
+    <string name="piko_pref_undo_posts_desc">Umożliwia cofnięcie wpisu przed jego opublikowaniem</string>
+    <string name="piko_pref_undo_posts_btn">Ustawienia cofania wpisów</string>
+    <string name="piko_pref_icon_n_navbar_btn">Ustawienia ikony i paska nawigacji</string>
+    <string name="piko_pref_enable_force_pip">automatyczny tryb PiP</string>
+    <string name="piko_pref_enable_force_pip_desc">Włącza tryb PiP (Obraz w obrazie) po zamknięciu aplikacji</string>
+
+    <!-- Download Settings -->
+    <string name="piko_title_download">Pobieranie</string>
+    <string name="piko_pref_video_download">Możliwość pobierania treści</string>
+    <string name="piko_pref_download">Zmień folder do pobierania treści</string>
+    <string name="piko_pref_download_path">Folder główny</string>
+    <string name="piko_pref_download_path_desc">Główny folder zapisu treści</string>
+    <string name="piko_pref_download_folder">Podfolder</string>
+    <string name="piko_pref_download_folder_desc">Podfolder zapisu treści ([folder główny]/[podfolder])</string>
+    <string name="piko_pref_download_media_link_handle">Preferencje pobierania</string>
+    <string name="piko_pref_download_media_link_handle_download">Bezpośrednie pobieranie</string>
+    <string name="piko_pref_download_media_link_handle_copy_link">Bezpośrednie kopiowanie linku</string>
+    <string name="piko_pref_download_media_link_handle_always_ask">Zawsze pytaj</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">Skopiuj link</string>
+    <string name="piko_pref_download_media_link_handle_share_media_link">Udostępnij link</string>
+
+    <!-- Native -->
+    <string name="piko_title_native">Funkcje natywne</string>
+    <string name="piko_pref_native_page_desc">Funkcje natywne Piko są dostępne w menu udostępniania wpisów.</string>
+    <string name="piko_title_native_downloader">Pobieranie</string>
+    <string name="piko_title_native_downloader_toggle">Włącz natywne pobieranie</string>
+    <string name="piko_pref_native_downloader_alert_title">Pobierz multimedia</string>
+    <string name="piko_pref_native_downloader_download_all">Pobierz wszystko</string>
+    <string name="piko_pref_native_downloader_no_media">Nie znaleziono multimediów</string>
+    <string name="piko_pref_native_downloader_filename_title">Format nazwy pliku</string>
+		<string name="piko_browse_object_title">Przeglądaj obiekt tweeta</string>
+    <string name="piko_share_image_title">Udostępnij wpis jako obraz</string>
+    <string name="piko_share_image_toggle">Włącz udostępnianie wpisów jako obraz</string>
+    <string name="piko_share_image_autocleanup">Automatyczne czyszczenie zrzutów</string>
+    <string name="piko_share_image_autocleanup_desc">Usuwa zrzuty starsze niż 24 godziny, gdy opcja jest włączona</string>
+
+    <string name="piko_title_native_translator">Tłumaczenie wpisów</string>
+    <string name="piko_native_translator_toggle">Włącz natywne tłumaczenie wpisów</string>
+    <string name="piko_native_translator_provider">Silnik tłumaczenia</string>
+    <string name="piko_native_translator_to_lang">Język docelowy</string>
+    <string name="piko_native_translator_zero_text">Nie znaleziono tekstu do przetłumaczenia</string>
+    <string name="piko_native_translator_google">Tłumacz Google</string>
+    <string name="piko_native_translator_google_v2">Tłumacz Google V2</string>
+    <string name="piko_native_translator_fxtwitter">FxTwitter API</string>
+
+    <string name="piko_title_native_reader_mode">Tryb czytnika</string>
+    <string name="piko_native_reader_mode_grok_thread">Przeanalizuj ten wątek</string>
+    <string name="piko_native_reader_mode_grok_author">O autorze</string>
+    <string name="piko_native_reader_mode_source">Źródło</string>
+    <string name="piko_native_reader_mode_published">Opublikowano</string>
+    <string name="piko_native_reader_mode_total_post">Liczba wpisów</string>
+    <string name="piko_native_reader_mode_pref_text_only_mode">Tylko tekst</string>
+    <string name="piko_native_reader_mode_pref_hide_quoted_posts">Ukryj cytowane wpisy</string>
+    <string name="piko_native_reader_mode_pref_no_grok">Bez analizy Groka</string>
+    <string name="piko_native_reader_mode_copy_post">Kopiuj link</string>
+    <string name="piko_native_reader_mode_cache_delete">Wyczyść pamięć podręczną</string>
+    <string name="piko_native_reader_mode_cache_delete_success">Pamięć podręczna została wyczyszczona</string>
+    <string name="piko_native_reader_mode_cache_delete_failed">Nie udało się wyczyścić pamięci podręcznej</string>
+
+    <!-- Ads Settings -->
+    <string name="piko_title_ads">Reklamy</string>
+    <string name="piko_pref_hide_promoted_posts">promowane wpisy</string>
+    <string name="piko_pref_wtf_section">sekcje \"Kogo obserwować\"</string>
+    <string name="piko_pref_cts_section">sekcje \"Polecani twórcy treści\"</string>
+    <string name="piko_pref_ctj_section">sekcje \"Dołącz do społeczności\"</string>
+    <string name="piko_pref_ryb_section">sekcje \"Przejrzyj zakładki\"</string>
+    <string name="piko_pref_pinned_posts_section">sekcje \"Przypięte wpisy przez obserwujących\"</string>
+    <string name="piko_pref_hide_detailed_posts">powiązane wpisy (w odpowiedziach)</string>
+    <string name="piko_pref_hide_premium_prompt">banery subskrypcji Premium</string>
+    <string name="piko_pref_hide_todays_news">bieżące wiadomości</string>
+    <string name="piko_pref_del_from_db">Usuń rekordy z bazy danych</string>
+    <string name="piko_pref_db_not_found">Nie znaleziono bazy danych</string>
+    <string name="piko_pref_db_not_open">Baza danych nie jest otwarta</string>
+    <string name="piko_pref_db_del_items">Usunięte elementy</string>
+    <string name="piko_pref_hide_premium_upsell">nagłówek Premium</string>
+    <string name="piko_pref_hide_premium_upsell_desc">Usuwa nagłówek zachęcający do zakupu Premium na osi czasu</string>
+    <string name="piko_pref_top_people_search">sekcje osób w wyszukiwaniu</string>
+    <string name="piko_pref_top_people_search_desc">Usuwa sekcję osób z wyników wyszukiwania</string>
+
+    <!-- Misc Settings -->
+    <string name="piko_title_misc">Różne</string>
+    <string name="piko_pref_chirp_font">czcionkę Chirp</string>
+    <string name="piko_pref_hide_fab">pływający przycisk akcji</string>
+    <string name="piko_pref_hide_fab_menu">przyciski menu akcji</string>
+    <string name="piko_pref_rec_users">polecanych użytkowników</string>
+    <string name="piko_pref_hide_view_count">licznik wyświetleń</string>
+    <string name="piko_pref_custom_share_domain">Własna domena udostępniania</string>
+    <string name="piko_pref_custom_share_domain_desc">Domena używana podczas udostępniania tweetów</string>
+    <string name="piko_pref_show_sensitive_media">Wyświetlaj wrażliwe treści</string>
+    <string name="piko_pref_selectable_text">Możliwość zaznaczenia tekstu</string>
+    <string name="piko_pref_clear_tracking_params">Usuń parametry śledzenia</string>
+    <string name="piko_pref_unshorten_link">Brak skróconych adresów URL</string>
+    <string name="piko_pref_unshorten_link_desc">Pozbądź się skróconych adresów URL t.co</string>
+    <string name="piko_pref_round_off_numbers">Zaokrąglij liczby</string>
+    <string name="piko_pref_round_off_numbers_desc">Zaokrąglaj liczby do K dla tysięcy i M dla milionów</string>
+    <string name="piko_pref_debug_menu">menu debugowania wpisów</string>
+    <string name="piko_pref_quick_settings">Włącz szybkie ustawienia</string>
+    <string name="piko_pref_quick_settings_summary">Dodaje przycisk szybkich ustawień na pasku bocznym</string>
+    <string name="piko_pref_pause_search_suggestion">Wstrzymaj sugestie wyszukiwania</string>
+    <string name="piko_pref_pause_search_suggestion_desc">Sugestie wyszukiwania nie będą zapisywane lokalnie</string>
+    <string name="piko_pref_search_suggestion">sugestie wyszukiwania</string>
+    <string name="piko_pref_search_suggestion_desc">Ukryj sugestie wyszukiwania w sekcji przeglądania</string>
+    <string name="piko_disunify_xchat_system">Rozdziel system XChat</string>
+    <string name="piko_disunify_xchat_system_desc">Przywraca klasyczne funkcje, takie jak wiadomości i menu udostępniania</string>
+
+    <!-- Feature flags Settings -->
+    <string name="piko_title_feature_flags">Flagi</string>
+    <string name="piko_pref_feature_flags">Zarządzaj flagami</string>
+    <string name="piko_pref_edit_flag_title">Edytuj flagę</string>
+    <string name="piko_pref_add_flag_title">Dodaj flagę</string>
+    <string name="piko_pref_search_flags">Szukaj flagi</string>
+
+    <!-- Timeline Settings -->
+    <string name="piko_title_timeline">Oś czasu</string>
+    <string name="piko_pref_disable_auto_timeline_scroll">Wyłącz auto-odświeżanie osi</string>
+    <string name="piko_pref_show_post_source">Pokaż źródło wpisu</string>
+    <string name="piko_pref_show_post_source_desc">Etykieta źródła jest widoczna tylko przy publicznych wpisach (może wystąpić opóźnienie przy wczytywaniu informacji o wpisie)</string>
+    <string name="piko_pref_hide_live_threads">pokoje \"Na żywo\"</string>
+    <string name="piko_pref_hide_live_threads_desc">Ukrywa transmisje i pokoje na osi czasu</string>
+    <string name="piko_pref_hide_banner">baner powiadomień</string>
+    <string name="piko_pref_hide_banner_desc">wyskakujące powiadomienie o nowych wpisach</string>
+    <string name="piko_pref_hide_bmk_timeline">ikonę zakładek na osi czasu</string>
+    <string name="piko_pref_force_translate">Wymuś opcję tłumaczenia</string>
+    <string name="piko_pref_force_translate_desc">Zapewnia przycisk tłumaczenia dla każdego wpisu</string>
+    <string name="piko_pref_hide_quick_promote">przycisk promowania wpisu</string>
+    <string name="piko_pref_hide_quick_promote_desc">Ukrywa przycisk promowania pod własnymi wpisami</string>
+    <string name="piko_pref_show_poll_result">Pokaż wyniki ankiet</string>
+    <string name="piko_pref_show_poll_result_desc">Pozwala zobaczyć wyniki ankiety bez oddawania głosu</string>
+    <string name="piko_pref_hide_immersive_player">immersyjny tryb odtwarzacza</string>
+    <string name="piko_pref_hide_immersive_player_desc">Wyłącza gest przesuwania w górę dla kolejnych filmów</string>
+    <string name="piko_pref_enable_vid_auto_advance">auto-przewijanie filmów</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Automatycznie przechodzi do kolejnego filmu w trybie immersyjnym</string>
+    <string name="piko_pref_hide_hidden_replies">ukryte odpowiedzi</string>
+    <string name="piko_pref_force_hd">wymuszenie jakości filmów w HD</string>
+    <string name="piko_pref_force_hd_desc">Filmy będą zawsze odtwarzane w najwyższej dostępnej jakości</string>
+    <string name="piko_pref_hide_nudge_button">Ukryj przycisk sugestii</string>
+    <string name="piko_pref_hide_nudge_button_desc">Ukrywa przyciski obserwowania/subskrypcji przy wpisach</string>
+    <string name="piko_pref_hide_social_proof">Ukryj kontekst \"Obserwowany(-a) przez\"</string>
+    <string name="piko_pref_hide_social_proof_desc">Ukrywa listę wspólnych obserwujących pod profilem</string>
+    <string name="piko_pref_hide_community_badge">Ukryj odznaki społeczności</string>
+    <string name="piko_pref_hide_badge_nav_bar">Ukryj odznaki na pasku nawigacji</string>
+    <string name="piko_pref_hide_badge_nav_bar_desc">Ukrywa liczniki i kropki powiadomień na ikonach paska nawigacji</string>
+    <string name="piko_pref_hide_post_inline_metrics">Ukryj liczniki na listach wpisów</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">Ukrywa licznik polubień i podań dalej podczas przeglądania osi czasu</string>
+    <string name="piko_pref_hide_post_detailed_metrics">Ukryj liczniki w widoku szczegółowym</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">Ukrywa licznik polubień i podań dalej po otwarciu wpisu</string>
+
+    <!-- Customization Settings -->
+    <string name="piko_title_customisation">Dostosowywanie</string>
+    <string name="piko_pref_customisation_profiletabs">Zakładki profilu do ukrycia</string>
+    <string name="piko_pref_customisation_timelinetabs">Zakładki osi czasu do ukrycia</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">Ukryj \"Dla Ciebie\"</string>
+    <string name="piko_pref_customisation_timelinetabs_following">Ukryj \"Obserwujesz\"</string>
+    <string name="piko_pref_customisation_timelinetabs_both">Wyświetl obie</string>
+    <string name="piko_pref_customisation_sidebartabs">Elementy paska bocznego do ukrycia</string>
+    <string name="piko_pref_customisation_navbartabs">Elementy paska nawigacyjnego do ukrycia</string>
+    <string name="piko_pref_customisation_inlinetabs">Elementy paska pod wpisem do ukrycia</string>
+    <string name="piko_pref_customisation_exploretabs">Zakładki przeglądania do ukrycia</string>
+    <string name="piko_pref_customisation_searchtabs">Zakładki wyszukiwania do ukrycia</string>
+    <string name="piko_pref_customisation_notificationtabs">Zakładki powiadomień do ukrycia</string>
+    <string name="piko_pref_customisation_reply_sorting">Domyślne sortowanie odpowiedzi</string>
+    <string name="piko_pref_customisation_reply_sorting_remember">Ostatnio wybrane</string>
+    <string name="piko_pref_customisation_post_font_size">Rozmiar czcionki wpisów</string>
+    <string name="piko_pref_customisation_search_type_ahead">Sugestie wyszukiwania do ukrycia</string>
+    <string name="piko_pref_customisation_change_app_icon">Zmień ikonę aplikacji</string>
+
+    <!-- Font Settings -->
+    <string name="piko_title_font">Styl czcionki</string>
+    <string name="piko_pref_add_font">Dodaj czcionkę</string>
+    <string name="piko_pref_add_font_desc">Wymagany format czcionki to .ttf lub .otf</string>
+    <string name="piko_pref_delete_font">Usuń czcionkę</string>
+    <string name="piko_pref_add_emoji_font">Dodaj czcionkę emoji</string>
+    <string name="piko_pref_delete_emoji_font">Usuń czcionkę emoji</string>
+    <string name="piko_pref_add_font_success">Czcionka została pomyślnie dodana</string>
+    <string name="piko_pref_add_font_fail">Nie udało się dodać czcionki</string>
+    <string name="piko_pref_delete_font_success">Czcionka została pomyślnie usunięta</string>
+    <string name="piko_pref_delete_font_fail">Nie udało się usunąć czcionki</string>
+    <string name="piko_pref_delete_font_warn">Nie znaleziono czcionki do usunięcia</string>
+
+    <!-- Logging Settings -->
+    <string name="piko_title_logging">Logi</string>
+    <string name="piko_pref_server_response_logging">Loguj odpowiedzi serwera</string>
+    <string name="piko_pref_server_response_logging_desc">Zapisuj odpowiedzi JSON otrzymane z serwera w folderze \"Download/Piko\"</string>
+    <string name="piko_pref_server_response_logging_file_overwrite">Nadpisuj plik z logami</string>
+    <string name="piko_pref_server_response_logging_file_overwrite_desc">Usuń istniejące logi przy uruchomieniu</string>
+
+    <!-- Backup and Restore -->
+    <string name="piko_title_backup">Kopia zapasowa i przywracanie</string>
+    <string name="piko_pref_export">Eksportuj %s</string>
+    <string name="piko_pref_import">Importuj %s</string>
+    <string name="piko_pref_success">powiodło się</string>
+    <string name="piko_pref_export_failed">Błąd: Eksportowanie %s nie powiodło się</string>
+    <string name="piko_pref_import_failed">Błąd: Importowanie %s nie powiodło się</string>
+    <string name="piko_pref_export_no_uri">Błąd: Nie podano miejsca docelowego</string>
+    <string name="piko_pref_import_no_uri">Błąd: Nie podano pliku</string>
+
+    <!-- About -->
+    <string name="piko_title_about">O aplikacji</string>
+    <string name="piko_pref_app_version">Wersja aplikacji</string>
+    <string name="piko_pref_patch_info">Informacje o poprawkach</string>
+    <string name="piko_pref_version_info">Informacje o wersjach</string>
+    <string name="piko_changelogs_title">Lista zmian</string>
+    <string name="piko_pref_patches">Poprawki</string>
+    <string name="piko_pref_included">Uwzględniono</string>
+    <string name="piko_pref_excluded">Wykluczono</string>
+    <string name="piko_pref_app_restart_rec">Zalecany jest restart aplikacji</string>
+    <string name="piko_pref_remove">Usuń %s</string>
+    <string name="piko_pref_enable">Włącz %s</string>
+    <string name="piko_single_page_settings">Ustawienia na pojedynczej stronie</string>
+    <string name="piko_single_page_settings_desc">Wyświetlaj ustawienia na pojedynczej stronie</string>
+
+    <string name="piko_pref_search_type_ahead_users">Użytkownicy</string>
+    <string name="piko_pref_search_type_ahead_events">Wydarzenia</string>
+    <string name="piko_pref_search_type_ahead_ordered_section">Sekcja uporządkowana</string>
+
+    <string name="piko_settings_supported_links">Otwieraj obsługiwane linki</string>
+
+    <!-- For arrays -->
+    <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_money">Money</string>
+    <string name="piko_array_xchat">Czat</string>
+    <string name="piko_array_x_lite">Nowa aplikacja X dla systemu Android</string>
+    <string name="piko_array_conference">Konferencje</string>
+    <string name="piko_array_creator_studio">Studio twórców treści</string>
+    <string name="piko_array_jobs">Oferty pracy</string>
+    <string name="piko_array_media">Multimedia</string>
+
+    <string name="piko_array_light_mode">Tryb jasny</string>
+
+    <!-- App icon strings -->
+    <string name="piko_app_icon_thanks">Podziękowania dla @NeoFreeBird za ikony aplikacji z iOS</string>
+    <string name="piko_app_icon_piko_exclusive">(Tylko w Piko)</string>
+
+    <!-- Category -->
+    <string name="piko_app_icon_category_legacy">Klasyczne</string>
+    <string name="piko_app_icon_category_seasonal_event">Wydarzenia sezonowe</string>
+    <string name="piko_app_icon_category_sports">Sport</string>
+    <string name="piko_app_icon_category_cultural_and_celebrations">Kultura i święta</string>
+    <string name="piko_app_icon_category_pride">Duma</string>
+    <string name="piko_app_icon_category_misc">Różne</string>
+    <string name="piko_app_icon_category_space">Kosmos</string>
+    <string name="piko_app_icon_category_movies_n_series">Filmy i seriale</string>
+
+    <!-- Icon names -->
+    <string name="piko_app_icon_name_default">Domyślna</string>
+    <string name="piko_app_icon_name_legacy_icon_1">Klasyczna 1</string>
+    <string name="piko_app_icon_name_legacy_icon_2">Klasyczna 2</string>
+    <string name="piko_app_icon_name_legacy_icon_3">Klasyczna 3</string>
+    <string name="piko_app_icon_name_legacy_icon_4">Klasyczna 4</string>
+    <string name="piko_app_icon_name_legacy_blue">Klasyczny błękit</string>
+    <string name="piko_app_icon_name_twitter_blue">Twitter Blue</string>
+
+    <string name="piko_app_icon_name_earth">Ziemia</string>
+    <string name="piko_app_icon_name_moon">Księżyc</string>
+    <string name="piko_app_icon_name_mars">Mars</string>
+    <string name="piko_app_icon_name_sun">Słońce</string>
+    <string name="piko_app_icon_name_stars">Gwiazdy</string>
+    <string name="piko_app_icon_name_milky_way">Droga Mleczna</string>
+
+    <string name="piko_app_icon_name_autumn_2021">Jesień 2021</string>
+    <string name="piko_app_icon_name_autumn_2022">Jesień 2022</string>
+    <string name="piko_app_icon_name_south_spring_2021">Wiosna Południowa 2021</string>
+    <string name="piko_app_icon_name_south_spring_2022">Wiosna Południowa 2022</string>
+    <string name="piko_app_icon_name_winter_1">Zima 1</string>
+    <string name="piko_app_icon_name_winter_2">Zima 2</string>
+    <string name="piko_app_icon_name_summer_1">Lato 1</string>
+    <string name="piko_app_icon_name_summer_2">Lato 2</string>
+    <string name="piko_app_icon_name_autumn_southern">Jesień Południowa</string>
+    <string name="piko_app_icon_name_summer">Lato</string>
+    <string name="piko_app_icon_name_winter">Zima</string>
+
+    <string name="piko_app_icon_name_beijing_olympics_1">Igrzyska w Pekinie 1</string>
+    <string name="piko_app_icon_name_beijing_olympics_2">Igrzyska w Pekinie 2</string>
+    <string name="piko_app_icon_name_daytona">Daytona</string>
+    <string name="piko_app_icon_name_formulaone">Formuła 1</string>
+    <string name="piko_app_icon_name_kentucky_derby">Kentucky Derby</string>
+    <string name="piko_app_icon_name_mlb">MLB</string>
+    <string name="piko_app_icon_name_nba">NBA</string>
+    <string name="piko_app_icon_name_nba_2">NBA 2</string>
+    <string name="piko_app_icon_name_ncaa">NCAA</string>
+    <string name="piko_app_icon_name_masters">Masters</string>
+    <string name="piko_app_icon_name_nba_finals">Finały NBA</string>
+    <string name="piko_app_icon_name_stanley_cup">Puchar Stanleya</string>
+    <string name="piko_app_icon_name_commonwealth">Igrzyska Wspólnoty</string>
+
+    <string name="piko_app_icon_name_mothers_day">Dzień Matki</string>
+    <string name="piko_app_icon_name_womansday">Dzień Kobiet</string>
+    <string name="piko_app_icon_name_halloween_2021">Halloween 1</string>
+    <string name="piko_app_icon_name_halloween_2022">Halloween 2</string>
+    <string name="piko_app_icon_name_halloween_2024_1">Halloween 3</string>
+    <string name="piko_app_icon_name_halloween_2024_2">Halloween 4</string>
+    <string name="piko_app_icon_name_halloween_2024_3">Halloween 5</string>
+    <string name="piko_app_icon_name_holi">Święto Kolorów</string>
+    <string name="piko_app_icon_name_stpatricks_day">Dzień św. Patryka</string>
+    <string name="piko_app_icon_name_easter">Wielkanoc</string>
+    <string name="piko_app_icon_name_anzac">Dzień ANZAC</string>
+    <string name="piko_app_icon_name_ramadan">Ramadan</string>
+    <string name="piko_app_icon_name_black_history">Miesiąc Historii Czarnoskórych</string>
+    <string name="piko_app_icon_name_eurovisionfinal">Finał Eurowizji</string>
+    <string name="piko_app_icon_name_lunar_new_year_1">Księżycowy Nowy Rok 1</string>
+    <string name="piko_app_icon_name_lunar_new_year_2">Księżycowy Nowy Rok 2</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_1">Japoński Nowy Rok 1</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_2">Japoński Nowy Rok 2</string>
+    <string name="piko_app_icon_name_may_the_fourth">Dzień Gwiezdnych Wojen</string>
+    <string name="piko_app_icon_name_barbie">Barbie</string>
+    <string name="piko_app_icon_name_thanksgiving_1">Święto Dziękczynienia 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2">Święto Dziękczynienia 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_1">Święto Dziękczynienia 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_2">Święto Dziękczynienia 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_3">Święto Dziękczynienia 3</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_4">Święto Dziękczynienia 4</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_5">Święto Dziękczynienia 5</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_6">Święto Dziękczynienia 6</string>
+    <string name="piko_app_icon_name_canada_day">Dzień Kanady</string>
+    <string name="piko_app_icon_name_canada_indigenous">Dzień Rdzennych Kanadyjczyków</string>
+    <string name="piko_app_icon_name_earth_hour">Godzina dla Ziemi</string>
+    <string name="piko_app_icon_name_euro">Euro</string>
+    <string name="piko_app_icon_name_independence_day">Dzień Niepodległości</string>
+    <string name="piko_app_icon_name_juneteenth">Dzień Wyzwolenia</string>
+    <string name="piko_app_icon_name_naidoc">Tydzień NAIDOC</string>
+    <string name="piko_app_icon_name_christmas_2024_1">Boże Narodzenie 1</string>
+    <string name="piko_app_icon_name_christmas_2024_2">Boże Narodzenie 2</string>
+    <string name="piko_app_icon_name_christmas_2024_3">Boże Narodzenie 3</string>
+    <string name="piko_app_icon_name_christmas_2024_4">Boże Narodzenie 4</string>
+
+    <string name="piko_app_icon_name_upsidedown">Druga Strona</string>
+    <string name="piko_app_icon_name_games_chamber">Komnata Gier</string>
+
+    <string name="piko_app_icon_name_pridesouthern">Duma Południowa</string>
+    <string name="piko_app_icon_name_newzealand_pride_1">Duma Nowej Zelandii 1</string>
+    <string name="piko_app_icon_name_newzealand_pride_2">Duma Nowej Zelandii 2</string>
+    <string name="piko_app_icon_name_pride_month">Miesiąc Dumy</string>
+
+    <string name="piko_app_icon_name_fancy">Elegancka</string>
+    <string name="piko_app_icon_name_broken">Pęknięta</string>
+    <string name="piko_app_icon_name_cyber">Cyber</string>
+    <string name="piko_app_icon_name_soft_pastel_pink">Pastelowy róż</string>
+    <string name="piko_app_icon_name_electric_indigo">Elektryczne indygo</string>
+    <string name="piko_app_icon_name_neon_pink">Neonowy róż</string>
+    <string name="piko_app_icon_name_tropical_teal">Tropikalny turkus</string>
+    <string name="piko_app_icon_name_vivid_orange">Jaskrawa pomarańcz</string>
+
+</resources>
