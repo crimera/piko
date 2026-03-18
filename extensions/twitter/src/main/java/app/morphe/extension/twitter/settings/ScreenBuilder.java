@@ -54,7 +54,7 @@ public class ScreenBuilder {
         if (SettingsStatus.enableUndoPosts) {
             addPreference(category,
                     helper.switchPreference(
-                            strEnableRes("piko_pref_undo_posts"),
+                            strRes("piko_pref_undo_posts"),
                             strRes("piko_pref_undo_posts_desc"),
                             Settings.PREMIUM_UNDO_POSTS
                     )
@@ -63,7 +63,7 @@ public class ScreenBuilder {
             if (SettingsStatus.enableForcePip) {
                 addPreference(category,
                         helper.switchPreference(
-                                strEnableRes("piko_pref_enable_force_pip"),
+                                strRes("piko_pref_enable_force_pip"),
                                 strRes("piko_pref_enable_force_pip_desc"),
                                 Settings.PREMIUM_ENABLE_FORCE_PIP
                         )
@@ -129,7 +129,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideAds) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_promoted_posts"),
+                            strRes("piko_pref_hide_promoted_posts"),
                             "",
                             Settings.ADS_HIDE_PROMOTED_POSTS
                     )
@@ -139,7 +139,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideWTF) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_wtf_section"),
+                            strRes("piko_pref_wtf_section"),
                             "",
                             Settings.ADS_HIDE_WHO_TO_FOLLOW
                     )
@@ -148,7 +148,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideCTS) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_cts_section"),
+                            strRes("piko_pref_cts_section"),
                             "",
                             Settings.ADS_HIDE_CREATORS_TO_SUB
                     )
@@ -158,7 +158,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideCTJ) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_ctj_section"),
+                            strRes("piko_pref_ctj_section"),
                             "",
                             Settings.ADS_HIDE_COMM_TO_JOIN
                     )
@@ -168,7 +168,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideRBMK) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_ryb_section"),
+                            strRes("piko_pref_ryb_section"),
                             "",
                             Settings.ADS_HIDE_REVISIT_BMK
                     )
@@ -178,7 +178,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideRPinnedPosts) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_pinned_posts_section"),
+                            strRes("piko_pref_pinned_posts_section"),
                             "",
                             Settings.ADS_HIDE_REVISIT_PINNED_POSTS
                     )
@@ -188,7 +188,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideDetailedPosts) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_detailed_posts"),
+                            strRes("piko_pref_hide_related_posts"),
                             "",
                             Settings.ADS_HIDE_DETAILED_POSTS
                     )
@@ -198,7 +198,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hidePremiumPrompt) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_premium_prompt"),
+                            strRes("piko_pref_hide_premium_prompt"),
                             "",
                             Settings.ADS_HIDE_PREMIUM_PROMPT
                     )
@@ -208,7 +208,7 @@ public class ScreenBuilder {
         if (SettingsStatus.removePremiumUpsell) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_premium_upsell"),
+                            strRes("piko_pref_hide_premium_upsell"),
                             strRes("piko_pref_hide_premium_upsell_desc"),
                             Settings.ADS_REMOVE_PREMIUM_UPSELL
                     )
@@ -218,7 +218,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideTopPeopleSearch) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_top_people_search"),
+                            strRes("piko_pref_top_people_search"),
                             strRes("piko_pref_top_people_search_desc"),
                             Settings.ADS_HIDE_TOP_PEOPLE_SEARCH
                     )
@@ -227,7 +227,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideTodaysNews) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_todays_news"),
+                            strRes("piko_pref_hide_todays_news"),
                             "",
                             Settings.ADS_REMOVE_TODAYS_NEW
                     )
@@ -328,7 +328,7 @@ public class ScreenBuilder {
         if (SettingsStatus.nativeReaderMode) {
             addPreference(category,
                     helper.switchPreference(
-                            strRes("piko_title_native_reader_mode"),
+                            strRes("piko_native_reader_mode_toggle"),
                             "",
                             Settings.NATIVE_READER_MODE
                     )
@@ -397,7 +397,7 @@ public class ScreenBuilder {
 
             addPreference(category,
                     helper.switchPreference(
-                            strEnableRes("piko_browse_object_title"),
+                            strRes("piko_browse_object_title"),
                             "",
                             Settings.BROWSE_OBJECT
                     )
@@ -415,7 +415,7 @@ public class ScreenBuilder {
         if (SettingsStatus.enableFontMod) {
             addPreference(category,
                     helper.switchPreference(
-                            strEnableRes("piko_pref_chirp_font"),
+                            strRes("piko_pref_chirp_font"),
                             "",
                             Settings.MISC_FONT
                     )
@@ -424,7 +424,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideFAB) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_fab"),
+                            strRes("piko_pref_hide_fab"),
                             "",
                             Settings.MISC_HIDE_FAB
                     )
@@ -433,7 +433,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideFABBtns) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_fab_menu"),
+                            strRes("piko_pref_hide_fab_menu"),
                             "",
                             Settings.MISC_HIDE_FAB_BTN
                     )
@@ -443,7 +443,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideRecommendedUsers) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_rec_users"),
+                            strRes("piko_pref_rec_users"),
                             "",
                             Settings.MISC_HIDE_RECOMMENDED_USERS
                     )
@@ -453,7 +453,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideViewCount) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_view_count"),
+                            strRes("piko_pref_hide_view_count"),
                             "",
                             Settings.MISC_HIDE_VIEW_COUNT
                     )
@@ -473,7 +473,7 @@ public class ScreenBuilder {
         if (SettingsStatus.enableDebugMenu) {
             addPreference(category,
                     helper.switchPreference(
-                            strEnableRes("piko_pref_debug_menu"),
+                            strRes("piko_pref_debug_menu"),
                             "",
                             Settings.MISC_DEBUG_MENU
                     )
@@ -503,7 +503,7 @@ public class ScreenBuilder {
         if (SettingsStatus.removeSearchSuggestions) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_search_suggestion"),
+                            strRes("piko_pref_search_suggestion"),
                             strRes("piko_pref_search_suggestion_desc"),
                             Settings.MISC_HIDE_SEARCH_SUGGESTIONS
                     )
@@ -553,7 +553,7 @@ public class ScreenBuilder {
 
         addPreference(category,
                 helper.buttonPreference(
-                        StringRef.str("piko_pref_import",strRes("piko_title_feature_flags")),
+                        strRes("piko_pref_import_flags"),
                         strRes("piko_pref_app_restart_rec"),
                         Settings.IMPORT_FLAGS,
                         "ic_vector_incoming",
@@ -563,7 +563,7 @@ public class ScreenBuilder {
 
         addPreference(category,
                 helper.buttonPreference(
-                        StringRef.str("piko_pref_export",strRes("piko_title_feature_flags")),
+                        strRes("piko_pref_export_flags"),
                         "",
                         Settings.EXPORT_FLAGS,
                         "ic_vector_outgoing",
@@ -573,7 +573,7 @@ public class ScreenBuilder {
 
         addPreference(category,
                 helper.buttonPreference(
-                        strRes("delete")+": "+strRes("piko_title_feature_flags"),
+                        strRes("piko_pref_reset_flags"),
                         "",
                         Settings.RESET_FLAGS,
                         "ic_vector_trashcan_stroke",
@@ -808,7 +808,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideLiveThreads) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_live_threads"),
+                            strRes("piko_pref_hide_live_threads"),
                             strRes("piko_pref_hide_live_threads_desc"),
                             Settings.TIMELINE_HIDE_LIVETHREADS
                     )
@@ -817,8 +817,8 @@ public class ScreenBuilder {
         if (SettingsStatus.hideBanner) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_banner"),
-                            strRemoveRes("piko_pref_hide_banner_desc"),
+                            strRes("piko_pref_hide_banner"),
+                            strRes("piko_pref_hide_banner_desc"),
                             Settings.TIMELINE_HIDE_BANNER
                     )
             );
@@ -826,7 +826,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideInlineBmk) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_bmk_timeline"),
+                            strRes("piko_pref_hide_bmk_timeline"),
                             "",
                             Settings.TIMELINE_HIDE_BMK_ICON
                     )
@@ -856,7 +856,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideCommunityNote) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("community_notes_title"),
+                            strRes("piko_pref_hide_community_notes"),
                             "",
                             Settings.MISC_HIDE_COMM_NOTES
                     )
@@ -876,7 +876,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hidePromoteButton) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_quick_promote"),
+                            strRes("piko_pref_hide_quick_promote"),
                             strRes("piko_pref_hide_quick_promote_desc"),
                             Settings.TIMELINE_HIDE_PROMOTE_BUTTON
                     )
@@ -886,7 +886,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideImmersivePlayer) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_immersive_player"),
+                            strRes("piko_pref_hide_immersive_player"),
                             strRes("piko_pref_hide_immersive_player_desc"),
                             Settings.TIMELINE_HIDE_IMMERSIVE_PLAYER
                     )
@@ -895,7 +895,7 @@ public class ScreenBuilder {
         if (SettingsStatus.enableVidAutoAdvance) {
             addPreference(category,
                     helper.switchPreference(
-                            strEnableRes("piko_pref_enable_vid_auto_advance"),
+                            strRes("piko_pref_enable_vid_auto_advance"),
                             strRes("piko_pref_enable_vid_auto_advance_desc"),
                             Settings.TIMELINE_ENABLE_VID_AUTO_ADVANCE
                     )
@@ -904,7 +904,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideHiddenReplies) {
             addPreference(category,
                     helper.switchPreference(
-                            strRemoveRes("piko_pref_hide_hidden_replies"),
+                            strRes("piko_pref_hide_hidden_replies"),
                             "",
                             Settings.TIMELINE_HIDE_HIDDEN_REPLIES
                     )
@@ -913,7 +913,7 @@ public class ScreenBuilder {
         if (SettingsStatus.enableForceHD) {
             addPreference(category,
                     helper.switchPreference(
-                            strEnableRes("piko_pref_force_hd"),
+                            strRes("piko_pref_force_hd"),
                             strRes("piko_pref_force_hd_desc"),
                             Settings.TIMELINE_ENABLE_VID_FORCE_HD
                     )
@@ -1011,7 +1011,7 @@ public class ScreenBuilder {
 
         addPreference(category,
                 helper.buttonPreference(
-                        StringRef.str("piko_pref_import",strRes("piko_name"))+" "+strRes("settings_notification_pref_item_title"),
+                        strRes("piko_pref_import_settings"),
                         strRes("piko_pref_app_restart_rec"),
                         Settings.IMPORT_PREF,
                         "ic_vector_incoming",
@@ -1021,7 +1021,7 @@ public class ScreenBuilder {
         );
        addPreference(category,
                 helper.buttonPreference(
-                        StringRef.str("piko_pref_export",strRes("piko_name"))+" "+strRes("settings_notification_pref_item_title"),
+                        strRes("piko_pref_export_settings"),
                         "",
                         Settings.EXPORT_PREF,
                         "ic_vector_outgoing",
@@ -1031,7 +1031,7 @@ public class ScreenBuilder {
 
        addPreference(category,
                 helper.buttonPreference(
-                        strRes("delete")+": "+strRes("piko_name")+" "+strRes("settings_notification_pref_item_title"),
+                        strRes("piko_pref_reset_settings"),
                         "",
                         Settings.RESET_PREF,
                         "ic_vector_trashcan_stroke",
@@ -1209,13 +1209,6 @@ public class ScreenBuilder {
         return StringRef.str(tag);
     }
 
-    public String strRemoveRes(String tag) {
-        return StringRef.str("piko_pref_remove",strRes(tag));
-    }
-
-    public String strEnableRes(String tag) {
-        return StringRef.str("piko_pref_enable",strRes(tag));
-    }
 
 
     //end
