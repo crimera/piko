@@ -174,9 +174,9 @@ public class Utils {
 
         String content = flag ? "piko_title_feature_flags" : "notification_settings_preferences_category";
 
-        dialog.setTitle(strRes("delete"));
+        dialog.setTitle(strRes("piko_dialog_delete_title"));
 
-        dialog.setMessage(strRes("delete") + " " + strRes(content) + " ?");
+        dialog.setMessage(StringRef.str("piko_dialog_delete_message", strRes(content)));
         dialog.setPositiveButton(strRes("ok"), (dialogInterface, i) -> {
             boolean success = false;
             if (flag) {

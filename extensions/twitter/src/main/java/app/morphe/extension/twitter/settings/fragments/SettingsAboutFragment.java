@@ -73,24 +73,24 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         );
 
         TreeMap<String,Boolean> flags = new TreeMap();
-        flags.put(strEnableRes("piko_pref_video_download"),SettingsStatus.enableVidDownload);
-        flags.put(strEnableRes("piko_pref_undo_posts"),SettingsStatus.enableUndoPosts);
+        flags.put(strRes("piko_pref_video_download"),SettingsStatus.enableVidDownload);
+        flags.put(strRes("piko_pref_undo_posts"),SettingsStatus.enableUndoPosts);
         flags.put(strRes("tab_customization_screen_title"),SettingsStatus.navBarCustomisation);
         flags.put(strRes("piko_pref_download"),SettingsStatus.changeDownloadEnabled);
         flags.put(strRes("piko_pref_download_media_link_handle"),SettingsStatus.mediaLinkHandle);
-        flags.put(strRemoveRes("piko_pref_hide_promoted_posts"),SettingsStatus.hideAds);
-        flags.put(strRemoveRes("piko_pref_wtf_section"),SettingsStatus.hideWTF);
-        flags.put(strRemoveRes("piko_pref_cts_section"),SettingsStatus.hideCTS);
-        flags.put(strRemoveRes("piko_pref_ctj_section"),SettingsStatus.hideCTJ);
-        flags.put(strRemoveRes("piko_pref_ryb_section"),SettingsStatus.hideRBMK);
-        flags.put(strRemoveRes("piko_pref_pinned_posts_section"),SettingsStatus.hideRPinnedPosts);
-        flags.put(strRemoveRes("piko_pref_hide_detailed_posts"),SettingsStatus.hideDetailedPosts);
-        flags.put(strEnableRes("piko_pref_chirp_font"),SettingsStatus.enableFontMod);
-        flags.put(strRemoveRes("piko_pref_hide_fab"),SettingsStatus.hideFAB);
-        flags.put(strRemoveRes("piko_pref_hide_fab_menu"),SettingsStatus.hideFABBtns);
+        flags.put(strRes("piko_pref_hide_promoted_posts"),SettingsStatus.hideAds);
+        flags.put(strRes("piko_pref_wtf_section"),SettingsStatus.hideWTF);
+        flags.put(strRes("piko_pref_cts_section"),SettingsStatus.hideCTS);
+        flags.put(strRes("piko_pref_ctj_section"),SettingsStatus.hideCTJ);
+        flags.put(strRes("piko_pref_ryb_section"),SettingsStatus.hideRBMK);
+        flags.put(strRes("piko_pref_pinned_posts_section"),SettingsStatus.hideRPinnedPosts);
+        flags.put(strRes("piko_pref_hide_detailed_posts"),SettingsStatus.hideDetailedPosts);
+        flags.put(strRes("piko_pref_chirp_font"),SettingsStatus.enableFontMod);
+        flags.put(strRes("piko_pref_hide_fab"),SettingsStatus.hideFAB);
+        flags.put(strRes("piko_pref_hide_fab_menu"),SettingsStatus.hideFABBtns);
         flags.put(strRes("piko_pref_show_sensitive_media"),SettingsStatus.showSensitiveMedia);
         flags.put(strRes("piko_pref_selectable_text"),SettingsStatus.selectableText);
-        flags.put(strRemoveRes("piko_pref_rec_users"),SettingsStatus.hideRecommendedUsers);
+        flags.put(strRes("piko_pref_rec_users"),SettingsStatus.hideRecommendedUsers);
         flags.put(strRes("piko_pref_custom_share_domain"),SettingsStatus.customSharingDomainEnabled);
         flags.put(strRes("piko_pref_feature_flags"),SettingsStatus.featureFlagsEnabled);
         flags.put(strRes("piko_pref_customisation_profiletabs"),SettingsStatus.profileTabCustomisation);
@@ -99,46 +99,44 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         flags.put(strRes("piko_pref_customisation_navbartabs"),SettingsStatus.navBarCustomisation);
         flags.put(strRes("piko_pref_customisation_sidebartabs"),SettingsStatus.sideBarCustomisation);
         flags.put(strRes("piko_pref_disable_auto_timeline_scroll"),SettingsStatus.disableAutoTimelineScroll);
-        flags.put(strRemoveRes("piko_pref_hide_live_threads"),SettingsStatus.hideLiveThreads);
-        flags.put(strRemoveRes("piko_pref_hide_view_count"),SettingsStatus.hideViewCount);
-        flags.put(strRemoveRes("piko_pref_hide_banner"),SettingsStatus.hideBanner);
-        flags.put(strRemoveRes("piko_pref_hide_bmk_timeline"),SettingsStatus.hideInlineBmk);
+        flags.put(strRes("piko_pref_hide_live_threads"),SettingsStatus.hideLiveThreads);
+        flags.put(strRes("piko_pref_hide_view_count"),SettingsStatus.hideViewCount);
+        flags.put(strRes("piko_pref_hide_banner"),SettingsStatus.hideBanner);
+        flags.put(strRes("piko_pref_hide_bmk_timeline"),SettingsStatus.hideInlineBmk);
         flags.put(strRes("piko_pref_show_poll_result"),SettingsStatus.showPollResultsEnabled);
-        flags.put(strRemoveRes("community_notes_title"),SettingsStatus.hideCommunityNote);
-        flags.put(strRemoveRes("piko_pref_hide_quick_promote"),SettingsStatus.hidePromoteButton);
-        flags.put(strRemoveRes("piko_pref_hide_immersive_player"),SettingsStatus.hideImmersivePlayer);
+        flags.put(strRes("community_notes_title"),SettingsStatus.hideCommunityNote);
+        flags.put(strRes("piko_pref_hide_quick_promote"),SettingsStatus.hidePromoteButton);
+        flags.put(strRes("piko_pref_hide_immersive_player"),SettingsStatus.hideImmersivePlayer);
         flags.put(strRes("piko_pref_clear_tracking_params"),SettingsStatus.cleartrackingparams);
         flags.put(strRes("piko_pref_unshorten_link"),SettingsStatus.unshortenlink);
         flags.put(strRes("piko_pref_force_translate"),SettingsStatus.forceTranslate);
         flags.put(strRes("piko_pref_round_off_numbers"),SettingsStatus.roundOffNumbers);
         flags.put(strRes("piko_pref_customisation_inlinetabs"),SettingsStatus.inlineBarCustomisation);
-        flags.put(strEnableRes("piko_pref_debug_menu"),SettingsStatus.enableDebugMenu);
-        flags.put(strRemoveRes("piko_pref_hide_premium_prompt"),SettingsStatus.hidePremiumPrompt);
-        flags.put(strRemoveRes("piko_pref_hide_hidden_replies"),SettingsStatus.hideHiddenReplies);
+        flags.put(strRes("piko_pref_debug_menu"),SettingsStatus.enableDebugMenu);
+        flags.put(strRes("piko_pref_hide_premium_prompt"),SettingsStatus.hidePremiumPrompt);
+        flags.put(strRes("piko_pref_hide_hidden_replies"),SettingsStatus.hideHiddenReplies);
         flags.put(strRes("piko_pref_del_from_db"),SettingsStatus.deleteFromDb);
-        flags.put(strRes("piko_pref_video_download"),SettingsStatus.enableVidDownload);
         flags.put(strRes("piko_title_native_downloader"),SettingsStatus.nativeDownloader);
         flags.put(strRes("piko_pref_native_downloader_inline_button"),SettingsStatus.inlineDownloadButton);
         flags.put(strRes("piko_share_image_title"),SettingsStatus.shareImage);
         flags.put(strRes("piko_browse_object_title"),SettingsStatus.browseObject);
         flags.put(strRes("piko_title_native_reader_mode"),SettingsStatus.nativeReaderMode);
-        flags.put(strEnableRes("piko_pref_enable_vid_auto_advance"),SettingsStatus.enableVidAutoAdvance);
-        flags.put(strEnableRes("piko_pref_enable_force_pip"),SettingsStatus.enableForcePip);
-        flags.put(strRemoveRes("piko_pref_hide_premium_upsell"),SettingsStatus.removePremiumUpsell);
+        flags.put(strRes("piko_pref_enable_vid_auto_advance"),SettingsStatus.enableVidAutoAdvance);
+        flags.put(strRes("piko_pref_enable_force_pip"),SettingsStatus.enableForcePip);
+        flags.put(strRes("piko_pref_hide_premium_upsell"),SettingsStatus.removePremiumUpsell);
         flags.put(strRes("piko_pref_customisation_reply_sorting"),SettingsStatus.defaultReplySortFilter);
-        flags.put(strEnableRes("piko_pref_force_hd"),SettingsStatus.enableForceHD);
+        flags.put(strRes("piko_pref_force_hd"),SettingsStatus.enableForceHD);
         flags.put(strRes("piko_pref_hide_nudge_button"),SettingsStatus.hideNudgeButton);
         flags.put(strRes("piko_pref_hide_social_proof"),SettingsStatus.hideSocialProof);
         flags.put(strRes("piko_pref_hide_community_badge"),SettingsStatus.hideCommBadge);
         flags.put(strRes("piko_title_native_translator"),SettingsStatus.nativeTranslator);
         flags.put(strRes("piko_pref_customisation_post_font_size"),SettingsStatus.customPostFontSize);
-        flags.put(strRemoveRes("piko_pref_top_people_search"),SettingsStatus.hideTopPeopleSearch);
+        flags.put(strRes("piko_pref_top_people_search"),SettingsStatus.hideTopPeopleSearch);
         flags.put(strRes("piko_pref_customisation_searchtabs"),SettingsStatus.searchTabCustomisation);
-        flags.put(strRemoveRes("piko_pref_hide_todays_news"),SettingsStatus.hideTodaysNews);
-        flags.put(strRemoveRes("piko_pref_server_response_logging"),SettingsStatus.serverResponseLogging);
+        flags.put(strRes("piko_pref_hide_todays_news"),SettingsStatus.hideTodaysNews);
+        flags.put(strRes("piko_pref_server_response_logging"),SettingsStatus.serverResponseLogging);
         flags.put(strRes("piko_pref_show_post_source"),SettingsStatus.showSourceLabel);
-        flags.put(strEnableRes("piko_changelogs_title"),SettingsStatus.showChangelogsPatchEnabled);
-        flags.put(strEnableRes("piko_changelogs_title"),SettingsStatus.showChangelogsPatchEnabled);
+        flags.put(strRes("piko_changelogs_title"),SettingsStatus.showChangelogsPatchEnabled);
         flags.put(strRes("piko_pref_pause_search_suggestion"),SettingsStatus.pauseSearchSuggestions);
         flags.put(strRes("piko_pref_search_suggestion"),SettingsStatus.removeSearchSuggestions);
         flags.put(strRes("piko_pref_customisation_change_app_icon"),SettingsStatus.appIconCustomisation);
@@ -214,11 +212,5 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
 
     private static String strRes(String tag) {
         return StringRef.str(tag);
-    }
-    private static String strRemoveRes(String tag) {
-        return StringRef.str("piko_pref_remove",strRes(tag));
-    }
-    private static String strEnableRes(String tag) {
-        return StringRef.str("piko_pref_enable",strRes(tag));
     }
 }
