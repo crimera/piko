@@ -3,6 +3,28 @@ api_token_env: "CROWDIN_PERSONAL_TOKEN"
 
 preserve_hierarchy: true
 
+# This section resolves the "Wrong export pattern" error by giving each language a unique folder name
+languages_mapping:
+  android_code:
+    ar: ar-rSA
+    es-ES: es-rES
+    es: es-rES
+    fr: fr-rFR
+    hi: hi-rIN
+    id: in-rID
+    it: it-rIT
+    ja: ja-rJP
+    ko: ko-rKR
+    pl: pl-rPL
+    pt-BR: pt-rBR
+    ru: ru-rRU
+    tr: tr-rTR
+    uk: uk-rUA
+    vi: vi-rVN
+    zh-CN: zh-rCN
+    zh-HK: zh-rHK
+    zh-TW: zh-rTW
+
 files:
     - source: patches/src/main/resources/addresources/values/shared/strings.xml
       translation: patches/src/main/resources/addresources/values-%android_code%/shared/strings.xml
