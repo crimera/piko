@@ -83,6 +83,8 @@ public class RestorePrefFragment extends Fragment {
         if(args != null){
             if (args.containsKey(Strings.IMPORT_DEV_OVERRIDES)) {
                 this.destinationFile = new File(this.context.getFilesDir() + "/mobileconfig", "mc_overrides.json");
+            } else if (args.containsKey(Strings.IMPORT_ID_MAPPING)) {
+                this.destinationFile = new File(this.context.getFilesDir() + "/mobileconfig", "id_name_mapping.json");
             }
 
             if(this.destinationFile!=null){

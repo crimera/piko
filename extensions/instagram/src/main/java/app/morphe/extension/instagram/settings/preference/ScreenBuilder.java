@@ -108,6 +108,13 @@ public class ScreenBuilder {
                             Strings.IMPORT_DEV_OVERRIDES
                     )
             );
+            addPreference(category,
+                    helper.buttonPreference(
+                            Strings.IMPORT_ID_MAPPING,
+                            "",
+                            Strings.IMPORT_ID_MAPPING
+                    )
+            );
         }
     }
     public void ghostSection(){

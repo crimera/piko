@@ -27,6 +27,7 @@ public class Strings{
     public static final String REMOVE_BUILD_EXPIRE_POPUP_DESC = "Removes the popup that appears after a while, when the app version ages";
     public static final String EXPORT_DEV_OVERRIDES = "Export overrides";
     public static final String IMPORT_DEV_OVERRIDES = "Import overrides";
+    public static final String IMPORT_ID_MAPPING = "Import mapping files";
 
     public static final String CATEGORY_LINKS = "Links";
     public static final String OPEN_LINKS_EXTERNALLY = "Open links externally";
