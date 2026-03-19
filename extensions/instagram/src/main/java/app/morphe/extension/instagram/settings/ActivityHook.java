@@ -14,73 +14,23 @@ package app.morphe.extension.instagram.settings;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.os.Bundle;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.util.TypedValue;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.view.ViewGroup.LayoutParams;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 
-import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.settings.SettingsFragment;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.settings.preference.fragments.BackupPrefFragment;
 
 @SuppressWarnings("deprecation")
 public class ActivityHook {
 
-    private static int getThemedColor(Context context, String attr) {
-        int attrId = Utils.getResourceIdentifier(attr, "attr");
-        TypedValue typedValue = new TypedValue();
-        boolean resolved = context.getTheme().resolveAttribute(attrId, typedValue, true);
-        return context.getColor(typedValue.resourceId);
-    }
-
-    public static void addPikoSettingsImageView(ViewGroup viewGroup) {
-        Context context = viewGroup.getContext();
-        ImageView imageView = new ImageView(context);
-        int dimenPixelSize = Utils.getResourceDimensionPixelSize("account_discovery_bottom_gap");
-        int dimenPixelSize2 = Utils.getResourceDimensionPixelSize("ab_test_media_thumbnail_preview_item_internal_padding");
-        Drawable drawable = context.getDrawable(Utils.getResourceIdentifier("instagram_settings_outline_24", "drawable"));
-        imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        imageView.setPaddingRelative(dimenPixelSize,dimenPixelSize2,dimenPixelSize,dimenPixelSize2);
-        imageView.setImageDrawable(drawable);
-        imageView.setColorFilter(new PorterDuffColorFilter(getThemedColor(context, "igds_color_primary_icon"), PorterDuff.Mode.SRC_ATOP));
-        imageView.setContentDescription(Strings.PIKO_SETTINGS);
-        imageView.setClickable(true);
-        imageView.setLongClickable(false);
-        imageView.setFocusable(true);
-        imageView.setFocusableInTouchMode(true);
-        imageView.setImportantForAccessibility(1);
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try{
-                    startPikoActivity();
-                }catch(Exception ex){
-                    Logger.printException(() -> "Failed to launch settings: ", ex);
-                }
-            }
-        });
-        viewGroup.addView(imageView);
-    }
-
-
-    public static boolean hook(Activity act) {
-        Intent intent = act.getIntent();
-        if (!(intent.getBooleanExtra(Strings.PIKO, false))) return false;
-        initialize(act);
-        return true;
-    }
-
-    private static void initialize(Activity activity) {
+    private static void startFragment(Activity activity, Fragment fragm, boolean addToBackStack) {
         int fragmentId = View.generateViewId();
         FrameLayout fragment = new FrameLayout(activity);
         fragment.setLayoutParams(new FrameLayout.LayoutParams(-1, -1));
@@ -95,20 +45,56 @@ public class ActivityHook {
         linearLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
         activity.setContentView(linearLayout);
 
-        activity.getFragmentManager()
+        FragmentTransaction transaction = activity.getFragmentManager()
                 .beginTransaction()
-                .replace(fragmentId, new SettingsFragment())
-                .commit();
+                .replace(fragmentId, fragm);
+        if (addToBackStack) {
+            transaction.addToBackStack(null);
+        }
+        transaction.commit();
     }
 
-    public static void startPikoActivity() throws Exception {
+    public static boolean hook(Activity activity) {
+        Bundle bundle = activity.getIntent().getExtras();
+        Utils.showToastShort(""+bundle.getBoolean(Strings.PIKO, false));
+        if(bundle.getBoolean(Strings.PIKO, false)){
+            startFragment(activity,new SettingsFragment(),true);
+            return true;
+        }
+
+        return false;
+    }
+
+    // --------------------------------
+    private static void startActivity(String bundleKey) throws Exception {
         Bundle bundle = new Bundle();
-        Context context = app.morphe.extension.shared.Utils.getContext();
+        Context context = Utils.getContext();
         Intent intent = new Intent(context, Class.forName("com.instagram.mainactivity.LauncherActivity"));
-        bundle.putBoolean(Strings.PIKO, true);
+        bundle.putBoolean(bundleKey, true);
         intent.putExtras(bundle);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+    }
+
+    public static void startPikoActivity() throws Exception {
+        startActivity(Strings.PIKO);
+    }
+
+    public static void callFragment(Activity activity, String bundleKey){
+        Fragment fragment = null;
+        boolean addToBackStack = false;
+        if (bundleKey.equals(Strings.EXPORT_DEV_OVERRIDES)) {
+            fragment = new BackupPrefFragment();
+            addToBackStack = true;
+        }
+        if(fragment!=null){
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(bundleKey, true);
+            bundle.putBoolean(Strings.PIKO,true);
+            fragment.setArguments(bundle);
+            startFragment(activity,fragment, addToBackStack);
+        }
+
     }
 
 }

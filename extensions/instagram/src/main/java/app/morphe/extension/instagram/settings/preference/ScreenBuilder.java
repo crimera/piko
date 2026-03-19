@@ -76,6 +76,16 @@ public class ScreenBuilder {
         if (!(SettingsStatus.developerOptionsSection())) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_DEV_OPTIONS);
+
+        if (SettingsStatus.removeBuildExpirePopup) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.REMOVE_BUILD_EXPIRE_POPUP,
+                            Strings.REMOVE_BUILD_EXPIRE_POPUP_DESC,
+                            Settings.REMOVE_BUILD_EXPIRE_POPUP
+                    )
+            );
+        }
         if (SettingsStatus.enableDeveloperOptions) {
             addPreference(category,
                     helper.switchPreference(
@@ -84,13 +94,11 @@ public class ScreenBuilder {
                             Settings.DEVELOPER_OPTIONS
                     )
             );
-        }
-        if (SettingsStatus.removeBuildExpirePopup) {
             addPreference(category,
-                    helper.switchPreference(
-                            Strings.REMOVE_BUILD_EXPIRE_POPUP,
-                            Strings.REMOVE_BUILD_EXPIRE_POPUP_DESC,
-                            Settings.REMOVE_BUILD_EXPIRE_POPUP
+                    helper.buttonPreference(
+                            Strings.EXPORT_DEV_OVERRIDES,
+                            "",
+                            Strings.EXPORT_DEV_OVERRIDES
                     )
             );
         }

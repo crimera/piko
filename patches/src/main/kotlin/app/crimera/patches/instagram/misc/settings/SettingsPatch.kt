@@ -13,6 +13,7 @@ package app.crimera.patches.instagram.misc.settings
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.utils.Constants.ACTIVITY_HOOK_CLASS
 import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.UI_CONSTANTS_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -42,7 +43,7 @@ val settingsPatch =
                 addInstruction(
                     firstGoto,
                     """
-                    invoke-static {v$viewGroupRegistry}, $ACTIVITY_HOOK_CLASS->addPikoSettingsImageView(Landroid/view/ViewGroup;)V
+                    invoke-static {v$viewGroupRegistry}, ${UI_CONSTANTS_DESCRIPTOR}->addPikoSettingsImageView(Landroid/view/ViewGroup;)V
                     """.trimIndent(),
                 )
             }

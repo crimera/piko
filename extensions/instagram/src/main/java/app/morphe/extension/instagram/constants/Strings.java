@@ -25,6 +25,10 @@ public class Strings{
     public static final String ENABLE_DEV_OPTIONS = "Enable developer options";
     public static final String REMOVE_BUILD_EXPIRE_POPUP = "Remove build expire popup";
     public static final String REMOVE_BUILD_EXPIRE_POPUP_DESC = "Removes the popup that appears after a while, when the app version ages";
+    public static final String EXPORT_DEV_OVERRIDES = "Export overrides";
+    public static final String EXPORT_SUCCESS = "Exported successfully";
+    public static final String EXPORT_FAIL = "Exporting failed";
+    public static final String EXPORT_FAIL_NO_PATH = "No destination path provided";
 
     public static final String CATEGORY_LINKS = "Links";
     public static final String OPEN_LINKS_EXTERNALLY = "Open links externally";
