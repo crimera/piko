@@ -86,7 +86,7 @@ public class ActivityHook {
         if (bundleKey.equals(Strings.EXPORT_DEV_OVERRIDES)) {
             fragment = new BackupPrefFragment();
             addToBackStack = true;
-        } else if (bundleKey.equals(Strings.IMPORT_DEV_OVERRIDES)) {
+        } else if (bundleKey.equals(Strings.IMPORT_DEV_OVERRIDES) || bundleKey.equals(Strings.IMPORT_ID_MAPPING)) {
             fragment = new RestorePrefFragment();
             addToBackStack = true;
         }

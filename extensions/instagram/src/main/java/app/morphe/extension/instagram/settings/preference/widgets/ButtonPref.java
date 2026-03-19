@@ -69,7 +69,7 @@ public class ButtonPref extends Preference {
             public boolean onPreferenceClick(Preference preference) {
             try {
                 String key = getKey();
-                if (key.equals(Strings.EXPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_DEV_OVERRIDES)) {
+                if (key.equals(Strings.EXPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_ID_MAPPING)) {
                     ActivityHook.callFragment((Activity) context, key);
                 }
             } catch (Exception e) {
