@@ -26,6 +26,7 @@ import app.morphe.extension.instagram.settings.SettingsFragment;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.preference.fragments.BackupPrefFragment;
+import app.morphe.extension.instagram.settings.preference.fragments.RestorePrefFragment;
 
 @SuppressWarnings("deprecation")
 public class ActivityHook {
@@ -56,7 +57,6 @@ public class ActivityHook {
 
     public static boolean hook(Activity activity) {
         Bundle bundle = activity.getIntent().getExtras();
-        Utils.showToastShort(""+bundle.getBoolean(Strings.PIKO, false));
         if(bundle.getBoolean(Strings.PIKO, false)){
             startFragment(activity,new SettingsFragment(),true);
             return true;
@@ -86,11 +86,13 @@ public class ActivityHook {
         if (bundleKey.equals(Strings.EXPORT_DEV_OVERRIDES)) {
             fragment = new BackupPrefFragment();
             addToBackStack = true;
+        } else if (bundleKey.equals(Strings.IMPORT_DEV_OVERRIDES)) {
+            fragment = new RestorePrefFragment();
+            addToBackStack = true;
         }
         if(fragment!=null){
             Bundle bundle = new Bundle();
             bundle.putBoolean(bundleKey, true);
-            bundle.putBoolean(Strings.PIKO,true);
             fragment.setArguments(bundle);
             startFragment(activity,fragment, addToBackStack);
         }
