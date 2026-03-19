@@ -101,6 +101,13 @@ public class ScreenBuilder {
                             Strings.EXPORT_DEV_OVERRIDES
                     )
             );
+            addPreference(category,
+                    helper.buttonPreference(
+                            Strings.IMPORT_DEV_OVERRIDES,
+                            "",
+                            Strings.IMPORT_DEV_OVERRIDES
+                    )
+            );
         }
     }
     public void ghostSection(){

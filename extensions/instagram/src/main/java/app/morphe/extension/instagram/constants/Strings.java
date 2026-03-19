@@ -26,9 +26,7 @@ public class Strings{
     public static final String REMOVE_BUILD_EXPIRE_POPUP = "Remove build expire popup";
     public static final String REMOVE_BUILD_EXPIRE_POPUP_DESC = "Removes the popup that appears after a while, when the app version ages";
     public static final String EXPORT_DEV_OVERRIDES = "Export overrides";
-    public static final String EXPORT_SUCCESS = "Exported successfully";
-    public static final String EXPORT_FAIL = "Exporting failed";
-    public static final String EXPORT_FAIL_NO_PATH = "No destination path provided";
+    public static final String IMPORT_DEV_OVERRIDES = "Import overrides";
 
     public static final String CATEGORY_LINKS = "Links";
     public static final String OPEN_LINKS_EXTERNALLY = "Open links externally";
@@ -79,4 +77,12 @@ public class Strings{
     public static final String DOWNLOADED_MEDIA = "Downloaded : ";
     public static final String MEDIA_EXISTS = "Media exits";
     public static final String DOWNLOAD_FAILED_MEDIA = "Download failed : ";
+
+    public static final String EXPORT_SUCCESS = "Exported successfully";
+    public static final String EXPORT_FAIL = "Exporting failed";
+    public static final String FAIL_NO_PATH = "No destination path provided";
+    public static final String IMPORT_SUCCESS = "Imported successfully";
+    public static final String IMPORT_FAIL = "Import failed";
+    public static final String RESTART_APP = "The app needs to be restarted for the changes to reflect";
+    public static final String OK = "OK";
 }

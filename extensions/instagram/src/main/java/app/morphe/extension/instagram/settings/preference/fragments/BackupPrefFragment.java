@@ -71,7 +71,7 @@ public class BackupPrefFragment extends Fragment {
             uri = intent.getData();
         }
         if (uri == null) {
-            toast(Strings.EXPORT_FAIL_NO_PATH);
+            toast(Strings.FAIL_NO_PATH);
 
         }
         else if (i2 == -1) {
