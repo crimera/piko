@@ -8,7 +8,7 @@
  * in the source code and version control history.
  */
 
-package app.crimera.patches.instagram.misc.RemoveBuildExpiredPopup
+package app.crimera.patches.instagram.misc.buildExpiredPopup
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
@@ -47,8 +47,8 @@ val removeBuildExpiredPopupPatch =
                 addInstructions(
                     longToIntIndex + 1,
                     """
-                    invoke-static {}, ${PREF_DESCRIPTOR}->buildAge()J
-                    move-result-wide v$appAgeRegister
+                    invoke-static/range {v$appAgeRegister .. v$appAgeRegister}, ${PREF_DESCRIPTOR}->buildAge(I)I
+                    move-result v$appAgeRegister
                     """.trimIndent(),
                 )
 
