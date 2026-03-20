@@ -1,50 +1,39 @@
-<div  align="center">
+<div align="center">
 
 <p align="center">
     <img src="https://socialify.git.ci/crimera/piko/image?forks=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Auto" alt="piko" width="640" height="320" />
 </p>
+
 <h1 align="center">
     Morphe patches focused on Twitter/X <br>
-    <a href ="https://t.me/pikopatches">
+    <a href="https://t.me/pikopatches">
         <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/>
     </a>
-    <a href ="https://crowdin.com/project/piko">
+    <a href="https://crowdin.com/project/piko">
         <img src="https://img.shields.io/badge/Crowdin-1B263B?style=for-the-badge&logo=crowdin&logoColor=white"/>
     </a>
 </h1>
 
-<summary><h2>🕹️ Usage</h2></summary>
+<h2>🕹️ Usage</h2>
 
-<b>Morphe Cli</b>
+**Morphe Manager**
+
+Use the deep link to add Piko as a patch source in Morphe Manager:
+
+[➕ Add Piko to Morphe](https://morphe.software/add-source?github=crimera/piko)
+
+Then patch Twitter/X:
+1. Download an original unpatched X APKM from [APKMirror.com](https://www.apkmirror.com/apk/x-corp/twitter/)
+2. Do _not_ unsplit or otherwise change the APKM.
+3. Select "Other apps" on the Morphe Manager home screen
+4. Provide the original APKM file
+5. Wait for patching to complete, install
+
+**Morphe CLI**
 
 ```sh
 java -jar cli.jar patch --patches piko.mpp input.apkm
 ```
-
-<p><b>or Morphe Manager</b>
-<details>
-
-<div align="left">
-
-<!-- TODO: Once enough time has passed, delete this sentence. -->
-Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software).
-
-To use these patches in Morphe Manager, follow these steps:
-
-#### Add Piko patches as a patch source 
-1. Tap patch sources (lower left button)
-2. Tap `+` button
-3. Paste this repo url: `https://github.com/crimera/piko` 
-
-#### Patching Twitter/X with Morphe
-1. Download an original unpatched X APKM from a reputable source such as [APKMirror.com](https://www.apkmirror.com/apk/x-corp/twitter/)
-2. Do _not_ unsplit or otherwise change the APKM. Morphe natively patches APKM/XAPK app bundles.
-3. Select "Other apps" on the Morphe Manager home screen
-4. Provide the original APKM file
-5. Wait for patching to complete, install
-</div>
-
-</details>
 
 <summary><h2>⚙️ Patch Details</h2></summary>
 <details>
