@@ -36,6 +36,10 @@ To use these patches in Morphe Manager, follow these steps:
 2. Tap `+` button
 3. Paste this repo url: `https://github.com/crimera/piko` 
 
+#### or
+
+Use the deep Link: https://morphe.software/add-source?github=crimera/piko
+
 #### Patching Twitter/X with Morphe
 1. Download an original unpatched X APKM from a reputable source such as [APKMirror.com](https://www.apkmirror.com/apk/x-corp/twitter/)
 2. Do _not_ unsplit or otherwise change the APKM. Morphe natively patches APKM/XAPK app bundles.
