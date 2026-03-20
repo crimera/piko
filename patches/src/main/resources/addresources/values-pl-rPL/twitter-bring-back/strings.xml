@@ -6,7 +6,7 @@
     <string name="button_action_options_tweet">Opcje Tweetów</string>
     <string name="button_action_retweet">Podaj dalej</string>
     <string name="button_new_tweet">Nowy tweet</string>
-    <string name="button_status_retweeted">Podaj dalej (Podany dalej)></string>
+    <string name="button_status_retweeted">Podaj dalej (Podany dalej)</string>
     <string name="chrome_action_post">Tweetnij</string>
     <string name="ps__share_post_tweet">Tweetnij</string>
     <string name="rux_landing_page_title">Tweetnij</string>

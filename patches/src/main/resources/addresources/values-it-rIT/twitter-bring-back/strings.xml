@@ -1,2 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <!-- Bring back Twitter -->
+    <string name="deleted_tweet_title">Questo tweet è stato cancellato.</string>
+    <string name="dm_sensitive_tweet_interstitial_header">Questo tweet può contenere materiale sensibile</string>
+    <string name="dm_untrusted_tweet_interstitial_header">Questo tweet è nascosto</string>
+    <string name="feedback_action_report_tweet">Segnala tweet</string>
+    <string name="feedback_tweet_unavailable">Questo tweet non è disponibile.</string>
+    <string name="filter_item_tweets_and_replies">Tweet &amp; risposte</string>
+    <string name="share_tweet_sheet_title">Condividi tweet</string>
+    <string name="retweet_label_subtitle">Condividi questo tweet con i tuoi follower</string>
+</resources>

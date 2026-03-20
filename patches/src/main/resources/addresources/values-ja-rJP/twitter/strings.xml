@@ -201,13 +201,11 @@
     <string name="piko_pref_search_type_ahead_ordered_section">並び替え</string>
     <string name="piko_settings_supported_links">対応リンクを開く</string>
     <!-- For arrays-->
-    <string name="piko_array_grok">Grok</string>
-    <string name="piko_array_money">Money</string>
     <string name="piko_array_xchat">チャット</string>
-    <string name="piko_array_x_lite">New X Android</string>
-    <string name="piko_array_conference">Conference</string>
     <string name="piko_array_creator_studio">クリエイタースタジオ</string>
-    <string name="piko_array_jobs">Jobs</string>
     <string name="piko_array_media">メディア</string>
     <string name="piko_array_light_mode">ライトモード</string>
+    <!-- App icon strings -->
+    <!-- Category -->
+    <!-- Icon names -->
 </resources>

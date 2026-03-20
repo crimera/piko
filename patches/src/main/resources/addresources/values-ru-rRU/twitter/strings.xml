@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="piko_title_settings">Меню Piko</string>
-    <string name="piko_title_piko_patches">Патчи Piko</string>
-    <string name="piko_title_piko_integrations">Интеграции Piko</string>
-
+    <!-- Premium Settings -->
     <string name="piko_title_premium">Премиум</string>
     <string name="piko_pref_reader_mode">режим чтения</string>
     <string name="piko_pref_reader_mode_desc">Удобный просмотр длинных постов</string>
@@ -13,7 +10,7 @@
     <string name="piko_pref_icon_n_navbar_btn">Иконка и панель навигации</string>
     <string name="piko_pref_enable_force_pip">режим картинка-в-картинке</string>
     <string name="piko_pref_enable_force_pip_desc">Активируется при сворачивании приложения</string>
-
+    <!-- Download Settings -->
     <string name="piko_title_download">Скачивание</string>
     <string name="piko_pref_video_download">скачивание видео</string>
     <string name="piko_pref_download">Изменить место скачивания</string>
@@ -27,23 +24,20 @@
     <string name="piko_pref_download_media_link_handle_always_ask">Всегда спрашивать</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Копировать ссылку на медиа</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Поделиться ссылкой на медиа</string>
-
+    <!-- Native -->
     <string name="piko_title_native_downloader">Нативное скачивание</string>
     <string name="piko_pref_native_downloader_alert_title">Скачать медиа</string>
     <string name="piko_pref_native_downloader_download_all">Скачать все</string>
     <string name="piko_pref_native_downloader_no_media">Медиа не найдено</string>
-
+    <!-- Ads Settings -->
     <string name="piko_title_ads">Реклама</string>
     <string name="piko_pref_hide_promoted_posts">продвигаемые посты</string>
-
-
     <string name="piko_pref_wtf_section">панель \"Кого чита\"</string>
     <string name="piko_pref_cts_section">панель \"Авторы для в\"</string>
     <string name="piko_pref_ctj_section">панель \"Обзор сообщес\"</string>
     <string name="piko_pref_ryb_section">панель \"Обзор заклад\"</string>
     <string name="piko_pref_pinned_posts_section">панель \"Закреплено пользователя\"</string>
     <string name="piko_pref_hide_detailed_posts">панель \"Похожие тви\"</string>
-
     <string name="piko_pref_hide_premium_prompt">рекламу премиума</string>
     <string name="piko_pref_del_from_db">Удалить записи из базы данных</string>
     <string name="piko_pref_db_not_found">База данных не найдена</string>
@@ -51,7 +45,7 @@
     <string name="piko_pref_db_del_items">Удаленные записи</string>
     <string name="piko_pref_hide_premium_upsell">навязывание премиума</string>
     <string name="piko_pref_hide_premium_upsell_desc">Убирает предложения купить премиум из ленты</string>
-
+    <!-- Misc Settings -->
     <string name="piko_title_misc">Прочее</string>
     <string name="piko_pref_chirp_font">шрифт Chirp</string>
     <string name="piko_pref_hide_fab">плавающую кнопку</string>
@@ -70,13 +64,13 @@
     <string name="piko_pref_debug_menu">меню отладки для постов</string>
     <string name="piko_pref_quick_settings">Включить быстрый доступ</string>
     <string name="piko_pref_quick_settings_summary">Переход в настройки Piko через боковое меню</string>
-
+    <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Флаги функций</string>
     <string name="piko_pref_feature_flags">Флаги функций</string>
     <string name="piko_pref_edit_flag_title">Изменить флаг</string>
     <string name="piko_pref_add_flag_title">Добавить флаг</string>
     <string name="piko_pref_search_flags">Поиск флагов</string>
-
+    <!-- Timeline Settings -->
     <string name="piko_title_timeline">Лента</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Отключить автопрокрутку ленты</string>
     <string name="piko_pref_hide_live_threads">треды в прямом эфире</string>
@@ -105,7 +99,7 @@
     <string name="piko_pref_hide_post_inline_metrics_desc">Скрывает количество лайков, репостов и т. д. во встроенном просмотре</string>
     <string name="piko_pref_hide_post_detailed_metrics">Скрыть метрики детального просмотра поста</string>
     <string name="piko_pref_hide_post_detailed_metrics_desc">Скрывает количество лайков, репостов и т. д. в детальном просмотре</string>
-
+    <!-- Customization Settings -->
     <string name="piko_title_customisation">Кастомизация</string>
     <string name="piko_pref_customisation_profiletabs">Скрыть разделы профиля</string>
     <string name="piko_pref_customisation_timelinetabs">Скрыть разделы ленты</string>
@@ -117,7 +111,9 @@
     <string name="piko_pref_customisation_inlinetabs">Скрыть кнопки под постом</string>
     <string name="piko_pref_customisation_reply_sorting">Сортировка ответов по умолчанию</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Ранее выбранное</string>
-
+    <!-- Font Settings -->
+    <!-- Logging Settings -->
+    <!-- Backup and Restore -->
     <string name="piko_title_backup">Бэкап и восстановление</string>
     <string name="piko_pref_export">Экспортировать %s</string>
     <string name="piko_pref_import">Импортировать %s</string>
@@ -126,7 +122,7 @@
     <string name="piko_pref_import_failed">Сбой: ошибка импорта %s</string>
     <string name="piko_pref_export_no_uri">Сбой: не выбрана папка</string>
     <string name="piko_pref_import_no_uri">Сбой: не выбран файл</string>
-
+    <!-- About -->
     <string name="piko_title_about">О приложении</string>
     <string name="piko_pref_app_version">Версия приложения</string>
     <string name="piko_pref_patch_info">Информация о патче</string>
@@ -139,4 +135,8 @@
     <string name="piko_pref_enable">Включить %s</string>
     <string name="piko_single_page_settings">Настройки одной страницей</string>
     <string name="piko_single_page_settings_desc">Показывать все настройки на одной странице</string>
+    <!-- For arrays-->
+    <!-- App icon strings -->
+    <!-- Category -->
+    <!-- Icon names -->
 </resources>
