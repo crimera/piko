@@ -15,19 +15,14 @@ import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.literal
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
-object AppUpdateLockoutBuilderFingerprint : Fingerprint(
-    strings = listOf("android.hardware.sensor.hinge_angle"),
-    filters =
-        listOf(
-            literal(0x5265c00L),
-        ),
+object SnoozeExpLockoutManagerFlagFingerprint : Fingerprint(
+    strings = listOf("snooze_expiration_lockout_manager"),
+    returnType = "Z",
 )
 
 @Suppress("unused")
@@ -40,14 +35,15 @@ val removeBuildExpiredPopupPatch =
         compatibleWith("com.instagram.android")
 
         execute {
-            AppUpdateLockoutBuilderFingerprint.method.apply {
-                val longToIntIndex = indexOfFirstInstruction(Opcode.LONG_TO_INT)
-                val appAgeRegister = getInstruction(longToIntIndex).registersUsed[0]
+            // Get the constructor.
+            SnoozeExpLockoutManagerFlagFingerprint.classDef.methods.first().apply {
+                val lastIPut = instructions.last { it.opcode == Opcode.IPUT }
+                val appAgeRegister = lastIPut.registersUsed[0]
 
                 addInstructions(
-                    longToIntIndex + 1,
+                    lastIPut.location.index,
                     """
-                    invoke-static/range {v$appAgeRegister .. v$appAgeRegister}, ${PREF_DESCRIPTOR}->buildAge(I)I
+                     invoke-static/range {v$appAgeRegister .. v$appAgeRegister}, $PREF_DESCRIPTOR->buildAge(I)I
                     move-result v$appAgeRegister
                     """.trimIndent(),
                 )
