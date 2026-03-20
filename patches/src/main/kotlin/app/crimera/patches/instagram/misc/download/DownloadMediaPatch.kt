@@ -25,9 +25,12 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.indexOfFirstInstructionOrThrow
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 @Suppress("unused")
 val downloadMediaPatch =
@@ -67,16 +70,16 @@ val downloadMediaPatch =
                     checkCastIndex = indexOfFirstInstruction(Opcode.CHECK_CAST)
                     checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
                 } else {
-                    instructions.filter { it.opcode == Opcode.RETURN_OBJECT }.forEach {
-                        val index = it.location.index
-                        val nextInstruction = getInstruction(index + 1)
-                        if (nextInstruction.opcode == Opcode.NEW_INSTANCE) {
-                            arrayListRegister = nextInstruction.registersUsed[0]
-                            checkCastIndex = indexOfFirstInstruction(index, Opcode.CHECK_CAST)
-                            checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
-                            return@apply
+                    val arrayListIndex =
+                        indexOfFirstInstructionOrThrow {
+                            opcode == Opcode.NEW_INSTANCE &&
+                                getReference<TypeReference>()?.type == "Ljava/util/ArrayList;"
                         }
-                    }
+
+                    val arrayInitInstruction = getInstruction(arrayListIndex + 1)
+                    arrayListRegister = arrayInitInstruction.registersUsed[0]
+                    checkCastIndex = indexOfFirstInstruction(arrayListIndex, Opcode.CHECK_CAST)
+                    checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
                 }
 
                 if (arrayListRegister != -1 && checkCastRegister != -1 && checkCastIndex != -1) {

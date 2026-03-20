@@ -33,9 +33,9 @@ internal object ShowDialogHelperFingerprint : Fingerprint(
     definingClass = "Lcom/instagram/react/modules/base/IgReactDialogModule;",
 )
 
-internal object OpenNativePhotoPickerFingerprint : Fingerprint(
-    name = "openNativePhotoPicker",
-    definingClass = "Lcom/instagram/react/modules/product/IgReactMediaPickerNativeModule;",
+internal object DialogBoxAddItemsMethodFingerprint : Fingerprint(
+    parameters = listOf("Landroid/content/DialogInterface\$OnClickListener;", "[Ljava/lang/CharSequence;"),
+    returnType = "V",
 )
 
 internal object ConstructorExtensionFingerprint : Fingerprint(
