@@ -8,6 +8,9 @@
     <a href ="https://t.me/pikopatches">
         <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/>
     </a>
+    <a href ="https://crowdin.com/project/piko">
+        <img src="https://img.shields.io/badge/Crowdin-1B263B?style=for-the-badge&logo=crowdin&logoColor=white"/>
+    </a>
 </h1>
 
 <summary><h2>🕹️ Usage</h2></summary>
