@@ -56,10 +56,6 @@ val instagramDialogBoxPatch =
                 }
             }
 
-            OpenNativePhotoPickerFingerprint.method.apply {
-                val lastBeforeInvokeVirtualIndex =
-                    getInstruction(instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL }.location.index - 1)
-                AddDialogMenuItemsExtensionFingerprint.changeFirstString(lastBeforeInvokeVirtualIndex.methodExtractor().name)
-            }
+            AddDialogMenuItemsExtensionFingerprint.changeFirstString(DialogBoxAddItemsMethodFingerprint.method.name)
         }
     }
