@@ -61,5 +61,4 @@
     <string name="ps__posted_on_twitter">*%s* 发布到</string>
     <string name="ps__retweeted_on_twitter">*%s* 转推到</string>
     <string name="tweet_removed_from_your_bookmarks">推文已从你的书签中移除</string>
-
 </resources>

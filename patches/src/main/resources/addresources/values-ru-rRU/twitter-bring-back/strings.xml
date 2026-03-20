@@ -62,5 +62,4 @@
     <string name="ps__posted_on_twitter">*%s* твитнул(а)</string>
     <string name="ps__retweeted_on_twitter">*%s* ретвитнул(а)</string>
     <string name="tweet_removed_from_your_bookmarks">Твит удален из закладок</string>
-
 </resources>
