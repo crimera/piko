@@ -34,6 +34,7 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting VIEW_STORY_MENTIONS = new BooleanSetting("view_story_mentions", true);
     public static final BooleanSetting DISABLE_STORY_FLIPPING = new BooleanSetting("disable_story_flipping", true);
     public static final StringSetting CUSTOMISE_STORY_TIMESTAMP = new StringSetting("customise_story_timestamp", "default");
+    public static final BooleanSetting UNLIMITED_REPLAYS = new BooleanSetting("unlimited_replays", true);
 
     public static final BooleanSetting ENABLE_DOWNLOAD = new BooleanSetting("enable_download", true);
     public static final BooleanSetting ENABLE_DIRECT_DOWNLOAD = new BooleanSetting("enable_direct_download", false);

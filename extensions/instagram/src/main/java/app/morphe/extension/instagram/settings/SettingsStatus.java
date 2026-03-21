@@ -105,7 +105,11 @@ public class SettingsStatus {
     public static void customiseStoryTimestamp() {
         customiseStoryTimestamp = true;
     }
-    public static boolean miscSection() {return (customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping);}
+    public static boolean unlimitedReplaysOnEphemeralMedia = false;
+    public static void unlimitedReplaysOnEphemeralMedia() {
+        unlimitedReplaysOnEphemeralMedia = true;
+    }
+    public static boolean miscSection() {return (unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping);}
 
     //Download section.
     public static boolean downloadMedia = false;

@@ -269,6 +269,16 @@ public class ScreenBuilder {
                     )
             );
         }
+
+        if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.UNLIMITED_REPLAYS,
+                            Strings.UNLIMITED_REPLAYS_DESC,
+                            Settings.UNLIMITED_REPLAYS
+                    )
+            );
+        }
     }
 
     public void buildDownloadSection(){

@@ -41,6 +41,9 @@ public class Pref {
     public static boolean hideStoriesTray(){
         return SharedPref.getBooleanPerf(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
     }
+    public static int unlimitedReplaysOnEphemeralMedia(int viewCount){
+        return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia ? 0:viewCount;
+    }
 
     public static boolean enableDevOptions(){
         return SharedPref.getBooleanPerf(Settings.DEVELOPER_OPTIONS);
