@@ -1,5 +1,6 @@
 package app.crimera.patches.twitter.misc.dynamiccolor
 
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.resourcePatch
 import java.io.FileWriter
 import java.nio.file.Files
@@ -8,9 +9,9 @@ import java.nio.file.Files
 val dynamicColorPatch = resourcePatch(
     name = "Dynamic color",
     description = "Replaces the default Twitter Blue with the user's Material You palette.",
-    use = false,
+    default = false,
 ) {
-    compatibleWith("com.twitter.android")
+    compatibleWith(COMPATIBILITY_X)
 
     execute {
         // For backward compatibility, add colors and styles into v31 res dir (A12+).

@@ -11,6 +11,7 @@
 package app.crimera.patches.twitter.misc.customize.font
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.Constants
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -32,7 +33,7 @@ val customFontHook =
     bytecodePatch(
         description = "Hook to customise font",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
 
         execute {

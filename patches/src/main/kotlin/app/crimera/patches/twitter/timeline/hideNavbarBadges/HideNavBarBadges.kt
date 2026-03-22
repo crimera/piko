@@ -12,6 +12,7 @@ package app.crimera.patches.twitter.timeline.hideNavbarBadges
 
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.Constants
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.Fingerprint
@@ -29,7 +30,7 @@ val hideNavBarBadgesPatch =
         name = "Hide badges from navigation bar icons",
         description = "Hides notification nudges & counts from navigation bar icons",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
 
         execute {

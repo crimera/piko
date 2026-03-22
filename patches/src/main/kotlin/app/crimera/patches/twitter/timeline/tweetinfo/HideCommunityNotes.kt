@@ -12,6 +12,7 @@ package app.crimera.patches.twitter.timeline.tweetinfo
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
 
@@ -20,7 +21,7 @@ val hideCommunityNotes =
     bytecodePatch(
         name = "Hide Community Notes",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch, tweetInfoHook)
 
         execute {

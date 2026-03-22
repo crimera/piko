@@ -11,6 +11,7 @@
 package app.crimera.patches.twitter.link.handlemodernsharesheetlinks
 
 
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.extractDescriptors
 import app.morphe.patcher.Fingerprint
@@ -44,7 +45,7 @@ val handleModernShareSheetLinks =
     bytecodePatch(
         description = "Hooks links on modern share sheet ( after 11.4x.xx )",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         execute {
 
             // Try catch is used in case someone uses this patch pre-11.4x.xx

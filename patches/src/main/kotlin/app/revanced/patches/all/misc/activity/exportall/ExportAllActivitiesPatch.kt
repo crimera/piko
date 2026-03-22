@@ -1,5 +1,6 @@
 package app.revanced.patches.all.misc.activity.exportall
 
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.resourcePatch
 
 @Suppress("unused")
@@ -7,9 +8,9 @@ val exportAllActivitiesPatch =
     resourcePatch(
         name = "Export all activities",
         description = "Makes all app activities exportable.",
-        use = false,
+        default = false,
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
 
         execute {
             val exportedFlag = "android:exported"

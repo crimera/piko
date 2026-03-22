@@ -12,6 +12,7 @@ package app.crimera.patches.twitter.misc.selectabletext
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
@@ -46,7 +47,7 @@ val selectableTextPatch =
         name = "Selectable Text",
         description = "Makes bio and username selectable",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch, selectableTextResourcePatch)
 
         execute {

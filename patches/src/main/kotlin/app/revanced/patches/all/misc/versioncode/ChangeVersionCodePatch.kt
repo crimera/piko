@@ -1,5 +1,6 @@
 package app.revanced.patches.all.misc.versioncode
 
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.intOption
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.util.getNode
@@ -9,10 +10,9 @@ import org.w3c.dom.Element
 val changeVersionCodePatch =
     resourcePatch(
         name = "Change version code",
-        description =
-            "Changes the version code of the app. This will turn off app store updates " +
+        description = "Changes the version code of the app. This will turn off app store updates " +
                 "and allows downgrading an existing app install to an older app version.",
-        use = true // Default on
+        default = true
     ) {
         val versionCode by intOption(
             key = "versionCode",
@@ -29,7 +29,7 @@ val changeVersionCodePatch =
             required = true,
         ) { versionCode -> versionCode!! >= 1 }
 
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
 
         execute {
             document("AndroidManifest.xml").use { document ->
