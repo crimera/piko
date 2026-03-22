@@ -181,14 +181,12 @@ internal val addResourcesPatch = resourcePatch(
                 val destFile = this@finalize[destSubPath]
                 if (!destFile.exists()) {
                     // Twitter APKM files on APKMirror do not always contain all languages.
-                    /*
+                    // Log only verbose logging is enabled.
                     if (locale.isBuiltInLanguage) {
-                        logger.warning {
-                            "Provided app does not contain all region localizations. " +
-                                    "Locale: $locale does not exist in provided app file: $destSubPath"
+                        logger.fine {
+                            "Locale: $locale does not exist in provided app file: $destSubPath"
                         }
                     }
-                    */
 
                     destFile.parentFile?.mkdirs()
                     if (!destFile.createNewFile()) throw IllegalStateException()
