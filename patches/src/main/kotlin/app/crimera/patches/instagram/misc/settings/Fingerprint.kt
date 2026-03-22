@@ -21,12 +21,6 @@ internal object AddButtonOnProfileBarFingerprint : Fingerprint(
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
 )
 
-internal object OnCreateFingerprint : Fingerprint(
-    definingClass = "Lcom/instagram/mainactivity/LauncherActivity;",
-    returnType = "V",
-    parameters = listOf("Landroid/os/Bundle;"),
-)
-
 internal object SettingsStatusLoadFingerprint : Fingerprint(
     definingClass = Constants.ACTIVITY_SETTINGS_STATUS_CLASS,
     name = "load",
