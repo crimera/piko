@@ -35,8 +35,3 @@ files:
       translation: patches/src/main/resources/addresources/values-%android_code%/twitter/strings.xml
       dest: '/Patches/Twitter.xml'
       skip_untranslated_strings: true
-
-    - source: patches/src/main/resources/addresources/values/twitter-bring-back/strings.xml
-      translation: patches/src/main/resources/addresources/values-%android_code%/twitter-bring-back/strings.xml
-      dest: '/Patches/Twitter-bring-back.xml'
-      skip_untranslated_strings: true

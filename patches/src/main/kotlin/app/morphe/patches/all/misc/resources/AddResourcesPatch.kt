@@ -50,17 +50,46 @@ import java.util.logging.Logger
 
 internal val locales = listOf(
     AppLocale("", ""), // Default English locale. Must be first.
+    AppLocale("ar-rEH", "ar-rEH"), // Not exist in Crowdin
     AppLocale("ar-rSA", "ar"),
+    AppLocale("bg-rBG", "bg"),
+    AppLocale("bn-rBD", "bn"),
+    AppLocale("ca-rES", "ca"),
+    AppLocale("cs-rCZ", "cs"),
+    AppLocale("da-rDK", "da"),
+    AppLocale("de-rDE", "de"),
+    AppLocale("el-rGR", "el"),
     AppLocale("es-rES", "es"),
+    AppLocale("fa-rIR", "fa"),
+    AppLocale("fi-rFI", "fi"),
     AppLocale("fr-rFR", "fr"),
+    AppLocale("gu-rIN", "gu"),
     AppLocale("hi-rIN", "hi"),
+    AppLocale("hr-rHR", "hr"),
+    AppLocale("hu-rHU", "hu"),
     AppLocale("in-rID", "in"),
     AppLocale("it-rIT", "it"),
+    AppLocale("iw-rIL", "iw"),
     AppLocale("ja-rJP", "ja"),
+    AppLocale("kn-rIN", "kn"),
     AppLocale("ko-rKR", "ko"),
+    AppLocale("mr-rIN", "mr"),
+    AppLocale("ms-rMY", "ms"),
+    AppLocale("nb-rNO", "nb"),
+    AppLocale("nl-rNL", "nl"),
     AppLocale("pl-rPL", "pl"),
     AppLocale("pt-rBR", "pt"),
+    AppLocale("ro-rRO", "ro"),
     AppLocale("ru-rRU", "ru"),
+    AppLocale("sk-rSK", "sk"),
+    AppLocale("sr-rSP", "sr"),
+    AppLocale("sv-rSE", "sv"),
+    AppLocale("ta-rIN", "ta"),
+    AppLocale("th-rTH", "th"),
+    AppLocale("tl-rPH", "tl"),
+    AppLocale("tr-rTR", "tr"),
+    AppLocale("uk-rUA", "uk"),
+    AppLocale("vi-rVN", "vi"),
     AppLocale("zh-rCN", "zh-rCN"),
     AppLocale("zh-rHK", "zh-rHK"),
     AppLocale("zh-rTW", "zh-rTW"),
@@ -127,7 +156,8 @@ internal val addResourcesPatch = resourcePatch(
         fun addResourcesFromFile(
             appId: String,
             locale: AppLocale,
-            resourceType: BundledResourceType
+            resourceType: BundledResourceType,
+            replaceExisting: Boolean, // If any added string resources replace existing strings in the target app.
         ) {
             val isDefaultLocale = locale.isDefaultLocale()
             val srcFolderName = locale.getSrcLocaleFolderName()
@@ -140,7 +170,8 @@ internal val addResourcesPatch = resourcePatch(
 
             if (srcStream == null) {
                 // String files are expected but other resource types are optional.
-                if (resourceType == BundledResourceType.STRINGS) {
+                // Default locale is expected but other languages are optional as they may not have been translated yet.
+                if (resourceType == BundledResourceType.STRINGS && locale.isDefaultLocale()) {
                     throw IllegalArgumentException("Could not find: $srcSubPath")
                 }
                 return
@@ -149,10 +180,11 @@ internal val addResourcesPatch = resourcePatch(
             srcStream.use {
                 val destFile = this@finalize[destSubPath]
                 if (!destFile.exists()) {
+                    // Twitter APKM files on APKMirror do not always contain all languages.
+                    // Log only verbose logging is enabled.
                     if (locale.isBuiltInLanguage) {
-                        logger.warning {
-                            "Provided app does not contain all region localizations. " +
-                                    "Locale: $locale does not exist in provided app file: $destSubPath"
+                        logger.fine {
+                            "Locale: $locale does not exist in provided app file: $destSubPath"
                         }
                     }
 
@@ -166,19 +198,24 @@ internal val addResourcesPatch = resourcePatch(
                 document(destSubPath).use { destDoc ->
                     val destResourceNode = destDoc.getNode("resources")
 
-                    // Build lookup table once per destination file.
-                    val children = destResourceNode.childNodes
-                    val existingNodes = HashMap<Pair<String, String>, Node>(
-                        2 * children.length, 0.5f
-                    )
+                    val existingNodes = if (replaceExisting) {
+                        val children = destResourceNode.childNodes
 
-                    for (i in 0 until children.length) {
-                        val node = children.item(i)
-                        if (node.nodeType == Node.ELEMENT_NODE) {
-                            val el = node as Element
-                            val key = el.tagName to el.getAttribute("name")
-                            existingNodes[key] = el
+                        // Build lookup table once per destination file.
+                        HashMap<Pair<String, String>, Node>(
+                            2 * children.length, 0.5f
+                        ).also {
+                            for (i in 0 until children.length) {
+                                val node = children.item(i)
+                                if (node.nodeType == Node.ELEMENT_NODE) {
+                                    val el = node as Element
+                                    val key = el.tagName to el.getAttribute("name")
+                                    it[key] = el
+                                }
+                            }
                         }
+                    } else {
+                        emptyMap()
                     }
 
                     document(srcStream).use { srcDoc ->
@@ -220,9 +257,14 @@ internal val addResourcesPatch = resourcePatch(
                                 return@forEachChildElement
                             }
 
-                            val key = srcNode.tagName to resourceName
-                            existingNodes[key]?.let { existing ->
-                                destResourceNode.removeChild(existing)
+                            // Remove existing resources with the same name.
+                            // ARSCLib doesn't check for duplicates and uses the last added,
+                            // but Apktool crashes if duplicates exist.
+                            if (replaceExisting) {
+                                val key = srcNode.tagName to resourceName
+                                existingNodes[key]?.let { existing ->
+                                    destResourceNode.removeChild(existing)
+                                }
                             }
 
                             // Import and append
@@ -235,9 +277,10 @@ internal val addResourcesPatch = resourcePatch(
         }
 
         appsToInclude.forEach { app ->
+            val replaceExisting = app == "twitter-bring-back"
             locales.forEach { locale ->
                 BundledResourceType.entries.forEach { type ->
-                    addResourcesFromFile(app, locale, type)
+                    addResourcesFromFile(app, locale, type, replaceExisting)
                 }
             }
         }
