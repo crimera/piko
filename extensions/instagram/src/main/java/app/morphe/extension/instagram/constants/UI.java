@@ -61,7 +61,7 @@ public class UI {
             @Override
             public void onClick(View v) {
                 try{
-                    ActivityHook. startPikoActivity();
+                    ActivityHook.startPikoActivity();
                 }catch(Exception ex){
                     Logger.printException(() -> "Failed to launch settings: ", ex);
                 }
@@ -70,7 +70,8 @@ public class UI {
         viewGroup.addView(imageView);
     }
 
-    public static void restartDialogBox(Context context){
+    public static void restartDialogBox(){
+        Context context = Utils.getContext();
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
         ArrayList<String> options = new ArrayList<>();
