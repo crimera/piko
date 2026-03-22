@@ -12,6 +12,7 @@ package app.crimera.patches.twitter.interaction.downloads.changedirectory
 
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.Fingerprint
@@ -38,8 +39,9 @@ val changeDownloadDirPatch =
     bytecodePatch(
         name = "Custom download folder",
         description = "Change the download directory for video downloads",
+        default = true
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
 
         execute {

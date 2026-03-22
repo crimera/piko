@@ -1,5 +1,6 @@
 package app.crimera.patches.twitter.link.customDeeplinks
 
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.patch.stringsOption
@@ -31,7 +32,7 @@ val customDeepLinksPatch = resourcePatch(
         ),
     )
 
-    compatibleWith("com.twitter.android")
+    compatibleWith(COMPATIBILITY_X)
 
     dependsOn(handleCustomDeepLinksPatch)
 

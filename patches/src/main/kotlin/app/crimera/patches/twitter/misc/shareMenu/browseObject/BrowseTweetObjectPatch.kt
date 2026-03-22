@@ -13,6 +13,7 @@ package app.crimera.patches.twitter.misc.shareMenu.browseObject
 import app.crimera.patches.twitter.entity.entityGenerator
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonInjection
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
@@ -20,9 +21,9 @@ val browseObjectPatch =
     bytecodePatch(
         name = "Browse tweet object",
         description = "Adds an option to browse the tweet object in the share menu.",
-        use = false,
+        default = false,
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch, entityGenerator)
 
         execute {

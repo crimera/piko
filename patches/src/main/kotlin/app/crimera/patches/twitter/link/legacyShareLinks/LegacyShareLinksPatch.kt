@@ -13,6 +13,7 @@ package app.crimera.patches.twitter.link.legacyShareLinks
 import app.crimera.patches.twitter.link.handlemodernsharesheetlinks.handleModernShareSheetLinks
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
 
@@ -22,7 +23,7 @@ val legacyShareLinksPatch =
         name = "Legacy share links",
         description = "Brings back username on post share links. Works post 11.4x.xx",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch, handleModernShareSheetLinks)
         execute {
 

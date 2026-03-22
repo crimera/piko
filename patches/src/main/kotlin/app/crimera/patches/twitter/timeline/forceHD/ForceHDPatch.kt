@@ -13,6 +13,7 @@ package app.crimera.patches.twitter.timeline.forceHD
 import app.crimera.patches.twitter.entity.entityGenerator
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.Constants
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.Fingerprint
@@ -37,7 +38,7 @@ val forceHDPatch =
         name = "Enable force HD videos",
         description = "Videos will be played in highest quality always",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch, entityGenerator)
 
         execute {

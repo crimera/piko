@@ -12,6 +12,7 @@ package app.crimera.patches.twitter.featureFlag.featureFlagPatch
 
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.Constants.FSTS_DESCRIPTOR
 import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.enableSettings
@@ -35,7 +36,7 @@ val featureFlagPatch =
     bytecodePatch(
         name = "Hook feature flag",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(featureFlagResourcePatch, settingsPatch)
         execute {
 
