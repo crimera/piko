@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Bring back Twitter -->
+    <string name="conference_default_title">Conferência do Twitter</string>
     <string name="button_action_add_tweet">Adicionar um Tweet</string>
     <string name="button_action_options_tweet">Opções de Tweets</string>
     <string name="button_action_retweet">Retweetar</string>
     <string name="button_new_tweet">Novo Tweet</string>
     <string name="button_status_retweeted">Retweet (Retweetado)</string>
+    <string name="chrome_action_post">Tweet</string>
     <string name="ps__share_post_tweet">Tweetar</string>
+    <string name="rux_landing_page_title">Tweet</string>
+    <string name="tweet_fab_item">Tweet</string>
+    <string name="tweet_title">Tweet</string>
     <string name="search_twitter">Buscar no Twitter</string>
     <string name="search_hint">Busca do Twitter</string>
     <string name="ps__accessibility_retweet_broadcast_button">Retweetar</string>
@@ -28,7 +33,9 @@
     <string name="empty_profile_tweets_tab_title">Você ainda não tweetou</string>
     <string name="feedback_action_report_tweet">Denunciar Tweet</string>
     <string name="feedback_tweet_unavailable">Este Tweet está indisponível.</string>
+    <string name="filter_item_tweets">Tweets</string>
     <string name="filter_item_tweets_and_replies">Tweets e respostas</string>
+    <string name="profile_tab_title_timeline">Tweets</string>
     <string name="users_turn_off_retweets">Desativar Retweets</string>
     <string name="tweets_retweet">Retweetar</string>
     <string name="tweets_retweeted">%s Retweetou</string>
