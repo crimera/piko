@@ -12,6 +12,7 @@ package app.crimera.patches.twitter.timeline.disableAutoScroll
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -35,7 +36,7 @@ val disableAutoScrollPatch =
     bytecodePatch(
         name = "Disable auto timeline scroll on launch",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
 
         execute {

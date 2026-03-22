@@ -12,6 +12,7 @@ package app.crimera.patches.twitter.ads.timelineEntryHook
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
 
@@ -21,7 +22,7 @@ val hideTimelinePostByCategory =
         name = "Hide timeline posts by category",
         description = "Hides different post category like who to follow, news today etc from timeline.",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
             // Pinned posts by followers.

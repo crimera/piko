@@ -13,6 +13,7 @@ package app.crimera.patches.twitter.ads.timelineEntryHook
 import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.FeatureFlagLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.Constants
 import app.crimera.utils.enableSettings
 import app.crimera.utils.flagSettings
@@ -37,7 +38,7 @@ val hideAds =
         name = "Remove Ads",
         description = "Removed promoted posts, trends and google ads",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
             // Normal Ads.

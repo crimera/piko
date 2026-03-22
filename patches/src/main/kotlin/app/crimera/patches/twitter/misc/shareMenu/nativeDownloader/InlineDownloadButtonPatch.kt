@@ -2,6 +2,7 @@ package app.crimera.patches.twitter.misc.shareMenu.nativeDownloader
 
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.enableSettings
@@ -58,7 +59,7 @@ private val inlineDownloadRenderHintsFocalFieldFingerprint = placeholderFingerpr
 val inlineDownloadButtonPatch = bytecodePatch(
     description = "Adds an inline 'Download' button to the tweet inline action bar and registers the extension hook.",
 ) {
-    compatibleWith("com.twitter.android")
+    compatibleWith(COMPATIBILITY_X)
     dependsOn(settingsPatch)
 
     execute {

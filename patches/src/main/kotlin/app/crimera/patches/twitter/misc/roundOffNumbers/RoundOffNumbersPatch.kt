@@ -12,6 +12,7 @@ package app.crimera.patches.twitter.misc.roundOffNumbers
 
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.Fingerprint
@@ -41,7 +42,7 @@ val roundOffNumbersPatch =
         name = "Round off numbers",
         description = "Enable or disable rounding off numbers",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
 
         execute {

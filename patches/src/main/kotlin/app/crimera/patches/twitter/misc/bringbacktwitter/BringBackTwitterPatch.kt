@@ -10,6 +10,7 @@
 
 package app.crimera.patches.twitter.misc.bringbacktwitter
 
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.replaceStringsInFile
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patches.all.misc.resources.addAppResources
@@ -25,9 +26,9 @@ val bringBackTwitterPatch =
     resourcePatch(
         name = "Bring back twitter",
         description = "Bring back old twitter logo and name",
-        use = false,
+        default = false,
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
 
         dependsOn(addResourcesPatch)
 

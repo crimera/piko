@@ -12,6 +12,7 @@ package app.crimera.patches.twitter.misc.customize.sidebar
 
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.Fingerprint
@@ -33,7 +34,7 @@ val customiseSideBarPatch =
     bytecodePatch(
         name = "Customize side bar items",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
 
         execute {

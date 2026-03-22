@@ -12,6 +12,7 @@ package app.crimera.patches.twitter.premium.unlockdownloads
 
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.OpcodesFilter
@@ -66,7 +67,7 @@ val downloadPatch =
         name = "Download patch",
         description = "Unlocks the ability to download videos and gifs from Twitter/X",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
 
         execute {

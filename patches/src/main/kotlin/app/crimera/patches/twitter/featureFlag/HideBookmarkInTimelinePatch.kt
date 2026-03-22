@@ -14,6 +14,7 @@ import app.crimera.patches.twitter.featureFlag.featureFlagPatch.featureFlagPatch
 import app.crimera.patches.twitter.featureFlag.featureFlagPatch.fingerprints.FeatureFlagLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
+import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.enableSettings
 import app.crimera.utils.flagSettings
 import app.morphe.patcher.patch.bytecodePatch
@@ -23,7 +24,7 @@ val hideBookmarkInTimelinePatch =
     bytecodePatch(
         name = "Hide bookmark icon in timeline",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(featureFlagPatch, settingsPatch)
         execute {
 
