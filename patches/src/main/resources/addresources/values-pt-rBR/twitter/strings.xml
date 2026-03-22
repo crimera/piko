@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Premium Settings -->
+    <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">modo leitor</string>
-    <string name="piko_pref_reader_mode_desc">Ativa o \"Modo leit\" em threads longas</string>
+    <string name="piko_pref_reader_mode_desc">Ativa o \"modo leitor\" em threads longas</string>
     <string name="piko_pref_undo_posts">desfazer postagens</string>
     <string name="piko_pref_undo_posts_desc">Ativa a capacidade de desfazer postagens antes de postar</string>
     <string name="piko_pref_undo_posts_btn">Configurações de desfazer postagens</string>
@@ -10,6 +11,7 @@
     <string name="piko_pref_enable_force_pip">modo PiP automáticamente</string>
     <string name="piko_pref_enable_force_pip_desc">Ativa o modo PiP quando você fecha o aplicativo</string>
     <!-- Download Settings -->
+    <string name="piko_title_download">Download</string>
     <string name="piko_pref_video_download">baixando vídeo</string>
     <string name="piko_pref_download">Alterar diretório de download</string>
     <string name="piko_pref_download_path">Pasta pública</string>
@@ -27,10 +29,17 @@
     <string name="piko_pref_native_page_desc">Esses recursos nativos do Piko estão disponíveis no menu de compartilhamento das postagens.</string>
     <string name="piko_title_native_downloader">Baixador nativo</string>
     <string name="piko_title_native_downloader_toggle">Ativar baixador nativo</string>
+    <string name="piko_pref_native_downloader_inline_button">Exibir botão de download embutido</string>
+    <string name="piko_pref_native_downloader_inline_button_desc">Adiciona um botão de download diretamente à barra de ação do post</string>
     <string name="piko_pref_native_downloader_alert_title">Baixar mídia</string>
     <string name="piko_pref_native_downloader_download_all">Baixar tudo</string>
     <string name="piko_pref_native_downloader_no_media">Nenhuma mídia encontrada</string>
     <string name="piko_pref_native_downloader_filename_title">Nome de arquivo padrão ao salvar</string>
+    <string name="piko_browse_object_title">Procurar objeto do tweet</string>
+    <string name="piko_share_image_title">Compartilhar Tweet como Imagem</string>
+    <string name="piko_share_image_toggle">Ativar compartilhamento de Tweet como Imagem</string>
+    <string name="piko_share_image_autocleanup">Limpar capturas automaticamente</string>
+    <string name="piko_share_image_autocleanup_desc">Remova capturas com mais de 24 horas quando ativado</string>
     <string name="piko_title_native_translator">Tradução nativa de postagem</string>
     <string name="piko_native_translator_toggle">Ativar tradução nativa de postagem</string>
     <string name="piko_native_translator_provider">Provedores de tradução</string>
@@ -38,6 +47,7 @@
     <string name="piko_native_translator_zero_text">Nenhum texto encontrado para traduzir</string>
     <string name="piko_native_translator_google">Google tradutor</string>
     <string name="piko_native_translator_google_v2">Google tradutor V2</string>
+    <string name="piko_native_translator_fxtwitter">API FxTwitter</string>
     <string name="piko_title_native_reader_mode">Modo leitor</string>
     <string name="piko_native_reader_mode_grok_thread">Analisar essa thread</string>
     <string name="piko_native_reader_mode_grok_author">Mais sobre o autor</string>
@@ -66,6 +76,7 @@
     <string name="piko_pref_db_not_found">Banco de dados não encontrado</string>
     <string name="piko_pref_db_not_open">Banco de dados não está aberto</string>
     <string name="piko_pref_db_del_items">Itens deletados</string>
+    <string name="piko_pref_hide_premium_upsell">oferta premium</string>
     <string name="piko_pref_hide_premium_upsell_desc">Remove upsell premium na linha do tempo inicial</string>
     <string name="piko_pref_top_people_search">principais pessoas na pesquisa</string>
     <string name="piko_pref_top_people_search_desc">Remove a seção de pessoas após a pesquisa</string>
@@ -95,6 +106,7 @@
     <string name="piko_disunify_xchat_system">Desunificar sistema do xchat</string>
     <string name="piko_disunify_xchat_system_desc">Traz de volta recursos antigos como mensagens e menu de compartilhamento</string>
     <!-- Feature flags Settings -->
+    <string name="piko_title_feature_flags">Feature flags</string>
     <string name="piko_pref_feature_flags">Adicionar feature flags</string>
     <string name="piko_pref_edit_flag_title">Editar flag</string>
     <string name="piko_pref_add_flag_title">Adicionar flag</string>
@@ -106,6 +118,7 @@
     <string name="piko_pref_show_post_source_desc">Pode haver um atraso ao abrir as informações da postagem e a etiqueta será mostrada apenas em postagens públicas</string>
     <string name="piko_pref_hide_live_threads">threads ao vivo</string>
     <string name="piko_pref_hide_live_threads_desc">Oculta a seção ao vivo na linha do tempo</string>
+    <string name="piko_pref_hide_banner">banner</string>
     <string name="piko_pref_hide_banner_desc">pílula de novas postagens</string>
     <string name="piko_pref_hide_bmk_timeline">ícone de Itens salvos na linha do tempo</string>
     <string name="piko_pref_force_translate">Forçar tradução</string>
@@ -183,6 +196,7 @@
     <string name="piko_pref_patch_info">Informações do patch</string>
     <string name="piko_pref_version_info">Informações da versão</string>
     <string name="piko_changelogs_title">Registro de alterações</string>
+    <string name="piko_pref_patches">Patches</string>
     <string name="piko_pref_included">Incluído</string>
     <string name="piko_pref_excluded">Excluído</string>
     <string name="piko_pref_app_restart_rec">Recomenda-se reiniciar o aplicativo</string>
@@ -195,7 +209,9 @@
     <string name="piko_pref_search_type_ahead_ordered_section">Seção ordenada</string>
     <string name="piko_settings_supported_links">Abrir links suportados</string>
     <!-- For arrays-->
+    <string name="piko_array_grok">Grok</string>
     <string name="piko_array_money">Dinheiro</string>
+    <string name="piko_array_xchat">X Chat</string>
     <string name="piko_array_x_lite">Novo X Android</string>
     <string name="piko_array_conference">Conferência</string>
     <string name="piko_array_creator_studio">Estúdio do criador</string>
@@ -203,6 +219,88 @@
     <string name="piko_array_media">Medía</string>
     <string name="piko_array_light_mode">Modo claro</string>
     <!-- App icon strings -->
+    <string name="piko_app_icon_thanks">Obrigado ao @NeoFreeBird pelos ícones do aplicativo do iOS</string>
+    <string name="piko_app_icon_piko_exclusive">(Exclusivo Piko)</string>
     <!-- Category -->
+    <string name="piko_app_icon_category_legacy">Antigo</string>
+    <string name="piko_app_icon_category_seasonal_event">Eventos sazonais</string>
+    <string name="piko_app_icon_category_sports">Esportes</string>
+    <string name="piko_app_icon_category_cultural_and_celebrations">Cultural e Celebrações</string>
+    <string name="piko_app_icon_category_pride">Orgulho</string>
+    <string name="piko_app_icon_category_misc">Diversos</string>
+    <string name="piko_app_icon_category_space">Espaço</string>
+    <string name="piko_app_icon_category_movies_n_series">Filmes e Séries</string>
     <!-- Icon names -->
+    <string name="piko_app_icon_name_default">Padrão</string>
+    <string name="piko_app_icon_name_legacy_icon_1">Ícone antigo 1</string>
+    <string name="piko_app_icon_name_legacy_icon_2">Ícone antigo 2</string>
+    <string name="piko_app_icon_name_legacy_icon_3">Ícone antigo 3</string>
+    <string name="piko_app_icon_name_legacy_icon_4">Ícone antigo 4</string>
+    <string name="piko_app_icon_name_legacy_blue">Azul antigo</string>
+    <string name="piko_app_icon_name_twitter_blue">Twitter Azul</string>
+    <string name="piko_app_icon_name_earth">Terra</string>
+    <string name="piko_app_icon_name_moon">Lua</string>
+    <string name="piko_app_icon_name_mars">Marte</string>
+    <string name="piko_app_icon_name_sun">Sol</string>
+    <string name="piko_app_icon_name_stars">Estrelas</string>
+    <string name="piko_app_icon_name_milky_way">Via Láctea</string>
+    <string name="piko_app_icon_name_autumn_2021">Outono 2021</string>
+    <string name="piko_app_icon_name_autumn_2022">Outono 2022</string>
+    <string name="piko_app_icon_name_south_spring_2021">Primavera do Sul 2021</string>
+    <string name="piko_app_icon_name_south_spring_2022">Primavera do Sul 2022</string>
+    <string name="piko_app_icon_name_winter_1">Inverno 1</string>
+    <string name="piko_app_icon_name_winter_2">Inverno 2</string>
+    <string name="piko_app_icon_name_summer_1">Verão 1</string>
+    <string name="piko_app_icon_name_summer_2">Verão 2</string>
+    <string name="piko_app_icon_name_autumn_southern">Outono do Sul</string>
+    <string name="piko_app_icon_name_summer">Verão</string>
+    <string name="piko_app_icon_name_winter">Inverno</string>
+    <string name="piko_app_icon_name_beijing_olympics_1">Olimpíadas de Pequim 1</string>
+    <string name="piko_app_icon_name_beijing_olympics_2">Olimpíadas de Pequim 2</string>
+    <string name="piko_app_icon_name_formulaone">Fórmula 1</string>
+    <string name="piko_app_icon_name_mlb">MLB</string>
+    <string name="piko_app_icon_name_nba">NBA</string>
+    <string name="piko_app_icon_name_nba_2">NBA 2</string>
+    <string name="piko_app_icon_name_ncaa">NCAA</string>
+    <string name="piko_app_icon_name_nba_finals">Finais NBA</string>
+    <string name="piko_app_icon_name_mothers_day">Dia das Mães</string>
+    <string name="piko_app_icon_name_womansday">Dia da Mulher</string>
+    <string name="piko_app_icon_name_halloween_2021">Halloween 2021</string>
+    <string name="piko_app_icon_name_halloween_2022">Halloween 2022</string>
+    <string name="piko_app_icon_name_halloween_2024_1">Halloween 2024 1</string>
+    <string name="piko_app_icon_name_halloween_2024_2">Halloween 2024 2</string>
+    <string name="piko_app_icon_name_halloween_2024_3">Halloween 2024 3</string>
+    <string name="piko_app_icon_name_stpatricks_day">Dia de São Patrício</string>
+    <string name="piko_app_icon_name_easter">Páscoa</string>
+    <string name="piko_app_icon_name_ramadan">Ramadã</string>
+    <string name="piko_app_icon_name_black_history">História Negra</string>
+    <string name="piko_app_icon_name_lunar_new_year_1">Ano Novo Lunar 1</string>
+    <string name="piko_app_icon_name_lunar_new_year_2">Ano Novo Lunar 2</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_1">Ano Novo Japonês 2024 1</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_2">Ano Novo Japonês 2024 2</string>
+    <string name="piko_app_icon_name_barbie">Barbie</string>
+    <string name="piko_app_icon_name_thanksgiving_1">Ação de Graças 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2">Ação de Graças 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_1">Ação de Graças 2024 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_2">Ação de Graças 2024 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_3">Ação de Graças 2024 3</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_4">Ação de Graças 2024 4</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_5">Ação de Graças 2024 5</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_6">Ação de Graças 2024 6</string>
+    <string name="piko_app_icon_name_canada_day">Dia do Canadá</string>
+    <string name="piko_app_icon_name_euro">Euro</string>
+    <string name="piko_app_icon_name_independence_day">Dia da Independência</string>
+    <string name="piko_app_icon_name_christmas_2024_1">Natal 2024 1</string>
+    <string name="piko_app_icon_name_christmas_2024_2">Natal 2024 2</string>
+    <string name="piko_app_icon_name_christmas_2024_3">Natal 2024 3</string>
+    <string name="piko_app_icon_name_christmas_2024_4">Natal 2024 4</string>
+    <string name="piko_app_icon_name_pridesouthern">Orgulho do Sul</string>
+    <string name="piko_app_icon_name_newzealand_pride_1">Orgulho da Nova Zelândia 1</string>
+    <string name="piko_app_icon_name_newzealand_pride_2">Orgulho da Nova Zelândia 2</string>
+    <string name="piko_app_icon_name_pride_month">Mês do Orgulho</string>
+    <string name="piko_app_icon_name_cyber">Cibernético</string>
+    <string name="piko_app_icon_name_soft_pastel_pink">Rosa Pastel Suave</string>
+    <string name="piko_app_icon_name_electric_indigo">Índigo Elétrico</string>
+    <string name="piko_app_icon_name_neon_pink">Rosa Néon</string>
+    <string name="piko_app_icon_name_vivid_orange">Laranja Vívido</string>
 </resources>

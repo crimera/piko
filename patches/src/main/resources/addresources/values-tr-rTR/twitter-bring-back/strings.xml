@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Bring back Twitter -->
+    <string name="conference_default_title">Twitter Konferans</string>
     <string name="button_action_add_tweet">Bir tweet ekle</string>
     <string name="button_action_options_tweet">Tweet seçenekleri</string>
+    <string name="button_action_retweet">Retweetle</string>
     <string name="button_new_tweet">Yeni tweet</string>
     <string name="button_status_retweeted">Retweet (retweetlendi)</string>
     <string name="chrome_action_post">Tweetle</string>
     <string name="ps__share_post_tweet">Tweetle</string>
     <string name="rux_landing_page_title">Tweetle</string>
     <string name="tweet_fab_item">Tweetle</string>
+    <string name="tweet_title">Tweet</string>
     <string name="search_twitter">Twitter\'da Ara</string>
     <string name="search_hint">Twitter\'da Ara</string>
+    <string name="ps__accessibility_retweet_broadcast_button">Retweetle</string>
+    <string name="shortcut_retweet_tweet">Retweet</string>
     <string name="social_you_retweeted">Retweetledin</string>
     <string name="composer_hint_self_thread">Başka bir tweet ekle</string>
     <string name="confirm_delete_shared_tweet_description">Bu tweet\'i silmek istediğinizden emin misiniz?</string>
@@ -32,6 +37,7 @@
     <string name="filter_item_tweets_and_replies">Tweetler ve yanıtlar</string>
     <string name="profile_tab_title_timeline">Tweetler</string>
     <string name="users_turn_off_retweets">Retweetleri kapat</string>
+    <string name="tweets_retweet">Retweet</string>
     <string name="tweets_retweeted">%s retweetledi</string>
     <string name="tweets_undo_retweet_vertical">Retweeti geri al</string>
     <string name="users_turn_on_retweets">Retweetleri aç</string>
