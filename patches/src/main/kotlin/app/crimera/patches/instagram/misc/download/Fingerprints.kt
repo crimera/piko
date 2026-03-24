@@ -58,17 +58,8 @@ internal object AddFeedButtonExtensionFingerprint : Fingerprint(
     name = "addButton",
 )
 
-internal object AddingReelButtonMethodFingerprint : Fingerprint(
-    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
-    returnType = "V",
-    parameters = listOf("Landroid/content/Context;", "Landroid/view/View\$OnClickListener;", "Ljava/lang/String;", "I"),
-    filters =
-        OpcodesFilter.opcodesToFilters(
-            Opcode.CONST_4,
-            Opcode.CONST_4,
-            Opcode.CONST_HIGH16,
-            Opcode.CONST_4,
-        ),
+internal object FeedReplaceAudioDialogHelperFingerprint : Fingerprint(
+    strings = listOf("FeedReplaceAudioDialogHelper"),
 )
 
 internal object AddReelButtonExtensionFingerprint : Fingerprint(

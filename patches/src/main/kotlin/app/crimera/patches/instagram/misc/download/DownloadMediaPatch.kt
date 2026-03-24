@@ -14,11 +14,11 @@ import app.crimera.patches.instagram.entity.mediadata.mediaDataPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.utils.MethodFieldMetadata
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
+import app.crimera.utils.methodExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -52,8 +52,13 @@ val downloadMediaPatch =
                 AddFeedButtonExtensionFingerprint.changeFirstString(addingFeedButtonMethodName)
             }
 
-            val addingReelButtonMethodName = AddingReelButtonMethodFingerprint.method.name
-            AddReelButtonExtensionFingerprint.changeFirstString(addingReelButtonMethodName)
+            FeedReplaceAudioDialogHelperFingerprint.method.apply {
+                val strIndex = FeedReplaceAudioDialogHelperFingerprint.stringMatches[0].index
+                val addingReelButtonMethodCallIndex = indexOfFirstInstruction(strIndex, Opcode.INVOKE_DIRECT_RANGE) + 1
+
+                val addingReelButtonMethodName = getInstruction(addingReelButtonMethodCallIndex).methodExtractor().name
+                AddReelButtonExtensionFingerprint.changeFirstString(addingReelButtonMethodName)
+            }
 
             val currentViewingMediaFieldData =
                 EditMediaInfoFragmentFingerprint.method.instructions
