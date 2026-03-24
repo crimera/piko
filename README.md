@@ -14,9 +14,16 @@
     </a>
 </h1>
 
-<h2>🕹️ Usage</h2>
+</div>
+
+## 🕹️ Usage
+
+> There are still many people who are unaware that piko has migrated from ReVanced to Morphe.
 
 **Morphe Manager**
+
+<details>
+<summary>Show steps</summary>
 
 Use the deep link to add Piko as a patch source in Morphe Manager:
 
@@ -25,9 +32,13 @@ Use the deep link to add Piko as a patch source in Morphe Manager:
 Then patch Twitter/X:
 1. Download an original unpatched X APKM from [APKMirror.com](https://www.apkmirror.com/apk/x-corp/twitter/)
 2. Do _not_ unsplit or otherwise change the APKM.
-3. Select "Other apps" on the Morphe Manager home screen
+3. Select X directly from the Morphe Manager home screen
 4. Provide the original APKM file
 5. Wait for patching to complete, install
+
+> For an up-to-date patching guide, see [Liso's official X patch guide](https://www.reddit.com/r/MorpheApp/comments/1r4xt24/x_twitter_can_now_be_patched_with_piko_patches/).
+
+</details>
 
 **Morphe CLI**
 
@@ -35,10 +46,11 @@ Then patch Twitter/X:
 java -jar cli.jar patch --patches piko.mpp input.apkm
 ```
 
-<h2>⚙️ Patch Details</h2>
+## ⚙️ Patch Details
 
 <details>
 <summary>Show patches</summary>
+
 <table>
 <thead>
 <tr>
@@ -118,21 +130,21 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Show sensitive media</code></td><td>Disables the sensitive media banner</td></tr>
 </tbody>
 </table>
+
 </details>
 
-<h2>🛠️ Building</h2>
+## 🛠️ Building
 
-To build Piko Patches, follow the <a href="https://github.com/MorpheApp/morphe-documentation">Morphe documentation</a>.
+To build Piko Patches, follow the [Morphe documentation](https://github.com/MorpheApp/morphe-documentation).
 
-<h2>✨ Stargazers over time</h2>
+## ✨ Stargazers over time
 
 <p align="center">
     <img src="https://starchart.cc/crimera/piko.svg?variant=light" alt="piko" width="640" height="320" />
 </p>
 
-</div>
-
 ## License
+
 [![GNU GPLv3 Image](https://www.gnu.org/graphics/gplv3-127x51.png)](http://www.gnu.org/licenses/gpl-3.0.en.html)
 
-These patches are fully FOSS — redistributable and modifiable under the [GNU General Public License v3](https://www.gnu.org/licenses/gpl.html) or later.
+These patches are fully FOSS redistributable and modifiable under the [GNU General Public License v3](https://www.gnu.org/licenses/gpl.html) or later.
