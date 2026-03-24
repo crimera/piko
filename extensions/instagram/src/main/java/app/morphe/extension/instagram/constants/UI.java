@@ -15,6 +15,7 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.ImageView;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -25,53 +26,67 @@ import android.content.DialogInterface;
 import android.app.Activity;
 import java.util.List;
 import java.util.ArrayList;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
+import com.instagram.igds.components.button.IgdsButton;
+import app.morphe.extension.instagram.entity.Entity;
 
 public class UI {
 
-    private static int getThemedColor(Context context, String attr) {
-        int attrId = Utils.getResourceIdentifier(attr, "attr");
-        TypedValue typedValue = new TypedValue();
-        boolean resolved = context.getTheme().resolveAttribute(attrId, typedValue, true);
-        return context.getColor(typedValue.resourceId);
+    private static Object pikoSettingsButtonStyle() throws Exception{
+        Entity e = new Entity();
+        Class<?> styleClass = Class.forName("X.0X3");
+        return e.getMethod(
+                styleClass,
+                "valueOf",
+                "PRIMARY"
+        );
     }
 
-    public static void addPikoSettingsImageView(ViewGroup viewGroup) {
+    private static void pikoSettingsButton(ViewGroup viewGroup) throws Exception{
         Context context = viewGroup.getContext();
-        ImageView imageView = new ImageView(context);
-        int dimenPixelSize = Utils.getResourceDimensionPixelSize("account_discovery_bottom_gap");
-        int dimenPixelSize2 = Utils.getResourceDimensionPixelSize("ab_test_media_thumbnail_preview_item_internal_padding");
-        Drawable drawable = context.getDrawable(Utils.getResourceIdentifier("instagram_settings_outline_24", "drawable"));
-        imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-        imageView.setPaddingRelative(dimenPixelSize,dimenPixelSize2,dimenPixelSize,dimenPixelSize2);
-        imageView.setImageDrawable(drawable);
-        imageView.setColorFilter(new PorterDuffColorFilter(getThemedColor(context, "igds_color_primary_icon"), PorterDuff.Mode.SRC_ATOP));
-        imageView.setContentDescription(Strings.PIKO_SETTINGS);
-        imageView.setClickable(true);
-        imageView.setLongClickable(false);
-        imageView.setFocusable(true);
-        imageView.setFocusableInTouchMode(true);
-        imageView.setImportantForAccessibility(1);
-        imageView.setOnClickListener(new View.OnClickListener() {
+        IgdsButton button = new IgdsButton(context);
+        button.setText(Strings.PIKO_SETTINGS_TITLE);
+        Object buttonStyle = pikoSettingsButtonStyle();
+        // The function call for adding the button style to the button will be injected here from patches.
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 try{
                     ActivityHook.startPikoActivity();
-                }catch(Exception ex){
+                } catch(Exception ex){
                     Logger.printException(() -> "Failed to launch settings: ", ex);
                 }
             }
         });
-        viewGroup.addView(imageView);
+
+        viewGroup.addView(button);
     }
 
-    public static void restartDialogBox(){
-        Context context = Utils.getContext();
+
+    public static void addPikoSettingsButton(ViewGroup viewGroup, Object object){
+        try{
+            Entity profileInfo = new Entity(object);
+            Object profileRelatedDetailsObject = profileInfo.getField("A07");
+            Entity profileRelatedDetails = new Entity(profileRelatedDetailsObject);
+            Boolean isSelfProfile = (Boolean) profileRelatedDetails.getField("A0D");
+
+            if(isSelfProfile){
+                pikoSettingsButton(viewGroup);
+            }
+        } catch (Exception e) {
+            Logger.printException(() -> "Failed to add piko button: ", e);
+        }
+
+    }
+
+    public static void restartDialogBox(Context context){
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
         ArrayList<String> options = new ArrayList<>();

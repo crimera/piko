@@ -26,11 +26,15 @@ import app.morphe.extension.instagram.settings.preference.fragments.RestorePrefA
 @SuppressWarnings("deprecation")
 public class ActivityHook {
 
-    public static void startPikoActivity() throws Exception {
-        Context context = Utils.getContext();
-        Intent intent = new Intent(context, SettingsActivity.class);
+    private static void callActivity(Context context, Intent intent){
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+    }
+
+    public static void startPikoActivity(){
+        Context context = Utils.getContext();
+        Intent intent = new Intent(context, SettingsActivity.class);
+        callActivity(context,intent);
     }
 
     public static void callFragment(Context ctx, String bundleKey){
@@ -41,9 +45,8 @@ public class ActivityHook {
             intent = new Intent(ctx,RestorePrefActivity.class);
         }
         if(intent!=null){
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra(bundleKey,true);
-            ctx.startActivity(intent);
+            callActivity(ctx,intent);
         }
     }
 
