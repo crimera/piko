@@ -15,12 +15,14 @@ import android.net.Uri;
 import android.content.Context;
 import android.content.Intent;
 import java.net.URI;
+import java.util.List;
 import java.io.IOException;
 
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.instagram.entity.Entity;
 
 public class Links {
     private static boolean DISABLE_ANALYTICS,VIEW_STORIES_ANONYMOUSLY,VIEW_LIVE_ANONYMOUSLY,DISABLE_STORIES,DISABLE_EXPLORE,DISABLE_COMMENTS,DISABLE_DISCOVER_PEOPLE;
@@ -118,6 +120,27 @@ public class Links {
             Logger.printException(() -> "sanitizeUrl failed: ", e);
         }
         return url;
+    }
+
+    public static boolean signatureCheck(Object appIdentityObject){
+        try{
+            Entity entity = new Entity(appIdentityObject);
+            List<String> packageNames = (List) entity.getField("A02");
+            if(packageNames!=null && packageNames.size() == 1){
+                // Just in case the packagename is changed by the user.
+                String currentAppPackageName = Utils.getContext().getPackageName();
+
+                // The idea behind here is when the package name lists of app identity object
+                // contains only one package name and that is similar to the application's package name,
+                // we need to return true else false
+                if(packageNames.get(0).equals(currentAppPackageName)){
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            Logger.printException(() -> "Handle signature failed: ", e);
+        }
+        return false;
     }
 
 }

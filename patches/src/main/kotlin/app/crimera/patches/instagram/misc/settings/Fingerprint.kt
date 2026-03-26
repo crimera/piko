@@ -11,6 +11,7 @@
 package app.crimera.patches.instagram.misc.settings
 
 import app.crimera.patches.instagram.utils.Constants
+import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.UI_CONSTANTS_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 import app.morphe.shared.misc.extension.EXTENSION_CLASS_DESCRIPTOR
@@ -40,6 +41,11 @@ internal object PikoSettingsButtonExtensionFingerprint : Fingerprint(
     name = "pikoSettingsButton",
 )
 
+internal object SignatureCheckExtensionFingerprint : Fingerprint(
+    definingClass = LINKS_DESCRIPTOR,
+    name = "signatureCheck",
+)
+
 // ----------------------
 
 internal object ProfileUserInfoViewBinderFingerprint : Fingerprint(
@@ -55,4 +61,12 @@ internal object ProfileRelatedDetailsFingerprint : Fingerprint(
 internal object IgdsButtonSetStyleFingerprint : Fingerprint(
     definingClass = "Lcom/instagram/igds/components/button/IgdsButton;",
     name = "setStyle",
+)
+
+internal object UriTrustingMethodFingerprint : Fingerprint(
+    strings = listOf("\' is not trusted: ", "The provider for uri \'"),
+)
+
+internal object AppIdentityToStringFingerprint : Fingerprint(
+    strings = listOf("AppIdentity{uid=", ", packageNames=", ", sha2=", ", version="),
 )
