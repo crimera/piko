@@ -10,7 +10,9 @@
 
 package app.crimera.patches.instagram.entity.userdata
 
+import app.crimera.patches.instagram.utils.Constants.FRIENDSHIP_STATUS_CLASS
 import app.crimera.utils.changeFirstString
+import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
 import app.crimera.utils.methodExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -26,13 +28,28 @@ val userDataPatch =
         execute {
 
             GetMatrixCursorFingerprint.method.apply {
-                val additionalUserInfoFieldName =
-                    instructions.filter { it.opcode == Opcode.IGET_OBJECT }[1].fieldExtractor().name
+                val additionalUserInfoField =
+                    instructions.filter { it.opcode == Opcode.IGET_OBJECT }[1].fieldExtractor()
+
+                val additionalUserInfoFieldName = additionalUserInfoField.name
                 GetAdditionalUserInfoExtensionFingerprint.changeFirstString(additionalUserInfoFieldName)
 
                 val invokeInterfaceList = instructions.filter { it.opcode == Opcode.INVOKE_INTERFACE }
                 GetUsernameExtensionFingerprint.changeFirstString(invokeInterfaceList[0].methodExtractor().name)
                 GetFullNameExtensionFingerprint.changeFirstString(invokeInterfaceList[1].methodExtractor().name)
+
+                val additionalUserInfoMethods =
+                    classDefBy(extensionToClassName(additionalUserInfoField.returnType))
+                        .methods
+
+                val friendshipStatusFromUserMethodName =
+                    additionalUserInfoMethods
+                        .first {
+                            it.returnType ==
+                                FRIENDSHIP_STATUS_CLASS
+                        }.name
+
+                GetUserFriendshipStatusExtensionFingerprint.changeFirstString(friendshipStatusFromUserMethodName)
             }
         }
     }

@@ -10,11 +10,10 @@
 
 package app.crimera.patches.instagram.entity.userfriendshipstatus
 
+import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
-import app.crimera.utils.methodExtractor
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.Opcode
 
 @Suppress("unused")
 val userFriendshipStatusEntity =
@@ -24,14 +23,9 @@ val userFriendshipStatusEntity =
 
         execute {
 
-            SimilarUserChainingUnitMethodFingerprint.method.apply {
-                val strIndex = SimilarUserChainingUnitMethodFingerprint.stringMatches[0].index
-                val invokeStaticMethodNames =
-                    instructions
-                        .filter { it.opcode == Opcode.INVOKE_STATIC && it.location.index > strIndex }[2]
-                        .methodExtractor()
-                GetHelperClassExtensionFingerprint.changeStringAt(0, invokeStaticMethodNames.definingClass)
-                GetFollowBackStatusFingerprint.changeStringAt(0, invokeStaticMethodNames.name)
+            FriendshipStatusMappingsFingerprint.method.apply {
+                GetMappingsFingerprint.changeFirstString(classNameToExtension(definingClass))
+                GetMappingsFingerprint.changeStringAt(1, name)
             }
         }
     }
