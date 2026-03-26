@@ -11,6 +11,10 @@
 package app.crimera.patches.instagram.utils
 
 object Constants {
+    // Instagram classes.
+    const val FRIENDSHIP_STATUS_CLASS = "Lcom/instagram/user/model/FriendshipStatus;"
+
+    // Extension classes.
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/instagram"
     const val ACTIVITY_SETTINGS_CLASS = "$INTEGRATIONS_PACKAGE/settings"
     const val ACTIVITY_HOOK_CLASS = "$ACTIVITY_SETTINGS_CLASS/ActivityHook;"

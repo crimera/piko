@@ -8,8 +8,11 @@
     * in the source code and version control history.
 */
 
-
 package app.morphe.extension.instagram.entity;
+
+import java.util.Map;
+import java.util.HashMap;
+import com.instagram.user.model.FriendshipStatus;
 
 public class UserFriendshipStatus extends Entity {
     private final Object obj;
@@ -19,13 +22,17 @@ public class UserFriendshipStatus extends Entity {
         this.obj = obj;
     }
 
-    private Class<?> getHelperClass() throws Exception {
-        return Class.forName("className");
+    private Map<String, Boolean> getMappings() throws Exception {
+        Class<?> helperClass = Class.forName("classname");
+        return (Map) super.getMethod(helperClass,"methodname",new Class[]{FriendshipStatus.class},this.obj);
+    }
+
+    private Boolean getValue(String key) throws Exception {
+        Map<String, Boolean> mappings = getMappings();
+        return mappings.getOrDefault(key,false);
     }
 
     public Boolean getFollowBackStatus() throws Exception {
-        String methodName = "methodName";
-        Class<?> helperClass = this.getHelperClass();
-        return (Boolean) super.getMethod(helperClass,methodName,this.obj);
+        return getValue("followed_by");
     }
 }

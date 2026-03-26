@@ -30,6 +30,11 @@ internal object GetFullNameExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
+internal object GetUserFriendshipStatusExtensionFingerprint : Fingerprint(
+    name = "getUserFriendshipStatus",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
 internal object GetMatrixCursorFingerprint : Fingerprint(
     returnType = "Landroid/database/MatrixCursor;",
     definingClass = "Lcom/instagram/contentprovider/FamilyAppsUserValuesProvider;",

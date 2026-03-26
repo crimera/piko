@@ -11,20 +11,19 @@
 package app.crimera.patches.instagram.entity.userfriendshipstatus
 
 import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
+import app.crimera.patches.instagram.utils.Constants.FRIENDSHIP_STATUS_CLASS
 import app.morphe.patcher.Fingerprint
+import com.android.tools.smali.dexlib2.AccessFlags
 
 internal const val EXTENSION_CLASS = "$ENTITY_CLASS/UserFriendshipStatus;"
 
-internal object SimilarUserChainingUnitMethodFingerprint : Fingerprint(
-    strings = listOf("similar_users_chaining_unit"),
+internal object GetMappingsFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS,
+    name = "getMappings",
 )
 
-internal object GetHelperClassExtensionFingerprint : Fingerprint(
-    definingClass = EXTENSION_CLASS,
-    name = "getHelperClass",
-)
-
-internal object GetFollowBackStatusFingerprint : Fingerprint(
-    definingClass = EXTENSION_CLASS,
-    name = "getFollowBackStatus",
+internal object FriendshipStatusMappingsFingerprint : Fingerprint(
+    returnType = "Ljava/util/Map;",
+    parameters = listOf(FRIENDSHIP_STATUS_CLASS),
+    accessFlags = listOf(AccessFlags.STATIC, AccessFlags.PUBLIC),
 )
