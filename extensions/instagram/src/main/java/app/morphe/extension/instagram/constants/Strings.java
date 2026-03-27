@@ -82,9 +82,14 @@ public class Strings{
     public static final String MEDIA_EXISTS = "Media exits";
     public static final String DOWNLOAD_FAILED_MEDIA = "Download failed : ";
 
+    public static final String BACKUP_AND_RESTORE_TITLE = "Backup and restore";
+    public static final String EXPORT_PIKO_PREF = "Export piko preferences";
+    public static final String IMPORT_PIKO_PREF = "Import piko preferences";
+
     public static final String EXPORT_SUCCESS = "Exported successfully";
     public static final String EXPORT_FAIL = "Exporting failed";
     public static final String FAIL_NO_PATH = "No destination path provided";
+    public static final String FAIL_NO_FILE = "File not found";
     public static final String IMPORT_SUCCESS = "Imported successfully";
     public static final String IMPORT_FAIL = "Import failed";
     public static final String RESTART_APP = "The app needs to be restarted for the changes to reflect";

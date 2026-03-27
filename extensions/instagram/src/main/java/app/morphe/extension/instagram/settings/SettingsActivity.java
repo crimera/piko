@@ -117,6 +117,7 @@ public class SettingsActivity extends Activity {
             screenBuilder.buildMiscSection();
             screenBuilder.buildDownloadSection();
             screenBuilder.buildDeveloperSection();
+            screenBuilder.backupAndRestoreSection();
 
             setPreferenceScreen(screen);
         }

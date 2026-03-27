@@ -51,22 +51,33 @@ public class BackupPrefActivity extends AppCompatActivity {
             if (args.containsKey(Strings.EXPORT_DEV_OVERRIDES)) {
                 filename = "mc_overrides";
                 ext = ".json";
-                sourceFile = new File( context.getFilesDir() + "/mobileconfig",filename + ext);
+                sourceFile = new File(context.getFilesDir() + "/mobileconfig", filename + ext);
+            } else if (args.containsKey(Strings.EXPORT_PIKO_PREF)) {
+                filename = Strings.PIKO_SETTINGS;
+                ext = ".xml";
+                sourceFile =  new File(context.getApplicationInfo().dataDir + "/shared_prefs",filename + ext);
             }
         }
 
         if (filename != null && ext != null) {
-            startIntent(filename, ext);
-        } else {
+            if (sourceFile.exists()) {
+                startIntent(filename, ext);
+            } else {
+                toast(Strings.FAIL_NO_FILE);
+                finish();
+            }
+        } else{
+            toast(Strings.IMPORT_FAIL);
             finish();
         }
+
     }
 
 
     private void startIntent(String fileName, String extension) {
         fileName = fileName + "_" + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date()) + extension;
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE );
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("application/json");
         intent.putExtra(Intent.EXTRA_TITLE, fileName);
 
@@ -97,7 +108,7 @@ public class BackupPrefActivity extends AppCompatActivity {
 
             toast(Strings.EXPORT_FAIL);
 
-            Logger.printException(() -> "export failure",e);
+            Logger.printException(() -> "export failure", e);
         }
     }
 

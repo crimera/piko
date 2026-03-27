@@ -67,16 +67,17 @@ public class ButtonPref extends Preference {
         setOnPreferenceClickListener(new OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-            try {
-                String key = getKey();
-                if (key.equals(Strings.EXPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_ID_MAPPING)) {
-                    ActivityHook.callFragment((Activity) context, key);
+                try {
+                    String key = getKey();
+                    if ( key.equals(Strings.EXPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_ID_MAPPING)
+                         || key.equals(Strings.EXPORT_PIKO_PREF) || key.equals(Strings.IMPORT_PIKO_PREF)) {
+                        ActivityHook.launchFragment((Activity) context, key);
+                    }
+                } catch (Exception e) {
+                    Utils.showToastShort(e.getMessage());
+                    Logger.printException(() -> "Preference button onclick failure", e);
                 }
-            } catch (Exception e) {
-                Utils.showToastShort(e.getMessage());
-                Logger.printException(() -> "Preference button onclick failure", e);
-            }
-            return true;
+                return true;
             }
         });
     }

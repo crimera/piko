@@ -26,7 +26,7 @@ import app.morphe.extension.instagram.settings.preference.fragments.RestorePrefA
 @SuppressWarnings("deprecation")
 public class ActivityHook {
 
-    private static void callActivity(Context context, Intent intent){
+    private static void launchActivity(Context context, Intent intent){
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
@@ -34,19 +34,19 @@ public class ActivityHook {
     public static void startPikoActivity(){
         Context context = Utils.getContext();
         Intent intent = new Intent(context, SettingsActivity.class);
-        callActivity(context,intent);
+        launchActivity(context,intent);
     }
 
-    public static void callFragment(Context ctx, String bundleKey){
+    public static void launchFragment(Context ctx, String bundleKey){
         Intent intent = null;
-        if (bundleKey.equals(Strings.EXPORT_DEV_OVERRIDES)) {
+        if (bundleKey.equals(Strings.EXPORT_DEV_OVERRIDES) || bundleKey.equals(Strings.EXPORT_PIKO_PREF)) {
             intent = new Intent(ctx,BackupPrefActivity.class);
-        } else if (bundleKey.equals(Strings.IMPORT_DEV_OVERRIDES) || bundleKey.equals(Strings.IMPORT_ID_MAPPING)) {
+        } else if (bundleKey.equals(Strings.IMPORT_DEV_OVERRIDES) || bundleKey.equals(Strings.IMPORT_ID_MAPPING)  || bundleKey.equals(Strings.IMPORT_PIKO_PREF)) {
             intent = new Intent(ctx,RestorePrefActivity.class);
         }
         if(intent!=null){
             intent.putExtra(bundleKey,true);
-            callActivity(ctx,intent);
+            launchActivity(ctx,intent);
         }
     }
 

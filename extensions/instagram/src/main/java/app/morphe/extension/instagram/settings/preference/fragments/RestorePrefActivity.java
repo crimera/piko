@@ -44,14 +44,18 @@ public class RestorePrefActivity extends AppCompatActivity {
         Bundle args = getIntent().getExtras();
 
         if (args != null) {
-
             if (args.containsKey(Strings.IMPORT_DEV_OVERRIDES)) {
                 destinationFile =new File(context.getFilesDir()+ "/mobileconfig","mc_overrides.json");
             } else if (args.containsKey(Strings.IMPORT_ID_MAPPING)) {
                 destinationFile = new File(context.getFilesDir()+ "/mobileconfig","id_name_mapping.json");
+            } else if (args.containsKey(Strings.IMPORT_PIKO_PREF)) {
+                destinationFile =  new File(context.getApplicationInfo().dataDir + "/shared_prefs",Strings.PIKO_SETTINGS+".xml");
             }
             if (destinationFile != null) {
                 requestFileForRestore();
+            } else {
+                toast(Strings.EXPORT_FAIL);
+                finish();
             }
         }
     }
@@ -81,6 +85,7 @@ public class RestorePrefActivity extends AppCompatActivity {
             in.close();
             out.close();
             toast(Strings.IMPORT_SUCCESS);
+            Utils.restartApp(ctx);
 
         } catch (Exception e) {
             toast(Strings.IMPORT_FAIL);
