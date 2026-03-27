@@ -1,12 +1,12 @@
 /*
-    * Copyright (C) 2026 piko <https://github.com/crimera/piko>
-    *
-    * This file is part of piko.
-    *
-    * Any modifications, derivatives, or substantial rewrites of this file
-    * must retain this copyright notice and the piko attribution
-    * in the source code and version control history.
-*/
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
 
 
 package app.morphe.extension.instagram.settings.preference;
@@ -27,16 +27,16 @@ public class ScreenBuilder {
     private final PreferenceScreen screen;
     private final Helper helper;
 
-    public ScreenBuilder(Context context,PreferenceScreen screen,Helper helper){
+    public ScreenBuilder(Context context, PreferenceScreen screen, Helper helper) {
         this.context = context;
         this.screen = screen;
         this.helper = helper;
     }
 
-    private void addPreference(PreferenceCategory category,Preference pref){
-        if(category!=null){
+    private void addPreference(PreferenceCategory category, Preference pref) {
+        if (category != null) {
             category.addPreference(pref);
-        }else {
+        } else {
             screen.addPreference(pref);
         }
     }
@@ -48,7 +48,7 @@ public class ScreenBuilder {
         return preferenceCategory;
     }
 
-    public void buildAdsSection(){
+    public void buildAdsSection() {
         if (!(SettingsStatus.adsSection())) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_ADS);
@@ -72,7 +72,7 @@ public class ScreenBuilder {
         }
     }
 
-    public void buildDeveloperSection(){
+    public void buildDeveloperSection() {
         if (!(SettingsStatus.developerOptionsSection())) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_DEV_OPTIONS);
@@ -117,7 +117,8 @@ public class ScreenBuilder {
             );
         }
     }
-    public void ghostSection(){
+
+    public void ghostSection() {
         if (!(SettingsStatus.ghostSection())) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_GHOST);
@@ -143,7 +144,7 @@ public class ScreenBuilder {
 
     }
 
-    public void linksSection(){
+    public void linksSection() {
         if (!(SettingsStatus.linksSection())) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_LINKS);
@@ -167,7 +168,7 @@ public class ScreenBuilder {
         }
     }
 
-    public void distractionFreeSection(){
+    public void distractionFreeSection() {
         if (!(SettingsStatus.distractionFreeSection())) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_DISTRACTION_FREE);
@@ -281,7 +282,7 @@ public class ScreenBuilder {
         }
     }
 
-    public void buildDownloadSection(){
+    public void buildDownloadSection() {
         if (!(SettingsStatus.downloadMedia)) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_DOWNLOAD_MEDIA);
@@ -307,6 +308,27 @@ public class ScreenBuilder {
                         Strings.DOWNLOAD_USERNAME_FOLDER,
                         Strings.DOWNLOAD_USERNAME_FOLDER_DESC,
                         Settings.DOWNLOAD_USERNAME_FOLDER
+                )
+        );
+    }
+
+    public void backupAndRestoreSection() {
+
+        PreferenceCategory category = category = addCategory(Strings.BACKUP_AND_RESTORE_TITLE);
+
+        addPreference(category,
+                helper.buttonPreference(
+                        Strings.EXPORT_PIKO_PREF,
+                        "",
+                        Strings.EXPORT_PIKO_PREF
+                )
+        );
+
+        addPreference(category,
+                helper.buttonPreference(
+                        Strings.IMPORT_PIKO_PREF,
+                        "",
+                        Strings.IMPORT_PIKO_PREF
                 )
         );
     }
