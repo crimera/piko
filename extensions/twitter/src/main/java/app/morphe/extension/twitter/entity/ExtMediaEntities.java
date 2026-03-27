@@ -53,7 +53,7 @@ public class ExtMediaEntities extends Debug{
         for(Object videoObject : videoVariant){
             Video video = new Video(videoObject);
             int bitrate = video.getBitrate();
-            if(bitrate > maxBitrate){
+            if(bitrate >= maxBitrate){
                 maxBitrateVideo = video;
             }
         }
