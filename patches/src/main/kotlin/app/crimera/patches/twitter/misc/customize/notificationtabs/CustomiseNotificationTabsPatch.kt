@@ -4,35 +4,33 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.misc.customize.notificationtabs
 
-import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
+import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
 import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
 import app.crimera.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private object CustomiseNotificationTabsFingerprint : Fingerprint(
-    strings = listOf(
-        "android_ntab_verified_tab_enabled",
-        "all",
-        "verified",
-        "super_followers",
-    )
+    strings =
+        listOf(
+            "android_ntab_verified_tab_enabled",
+            "all",
+            "verified",
+            "mentions",
+        ),
 )
 
 @Suppress("unused")
@@ -46,16 +44,9 @@ val customiseNotificationTabsPatch =
         execute {
 
             CustomiseNotificationTabsFingerprint.method.apply {
-                val strIndex =
-                    instructions
-                        .first {
-                            it.opcode == Opcode.CONST_STRING &&
-                                it.getReference<StringReference>()?.string == "mentions"
-                        }.location.index
-
+                val strIndex = CustomiseNotificationTabsFingerprint.stringMatches[3].index
                 val index = indexOfFirstInstruction(strIndex, Opcode.CHECK_CAST)
-
-                val reg = (getInstruction(index) as OneRegisterInstruction).registerA
+                val reg = getInstruction(index).registersUsed[0]
 
                 addInstructions(
                     index + 1,
