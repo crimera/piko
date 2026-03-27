@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-03-22T23:44:12",
-  "description": "# [3.1.0-dev.1](https://github.com/crimera/piko/compare/v3.0.0...v3.1.0-dev.1) (2026-03-22)\n\n\n### Features\n\n* **Bring back twitter:** Use strings from Twitter 9.98.0 for all languages ([ebcfb9a](https://github.com/crimera/piko/commit/ebcfb9ae7bdbb8f3648b4191ee7c448ee4f6c90a))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.1.0-dev.1/patches-3.1.0-dev.1.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.1.0-dev.1/patches-3.1.0-dev.1.mpp.asc",
-  "version": "3.1.0-dev.1"
+  "created_at": "2026-03-27T07:30:18",
+  "description": "# [3.1.0-dev.2](https://github.com/crimera/piko/compare/v3.1.0-dev.1...v3.1.0-dev.2) (2026-03-27)\n\n\n### Bug Fixes\n\n* **Twitter:** Fix `Customize notification tabs` patch on 11.78.xx ([05958d2](https://github.com/crimera/piko/commit/05958d2de69935b2a9de1550f06eeed4e2debaee))\n* **Twitter:** Fix `Log server response` patch on 11.77.xx ([c2111f1](https://github.com/crimera/piko/commit/c2111f1fd166107eefc436c38f320bd1db33a905))\n* **Twitter:** Fix GIFs downloading as image via native downloader ([d18317a](https://github.com/crimera/piko/commit/d18317a4f7b7e013765143f33d34807e3764a063))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.1.0-dev.2/patches-3.1.0-dev.2.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.1.0-dev.2/patches-3.1.0-dev.2.mpp.asc",
+  "version": "3.1.0-dev.2"
 }
