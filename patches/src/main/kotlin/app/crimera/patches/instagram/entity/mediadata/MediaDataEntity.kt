@@ -50,9 +50,15 @@ val mediaDataEntity =
                 IsVideoExtensionFingerprint.changeFirstString(isVideoCallingMethodName)
             }
 
-            UserDetailFragmentGetAndroidLinkFingerprint.method.apply {
-                val extendedDataFieldName = instructions.first { it.opcode == Opcode.IGET_OBJECT }.fieldExtractor().name
-                val mediaListMethodName = instructions.first { it.opcode == Opcode.INVOKE_INTERFACE }.methodExtractor().name
+            EditMediaInfoFragmentMediaSizeFingerprint.method.apply {
+                val firstReturnIndex = indexOfFirstInstruction(Opcode.RETURN)
+
+                val extendedDataFieldIndex = indexOfFirstInstruction(firstReturnIndex, Opcode.IGET_OBJECT)
+                val extendedDataFieldName =
+                    getInstruction(
+                        extendedDataFieldIndex,
+                    ).fieldExtractor().name
+                val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
 
                 GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
                 GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
