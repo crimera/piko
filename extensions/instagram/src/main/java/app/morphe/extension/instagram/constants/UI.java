@@ -71,7 +71,7 @@ public class UI {
         );
     }
 
-    private static void pikoSettingsButton(ViewGroup viewGroup) throws Exception {
+    public static void pikoSettingsButton(ViewGroup viewGroup) throws Exception {
         Context context = viewGroup.getContext();
         IgdsButton button = new IgdsButton(context);
         button.setText(Strings.PIKO_SETTINGS_TITLE);
@@ -89,23 +89,6 @@ public class UI {
         });
 
         viewGroup.addView(button);
-    }
-
-
-    public static void addPikoSettingsButton(ViewGroup viewGroup, Object object) {
-        try {
-            Entity profileInfo = new Entity(object);
-            Object profileRelatedDetailsObject = profileInfo.getField("A07");
-            Entity profileRelatedDetails = new Entity(profileRelatedDetailsObject);
-            Boolean isSelfProfile = (Boolean) profileRelatedDetails.getField("A0D");
-
-            if (isSelfProfile) {
-                pikoSettingsButton(viewGroup);
-            }
-        } catch (Exception e) {
-            Logger.printException(() -> "Failed to add piko button: ", e);
-        }
-
     }
 
     public static void restartDialogBox(Context context) {

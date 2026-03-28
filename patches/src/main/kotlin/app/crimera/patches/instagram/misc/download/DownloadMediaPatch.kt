@@ -10,7 +10,7 @@
 
 package app.crimera.patches.instagram.misc.download
 
-import app.crimera.patches.instagram.entity.mediadata.mediaDataPatch
+import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.enableSettings
@@ -38,7 +38,7 @@ val downloadMediaPatch =
         name = "Download media",
         description = "Adds ability to download posts, reels, stories and highlights",
     ) {
-        dependsOn(settingsPatch, mediaDataPatch, handleStoryButtonPatch)
+        dependsOn(settingsPatch, mediaDataEntity, handleStoryButtonPatch)
         compatibleWith("com.instagram.android")
 
         execute {

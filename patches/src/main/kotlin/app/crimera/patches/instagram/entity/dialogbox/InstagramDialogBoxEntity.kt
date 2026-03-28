@@ -20,7 +20,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
 
-val instagramDialogBoxPatch =
+val instagramDialogBoxEntity =
     bytecodePatch(
         description = "This patch is used for decoding obfuscated code of the native box of Instagram",
     ) {
