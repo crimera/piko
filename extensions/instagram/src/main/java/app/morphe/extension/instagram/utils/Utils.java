@@ -14,6 +14,8 @@ package app.morphe.extension.instagram.utils;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+import java.io.File;
+import app.morphe.extension.instagram.constants.Strings;
 
 public class Utils {
 
@@ -32,5 +34,27 @@ public class Utils {
                         + "." + element.getMethodName());
             }
         }
+    }
+
+    public static boolean deleteRecursive(File file) {
+        try {
+            if (file == null || !file.exists()){
+                toast(Strings.FAIL_NO_FILE);
+                return false;
+            }
+
+            if (file.isDirectory()) {
+                File[] children = file.listFiles();
+                if (children != null) {
+                    for (File child : children) {
+                        deleteRecursive(child);
+                    }
+                }
+            }
+            return file.delete();
+        } catch (RuntimeException e) {
+            logger(e);
+        }
+        return false;
     }
 }

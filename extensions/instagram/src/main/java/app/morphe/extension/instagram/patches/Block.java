@@ -13,6 +13,7 @@ package app.morphe.extension.instagram.patches;
 
 import java.util.List;
 import java.util.Arrays;
+import java.io.File;
 
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.utils.Utils;
@@ -35,5 +36,13 @@ public class Block {
         }
 
         return condition?Strings.PIKO:key;
+    }
+
+    public static void deleteAnalyticsCacheFolder(){
+        File analyticDirectory = new File(app.morphe.extension.shared.Utils.getContext().getDataDir(), "app_analytics");
+        Boolean done = Utils.deleteRecursive(analyticDirectory);
+        if(done){
+            Utils.toast(Strings.DELETED);
+        }
     }
 }
