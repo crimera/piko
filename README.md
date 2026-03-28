@@ -18,7 +18,7 @@
 
 ## 🕹️ Usage
 
-> There are still many people who are unaware that piko has migrated from ReVanced to Morphe.
+> Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software).
 
 **Morphe Manager**
 
