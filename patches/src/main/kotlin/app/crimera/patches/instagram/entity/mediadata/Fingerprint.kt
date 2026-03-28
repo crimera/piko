@@ -14,6 +14,7 @@ import app.crimera.patches.instagram.utils.Constants
 import app.morphe.patcher.Fingerprint
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
+internal const val EDIT_MEDIA_INFO_FRAGMENT_CLASS = "Linstagram/features/creation/fragment/EditMediaInfoFragment;"
 
 internal object GetHelperClassExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
@@ -80,9 +81,10 @@ internal object AslSessionRelatedFingerprint : Fingerprint(
     strings = listOf("asl_session_id", "is_video", "is_carousel"),
 )
 
-internal object UserDetailFragmentGetAndroidLinkFingerprint : Fingerprint(
-    returnType = "Lcom/instagram/model/androidlink/AndroidLink;",
-    definingClass = "Lcom/instagram/profile/fragment/UserDetailFragment;",
+internal object EditMediaInfoFragmentMediaSizeFingerprint : Fingerprint(
+    parameters = listOf(EDIT_MEDIA_INFO_FRAGMENT_CLASS),
+    returnType = "F",
+    definingClass = EDIT_MEDIA_INFO_FRAGMENT_CLASS,
 )
 
 internal object FanClubContentPreviewInteractorImplFingerprint : Fingerprint(
