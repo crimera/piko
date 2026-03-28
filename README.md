@@ -30,11 +30,9 @@ Use the deep link to add Piko as a patch source in Morphe Manager:
 [➕ Add Piko to Morphe](https://morphe.software/add-source?github=crimera/piko)
 
 Then patch Twitter/X:
-1. Download an original unpatched X APKM from [APKMirror.com](https://www.apkmirror.com/apk/x-corp/twitter/)
-2. Do _not_ unsplit or otherwise change the APKM.
-3. Select X directly from the Morphe Manager home screen
-4. Provide the original APKM file
-5. Wait for patching to complete, install
+1. Tap X app icon in Morphe
+2. Download original APKM file from ApkMirror. Do _not_ unspilt or modify the file, Morphe patches APKM directly
+3. Wait for patching to complete, install
 
 > For an up-to-date patching guide, see [Liso's official X patch guide](https://www.reddit.com/r/MorpheApp/comments/1r4xt24/x_twitter_can_now_be_patched_with_piko_patches/).
 
