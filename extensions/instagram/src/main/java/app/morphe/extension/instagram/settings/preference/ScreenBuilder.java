@@ -223,6 +223,13 @@ public class ScreenBuilder {
                             Settings.DISABLE_ANALYTICS
                     )
             );
+            addPreference(category,
+                    helper.buttonPreference(
+                            Strings.DELETE_ANALYTICS_CACHE,
+                            "",
+                            Strings.DELETE_ANALYTICS_CACHE
+                    )
+            );
         }
         if (SettingsStatus.disableDiscoverPeople) {
             addPreference(category,

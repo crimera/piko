@@ -48,6 +48,7 @@ public class Strings{
 
     public static final String CATEGORY_MISC = "Misc";
     public static final String DISABLE_ANALYTICS = "Disable analytics";
+    public static final String DELETE_ANALYTICS_CACHE = "Delete analytic cache";
     public static final String DISABLE_ANALYTICS_DESC = "Block analytics that are sent to Instagram/Facebook servers";
     public static final String DISABLE_DISCOVER_PEOPLE = "Disable discover people";
     public static final String DISABLE_DISCOVER_PEOPLE_DESC = "Disables discover people section on user profile";
@@ -94,4 +95,5 @@ public class Strings{
     public static final String IMPORT_FAIL = "Import failed";
     public static final String RESTART_APP = "The app needs to be restarted for the changes to reflect";
     public static final String OK = "OK";
+    public static final String DELETED = "Deleted";
 }
