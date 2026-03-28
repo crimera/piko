@@ -1,12 +1,12 @@
 /*
-    * Copyright (C) 2026 piko <https://github.com/crimera/piko>
-    *
-    * This file is part of piko.
-    *
-    * Any modifications, derivatives, or substantial rewrites of this file
-    * must retain this copyright notice and the piko attribution
-    * in the source code and version control history.
-*/
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
 
 
 package app.morphe.extension.instagram.settings;
@@ -25,8 +25,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.view.WindowInsets;
 
 import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.shared.Utils;
@@ -43,10 +45,7 @@ public class SettingsActivity extends Activity {
 
         createLayout();
 
-        getFragmentManager()
-                .beginTransaction()
-                .replace(1001, new SettingsFragment())
-                .commit();
+        getFragmentManager().beginTransaction().replace(1001, new SettingsFragment()).commit();
     }
 
 
@@ -56,11 +55,12 @@ public class SettingsActivity extends Activity {
         // ---------- Toolbar ----------
         toolbar = new LinearLayout(this);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
-        toolbar.setPadding(20, 40, 20, 40);
         ImageView back = new ImageView(this);
         back.setLayoutParams(new LinearLayout.LayoutParams(100, 100));
-        back.setImageResource(Utils.getResourceIdentifier("material_ic_keyboard_arrow_left_black_24dp","drawable"));
+        int dimen = Utils.getResourceDimensionPixelSize("abc_edit_text_inset_top_material");
 
+        UI.setThemedIcon(back, "material_ic_keyboard_arrow_left_black_24dp");
+        back.setPaddingRelative(dimen, dimen, dimen, dimen);
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,8 +70,9 @@ public class SettingsActivity extends Activity {
 
         TextView title = new TextView(this);
         title.setText(Strings.PIKO_SETTINGS_TITLE);
-        title.setTextSize(18f);
-        title.setPadding(20, 0, 0, 0);
+        title.setTextSize(Utils.getResourceDimensionPixelSize("fbui_text_size_micro"));
+        title.setPaddingRelative(dimen, dimen, dimen, dimen);
+        title.setTextColor(UI.getThemedColour());
 
         toolbar.addView(back);
         toolbar.addView(title);
@@ -83,18 +84,22 @@ public class SettingsActivity extends Activity {
         content.setOrientation(LinearLayout.VERTICAL);
 
         root.addView(toolbar);
-        root.addView(content,
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.MATCH_PARENT
-                ));
+        root.addView(content, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+
+        root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                int topInset = insets.getSystemWindowInsetTop();
+                v.setPadding(0, topInset, 0, 0);
+                return insets;
+            }
+        });
 
         setContentView(root);
     }
 
 
-
-    public static class SettingsFragment extends PreferenceFragment{
+    public static class SettingsFragment extends PreferenceFragment {
 
         Context context;
 
