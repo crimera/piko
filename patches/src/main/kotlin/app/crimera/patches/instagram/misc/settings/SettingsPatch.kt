@@ -10,12 +10,13 @@
 
 package app.crimera.patches.instagram.misc.settings
 
+import app.crimera.patches.instagram.entity.profileinfo.ProfileUserInfoViewBinderFingerprint
+import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
-import app.crimera.patches.instagram.utils.Constants.UI_CONSTANTS_DESCRIPTOR
 import app.crimera.utils.changeFirstString
-import app.crimera.utils.changeStringAt
 import app.crimera.utils.classNameToExtension
 import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -38,7 +39,7 @@ val settingsPatch =
         use = true,
     ) {
         compatibleWith("com.instagram.android")
-        dependsOn(sharedExtensionPatch, addSettingsActivityPatch)
+        dependsOn(sharedExtensionPatch, addSettingsActivityPatch, profileInfoEntity)
         execute {
 
             ProfileUserInfoViewBinderFingerprint.method.apply {
@@ -46,21 +47,9 @@ val settingsPatch =
                 addInstructions(
                     moveResObj + 1,
                     """
-                    invoke-static {p1,p2}, ${UI_CONSTANTS_DESCRIPTOR}->addPikoSettingsButton(Landroid/view/ViewGroup;Ljava/lang/Object;)V
+                    invoke-static {p1,p2}, ${PATCHES_DESCRIPTOR}/userprofile/PikoSettingsButton;->addPikoSettingsButton(Landroid/view/ViewGroup;Ljava/lang/Object;)V
                     """.trimIndent(),
                 )
-
-                mutableClassDefBy(parameters[1].type).apply {
-                    val profileRelatedDetailsClass = ProfileRelatedDetailsFingerprint.classDef
-                    val profileRelatedDetailsFieldName = fields.last { it.type == profileRelatedDetailsClass.type }.name
-                    AddPikoSettingsButtonExtensionFingerprint.changeFirstString(profileRelatedDetailsFieldName)
-
-                    val isSelfProfileFieldName =
-                        profileRelatedDetailsClass.fields
-                            .last { it.type == "Z" }
-                            .name
-                    AddPikoSettingsButtonExtensionFingerprint.changeStringAt(1, isSelfProfileFieldName)
-                }
             }
 
             PikoSettingsButtonExtensionFingerprint.method.apply {

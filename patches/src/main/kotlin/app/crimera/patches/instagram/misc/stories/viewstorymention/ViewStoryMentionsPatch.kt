@@ -10,9 +10,9 @@
 
 package app.crimera.patches.instagram.misc.stories.viewstorymention
 
-import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxPatch
-import app.crimera.patches.instagram.entity.mediadata.mediaDataPatch
-import app.crimera.patches.instagram.entity.userdata.userDataPatch
+import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxEntity
+import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
+import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.enableSettings
@@ -24,7 +24,7 @@ val viewStoryMentionsPatch =
         name = "View story mentions",
         description = "Add option to view visible and hidden story mentions.",
     ) {
-        dependsOn(settingsPatch, handleStoryButtonPatch, userDataPatch, mediaDataPatch, instagramDialogBoxPatch)
+        dependsOn(settingsPatch, handleStoryButtonPatch, userDataEntity, mediaDataEntity, instagramDialogBoxEntity)
 
         compatibleWith("com.instagram.android")
 

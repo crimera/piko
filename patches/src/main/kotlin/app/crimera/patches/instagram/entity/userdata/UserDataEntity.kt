@@ -19,7 +19,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
-val userDataPatch =
+val userDataEntity =
     bytecodePatch(
         description = "This patch is used for decoding obfuscated code of the user data",
     ) {

@@ -31,11 +31,6 @@ internal object PikoSettingsButtonStyleExtensionFingerprint : Fingerprint(
     name = "pikoSettingsButtonStyle",
 )
 
-internal object AddPikoSettingsButtonExtensionFingerprint : Fingerprint(
-    definingClass = UI_CONSTANTS_DESCRIPTOR,
-    name = "addPikoSettingsButton",
-)
-
 internal object PikoSettingsButtonExtensionFingerprint : Fingerprint(
     definingClass = UI_CONSTANTS_DESCRIPTOR,
     name = "pikoSettingsButton",
@@ -47,16 +42,6 @@ internal object SignatureCheckExtensionFingerprint : Fingerprint(
 )
 
 // ----------------------
-
-internal object ProfileUserInfoViewBinderFingerprint : Fingerprint(
-    strings = listOf("ProfileUserInfoViewBinder.newView"),
-)
-
-internal object ProfileRelatedDetailsFingerprint : Fingerprint(
-    returnType = "V",
-    parameters = listOf(),
-    strings = listOf("is_self", "trigger", "content_source", "destination"),
-)
 
 internal object IgdsButtonSetStyleFingerprint : Fingerprint(
     definingClass = "Lcom/instagram/igds/components/button/IgdsButton;",

@@ -19,7 +19,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
 
-val mediaDataPatch =
+val mediaDataEntity =
     bytecodePatch(
         description = "This patch is used for decoding obfuscated code of the media data",
     ) {
