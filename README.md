@@ -5,7 +5,7 @@
 </p>
 
 <h1 align="center">
-    Morphe patches focused on Twitter/X <br>
+    Morphe patches focused on Twitter/X & Instagram<br>
     <a href="https://t.me/pikopatches">
         <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/>
     </a>
@@ -29,8 +29,8 @@ Use the deep link to add Piko as a patch source in Morphe Manager:
 
 [➕ Add Piko to Morphe](https://morphe.software/add-source?github=crimera/piko)
 
-Then patch Twitter/X:
-1. Tap X app icon in Morphe
+Then patch Twitter/X or Instagram:
+1. Tap X or Instagram app icon in Morphe
 2. Download original APKM file from ApkMirror. Do _not_ unspilt or modify the file, Morphe patches APKM directly
 3. Wait for patching to complete, install
 
@@ -47,7 +47,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 ## ⚙️ Patch Details
 
 <details>
-<summary>Show patches</summary>
+<summary>Show Twitter/X patches</summary>
 
 <table>
 <thead>
@@ -126,6 +126,42 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Show poll results</code></td><td>Adds an option to show poll results without voting</td></tr>
 <tr><td><code>Show post source label</code></td><td>Source label will be shown only on public posts</td></tr>
 <tr><td><code>Show sensitive media</code></td><td>Disables the sensitive media banner</td></tr>
+</tbody>
+</table>
+
+</details>
+<br>
+<details>
+<summary>Show Instagram patches</summary>
+<table>
+<thead>
+<tr>
+<th>Patch Name</th>
+<th>Patch Description</th>
+</tr>
+</thead>
+<tbody>
+<tr><td><code>Disable ads</code></td><td></td></tr>
+<tr><td><code>Hide suggested content</code></td><td>Hides suggested stories, reels, threads (Suggested posts will still be shown).</td></tr>
+<tr><td><code>Disable comments</code></td><td></td></tr>
+<tr><td><code>Disable explore</code></td><td></td></tr>
+<tr><td><code>Disable stories</code></td><td></td></tr>
+<tr><td><code>Hide stories tray</code></td><td>Hides stories tray from main feed.</td></tr>
+<tr><td><code>Disable analytics</code></td><td>Block analytics that are sent to Instagram/Facebook servers.</td></tr>
+<tr><td><code>Disable discover people</code></td><td>Disables discover people section on user profile</td></tr>
+<tr><td><code>View live anonymously</code></td><td></td></tr>
+<tr><td><code>View stories anonymously</code></td><td></td></tr>
+<tr><td><code>Sanitize share links</code></td><td></td></tr>
+<tr><td><code>Open links externally</code></td><td>Changes links to always open in your external browser, instead of the in-app browser.</td></tr>
+<tr><td><code>Remove build expired popup</code></td><td>Removes the popup that appears after a while, when the app version ages.</td></tr>
+<tr><td><code>Unlock developer options</code></td><td></td></tr>
+<tr><td><code>Download media</code></td><td>Adds ability to download posts, reels, stories and highlights</td></tr>
+<tr><td><code>Add settings</code></td><td>Adds settings to control preferences are patching</td></tr>
+<tr><td><code>Customise story timestamp</code></td><td>Customise the timestamp that shows when the story was posted</td></tr>
+<tr><td><code>Disable story flipping</code></td><td>Disable automatic flipping/moving to next story</td></tr>
+<tr><td><code>View story mentions</code></td><td>Add option to view visible and hidden story mentions.</td></tr>
+<tr><td><code>Unlimited replays on ephemeral media</code></td><td>Unlimited replays on view once, view twice media before they get expired</td></tr>
+<tr><td><code>Follow back indicator</code></td><td>Adds a label on the profile page, indicating whether a user is follows you back.</td></tr>
 </tbody>
 </table>
 
