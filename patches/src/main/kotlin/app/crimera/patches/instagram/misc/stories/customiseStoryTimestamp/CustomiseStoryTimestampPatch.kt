@@ -11,6 +11,7 @@
 package app.crimera.patches.instagram.misc.stories.customiseStoryTimestamp
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
@@ -36,7 +37,7 @@ val customiseStoryTimestampPatch =
     ) {
         dependsOn(settingsPatch)
 
-        compatibleWith("com.instagram.android")
+        compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
             ReelItemTimestampFormatMethodFingerprint.method.apply {

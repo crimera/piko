@@ -12,6 +12,7 @@ package app.crimera.patches.instagram.links
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -34,12 +35,12 @@ val openLinksExternallyPatch =
     bytecodePatch(
         name = "Open links externally",
         description = "Changes links to always open in your external browser, instead of the in-app browser.",
-        use = true,
+        default = true,
     ) {
 
         dependsOn(settingsPatch)
 
-        compatibleWith("com.instagram.android")
+        compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
 

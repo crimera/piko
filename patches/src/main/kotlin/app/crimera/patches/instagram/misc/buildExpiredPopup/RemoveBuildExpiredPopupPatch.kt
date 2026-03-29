@@ -11,6 +11,7 @@
 package app.crimera.patches.instagram.misc.buildExpiredPopup
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
@@ -32,7 +33,7 @@ val removeBuildExpiredPopupPatch =
         description = "Removes the popup that appears after a while, when the app version ages.",
     ) {
         dependsOn(settingsPatch)
-        compatibleWith("com.instagram.android")
+        compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
             // Get the constructor.

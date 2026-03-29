@@ -10,6 +10,7 @@
 
 package app.crimera.patches.instagram.misc.stories
 
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.utils.MethodFieldMetadata
 import app.crimera.utils.extensionToClassName
@@ -41,7 +42,7 @@ val handleStoryButtonPatch =
     bytecodePatch(
         description = "This patch is used for handing button interaction on stories",
     ) {
-        compatibleWith("com.instagram.android")
+        compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
 
