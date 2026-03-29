@@ -25,7 +25,8 @@ internal object AddFeedButtonFingerprint : Fingerprint(
 
 internal object FeedButtonOnClickFingerprint : Fingerprint(
     parameters = listOf("Lcom/instagram/feed/media/mediaoption/MediaOption\$Option;"),
-    strings = listOf("three_dot_menu"),
+    strings = listOf("accounts/change_profile_picture/"),
+    returnType = "V",
 )
 
 internal object EditMediaInfoFragmentFingerprint : Fingerprint(
