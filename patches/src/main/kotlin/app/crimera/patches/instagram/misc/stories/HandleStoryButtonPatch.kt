@@ -30,6 +30,9 @@ import com.android.tools.smali.dexlib2.Opcode
 object AddStoryButtonFingerprint : Fingerprint(
     returnType = "[Ljava/lang/CharSequence;",
     strings = listOf("[INTERNAL] Pause Playback"),
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 1
+    },
 )
 
 // The method is obfuscated but this is where the onclick call executes.
@@ -51,7 +54,6 @@ val handleStoryButtonPatch =
             var mediaObjectFromReelItemFieldExtraction: MethodFieldMetadata
             // Add button on story bottom sheet.
             AddStoryButtonFingerprint.method.apply {
-
                 mediaObjectFromReelItemFieldExtraction = instructions.filter { it.opcode == Opcode.IGET_OBJECT }[1].fieldExtractor()
                 // The last invoke-virtual instruction is arrayList.add().
                 val lastInvokeVirtualRegisters = instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL }.registersUsed
