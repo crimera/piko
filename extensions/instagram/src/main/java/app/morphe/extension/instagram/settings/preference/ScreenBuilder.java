@@ -21,6 +21,7 @@ import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
+import app.morphe.extension.shared.Utils;
 
 public class ScreenBuilder {
     private final Context context;
@@ -319,9 +320,26 @@ public class ScreenBuilder {
         );
     }
 
-    public void backupAndRestoreSection() {
+    public void aboutSection() {
 
-        PreferenceCategory category = category = addCategory(Strings.BACKUP_AND_RESTORE_TITLE);
+        PreferenceCategory category = category = addCategory(Strings.PATCH_INFO_TITLE);
+        String appVersionText = String.format(Strings.APP_VERSION, Utils.getAppVersionName());
+        String patchVersionText = String.format(Strings.PATCH_VERSION, Utils.getPatchesReleaseVersion());
+        addPreference(category,
+                helper.buttonPreference(
+                        appVersionText,
+                        "",
+                        appVersionText
+                )
+        );
+
+        addPreference(category,
+                helper.buttonPreference(
+                        patchVersionText,
+                        "",
+                        patchVersionText
+                )
+        );
 
         addPreference(category,
                 helper.buttonPreference(

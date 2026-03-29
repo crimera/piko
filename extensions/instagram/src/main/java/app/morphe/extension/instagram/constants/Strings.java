@@ -83,9 +83,11 @@ public class Strings{
     public static final String MEDIA_EXISTS = "Media exits";
     public static final String DOWNLOAD_FAILED_MEDIA = "Download failed : ";
 
-    public static final String BACKUP_AND_RESTORE_TITLE = "Backup and restore";
+    public static final String PATCH_INFO_TITLE = "Patch information";
     public static final String EXPORT_PIKO_PREF = "Export piko preferences";
     public static final String IMPORT_PIKO_PREF = "Import piko preferences";
+    public static final String APP_VERSION = "App version: %s";
+    public static final String PATCH_VERSION = "Patch version: %s";
 
     public static final String EXPORT_SUCCESS = "Exported successfully";
     public static final String EXPORT_FAIL = "Exporting failed";
