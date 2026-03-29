@@ -37,14 +37,15 @@ val userDataEntity =
                 GetFullNameExtensionFingerprint.changeFirstString(invokeInterfaceList[1].methodExtractor().name)
 
                 val additionalUserInfoMethods =
-                    classDefBy(extensionToClassName(additionalUserInfoField.returnType))
+                    mutableClassDefBy(extensionToClassName(additionalUserInfoField.returnType))
                         .methods
 
                 val friendshipStatusFromUserMethodName =
                     additionalUserInfoMethods
                         .first {
                             it.returnType ==
-                                FRIENDSHIP_STATUS_CLASS
+                                FRIENDSHIP_STATUS_CLASS &&
+                                it.parameters.isEmpty()
                         }.name
 
                 GetUserFriendshipStatusExtensionFingerprint.changeFirstString(friendshipStatusFromUserMethodName)
