@@ -1,3 +1,10 @@
+# [3.1.0-dev.4](https://github.com/crimera/piko/compare/v3.1.0-dev.3...v3.1.0-dev.4) (2026-03-29)
+
+
+### Bug Fixes
+
+* **Instagram:** Fix `Open links externally` patch ([b5aa5da](https://github.com/crimera/piko/commit/b5aa5da0bbf860ec3108bce45b51e401e848d36f))
+
 # [3.1.0-dev.3](https://github.com/crimera/piko/compare/v3.1.0-dev.2...v3.1.0-dev.3) (2026-03-29)
 
 
