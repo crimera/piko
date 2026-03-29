@@ -45,7 +45,7 @@ val openLinksExternallyPatch =
         execute {
 
             InAppBrowserFunctionFingerprint.let {
-                val stringMatchIndex = it.stringMatches[1].index
+                val stringMatchIndex = it.stringMatches[0].index
 
                 it.method.apply {
                     val urlResultObjIndex =
