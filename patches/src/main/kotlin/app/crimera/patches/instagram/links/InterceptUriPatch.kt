@@ -11,6 +11,7 @@
 package app.crimera.patches.instagram.links
 
 import app.crimera.patches.instagram.utils.Constants
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -29,7 +30,7 @@ val interceptUriPatch =
     bytecodePatch(
         description = "Intercept uri to block.",
     ) {
-        compatibleWith("com.instagram.android")
+        compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
             TigonServiceLayerStartRequestFingerprint.method.apply {

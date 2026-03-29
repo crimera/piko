@@ -14,6 +14,7 @@ import app.crimera.patches.instagram.entity.profileinfo.ProfileUserInfoViewBinde
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
 import app.crimera.patches.instagram.entity.userfriendshipstatus.userFriendshipStatusEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
@@ -29,16 +30,6 @@ internal object BindInternalBadgeFingerprint : Fingerprint(
     strings = listOf("bindInternalBadges"),
 )
 
-internal object BindRowViewTypesFingerprint : Fingerprint(
-    strings = listOf("NONE should not map to item type"),
-)
-
-internal object GetViewingProfileUserObjectExtensionFingerprint : Fingerprint(
-    custom = { method, classDef ->
-        method.name == "getViewingProfileUserObject" && classDef.type.endsWith("userprofile/FriendshipStatusIndicator;")
-    },
-)
-
 @Suppress("unused")
 val followBackIndicatorPatch =
     bytecodePatch(
@@ -48,7 +39,7 @@ val followBackIndicatorPatch =
 
         dependsOn(settingsPatch, userFriendshipStatusEntity, profileInfoEntity)
 
-        compatibleWith("com.instagram.android")
+        compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
             // This constant stores the value of the obfuscated profile info class,

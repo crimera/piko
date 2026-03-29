@@ -15,6 +15,7 @@ import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
 
@@ -26,7 +27,7 @@ val viewStoryMentionsPatch =
     ) {
         dependsOn(settingsPatch, handleStoryButtonPatch, userDataEntity, mediaDataEntity, instagramDialogBoxEntity)
 
-        compatibleWith("com.instagram.android")
+        compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
 

@@ -13,6 +13,7 @@ package app.crimera.patches.instagram.misc.download
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
@@ -39,7 +40,7 @@ val downloadMediaPatch =
         description = "Adds ability to download posts, reels, stories and highlights",
     ) {
         dependsOn(settingsPatch, mediaDataEntity, handleStoryButtonPatch)
-        compatibleWith("com.instagram.android")
+        compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
             val appActivity = "Landroidx/fragment/app/FragmentActivity;"

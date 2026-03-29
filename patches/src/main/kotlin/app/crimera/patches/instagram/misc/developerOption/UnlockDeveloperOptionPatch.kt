@@ -11,7 +11,8 @@
 package app.crimera.patches.instagram.misc.developerOption
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
-import app.crimera.patches.instagram.utils.Constants
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -24,9 +25,9 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 val unlockDeveloperOptionPatch =
     bytecodePatch(
         name = "Unlock developer options",
-        use = true,
+        default = true,
     ) {
-        compatibleWith("com.instagram.android")
+        compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(settingsPatch)
         execute {
 
@@ -44,7 +45,7 @@ val unlockDeveloperOptionPatch =
                 devOptionsMethod.addInstructions(
                     0,
                     """
-                    ${Constants.PREF_CALL_DESCRIPTOR}->enableDevOptions()Z
+                    ${PREF_CALL_DESCRIPTOR}->enableDevOptions()Z
                     move-result v0
                     return v0
                     """.trimIndent(),

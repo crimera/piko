@@ -23,8 +23,6 @@ val userDataEntity =
     bytecodePatch(
         description = "This patch is used for decoding obfuscated code of the user data",
     ) {
-        compatibleWith("com.instagram.android")
-
         execute {
 
             GetMatrixCursorFingerprint.method.apply {

@@ -23,8 +23,6 @@ val mediaDataEntity =
     bytecodePatch(
         description = "This patch is used for decoding obfuscated code of the media data",
     ) {
-        compatibleWith("com.instagram.android")
-
         execute {
 
             ReelsMentionDoubleTapFingerprint.method.apply {

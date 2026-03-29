@@ -24,8 +24,6 @@ val instagramDialogBoxEntity =
     bytecodePatch(
         description = "This patch is used for decoding obfuscated code of the native box of Instagram",
     ) {
-        compatibleWith("com.instagram.android")
-
         execute {
 
             ConstructorExtensionFingerprint.changeFirstString(

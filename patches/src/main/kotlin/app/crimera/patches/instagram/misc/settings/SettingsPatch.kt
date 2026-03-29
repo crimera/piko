@@ -13,6 +13,7 @@ package app.crimera.patches.instagram.misc.settings
 import app.crimera.patches.instagram.entity.profileinfo.ProfileUserInfoViewBinderFingerprint
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
@@ -36,9 +37,9 @@ val settingsPatch =
     bytecodePatch(
         name = "Add settings",
         description = "Adds settings to control preferences are patching",
-        use = true,
+        default = true,
     ) {
-        compatibleWith("com.instagram.android")
+        compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(sharedExtensionPatch, addSettingsActivityPatch, profileInfoEntity)
         execute {
 

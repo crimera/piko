@@ -11,6 +11,7 @@
 package app.crimera.patches.instagram.links.distractionFree
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
@@ -39,7 +40,7 @@ val hideStoriesTrayPatch =
         description = "Hides stories tray from main feed.",
     ) {
         dependsOn(settingsPatch, resourceMappingPatch)
-        compatibleWith("com.instagram.android")
+        compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
 
