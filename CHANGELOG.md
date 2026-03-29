@@ -1,3 +1,17 @@
+# [3.1.0](https://github.com/crimera/piko/compare/v3.0.0...v3.1.0) (2026-03-29)
+
+
+### Bug Fixes
+
+* **Twitter:** Fix `Customize notification tabs` patch on 11.78.xx ([8f884e5](https://github.com/crimera/piko/commit/8f884e56e3b95581c96bc67e7801369b42f7d5f0))
+* **Twitter:** Fix `Log server response` patch on 11.77.xx ([08f7fb0](https://github.com/crimera/piko/commit/08f7fb0aed0ca20f1d44fe46d8e1469d0fa787d4))
+* **Twitter:** Fix GIFs downloading as image via native downloader ([5b40c87](https://github.com/crimera/piko/commit/5b40c87bc3cc383f127e20243a1482c3e7613e3b))
+
+
+### Features
+
+* **Bring back twitter:** Use strings from Twitter 9.98.0 for all languages ([68cf8c3](https://github.com/crimera/piko/commit/68cf8c379292ddfb80e3d11b7851703ffb7eca8b))
+
 # [3.1.0-dev.2](https://github.com/crimera/piko/compare/v3.1.0-dev.1...v3.1.0-dev.2) (2026-03-27)
 
 
