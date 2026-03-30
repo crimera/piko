@@ -1,3 +1,10 @@
+# [3.1.0-dev.5](https://github.com/crimera/piko/compare/v3.1.0-dev.4...v3.1.0-dev.5) (2026-03-30)
+
+
+### Bug Fixes
+
+* **Instagram:** Fixed sanitize post and reels urls ([61257fb](https://github.com/crimera/piko/commit/61257fbd601e69b3c507b5da22b687439890c873))
+
 # [3.1.0-dev.4](https://github.com/crimera/piko/compare/v3.1.0-dev.3...v3.1.0-dev.4) (2026-03-29)
 
 

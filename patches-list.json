@@ -1,5 +1,5 @@
 {
-  "version": "3.1.0-dev.4",
+  "version": "3.1.0-dev.5",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -23,7 +23,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -72,7 +75,10 @@
       "dependencies": [],
       "compatiblePackages": {
         "com.twitter.android": null,
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": [
         {
@@ -197,7 +203,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -341,7 +350,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -354,7 +366,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -392,7 +407,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -405,7 +423,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -418,7 +439,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -431,7 +455,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -443,7 +470,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -455,7 +485,9 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.twitter.android": null
+        "com.twitter.android": [
+          "11.69.0-release.0"
+        ]
       },
       "options": []
     },
@@ -469,7 +501,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -564,7 +599,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -808,7 +846,10 @@
         "ResourcePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -820,7 +861,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -923,7 +967,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -960,7 +1007,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -1021,7 +1071,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -1107,7 +1160,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -1119,7 +1175,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -1132,7 +1191,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -1145,7 +1207,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     },
@@ -1161,7 +1226,10 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.instagram.android": null
+        "com.instagram.android": [
+          "422.0.0.44.64",
+          "424.0.0.0.39"
+        ]
       },
       "options": []
     }
