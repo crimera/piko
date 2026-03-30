@@ -11,12 +11,11 @@
 package app.crimera.patches.instagram.links.sanitizeShareLinks
 
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.OpcodesFilter
 import com.android.tools.smali.dexlib2.Opcode
 
 internal val TARGET_STRING_ARRAY =
     arrayOf(
-        "permalink",
+        "XDTPermalinkResponse",
         "profile_to_share_url",
     )
 
