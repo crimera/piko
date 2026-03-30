@@ -204,7 +204,7 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
             Utils.setClipboard(summary);
             Utils.showToastShort(strRes("copied_to_clipboard")+": "+ summary);
         }else if (key.equals(strRes("piko_settings_supported_links"))){
-            app.morphe.extension.twitter.Utils.openDefaultLinks();
+            app.morphe.extension.crimera.Utils.openDefaultLinks();
         }else if (key.equals(strRes("piko_changelogs_title"))){
             Changelogs.showChangelogDialog(context);
         }

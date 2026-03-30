@@ -19,27 +19,10 @@ import app.morphe.extension.instagram.constants.Strings;
 
 public class Utils {
 
-    public static void toast(String msg) {
-        app.morphe.extension.shared.Utils.showToastShort(msg);
-    }
-
-    public static void logger(Object e) {
-        String logName = "piko";
-        Log.d(logName, e +"\n");
-        if (e instanceof Exception) {
-            Exception ex = (Exception) e;
-            StackTraceElement[] stackTraceElements = ex.getStackTrace();
-            for (StackTraceElement element : stackTraceElements) {
-                Log.d(logName, "Exception occurred at line " + element.getLineNumber() + " in " + element.getClassName()
-                        + "." + element.getMethodName());
-            }
-        }
-    }
-
     public static boolean deleteRecursive(File file) {
         try {
             if (file == null || !file.exists()){
-                toast(Strings.FAIL_NO_FILE);
+                app.morphe.extension.crimera.Utils.toast(Strings.FAIL_NO_FILE);
                 return false;
             }
 
@@ -53,7 +36,7 @@ public class Utils {
             }
             return file.delete();
         } catch (RuntimeException e) {
-            logger(e);
+            app.morphe.extension.crimera.Utils.logger(e);
         }
         return false;
     }

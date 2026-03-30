@@ -18,7 +18,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.Utils;
 import java.io.OutputStream;
 
 public class ViewUtils {

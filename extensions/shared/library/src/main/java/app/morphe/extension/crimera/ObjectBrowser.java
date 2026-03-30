@@ -8,7 +8,7 @@
  * in the source code and version control history.
  */
 
-package app.crimera.utils;
+package app.morphe.extension.crimera;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -50,13 +50,17 @@ public class ObjectBrowser {
     }
 
     public static void browseObject(Context context, Object obj) {
-        if (context == null || obj == null) {
-            Utils.showToastShort("Cannot browse null object");
-            return;
-        }
+        try {
+            if (context == null || obj == null) {
+                Utils.showToastShort("Cannot browse null object");
+                return;
+            }
 
-        String title = getClassName(obj.getClass());
-        showObjectDialog(context, obj, title, false, null);
+            String title = getClassName(obj.getClass());
+            showObjectDialog(context, obj, title, false, null);
+        } catch (Exception ex) {
+            app.morphe.extension.crimera.Utils.logger(ex);
+        }
     }
 
     private static void browseObject(Context context, Object obj, String path) {

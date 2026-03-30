@@ -124,8 +124,8 @@ public class Helper {
             }
 
         } catch (Exception ex) {
-            Utils.toast(ex.toString());
-            Utils.logger(ex);
+            app.morphe.extension.crimera.Utils.toast(ex.toString());
+            app.morphe.extension.crimera.Utils.logger(ex);
         }
     }
 

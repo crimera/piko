@@ -4,17 +4,16 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.misc.customize.inlinebar
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.CUSTOMISE_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -26,9 +25,10 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 private object CustomiseInlineBarFingerprint : Fingerprint(
     returnType = "Ljava/util/List;",
-    filters = listOf(
-        string("bookmarks_in_timelines_enabled")
-    )
+    filters =
+        listOf(
+            string("bookmarks_in_timelines_enabled"),
+        ),
 )
 
 @Suppress("unused")
@@ -54,6 +54,6 @@ val customiseInlineBarPatch =
                 """.trimIndent()
 
             method.addInstructions(returnObj_loc, METHOD)
-            SettingsStatusLoadFingerprint.enableSettings("inlineBarCustomisation")
+            enableSettings("inlineBarCustomisation")
         }
     }

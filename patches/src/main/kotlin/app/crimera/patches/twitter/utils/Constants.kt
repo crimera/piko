@@ -1,16 +1,30 @@
-/*
- * Copyright (C) 2026 piko <https://github.com/crimera/piko>
- *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
- * in the source code and version control history.
- */
+package app.crimera.patches.twitter.utils
 
-package app.crimera.utils
+import app.morphe.patcher.patch.ApkFileType
+import app.morphe.patcher.patch.AppTarget
+import app.morphe.patcher.patch.Compatibility
 
 object Constants {
+    val COMPATIBILITY_X =
+        Compatibility(
+            name = "X",
+            packageName = "com.twitter.android",
+            apkFileType = ApkFileType.APKM,
+            appIconColor = 0x000000,
+            signatures =
+                setOf(
+                    // APK
+                    "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+                    // APKM
+                    "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f",
+                ),
+            targets =
+                listOf(
+                    // Any version
+                    AppTarget(version = null),
+                ),
+        )
+
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/twitter"
     const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
     const val ACTIVITY_SETTINGS_CLASS = "$INTEGRATIONS_PACKAGE/settings"

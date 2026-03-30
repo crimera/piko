@@ -90,7 +90,7 @@ public class RestorePrefFragment extends Fragment {
     }
 
     private static void toast(String msg){
-        Utils.toast(msg);
+        app.morphe.extension.crimera.Utils.toast(msg);
     }
 
     @Override

@@ -1,11 +1,10 @@
 package app.crimera.patches.twitter.misc.shareMenu.nativeDownloader
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.crimera.utils.changeFirstString
-import app.crimera.utils.enableSettings
 import app.crimera.utils.getFieldName
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -56,63 +55,72 @@ private val inlineDownloadRenderHintsFieldFingerprint = placeholderFingerprint("
 private val inlineDownloadRenderHintsFocalFieldFingerprint = placeholderFingerprint("isFocalTweet")
 
 @Suppress("unused")
-val inlineDownloadButtonPatch = bytecodePatch(
-    description = "Adds an inline 'Download' button to the tweet inline action bar and registers the extension hook.",
-) {
-    compatibleWith(COMPATIBILITY_X)
-    dependsOn(settingsPatch)
+val inlineDownloadButtonPatch =
+    bytecodePatch(
+        description = "Adds an inline 'Download' button to the tweet inline action bar and registers the extension hook.",
+    ) {
+        compatibleWith(COMPATIBILITY_X)
+        dependsOn(settingsPatch)
 
-    execute {
-        val onFinishInflateMethod = OnFinishInflateFingerprint.method
-        val returnIndex = onFinishInflateMethod.instructions
-            .indexOfLast { it.opcode == Opcode.RETURN_VOID }
-            .takeIf { it >= 0 }
-            ?: throw PatchException("onFinishInflate return not found")
+        execute {
+            val onFinishInflateMethod = OnFinishInflateFingerprint.method
+            val returnIndex =
+                onFinishInflateMethod.instructions
+                    .indexOfLast { it.opcode == Opcode.RETURN_VOID }
+                    .takeIf { it >= 0 }
+                    ?: throw PatchException("onFinishInflate return not found")
 
-        onFinishInflateMethod.addInstruction(
-            returnIndex,
-            "invoke-static {p0}, $PATCHES_DESCRIPTOR/InlineDownloadButton;->onFinishInflate(Landroid/view/ViewGroup;)V"
-        )
+            onFinishInflateMethod.addInstruction(
+                returnIndex,
+                "invoke-static {p0}, $PATCHES_DESCRIPTOR/InlineDownloadButton;->onFinishInflate(Landroid/view/ViewGroup;)V",
+            )
 
-        val setTweetMethod = SetTweetFingerprint.method
-        val tweetFieldIndex = setTweetMethod.indexOfFirstInstructionOrThrow(Opcode.IPUT_OBJECT)
-        inlineDownloadTweetFieldFingerprint.changeFirstString(SetTweetFingerprint.getFieldName(tweetFieldIndex))
+            val setTweetMethod = SetTweetFingerprint.method
+            val tweetFieldIndex = setTweetMethod.indexOfFirstInstructionOrThrow(Opcode.IPUT_OBJECT)
+            inlineDownloadTweetFieldFingerprint.changeFirstString(SetTweetFingerprint.getFieldName(tweetFieldIndex))
 
-        val constructorMethod = InlineActionViewConstructorFingerprint.method
-        val iconColorFieldIndex = constructorMethod.indexOfFirstInstructionOrThrow {
-            opcode == Opcode.IPUT_OBJECT &&
-                ((this as? ReferenceInstruction)?.reference as? FieldReference)?.type == COLOR_STATE_LIST_DESCRIPTOR
+            val constructorMethod = InlineActionViewConstructorFingerprint.method
+            val iconColorFieldIndex =
+                constructorMethod.indexOfFirstInstructionOrThrow {
+                    opcode == Opcode.IPUT_OBJECT &&
+                        ((this as? ReferenceInstruction)?.reference as? FieldReference)?.type == COLOR_STATE_LIST_DESCRIPTOR
+                }
+            inlineDownloadIconColorFieldFingerprint.changeFirstString(
+                InlineActionViewConstructorFingerprint.getFieldName(iconColorFieldIndex),
+            )
+
+            val inlineActionBarClass =
+                classDefByOrNull(INLINE_ACTION_BAR_DESCRIPTOR)
+                    ?: throw PatchException("InlineActionBar class not found")
+
+            val renderHintsField =
+                inlineActionBarClass.fields.firstOrNull { field ->
+                    if (!field.type.startsWith(INLINE_ACTIONS_PACKAGE_PREFIX)) return@firstOrNull false
+
+                    val candidateClass = classDefByOrNull(field.type) ?: return@firstOrNull false
+                    candidateClass.fields.count { it.type == BOOLEAN_DESCRIPTOR } >= RENDER_HINTS_BOOLEAN_COUNT &&
+                        candidateClass.methods.any(::isRenderHintsConstructor)
+                } ?: throw PatchException("RenderHints field not found on InlineActionBar")
+
+            inlineDownloadRenderHintsFieldFingerprint.changeFirstString(renderHintsField.name)
+
+            val renderHintsClass =
+                classDefByOrNull(renderHintsField.type)
+                    ?: throw PatchException("RenderHints class not found: ${renderHintsField.type}")
+            val renderHintsConstructor =
+                renderHintsClass.methods.firstOrNull(::isRenderHintsConstructor)
+                    ?: throw PatchException("RenderHints constructor not found")
+
+            val focalFieldReference =
+                renderHintsConstructor.implementation
+                    ?.instructions
+                    ?.filter { it.opcode == Opcode.IPUT_BOOLEAN }
+                    ?.getOrNull(FOCAL_TWEET_FIELD_WRITE_INDEX)
+                    ?.let { (it as? ReferenceInstruction)?.reference as? FieldReference }
+                    ?: throw PatchException("RenderHints focal field write not found")
+
+            inlineDownloadRenderHintsFocalFieldFingerprint.changeFirstString(focalFieldReference.name)
+
+            enableSettings("inlineDownloadButton")
         }
-        inlineDownloadIconColorFieldFingerprint.changeFirstString(
-            InlineActionViewConstructorFingerprint.getFieldName(iconColorFieldIndex)
-        )
-
-        val inlineActionBarClass = classDefByOrNull(INLINE_ACTION_BAR_DESCRIPTOR)
-            ?: throw PatchException("InlineActionBar class not found")
-
-        val renderHintsField = inlineActionBarClass.fields.firstOrNull { field ->
-            if (!field.type.startsWith(INLINE_ACTIONS_PACKAGE_PREFIX)) return@firstOrNull false
-
-            val candidateClass = classDefByOrNull(field.type) ?: return@firstOrNull false
-            candidateClass.fields.count { it.type == BOOLEAN_DESCRIPTOR } >= RENDER_HINTS_BOOLEAN_COUNT &&
-                candidateClass.methods.any(::isRenderHintsConstructor)
-        } ?: throw PatchException("RenderHints field not found on InlineActionBar")
-
-        inlineDownloadRenderHintsFieldFingerprint.changeFirstString(renderHintsField.name)
-
-        val renderHintsClass = classDefByOrNull(renderHintsField.type)
-            ?: throw PatchException("RenderHints class not found: ${renderHintsField.type}")
-        val renderHintsConstructor = renderHintsClass.methods.firstOrNull(::isRenderHintsConstructor)
-            ?: throw PatchException("RenderHints constructor not found")
-
-        val focalFieldReference = renderHintsConstructor.implementation?.instructions
-            ?.filter { it.opcode == Opcode.IPUT_BOOLEAN }
-            ?.getOrNull(FOCAL_TWEET_FIELD_WRITE_INDEX)
-            ?.let { (it as? ReferenceInstruction)?.reference as? FieldReference }
-            ?: throw PatchException("RenderHints focal field write not found")
-
-        inlineDownloadRenderHintsFocalFieldFingerprint.changeFirstString(focalFieldReference.name)
-
-        SettingsStatusLoadFingerprint.enableSettings("inlineDownloadButton")
     }
-}

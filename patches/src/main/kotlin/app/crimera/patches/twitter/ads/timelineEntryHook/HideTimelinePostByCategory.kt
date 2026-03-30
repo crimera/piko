@@ -4,16 +4,15 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.ads.timelineEntryHook
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
@@ -26,30 +25,30 @@ val hideTimelinePostByCategory =
         dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
             // Pinned posts by followers.
-            SettingsStatusLoadFingerprint.enableSettings("hideRevistPinnedPost")
+            enableSettings("hideRevistPinnedPost")
 
             // Communities to join.
-            SettingsStatusLoadFingerprint.enableSettings("hideCommToJoin")
+            enableSettings("hideCommToJoin")
 
             // Creators to subscribe.
-            SettingsStatusLoadFingerprint.enableSettings("hideCreatorsToSub")
+            enableSettings("hideCreatorsToSub")
 
             // Detailed posts.
-            SettingsStatusLoadFingerprint.enableSettings("hideDetailedPost")
+            enableSettings("hideDetailedPost")
 
             // Premium prompt.
-            SettingsStatusLoadFingerprint.enableSettings("hidePremiumPrompt")
+            enableSettings("hidePremiumPrompt")
 
             // Revisit bookmarks.
-            SettingsStatusLoadFingerprint.enableSettings("hideRevistBookmark")
+            enableSettings("hideRevistBookmark")
 
             // Today's news.
-            SettingsStatusLoadFingerprint.enableSettings("hideTodaysNews")
+            enableSettings("hideTodaysNews")
 
             // Top people in search.
-            SettingsStatusLoadFingerprint.enableSettings("hideTopPeopleSearch")
+            enableSettings("hideTopPeopleSearch")
 
             // Who to follow.
-            SettingsStatusLoadFingerprint.enableSettings("hideWhoToFollow")
+            enableSettings("hideWhoToFollow")
         }
     }

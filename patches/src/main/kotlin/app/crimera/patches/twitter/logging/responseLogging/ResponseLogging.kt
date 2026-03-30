@@ -10,11 +10,10 @@
 
 package app.crimera.patches.twitter.logging.responseLogging
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
@@ -47,8 +46,8 @@ val responseLoggingPatch =
                 move-result-object p1
                 """.trimIndent(),
             )
-            SettingsStatusLoadFingerprint.enableSettings("serverResponseLogging")
+            enableSettings("serverResponseLogging")
 
-            SettingsStatusLoadFingerprint.enableSettings("serverResponseLoggingOverwriteFile")
+            enableSettings("serverResponseLoggingOverwriteFile")
         }
     }

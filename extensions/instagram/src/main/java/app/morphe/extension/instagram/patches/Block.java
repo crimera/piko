@@ -42,7 +42,7 @@ public class Block {
         File analyticDirectory = new File(app.morphe.extension.shared.Utils.getContext().getDataDir(), "app_analytics");
         Boolean done = Utils.deleteRecursive(analyticDirectory);
         if(done){
-            Utils.toast(Strings.DELETED);
+            app.morphe.extension.crimera.Utils.toast(Strings.DELETED);
         }
     }
 }

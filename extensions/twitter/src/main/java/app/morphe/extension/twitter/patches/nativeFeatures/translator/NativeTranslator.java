@@ -12,7 +12,7 @@ package app.morphe.extension.twitter.patches.nativeFeatures.translator;
 
 import android.content.Context;
 
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.Utils;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.twitter.patches.nativeFeatures.translator.providers.Translate;
 import app.morphe.extension.twitter.patches.nativeFeatures.translator.providers.GTranslate;

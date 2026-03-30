@@ -15,7 +15,7 @@ import app.morphe.extension.twitter.entity.TweetInfo;
 import app.morphe.extension.twitter.entity.Debug;
 
 import java.util.*;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.Utils;
 
 // All comments based of 11.14.beta-0
 // Lcom/twitter/model/core/entity/e;

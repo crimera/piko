@@ -13,7 +13,7 @@ package app.crimera.patches.twitter.misc.shareMenu.nativeDownloader
 import app.crimera.patches.twitter.entity.entityGenerator
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonInjection
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")

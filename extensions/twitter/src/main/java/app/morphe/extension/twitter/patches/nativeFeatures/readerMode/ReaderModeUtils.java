@@ -13,7 +13,7 @@ package app.morphe.extension.twitter.patches.nativeFeatures.readerMode;
 import android.content.Context;
 
 import app.morphe.extension.twitter.settings.ActivityHook;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.Utils;
 import app.morphe.extension.shared.StringRef;
 import java.io.File;
 import java.io.BufferedReader;
@@ -195,7 +195,7 @@ public class ReaderModeUtils {
         String themeClass = Pref.getNativeReaderTheme();
 
         if(themeClass.equals("system")){
-            themeClass = Utils.getTheme();
+            themeClass = app.morphe.extension.twitter.Utils.getTheme();
         }
         return themeClass;
     }

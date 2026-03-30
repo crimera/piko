@@ -18,8 +18,10 @@ import android.widget.LinearLayout;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.Utils;
 import app.morphe.extension.twitter.Pref;
+import app.morphe.extension.shared.StringRef;
+
 
 public class DownloadPatch {
 
@@ -132,7 +134,7 @@ public class DownloadPatch {
     }
 
     private static String strRes(String tag) {
-        return Utils.strRes(tag);
+        return StringRef.str(tag);
     }
     //end
 }

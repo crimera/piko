@@ -4,13 +4,13 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.misc.shareMenu.hooks
 
-import app.crimera.utils.Constants.UTILS_DESCRIPTOR
+import app.crimera.patches.twitter.utils.Constants.UTILS_DESCRIPTOR
 import app.crimera.utils.instructionToString
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -47,7 +47,10 @@ fun setButtonText(
                     index in setTextStart..setTextEnd
                 }.mapIndexed { index, ins ->
                     when (index) {
-                        0 -> instructionToString(ins).replace("ViewDebugDialog", name)
+                        0 -> {
+                            instructionToString(ins).replace("ViewDebugDialog", name)
+                        }
+
                         1 -> {
                             ins as Instruction21c
                             """
@@ -57,7 +60,9 @@ fun setButtonText(
                             """.trimIndent()
                         }
 
-                        else -> instructionToString(ins)
+                        else -> {
+                            instructionToString(ins)
+                        }
                     }
                 }.joinToString("\n")
 

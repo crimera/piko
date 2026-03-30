@@ -4,17 +4,16 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.timeline.live
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.Constants.PREF_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -26,9 +25,10 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 private object HideLiveThreadsFingerprint : Fingerprint(
     definingClass = "Lcom/twitter/fleets/api/json/JsonFleetsTimelineResponse;",
-    filters = listOf(
-        opcode(Opcode.IGET_OBJECT)
-    )
+    filters =
+        listOf(
+            opcode(Opcode.IGET_OBJECT),
+        ),
 )
 
 @Suppress("unused")
@@ -56,6 +56,6 @@ val hideLiveThreadsPatch =
                 move-result-object v$reg
                 """.trimIndent(),
             )
-            SettingsStatusLoadFingerprint.enableSettings("hideLiveThreads")
+            enableSettings("hideLiveThreads")
         }
     }

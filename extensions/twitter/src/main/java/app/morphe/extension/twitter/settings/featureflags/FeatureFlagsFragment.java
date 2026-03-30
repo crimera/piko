@@ -95,7 +95,7 @@ public class FeatureFlagsFragment extends Fragment {
 
             dia.create().show();
         } catch (Exception exception){
-            app.morphe.extension.twitter.Utils.toast(exception.toString());
+            Utils.showToastShort(exception.toString());
         }
     }
 
@@ -193,7 +193,7 @@ public class FeatureFlagsFragment extends Fragment {
         FeatureFlagAdapter adapter = new FeatureFlagAdapter(getContext(), flags);
 
         rc.setOnItemClickListener((adapterView, view1, i, l) -> {
-            app.morphe.extension.twitter.Utils.toast(adapter.getItem(i).getName());
+            Utils.showToastShort(adapter.getItem(i).getName());
         });
 
         floatingActionButton.setOnClickListener(view1 -> addFlag(adapter, bundle));

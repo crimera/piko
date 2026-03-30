@@ -4,17 +4,16 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.premium.undoposts
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.Constants.PREF_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.OpcodesFilter
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -25,29 +24,32 @@ import com.android.tools.smali.dexlib2.Opcode
 private object UndoPost1Fingerprint : Fingerprint(
     returnType = "Z",
     filters = OpcodesFilter.opcodesToFilters(Opcode.MOVE_RESULT_OBJECT),
-    strings = listOf(
-        "subscriptions_feature_1003",
-        "allow_undo_replies",
-        "allow_undo_tweet",
-    )
+    strings =
+        listOf(
+            "subscriptions_feature_1003",
+            "allow_undo_replies",
+            "allow_undo_tweet",
+        ),
 )
 
 private object UndoPost2Fingerprint : Fingerprint(
     returnType = "Z",
-    strings = listOf(
-        "userPreferences",
-        "draftTweet",
-        "subscriptions_feature_1003",
-        "allow_undo_replies",
-        "allow_undo_tweet",
-    )
+    strings =
+        listOf(
+            "userPreferences",
+            "draftTweet",
+            "subscriptions_feature_1003",
+            "allow_undo_replies",
+            "allow_undo_tweet",
+        ),
 )
 
 private object undoPost3Fingerprint : Fingerprint(
     returnType = "Landroid/content/Intent;",
-    strings = listOf(
-        "subscriptions_feature_1003",
-    )
+    strings =
+        listOf(
+            "subscriptions_feature_1003",
+        ),
 )
 
 @Suppress("unused")
@@ -90,6 +92,6 @@ val enableUndoPostPatch =
                     .location.index
             method3.addInstruction(loc3, PREF.trimIndent())
 
-            SettingsStatusLoadFingerprint.enableSettings("enableUndoPosts")
+            enableSettings("enableUndoPosts")
         }
     }

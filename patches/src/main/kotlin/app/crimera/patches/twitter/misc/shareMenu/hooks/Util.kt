@@ -4,18 +4,17 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.misc.shareMenu.hooks
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.addAction
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.addButtonInstructions
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.shareMenuButtonFuncCallFingerprint
-import app.crimera.utils.Constants
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants
+import app.crimera.patches.twitter.utils.enableSettings
 import app.crimera.utils.extractDescriptors
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
@@ -99,5 +98,5 @@ fun shareMenuButtonInjection(
         viewDebugDialogReference,
     )
 
-    SettingsStatusLoadFingerprint.enableSettings(statusFunctionName)
+    enableSettings(statusFunctionName)
 }
