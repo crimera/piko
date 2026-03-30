@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Premium Settings -->
+    <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">읽기 모드</string>
     <string name="piko_pref_reader_mode_desc">긴 쓰레드에서 \"읽기 모드\"를 활성화할 수 있습니다.</string>
     <string name="piko_pref_undo_posts">게시물 취소</string>
@@ -28,12 +29,15 @@
     <string name="piko_pref_native_page_desc">이 Piko 기본 기능은 게시물 공유 메뉴에서 확인할 수 있습니다.</string>
     <string name="piko_title_native_downloader">기본 다운로더</string>
     <string name="piko_title_native_downloader_toggle">기본 다운로더</string>
+    <string name="piko_pref_native_downloader_inline_button">타임라인 게시물에서 다운로드 버튼 표시하기</string>
+    <string name="piko_pref_native_downloader_inline_button_desc">게시물 동작 버튼 바에 다운로드 버튼을 직접 추가합니다</string>
     <string name="piko_pref_native_downloader_alert_title">미디어 다운로드</string>
     <string name="piko_pref_native_downloader_download_all">모두 다운로드</string>
     <string name="piko_pref_native_downloader_no_media">미디어를 찾을 수 없습니다.</string>
     <string name="piko_pref_native_downloader_filename_title">저장될 파일 이름 형식</string>
+    <string name="piko_browse_object_title">트윗 객체 보기</string>
     <string name="piko_share_image_title">트윗을 이미지로 공유하기</string>
-    <string name="piko_share_image_toggle">\'트윗을 이미지로 공유하기\' 활성화하기</string>
+    <string name="piko_share_image_toggle">트윗을 이미지로 공유 활성화하기</string>
     <string name="piko_share_image_autocleanup">캡쳐 자동 정리하기</string>
     <string name="piko_share_image_autocleanup_desc">활성화 시 24시간이 지난 캡처를 자동으로 제거합니다.</string>
     <string name="piko_title_native_translator">기본 게시물 번역기</string>
@@ -43,6 +47,7 @@
     <string name="piko_native_translator_zero_text">번역할 텍스트를 찾을 수 없습니다.</string>
     <string name="piko_native_translator_google">Google 번역기</string>
     <string name="piko_native_translator_google_v2">Google 번역기 V2</string>
+    <string name="piko_native_translator_fxtwitter">FxTwitter API</string>
     <string name="piko_title_native_reader_mode">읽기 모드</string>
     <string name="piko_native_reader_mode_grok_thread">이 쓰레드 분석하기</string>
     <string name="piko_native_reader_mode_grok_author">작성자 정보 더 보기</string>
@@ -100,6 +105,7 @@
     <string name="piko_pref_search_suggestion_desc">탐색 영역에서 검색어 추천을 숨기거나 제거할 수 있습니다.</string>
     <string name="piko_disunify_xchat_system">Disunify xchat 시스템</string>
     <string name="piko_disunify_xchat_system_desc">메시지 및 공유 시트와 같은 기존 기능을 복원할 수 있습니다.</string>
+    <string name="piko_legacy_share_link">이전 공유 링크</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">기능 플래그</string>
     <string name="piko_pref_feature_flags">추가하기: 기능 플래그</string>
@@ -204,6 +210,8 @@
     <string name="piko_pref_search_type_ahead_ordered_section">정렬된 영역</string>
     <string name="piko_settings_supported_links">지원되는 링크 열기</string>
     <!-- For arrays-->
+    <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_money">Money</string>
     <string name="piko_array_xchat">Chat</string>
     <string name="piko_array_x_lite">새 X Android</string>
     <string name="piko_array_conference">회의</string>
@@ -213,13 +221,105 @@
     <string name="piko_array_light_mode">밝은 모드</string>
     <!-- App icon strings -->
     <string name="piko_app_icon_thanks">iOS 앱 아이콘을 제공해 주신 @NeoFreeBird 님께 감사드립니다.</string>
+    <string name="piko_app_icon_piko_exclusive">(Piko 전용)</string>
     <!-- Category -->
     <string name="piko_app_icon_category_legacy">기존</string>
     <string name="piko_app_icon_category_seasonal_event">계절 행사</string>
     <string name="piko_app_icon_category_sports">스포츠</string>
     <string name="piko_app_icon_category_cultural_and_celebrations">문화 및 기념행사</string>
+    <string name="piko_app_icon_category_pride">프라이드</string>
     <string name="piko_app_icon_category_misc">기타</string>
     <string name="piko_app_icon_category_space">우주</string>
     <string name="piko_app_icon_category_movies_n_series">영화 및 시리즈</string>
     <!-- Icon names -->
+    <string name="piko_app_icon_name_default">기본값</string>
+    <string name="piko_app_icon_name_legacy_icon_1">이전 아이콘 1</string>
+    <string name="piko_app_icon_name_legacy_icon_2">이전 아이콘 2</string>
+    <string name="piko_app_icon_name_legacy_icon_3">이전 아이콘 3</string>
+    <string name="piko_app_icon_name_legacy_icon_4">이전 아이콘 4</string>
+    <string name="piko_app_icon_name_legacy_blue">이전 블루</string>
+    <string name="piko_app_icon_name_twitter_blue">트위터 블루</string>
+    <string name="piko_app_icon_name_earth">지구</string>
+    <string name="piko_app_icon_name_moon">달</string>
+    <string name="piko_app_icon_name_mars">화성</string>
+    <string name="piko_app_icon_name_sun">태양</string>
+    <string name="piko_app_icon_name_stars">별</string>
+    <string name="piko_app_icon_name_milky_way">은하수</string>
+    <string name="piko_app_icon_name_autumn_2021">가을 2021</string>
+    <string name="piko_app_icon_name_autumn_2022">가을 2022</string>
+    <string name="piko_app_icon_name_south_spring_2021">남부 봄 2021</string>
+    <string name="piko_app_icon_name_south_spring_2022">남부 봄 2022</string>
+    <string name="piko_app_icon_name_winter_1">겨울 1</string>
+    <string name="piko_app_icon_name_winter_2">겨울 2</string>
+    <string name="piko_app_icon_name_summer_1">여름 1</string>
+    <string name="piko_app_icon_name_summer_2">여름 2</string>
+    <string name="piko_app_icon_name_autumn_southern">남부 가을</string>
+    <string name="piko_app_icon_name_summer">여름</string>
+    <string name="piko_app_icon_name_winter">겨울</string>
+    <string name="piko_app_icon_name_beijing_olympics_1">베이징 올림픽 1</string>
+    <string name="piko_app_icon_name_beijing_olympics_2">베이징 올림픽 2</string>
+    <string name="piko_app_icon_name_daytona">데이토나</string>
+    <string name="piko_app_icon_name_formulaone">포뮬러 원</string>
+    <string name="piko_app_icon_name_kentucky_derby">켄터키 더비</string>
+    <string name="piko_app_icon_name_mlb">MLB</string>
+    <string name="piko_app_icon_name_nba">NBA</string>
+    <string name="piko_app_icon_name_nba_2">NBA 2</string>
+    <string name="piko_app_icon_name_ncaa">NCAA</string>
+    <string name="piko_app_icon_name_masters">마스터스</string>
+    <string name="piko_app_icon_name_nba_finals">NBA 결승</string>
+    <string name="piko_app_icon_name_stanley_cup">스탠리 컵</string>
+    <string name="piko_app_icon_name_commonwealth">영연방</string>
+    <string name="piko_app_icon_name_mothers_day">어머니의 날</string>
+    <string name="piko_app_icon_name_womansday">여성의 날</string>
+    <string name="piko_app_icon_name_halloween_2021">할로윈 2021</string>
+    <string name="piko_app_icon_name_halloween_2022">할로윈 2022</string>
+    <string name="piko_app_icon_name_halloween_2024_1">할로윈 2024 1</string>
+    <string name="piko_app_icon_name_halloween_2024_2">할로윈 2024 2</string>
+    <string name="piko_app_icon_name_halloween_2024_3">할로윈 2024 3</string>
+    <string name="piko_app_icon_name_holi">홀리</string>
+    <string name="piko_app_icon_name_stpatricks_day">성 패트릭의 날</string>
+    <string name="piko_app_icon_name_easter">부활절</string>
+    <string name="piko_app_icon_name_anzac">안작</string>
+    <string name="piko_app_icon_name_ramadan">라마단</string>
+    <string name="piko_app_icon_name_black_history">흑인 역사</string>
+    <string name="piko_app_icon_name_eurovisionfinal">유로비전 결승</string>
+    <string name="piko_app_icon_name_lunar_new_year_1">음력 설날 1</string>
+    <string name="piko_app_icon_name_lunar_new_year_2">음력 설날 2</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_1">일본 설날 2024 1</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_2">일본 설날 2024 2</string>
+    <string name="piko_app_icon_name_may_the_fourth">메이 더 포스</string>
+    <string name="piko_app_icon_name_barbie">바비</string>
+    <string name="piko_app_icon_name_thanksgiving_1">추수감사절 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2">추수감사절 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_1">추수감사절 2024 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_2">추수감사절 2024 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_3">추수감사절 2024 3</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_4">추수감사절 2024 4</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_5">추수감사절 2024 5</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_6">추수감사절 2024 6</string>
+    <string name="piko_app_icon_name_canada_day">캐나다의 날</string>
+    <string name="piko_app_icon_name_canada_indigenous">캐나다 원주민</string>
+    <string name="piko_app_icon_name_earth_hour">지구 시간</string>
+    <string name="piko_app_icon_name_euro">유료</string>
+    <string name="piko_app_icon_name_independence_day">독립 기념일</string>
+    <string name="piko_app_icon_name_juneteenth">준틴스</string>
+    <string name="piko_app_icon_name_naidoc">나이독</string>
+    <string name="piko_app_icon_name_christmas_2024_1">크리스마스 2024 1</string>
+    <string name="piko_app_icon_name_christmas_2024_2">크리스마스 2024 2</string>
+    <string name="piko_app_icon_name_christmas_2024_3">크리스마스 2024 3</string>
+    <string name="piko_app_icon_name_christmas_2024_4">크리스마스 2024 4</string>
+    <string name="piko_app_icon_name_upsidedown">업사이드 다운</string>
+    <string name="piko_app_icon_name_games_chamber">게임 챔버</string>
+    <string name="piko_app_icon_name_pridesouthern">남부 프라이드</string>
+    <string name="piko_app_icon_name_newzealand_pride_1">뉴질랜드 프라이드 1</string>
+    <string name="piko_app_icon_name_newzealand_pride_2">뉴질랜드 프라이드 2</string>
+    <string name="piko_app_icon_name_pride_month">프라이드의 달</string>
+    <string name="piko_app_icon_name_fancy">팬시</string>
+    <string name="piko_app_icon_name_broken">브로큰</string>
+    <string name="piko_app_icon_name_cyber">사이버</string>
+    <string name="piko_app_icon_name_soft_pastel_pink">소프크 파스텔 핑크</string>
+    <string name="piko_app_icon_name_electric_indigo">일렉트릭 인디고</string>
+    <string name="piko_app_icon_name_neon_pink">네온 핑크</string>
+    <string name="piko_app_icon_name_tropical_teal">트로피컬 틸</string>
+    <string name="piko_app_icon_name_vivid_orange">비비드 오렌지</string>
 </resources>
