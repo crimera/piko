@@ -11,7 +11,7 @@
 package app.crimera.patches.twitter.misc.disUnifyXChatSystem
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X_11_69
 import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
@@ -36,7 +36,7 @@ val disUnifyXchatSystemPatch =
         description = "Bring back legacy features like messages and share sheet.",
         default = false,
     ) {
-        compatibleWith(COMPATIBILITY_X)
+        compatibleWith(COMPATIBILITY_X_11_69)
         dependsOn(settingsPatch)
 
         execute {

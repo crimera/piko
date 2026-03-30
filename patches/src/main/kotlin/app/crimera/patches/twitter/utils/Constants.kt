@@ -24,7 +24,24 @@ object Constants {
                     AppTarget(version = null),
                 ),
         )
-
+    val COMPATIBILITY_X_11_69 =
+        Compatibility(
+            name = "X",
+            packageName = "com.twitter.android",
+            apkFileType = ApkFileType.APKM,
+            appIconColor = 0x000000,
+            signatures =
+                setOf(
+                    // APK
+                    "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+                    // APKM
+                    "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f",
+                ),
+            targets =
+                listOf(
+                    AppTarget(version = "11.69.0-release.0"),
+                ),
+        )
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/twitter"
     const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
     const val ACTIVITY_SETTINGS_CLASS = "$INTEGRATIONS_PACKAGE/settings"
