@@ -32,6 +32,12 @@ val customDeepLinksPatch =
                     "stupidpenisx.com",
                     "cunnyx.com",
                     "autistic.kids",
+                    "autistic.kids",
+                    "gockx.com",
+                    "yiffx.com",
+                    "mpregx.com",
+                    "skibidix.com",
+                    "xcancel.com",
                 ),
         )
 
