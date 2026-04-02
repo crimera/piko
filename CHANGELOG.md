@@ -1,3 +1,10 @@
+# [3.2.0-dev.2](https://github.com/crimera/piko/compare/v3.2.0-dev.1...v3.2.0-dev.2) (2026-04-02)
+
+
+### Bug Fixes
+
+* **Instagram:** Fix fingerprint of Feed button on click ([9f988e2](https://github.com/crimera/piko/commit/9f988e269e205609b2122675f88a09862b0d2e2c))
+
 # [3.2.0-dev.1](https://github.com/crimera/piko/compare/v3.1.0...v3.2.0-dev.1) (2026-04-01)
 
 
