@@ -13,14 +13,13 @@ package app.morphe.extension.instagram.settings.preference;
 
 
 import android.content.Context;
-import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
+import android.preference.PreferenceScreen;
 
 import app.morphe.extension.instagram.constants.Strings;
-import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
-import app.morphe.extension.instagram.settings.preference.widgets.*;
+import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.shared.Utils;
 
 public class ScreenBuilder {
@@ -294,6 +293,16 @@ public class ScreenBuilder {
                             Strings.UNLIMITED_REPLAYS,
                             Strings.UNLIMITED_REPLAYS_DESC,
                             Settings.UNLIMITED_REPLAYS
+                    )
+            );
+        }
+
+        if (SettingsStatus.hideReshareButton) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.HIDE_RESHARE_BUTTON,
+                            "",
+                            Settings.HIDE_RESHARE_BUTTON
                     )
             );
         }

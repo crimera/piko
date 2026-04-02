@@ -113,7 +113,11 @@ public class SettingsStatus {
     public static void unlimitedReplaysOnEphemeralMedia() {
         unlimitedReplaysOnEphemeralMedia = true;
     }
-    public static boolean miscSection() {return (unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping);}
+    public static boolean hideReshareButton = false;
+    public static void hideReshareButton() {
+        hideReshareButton = true;
+    }
+    public static boolean miscSection() {return (unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
 
     //Download section.
     public static boolean downloadMedia = false;
