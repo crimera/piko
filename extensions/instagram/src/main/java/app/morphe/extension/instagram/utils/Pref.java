@@ -38,6 +38,9 @@ public class Pref {
     public static boolean disableComments(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_COMMENTS);
     }
+    public static boolean limitFollowingFeed(){
+        return SharedPref.getBooleanPerf(Settings.LIMIT_FOLLOWING_FEED);
+    }
     public static boolean hideStoriesTray(){
         return SharedPref.getBooleanPerf(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
     }

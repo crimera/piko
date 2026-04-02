@@ -80,19 +80,23 @@ public class SettingsStatus {
     public static void hideStoriesTray() {
         hideStoriesTray = true;
     }
+    public static boolean limitFollowingFeed = false;
+    public static void limitFollowingFeed() {
+        limitFollowingFeed = true;
+    }
     public static boolean distractionFreeSection() {
-        return (disableStories || disableExplore || disableComments || hideStoriesTray);
+        return (disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed);
     }
 
     //Misc section.
     public static boolean disableAnalytics = false;
-    public static void disableAnalytics() {disableAnalytics = true;}
+    public static void disableAnalytics() { disableAnalytics = true; }
     public static boolean disableDiscoverPeople = false;
     public static void disableDiscoverPeople() {
         disableDiscoverPeople = true;
     }
     public static boolean followBackIndicator = false;
-    public static void followBackIndicator() {followBackIndicator = true;}
+    public static void followBackIndicator() { followBackIndicator = true; }
     public static boolean viewStoryMentions = false;
     public static void viewStoryMentions() {
         viewStoryMentions = true;

@@ -43,6 +43,8 @@ public class Strings{
     public static final String DISABLE_STORIES = "Disable stories";
     public static final String DISABLE_EXPLORE = "Disable explore";
     public static final String DISABLE_COMMENTS = "Disable comments";
+    public static final String LIMIT_FOLLOWING_FEED = "Limit feed to following profiles";
+    public static final String LIMIT_FOLLOWING_FEED_DESC = "Filters the home feed to display only content from profiles you follow.";
     public static final String HIDE_STORIES_TRAY = "Hide stories tray";
     public static final String HIDE_STORIES_TRAY_DESC = "Hide stories tray from main feed";
 
