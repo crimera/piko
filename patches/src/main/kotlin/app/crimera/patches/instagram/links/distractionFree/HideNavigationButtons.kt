@@ -63,7 +63,7 @@ val hideNavigationButtonsPatch = bytecodePatch(
     execute {
         val enumNameField: String
 
-        // Get the field name which contains the name of the enum for the navigation button ("SHARE", "SEARCH", ...)
+        // Get the field name which contains the name of the enum for the navigation button ("fragment_share", "fragment_search", ...)
         with(NavigationButtonsEnumInitFingerprint.method) {
             enumNameField = indexOfFirstInstructionOrThrow {
                 opcode == Opcode.IPUT_OBJECT &&
