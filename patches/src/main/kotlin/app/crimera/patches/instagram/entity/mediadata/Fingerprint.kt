@@ -87,6 +87,12 @@ internal object EditMediaInfoFragmentMediaSizeFingerprint : Fingerprint(
     definingClass = EDIT_MEDIA_INFO_FRAGMENT_CLASS,
 )
 
+// Backup fingerprint to find a media list method.
+internal object GetAndroidLinkFromMediaObject : Fingerprint(
+    returnType = "Lcom/instagram/model/androidlink/AndroidLink;",
+    definingClass = "Lcom/instagram/profile/fragment/UserDetailFragment;",
+)
+
 internal object FanClubContentPreviewInteractorImplFingerprint : Fingerprint(
     definingClass = "Lcom/instagram/fanclub/preview/impl/FanClubContentPreviewInteractorImpl;",
     strings = listOf("subscription_exclusive_content_public_preview_select", "creator_igid"),
