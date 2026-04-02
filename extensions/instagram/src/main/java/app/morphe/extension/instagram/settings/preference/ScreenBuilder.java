@@ -210,6 +210,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.limitFollowingFeed) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.LIMIT_FOLLOWING_FEED,
+                            Strings.LIMIT_FOLLOWING_FEED_DESC,
+                            Settings.LIMIT_FOLLOWING_FEED
+                    )
+            );
+        }
     }
 
     public void buildMiscSection() {

@@ -11,26 +11,23 @@
 
 package app.morphe.extension.instagram.settings;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
 import android.preference.PreferenceManager;
-import android.view.Gravity;
+import android.preference.PreferenceScreen;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.view.WindowInsets;
 
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.constants.UI;
-import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.Helper;
+import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.shared.Utils;
 
 public class SettingsActivity extends Activity {
@@ -39,6 +36,7 @@ public class SettingsActivity extends Activity {
     private LinearLayout toolbar;
     private LinearLayout content;
 
+    @SuppressLint("ResourceType")
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -49,6 +47,7 @@ public class SettingsActivity extends Activity {
     }
 
 
+    @SuppressLint("ResourceType")
     private void createLayout() {
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
