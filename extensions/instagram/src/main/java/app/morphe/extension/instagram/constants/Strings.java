@@ -1,17 +1,17 @@
 /*
-    * Copyright (C) 2026 piko <https://github.com/crimera/piko>
-    *
-    * This file is part of piko.
-    *
-    * Any modifications, derivatives, or substantial rewrites of this file
-    * must retain this copyright notice and the piko attribution
-    * in the source code and version control history.
-*/
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
 
 
 package app.morphe.extension.instagram.constants;
 
-public class Strings{
+public class Strings {
     public static final String PIKO = "piko";
     public static final String PIKO_SETTINGS = PIKO + "_settings";
     public static final String SHARED_PREF_NAME = PIKO_SETTINGS;
@@ -112,4 +112,9 @@ public class Strings{
     public static final String RESTART_APP = "The app needs to be restarted for the changes to reflect";
     public static final String OK = "OK";
     public static final String DELETED = "Deleted";
+
+    public static final String OPEN_IMAGE_EXTERNALLY = "Open image externally";
+    public static final String OPEN_VIDEO_EXTERNALLY = "Open video externally";
+    public static final String OPEN_IMAGE_WITH = "Open image with";
+    public static final String OPEN_VIDEO_WITH = "Open video with";
 }
