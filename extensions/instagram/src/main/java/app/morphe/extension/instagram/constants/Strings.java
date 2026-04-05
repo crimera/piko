@@ -67,6 +67,8 @@ public class Strings {
     public static final String CUSTOMISE_STORY_TIMESTAMP_DESC = "Customise the timestamp that shows when the story was posted";
     public static final String UNLIMITED_REPLAYS = "Unlimited replays on ephemeral media";
     public static final String UNLIMITED_REPLAYS_DESC = "Unlimited replays on view once, view twice media before they get expired";
+    public static final String IMPROVE_IMAGE_VIEWING = "Improve image viewing";
+    public static final String IMPROVE_IMAGE_VIEWING_DESC = "Fetches max resolution images from server";
     public static final String HIDE_RESHARE_BUTTON = "Hide reshare button";
 
     public static final String CATEGORY_DOWNLOAD_MEDIA = "Download media";

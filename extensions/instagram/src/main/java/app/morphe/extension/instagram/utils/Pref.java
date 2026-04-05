@@ -56,7 +56,8 @@ public class Pref {
     }
 
     public static int buildAge(int appAge){
-        return SharedPref.getBooleanPerf(Settings.REMOVE_BUILD_EXPIRE_POPUP) ? 1:appAge;}
+        return SharedPref.getBooleanPerf(Settings.REMOVE_BUILD_EXPIRE_POPUP) ? 1:appAge;
+    }
 
     public static boolean disableAnalytics(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_ANALYTICS);
@@ -76,7 +77,9 @@ public class Pref {
     public static String customiseStoryTimestamp(){
         return SharedPref.getStringPref(Settings.CUSTOMISE_STORY_TIMESTAMP);
     }
-
+    public static int improveImageViewing(int defaultSize){
+        return SharedPref.getBooleanPerf(Settings.IMPROVE_IMAGE_VIEWING) ? 2048:defaultSize;
+    }
 
     public static boolean enableDownload(){
         return SharedPref.getBooleanPerf(Settings.ENABLE_DOWNLOAD);
