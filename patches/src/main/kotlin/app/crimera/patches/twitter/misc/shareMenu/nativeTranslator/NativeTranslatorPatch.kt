@@ -19,7 +19,7 @@ import app.morphe.patcher.patch.bytecodePatch
 @Suppress("unused")
 val nativeTranslatorModePatch =
     bytecodePatch(
-        name = "Custom translator",
+        name = "Native translator",
         description = "Requires X 11.0.0-release.0 or higher.",
     ) {
         compatibleWith(COMPATIBILITY_X)
