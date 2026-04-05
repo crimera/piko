@@ -12,7 +12,16 @@ package app.crimera.patches.instagram.misc.developerOption
 
 import app.morphe.patcher.Fingerprint
 
-internal object PromoteActivityOnCreate : Fingerprint(
-    definingClass = "Lcom/instagram/business/promote/activity/PromoteActivity;",
-    strings = listOf("selected 2 media for A/B testing"),
+internal object AREffectsDebugViewRelatedFingerprint : Fingerprint(
+    returnType = "Z",
+    parameters = listOf("Landroid/view/View;"),
+    strings = listOf("VIEW_AR_EFFECT_ID", "AR Effect ID:"),
+)
+
+internal object ChromeTraceRelatedFingerprint : Fingerprint(
+    strings = listOf("Chrome trace is only available for employees"),
+)
+
+internal object MessageInputMethodRelatedFingerprint : Fingerprint(
+    strings = listOf("is_employee", "ig_user_id"),
 )
