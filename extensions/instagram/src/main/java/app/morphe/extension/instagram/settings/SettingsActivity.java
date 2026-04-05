@@ -89,7 +89,19 @@ public class SettingsActivity extends Activity {
             @Override
             public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
                 int topInset = insets.getSystemWindowInsetTop();
+                int bottomInset = insets.getSystemWindowInsetBottom();
+
+                // Apply top inset to root (status bar)
                 v.setPadding(0, topInset, 0, 0);
+
+                // Apply bottom inset to content (gesture nav area)
+                content.setPadding(
+                        content.getPaddingLeft(),
+                        content.getPaddingTop(),
+                        content.getPaddingRight(),
+                        bottomInset
+                );
+
                 return insets;
             }
         });
