@@ -1,3 +1,10 @@
+# [3.2.0-dev.3](https://github.com/crimera/piko/compare/v3.2.0-dev.2...v3.2.0-dev.3) (2026-04-05)
+
+
+### Features
+
+* Add `Import/Export login token` patch ([5667e4c](https://github.com/crimera/piko/commit/5667e4cd251685a01d9459a2c637a79a832259b6))
+
 # [3.2.0-dev.2](https://github.com/crimera/piko/compare/v3.2.0-dev.1...v3.2.0-dev.2) (2026-04-02)
 
 

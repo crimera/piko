@@ -1,5 +1,5 @@
 {
-  "version": "3.2.0-dev.2",
+  "version": "3.2.0-dev.3",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -158,19 +158,6 @@
     {
       "name": "Custom sharing domain",
       "description": "Allows for using domains like fxtwitter when sharing tweets/posts.",
-      "use": true,
-      "dependencies": [
-        "BytecodePatch",
-        "BytecodePatch"
-      ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
-      "options": []
-    },
-    {
-      "name": "Custom translator",
-      "description": "Requires X 11.0.0-release.0 or higher.",
       "use": true,
       "dependencies": [
         "BytecodePatch",
@@ -826,6 +813,19 @@
       "options": []
     },
     {
+      "name": "Hide recommendation items",
+      "description": "Adds options to hide recommendation items such as \"Who to follow\" and \"Today's news\" in timeline, search, and replies.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
       "name": "Hide stories tray",
       "description": "Hides stories tray from main feed.",
       "use": true,
@@ -855,11 +855,11 @@
       "options": []
     },
     {
-      "name": "Hide timeline posts by category",
-      "description": "Hides different post category like who to follow, news today etc from timeline.",
+      "name": "Hook feature flag",
+      "description": null,
       "use": true,
       "dependencies": [
-        "BytecodePatch",
+        "ResourcePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": {
@@ -868,12 +868,13 @@
       "options": []
     },
     {
-      "name": "Hook feature flag",
-      "description": null,
+      "name": "Import/Export login token",
+      "description": "Adds an feature to export and import the token of accounts. This is useful when logging in on your second device or when re-installing piko.",
       "use": true,
       "dependencies": [
         "ResourcePatch",
-        "BytecodePatch"
+        "BytecodePatch",
+        "ResourcePatch"
       ],
       "compatiblePackages": {
         "com.twitter.android": null
@@ -939,6 +940,19 @@
       "use": true,
       "dependencies": [
         "ResourcePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Native translator",
+      "description": "Requires X 11.0.0-release.0 or higher.",
+      "use": true,
+      "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
