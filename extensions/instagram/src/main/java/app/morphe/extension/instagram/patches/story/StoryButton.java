@@ -22,16 +22,25 @@ import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
+import app.morphe.extension.crimera.ObjectBrowser;
 
 public class StoryButton {
-    private static boolean VIEW_STORY_MENTIONS,ENABLE_DOWNLOAD,ENABLE_DIRECT_DOWNLOAD;
+    private static boolean VIEW_STORY_MENTIONS;
+    private static boolean ENABLE_DOWNLOAD;
+    private static boolean ENABLE_DIRECT_DOWNLOAD;
+    private static boolean DEBUG;
+
     static{
         VIEW_STORY_MENTIONS = Pref.viewStoryMentions() && SettingsStatus.viewStoryMentions;
         ENABLE_DOWNLOAD = Pref.enableDownload() && SettingsStatus.downloadMedia;
         ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
+        DEBUG = Pref.pikoDebug();
     }
 
     public static ArrayList addButtons(ArrayList buttonList){
+        if(DEBUG){
+            buttonList.add(Strings.PIKO_DEBUG);
+        }
         if(VIEW_STORY_MENTIONS){
             buttonList.add(Strings.VIEW_STORY_MENTIONS);
         }
@@ -53,6 +62,9 @@ public class StoryButton {
                 return true;
             } else if (buttonText.equals(Strings.DOWNLOAD_OPTIONS) || buttonText.equals(Strings.CATEGORY_DOWNLOAD_MEDIA)) {
                 DownloadUtils.downloadPost(ctx,mediaObject,0);
+                return true;
+            } else if (buttonText.equals(Strings.PIKO_DEBUG)) {
+                ObjectBrowser.browseObject(ctx, mediaObject);
                 return true;
             }
         } catch (Exception ex) {

@@ -41,13 +41,17 @@ import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.crimera.ObjectBrowser;
 
 public class DownloadUtils {
-    private static boolean ENABLE_DIRECT_DOWNLOAD, SPLIT_BY_USERNAME;
+    private static boolean ENABLE_DIRECT_DOWNLOAD;
+    private static boolean SPLIT_BY_USERNAME;
+    private static boolean DEBUG;
 
     static {
         ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
         SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
+        DEBUG = Pref.pikoDebug();
     }
 
     private static void downloadDialogBox(Context context, MediaData mediaInfo, int position) throws Exception {
@@ -67,6 +71,7 @@ public class DownloadUtils {
             options.add(Strings.OPEN_IMAGE_EXTERNALLY);
         }
         if (carouselSize > 1) options.add(Strings.DOWNLOAD_ALL);
+        if(DEBUG) options.add(Strings.PIKO_DEBUG);
 
         CharSequence[] items = options.toArray(new CharSequence[0]);
 
@@ -92,6 +97,9 @@ public class DownloadUtils {
 
                     } else if (selectedOption.equals(Strings.OPEN_VIDEO_EXTERNALLY) || selectedOption.equals(Strings.OPEN_IMAGE_EXTERNALLY)) {
                         ActivityHook.handleUrlIntent(isCurrentMediaVideo,currentMediaData.getMediaLink());
+
+                    } else if (selectedOption.equals(Strings.PIKO_DEBUG)) {
+                        ObjectBrowser.browseObject(context,currentMediaData);
 
                     }
                 } catch (Exception e) {
