@@ -29,6 +29,10 @@ public class NativeDownloader {
         return StringRef.str(tag);
     }
 
+    private static String strRes(String tag, Object... args) {
+        return StringRef.str(tag, args);
+    }
+
     public static String downloadString() {
         return strRes("piko_pref_native_downloader_alert_title");
     }
@@ -70,6 +74,12 @@ public class NativeDownloader {
         ln.setOrientation(LinearLayout.VERTICAL);
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
         builder.setTitle(strRes("piko_pref_native_downloader_alert_title"));
+        if (Pref.hasNativeDownloaderSafTreeUri()) {
+            String label = Pref.getNativeDownloaderSafFolderLabel();
+            if (!label.isBlank()) {
+                builder.setMessage(strRes("piko_pref_download_saf_active", label));
+            }
+        }
 
         int n = mediaData.size();
         String[] choices = new String[n];
