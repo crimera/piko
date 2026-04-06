@@ -70,16 +70,8 @@ public class NativeDownloader {
         String photo = strRes("drafts_empty_photo");
         String video = strRes("drafts_empty_video");
 
-        LinearLayout ln = new LinearLayout(ctx);
-        ln.setOrientation(LinearLayout.VERTICAL);
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
         builder.setTitle(strRes("piko_pref_native_downloader_alert_title"));
-        if (Pref.hasNativeDownloaderSafTreeUri()) {
-            String label = Pref.getNativeDownloaderSafFolderLabel();
-            if (!label.isBlank()) {
-                builder.setMessage(strRes("piko_pref_download_saf_active", label));
-            }
-        }
 
         int n = mediaData.size();
         String[] choices = new String[n];
