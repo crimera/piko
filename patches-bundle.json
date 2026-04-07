@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-03-30T17:51:45",
-  "description": "# [3.1.0-dev.5](https://github.com/crimera/piko/compare/v3.1.0-dev.4...v3.1.0-dev.5) (2026-03-30)\n\n\n### Bug Fixes\n\n* **Instagram:** Fixed sanitize post and reels urls ([61257fb](https://github.com/crimera/piko/commit/61257fbd601e69b3c507b5da22b687439890c873))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.1.0-dev.5/patches-3.1.0-dev.5.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.1.0-dev.5/patches-3.1.0-dev.5.mpp.asc",
-  "version": "3.1.0-dev.5"
+  "created_at": "2026-04-02T18:59:29",
+  "description": "# [3.2.0-dev.2](https://github.com/crimera/piko/compare/v3.2.0-dev.1...v3.2.0-dev.2) (2026-04-02)\n\n\n### Bug Fixes\n\n* **Instagram:** Fix fingerprint of Feed button on click ([9f988e2](https://github.com/crimera/piko/commit/9f988e269e205609b2122675f88a09862b0d2e2c))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.2.0-dev.2/patches-3.2.0-dev.2.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.2.0-dev.2/patches-3.2.0-dev.2.mpp.asc",
+  "version": "3.2.0-dev.2"
 }

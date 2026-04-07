@@ -1,5 +1,5 @@
 {
-  "version": "3.1.0-dev.5",
+  "version": "3.2.0-dev.2",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -24,8 +24,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -76,8 +75,7 @@
       "compatiblePackages": {
         "com.twitter.android": null,
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": [
@@ -204,8 +202,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -351,8 +348,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -367,8 +363,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -408,8 +403,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -424,8 +418,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -440,8 +433,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -456,8 +448,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -471,8 +462,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -502,8 +492,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -600,8 +589,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -847,8 +835,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -862,8 +849,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -904,6 +890,20 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Limit feed to following profiles",
+      "description": "Filters the home feed to display only content from profiles you follow.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -968,8 +968,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1008,8 +1007,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1072,8 +1070,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1161,8 +1158,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1176,8 +1172,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1192,8 +1187,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1208,8 +1202,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1227,8 +1220,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
