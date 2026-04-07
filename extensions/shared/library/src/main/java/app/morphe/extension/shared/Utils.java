@@ -1459,7 +1459,7 @@ public class Utils {
         return  (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_SP,
                 sp,
-                getResources().getDisplayMetrics()
+                Resources.getSystem().getDisplayMetrics()
         );
     }
 

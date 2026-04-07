@@ -11,6 +11,7 @@
 package app.crimera.patches.instagram.entity.mediadata
 
 import app.crimera.utils.changeFirstString
+import app.crimera.utils.classNameToExtension
 import app.crimera.utils.fieldExtractor
 import app.crimera.utils.methodExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -25,10 +26,23 @@ val mediaDataEntity =
     ) {
         execute {
             // Extracting the media helper class name.
+            AdCollectionMediaDebugFingerprint.apply {
+                GetHelperClassExtensionFingerprint.changeFirstString(classNameToExtension(classDef.toString()))
+
+                // Get all the methods inside media helper class.
+                val mediaHelperMethods = mutableClassDefBy { it.type == classDef.type }.methods
+
+                val imageExtractionMethodName =
+                    mediaHelperMethods
+                        .first { it.parameterTypes.first() == "Landroid/content/Context;" && it.returnType == "Ljava/lang/String;" }
+                        .name
+                GetPhotoLinkExtensionFingerprint.changeFirstString(imageExtractionMethodName)
+            }
+
             // Extracting the get mention set method used media helper class.
             ReelsMentionDoubleTapFingerprint.method.apply {
                 val secondInvokeStaticMethodData = instructions.filter { it.opcode == Opcode.INVOKE_STATIC }[1].methodExtractor()
-                GetHelperClassExtensionFingerprint.changeFirstString(secondInvokeStaticMethodData.definingClass)
+
                 GetMentionSetExtensionFingerprint.changeFirstString(secondInvokeStaticMethodData.name)
             }
 
@@ -36,12 +50,6 @@ val mediaDataEntity =
             ClipsEditMetadataControllerRunFingerprint.method.apply {
                 val firstInvokeStaticCallingMethodName = instructions.first { it.opcode == Opcode.INVOKE_STATIC }.methodExtractor().name
                 GetVideoLinkExtensionFingerprint.changeFirstString(firstInvokeStaticCallingMethodName)
-            }
-
-            // Extracting the image URL field used in media class.
-            MediaUpdateFieldsFingerprint.classDef.apply {
-                val extendedImageUrlFieldName = fields.first { it.type == "Lcom/instagram/model/mediasize/ExtendedImageUrl;" }.name
-                GetPhotoLinkExtensionFingerprint.changeFirstString(extendedImageUrlFieldName)
             }
 
             // Extracting method is video used in media class.

@@ -61,6 +61,11 @@ internal object GetMediaPkIdExtensionFingerprint : Fingerprint(
     name = "getMediaPkId",
 )
 
+internal object AdCollectionMediaDebugFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    strings = listOf("ad_token", "{collection_media_role: "),
+)
+
 internal object ReelsMentionDoubleTapFingerprint : Fingerprint(
     returnType = "V",
     strings = listOf("userSession", "direct_add_mention_tap"),
@@ -70,10 +75,6 @@ internal object ClipsEditMetadataControllerRunFingerprint : Fingerprint(
     returnType = "V",
     name = "run",
     strings = listOf("ClipsEditMetadataController"),
-)
-
-internal object MediaUpdateFieldsFingerprint : Fingerprint(
-    strings = listOf("Media#updateFields"),
 )
 
 internal object AslSessionRelatedFingerprint : Fingerprint(
