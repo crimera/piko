@@ -15,6 +15,7 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
@@ -39,6 +40,11 @@ private object FeedResponseMediaParserFingerprint : Fingerprint(
                     (this as SparseSwitchPayload).switchElements.any { it.key == hashedFieldInteger }
         } >= 0
     }
+)
+
+private object LiveTreeGetOptionalBooleanFingerprint : Fingerprint (
+    name = "getOptionalBooleanValueByHashCode",
+    definingClass = "Lcom/instagram/pando/livetree/LiveTreeJNI;"
 )
 
 @Suppress("unused")
@@ -71,7 +77,8 @@ val hideReshareButtonPatch = bytecodePatch(
                 Opcode.MOVE_RESULT_OBJECT
             )
 
-            val moveResultRegister = getInstruction<OneRegisterInstruction>(moveResultIndex).registerA
+            val moveResultRegister =
+                getInstruction<OneRegisterInstruction>(moveResultIndex).registerA
             val freeRegister = findFreeRegister(moveResultIndex, moveResultRegister)
 
             addInstructionsWithLabels(
@@ -86,6 +93,18 @@ val hideReshareButtonPatch = bytecodePatch(
                 """
             )
         }
+
+        LiveTreeGetOptionalBooleanFingerprint.method.addInstructions(
+            0,
+            """
+            const v0, -0x207dadd2
+            if-ne p1, v0, :piko
+            sget-object v0, Ljava/lang/Boolean;->FALSE:Ljava/lang/Boolean;
+            return-object v0
+            :piko
+            nop
+        """
+        )
 
         enableSettings("hideReshareButton")
     }
