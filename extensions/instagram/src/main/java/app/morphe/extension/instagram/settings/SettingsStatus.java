@@ -84,8 +84,12 @@ public class SettingsStatus {
     public static void limitFollowingFeed() {
         limitFollowingFeed = true;
     }
+    public static boolean hideGroupCreationOnSharesheet = false;
+    public static void hideGroupCreationOnSharesheet() {
+        hideGroupCreationOnSharesheet = true;
+    }
     public static boolean distractionFreeSection() {
-        return (disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed);
+        return (disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet);
     }
 
     //Misc section.
@@ -113,11 +117,15 @@ public class SettingsStatus {
     public static void unlimitedReplaysOnEphemeralMedia() {
         unlimitedReplaysOnEphemeralMedia = true;
     }
+    public static boolean improveImageViewing = false;
+    public static void improveImageViewing() {
+        improveImageViewing = true;
+    }
     public static boolean hideReshareButton = false;
     public static void hideReshareButton() {
         hideReshareButton = true;
     }
-    public static boolean miscSection() {return (unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
+    public static boolean miscSection() {return (improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
 
     //Download section.
     public static boolean downloadMedia = false;

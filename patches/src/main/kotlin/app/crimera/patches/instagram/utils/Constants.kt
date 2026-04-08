@@ -20,7 +20,7 @@ object Constants {
             name = "Instagram",
             packageName = "com.instagram.android",
             apkFileType = ApkFileType.APKM,
-            appIconColor = 0x000000,
+            appIconColor = 0xFC483C,
             targets =
                 listOf(
                     // Stable

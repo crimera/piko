@@ -24,6 +24,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.app.Activity;
+import android.view.ViewGroup.MarginLayoutParams;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -87,6 +88,15 @@ public class UI {
                 }
             }
         });
+
+        int marginPx = Utils.dipToPixels(12);
+
+        MarginLayoutParams params = new MarginLayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(marginPx, marginPx, marginPx, marginPx);
+        button.setLayoutParams(params);
 
         viewGroup.addView(button);
     }

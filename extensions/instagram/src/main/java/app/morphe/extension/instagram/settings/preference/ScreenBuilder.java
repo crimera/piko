@@ -13,6 +13,7 @@ package app.morphe.extension.instagram.settings.preference;
 
 
 import android.content.Context;
+import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
@@ -20,6 +21,8 @@ import android.preference.PreferenceScreen;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.instagram.settings.Settings;
+import app.morphe.extension.instagram.settings.preference.widgets.*;
 import app.morphe.extension.shared.Utils;
 
 public class ScreenBuilder {
@@ -218,6 +221,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.hideGroupCreationOnSharesheet) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET,
+                            "",
+                            Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET
+                    )
+            );
+        }
     }
 
     public void buildMiscSection() {
@@ -293,6 +305,16 @@ public class ScreenBuilder {
                             Strings.UNLIMITED_REPLAYS,
                             Strings.UNLIMITED_REPLAYS_DESC,
                             Settings.UNLIMITED_REPLAYS
+                    )
+            );
+        }
+
+        if (SettingsStatus.improveImageViewing) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.IMPROVE_IMAGE_VIEWING,
+                            Strings.IMPROVE_IMAGE_VIEWING_DESC,
+                            Settings.IMPROVE_IMAGE_VIEWING
                     )
             );
         }

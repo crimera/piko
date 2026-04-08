@@ -8,7 +8,7 @@
  * in the source code and version control history.
  */
 
-package app.crimera.patches.instagram.links.distractionFree
+package app.crimera.patches.instagram.misc.distractionFree
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
