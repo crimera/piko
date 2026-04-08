@@ -296,6 +296,16 @@ public class ScreenBuilder {
                     )
             );
         }
+
+        if (SettingsStatus.hideReshareButton) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.HIDE_RESHARE_BUTTON,
+                            "",
+                            Settings.HIDE_RESHARE_BUTTON
+                    )
+            );
+        }
     }
 
     public void buildDownloadSection() {
