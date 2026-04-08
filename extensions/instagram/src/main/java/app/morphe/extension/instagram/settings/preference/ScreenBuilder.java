@@ -221,6 +221,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.hideGroupCreationOnSharesheet) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET,
+                            "",
+                            Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET
+                    )
+            );
+        }
     }
 
     public void buildMiscSection() {

@@ -84,8 +84,12 @@ public class SettingsStatus {
     public static void limitFollowingFeed() {
         limitFollowingFeed = true;
     }
+    public static boolean hideGroupCreationOnSharesheet = false;
+    public static void hideGroupCreationOnSharesheet() {
+        hideGroupCreationOnSharesheet = true;
+    }
     public static boolean distractionFreeSection() {
-        return (disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed);
+        return (disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet);
     }
 
     //Misc section.

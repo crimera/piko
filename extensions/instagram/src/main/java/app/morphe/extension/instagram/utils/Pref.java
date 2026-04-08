@@ -56,6 +56,9 @@ public class Pref {
     public static int unlimitedReplaysOnEphemeralMedia(int viewCount){
         return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia ? 0:viewCount;
     }
+    public static boolean hideGroupCreationOnSharesheet(){
+        return SharedPref.getBooleanPerf(Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET);
+    }
 
     public static boolean enableDevOptions(){
         return SharedPref.getBooleanPerf(Settings.DEVELOPER_OPTIONS);
