@@ -86,7 +86,7 @@ public class Strings {
     public static final String DOWNLOAD_ALL = "Download all";
     public static final String DOWNLOADING_MEDIA = "Downloading : ";
     public static final String DOWNLOADED_MEDIA = "Downloaded : ";
-    public static final String MEDIA_EXISTS = "Media exits";
+    public static final String MEDIA_EXISTS = "Media exists";
     public static final String DOWNLOAD_FAILED_MEDIA = "Download failed : ";
 
 
