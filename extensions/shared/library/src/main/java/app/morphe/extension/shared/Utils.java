@@ -1451,6 +1451,19 @@ public class Utils {
     }
 
     /**
+     * Converts sp value to actual device pixels.
+     *
+     * @return The device pixel value.
+     */
+    public static int spToPixels(float sp) {
+        return  (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP,
+                sp,
+                Resources.getSystem().getDisplayMetrics()
+        );
+    }
+
+    /**
      * Converts a percentage of the screen height to actual device pixels.
      *
      * @param percentage The percentage of the screen height (e.g., 30 for 30%).

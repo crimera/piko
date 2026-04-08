@@ -16,8 +16,10 @@ import android.content.Context;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
+import android.preference.PreferenceScreen;
 
 import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
@@ -210,6 +212,24 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.limitFollowingFeed) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.LIMIT_FOLLOWING_FEED,
+                            Strings.LIMIT_FOLLOWING_FEED_DESC,
+                            Settings.LIMIT_FOLLOWING_FEED
+                    )
+            );
+        }
+        if (SettingsStatus.hideGroupCreationOnSharesheet) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET,
+                            "",
+                            Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET
+                    )
+            );
+        }
     }
 
     public void buildMiscSection() {
@@ -288,6 +308,26 @@ public class ScreenBuilder {
                     )
             );
         }
+
+        if (SettingsStatus.improveImageViewing) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.IMPROVE_IMAGE_VIEWING,
+                            Strings.IMPROVE_IMAGE_VIEWING_DESC,
+                            Settings.IMPROVE_IMAGE_VIEWING
+                    )
+            );
+        }
+
+        if (SettingsStatus.hideReshareButton) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.HIDE_RESHARE_BUTTON,
+                            "",
+                            Settings.HIDE_RESHARE_BUTTON
+                    )
+            );
+        }
     }
 
     public void buildDownloadSection() {
@@ -316,6 +356,60 @@ public class ScreenBuilder {
                         Strings.DOWNLOAD_USERNAME_FOLDER,
                         Strings.DOWNLOAD_USERNAME_FOLDER_DESC,
                         Settings.DOWNLOAD_USERNAME_FOLDER
+                )
+        );
+    }
+
+    public void buildNavigationSection() {
+        if (!(SettingsStatus.hideNavigationButtons)) return;
+
+        PreferenceCategory category = addCategory(Strings.CATEGORY_HIDE_NAVIGATION_BUTTONS);
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.HIDE_NAVIGATION_FEED,
+                        "",
+                        Settings.HIDE_NAVIGATION_FEED
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.HIDE_NAVIGATION_REELS,
+                        "",
+                        Settings.HIDE_NAVIGATION_REELS
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.HIDE_NAVIGATION_DIRECT,
+                        "",
+                        Settings.HIDE_NAVIGATION_DIRECT
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.HIDE_NAVIGATION_SEARCH,
+                        "",
+                        Settings.HIDE_NAVIGATION_SEARCH
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.HIDE_NAVIGATION_CREATE,
+                        "",
+                        Settings.HIDE_NAVIGATION_CREATE
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.HIDE_NAVIGATION_PROFILE,
+                        "",
+                        Settings.HIDE_NAVIGATION_PROFILE
                 )
         );
     }

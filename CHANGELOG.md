@@ -1,3 +1,92 @@
+# [3.2.0-dev.4](https://github.com/crimera/piko/compare/v3.2.0-dev.3...v3.2.0-dev.4) (2026-04-08)
+
+
+### Bug Fixes
+
+* **Instagram:** fix `Improve image viewing` patch ([5655756](https://github.com/crimera/piko/commit/5655756526bbad2588db7fefcb0641d1470aa251))
+* **Instagram:** fix padding issue in Piko settings button ([4855f38](https://github.com/crimera/piko/commit/4855f38410ed6999e3d501cb0301efee4490a148))
+* **Instagram:** fix Piko settings issues ([d3369f2](https://github.com/crimera/piko/commit/d3369f2aa594737bbf73ef86bb8b3001e17c4327))
+* **Instagram:** fix piko settings nav bar clipping ([0b94452](https://github.com/crimera/piko/commit/0b94452310b8d3630142d8b9b3715b4bbea012d9))
+
+
+### Features
+
+* **Instagram:** Add `Hide navigation buttons` patch ([948f136](https://github.com/crimera/piko/commit/948f1362b298668c8ec960f2801bb1b2c7807a04))
+* **Instagram:** Add `Hide reshare button` patch ([84ad6ae](https://github.com/crimera/piko/commit/84ad6ae7b4f3112a2175b1360c113c9a71b1ff9b))
+* **Instagram:** Added `Hide group creation button on sharesheet` patch ([8faab8c](https://github.com/crimera/piko/commit/8faab8cd984e2dede46aa9ed0355b7c63e2d0535))
+* **Instagram:** Added `Improve image viewing` patch ([72d103d](https://github.com/crimera/piko/commit/72d103da8c059e2751fdb54c968995a669b1612f))
+* **Instagram:** Added open media externally ([9d0b1eb](https://github.com/crimera/piko/commit/9d0b1ebd6d71eb3db43123f9b8577f29c75fb223))
+
+# [3.2.0-dev.3](https://github.com/crimera/piko/compare/v3.2.0-dev.2...v3.2.0-dev.3) (2026-04-05)
+
+
+### Features
+
+* Add `Import/Export login token` patch ([5667e4c](https://github.com/crimera/piko/commit/5667e4cd251685a01d9459a2c637a79a832259b6))
+
+# [3.2.0-dev.2](https://github.com/crimera/piko/compare/v3.2.0-dev.1...v3.2.0-dev.2) (2026-04-02)
+
+
+### Bug Fixes
+
+* **Instagram:** Fix fingerprint of Feed button on click ([9f988e2](https://github.com/crimera/piko/commit/9f988e269e205609b2122675f88a09862b0d2e2c))
+
+# [3.2.0-dev.1](https://github.com/crimera/piko/compare/v3.1.0...v3.2.0-dev.1) (2026-04-01)
+
+
+### Bug Fixes
+
+* **Instagram:** `Download media` fingerprint ([e161d4e](https://github.com/crimera/piko/commit/e161d4ed0eafb3a7d802c1ac3d20ed176ede797d))
+* **Instagram:** `Hide suggested content` patch fingerprint ([fdb7a1f](https://github.com/crimera/piko/commit/fdb7a1fc72287a9d509c749b3a9bb58e4a8633ea))
+* **Instagram:** `Remove build expired popup` patch yet again ([33378d1](https://github.com/crimera/piko/commit/33378d13a7aff3c52160190c1d474884c205df78))
+* **Instagram:** `Sanitize share links` patch fingerprint ([339d6b0](https://github.com/crimera/piko/commit/339d6b0f58245af830c72ef89f27d87ac3aa3f92))
+* **Instagram:** fix `Media` fingerprints again ([1fdaa80](https://github.com/crimera/piko/commit/1fdaa80a8761fdc25f5ee33e61860fd800dcf2c3))
+* **Instagram:** Fix `Open links externally` patch ([b5aa5da](https://github.com/crimera/piko/commit/b5aa5da0bbf860ec3108bce45b51e401e848d36f))
+* **Instagram:** Fix `Remove build expired popup` patch ([1235af4](https://github.com/crimera/piko/commit/1235af4aac05c939ce5ff84ca570f2dced3e4e24))
+* **Instagram:** fix Download media - author and media type ([95c7a73](https://github.com/crimera/piko/commit/95c7a732479b5954b7793826c37d8e64a4bbc821))
+* **Instagram:** fix Download option on feed ([4f4c07f](https://github.com/crimera/piko/commit/4f4c07fcd64c3bcb513dc59b184d7e3e3cde5bb2))
+* **Instagram:** Fix feed download button method fingerprint ([dc1b97e](https://github.com/crimera/piko/commit/dc1b97ebf1afd5ca03a4de403ec3a9e84144052b))
+* **Instagram:** Fix fingerprints broken on 423 ([3859ba4](https://github.com/crimera/piko/commit/3859ba4da669dfb0dbfd23ab66fa3c9354f84199))
+* **Instagram:** Fix Friendship status fingerprints broken on 423 ([0f42aaf](https://github.com/crimera/piko/commit/0f42aaf4e6d818db4a40b83ace1bbe6ca126abf9))
+* **Instagram:** Fix friendship status method fingerprint ([276048e](https://github.com/crimera/piko/commit/276048e0e6ffc31d531096748b1243d1c7500aca))
+* **Instagram:** Fix piko settings action bar ([1712146](https://github.com/crimera/piko/commit/17121469f71b0c71953f70b2cf6dc09ab920b78a))
+* **Instagram:** Fix story button method fingerprint ([ba7b16d](https://github.com/crimera/piko/commit/ba7b16d599eabb43400f6cb5a8162a8f056c29b6))
+* **Instagram:** Fixed sanitize post and reels urls ([61257fb](https://github.com/crimera/piko/commit/61257fbd601e69b3c507b5da22b687439890c873))
+* **Instagram:** Follow indicator handling ([ad3ed3f](https://github.com/crimera/piko/commit/ad3ed3fd0576c17cf409a69c2703ed0484c0fac0))
+* **Twitter:** Fix `Customize notification tabs` patch on 11.78.xx ([05958d2](https://github.com/crimera/piko/commit/05958d2de69935b2a9de1550f06eeed4e2debaee))
+* **Twitter:** Fix `Log server response` patch on 11.77.xx ([c2111f1](https://github.com/crimera/piko/commit/c2111f1fd166107eefc436c38f320bd1db33a905))
+* **Twitter:** Fix GIFs downloading as image via native downloader ([d18317a](https://github.com/crimera/piko/commit/d18317a4f7b7e013765143f33d34807e3764a063))
+
+
+### Features
+
+* **Bring back twitter:** Use strings from Twitter 9.98.0 for all languages ([ebcfb9a](https://github.com/crimera/piko/commit/ebcfb9ae7bdbb8f3648b4191ee7c448ee4f6c90a))
+* **Instagram:** Added `Customise story timestamp` patch ([421ca76](https://github.com/crimera/piko/commit/421ca76dfa2f67b77bafed5c477c1e24f50657a4))
+* **Instagram:** Added `Disable ads` patch ([4046078](https://github.com/crimera/piko/commit/40460788ac473f32f2dbee9735b691e0086d3b31))
+* **Instagram:** Added `Disable analytics` patch ([e01da66](https://github.com/crimera/piko/commit/e01da663b520a00b386016cfc00d733a3b39ec70))
+* **Instagram:** Added `Disable discover people` patch ([36fbfb5](https://github.com/crimera/piko/commit/36fbfb53f48996c977507c675c8ca4cc426f387b))
+* **Instagram:** Added `Disable story flipping` patch ([05f374b](https://github.com/crimera/piko/commit/05f374b4fbe54e8bd8cc165545c6d7e7d01848a7))
+* **Instagram:** Added `Distraction free` patches ([ec3ae44](https://github.com/crimera/piko/commit/ec3ae44a0fbfe95515e5250d7e366fcbf88eb8a3))
+* **Instagram:** Added `Download media` patch ([b87f023](https://github.com/crimera/piko/commit/b87f02368f26185cf6881d68d63f91830ff46fe8))
+* **Instagram:** Added `Follow back indicator` patch ([e6974a1](https://github.com/crimera/piko/commit/e6974a14f23cc549ff1330e3fce125ddee930e15))
+* **Instagram:** Added `Hide stories tray` patch ([c4af4df](https://github.com/crimera/piko/commit/c4af4df649762d0b4f1409849edd7fa6626ca3c7))
+* **Instagram:** Added `Hide suggested content` patch ([2a10346](https://github.com/crimera/piko/commit/2a10346a3ff680e0ebda33fb2cff547de46457fe))
+* **Instagram:** Added `Open links externally` patch ([d199468](https://github.com/crimera/piko/commit/d1994683fac5e9734e4287c424f25205e21de80f))
+* **Instagram:** Added `Remove build expired popup` patch ([8932242](https://github.com/crimera/piko/commit/89322421eb2d1f0fbd0e6c2b937e23cd987005ec))
+* **Instagram:** Added `Sanitize share links` patch ([43a886f](https://github.com/crimera/piko/commit/43a886ffa801476d57a14a40fd149fc09ec7aa9a))
+* **Instagram:** Added `Unlimited replays on ephemeral media` patch ([00e3656](https://github.com/crimera/piko/commit/00e3656db467efd5fbca9de9884716fe75faa188))
+* **Instagram:** Added `View live anonymously` patch ([d5c6fb3](https://github.com/crimera/piko/commit/d5c6fb3dc87288eb3429a898d132b55c98609091))
+* **Instagram:** Added `View stories anonymously` patch ([2fab876](https://github.com/crimera/piko/commit/2fab8765622b41e7e11cfb57493bd09b788eee27))
+* **Instagram:** Added `View story mentions` patch ([ebddfbe](https://github.com/crimera/piko/commit/ebddfbeb46ec781ddcabc7956ca9a40645f5cb18))
+* **Instagram:** Added delete analytics cache folder ([f1a1602](https://github.com/crimera/piko/commit/f1a16029c2d0951a77dbad5dff0735abc3fb4d47))
+* **Instagram:** Added mapping restore ([6691e56](https://github.com/crimera/piko/commit/6691e565722877aca516a8b6bf531fab667574af))
+* **Instagram:** Added override backup ([9b9498a](https://github.com/crimera/piko/commit/9b9498abf51c75b24578470d473076eb35421990))
+* **Instagram:** Added override restore ([7d433b2](https://github.com/crimera/piko/commit/7d433b2c39a2e8eb9c70324582d9704a7c7889b5))
+* **Instagram:** Added patch information in settings ([90f1885](https://github.com/crimera/piko/commit/90f1885dc65d0a1670d751fe25367ffd711f992e))
+* **Instagram:** Added settings and developer options patch ([859c684](https://github.com/crimera/piko/commit/859c6847ee2e45f33812c66201e3fd9f8a96689c))
+* **Instagram:** handle signature check on link share and on incoming link ([7698274](https://github.com/crimera/piko/commit/76982744b7adcc8cac5470586af9d27bad9a01c6))
+* **Twitter:** Added `Backup and restore` section ([4d894f4](https://github.com/crimera/piko/commit/4d894f4686feb1bf3c2e2973b8fe3e986e1af22c))
+
 # [3.1.0-dev.5](https://github.com/crimera/piko/compare/v3.1.0-dev.4...v3.1.0-dev.5) (2026-03-30)
 
 

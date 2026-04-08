@@ -1,5 +1,5 @@
 {
-  "version": "3.1.0-dev.5",
+  "version": "3.2.0-dev.4",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -24,8 +24,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -76,8 +75,7 @@
       "compatiblePackages": {
         "com.twitter.android": null,
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": [
@@ -171,19 +169,6 @@
       "options": []
     },
     {
-      "name": "Custom translator",
-      "description": "Requires X 11.0.0-release.0 or higher.",
-      "use": true,
-      "dependencies": [
-        "BytecodePatch",
-        "BytecodePatch"
-      ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
-      "options": []
-    },
-    {
       "name": "Customise post font size",
       "description": null,
       "use": true,
@@ -204,8 +189,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -351,8 +335,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -367,8 +350,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -408,8 +390,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -424,8 +405,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -440,8 +420,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -456,8 +435,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -471,8 +449,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -502,8 +479,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -600,8 +576,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -776,6 +751,20 @@
       "options": []
     },
     {
+      "name": "Hide group creation button on sharesheet",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Hide hidden replies",
       "description": null,
       "use": true,
@@ -797,6 +786,20 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide navigation buttons",
+      "description": "Hides navigation bar buttons, such as the Reels and Create button.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -838,6 +841,33 @@
       "options": []
     },
     {
+      "name": "Hide recommendation items",
+      "description": "Adds options to hide recommendation items such as \"Who to follow\" and \"Today's news\" in timeline, search, and replies.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide reshare button",
+      "description": "Hides the reshare button from both posts and reels.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Hide stories tray",
       "description": "Hides stories tray from main feed.",
       "use": true,
@@ -847,8 +877,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -862,22 +891,8 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
-      },
-      "options": []
-    },
-    {
-      "name": "Hide timeline posts by category",
-      "description": "Hides different post category like who to follow, news today etc from timeline.",
-      "use": true,
-      "dependencies": [
-        "BytecodePatch",
-        "BytecodePatch"
-      ],
-      "compatiblePackages": {
-        "com.twitter.android": null
       },
       "options": []
     },
@@ -895,6 +910,34 @@
       "options": []
     },
     {
+      "name": "Import/Export login token",
+      "description": "Adds an feature to export and import the token of accounts. This is useful when logging in on your second device or when re-installing piko.",
+      "use": true,
+      "dependencies": [
+        "ResourcePatch",
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Improve image viewing",
+      "description": "Fetches max resolution images from server.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Legacy share links",
       "description": "Brings back username on post share links. Works post 11.4x.xx",
       "use": true,
@@ -908,6 +951,20 @@
       "options": []
     },
     {
+      "name": "Limit feed to following profiles",
+      "description": "Filters the home feed to display only content from profiles you follow.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Log server response",
       "description": "Log json responses received from server",
       "use": true,
@@ -916,6 +973,20 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Make ephemeral media permanent",
+      "description": "changes view once, view twice media to permanent view. Do note older ephemeral media might look blank.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -948,6 +1019,19 @@
       "options": []
     },
     {
+      "name": "Native translator",
+      "description": "Requires X 11.0.0-release.0 or higher.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
       "name": "No shortened URL",
       "description": "Get rid of t.co short urls.",
       "use": true,
@@ -968,8 +1052,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1008,8 +1091,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1072,8 +1154,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1153,21 +1234,6 @@
       "options": []
     },
     {
-      "name": "Unlimited replays on ephemeral media",
-      "description": "Unlimited replays on view once, view twice media before they get expired",
-      "use": true,
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": {
-        "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
-        ]
-      },
-      "options": []
-    },
-    {
       "name": "Unlock developer options",
       "description": null,
       "use": true,
@@ -1176,8 +1242,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1192,8 +1257,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1208,8 +1272,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []
@@ -1227,8 +1290,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "422.0.0.44.64",
-          "424.0.0.0.39"
+          "423.0.0.47.66"
         ]
       },
       "options": []

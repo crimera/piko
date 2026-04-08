@@ -61,6 +61,11 @@ internal object GetMediaPkIdExtensionFingerprint : Fingerprint(
     name = "getMediaPkId",
 )
 
+internal object AdCollectionMediaDebugFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    strings = listOf("ad_token", "{collection_media_role: "),
+)
+
 internal object ReelsMentionDoubleTapFingerprint : Fingerprint(
     returnType = "V",
     strings = listOf("userSession", "direct_add_mention_tap"),
@@ -72,10 +77,6 @@ internal object ClipsEditMetadataControllerRunFingerprint : Fingerprint(
     strings = listOf("ClipsEditMetadataController"),
 )
 
-internal object MediaUpdateFieldsFingerprint : Fingerprint(
-    strings = listOf("Media#updateFields"),
-)
-
 internal object AslSessionRelatedFingerprint : Fingerprint(
     returnType = "V",
     strings = listOf("asl_session_id", "is_video", "is_carousel"),
@@ -85,6 +86,12 @@ internal object EditMediaInfoFragmentMediaSizeFingerprint : Fingerprint(
     parameters = listOf(EDIT_MEDIA_INFO_FRAGMENT_CLASS),
     returnType = "F",
     definingClass = EDIT_MEDIA_INFO_FRAGMENT_CLASS,
+)
+
+// Backup fingerprint to find a media list method.
+internal object GetAndroidLinkFromMediaObject : Fingerprint(
+    returnType = "Lcom/instagram/model/androidlink/AndroidLink;",
+    definingClass = "Lcom/instagram/profile/fragment/UserDetailFragment;",
 )
 
 internal object FanClubContentPreviewInteractorImplFingerprint : Fingerprint(

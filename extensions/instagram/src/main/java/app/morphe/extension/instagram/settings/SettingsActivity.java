@@ -11,26 +11,25 @@
 
 package app.morphe.extension.instagram.settings;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceScreen;
 import android.preference.PreferenceManager;
-import android.view.Gravity;
+import android.preference.PreferenceScreen;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
-import android.view.WindowInsets;
 
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.constants.UI;
-import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.Helper;
+import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.shared.Utils;
 
 public class SettingsActivity extends Activity {
@@ -39,6 +38,7 @@ public class SettingsActivity extends Activity {
     private LinearLayout toolbar;
     private LinearLayout content;
 
+    @SuppressLint("ResourceType")
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -49,18 +49,26 @@ public class SettingsActivity extends Activity {
     }
 
 
+    @SuppressLint("ResourceType")
     private void createLayout() {
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         // ---------- Toolbar ----------
         toolbar = new LinearLayout(this);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
+
+        int toolbarPadding = Utils.dipToPixels(8);
+        toolbar.setPadding(toolbarPadding, toolbarPadding, toolbarPadding, toolbarPadding);
+
+        int iconSize = Utils.dipToPixels(48);
+
         ImageView back = new ImageView(this);
-        back.setLayoutParams(new LinearLayout.LayoutParams(100, 100));
-        int dimen = Utils.getResourceDimensionPixelSize("abc_edit_text_inset_top_material");
+        LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(iconSize, iconSize);
+        backParams.gravity = android.view.Gravity.CENTER_VERTICAL;
+        back.setLayoutParams(backParams);
 
         UI.setThemedIcon(back, "material_ic_keyboard_arrow_left_black_24dp");
-        back.setPaddingRelative(dimen, dimen, dimen, dimen);
+        back.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -70,8 +78,15 @@ public class SettingsActivity extends Activity {
 
         TextView title = new TextView(this);
         title.setText(Strings.PIKO_SETTINGS_TITLE);
-        title.setTextSize(Utils.getResourceDimensionPixelSize("fbui_text_size_micro"));
-        title.setPaddingRelative(dimen, dimen, dimen, dimen);
+        int textSize = Utils.spToPixels(20);
+        title.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        titleParams.gravity = android.view.Gravity.CENTER_VERTICAL;
+        titleParams.leftMargin = toolbarPadding / 2;
+        title.setLayoutParams(titleParams);
         title.setTextColor(UI.getThemedColour());
 
         toolbar.addView(back);
@@ -79,18 +94,35 @@ public class SettingsActivity extends Activity {
 
         // ---------- Content ----------
 
+        ScrollView scrollView = new ScrollView(this);
+        scrollView.setFillViewport(true);
+
         content = new LinearLayout(this);
         content.setId(1001);
         content.setOrientation(LinearLayout.VERTICAL);
 
+        scrollView.addView(content, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+
         root.addView(toolbar);
-        root.addView(content, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        root.addView(scrollView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
 
         root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @Override
             public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
                 int topInset = insets.getSystemWindowInsetTop();
+                int bottomInset = insets.getSystemWindowInsetBottom();
+
+                // Apply top inset to root (status bar)
                 v.setPadding(0, topInset, 0, 0);
+
+                // Apply bottom inset to content (gesture nav area)
+                content.setPadding(
+                        content.getPaddingLeft(),
+                        content.getPaddingTop(),
+                        content.getPaddingRight(),
+                        bottomInset
+                );
+
                 return insets;
             }
         });
@@ -121,6 +153,7 @@ public class SettingsActivity extends Activity {
             screenBuilder.distractionFreeSection();
             screenBuilder.buildMiscSection();
             screenBuilder.buildDownloadSection();
+            screenBuilder.buildNavigationSection();
             screenBuilder.buildDeveloperSection();
             screenBuilder.aboutSection();
 
