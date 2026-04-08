@@ -40,7 +40,7 @@ val improveImageViewingPatch =
 
             SetDPIMetricsFingerprint.method.apply {
                 // First one is DPI which is not needed for us.
-                val iGetInstructions = instructions.filter { it.opcode == Opcode.IGET }.drop(0)
+                val iGetInstructions = instructions.filter { it.opcode == Opcode.IGET }.drop(1)
 
                 iGetInstructions.forEach { instruction ->
                     val register = instruction.registersUsed[0]
