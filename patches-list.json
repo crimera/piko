@@ -1,5 +1,5 @@
 {
-  "version": "3.2.0-dev.3",
+  "version": "3.2.0-dev.4",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -751,6 +751,20 @@
       "options": []
     },
     {
+      "name": "Hide group creation button on sharesheet",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Hide hidden replies",
       "description": null,
       "use": true,
@@ -772,6 +786,20 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide navigation buttons",
+      "description": "Hides navigation bar buttons, such as the Reels and Create button.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -822,6 +850,20 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide reshare button",
+      "description": "Hides the reshare button from both posts and reels.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -882,6 +924,20 @@
       "options": []
     },
     {
+      "name": "Improve image viewing",
+      "description": "Fetches max resolution images from server.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Legacy share links",
       "description": "Brings back username on post share links. Works post 11.4x.xx",
       "use": true,
@@ -917,6 +973,20 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Make ephemeral media permanent",
+      "description": "changes view once, view twice media to permanent view. Do note older ephemeral media might look blank.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -1160,20 +1230,6 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
-      },
-      "options": []
-    },
-    {
-      "name": "Unlimited replays on ephemeral media",
-      "description": "Unlimited replays on view once, view twice media before they get expired",
-      "use": true,
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": {
-        "com.instagram.android": [
-          "423.0.0.47.66"
-        ]
       },
       "options": []
     },
