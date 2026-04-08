@@ -1,12 +1,12 @@
 /*
-    * Copyright (C) 2026 piko <https://github.com/crimera/piko>
-    *
-    * This file is part of piko.
-    *
-    * Any modifications, derivatives, or substantial rewrites of this file
-    * must retain this copyright notice and the piko attribution
-    * in the source code and version control history.
-*/
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
 
 
 package app.morphe.extension.instagram.patches.download;
@@ -16,16 +16,20 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.app.Activity;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Environment;
+
 import java.io.FileOutputStream;
 import java.io.File;
+
 import android.net.Uri;
 
 import app.morphe.extension.instagram.constants.Strings;
@@ -36,17 +40,24 @@ import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.crimera.ObjectBrowser;
 
 public class DownloadUtils {
-    private static boolean ENABLE_DIRECT_DOWNLOAD,SPLIT_BY_USERNAME;
-    static{
+    private static boolean ENABLE_DIRECT_DOWNLOAD;
+    private static boolean SPLIT_BY_USERNAME;
+    private static boolean DEBUG;
+
+    static {
         ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
         SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
+        DEBUG = Pref.pikoDebug();
     }
 
-    private static void downloadDialogBox(Context context, MediaData mediaInfo, int position) throws Exception{
+    private static void downloadDialogBox(Context context, MediaData mediaInfo, int position) throws Exception {
         int carouselSize = mediaInfo.getCarouselSize();
         MediaData currentMediaData = mediaInfo.getMediaAt(position);
+        Boolean isCurrentMediaVideo = currentMediaData.isVideo();
 
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
@@ -54,7 +65,14 @@ public class DownloadUtils {
         options.add(Strings.DOWNLOAD_CURRENT_MEDIA);
         options.add(Strings.DOWNLOAD_AS_IMAGE);
         options.add(Strings.COPY_MEDIA_LINK);
-        if(carouselSize > 1) options.add(Strings.DOWNLOAD_ALL);
+        if (isCurrentMediaVideo) {
+            options.add(Strings.OPEN_VIDEO_EXTERNALLY);
+        } else {
+            options.add(Strings.OPEN_IMAGE_EXTERNALLY);
+        }
+        if (carouselSize > 1) options.add(Strings.DOWNLOAD_ALL);
+        if(DEBUG) options.add(Strings.PIKO_DEBUG);
+
         CharSequence[] items = options.toArray(new CharSequence[0]);
 
         dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
@@ -65,7 +83,7 @@ public class DownloadUtils {
                     String selectedOption = options.get(which);
 
                     if (selectedOption.equals(Strings.DOWNLOAD_CURRENT_MEDIA)) {
-                        downloadMediaAt(context,mediaInfo,position);
+                        downloadMediaAt(context, mediaInfo, position);
 
                     } else if (selectedOption.equals(Strings.DOWNLOAD_AS_IMAGE)) {
                         String username = mediaInfo.getUserData().getUsername();
@@ -77,13 +95,15 @@ public class DownloadUtils {
                         Utils.setClipboard(currentMediaData.getMediaLink());
                         Utils.showToastShort(Strings.COPIED_MEDIA_LINK);
 
-                    } else if (selectedOption.equals(Strings.DOWNLOAD_ALL)) {
-                        for(int index=0;index<carouselSize;index++){
-                            downloadMediaAt(context,mediaInfo,index);
-                        }
+                    } else if (selectedOption.equals(Strings.OPEN_VIDEO_EXTERNALLY) || selectedOption.equals(Strings.OPEN_IMAGE_EXTERNALLY)) {
+                        ActivityHook.handleUrlIntent(isCurrentMediaVideo,currentMediaData.getMediaLink());
+
+                    } else if (selectedOption.equals(Strings.PIKO_DEBUG)) {
+                        ObjectBrowser.browseObject(context,currentMediaData);
+
                     }
                 } catch (Exception e) {
-                    Logger.printException(() -> "Error at downloadDialogBox",e);
+                    Logger.printException(() -> "Error at downloadDialogBox", e);
                     Utils.showToastShort(e.getMessage());
                 }
             }
@@ -98,7 +118,7 @@ public class DownloadUtils {
         dlg.show();
     }
 
-    public static void downloadMediaAt(Context context, MediaData mediaInfo, int position) throws Exception{
+    public static void downloadMediaAt(Context context, MediaData mediaInfo, int position) throws Exception {
         MediaData currentMediaData = mediaInfo.getMediaAt(position);
         String username = mediaInfo.getUserData().getUsername();
         String downloadFileName = currentMediaData.getDownloadFilename(false);
@@ -107,24 +127,24 @@ public class DownloadUtils {
     }
 
 
-    public static void downloadPost(Context context, Object mediaObject, int position){
-        try{
+    public static void downloadPost(Context context, Object mediaObject, int position) {
+        try {
             position = position < 1 ? 0 : position;
             MediaData mediaInfo = new MediaData(mediaObject);
-            if(ENABLE_DIRECT_DOWNLOAD){
-                downloadMediaAt(context,mediaInfo,position);
-            }else {
+            if (ENABLE_DIRECT_DOWNLOAD) {
+                downloadMediaAt(context, mediaInfo, position);
+            } else {
                 downloadDialogBox(context, mediaInfo, position);
             }
 
         } catch (Exception e) {
-            Logger.printException(() -> "Error at downloadPost",e);
+            Logger.printException(() -> "Error at downloadPost", e);
         }
     }
 
 
     private static void downloader(Context context, String filename, File file, File tempFile, Intent intent, long downloadId,
-                                     BroadcastReceiver broadcastReceiver) {
+                                   BroadcastReceiver broadcastReceiver) {
         long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
         if (id == downloadId) {
             tempFile.renameTo(file);
@@ -136,10 +156,10 @@ public class DownloadUtils {
     private static void downloadFile(Context ctx, String url, String username, String downloadFilename) {
         String publicFolder = Environment.DIRECTORY_DOWNLOADS;
         String subFolder = "Piko-Instagram";
-        final String filename = username+"_"+downloadFilename;
+        final String filename = username + "_" + downloadFilename;
 
-        if(SPLIT_BY_USERNAME){
-            subFolder+="/"+username;
+        if (SPLIT_BY_USERNAME) {
+            subFolder += "/" + username;
         }
 
         File dir = new File(
@@ -176,14 +196,14 @@ public class DownloadUtils {
             ctx.registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    downloader(ctx, filename, file, temp,intent, downloadId, this);
+                    downloader(ctx, filename, file, temp, intent, downloadId, this);
                 }
             }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), Context.RECEIVER_EXPORTED);
         } else {
             ctx.registerReceiver(new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    downloader(ctx, filename, file, temp,intent, downloadId, this);
+                    downloader(ctx, filename, file, temp, intent, downloadId, this);
                 }
             }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
         }

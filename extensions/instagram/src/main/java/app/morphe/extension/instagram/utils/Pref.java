@@ -16,6 +16,10 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 
 @SuppressWarnings("unused")
 public class Pref {
+    public static boolean pikoDebug(){
+        return false;
+    }
+
     public static boolean disableAds(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_ADS);
     }
@@ -44,8 +48,17 @@ public class Pref {
     public static boolean hideStoriesTray(){
         return SharedPref.getBooleanPerf(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
     }
+    public static String unlimitedReplaysOnEphemeralMedia(String viewMode) {
+        return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia ? "permanent" : viewMode;
+    }
+    public static boolean hideReshareButton(){
+        return SharedPref.getBooleanPerf(Settings.HIDE_RESHARE_BUTTON) && SettingsStatus.hideReshareButton;
+    }
     public static int unlimitedReplaysOnEphemeralMedia(int viewCount){
         return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia ? 0:viewCount;
+    }
+    public static boolean hideGroupCreationOnSharesheet(){
+        return SharedPref.getBooleanPerf(Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET);
     }
 
     public static boolean enableDevOptions(){
@@ -53,7 +66,8 @@ public class Pref {
     }
 
     public static int buildAge(int appAge){
-        return SharedPref.getBooleanPerf(Settings.REMOVE_BUILD_EXPIRE_POPUP) ? 1:appAge;}
+        return SharedPref.getBooleanPerf(Settings.REMOVE_BUILD_EXPIRE_POPUP) ? 1:appAge;
+    }
 
     public static boolean disableAnalytics(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_ANALYTICS);
@@ -73,7 +87,9 @@ public class Pref {
     public static String customiseStoryTimestamp(){
         return SharedPref.getStringPref(Settings.CUSTOMISE_STORY_TIMESTAMP);
     }
-
+    public static int improveImageViewing(int defaultSize){
+        return SharedPref.getBooleanPerf(Settings.IMPROVE_IMAGE_VIEWING) ? 2048:defaultSize;
+    }
 
     public static boolean enableDownload(){
         return SharedPref.getBooleanPerf(Settings.ENABLE_DOWNLOAD);
@@ -83,6 +99,30 @@ public class Pref {
     }
     public static boolean downloadUsernameFolder(){
         return SharedPref.getBooleanPerf(Settings.DOWNLOAD_USERNAME_FOLDER);
+    }
+
+    public static boolean hideNavigationFeed() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_FEED);
+    }
+
+    public static boolean hideNavigationReels() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_REELS);
+    }
+
+    public static boolean hideNavigationDirect() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_DIRECT);
+    }
+
+    public static boolean hideNavigationSearch() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_SEARCH);
+    }
+
+    public static boolean hideNavigationCreate() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_CREATE);
+    }
+
+    public static boolean hideNavigationProfile() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_PROFILE);
     }
 
     //end

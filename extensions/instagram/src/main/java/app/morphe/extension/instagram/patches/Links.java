@@ -33,6 +33,7 @@ public class Links {
     private static final boolean DISABLE_EXPLORE;
     private static final boolean DISABLE_COMMENTS;
     private static final boolean DISABLE_DISCOVER_PEOPLE;
+    private static final boolean DISABLE_ADS;
 
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
@@ -42,6 +43,7 @@ public class Links {
         DISABLE_EXPLORE = Pref.disableExplore() && SettingsStatus.disableExplore;
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
         DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
+        DISABLE_ADS = Pref.disableAds() && SettingsStatus.disableAds;
     }
 
 
@@ -103,6 +105,11 @@ public class Links {
                     shouldBlockUri = DISABLE_COMMENTS;
                 } else if (path.contains("/discover/ayml/")) {
                     shouldBlockUri = DISABLE_DISCOVER_PEOPLE;
+                } else if (path.contains("profile_ads/get_profile_ads/")
+                        || path.contains("/async_ads/")
+                        || path.contains("/feed/injected_reels_media/")
+                        || path.contains("/api/v1/ads/graphql/")) {
+                    shouldBlockUri = DISABLE_ADS;
                 }
 
             }
