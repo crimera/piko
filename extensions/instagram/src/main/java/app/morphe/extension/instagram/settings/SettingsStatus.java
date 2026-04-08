@@ -84,8 +84,13 @@ public class SettingsStatus {
     public static void limitFollowingFeed() {
         limitFollowingFeed = true;
     }
+    public static boolean disableReelsScrolling = false;
+    public static void disableReelsScrolling() {
+        disableReelsScrolling = true;
+    }
+
     public static boolean distractionFreeSection() {
-        return (disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed);
+        return (disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || disableReelsScrolling);
     }
 
     //Misc section.

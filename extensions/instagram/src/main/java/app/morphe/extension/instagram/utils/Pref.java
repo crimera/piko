@@ -41,6 +41,9 @@ public class Pref {
     public static boolean limitFollowingFeed(){
         return SharedPref.getBooleanPerf(Settings.LIMIT_FOLLOWING_FEED);
     }
+    public static boolean disableReelsScrolling(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
+    }
     public static boolean hideStoriesTray(){
         return SharedPref.getBooleanPerf(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
     }
