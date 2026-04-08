@@ -77,8 +77,7 @@ val hideReshareButtonPatch = bytecodePatch(
                 Opcode.MOVE_RESULT_OBJECT
             )
 
-            val moveResultRegister =
-                getInstruction<OneRegisterInstruction>(moveResultIndex).registerA
+            val moveResultRegister = getInstruction<OneRegisterInstruction>(moveResultIndex).registerA
             val freeRegister = findFreeRegister(moveResultIndex, moveResultRegister)
 
             addInstructionsWithLabels(
@@ -94,15 +93,20 @@ val hideReshareButtonPatch = bytecodePatch(
             )
         }
 
+        // If it's trying to get the value for our field of interest via the Pando native library,
+        // force the value to false instead
         LiveTreeGetOptionalBooleanFingerprint.method.addInstructions(
             0,
             """
-            const v0, -0x207dadd2
-            if-ne p1, v0, :piko
-            sget-object v0, Ljava/lang/Boolean;->FALSE:Ljava/lang/Boolean;
-            return-object v0
-            :piko
-            nop
+                ${PREF_CALL_DESCRIPTOR}->hideReshareButton()Z
+                move-result v0
+                if-eqz v0, :piko
+                const v0, $hashedFieldInteger
+                if-ne p1, v0, :piko
+                sget-object v0, Ljava/lang/Boolean;->FALSE:Ljava/lang/Boolean;
+                return-object v0
+                :piko
+                nop
         """
         )
 
