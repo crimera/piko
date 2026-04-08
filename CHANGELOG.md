@@ -1,3 +1,22 @@
+# [3.2.0-dev.4](https://github.com/crimera/piko/compare/v3.2.0-dev.3...v3.2.0-dev.4) (2026-04-08)
+
+
+### Bug Fixes
+
+* **Instagram:** fix `Improve image viewing` patch ([5655756](https://github.com/crimera/piko/commit/5655756526bbad2588db7fefcb0641d1470aa251))
+* **Instagram:** fix padding issue in Piko settings button ([4855f38](https://github.com/crimera/piko/commit/4855f38410ed6999e3d501cb0301efee4490a148))
+* **Instagram:** fix Piko settings issues ([d3369f2](https://github.com/crimera/piko/commit/d3369f2aa594737bbf73ef86bb8b3001e17c4327))
+* **Instagram:** fix piko settings nav bar clipping ([0b94452](https://github.com/crimera/piko/commit/0b94452310b8d3630142d8b9b3715b4bbea012d9))
+
+
+### Features
+
+* **Instagram:** Add `Hide navigation buttons` patch ([948f136](https://github.com/crimera/piko/commit/948f1362b298668c8ec960f2801bb1b2c7807a04))
+* **Instagram:** Add `Hide reshare button` patch ([84ad6ae](https://github.com/crimera/piko/commit/84ad6ae7b4f3112a2175b1360c113c9a71b1ff9b))
+* **Instagram:** Added `Hide group creation button on sharesheet` patch ([8faab8c](https://github.com/crimera/piko/commit/8faab8cd984e2dede46aa9ed0355b7c63e2d0535))
+* **Instagram:** Added `Improve image viewing` patch ([72d103d](https://github.com/crimera/piko/commit/72d103da8c059e2751fdb54c968995a669b1612f))
+* **Instagram:** Added open media externally ([9d0b1eb](https://github.com/crimera/piko/commit/9d0b1ebd6d71eb3db43123f9b8577f29c75fb223))
+
 # [3.2.0-dev.3](https://github.com/crimera/piko/compare/v3.2.0-dev.2...v3.2.0-dev.3) (2026-04-05)
 
 
