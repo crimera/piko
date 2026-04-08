@@ -85,6 +85,17 @@ public class Strings{
     public static final String MEDIA_EXISTS = "Media exits";
     public static final String DOWNLOAD_FAILED_MEDIA = "Download failed : ";
 
+
+    public static final String CATEGORY_HIDE_NAVIGATION_BUTTONS = "Hide navigation buttons";
+
+    public static final String HIDE_NAVIGATION_FEED = "Hide Feed button";
+    public static final String HIDE_NAVIGATION_REELS = "Hide Reels button";
+    public static final String HIDE_NAVIGATION_DIRECT = "Hide Direct button";
+    public static final String HIDE_NAVIGATION_SEARCH = "Hide Search button";
+    public static final String HIDE_NAVIGATION_CREATE = "Hide Create button";
+    public static final String HIDE_NAVIGATION_PROFILE = "Hide Profile button";
+
+
     public static final String PATCH_INFO_TITLE = "Patch information";
     public static final String EXPORT_PIKO_PREF = "Export piko preferences";
     public static final String IMPORT_PIKO_PREF = "Import piko preferences";

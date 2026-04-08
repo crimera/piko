@@ -85,5 +85,29 @@ public class Pref {
         return SharedPref.getBooleanPerf(Settings.DOWNLOAD_USERNAME_FOLDER);
     }
 
+    public static boolean hideNavigationFeed() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_FEED);
+    }
+
+    public static boolean hideNavigationReels() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_REELS);
+    }
+
+    public static boolean hideNavigationDirect() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_DIRECT);
+    }
+
+    public static boolean hideNavigationSearch() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_SEARCH);
+    }
+
+    public static boolean hideNavigationCreate() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_CREATE);
+    }
+
+    public static boolean hideNavigationProfile() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_PROFILE);
+    }
+
     //end
 }

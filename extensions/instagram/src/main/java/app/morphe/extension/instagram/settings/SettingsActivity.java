@@ -120,6 +120,7 @@ public class SettingsActivity extends Activity {
             screenBuilder.distractionFreeSection();
             screenBuilder.buildMiscSection();
             screenBuilder.buildDownloadSection();
+            screenBuilder.buildNavigationSection();
             screenBuilder.buildDeveloperSection();
             screenBuilder.aboutSection();
 

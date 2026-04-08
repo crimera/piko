@@ -119,6 +119,9 @@ public class SettingsStatus {
     public static boolean downloadMedia = false;
     public static void downloadMedia() {downloadMedia = true;}
 
+    public static boolean hideNavigationButtons = false;
+    public static void hideNavigationButtons() { hideNavigationButtons = true; }
+
     public static void load() {
     }
 }
