@@ -67,19 +67,22 @@ val unlockDeveloperOptionPatch =
                 listOf(
                     AREffectsDebugViewRelatedFingerprint,
                     ChromeTraceRelatedFingerprint,
-                    MessageInputMethodRelatedFingerprint,
+                    PromoteActivityOnCreateFingerprint,
                 )
 
             for (fingerprint in fingerprints) {
-                val strIndex = fingerprint.stringMatches[0].index
-                val method = fingerprint.method
-                val invokeStatic =
-                    method.instructions.last { it.opcode == Opcode.INVOKE_STATIC && it.location.index < strIndex }
+                try {
+                    val strIndex = fingerprint.stringMatches[0].index
+                    val method = fingerprint.method
+                    val invokeStatic =
+                        method.instructions.last { it.opcode == Opcode.INVOKE_STATIC && it.location.index < strIndex }
 
-                isDeveloperOptionUnlocked = checkAndHookDeveloperOptions(invokeStatic)
+                    isDeveloperOptionUnlocked = checkAndHookDeveloperOptions(invokeStatic)
 
-                if (isDeveloperOptionUnlocked) {
-                    break
+                    if (isDeveloperOptionUnlocked) {
+                        break
+                    }
+                } catch (e: Exception) {
                 }
             }
 
