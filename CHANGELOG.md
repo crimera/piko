@@ -1,3 +1,10 @@
+# [3.2.0-dev.5](https://github.com/crimera/piko/compare/v3.2.0-dev.4...v3.2.0-dev.5) (2026-04-09)
+
+
+### Bug Fixes
+
+* **Twitter:** Fix `Customize notification tabs` patch in 11.81 ([fa81d84](https://github.com/crimera/piko/commit/fa81d844096ce7a941df12a6301ff48c2f489582))
+
 # [3.2.0-dev.4](https://github.com/crimera/piko/compare/v3.2.0-dev.3...v3.2.0-dev.4) (2026-04-08)
 
 
