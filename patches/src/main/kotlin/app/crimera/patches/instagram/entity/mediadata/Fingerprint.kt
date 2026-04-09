@@ -61,9 +61,8 @@ internal object GetMediaPkIdExtensionFingerprint : Fingerprint(
     name = "getMediaPkId",
 )
 
-internal object AdCollectionMediaDebugFingerprint : Fingerprint(
-    returnType = "Ljava/lang/String;",
-    strings = listOf("ad_token", "{collection_media_role: "),
+internal object ReelsInlineQualitySurveryRelatedFingerprint : Fingerprint(
+    strings = listOf("reels_inline_quality_survey"),
 )
 
 internal object ReelsMentionDoubleTapFingerprint : Fingerprint(

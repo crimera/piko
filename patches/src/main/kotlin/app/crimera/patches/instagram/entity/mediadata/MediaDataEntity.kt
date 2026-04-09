@@ -26,7 +26,7 @@ val mediaDataEntity =
     ) {
         execute {
             // Extracting the media helper class name.
-            AdCollectionMediaDebugFingerprint.apply {
+            ReelsInlineQualitySurveryRelatedFingerprint.apply {
                 GetHelperClassExtensionFingerprint.changeFirstString(classNameToExtension(classDef.toString()))
 
                 // Get all the methods inside media helper class.
