@@ -50,20 +50,6 @@ public class Utils {
     private static final SharedPrefCategory sp = new SharedPrefCategory(Settings.SHARED_PREF_NAME);
     private static final SharedPrefCategory defsp = new SharedPrefCategory(ctx.getPackageName() + "_preferences");
 
-    public static void openUrl(String url) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.setPackage(ctx.getPackageName());
-        ctx.startActivity(intent);
-    }
-
-    public static void openDefaultLinks() {
-        Intent intent = new Intent(android.provider.Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS);
-        intent.setData(Uri.parse("package:" + ctx.getPackageName()));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        ctx.startActivity(intent);
-    }
-
     private static void startActivity(Class cls) {
         Intent intent = new Intent(ctx, cls);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -109,7 +95,7 @@ public class Utils {
             }
 
         } catch (Exception e) {
-            logger(e.toString());
+            app.morphe.extension.crimera.Utils.logger(e.toString());
         }
         return false;
     }
@@ -339,85 +325,8 @@ public class Utils {
         return theme;
     }
 
-    public static boolean pikoWriteFile(String fileName,String data,boolean append){
-        File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File pikoDir = new File(downloadsDir, "Piko");
-
-        if (!pikoDir.exists()) {
-            pikoDir.mkdirs();
-        }
-
-        File outputFile = new File(pikoDir, fileName);
-        return writeFile(outputFile,data.getBytes(),append);
-    }
-
-    public static boolean writeFile(File fileName, byte[] data, boolean append) {
-        try {
-            FileOutputStream outputStream = new FileOutputStream(fileName, append);
-            outputStream.write(data);
-            outputStream.close();
-            return true;
-        } catch (Exception e) {
-            logger(e.toString());
-        }
-        return false;
-    }
-
-    public static String readFile(File fileName) {
-        try {
-            if (!fileName.exists())
-                return null;
-
-            StringBuilder content = new StringBuilder();
-            BufferedReader reader = null;
-            try {
-                reader = new BufferedReader(new FileReader(fileName));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    content.append(line);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException ignored) {
-                    }
-                }
-            }
-            return content.toString();
-        } catch (Exception e) {
-            logger(e.toString());
-        }
-        return null;
-    }
-
-    public static void toast(String msg) {
-        app.morphe.extension.shared.Utils.showToastShort(msg);
-    }
-
-    public static void logger(Object e) {
-        String logName = "piko";
-        Log.d(logName, e +"\n");
-        if (e instanceof Exception) {
-            Exception ex = (Exception) e;
-        StackTraceElement[] stackTraceElements = ex.getStackTrace();
-            for (StackTraceElement element : stackTraceElements) {
-                Log.d(logName, "Exception occurred at line " + element.getLineNumber() + " in " + element.getClassName()
-                        + "." + element.getMethodName());
-            }
-        }
-    }
-
-    /*** THIS FUNCTION SHOULD BE USED ONLY WHILE DEVELOPMENT ***/
-    public static void debugClass(Object obj) {
-        Debug cls = new Debug(obj);
-        try{
-        cls.describeClass();
-        }catch(Exception e){
-            logger(e);
-        }
+    private static void toast(String msg){
+        app.morphe.extension.crimera.Utils.toast(msg);
     }
 
 }

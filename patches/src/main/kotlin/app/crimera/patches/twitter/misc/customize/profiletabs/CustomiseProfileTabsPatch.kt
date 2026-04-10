@@ -4,17 +4,16 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.misc.customize.profiletabs
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.CUSTOMISE_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -28,13 +27,14 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 private object CustomiseProfileTabsFingerprint : Fingerprint(
     returnType = "Ljava/util/ArrayList;",
-    strings = listOf(
-        "fragment_page_number",
-        "arg_is_unlimited_timeline",
-        "statuses_count",
-        "tweets",
-        "blue_business_affiliates_list_consumption_ui_enabled",
-    )
+    strings =
+        listOf(
+            "fragment_page_number",
+            "arg_is_unlimited_timeline",
+            "statuses_count",
+            "tweets",
+            "blue_business_affiliates_list_consumption_ui_enabled",
+        ),
 )
 
 @Suppress("unused")
@@ -98,6 +98,6 @@ val customiseProfileTabsPatch =
                     ExternalLabel("check1", last_invoke_static),
                 )
             }
-            SettingsStatusLoadFingerprint.enableSettings("profileTabCustomisation")
+            enableSettings("profileTabCustomisation")
         }
     }

@@ -19,7 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import android.app.Fragment;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.Utils;
 import app.morphe.extension.shared.StringRef;
 
 
@@ -92,7 +92,7 @@ public class FontPickerFragment extends Fragment {
                 if (hasValidFontHeader(uri)) {
                     if(copyFont(uri)){
                         toast(StringRef.str("piko_pref_add_font_success"));
-                        Utils.showRestartAppDialog(getActivity());
+                        app.morphe.extension.twitter.Utils.showRestartAppDialog(getActivity());
                     }else{
                         toast(StringRef.str("piko_pref_add_font_fail"));
                     }

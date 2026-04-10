@@ -1039,6 +1039,17 @@ public class ScreenBuilder {
                 )
         );
 
+       if (SettingsStatus.exportLoginToken) {
+           addPreference(category,
+                   helper.buttonPreference(
+                           StringRef.str("piko_pref_export_login_token"),
+                           "",
+                           Settings.EXPORT_LOGIN_TOKEN,
+                           "ic_vector_passkey",
+                           null
+                   )
+           );
+       }
     }
 
     public void buildPikoSection(boolean buildCategory){

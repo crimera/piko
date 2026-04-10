@@ -1,6 +1,7 @@
 package app.revanced.patches.all.misc.versioncode
 
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.intOption
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.util.getNode
@@ -12,7 +13,7 @@ val changeVersionCodePatch =
         name = "Change version code",
         description = "Changes the version code of the app. This will turn off app store updates " +
                 "and allows downgrading an existing app install to an older app version.",
-        default = true
+        default = true,
     ) {
         val versionCode by intOption(
             key = "versionCode",
@@ -29,7 +30,7 @@ val changeVersionCodePatch =
             required = true,
         ) { versionCode -> versionCode!! >= 1 }
 
-        compatibleWith(COMPATIBILITY_X)
+        compatibleWith(COMPATIBILITY_X, COMPATIBILITY_INSTAGRAM)
 
         execute {
             document("AndroidManifest.xml").use { document ->

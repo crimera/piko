@@ -4,17 +4,16 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.link.unshorten
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -53,6 +52,6 @@ val noShortenedUrlPatch =
                 move-result-object p1
                 """.trimIndent(),
             )
-            SettingsStatusLoadFingerprint.enableSettings("unshortenlink")
+            enableSettings("unshortenlink")
         }
     }

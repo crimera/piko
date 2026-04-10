@@ -4,17 +4,16 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.premium.enableForcePip
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.Constants.PREF_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -22,16 +21,17 @@ import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
 
 private object EnableForcePip1Fingerprint : Fingerprint(
-    strings = listOf(
-        "impl",
-        "unsupported",
-        "android_immersive_media_player_native_pip_enabled",
-    )
+    strings =
+        listOf(
+            "impl",
+            "unsupported",
+            "android_immersive_media_player_native_pip_enabled",
+        ),
 )
 
 private object EnableForcePip2Fingerprint : Fingerprint(
     returnType = "Ljava/lang/Object",
-    strings = listOf("android_immersive_media_player_native_pip_enabled")
+    strings = listOf("android_immersive_media_player_native_pip_enabled"),
 )
 
 @Suppress("unused")
@@ -60,6 +60,6 @@ val enableForcePipPatch =
                     .location.index
             methods2.addInstruction(first_sget_loc + 2, PREF)
 
-            SettingsStatusLoadFingerprint.enableSettings("enableForcePip")
+            enableSettings("enableForcePip")
         }
     }

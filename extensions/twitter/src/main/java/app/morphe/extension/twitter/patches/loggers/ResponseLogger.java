@@ -16,7 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import app.morphe.extension.twitter.Pref;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.Utils;
 
 public class ResponseLogger {
     private static final boolean LOG_RES;

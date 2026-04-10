@@ -10,11 +10,10 @@
 
 package app.crimera.patches.twitter.misc.customize.notificationtabs
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.CUSTOMISE_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -28,7 +27,6 @@ private object CustomiseNotificationTabsFingerprint : Fingerprint(
         listOf(
             "android_ntab_verified_tab_enabled",
             "all",
-            "verified",
             "mentions",
         ),
 )
@@ -44,7 +42,7 @@ val customiseNotificationTabsPatch =
         execute {
 
             CustomiseNotificationTabsFingerprint.method.apply {
-                val strIndex = CustomiseNotificationTabsFingerprint.stringMatches[3].index
+                val strIndex = CustomiseNotificationTabsFingerprint.stringMatches[2].index
                 val index = indexOfFirstInstruction(strIndex, Opcode.CHECK_CAST)
                 val reg = getInstruction(index).registersUsed[0]
 
@@ -55,7 +53,7 @@ val customiseNotificationTabsPatch =
                     move-result-object v$reg
                     """.trimIndent(),
                 )
-                SettingsStatusLoadFingerprint.enableSettings("notificationTabCustomisation")
+                enableSettings("notificationTabCustomisation")
             }
         }
     }

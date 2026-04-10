@@ -11,7 +11,7 @@
 package app.morphe.extension.twitter.entity;
 
 import app.morphe.extension.twitter.entity.Debug;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.Utils;
 
 // Lcom/twitter/media/av/model/b0;
 public class Video extends Debug {

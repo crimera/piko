@@ -94,6 +94,6 @@ public class AppIconManager {
         logger("Set: "+componentName);
     }
     private void logger(String msg){
-        app.morphe.extension.twitter.Utils.logger(msg);
+        app.morphe.extension.crimera.Utils.logger(msg);
     }
 }

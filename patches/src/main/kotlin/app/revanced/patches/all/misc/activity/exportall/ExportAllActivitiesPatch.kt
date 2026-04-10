@@ -1,6 +1,6 @@
 package app.revanced.patches.all.misc.activity.exportall
 
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.resourcePatch
 
 @Suppress("unused")

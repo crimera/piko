@@ -4,13 +4,13 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.misc.bringbacktwitter
 
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.utils.replaceStringsInFile
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patches.all.misc.resources.addAppResources

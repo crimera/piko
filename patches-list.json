@@ -1,5 +1,5 @@
 {
-  "version": "3.1.0",
+  "version": "3.2.0-dev.5",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -10,6 +10,22 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Add settings",
+      "description": "Adds settings to control preferences are patching",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -57,7 +73,10 @@
       "use": true,
       "dependencies": [],
       "compatiblePackages": {
-        "com.twitter.android": null
+        "com.twitter.android": null,
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": [
         {
@@ -150,19 +169,6 @@
       "options": []
     },
     {
-      "name": "Custom translator",
-      "description": "Requires X 11.0.0-release.0 or higher.",
-      "use": true,
-      "dependencies": [
-        "BytecodePatch",
-        "BytecodePatch"
-      ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
-      "options": []
-    },
-    {
       "name": "Customise post font size",
       "description": null,
       "use": true,
@@ -171,6 +177,20 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Customise story timestamp",
+      "description": "Customise the timestamp that shows when the story was posted",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -307,6 +327,35 @@
       "options": []
     },
     {
+      "name": "Disable ads",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Disable analytics",
+      "description": "Block analytics that are sent to Instagram/Facebook servers.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Disable auto timeline scroll on launch",
       "description": null,
       "use": true,
@@ -332,6 +381,80 @@
       "options": []
     },
     {
+      "name": "Disable comments",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Disable discover people",
+      "description": "Disables discover people section on user profile",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Disable explore",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Disable stories",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Disable story flipping",
+      "description": "Disable automatic flipping/moving to next story",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Disunify xchat system",
       "description": "Bring back legacy features like messages and share sheet.",
       "use": false,
@@ -339,7 +462,25 @@
         "BytecodePatch"
       ],
       "compatiblePackages": {
-        "com.twitter.android": null
+        "com.twitter.android": [
+          "11.69.0-release.0"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Download media",
+      "description": "Adds ability to download posts, reels, stories and highlights",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -421,6 +562,22 @@
       "dependencies": [],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Follow back indicator",
+      "description": "Adds a label on the profile page, indicating whether a user is follows you back.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -594,6 +751,20 @@
       "options": []
     },
     {
+      "name": "Hide group creation button on sharesheet",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Hide hidden replies",
       "description": null,
       "use": true,
@@ -615,6 +786,20 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide navigation buttons",
+      "description": "Hides navigation bar buttons, such as the Reels and Create button.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -656,8 +841,8 @@
       "options": []
     },
     {
-      "name": "Hide timeline posts by category",
-      "description": "Hides different post category like who to follow, news today etc from timeline.",
+      "name": "Hide recommendation items",
+      "description": "Adds options to hide recommendation items such as \"Who to follow\" and \"Today's news\" in timeline, search, and replies.",
       "use": true,
       "dependencies": [
         "BytecodePatch",
@@ -665,6 +850,49 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Hide reshare button",
+      "description": "Hides the reshare button from both posts and reels.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Hide stories tray",
+      "description": "Hides stories tray from main feed.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Hide suggested content",
+      "description": "Hides suggested stories, reels, threads (Suggested posts will still be shown).",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -682,6 +910,34 @@
       "options": []
     },
     {
+      "name": "Import/Export login token",
+      "description": "Adds an feature to export and import the token of accounts. This is useful when logging in on your second device or when re-installing piko.",
+      "use": true,
+      "dependencies": [
+        "ResourcePatch",
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Improve image viewing",
+      "description": "Fetches max resolution images from server.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Legacy share links",
       "description": "Brings back username on post share links. Works post 11.4x.xx",
       "use": true,
@@ -695,6 +951,20 @@
       "options": []
     },
     {
+      "name": "Limit feed to following profiles",
+      "description": "Filters the home feed to display only content from profiles you follow.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Log server response",
       "description": "Log json responses received from server",
       "use": true,
@@ -703,6 +973,20 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Make ephemeral media permanent",
+      "description": "changes view once, view twice media to permanent view. Do note older ephemeral media might look blank.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -735,6 +1019,19 @@
       "options": []
     },
     {
+      "name": "Native translator",
+      "description": "Requires X 11.0.0-release.0 or higher.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
       "name": "No shortened URL",
       "description": "Get rid of t.co short urls.",
       "use": true,
@@ -743,6 +1040,20 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Open links externally",
+      "description": "Changes links to always open in your external browser, instead of the in-app browser.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -768,6 +1079,20 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Remove build expired popup",
+      "description": "Removes the popup that appears after a while, when the app version ages.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -817,6 +1142,20 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Sanitize share links",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -891,6 +1230,68 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Unlock developer options",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "View live anonymously",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "View stories anonymously",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "View story mentions",
+      "description": "Add option to view visible and hidden story mentions.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     }

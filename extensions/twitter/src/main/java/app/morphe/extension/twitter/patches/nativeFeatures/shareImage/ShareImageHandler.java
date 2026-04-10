@@ -30,7 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.Utils;
 import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.twitter.entity.Tweet;
 import app.morphe.extension.twitter.utils.ViewUtils;

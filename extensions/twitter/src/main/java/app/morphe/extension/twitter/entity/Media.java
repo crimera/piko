@@ -10,7 +10,7 @@
 
 package app.morphe.extension.twitter.entity;
 
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.Utils;
 
 public class Media {
     // 0-img, 1-video

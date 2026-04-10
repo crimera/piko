@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-03-29T10:17:31",
-  "description": "# [3.1.0](https://github.com/crimera/piko/compare/v3.0.0...v3.1.0) (2026-03-29)\n\n\n### Bug Fixes\n\n* **Twitter:** Fix `Customize notification tabs` patch on 11.78.xx ([8f884e5](https://github.com/crimera/piko/commit/8f884e56e3b95581c96bc67e7801369b42f7d5f0))\n* **Twitter:** Fix `Log server response` patch on 11.77.xx ([08f7fb0](https://github.com/crimera/piko/commit/08f7fb0aed0ca20f1d44fe46d8e1469d0fa787d4))\n* **Twitter:** Fix GIFs downloading as image via native downloader ([5b40c87](https://github.com/crimera/piko/commit/5b40c87bc3cc383f127e20243a1482c3e7613e3b))\n\n\n### Features\n\n* **Bring back twitter:** Use strings from Twitter 9.98.0 for all languages ([68cf8c3](https://github.com/crimera/piko/commit/68cf8c379292ddfb80e3d11b7851703ffb7eca8b))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.1.0/patches-3.1.0.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.1.0/patches-3.1.0.mpp.asc",
-  "version": "3.1.0"
+  "created_at": "2026-04-09T08:09:58",
+  "description": "# [3.2.0-dev.5](https://github.com/crimera/piko/compare/v3.2.0-dev.4...v3.2.0-dev.5) (2026-04-09)\n\n\n### Bug Fixes\n\n* **Twitter:** Fix `Customize notification tabs` patch in 11.81 ([fa81d84](https://github.com/crimera/piko/commit/fa81d844096ce7a941df12a6301ff48c2f489582))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.2.0-dev.5/patches-3.2.0-dev.5.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.2.0-dev.5/patches-3.2.0-dev.5.mpp.asc",
+  "version": "3.2.0-dev.5"
 }

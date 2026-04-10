@@ -4,17 +4,16 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.timeline.enableVidAutoAdvance
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.Constants.PREF_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.opcode
@@ -23,10 +22,11 @@ import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
 private object EnableVidAutoAdvancePatchFingerprint : Fingerprint(
-    filters = listOf(
-        string("immersive_video_auto_advance_duration_threshold"),
-        opcode(Opcode.MOVE_RESULT)
-    )
+    filters =
+        listOf(
+            string("immersive_video_auto_advance_duration_threshold"),
+            opcode(Opcode.MOVE_RESULT),
+        ),
 )
 
 @Suppress("unused")
@@ -49,6 +49,6 @@ val enableVidAutoAdvancePatch =
                 """.trimIndent(),
             )
 
-            SettingsStatusLoadFingerprint.enableSettings("enableVidAutoAdvance")
+            enableSettings("enableVidAutoAdvance")
         }
     }

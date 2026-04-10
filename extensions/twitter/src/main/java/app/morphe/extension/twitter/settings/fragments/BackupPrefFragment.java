@@ -69,7 +69,7 @@ public class BackupPrefFragment extends Fragment {
     }
 
     private void toast(String msg){
-        Utils.toast(msg);
+        app.morphe.extension.crimera.Utils.toast(msg);
     }
 
     @Override

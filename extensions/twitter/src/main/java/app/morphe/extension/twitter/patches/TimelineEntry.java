@@ -18,7 +18,7 @@ import app.morphe.extension.twitter.settings.SettingsStatus;
 import app.morphe.extension.twitter.entity.Video;
 import java.util.List;
 import java.util.ArrayList;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.Utils;
 
 public class TimelineEntry {
     public static final boolean hideAds;

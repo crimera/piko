@@ -4,17 +4,16 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.misc.roundOffNumbers
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.Constants.PREF_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -26,14 +25,15 @@ import com.android.tools.smali.dexlib2.Opcode
 
 private object RoundOffNumbersFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
-    filters = listOf(
-        resourceLiteral(ResourceType.INTEGER,"abbr_number_divider_billions"),
-        resourceLiteral(ResourceType.INTEGER,"abbr_number_divider_millions"),
-        resourceLiteral(ResourceType.INTEGER,"abbr_number_divider_thousands"),
-        resourceLiteral(ResourceType.STRING, "abbr_number_unit_billions"),
-        resourceLiteral(ResourceType.STRING, "abbr_number_unit_millions"),
-        resourceLiteral(ResourceType.STRING, "abbr_number_unit_thousands"),
-        )
+    filters =
+        listOf(
+            resourceLiteral(ResourceType.INTEGER, "abbr_number_divider_billions"),
+            resourceLiteral(ResourceType.INTEGER, "abbr_number_divider_millions"),
+            resourceLiteral(ResourceType.INTEGER, "abbr_number_divider_thousands"),
+            resourceLiteral(ResourceType.STRING, "abbr_number_unit_billions"),
+            resourceLiteral(ResourceType.STRING, "abbr_number_unit_millions"),
+            resourceLiteral(ResourceType.STRING, "abbr_number_unit_thousands"),
+        ),
 )
 
 @Suppress("unused")
@@ -54,15 +54,15 @@ val roundOffNumbersPatch =
                 addInstructionsWithLabels(
                     move_res_obj + 1,
                     """
-                        sget-boolean v1, $PREF_DESCRIPTOR;->ROUND_OFF_NUMBERS:Z
-                        if-nez v1, :cond
-                        goto :here
-                        """.trimIndent(),
+                    sget-boolean v1, $PREF_DESCRIPTOR;->ROUND_OFF_NUMBERS:Z
+                    if-nez v1, :cond
+                    goto :here
+                    """.trimIndent(),
                     ExternalLabel("here", sget_obj),
                     ExternalLabel("cond", inv_vir),
                 )
 
-                SettingsStatusLoadFingerprint.enableSettings("roundOffNumbers")
+                enableSettings("roundOffNumbers")
             }
         }
     }

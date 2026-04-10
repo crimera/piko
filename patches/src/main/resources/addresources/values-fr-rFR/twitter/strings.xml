@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Premium Settings -->
+    <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">mode lecture</string>
     <string name="piko_pref_reader_mode_desc">Active le \"mode lecture\" pour les longs fils de discussion</string>
     <string name="piko_pref_undo_posts">annuler les publications</string>

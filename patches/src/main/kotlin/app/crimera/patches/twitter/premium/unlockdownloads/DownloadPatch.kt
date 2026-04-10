@@ -4,16 +4,15 @@
  * This file is part of piko.
  *
  * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
+ * must retain this copyright notice and the piko attribution
  * in the source code and version control history.
  */
 
 package app.crimera.patches.twitter.premium.unlockdownloads
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.OpcodesFilter
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -30,34 +29,36 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
 private object DownloadPatchFingerprint : Fingerprint(
-    filters = OpcodesFilter.opcodesToFilters(
-        Opcode.IF_EQ,
-        Opcode.SGET_OBJECT,
-        Opcode.GOTO_16,
-        Opcode.NEW_INSTANCE,
-    ),
-    strings = listOf(
-        "mediaEntity",
-        "media_options_sheet",
-    )
+    filters =
+        OpcodesFilter.opcodesToFilters(
+            Opcode.IF_EQ,
+            Opcode.SGET_OBJECT,
+            Opcode.GOTO_16,
+            Opcode.NEW_INSTANCE,
+        ),
+    strings =
+        listOf(
+            "mediaEntity",
+            "media_options_sheet",
+        ),
 )
 
 private object FileDownloaderFingerprint : Fingerprint(
     returnType = "Z",
     filters = OpcodesFilter.opcodesToFilters(Opcode.IF_EQZ),
-    strings = listOf("mediaEntity", "url")
+    strings = listOf("mediaEntity", "url"),
 )
 
 // credits @revanced
 private object ImmersiveBottomSheetPatchFingerprint : Fingerprint(
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.CONSTRUCTOR),
     returnType = "V",
-    strings = listOf("captionsState")
+    strings = listOf("captionsState"),
 )
 
 private object MediaEntityFingerprint : Fingerprint(
     definingClass = "Lcom/twitter/model/json/core/JsonMediaEntity;",
-    filters = OpcodesFilter.opcodesToFilters(Opcode.IGET_BOOLEAN)
+    filters = OpcodesFilter.opcodesToFilters(Opcode.IGET_BOOLEAN),
 )
 
 // Credits to @iKirby
@@ -136,6 +137,6 @@ val downloadPatch =
                 """.trimIndent(),
             )
 
-            SettingsStatusLoadFingerprint.enableSettings("enableVidDownload")
+            enableSettings("enableVidDownload")
         }
     }

@@ -1,2 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="piko_title_settings">Configurações Piko</string>
+    <string name="piko_title_piko_patches">Piko Patches</string>
+    <string name="piko_title_piko_integrations">Piko Integrations</string>
+</resources>

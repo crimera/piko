@@ -13,7 +13,7 @@ package app.morphe.extension.twitter.entity;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.Utils;
 
 public class Debug {
     protected final Object obj;

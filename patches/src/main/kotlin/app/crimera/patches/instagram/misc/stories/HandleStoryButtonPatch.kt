@@ -1,0 +1,110 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
+package app.crimera.patches.instagram.misc.stories
+
+import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.utils.MethodFieldMetadata
+import app.crimera.utils.extensionToClassName
+import app.crimera.utils.fieldExtractor
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.Opcode
+
+// The method is obfuscated but this is where it adds buttons.
+object AddStoryButtonFingerprint : Fingerprint(
+    returnType = "[Ljava/lang/CharSequence;",
+    strings = listOf("[INTERNAL] Pause Playback"),
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 1
+    },
+)
+
+// The method is obfuscated but this is where the onclick call executes.
+internal object OnCLickStoryButtonFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("explore_viewer", "friendships/mute_friend_reel/%s/", "[INTERNAL] Pause Playback"),
+)
+
+val handleStoryButtonPatch =
+    bytecodePatch(
+        description = "This patch is used for handing button interaction on stories",
+    ) {
+        compatibleWith(COMPATIBILITY_INSTAGRAM)
+
+        execute {
+
+            val STORY_BUTTON_EXTENSION_CLASS = "${PATCHES_DESCRIPTOR}/story/StoryButton;"
+
+            var mediaObjectFromReelItemFieldExtraction: MethodFieldMetadata
+            // Add button on story bottom sheet.
+            AddStoryButtonFingerprint.method.apply {
+                mediaObjectFromReelItemFieldExtraction = instructions.filter { it.opcode == Opcode.IGET_OBJECT }[1].fieldExtractor()
+                // The last invoke-virtual instruction is arrayList.add().
+                val lastInvokeVirtualRegisters = instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL }.registersUsed
+                val arrayListRegister = lastInvokeVirtualRegisters[0]
+
+                val firstMoveResultObjectInstruction = indexOfFirstInstruction(Opcode.MOVE_RESULT_OBJECT)
+
+                addInstructions(
+                    firstMoveResultObjectInstruction + 1,
+                    """
+                    invoke-static {v$arrayListRegister},$STORY_BUTTON_EXTENSION_CLASS ->addButtons(Ljava/util/ArrayList;)Ljava/util/ArrayList;
+                    move-result-object v$arrayListRegister
+                    """.trimIndent(),
+                )
+            }
+
+            OnCLickStoryButtonFingerprint.method.apply {
+                val classDef = OnCLickStoryButtonFingerprint.classDef
+                val reelItemClassName = "Lcom/instagram/model/reels/ReelItem;"
+                val appActivity = "Landroid/app/Activity;"
+                val charSequence = "Ljava/lang/CharSequence;"
+
+                val classFields = classDef.fields
+                val reelItemFieldName = classFields.first { it.type == reelItemClassName }.name
+                val appActivityFieldName = classFields.first { it.type == appActivity }.name
+
+                val characterSequenceParameterIndex =
+                    OnCLickStoryButtonFingerprint.method.parameters.indexOfLast {
+                        it.type == charSequence
+                    }
+                val selfClassParameterIndex = OnCLickStoryButtonFingerprint.method.parameters.indexOfLast { it.type == classDef.type }
+
+                // Hard coding registries as it's going to be the first line in the method.
+                addInstructionsWithLabels(
+                    0,
+                    """
+                    move-object/from16 v0, p$characterSequenceParameterIndex
+                    move-object/from16 v1, p$selfClassParameterIndex
+                    
+                    iget-object v2, v1, ${classDef.type}->$appActivityFieldName:$appActivity
+                    iget-object v3, v1, ${classDef.type}->$reelItemFieldName:$reelItemClassName
+                    iget-object v3, v3, $reelItemClassName->${mediaObjectFromReelItemFieldExtraction.name}:${extensionToClassName(
+                        mediaObjectFromReelItemFieldExtraction.returnType,
+                    )}
+                    invoke-static {v0,v2,v3}, $STORY_BUTTON_EXTENSION_CLASS->storyButtonAction($charSequence Landroid/content/Context;Ljava/lang/Object;)Z
+                    move-result v0
+                    if-eqz v0, :piko
+                    return-void
+                    """.trimIndent(),
+                    ExternalLabel("piko", getInstruction(0)),
+                )
+            }
+        }
+    }

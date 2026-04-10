@@ -12,11 +12,10 @@ package app.crimera.patches.twitter.link.customsharingdomain
 
 import app.crimera.patches.twitter.link.cleartrackingparams.AddSessionTokenFingerprint
 import app.crimera.patches.twitter.link.handlemodernsharesheetlinks.handleModernShareSheetLinks
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.shared.Constants.COMPATIBILITY_X
-import app.crimera.utils.Constants.PATCHES_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
 
@@ -42,6 +41,6 @@ val customSharingDomainPatch =
                 callStatement.replace(dummyReg, "p0"),
             )
 
-            SettingsStatusLoadFingerprint.enableSettings("enableCustomSharingDomain")
+            enableSettings("enableCustomSharingDomain")
         }
     }
