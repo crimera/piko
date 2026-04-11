@@ -2,7 +2,7 @@ name: Build Custom Patches
 
 on:
   push:
-    branches: [ "build-test" ] # שינינו את זה כדי שירוץ אוטומטית על הבראנץ' הזמני!
+    branches: [ "build-test" ]
   workflow_dispatch:
 
 jobs:
