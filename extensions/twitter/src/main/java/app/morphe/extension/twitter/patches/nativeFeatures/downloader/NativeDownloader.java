@@ -29,6 +29,10 @@ public class NativeDownloader {
         return StringRef.str(tag);
     }
 
+    private static String strRes(String tag, Object... args) {
+        return StringRef.str(tag, args);
+    }
+
     public static String downloadString() {
         return strRes("piko_pref_native_downloader_alert_title");
     }
@@ -66,8 +70,6 @@ public class NativeDownloader {
         String photo = strRes("drafts_empty_photo");
         String video = strRes("drafts_empty_video");
 
-        LinearLayout ln = new LinearLayout(ctx);
-        ln.setOrientation(LinearLayout.VERTICAL);
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
         builder.setTitle(strRes("piko_pref_native_downloader_alert_title"));
 

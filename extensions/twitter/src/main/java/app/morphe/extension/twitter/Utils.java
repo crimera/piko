@@ -29,6 +29,7 @@ import app.morphe.extension.shared.settings.BooleanSetting;
 import app.morphe.extension.shared.settings.StringSetting;
 import app.morphe.extension.shared.settings.preference.SharedPrefCategory;
 import app.morphe.extension.twitter.settings.Settings;
+import app.morphe.extension.twitter.patches.nativeFeatures.downloader.NativeDownloaderSafUtils;
 import com.google.android.material.tabs.TabLayout$g;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -265,8 +266,12 @@ public class Utils {
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     public static void downloadFile(String url, String mediaName, String ext) {
+        if (NativeDownloaderSafUtils.isConfigured()) {
+            NativeDownloaderSafUtils.downloadFile(ctx, url, mediaName, ext);
+            return;
+        }
+
         String filename = mediaName + "." + ext;
-        boolean isPhoto = ext.equals("jpg");
 
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
         request.setDescription("Downloading " + filename);
@@ -275,11 +280,6 @@ public class Utils {
 
         String publicFolder = "Pictures";
         String subFolder = "Twitter";
-
-        if (!isPhoto) {
-            publicFolder = Pref.getPublicFolder();
-            subFolder = Utils.getStringPref(Settings.VID_SUBFOLDER);
-        }
         request.setDestinationInExternalPublicDir(publicFolder, subFolder + "/" + "temp_" + filename);
 
         File file = new File(Environment.getExternalStorageDirectory(), getPath(publicFolder, subFolder, filename));

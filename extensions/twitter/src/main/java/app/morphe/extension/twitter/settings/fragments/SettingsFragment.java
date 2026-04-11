@@ -14,6 +14,7 @@ import app.morphe.extension.shared.StringRef;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.*;
+import android.view.ContextThemeWrapper;
 import androidx.annotation.Nullable;
 import app.morphe.extension.twitter.settings.widgets.Helper;
 import app.morphe.extension.twitter.settings.ScreenBuilder;
@@ -30,10 +31,18 @@ public class SettingsFragment extends PreferenceFragment {
         ActivityHook.toolbar.setTitle(StringRef.str("piko_title_settings"));
     }
 
+    private Context getPreferenceContext() {
+        Context activity = getActivity();
+        if (activity == null) {
+            return getContext();
+        }
+        return new ContextThemeWrapper(activity, android.R.style.Theme_DeviceDefault);
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = getContext();
+        context = getPreferenceContext();
 
         PreferenceManager preferenceManager = getPreferenceManager();
         PreferenceScreen screen = preferenceManager.createPreferenceScreen(context);

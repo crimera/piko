@@ -14,6 +14,7 @@ package app.morphe.extension.twitter.settings.widgets;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -32,6 +33,8 @@ import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderMode
 import app.morphe.extension.twitter.patches.customise.font.FontPickerFragment;
 import app.morphe.extension.twitter.patches.customise.font.UpdateFont;
 import app.morphe.extension.twitter.patches.customise.appIcon.IconSelectorFragment;
+import app.morphe.extension.twitter.patches.nativeFeatures.downloader.NativeDownloaderSafUtils;
+import app.morphe.extension.twitter.settings.fragments.PickDownloadFolderFragment;
 
 public class ButtonPref extends Preference {
     private final Context context;
@@ -67,6 +70,17 @@ public class ButtonPref extends Preference {
         this.iconName = iconName;
     }
 
+
+    private Activity getActivityContext() {
+        Context current = context;
+        while (current instanceof ContextWrapper) {
+            if (current instanceof Activity) {
+                return (Activity) current;
+            }
+            current = ((ContextWrapper) current).getBaseContext();
+        }
+        return null;
+    }
 
     private void init() {
         if (iconName != null) {
@@ -130,13 +144,22 @@ public class ButtonPref extends Preference {
                         fragment = new IconSelectorFragment();
                     } else if (key.equals(Settings.EXPORT_LOGIN_TOKEN)) {
                         fragment = new ExportLoginTokenFragment();
+                    } else if (key.equals(Settings.PICK_DOWNLOAD_FOLDER)) {
+                        fragment = new PickDownloadFolderFragment();
+                    } else if (key.equals(Settings.CLEAR_DOWNLOAD_FOLDER)) {
+                        NativeDownloaderSafUtils.clearTreeUri(context);
+                        app.morphe.extension.crimera.Utils.toast(app.morphe.extension.shared.StringRef.str("piko_pref_download_saf_cleared"));
                     } else {
                         ActivityHook.startActivity(key);
                     }
 
                     if (fragment != null) {
+                        Activity activity = getActivityContext();
+                        if (activity == null) {
+                            throw new IllegalStateException("No activity context found");
+                        }
                         fragment.setArguments(bundle);
-                        ActivityHook.startFragment((Activity) context, key,fragment, true);
+                        ActivityHook.startFragment(activity, key,fragment, true);
                     }
                 } catch (Exception e) {
                     app.morphe.extension.crimera.Utils.logger(e);

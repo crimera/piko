@@ -133,12 +133,16 @@ public class Pref {
         return Utils.getBooleanPerf(Settings.TIMELINE_UNSHORT_URL);
     }
 
-    public static String getPublicFolder() {
-        return Utils.getStringPref(Settings.VID_PUBLIC_FOLDER);
+    public static String getNativeDownloaderSafTreeUri() {
+        return Utils.getStringPref(Settings.VID_SAF_TREE_URI);
     }
 
-    public static String getVideoFolder(String filename) {
-        return Utils.getStringPref(Settings.VID_SUBFOLDER) + "/" + filename;
+    public static boolean hasNativeDownloaderSafTreeUri() {
+        return !getNativeDownloaderSafTreeUri().isBlank();
+    }
+
+    public static String getNativeDownloaderSafFolderLabel() {
+        return Utils.getStringPref(Settings.VID_SAF_FOLDER_LABEL);
     }
 
     public static int vidMediaHandle() {
