@@ -126,6 +126,7 @@ public class DownloadUtils {
     private static final String USER_AGENT = "Instagram " + Utils.getAppVersionName()
             + " Android (" + Build.MANUFACTURER + "; " + Build.MODEL + "; " + Build.DISPLAY + ")";
 
+    // Fast download engine — inspiration and core logic adapted from MyInsta by bluepapilte.
     private static void downloadFile(Context ctx, String url, String username, String downloadFilename) {
         String publicFolder = Environment.DIRECTORY_DOWNLOADS;
         String subFolder = "Piko-Instagram";

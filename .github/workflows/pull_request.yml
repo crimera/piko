@@ -1,0 +1,27 @@
+name: Open a PR to main
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+
+env:
+  TITLE: 'chore: Merge branch `${{ github.head_ref || github.ref_name }}` to `main`'
+  BODY: 'This pull request will `${{ github.head_ref || github.ref_name }}` to `main`.'
+
+jobs:
+  pull-request:
+    name: Open pull request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Open pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr create -d -B main -H dev --title '${{ env.TITLE }}' --body '${{ env.BODY }}' ||  gh pr edit -B main --title '${{ env.TITLE }}' --body '${{ env.BODY }}'

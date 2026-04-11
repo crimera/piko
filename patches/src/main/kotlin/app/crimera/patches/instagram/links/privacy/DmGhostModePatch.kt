@@ -29,6 +29,7 @@ internal object MarkThreadSeenFingerprint : Fingerprint(
     },
 )
 
+// Feature inspiration and core logic adapted from MyInsta by bluepapilte.
 @Suppress("unused")
 val dmGhostModePatch =
     bytecodePatch(

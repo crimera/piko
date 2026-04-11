@@ -114,6 +114,7 @@ public class Links {
                         || path.contains("/feed/injected_reels_media/")
                         || path.contains("/api/v1/ads/graphql/")) {
                     shouldBlockUri = DISABLE_ADS;
+                // DM Ghost Mode URI interception — inspiration and core logic adapted from MyInsta by bluepapilte.
                 } else if (path.matches(".*/direct_v2/threads/.*/items/.*/seen.*")) {
                     shouldBlockUri = DM_GHOST_MODE;
                 }
