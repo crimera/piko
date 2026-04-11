@@ -71,6 +71,10 @@ public class Strings {
     public static final String IMPROVE_IMAGE_VIEWING = "Improve image viewing";
     public static final String IMPROVE_IMAGE_VIEWING_DESC = "Fetches max resolution images from server";
     public static final String HIDE_RESHARE_BUTTON = "Hide reshare button";
+    public static final String COPY_COMMENT = "Copy comment";
+    public static final String COPY_COMMENT_DESC = "Adds a button to copy comments on posts and reels";
+    public static final String COMMENT_COPIED_SUCCESS = "Comment copied";
+    public static final String COMMENT_COPIED_FAILED = "No text found to copy";
 
     public static final String CATEGORY_DOWNLOAD_MEDIA = "Download media";
     public static final String ENABLE_DOWNLOAD = "Enable download";

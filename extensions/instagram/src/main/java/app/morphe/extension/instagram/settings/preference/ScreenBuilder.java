@@ -328,6 +328,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.copyCommentButton) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.COPY_COMMENT,
+                            Strings.COPY_COMMENT_DESC,
+                            Settings.COMMENT_COPY_BUTTON
+                    )
+            );
+        }
     }
 
     public void buildDownloadSection() {

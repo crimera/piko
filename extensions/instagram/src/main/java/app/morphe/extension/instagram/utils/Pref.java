@@ -125,5 +125,9 @@ public class Pref {
         return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_PROFILE);
     }
 
+    public static boolean commentCopyButton() {
+        return SharedPref.getBooleanPerf(Settings.COMMENT_COPY_BUTTON) && SettingsStatus.copyCommentButton;
+    }
+
     //end
 }

@@ -125,7 +125,11 @@ public class SettingsStatus {
     public static void hideReshareButton() {
         hideReshareButton = true;
     }
-    public static boolean miscSection() {return (improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
+    public static boolean copyCommentButton = false;
+    public static void copyCommentButton() {
+        copyCommentButton = true;
+    }
+    public static boolean miscSection() {return (copyCommentButton || improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
 
     //Download section.
     public static boolean downloadMedia = false;

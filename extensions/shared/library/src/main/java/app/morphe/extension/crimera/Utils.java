@@ -28,6 +28,10 @@ import java.io.IOException;
 public class Utils {
     private static final Context ctx = app.morphe.extension.shared.Utils.getContext();
 
+    public static Context getContext() {
+        return ctx;
+    }
+
     public static void openUrl(String url) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
