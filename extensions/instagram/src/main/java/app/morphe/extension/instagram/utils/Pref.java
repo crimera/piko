@@ -125,5 +125,15 @@ public class Pref {
         return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_PROFILE);
     }
 
+    public static boolean dmGhostMode(){
+        return SharedPref.getBooleanPerf(Settings.DM_GHOST_MODE);
+    }
+    public static boolean disableScreenshotDetection(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_SCREENSHOT_DETECTION);
+    }
+    public static boolean disableFlagSecure(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_FLAG_SECURE);
+    }
+
     //end
 }

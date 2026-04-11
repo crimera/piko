@@ -45,6 +45,10 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting DOWNLOAD_USERNAME_FOLDER = new BooleanSetting("download_username_folder", false);
 
 
+    public static final BooleanSetting DM_GHOST_MODE = new BooleanSetting("dm_ghost_mode", false);
+    public static final BooleanSetting DISABLE_SCREENSHOT_DETECTION = new BooleanSetting("disable_screenshot_detection", false);
+    public static final BooleanSetting DISABLE_FLAG_SECURE = new BooleanSetting("disable_flag_secure", false);
+
     public static final BooleanSetting HIDE_NAVIGATION_FEED = new BooleanSetting("hide_navigation_feed", false);
     public static final BooleanSetting HIDE_NAVIGATION_REELS = new BooleanSetting("hide_navigation_reels", false);
     public static final BooleanSetting HIDE_NAVIGATION_DIRECT = new BooleanSetting("hide_navigation_direct", false);

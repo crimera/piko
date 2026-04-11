@@ -34,6 +34,7 @@ public class Links {
     private static final boolean DISABLE_COMMENTS;
     private static final boolean DISABLE_DISCOVER_PEOPLE;
     private static final boolean DISABLE_ADS;
+    private static final boolean DM_GHOST_MODE;
 
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
@@ -44,6 +45,9 @@ public class Links {
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
         DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
         DISABLE_ADS = Pref.disableAds() && SettingsStatus.disableAds;
+        DM_GHOST_MODE = Pref.dmGhostMode() && SettingsStatus.dmGhostMode;
+
+        FlagSecureBypass.init();
     }
 
 
@@ -110,6 +114,8 @@ public class Links {
                         || path.contains("/feed/injected_reels_media/")
                         || path.contains("/api/v1/ads/graphql/")) {
                     shouldBlockUri = DISABLE_ADS;
+                } else if (path.matches(".*/direct_v2/threads/.*/items/.*/seen.*")) {
+                    shouldBlockUri = DM_GHOST_MODE;
                 }
 
             }

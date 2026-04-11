@@ -144,6 +144,33 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.dmGhostMode) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DM_GHOST_MODE,
+                            Strings.DM_GHOST_MODE_DESC,
+                            Settings.DM_GHOST_MODE
+                    )
+            );
+        }
+        if (SettingsStatus.disableScreenshotDetection) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_SCREENSHOT_DETECTION,
+                            Strings.DISABLE_SCREENSHOT_DETECTION_DESC,
+                            Settings.DISABLE_SCREENSHOT_DETECTION
+                    )
+            );
+        }
+        if (SettingsStatus.disableFlagSecure) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_FLAG_SECURE,
+                            Strings.DISABLE_FLAG_SECURE_DESC,
+                            Settings.DISABLE_FLAG_SECURE
+                    )
+            );
+        }
 
     }
 

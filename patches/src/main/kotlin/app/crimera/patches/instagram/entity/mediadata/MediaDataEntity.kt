@@ -17,8 +17,12 @@ import app.crimera.utils.methodExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.getMutableMethod
 import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 val mediaDataEntity =
     bytecodePatch(
@@ -66,18 +70,38 @@ val mediaDataEntity =
             EditMediaInfoFragmentMediaSizeFingerprint.method.apply {
                 val firstReturnIndex = indexOfFirstInstruction(Opcode.RETURN)
 
-                val extendedDataFieldIndex = indexOfFirstInstruction(firstReturnIndex, Opcode.IGET_OBJECT)
-                // If iget-object is found after return instruction.
-                if (extendedDataFieldIndex > 0) {
+                val igetAfterReturn = indexOfFirstInstruction(firstReturnIndex, Opcode.IGET_OBJECT)
+                if (igetAfterReturn > 0) {
+                    // Old pattern: IGET_OBJECT after RETURN, followed directly by the media list method call
                     val extendedDataFieldName =
-                        getInstruction(
-                            extendedDataFieldIndex,
-                        ).fieldExtractor().name
-                    val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
+                        getInstruction(igetAfterReturn).fieldExtractor().name
+                    val mediaListMethodName = getInstruction(igetAfterReturn + 1).methodExtractor().name
 
                     GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
                     GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
                     foundMediaListMethod = true
+                } else {
+                    // v423 pattern: all IGET_OBJECTs are before RETURN; INVOKE_STATIC after RETURN
+                    // delegates through a static helper to the real INVOKE_INTERFACE method.
+                    val lastIgetBeforeReturn = instructions
+                        .take(firstReturnIndex)
+                        .indexOfLast { it.opcode == Opcode.IGET_OBJECT }
+                    if (lastIgetBeforeReturn >= 0) {
+                        val extendedDataFieldName =
+                            getInstruction(lastIgetBeforeReturn).fieldExtractor().name
+                        GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
+
+                        val invokeStaticAfterReturn = indexOfFirstInstructionOrThrow(firstReturnIndex, Opcode.INVOKE_STATIC)
+                        val staticMethodRef = (getInstruction(invokeStaticAfterReturn) as ReferenceInstruction)
+                            .reference as MethodReference
+                        val staticBody = staticMethodRef.getMutableMethod()
+                        val interfaceCallIndex = staticBody.indexOfFirstInstructionOrThrow(Opcode.INVOKE_INTERFACE)
+                        val realMethodName = ((staticBody.getInstruction(interfaceCallIndex) as ReferenceInstruction)
+                            .reference as MethodReference).name
+
+                        GetMediaListExtensionFingerprint.changeFirstString(realMethodName)
+                        foundMediaListMethod = true
+                    }
                 }
             }
             // Backup for media list extraction if the first fingerprint fails.

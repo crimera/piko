@@ -59,8 +59,20 @@ public class SettingsStatus {
     public static void viewLiveAnonymously() {
         viewLiveAnonymously = true;
     }
+    public static boolean dmGhostMode = false;
+    public static void dmGhostMode() {
+        dmGhostMode = true;
+    }
+    public static boolean disableScreenshotDetection = false;
+    public static void disableScreenshotDetection() {
+        disableScreenshotDetection = true;
+    }
+    public static boolean disableFlagSecure = false;
+    public static void disableFlagSecure() {
+        disableFlagSecure = true;
+    }
     public static boolean ghostSection() {
-        return (viewStoriesAnonymously || viewLiveAnonymously);
+        return (viewStoriesAnonymously || viewLiveAnonymously || dmGhostMode || disableScreenshotDetection || disableFlagSecure);
     }
 
 
