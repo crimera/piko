@@ -33,21 +33,27 @@ val unlockDeveloperOptionPatch =
         dependsOn(settingsPatch)
         execute {
 
-            // This method takes in the developer option call instruction
-            // and checks whether that method is actually the developer option check method
-            // If it is, then it will hook the method and return true.
-            // If it is not, then it will return false.
             fun checkAndHookDeveloperOptions(developerOptionCallInstruction: BuilderInstruction): Boolean {
                 val methodRef = developerOptionCallInstruction.getReference<MethodReference>()
-                val devOptionsClassMethods =
-                    mutableClassDefBy(methodRef!!.definingClass)
-                        .methods
+                    ?: return false
 
-                if (devOptionsClassMethods.size != 1) {
+                // In v423+, the employee-check method moved into a multi-method utility class
+                // (LX/5dV). The old heuristic required the class to have exactly 1 method, which
+                // no longer holds. Instead, validate the method signature: it must return boolean
+                // and accept a UserSession parameter, which is the stable pattern for the
+                // developer-options gate across Instagram versions.
+                if (methodRef.returnType != "Z") return false
+                if (methodRef.parameterTypes.none { it == "Lcom/instagram/common/session/UserSession;" }) return false
+
+                val devOptionsClass = try {
+                    mutableClassDefBy(methodRef.definingClass)
+                } catch (_: Exception) {
                     return false
                 }
 
-                val devOptionsMethod = devOptionsClassMethods.first { it.name == methodRef.name }
+                val devOptionsMethod = devOptionsClass.methods
+                    .firstOrNull { it.name == methodRef.name }
+                    ?: return false
 
                 devOptionsMethod.addInstructions(
                     0,
@@ -74,7 +80,9 @@ val unlockDeveloperOptionPatch =
                 val strIndex = fingerprint.stringMatches[0].index
                 val method = fingerprint.method
                 val invokeStatic =
-                    method.instructions.last { it.opcode == Opcode.INVOKE_STATIC && it.location.index < strIndex }
+                    method.instructions.lastOrNull {
+                        it.opcode == Opcode.INVOKE_STATIC && it.location.index < strIndex
+                    } ?: continue
 
                 isDeveloperOptionUnlocked = checkAndHookDeveloperOptions(invokeStatic)
 
@@ -86,7 +94,10 @@ val unlockDeveloperOptionPatch =
             if (isDeveloperOptionUnlocked) {
                 enableSettings("enableDeveloperOptions")
             } else {
-                throw PatchException("Failed to match fingerprints for Enable developer options")
+                throw PatchException(
+                    "Failed to match fingerprints for Enable developer options. " +
+                        "The employee-check method signature may have changed in this Instagram version.",
+                )
             }
         }
     }
