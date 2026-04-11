@@ -46,6 +46,9 @@ public class Links {
         DISABLE_ADS = Pref.disableAds() && SettingsStatus.disableAds;
     }
 
+    public static boolean setStorySeen(boolean seenStatus){
+        return VIEW_STORIES_ANONYMOUSLY ? true:seenStatus;
+    }
 
     private static void openLink(String url) {
         try {
