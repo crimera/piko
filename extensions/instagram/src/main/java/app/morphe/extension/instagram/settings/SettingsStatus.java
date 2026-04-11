@@ -59,8 +59,12 @@ public class SettingsStatus {
     public static void viewLiveAnonymously() {
         viewLiveAnonymously = true;
     }
+    public static boolean viewDmsAnonymously = false;
+    public static void viewDmsAnonymously() {
+        viewDmsAnonymously = true;
+    }
     public static boolean ghostSection() {
-        return (viewStoriesAnonymously || viewLiveAnonymously);
+        return (viewStoriesAnonymously || viewLiveAnonymously || viewDmsAnonymously);
     }
 
 

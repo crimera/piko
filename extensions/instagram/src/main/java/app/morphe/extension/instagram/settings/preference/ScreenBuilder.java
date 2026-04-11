@@ -144,6 +144,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.viewDmsAnonymously) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.VIEW_DMS_ANONYMOUSLY,
+                            Strings.VIEW_DMS_ANONYMOUSLY_DESC,
+                            Settings.VIEW_DMS_ANONYMOUSLY
+                    )
+            );
+        }
 
     }
 
