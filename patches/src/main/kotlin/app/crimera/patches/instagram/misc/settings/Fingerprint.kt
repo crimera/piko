@@ -26,27 +26,12 @@ internal object ExtensionsUtilsFingerprint : Fingerprint(
     name = "load",
 )
 
-internal object PikoSettingsButtonStyleExtensionFingerprint : Fingerprint(
-    definingClass = UI_CONSTANTS_DESCRIPTOR,
-    name = "pikoSettingsButtonStyle",
-)
-
-internal object PikoSettingsButtonExtensionFingerprint : Fingerprint(
-    definingClass = UI_CONSTANTS_DESCRIPTOR,
-    name = "pikoSettingsButton",
-)
-
 internal object SignatureCheckExtensionFingerprint : Fingerprint(
     definingClass = LINKS_DESCRIPTOR,
     name = "signatureCheck",
 )
 
 // ----------------------
-
-internal object IgdsButtonSetStyleFingerprint : Fingerprint(
-    definingClass = "Lcom/instagram/igds/components/button/IgdsButton;",
-    name = "setStyle",
-)
 
 internal object UriTrustingMethodFingerprint : Fingerprint(
     strings = listOf("\' is not trusted: ", "The provider for uri \'"),
