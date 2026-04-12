@@ -23,7 +23,7 @@ import app.morphe.util.getFreeRegisterProvider
 @Suppress("unused")
 val viewDmAnonymouslyPatch =
     bytecodePatch(
-        name = "View DM anonymously",
+        name = "View DMs anonymously",
     ) {
         dependsOn(settingsPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
@@ -43,7 +43,7 @@ val viewDmAnonymouslyPatch =
                     if-eqz v$shouldDisableRegister, :piko_continue
                     return-void
                 """.trimIndent(),
-                    ExternalLabel("piko_continue", getInstruction(0))
+                    ExternalLabel("piko_continue", getInstruction(1))
                 )
             }
             enableSettings("viewDmAnonymously")
