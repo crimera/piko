@@ -191,6 +191,7 @@
     <string name="piko_pref_import_failed">Błąd: Importowanie %s nie powiodło się</string>
     <string name="piko_pref_export_no_uri">Błąd: Nie podano miejsca docelowego</string>
     <string name="piko_pref_import_no_uri">Błąd: Nie podano pliku</string>
+    <string name="piko_pref_export_login_token">Eksportuj token logowania</string>
     <!-- About -->
     <string name="piko_title_about">O aplikacji</string>
     <string name="piko_pref_app_version">Wersja aplikacji</string>
@@ -322,4 +323,24 @@
     <string name="piko_app_icon_name_neon_pink">Neonowy róż</string>
     <string name="piko_app_icon_name_tropical_teal">Tropikalny turkus</string>
     <string name="piko_app_icon_name_vivid_orange">Jaskrawa pomarańcz</string>
+    <!-- Import / export login tokens -->
+    <string name="piko_login_token_export_screen_description">"Ta funkcja eksportuje tokeny sesji dla aktualnie zalogowanego konta.
+Możesz je zaimportować z poziomu ekranu logowania lub ekranu \"Utwórz konto\".
+
+OSTRZEŻENIE: Wyeksportowane tokeny to ściśle poufne dane.
+Nigdy się nimi z nikim nie dziel!
+Jeśli ktoś zdobędzie ten token, uzyska pełny dostęp do Twojego konta, dopóki nie wylogujesz się z tej sesji.
+
+Więcej szczegółów znajdziesz na tej stronie:
+https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
+Zalecamy zapoznanie się z tym dokumentem przed użyciem funkcji, ponieważ zawiera on ważne uwagi."</string>
+    <string name="piko_login_token_select_account">Wybierz konto:</string>
+    <string name="piko_login_token_export_copy_to_clipboard">Skopiuj do schowka</string>
+    <string name="piko_login_token_export_save_to_file">Zapisz do pliku</string>
+    <string name="piko_login_token_import_token_button_text">Zaloguj przez token JSON</string>
+    <string name="piko_login_token_import_from_text">Importuj z tekstu</string>
+    <string name="piko_login_token_import_from_file">Importuj z pliku</string>
+    <string name="piko_login_token_import_success_reopen_required">Zamknij i uruchom ponownie aplikację</string>
+    <string name="piko_login_token_import_failed_missing_info">Błąd: Brak nazwy użytkownika, tokenu lub sekretu</string>
+    <string name="piko_login_token_import_failed_already_exist">Nie udało się dodać konta (może już istnieć)</string>
 </resources>

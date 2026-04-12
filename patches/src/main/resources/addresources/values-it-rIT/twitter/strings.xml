@@ -249,4 +249,5 @@
     <string name="piko_app_icon_name_christmas_2024_4">Natale 2024 4</string>
     <string name="piko_app_icon_name_pride_month">Pride Month</string>
     <string name="piko_app_icon_name_cyber">Cyber</string>
+    <!-- Import / export login tokens -->
 </resources>

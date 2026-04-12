@@ -271,4 +271,5 @@
     <string name="piko_app_icon_name_neon_pink">Neon Pembe</string>
     <string name="piko_app_icon_name_tropical_teal">Tropikal Çamurkuşu</string>
     <string name="piko_app_icon_name_vivid_orange">Canlı Turuncu</string>
+    <!-- Import / export login tokens -->
 </resources>

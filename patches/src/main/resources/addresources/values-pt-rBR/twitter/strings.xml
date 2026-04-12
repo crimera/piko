@@ -304,4 +304,5 @@
     <string name="piko_app_icon_name_electric_indigo">Índigo Elétrico</string>
     <string name="piko_app_icon_name_neon_pink">Rosa Néon</string>
     <string name="piko_app_icon_name_vivid_orange">Laranja Vívido</string>
+    <!-- Import / export login tokens -->
 </resources>
