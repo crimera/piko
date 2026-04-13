@@ -97,7 +97,6 @@ public class Strings {
     public static final String HIDE_NAVIGATION_DIRECT = "Hide Direct button";
     public static final String HIDE_NAVIGATION_SEARCH = "Hide Search button";
     public static final String HIDE_NAVIGATION_CREATE = "Hide Create button";
-    public static final String HIDE_NAVIGATION_PROFILE = "Hide Profile button";
 
 
     public static final String PATCH_INFO_TITLE = "Patch information";

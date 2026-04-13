@@ -50,5 +50,4 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting HIDE_NAVIGATION_DIRECT = new BooleanSetting("hide_navigation_direct", false);
     public static final BooleanSetting HIDE_NAVIGATION_SEARCH = new BooleanSetting("hide_navigation_search", false);
     public static final BooleanSetting HIDE_NAVIGATION_CREATE = new BooleanSetting("hide_navigation_create", false);
-    public static final BooleanSetting HIDE_NAVIGATION_PROFILE = new BooleanSetting("hide_navigation_profile", false);
 }

@@ -121,9 +121,5 @@ public class Pref {
         return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_CREATE);
     }
 
-    public static boolean hideNavigationProfile() {
-        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_PROFILE);
-    }
-
     //end
 }
