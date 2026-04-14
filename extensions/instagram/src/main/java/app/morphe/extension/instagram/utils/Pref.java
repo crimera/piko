@@ -88,7 +88,10 @@ public class Pref {
         return SharedPref.getStringPref(Settings.CUSTOMISE_STORY_TIMESTAMP);
     }
     public static int improveImageViewing(int defaultSize){
-        return SharedPref.getBooleanPerf(Settings.IMPROVE_IMAGE_VIEWING) ? 2048:defaultSize;
+        try{
+            return SharedPref.getBooleanPerf(Settings.IMPROVE_IMAGE_VIEWING) ? 2048:defaultSize;
+        } catch (Exception e) {}
+        return defaultSize;
     }
 
     public static boolean enableDownload(){
