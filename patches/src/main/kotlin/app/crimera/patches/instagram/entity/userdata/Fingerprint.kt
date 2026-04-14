@@ -35,7 +35,22 @@ internal object GetUserFriendshipStatusExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
+internal object GetBioExtensionFingerprint : Fingerprint(
+    name = "getBio",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
+internal object GetProfilePictureUrlExtensionFingerprint : Fingerprint(
+    name = "getProfilePictureUrl",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
 internal object GetMatrixCursorFingerprint : Fingerprint(
     returnType = "Landroid/database/MatrixCursor;",
     definingClass = "Lcom/instagram/contentprovider/FamilyAppsUserValuesProvider;",
+)
+
+internal object EditProfileNuxFragmentOnCreateFingerprint : Fingerprint(
+    name = "onCreate",
+    strings = listOf("arg_username", "arg_bio"),
 )

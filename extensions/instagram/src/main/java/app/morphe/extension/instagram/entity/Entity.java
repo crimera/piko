@@ -26,6 +26,10 @@ public class Entity {
         this.obj = null;
     }
 
+    public Object getObject(){
+        return this.obj;
+    }
+
     public Class<?> getObjClass() throws ClassNotFoundException {
         return this.obj.getClass();
     }

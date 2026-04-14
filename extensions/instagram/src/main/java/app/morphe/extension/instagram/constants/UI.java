@@ -33,6 +33,7 @@ import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.InstagramButton;
+import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 
 public class UI {
 
@@ -60,7 +61,7 @@ public class UI {
         Context context = viewGroup.getContext();
         InstagramButton button = new InstagramButton(context);
         button.setText(Strings.PIKO_SETTINGS_TITLE);
-        button.setStyle("PRIMARY");
+        button.setStyle(InstagramButtonStyleEnum.SUPER_PRIMARY);
         button.setOnClickListener(() -> ActivityHook.startPikoActivity());
 
         int marginPx = Utils.dipToPixels(12);

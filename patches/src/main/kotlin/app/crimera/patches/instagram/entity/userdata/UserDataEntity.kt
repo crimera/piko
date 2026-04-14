@@ -15,8 +15,10 @@ import app.crimera.utils.changeFirstString
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
 import app.crimera.utils.methodExtractor
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
 
 val userDataEntity =
@@ -49,6 +51,22 @@ val userDataEntity =
                         }.name
 
                 GetUserFriendshipStatusExtensionFingerprint.changeFirstString(friendshipStatusFromUserMethodName)
+
+                val profilePicUrlInfoMethodName =
+                    additionalUserInfoMethods
+                        .first {
+                            it.returnType == "Lcom/instagram/api/schemas/ProfilePicUrlInfo;"
+                        }.name
+                GetProfilePictureUrlExtensionFingerprint.changeFirstString(profilePicUrlInfoMethodName)
+            }
+
+            EditProfileNuxFragmentOnCreateFingerprint.apply {
+                val strIndex = stringMatches[1].index
+                method.apply {
+                    val firstInvokeInterfaceAfterStrIndex = indexOfFirstInstruction(strIndex, Opcode.INVOKE_INTERFACE)
+                    val bioMethod = getInstruction(firstInvokeInterfaceAfterStrIndex).methodExtractor().name
+                    GetBioExtensionFingerprint.changeFirstString(bioMethod)
+                }
             }
         }
     }

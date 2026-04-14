@@ -153,7 +153,7 @@ public class DownloadUtils {
         }
     }
 
-    private static void downloadFile(Context ctx, String url, String username, String downloadFilename) {
+    public static void downloadFile(Context ctx, String url, String username, String downloadFilename) {
         String publicFolder = Environment.DIRECTORY_DOWNLOADS;
         String subFolder = "Piko-Instagram";
         final String filename = username + "_" + downloadFilename;

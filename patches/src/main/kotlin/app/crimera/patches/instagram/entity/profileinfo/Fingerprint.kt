@@ -36,7 +36,7 @@ internal object GetUserDataExtensionFingerprint : Fingerprint(
     name = "getUserData",
 )
 
-// This fingerprint will also be using for follow back indicator patch && settings button
+// This fingerprint will also be using for follow back indicator patch && settings button && profile more options
 object ProfileUserInfoViewBinderFingerprint : Fingerprint(
     strings = listOf("ProfileUserInfoViewBinder.newView"),
 )

@@ -75,6 +75,13 @@ public class Strings {
     public static final String COPY_COMMENT_DESC = "Adds a button to copy comments on posts and reels";
     public static final String COMMENT_COPIED_SUCCESS = "Comment copied";
     public static final String COMMENT_COPIED_FAILED = "No text found to copy";
+    public static final String COPY_USERNAME = "Copy username";
+    public static final String COPY_FULL_NAME = "Copy full name";
+    public static final String COPY_USER_ID = "Copy user id";
+    public static final String COPY_BIO = "Copy bio";
+    public static final String DOWNLOAD_PROFILE_PICTURE = "Download profile picture";
+    public static final String COPIED = "Copied";
+    public static final String MORE_PROFILE_OPTIONS = "More profile options";
 
     public static final String CATEGORY_DOWNLOAD_MEDIA = "Download media";
     public static final String ENABLE_DOWNLOAD = "Enable download";

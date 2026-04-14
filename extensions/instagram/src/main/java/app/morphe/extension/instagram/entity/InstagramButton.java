@@ -19,6 +19,7 @@ import android.view.ViewGroup.MarginLayoutParams;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.entity.Entity;
+import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 
 import com.instagram.igds.components.button.IgdsButton;
 
@@ -55,14 +56,15 @@ public class InstagramButton extends FrameLayout {
         // The function call for adding the button style to the button will be injected here from patches.
     }
 
-    public void setStyle(String style){
+    public void setStyle(InstagramButtonStyleEnum style){
         try {
+            String styleName = style.name;
             Entity entity = new Entity();
             Class<?> styleClass = Class.forName("X.0X3");
             Object buttonStyle = entity.getMethod(
                     styleClass,
                     "valueOf",
-                    style
+                    styleName
             );
             setStyleObject(buttonStyle);
 
