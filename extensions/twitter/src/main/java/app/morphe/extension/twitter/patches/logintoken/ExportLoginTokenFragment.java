@@ -70,6 +70,7 @@ public class ExportLoginTokenFragment extends Fragment {
         Button saveToFileButton = view.findViewById(Utils.getResourceIdentifier("save_to_file_button", "id"));
         saveToFileButton.setOnClickListener(v -> {
             Account account = (Account) spinner.getSelectedItem();
+            if (account == null) return;
             accountToSaveToFile = account;
 
             Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
