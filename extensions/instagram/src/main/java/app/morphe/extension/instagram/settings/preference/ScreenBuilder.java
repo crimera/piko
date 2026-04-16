@@ -144,6 +144,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.disableScreenshotDetection) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_SCREENSHOT_DETECTION,
+                            "",
+                            Settings.DISABLE_SCREENSHOT_DETECTION
+                    )
+            );
+        }
 
     }
 

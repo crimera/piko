@@ -32,6 +32,9 @@ public class Pref {
     public static boolean viewLiveAnonymously(){
         return SharedPref.getBooleanPerf(Settings.VIEW_LIVE_ANONYMOUSLY);
     }
+    public static boolean disableScreenshotDetection(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_SCREENSHOT_DETECTION);
+    }
 
     public static boolean disableStories(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_STORIES);
