@@ -131,6 +131,10 @@ public class Pref {
         return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_PROFILE);
     }
 
+    public static boolean removeEmptyBottomSpace() {
+        return SharedPref.getBooleanPerf(Settings.REMOVE_EMPTY_BOTTOM_SPACE);
+    }
+
     public static boolean commentCopyButton() {
         return SharedPref.getBooleanPerf(Settings.COMMENT_COPY_BUTTON) && SettingsStatus.copyCommentButton;
     }

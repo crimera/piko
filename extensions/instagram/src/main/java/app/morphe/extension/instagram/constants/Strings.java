@@ -83,6 +83,7 @@ public class Strings {
     public static final String DOWNLOAD_PROFILE_PICTURE = "Download profile picture";
     public static final String COPIED = "Copied";
     public static final String MORE_PROFILE_OPTIONS = "More profile options";
+    public static final String REMOVE_EMPTY_BOTTOM_SPACE = "Remove empty bottom space";
 
     public static final String CATEGORY_DOWNLOAD_MEDIA = "Download media";
     public static final String ENABLE_DOWNLOAD = "Enable download";

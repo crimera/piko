@@ -133,7 +133,11 @@ public class SettingsStatus {
     public static void copyCommentButton() {
         copyCommentButton = true;
     }
-    public static boolean miscSection() {return (copyCommentButton || improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
+    public static boolean removeEmptyBottomSpace = false;
+    public static void removeEmptyBottomSpace() {
+        removeEmptyBottomSpace = true;
+    }
+    public static boolean miscSection() {return (removeEmptyBottomSpace || copyCommentButton || improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
 
     //Download section.
     public static boolean downloadMedia = false;

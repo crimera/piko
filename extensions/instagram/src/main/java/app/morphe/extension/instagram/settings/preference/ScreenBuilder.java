@@ -346,6 +346,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.removeEmptyBottomSpace) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.REMOVE_EMPTY_BOTTOM_SPACE,
+                            "",
+                            Settings.REMOVE_EMPTY_BOTTOM_SPACE
+                    )
+            );
+        }
     }
 
     public void buildDownloadSection() {
