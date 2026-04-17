@@ -63,8 +63,12 @@ public class SettingsStatus {
     public static void disableScreenshotDetection() {
         disableScreenshotDetection = true;
     }
+    public static boolean disableTypingStatus = false;
+    public static void disableTypingStatus() {
+        disableTypingStatus = true;
+    }
     public static boolean ghostSection() {
-        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection);
+        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus);
     }
 
 

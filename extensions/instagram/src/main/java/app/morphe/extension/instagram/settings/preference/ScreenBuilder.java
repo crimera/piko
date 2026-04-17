@@ -144,6 +144,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.disableTypingStatus) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_TYPING_STATUS,
+                            "",
+                            Settings.DISABLE_TYPING_STATUS
+                    )
+            );
+        }
         if (SettingsStatus.disableScreenshotDetection) {
             addPreference(category,
                     helper.switchPreference(

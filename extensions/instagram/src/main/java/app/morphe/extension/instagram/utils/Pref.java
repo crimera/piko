@@ -35,6 +35,10 @@ public class Pref {
     public static boolean disableScreenshotDetection(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_SCREENSHOT_DETECTION);
     }
+    public static boolean disableTypingStatus(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_TYPING_STATUS);
+    }
+
 
     public static boolean disableStories(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_STORIES);
