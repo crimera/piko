@@ -88,6 +88,10 @@ public class SettingsStatus {
     public static void hideStoriesTray() {
         hideStoriesTray = true;
     }
+    public static boolean hideNotesTray = false;
+    public static void hideNotesTray() {
+        hideNotesTray = true;
+    }
     public static boolean limitFollowingFeed = false;
     public static void limitFollowingFeed() {
         limitFollowingFeed = true;
@@ -97,7 +101,7 @@ public class SettingsStatus {
         hideGroupCreationOnSharesheet = true;
     }
     public static boolean distractionFreeSection() {
-        return (disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet);
+        return (hideNotesTray || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet);
     }
 
     //Misc section.

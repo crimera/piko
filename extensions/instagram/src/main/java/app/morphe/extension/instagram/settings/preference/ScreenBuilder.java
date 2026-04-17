@@ -212,6 +212,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.hideNotesTray) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.HIDE_NOTES_TRAY,
+                            Strings.HIDE_NOTES_TRAY_DESC,
+                            Settings.HIDE_NOTES_TRAY
+                    )
+            );
+        }
         if (SettingsStatus.disableExplore) {
             addPreference(category,
                     helper.switchPreference(

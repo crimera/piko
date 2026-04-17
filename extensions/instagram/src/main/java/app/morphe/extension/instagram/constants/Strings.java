@@ -49,6 +49,8 @@ public class Strings {
     public static final String LIMIT_FOLLOWING_FEED_DESC = "Filters the home feed to display only content from profiles you follow.";
     public static final String HIDE_STORIES_TRAY = "Hide stories tray";
     public static final String HIDE_STORIES_TRAY_DESC = "Hide stories tray from main feed";
+    public static final String HIDE_NOTES_TRAY = "Hide notes tray";
+    public static final String HIDE_NOTES_TRAY_DESC = "Hides notes tray in DM section";
     public static final String HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = "Hide group creation button on sharesheet";
 
     public static final String CATEGORY_MISC = "Misc";

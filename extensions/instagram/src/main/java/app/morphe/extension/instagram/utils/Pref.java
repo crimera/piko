@@ -38,8 +38,6 @@ public class Pref {
     public static boolean disableTypingStatus(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_TYPING_STATUS);
     }
-
-
     public static boolean disableStories(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_STORIES);
     }
@@ -52,8 +50,9 @@ public class Pref {
     public static boolean limitFollowingFeed(){
         return SharedPref.getBooleanPerf(Settings.LIMIT_FOLLOWING_FEED);
     }
-    public static boolean hideStoriesTray(){
-        return SharedPref.getBooleanPerf(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
+    public static boolean hideStoriesTray(){return SharedPref.getBooleanPerf(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;}
+    public static boolean hideNotesTray(){
+        return SharedPref.getBooleanPerf(Settings.HIDE_NOTES_TRAY) && SettingsStatus.hideNotesTray;
     }
     public static String unlimitedReplaysOnEphemeralMedia(String viewMode) {
         return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia ? "permanent" : viewMode;
