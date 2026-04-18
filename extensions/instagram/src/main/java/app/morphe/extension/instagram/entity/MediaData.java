@@ -77,8 +77,10 @@ public class MediaData extends Entity {
 
     public MediaData getMediaAt(int position) throws Exception {
         List<Object> mediaList = this.getMediaList();
-        if (position > mediaList.size()) return new MediaData(this.obj);
-        return new MediaData(mediaList.get(position));
+        if (mediaList.isEmpty()) return new MediaData(this.obj);
+
+        int safePosition = Math.max(0, Math.min(position, mediaList.size() - 1));
+        return new MediaData(mediaList.get(safePosition));
     }
 
     public String getPhotoLink() throws Exception {
