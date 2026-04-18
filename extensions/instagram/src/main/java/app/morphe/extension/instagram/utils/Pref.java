@@ -53,6 +53,11 @@ public class Pref {
     public static boolean hideStoriesTray(){return SharedPref.getBooleanPerf(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;}
     public static boolean hideNotesTray(){
         return SharedPref.getBooleanPerf(Settings.HIDE_NOTES_TRAY) && SettingsStatus.hideNotesTray;
+    public static boolean disableReelsScrolling(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
+    }
+    public static boolean hideStoriesTray(){
+        return SharedPref.getBooleanPerf(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
     }
     public static String unlimitedReplaysOnEphemeralMedia(String viewMode) {
         return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia ? "permanent" : viewMode;

@@ -16,10 +16,8 @@ import android.content.Context;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
-import android.preference.PreferenceScreen;
 
 import app.morphe.extension.instagram.constants.Strings;
-import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
@@ -245,6 +243,15 @@ public class ScreenBuilder {
                             Strings.LIMIT_FOLLOWING_FEED,
                             Strings.LIMIT_FOLLOWING_FEED_DESC,
                             Settings.LIMIT_FOLLOWING_FEED
+                    )
+            );
+        }
+        if (SettingsStatus.disableReelsScrolling) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_REELS_SCROLLING,
+                            Strings.DISABLE_REELS_SCROLLING_DESC,
+                            Settings.DISABLE_REELS_SCROLLING
                     )
             );
         }

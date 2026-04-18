@@ -40,6 +40,7 @@ public class Settings {
     public static final BooleanSetting IMPROVE_IMAGE_VIEWING = new BooleanSetting("improve_image_viewing", true);
     public static final BooleanSetting COMMENT_COPY_BUTTON = new BooleanSetting("comment_copy_button", true);
     public static final BooleanSetting HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = new BooleanSetting("hide_group_creation_button_on_sharesheet", true);
+    public static final BooleanSetting DISABLE_REELS_SCROLLING = new BooleanSetting("disable_reels_scrolling", false);
     public static final BooleanSetting REMOVE_EMPTY_BOTTOM_SPACE = new BooleanSetting("remove_empty_bottom_space", true);
     public static final BooleanSetting DISABLE_TYPING_STATUS = new BooleanSetting("disable_typing_status", true);
     public static final BooleanSetting HIDE_NOTES_TRAY = new BooleanSetting("hide_notes_tray", true);

@@ -100,6 +100,11 @@ public class SettingsStatus {
     public static void hideGroupCreationOnSharesheet() {
         hideGroupCreationOnSharesheet = true;
     }
+    public static boolean disableReelsScrolling = false;
+    public static void disableReelsScrolling() {
+        disableReelsScrolling = true;
+    }
+
     public static boolean distractionFreeSection() {
         return (hideNotesTray || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet);
     }
