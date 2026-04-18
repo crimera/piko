@@ -465,14 +465,6 @@ public class ScreenBuilder {
                         Settings.HIDE_NAVIGATION_CREATE
                 )
         );
-
-        addPreference(category,
-                helper.switchPreference(
-                        Strings.HIDE_NAVIGATION_PROFILE,
-                        "",
-                        Settings.HIDE_NAVIGATION_PROFILE
-                )
-        );
     }
 
     public void aboutSection() {

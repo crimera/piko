@@ -81,5 +81,4 @@ public class Helper {
             Logger.printException(() -> "Failed setting pref: ", ex);
         }
     }
-
 }
