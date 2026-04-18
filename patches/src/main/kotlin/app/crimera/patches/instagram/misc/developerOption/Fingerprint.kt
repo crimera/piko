@@ -22,6 +22,7 @@ internal object ChromeTraceRelatedFingerprint : Fingerprint(
     strings = listOf("Chrome trace is only available for employees"),
 )
 
-internal object MessageInputMethodRelatedFingerprint : Fingerprint(
-    strings = listOf("is_employee", "ig_user_id"),
+internal object PromoteActivityOnCreateFingerprint : Fingerprint(
+    definingClass = "Lcom/instagram/business/promote/activity/PromoteActivity;",
+    strings = listOf("selected 2 media for A/B testing"),
 )

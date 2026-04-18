@@ -68,7 +68,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Custom emoji font</code></td><td>Customise emoji font style</td></tr>
 <tr><td><code>Custom font</code></td><td>Customise font style</td></tr>
 <tr><td><code>Custom sharing domain</code></td><td>Allows using domains like fxtwitter when sharing tweets/posts.</td></tr>
-<tr><td><code>Custom translator</code></td><td>A custom translator with multiple providers.</td></tr>
+<tr><td><code>Native translator</code></td><td>A native translator with multiple providers.</td></tr>
 <tr><td><code>Customise post font size</code></td><td></td></tr>
 <tr><td><code>Customize Inline action Bar items</code></td><td></td></tr>
 <tr><td><code>Customize Navigation Bar items</code></td><td></td></tr>
@@ -107,7 +107,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Hide nudge button</code></td><td>Hides follow/subscribe/follow back buttons on posts</td></tr>
 <tr><td><code>Hide post metrics</code></td><td>Hides like, reposts etc counts.</td></tr>
 <tr><td><code>Hide promote button</code></td><td>Hides promote button under self posts</td></tr>
-<tr><td><code>Hide timeline posts by category</code></td><td>Hides different post categories like who to follow, news etc from timeline.</td></tr>
+<tr><td><code>Hide recommendation items</code></td><td>Adds options to hide recommendation items such as "Who to follow" and "Today's news" in timeline, search, and replies.</td></tr>
 <tr><td><code>Hook feature flag</code></td><td>Toggle feature flags to enable development features.</td></tr>
 <tr><td><code>Legacy share links</code></td><td>Brings back username on post share links. Works post 11.4x.xx</td></tr>
 <tr><td><code>Log server response</code></td><td>Log json responses received from server</td></tr>
@@ -126,6 +126,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Show poll results</code></td><td>Adds an option to show poll results without voting</td></tr>
 <tr><td><code>Show post source label</code></td><td>Source label will be shown only on public posts</td></tr>
 <tr><td><code>Show sensitive media</code></td><td>Disables the sensitive media banner</td></tr>
+<tr><td><code>Import/Export login token</code></td><td>Adds an feature to export and import the token of accounts. This is useful when logging in on your second device or when re-installing piko.</td></tr>
 </tbody>
 </table>
 
@@ -160,8 +161,13 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Customise story timestamp</code></td><td>Customise the timestamp that shows when the story was posted</td></tr>
 <tr><td><code>Disable story flipping</code></td><td>Disable automatic flipping/moving to next story</td></tr>
 <tr><td><code>View story mentions</code></td><td>Add option to view visible and hidden story mentions.</td></tr>
-<tr><td><code>Unlimited replays on ephemeral media</code></td><td>Unlimited replays on view once, view twice media before they get expired</td></tr>
+<tr><td><code>Make ephemeral media permanent</code></td><td>Changes view once, view twice media to permanent view. Do note older ephemeral media might look blank.</td></tr>
 <tr><td><code>Follow back indicator</code></td><td>Adds a label on the profile page, indicating whether a user is follows you back.</td></tr>
+<tr><td><code>Hide group creation button on sharesheet</code></td><td></td></tr>
+<tr><td><code>Improve image viewing</code></td><td>Fetches max resolution images from server.</td></tr>
+<tr><td><code>Hide reshare button</code></td><td>Hides the reshare button from both posts and reels.</td></tr>
+<tr><td><code>Hide navigation buttons</code></td><td>Hides navigation bar buttons, such as the Reels and Create button.</td></tr>
+<tr><td><code>Hide navigation buttons</code></td><td>Hides navigation bar buttons, such as the Reels and Create button.</td></tr>
 </tbody>
 </table>
 

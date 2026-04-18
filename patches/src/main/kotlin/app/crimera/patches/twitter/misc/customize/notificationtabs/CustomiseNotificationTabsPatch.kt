@@ -27,7 +27,6 @@ private object CustomiseNotificationTabsFingerprint : Fingerprint(
         listOf(
             "android_ntab_verified_tab_enabled",
             "all",
-            "verified",
             "mentions",
         ),
 )
@@ -43,7 +42,7 @@ val customiseNotificationTabsPatch =
         execute {
 
             CustomiseNotificationTabsFingerprint.method.apply {
-                val strIndex = CustomiseNotificationTabsFingerprint.stringMatches[3].index
+                val strIndex = CustomiseNotificationTabsFingerprint.stringMatches[2].index
                 val index = indexOfFirstInstruction(strIndex, Opcode.CHECK_CAST)
                 val reg = getInstruction(index).registersUsed[0]
 
