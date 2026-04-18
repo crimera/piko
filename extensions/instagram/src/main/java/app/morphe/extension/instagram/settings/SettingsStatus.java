@@ -67,6 +67,10 @@ public class SettingsStatus {
     public static void disableTypingStatus() {
         disableTypingStatus = true;
     }
+    public static boolean viewDmAnonymously = false;
+    public static void viewDmAnonymously() {
+        viewDmAnonymously = true;
+    }
     public static boolean ghostSection() {
         return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus);
     }
