@@ -45,6 +45,10 @@ public class Strings {
     public static final String DISABLE_COMMENTS = "Disable comments";
     public static final String LIMIT_FOLLOWING_FEED = "Limit feed to following profiles";
     public static final String LIMIT_FOLLOWING_FEED_DESC = "Filters the home feed to display only content from profiles you follow.";
+    public static final String DISABLE_REELS_SCROLLING = "Disable Reels scrolling";
+    public static final String DISABLE_REELS_SCROLLING_DESC =
+            "Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. " +
+            "Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds.";
     public static final String HIDE_STORIES_TRAY = "Hide stories tray";
     public static final String HIDE_STORIES_TRAY_DESC = "Hide stories tray from main feed";
     public static final String HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = "Hide group creation button on sharesheet";
