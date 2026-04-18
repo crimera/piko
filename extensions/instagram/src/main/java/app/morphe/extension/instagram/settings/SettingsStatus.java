@@ -72,7 +72,7 @@ public class SettingsStatus {
         viewDmAnonymously = true;
     }
     public static boolean ghostSection() {
-        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus);
+        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously);
     }
 
 
@@ -110,7 +110,7 @@ public class SettingsStatus {
     }
 
     public static boolean distractionFreeSection() {
-        return (hideNotesTray || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet);
+        return (hideNotesTray || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling);
     }
 
     //Misc section.
