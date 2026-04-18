@@ -12,9 +12,7 @@ This is useful in the following cases:
 - If you have another rooted device and can log in normally
 
 Tokens and other necessary data will be exported in JSON format.  
-You can use it from the login screen.
-
-To import additional accounts, select "Create a new account" instead of "Add an existing account".
+You can import it from the login screen or piko settings.
 
 **Important: This patch does NOT fix the login attestation problem.**
 
@@ -39,11 +37,30 @@ Please be careful if you want to remove an account from one device after importi
 
 Logging out from settings will log out of the session associated with that token.  
 Therefore, if you simply press the logout button in the settings, you will also be logged out of other devices using the same token.
+This also applies when you press "Remove account" in the account manager in the device settings app.
 
 There are two ways to remove an account from the app without logging out.
 
 - Press the Logout button in airplane mode. (no internet connections)
 - If the app has only one account currently logged in, just uninstall and reinstall the app.
+
+In other words, you just need to prevent the logout request from being sent to the server.
+
+Also, when you factory reset your device, you will need to uninstall the Twitter app beforehand.
+It has been reported that the token is logged out when performing a factory reset.
+
+## Regarding the new login screen
+
+Recently, Twitter has been testing a new redesigned login screen for some users.  
+This patch does not yet support this new login screen, and the "Login through token json" button will not be displayed.
+
+<img alt="new_login_screen" width="360" src="https://github.com/user-attachments/assets/22d9c2b4-8947-41bb-90a2-c305b02a8833"/>
+
+As a workaround, you can open the import menu by clicking the deep link.  
+First, set the Piko Twitter app to open x.com links. (App Info > Open by default)  
+Then click the deep link below.
+
+[**\<\<\<CLICK HERE\>\>\>**](https://x.com/i/piko/pref)
 
 ## Troubleshooting
 
@@ -54,6 +71,10 @@ A: The session has already been logged out. That token cannot be used.
 **Q: After importing a token, it's not logged in even after restarting the app, but there is no notification.**
 
 A: Allow notifications for the X app and try again.
+
+**Q: Can I use tokens from the web version of Twitter?**
+
+A: No. Because it is completely different from the Android token.
 
 ## Appendix
 
