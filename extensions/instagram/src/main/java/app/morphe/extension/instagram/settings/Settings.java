@@ -11,8 +11,8 @@
 
 package app.morphe.extension.instagram.settings;
 
-import app.morphe.extension.shared.settings.BooleanSetting;
-import app.morphe.extension.shared.settings.StringSetting;
+import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
 
 public class Settings {
     public static final BooleanSetting DISABLE_ADS = new BooleanSetting("disable_ads", true);

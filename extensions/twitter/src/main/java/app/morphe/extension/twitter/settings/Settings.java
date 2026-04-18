@@ -10,12 +10,11 @@
 
 package app.morphe.extension.twitter.settings;
 
-import app.morphe.extension.shared.settings.BaseSettings;
-import app.morphe.extension.shared.settings.BooleanSetting;
-import app.morphe.extension.shared.settings.StringSetting;
+import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
 import app.morphe.extension.shared.Utils;
 
-public class Settings extends BaseSettings {
+public class Settings {
     public static final String SHARED_PREF_NAME = "piko_settings";
     public static final String ACT_NAME = "activity_name";
 

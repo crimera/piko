@@ -16,22 +16,34 @@ import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.preference.SharedPrefCategory;
 import app.morphe.extension.instagram.constants.Strings;
 
-import app.morphe.extension.shared.settings.BooleanSetting;
-import app.morphe.extension.shared.settings.StringSetting;
+import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
 
 public class SharedPref {
 
     private static final Context ctx = app.morphe.extension.shared.Utils.getContext();
-    private static final SharedPrefCategory sp = new SharedPrefCategory(Strings.PIKO_SETTINGS);
+    private static SharedPrefCategory sp;
+
+    static {
+        if(ctx!=null) {
+            sp = new SharedPrefCategory(Strings.PIKO_SETTINGS);
+        }
+    }
 
     public static Boolean getBooleanPerf(BooleanSetting setting) {
-        return sp.getBoolean(setting.key, setting.defaultValue);
+        Boolean defaultValue = setting.defaultValue;
+        if(sp!=null) {
+            return sp.getBoolean(setting.key, defaultValue);
+        }
+        return defaultValue;
     }
 
     public static Boolean setBooleanPerf(String key, Boolean val) {
         try {
-            sp.saveBoolean(key, val);
-            return true;
+            if(sp!=null) {
+                sp.saveBoolean(key, val);
+                return true;
+            }
         } catch (Exception ex) {
             Utils.showToastShort(ex.toString());
         }
@@ -40,8 +52,10 @@ public class SharedPref {
 
     public static Boolean setStringPref(String key, String val) {
         try {
-            sp.saveString(key, val);
-            return true;
+            if(sp!=null) {
+                sp.saveString(key, val);
+                return true;
+            }
         } catch (Exception ex) {
             Utils.showToastShort(ex.toString());
         }
@@ -49,10 +63,14 @@ public class SharedPref {
     }
 
     public static String getStringPref(StringSetting setting) {
-        String value = sp.getString(setting.key, setting.defaultValue);
-        if (value.isBlank()) {
-            return setting.defaultValue;
-        }
+        String defaultValue = setting.defaultValue;
+        if(sp == null)
+            return defaultValue;
+
+        String value = sp.getString(setting.key, defaultValue);
+        if (value.isBlank())
+            return defaultValue;
+
         return value;
     }
 
