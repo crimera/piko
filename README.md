@@ -155,7 +155,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Sanitize share links</code></td><td>This removes the igsh parameter which exposes your profile on share links.</td></tr>
 <tr><td><code>Open links externally</code></td><td>Changes links to always open in your external browser, instead of the in-app browser.</td></tr>
 <tr><td><code>Remove build expired popup</code></td><td>Removes the popup that appears after a while, when the app version ages.</td></tr>
-<tr><td><code>Unlock developer options</code></td><td></td></tr>
+<tr><td><code>Unlock developer options</code></td><td>This unlocks various developer options, including experiments.</td></tr>
 <tr><td><code>Download media</code></td><td>Adds ability to download posts, reels, stories and highlights</td></tr>
 <tr><td><code>Add settings</code></td><td>Adds settings to control preferences are patching</td></tr>
 <tr><td><code>Customise story timestamp</code></td><td>Customise the timestamp that shows when the story was posted</td></tr>
