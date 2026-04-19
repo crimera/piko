@@ -191,6 +191,7 @@
     <string name="piko_pref_import_failed">Kesalahan: Gagal mengimpor %s</string>
     <string name="piko_pref_export_no_uri">Kesalahan: Tidak ada tujuan yang disediakan</string>
     <string name="piko_pref_import_no_uri">Kesalahan: Tidak ada berkas yang disediakan</string>
+    <string name="piko_pref_export_login_token">Ekspor token masuk</string>
     <!-- About -->
     <string name="piko_title_about">Tentang</string>
     <string name="piko_pref_app_version">Versi aplikasi</string>
@@ -322,4 +323,24 @@
     <string name="piko_app_icon_name_neon_pink">Pink Neon</string>
     <string name="piko_app_icon_name_tropical_teal">Hijau Tosca Tropis</string>
     <string name="piko_app_icon_name_vivid_orange">Oranye Cerah</string>
+    <!-- Import / export login tokens -->
+    <string name="piko_login_token_export_screen_description">"Fitur ini mengekspor token sesi untuk akun yang sedang masuk.
+Anda dapat mengimpornya dari layar masuk atau layar \"Buat akun baru\".
+
+PERINGATAN: Token yang diekspor merupakan informasi yang sangat rahasia.
+Jangan pernah membagikannya kepada siapa pun!
+Jika seseorang memiliki token ini, mereka dapat mengakses akun Anda dengan bebas hingga Anda keluar dari sesi tersebut.
+
+Untuk detail lebih lanjut, silakan lihat halaman ini.
+https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
+Disarankan untuk membaca halaman ini sebelum menggunakan fitur ini. Halaman tersebut berisi beberapa catatan penting."</string>
+    <string name="piko_login_token_select_account">Pilih akun:</string>
+    <string name="piko_login_token_export_copy_to_clipboard">Salin ke papan klip</string>
+    <string name="piko_login_token_export_save_to_file">Simpan ke berkas</string>
+    <string name="piko_login_token_import_token_button_text">Masuk melalui token json</string>
+    <string name="piko_login_token_import_from_text">Impor dari teks</string>
+    <string name="piko_login_token_import_from_file">Impor dari berkas</string>
+    <string name="piko_login_token_import_success_reopen_required">Silahkan tutup dan buka kembali aplikasi</string>
+    <string name="piko_login_token_import_failed_missing_info">Kesalahan: Nama pengguna atau token atau rahasia tidak ditemukan</string>
+    <string name="piko_login_token_import_failed_already_exist">Gagal menambahkan akun (mungkin sudah ada)</string>
 </resources>

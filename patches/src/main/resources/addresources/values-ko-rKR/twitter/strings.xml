@@ -191,6 +191,7 @@
     <string name="piko_pref_import_failed">오류: %s 를 가져올 수 없습니다.</string>
     <string name="piko_pref_export_no_uri">오류: 제공된 목적지가 없습니다.</string>
     <string name="piko_pref_import_no_uri">오류: 제공된 파일이 없습니다.</string>
+    <string name="piko_pref_export_login_token">로그인 토큰 내보내기</string>
     <!-- About -->
     <string name="piko_title_about">정보</string>
     <string name="piko_pref_app_version">앱 버전</string>
@@ -322,4 +323,24 @@
     <string name="piko_app_icon_name_neon_pink">네온 핑크</string>
     <string name="piko_app_icon_name_tropical_teal">트로피컬 틸</string>
     <string name="piko_app_icon_name_vivid_orange">비비드 오렌지</string>
+    <!-- Import / export login tokens -->
+    <string name="piko_login_token_export_screen_description">"현재 로그인된 계정의 세션 토큰을 내보내는 기능입니다.
+이 토큰은 로그인 화면 또는 “계정 만들기” 화면에서 가져올 수 있습니다.
+
+경고: 내보낸 토큰은 매우 민감한 정보입니다.
+절대로 다른 사람과 공유하지 마세요!
+누군가 이 토큰을 가지게 되면, 해당 세션에서 로그아웃하기 전까지 자유롭게 계정에 접근할 수 있습니다.
+
+자세한 내용은 아래 페이지를 참고하세요:
+https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md⁠
+이 기능을 사용하기 전에 반드시 읽는 것을 권장합니다. 중요한 주의사항이 포함되어 있습니다."</string>
+    <string name="piko_login_token_select_account">계정 선택:</string>
+    <string name="piko_login_token_export_copy_to_clipboard">클립보드에 복사</string>
+    <string name="piko_login_token_export_save_to_file">파일에 저장</string>
+    <string name="piko_login_token_import_token_button_text">토큰 JSON으로 로그인</string>
+    <string name="piko_login_token_import_from_text">텍스트에서 가져오기</string>
+    <string name="piko_login_token_import_from_file">파일에서 가져오기</string>
+    <string name="piko_login_token_import_success_reopen_required">앱을 종료하고 다시 실행하세요</string>
+    <string name="piko_login_token_import_failed_missing_info">오류: 사용자 이름, 토큰 또는 비밀 키가 누락되어 있습니다</string>
+    <string name="piko_login_token_import_failed_already_exist">계정을 추가할 수 없습니다 (이미 존재할 수 있습니다)</string>
 </resources>

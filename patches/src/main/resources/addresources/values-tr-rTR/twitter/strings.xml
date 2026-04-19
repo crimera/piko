@@ -105,6 +105,7 @@
     <string name="piko_pref_search_suggestion_desc">Keşfet bölümündeki arama önerilerini gizle/kaldır</string>
     <string name="piko_disunify_xchat_system">Xchat sistemini ayırma</string>
     <string name="piko_disunify_xchat_system_desc">Mesajlar ve paylaşım sayfası gibi eski özellikleri geri getirir</string>
+    <string name="piko_legacy_share_link">Türkçe</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Özellik bayrakları</string>
     <string name="piko_pref_feature_flags">Özellik bayrağı ekle</string>
@@ -271,4 +272,5 @@
     <string name="piko_app_icon_name_neon_pink">Neon Pembe</string>
     <string name="piko_app_icon_name_tropical_teal">Tropikal Çamurkuşu</string>
     <string name="piko_app_icon_name_vivid_orange">Canlı Turuncu</string>
+    <!-- Import / export login tokens -->
 </resources>
