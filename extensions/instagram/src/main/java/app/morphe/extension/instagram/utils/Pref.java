@@ -61,14 +61,12 @@ public class Pref {
     public static boolean disableReelsScrolling(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
     }
-    public static String unlimitedReplaysOnEphemeralMedia(String viewMode) {
-        return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia ? "permanent" : viewMode;
+    public static String unlimitedReplaysOnEphemeralMedia(String viewMode,Long expireTime) {
+        Boolean isExpired = expireTime != null && Long.valueOf(expireTime) * 1000 < System.currentTimeMillis();
+        return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && isExpired ? "permanent" : viewMode;
     }
     public static boolean hideReshareButton(){
         return SharedPref.getBooleanPerf(Settings.HIDE_RESHARE_BUTTON) && SettingsStatus.hideReshareButton;
-    }
-    public static int unlimitedReplaysOnEphemeralMedia(int viewCount){
-        return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia ? 0:viewCount;
     }
     public static boolean hideGroupCreationOnSharesheet(){
         return SharedPref.getBooleanPerf(Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET);
