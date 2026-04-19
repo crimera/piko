@@ -152,6 +152,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Disable discover people</code></td><td>Disables discover people section on user profile</td></tr>
 <tr><td><code>View live anonymously</code></td><td></td></tr>
 <tr><td><code>View stories anonymously</code></td><td></td></tr>
+<tr><td><code>View DM anonymously</code></td><td></td></tr>
 <tr><td><code>Sanitize share links</code></td><td></td></tr>
 <tr><td><code>Open links externally</code></td><td>Changes links to always open in your external browser, instead of the in-app browser.</td></tr>
 <tr><td><code>Remove build expired popup</code></td><td>Removes the popup that appears after a while, when the app version ages.</td></tr>
@@ -167,7 +168,18 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Improve image viewing</code></td><td>Fetches max resolution images from server.</td></tr>
 <tr><td><code>Hide reshare button</code></td><td>Hides the reshare button from both posts and reels.</td></tr>
 <tr><td><code>Hide navigation buttons</code></td><td>Hides navigation bar buttons, such as the Reels and Create button.</td></tr>
-<tr><td><code>Hide navigation buttons</code></td><td>Hides navigation bar buttons, such as the Reels and Create button.</td></tr>
+<tr><td><code>Disable Reels scrolling</code></td><td>Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel.</td></tr>
+<tr><td><code>Copy comment</code></td><td>Adds a button to copy comments on posts and reels.</td></tr>
+<tr><td><code>More options on profile</code></td><td>Adds a new button to handle user related data like copy handle, download profile picture etc</td></tr>
+<tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
+<tr><td><code>Remove empty bottom space</code></td><td>Removes empty space below bottom navigation bar</td></tr>
+<tr><td><code>Disable typing status</code></td><td></td></tr>
+<tr><td><code>Hide notes tray</code></td><td>Hides notes tray in DM section</td></tr>
+<tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
+<tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
+<tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
+
+
 </tbody>
 </table>
 
