@@ -1,3 +1,25 @@
+# [3.3.0-dev.1](https://github.com/crimera/piko/compare/v3.2.0...v3.3.0-dev.1) (2026-04-19)
+
+
+### Bug Fixes
+
+* fallback instruction address ([95f69e3](https://github.com/crimera/piko/commit/95f69e3fef4774072bb82b2717d9ba44ed8e0487))
+* **Instagram:** download all carousel media ([2f93f78](https://github.com/crimera/piko/commit/2f93f786eb25b6186b0a2657b6eb75b52a405f33))
+* **Instagram:** keep one navigation button visible ([dd5dce8](https://github.com/crimera/piko/commit/dd5dce8f8974df4e47ff3eb32057ca8ca0cd9c25))
+* **Twitter - Import/Export login token:** Add import menu to piko settings as a workaround for redesigned login screen ([dad823c](https://github.com/crimera/piko/commit/dad823c3d4a7fa88d5e98cc8b24146fcfb5c5758))
+
+
+### Features
+
+* **Instagram:** Add `Disable Reels scrolling` patch ([9a03ca1](https://github.com/crimera/piko/commit/9a03ca1ed1ec529489dcca73cb8b7fb314ea198b))
+* **Instagram:** Added `Copy comment` patch ([eb3f378](https://github.com/crimera/piko/commit/eb3f378a2e29ad60560cb6ccc0f05ab9eca44aae))
+* **Instagram:** Added `Disable screenshot detection` patch ([a1141c9](https://github.com/crimera/piko/commit/a1141c9af37bfac52a06c2ea86a1b9c72b2de8b0))
+* **Instagram:** Added `Hide notes tray` patch ([a856398](https://github.com/crimera/piko/commit/a8563984fe465ae8cc8e7e1a0d3b129ae343ca81))
+* **Instagram:** Added `Improve image viewing` patch ([d716354](https://github.com/crimera/piko/commit/d7163541f0678bf532d137e2147572975d925638))
+* **Instagram:** Added `More options on profile` patch ([1cd5797](https://github.com/crimera/piko/commit/1cd5797d945b7ecbdaa295b1a426302784546975))
+* **Instagram:** Added `Remove empty bottom space` patch ([2b0eb1f](https://github.com/crimera/piko/commit/2b0eb1fa94cfc8c5d6b7d713a8080c351fa25d66))
+* Read DMs anonymously ([48f1593](https://github.com/crimera/piko/commit/48f1593e303f00cb4fb1e14233ac51d03f273ae3))
+
 # [3.2.0](https://github.com/crimera/piko/compare/v3.1.0...v3.2.0) (2026-04-10)
 
 
