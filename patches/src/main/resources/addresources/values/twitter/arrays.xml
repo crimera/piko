@@ -85,16 +85,16 @@
         <item>@string/button_action_share</item>
     </string-array>
 
-    <string-array name="piko_array_ads_hooks">
-        <item>@string/piko_pref_hide_promoted_posts</item>
-        <item>@string/piko_pref_wtf_section</item>
-        <item>@string/piko_pref_cts_section</item>
-        <item>@string/piko_pref_ctj_section</item>
-        <item>@string/piko_pref_ryb_section</item>
-        <item>@string/piko_pref_pinned_posts_section</item>
-        <item>@string/piko_pref_hide_detailed_posts</item>
-        <item>@string/piko_pref_hide_premium_prompt</item>
-        <item>@string/piko_pref_hide_todays_news</item>
+    <string-array name="piko_array_db_del_items">
+        <item>@string/piko_pref_db_promoted_posts</item>
+        <item>@string/piko_pref_db_wtf_section</item>
+        <item>@string/piko_pref_db_cts_section</item>
+        <item>@string/piko_pref_db_ctj_section</item>
+        <item>@string/piko_pref_db_ryb_section</item>
+        <item>@string/piko_pref_db_pinned_posts_section</item>
+        <item>@string/piko_pref_db_related_posts</item>
+        <item>@string/piko_pref_db_premium_prompt</item>
+        <item>@string/piko_pref_db_todays_news</item>
     </string-array>
 
     <string-array name="piko_array_reply_sorting">

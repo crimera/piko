@@ -24,7 +24,7 @@ import android.widget.LinearLayout;
 
 public class DatabasePatch {
     private static final Context ctx = app.morphe.extension.shared.Utils.getContext();
-    private static final String[] listItems = app.morphe.extension.shared.Utils.getResourceStringArray("piko_array_ads_hooks");
+    private static final String[] listItems = app.morphe.extension.shared.Utils.getResourceStringArray("piko_array_db_del_items");
 
     private static void logger(Object j){
         Log.d("piko", j.toString());

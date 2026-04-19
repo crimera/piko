@@ -95,7 +95,7 @@ public class ExportLoginTokenFragment extends Fragment {
             try (OutputStream outputStream = getContext().getContentResolver().openOutputStream(data.getData())) {
                 byte[] jsonStringByteArray = ImportExportLoginTokenPatch.createAccountJsonText(accountToSaveToFile).getBytes();
                 outputStream.write(jsonStringByteArray);
-                Utils.showToastShort(StringRef.str("piko_pref_success"));
+                Utils.showToastShort(StringRef.str("piko_pref_export_success"));
             } catch (Exception e) {
                 Utils.showToastLong(StringRef.str("piko_pref_export_failed", StringRef.str("accounts_title")));
                 Logger.printInfo(() -> "Failed to export account to a file", e);
