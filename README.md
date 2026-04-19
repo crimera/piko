@@ -142,17 +142,17 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 </tr>
 </thead>
 <tbody>
-<tr><td><code>Disable ads</code></td><td></td></tr>
+<tr><td><code>Disable ads</code></td><td>Disables ads app wide. This includes stories' and feed's ads.</td></tr>
 <tr><td><code>Hide suggested content</code></td><td>Hides suggested stories, reels, threads (Suggested posts will still be shown).</td></tr>
-<tr><td><code>Disable comments</code></td><td></td></tr>
-<tr><td><code>Disable explore</code></td><td></td></tr>
-<tr><td><code>Disable stories</code></td><td></td></tr>
+<tr><td><code>Disable comments</code></td><td>Disables the loading of comments.</td></tr>
+<tr><td><code>Disable explore</code></td><td>Disables the explore page.</td></tr>
+<tr><td><code>Disable stories</code></td><td>Disables the stories top pane.</td></tr>
 <tr><td><code>Hide stories tray</code></td><td>Hides stories tray from main feed.</td></tr>
 <tr><td><code>Disable analytics</code></td><td>Block analytics that are sent to Instagram/Facebook servers.</td></tr>
 <tr><td><code>Disable discover people</code></td><td>Disables discover people section on user profile</td></tr>
-<tr><td><code>View live anonymously</code></td><td></td></tr>
-<tr><td><code>View stories anonymously</code></td><td></td></tr>
-<tr><td><code>Sanitize share links</code></td><td></td></tr>
+<tr><td><code>View live anonymously</code></td><td>Allows you to view lives anonymously. Please note due to Instagram's limitation this will prevent you from accessing viewer count while this is enabled.</td></tr>
+<tr><td><code>View stories anonymously</code></td><td>Allows you to view stories without notifying the user.</td></tr>
+<tr><td><code>Sanitize share links</code></td><td>This removes the igsh parameter which exposes your profile on share links.</td></tr>
 <tr><td><code>Open links externally</code></td><td>Changes links to always open in your external browser, instead of the in-app browser.</td></tr>
 <tr><td><code>Remove build expired popup</code></td><td>Removes the popup that appears after a while, when the app version ages.</td></tr>
 <tr><td><code>Unlock developer options</code></td><td></td></tr>
@@ -163,10 +163,9 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>View story mentions</code></td><td>Add option to view visible and hidden story mentions.</td></tr>
 <tr><td><code>Make ephemeral media permanent</code></td><td>Changes view once, view twice media to permanent view. Do note older ephemeral media might look blank.</td></tr>
 <tr><td><code>Follow back indicator</code></td><td>Adds a label on the profile page, indicating whether a user is follows you back.</td></tr>
-<tr><td><code>Hide group creation button on sharesheet</code></td><td></td></tr>
+<tr><td><code>Hide group creation button on sharesheet</code></td><td>Removes the group creating button when sharing media to multiple users.</td></tr>
 <tr><td><code>Improve image viewing</code></td><td>Fetches max resolution images from server.</td></tr>
 <tr><td><code>Hide reshare button</code></td><td>Hides the reshare button from both posts and reels.</td></tr>
-<tr><td><code>Hide navigation buttons</code></td><td>Hides navigation bar buttons, such as the Reels and Create button.</td></tr>
 <tr><td><code>Hide navigation buttons</code></td><td>Hides navigation bar buttons, such as the Reels and Create button.</td></tr>
 </tbody>
 </table>
