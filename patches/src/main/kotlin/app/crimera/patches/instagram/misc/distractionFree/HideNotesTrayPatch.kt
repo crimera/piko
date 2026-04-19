@@ -20,19 +20,15 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.shared.misc.mapping.ResourceType
-import app.morphe.shared.misc.mapping.resourceLiteral
-import app.morphe.shared.misc.mapping.resourceMappingPatch
 import app.morphe.util.findFreeRegister
+import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
 object NotesTrayBuilderConstructorFingerprint : Fingerprint(
     strings = listOf("NotesTray"),
-    filters =
-        listOf(
-            resourceLiteral(ResourceType.ID, "cf_hub_recycler_view"),
-        ),
+    returnType = "V",
+    name = "<init>",
 )
 
 @Suppress("unused")
@@ -41,7 +37,7 @@ val hideNotesTrayPatch =
         name = "Hide notes tray",
         description = "Hides notes tray in DM section",
     ) {
-        dependsOn(settingsPatch, resourceMappingPatch)
+        dependsOn(settingsPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
@@ -49,15 +45,20 @@ val hideNotesTrayPatch =
             NotesTrayBuilderConstructorFingerprint.apply {
                 val strIndex = stringMatches[0].index
                 method.apply {
-                    val notesRecyclerViewInstruction = instructions.last { it.location.index < strIndex && it.opcode == Opcode.CHECK_CAST }
-                    val index = notesRecyclerViewInstruction.location.index
-                    val notesTrayRegister = notesRecyclerViewInstruction.registersUsed[0]
-                    val freeRegister = findFreeRegister(index + 1)
 
-                    val iPutObjectInstruction = getInstruction(index + 1)
+                    val notesRecyclerViewIDIndex =
+                        instructions
+                            .last { it.location.index < strIndex && it.opcode == Opcode.CONST }
+                            .location.index
+                    val notesRecyclerViewIndex = indexOfFirstInstruction(notesRecyclerViewIDIndex, Opcode.IPUT_OBJECT)
+                    val notesRecyclerViewInstruction = getInstruction(notesRecyclerViewIndex)
+                    val notesTrayRegister = notesRecyclerViewInstruction.registersUsed[0]
+                    val freeRegister = findFreeRegister(notesRecyclerViewIndex)
+
+                    val iPutObjectInstruction = getInstruction(notesRecyclerViewIndex)
 
                     addInstructionsWithLabels(
-                        index + 1,
+                        notesRecyclerViewIndex,
                         """
                         ${PREF_CALL_DESCRIPTOR}->hideNotesTray()Z
                         move-result v$freeRegister
