@@ -52,5 +52,5 @@ internal object GetMatrixCursorFingerprint : Fingerprint(
 
 internal object EditProfileNuxFragmentOnCreateFingerprint : Fingerprint(
     name = "onCreate",
-    strings = listOf("arg_username", "arg_bio"),
+    strings = listOf("arg_full_name", "arg_bio"),
 )
