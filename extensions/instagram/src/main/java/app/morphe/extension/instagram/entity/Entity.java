@@ -48,6 +48,11 @@ public class Entity {
         return getField(this.obj, fieldName);
     }
 
+    public Entity getFieldAsEntity(String fieldName) throws Exception {
+        Object object = getField(fieldName);
+        return new Entity(object);
+    }
+
     public Object getMethod(Object clsObj, String methodName, Class<?>[] paramTypes, Object... params) throws Exception {
         Class<?> clazz;
         if (clsObj instanceof Class<?>) {

@@ -61,7 +61,7 @@ internal object GetMediaPkIdExtensionFingerprint : Fingerprint(
     name = "getMediaPkId",
 )
 
-internal object ReelsInlineQualitySurveryRelatedFingerprint : Fingerprint(
+internal object ReelsInlineQualitySurveyRelatedFingerprint : Fingerprint(
     strings = listOf("reels_inline_quality_survey"),
 )
 
