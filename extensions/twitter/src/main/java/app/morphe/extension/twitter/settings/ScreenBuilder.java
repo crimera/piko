@@ -21,6 +21,7 @@ import com.twitter.ui.widget.LegacyTwitterPreferenceCategory;
 import app.morphe.extension.twitter.settings.widgets.*;
 import androidx.annotation.Nullable;
 import app.morphe.extension.twitter.Pref;
+import app.morphe.extension.twitter.patches.nativeFeatures.downloader.NativeDownloaderSafUtils;
 public class ScreenBuilder {
     private final Context context;
     private final PreferenceScreen screen;
@@ -41,6 +42,28 @@ public class ScreenBuilder {
         }else {
             addPreference(pref);
         }
+    }
+
+    private void addNativeDownloaderLocationPreferences(@Nullable LegacyTwitterPreferenceCategory category) {
+        addPreference(category,
+                helper.buttonPreference(
+                        strRes("piko_pref_download_saf_folder"),
+                        NativeDownloaderSafUtils.getFolderSummary(),
+                        Settings.PICK_DOWNLOAD_FOLDER
+                )
+        );
+
+        if (!Pref.hasNativeDownloaderSafTreeUri()) {
+            return;
+        }
+
+        addPreference(category,
+                helper.buttonPreference(
+                        strRes("piko_pref_download_saf_clear"),
+                        "",
+                        Settings.CLEAR_DOWNLOAD_FOLDER
+                )
+        );
     }
 
     public void buildPremiumSection(boolean buildCategory){
@@ -97,18 +120,6 @@ public class ScreenBuilder {
         LegacyTwitterPreferenceCategory category = null;
         if(buildCategory)
             category = preferenceCategory(strRes("piko_title_download"));
-        if (SettingsStatus.changeDownloadEnabled) {
-            addPreference(category,helper.listPreference(
-                    strRes("piko_pref_download_path"),
-                    strRes("piko_pref_download_path_desc"),
-                    Settings.VID_PUBLIC_FOLDER
-            ));
-            addPreference(category,helper.editTextPreference(
-                    strRes("piko_pref_download_folder"),
-                    strRes("piko_pref_download_folder_desc"),
-                    Settings.VID_SUBFOLDER
-            ));
-        }
         if (SettingsStatus.mediaLinkHandle) {
             addPreference(category,
                     helper.listPreference(
@@ -276,16 +287,7 @@ public class ScreenBuilder {
                 );
             }
 
-            addPreference(category,helper.listPreference(
-                    strRes("piko_pref_download_path"),
-                    strRes("piko_pref_download_path_desc"),
-                    Settings.VID_PUBLIC_FOLDER
-            ));
-            addPreference(category,helper.editTextPreference(
-                    strRes("piko_pref_download_folder"),
-                    strRes("piko_pref_download_folder_desc"),
-                    Settings.VID_SUBFOLDER
-            ));
+            addNativeDownloaderLocationPreferences(category);
             addPreference(category,
                     helper.listPreference(
                             strRes("piko_pref_native_downloader_filename_title"),

@@ -25,6 +25,17 @@
     <string name="piko_pref_download_media_link_handle_always_ask">Always ask</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Copy media link</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Share media link</string>
+    <string name="piko_pref_download_saf_folder">Choose custom download folder</string>
+    <string name="piko_pref_download_saf_clear">Clear custom download folder</string>
+    <string name="piko_pref_download_saf_not_set">Not set. Falls back to Pictures/Twitter.</string>
+    <string name="piko_pref_download_saf_active">Current folder: %s</string>
+    <string name="piko_pref_download_saf_active_unknown">Custom folder enabled</string>
+    <string name="piko_pref_download_saf_pick_success">Download folder saved: %s</string>
+    <string name="piko_pref_download_saf_pick_failed">Failed to pick download folder</string>
+    <string name="piko_pref_download_saf_permission_failed">Failed to persist folder permission</string>
+    <string name="piko_pref_download_saf_invalid_folder">Custom download folder is unavailable</string>
+    <string name="piko_pref_download_saf_download_failed">Failed to save download to custom folder</string>
+    <string name="piko_pref_download_saf_cleared">Custom download folder cleared</string>
 
     <!-- Native -->
     <string name="piko_title_native">Native features</string>
