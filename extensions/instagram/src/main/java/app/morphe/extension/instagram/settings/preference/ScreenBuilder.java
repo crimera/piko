@@ -16,10 +16,8 @@ import android.content.Context;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
-import android.preference.PreferenceScreen;
 
 import app.morphe.extension.instagram.constants.Strings;
-import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
@@ -144,6 +142,33 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.disableTypingStatus) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_TYPING_STATUS,
+                            "",
+                            Settings.DISABLE_TYPING_STATUS
+                    )
+            );
+        }
+        if (SettingsStatus.disableScreenshotDetection) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_SCREENSHOT_DETECTION,
+                            "",
+                            Settings.DISABLE_SCREENSHOT_DETECTION
+                    )
+            );
+        }
+        if (SettingsStatus.viewDmAnonymously) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.VIEW_DM_ANONYMOUSLY,
+                            "",
+                            Settings.VIEW_DM_ANONYMOUSLY
+                    )
+            );
+        }
 
     }
 
@@ -194,6 +219,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.hideNotesTray) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.HIDE_NOTES_TRAY,
+                            Strings.HIDE_NOTES_TRAY_DESC,
+                            Settings.HIDE_NOTES_TRAY
+                    )
+            );
+        }
         if (SettingsStatus.disableExplore) {
             addPreference(category,
                     helper.switchPreference(
@@ -218,6 +252,15 @@ public class ScreenBuilder {
                             Strings.LIMIT_FOLLOWING_FEED,
                             Strings.LIMIT_FOLLOWING_FEED_DESC,
                             Settings.LIMIT_FOLLOWING_FEED
+                    )
+            );
+        }
+        if (SettingsStatus.disableReelsScrolling) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_REELS_SCROLLING,
+                            Strings.DISABLE_REELS_SCROLLING_DESC,
+                            Settings.DISABLE_REELS_SCROLLING
                     )
             );
         }
@@ -328,6 +371,24 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.copyCommentButton) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.COPY_COMMENT,
+                            Strings.COPY_COMMENT_DESC,
+                            Settings.COMMENT_COPY_BUTTON
+                    )
+            );
+        }
+        if (SettingsStatus.removeEmptyBottomSpace) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.REMOVE_EMPTY_BOTTOM_SPACE,
+                            "",
+                            Settings.REMOVE_EMPTY_BOTTOM_SPACE
+                    )
+            );
+        }
     }
 
     public void buildDownloadSection() {
@@ -402,14 +463,6 @@ public class ScreenBuilder {
                         Strings.HIDE_NAVIGATION_CREATE,
                         "",
                         Settings.HIDE_NAVIGATION_CREATE
-                )
-        );
-
-        addPreference(category,
-                helper.switchPreference(
-                        Strings.HIDE_NAVIGATION_PROFILE,
-                        "",
-                        Settings.HIDE_NAVIGATION_PROFILE
                 )
         );
     }

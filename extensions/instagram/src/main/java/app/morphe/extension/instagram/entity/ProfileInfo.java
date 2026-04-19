@@ -19,16 +19,13 @@ public class ProfileInfo extends Entity {
         super(obj);
         this.obj = obj;
     }
-    private Entity getFieldAsEntity(String fieldName) throws Exception {
-        Object object = this.getField(fieldName);
-        return new Entity(object);
-    }
+
     private Entity getProfileRelatedDetails() throws Exception {
-        return getFieldAsEntity("fieldName");
+        return super.getFieldAsEntity("fieldName");
     }
 
     private Entity getUserDetailViewModel() throws Exception {
-        return getFieldAsEntity("fieldName");
+        return super.getFieldAsEntity("fieldName");
     }
 
     public boolean isSelfProfile() throws Exception {

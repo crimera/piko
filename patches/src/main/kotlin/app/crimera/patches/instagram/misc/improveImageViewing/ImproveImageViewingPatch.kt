@@ -16,7 +16,6 @@ import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
@@ -32,27 +31,11 @@ val improveImageViewingPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         dependsOn(settingsPatch)
         execute {
-            val PREF_CALL =
+            var PREF_CALL =
                 """
-                invoke-static/range {v#reg}, $PREF_DESCRIPTOR->improveImageViewing(I)I
+                invoke-static {v#reg}, $PREF_DESCRIPTOR->improveImageViewing(I)I
                     move-result v#reg
                 """.trimIndent()
-
-            SetDPIMetricsFingerprint.method.apply {
-                // First one is DPI which is not needed for us.
-                val iGetInstructions = instructions.filter { it.opcode == Opcode.IGET }.drop(1)
-
-                iGetInstructions.forEach { instruction ->
-                    val register = instruction.registersUsed[0]
-
-                    addInstructions(
-                        instruction.location.index + 1,
-                        """
-                        ${PREF_CALL.replace("#reg",register.toString())}
-                        """.trimIndent(),
-                    )
-                }
-            }
 
             ReturnExtendedImageUrlFingerprint.method.apply {
 
@@ -67,6 +50,29 @@ val improveImageViewingPatch =
                     """
                     ${PREF_CALL.replace("#reg",heightRegister.toString())}
                     ${PREF_CALL.replace("#reg", widthRegister.toString())}
+                    """.trimIndent(),
+                )
+            }
+
+            PREF_CALL =
+                """
+                invoke-static {v#reg}, $PREF_DESCRIPTOR->improveImageViewing(Ljava/lang/Integer;)Ljava/lang/Integer;
+                    move-result-object v#reg
+                """.trimIndent()
+
+            SetDPIMetricsFingerprint.method.apply {
+                val filledNewArrayIndex = indexOfFirstInstruction(Opcode.FILLED_NEW_ARRAY)
+
+                val registers = getInstruction(filledNewArrayIndex).registersUsed
+
+                val heightRegister = registers[1].toString()
+                val widthRegister = registers[2].toString()
+
+                addInstructions(
+                    filledNewArrayIndex,
+                    """
+                    ${PREF_CALL.replace("#reg",heightRegister)}
+                    ${PREF_CALL.replace("#reg", widthRegister)}
                     """.trimIndent(),
                 )
             }

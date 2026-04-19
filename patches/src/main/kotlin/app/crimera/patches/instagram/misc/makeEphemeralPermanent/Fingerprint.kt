@@ -11,15 +11,11 @@
 package app.crimera.patches.instagram.misc.makeEphemeralPermanent
 
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.InstructionLocation
-import app.morphe.patcher.opcode
-import com.android.tools.smali.dexlib2.AccessFlags
-import com.android.tools.smali.dexlib2.Opcode
 
 internal object EphemeralMediaJsonParserFingerprint : Fingerprint(
     custom = { methodDef, _ ->
         methodDef.name.lowercase().contains("parsefromjson")
     },
     returnType = "Ljava/lang/Object;",
-    strings = listOf("view_mode", "seen_count", "tap_models"),
+    strings = listOf("url_expire_at_secs", "view_mode", "seen_count", "tap_models"),
 )

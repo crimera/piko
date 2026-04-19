@@ -13,6 +13,7 @@ package app.morphe.extension.instagram.entity;
 import java.util.Map;
 import java.util.HashMap;
 import com.instagram.user.model.FriendshipStatus;
+import app.morphe.extension.crimera.Utils;
 
 public class UserFriendshipStatus extends Entity {
     private final Object obj;
@@ -22,9 +23,14 @@ public class UserFriendshipStatus extends Entity {
         this.obj = obj;
     }
 
-    private Map<String, Boolean> getMappings() throws Exception {
-        Class<?> helperClass = Class.forName("classname");
-        return (Map) super.getMethod(helperClass,"methodname",new Class[]{FriendshipStatus.class},this.obj);
+    private Map<String, Boolean> getMappings(){
+        try {
+            Class<?> helperClass = Class.forName("classname");
+            return (Map) super.getMethod(helperClass, "methodname", new Class[]{FriendshipStatus.class}, this.obj);
+        } catch (Exception e) {
+            Utils.logger(e);
+        }
+        return new HashMap();
     }
 
     private Boolean getValue(String key) throws Exception {

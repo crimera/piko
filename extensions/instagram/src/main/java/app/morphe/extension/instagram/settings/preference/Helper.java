@@ -18,8 +18,8 @@ import app.morphe.extension.instagram.utils.SharedPref;
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
-import app.morphe.extension.shared.settings.BooleanSetting;
-import app.morphe.extension.shared.settings.StringSetting;
+import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
@@ -81,5 +81,4 @@ public class Helper {
             Logger.printException(() -> "Failed setting pref: ", ex);
         }
     }
-
 }

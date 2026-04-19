@@ -59,8 +59,20 @@ public class SettingsStatus {
     public static void viewLiveAnonymously() {
         viewLiveAnonymously = true;
     }
+    public static boolean disableScreenshotDetection = false;
+    public static void disableScreenshotDetection() {
+        disableScreenshotDetection = true;
+    }
+    public static boolean disableTypingStatus = false;
+    public static void disableTypingStatus() {
+        disableTypingStatus = true;
+    }
+    public static boolean viewDmAnonymously = false;
+    public static void viewDmAnonymously() {
+        viewDmAnonymously = true;
+    }
     public static boolean ghostSection() {
-        return (viewStoriesAnonymously || viewLiveAnonymously);
+        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously);
     }
 
 
@@ -80,6 +92,10 @@ public class SettingsStatus {
     public static void hideStoriesTray() {
         hideStoriesTray = true;
     }
+    public static boolean hideNotesTray = false;
+    public static void hideNotesTray() {
+        hideNotesTray = true;
+    }
     public static boolean limitFollowingFeed = false;
     public static void limitFollowingFeed() {
         limitFollowingFeed = true;
@@ -88,8 +104,13 @@ public class SettingsStatus {
     public static void hideGroupCreationOnSharesheet() {
         hideGroupCreationOnSharesheet = true;
     }
+    public static boolean disableReelsScrolling = false;
+    public static void disableReelsScrolling() {
+        disableReelsScrolling = true;
+    }
+
     public static boolean distractionFreeSection() {
-        return (disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet);
+        return (hideNotesTray || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling);
     }
 
     //Misc section.
@@ -125,7 +146,15 @@ public class SettingsStatus {
     public static void hideReshareButton() {
         hideReshareButton = true;
     }
-    public static boolean miscSection() {return (improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
+    public static boolean copyCommentButton = false;
+    public static void copyCommentButton() {
+        copyCommentButton = true;
+    }
+    public static boolean removeEmptyBottomSpace = false;
+    public static void removeEmptyBottomSpace() {
+        removeEmptyBottomSpace = true;
+    }
+    public static boolean miscSection() {return (removeEmptyBottomSpace || copyCommentButton || improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
 
     //Download section.
     public static boolean downloadMedia = false;

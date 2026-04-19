@@ -1,5 +1,5 @@
 {
-  "version": "3.2.0",
+  "version": "3.3.0-dev.1",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -20,6 +20,7 @@
       "dependencies": [
         "BytecodePatch",
         "ResourcePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": {
@@ -114,6 +115,21 @@
       ],
       "compatiblePackages": {
         "com.twitter.android": null
+      },
+      "options": []
+    },
+    {
+      "name": "Copy comment",
+      "description": "Adds a button to copy comments on posts and reels.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
       },
       "options": []
     },
@@ -327,6 +343,18 @@
       "options": []
     },
     {
+      "name": "Disable Reels scrolling",
+      "description": "Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Disable ads",
       "description": null,
       "use": true,
@@ -426,6 +454,20 @@
       "options": []
     },
     {
+      "name": "Disable screenshot detection",
+      "description": "Disables screenshots detection in DM",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Disable stories",
       "description": null,
       "use": true,
@@ -443,6 +485,20 @@
     {
       "name": "Disable story flipping",
       "description": "Disable automatic flipping/moving to next story",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Disable typing status",
+      "description": null,
       "use": true,
       "dependencies": [
         "BytecodePatch"
@@ -621,7 +677,12 @@
             "girlcockx.com",
             "stupidpenisx.com",
             "cunnyx.com",
-            "autistic.kids"
+            "autistic.kids",
+            "gockx.com",
+            "yiffx.com",
+            "mpregx.com",
+            "skibidix.com",
+            "xcancel.com"
           ],
           "values": null
         }
@@ -792,6 +853,20 @@
     {
       "name": "Hide navigation buttons",
       "description": "Hides navigation bar buttons, such as the Reels and Create button.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Hide notes tray",
+      "description": "Hides notes tray in DM section",
       "use": true,
       "dependencies": [
         "BytecodePatch"
@@ -978,9 +1053,24 @@
     },
     {
       "name": "Make ephemeral media permanent",
-      "description": "changes view once, view twice media to permanent view. Do note older ephemeral media might look blank.",
+      "description": "Changes unexpired view once, view twice media to permanent view.",
       "use": true,
       "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "More options on profile",
+      "description": "Adds a new button to handle user related data like copy handle, download profile picture etc",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": {
@@ -1085,6 +1175,20 @@
     {
       "name": "Remove build expired popup",
       "description": "Removes the popup that appears after a while, when the app version ages.",
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Remove empty bottom space",
+      "description": "Removes empty space below bottom navigation bar",
       "use": true,
       "dependencies": [
         "BytecodePatch"
@@ -1235,6 +1339,20 @@
     },
     {
       "name": "Unlock developer options",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "423.0.0.47.66"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "View DMs anonymously",
       "description": null,
       "use": true,
       "dependencies": [

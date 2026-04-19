@@ -10,6 +10,7 @@
 
 package app.crimera.patches.instagram.misc.settings
 
+import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntity
 import app.crimera.patches.instagram.entity.profileinfo.ProfileUserInfoViewBinderFingerprint
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
@@ -40,7 +41,7 @@ val settingsPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(sharedExtensionPatch, addSettingsActivityPatch, profileInfoEntity)
+        dependsOn(sharedExtensionPatch, addSettingsActivityPatch, profileInfoEntity, instagramButtonEntity)
         execute {
 
             ProfileUserInfoViewBinderFingerprint.method.apply {
@@ -49,26 +50,6 @@ val settingsPatch =
                     moveResObj + 1,
                     """
                     invoke-static {p1,p2}, ${PATCHES_DESCRIPTOR}/userprofile/PikoSettingsButton;->addPikoSettingsButton(Landroid/view/ViewGroup;Ljava/lang/Object;)V
-                    """.trimIndent(),
-                )
-            }
-
-            PikoSettingsButtonExtensionFingerprint.method.apply {
-                val buttonStyleClass =
-                    IgdsButtonSetStyleFingerprint.method.parameters
-                        .first()
-                        .type
-                PikoSettingsButtonStyleExtensionFingerprint.changeFirstString(classNameToExtension(buttonStyleClass))
-
-                val buttonStyleInstructionIndex = indexOfFirstInstruction(Opcode.INVOKE_STATIC)
-                val dummyRegister = findFreeRegister(buttonStyleInstructionIndex)
-                val buttonRegister = instructions.first { it.opcode == Opcode.NEW_INSTANCE }.registersUsed[0]
-
-                addInstructions(
-                    buttonStyleInstructionIndex + 1,
-                    """
-                    move-result-object v$dummyRegister
-                    invoke-virtual {v$buttonRegister, v$dummyRegister}, ${IgdsButtonSetStyleFingerprint.definingClass}->setStyle($buttonStyleClass)V
                     """.trimIndent(),
                 )
             }

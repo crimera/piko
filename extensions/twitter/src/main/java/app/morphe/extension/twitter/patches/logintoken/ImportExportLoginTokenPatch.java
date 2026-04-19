@@ -105,11 +105,7 @@ public class ImportExportLoginTokenPatch {
             new AlertDialog.Builder(context)
                     .setTitle(StringRef.str("piko_pref_success"))
                     .setMessage(StringRef.str("piko_login_token_import_success_reopen_required"))
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        if (context instanceof Activity activity)
-                            activity.finish();
-                    })
-                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok, null)
                     .setCancelable(false)
                     .show();
         } catch (JSONException e) {

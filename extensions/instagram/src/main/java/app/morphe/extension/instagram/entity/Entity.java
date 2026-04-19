@@ -26,6 +26,10 @@ public class Entity {
         this.obj = null;
     }
 
+    public Object getObject(){
+        return this.obj;
+    }
+
     public Class<?> getObjClass() throws ClassNotFoundException {
         return this.obj.getClass();
     }
@@ -42,6 +46,11 @@ public class Entity {
 
     public Object getField(String fieldName) throws Exception {
         return getField(this.obj, fieldName);
+    }
+
+    public Entity getFieldAsEntity(String fieldName) throws Exception {
+        Object object = getField(fieldName);
+        return new Entity(object);
     }
 
     public Object getMethod(Object clsObj, String methodName, Class<?>[] paramTypes, Object... params) throws Exception {

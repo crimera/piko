@@ -98,6 +98,9 @@ public class DownloadUtils {
                     } else if (selectedOption.equals(Strings.OPEN_VIDEO_EXTERNALLY) || selectedOption.equals(Strings.OPEN_IMAGE_EXTERNALLY)) {
                         ActivityHook.handleUrlIntent(isCurrentMediaVideo,currentMediaData.getMediaLink());
 
+                    } else if (selectedOption.equals(Strings.DOWNLOAD_ALL)) {
+                        downloadAllMedia(context, mediaInfo);
+
                     } else if (selectedOption.equals(Strings.PIKO_DEBUG)) {
                         ObjectBrowser.browseObject(context,currentMediaData);
 
@@ -124,6 +127,17 @@ public class DownloadUtils {
         String downloadFileName = currentMediaData.getDownloadFilename(false);
 
         downloadFile(context, currentMediaData.getMediaLink(), username, downloadFileName);
+    }
+
+    public static void downloadAllMedia(Context context, MediaData mediaInfo) throws Exception {
+        String username = mediaInfo.getUserData().getUsername();
+        int carouselSize = mediaInfo.getCarouselSize();
+
+        for (int position = 0; position < carouselSize; position++) {
+            MediaData currentMediaData = mediaInfo.getMediaAt(position);
+            String downloadFileName = currentMediaData.getDownloadFilename(false);
+            downloadFile(context, currentMediaData.getMediaLink(), username, downloadFileName);
+        }
     }
 
 
@@ -153,7 +167,7 @@ public class DownloadUtils {
         }
     }
 
-    private static void downloadFile(Context ctx, String url, String username, String downloadFilename) {
+    public static void downloadFile(Context ctx, String url, String username, String downloadFilename) {
         String publicFolder = Environment.DIRECTORY_DOWNLOADS;
         String subFolder = "Piko-Instagram";
         final String filename = username + "_" + downloadFilename;

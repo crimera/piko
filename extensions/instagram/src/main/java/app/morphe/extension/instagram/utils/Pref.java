@@ -32,6 +32,15 @@ public class Pref {
     public static boolean viewLiveAnonymously(){
         return SharedPref.getBooleanPerf(Settings.VIEW_LIVE_ANONYMOUSLY);
     }
+    public static boolean disableScreenshotDetection(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_SCREENSHOT_DETECTION);
+    }
+    public static boolean disableTypingStatus(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_TYPING_STATUS);
+    }
+    public static boolean viewDmAnonymously(){
+        return SharedPref.getBooleanPerf(Settings.VIEW_DM_ANONYMOUSLY);
+    }
 
     public static boolean disableStories(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_STORIES);
@@ -45,17 +54,19 @@ public class Pref {
     public static boolean limitFollowingFeed(){
         return SharedPref.getBooleanPerf(Settings.LIMIT_FOLLOWING_FEED);
     }
-    public static boolean hideStoriesTray(){
-        return SharedPref.getBooleanPerf(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;
+    public static boolean hideStoriesTray(){return SharedPref.getBooleanPerf(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;}
+    public static boolean hideNotesTray() {
+        return SharedPref.getBooleanPerf(Settings.HIDE_NOTES_TRAY) && SettingsStatus.hideNotesTray;
     }
-    public static String unlimitedReplaysOnEphemeralMedia(String viewMode) {
-        return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia ? "permanent" : viewMode;
+    public static boolean disableReelsScrolling(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
+    }
+    public static String unlimitedReplaysOnEphemeralMedia(String viewMode,Long expireTime) {
+        Boolean isExpired = expireTime != null && Long.valueOf(expireTime) * 1000 < System.currentTimeMillis();
+        return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && isExpired ? "permanent" : viewMode;
     }
     public static boolean hideReshareButton(){
         return SharedPref.getBooleanPerf(Settings.HIDE_RESHARE_BUTTON) && SettingsStatus.hideReshareButton;
-    }
-    public static int unlimitedReplaysOnEphemeralMedia(int viewCount){
-        return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia ? 0:viewCount;
     }
     public static boolean hideGroupCreationOnSharesheet(){
         return SharedPref.getBooleanPerf(Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET);
@@ -88,6 +99,10 @@ public class Pref {
         return SharedPref.getStringPref(Settings.CUSTOMISE_STORY_TIMESTAMP);
     }
     public static int improveImageViewing(int defaultSize){
+            return SharedPref.getBooleanPerf(Settings.IMPROVE_IMAGE_VIEWING) ? 2048:defaultSize;
+    }
+
+    public static Integer improveImageViewing(Integer defaultSize){
         return SharedPref.getBooleanPerf(Settings.IMPROVE_IMAGE_VIEWING) ? 2048:defaultSize;
     }
 
@@ -121,8 +136,12 @@ public class Pref {
         return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_CREATE);
     }
 
-    public static boolean hideNavigationProfile() {
-        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_PROFILE);
+    public static boolean removeEmptyBottomSpace() {
+        return SharedPref.getBooleanPerf(Settings.REMOVE_EMPTY_BOTTOM_SPACE);
+    }
+
+    public static boolean commentCopyButton() {
+        return SharedPref.getBooleanPerf(Settings.COMMENT_COPY_BUTTON) && SettingsStatus.copyCommentButton;
     }
 
     //end

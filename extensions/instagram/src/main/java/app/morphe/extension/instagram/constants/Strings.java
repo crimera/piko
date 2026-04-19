@@ -38,6 +38,9 @@ public class Strings {
     public static final String CATEGORY_GHOST = "Ghost";
     public static final String VIEW_STORIES_ANONYMOUSLY = "View stories anonymously";
     public static final String VIEW_LIVE_ANONYMOUSLY = "View live anonymously";
+    public static final String DISABLE_TYPING_STATUS = "Disable typing status";
+    public static final String DISABLE_SCREENSHOT_DETECTION = "Disable screenshot detection";
+    public static final String VIEW_DM_ANONYMOUSLY = "View direct messages anonymously";
 
     public static final String CATEGORY_DISTRACTION_FREE = "Distraction free";
     public static final String DISABLE_STORIES = "Disable stories";
@@ -45,8 +48,14 @@ public class Strings {
     public static final String DISABLE_COMMENTS = "Disable comments";
     public static final String LIMIT_FOLLOWING_FEED = "Limit feed to following profiles";
     public static final String LIMIT_FOLLOWING_FEED_DESC = "Filters the home feed to display only content from profiles you follow.";
+    public static final String DISABLE_REELS_SCROLLING = "Disable Reels scrolling";
+    public static final String DISABLE_REELS_SCROLLING_DESC =
+            "Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. " +
+            "Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds.";
     public static final String HIDE_STORIES_TRAY = "Hide stories tray";
     public static final String HIDE_STORIES_TRAY_DESC = "Hide stories tray from main feed";
+    public static final String HIDE_NOTES_TRAY = "Hide notes tray";
+    public static final String HIDE_NOTES_TRAY_DESC = "Hides notes tray in DM section";
     public static final String HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = "Hide group creation button on sharesheet";
 
     public static final String CATEGORY_MISC = "Misc";
@@ -67,10 +76,22 @@ public class Strings {
     public static final String CUSTOMISE_STORY_TIMESTAMP = "Customise story timestamp";
     public static final String CUSTOMISE_STORY_TIMESTAMP_DESC = "Customise the timestamp that shows when the story was posted";
     public static final String UNLIMITED_REPLAYS = "Make ephemeral media permament";
-    public static final String UNLIMITED_REPLAYS_DESC = "changes view once, view twice media to permanent view. Do note older ephemeral media might look blank";
+    public static final String UNLIMITED_REPLAYS_DESC = "Changes unexpired view once, view twice media to permanent view";
     public static final String IMPROVE_IMAGE_VIEWING = "Improve image viewing";
     public static final String IMPROVE_IMAGE_VIEWING_DESC = "Fetches max resolution images from server";
     public static final String HIDE_RESHARE_BUTTON = "Hide reshare button";
+    public static final String COPY_COMMENT = "Copy comment";
+    public static final String COPY_COMMENT_DESC = "Adds a button to copy comments on posts and reels";
+    public static final String COMMENT_COPIED_SUCCESS = "Comment copied";
+    public static final String COMMENT_COPIED_FAILED = "No text found to copy";
+    public static final String COPY_USERNAME = "Copy username";
+    public static final String COPY_FULL_NAME = "Copy full name";
+    public static final String COPY_USER_ID = "Copy user id";
+    public static final String COPY_BIO = "Copy bio";
+    public static final String DOWNLOAD_PROFILE_PICTURE = "Download profile picture";
+    public static final String COPIED = "Copied";
+    public static final String MORE_PROFILE_OPTIONS = "More profile options";
+    public static final String REMOVE_EMPTY_BOTTOM_SPACE = "Remove empty bottom space";
 
     public static final String CATEGORY_DOWNLOAD_MEDIA = "Download media";
     public static final String ENABLE_DOWNLOAD = "Enable download";
@@ -97,7 +118,6 @@ public class Strings {
     public static final String HIDE_NAVIGATION_DIRECT = "Hide Direct button";
     public static final String HIDE_NAVIGATION_SEARCH = "Hide Search button";
     public static final String HIDE_NAVIGATION_CREATE = "Hide Create button";
-    public static final String HIDE_NAVIGATION_PROFILE = "Hide Profile button";
 
 
     public static final String PATCH_INFO_TITLE = "Patch information";

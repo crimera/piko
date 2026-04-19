@@ -11,11 +11,10 @@
 
 package app.morphe.extension.instagram.settings;
 
-import app.morphe.extension.shared.settings.BaseSettings;
-import app.morphe.extension.shared.settings.BooleanSetting;
-import app.morphe.extension.shared.settings.StringSetting;
+import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
 
-public class Settings extends BaseSettings {
+public class Settings {
     public static final BooleanSetting DISABLE_ADS = new BooleanSetting("disable_ads", true);
     public static final BooleanSetting OPEN_LINKS_EXTERNALLY = new BooleanSetting("open_links_externally", true);
     public static final BooleanSetting SANITIZE_SHARE_LINKS = new BooleanSetting("sanitize_share_links", true);
@@ -27,6 +26,8 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting DISABLE_ANALYTICS = new BooleanSetting("disable_analytics", true);
     public static final BooleanSetting VIEW_STORIES_ANONYMOUSLY = new BooleanSetting("view_stories_anonymously", false);
     public static final BooleanSetting VIEW_LIVE_ANONYMOUSLY = new BooleanSetting("view_live_anonymously", true);
+    public static final BooleanSetting DISABLE_SCREENSHOT_DETECTION = new BooleanSetting("disable_screenshot_detection", true);
+    public static final BooleanSetting VIEW_DM_ANONYMOUSLY = new BooleanSetting("view_dm_anonymously", true);
     public static final BooleanSetting DISABLE_STORIES = new BooleanSetting("disable_stories", false);
     public static final BooleanSetting HIDE_STORIES_TRAY = new BooleanSetting("hide_stories_tray", false);
     public static final BooleanSetting DISABLE_EXPLORE = new BooleanSetting("disable_explore", false);
@@ -38,7 +39,12 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting UNLIMITED_REPLAYS = new BooleanSetting("unlimited_replays", true);
     public static final BooleanSetting HIDE_RESHARE_BUTTON = new BooleanSetting("hide_reshare_button", true);
     public static final BooleanSetting IMPROVE_IMAGE_VIEWING = new BooleanSetting("improve_image_viewing", true);
+    public static final BooleanSetting COMMENT_COPY_BUTTON = new BooleanSetting("comment_copy_button", true);
     public static final BooleanSetting HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = new BooleanSetting("hide_group_creation_button_on_sharesheet", true);
+    public static final BooleanSetting DISABLE_REELS_SCROLLING = new BooleanSetting("disable_reels_scrolling", false);
+    public static final BooleanSetting REMOVE_EMPTY_BOTTOM_SPACE = new BooleanSetting("remove_empty_bottom_space", true);
+    public static final BooleanSetting DISABLE_TYPING_STATUS = new BooleanSetting("disable_typing_status", true);
+    public static final BooleanSetting HIDE_NOTES_TRAY = new BooleanSetting("hide_notes_tray", true);
 
     public static final BooleanSetting ENABLE_DOWNLOAD = new BooleanSetting("enable_download", true);
     public static final BooleanSetting ENABLE_DIRECT_DOWNLOAD = new BooleanSetting("enable_direct_download", false);
@@ -50,5 +56,4 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting HIDE_NAVIGATION_DIRECT = new BooleanSetting("hide_navigation_direct", false);
     public static final BooleanSetting HIDE_NAVIGATION_SEARCH = new BooleanSetting("hide_navigation_search", false);
     public static final BooleanSetting HIDE_NAVIGATION_CREATE = new BooleanSetting("hide_navigation_create", false);
-    public static final BooleanSetting HIDE_NAVIGATION_PROFILE = new BooleanSetting("hide_navigation_profile", false);
 }

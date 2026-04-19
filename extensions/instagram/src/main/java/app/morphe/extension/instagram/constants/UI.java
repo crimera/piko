@@ -15,7 +15,6 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.ImageView;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -24,20 +23,17 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.app.Activity;
-import android.view.ViewGroup.MarginLayoutParams;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
-import com.instagram.igds.components.button.IgdsButton;
-import app.morphe.extension.instagram.entity.Entity;
+import app.morphe.extension.instagram.entity.InstagramButton;
+import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 
 public class UI {
 
@@ -61,44 +57,17 @@ public class UI {
         }
     }
 
-
-    private static Object pikoSettingsButtonStyle() throws Exception {
-        Entity e = new Entity();
-        Class<?> styleClass = Class.forName("X.0X3");
-        return e.getMethod(
-                styleClass,
-                "valueOf",
-                "PRIMARY"
-        );
-    }
-
     public static void pikoSettingsButton(ViewGroup viewGroup) throws Exception {
         Context context = viewGroup.getContext();
-        IgdsButton button = new IgdsButton(context);
+        InstagramButton button = new InstagramButton(context);
         button.setText(Strings.PIKO_SETTINGS_TITLE);
-        Object buttonStyle = pikoSettingsButtonStyle();
-        // The function call for adding the button style to the button will be injected here from patches.
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    ActivityHook.startPikoActivity();
-                } catch (Exception ex) {
-                    Logger.printException(() -> "Failed to launch settings: ", ex);
-                }
-            }
-        });
+        button.setStyle(InstagramButtonStyleEnum.SUPER_PRIMARY);
+        button.setOnClickListener(() -> ActivityHook.startPikoActivity());
 
         int marginPx = Utils.dipToPixels(12);
+        button.setMargins(marginPx, marginPx, marginPx, marginPx);
 
-        MarginLayoutParams params = new MarginLayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        params.setMargins(marginPx, marginPx, marginPx, marginPx);
-        button.setLayoutParams(params);
-
-        viewGroup.addView(button);
+        viewGroup.addView(button.getIgdsButton());
     }
 
     public static void restartDialogBox(Context context) {
