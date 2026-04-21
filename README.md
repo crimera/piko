@@ -175,9 +175,6 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Remove empty bottom space</code></td><td>Removes empty space below bottom navigation bar</td></tr>
 <tr><td><code>Disable typing status</code></td><td></td></tr>
 <tr><td><code>Hide notes tray</code></td><td>Hides notes tray in DM section</td></tr>
-<tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
-<tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
-<tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
 <tr><td><code>Amoled theme</code></td><td>Replaces Instagram's dark-mode elevated greys with pure black for AMOLED displays.</td></tr>
 
 
