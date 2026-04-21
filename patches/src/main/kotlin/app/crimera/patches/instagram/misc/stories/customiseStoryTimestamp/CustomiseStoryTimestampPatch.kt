@@ -50,7 +50,7 @@ val customiseStoryTimestampPatch =
                 addInstructionsWithLabels(
                     longToDoubleIndex,
                     """
-                    invoke-static {v$postedTimestampRegister, v1 }, ${PATCHES_DESCRIPTOR}/story/StoryTimestamp;->customiseStoryTimestamp(J)Ljava/lang/String;
+                    invoke-static/range {v$postedTimestampRegister .. v${postedTimestampRegister + 1}}, ${PATCHES_DESCRIPTOR}/story/StoryTimestamp;->customiseStoryTimestamp(J)Ljava/lang/String;
                     move-result-object v$dummyRegister
                     if-eqz v$dummyRegister, :piko
                     return-object v$dummyRegister

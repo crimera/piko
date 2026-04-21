@@ -55,7 +55,7 @@ public class StoryButton {
         return buttonList;
     }
 
-    public boolean storyButtonAction(CharSequence buttonText, Context ctx, Object mediaObject){
+    public static boolean storyButtonAction(CharSequence buttonText, Context ctx, Object mediaObject){
         try {
             if (buttonText.equals(Strings.VIEW_STORY_MENTIONS)) {
                 ViewStoryMentionsPatch.viewMentions(ctx, mediaObject);
