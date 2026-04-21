@@ -28,10 +28,17 @@ val instagramButtonEntity =
             SetStyleExtensionFingerprint.changeFirstString(classNameToExtension(buttonStyleClass))
 
             SetStyleObjectExtensionFingerprint.method.apply {
+                // p1 arrives typed as java.lang.Object (the setStyleObject(Object)
+                // signature is intentionally generic so callers don't depend on
+                // the obfuscated IgdsButtonStyle class name). ART's verifier
+                // requires an explicit check-cast before we hand p1 to
+                // setStyle($buttonStyleClass), otherwise the class fails to
+                // verify with "register v1 has type Object but expected …".
                 addInstructions(
                     0,
                     """
                     iget-object v0, p0, $EXTENSION_CLASS_DESCRIPTOR->igdsButton:$IGDS_BUTTON_CLASS_DESCRIPTOR
+                    check-cast p1, $buttonStyleClass
                     invoke-virtual {v0, p1}, $IGDS_BUTTON_CLASS_DESCRIPTOR->setStyle($buttonStyleClass)V
                     """.trimIndent(),
                 )
