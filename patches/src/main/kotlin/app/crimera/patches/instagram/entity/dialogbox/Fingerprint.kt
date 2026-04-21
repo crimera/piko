@@ -33,11 +33,6 @@ internal object ShowDialogHelperFingerprint : Fingerprint(
     definingClass = "Lcom/instagram/react/modules/base/IgReactDialogModule;",
 )
 
-internal object DialogBoxAddItemsMethodFingerprint : Fingerprint(
-    parameters = listOf("Landroid/content/DialogInterface\$OnClickListener;", "[Ljava/lang/CharSequence;"),
-    returnType = "V",
-)
-
 internal object ConstructorExtensionFingerprint : Fingerprint(
     name = "<init>",
     definingClass = EXTENSION_CLASS_DESCRIPTOR,

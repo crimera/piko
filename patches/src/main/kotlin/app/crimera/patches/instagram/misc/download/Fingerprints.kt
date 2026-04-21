@@ -12,8 +12,6 @@ package app.crimera.patches.instagram.misc.download
 
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
-import app.morphe.shared.misc.mapping.ResourceType
-import app.morphe.shared.misc.mapping.resourceLiteral
 
 val FEED_BUTTON_DESCRIPTOR = "$DOWNLOAD_DESCRIPTOR/FeedButton;"
 val REEL_BUTTON_DESCRIPTOR = "$DOWNLOAD_DESCRIPTOR/ReelButton;"
@@ -28,11 +26,10 @@ internal object FeedButtonOnClickFingerprint : Fingerprint(
     returnType = "V",
 )
 
-internal object EditMediaInfoFragmentFingerprint : Fingerprint(
+internal object EditMediaInfoGetCurrentMediaIdFingerprint : Fingerprint(
     definingClass = "Linstagram/features/creation/fragment/EditMediaInfoFragment;",
-    returnType = "V",
+    returnType = "Ljava/lang/String;",
     parameters = listOf(),
-    strings = listOf("Required value was null."),
 )
 
 internal object AddReelButtonFingerprint : Fingerprint(
@@ -51,12 +48,7 @@ internal object GetDirectThreadMediaSaverModuleNameFingerprint : Fingerprint(
 
 internal object DMLongPressButtonAdderFingerprint : Fingerprint(
     returnType = "V",
-    filters =
-        listOf(
-            resourceLiteral(ResourceType.DRAWABLE, "instagram_sticker_outline_24"),
-            resourceLiteral(ResourceType.DRAWABLE, "instagram_reply_outline_24"),
-            resourceLiteral(ResourceType.DRAWABLE, "instagram_meta_gen_ai_outline_24"),
-        ),
+    strings = listOf("⏰", "userSession"),
 )
 
 internal object GetEnumButtonClassExtensionFingerprint : Fingerprint(

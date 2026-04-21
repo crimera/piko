@@ -54,6 +54,13 @@ val instagramDialogBoxEntity =
                 }
             }
 
-            AddDialogMenuItemsExtensionFingerprint.changeFirstString(DialogBoxAddItemsMethodFingerprint.method.name)
+            val dialogBoxClassMethods = GetDialogFingerprint.classDef.methods
+            val dialogBoxAddItemsMethodName =
+                dialogBoxClassMethods
+                    .first {
+                        it.parameters.size > 1 &&
+                            it.parameters[1].type == "[Ljava/lang/CharSequence;"
+                    }.name
+            AddDialogMenuItemsExtensionFingerprint.changeFirstString(dialogBoxAddItemsMethodName)
         }
     }

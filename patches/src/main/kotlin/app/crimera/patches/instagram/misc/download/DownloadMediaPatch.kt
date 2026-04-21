@@ -28,12 +28,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.shared.misc.mapping.ResourceType
-import app.morphe.shared.misc.mapping.getResourceId
 import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.indexOfFirstInstructionOrThrow
-import app.morphe.util.indexOfFirstLiteralInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
@@ -67,8 +64,8 @@ val downloadMediaPatch =
             }
 
             val currentViewingMediaFieldData =
-                EditMediaInfoFragmentFingerprint.method.instructions
-                    .last { it.opcode == Opcode.IGET }
+                EditMediaInfoGetCurrentMediaIdFingerprint.method.instructions
+                    .first { it.opcode == Opcode.IGET }
                     .fieldExtractor()
 
             AddFeedButtonFingerprint.method.apply {
@@ -166,11 +163,19 @@ val downloadMediaPatch =
 
             // Make Save option available for all DM content.
             DMLongPressButtonAdderFingerprint.method.apply {
-                val resourceLiteralIndex =
-                    indexOfFirstLiteralInstruction(getResourceId(ResourceType.DRAWABLE, "instagram_meta_gen_ai_outline_24"))
-                val firstIfEqzAfterLiteralIndex = indexOfFirstInstruction(resourceLiteralIndex, Opcode.IF_EQZ)
+                val allIfNez = instructions.filter { it.opcode == Opcode.IF_NEZ }
+                allIfNez.firstOrNull { instruction ->
+                    val index = instruction.location.index
+                    val opCodeOfPrevInstruction = getInstruction(index - 1).opcode
+                    val opCodeOfNextInstruction = getInstruction(index + 1).opcode
 
-                removeInstruction(firstIfEqzAfterLiteralIndex)
+                    if (opCodeOfPrevInstruction == Opcode.IF_EQZ && opCodeOfNextInstruction == Opcode.SGET_OBJECT) {
+                        removeInstruction(index - 1)
+                        true
+                    } else {
+                        false
+                    }
+                }
             }
             // DM media downloader.
             GetDirectThreadMediaSaverModuleNameFingerprint.classDef.methods.first { it.returnType == "V" && it.name != "<init>" }.apply {

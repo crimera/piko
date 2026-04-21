@@ -57,23 +57,31 @@ val copyCommentPatch =
 
             AddCommentButtonFingerprint.method.apply {
                 // Include copy button.
-                val arrayListInitInstruction =
+                val arrayListInitInstructions =
                     instructions.filter {
                         it.opcode == Opcode.NEW_INSTANCE &&
                             it.getReference<TypeReference>()?.type == "Ljava/util/ArrayList;"
-                    }[1]
+                    }
 
-                val arrayListIndex = arrayListInitInstruction.location.index
+                arrayListInitInstructions.firstOrNull { instruction ->
+                    val index = instruction.location.index
+                    val nextInstructionOpcode: Opcode = getInstruction(index + 1).opcode
+                    val nextNextInstructionOpcode: Opcode = getInstruction(index + 2).opcode
 
-                val arrayListRegister = arrayListInitInstruction.registersUsed[0]
-                val freeRegister = findFreeRegister(arrayListIndex + 1)
+                    if (nextInstructionOpcode == Opcode.INVOKE_DIRECT && nextNextInstructionOpcode == Opcode.IGET_OBJECT) {
+                        val arrayListRegister = instruction.registersUsed[0]
+                        val freeRegister = findFreeRegister(index + 1)
 
-                addInstruction(
-                    arrayListIndex + 2,
-                    """
-                    invoke-static {v$arrayListRegister},$HANDLE_COMMENT_BUTTON_EXTENSION_CLASS->addCopyButton(Ljava/util/List;)V
-                    """.trimIndent(),
-                )
+                        addInstruction(
+                            index + 2,
+                            """
+                            invoke-static {v$arrayListRegister},$HANDLE_COMMENT_BUTTON_EXTENSION_CLASS->addCopyButton(Ljava/util/List;)V
+                            """.trimIndent(),
+                        )
+                        true
+                    }
+                    false
+                }
 
                 // Copy button attributes.
                 val drawableId = getResourceId(ResourceType.DRAWABLE, "instagram_eye_off_outline_24")

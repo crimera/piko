@@ -83,8 +83,8 @@ val followBackIndicatorPatch =
                     val dummyRegistry2 = getInstruction(internalBadgeStringIndex).registersUsed[0]
 
                     // Instruction to which the call needs to transfer after our hook.
-                    val invokeStaticRangeIndex =
-                        indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.INVOKE_STATIC_RANGE)
+                    val moveFrom16Index =
+                        indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.MOVE_FROM16)
 
                     // Added instructions:
                     // Move the profile info parameter to a suitable registry.
@@ -96,7 +96,7 @@ val followBackIndicatorPatch =
                         invoke-static {v$dummyRegistry2, v$internalBadgeRegistry}, ${PATCHES_DESCRIPTOR}/userprofile/FriendshipStatusIndicator;->indicators(Ljava/lang/Object;Ljava/lang/Object;)V
                         goto :piko
                         """.trimIndent(),
-                        ExternalLabel("piko", getInstruction(invokeStaticRangeIndex)),
+                        ExternalLabel("piko", getInstruction(moveFrom16Index)),
                     )
 
                     enableSettings("followBackIndicator")

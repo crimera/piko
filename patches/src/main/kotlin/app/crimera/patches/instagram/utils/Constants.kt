@@ -25,14 +25,8 @@ object Constants {
                 listOf(
                     // Stable
                     AppTarget(
-                        version = "423.0.0.47.66",
+                        version = "425.0.0.47.61",
                         description = "Instagram Stable version (all archs)",
-                    ),
-                    // Alpha
-                    AppTarget(
-                        version = "425.0.0.0.0",
-                        description = "Instagram Alpha version (arm64-v8a only)",
-                        isExperimental = true,
                     ),
                 ),
         )
