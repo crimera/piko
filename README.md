@@ -70,7 +70,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Custom sharing domain</code></td><td>Allows using domains like fxtwitter when sharing tweets/posts.</td></tr>
 <tr><td><code>Native translator</code></td><td>A native translator with multiple providers.</td></tr>
 <tr><td><code>Customise post font size</code></td><td>Allows you to customize the post's font size.</td></tr>
-<tr><td><code>Customize Inline action Bar items</code></td><td></td></tr>
+<tr><td><code>Customize Inline action Bar items</code></td><td>Customizes the items in the action bar.</td></tr>
 <tr><td><code>Customize Navigation Bar items</code></td><td>Allows you to customize the navigation bar items.</td></tr>
 <tr><td><code>Customize default reply sorting</code></td><td>Allows you to customize the default reply sorting.</td></tr>
 <tr><td><code>Customize explore tabs</code></td><td>Allows you customize the explore tabs.</td></tr>
