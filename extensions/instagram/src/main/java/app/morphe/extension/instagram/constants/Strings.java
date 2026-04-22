@@ -136,6 +136,7 @@ public class Strings {
     public static final String OK = "OK";
     public static final String DELETED = "Deleted";
     public static final String PIKO_DEBUG = "Piko debug";
+    public static final String PIKO_DEBUG_DESC = "Adds debug option on some of the componenets for testing";
 
     public static final String OPEN_IMAGE_EXTERNALLY = "Open image externally";
     public static final String OPEN_VIDEO_EXTERNALLY = "Open video externally";

@@ -472,6 +472,7 @@ public class ScreenBuilder {
         PreferenceCategory category = category = addCategory(Strings.PATCH_INFO_TITLE);
         String appVersionText = String.format(Strings.APP_VERSION, Utils.getAppVersionName());
         String patchVersionText = String.format(Strings.PATCH_VERSION, Utils.getPatchesReleaseVersion());
+
         addPreference(category,
                 helper.buttonPreference(
                         appVersionText,
@@ -501,6 +502,14 @@ public class ScreenBuilder {
                         Strings.IMPORT_PIKO_PREF,
                         "",
                         Strings.IMPORT_PIKO_PREF
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.PIKO_DEBUG,
+                        Strings.PIKO_DEBUG_DESC,
+                        Settings.PIKO_DEBUG
                 )
         );
     }

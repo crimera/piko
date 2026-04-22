@@ -17,7 +17,7 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 @SuppressWarnings("unused")
 public class Pref {
     public static boolean pikoDebug(){
-        return false;
+        return SharedPref.getBooleanPerf(Settings.PIKO_DEBUG);
     }
 
     public static boolean disableAds(){
