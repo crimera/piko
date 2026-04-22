@@ -57,7 +57,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 </tr>
 </thead>
 <tbody>
-<tr><td><code>Add ability to copy media link</code></td><td></td></tr>
+<tr><td><code>Add ability to copy media link</code></td><td>Adds the ability to copy media link.</td></tr>
 <tr><td><code>Bring back twitter</code></td><td>Bring back old twitter logo and name</td></tr>
 <tr><td><code>Browse tweet object</code></td><td>Adds an option to browse the tweet object in the share menu.</td></tr>
 <tr><td><code>Change app icon</code></td><td>Ability to change app icons from a wide collection</td></tr>
@@ -69,20 +69,20 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Custom font</code></td><td>Customise font style</td></tr>
 <tr><td><code>Custom sharing domain</code></td><td>Allows using domains like fxtwitter when sharing tweets/posts.</td></tr>
 <tr><td><code>Native translator</code></td><td>A native translator with multiple providers.</td></tr>
-<tr><td><code>Customise post font size</code></td><td></td></tr>
+<tr><td><code>Customise post font size</code></td><td>Allows you to customize the post's font size.</td></tr>
 <tr><td><code>Customize Inline action Bar items</code></td><td></td></tr>
-<tr><td><code>Customize Navigation Bar items</code></td><td></td></tr>
-<tr><td><code>Customize default reply sorting</code></td><td></td></tr>
-<tr><td><code>Customize explore tabs</code></td><td></td></tr>
-<tr><td><code>Customize notification tabs</code></td><td></td></tr>
-<tr><td><code>Customize profile tabs</code></td><td></td></tr>
-<tr><td><code>Customize search suggestions</code></td><td></td></tr>
-<tr><td><code>Customize search tab items</code></td><td></td></tr>
-<tr><td><code>Customize side bar items</code></td><td></td></tr>
-<tr><td><code>Customize timeline top bar</code></td><td></td></tr>
+<tr><td><code>Customize Navigation Bar items</code></td><td>Allows you to customize the navigation bar items.</td></tr>
+<tr><td><code>Customize default reply sorting</code></td><td>Allows you to customize the default reply sorting.</td></tr>
+<tr><td><code>Customize explore tabs</code></td><td>Allows you customize the explore tabs.</td></tr>
+<tr><td><code>Customize notification tabs</code></td><td>Allows you to customize the notifications tabs.</td></tr>
+<tr><td><code>Customize profile tabs</code></td><td>Allows you to customize the profile tabs.</td></tr>
+<tr><td><code>Customize search suggestions</code></td><td>Allows you customize search suggestions.</td></tr>
+<tr><td><code>Customize search tab items</code></td><td>Allows you to customize the search tab items.</td></tr>
+<tr><td><code>Customize side bar items</code></td><td>Allows you to re align the side bar items.</td></tr>
+<tr><td><code>Customize timeline top bar</code></td><td>Allows you to customize the timeline in the top bar.</td></tr>
 <tr><td><code>Delete from database</code></td><td>Delete entries from database (cache)</td></tr>
-<tr><td><code>Disable auto timeline scroll on launch</code></td><td></td></tr>
-<tr><td><code>Disable chirp font</code></td><td></td></tr>
+<tr><td><code>Disable auto timeline scroll on launch</code></td><td>Disable X auto scrolling your timeline on startup.</td></tr>
+<tr><td><code>Disable chirp font</code></td><td>Disables the chirp font.</td></tr>
 <tr><td><code>Disunify xchat system</code></td><td>Bring back legacy features like messages and share sheet.</td></tr>
 <tr><td><code>Download patch</code></td><td>Unlocks the ability to download videos and gifs from Twitter/X</td></tr>
 <tr><td><code>Dynamic color</code></td><td>Replaces Twitter Blue with the user's Material You palette.</td></tr>
@@ -93,7 +93,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Force enable translate</code></td><td>Get translate option for all posts</td></tr>
 <tr><td><code>Handle custom twitter links</code></td><td>Adds support for opening vxtwitter, fxtwitter, and fixupx links within the app.</td></tr>
 <tr><td><code>Hide Banner</code></td><td>Hide new post banner</td></tr>
-<tr><td><code>Hide Community Notes</code></td><td></td></tr>
+<tr><td><code>Hide Community Notes</code></td><td>Hides community notes.</td></tr>
 <tr><td><code>Hide FAB</code></td><td>Adds an option to hide Floating action button</td></tr>
 <tr><td><code>Hide FAB Menu Buttons</code></td><td>Hides options from floating action button.</td></tr>
 <tr><td><code>Hide Live Threads</code></td><td>Hides live, spaces section from home timeline.</td></tr>
@@ -102,7 +102,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Hide bookmark icon in timeline</code></td><td>Hide the bookmark icon from tweet inline action.</td></tr>
 <tr><td><code>Hide community badges</code></td><td></td></tr>
 <tr><td><code>Hide followed by context</code></td><td>Hides followed by context under profile</td></tr>
-<tr><td><code>Hide hidden replies</code></td><td></td></tr>
+<tr><td><code>Hide hidden replies</code></td><td>Hides hidden replies (Pretty ironic)</td></tr>
 <tr><td><code>Hide immersive player</code></td><td>Removes swipe up for more videos in video player</td></tr>
 <tr><td><code>Hide nudge button</code></td><td>Hides follow/subscribe/follow back buttons on posts</td></tr>
 <tr><td><code>Hide post metrics</code></td><td>Hides like, reposts etc counts.</td></tr>
