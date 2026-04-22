@@ -100,7 +100,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Hide Recommended Users</code></td><td>Hide recommended users that pops up when you follow someone</td></tr>
 <tr><td><code>Hide badges from navigation bar icons</code></td><td>Hides notification nudges & counts from navigation bar icons</td></tr>
 <tr><td><code>Hide bookmark icon in timeline</code></td><td>Hide the bookmark icon from tweet inline action.</td></tr>
-<tr><td><code>Hide community badges</code></td><td></td></tr>
+<tr><td><code>Hide community badges</code></td><td>Hides community badges.</td></tr>
 <tr><td><code>Hide followed by context</code></td><td>Hides followed by context under profile</td></tr>
 <tr><td><code>Hide hidden replies</code></td><td>Hides hidden replies (Pretty ironic)</td></tr>
 <tr><td><code>Hide immersive player</code></td><td>Removes swipe up for more videos in video player</td></tr>
