@@ -104,4 +104,36 @@ public class MediaData extends Entity {
     public String getMediaLink() throws Exception {
         return this.isVideo() ? this.getVideoLink() : this.getPhotoLink();
     }
+
+    private OriginalSoundDataIntf getOriginalSoundDataIntf() throws Exception {
+        Class<?> helperClass = this.getHelperClass();
+        Object result = super.getMethod(helperClass, "A06", this.obj);
+        if(result!=null){
+            return new OriginalSoundDataIntf(result);
+        }
+        return null;
+    }
+
+    private TrackDataIntf getTrackDataIntf() throws Exception {
+        Class<?> helperClass = this.getHelperClass();
+        Object result = super.getMethod(helperClass, "A0F", this.obj);
+        if(result!=null){
+            return new TrackDataIntf(result);
+        }
+        return null;
+    }
+
+    public AudioMediaInterface getAudioMedia() throws Exception {
+        AudioMediaInterface originalSoundDataIntf = this.getOriginalSoundDataIntf();
+        if(originalSoundDataIntf!=null){
+            return originalSoundDataIntf;
+        }
+
+        AudioMediaInterface TrackDataIntf = this.getTrackDataIntf();
+        if(TrackDataIntf!=null){
+            return TrackDataIntf;
+        }
+
+        return null;
+    }
 }

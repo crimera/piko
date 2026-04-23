@@ -11,6 +11,8 @@
 package app.crimera.patches.instagram.misc.download
 
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
+import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundDataIntfEntity
+import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
@@ -41,7 +43,13 @@ val downloadMediaPatch =
         name = "Download media",
         description = "Adds ability to download posts, reels, stories and highlights",
     ) {
-        dependsOn(settingsPatch, mediaDataEntity, handleStoryButtonPatch)
+        dependsOn(
+            settingsPatch,
+            mediaDataEntity,
+            handleStoryButtonPatch,
+            originalSoundDataIntfEntity,
+            trackDataIntfEntity,
+        )
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {

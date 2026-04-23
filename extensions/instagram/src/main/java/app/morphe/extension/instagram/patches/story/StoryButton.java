@@ -23,6 +23,7 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.crimera.ObjectBrowser;
+import app.morphe.extension.instagram.entity.MediaData;
 
 public class StoryButton {
     private static boolean VIEW_STORY_MENTIONS;
@@ -64,7 +65,7 @@ public class StoryButton {
                 DownloadUtils.downloadPost(ctx,mediaObject,0);
                 return true;
             } else if (buttonText.equals(Strings.PIKO_DEBUG)) {
-                ObjectBrowser.browseObject(ctx, mediaObject);
+                ObjectBrowser.browseObject(ctx, new MediaData(mediaObject));
                 return true;
             }
         } catch (Exception ex) {

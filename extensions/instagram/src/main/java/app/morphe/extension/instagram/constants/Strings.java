@@ -17,6 +17,7 @@ public class Strings {
     public static final String SHARED_PREF_NAME = PIKO_SETTINGS;
     public static final String PIKO_SETTINGS_TITLE = "Piko settings";
     public static final String DEFAULT_PIKO_FOLDER = "Piko-Instagram";
+    public static final String DEFAULT_AUDIO_FOLDER = "Audio";
 
     public static final String CATEGORY_ADS = "Ads";
     public static final String DISABLE_ADS = "Disable ads";
@@ -102,6 +103,7 @@ public class Strings {
     public static final String DOWNLOAD_USERNAME_FOLDER_DESC = "Creates subfolders based on username";
     public static final String DOWNLOAD_CURRENT_MEDIA = "Download current media";
     public static final String DOWNLOAD_AS_IMAGE = "Download as image";
+    public static final String DOWNLOAD_AUDIO = "Download audio";
     public static final String DOWNLOAD_OPTIONS = "Download options";
     public static final String COPY_MEDIA_LINK = "Copy media link";
     public static final String COPIED_MEDIA_LINK = "Copied media link";
