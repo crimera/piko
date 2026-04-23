@@ -314,6 +314,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.storiesAudioAutoplay) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.STORIES_AUDIO_AUTOPLAY,
+                            "",
+                            Settings.STORIES_AUDIO_AUTOPLAY
+                    )
+            );
+        }
         if (SettingsStatus.disableDiscoverPeople) {
             addPreference(category,
                     helper.switchPreference(

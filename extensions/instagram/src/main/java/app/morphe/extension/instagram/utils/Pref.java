@@ -43,6 +43,7 @@ public class Pref {
     }
 
     public static boolean disableVideoAutoplay(){return SharedPref.getBooleanPerf(Settings.DISABLE_VIDEO_AUTOPLAY);}
+    public static boolean storiesAudioAutoplay(){return SharedPref.getBooleanPerf(Settings.STORIES_AUDIO_AUTOPLAY);}
 
     public
     static boolean disableStories(){

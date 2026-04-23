@@ -159,7 +159,9 @@ public class SettingsStatus {
     }
     public static boolean disableVideoAutoplay = false;
     public static void disableVideoAutoplay() { disableVideoAutoplay = true; }
-    public static boolean miscSection() {return (disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
+    public static boolean storiesAudioAutoplay = false;
+    public static void storiesAudioAutoplay() { storiesAudioAutoplay = true; }
+    public static boolean miscSection() {return (storiesAudioAutoplay || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
 
     //Download section.
     public static boolean downloadMedia = false;
