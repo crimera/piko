@@ -169,7 +169,7 @@ public class DownloadUtils {
 
     public static void downloadFile(Context ctx, String url, String username, String downloadFilename) {
         String publicFolder = Environment.DIRECTORY_DOWNLOADS;
-        String subFolder = "Piko-Instagram";
+        String subFolder = Strings.DEFAULT_PIKO_FOLDER;
         final String filename = username + "_" + downloadFilename;
 
         if (SPLIT_BY_USERNAME) {

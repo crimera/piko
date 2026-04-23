@@ -10,6 +10,7 @@
 
 package app.crimera.patches.instagram.misc.settings
 
+import app.crimera.patches.instagram.entity.developerOptions.developerOptionsEntity
 import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntity
 import app.crimera.patches.instagram.entity.profileinfo.ProfileUserInfoViewBinderFingerprint
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
@@ -19,18 +20,14 @@ import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
 import app.crimera.utils.changeFirstString
-import app.crimera.utils.classNameToExtension
 import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
 @Suppress("unused")
@@ -41,7 +38,7 @@ val settingsPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(sharedExtensionPatch, addSettingsActivityPatch, profileInfoEntity, instagramButtonEntity)
+        dependsOn(sharedExtensionPatch, addSettingsActivityPatch, profileInfoEntity, instagramButtonEntity, developerOptionsEntity)
         execute {
 
             ProfileUserInfoViewBinderFingerprint.method.apply {

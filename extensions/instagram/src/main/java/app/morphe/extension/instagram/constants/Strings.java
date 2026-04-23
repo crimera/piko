@@ -16,6 +16,7 @@ public class Strings {
     public static final String PIKO_SETTINGS = PIKO + "_settings";
     public static final String SHARED_PREF_NAME = PIKO_SETTINGS;
     public static final String PIKO_SETTINGS_TITLE = "Piko settings";
+    public static final String DEFAULT_PIKO_FOLDER = "Piko-Instagram";
 
     public static final String CATEGORY_ADS = "Ads";
     public static final String DISABLE_ADS = "Disable ads";
@@ -137,6 +138,7 @@ public class Strings {
     public static final String DELETED = "Deleted";
     public static final String PIKO_DEBUG = "Piko debug";
     public static final String PIKO_DEBUG_DESC = "Adds debug option on some of the componenets for testing";
+    public static final String PIKO_EXPORT_EXPERIMENT_LIST = "Export experiment list";
 
     public static final String OPEN_IMAGE_EXTERNALLY = "Open image externally";
     public static final String OPEN_VIDEO_EXTERNALLY = "Open video externally";

@@ -46,10 +46,13 @@ public class Utils {
         ctx.startActivity(intent);
     }
 
-
     public static boolean pikoWriteFile(String fileName,String data,boolean append){
+        return pikoWriteFile(fileName,"Piko",data,append);
+    }
+
+    public static boolean pikoWriteFile(String fileName,String subFolder, String data,boolean append){
         File downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        File pikoDir = new File(downloadsDir, "Piko");
+        File pikoDir = new File(downloadsDir, subFolder);
 
         if (!pikoDir.exists()) {
             pikoDir.mkdirs();

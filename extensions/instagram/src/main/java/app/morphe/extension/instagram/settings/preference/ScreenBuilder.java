@@ -22,6 +22,7 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.instagram.utils.Pref;
 
 public class ScreenBuilder {
     private final Context context;
@@ -512,6 +513,16 @@ public class ScreenBuilder {
                         Settings.PIKO_DEBUG
                 )
         );
+
+        if(Pref.pikoDebug()) {
+            addPreference(category,
+                    helper.buttonPreference(
+                            Strings.PIKO_EXPORT_EXPERIMENT_LIST,
+                            "",
+                            Strings.PIKO_EXPORT_EXPERIMENT_LIST
+                    )
+            );
+        }
     }
 
     //end
