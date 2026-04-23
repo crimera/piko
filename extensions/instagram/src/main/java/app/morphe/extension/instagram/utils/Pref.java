@@ -42,6 +42,8 @@ public class Pref {
         return SharedPref.getBooleanPerf(Settings.VIEW_DM_ANONYMOUSLY);
     }
 
+    public static boolean disableVideoAutoplay(){return SharedPref.getBooleanPerf(Settings.DISABLE_VIDEO_AUTOPLAY);}
+
     public
     static boolean disableStories(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_STORIES);

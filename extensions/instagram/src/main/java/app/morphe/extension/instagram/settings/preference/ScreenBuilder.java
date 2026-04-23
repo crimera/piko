@@ -305,6 +305,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.disableVideoAutoplay) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_VIDEO_AUTOPLAY,
+                            "",
+                            Settings.DISABLE_VIDEO_AUTOPLAY
+                    )
+            );
+        }
         if (SettingsStatus.disableDiscoverPeople) {
             addPreference(category,
                     helper.switchPreference(
