@@ -28,12 +28,14 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
@@ -86,16 +88,25 @@ val downloadMediaPatch =
                     checkCastIndex = indexOfFirstInstruction(Opcode.CHECK_CAST)
                     checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
                 } else {
-                    val arrayListIndex =
-                        indexOfFirstInstructionOrThrow {
-                            opcode == Opcode.NEW_INSTANCE &&
-                                getReference<TypeReference>()?.type == "Ljava/util/ArrayList;"
+                    val arrayListInstructions =
+                        instructions.filter {
+                            it.opcode == Opcode.NEW_INSTANCE &&
+                                it.getReference<TypeReference>()?.type == "Ljava/util/ArrayList;"
                         }
 
-                    val arrayInitInstruction = getInstruction(arrayListIndex + 1)
-                    arrayListRegister = arrayInitInstruction.registersUsed[0]
-                    checkCastIndex = indexOfFirstInstruction(arrayListIndex, Opcode.CHECK_CAST)
-                    checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
+                    arrayListInstructions.firstOrNull { instruction ->
+                        val index = instruction.location.index
+                        val nextNextInstructionOpcode = getInstruction(index + 2).opcode
+                        val nextNextNextInstructionOpcode = getInstruction(index + 3).opcode
+                        if (nextNextInstructionOpcode == Opcode.IGET_OBJECT && nextNextNextInstructionOpcode == Opcode.CHECK_CAST) {
+                            val arrayInitInstruction = getInstruction(index + 1)
+                            arrayListRegister = arrayInitInstruction.registersUsed[0]
+                            checkCastIndex = indexOfFirstInstruction(index, Opcode.CHECK_CAST)
+                            checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
+                            true
+                        }
+                        false
+                    }
                 }
 
                 if (arrayListRegister != -1 && checkCastRegister != -1 && checkCastIndex != -1) {
@@ -115,9 +126,10 @@ val downloadMediaPatch =
 
                 val appActivityField = classFields.first { it.type == appActivity }
 
-                val mediaObjectIGetFieldData = instructions[indexOfFirstInstruction(Opcode.IGET_OBJECT)].fieldExtractor()
-                val mediaObjectClass = extensionToClassName(mediaObjectIGetFieldData.returnType)
-                val mediaObjectField = mediaObjectIGetFieldData.name
+                val getMediaObjectMethod =
+                    classDef.methods.first {
+                        AccessFlags.FINAL.isSet(it.accessFlags) && it.implementation?.registerCount == 1
+                    }
 
                 val mediaExtraDataClass = currentViewingMediaFieldData.definingClass
                 val mediaExtraDataField = classDef.fields.first { it.type == extensionToClassName(mediaExtraDataClass) }
@@ -133,7 +145,8 @@ val downloadMediaPatch =
                     
                     move-object/from16 v0, p0
                     iget-object v5, v0, $appActivityField
-                    iget-object v2, v0, $className->$mediaObjectField:$mediaObjectClass
+                    invoke-static {v0}, $getMediaObjectMethod
+                    move-result-object v2
                     iget-object v4, v0, $mediaExtraDataField
                     iget v4, v4, ${mediaExtraDataField.type}->$currentViewingMediaIndexField:I
                     

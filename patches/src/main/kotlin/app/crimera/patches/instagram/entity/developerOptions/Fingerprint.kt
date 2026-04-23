@@ -30,8 +30,8 @@ internal object GetAllExperimentsClassExtension : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
-internal object ExperimentsLongPressItemBuilder : Fingerprint(
-    strings = listOf("Remove Override", "Copy Universe Name"),
+internal object ExperimentsValueBuilderFingerprint : Fingerprint(
+    strings = listOf("default[after mc dispose]", "default[before mc init]", "override", "server"),
 )
 
 internal object ExperimentsGetMobileConfigSpecifier : Fingerprint(

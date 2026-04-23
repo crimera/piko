@@ -19,7 +19,7 @@ val developerOptionsEntity =
         description = "This patch is used for decoding obfuscated code of developer options items",
     ) {
         execute {
-            ExperimentsLongPressItemBuilder.apply {
+            ExperimentsValueBuilderFingerprint.apply {
                 GetQuickExperimentHelperClassExtension.changeFirstString(classNameToExtension(classDef.type))
 
                 val getAllExperimentsMethodName = classDef.methods.first { it.returnType == "Ljava/util/List;" }.name
