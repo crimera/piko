@@ -75,10 +75,13 @@ public class SettingsStatus {
         return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously);
     }
 
-
     public static boolean disableStories = false;
     public static void disableStories() {
         disableStories = true;
+    }
+    public static boolean disableHighlights = false;
+    public static void disableHighlights() {
+        disableHighlights = true;
     }
     public static boolean disableExplore = false;
     public static void disableExplore() {
@@ -110,7 +113,7 @@ public class SettingsStatus {
     }
 
     public static boolean distractionFreeSection() {
-        return (hideNotesTray || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling);
+        return (hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling);
     }
 
     //Misc section.

@@ -46,6 +46,7 @@ public class Strings {
 
     public static final String CATEGORY_DISTRACTION_FREE = "Distraction free";
     public static final String DISABLE_STORIES = "Disable stories";
+    public static final String DISABLE_HIGHLIGHTS = "Disable highlights";
     public static final String DISABLE_EXPLORE = "Disable explore";
     public static final String DISABLE_COMMENTS = "Disable comments";
     public static final String LIMIT_FOLLOWING_FEED = "Limit feed to following profiles";

@@ -42,9 +42,11 @@ public class Pref {
         return SharedPref.getBooleanPerf(Settings.VIEW_DM_ANONYMOUSLY);
     }
 
-    public static boolean disableStories(){
+    public
+    static boolean disableStories(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_STORIES);
     }
+    public static boolean disableHighlights(){return SharedPref.getBooleanPerf(Settings.DISABLE_HIGHLIGHTS);}
     public static boolean disableExplore(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_EXPLORE);
     }

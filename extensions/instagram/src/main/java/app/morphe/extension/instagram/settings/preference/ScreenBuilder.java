@@ -220,6 +220,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.disableHighlights) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_HIGHLIGHTS,
+                            "",
+                            Settings.DISABLE_HIGHLIGHTS
+                    )
+            );
+        }
         if (SettingsStatus.hideNotesTray) {
             addPreference(category,
                     helper.switchPreference(
