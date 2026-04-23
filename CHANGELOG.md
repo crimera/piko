@@ -1,3 +1,25 @@
+# [3.3.0-dev.2](https://github.com/crimera/piko/compare/v3.3.0-dev.1...v3.3.0-dev.2) (2026-04-23)
+
+
+### Bug Fixes
+
+* **instagram/entity:** check-cast Object arg before IgdsButton.setStyle ([7f7b605](https://github.com/crimera/piko/commit/7f7b605de6d0e36a23d4413c6876f7e48b16e5c3))
+* **instagram/story:** declare StoryButton.storyButtonAction static ([24d435e](https://github.com/crimera/piko/commit/24d435eb15e9598912af101bfd161372801d9143))
+* **instagram/story:** pair long arg with consecutive /range register in emitted invoke ([d65b339](https://github.com/crimera/piko/commit/d65b339b0d01705a2b5b837b3e7b6f601a73e742))
+* **Instagram:** fix `Follow back indicator` patch ([ef6dfdf](https://github.com/crimera/piko/commit/ef6dfdfec9d1a89d5289c26f1b942f2f7da757ad))
+
+
+### Features
+
+* **instagram:** add amoled theme patch ([f34ea47](https://github.com/crimera/piko/commit/f34ea473d3a63b6afd35f573bb88d7aad1178813)), closes [#ff000000](https://github.com/crimera/piko/issues/ff000000) [#ff0c1014](https://github.com/crimera/piko/issues/ff0c1014) [#000000](https://github.com/crimera/piko/issues/000000)
+* **Instagram:** Added `Disable highlights` patch ([03f367e](https://github.com/crimera/piko/commit/03f367eb1a371b46e1425028a861d44886ecd906))
+* **Instagram:** Added `Disable video autoplay` patch ([9294e08](https://github.com/crimera/piko/commit/9294e08699c8e996140a8cd84f345819eee96dab))
+* **Instagram:** Added `Stories audio autoplay` patch ([f514dcf](https://github.com/crimera/piko/commit/f514dcf35bd77fe318103741c95adf5f7ccfcff6))
+* **Instagram:** Added ability to download audio from some posts and reel ([8d503d3](https://github.com/crimera/piko/commit/8d503d3ecffd66949779acb5cc24480e75f06f91))
+* **Instagram:** Added debug option to extraction developer options codes ([313e15c](https://github.com/crimera/piko/commit/313e15c74be4f0c389ecebce8447fcdfc455c95e))
+* **Instagram:** Added support to `425.0.0.47.61` ([f02ede0](https://github.com/crimera/piko/commit/f02ede0ee1f8444dfae5580c4dcee63d49bb3d5e))
+* **Instagram:** Added support to `426.0.0.37.68` ([dce5983](https://github.com/crimera/piko/commit/dce598300cb6af1cad291e4b820bd7ce6e441b9a))
+
 # [3.3.0-dev.1](https://github.com/crimera/piko/compare/v3.2.0...v3.3.0-dev.1) (2026-04-19)
 
 

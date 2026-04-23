@@ -1,5 +1,5 @@
 {
-  "version": "3.3.0-dev.1",
+  "version": "3.3.0-dev.2",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -21,11 +21,24 @@
         "BytecodePatch",
         "ResourcePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Amoled theme",
+      "description": "Replaces Instagram's dark-mode background greys with pure black for AMOLED displays.",
+      "use": true,
+      "dependencies": [],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -76,7 +89,7 @@
       "compatiblePackages": {
         "com.twitter.android": null,
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": [
@@ -128,7 +141,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -205,7 +218,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -349,7 +362,7 @@
       "dependencies": [],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -363,7 +376,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -378,7 +391,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -418,7 +431,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -433,7 +446,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -448,7 +461,22 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Disable highlights",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -462,7 +490,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -477,7 +505,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -491,7 +519,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -505,7 +533,21 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
+        ]
+      },
+      "options": []
+    },
+    {
+      "name": "Disable video autoplay",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -531,11 +573,13 @@
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -632,7 +676,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -820,7 +864,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -859,7 +903,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -873,7 +917,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -937,7 +981,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -952,7 +996,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -966,7 +1010,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1007,7 +1051,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1034,7 +1078,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1060,7 +1104,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1075,7 +1119,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1142,7 +1186,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1181,7 +1225,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1195,7 +1239,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1258,7 +1302,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1338,6 +1382,20 @@
       "options": []
     },
     {
+      "name": "Stories audio autoplay",
+      "description": null,
+      "use": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": {
+        "com.instagram.android": [
+          "426.0.0.37.68"
+        ]
+      },
+      "options": []
+    },
+    {
       "name": "Unlock developer options",
       "description": null,
       "use": true,
@@ -1346,7 +1404,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1360,7 +1418,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1375,7 +1433,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1390,7 +1448,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
@@ -1408,7 +1466,7 @@
       ],
       "compatiblePackages": {
         "com.instagram.android": [
-          "423.0.0.47.66"
+          "426.0.0.37.68"
         ]
       },
       "options": []
