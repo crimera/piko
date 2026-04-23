@@ -178,8 +178,9 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
 <tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
 <tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
-
-
+<tr><td><code>Disable highlights</code></td><td></td></tr>
+<tr><td><code>Disable video autoplay</code></td><td></td></tr>
+<tr><td><code>Stories audio autoplay</code></td><td></td></tr>
 </tbody>
 </table>
 
