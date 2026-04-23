@@ -178,6 +178,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
 <tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
 <tr><td><code>Disable screenshot detection</code></td><td>Disables screenshots detection in DM</td></tr>
+<tr><td><code>Amoled theme</code></td><td>Replaces Instagram's dark-mode elevated greys with pure black for AMOLED displays.</td></tr>
 
 
 </tbody>
