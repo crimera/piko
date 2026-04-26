@@ -38,7 +38,7 @@ public class SharedPref {
         return defaultValue;
     }
 
-    public static Boolean setBooleanPerf(String key, Boolean val) {
+    public static Boolean setBooleanPref(String key, Boolean val) {
         try {
             if(sp!=null) {
                 sp.saveBoolean(key, val);

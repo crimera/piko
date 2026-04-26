@@ -89,7 +89,7 @@ public class Helper {
                 String newValClass = newValue.getClass().getSimpleName();
 
                 if (newValClass.equals("Boolean")) {
-                    SharedPref.setBooleanPerf(key, (Boolean) newValue);
+                    SharedPref.setBooleanPref(key, (Boolean) newValue);
                 } else if (newValClass.equals("String")) {
                     SharedPref.setStringPref(key, (String) newValue);
                 }

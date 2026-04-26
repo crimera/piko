@@ -354,7 +354,7 @@ public class Pref {
     private static ArrayList getList(String key){
         ArrayList<String> arrayList = new ArrayList<String>();
         try{
-            Set<String> ch = Utils.getSetPerf(key,null);
+            Set<String> ch = Utils.getSetPref(key,null);
             if(!ch.isEmpty()) {
                 arrayList = new ArrayList<String>(ch);
             }

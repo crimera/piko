@@ -115,11 +115,11 @@ public class Helper {
                 String newValClass = newValue.getClass().getSimpleName();
 
                 if (newValClass.equals("Boolean")) {
-                    Utils.setBooleanPerf(key, (Boolean) newValue);
+                    Utils.setBooleanPref(key, (Boolean) newValue);
                 } else if (newValClass.equals("String")) {
                     Utils.setStringPref(key, (String) newValue);
                 } else if (newValClass.equals("HashSet")) {
-                    Utils.setSetPerf(key, (Set) newValue);
+                    Utils.setSetPref(key, (Set) newValue);
                 }
             }
 

@@ -100,7 +100,7 @@ public class Utils {
         return false;
     }
 
-    public static Boolean setBooleanPerf(String key, Boolean val) {
+    public static Boolean setBooleanPref(String key, Boolean val) {
         try {
             sp.saveBoolean(key, val);
             return true;
@@ -193,11 +193,11 @@ public class Utils {
         return prefs.toString();
     }
 
-    public static Set<String> getSetPerf(String key, Set<String> defaultValue) {
+    public static Set<String> getSetPref(String key, Set<String> defaultValue) {
         return sp.getSet(key, defaultValue);
     }
 
-    public static Boolean setSetPerf(String key, Set<String> defaultValue) {
+    public static Boolean setSetPref(String key, Set<String> defaultValue) {
         try {
             sp.saveSet(key, defaultValue);
             return true;
@@ -216,7 +216,7 @@ public class Utils {
                 String key = keys.next();
                 Object value = jsonObject.get(key);
                 if (value instanceof Boolean) {
-                    setBooleanPerf(key, (Boolean) value);
+                    setBooleanPref(key, (Boolean) value);
                 } else if (value instanceof String) {
                     setStringPref(key, (String) value);
                 } else if (value instanceof JSONArray) {
@@ -229,7 +229,7 @@ public class Utils {
                         strings.add(jsonArray.getString(i));
                     }
 
-                    setSetPerf(key, strings);
+                    setSetPref(key, strings);
                 }
             }
             sts = true;
