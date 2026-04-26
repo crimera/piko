@@ -179,7 +179,9 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 <tr><td><code>Disable video autoplay</code></td><td></td></tr>
 <tr><td><code>Stories audio autoplay</code></td><td></td></tr>
 <tr><td><code>Amoled theme</code></td><td>Replaces Instagram's dark-mode elevated greys with pure black for AMOLED displays.</td></tr>
-
+<tr><td><code>Unlock Plus benefits</code></td><td>Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK</td></tr>
+<tr><td><code>Change like animation</code></td><td>Change the animation to one from existing Rings like animations</td></tr>
+<tr><td><code>Customise story ring size</code></td><td></td></tr>
 
 </tbody>
 </table>
