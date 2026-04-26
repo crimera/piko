@@ -20,8 +20,21 @@ object Constants {
                 ),
             targets =
                 listOf(
-                    // Any version
-                    AppTarget(version = null),
+                    // Beta
+                    AppTarget(
+                        version = "11.80.0-alpha.1",
+                        description = "Last alpha version without PairIP protection",
+                    ),
+                    // Beta
+                    AppTarget(
+                        version = "11.82.0-beta.1",
+                        description = "Last beta version without PairIP protection",
+                    ),
+                    // Stable
+                    AppTarget(
+                        version = "11.81.0-release.0",
+                        description = "Last stable version without PairIP protection",
+                    ),
                 ),
         )
     val COMPATIBILITY_X_11_69 =
@@ -39,7 +52,10 @@ object Constants {
                 ),
             targets =
                 listOf(
-                    AppTarget(version = "11.69.0-release.0"),
+                    AppTarget(
+                        version = "11.69.0-release.0",
+                        description = "Last stable version which had old share sheet and DMs",
+                    ),
                 ),
         )
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/twitter"
