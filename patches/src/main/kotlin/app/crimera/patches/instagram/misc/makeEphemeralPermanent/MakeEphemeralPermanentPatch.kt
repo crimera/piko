@@ -69,9 +69,9 @@ val makeEphemeralPermanentPatch =
                     val returnObjectInstruction = instructions.last { it.opcode == Opcode.RETURN_OBJECT }
                     val ephemeralMediaClassRegister = returnObjectInstruction.registersUsed[0]
 
-                    val lastIfEq = instructions.filter { it.opcode == Opcode.IF_EQ }[2]
-                    val lastIfEqIndex = lastIfEq.location.index
-                    val registers = lastIfEq.registersUsed
+                    val midIfEqInstruction = instructions.filter { it.opcode == Opcode.IF_EQ }[1]
+                    val lastIfEqIndex = midIfEqInstruction.location.index
+                    val registers = midIfEqInstruction.registersUsed
                     val registerA = registers[0]
                     val registerB = registers[1]
 
@@ -89,7 +89,7 @@ val makeEphemeralPermanentPatch =
                         iput-object v1, v$ephemeralMediaClassRegister, $ephemeralMediaClassName->$viewModeFieldName:Ljava/lang/String;
                         return-object v$ephemeralMediaClassRegister
                         """.trimIndent(),
-                        ExternalLabel("piko", lastIfEq),
+                        ExternalLabel("piko", midIfEqInstruction),
                     )
                 }
             }
