@@ -17,137 +17,137 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 @SuppressWarnings("unused")
 public class Pref {
     public static boolean pikoDebug(){
-        return SharedPref.getBooleanPerf(Settings.PIKO_DEBUG);
+        return SharedPref.getBooleanPref(Settings.PIKO_DEBUG);
     }
 
     public static boolean disableAds(){
-        return SharedPref.getBooleanPerf(Settings.DISABLE_ADS);
+        return SharedPref.getBooleanPref(Settings.DISABLE_ADS);
     }
 
-    public static boolean hideSuggestedContent(){return SharedPref.getBooleanPerf(Settings.HIDE_SUGGESTED_CONTENT);}
+    public static boolean hideSuggestedContent(){return SharedPref.getBooleanPref(Settings.HIDE_SUGGESTED_CONTENT);}
 
-    public static boolean openLinksExternally(){return SharedPref.getBooleanPerf(Settings.OPEN_LINKS_EXTERNALLY);}
-    public static boolean sanitizeShareLinks(){return SharedPref.getBooleanPerf(Settings.SANITIZE_SHARE_LINKS);}
-    public static boolean viewStoriesAnonymously(){return SharedPref.getBooleanPerf(Settings.VIEW_STORIES_ANONYMOUSLY);}
+    public static boolean openLinksExternally(){return SharedPref.getBooleanPref(Settings.OPEN_LINKS_EXTERNALLY);}
+    public static boolean sanitizeShareLinks(){return SharedPref.getBooleanPref(Settings.SANITIZE_SHARE_LINKS);}
+    public static boolean viewStoriesAnonymously(){return SharedPref.getBooleanPref(Settings.VIEW_STORIES_ANONYMOUSLY);}
     public static boolean viewLiveAnonymously(){
-        return SharedPref.getBooleanPerf(Settings.VIEW_LIVE_ANONYMOUSLY);
+        return SharedPref.getBooleanPref(Settings.VIEW_LIVE_ANONYMOUSLY);
     }
     public static boolean disableScreenshotDetection(){
-        return SharedPref.getBooleanPerf(Settings.DISABLE_SCREENSHOT_DETECTION);
+        return SharedPref.getBooleanPref(Settings.DISABLE_SCREENSHOT_DETECTION);
     }
     public static boolean disableTypingStatus(){
-        return SharedPref.getBooleanPerf(Settings.DISABLE_TYPING_STATUS);
+        return SharedPref.getBooleanPref(Settings.DISABLE_TYPING_STATUS);
     }
     public static boolean viewDmAnonymously(){
-        return SharedPref.getBooleanPerf(Settings.VIEW_DM_ANONYMOUSLY);
+        return SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY);
     }
 
-    public static boolean disableVideoAutoplay(){return SharedPref.getBooleanPerf(Settings.DISABLE_VIDEO_AUTOPLAY);}
-    public static boolean storiesAudioAutoplay(){return SharedPref.getBooleanPerf(Settings.STORIES_AUDIO_AUTOPLAY);}
+    public static boolean disableVideoAutoplay(){return SharedPref.getBooleanPref(Settings.DISABLE_VIDEO_AUTOPLAY);}
+    public static boolean storiesAudioAutoplay(){return SharedPref.getBooleanPref(Settings.STORIES_AUDIO_AUTOPLAY);}
 
     public
     static boolean disableStories(){
-        return SharedPref.getBooleanPerf(Settings.DISABLE_STORIES);
+        return SharedPref.getBooleanPref(Settings.DISABLE_STORIES);
     }
-    public static boolean disableHighlights(){return SharedPref.getBooleanPerf(Settings.DISABLE_HIGHLIGHTS);}
+    public static boolean disableHighlights(){return SharedPref.getBooleanPref(Settings.DISABLE_HIGHLIGHTS);}
     public static boolean disableExplore(){
-        return SharedPref.getBooleanPerf(Settings.DISABLE_EXPLORE);
+        return SharedPref.getBooleanPref(Settings.DISABLE_EXPLORE);
     }
     public static boolean disableComments(){
-        return SharedPref.getBooleanPerf(Settings.DISABLE_COMMENTS);
+        return SharedPref.getBooleanPref(Settings.DISABLE_COMMENTS);
     }
     public static boolean limitFollowingFeed(){
-        return SharedPref.getBooleanPerf(Settings.LIMIT_FOLLOWING_FEED);
+        return SharedPref.getBooleanPref(Settings.LIMIT_FOLLOWING_FEED);
     }
-    public static boolean hideStoriesTray(){return SharedPref.getBooleanPerf(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;}
+    public static boolean hideStoriesTray(){return SharedPref.getBooleanPref(Settings.HIDE_STORIES_TRAY) && SettingsStatus.hideStoriesTray;}
     public static boolean hideNotesTray() {
-        return SharedPref.getBooleanPerf(Settings.HIDE_NOTES_TRAY) && SettingsStatus.hideNotesTray;
+        return SharedPref.getBooleanPref(Settings.HIDE_NOTES_TRAY) && SettingsStatus.hideNotesTray;
     }
     public static boolean disableReelsScrolling(){
-        return SharedPref.getBooleanPerf(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
+        return SharedPref.getBooleanPref(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
     }
 
     public static boolean makeEphemeralMediaPermanent(){
-        return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
+        return SharedPref.getBooleanPref(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
     }
 
     public static boolean hideReshareButton(){
-        return SharedPref.getBooleanPerf(Settings.HIDE_RESHARE_BUTTON) && SettingsStatus.hideReshareButton;
+        return SharedPref.getBooleanPref(Settings.HIDE_RESHARE_BUTTON) && SettingsStatus.hideReshareButton;
     }
     public static boolean hideGroupCreationOnSharesheet(){
-        return SharedPref.getBooleanPerf(Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET);
+        return SharedPref.getBooleanPref(Settings.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET);
     }
 
     public static boolean enableDevOptions(){
-        return SharedPref.getBooleanPerf(Settings.DEVELOPER_OPTIONS);
+        return SharedPref.getBooleanPref(Settings.DEVELOPER_OPTIONS);
     }
 
     public static int buildAge(int appAge){
-        return SharedPref.getBooleanPerf(Settings.REMOVE_BUILD_EXPIRE_POPUP) ? 1:appAge;
+        return SharedPref.getBooleanPref(Settings.REMOVE_BUILD_EXPIRE_POPUP) ? 1:appAge;
     }
 
     public static boolean disableAnalytics(){
-        return SharedPref.getBooleanPerf(Settings.DISABLE_ANALYTICS);
+        return SharedPref.getBooleanPref(Settings.DISABLE_ANALYTICS);
     }
     public static boolean disableDiscoverPeople(){
-        return SharedPref.getBooleanPerf(Settings.DISABLE_DISCOVER_PEOPLE);
+        return SharedPref.getBooleanPref(Settings.DISABLE_DISCOVER_PEOPLE);
     }
     public static boolean followBackIndicator(){
-        return SharedPref.getBooleanPerf(Settings.FOLLOW_BACK_INDICATOR);
+        return SharedPref.getBooleanPref(Settings.FOLLOW_BACK_INDICATOR);
     }
     public static boolean disableStoryFlipping(){
-        return SharedPref.getBooleanPerf(Settings.DISABLE_STORY_FLIPPING);
+        return SharedPref.getBooleanPref(Settings.DISABLE_STORY_FLIPPING);
     }
     public static boolean viewStoryMentions(){
-        return SharedPref.getBooleanPerf(Settings.VIEW_STORY_MENTIONS);
+        return SharedPref.getBooleanPref(Settings.VIEW_STORY_MENTIONS);
     }
     public static String customiseStoryTimestamp(){
         return SharedPref.getStringPref(Settings.CUSTOMISE_STORY_TIMESTAMP);
     }
     public static int improveImageViewing(int defaultSize){
-            return SharedPref.getBooleanPerf(Settings.IMPROVE_IMAGE_VIEWING) ? 2048:defaultSize;
+            return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? 2048:defaultSize;
     }
 
     public static Integer improveImageViewing(Integer defaultSize){
-        return SharedPref.getBooleanPerf(Settings.IMPROVE_IMAGE_VIEWING) ? 2048:defaultSize;
+        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? 2048:defaultSize;
     }
 
     public static boolean enableDownload(){
-        return SharedPref.getBooleanPerf(Settings.ENABLE_DOWNLOAD);
+        return SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD);
     }
     public static boolean enableDirectDownload(){
-        return SharedPref.getBooleanPerf(Settings.ENABLE_DIRECT_DOWNLOAD);
+        return SharedPref.getBooleanPref(Settings.ENABLE_DIRECT_DOWNLOAD);
     }
     public static boolean downloadUsernameFolder(){
-        return SharedPref.getBooleanPerf(Settings.DOWNLOAD_USERNAME_FOLDER);
+        return SharedPref.getBooleanPref(Settings.DOWNLOAD_USERNAME_FOLDER);
     }
 
     public static boolean hideNavigationFeed() {
-        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_FEED);
+        return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_FEED);
     }
 
     public static boolean hideNavigationReels() {
-        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_REELS);
+        return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_REELS);
     }
 
     public static boolean hideNavigationDirect() {
-        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_DIRECT);
+        return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_DIRECT);
     }
 
     public static boolean hideNavigationSearch() {
-        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_SEARCH);
+        return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_SEARCH);
     }
 
     public static boolean hideNavigationCreate() {
-        return SharedPref.getBooleanPerf(Settings.HIDE_NAVIGATION_CREATE);
+        return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_CREATE);
     }
 
     public static boolean removeEmptyBottomSpace() {
-        return SharedPref.getBooleanPerf(Settings.REMOVE_EMPTY_BOTTOM_SPACE);
+        return SharedPref.getBooleanPref(Settings.REMOVE_EMPTY_BOTTOM_SPACE);
     }
 
     public static boolean commentCopyButton() {
-        return SharedPref.getBooleanPerf(Settings.COMMENT_COPY_BUTTON) && SettingsStatus.copyCommentButton;
+        return SharedPref.getBooleanPref(Settings.COMMENT_COPY_BUTTON) && SettingsStatus.copyCommentButton;
     }
 
     //end

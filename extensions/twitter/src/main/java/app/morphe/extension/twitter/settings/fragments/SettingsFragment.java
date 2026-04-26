@@ -42,7 +42,7 @@ public class SettingsFragment extends PreferenceFragment {
         Helper helper = new Helper(context);
         ScreenBuilder screenBuilder = new ScreenBuilder(context, screen, helper);
 
-        boolean isSinglePage = app.morphe.extension.twitter.Utils.getBooleanPerf(Settings.SINGLE_PAGE_SETTINGS);
+        boolean isSinglePage = app.morphe.extension.twitter.Utils.getBooleanPref(Settings.SINGLE_PAGE_SETTINGS);
         if (isSinglePage) {
             boolean buildCategory = true;
             screenBuilder.buildPremiumSection(buildCategory);

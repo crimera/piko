@@ -39,7 +39,7 @@ public class PikoSettingsButton extends AppCompatButton implements View.OnClickL
     // Initialization method
     private void init() {
         setOnClickListener(this);
-        if (!Utils.getBooleanPerf(Settings.MISC_QUICK_SETTINGS_BUTTON)) {
+        if (!Utils.getBooleanPref(Settings.MISC_QUICK_SETTINGS_BUTTON)) {
             setVisibility(GONE);
         }
     }

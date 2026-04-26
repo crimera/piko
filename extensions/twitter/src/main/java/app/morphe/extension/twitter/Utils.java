@@ -179,7 +179,7 @@ public class Utils {
         dialog.show();
     }
 
-    public static Boolean getBooleanPerf(BooleanSetting setting) {
+    public static Boolean getBooleanPref(BooleanSetting setting) {
         return sp.getBoolean(setting.key, setting.defaultValue);
     }
 

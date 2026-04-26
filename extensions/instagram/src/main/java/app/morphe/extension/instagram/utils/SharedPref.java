@@ -30,7 +30,7 @@ public class SharedPref {
         }
     }
 
-    public static Boolean getBooleanPerf(BooleanSetting setting) {
+    public static Boolean getBooleanPref(BooleanSetting setting) {
         Boolean defaultValue = setting.defaultValue;
         if(sp!=null) {
             return sp.getBoolean(setting.key, defaultValue);
