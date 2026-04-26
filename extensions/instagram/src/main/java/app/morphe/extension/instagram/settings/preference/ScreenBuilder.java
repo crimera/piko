@@ -144,6 +144,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.disableFlagSecure) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_FLAG_SECURE,
+                            Strings.DISABLE_FLAG_SECURE_DESC,
+                            Settings.DISABLE_FLAG_SECURE
+                    )
+            );
+        }
 
     }
 

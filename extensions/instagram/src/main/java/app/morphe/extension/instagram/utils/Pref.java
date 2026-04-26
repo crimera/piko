@@ -32,6 +32,9 @@ public class Pref {
     public static boolean viewLiveAnonymously(){
         return SharedPref.getBooleanPerf(Settings.VIEW_LIVE_ANONYMOUSLY);
     }
+    public static boolean disableFlagSecure(){
+        return SharedPref.getBooleanPerf(Settings.DISABLE_FLAG_SECURE);
+    }
 
     public static boolean disableStories(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_STORIES);

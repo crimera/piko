@@ -38,6 +38,8 @@ public class Strings {
     public static final String CATEGORY_GHOST = "Ghost";
     public static final String VIEW_STORIES_ANONYMOUSLY = "View stories anonymously";
     public static final String VIEW_LIVE_ANONYMOUSLY = "View live anonymously";
+    public static final String DISABLE_FLAG_SECURE = "Disable FLAG_SECURE";
+    public static final String DISABLE_FLAG_SECURE_DESC = "Allows screenshots and screen recording on protected screens";
 
     public static final String CATEGORY_DISTRACTION_FREE = "Distraction free";
     public static final String DISABLE_STORIES = "Disable stories";

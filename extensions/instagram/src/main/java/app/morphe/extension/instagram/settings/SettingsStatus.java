@@ -59,8 +59,12 @@ public class SettingsStatus {
     public static void viewLiveAnonymously() {
         viewLiveAnonymously = true;
     }
+    public static boolean disableFlagSecure = false;
+    public static void disableFlagSecure() {
+        disableFlagSecure = true;
+    }
     public static boolean ghostSection() {
-        return (viewStoriesAnonymously || viewLiveAnonymously);
+        return (viewStoriesAnonymously || viewLiveAnonymously || disableFlagSecure);
     }
 
 
