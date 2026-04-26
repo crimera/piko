@@ -20,6 +20,8 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.PIKO_DEBUG);
     }
 
+    public static boolean unlockPlusBenefits(){return SharedPref.getBooleanPref(Settings.UNLOCK_PLUS_BENEFITS);}
+
     public static boolean disableAds(){
         return SharedPref.getBooleanPref(Settings.DISABLE_ADS);
     }

@@ -289,6 +289,15 @@ public class ScreenBuilder {
         if (!(SettingsStatus.miscSection())) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_MISC);
+        if (SettingsStatus.unlockPlusBenefits) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.UNLOCK_PLUS_BENEFITS,
+                            Strings.UNLOCK_PLUS_BENEFITS_DESC,
+                            Settings.UNLOCK_PLUS_BENEFITS
+                    )
+            );
+        }
         if (SettingsStatus.disableAnalytics) {
             addPreference(category,
                     helper.switchPreference(
