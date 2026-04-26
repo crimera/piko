@@ -12,16 +12,27 @@ package app.crimera.patches.instagram.misc.makeEphemeralPermanent
 
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+
+internal object EphemeralMediaJsonParserFingerprint : Fingerprint(
+    custom = { methodDef, _ ->
+        methodDef.name.lowercase().contains("parsefromjson")
+    },
+    returnType = "Ljava/lang/Object;",
+    strings = listOf("url_expire_at_secs", "view_mode", "seen_count", "tap_models"),
+)
 
 @Suppress("unused")
 val makeEphemeralPermanentPatch =
@@ -47,21 +58,38 @@ val makeEphemeralPermanentPatch =
                     val ephemeralMediaClassName = extensionToClassName(viewModeInstructionExtraction.definingClass)
                     val viewModeFieldName = viewModeInstructionExtraction.name
 
-                    val expireAtIPutObjectIndex = indexOfFirstInstruction(expireAtStringIndex, Opcode.IPUT_OBJECT)
-                    val expireAtIPutObjectInstruction = getInstruction(expireAtIPutObjectIndex)
+                    val expireAtInstructionExtraction =
+                        instructions
+                            .last {
+                                it.location.index < viewModeStringIndex &&
+                                    it.opcode == Opcode.IPUT_OBJECT
+                            }.fieldExtractor()
+                    val expireAtFieldName = expireAtInstructionExtraction.name
 
-                    val expireAtLongRegister = viewModeIPutObjectInstruction.registersUsed[0]
-                    val ephemeralMediaClassRegister = viewModeIPutObjectInstruction.registersUsed[1]
-                    val dummyRegister = getInstruction(expireAtIPutObjectIndex - 2).registersUsed[1]
+                    val returnObjectInstruction = instructions.last { it.opcode == Opcode.RETURN_OBJECT }
+                    val ephemeralMediaClassRegister = returnObjectInstruction.registersUsed[0]
 
-                    addInstructions(
-                        expireAtIPutObjectIndex + 1,
+                    val lastIfEq = instructions.filter { it.opcode == Opcode.IF_EQ }[2]
+                    val lastIfEqIndex = lastIfEq.location.index
+                    val registers = lastIfEq.registersUsed
+                    val registerA = registers[0]
+                    val registerB = registers[1]
+
+                    addInstructionsWithLabels(
+                        lastIfEqIndex,
                         """
-                        iget-object v$dummyRegister, v$ephemeralMediaClassRegister, $ephemeralMediaClassName->$viewModeFieldName:Ljava/lang/String;
-                        invoke-static {v$dummyRegister, v$expireAtLongRegister}, $PREF_DESCRIPTOR->unlimitedReplaysOnEphemeralMedia(Ljava/lang/String;Ljava/lang/Long;)Ljava/lang/String;
-                        move-result-object v$expireAtLongRegister
-                        iput-object v$expireAtLongRegister, v$ephemeralMediaClassRegister, $ephemeralMediaClassName->$viewModeFieldName:Ljava/lang/String;
+                        if-ne v$registerA, v$registerB, :piko
+                        
+                        iget-object v0, v$ephemeralMediaClassRegister, $ephemeralMediaClassName->$expireAtFieldName:Ljava/lang/Long;
+                        iget-object v1, v$ephemeralMediaClassRegister, $ephemeralMediaClassName->$viewModeFieldName:Ljava/lang/String;
+                        
+                        invoke-static {v0, v1}, $PATCHES_DESCRIPTOR/EphemeralMediaPatch;->makeEphemeralMediaPermanent(Ljava/lang/Long;Ljava/lang/String;)Ljava/lang/String;
+                        move-result-object v1                        
+                        
+                        iput-object v1, v$ephemeralMediaClassRegister, $ephemeralMediaClassName->$viewModeFieldName:Ljava/lang/String;
+                        return-object v$ephemeralMediaClassRegister
                         """.trimIndent(),
+                        ExternalLabel("piko", lastIfEq),
                     )
                 }
             }

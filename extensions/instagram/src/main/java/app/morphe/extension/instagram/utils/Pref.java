@@ -66,10 +66,11 @@ public class Pref {
     public static boolean disableReelsScrolling(){
         return SharedPref.getBooleanPerf(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
     }
-    public static String unlimitedReplaysOnEphemeralMedia(String viewMode,Long expireTime) {
-        Boolean isExpired = expireTime != null && Long.valueOf(expireTime) * 1000 < System.currentTimeMillis();
-        return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && isExpired ? "permanent" : viewMode;
+
+    public static boolean makeEphemeralMediaPermanent(){
+        return SharedPref.getBooleanPerf(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
     }
+
     public static boolean hideReshareButton(){
         return SharedPref.getBooleanPerf(Settings.HIDE_RESHARE_BUTTON) && SettingsStatus.hideReshareButton;
     }
