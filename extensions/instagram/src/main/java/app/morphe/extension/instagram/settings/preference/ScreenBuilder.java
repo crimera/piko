@@ -298,6 +298,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.changeLikeAnimation) {
+            addPreference(category,
+                    helper.listPreference(
+                            Strings.CHANGE_LIKE_ANIMATION,
+                            Strings.CHANGE_LIKE_ANIMATION_DESC,
+                            Settings.CHANGE_LIKE_ANIMATION
+                    )
+            );
+        }
         if (SettingsStatus.disableAnalytics) {
             addPreference(category,
                     helper.switchPreference(

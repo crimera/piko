@@ -1,0 +1,41 @@
+/*
+    * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+    *
+    * This file is part of piko.
+    *
+    * Any modifications, derivatives, or substantial rewrites of this file
+    * must retain this copyright notice and the piko attribution
+    * in the source code and version control history.
+*/
+
+
+package app.morphe.extension.instagram.patches.feed;
+
+import app.morphe.extension.instagram.entity.Entity;
+import app.morphe.extension.instagram.utils.Pref;
+import app.morphe.extension.shared.Logger;
+
+public class ChangeLikeAnimationPatch {
+    private static String CHANGE_LIKE_ANIMATION;
+    static{
+        CHANGE_LIKE_ANIMATION = Pref.changeLikeAnimation();
+    }
+
+    public static Object changeLikeAnimation(Object defaultAnimation){
+        try {
+            Entity entity = new Entity();
+            Class<?> animationEnumClass = Class.forName("X.05zO");
+            Object likeAnimation = entity.getMethod(
+                    animationEnumClass,
+                    "valueOf",
+                    CHANGE_LIKE_ANIMATION
+            );
+            return likeAnimation;
+
+        } catch (Exception e) {
+            Logger.printException(() -> "changeLikeAnimation failure", e);
+        }
+        return defaultAnimation;
+    }
+
+}

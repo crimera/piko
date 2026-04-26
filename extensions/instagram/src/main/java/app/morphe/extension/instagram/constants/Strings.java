@@ -150,4 +150,8 @@ public class Strings {
     public static final String OPEN_VIDEO_EXTERNALLY = "Open video externally";
     public static final String OPEN_IMAGE_WITH = "Open image with";
     public static final String OPEN_VIDEO_WITH = "Open video with";
+
+    public static final String CHANGE_LIKE_ANIMATION = "Change like animation";
+    public static final String CHANGE_LIKE_ANIMATION_DESC = "Change the animation to one from existing Rings like animations";
+    public static final String AVAILABLE_LIKE_ANIMATION = "Available like animations";
 }
