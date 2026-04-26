@@ -387,6 +387,14 @@ public class ScreenBuilder {
                     )
             );
         }
+        if(SettingsStatus.customiseStoryRingSize) {
+            addPreference(category,
+                    helper.editTextNumPreference(
+                            Strings.CUSTOMISE_STORY_RING_SIZE,
+                            "",
+                            Settings.CUSTOMISE_STORY_RING_SIZE
+                    ));
+        }
 
         if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
             addPreference(category,

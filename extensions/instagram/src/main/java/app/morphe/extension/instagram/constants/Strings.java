@@ -98,6 +98,7 @@ public class Strings {
     public static final String REMOVE_EMPTY_BOTTOM_SPACE = "Remove empty bottom space";
     public static final String UNLOCK_PLUS_BENEFITS = "Unlock Plus benefits";
     public static final String UNLOCK_PLUS_BENEFITS_DESC = "Unlock 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK";
+    public static final String CUSTOMISE_STORY_RING_SIZE = "Customise story ring size";
 
     public static final String CATEGORY_DOWNLOAD_MEDIA = "Download media";
     public static final String ENABLE_DOWNLOAD = "Enable download";

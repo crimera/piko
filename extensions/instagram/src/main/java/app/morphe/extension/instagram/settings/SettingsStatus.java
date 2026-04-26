@@ -121,6 +121,8 @@ public class SettingsStatus {
     public static void unlockPlusBenefits() { unlockPlusBenefits = true; }
     public static boolean changeLikeAnimation = false;
     public static void changeLikeAnimation() { changeLikeAnimation = true; }
+    public static boolean customiseStoryRingSize = false;
+    public static void customiseStoryRingSize() { customiseStoryRingSize = true; }
     public static boolean disableAnalytics = false;
     public static void disableAnalytics() { disableAnalytics = true; }
     public static boolean disableDiscoverPeople = false;
@@ -165,7 +167,7 @@ public class SettingsStatus {
     public static void disableVideoAutoplay() { disableVideoAutoplay = true; }
     public static boolean storiesAudioAutoplay = false;
     public static void storiesAudioAutoplay() { storiesAudioAutoplay = true; }
-    public static boolean miscSection() {return (changeLikeAnimation || unlockPlusBenefits || storiesAudioAutoplay || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
+    public static boolean miscSection() {return (customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || storiesAudioAutoplay || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
 
     //Download section.
     public static boolean downloadMedia = false;

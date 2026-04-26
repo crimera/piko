@@ -18,6 +18,7 @@ import app.morphe.extension.instagram.utils.SharedPref;
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
+import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
 import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.crimera.settings.StringSetting;
 import app.morphe.extension.shared.Utils;
@@ -58,6 +59,24 @@ public class Helper {
         preference.setTitle(title);
         preference.setSummary(summary);
         preference.setKey(setting);
+        preference.setSingleLineTitle(false);
+        return preference;
+    }
+
+    public Preference editTextPreference(String title, String summary, StringSetting setting) {
+        EditTextPref preference = new EditTextPref(context);
+        preference.setTitle(title);
+        preference.setDialogTitle(title);
+        preference.setSummary(summary);
+        preference.setKey(setting.key);
+        preference.setDefaultValue(setting.defaultValue);
+        preference.setSingleLineTitle(false);
+        return preference;
+    }
+
+    public Preference editTextNumPreference(String title, String summary, StringSetting setting) {
+        EditTextPref preference = (EditTextPref)editTextPreference(title,summary,setting);
+        preference.setNumericOnly(true);
         preference.setSingleLineTitle(false);
         return preference;
     }
