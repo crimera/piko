@@ -1,3 +1,17 @@
+# [3.3.0-dev.3](https://github.com/crimera/piko/compare/v3.3.0-dev.2...v3.3.0-dev.3) (2026-04-26)
+
+
+### Bug Fixes
+
+* **Instagram:** Fix `Make ephemeral media permanent` patch ([fc22c94](https://github.com/crimera/piko/commit/fc22c94eb323fbc5ce12591e4a06c2dd4e590a88))
+
+
+### Features
+
+* **Instagram:** Added `Change like animation` patch ([cb759bc](https://github.com/crimera/piko/commit/cb759bcab2e754a794a907846e077a956416e363))
+* **Instagram:** Added `Customise story ring size` patch ([cfe8a55](https://github.com/crimera/piko/commit/cfe8a55423e2e1f53dbc769beb082644d1bc3689))
+* **Instagram:** Added `Unlock Plus benefits` patch ([84d9fd6](https://github.com/crimera/piko/commit/84d9fd62e12d103a833e386c90504b97a4652744))
+
 # [3.3.0-dev.2](https://github.com/crimera/piko/compare/v3.3.0-dev.1...v3.3.0-dev.2) (2026-04-23)
 
 
