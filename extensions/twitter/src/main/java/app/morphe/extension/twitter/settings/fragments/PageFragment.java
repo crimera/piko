@@ -13,6 +13,7 @@ package app.morphe.extension.twitter.settings.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.*;
+import android.view.ContextThemeWrapper;
 import androidx.annotation.Nullable;
 
 import app.morphe.extension.twitter.settings.widgets.Helper;
@@ -29,10 +30,18 @@ public class PageFragment extends PreferenceFragment {
 //        ActivityHook.toolbar.setTitle(StringRef.str("piko_title_settings"));
 //    }
 
+    private Context getPreferenceContext() {
+        Context activity = getActivity();
+        if (activity == null) {
+            return getContext();
+        }
+        return new ContextThemeWrapper(activity, android.R.style.Theme_DeviceDefault);
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = getContext();
+        context = getPreferenceContext();
         String toolbarText = "piko_title_settings";
 
         PreferenceManager preferenceManager = getPreferenceManager();

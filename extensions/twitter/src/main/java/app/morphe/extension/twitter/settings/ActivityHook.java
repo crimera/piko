@@ -126,6 +126,8 @@ public class ActivityHook {
             toolbarText = "piko_pref_customisation_change_app_icon";
         }else if (activity_name.equals(Settings.EXPORT_LOGIN_TOKEN)) {
             toolbarText = "piko_pref_export_login_token";
+        }else if (activity_name.equals(Settings.PICK_DOWNLOAD_FOLDER)) {
+            toolbarText = "piko_pref_download_saf_folder";
         }
         return Utils.getResourceString(toolbarText);
     }

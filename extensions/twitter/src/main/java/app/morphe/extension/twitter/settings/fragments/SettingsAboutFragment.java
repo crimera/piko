@@ -16,6 +16,7 @@ import android.graphics.Color;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.*;
+import android.view.ContextThemeWrapper;
 
 import app.morphe.extension.shared.Utils;
 import com.twitter.ui.widget.LegacyTwitterPreferenceCategory;
@@ -35,10 +36,18 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         ActivityHook.toolbar.setTitle(strRes("piko_pref_patch_info"));
     }
 
+    private Context getPreferenceContext() {
+        Context activity = getActivity();
+        if (activity == null) {
+            return getContext();
+        }
+        return new ContextThemeWrapper(activity, android.R.style.Theme_DeviceDefault);
+    }
+
     @Override
     public void onCreate(@org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        context = getContext();
+        context = getPreferenceContext();
 
         PreferenceManager preferenceManager = getPreferenceManager();
         PreferenceScreen screen = preferenceManager.createPreferenceScreen(context);
@@ -76,7 +85,6 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         flags.put(strEnableRes("piko_pref_video_download"),SettingsStatus.enableVidDownload);
         flags.put(strEnableRes("piko_pref_undo_posts"),SettingsStatus.enableUndoPosts);
         flags.put(strRes("tab_customization_screen_title"),SettingsStatus.navBarCustomisation);
-        flags.put(strRes("piko_pref_download"),SettingsStatus.changeDownloadEnabled);
         flags.put(strRes("piko_pref_download_media_link_handle"),SettingsStatus.mediaLinkHandle);
         flags.put(strRemoveRes("piko_pref_hide_promoted_posts"),SettingsStatus.hideAds);
         flags.put(strRemoveRes("piko_pref_wtf_section"),SettingsStatus.hideWTF);
