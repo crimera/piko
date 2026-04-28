@@ -18,11 +18,12 @@ import android.widget.BaseAdapter;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import app.morphe.extension.shared.Utils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 
 public class FeatureFlagAdapter extends BaseAdapter {
     private final LayoutInflater inflater;
@@ -70,10 +71,10 @@ public class FeatureFlagAdapter extends BaseAdapter {
         final ViewHolder holder;
         if (convertView == null) {
             holder = new ViewHolder();
-            convertView = inflater.inflate(Utils.getResourceIdentifier("item_row", "layout"), null);
+            convertView = inflater.inflate(ResourceUtils.getIdentifier(ResourceType.LAYOUT, "item_row"), null);
 
-            holder.textView = convertView.findViewById(Utils.getResourceIdentifier("textView", "id"));
-            holder.enabled = convertView.findViewById(Utils.getResourceIdentifier("enabled", "id"));
+            holder.textView = convertView.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "textView"));
+            holder.enabled = convertView.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "enabled"));
 
             convertView.setTag(holder);
         } else {

@@ -11,23 +11,28 @@
 package app.morphe.extension.twitter.patches.nativeFeatures.readerMode;
 
 
+import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import app.morphe.extension.shared.Utils;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.app.Fragment;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
-import android.webkit.JavascriptInterface;
+import app.morphe.extension.shared.Utils;
 
 public class ReaderModeFragment extends Fragment {
 
@@ -65,13 +70,13 @@ public class ReaderModeFragment extends Fragment {
             @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(Utils.getResourceIdentifier("webview", "layout"), container, false);
+        View rootView = inflater.inflate(ResourceUtils.getIdentifier(ResourceType.LAYOUT, "webview"), container, false);
         
         // View  progressBarView = inflater.inflate(Utils.getResourceIdentifier("progress_bar", "layout"), container, false);
         // ProgressBar progressBar = progressBarView.findViewById(Utils.getResourceIdentifier("progressbar", "id"));
         // progressBar.setVisibility(View.VISIBLE);
 
-        webView = rootView.findViewById(Utils.getResourceIdentifier("webview", "id"));
+        webView = rootView.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "webview"));
         webView.getSettings().setJavaScriptEnabled(true);
          webView.addJavascriptInterface(new WebAppInterface(getContext()), "Android");
         webView.getSettings().setLoadWithOverviewMode(true);

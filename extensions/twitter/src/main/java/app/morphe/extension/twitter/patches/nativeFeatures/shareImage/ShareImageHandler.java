@@ -30,15 +30,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import app.morphe.extension.crimera.Utils;
-import app.morphe.extension.twitter.Pref;
-import app.morphe.extension.twitter.entity.Tweet;
-import app.morphe.extension.twitter.utils.ViewUtils;
-
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
+import app.morphe.extension.twitter.Pref;
+import app.morphe.extension.twitter.entity.Tweet;
+import app.morphe.extension.twitter.utils.ViewUtils;
 
 public class ShareImageHandler {
 
@@ -269,7 +271,7 @@ public class ShareImageHandler {
     private static int getId(String name) {
         Integer cached = RESOURCE_IDS.get(name);
         if (cached != null) return cached;
-        int id = app.morphe.extension.shared.Utils.getResourceIdentifier(name, "id");
+        int id = ResourceUtils.getIdentifier(ResourceType.ID, name);
         RESOURCE_IDS.put(name, id);
         return id;
     }

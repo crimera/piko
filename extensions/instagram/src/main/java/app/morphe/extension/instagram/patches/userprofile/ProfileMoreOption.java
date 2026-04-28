@@ -28,6 +28,7 @@ import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.InstagramButton;
 import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
+import app.morphe.extension.shared.ui.Dim;
 
 import com.instagram.igds.components.button.IgdsButton;
 
@@ -125,7 +126,7 @@ public class ProfileMoreOption {
                     moreOptionsDailogueBox(context, userData)
             );
 
-            int marginPx = Utils.dipToPixels(12);
+            int marginPx = Dim.dp12;
             button.setMargins(marginPx, marginPx, marginPx, marginPx);
 
             IgdsButton igdsButton = button.getIgdsButton();

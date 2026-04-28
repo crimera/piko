@@ -12,21 +12,22 @@ package app.morphe.extension.crimera;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+import android.util.TypedValue;
 
-import java.io.FileOutputStream;
-import java.io.File;
-import java.util.Set;
-import java.io.FileReader;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 
 @SuppressWarnings("unused")
+// TODO? Rename to PikoUtils or some other name different from patches-library Utils?
 public class Utils {
-    private static final Context ctx = app.morphe.extension.shared.Utils.getContext();
+    private static final Context ctx = Utils.getContext();
 
     public static Context getContext() {
         return ctx;
@@ -121,4 +122,27 @@ public class Utils {
         }
     }
 
+    /**
+     * Converts sp value to actual device pixels.
+     *
+     * @return The device pixel value.
+     */
+    public static int spToPixels(float sp) {
+        return  (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP,
+                sp,
+                Resources.getSystem().getDisplayMetrics()
+        );
+    }
+
+    public static void shareText(String txt) {
+        Context context = Utils.getContext();
+        final String appPackageName = context.getPackageName();
+        Intent sendIntent = new Intent();
+        sendIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, txt);
+        sendIntent.setType("text/plain");
+        context.startActivity(sendIntent);
+    }
 }

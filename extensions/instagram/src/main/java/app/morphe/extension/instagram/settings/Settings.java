@@ -8,11 +8,10 @@
     * in the source code and version control history.
 */
 
-
 package app.morphe.extension.instagram.settings;
 
-import app.morphe.extension.crimera.settings.BooleanSetting;
-import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.shared.settings.BooleanSetting;
+import app.morphe.extension.shared.settings.StringSetting;
 
 public class Settings {
     public static final BooleanSetting PIKO_DEBUG = new BooleanSetting("piko_debug", false);

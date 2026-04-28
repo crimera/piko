@@ -16,6 +16,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 
 import java.util.ArrayList;
@@ -59,9 +62,9 @@ class FeatureFlagSearchAdapter extends BaseAdapter {
         final ViewHolder holder;
         if (convertView == null) {
             holder = new ViewHolder();
-            convertView = inflater.inflate(Utils.getResourceIdentifier("search_item_row", "layout"), null);
+            convertView = inflater.inflate(ResourceUtils.getIdentifier(ResourceType.LAYOUT, "search_item_row"), null);
 
-            holder.textView = convertView.findViewById(Utils.getResourceIdentifier("searchItemText", "id"));
+            holder.textView = convertView.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "searchItemText"));
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();

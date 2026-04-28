@@ -12,6 +12,9 @@ package app.morphe.extension.twitter.patches.links;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 
 @SuppressWarnings("unused")
@@ -26,7 +29,7 @@ public class HandleCustomDeepLinksPatch {
         if (uri == null) return;
 
         if (customLinkHosts == null)
-            customLinkHosts = Utils.getResourceStringArray("piko_custom_deeplink_hosts");
+            customLinkHosts = ResourceUtils.getStringArray("piko_custom_deeplink_hosts");
 
         String host = uri.getHost();
 

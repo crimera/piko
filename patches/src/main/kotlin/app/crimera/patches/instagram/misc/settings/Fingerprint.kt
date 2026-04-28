@@ -12,17 +12,10 @@ package app.crimera.patches.instagram.misc.settings
 
 import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
-import app.crimera.patches.instagram.utils.Constants.UI_CONSTANTS_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
-import app.morphe.shared.misc.extension.EXTENSION_CLASS_DESCRIPTOR
 
 internal object SettingsStatusLoadFingerprint : Fingerprint(
     definingClass = Constants.ACTIVITY_SETTINGS_STATUS_CLASS,
-    name = "load",
-)
-
-internal object ExtensionsUtilsFingerprint : Fingerprint(
-    definingClass = EXTENSION_CLASS_DESCRIPTOR,
     name = "load",
 )
 

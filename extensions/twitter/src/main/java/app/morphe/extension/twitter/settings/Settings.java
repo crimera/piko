@@ -10,9 +10,10 @@
 
 package app.morphe.extension.twitter.settings;
 
-import app.morphe.extension.crimera.settings.BooleanSetting;
-import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.settings.BooleanSetting;
+import app.morphe.extension.shared.settings.StringSetting;
 
 public class Settings {
     public static final String SHARED_PREF_NAME = "piko_settings";
@@ -103,7 +104,7 @@ public class Settings {
     public static final StringSetting CUSTOM_DEF_REPLY_SORTING = new StringSetting("customisation_def_reply_sorting", "Relevance");
     public static final StringSetting REPLY_SORTING_LAST_FILTER = new StringSetting("reply_sorting_last_filter", "Relevance");
     public static final StringSetting CUSTOM_SEARCH_TYPE_AHEAD = new StringSetting("customisation_search_type_ahead", "");
-    public static final StringSetting CUSTOM_POST_FONT_SIZE = new StringSetting("customisation_post_font_size", String.valueOf(Utils.getResourceDimension("font_size_normal")));
+    public static final StringSetting CUSTOM_POST_FONT_SIZE = new StringSetting("customisation_post_font_size", String.valueOf(ResourceUtils.getDimension("font_size_normal")));
 
     public static final StringSetting LAST_CHANGELOG_VERSION = new StringSetting("last_changelog_version", "0");
     public static final StringSetting LAST_CHANGELOG = new StringSetting("last_changelog", "0");

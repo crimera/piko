@@ -11,6 +11,7 @@
 package app.morphe.extension.twitter.patches;
 
 import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
 import android.content.Context;
 import com.twitter.util.user.UserIdentifier;
@@ -23,8 +24,7 @@ import android.widget.LinearLayout;
 
 
 public class DatabasePatch {
-    private static final Context ctx = app.morphe.extension.shared.Utils.getContext();
-    private static final String[] listItems = app.morphe.extension.shared.Utils.getResourceStringArray("piko_array_ads_hooks");
+    private static final String[] listItems = ResourceUtils.getStringArray("piko_array_ads_hooks");
 
     private static void logger(Object j){
         Log.d("piko", j.toString());
@@ -32,7 +32,7 @@ public class DatabasePatch {
 
     private static String getDBPath(){
         String dbName = UserIdentifier.getCurrent().getStringId()+"-66.db";
-        return ctx.getDatabasePath(dbName).getAbsolutePath();
+        return app.morphe.extension.shared.Utils.getContext().getDatabasePath(dbName).getAbsolutePath();
     }
     private static void showItemDialog(Context context,String result){
         AlertDialog.Builder builder = new AlertDialog.Builder(context);

@@ -28,6 +28,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 
@@ -41,20 +43,21 @@ public class ExportLoginTokenFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(Utils.getResourceIdentifier("fragment_export_token", "layout"), container, false);
+        return inflater.inflate(ResourceUtils.getIdentifier(ResourceType.LAYOUT,
+                "fragment_export_token"), container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Spinner spinner = view.findViewById(Utils.getResourceIdentifier("spinner", "id"));
+        Spinner spinner = view.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "spinner"));
         AccountManager accountManager = AccountManager.get(getContext());
         Account[] accounts = accountManager.getAccountsByType("com.twitter.android.auth.login");
         AccountArrayAdapter arrayAdapter = new AccountArrayAdapter(getContext(), android.R.layout.simple_spinner_dropdown_item, accounts);
         spinner.setAdapter(arrayAdapter);
 
-        Button copyToClipboardButton = view.findViewById(Utils.getResourceIdentifier("copy_button", "id"));
+        Button copyToClipboardButton = view.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "copy_button"));
         copyToClipboardButton.setOnClickListener(v -> {
             try {
                 Account account = (Account) spinner.getSelectedItem();
@@ -67,7 +70,7 @@ public class ExportLoginTokenFragment extends Fragment {
             }
         });
 
-        Button saveToFileButton = view.findViewById(Utils.getResourceIdentifier("save_to_file_button", "id"));
+        Button saveToFileButton = view.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "save_to_file_button"));
         saveToFileButton.setOnClickListener(v -> {
             Account account = (Account) spinner.getSelectedItem();
             if (account == null) return;

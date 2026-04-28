@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.twitter.patches.nativeFeatures.downloader.NativeDownloader;
@@ -242,7 +244,7 @@ public class InlineDownloadButton {
             downloadContainer.setContentDescription(NativeDownloader.downloadString());
 
             ImageView downloadIcon = new ImageView(context);
-            int iconId = Utils.getResourceIdentifier("ic_vector_incoming", "drawable");
+            int iconId = ResourceUtils.getIdentifier(ResourceType.DRAWABLE, "ic_vector_incoming");
             if (iconId != 0) {
                 downloadIcon.setImageResource(iconId);
             }

@@ -21,18 +21,21 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.util.AttributeSet;
+
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.twitter.Utils;
 import app.morphe.extension.twitter.patches.DatabasePatch;
+import app.morphe.extension.twitter.patches.customise.appIcon.IconSelectorFragment;
+import app.morphe.extension.twitter.patches.customise.font.FontPickerFragment;
+import app.morphe.extension.twitter.patches.customise.font.UpdateFont;
 import app.morphe.extension.twitter.patches.logintoken.ExportLoginTokenFragment;
 import app.morphe.extension.twitter.patches.logintoken.ImportLoginTokenDialogFragment;
+import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeUtils;
 import app.morphe.extension.twitter.settings.ActivityHook;
 import app.morphe.extension.twitter.settings.Settings;
 import app.morphe.extension.twitter.settings.fragments.BackupPrefFragment;
 import app.morphe.extension.twitter.settings.fragments.RestorePrefFragment;
-import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeUtils;
-import app.morphe.extension.twitter.patches.customise.font.FontPickerFragment;
-import app.morphe.extension.twitter.patches.customise.font.UpdateFont;
-import app.morphe.extension.twitter.patches.customise.appIcon.IconSelectorFragment;
 
 public class ButtonPref extends Preference {
     private final Context context;
@@ -71,7 +74,7 @@ public class ButtonPref extends Preference {
 
     private void init() {
         if (iconName != null) {
-            int resId = app.morphe.extension.shared.Utils.getResourceIdentifier(iconName, "drawable");
+            int resId = ResourceUtils.getIdentifier(ResourceType.DRAWABLE, iconName);
             Drawable icon = context.getResources().getDrawable(resId);
 
             int clr = Color.RED;

@@ -1,4 +1,6 @@
 android {
+    namespace = "app.morphe.extension"
+
     defaultConfig {
         minSdk = 28
     }

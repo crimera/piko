@@ -10,6 +10,9 @@
 
 package app.crimera.patches.twitter.misc.extension
 
-import app.morphe.shared.misc.extension.sharedExtensionPatch
+import app.morphe.patches.all.misc.extension.sharedExtensionPatch
 
-val sharedExtensionPatch = sharedExtensionPatch("twitter", initHook)
+val sharedExtensionPatch = sharedExtensionPatch(
+    listOf("shared", "twitter"),
+    twitterInitHook
+)

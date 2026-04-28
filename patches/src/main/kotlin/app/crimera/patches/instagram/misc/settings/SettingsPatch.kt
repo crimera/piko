@@ -14,6 +14,7 @@ import app.crimera.patches.instagram.entity.developerOptions.developerOptionsEnt
 import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntity
 import app.crimera.patches.instagram.entity.profileinfo.ProfileUserInfoViewBinderFingerprint
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
+import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
@@ -51,7 +52,7 @@ val settingsPatch =
                 )
             }
 
-            ExtensionsUtilsFingerprint.method.addInstruction(
+            instagramInitHook.fingerprint.method.addInstruction(
                 0,
                 SSTS_DESCRIPTOR.format("load"),
             )

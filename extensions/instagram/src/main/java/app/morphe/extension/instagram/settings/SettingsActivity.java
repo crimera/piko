@@ -31,6 +31,7 @@ import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.ui.Dim;
 
 public class SettingsActivity extends Activity {
 
@@ -57,10 +58,10 @@ public class SettingsActivity extends Activity {
         toolbar = new LinearLayout(this);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
 
-        int toolbarPadding = Utils.dipToPixels(8);
+        int toolbarPadding = Dim.dp8;
         toolbar.setPadding(toolbarPadding, toolbarPadding, toolbarPadding, toolbarPadding);
 
-        int iconSize = Utils.dipToPixels(48);
+        int iconSize = Dim.dp48;
 
         ImageView back = new ImageView(this);
         LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(iconSize, iconSize);
@@ -78,7 +79,7 @@ public class SettingsActivity extends Activity {
 
         TextView title = new TextView(this);
         title.setText(Strings.PIKO_SETTINGS_TITLE);
-        int textSize = Utils.spToPixels(20);
+        int textSize = app.morphe.extension.crimera.Utils.spToPixels(20);
         title.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,

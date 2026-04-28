@@ -11,6 +11,8 @@
 package app.morphe.extension.twitter;
 
 import android.util.Log;
+
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.twitter.settings.Settings;
 import com.google.android.material.tabs.TabLayout$g;
 import java.util.*;
@@ -45,9 +47,9 @@ public class Pref {
     public static float setPostFontSize() {
         float fontSize;
         try{
-            fontSize = Float.valueOf(Utils.getStringPref(Settings.CUSTOM_POST_FONT_SIZE));
+            fontSize = Float.parseFloat(Utils.getStringPref(Settings.CUSTOM_POST_FONT_SIZE));
         }catch (Exception ex){
-            fontSize = app.morphe.extension.shared.Utils.getResourceDimension("font_size_normal");
+            fontSize = ResourceUtils.getDimension("font_size_normal");
         }
         return fontSize;
     }

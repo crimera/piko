@@ -129,16 +129,16 @@ fun Reference.extractDescriptors(): List<String> {
     return regex.findAll(this.toString()).map { it.value }.toList()
 }
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.getReference(index: Int): Reference = method.getInstruction<ReferenceInstruction>(index).reference
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.getMethodName(index: Int): String = (getReference(index) as DexBackedMethodReference).name
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.getFieldName(index: Int): String = (getReference(index) as FieldReference).name
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.changeStringAt(
     index: Int,
     value: String,
@@ -149,7 +149,7 @@ fun Fingerprint.changeStringAt(
     }
 }
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.changeFirstString(value: String) {
     changeStringAt(0, value)
 }

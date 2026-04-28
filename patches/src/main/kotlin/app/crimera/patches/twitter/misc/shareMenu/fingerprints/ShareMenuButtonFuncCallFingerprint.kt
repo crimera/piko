@@ -37,7 +37,7 @@ internal object shareMenuButtonFuncCallFingerprint : Fingerprint(
     )
 )
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun addButtonInstructions(
     reference: String,
     instructions: String,

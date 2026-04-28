@@ -17,8 +17,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.string
-import app.morphe.shared.misc.mapping.ResourceType
-import app.morphe.shared.misc.mapping.getResourceId
+import app.morphe.patches.all.misc.resources.ResourceType
+import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
@@ -31,7 +31,7 @@ internal object ShareMenuButtonInitHook : Fingerprint(
         ),
 )
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun setButtonText(
     name: String,
     stringId: String,
@@ -70,7 +70,7 @@ fun setButtonText(
     }
 }
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun setButtonIcon(
     name: String,
     iconStr: String,

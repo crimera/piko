@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.shared.Logger;
 import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.shared.StringRef;
 
@@ -89,9 +90,9 @@ public class DownloadPatch {
     private static void shareMediaLink(Object para1) {
         try{
             String mediaLink = getMediaLink(para1);
-            app.morphe.extension.shared.Utils.shareText(mediaLink);
+            Utils.shareText(mediaLink);
         }
-        catch (Exception e){
+        catch (Exception e) {
             Utils.toast(e.toString());
         }
     }

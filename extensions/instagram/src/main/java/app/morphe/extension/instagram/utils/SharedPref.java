@@ -12,21 +12,21 @@
 package app.morphe.extension.instagram.utils;
 
 import android.content.Context;
-import app.morphe.extension.shared.Utils;
-import app.morphe.extension.shared.settings.preference.SharedPrefCategory;
-import app.morphe.extension.instagram.constants.Strings;
 
-import app.morphe.extension.crimera.settings.BooleanSetting;
-import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.settings.BooleanSetting;
+import app.morphe.extension.shared.settings.StringSetting;
+import app.morphe.extension.shared.settings.preference.PikoSharedPrefCategory;
 
 public class SharedPref {
 
     private static final Context ctx = app.morphe.extension.shared.Utils.getContext();
-    private static SharedPrefCategory sp;
+    private static PikoSharedPrefCategory sp;
 
     static {
         if(ctx!=null) {
-            sp = new SharedPrefCategory(Strings.PIKO_SETTINGS);
+            sp = new PikoSharedPrefCategory(Strings.PIKO_SETTINGS);
         }
     }
 

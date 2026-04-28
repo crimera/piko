@@ -11,19 +11,14 @@
 
 package app.morphe.extension.instagram.settings;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.view.View;
-import android.os.Bundle;
 import android.net.Uri;
 
-import app.morphe.extension.instagram.settings.SettingsActivity;
-import app.morphe.extension.shared.Utils;
+import app.morphe.extension.crimera.Utils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.preference.fragments.BackupPrefActivity;
 import app.morphe.extension.instagram.settings.preference.fragments.RestorePrefActivity;
-import app.morphe.extension.shared.Logger;
 
 @SuppressWarnings("deprecation")
 public class ActivityHook {
@@ -33,7 +28,7 @@ public class ActivityHook {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         } catch (Exception e) {
-            Logger.printException(() -> "launchActivity failure", e);
+            app.morphe.extension.shared.Logger.printException(() -> "launchActivity failure", e);
         }
     }
 

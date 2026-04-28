@@ -68,7 +68,7 @@ val openLinksExternallyPatch =
                         ExternalLabel("piko", instructions[urlResultObjIndex + 1]),
                     )
 
-                    enableSettings("openLinksExternally")
+                    enableSettings( "openLinksExternally")
                 }
             }
         }

@@ -10,7 +10,6 @@
 
 package app.morphe.extension.twitter;
 
-import app.morphe.extension.twitter.entity.Debug;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
@@ -21,34 +20,31 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.util.Log;
 import android.widget.LinearLayout;
 
-import app.morphe.extension.shared.StringRef;
-import app.morphe.extension.crimera.settings.BooleanSetting;
-import app.morphe.extension.crimera.settings.StringSetting;
-import app.morphe.extension.shared.settings.preference.SharedPrefCategory;
-import app.morphe.extension.twitter.settings.Settings;
 import com.google.android.material.tabs.TabLayout$g;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.FileOutputStream;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.IOException;
+
+import app.morphe.extension.shared.StringRef;
+import app.morphe.extension.shared.settings.BooleanSetting;
+import app.morphe.extension.shared.settings.StringSetting;
+import app.morphe.extension.shared.settings.preference.PikoSharedPrefCategory;
+import app.morphe.extension.twitter.settings.Settings;
 
 @SuppressWarnings("unused")
 public class Utils {
     @SuppressLint("StaticFieldLeak")
     private static final Context ctx = app.morphe.extension.shared.Utils.getContext();
-    private static final SharedPrefCategory sp = new SharedPrefCategory(Settings.SHARED_PREF_NAME);
-    private static final SharedPrefCategory defsp = new SharedPrefCategory(ctx.getPackageName() + "_preferences");
+    private static final PikoSharedPrefCategory sp = new PikoSharedPrefCategory(Settings.SHARED_PREF_NAME);
+    private static final PikoSharedPrefCategory defsp = new PikoSharedPrefCategory(ctx.getPackageName() + "_preferences");
 
     private static void startActivity(Class cls) {
         Intent intent = new Intent(ctx, cls);

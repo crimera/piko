@@ -29,7 +29,7 @@ internal object ActionEnumsFingerprint : Fingerprint(
     strings = listOf("None", "Favorite", "Retweet")
 )
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun addAction(name: String): String {
     val field =
         ActionEnumsFingerprint.classDef.fields
