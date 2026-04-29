@@ -47,12 +47,7 @@ val customiseStoryRingSizePatch =
             StoryRingBuilderFingerprint.method.apply {
                 val ringSizeLiteralIndex = indexOfFirstLiteralInstructionOrThrow(HUNDRED)
                 val register = getInstruction(ringSizeLiteralIndex).registersUsed[0]
-                println(
-                    """
-                    $PREF_CALL_DESCRIPTOR->customiseStoryRingSize()F
-                    move-result v$register
-                    """.trimIndent(),
-                )
+
                 addInstructions(
                     ringSizeLiteralIndex + 1,
                     """
