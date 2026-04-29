@@ -50,7 +50,6 @@ import java.util.logging.Logger
 
 internal val locales = listOf(
     AppLocale("", ""), // Default English locale. Must be first.
-    AppLocale("ar-rEH", "ar-rEH"), // Not exist in Crowdin
     AppLocale("ar-rSA", "ar"),
     AppLocale("bg-rBG", "bg"),
     AppLocale("bn-rBD", "bn"),
@@ -93,6 +92,11 @@ internal val locales = listOf(
     AppLocale("zh-rCN", "zh-rCN"),
     AppLocale("zh-rHK", "zh-rHK"),
     AppLocale("zh-rTW", "zh-rTW"),
+
+    // Languages not on Crowdin.
+    // Only used for 'Bring back Twitter' to copy translations to multiple regional variants.
+    AppLocale("ar-rEH", "ar-rEH"),
+    AppLocale("", "en-rGB"),
 )
 
 internal class AppLocale(
