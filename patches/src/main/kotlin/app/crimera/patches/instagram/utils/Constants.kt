@@ -26,7 +26,7 @@ object Constants {
                     // Stable
                     AppTarget(
                         version = "426.0.0.37.68",
-                        description = "Instagram Stable version (all archs)",
+                        description = "Tested on version code - 383207248, 383207252",
                     ),
                 ),
         )
