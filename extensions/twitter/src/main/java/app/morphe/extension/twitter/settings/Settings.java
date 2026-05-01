@@ -12,8 +12,8 @@ package app.morphe.extension.twitter.settings;
 
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.shared.settings.BooleanSetting;
-import app.morphe.extension.shared.settings.StringSetting;
+import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
 
 public class Settings {
     public static final String SHARED_PREF_NAME = "piko_settings";

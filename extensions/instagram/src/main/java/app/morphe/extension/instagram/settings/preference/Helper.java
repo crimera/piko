@@ -21,8 +21,8 @@ import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.shared.settings.BooleanSetting;
-import app.morphe.extension.shared.settings.StringSetting;
+import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
 
 
 public class Helper {
