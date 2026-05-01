@@ -50,8 +50,10 @@ object Constants {
     const val LINKS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Links;"
     const val DOWNLOAD_DESCRIPTOR = "$PATCHES_DESCRIPTOR/download"
     const val UI_CONSTANTS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/constants/UI;"
+    const val ENTITY_CLASS = "$INTEGRATIONS_PACKAGE/entity"
 
     const val ACTIVITY_SETTINGS_STATUS_CLASS = "$ACTIVITY_SETTINGS_CLASS/SettingsStatus;"
-    const val ENTITY_CLASS = "$INTEGRATIONS_PACKAGE/entity"
     const val SSTS_DESCRIPTOR = "invoke-static {}, $ACTIVITY_SETTINGS_STATUS_CLASS->%s()V"
+    const val HOOK_FLAGS_DESCRIPTOR = "$UTILS_DESCRIPTOR/HookFlags;"
+    const val LOAD_FLAGS_DESCRIPTOR = "invoke-static {}, $HOOK_FLAGS_DESCRIPTOR->%s()V"
 }

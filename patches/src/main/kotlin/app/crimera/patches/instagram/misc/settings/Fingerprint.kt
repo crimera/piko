@@ -10,12 +10,18 @@
 
 package app.crimera.patches.instagram.misc.settings
 
-import app.crimera.patches.instagram.utils.Constants
+import app.crimera.patches.instagram.utils.Constants.ACTIVITY_SETTINGS_STATUS_CLASS
+import app.crimera.patches.instagram.utils.Constants.HOOK_FLAGS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 
+internal object HookFlagsLoadFingerprint : Fingerprint(
+    definingClass = HOOK_FLAGS_DESCRIPTOR,
+    name = "load",
+)
+
 internal object SettingsStatusLoadFingerprint : Fingerprint(
-    definingClass = Constants.ACTIVITY_SETTINGS_STATUS_CLASS,
+    definingClass = ACTIVITY_SETTINGS_STATUS_CLASS,
     name = "load",
 )
 

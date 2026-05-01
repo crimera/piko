@@ -16,13 +16,15 @@ import app.crimera.patches.instagram.entity.profileinfo.ProfileUserInfoViewBinde
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
+import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.LOAD_FLAGS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
+import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.fieldExtractor
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -39,7 +41,14 @@ val settingsPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(sharedExtensionPatch, addSettingsActivityPatch, profileInfoEntity, instagramButtonEntity, developerOptionsEntity)
+        dependsOn(
+            sharedExtensionPatch,
+            addSettingsActivityPatch,
+            hookFlagsPatch,
+            profileInfoEntity,
+            instagramButtonEntity,
+            developerOptionsEntity,
+        )
         execute {
 
             ProfileUserInfoViewBinderFingerprint.method.apply {
@@ -52,9 +61,12 @@ val settingsPatch =
                 )
             }
 
-            instagramInitHook.fingerprint.method.addInstruction(
+            instagramInitHook.fingerprint.method.addInstructions(
                 0,
-                SSTS_DESCRIPTOR.format("load"),
+                """
+                ${SSTS_DESCRIPTOR.format("load")}
+                ${LOAD_FLAGS_DESCRIPTOR.format("load")}
+                """.trimIndent(),
             )
 
             // The following handles the signature check while sharing a link externally and opening a link.
