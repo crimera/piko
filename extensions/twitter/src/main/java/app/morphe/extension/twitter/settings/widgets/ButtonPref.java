@@ -121,7 +121,7 @@ public class ButtonPref extends Preference {
                     } else if (key.equals(Settings.PREMIUM_UNDO_POSTS.key)) {
                         Utils.startUndoPostActivity();
                     }  else if (key.equals(Settings.PREMIUM_NAVBAR.key)) {
-                        app.morphe.extension.crimera.Utils.openUrl("https://www.x.com/settings/custom_navigation");
+                        app.morphe.extension.crimera.PikoUtils.openUrl("https://www.x.com/settings/custom_navigation");
                     } else if (key.equals(Settings.RESET_PREF)) {
                         Utils.deleteSharedPrefAB(context, false);
                     } else if (key.equals(Settings.RESET_FLAGS)) {
@@ -145,8 +145,8 @@ public class ButtonPref extends Preference {
                         ActivityHook.startFragment((Activity) context, key,fragment, true);
                     }
                 } catch (Exception e) {
-                    app.morphe.extension.crimera.Utils.logger(e);
-                    app.morphe.extension.crimera.Utils.toast(e.toString());
+                    app.morphe.extension.crimera.PikoUtils.logger(e);
+                    app.morphe.extension.crimera.PikoUtils.toast(e.toString());
                 }
 
                 return true;

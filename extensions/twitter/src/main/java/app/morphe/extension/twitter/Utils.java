@@ -91,7 +91,7 @@ public class Utils {
             }
 
         } catch (Exception e) {
-            app.morphe.extension.crimera.Utils.logger(e.toString());
+            app.morphe.extension.crimera.PikoUtils.logger(e.toString());
         }
         return false;
     }
@@ -322,7 +322,7 @@ public class Utils {
     }
 
     private static void toast(String msg){
-        app.morphe.extension.crimera.Utils.toast(msg);
+        app.morphe.extension.crimera.PikoUtils.toast(msg);
     }
 
 }

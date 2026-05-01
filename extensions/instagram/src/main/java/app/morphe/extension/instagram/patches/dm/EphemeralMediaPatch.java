@@ -14,7 +14,6 @@ package app.morphe.extension.instagram.patches;
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.crimera.Utils;
 
 @SuppressWarnings("unused")
 public class EphemeralMediaPatch {

@@ -89,7 +89,7 @@ public class DeepLink {
                 return true;
             }
         }catch(Exception e){
-            app.morphe.extension.crimera.Utils.logger(e);
+            app.morphe.extension.crimera.PikoUtils.logger(e);
         }
 
         return false;

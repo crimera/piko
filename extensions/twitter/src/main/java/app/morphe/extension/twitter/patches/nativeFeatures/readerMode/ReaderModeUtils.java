@@ -13,7 +13,7 @@ package app.morphe.extension.twitter.patches.nativeFeatures.readerMode;
 import android.content.Context;
 
 import app.morphe.extension.twitter.settings.ActivityHook;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.StringRef;
 import java.io.File;
 import java.io.BufferedReader;
@@ -167,26 +167,26 @@ public class ReaderModeUtils {
             }
         }
         if (deleted) {
-            Utils.toast(StringRef.str("piko_native_reader_mode_cache_delete_success"));
+            PikoUtils.toast(StringRef.str("piko_native_reader_mode_cache_delete_success"));
         } else {
-            Utils.toast(StringRef.str("piko_native_reader_mode_cache_delete_failed"));
+            PikoUtils.toast(StringRef.str("piko_native_reader_mode_cache_delete_failed"));
         }
     }
 
     private static boolean writeCacheFile(String tweetId, String data) {
         try {
-            return Utils.writeFile(cacheFileDir(tweetId), data.getBytes(), false);
+            return PikoUtils.writeFile(cacheFileDir(tweetId), data.getBytes(), false);
         } catch (Exception e) {
-            Utils.logger(e.toString());
+            PikoUtils.logger(e.toString());
         }
         return false;
     }
 
     private static String readCacheFile(String tweetId) throws Exception {
         try {
-            return Utils.readFile(cacheFileDir(tweetId));
+            return PikoUtils.readFile(cacheFileDir(tweetId));
         } catch (Exception e) {
-            Utils.logger(e.toString());
+            PikoUtils.logger(e.toString());
         }
         return null;
     }

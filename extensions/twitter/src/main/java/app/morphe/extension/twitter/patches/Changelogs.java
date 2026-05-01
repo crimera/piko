@@ -91,7 +91,7 @@ public class Changelogs {
             try {
                 htmlString = getUpdateMessage();
             } catch (Exception ex) {
-                app.morphe.extension.crimera.Utils.logger(ex);
+                app.morphe.extension.crimera.PikoUtils.logger(ex);
                 htmlString = null;
             }
             if (htmlString == null) return;

@@ -15,7 +15,7 @@ import app.morphe.extension.twitter.entity.TweetInfo;
 import app.morphe.extension.twitter.entity.Debug;
 
 import java.util.*;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 // All comments based of 11.14.beta-0
 // Lcom/twitter/model/core/entity/e;
@@ -109,7 +109,7 @@ public class Tweet extends Debug {
             text = text.replaceAll("https?://t\\.co/\\S+", "");
 
         } catch (Exception e) {
-            Utils.logger(e);
+            PikoUtils.logger(e);
             text = e.getMessage();
         }
         return text;
@@ -125,7 +125,7 @@ public class Tweet extends Debug {
                     + this.getTweetLang() + ", getLongText()=" + this.getLongText() + ", getShortText()=" + this.getShortText() + "]";
 
         } catch (Exception e) {
-            Utils.logger(e);
+            PikoUtils.logger(e);
             return e.getMessage();
         }
 

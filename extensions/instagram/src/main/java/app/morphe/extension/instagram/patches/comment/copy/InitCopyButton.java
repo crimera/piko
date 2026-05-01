@@ -11,17 +11,6 @@
 
 package app.morphe.extension.instagram.patches.comment.copy;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.Objects;
-
-import app.morphe.extension.instagram.entity.Entity;
-import app.morphe.extension.instagram.settings.SettingsStatus;
-import app.morphe.extension.instagram.utils.Pref;
-import app.morphe.extension.shared.Logger;
-import app.morphe.extension.crimera.Utils;
-
 @SuppressWarnings("unused")
 public final class InitCopyButton {
 }

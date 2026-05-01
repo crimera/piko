@@ -14,7 +14,7 @@ import java.util.List;
 
 import app.morphe.extension.twitter.entity.Video;
 import app.morphe.extension.twitter.entity.Media;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 // Lcom/twitter/model/core/entity/b0;
 public class ExtMediaEntities extends Debug{
@@ -84,7 +84,7 @@ public class ExtMediaEntities extends Debug{
         return "ExtMediaEntities [getImageUrl()=" + this.getImageUrl() + ", getHighResImageUrl()="
                 + this.getHighResImageUrl() + ", getHighResVideo()=" + this.getHighResVideo() + "]";
         }catch(Exception e){
-            Utils.logger(e);
+            PikoUtils.logger(e);
             return e.getMessage();
         }
     }

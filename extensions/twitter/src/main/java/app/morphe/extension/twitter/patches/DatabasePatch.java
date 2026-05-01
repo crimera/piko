@@ -10,7 +10,7 @@
 
 package app.morphe.extension.twitter.patches;
 
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
 import android.content.Context;
@@ -76,7 +76,7 @@ public class DatabasePatch {
             String DATABASE_PATH = getDBPath();
             File f = new File(DATABASE_PATH);
             if (!f.exists() && f.isDirectory()) {
-                Utils.toast(StringRef.str("piko_pref_db_not_found"));
+                PikoUtils.toast(StringRef.str("piko_pref_db_not_found"));
                 return result;
             }
             database = SQLiteDatabase.openDatabase(DATABASE_PATH, null, SQLiteDatabase.OPEN_READWRITE);
@@ -144,13 +144,13 @@ public class DatabasePatch {
                     }
                 }
             } else {
-                Utils.toast(StringRef.str("piko_pref_db_not_open"));
+                PikoUtils.toast(StringRef.str("piko_pref_db_not_open"));
             }
 
         }
         catch (Exception e){
             logger(e.toString());
-            Utils.toast(e.toString());
+            PikoUtils.toast(e.toString());
         }
         if (database != null && database.isOpen()) {
             database.close();

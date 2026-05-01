@@ -21,7 +21,7 @@ import app.morphe.extension.shared.settings.preference.PikoSharedPrefCategory;
 
 public class SharedPref {
 
-    private static final Context ctx = app.morphe.extension.shared.Utils.getContext();
+    private static final Context ctx = Utils.getContext();
     private static PikoSharedPrefCategory sp;
 
     static {

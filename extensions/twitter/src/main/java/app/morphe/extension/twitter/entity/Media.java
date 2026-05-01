@@ -10,7 +10,7 @@
 
 package app.morphe.extension.twitter.entity;
 
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 public class Media {
     // 0-img, 1-video
@@ -30,7 +30,7 @@ public class Media {
         try {
             return "Media [type=" + this.type + ", url=" + this.url + ", ext=" + this.ext + "]";
         } catch (Exception e) {
-            Utils.logger(e);
+            PikoUtils.logger(e);
             return e.getMessage();
         }
     }

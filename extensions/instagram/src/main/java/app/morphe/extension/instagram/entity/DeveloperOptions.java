@@ -12,7 +12,7 @@
 package app.morphe.extension.instagram.entity;
 
 import java.util.List;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 public class DeveloperOptions extends Entity {
 
@@ -69,8 +69,8 @@ public class DeveloperOptions extends Entity {
                 sb.append("---------------------\n");
             }
         } catch (Exception e) {
-            Utils.logger(e);
-            Utils.toast("Developer options extraction failed");
+            PikoUtils.logger(e);
+            PikoUtils.toast("Developer options extraction failed");
             sb.append(e.toString() + "\n");
         }
         return sb.toString();

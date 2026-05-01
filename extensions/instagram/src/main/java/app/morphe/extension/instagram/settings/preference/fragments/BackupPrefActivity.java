@@ -25,7 +25,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
 
 public class BackupPrefActivity extends AppCompatActivity {
@@ -37,7 +37,7 @@ public class BackupPrefActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        context = Utils.getContext();
+        context = PikoUtils.getContext();
 
         Bundle args = getIntent().getExtras();
 
@@ -132,6 +132,6 @@ public class BackupPrefActivity extends AppCompatActivity {
 
 
     private void toast(String msg) {
-        app.morphe.extension.shared.Utils.showToastShort(msg);
+        PikoUtils.toast(msg);
     }
 }

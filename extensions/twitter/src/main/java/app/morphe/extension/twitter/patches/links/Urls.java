@@ -14,7 +14,7 @@ import com.twitter.model.json.core.JsonUrlEntity;
 
 import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.twitter.settings.SettingsStatus;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import com.x.models.ContextualPost;
 import com.x.models.CanonicalPost;
 import com.x.models.UserResult;
@@ -32,7 +32,7 @@ public class Urls {
                 entity.e = entity.c;
             }
         } catch (Exception ex) {
-            Utils.logger(ex);
+            PikoUtils.logger(ex);
         }
         return entity;
     }
@@ -51,7 +51,7 @@ public class Urls {
                 return new URL(url.getProtocol(), customDomainName, url.getPort(), url.getFile()).toString();
             }
         } catch (Exception ex) {
-            Utils.logger(ex);
+            PikoUtils.logger(ex);
         }
         return urlString;
     }
@@ -65,7 +65,7 @@ public class Urls {
                 link = link.replace("/i/", "/" + username + "/");
             }
         }catch (Exception ex) {
-            Utils.logger(ex);
+            PikoUtils.logger(ex);
         }
         return changeDomain(link);
     }

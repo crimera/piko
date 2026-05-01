@@ -126,8 +126,8 @@ public class Helper {
             }
 
         } catch (Exception ex) {
-            app.morphe.extension.crimera.Utils.toast(ex.toString());
-            app.morphe.extension.crimera.Utils.logger(ex);
+            app.morphe.extension.crimera.PikoUtils.toast(ex.toString());
+            app.morphe.extension.crimera.PikoUtils.logger(ex);
         }
     }
 

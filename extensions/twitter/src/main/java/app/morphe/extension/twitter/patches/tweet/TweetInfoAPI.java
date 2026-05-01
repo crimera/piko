@@ -16,7 +16,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 public class TweetInfoAPI {
     private static JSONObject responseObj = null;
@@ -54,7 +54,7 @@ public class TweetInfoAPI {
             return new JSONObject(responseBuilder.toString());
 
         } catch (Exception e) {
-            Utils.logger(e);
+            PikoUtils.logger(e);
             return null;
 
         } finally {
@@ -95,7 +95,7 @@ public class TweetInfoAPI {
                             lock.wait();
                         }catch (InterruptedException e){
                             Thread.currentThread().interrupt();
-                            Utils.logger("Interrupted while waiting: " + e.getMessage());
+                            PikoUtils.logger("Interrupted while waiting: " + e.getMessage());
                         }
                     }
 
@@ -107,7 +107,7 @@ public class TweetInfoAPI {
             }
             }
         }catch(Exception e){
-            Utils.logger(e);
+            PikoUtils.logger(e);
         }
         return src;
     }

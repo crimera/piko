@@ -79,7 +79,7 @@ public class SettingsActivity extends Activity {
 
         TextView title = new TextView(this);
         title.setText(Strings.PIKO_SETTINGS_TITLE);
-        int textSize = app.morphe.extension.crimera.Utils.spToPixels(20);
+        int textSize = app.morphe.extension.crimera.PikoUtils.spToPixels(20);
         title.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,

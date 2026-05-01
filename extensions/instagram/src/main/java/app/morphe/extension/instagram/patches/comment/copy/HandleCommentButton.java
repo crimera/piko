@@ -16,7 +16,7 @@ import java.util.List;
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.crimera.ObjectBrowser;
 
@@ -40,14 +40,14 @@ public class HandleCommentButton {
                 String commentText = (String) commentEntity.getField("A0N");
                 if (commentText!=null && commentText.length() > 0) {
                     app.morphe.extension.shared.Utils.setClipboard(commentText);
-                    Utils.toast(Strings.COMMENT_COPIED_SUCCESS);
+                    PikoUtils.toast(Strings.COMMENT_COPIED_SUCCESS);
                 } else {
-                    Utils.toast(Strings.COMMENT_COPIED_FAILED);
+                    PikoUtils.toast(Strings.COMMENT_COPIED_FAILED);
                 }
                 return true;
             }
         } catch (Exception e) {
-            Utils.logger(e);
+            PikoUtils.logger(e);
         }
         return false;
     }

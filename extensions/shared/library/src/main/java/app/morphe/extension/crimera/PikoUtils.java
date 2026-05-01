@@ -24,9 +24,10 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 
+import app.morphe.extension.shared.Utils;
+
 @SuppressWarnings("unused")
-// TODO? Rename to PikoUtils or some other name different from patches-library Utils?
-public class Utils {
+public class PikoUtils {
     private static final Context ctx = Utils.getContext();
 
     public static Context getContext() {
@@ -136,7 +137,7 @@ public class Utils {
     }
 
     public static void shareText(String txt) {
-        Context context = Utils.getContext();
+        Context context = getContext();
         final String appPackageName = context.getPackageName();
         Intent sendIntent = new Intent();
         sendIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

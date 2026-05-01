@@ -25,7 +25,7 @@ public class Utils {
     public static boolean deleteRecursive(File file) {
         try {
             if (file == null || !file.exists()) {
-                app.morphe.extension.crimera.Utils.toast(Strings.FAIL_NO_FILE);
+                app.morphe.extension.crimera.PikoUtils.toast(Strings.FAIL_NO_FILE);
                 return false;
             }
 
@@ -39,7 +39,7 @@ public class Utils {
             }
             return file.delete();
         } catch (RuntimeException e) {
-            app.morphe.extension.crimera.Utils.logger(e);
+            app.morphe.extension.crimera.PikoUtils.logger(e);
         }
         return false;
     }
@@ -47,13 +47,13 @@ public class Utils {
     public static void decompileExperiments() {
         String fileName = app.morphe.extension.shared.Utils.getAppVersionName() + " Experiments.txt";
         String data = new DeveloperOptions().toString();
-        boolean fileDone = app.morphe.extension.crimera.Utils.pikoWriteFile(fileName, Strings.DEFAULT_PIKO_FOLDER, data, false);
+        boolean fileDone = app.morphe.extension.crimera.PikoUtils.pikoWriteFile(fileName, Strings.DEFAULT_PIKO_FOLDER, data, false);
         String fileDoneTxt = "";
         if (fileDone) {
             fileDoneTxt = fileName + " created";
         } else {
             fileDoneTxt = fileName + " failed";
         }
-        app.morphe.extension.crimera.Utils.toast(fileDoneTxt);
+        app.morphe.extension.crimera.PikoUtils.toast(fileDoneTxt);
     }
 }

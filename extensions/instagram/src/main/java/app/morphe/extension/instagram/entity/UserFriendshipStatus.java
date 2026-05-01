@@ -13,7 +13,7 @@ package app.morphe.extension.instagram.entity;
 import java.util.Map;
 import java.util.HashMap;
 import com.instagram.user.model.FriendshipStatus;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 public class UserFriendshipStatus extends Entity {
     private final Object obj;
@@ -28,7 +28,7 @@ public class UserFriendshipStatus extends Entity {
             Class<?> helperClass = Class.forName("classname");
             return (Map) super.getMethod(helperClass, "methodname", new Class[]{FriendshipStatus.class}, this.obj);
         } catch (Exception e) {
-            Utils.logger(e);
+            PikoUtils.logger(e);
         }
         return new HashMap();
     }

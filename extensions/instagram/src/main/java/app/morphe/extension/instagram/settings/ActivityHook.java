@@ -15,7 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.preference.fragments.BackupPrefActivity;
 import app.morphe.extension.instagram.settings.preference.fragments.RestorePrefActivity;
@@ -33,11 +33,11 @@ public class ActivityHook {
     }
 
     private static void launchActivity(Intent intent){
-        launchActivity(Utils.getContext(),intent);
+        launchActivity(PikoUtils.getContext(),intent);
     }
 
     public static void startPikoActivity(){
-        Context context = Utils.getContext();
+        Context context = PikoUtils.getContext();
         Intent intent = new Intent(context, SettingsActivity.class);
         launchActivity(context,intent);
     }

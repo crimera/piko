@@ -13,7 +13,7 @@ package app.morphe.extension.twitter.patches.nativeFeatures.downloader;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.widget.LinearLayout;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.shared.StringRef;
 import java.lang.reflect.InvocationTargetException;
@@ -82,12 +82,12 @@ public class NativeDownloader {
         builder.setItems(choices, (dialogInterface, which) -> {
             Media media = mediaData.get(which);
 
-            Utils.toast(strRes("download_started"));
+            PikoUtils.toast(strRes("download_started"));
             app.morphe.extension.twitter.Utils.downloadFile(media.url, filename + (which + 1), media.ext);
         });
 
         builder.setNegativeButton(strRes("piko_pref_native_downloader_download_all"), (dialogInterface, index) -> {
-            Utils.toast(strRes("download_started"));
+            PikoUtils.toast(strRes("download_started"));
 
             int i = 1;
             for (Media media : mediaData) {
@@ -108,7 +108,7 @@ public class NativeDownloader {
 
             assert media != null;
             if (media.isEmpty()) {
-                Utils.toast(strRes("piko_pref_native_downloader_no_media"));
+                PikoUtils.toast(strRes("piko_pref_native_downloader_no_media"));
                 return;
             }
 
@@ -116,14 +116,14 @@ public class NativeDownloader {
 
             if (media.size() == 1) {
                 Media item = media.get(0);
-                Utils.toast(strRes("download_started"));
+                PikoUtils.toast(strRes("download_started"));
                 app.morphe.extension.twitter.Utils.downloadFile(item.url, fileName, item.ext);
                 return;
             }
 
             alertBox(activity, fileName + "-", media);
         } catch (Exception ex) {
-            Utils.logger(ex);
+            PikoUtils.logger(ex);
         }
     }
 

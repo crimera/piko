@@ -11,7 +11,7 @@
 package app.morphe.extension.twitter.patches.customise.font;
 
 import android.os.Build;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.StringRef;
 import android.content.Context;
 import android.graphics.Typeface;
@@ -54,7 +54,7 @@ public class UpdateFont {
     public static void loadFont(String fontName,boolean isEmojiFont){
         File fontFile = new File(context.getFilesDir(), fontName);
         if (!fontFile.exists()) {
-            Utils.logger("Font not found: " + fontFile.getAbsolutePath());
+            PikoUtils.logger("Font not found: " + fontFile.getAbsolutePath());
         }else{
 
             Typeface typeface = Typeface.createFromFile(fontFile);
@@ -63,7 +63,7 @@ public class UpdateFont {
             }else{
                 textTypeface = typeface;
             }
-            Utils.logger("Font loaded: " + fontFile.getAbsolutePath());
+            PikoUtils.logger("Font loaded: " + fontFile.getAbsolutePath());
         }
     }
 
@@ -72,12 +72,12 @@ public class UpdateFont {
         File fontFile = new File(context.getFilesDir(), filename);
         if (fontFile.exists()) {
             if (fontFile.delete()) {
-                Utils.toast(StringRef.str("piko_pref_delete_font_success"));
+                PikoUtils.toast(StringRef.str("piko_pref_delete_font_success"));
             } else {
-                Utils.toast(StringRef.str("piko_pref_delete_font_fail"));
+                PikoUtils.toast(StringRef.str("piko_pref_delete_font_fail"));
             }
         } else {
-            Utils.toast(StringRef.str("piko_pref_delete_font_warn"));
+            PikoUtils.toast(StringRef.str("piko_pref_delete_font_warn"));
         }
     }
 
