@@ -12,7 +12,11 @@ package app.crimera.patches.instagram.entity.developerOptions
 
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
+import app.crimera.utils.methodExtractor
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.indexOfFirstInstruction
+import com.android.tools.smali.dexlib2.Opcode
 
 val developerOptionsEntity =
     bytecodePatch(
@@ -26,7 +30,12 @@ val developerOptionsEntity =
                 GetAllExperimentsClassExtension.changeFirstString(getAllExperimentsMethodName)
             }
 
-            val experimentsItemClassName = classNameToExtension(ExperimentsGetMobileConfigSpecifier.classDef.type)
-            GetExperimentItemHelperClassExtension.changeFirstString(experimentsItemClassName)
+            ExperimentsGetMobileConfigSpecifier.apply {
+                GetExperimentItemHelperClassExtension.changeFirstString(classNameToExtension(classDef.type))
+                method.apply {
+                    val getUniversalIdInstructionData = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_STATIC)).methodExtractor()
+                    GetUniversalIdHelperClassExtension.changeFirstString(getUniversalIdInstructionData.definingClass)
+                }
+            }
         }
     }

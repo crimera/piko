@@ -15,6 +15,11 @@ import app.morphe.patcher.Fingerprint
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/DeveloperOptions;"
 
+internal object GetUniversalIdHelperClassExtension : Fingerprint(
+    name = "getUniversalIdHelperClass",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
 internal object GetQuickExperimentHelperClassExtension : Fingerprint(
     name = "getQuickExperimentHelperClass",
     definingClass = EXTENSION_CLASS_DESCRIPTOR,

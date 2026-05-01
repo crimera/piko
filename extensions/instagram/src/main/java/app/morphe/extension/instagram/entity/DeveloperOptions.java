@@ -12,6 +12,9 @@
 package app.morphe.extension.instagram.entity;
 
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+
 import app.morphe.extension.crimera.PikoUtils;
 
 public class DeveloperOptions extends Entity {
@@ -49,6 +52,24 @@ public class DeveloperOptions extends Entity {
         return null;
     }
 
+
+    private Class<?> getUniversalIdHelperClass() throws Exception {
+        return Class.forName("X.0B3D");
+    }
+
+    public String getUniversalId(long mobileConfigSpecifier) throws Exception {
+        Class<?> universalIdHelperClass = this.getUniversalIdHelperClass();
+        int universalId = (int) super.getMethod(universalIdHelperClass, "A00", new Class[]{long.class}, mobileConfigSpecifier);
+        return String.valueOf(universalId);
+    }
+
+    public String getParamId(long mobileConfigSpecifier) throws Exception {
+        long shifted = mobileConfigSpecifier >>> 16;
+        boolean flag = ((mobileConfigSpecifier >>> 62) & 1L) == 1L;
+        Object paramId = flag ? (shifted & 0xffff) : (shifted & 0xfff);
+        return String.valueOf(paramId);
+    }
+
     @java.lang.Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -58,15 +79,21 @@ public class DeveloperOptions extends Entity {
             Class<?> quickExperimentHelper = this.getExperimentItemHelperClass();
 
             List allExperiments = this.getAllExperiments();
+            Set<String> seenUniversalNames = new HashSet<>();
+
             for (Object item : allExperiments) {
+                String universalName = (String) super.getField(quickExperimentHelper, item, this.getUniversalNameFieldName());
+                if (!seenUniversalNames.contains(universalName)) {
+                    seenUniversalNames.add(universalName);
+                    sb.append("---------------------\n").append("Universal name: ").append(universalName).append("\n\n");
+                }
                 long mobileConfigSpecifier = (long) super.getField(quickExperimentHelper, item, this.getMobileConfigSpecifierFieldName());
                 String paramName = (String) super.getField(quickExperimentHelper, item, this.getParamNameFieldName());
-                String universalName = (String) super.getField(quickExperimentHelper, item, this.getUniversalNameFieldName());
+                String configId = this.getUniversalId(mobileConfigSpecifier) + "::" + this.getParamId(mobileConfigSpecifier);
 
-                sb.append("ConfigId: ").append(Long.toHexString(mobileConfigSpecifier)).append("\n");
-                sb.append("Universal name: ").append(universalName).append("\n");
                 sb.append("Param name: ").append(paramName).append("\n");
-                sb.append("---------------------\n");
+                sb.append("Hex id: ").append(Long.toHexString(mobileConfigSpecifier)).append("\n");
+                sb.append("Config id: ").append(configId).append("\n\n");
             }
         } catch (Exception e) {
             PikoUtils.logger(e);
