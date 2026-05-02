@@ -11,6 +11,7 @@
 package app.crimera.patches.instagram.misc.download
 
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CLASS
 import app.morphe.patcher.Fingerprint
 
 val FEED_BUTTON_DESCRIPTOR = "$DOWNLOAD_DESCRIPTOR/FeedButton;"
@@ -26,8 +27,9 @@ internal object FeedButtonOnClickFingerprint : Fingerprint(
     returnType = "V",
 )
 
-internal object EditMediaInfoGetCurrentMediaIdFingerprint : Fingerprint(
-    definingClass = "Linstagram/features/creation/fragment/EditMediaInfoFragment;",
+// Also used to in description extraction in MediaEntity
+object EditMediaInfoGetCurrentMediaIdFingerprint : Fingerprint(
+    definingClass = EDIT_MEDIA_INFO_FRAGMENT_CLASS,
     returnType = "Ljava/lang/String;",
     parameters = listOf(),
 )

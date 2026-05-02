@@ -217,6 +217,9 @@ public class Pref {
     public static boolean disableDoubleTapMessage() {
         return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE);
     }
+    public static boolean moreOptionsOnPost() {
+        return SharedPref.getBooleanPref(Settings.ENABLE_MORE_OPTIONS_ON_POST);
+    }
 
     //end
 }

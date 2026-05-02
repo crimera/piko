@@ -133,7 +133,13 @@ public class MediaData extends Entity {
         if(TrackDataIntf!=null){
             return TrackDataIntf;
         }
-
         return null;
     }
+
+    public String getDescriptionText() throws Exception {
+        Class<?> helperClass = this.getHelperClass();
+        Object result = super.getMethod(helperClass, "A0J", this.obj);
+        return result != null ? (String) super.getField(result, "A0Z") : null;
+    }
+
 }

@@ -357,6 +357,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.moreOptionsOnPost) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.ENABLE_MORE_OPTIONS_ON_POST,
+                            Strings.ENABLE_MORE_OPTIONS_ON_POST_DESC,
+                            Settings.ENABLE_MORE_OPTIONS_ON_POST
+                    )
+            );
+        }
         if (SettingsStatus.disableVideoAutoplay) {
             addPreference(category,
                     helper.switchPreference(

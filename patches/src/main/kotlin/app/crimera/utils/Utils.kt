@@ -10,10 +10,7 @@
 
 package app.crimera.utils
 
-import app.crimera.patches.twitter.utils.Constants.FSTS_DESCRIPTOR
-import app.crimera.patches.twitter.utils.Constants.SSTS_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
@@ -260,3 +257,41 @@ class InitMethod(
 
     override fun getImplementation(): MethodImplementation = implementation
 }
+
+/**
+ * Get the index of the last [Instruction] that matches the predicate, before [endIndex].
+ *
+ * @param endIndex Optional starting index to start searching from.
+ * @return -1 if the instruction is not found.
+ */
+fun Method.indexOfLastInstruction(
+    endIndex: Int = this.instructions.count(),
+    filter: Instruction.() -> Boolean,
+): Int {
+    val instructions = this.implementation?.instructions ?: return -1
+    val index = instructions.indexOfLast(filter)
+
+    return if (index < endIndex) {
+        endIndex
+    } else {
+        -1
+    }
+}
+
+/**
+ * @return The index of the last opcode specified, or -1 if not found.
+ */
+fun Method.indexOfLastInstruction(targetOpcode: Opcode): Int = indexOfLastInstruction(this.instructions.count(), targetOpcode)
+
+/**
+ * @param endIndex Optional ending index to search before from.
+ * @return The index of the last opcode specified, or -1 if not found.
+ * @see indexOfFirstInstructionOrThrow
+ */
+fun Method.indexOfLastInstruction(
+    endIndex: Int = 0,
+    targetOpcode: Opcode,
+): Int =
+    indexOfLastInstruction(endIndex) {
+        opcode == targetOpcode
+    }

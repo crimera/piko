@@ -11,10 +11,10 @@
 package app.crimera.patches.instagram.entity.mediadata
 
 import app.crimera.patches.instagram.utils.Constants
+import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CLASS
 import app.morphe.patcher.Fingerprint
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
-internal const val EDIT_MEDIA_INFO_FRAGMENT_CLASS = "Linstagram/features/creation/fragment/EditMediaInfoFragment;"
 
 internal object GetHelperClassExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
@@ -59,6 +59,11 @@ internal object GetUserDataExtensionFingerprint : Fingerprint(
 internal object GetMediaPkIdExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
     name = "getMediaPkId",
+)
+
+internal object GetDescriptionTextExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getDescriptionText",
 )
 
 internal object ReelsInlineQualitySurveyRelatedFingerprint : Fingerprint(

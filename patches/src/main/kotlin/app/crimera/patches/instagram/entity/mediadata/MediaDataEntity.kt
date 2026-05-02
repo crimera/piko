@@ -10,7 +10,9 @@
 
 package app.crimera.patches.instagram.entity.mediadata
 
+import app.crimera.patches.instagram.misc.download.EditMediaInfoGetCurrentMediaIdFingerprint
 import app.crimera.utils.changeFirstString
+import app.crimera.utils.changeStringAt
 import app.crimera.utils.classNameToExtension
 import app.crimera.utils.fieldExtractor
 import app.crimera.utils.methodExtractor
@@ -111,6 +113,23 @@ val mediaDataEntity =
                 val firstConst = indexOfFirstInstruction(Opcode.CONST_4)
                 val userDataMethodName = instructions[indexOfFirstInstruction(firstConst, Opcode.INVOKE_INTERFACE)].methodExtractor().name
                 GetUserDataExtensionFingerprint.changeFirstString(userDataMethodName)
+            }
+
+            // Extraction of description
+            EditMediaInfoGetCurrentMediaIdFingerprint.method.apply {
+
+                val getCommentDataFromMediaMethodName =
+                    getInstruction(
+                        instructions.indexOfLast { it.opcode == Opcode.INVOKE_STATIC },
+                    ).methodExtractor().name
+
+                val getCommentTextFieldName =
+                    getInstruction(
+                        instructions.indexOfLast { it.opcode == Opcode.IGET_OBJECT },
+                    ).fieldExtractor().name
+
+                GetDescriptionTextExtensionFingerprint.changeFirstString(getCommentDataFromMediaMethodName)
+                GetDescriptionTextExtensionFingerprint.changeStringAt(1, getCommentTextFieldName)
             }
         }
     }

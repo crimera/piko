@@ -121,6 +121,12 @@ public class Strings {
     public static final String DOWNLOADED_MEDIA = "Downloaded : ";
     public static final String MEDIA_EXISTS = "Media exists";
     public static final String DOWNLOAD_FAILED_MEDIA = "Download failed : ";
+    public static final String POST_OPTIONS = "Post options";
+    public static final String COPY_POST_DESCRIPTION = "Copy post description";
+    public static final String COPY_POST_OWNER_USERNAME = "Copy post owner username";
+    public static final String COPY_POST_OWNER_FULLNAME = "Copy post owner fullname";
+    public static final String ENABLE_MORE_OPTIONS_ON_POST = "Enable more option on post";
+    public static final String ENABLE_MORE_OPTIONS_ON_POST_DESC = "Get more options on long pressing the post";
 
 
     public static final String CATEGORY_HIDE_NAVIGATION_BUTTONS = "Hide navigation buttons";

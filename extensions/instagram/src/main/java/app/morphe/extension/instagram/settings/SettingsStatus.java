@@ -170,7 +170,9 @@ public class SettingsStatus {
     public static void disableVideoAutoplay() { disableVideoAutoplay = true; }
     public static boolean storiesAudioAutoplay = false;
     public static void storiesAudioAutoplay() { storiesAudioAutoplay = true; }
-    public static boolean miscSection() {return (customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || storiesAudioAutoplay || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
+    public static boolean moreOptionsOnPost = false;
+    public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
+    public static boolean miscSection() {return (moreOptionsOnPost || customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || storiesAudioAutoplay || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
 
     //Download section.
     public static boolean downloadMedia = false;
