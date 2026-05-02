@@ -205,5 +205,18 @@ public class Pref {
         }
     }
 
+    public static boolean disableDoubleTapPost() {
+        return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_POST);
+    }
+    public static boolean disableDoubleTapReel() {
+        return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_REEL);
+    }
+    public static boolean disableDoubleTapComment() {
+        return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_COMMENT);
+    }
+    public static boolean disableDoubleTapMessage() {
+        return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE);
+    }
+
     //end
 }

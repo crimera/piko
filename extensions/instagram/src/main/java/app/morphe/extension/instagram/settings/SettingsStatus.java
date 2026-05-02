@@ -111,9 +111,12 @@ public class SettingsStatus {
     public static void disableReelsScrolling() {
         disableReelsScrolling = true;
     }
-
+    public static boolean disableDoubleTapLike = false;
+    public static void disableDoubleTapLike() {
+        disableDoubleTapLike = true;
+    }
     public static boolean distractionFreeSection() {
-        return (hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling);
+        return (disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling);
     }
 
     //Misc section.

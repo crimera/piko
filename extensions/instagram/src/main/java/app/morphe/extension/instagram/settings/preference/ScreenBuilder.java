@@ -283,6 +283,40 @@ public class ScreenBuilder {
                     )
             );
         }
+
+        if (SettingsStatus.disableDoubleTapLike) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_DOUBLE_TAP_LIKE_POST,
+                            "",
+                            Settings.DISABLE_DOUBLE_TAP_LIKE_POST
+                    )
+            );
+
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_DOUBLE_TAP_LIKE_REEL,
+                            "",
+                            Settings.DISABLE_DOUBLE_TAP_LIKE_REEL
+                    )
+            );
+
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_DOUBLE_TAP_LIKE_COMMENT,
+                            "",
+                            Settings.DISABLE_DOUBLE_TAP_LIKE_COMMENT
+                    )
+            );
+
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE,
+                            "",
+                            Settings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE
+                    )
+            );
+        }
     }
 
     public void buildMiscSection() {
