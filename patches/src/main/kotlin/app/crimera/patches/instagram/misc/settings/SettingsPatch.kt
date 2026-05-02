@@ -93,5 +93,7 @@ val settingsPatch =
                 val firstIGetObject = getInstruction(indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT))
                 SignatureCheckExtensionFingerprint.changeFirstString(firstIGetObject.fieldExtractor().name)
             }
+
+            addFlags("contactPermissionConsentFlags")
         }
     }

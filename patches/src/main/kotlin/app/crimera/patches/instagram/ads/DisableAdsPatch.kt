@@ -13,6 +13,7 @@ package app.crimera.patches.instagram.ads
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -43,6 +44,7 @@ val disableAdsPatch =
                 )
 
                 enableSettings("disableAds")
+                addFlags("adsFlags")
             }
         }
     }

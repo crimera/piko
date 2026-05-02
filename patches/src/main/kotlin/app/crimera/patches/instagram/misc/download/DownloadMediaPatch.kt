@@ -17,6 +17,7 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
+import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
@@ -212,6 +213,8 @@ val downloadMediaPatch =
                     ExternalLabel("piko", getInstruction(0)),
                 )
             }
+
             enableSettings("downloadMedia")
+            addFlags("simpleOverflowMenuFlags")
         }
     }
