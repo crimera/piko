@@ -12,12 +12,25 @@ package app.crimera.patches.instagram.misc.distractionFree.doubleTap
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.InstructionLocation.MatchFirst
+import app.morphe.patcher.OpcodeFilter
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
+import com.android.tools.smali.dexlib2.Opcode
 
-internal object MessageOnTouchFingerprint : Fingerprint(
-    strings = listOf("This container can only be used in a RecyclerView.ViewHolder"),
-    name = "onTouch",
+internal object MessageOnKeyFingerprint : Fingerprint(
+    returnType = "Z",
+    name = "onKey",
+    custom = { method, _ ->
+        method.implementation?.registerCount == 6
+    },
+    filters =
+        listOf(
+            opcode(Opcode.CONST_4, MatchFirst()),
+            opcode(Opcode.INVOKE_STATIC, MatchAfterImmediately()),
+        ),
 )
 
 @Suppress("unused")
@@ -29,7 +42,7 @@ val disableDoubleTapOnMessagePatch =
 
         execute {
 
-            MessageOnTouchFingerprint.apply {
+            MessageOnKeyFingerprint.apply {
                 classDef.methods.first { it.name == "onDoubleTap" }.apply {
                     addInstructions(
                         0,
