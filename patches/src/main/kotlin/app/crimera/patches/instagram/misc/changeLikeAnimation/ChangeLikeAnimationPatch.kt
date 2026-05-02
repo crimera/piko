@@ -35,7 +35,7 @@ internal object XDTUserActivationMetadataImplInitFingerprint : Fingerprint(
 )
 
 @Suppress("unused")
-val changeLikeAnimationtPatch =
+val changeLikeAnimationPatch =
     bytecodePatch(
         name = "Change like animation",
         description = "Change the animation to one from existing Rings like animations",
@@ -52,10 +52,10 @@ val changeLikeAnimationtPatch =
                 addInstructionsWithLabels(
                     0,
                     """
-                    sget-object p2, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
                     invoke-static {p1}, $EXTENSION_CLASS_DESCRIPTOR->changeLikeAnimation(Ljava/lang/Object;)Ljava/lang/Object;
                     move-result-object v0
                     if-eqz v0, :piko
+                    sget-object p2, Ljava/lang/Boolean;->TRUE:Ljava/lang/Boolean;
                     check-cast v0, $animationEnumClassType
                     move-object/from16 p1, v0
                     """.trimIndent(),
