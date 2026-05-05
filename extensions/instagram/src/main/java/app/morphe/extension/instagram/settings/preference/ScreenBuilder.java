@@ -88,6 +88,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.unlockEmployeeOptions) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.ENABLE_EMP_OPTIONS,
+                            Strings.ENABLE_EMP_OPTIONS_DESC,
+                            Settings.ENABLE_EMP_OPTIONS
+                    )
+            );
+        }
         if (SettingsStatus.enableDeveloperOptions) {
             addPreference(category,
                     helper.switchPreference(

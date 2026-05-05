@@ -21,8 +21,12 @@ public class SettingsStatus {
     public static void removeBuildExpirePopup() {
         removeBuildExpirePopup = true;
     }
+    public static boolean unlockEmployeeOptions = false;
+    public static void unlockEmployeeOptions() {
+        unlockEmployeeOptions = true;
+    }
     public static boolean developerOptionsSection() {
-        return (enableDeveloperOptions || removeBuildExpirePopup);
+        return (unlockEmployeeOptions || enableDeveloperOptions || removeBuildExpirePopup);
     }
 
     //Ads section.

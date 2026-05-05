@@ -16,6 +16,7 @@ import java.util.HashMap;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
+import app.morphe.extension.instagram.utils.Pref;
 
 public class HookFlags {
     private static Map<String, Boolean> BOOL_FLAGS = new HashMap<>();
@@ -42,6 +43,13 @@ public class HookFlags {
         BOOL_FLAGS.put("78046::9", false); //enable_no_invalidation_reason_for_mae_exclusion
         BOOL_FLAGS.put("79181::0", false); //ig_reels_ads_1x2_explore_halc_android::is_enabled
         BOOL_FLAGS.put("110800::0", false); //ig_android_controller_migration::use_v2_controller
+    }
+    private static void employeeOptionsFlags() {
+        if(Pref.enableEmployeeOptions()){
+            BOOL_FLAGS.put("28538::0", true); //ig_android_employee_options::is_enabled
+        }else{
+            BOOL_FLAGS.put("28538::0", false); //ig_android_employee_options::is_enabled
+        }
     }
 
     public static void load() {
