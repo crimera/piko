@@ -47,7 +47,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.3.0-dev.3](https://github.com/crimera/piko/releases/tag/v3.3.0-dev.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;113 patches total
+> **[v3.3.0-dev.4](https://github.com/crimera/piko/releases/tag/v3.3.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;117 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
 <br>
@@ -134,7 +134,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;42 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;46 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -156,6 +156,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Disable analytics](#disable-analytics) | Block analytics that are sent to Instagram/Facebook servers. |  |
 | [Disable comments](#disable-comments) |  |  |
 | [Disable discover people](#disable-discover-people) | Disables discover people section on user profile |  |
+| [Disable double tap like](#disable-double-tap-like) | Disable double tap like on post, reel, comment and message |  |
 | [Disable explore](#disable-explore) |  |  |
 | [Disable highlights](#disable-highlights) |  |  |
 | [Disable screenshot detection](#disable-screenshot-detection) | Disables screenshots detection in DM |  |
@@ -164,6 +165,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Disable typing status](#disable-typing-status) |  |  |
 | [Disable video autoplay](#disable-video-autoplay) |  |  |
 | [Download media](#download-media) | Adds ability to download posts, reels, stories and highlights |  |
+| [Enable whitehat settings](#enable-whitehat-settings) | Unlocks settings used for network testing |  |
 | [Follow back indicator](#follow-back-indicator) | Adds a label on the profile page, indicating whether a user is follows you back. |  |
 | [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) |  |  |
 | [Hide navigation buttons](#hide-navigation-buttons) | Hides navigation bar buttons, such as the Reels and Create button. |  |
@@ -174,6 +176,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Improve image viewing](#improve-image-viewing) | Fetches max resolution images from server. |  |
 | [Limit feed to following profiles](#limit-feed-to-following-profiles) | Filters the home feed to display only content from profiles you follow. |  |
 | [Make ephemeral media permanent](#make-ephemeral-media-permanent) | Changes unexpired view once, view twice media to permanent view. |  |
+| [More options on post](#more-options-on-post) | Adds more options on post, like copy description by long pressing on post |  |
 | [More options on profile](#more-options-on-profile) | Adds a new button to handle user related data like copy handle, download profile picture etc |  |
 | [Open links externally](#open-links-externally) | Changes links to always open in your external browser, instead of the in-app browser. |  |
 | [Remove build expired popup](#remove-build-expired-popup) | Removes the popup that appears after a while, when the app version ages. |  |
@@ -181,7 +184,8 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Sanitize share links](#sanitize-share-links) |  |  |
 | [Stories audio autoplay](#stories-audio-autoplay) |  |  |
 | [Unlock Plus benefits](#unlock-plus-benefits) | Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK |  |
-| [Unlock developer options](#unlock-developer-options) |  |  |
+| [Unlock developer options](#unlock-developer-options) | Unlocks developer option by long pressing home icon |  |
+| [Unlock employee options](#unlock-employee-options) | Unlocks all options using by employee for debugging |  |
 | [View DMs anonymously](#view-dms-anonymously) |  |  |
 | [View live anonymously](#view-live-anonymously) |  |  |
 | [View stories anonymously](#view-stories-anonymously) |  |  |

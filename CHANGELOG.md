@@ -1,3 +1,22 @@
+# [3.3.0-dev.4](https://github.com/crimera/piko/compare/v3.3.0-dev.3...v3.3.0-dev.4) (2026-05-05)
+
+
+### Bug Fixes
+
+* **Instagram:** Fix `Change like animation` patch ([a9dacb2](https://github.com/crimera/piko/commit/a9dacb2a15bc7a502d3931f0fb8ec5e13bc05d61))
+* **Instagram:** Fix flag hooks loading ([a673853](https://github.com/crimera/piko/commit/a673853a8dae600a58dad3144f11310fe4e28475))
+* **Instagram:** Override flags to fix certain issues ([07c6313](https://github.com/crimera/piko/commit/07c63138482048709618c172bfd8a7a3843d30f2))
+
+
+### Features
+
+* **Instagram:** Added `Disable double tap like` patch ([daa8474](https://github.com/crimera/piko/commit/daa84741cb05f1d7bd4af63dfe3458125a7df5c5))
+* **Instagram:** Added `Enable whitehat settings` patch ([31529bb](https://github.com/crimera/piko/commit/31529bb0a2c90a700dc99b54f9302377ca29f91e))
+* **Instagram:** Added `More options on post` patch ([19db767](https://github.com/crimera/piko/commit/19db767dbeb00d9d5cd46552ba2bd425753eef2e))
+* **Instagram:** Added `Unlock employee options` patch ([6041c06](https://github.com/crimera/piko/commit/6041c06875ba7e879f2fbd07a49f8596af1368bb))
+* **Instagram:** Added hook to override developer flags ([01e43a6](https://github.com/crimera/piko/commit/01e43a6f206af4692f3545adf8680f77f855dddc))
+* **Instagram:** Initial support for translations ([caf8ffb](https://github.com/crimera/piko/commit/caf8ffb7704ae514a3b5f98ae265878214d42ae5))
+
 # [3.3.0-dev.3](https://github.com/crimera/piko/compare/v3.3.0-dev.2...v3.3.0-dev.3) (2026-04-26)
 
 
