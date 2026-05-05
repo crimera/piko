@@ -59,10 +59,10 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
-| [Add ability to copy media link](#add-ability-to-copy-media-link) | None |  |
+| [Add ability to copy media link](#add-ability-to-copy-media-link) |  |  |
 | [Bring back twitter](#bring-back-twitter) | Bring back old twitter logo and name |  |
 | [Browse tweet object](#browse-tweet-object) | Adds an option to browse the tweet object in the share menu. |  |
-| [Change app icon](#change-app-icon) | None |  |
+| [Change app icon](#change-app-icon) |  |  |
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
 | [Clear tracking params](#clear-tracking-params) | Removes tracking parameters when sharing links |  |
 | [Control video auto scroll](#control-video-auto-scroll) | Control video auto scroll in immersive view |  |
@@ -70,47 +70,47 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Custom emoji font](#custom-emoji-font) | Customise emoji font style |  |
 | [Custom font](#custom-font) | Customise font style |  |
 | [Custom sharing domain](#custom-sharing-domain) | Allows for using domains like fxtwitter when sharing tweets/posts. |  |
-| [Customise post font size](#customise-post-font-size) | None |  |
-| [Customize Inline action Bar items](#customize-inline-action-bar-items) | None |  |
-| [Customize Navigation Bar items](#customize-navigation-bar-items) | None |  |
-| [Customize default reply sorting](#customize-default-reply-sorting) | None |  |
-| [Customize explore tabs](#customize-explore-tabs) | None |  |
-| [Customize notification tabs](#customize-notification-tabs) | None |  |
-| [Customize profile tabs](#customize-profile-tabs) | None |  |
-| [Customize search suggestions](#customize-search-suggestions) | None |  |
-| [Customize search tab items](#customize-search-tab-items) | None |  |
-| [Customize side bar items](#customize-side-bar-items) | None |  |
-| [Customize timeline top bar](#customize-timeline-top-bar) | None |  |
+| [Customise post font size](#customise-post-font-size) |  |  |
+| [Customize Inline action Bar items](#customize-inline-action-bar-items) |  |  |
+| [Customize Navigation Bar items](#customize-navigation-bar-items) |  |  |
+| [Customize default reply sorting](#customize-default-reply-sorting) |  |  |
+| [Customize explore tabs](#customize-explore-tabs) |  |  |
+| [Customize notification tabs](#customize-notification-tabs) |  |  |
+| [Customize profile tabs](#customize-profile-tabs) |  |  |
+| [Customize search suggestions](#customize-search-suggestions) |  |  |
+| [Customize search tab items](#customize-search-tab-items) |  |  |
+| [Customize side bar items](#customize-side-bar-items) |  |  |
+| [Customize timeline top bar](#customize-timeline-top-bar) |  |  |
 | [Delete from database](#delete-from-database) | Delete entries from database(cache) |  |
-| [Disable auto timeline scroll on launch](#disable-auto-timeline-scroll-on-launch) | None |  |
-| [Disable chirp font](#disable-chirp-font) | None |  |
+| [Disable auto timeline scroll on launch](#disable-auto-timeline-scroll-on-launch) |  |  |
+| [Disable chirp font](#disable-chirp-font) |  |  |
 | [Disunify xchat system](#disunify-xchat-system) | Bring back legacy features like messages and share sheet. |  |
 | [Download patch](#download-patch) | Unlocks the ability to download videos and gifs from Twitter/X |  |
 | [Dynamic color](#dynamic-color) | Replaces the default Twitter Blue with the user's Material You palette. |  |
 | [Enable PiP mode automatically](#enable-pip-mode-automatically) | Enables PiP mode when you close the app |  |
 | [Enable Undo Posts](#enable-undo-posts) | Enables ability to undo posts before posting |  |
-| [Enable debug menu for posts](#enable-debug-menu-for-posts) | None |  |
+| [Enable debug menu for posts](#enable-debug-menu-for-posts) |  |  |
 | [Enable force HD videos](#enable-force-hd-videos) | Videos will be played in highest quality always |  |
 | [Export all activities](#export-all-activities) | Makes all app activities exportable. |  |
 | [Force enable translate](#force-enable-translate) | Get translate option for all posts |  |
 | [Handle custom twitter links](#handle-custom-twitter-links) | Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. These will have to be manually enabled under the "Open by default" section in the app info! | • Custom sharing domains |
 | [Hide Banner](#hide-banner) | Hide new post banner |  |
-| [Hide Community Notes](#hide-community-notes) | None |  |
+| [Hide Community Notes](#hide-community-notes) |  |  |
 | [Hide FAB](#hide-fab) | Adds an option to hide Floating action button |  |
-| [Hide FAB Menu Buttons](#hide-fab-menu-buttons) | None |  |
-| [Hide Live Threads](#hide-live-threads) | None |  |
+| [Hide FAB Menu Buttons](#hide-fab-menu-buttons) |  |  |
+| [Hide Live Threads](#hide-live-threads) |  |  |
 | [Hide Recommended Users](#hide-recommended-users) | Hide recommended users that pops up when you follow someone |  |
 | [Hide badges from navigation bar icons](#hide-badges-from-navigation-bar-icons) | Hides notification nudges & counts from navigation bar icons |  |
-| [Hide bookmark icon in timeline](#hide-bookmark-icon-in-timeline) | None |  |
-| [Hide community badges](#hide-community-badges) | None |  |
+| [Hide bookmark icon in timeline](#hide-bookmark-icon-in-timeline) |  |  |
+| [Hide community badges](#hide-community-badges) |  |  |
 | [Hide followed by context](#hide-followed-by-context) | Hides followed by context under profile |  |
-| [Hide hidden replies](#hide-hidden-replies) | None |  |
+| [Hide hidden replies](#hide-hidden-replies) |  |  |
 | [Hide immersive player](#hide-immersive-player) | Removes swipe up for more videos in video player |  |
 | [Hide nudge button](#hide-nudge-button) | Hides follow/subscribe/follow back buttons on posts |  |
 | [Hide post metrics](#hide-post-metrics) | Hides like, reposts etc counts. |  |
 | [Hide promote button](#hide-promote-button) | Hides promote button under self posts |  |
 | [Hide recommendation items](#hide-recommendation-items) | Adds options to hide recommendation items such as "Who to follow" and "Today's news" in timeline, search, and replies. |  |
-| [Hook feature flag](#hook-feature-flag) | None |  |
+| [Hook feature flag](#hook-feature-flag) |  |  |
 | [Import/Export login token](#import-export-login-token) | Adds an feature to export and import the token of accounts. This is useful when logging in on your second device or when re-installing piko. |  |
 | [Legacy share links](#legacy-share-links) | Brings back username on post share links. Works post 11.4x.xx |  |
 | [Log server response](#log-server-response) | Log json responses received from server |  |
@@ -129,7 +129,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Show changelogs](#show-changelogs) | Shows changelogs when new a patch is installed. |  |
 | [Show poll results](#show-poll-results) | Adds an option to show poll results without voting |  |
 | [Show post source label](#show-post-source-label) | Source label will be shown only on public posts |  |
-| [Show sensitive media](#show-sensitive-media) | None |  |
+| [Show sensitive media](#show-sensitive-media) |  |  |
 
 </details>
 
@@ -149,23 +149,23 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Change like animation](#change-like-animation) | Change the animation to one from existing Rings like animations |  |
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
 | [Copy comment](#copy-comment) | Adds a button to copy comments on posts and reels. |  |
-| [Customise story ring size](#customise-story-ring-size) | None |  |
+| [Customise story ring size](#customise-story-ring-size) |  |  |
 | [Customise story timestamp](#customise-story-timestamp) | Customise the timestamp that shows when the story was posted |  |
 | [Disable Reels scrolling](#disable-reels-scrolling) | Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds. |  |
-| [Disable ads](#disable-ads) | None |  |
+| [Disable ads](#disable-ads) |  |  |
 | [Disable analytics](#disable-analytics) | Block analytics that are sent to Instagram/Facebook servers. |  |
-| [Disable comments](#disable-comments) | None |  |
+| [Disable comments](#disable-comments) |  |  |
 | [Disable discover people](#disable-discover-people) | Disables discover people section on user profile |  |
-| [Disable explore](#disable-explore) | None |  |
-| [Disable highlights](#disable-highlights) | None |  |
+| [Disable explore](#disable-explore) |  |  |
+| [Disable highlights](#disable-highlights) |  |  |
 | [Disable screenshot detection](#disable-screenshot-detection) | Disables screenshots detection in DM |  |
-| [Disable stories](#disable-stories) | None |  |
+| [Disable stories](#disable-stories) |  |  |
 | [Disable story flipping](#disable-story-flipping) | Disable automatic flipping/moving to next story |  |
-| [Disable typing status](#disable-typing-status) | None |  |
-| [Disable video autoplay](#disable-video-autoplay) | None |  |
+| [Disable typing status](#disable-typing-status) |  |  |
+| [Disable video autoplay](#disable-video-autoplay) |  |  |
 | [Download media](#download-media) | Adds ability to download posts, reels, stories and highlights |  |
 | [Follow back indicator](#follow-back-indicator) | Adds a label on the profile page, indicating whether a user is follows you back. |  |
-| [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) | None |  |
+| [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) |  |  |
 | [Hide navigation buttons](#hide-navigation-buttons) | Hides navigation bar buttons, such as the Reels and Create button. |  |
 | [Hide notes tray](#hide-notes-tray) | Hides notes tray in DM section |  |
 | [Hide reshare button](#hide-reshare-button) | Hides the reshare button from both posts and reels. |  |
@@ -178,13 +178,13 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Open links externally](#open-links-externally) | Changes links to always open in your external browser, instead of the in-app browser. |  |
 | [Remove build expired popup](#remove-build-expired-popup) | Removes the popup that appears after a while, when the app version ages. |  |
 | [Remove empty bottom space](#remove-empty-bottom-space) | Removes empty space below bottom navigation bar |  |
-| [Sanitize share links](#sanitize-share-links) | None |  |
-| [Stories audio autoplay](#stories-audio-autoplay) | None |  |
+| [Sanitize share links](#sanitize-share-links) |  |  |
+| [Stories audio autoplay](#stories-audio-autoplay) |  |  |
 | [Unlock Plus benefits](#unlock-plus-benefits) | Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK |  |
-| [Unlock developer options](#unlock-developer-options) | None |  |
-| [View DMs anonymously](#view-dms-anonymously) | None |  |
-| [View live anonymously](#view-live-anonymously) | None |  |
-| [View stories anonymously](#view-stories-anonymously) | None |  |
+| [Unlock developer options](#unlock-developer-options) |  |  |
+| [View DMs anonymously](#view-dms-anonymously) |  |  |
+| [View live anonymously](#view-live-anonymously) |  |  |
+| [View stories anonymously](#view-stories-anonymously) |  |  |
 | [View story mentions](#view-story-mentions) | Add option to view visible and hidden story mentions. |  |
 
 </details>

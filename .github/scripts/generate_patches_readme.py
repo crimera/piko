@@ -89,7 +89,8 @@ def patches_table(patches):
             opts_cell = "<br>".join(f"• {t}" for t in parts)
         else:
             opts_cell = ""
-        rows.append(f"| [{p['name']}](#{a}) | {p['description']} | {opts_cell} |")
+        desc = p.get("description") or ""
+        rows.append(f"| [{p['name']}](#{a}) | {desc} | {opts_cell} |")
     return "\n".join(rows)
 
 
