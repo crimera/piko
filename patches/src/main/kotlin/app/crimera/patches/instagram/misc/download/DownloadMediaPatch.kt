@@ -202,18 +202,26 @@ val downloadMediaPatch =
                 }
             }
             // DM media downloader.
-            GetDirectThreadMediaSaverModuleNameFingerprint.classDef.methods.first { it.returnType == "V" && it.name != "<init>" }.apply {
-                addInstructionsWithLabels(
-                    0,
-                    """
-                    move-object v1, p2
-                    invoke-static {v1}, $DOWNLOAD_DESCRIPTOR/MessageUtils;->messageDownloadCheck(Ljava/lang/Object;)Z
-                    move-result v1
-                    if-nez v1, :piko
-                    return-void
-                    """.trimIndent(),
-                    ExternalLabel("piko", getInstruction(0)),
-                )
+            GetDirectThreadMediaSaverModuleNameFingerprint.apply {
+
+                val appActivityField = classDef.fields.first { it.type == "Landroid/app/Activity;" }
+
+                classDef.methods
+                    .first { it.returnType == "V" && it.name != "<init>" }
+                    .apply {
+                        addInstructionsWithLabels(
+                            0,
+                            """
+                            iget-object v0, p1, $appActivityField
+                            move-object v1, p2
+                            invoke-static {v0, v1}, $DOWNLOAD_DESCRIPTOR/MessageUtils;->messageDownloadCheck(Landroid/content/Context;Ljava/lang/Object;)Z
+                            move-result v1
+                            if-nez v1, :piko
+                            return-void
+                            """.trimIndent(),
+                            ExternalLabel("piko", getInstruction(0)),
+                        )
+                    }
             }
 
             enableSettings("downloadMedia")
