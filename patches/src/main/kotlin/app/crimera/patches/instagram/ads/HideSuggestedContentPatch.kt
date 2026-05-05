@@ -38,6 +38,18 @@ internal object FeedItemParseFromJsonFingerprint : Fingerprint(
     },
 )
 
+internal object SuggestedItemsParseFromJsonFingerprint : Fingerprint(
+    strings =
+        listOf(
+            "clips_items",
+            "items_with_ads",
+            "media_id_to_brand_safety_severity_map",
+        ),
+    custom = { methodDef, _ ->
+        methodDef.name.lowercase().contains("parsefromjson")
+    },
+)
+
 @Suppress("unused")
 val hideSuggestedContentPatch =
     bytecodePatch(
@@ -49,24 +61,33 @@ val hideSuggestedContentPatch =
         dependsOn(settingsPatch)
         execute {
 
-            FeedItemParseFromJsonFingerprint.method.apply {
-                val strIndex = FeedItemParseFromJsonFingerprint.stringMatches[0].index
-                val moveResultObjectInstruction =
-                    instructions.last {
-                        it.opcode == Opcode.MOVE_RESULT_OBJECT &&
-                            it.location.index < strIndex
-                    }
-                val index = moveResultObjectInstruction.location.index
-                val register = moveResultObjectInstruction.registersUsed[0]
-
-                addInstructions(
-                    index + 1,
-                    """
-                    ${Constants.JSONPARSER_CHECK_DESCRIPTOR.format(register,register)}
-                    """.trimIndent(),
+            val fingerprints =
+                listOf(
+                    FeedItemParseFromJsonFingerprint,
+                    SuggestedItemsParseFromJsonFingerprint,
                 )
 
-                enableSettings("hideSuggestedContent")
+            fingerprints.forEach { fingerprint ->
+                fingerprint.apply {
+                    val strIndex = stringMatches[0].index
+                    method.apply {
+                        val moveResultObjectInstruction =
+                            instructions.last {
+                                it.opcode == Opcode.MOVE_RESULT_OBJECT &&
+                                    it.location.index < strIndex
+                            }
+                        val moveResultObjectIndex = moveResultObjectInstruction.location.index
+                        val strRegister = moveResultObjectInstruction.registersUsed[0]
+
+                        addInstructions(
+                            moveResultObjectIndex + 1,
+                            """
+                            ${Constants.JSONPARSER_CHECK_DESCRIPTOR.format(strRegister,strRegister)}
+                            """.trimIndent(),
+                        )
+                    }
+                }
             }
+            enableSettings("hideSuggestedContent")
         }
     }
