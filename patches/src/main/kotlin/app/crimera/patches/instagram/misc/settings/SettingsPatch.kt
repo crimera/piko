@@ -25,6 +25,7 @@ import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.fieldExtractor
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -61,13 +62,19 @@ val settingsPatch =
                 )
             }
 
-            instagramInitHook.fingerprint.method.addInstructions(
-                0,
-                """
-                ${SSTS_DESCRIPTOR.format("load")}
-                ${LOAD_FLAGS_DESCRIPTOR.format("load")}
-                """.trimIndent(),
-            )
+            instagramInitHook.fingerprint.method.apply {
+
+                addInstruction(
+                    0,
+                    SSTS_DESCRIPTOR.format("load"),
+                )
+
+                val firstInvokeSuperIndex = indexOfFirstInstruction(Opcode.INVOKE_SUPER)
+                addInstruction(
+                    firstInvokeSuperIndex + 1,
+                    LOAD_FLAGS_DESCRIPTOR.format("load"),
+                )
+            }
 
             // The following handles the signature check while sharing a link externally and opening a link.
             UriTrustingMethodFingerprint.classDef.methods

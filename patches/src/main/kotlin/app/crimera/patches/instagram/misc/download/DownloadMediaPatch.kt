@@ -13,6 +13,7 @@ package app.crimera.patches.instagram.misc.download
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
 import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundDataIntfEntity
 import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
+import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
@@ -52,6 +53,7 @@ val downloadMediaPatch =
             handleStoryButtonPatch,
             originalSoundDataIntfEntity,
             trackDataIntfEntity,
+            hookFlagsPatch,
         )
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 

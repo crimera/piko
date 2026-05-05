@@ -9,7 +9,7 @@
  */
 
 
-package app.morphe.extension.instagram.utils;
+package app.morphe.extension.instagram.patches;
 
 import java.util.Map;
 import java.util.HashMap;
