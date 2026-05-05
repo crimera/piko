@@ -92,8 +92,15 @@ public class ScreenBuilder {
             addPreference(category,
                     helper.switchPreference(
                             Strings.ENABLE_DEV_OPTIONS,
-                            "",
+                            Strings.ENABLE_DEV_OPTIONS_DESC,
                             Settings.DEVELOPER_OPTIONS
+                    )
+            );
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DIRECTLY_OPEN_METACONFIG,
+                            Strings.DIRECTLY_OPEN_METACONFIG_DESC,
+                            Settings.DIRECTLY_OPEN_METACONFIG
                     )
             );
             addPreference(category,

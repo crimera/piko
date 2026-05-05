@@ -21,6 +21,13 @@ public class DefaultStrings {
 
     public static String CATEGORY_DEV_OPTIONS = "Developer options";
     public static String ENABLE_DEV_OPTIONS = "Enable developer options";
+    public static String ENABLE_DEV_OPTIONS_DESC = "Unlocks developer option by long pressing home icon";
+    public static String DIRECTLY_OPEN_METACONFIG = "Directly opens MetaConfig overrides";
+    public static String DIRECTLY_OPEN_METACONFIG_DESC = "Directly opens MetaConfig overrides on long pressing home icon (needs developer options enabled)";
+    public static String ENABLE_EMP_OPTIONS = "Enable employee options";
+    public static String ENABLE_EMP_OPTIONS_DESC = "Unlocks all employee options used for testing";
+    public static String ENABLE_WHITEHAT_SETTINGS = "Enable whitehat settings";
+    public static String ENABLE_WHITEHAT_SETTINGS_DESC = "Unlocks settings used for network testing";
     public static String REMOVE_BUILD_EXPIRE_POPUP = "Remove build expire popup";
     public static String REMOVE_BUILD_EXPIRE_POPUP_DESC = "Removes the popup that appears after a while, when the app version ages";
     public static String EXPORT_DEV_OVERRIDES = "Export overrides";

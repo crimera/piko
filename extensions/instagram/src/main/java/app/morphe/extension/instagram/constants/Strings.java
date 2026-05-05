@@ -31,6 +31,13 @@ public class Strings {
 
     public static final String CATEGORY_DEV_OPTIONS = langInstance.CATEGORY_DEV_OPTIONS;
     public static final String ENABLE_DEV_OPTIONS = langInstance.ENABLE_DEV_OPTIONS;
+    public static final String ENABLE_DEV_OPTIONS_DESC = langInstance.ENABLE_DEV_OPTIONS_DESC;
+    public static final String DIRECTLY_OPEN_METACONFIG = langInstance.DIRECTLY_OPEN_METACONFIG;
+    public static final String DIRECTLY_OPEN_METACONFIG_DESC = langInstance.DIRECTLY_OPEN_METACONFIG_DESC;
+    public static final String ENABLE_EMP_OPTIONS = langInstance.ENABLE_EMP_OPTIONS;
+    public static final String ENABLE_EMP_OPTIONS_DESC = langInstance.ENABLE_EMP_OPTIONS_DESC;
+    public static final String ENABLE_WHITEHAT_SETTINGS = langInstance.ENABLE_WHITEHAT_SETTINGS;
+    public static final String ENABLE_WHITEHAT_SETTINGS_DESC = langInstance.ENABLE_WHITEHAT_SETTINGS_DESC;
     public static final String REMOVE_BUILD_EXPIRE_POPUP = langInstance.REMOVE_BUILD_EXPIRE_POPUP;
     public static final String REMOVE_BUILD_EXPIRE_POPUP_DESC = langInstance.REMOVE_BUILD_EXPIRE_POPUP_DESC;
     public static final String EXPORT_DEV_OVERRIDES = langInstance.EXPORT_DEV_OVERRIDES;

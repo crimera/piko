@@ -116,6 +116,9 @@ public class Pref {
     public static boolean enableDevOptions() {
         return SharedPref.getBooleanPref(Settings.DEVELOPER_OPTIONS);
     }
+    public static boolean directlyOpenMetaConfig() {
+        return SharedPref.getBooleanPref(Settings.DIRECTLY_OPEN_METACONFIG);
+    }
 
     public static int buildAge(int appAge) {
         return SharedPref.getBooleanPref(Settings.REMOVE_BUILD_EXPIRE_POPUP) ? 1 : appAge;
