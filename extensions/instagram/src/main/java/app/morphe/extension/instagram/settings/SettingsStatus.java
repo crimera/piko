@@ -25,8 +25,12 @@ public class SettingsStatus {
     public static void unlockEmployeeOptions() {
         unlockEmployeeOptions = true;
     }
+    public static boolean enableWhitehatSettings = false;
+    public static void enableWhitehatSettings() {
+        enableWhitehatSettings = true;
+    }
     public static boolean developerOptionsSection() {
-        return (unlockEmployeeOptions || enableDeveloperOptions || removeBuildExpirePopup);
+        return (enableWhitehatSettings || unlockEmployeeOptions || enableDeveloperOptions || removeBuildExpirePopup);
     }
 
     //Ads section.

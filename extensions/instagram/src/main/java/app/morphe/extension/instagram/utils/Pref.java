@@ -122,6 +122,9 @@ public class Pref {
     public static boolean enableEmployeeOptions() {
         return SharedPref.getBooleanPref(Settings.ENABLE_EMP_OPTIONS);
     }
+    public static boolean enableWhitehatSettings() {
+        return SharedPref.getBooleanPref(Settings.ENABLE_WHITEHAT_SETTINGS);
+    }
 
     public static int buildAge(int appAge) {
         return SharedPref.getBooleanPref(Settings.REMOVE_BUILD_EXPIRE_POPUP) ? 1 : appAge;

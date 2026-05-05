@@ -44,11 +44,20 @@ public class HookFlags {
         BOOL_FLAGS.put("79181::0", false); //ig_reels_ads_1x2_explore_halc_android::is_enabled
         BOOL_FLAGS.put("110800::0", false); //ig_android_controller_migration::use_v2_controller
     }
+
     private static void employeeOptionsFlags() {
         if(Pref.enableEmployeeOptions()){
             BOOL_FLAGS.put("28538::0", true); //ig_android_employee_options::is_enabled
         }else{
             BOOL_FLAGS.put("28538::0", false); //ig_android_employee_options::is_enabled
+        }
+    }
+
+    private static void whitehatSettingsFlags() {
+        if(Pref.enableWhitehatSettings()){
+            BOOL_FLAGS.put("115529::0", true); //whitehat_settings_android_ig::show_settings
+        }else{
+            BOOL_FLAGS.put("115529::0", false); //whitehat_settings_android_ig::show_settings
         }
     }
 

@@ -97,6 +97,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.unlockEmployeeOptions) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.ENABLE_WHITEHAT_SETTINGS,
+                            Strings.ENABLE_WHITEHAT_SETTINGS_DESC,
+                            Settings.ENABLE_WHITEHAT_SETTINGS
+                    )
+            );
+        }
         if (SettingsStatus.enableDeveloperOptions) {
             addPreference(category,
                     helper.switchPreference(
