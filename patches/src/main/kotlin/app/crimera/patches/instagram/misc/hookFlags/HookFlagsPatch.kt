@@ -60,7 +60,7 @@ val hookFlagsPatch =
                                 
                                 invoke-virtual {v0}, Ljava/lang/Boolean;->booleanValue()Z
                                 move-result v1
-                                return-object v1
+                                return v1
                                 :piko
                                 nop
                                 """.trimIndent(),
