@@ -52,6 +52,7 @@ val changeLikeAnimationPatch =
                 addInstructionsWithLabels(
                     0,
                     """
+                    sget-object p2, Ljava/lang/Boolean;->FALSE:Ljava/lang/Boolean;
                     invoke-static {p1}, $EXTENSION_CLASS_DESCRIPTOR->changeLikeAnimation(Ljava/lang/Object;)Ljava/lang/Object;
                     move-result-object v0
                     if-eqz v0, :piko
