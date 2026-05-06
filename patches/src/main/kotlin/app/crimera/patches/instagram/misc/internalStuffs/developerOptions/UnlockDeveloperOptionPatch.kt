@@ -62,6 +62,8 @@ val unlockDeveloperOptionPatch =
                             it.instructions[0].opcode == Opcode.SGET_OBJECT
                     }
 
+                val userSessionCastType = fragmentConstructor.parameters[1].type
+
                 addInstructionsWithLabels(
                     2,
                     """
@@ -74,6 +76,7 @@ val unlockDeveloperOptionPatch =
                     
                     if-eqz v$freeRegister, :not_direct_config
                     # thanks to instafel
+                    check-cast v$userSessionRegister, $userSessionCastType
                     new-instance v$freeRegister, $QE_FRAGMENT_DESCRIPTOR
                     invoke-direct {v$freeRegister}, $QE_FRAGMENT_DESCRIPTOR-><init>()V
                     
