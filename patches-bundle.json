@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-05-05T18:14:04",
-  "description": "# [3.3.0-dev.4](https://github.com/crimera/piko/compare/v3.3.0-dev.3...v3.3.0-dev.4) (2026-05-05)\n\n\n### Bug Fixes\n\n* **Instagram:** Fix `Change like animation` patch ([a9dacb2](https://github.com/crimera/piko/commit/a9dacb2a15bc7a502d3931f0fb8ec5e13bc05d61))\n* **Instagram:** Fix flag hooks loading ([a673853](https://github.com/crimera/piko/commit/a673853a8dae600a58dad3144f11310fe4e28475))\n* **Instagram:** Override flags to fix certain issues ([07c6313](https://github.com/crimera/piko/commit/07c63138482048709618c172bfd8a7a3843d30f2))\n\n\n### Features\n\n* **Instagram:** Added `Disable double tap like` patch ([daa8474](https://github.com/crimera/piko/commit/daa84741cb05f1d7bd4af63dfe3458125a7df5c5))\n* **Instagram:** Added `Enable whitehat settings` patch ([31529bb](https://github.com/crimera/piko/commit/31529bb0a2c90a700dc99b54f9302377ca29f91e))\n* **Instagram:** Added `More options on post` patch ([19db767](https://github.com/crimera/piko/commit/19db767dbeb00d9d5cd46552ba2bd425753eef2e))\n* **Instagram:** Added `Unlock employee options` patch ([6041c06](https://github.com/crimera/piko/commit/6041c06875ba7e879f2fbd07a49f8596af1368bb))\n* **Instagram:** Added hook to override developer flags ([01e43a6](https://github.com/crimera/piko/commit/01e43a6f206af4692f3545adf8680f77f855dddc))\n* **Instagram:** Initial support for translations ([caf8ffb](https://github.com/crimera/piko/commit/caf8ffb7704ae514a3b5f98ae265878214d42ae5))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.3.0-dev.4/patches-3.3.0-dev.4.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.3.0-dev.4/patches-3.3.0-dev.4.mpp.asc",
-  "version": "3.3.0-dev.4"
+  "created_at": "2026-05-06T05:41:33",
+  "description": "# [3.3.0-dev.5](https://github.com/crimera/piko/compare/v3.3.0-dev.4...v3.3.0-dev.5) (2026-05-06)\n\n\n### Bug Fixes\n\n* **Instagram:** Potential fix for A16-A17 ([b3352b4](https://github.com/crimera/piko/commit/b3352b481c0af9c59f587bceb0e1b6f50472437f))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.3.0-dev.5/patches-3.3.0-dev.5.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.3.0-dev.5/patches-3.3.0-dev.5.mpp.asc",
+  "version": "3.3.0-dev.5"
 }

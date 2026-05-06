@@ -1,3 +1,10 @@
+# [3.3.0-dev.5](https://github.com/crimera/piko/compare/v3.3.0-dev.4...v3.3.0-dev.5) (2026-05-06)
+
+
+### Bug Fixes
+
+* **Instagram:** Potential fix for A16-A17 ([b3352b4](https://github.com/crimera/piko/commit/b3352b481c0af9c59f587bceb0e1b6f50472437f))
+
 # [3.3.0-dev.4](https://github.com/crimera/piko/compare/v3.3.0-dev.3...v3.3.0-dev.4) (2026-05-05)
 
 
