@@ -1,3 +1,10 @@
+# [3.3.0-dev.6](https://github.com/crimera/piko/compare/v3.3.0-dev.5...v3.3.0-dev.6) (2026-05-06)
+
+
+### Bug Fixes
+
+* **Instagram:** Fix hooks flag (for trigger) ([a3a6c3d](https://github.com/crimera/piko/commit/a3a6c3d1b9a08f755f12fe46f3b5944e96e708e8))
+
 # [3.3.0-dev.5](https://github.com/crimera/piko/compare/v3.3.0-dev.4...v3.3.0-dev.5) (2026-05-06)
 
 

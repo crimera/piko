@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-05-06T05:41:33",
-  "description": "# [3.3.0-dev.5](https://github.com/crimera/piko/compare/v3.3.0-dev.4...v3.3.0-dev.5) (2026-05-06)\n\n\n### Bug Fixes\n\n* **Instagram:** Potential fix for A16-A17 ([b3352b4](https://github.com/crimera/piko/commit/b3352b481c0af9c59f587bceb0e1b6f50472437f))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.3.0-dev.5/patches-3.3.0-dev.5.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.3.0-dev.5/patches-3.3.0-dev.5.mpp.asc",
-  "version": "3.3.0-dev.5"
+  "created_at": "2026-05-06T17:03:29",
+  "description": "# [3.3.0-dev.6](https://github.com/crimera/piko/compare/v3.3.0-dev.5...v3.3.0-dev.6) (2026-05-06)\n\n\n### Bug Fixes\n\n* **Instagram:** Fix hooks flag (for trigger) ([a3a6c3d](https://github.com/crimera/piko/commit/a3a6c3d1b9a08f755f12fe46f3b5944e96e708e8))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.3.0-dev.6/patches-3.3.0-dev.6.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.3.0-dev.6/patches-3.3.0-dev.6.mpp.asc",
+  "version": "3.3.0-dev.6"
 }
