@@ -20,7 +20,9 @@ public class LanguageInstance {
 
         if (lang.equals("hi")) {
             return new StringsHindi();
-        }
+        }else if (lang.equals("ko")) {
+            return new StringsKorean();
+        }
 
         return new StringsEnglish(); // Default fallback
     }
