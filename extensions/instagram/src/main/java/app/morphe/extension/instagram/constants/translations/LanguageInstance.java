@@ -22,6 +22,8 @@ public class LanguageInstance {
             return new StringsHindi();
         } else if (lang.equals("ko")) {
             return new StringsKorean();
+        } else if (lang.equals("pl")) {
+            return new StringsPolish();
         }
 
         return new StringsEnglish(); // Default fallback
