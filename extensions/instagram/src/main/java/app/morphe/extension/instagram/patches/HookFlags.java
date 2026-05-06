@@ -37,11 +37,11 @@ public class HookFlags {
     }
 
     private static void adsFlags() {
-        BOOL_FLAGS.put("58206::0", false); //is_acp_enabled
-        BOOL_FLAGS.put("72396::0", false); //is_mae_exclusion_feed_enabled
-        BOOL_FLAGS.put("78046::0", false); //is_mae_exclusion_feed_enabled
-        BOOL_FLAGS.put("78046::9", false); //enable_no_invalidation_reason_for_mae_exclusion
-        BOOL_FLAGS.put("79181::0", false); //ig_reels_ads_1x2_explore_halc_android::is_enabled
+//        BOOL_FLAGS.put("58206::0", false); //is_acp_enabled
+//        BOOL_FLAGS.put("72396::0", false); //is_mae_exclusion_feed_enabled
+//        BOOL_FLAGS.put("78046::0", false); //is_mae_exclusion_feed_enabled
+//        BOOL_FLAGS.put("78046::9", false); //enable_no_invalidation_reason_for_mae_exclusion
+//        BOOL_FLAGS.put("79181::0", false); //ig_reels_ads_1x2_explore_halc_android::is_enabled
         BOOL_FLAGS.put("110800::0", false); //ig_android_controller_migration::use_v2_controller
     }
 

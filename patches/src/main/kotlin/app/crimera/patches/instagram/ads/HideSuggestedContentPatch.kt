@@ -38,18 +38,6 @@ internal object FeedItemParseFromJsonFingerprint : Fingerprint(
     },
 )
 
-internal object SuggestedItemsParseFromJsonFingerprint : Fingerprint(
-    strings =
-        listOf(
-            "clips_items",
-            "items_with_ads",
-            "media_id_to_brand_safety_severity_map",
-        ),
-    custom = { methodDef, _ ->
-        methodDef.name.lowercase().contains("parsefromjson")
-    },
-)
-
 @Suppress("unused")
 val hideSuggestedContentPatch =
     bytecodePatch(
@@ -64,7 +52,6 @@ val hideSuggestedContentPatch =
             val fingerprints =
                 listOf(
                     FeedItemParseFromJsonFingerprint,
-                    SuggestedItemsParseFromJsonFingerprint,
                 )
 
             fingerprints.forEach { fingerprint ->
