@@ -101,7 +101,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.COPY_BIO = "Salin bio";
 		this.DOWNLOAD_PROFILE_PICTURE = "Unduh foto profil";
 		this.COPIED = "Disalin";
-		this.MORE_PROFILE_OPTIONS = "Opsi profil lainnya";
+		this.MORE_PROFILE_OPTIONS = "Pilihan profil lainnya";
 		this.REMOVE_EMPTY_BOTTOM_SPACE = "Hapus ruang kosong di bagian bawah";
 		this.UNLOCK_PLUS_BENEFITS = "Buka keuntungan Plus";
 		this.UNLOCK_PLUS_BENEFITS_DESC = "Buka keuntungan langganan 'Plus' yang diperiksa secara lokal. GUNAKAN DENGAN RISIKO ANDA SENDIRI";
@@ -110,13 +110,13 @@ public class StringsIndonesian extends DefaultStrings {
 		this.CATEGORY_DOWNLOAD_MEDIA = "Unduh media";
 		this.ENABLE_DOWNLOAD = "Aktifkan unduhan";
 		this.ENABLE_DIRECT_DOWNLOAD = "Aktifkan unduhan langsung";
-		this.ENABLE_DIRECT_DOWNLOAD_DESC = "Mengunduh media yang sedang dilihat tanpa menanyakan opsi";
+		this.ENABLE_DIRECT_DOWNLOAD_DESC = "Mengunduh media yang sedang dilihat tanpa menanyakan pilihan";
 		this.DOWNLOAD_USERNAME_FOLDER = "Pisahkan media berdasarkan nama pengguna";
 		this.DOWNLOAD_USERNAME_FOLDER_DESC = "Membuat subfolder berdasarkan nama pengguna";
 		this.DOWNLOAD_CURRENT_MEDIA = "Unduh media saat ini";
 		this.DOWNLOAD_AS_IMAGE = "Unduh sebagai gambar";
 		this.DOWNLOAD_AUDIO = "Unduh audio";
-		this.DOWNLOAD_OPTIONS = "Opsi unduhan";
+		this.DOWNLOAD_OPTIONS = "Pilihan unduhan";
 		this.COPY_MEDIA_LINK = "Salin tautan media";
 		this.COPIED_MEDIA_LINK = "Tautan media disalin";
 		this.DOWNLOAD_ALL = "Unduh semua";
@@ -124,12 +124,12 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DOWNLOADED_MEDIA = "Diunduh : ";
 		this.MEDIA_EXISTS = "Media sudah ada";
 		this.DOWNLOAD_FAILED_MEDIA = "Unduhan gagal : ";
-		this.POST_OPTIONS = "Opsi postingan";
+		this.POST_OPTIONS = "Pilihan postingan";
 		this.COPY_POST_DESCRIPTION = "Salin deskripsi postingan";
 		this.COPY_POST_OWNER_USERNAME = "Salin nama pengguna pemilik postingan";
 		this.COPY_POST_OWNER_FULLNAME = "Salin nama lengkap pemilik postingan";
-		this.ENABLE_MORE_OPTIONS_ON_POST = "Aktifkan lebih banyak opsi pada postingan";
-		this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Dapatkan lebih banyak opsi dengan menekan lama postingan";
+		this.ENABLE_MORE_OPTIONS_ON_POST = "Aktifkan lebih banyak pilihan pada postingan";
+		this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Dapatkan lebih banyak pilihan dengan menekan lama postingan";
 
 		this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Sembunyikan tombol navigasi";
 		this.HIDE_NAVIGATION_FEED = "Sembunyikan tombol Beranda";
@@ -155,7 +155,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.OK = "OKE";
 		this.DELETED = "Dihapus";
 		this.PIKO_DEBUG = "Piko debug";
-		this.PIKO_DEBUG_DESC = "Menambahkan opsi debug pada beberapa komponen untuk pengujian";
+		this.PIKO_DEBUG_DESC = "Menambahkan pilihan debug pada beberapa komponen untuk pengujian";
 		this.PIKO_EXPORT_EXPERIMENT_LIST = "Ekspor daftar eksperimen";
 
 		this.OPEN_IMAGE_EXTERNALLY = "Buka gambar secara eksternal";
