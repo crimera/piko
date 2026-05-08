@@ -643,6 +643,14 @@ public class ScreenBuilder {
                             Strings.PIKO_EXPORT_EXPERIMENT_LIST
                     )
             );
+
+            addPreference(category,
+                    helper.buttonPreference(
+                            Strings.PIKO_EXPORT_EXPERIMENT_MAPPINGS,
+                            "",
+                            Strings.PIKO_EXPORT_EXPERIMENT_MAPPINGS
+                    )
+            );
         }
     }
 

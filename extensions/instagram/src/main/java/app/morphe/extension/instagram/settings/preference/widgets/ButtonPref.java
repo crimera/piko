@@ -78,7 +78,10 @@ public class ButtonPref extends Preference {
                         Block.deleteAnalyticsCacheFolder();
 
                     } else if (key.equals(Strings.PIKO_EXPORT_EXPERIMENT_LIST)) {
-                        app.morphe.extension.instagram.utils.Utils.decompileExperiments();
+                        app.morphe.extension.instagram.utils.Utils.decompileExperiments(false);
+
+                    } else if (key.equals(Strings.PIKO_EXPORT_EXPERIMENT_MAPPINGS)) {
+                        app.morphe.extension.instagram.utils.Utils.decompileExperiments(true);
 
                     }
                 } catch (Exception e) {

@@ -17,6 +17,7 @@ import android.util.Log;
 
 import java.io.File;
 
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
 
@@ -25,7 +26,7 @@ public class Utils {
     public static boolean deleteRecursive(File file) {
         try {
             if (file == null || !file.exists()) {
-                app.morphe.extension.crimera.PikoUtils.toast(Strings.FAIL_NO_FILE);
+                PikoUtils.toast(Strings.FAIL_NO_FILE);
                 return false;
             }
 
@@ -39,21 +40,29 @@ public class Utils {
             }
             return file.delete();
         } catch (RuntimeException e) {
-            app.morphe.extension.crimera.PikoUtils.logger(e);
+            PikoUtils.logger(e);
         }
         return false;
     }
 
-    public static void decompileExperiments() {
-        String fileName = app.morphe.extension.shared.Utils.getAppVersionName() + " Experiments.txt";
-        String data = new DeveloperOptions().toString();
-        boolean fileDone = app.morphe.extension.crimera.PikoUtils.pikoWriteFile(fileName, Strings.DEFAULT_PIKO_FOLDER, data, false);
-        String fileDoneTxt = "";
-        if (fileDone) {
-            fileDoneTxt = fileName + " created";
+    public static void decompileExperiments(boolean asJson) {
+        String appVersionName = app.morphe.extension.shared.Utils.getAppVersionName();
+        DeveloperOptions developerOptions = new DeveloperOptions();
+
+        String fileName = appVersionName + " Experiments";
+        boolean fileDone = false;
+        String data = "";
+        String fileDoneTxt = " failed";
+
+        if (asJson) {
+            fileName += ".json";
+            data = developerOptions.toJSONObject().toString();
         } else {
-            fileDoneTxt = fileName + " failed";
+            fileName += ".txt";
+            data = developerOptions.toString();
         }
-        app.morphe.extension.crimera.PikoUtils.toast(fileDoneTxt);
+        fileDone = PikoUtils.pikoWriteFile(fileName, Strings.DEFAULT_PIKO_FOLDER, data, false);
+        fileDoneTxt = fileDone ? " created" : fileDoneTxt;
+        PikoUtils.toast(fileName + fileDoneTxt);
     }
 }

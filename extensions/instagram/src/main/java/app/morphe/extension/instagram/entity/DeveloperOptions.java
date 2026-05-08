@@ -15,6 +15,11 @@ import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.Arrays;
+
 import app.morphe.extension.crimera.PikoUtils;
 
 public class DeveloperOptions extends Entity {
@@ -52,22 +57,38 @@ public class DeveloperOptions extends Entity {
         return null;
     }
 
+    public DeveloperOptionsItem getDeveloperOptionsItem(Object experimentItem) throws Exception {
+        Class<?> experimentItemHelperClass = this.getExperimentItemHelperClass();
 
-    private Class<?> getUniversalIdHelperClass() throws Exception {
-        return Class.forName("X.0B3D");
+        String universalName = (String) super.getField(experimentItemHelperClass, experimentItem, this.getUniversalNameFieldName());
+        long mobileConfigSpecifier = (long) super.getField(experimentItemHelperClass, experimentItem, this.getMobileConfigSpecifierFieldName());
+        String paramName = (String) super.getField(experimentItemHelperClass, experimentItem, this.getParamNameFieldName());
+
+        return new DeveloperOptionsItem(mobileConfigSpecifier, universalName, paramName);
     }
 
-    public String getUniversalId(long mobileConfigSpecifier) throws Exception {
-        Class<?> universalIdHelperClass = this.getUniversalIdHelperClass();
-        int universalId = (int) super.getMethod(universalIdHelperClass, "A00", new Class[]{long.class}, mobileConfigSpecifier);
-        return String.valueOf(universalId);
-    }
+    public JSONObject toJSONObject() {
+        JSONObject mappings = new JSONObject();
+        try {
+            List allExperiments = this.getAllExperiments();
+            for (Object item : allExperiments) {
+                DeveloperOptionsItem developerOptionsItem = this.getDeveloperOptionsItem(item);
 
-    public String getParamId(long mobileConfigSpecifier) throws Exception {
-        long shifted = mobileConfigSpecifier >>> 16;
-        boolean flag = ((mobileConfigSpecifier >>> 62) & 1L) == 1L;
-        Object paramId = flag ? (shifted & 0xffff) : (shifted & 0xfff);
-        return String.valueOf(paramId);
+                String universalId = developerOptionsItem.getUniversalId();
+                String paramId = developerOptionsItem.getParamId();
+
+                if (mappings.has(universalId)) {
+                    mappings.accumulate(universalId, paramId);
+                } else {
+                    JSONArray paramList = new JSONArray(Arrays.asList(paramId));
+                    mappings.put(universalId, paramList);
+                }
+            }
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+            PikoUtils.toast("Developer options toJSONObject failed");
+        }
+        return mappings;
     }
 
     @java.lang.Override
@@ -76,20 +97,22 @@ public class DeveloperOptions extends Entity {
         try {
             sb.append("All Experiments\n");
             sb.append("=====================\n\n");
-            Class<?> quickExperimentHelper = this.getExperimentItemHelperClass();
 
             List allExperiments = this.getAllExperiments();
             Set<String> seenUniversalNames = new HashSet<>();
 
             for (Object item : allExperiments) {
-                String universalName = (String) super.getField(quickExperimentHelper, item, this.getUniversalNameFieldName());
+                DeveloperOptionsItem developerOptionsItem = this.getDeveloperOptionsItem(item);
+
+                long mobileConfigSpecifier = developerOptionsItem.getMobileConfigSpecifier();
+                String universalName = developerOptionsItem.getUniversalName();
+                String paramName = developerOptionsItem.getParamName();
+                String configId = developerOptionsItem.getConfigId();
+
                 if (!seenUniversalNames.contains(universalName)) {
                     seenUniversalNames.add(universalName);
                     sb.append("---------------------\n").append("Universal name: ").append(universalName).append("\n\n");
                 }
-                long mobileConfigSpecifier = (long) super.getField(quickExperimentHelper, item, this.getMobileConfigSpecifierFieldName());
-                String paramName = (String) super.getField(quickExperimentHelper, item, this.getParamNameFieldName());
-                String configId = this.getUniversalId(mobileConfigSpecifier) + "::" + this.getParamId(mobileConfigSpecifier);
 
                 sb.append("Param name: ").append(paramName).append("\n");
                 sb.append("Hex id: ").append(Long.toHexString(mobileConfigSpecifier)).append("\n");

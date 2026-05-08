@@ -16,6 +16,7 @@ import java.util.HashMap;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
+import app.morphe.extension.instagram.entity.DeveloperOptionsItem;
 import app.morphe.extension.instagram.utils.Pref;
 
 public class HookFlags {
@@ -66,7 +67,8 @@ public class HookFlags {
 
     public static Boolean handleBoolFlags(long mobileConfigSpecifier) {
         try {
-            String configId = developerOptions.getUniversalId(mobileConfigSpecifier) + "::" + developerOptions.getParamId(mobileConfigSpecifier);
+            DeveloperOptionsItem developerOptionsItem = new DeveloperOptionsItem(mobileConfigSpecifier);
+            String configId = developerOptionsItem.getConfigId();
             return BOOL_FLAGS.getOrDefault(configId, null);
         } catch (Exception e) {
             PikoUtils.logger(e);

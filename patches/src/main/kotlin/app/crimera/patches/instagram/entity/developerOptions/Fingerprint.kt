@@ -10,14 +10,15 @@
 
 package app.crimera.patches.instagram.entity.developerOptions
 
-import app.crimera.patches.instagram.utils.Constants
+import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
 import app.morphe.patcher.Fingerprint
 
-internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/DeveloperOptions;"
+internal const val EXTENSION_CLASS_DESCRIPTOR = "$ENTITY_CLASS/DeveloperOptions;"
+internal const val ITEM_CLASS_DESCRIPTOR = "$ENTITY_CLASS/DeveloperOptionsItem;"
 
 internal object GetUniversalIdHelperClassExtension : Fingerprint(
     name = "getUniversalIdHelperClass",
-    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    definingClass = ITEM_CLASS_DESCRIPTOR,
 )
 
 internal object GetQuickExperimentHelperClassExtension : Fingerprint(

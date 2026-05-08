@@ -165,6 +165,7 @@ public class Strings {
     public static final String PIKO_DEBUG = langInstance.PIKO_DEBUG;
     public static final String PIKO_DEBUG_DESC = langInstance.PIKO_DEBUG_DESC;
     public static final String PIKO_EXPORT_EXPERIMENT_LIST = langInstance.PIKO_EXPORT_EXPERIMENT_LIST;
+    public static String PIKO_EXPORT_EXPERIMENT_MAPPINGS = langInstance.PIKO_EXPORT_EXPERIMENT_MAPPINGS;
 
     public static final String OPEN_IMAGE_EXTERNALLY = langInstance.OPEN_IMAGE_EXTERNALLY;
     public static final String OPEN_VIDEO_EXTERNALLY = langInstance.OPEN_VIDEO_EXTERNALLY;
