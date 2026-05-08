@@ -27,8 +27,8 @@ public class StringsPolish extends DefaultStrings {
         this.DIRECTLY_OPEN_METACONFIG_DESC = "Otwiera nadpisania MetaConfig po przytrzymaniu ikony strony głównej (wymaga włączonych opcji programisty)";
         this.ENABLE_EMP_OPTIONS = "Włącz opcje pracownicze";
         this.ENABLE_EMP_OPTIONS_DESC = "Odblokowuje wszystkie opcje pracownicze używane do testów";
-        this.ENABLE_WHITEHAT_SETTINGS = "Włącz ustawienia whitehat";
-        this.ENABLE_WHITEHAT_SETTINGS_DESC = "Odblokowuje ustawienia używane do testowania sieci";
+        this.ALLOW_USER_NETWORK_CERTIFICATE = "Włącz ustawienia whitehat";
+        this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "Odblokowuje ustawienia używane do testowania sieci";
         this.REMOVE_BUILD_EXPIRE_POPUP = "Usuń komunikat o wygasaniu wersji";
         this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Usuwa powiadomienie, które pojawia się, gdy zainstalowana wersja aplikacji jest zbyt stara";
         this.EXPORT_DEV_OVERRIDES = "Eksportuj nadpisania";

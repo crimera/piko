@@ -36,8 +36,8 @@ public class Strings {
     public static final String DIRECTLY_OPEN_METACONFIG_DESC = langInstance.DIRECTLY_OPEN_METACONFIG_DESC;
     public static final String ENABLE_EMP_OPTIONS = langInstance.ENABLE_EMP_OPTIONS;
     public static final String ENABLE_EMP_OPTIONS_DESC = langInstance.ENABLE_EMP_OPTIONS_DESC;
-    public static final String ENABLE_WHITEHAT_SETTINGS = langInstance.ENABLE_WHITEHAT_SETTINGS;
-    public static final String ENABLE_WHITEHAT_SETTINGS_DESC = langInstance.ENABLE_WHITEHAT_SETTINGS_DESC;
+    public static final String ALLOW_USER_NETWORK_CERTIFICATE = langInstance.ALLOW_USER_NETWORK_CERTIFICATE;
+    public static final String ALLOW_USER_NETWORK_CERTIFICATE_DESC = langInstance.ALLOW_USER_NETWORK_CERTIFICATE_DESC;
     public static final String REMOVE_BUILD_EXPIRE_POPUP = langInstance.REMOVE_BUILD_EXPIRE_POPUP;
     public static final String REMOVE_BUILD_EXPIRE_POPUP_DESC = langInstance.REMOVE_BUILD_EXPIRE_POPUP_DESC;
     public static final String EXPORT_DEV_OVERRIDES = langInstance.EXPORT_DEV_OVERRIDES;

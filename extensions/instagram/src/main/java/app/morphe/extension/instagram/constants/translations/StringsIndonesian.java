@@ -27,8 +27,8 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DIRECTLY_OPEN_METACONFIG_DESC = "Langsung membuka penggantian MetaConfig dengan menekan lama ikon beranda (pilihan pengembang harus diaktifkan)";
 		this.ENABLE_EMP_OPTIONS = "Aktifkan pilihan karyawan";
 		this.ENABLE_EMP_OPTIONS_DESC = "Membuka semua pilihan karyawan yang digunakan untuk pengujian";
-		this.ENABLE_WHITEHAT_SETTINGS = "Aktifkan pengaturan whitehat";
-		this.ENABLE_WHITEHAT_SETTINGS_DESC = "Membuka pengaturan yang digunakan untuk pengujian jaringan";
+		this.ALLOW_USER_NETWORK_CERTIFICATE = "Aktifkan pengaturan whitehat";
+		this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "Membuka pengaturan yang digunakan untuk pengujian jaringan";
 		this.REMOVE_BUILD_EXPIRE_POPUP = "Hapus popup build kedaluwarsa";
 		this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Menghapus popup yang muncul setelah beberapa saat, ketika versi aplikasi menua";
 		this.EXPORT_DEV_OVERRIDES = "Ekspor override";

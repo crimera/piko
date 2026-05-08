@@ -129,8 +129,8 @@ public class Pref {
     public static boolean enableEmployeeOptions() {
         return SharedPref.getBooleanPref(Settings.ENABLE_EMP_OPTIONS);
     }
-    public static boolean enableWhitehatSettings() {
-        return SharedPref.getBooleanPref(Settings.ENABLE_WHITEHAT_SETTINGS);
+    public static boolean allowUserNetworkCertificate() {
+        return SharedPref.getBooleanPref(Settings.ALLOW_USER_NETWORK_CERTIFICATE);
     }
 
     public static int buildAge(int appAge) {

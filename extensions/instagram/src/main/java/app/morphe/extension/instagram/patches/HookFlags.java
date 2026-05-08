@@ -54,14 +54,6 @@ public class HookFlags {
         }
     }
 
-    private static void whitehatSettingsFlags() {
-        if(Pref.enableWhitehatSettings()){
-            BOOL_FLAGS.put("115529::0", true); //whitehat_settings_android_ig::show_settings
-        }else{
-            BOOL_FLAGS.put("115529::0", false); //whitehat_settings_android_ig::show_settings
-        }
-    }
-
     public static void load() {
     }
 

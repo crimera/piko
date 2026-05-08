@@ -100,9 +100,9 @@ public class ScreenBuilder {
         if (SettingsStatus.unlockEmployeeOptions) {
             addPreference(category,
                     helper.switchPreference(
-                            Strings.ENABLE_WHITEHAT_SETTINGS,
-                            Strings.ENABLE_WHITEHAT_SETTINGS_DESC,
-                            Settings.ENABLE_WHITEHAT_SETTINGS
+                            Strings.ALLOW_USER_NETWORK_CERTIFICATE,
+                            Strings.ALLOW_USER_NETWORK_CERTIFICATE_DESC,
+                            Settings.ALLOW_USER_NETWORK_CERTIFICATE
                     )
             );
         }

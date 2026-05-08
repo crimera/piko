@@ -25,12 +25,12 @@ public class SettingsStatus {
     public static void unlockEmployeeOptions() {
         unlockEmployeeOptions = true;
     }
-    public static boolean enableWhitehatSettings = false;
-    public static void enableWhitehatSettings() {
-        enableWhitehatSettings = true;
+    public static boolean allowUserNetworkCertificate = false;
+    public static void allowUserNetworkCertificate() {
+        allowUserNetworkCertificate = true;
     }
     public static boolean developerOptionsSection() {
-        return (enableWhitehatSettings || unlockEmployeeOptions || enableDeveloperOptions || removeBuildExpirePopup);
+        return (allowUserNetworkCertificate || unlockEmployeeOptions || enableDeveloperOptions || removeBuildExpirePopup);
     }
 
     //Ads section.

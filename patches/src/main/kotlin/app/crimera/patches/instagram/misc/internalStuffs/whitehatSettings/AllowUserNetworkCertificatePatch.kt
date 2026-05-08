@@ -13,15 +13,22 @@ package app.crimera.patches.instagram.misc.internalStuffs.whitehatSettings
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.addFlags
+import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
 
+internal object AllowUserCertificateCheckFingerprint : Fingerprint(
+    returnType = "Z",
+    strings = listOf("debug_allow_user_certs_ttl", "debug_allow_user_certs"),
+)
+
 @Suppress("unused")
-val enableWhitehatSettingsPatch =
+val allowUserNetworkCertificatePatch =
     bytecodePatch(
-        name = "Enable whitehat settings",
-        description = "Unlocks settings used for network testing",
+        name = "Allow user network certificate",
+        description = "Allows user network certificate for whitehat testing",
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
@@ -31,7 +38,14 @@ val enableWhitehatSettingsPatch =
         )
         execute {
 
-            addFlags("whitehatSettingsFlags")
-            enableSettings("enableWhitehatSettings")
+            AllowUserCertificateCheckFingerprint.method.addInstructions(
+                0,
+                """
+                 $PREF_CALL_DESCRIPTOR->allowUserNetworkCertificate()Z
+                move-result v0
+                return v0
+                """.trimIndent(),
+            )
+            enableSettings("allowUserNetworkCertificate")
         }
     }

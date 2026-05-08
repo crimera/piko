@@ -27,8 +27,8 @@ public class StringsKorean extends DefaultStrings {
         this.DIRECTLY_OPEN_METACONFIG_DESC = "홈 아이콘을 길게 탭하였을 경우에 MetaConfig 재정의를 바로 엽니다 (개발자 옵션 활성화 필요)";
         this.ENABLE_EMP_OPTIONS = "직원 옵션 활성화";
         this.ENABLE_EMP_OPTIONS_DESC = "테스트에 사용되는 모든 직원 옵션을 활성화합니다";
-        this.ENABLE_WHITEHAT_SETTINGS = "화이트햇 설정 활성화";
-        this.ENABLE_WHITEHAT_SETTINGS_DESC = "네트워크 테스트에 사용되는 설정을 활성화합니다";
+        this.ALLOW_USER_NETWORK_CERTIFICATE = "화이트햇 설정 활성화";
+        this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "네트워크 테스트에 사용되는 설정을 활성화합니다";
         this.REMOVE_BUILD_EXPIRE_POPUP = "빌드 만료 팝업 제거";
         this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "앱 버전이 오래되었을 경우에 일정 시간이 지나면 표시되는 팝업을 제거합니다";
         this.EXPORT_DEV_OVERRIDES = "재정의 내보내기";
