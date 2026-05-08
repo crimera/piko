@@ -16,6 +16,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
+import android.animation.ObjectAnimator;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.entity.Entity;
@@ -80,5 +81,15 @@ public class InstagramButton extends FrameLayout {
         );
         params.setMargins(left, top, right, bottom);
         this.igdsButton.setLayoutParams(params);
+    }
+
+    public void startPulseAnimation() {
+        IgdsButton button = getIgdsButton();
+        ObjectAnimator objectAnimatorOfFloat = ObjectAnimator.ofFloat(button, "alpha", 0.6f, 1.0f);
+        objectAnimatorOfFloat.setDuration(1000L);
+        objectAnimatorOfFloat.setRepeatCount(-1);
+        objectAnimatorOfFloat.setRepeatMode(2);
+        objectAnimatorOfFloat.start();
+
     }
 }

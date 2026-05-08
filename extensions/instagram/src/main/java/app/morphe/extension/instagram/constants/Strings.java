@@ -178,4 +178,8 @@ public class Strings {
     public static final String DEFAULT = langInstance.DEFAULT;
     public static final String ARR_DETAILED_TIMESTAMP = langInstance.ARR_DETAILED_TIMESTAMP;
     public static final String ARR_TIME_LEFT = langInstance.ARR_TIME_LEFT;
+
+    public static String WELCOME_TITLE = langInstance.WELCOME_TITLE;
+    public static String WELCOME_MESSAGE = langInstance.WELCOME_MESSAGE;
+    public static String GOTO_PIKO_SETTINGS = langInstance.GOTO_PIKO_SETTINGS;
 }

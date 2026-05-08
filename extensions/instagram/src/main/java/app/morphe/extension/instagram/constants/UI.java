@@ -19,9 +19,10 @@ import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-
 import java.util.ArrayList;
 
+import app.morphe.extension.instagram.utils.Pref;
+import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.entity.InstagramButton;
 import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
@@ -54,6 +55,8 @@ public class UI {
     }
 
     public static void pikoSettingsButton(ViewGroup viewGroup) throws Exception {
+        boolean isFirstTime = Pref.firstTimePiko();
+
         Context context = viewGroup.getContext();
         InstagramButton button = new InstagramButton(context);
         button.setText(Strings.PIKO_SETTINGS_TITLE);
@@ -64,6 +67,10 @@ public class UI {
         button.setMargins(marginPx, marginPx, marginPx, marginPx);
 
         viewGroup.addView(button.getIgdsButton());
+        if(isFirstTime){
+            button.startPulseAnimation();
+            Pref.setFirstTimePiko(false);
+        }
     }
 
     public static void restartDialogBox(Context context) {
@@ -85,7 +92,7 @@ public class UI {
 
                     }
                 } catch (Exception e) {
-                    Logger.printException(() -> "Error at downloadDialogBox", e);
+                    Logger.printException(() -> "Error at restartDialogBox", e);
                     Utils.showToastShort(e.getMessage());
                 }
             }
@@ -100,4 +107,36 @@ public class UI {
         dlg.show();
     }
 
+    public static void welcomeDialogBox(Context context) {
+        InstagramDialogBox dialog = new InstagramDialogBox(context);
+
+        ArrayList<String> options = new ArrayList<>();
+        options.add(Strings.GOTO_PIKO_SETTINGS);
+        CharSequence[] items = options.toArray(new CharSequence[0]);
+
+        dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface d, int which) {
+                try {
+                    // Doing like this because options are dynamic.
+                    String selectedOption = options.get(which);
+
+                    if (selectedOption.equals(Strings.GOTO_PIKO_SETTINGS)) {
+                        ActivityHook.openLink("instagram://profile");
+                    }
+                } catch (Exception e) {
+                    Logger.printException(() -> "Error at welcomeDialogBox", e);
+                    Utils.showToastShort(e.getMessage());
+                }
+            }
+        });
+
+        dialog.setTitle(Strings.WELCOME_TITLE);
+        dialog.setMessage(Strings.WELCOME_MESSAGE);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+
+        Dialog dlg = dialog.getDialog();
+        dlg.show();
+    }
 }

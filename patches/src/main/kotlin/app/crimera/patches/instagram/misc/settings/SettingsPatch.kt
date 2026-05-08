@@ -32,6 +32,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
 @Suppress("unused")
@@ -99,6 +100,24 @@ val settingsPatch =
 
                 val firstIGetObject = getInstruction(indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT))
                 SignatureCheckExtensionFingerprint.changeFirstString(firstIGetObject.fieldExtractor().name)
+            }
+
+            // For welcome message.
+            MainFeedFragmentOnCreateFingerprint.apply {
+                val strIndex = stringMatches[0].index
+
+                method.apply {
+                    val contextIndex = indexOfFirstInstruction(strIndex, Opcode.MOVE_RESULT_OBJECT)
+                    val contextInstruction = getInstruction(contextIndex)
+                    val contextRegister = contextInstruction.registersUsed[0]
+
+                    addInstruction(
+                        contextIndex + 1,
+                        """
+                        invoke-static{v$contextRegister}, $PATCHES_DESCRIPTOR/WelcomeMessage;->openWelcomeMessage(Landroid/content/Context;)V
+                        """.trimIndent(),
+                    )
+                }
             }
 
             addFlags("contactPermissionConsentFlags")

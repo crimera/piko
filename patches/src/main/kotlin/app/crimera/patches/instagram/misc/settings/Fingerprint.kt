@@ -39,3 +39,8 @@ internal object UriTrustingMethodFingerprint : Fingerprint(
 internal object AppIdentityToStringFingerprint : Fingerprint(
     strings = listOf("AppIdentity{uid=", ", packageNames=", ", sha2=", ", version="),
 )
+
+internal object MainFeedFragmentOnCreateFingerprint : Fingerprint(
+    name = "onCreate",
+    strings = listOf("MainFeedFragment.onCreate"),
+)

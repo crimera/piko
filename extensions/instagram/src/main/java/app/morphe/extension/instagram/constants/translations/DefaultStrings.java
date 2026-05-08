@@ -169,4 +169,9 @@ public class DefaultStrings {
     public static String DEFAULT = "Default";
     public static String ARR_DETAILED_TIMESTAMP = "Detailed timestamp";
     public static String ARR_TIME_LEFT = "Time left";
+
+    public static String WELCOME_TITLE = "Welcome to Piko";
+    public static String WELCOME_MESSAGE = "To improve your experience with Piko, please vist Piko settings and adjust your preference";
+    public static String GOTO_PIKO_SETTINGS = "Goto Piko settings";
+
 }

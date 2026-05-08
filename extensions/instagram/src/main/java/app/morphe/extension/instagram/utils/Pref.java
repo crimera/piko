@@ -20,6 +20,13 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.PIKO_DEBUG);
     }
 
+    public static boolean firstTimePiko() {
+        return SharedPref.getBooleanPref(Settings.FIRST_TIME_PIKO);
+    }
+    public static boolean setFirstTimePiko(boolean bool) {
+        return SharedPref.setBooleanPref(Settings.FIRST_TIME_PIKO.key,bool);
+    }
+
     public static boolean unlockPlusBenefits() {
         return SharedPref.getBooleanPref(Settings.UNLOCK_PLUS_BENEFITS);
     }

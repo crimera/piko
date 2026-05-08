@@ -15,6 +15,8 @@ import app.morphe.extension.crimera.settings.StringSetting;
 
 public class Settings {
     public static final BooleanSetting PIKO_DEBUG = new BooleanSetting("piko_debug", false);
+    // It should be true always. It will be handled upon opening the piko settings for the first time.
+    public static final BooleanSetting FIRST_TIME_PIKO = new BooleanSetting("first_time_piko", true);
 
     public static final BooleanSetting DISABLE_ADS = new BooleanSetting("disable_ads", true);
     public static final BooleanSetting OPEN_LINKS_EXTERNALLY = new BooleanSetting("open_links_externally", true);
