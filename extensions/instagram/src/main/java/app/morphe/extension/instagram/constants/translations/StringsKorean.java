@@ -27,13 +27,14 @@ public class StringsKorean extends DefaultStrings {
         this.DIRECTLY_OPEN_METACONFIG_DESC = "홈 아이콘을 길게 탭하였을 경우에 MetaConfig 재정의를 바로 엽니다 (개발자 옵션 활성화 필요)";
         this.ENABLE_EMP_OPTIONS = "직원 옵션 활성화";
         this.ENABLE_EMP_OPTIONS_DESC = "테스트에 사용되는 모든 직원 옵션을 활성화합니다";
-        this.ALLOW_USER_NETWORK_CERTIFICATE = "화이트햇 설정 활성화";
-        this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "네트워크 테스트에 사용되는 설정을 활성화합니다";
+        this.ALLOW_USER_NETWORK_CERTIFICATE = "사용자 네트워크 인증서 허용";
+        this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "화이트햇 테스트를 위해 사용자 네트워크 인증서를 허용합니다";
         this.REMOVE_BUILD_EXPIRE_POPUP = "빌드 만료 팝업 제거";
         this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "앱 버전이 오래되었을 경우에 일정 시간이 지나면 표시되는 팝업을 제거합니다";
         this.EXPORT_DEV_OVERRIDES = "재정의 내보내기";
         this.IMPORT_DEV_OVERRIDES = "재정의 가져오기";
         this.IMPORT_ID_MAPPING = "매핑 파일 가져오기";
+        this.DOWNLOAD_ID_MAPPING = "매핑 파일 다운로드";
 
         this.CATEGORY_LINKS = "링크";
         this.OPEN_LINKS_EXTERNALLY = "외부 브라우저 사용";
@@ -41,11 +42,11 @@ public class StringsKorean extends DefaultStrings {
         this.SANITIZE_SHARE_LINKS = "공유 링크 정리";
 
         this.CATEGORY_GHOST = "고스트 모드";
-        this.VIEW_STORIES_ANONYMOUSLY = "스토리 익명으로 보기";
-        this.VIEW_LIVE_ANONYMOUSLY = "라이브 익명으로 보기";
+        this.VIEW_STORIES_ANONYMOUSLY = "스토리 몰래보기";
+        this.VIEW_LIVE_ANONYMOUSLY = "라이브 몰래보기";
         this.DISABLE_TYPING_STATUS = "입력 중 상태 비활성화";
         this.DISABLE_SCREENSHOT_DETECTION = "스크린샷 감지 비활성화";
-        this.VIEW_DM_ANONYMOUSLY = "메시지 익명으로 보기";
+        this.VIEW_DM_ANONYMOUSLY = "메시지 몰래보기";
 
         this.CATEGORY_DISTRACTION_FREE = "방해 요소 제거";
         this.DISABLE_STORIES = "스토리 비활성화";
@@ -128,8 +129,8 @@ public class StringsKorean extends DefaultStrings {
         this.COPY_POST_DESCRIPTION = "게시물 설명 복사";
         this.COPY_POST_OWNER_USERNAME = "작성자 사용자 이름 복사";
         this.COPY_POST_OWNER_FULLNAME = "작성자 이름 복사";
-        this.ENABLE_MORE_OPTIONS_ON_POST = "게시물 추가 옵션 활성화";
-        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "게시물을 길게 탭하였을 경우에 추가 옵션을 표시합니다";
+        this.ENABLE_MORE_OPTIONS_ON_POST = "게시물 옵션 더보기 활성화";
+        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "게시물을 길게 탭하였을 경우에 옵션 더보기를 표시합니다";
 
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "하단바 버튼 숨기기";
         this.HIDE_NAVIGATION_FEED = "피드 버튼 숨기기";
@@ -156,6 +157,7 @@ public class StringsKorean extends DefaultStrings {
         this.PIKO_DEBUG = "Piko 디버그";
         this.PIKO_DEBUG_DESC = "일부 구성요소에 테스트용 디버그 옵션을 추가합니다";
         this.PIKO_EXPORT_EXPERIMENT_LIST = "실험 목록 내보내기";
+        this.PIKO_EXPORT_EXPERIMENT_MAPPINGS = "실험 매핑 내보내기";
 
         this.OPEN_IMAGE_EXTERNALLY = "이미지를 외부 앱으로 열기";
         this.OPEN_VIDEO_EXTERNALLY = "동영상을 외부 앱으로 열기";
@@ -169,5 +171,10 @@ public class StringsKorean extends DefaultStrings {
         this.DEFAULT = "기본";
         this.ARR_DETAILED_TIMESTAMP = "상세 시간";
         this.ARR_TIME_LEFT = "남은 시간";
+        
+        this.WELCOME_TITLE = "Piko에 오신 것을 환영합니다";
+        this.WELCOME_MESSAGE = "Piko 사용 경험을 개선하려면 Piko 설정으로 이동하여 원하는 대로 설정해 주세요";
+        this.GOTO_PIKO_SETTINGS = "Piko 설정으로 이동";
+        this.NO_INTERNET = "인터넷에 연결해 주세요";
     }
 }
