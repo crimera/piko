@@ -1,5 +1,5 @@
 {
-  "version": "3.3.0-dev.6",
+  "version": "3.3.0-dev.7",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -52,6 +52,34 @@
         "ResourcePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Allow user network certificate",
+      "description": "Allows user network certificate for whitehat testing",
+      "default": true,
+      "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
@@ -1914,34 +1942,6 @@
             },
             {
               "version": "11.81.0-release.0",
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Enable whitehat settings",
-      "description": "Unlocks settings used for network testing",
-      "default": true,
-      "dependencies": [
-        "BytecodePatch",
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.instagram.android",
-          "name": "Instagram",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#FC483C",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
               "description": null

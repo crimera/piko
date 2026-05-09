@@ -47,7 +47,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.3.0-dev.6](https://github.com/crimera/piko/releases/tag/v3.3.0-dev.6)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;117 patches total
+> **[v3.3.0-dev.7](https://github.com/crimera/piko/releases/tag/v3.3.0-dev.7)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;117 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
 <br>
@@ -145,6 +145,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
 | [Add settings](#add-settings) | Adds settings to control preferences are patching |  |
+| [Allow user network certificate](#allow-user-network-certificate) | Allows user network certificate for whitehat testing |  |
 | [Amoled theme](#amoled-theme) | Replaces Instagram's dark-mode background greys with pure black for AMOLED displays. |  |
 | [Change like animation](#change-like-animation) | Change the animation to one from existing Rings like animations |  |
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
@@ -165,7 +166,6 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Disable typing status](#disable-typing-status) |  |  |
 | [Disable video autoplay](#disable-video-autoplay) |  |  |
 | [Download media](#download-media) | Adds ability to download posts, reels, stories and highlights |  |
-| [Enable whitehat settings](#enable-whitehat-settings) | Unlocks settings used for network testing |  |
 | [Follow back indicator](#follow-back-indicator) | Adds a label on the profile page, indicating whether a user is follows you back. |  |
 | [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) |  |  |
 | [Hide navigation buttons](#hide-navigation-buttons) | Hides navigation bar buttons, such as the Reels and Create button. |  |

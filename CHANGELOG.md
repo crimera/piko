@@ -1,3 +1,14 @@
+# [3.3.0-dev.7](https://github.com/crimera/piko/compare/v3.3.0-dev.6...v3.3.0-dev.7) (2026-05-09)
+
+
+### Features
+
+* **Instagram:** Added ability to download mappings ([ee843af](https://github.com/crimera/piko/commit/ee843af511c656e3a6ce4fa86102459ff80392e0))
+* **Instagram:** Added one time welcome message on launch ([6d03daa](https://github.com/crimera/piko/commit/6d03daa1dba71482d373f726f67d359e8958dfcb))
+* **Translations-Instagram:** Added `Indonesian` translations ([4a77dcb](https://github.com/crimera/piko/commit/4a77dcb64b3747b04535999b0809908f93cc39d6))
+* **Translations-Instagram:** Added `Polish` translation ([#1089](https://github.com/crimera/piko/issues/1089)) ([99ccf20](https://github.com/crimera/piko/commit/99ccf20e3f88d39be9c4ea1b2d248479bfe790ba))
+* **Translations-Instagram:** Added `Russian` translations ([b8b951b](https://github.com/crimera/piko/commit/b8b951b14267aaafb8193c65553dd6ea3cdbce3f))
+
 # [3.3.0-dev.6](https://github.com/crimera/piko/compare/v3.3.0-dev.5...v3.3.0-dev.6) (2026-05-06)
 
 
