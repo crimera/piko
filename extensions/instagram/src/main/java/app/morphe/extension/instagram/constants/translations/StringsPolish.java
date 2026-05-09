@@ -27,13 +27,14 @@ public class StringsPolish extends DefaultStrings {
         this.DIRECTLY_OPEN_METACONFIG_DESC = "Otwiera nadpisania MetaConfig po przytrzymaniu ikony strony głównej (wymaga włączonych opcji programisty)";
         this.ENABLE_EMP_OPTIONS = "Włącz opcje pracownicze";
         this.ENABLE_EMP_OPTIONS_DESC = "Odblokowuje wszystkie opcje pracownicze używane do testów";
-        this.ALLOW_USER_NETWORK_CERTIFICATE = "Włącz ustawienia whitehat";
-        this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "Odblokowuje ustawienia używane do testowania sieci";
+        this.ALLOW_USER_NETWORK_CERTIFICATE = "Zezwalaj na certyfikaty użytkownika";
+        this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "Pozwala aplikacji ufać certyfikatom sieciowym zainstalowanym przez użytkownika (do analizy ruchu i testów whitehat)";
         this.REMOVE_BUILD_EXPIRE_POPUP = "Usuń komunikat o wygasaniu wersji";
         this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Usuwa powiadomienie, które pojawia się, gdy zainstalowana wersja aplikacji jest zbyt stara";
         this.EXPORT_DEV_OVERRIDES = "Eksportuj nadpisania";
         this.IMPORT_DEV_OVERRIDES = "Importuj nadpisania";
         this.IMPORT_ID_MAPPING = "Importuj pliki mapowania";
+        this.DOWNLOAD_ID_MAPPING = "Pobierz plik mapowania";
 
         this.CATEGORY_LINKS = "Linki";
         this.OPEN_LINKS_EXTERNALLY = "Otwieraj linki zewnętrznie";
@@ -156,6 +157,7 @@ public class StringsPolish extends DefaultStrings {
         this.PIKO_DEBUG = "Debugowanie Piko";
         this.PIKO_DEBUG_DESC = "Dodaje opcje debugowania do niektórych komponentów (do testów)";
         this.PIKO_EXPORT_EXPERIMENT_LIST = "Eksportuj listę eksperymentów";
+        this.PIKO_EXPORT_EXPERIMENT_MAPPINGS = "Eksportuj mapowania eksperymentów";
 
         this.OPEN_IMAGE_EXTERNALLY = "Otwórz obraz zewnętrznie";
         this.OPEN_VIDEO_EXTERNALLY = "Otwórz film zewnętrznie";
@@ -169,5 +171,10 @@ public class StringsPolish extends DefaultStrings {
         this.DEFAULT = "Domyślna";
         this.ARR_DETAILED_TIMESTAMP = "Szczegółowa data";
         this.ARR_TIME_LEFT = "Pozostały czas";
+
+        this.WELCOME_TITLE = "Witaj w Piko";
+        this.WELCOME_MESSAGE = "Aby wyciągnąć z Piko jak najwięcej, zajrzyj do ustawień i dostosuj je pod siebie";
+        this.GOTO_PIKO_SETTINGS = "Przejdź do ustawień Piko";
+        this.NO_INTERNET = "Brak połączenia z internetem";        
     }
 }
