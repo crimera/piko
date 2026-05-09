@@ -23,10 +23,13 @@ public class LanguageInstance {
         } else if (lang.equals("ko")) {
             return new StringsKorean();
         } else if (lang.equals("in")) {
-			      return new StringsIndonesian();
+			return new StringsIndonesian();
         } else if (lang.equals("pl")) {
             return new StringsPolish();
+        } else if (lang.equals("ru")) {
+            return new StringsRussian();
         }
+
 
         return new StringsEnglish(); // Default fallback
     }
