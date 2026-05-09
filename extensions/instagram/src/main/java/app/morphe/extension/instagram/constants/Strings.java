@@ -43,6 +43,7 @@ public class Strings {
     public static final String EXPORT_DEV_OVERRIDES = langInstance.EXPORT_DEV_OVERRIDES;
     public static final String IMPORT_DEV_OVERRIDES = langInstance.IMPORT_DEV_OVERRIDES;
     public static final String IMPORT_ID_MAPPING = langInstance.IMPORT_ID_MAPPING;
+    public static final String DOWNLOAD_ID_MAPPING = langInstance.DOWNLOAD_ID_MAPPING;
 
     public static final String CATEGORY_LINKS = langInstance.CATEGORY_LINKS;
     public static final String OPEN_LINKS_EXTERNALLY = langInstance.OPEN_LINKS_EXTERNALLY;
@@ -183,4 +184,5 @@ public class Strings {
     public static String WELCOME_TITLE = langInstance.WELCOME_TITLE;
     public static String WELCOME_MESSAGE = langInstance.WELCOME_MESSAGE;
     public static String GOTO_PIKO_SETTINGS = langInstance.GOTO_PIKO_SETTINGS;
+    public static String NO_INTERNET = langInstance.NO_INTERNET;
 }

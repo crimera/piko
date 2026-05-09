@@ -142,6 +142,13 @@ public class ScreenBuilder {
                             Strings.IMPORT_ID_MAPPING
                     )
             );
+            addPreference(category,
+                    helper.buttonPreference(
+                            Strings.DOWNLOAD_ID_MAPPING,
+                            "",
+                            Strings.DOWNLOAD_ID_MAPPING
+                    )
+            );
         }
     }
 

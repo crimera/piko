@@ -27,6 +27,7 @@ import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.patches.Block;
+import app.morphe.extension.instagram.patches.download.DownloadMapping;
 
 public class ButtonPref extends Preference {
     private final Context context;
@@ -82,6 +83,9 @@ public class ButtonPref extends Preference {
 
                     } else if (key.equals(Strings.PIKO_EXPORT_EXPERIMENT_MAPPINGS)) {
                         app.morphe.extension.instagram.utils.Utils.decompileExperiments(true);
+
+                    } else if (key.equals(Strings.DOWNLOAD_ID_MAPPING)) {
+                        DownloadMapping.downloadMapping();
 
                     }
                 } catch (Exception e) {

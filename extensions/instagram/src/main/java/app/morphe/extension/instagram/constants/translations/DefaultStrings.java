@@ -33,6 +33,7 @@ public class DefaultStrings {
     public static String EXPORT_DEV_OVERRIDES = "Export overrides";
     public static String IMPORT_DEV_OVERRIDES = "Import overrides";
     public static String IMPORT_ID_MAPPING = "Import mapping files";
+    public static String DOWNLOAD_ID_MAPPING = "Download mapping file";
 
     public static String CATEGORY_LINKS = "Links";
     public static String OPEN_LINKS_EXTERNALLY = "Open links externally";
@@ -174,5 +175,6 @@ public class DefaultStrings {
     public static String WELCOME_TITLE = "Welcome to Piko";
     public static String WELCOME_MESSAGE = "To improve your experience with Piko, please vist Piko settings and adjust your preference";
     public static String GOTO_PIKO_SETTINGS = "Goto Piko settings";
+    public static String NO_INTERNET = "Please connect to internet";
 
 }
