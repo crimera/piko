@@ -10,7 +10,8 @@
 
 package app.morphe.extension.instagram.constants.translations;
 
-public class StringsTurkish {
+public class StringsTurkish extends DefaultStrings{
+  public class StringsTurkish()
     public static String PIKO_SETTINGS_TITLE = "Piko ayarları";
 
     public static String CATEGORY_ADS = "Reklamlar";
