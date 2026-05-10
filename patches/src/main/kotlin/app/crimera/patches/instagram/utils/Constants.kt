@@ -13,6 +13,7 @@ package app.crimera.patches.instagram.utils
 import app.morphe.patcher.patch.ApkFileType
 import app.morphe.patcher.patch.AppTarget
 import app.morphe.patcher.patch.Compatibility
+import app.morphe.patcher.patch.SupportedAbi.ARM64_V8A
 
 object Constants {
     val COMPATIBILITY_INSTAGRAM =
@@ -27,6 +28,11 @@ object Constants {
                     AppTarget(
                         version = "426.0.0.37.68",
                         description = "Tested on version code - 383207248, 383207252",
+                        versionCodes =
+                            mapOf(
+                                ARM64_V8A to 383207248,
+                                ARM64_V8A to 383207252,
+                            ),
                     ),
                 ),
         )
