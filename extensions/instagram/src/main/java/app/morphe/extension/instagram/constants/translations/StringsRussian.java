@@ -126,7 +126,7 @@ public class StringsRussian extends DefaultStrings {
         this.HIDE_NAVIGATION_DIRECT = "Скрыть кнопку «Сообщения»";
         this.HIDE_NAVIGATION_SEARCH = "Скрыть кнопку «Поиск»";
         this.HIDE_NAVIGATION_CREATE = "Скрыть кнопку «Создать»";
-        this.PATCH_INFO_TITLE = "Сведения об исправлении";
+        this.PATCH_INFO_TITLE = "Сведения о патче";
         this.EXPORT_PIKO_PREF = "Экспорт настроек Piko";
         this.IMPORT_PIKO_PREF = "Импорт настроек Piko";
         this.APP_VERSION = "Версия приложения: %s";
@@ -153,5 +153,7 @@ public class StringsRussian extends DefaultStrings {
         this.DEFAULT = "По умолчанию";
         this.ARR_DETAILED_TIMESTAMP = "Подробная отметка времени";
         this.ARR_TIME_LEFT = "Осталось времени";
+        this.ENABLE_DEV_OPTIONS_DESC = "Разблокирует опцию разработчика при длительном нажатии значка «Домой»";
+        this.DOWNLOAD_ID_MAPPING = "Скачать файл сопоставления";
     }
 }
