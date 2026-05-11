@@ -1,5 +1,5 @@
 {
-  "version": "3.3.0-dev.7",
+  "version": "3.3.0-dev.8",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -68,7 +68,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -96,7 +96,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -121,7 +121,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -276,7 +276,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -332,7 +332,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -457,7 +457,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -697,7 +697,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -724,7 +724,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1211,7 +1211,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1239,7 +1239,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1267,7 +1267,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1380,7 +1380,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1408,7 +1408,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1439,7 +1439,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1467,7 +1467,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1495,7 +1495,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1522,7 +1522,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1550,7 +1550,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1577,7 +1577,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1604,7 +1604,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1631,7 +1631,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -1657,6 +1657,24 @@
             "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
           ],
           "targets": [
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
             {
               "version": "11.69.0-release.0",
               "isExperimental": false,
@@ -1693,7 +1711,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -2013,7 +2031,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -2574,7 +2592,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -2686,7 +2704,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -2713,7 +2731,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -2910,7 +2928,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -2938,7 +2956,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -2965,7 +2983,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -3079,7 +3097,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -3149,7 +3167,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -3218,7 +3236,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -3245,7 +3263,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -3273,7 +3291,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -3473,7 +3491,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -3585,7 +3603,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -3612,7 +3630,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -3808,7 +3826,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -4089,7 +4107,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -4116,7 +4134,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -4144,7 +4162,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -4172,7 +4190,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -4199,7 +4217,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -4227,7 +4245,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -4255,7 +4273,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }
@@ -4286,7 +4304,7 @@
               "version": "426.0.0.37.68",
               "isExperimental": false,
               "minSdk": null,
-              "description": null
+              "description": "Tested on version code - 383207248, 383207252"
             }
           ]
         }

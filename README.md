@@ -47,7 +47,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.3.0-dev.7](https://github.com/crimera/piko/releases/tag/v3.3.0-dev.7)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;117 patches total
+> **[v3.3.0-dev.8](https://github.com/crimera/piko/releases/tag/v3.3.0-dev.8)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;117 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
 <br>
@@ -141,6 +141,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 
 | 426.0.0.37.68 |
 | :---: |
+| Tested on version code - 383207248, 383207252 |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
