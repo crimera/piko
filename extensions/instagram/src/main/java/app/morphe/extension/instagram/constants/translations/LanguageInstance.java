@@ -26,6 +26,8 @@ public class LanguageInstance {
 			return new StringsIndonesian();
         } else if (lang.equals("pl")) {
             return new StringsPolish();
+		} else if (lang.equals("tr")) {
+            return new StringsTurkish();
         } else if (lang.equals("ru")) {
             return new StringsRussian();
         }
