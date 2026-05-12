@@ -16,6 +16,8 @@ import android.view.*;
 import android.widget.ListView;
 import java.util.List;
 
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 
 public class IconSelectorFragment extends Fragment {
@@ -28,8 +30,8 @@ public class IconSelectorFragment extends Fragment {
 
         iconManager = new AppIconManager(getActivity());
 
-        View root = inflater.inflate(Utils.getResourceIdentifier("fragment_icon_selector", "layout"), container, false);
-        ListView listView = root.findViewById(Utils.getResourceIdentifier("icon_listview", "id"));
+        View root = inflater.inflate(ResourceUtils.getIdentifier(ResourceType.LAYOUT, "fragment_icon_selector"), container, false);
+        ListView listView = root.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "icon_listview"));
 
         // Build all rows using the new builder class
         IconListBuilder builder = new IconListBuilder();

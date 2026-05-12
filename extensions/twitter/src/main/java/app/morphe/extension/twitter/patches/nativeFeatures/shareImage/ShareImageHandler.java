@@ -30,15 +30,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import app.morphe.extension.crimera.Utils;
-import app.morphe.extension.twitter.Pref;
-import app.morphe.extension.twitter.entity.Tweet;
-import app.morphe.extension.twitter.utils.ViewUtils;
-
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
+import app.morphe.extension.twitter.Pref;
+import app.morphe.extension.twitter.entity.Tweet;
+import app.morphe.extension.twitter.utils.ViewUtils;
 
 public class ShareImageHandler {
 
@@ -50,7 +52,7 @@ public class ShareImageHandler {
 
     public static void shareAsImage(Context context, Object tweetObj) {
         if (!(context instanceof Activity)) {
-            Utils.toast("Invalid context");
+            PikoUtils.toast("Invalid context");
             return;
         }
 
@@ -62,12 +64,12 @@ public class ShareImageHandler {
 
         try {
             Tweet tweet = new Tweet(tweetObj);
-            Utils.toast("Capturing tweet...");
+            PikoUtils.toast("Capturing tweet...");
             
             View rootView = activity.getWindow().getDecorView().getRootView();
             View tweetView = searchViewTree(rootView, tweet.getTweetId(), 0);
             if (tweetView == null) {
-                Utils.toast("Tweet view not found");
+                PikoUtils.toast("Tweet view not found");
                 return;
             }
             CaptureTarget target = resolveCaptureTarget(activity, rootView, tweetView);
@@ -75,12 +77,12 @@ public class ShareImageHandler {
             if (target == null) target = new CaptureTarget(tweetView, null);
 
             if (ViewUtils.DEBUG) {
-                Utils.logger(String.format("Capture: Tweet %d | Density %.1f", 
+                PikoUtils.logger(String.format("Capture: Tweet %d | Density %.1f",
                     tweet.getTweetId(), activity.getResources().getDisplayMetrics().density));
-                Utils.logger("Target: " + target.view.getClass().getSimpleName() + " " + target.view.getWidth() + "x" + target.view.getHeight());
+                PikoUtils.logger("Target: " + target.view.getClass().getSimpleName() + " " + target.view.getWidth() + "x" + target.view.getHeight());
                 
                 if (target.clipRect != null) {
-                    Utils.logger("Clip: " + target.clipRect.toShortString());
+                    PikoUtils.logger("Clip: " + target.clipRect.toShortString());
                 }
             }
             
@@ -97,14 +99,14 @@ public class ShareImageHandler {
             }
             
             if (bitmap == null) {
-                Utils.toast("Failed to capture image");
+                PikoUtils.toast("Failed to capture image");
                 return;
             }
 
             shareImage(activity, bitmap, "tweet_" + tweet.getTweetId());
         } catch (Exception e) {
-            Utils.logger(e);
-            Utils.toast("Error: " + e.getMessage());
+            PikoUtils.logger(e);
+            PikoUtils.toast("Error: " + e.getMessage());
         }
     }
 
@@ -164,7 +166,7 @@ public class ShareImageHandler {
 
             activity.startActivity(chooser);
         } catch (Exception e) {
-            Utils.logger(e);
+            PikoUtils.logger(e);
         }
     }
 
@@ -237,7 +239,7 @@ public class ShareImageHandler {
             int crop = getRelativeBottom(anchor, target) - dp(activity, 1);
             if (crop > 0 && crop < h) {
                 if (ViewUtils.DEBUG) {
-                    Utils.logger("Cropped at #" + name);
+                    PikoUtils.logger("Cropped at #" + name);
                 }
                 return crop;
             }
@@ -254,7 +256,7 @@ public class ShareImageHandler {
             if (v.getHeight() <= dp(activity, 4) && v.getBottom() >= bot - dp(activity, 1)) {
                 bot = v.getTop();
                 if (ViewUtils.DEBUG) {
-                    Utils.logger("Removed slop: " + v.getClass().getSimpleName());
+                    PikoUtils.logger("Removed slop: " + v.getClass().getSimpleName());
                 }
             } else break;
         }
@@ -269,7 +271,7 @@ public class ShareImageHandler {
     private static int getId(String name) {
         Integer cached = RESOURCE_IDS.get(name);
         if (cached != null) return cached;
-        int id = app.morphe.extension.shared.Utils.getResourceIdentifier(name, "id");
+        int id = ResourceUtils.getIdentifier(ResourceType.ID, name);
         RESOURCE_IDS.put(name, id);
         return id;
     }
@@ -449,8 +451,8 @@ public class ShareImageHandler {
         sb.append(String.format("%s [%dx%d] @%d,%d%s", 
             v.getClass().getSimpleName(), v.getWidth(), v.getHeight(), v.getLeft(), v.getTop(), 
             idName.isEmpty() ? "" : " #" + idName));
-        
-        Utils.logger(sb.toString());
+
+        PikoUtils.logger(sb.toString());
         
         if (v instanceof ViewGroup group) {
             for (int i = 0; i < group.getChildCount(); i++) {

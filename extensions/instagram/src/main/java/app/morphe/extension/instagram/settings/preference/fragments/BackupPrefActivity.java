@@ -10,6 +10,7 @@
 
 package app.morphe.extension.instagram.settings.preference.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,18 +18,15 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-
-import android.content.Context;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import app.morphe.extension.shared.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
-import app.morphe.extension.shared.Logger;
 
 public class BackupPrefActivity extends AppCompatActivity {
 
@@ -39,7 +37,7 @@ public class BackupPrefActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        context = Utils.getContext();
+        context = PikoUtils.getContext();
 
         Bundle args = getIntent().getExtras();
 
@@ -108,7 +106,7 @@ public class BackupPrefActivity extends AppCompatActivity {
 
             toast(Strings.EXPORT_FAIL);
 
-            Logger.printException(() -> "export failure", e);
+            app.morphe.extension.shared.Logger.printException(() -> "export failure", e);
         }
     }
 
@@ -134,6 +132,6 @@ public class BackupPrefActivity extends AppCompatActivity {
 
 
     private void toast(String msg) {
-        Utils.showToastShort(msg);
+        PikoUtils.toast(msg);
     }
 }

@@ -49,24 +49,32 @@ val hideSuggestedContentPatch =
         dependsOn(settingsPatch)
         execute {
 
-            FeedItemParseFromJsonFingerprint.method.apply {
-                val strIndex = FeedItemParseFromJsonFingerprint.stringMatches[0].index
-                val moveResultObjectInstruction =
-                    instructions.last {
-                        it.opcode == Opcode.MOVE_RESULT_OBJECT &&
-                            it.location.index < strIndex
-                    }
-                val index = moveResultObjectInstruction.location.index
-                val register = moveResultObjectInstruction.registersUsed[0]
-
-                addInstructions(
-                    index + 1,
-                    """
-                    ${Constants.JSONPARSER_CHECK_DESCRIPTOR.format(register,register)}
-                    """.trimIndent(),
+            val fingerprints =
+                listOf(
+                    FeedItemParseFromJsonFingerprint,
                 )
 
-                enableSettings("hideSuggestedContent")
+            fingerprints.forEach { fingerprint ->
+                fingerprint.apply {
+                    val strIndex = stringMatches[0].index
+                    method.apply {
+                        val moveResultObjectInstruction =
+                            instructions.last {
+                                it.opcode == Opcode.MOVE_RESULT_OBJECT &&
+                                    it.location.index < strIndex
+                            }
+                        val moveResultObjectIndex = moveResultObjectInstruction.location.index
+                        val strRegister = moveResultObjectInstruction.registersUsed[0]
+
+                        addInstructions(
+                            moveResultObjectIndex + 1,
+                            """
+                            ${Constants.JSONPARSER_CHECK_DESCRIPTOR.format(strRegister,strRegister)}
+                            """.trimIndent(),
+                        )
+                    }
+                }
             }
+            enableSettings("hideSuggestedContent")
         }
     }

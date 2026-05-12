@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - dev
 
 jobs:
   release:
@@ -28,11 +27,6 @@ jobs:
 
       - name: Cache Gradle
         uses: burrunan/gradle-cache-action@v3
-
-      - name: Build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew :patches:buildAndroid generatePatchesList clean
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -62,9 +56,3 @@ jobs:
         with:
           subject-name: 'Piko Patches ${{ steps.release.outputs.new_release_git_tag }}'
           subject-path: patches/build/libs/patches-*.mpp
-
-      - name: Purge jsDelivr Cache
-        run: |
-          for file in patches-bundle.json patches-list.json; do
-            curl -i "https://purge.jsdelivr.net/gh/${{ github.repository }}@${{ github.ref_name }}/$file"
-          done

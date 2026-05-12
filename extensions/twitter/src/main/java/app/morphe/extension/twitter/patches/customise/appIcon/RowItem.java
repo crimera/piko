@@ -10,8 +10,9 @@
 
 package app.morphe.extension.twitter.patches.customise.appIcon;
 
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
-import app.morphe.extension.shared.Utils;
 
 public class RowItem {
     public boolean isHeader;
@@ -31,7 +32,7 @@ public class RowItem {
     public static RowItem icon(String labelKey, String iconId, String iconNum) {
         RowItem r = new RowItem();
         r.isHeader = false;
-        r.iconRes = Utils.getResourceIdentifier(iconId, "mipmap");
+        r.iconRes = ResourceUtils.getIdentifier(ResourceType.MIPMAP, iconId);
         r.iconLabel = StringRef.str(labelKey);
         r.componentName = "app.morphe.extension.twitter.appicon"+iconNum;
         return r;

@@ -20,28 +20,32 @@ object Constants {
                 ),
             targets =
                 listOf(
-                    // Any version
-                    AppTarget(version = null),
+                    // Beta
+                    AppTarget(
+                        version = "11.80.0-alpha.1",
+                        description = "Last alpha version without PairIP protection",
+                    ),
+                    // Beta
+                    AppTarget(
+                        version = "11.82.0-beta.1",
+                        description = "Last beta version without PairIP protection",
+                    ),
+                    // Stable
+                    AppTarget(
+                        version = "11.81.0-release.0",
+                        description = "Last stable version without PairIP protection",
+                    ),
                 ),
         )
     val COMPATIBILITY_X_11_69 =
-        Compatibility(
-            name = "X",
-            packageName = "com.twitter.android",
-            apkFileType = ApkFileType.APKM,
-            appIconColor = 0x000000,
-            signatures =
-                setOf(
-                    // APK
-                    "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-                    // APKM
-                    "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f",
+        COMPATIBILITY_X
+            .including(
+                AppTarget(
+                    version = "11.69.0-release.0",
+                    description = "Last stable version which had old share sheet and DMs (Disunify XChat Subsystem patch)",
                 ),
-            targets =
-                listOf(
-                    AppTarget(version = "11.69.0-release.0"),
-                ),
-        )
+            ).excluding(null)
+
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/twitter"
     const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
     const val ACTIVITY_SETTINGS_CLASS = "$INTEGRATIONS_PACKAGE/settings"

@@ -30,7 +30,7 @@ internal object ShareMenuButtonAddHook : Fingerprint(
         ),
 )
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun registerButton(
     buttonActionReference: String,
     functionName: String,

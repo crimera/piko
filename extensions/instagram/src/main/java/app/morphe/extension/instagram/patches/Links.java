@@ -10,8 +10,6 @@
 
 
 package app.morphe.extension.instagram.patches;
-
-import android.content.Intent;
 import android.net.Uri;
 
 import java.io.IOException;
@@ -23,6 +21,7 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.instagram.settings.ActivityHook;
 
 @SuppressWarnings("unused")
 public class Links {
@@ -34,27 +33,22 @@ public class Links {
     private static final boolean DISABLE_COMMENTS;
     private static final boolean DISABLE_DISCOVER_PEOPLE;
     private static final boolean DISABLE_ADS;
+    private static final boolean DISABLE_HIGHLIGHTS;
 
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
         VIEW_STORIES_ANONYMOUSLY = Pref.viewStoriesAnonymously() && SettingsStatus.viewStoriesAnonymously;
         VIEW_LIVE_ANONYMOUSLY = Pref.viewLiveAnonymously() && SettingsStatus.viewLiveAnonymously;
         DISABLE_STORIES = Pref.disableStories() && SettingsStatus.disableStories;
+        DISABLE_HIGHLIGHTS = Pref.disableHighlights() && SettingsStatus.disableHighlights;
         DISABLE_EXPLORE = Pref.disableExplore() && SettingsStatus.disableExplore;
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
         DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
         DISABLE_ADS = Pref.disableAds() && SettingsStatus.disableAds;
     }
 
-
-    private static void openLink(String url) {
-        try {
-            Intent intent = new Intent("android.intent.action.VIEW", Uri.parse(url));
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            Utils.getContext().startActivity(intent);
-        } catch (Exception ex) {
-            Logger.printException(() -> "openLink failure", ex);
-        }
+    public static boolean setStorySeen(boolean seenStatus){
+        return VIEW_STORIES_ANONYMOUSLY ? true:seenStatus;
     }
 
     public static boolean openExternally(String url) {
@@ -64,7 +58,7 @@ public class Links {
                 String actualUrl = Uri.parse(url).getQueryParameter("u");
                 if (actualUrl != null) {
                     String sanitizedUrl = sanitizeUrl(actualUrl);
-                    openLink(sanitizedUrl);
+                    ActivityHook.openLink(sanitizedUrl);
                     return true;
                 }
             }
@@ -110,6 +104,8 @@ public class Links {
                         || path.contains("/feed/injected_reels_media/")
                         || path.contains("/api/v1/ads/graphql/")) {
                     shouldBlockUri = DISABLE_ADS;
+                } else if (path.contains("/highlights_tray")) {
+                    shouldBlockUri = DISABLE_HIGHLIGHTS;
                 }
 
             }

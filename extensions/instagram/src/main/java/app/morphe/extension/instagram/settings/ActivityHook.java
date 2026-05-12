@@ -11,15 +11,11 @@
 
 package app.morphe.extension.instagram.settings;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.view.View;
-import android.os.Bundle;
 import android.net.Uri;
 
-import app.morphe.extension.instagram.settings.SettingsActivity;
-import app.morphe.extension.shared.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.preference.fragments.BackupPrefActivity;
 import app.morphe.extension.instagram.settings.preference.fragments.RestorePrefActivity;
@@ -31,6 +27,7 @@ public class ActivityHook {
     private static void launchActivity(Context context, Intent intent){
         try {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         } catch (Exception e) {
             Logger.printException(() -> "launchActivity failure", e);
@@ -38,11 +35,11 @@ public class ActivityHook {
     }
 
     private static void launchActivity(Intent intent){
-        launchActivity(Utils.getContext(),intent);
+        launchActivity(PikoUtils.getContext(),intent);
     }
 
     public static void startPikoActivity(){
-        Context context = Utils.getContext();
+        Context context = PikoUtils.getContext();
         Intent intent = new Intent(context, SettingsActivity.class);
         launchActivity(context,intent);
     }
@@ -74,5 +71,11 @@ public class ActivityHook {
         Intent chooserIntent = Intent.createChooser(intent, exportHeaderString);
         launchActivity(chooserIntent);
     }
+
+    public static void openLink(String url) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        launchActivity(intent);
+    }
+
 
 }

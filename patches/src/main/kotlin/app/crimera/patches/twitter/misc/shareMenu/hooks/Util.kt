@@ -23,7 +23,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun shareMenuButtonInjection(
     actionName: String,
     prefFunctionName: String,

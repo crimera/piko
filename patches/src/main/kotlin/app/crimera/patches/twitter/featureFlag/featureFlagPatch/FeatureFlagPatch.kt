@@ -10,6 +10,8 @@
 
 package app.crimera.patches.twitter.featureFlag.featureFlagPatch
 
+import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
+import app.crimera.patches.twitter.misc.extension.twitterInitHook
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.FSTS_DESCRIPTOR
@@ -21,7 +23,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
-import app.morphe.shared.misc.extension.ExtensionsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 
 private object FeatureFlagFingerprint : Fingerprint(
@@ -55,8 +56,8 @@ val featureFlagPatch =
 
             booleanMethod.addInstructions(loc + 1, METHOD)
 
-            ExtensionsUtilsFingerprint.method.addInstruction(
-                1,
+            twitterInitHook.fingerprint.method.addInstruction(
+                0,
                 "$FSTS_DESCRIPTOR->load()V",
             )
 

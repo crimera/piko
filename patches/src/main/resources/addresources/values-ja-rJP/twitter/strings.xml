@@ -29,10 +29,17 @@
     <string name="piko_pref_native_page_desc">これらのPikoネイティブ機能は、ポストの共有メニューから使用できます。</string>
     <string name="piko_title_native_downloader">ネイティブダウンローダー</string>
     <string name="piko_title_native_downloader_toggle">ネイティブダウンローダーを有効化</string>
+    <string name="piko_pref_native_downloader_inline_button">ダウンロードボタンをインラインバーに表示</string>
+    <string name="piko_pref_native_downloader_inline_button_desc">インラインバーにダウンロードボタンを追加します</string>
     <string name="piko_pref_native_downloader_alert_title">メディアをダウンロード</string>
     <string name="piko_pref_native_downloader_download_all">すべてダウンロード</string>
     <string name="piko_pref_native_downloader_no_media">メディアが見つかりません</string>
     <string name="piko_pref_native_downloader_filename_title">ファイル名のパターンを選択</string>
+    <string name="piko_browse_object_title">ツイートオブジェクトを閲覧</string>
+    <string name="piko_share_image_title">ツイートを画像として共有</string>
+    <string name="piko_share_image_toggle">ツイートを画像として共有を有効化</string>
+    <string name="piko_share_image_autocleanup">キャプチャを自動削除</string>
+    <string name="piko_share_image_autocleanup_desc">これを有効化すると、24時間以上経過したキャプチャを削除します</string>
     <string name="piko_title_native_translator">翻訳</string>
     <string name="piko_native_translator_toggle">共有メニューに翻訳ボタンを追加</string>
     <string name="piko_native_translator_provider">翻訳プロバイダー</string>
@@ -40,6 +47,7 @@
     <string name="piko_native_translator_zero_text">翻訳するテキストが見つかりません</string>
     <string name="piko_native_translator_google">Google翻訳</string>
     <string name="piko_native_translator_google_v2">Google翻訳 V2</string>
+    <string name="piko_native_translator_fxtwitter">FxTwitter API</string>
     <string name="piko_title_native_reader_mode">リーダーモード</string>
     <string name="piko_native_reader_mode_grok_thread">このスレッドを分析</string>
     <string name="piko_native_reader_mode_grok_author">投稿者についての詳細</string>
@@ -97,6 +105,7 @@
     <string name="piko_pref_search_suggestion_desc">[話題を検索] タブの検索候補を非表示または削除します</string>
     <string name="piko_disunify_xchat_system">xchatシステムを無効化</string>
     <string name="piko_disunify_xchat_system_desc">メッセージや共有シートなどの従来の機能を復活させます</string>
+    <string name="piko_legacy_share_link">旧式の共有リンク</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">機能フラグ</string>
     <string name="piko_pref_feature_flags">機能フラグを追加</string>
@@ -182,6 +191,7 @@
     <string name="piko_pref_import_failed">エラー: %sのインポートに失敗しました</string>
     <string name="piko_pref_export_no_uri">エラー: 宛先が指定されていません</string>
     <string name="piko_pref_import_no_uri">エラー: ファイルが提供されていません</string>
+    <string name="piko_pref_export_login_token">ログイントークンをエクスポート</string>
     <!-- About -->
     <string name="piko_title_about">アプリに関する情報</string>
     <string name="piko_pref_app_version">アプリのバージョン</string>
@@ -201,11 +211,24 @@
     <string name="piko_pref_search_type_ahead_ordered_section">並び替え</string>
     <string name="piko_settings_supported_links">対応リンクを開く</string>
     <!-- For arrays-->
+    <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_money">Money</string>
     <string name="piko_array_xchat">チャット</string>
     <string name="piko_array_creator_studio">クリエイタースタジオ</string>
+    <string name="piko_array_jobs">求人</string>
     <string name="piko_array_media">メディア</string>
     <string name="piko_array_light_mode">ライトモード</string>
     <!-- App icon strings -->
+    <string name="piko_app_icon_thanks">iOSのアプリアイコンを提供してくれた@NeoFreeBirdに感謝します</string>
     <!-- Category -->
     <!-- Icon names -->
+    <!-- Import / export login tokens -->
+    <string name="piko_login_token_select_account">アカウントを選択：</string>
+    <string name="piko_login_token_export_copy_to_clipboard">クリップボードにコピー</string>
+    <string name="piko_login_token_export_save_to_file">ファイルに保存</string>
+    <string name="piko_login_token_import_token_button_text">トークンjson経由でログイン</string>
+    <string name="piko_login_token_import_from_text">テキストからインポート</string>
+    <string name="piko_login_token_import_from_file">ファイルからインポート</string>
+    <string name="piko_login_token_import_failed_missing_info">エラー：username、tokenまたはsecretがありません</string>
+    <string name="piko_login_token_import_failed_already_exist">アカウントの追加に失敗しました (既に存在している可能性があります)</string>
 </resources>

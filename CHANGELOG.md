@@ -1,3 +1,112 @@
+# [3.3.0-dev.8](https://github.com/crimera/piko/compare/v3.3.0-dev.7...v3.3.0-dev.8) (2026-05-11)
+
+
+### Features
+
+* **Translations-Instagram:** Added `Turkish` translations ([#1103](https://github.com/crimera/piko/issues/1103)) ([6f03170](https://github.com/crimera/piko/commit/6f03170d88b4f9fc2c156838cbafc792246496fa))
+
+# [3.3.0-dev.7](https://github.com/crimera/piko/compare/v3.3.0-dev.6...v3.3.0-dev.7) (2026-05-09)
+
+
+### Features
+
+* **Instagram:** Added ability to download mappings ([ee843af](https://github.com/crimera/piko/commit/ee843af511c656e3a6ce4fa86102459ff80392e0))
+* **Instagram:** Added one time welcome message on launch ([6d03daa](https://github.com/crimera/piko/commit/6d03daa1dba71482d373f726f67d359e8958dfcb))
+* **Translations-Instagram:** Added `Indonesian` translations ([4a77dcb](https://github.com/crimera/piko/commit/4a77dcb64b3747b04535999b0809908f93cc39d6))
+* **Translations-Instagram:** Added `Polish` translation ([#1089](https://github.com/crimera/piko/issues/1089)) ([99ccf20](https://github.com/crimera/piko/commit/99ccf20e3f88d39be9c4ea1b2d248479bfe790ba))
+* **Translations-Instagram:** Added `Russian` translations ([b8b951b](https://github.com/crimera/piko/commit/b8b951b14267aaafb8193c65553dd6ea3cdbce3f))
+
+# [3.3.0-dev.6](https://github.com/crimera/piko/compare/v3.3.0-dev.5...v3.3.0-dev.6) (2026-05-06)
+
+
+### Bug Fixes
+
+* **Instagram:** Fix hooks flag (for trigger) ([a3a6c3d](https://github.com/crimera/piko/commit/a3a6c3d1b9a08f755f12fe46f3b5944e96e708e8))
+
+# [3.3.0-dev.5](https://github.com/crimera/piko/compare/v3.3.0-dev.4...v3.3.0-dev.5) (2026-05-06)
+
+
+### Bug Fixes
+
+* **Instagram:** Potential fix for A16-A17 ([b3352b4](https://github.com/crimera/piko/commit/b3352b481c0af9c59f587bceb0e1b6f50472437f))
+
+# [3.3.0-dev.4](https://github.com/crimera/piko/compare/v3.3.0-dev.3...v3.3.0-dev.4) (2026-05-05)
+
+
+### Bug Fixes
+
+* **Instagram:** Fix `Change like animation` patch ([a9dacb2](https://github.com/crimera/piko/commit/a9dacb2a15bc7a502d3931f0fb8ec5e13bc05d61))
+* **Instagram:** Fix flag hooks loading ([a673853](https://github.com/crimera/piko/commit/a673853a8dae600a58dad3144f11310fe4e28475))
+* **Instagram:** Override flags to fix certain issues ([07c6313](https://github.com/crimera/piko/commit/07c63138482048709618c172bfd8a7a3843d30f2))
+
+
+### Features
+
+* **Instagram:** Added `Disable double tap like` patch ([daa8474](https://github.com/crimera/piko/commit/daa84741cb05f1d7bd4af63dfe3458125a7df5c5))
+* **Instagram:** Added `Enable whitehat settings` patch ([31529bb](https://github.com/crimera/piko/commit/31529bb0a2c90a700dc99b54f9302377ca29f91e))
+* **Instagram:** Added `More options on post` patch ([19db767](https://github.com/crimera/piko/commit/19db767dbeb00d9d5cd46552ba2bd425753eef2e))
+* **Instagram:** Added `Unlock employee options` patch ([6041c06](https://github.com/crimera/piko/commit/6041c06875ba7e879f2fbd07a49f8596af1368bb))
+* **Instagram:** Added hook to override developer flags ([01e43a6](https://github.com/crimera/piko/commit/01e43a6f206af4692f3545adf8680f77f855dddc))
+* **Instagram:** Initial support for translations ([caf8ffb](https://github.com/crimera/piko/commit/caf8ffb7704ae514a3b5f98ae265878214d42ae5))
+
+# [3.3.0-dev.3](https://github.com/crimera/piko/compare/v3.3.0-dev.2...v3.3.0-dev.3) (2026-04-26)
+
+
+### Bug Fixes
+
+* **Instagram:** Fix `Make ephemeral media permanent` patch ([fc22c94](https://github.com/crimera/piko/commit/fc22c94eb323fbc5ce12591e4a06c2dd4e590a88))
+
+
+### Features
+
+* **Instagram:** Added `Change like animation` patch ([cb759bc](https://github.com/crimera/piko/commit/cb759bcab2e754a794a907846e077a956416e363))
+* **Instagram:** Added `Customise story ring size` patch ([cfe8a55](https://github.com/crimera/piko/commit/cfe8a55423e2e1f53dbc769beb082644d1bc3689))
+* **Instagram:** Added `Unlock Plus benefits` patch ([84d9fd6](https://github.com/crimera/piko/commit/84d9fd62e12d103a833e386c90504b97a4652744))
+
+# [3.3.0-dev.2](https://github.com/crimera/piko/compare/v3.3.0-dev.1...v3.3.0-dev.2) (2026-04-23)
+
+
+### Bug Fixes
+
+* **instagram/entity:** check-cast Object arg before IgdsButton.setStyle ([7f7b605](https://github.com/crimera/piko/commit/7f7b605de6d0e36a23d4413c6876f7e48b16e5c3))
+* **instagram/story:** declare StoryButton.storyButtonAction static ([24d435e](https://github.com/crimera/piko/commit/24d435eb15e9598912af101bfd161372801d9143))
+* **instagram/story:** pair long arg with consecutive /range register in emitted invoke ([d65b339](https://github.com/crimera/piko/commit/d65b339b0d01705a2b5b837b3e7b6f601a73e742))
+* **Instagram:** fix `Follow back indicator` patch ([ef6dfdf](https://github.com/crimera/piko/commit/ef6dfdfec9d1a89d5289c26f1b942f2f7da757ad))
+
+
+### Features
+
+* **instagram:** add amoled theme patch ([f34ea47](https://github.com/crimera/piko/commit/f34ea473d3a63b6afd35f573bb88d7aad1178813)), closes [#ff000000](https://github.com/crimera/piko/issues/ff000000) [#ff0c1014](https://github.com/crimera/piko/issues/ff0c1014) [#000000](https://github.com/crimera/piko/issues/000000)
+* **Instagram:** Added `Disable highlights` patch ([03f367e](https://github.com/crimera/piko/commit/03f367eb1a371b46e1425028a861d44886ecd906))
+* **Instagram:** Added `Disable video autoplay` patch ([9294e08](https://github.com/crimera/piko/commit/9294e08699c8e996140a8cd84f345819eee96dab))
+* **Instagram:** Added `Stories audio autoplay` patch ([f514dcf](https://github.com/crimera/piko/commit/f514dcf35bd77fe318103741c95adf5f7ccfcff6))
+* **Instagram:** Added ability to download audio from some posts and reel ([8d503d3](https://github.com/crimera/piko/commit/8d503d3ecffd66949779acb5cc24480e75f06f91))
+* **Instagram:** Added debug option to extraction developer options codes ([313e15c](https://github.com/crimera/piko/commit/313e15c74be4f0c389ecebce8447fcdfc455c95e))
+* **Instagram:** Added support to `425.0.0.47.61` ([f02ede0](https://github.com/crimera/piko/commit/f02ede0ee1f8444dfae5580c4dcee63d49bb3d5e))
+* **Instagram:** Added support to `426.0.0.37.68` ([dce5983](https://github.com/crimera/piko/commit/dce598300cb6af1cad291e4b820bd7ce6e441b9a))
+
+# [3.3.0-dev.1](https://github.com/crimera/piko/compare/v3.2.0...v3.3.0-dev.1) (2026-04-19)
+
+
+### Bug Fixes
+
+* fallback instruction address ([95f69e3](https://github.com/crimera/piko/commit/95f69e3fef4774072bb82b2717d9ba44ed8e0487))
+* **Instagram:** download all carousel media ([2f93f78](https://github.com/crimera/piko/commit/2f93f786eb25b6186b0a2657b6eb75b52a405f33))
+* **Instagram:** keep one navigation button visible ([dd5dce8](https://github.com/crimera/piko/commit/dd5dce8f8974df4e47ff3eb32057ca8ca0cd9c25))
+* **Twitter - Import/Export login token:** Add import menu to piko settings as a workaround for redesigned login screen ([dad823c](https://github.com/crimera/piko/commit/dad823c3d4a7fa88d5e98cc8b24146fcfb5c5758))
+
+
+### Features
+
+* **Instagram:** Add `Disable Reels scrolling` patch ([9a03ca1](https://github.com/crimera/piko/commit/9a03ca1ed1ec529489dcca73cb8b7fb314ea198b))
+* **Instagram:** Added `Copy comment` patch ([eb3f378](https://github.com/crimera/piko/commit/eb3f378a2e29ad60560cb6ccc0f05ab9eca44aae))
+* **Instagram:** Added `Disable screenshot detection` patch ([a1141c9](https://github.com/crimera/piko/commit/a1141c9af37bfac52a06c2ea86a1b9c72b2de8b0))
+* **Instagram:** Added `Hide notes tray` patch ([a856398](https://github.com/crimera/piko/commit/a8563984fe465ae8cc8e7e1a0d3b129ae343ca81))
+* **Instagram:** Added `Improve image viewing` patch ([d716354](https://github.com/crimera/piko/commit/d7163541f0678bf532d137e2147572975d925638))
+* **Instagram:** Added `More options on profile` patch ([1cd5797](https://github.com/crimera/piko/commit/1cd5797d945b7ecbdaa295b1a426302784546975))
+* **Instagram:** Added `Remove empty bottom space` patch ([2b0eb1f](https://github.com/crimera/piko/commit/2b0eb1fa94cfc8c5d6b7d713a8080c351fa25d66))
+* Read DMs anonymously ([48f1593](https://github.com/crimera/piko/commit/48f1593e303f00cb4fb1e14233ac51d03f273ae3))
+
 # [3.2.0](https://github.com/crimera/piko/compare/v3.1.0...v3.2.0) (2026-04-10)
 
 

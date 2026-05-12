@@ -204,6 +204,7 @@
     <string name="piko_pref_export_no_uri">Error: No destination provided</string>
     <string name="piko_pref_import_no_uri">Error: No file provided</string>
     <string name="piko_pref_export_login_token">Export login token</string>
+    <string name="piko_pref_import_login_token">Import login token</string>
 
     <!-- About -->
     <string name="piko_title_about">About</string>
@@ -368,7 +369,8 @@ It's recommended to read this before using this feature. It includes some import
     <string name="piko_login_token_import_token_button_text">Login through token json</string>
     <string name="piko_login_token_import_from_text">Import from text</string>
     <string name="piko_login_token_import_from_file">Import from file</string>
-    <string name="piko_login_token_import_success_reopen_required">Please exit and reopen the app</string>
+    <string name="piko_login_token_import_about">About this feature (Open website)</string>
+    <string name="piko_login_token_import_success_reopen_required">Please quit the app and reopen it</string>
     <string name="piko_login_token_import_failed_missing_info">Error: Missing username or token or secret</string>
     <string name="piko_login_token_import_failed_already_exist">Failed to add account (may already exist)</string>
 

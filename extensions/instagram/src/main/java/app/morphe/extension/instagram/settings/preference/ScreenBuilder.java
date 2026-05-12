@@ -16,14 +16,13 @@ import android.content.Context;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
-import android.preference.PreferenceScreen;
 
 import app.morphe.extension.instagram.constants.Strings;
-import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.instagram.utils.Pref;
 
 public class ScreenBuilder {
     private final Context context;
@@ -89,12 +88,37 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.unlockEmployeeOptions) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.ENABLE_EMP_OPTIONS,
+                            Strings.ENABLE_EMP_OPTIONS_DESC,
+                            Settings.ENABLE_EMP_OPTIONS
+                    )
+            );
+        }
+        if (SettingsStatus.unlockEmployeeOptions) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.ALLOW_USER_NETWORK_CERTIFICATE,
+                            Strings.ALLOW_USER_NETWORK_CERTIFICATE_DESC,
+                            Settings.ALLOW_USER_NETWORK_CERTIFICATE
+                    )
+            );
+        }
         if (SettingsStatus.enableDeveloperOptions) {
             addPreference(category,
                     helper.switchPreference(
                             Strings.ENABLE_DEV_OPTIONS,
-                            "",
+                            Strings.ENABLE_DEV_OPTIONS_DESC,
                             Settings.DEVELOPER_OPTIONS
+                    )
+            );
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DIRECTLY_OPEN_METACONFIG,
+                            Strings.DIRECTLY_OPEN_METACONFIG_DESC,
+                            Settings.DIRECTLY_OPEN_METACONFIG
                     )
             );
             addPreference(category,
@@ -116,6 +140,13 @@ public class ScreenBuilder {
                             Strings.IMPORT_ID_MAPPING,
                             "",
                             Strings.IMPORT_ID_MAPPING
+                    )
+            );
+            addPreference(category,
+                    helper.buttonPreference(
+                            Strings.DOWNLOAD_ID_MAPPING,
+                            "",
+                            Strings.DOWNLOAD_ID_MAPPING
                     )
             );
         }
@@ -141,6 +172,33 @@ public class ScreenBuilder {
                             Strings.VIEW_LIVE_ANONYMOUSLY,
                             "",
                             Settings.VIEW_LIVE_ANONYMOUSLY
+                    )
+            );
+        }
+        if (SettingsStatus.disableTypingStatus) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_TYPING_STATUS,
+                            "",
+                            Settings.DISABLE_TYPING_STATUS
+                    )
+            );
+        }
+        if (SettingsStatus.disableScreenshotDetection) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_SCREENSHOT_DETECTION,
+                            "",
+                            Settings.DISABLE_SCREENSHOT_DETECTION
+                    )
+            );
+        }
+        if (SettingsStatus.viewDmAnonymously) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.VIEW_DM_ANONYMOUSLY,
+                            "",
+                            Settings.VIEW_DM_ANONYMOUSLY
                     )
             );
         }
@@ -194,6 +252,24 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.disableHighlights) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_HIGHLIGHTS,
+                            "",
+                            Settings.DISABLE_HIGHLIGHTS
+                    )
+            );
+        }
+        if (SettingsStatus.hideNotesTray) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.HIDE_NOTES_TRAY,
+                            Strings.HIDE_NOTES_TRAY_DESC,
+                            Settings.HIDE_NOTES_TRAY
+                    )
+            );
+        }
         if (SettingsStatus.disableExplore) {
             addPreference(category,
                     helper.switchPreference(
@@ -221,6 +297,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.disableReelsScrolling) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_REELS_SCROLLING,
+                            Strings.DISABLE_REELS_SCROLLING_DESC,
+                            Settings.DISABLE_REELS_SCROLLING
+                    )
+            );
+        }
         if (SettingsStatus.hideGroupCreationOnSharesheet) {
             addPreference(category,
                     helper.switchPreference(
@@ -230,12 +315,64 @@ public class ScreenBuilder {
                     )
             );
         }
+
+        if (SettingsStatus.disableDoubleTapLike) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_DOUBLE_TAP_LIKE_POST,
+                            "",
+                            Settings.DISABLE_DOUBLE_TAP_LIKE_POST
+                    )
+            );
+
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_DOUBLE_TAP_LIKE_REEL,
+                            "",
+                            Settings.DISABLE_DOUBLE_TAP_LIKE_REEL
+                    )
+            );
+
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_DOUBLE_TAP_LIKE_COMMENT,
+                            "",
+                            Settings.DISABLE_DOUBLE_TAP_LIKE_COMMENT
+                    )
+            );
+
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE,
+                            "",
+                            Settings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE
+                    )
+            );
+        }
     }
 
     public void buildMiscSection() {
         if (!(SettingsStatus.miscSection())) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_MISC);
+        if (SettingsStatus.unlockPlusBenefits) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.UNLOCK_PLUS_BENEFITS,
+                            Strings.UNLOCK_PLUS_BENEFITS_DESC,
+                            Settings.UNLOCK_PLUS_BENEFITS
+                    )
+            );
+        }
+        if (SettingsStatus.changeLikeAnimation) {
+            addPreference(category,
+                    helper.listPreference(
+                            Strings.CHANGE_LIKE_ANIMATION,
+                            Strings.CHANGE_LIKE_ANIMATION_DESC,
+                            Settings.CHANGE_LIKE_ANIMATION
+                    )
+            );
+        }
         if (SettingsStatus.disableAnalytics) {
             addPreference(category,
                     helper.switchPreference(
@@ -249,6 +386,33 @@ public class ScreenBuilder {
                             Strings.DELETE_ANALYTICS_CACHE,
                             "",
                             Strings.DELETE_ANALYTICS_CACHE
+                    )
+            );
+        }
+        if (SettingsStatus.moreOptionsOnPost) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.ENABLE_MORE_OPTIONS_ON_POST,
+                            Strings.ENABLE_MORE_OPTIONS_ON_POST_DESC,
+                            Settings.ENABLE_MORE_OPTIONS_ON_POST
+                    )
+            );
+        }
+        if (SettingsStatus.disableVideoAutoplay) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.DISABLE_VIDEO_AUTOPLAY,
+                            "",
+                            Settings.DISABLE_VIDEO_AUTOPLAY
+                    )
+            );
+        }
+        if (SettingsStatus.storiesAudioAutoplay) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.STORIES_AUDIO_AUTOPLAY,
+                            "",
+                            Settings.STORIES_AUDIO_AUTOPLAY
                     )
             );
         }
@@ -298,6 +462,14 @@ public class ScreenBuilder {
                     )
             );
         }
+        if(SettingsStatus.customiseStoryRingSize) {
+            addPreference(category,
+                    helper.editTextNumPreference(
+                            Strings.CUSTOMISE_STORY_RING_SIZE,
+                            "",
+                            Settings.CUSTOMISE_STORY_RING_SIZE
+                    ));
+        }
 
         if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
             addPreference(category,
@@ -325,6 +497,24 @@ public class ScreenBuilder {
                             Strings.HIDE_RESHARE_BUTTON,
                             "",
                             Settings.HIDE_RESHARE_BUTTON
+                    )
+            );
+        }
+        if (SettingsStatus.copyCommentButton) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.COPY_COMMENT,
+                            Strings.COPY_COMMENT_DESC,
+                            Settings.COMMENT_COPY_BUTTON
+                    )
+            );
+        }
+        if (SettingsStatus.removeEmptyBottomSpace) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.REMOVE_EMPTY_BOTTOM_SPACE,
+                            "",
+                            Settings.REMOVE_EMPTY_BOTTOM_SPACE
                     )
             );
         }
@@ -404,14 +594,6 @@ public class ScreenBuilder {
                         Settings.HIDE_NAVIGATION_CREATE
                 )
         );
-
-        addPreference(category,
-                helper.switchPreference(
-                        Strings.HIDE_NAVIGATION_PROFILE,
-                        "",
-                        Settings.HIDE_NAVIGATION_PROFILE
-                )
-        );
     }
 
     public void aboutSection() {
@@ -419,6 +601,7 @@ public class ScreenBuilder {
         PreferenceCategory category = category = addCategory(Strings.PATCH_INFO_TITLE);
         String appVersionText = String.format(Strings.APP_VERSION, Utils.getAppVersionName());
         String patchVersionText = String.format(Strings.PATCH_VERSION, Utils.getPatchesReleaseVersion());
+
         addPreference(category,
                 helper.buttonPreference(
                         appVersionText,
@@ -450,6 +633,32 @@ public class ScreenBuilder {
                         Strings.IMPORT_PIKO_PREF
                 )
         );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.PIKO_DEBUG,
+                        Strings.PIKO_DEBUG_DESC,
+                        Settings.PIKO_DEBUG
+                )
+        );
+
+        if(Pref.pikoDebug()) {
+            addPreference(category,
+                    helper.buttonPreference(
+                            Strings.PIKO_EXPORT_EXPERIMENT_LIST,
+                            "",
+                            Strings.PIKO_EXPORT_EXPERIMENT_LIST
+                    )
+            );
+
+            addPreference(category,
+                    helper.buttonPreference(
+                            Strings.PIKO_EXPORT_EXPERIMENT_MAPPINGS,
+                            "",
+                            Strings.PIKO_EXPORT_EXPERIMENT_MAPPINGS
+                    )
+            );
+        }
     }
 
     //end

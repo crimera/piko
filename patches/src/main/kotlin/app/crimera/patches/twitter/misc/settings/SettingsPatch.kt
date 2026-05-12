@@ -11,6 +11,7 @@
 package app.crimera.patches.twitter.misc.settings
 
 import app.crimera.patches.twitter.misc.extension.sharedExtensionPatch
+import app.crimera.patches.twitter.misc.extension.twitterInitHook
 import app.crimera.patches.twitter.premium.redirectBMNavBar.redirectBMTab
 import app.crimera.patches.twitter.utils.Constants.ACTIVITY_HOOK_CLASS
 import app.crimera.patches.twitter.utils.Constants.ADD_PREF_DESCRIPTOR
@@ -28,7 +29,6 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
-import app.morphe.shared.misc.extension.ExtensionsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
@@ -140,7 +140,7 @@ val settingsPatch =
                 ),
             )
 
-            ExtensionsUtilsFingerprint.method.addInstruction(
+            twitterInitHook.fingerprint.method.addInstruction(
                 0,
                 "$SSTS_DESCRIPTOR->load()V",
             )

@@ -10,7 +10,6 @@
 
 package app.morphe.extension.twitter;
 
-import app.morphe.extension.twitter.entity.Debug;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
@@ -21,34 +20,31 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.util.Log;
 import android.widget.LinearLayout;
 
-import app.morphe.extension.shared.StringRef;
-import app.morphe.extension.shared.settings.BooleanSetting;
-import app.morphe.extension.shared.settings.StringSetting;
-import app.morphe.extension.shared.settings.preference.SharedPrefCategory;
-import app.morphe.extension.twitter.settings.Settings;
 import com.google.android.material.tabs.TabLayout$g;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.FileOutputStream;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.IOException;
+
+import app.morphe.extension.shared.StringRef;
+import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.shared.settings.preference.PikoSharedPrefCategory;
+import app.morphe.extension.twitter.settings.Settings;
 
 @SuppressWarnings("unused")
 public class Utils {
     @SuppressLint("StaticFieldLeak")
     private static final Context ctx = app.morphe.extension.shared.Utils.getContext();
-    private static final SharedPrefCategory sp = new SharedPrefCategory(Settings.SHARED_PREF_NAME);
-    private static final SharedPrefCategory defsp = new SharedPrefCategory(ctx.getPackageName() + "_preferences");
+    private static final PikoSharedPrefCategory sp = new PikoSharedPrefCategory(Settings.SHARED_PREF_NAME);
+    private static final PikoSharedPrefCategory defsp = new PikoSharedPrefCategory(ctx.getPackageName() + "_preferences");
 
     private static void startActivity(Class cls) {
         Intent intent = new Intent(ctx, cls);
@@ -95,12 +91,12 @@ public class Utils {
             }
 
         } catch (Exception e) {
-            app.morphe.extension.crimera.Utils.logger(e.toString());
+            app.morphe.extension.crimera.PikoUtils.logger(e.toString());
         }
         return false;
     }
 
-    public static Boolean setBooleanPerf(String key, Boolean val) {
+    public static Boolean setBooleanPref(String key, Boolean val) {
         try {
             sp.saveBoolean(key, val);
             return true;
@@ -179,7 +175,7 @@ public class Utils {
         dialog.show();
     }
 
-    public static Boolean getBooleanPerf(BooleanSetting setting) {
+    public static Boolean getBooleanPref(BooleanSetting setting) {
         return sp.getBoolean(setting.key, setting.defaultValue);
     }
 
@@ -193,11 +189,11 @@ public class Utils {
         return prefs.toString();
     }
 
-    public static Set<String> getSetPerf(String key, Set<String> defaultValue) {
+    public static Set<String> getSetPref(String key, Set<String> defaultValue) {
         return sp.getSet(key, defaultValue);
     }
 
-    public static Boolean setSetPerf(String key, Set<String> defaultValue) {
+    public static Boolean setSetPref(String key, Set<String> defaultValue) {
         try {
             sp.saveSet(key, defaultValue);
             return true;
@@ -216,7 +212,7 @@ public class Utils {
                 String key = keys.next();
                 Object value = jsonObject.get(key);
                 if (value instanceof Boolean) {
-                    setBooleanPerf(key, (Boolean) value);
+                    setBooleanPref(key, (Boolean) value);
                 } else if (value instanceof String) {
                     setStringPref(key, (String) value);
                 } else if (value instanceof JSONArray) {
@@ -229,7 +225,7 @@ public class Utils {
                         strings.add(jsonArray.getString(i));
                     }
 
-                    setSetPerf(key, strings);
+                    setSetPref(key, strings);
                 }
             }
             sts = true;
@@ -326,7 +322,7 @@ public class Utils {
     }
 
     private static void toast(String msg){
-        app.morphe.extension.crimera.Utils.toast(msg);
+        app.morphe.extension.crimera.PikoUtils.toast(msg);
     }
 
 }

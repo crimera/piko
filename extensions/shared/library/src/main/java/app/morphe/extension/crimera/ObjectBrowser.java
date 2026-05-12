@@ -59,7 +59,7 @@ public class ObjectBrowser {
             String title = getClassName(obj.getClass());
             showObjectDialog(context, obj, title, false, null);
         } catch (Exception ex) {
-            app.morphe.extension.crimera.Utils.logger(ex);
+            app.morphe.extension.crimera.PikoUtils.logger(ex);
         }
     }
 

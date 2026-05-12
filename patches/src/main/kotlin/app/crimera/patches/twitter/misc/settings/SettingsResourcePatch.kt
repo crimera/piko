@@ -11,7 +11,7 @@
 package app.crimera.patches.twitter.misc.settings
 
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.shared.misc.mapping.resourceMappingPatch
+import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import org.w3c.dom.Element
 
 internal val settingsResourcePatch =

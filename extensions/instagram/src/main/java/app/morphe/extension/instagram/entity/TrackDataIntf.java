@@ -1,0 +1,72 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
+
+package app.morphe.extension.instagram.entity;
+
+import java.util.Map;
+
+public class TrackDataIntf extends Entity implements AudioMediaInterface {
+    private final Object obj;
+
+    public TrackDataIntf(Object obj) {
+        super(obj);
+        this.obj = obj;
+    }
+
+    private Object getTrackData() throws Exception {
+        Object musicInfoObject = super.getField("A00");
+        return super.getMethod(musicInfoObject, "CJN");
+    }
+
+    public Map getMappings() throws Exception {
+        Object trackData = this.getTrackData();
+        Map trackMap = (Map) super.getMethod(trackData, "Gkh");
+        return trackMap;
+    }
+
+    private Object getValue(String key) throws Exception {
+        Map mappings = getMappings();
+        return mappings.getOrDefault(key, null);
+    }
+
+    public String getSongId() throws Exception {
+        return String.valueOf(this.getValue("audio_asset_id"));
+    }
+
+    public String getSongName() throws Exception {
+        return (String) this.getValue("title");
+    }
+
+    public String getSongArtistName() throws Exception {
+        return (String) this.getValue("display_artist");
+    }
+
+    public String getSongArtistUsername() throws Exception {
+        return (String) this.getValue("ig_username");
+    }
+
+    @Override
+    public String getAudioUrl() throws Exception {
+        return (String) this.getValue("progressive_download_url");
+    }
+
+    public String getSongThumbnailUrl() throws Exception {
+        return (String) this.getValue("cover_artwork_thumbnail_uri");
+    }
+
+    @Override
+    public String getDownloadName() throws Exception {
+        String artistName = this.getSongArtistName();
+        String songName = this.getSongName();
+        // Original audio is actually stored as mp4 but forcefully renaming it to mp3.
+        return artistName + "_" + songName + ".mp3";
+    }
+}

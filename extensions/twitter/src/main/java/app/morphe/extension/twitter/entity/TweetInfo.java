@@ -11,7 +11,7 @@
 package app.morphe.extension.twitter.entity;
 
 import app.morphe.extension.twitter.entity.Debug;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 // Lcom/twitter/model/core/entity/d;
 public class TweetInfo extends Debug {
@@ -34,7 +34,7 @@ public class TweetInfo extends Debug {
             return "TweetInfo [getLang()=" + this.getLang() + "]";
 
         } catch (Exception e) {
-            Utils.logger(e);
+            PikoUtils.logger(e);
             return e.getMessage();
         }
 

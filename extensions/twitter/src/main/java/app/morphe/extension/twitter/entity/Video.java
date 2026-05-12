@@ -11,7 +11,7 @@
 package app.morphe.extension.twitter.entity;
 
 import app.morphe.extension.twitter.entity.Debug;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 // Lcom/twitter/media/av/model/b0;
 public class Video extends Debug {
@@ -65,7 +65,7 @@ public class Video extends Debug {
                     + ", getThumbnail()=" + this.getThumbnail() + ", getExtension()=" + this.getExtension() + "]";
 
         } catch (Exception e) {
-            Utils.logger(e);
+            PikoUtils.logger(e);
             return e.getMessage();
         }
 

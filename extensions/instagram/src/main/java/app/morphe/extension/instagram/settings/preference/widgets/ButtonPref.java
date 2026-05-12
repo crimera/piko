@@ -27,6 +27,7 @@ import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.patches.Block;
+import app.morphe.extension.instagram.patches.download.DownloadMapping;
 
 public class ButtonPref extends Preference {
     private final Context context;
@@ -70,11 +71,22 @@ public class ButtonPref extends Preference {
             public boolean onPreferenceClick(Preference preference) {
                 try {
                     String key = getKey();
-                    if ( key.equals(Strings.EXPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_ID_MAPPING)
-                         || key.equals(Strings.EXPORT_PIKO_PREF) || key.equals(Strings.IMPORT_PIKO_PREF)) {
+                    if (key.equals(Strings.EXPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_ID_MAPPING)
+                            || key.equals(Strings.EXPORT_PIKO_PREF) || key.equals(Strings.IMPORT_PIKO_PREF)) {
                         ActivityHook.launchFragment((Activity) context, key);
-                    } else if (key.equals(Strings.DELETE_ANALYTICS_CACHE)){
+
+                    } else if (key.equals(Strings.DELETE_ANALYTICS_CACHE)) {
                         Block.deleteAnalyticsCacheFolder();
+
+                    } else if (key.equals(Strings.PIKO_EXPORT_EXPERIMENT_LIST)) {
+                        app.morphe.extension.instagram.utils.Utils.decompileExperiments(false);
+
+                    } else if (key.equals(Strings.PIKO_EXPORT_EXPERIMENT_MAPPINGS)) {
+                        app.morphe.extension.instagram.utils.Utils.decompileExperiments(true);
+
+                    } else if (key.equals(Strings.DOWNLOAD_ID_MAPPING)) {
+                        DownloadMapping.downloadMapping();
+
                     }
                 } catch (Exception e) {
                     Utils.showToastShort(e.getMessage());

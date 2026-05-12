@@ -25,7 +25,6 @@ public class HideNavigationButtonsPatch {
     private static final boolean HIDE_DIRECT;
     private static final boolean HIDE_SEARCH;
     private static final boolean HIDE_CREATE;
-    private static final boolean HIDE_PROFILE;
 
     static {
         HIDE_FEED = Pref.hideNavigationFeed() && SettingsStatus.hideNavigationButtons;
@@ -33,7 +32,6 @@ public class HideNavigationButtonsPatch {
         HIDE_DIRECT = Pref.hideNavigationDirect() && SettingsStatus.hideNavigationButtons;
         HIDE_SEARCH = Pref.hideNavigationSearch() && SettingsStatus.hideNavigationButtons;
         HIDE_CREATE = Pref.hideNavigationCreate() && SettingsStatus.hideNavigationButtons;
-        HIDE_PROFILE = Pref.hideNavigationProfile() && SettingsStatus.hideNavigationButtons;
     }
 
     /**
@@ -59,8 +57,7 @@ public class HideNavigationButtonsPatch {
                     name.equals("fragment_clips") && HIDE_REELS ||
                     name.equals("fragment_direct_tab") && HIDE_DIRECT ||
                     name.equals("fragment_search") && HIDE_SEARCH ||
-                    name.equals("fragment_share") && HIDE_CREATE ||
-                    name.equals("fragment_profile") && HIDE_PROFILE
+                    name.equals("fragment_share") && HIDE_CREATE
             ) {
                 iterator.remove();
             }

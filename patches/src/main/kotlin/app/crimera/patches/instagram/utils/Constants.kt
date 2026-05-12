@@ -13,6 +13,7 @@ package app.crimera.patches.instagram.utils
 import app.morphe.patcher.patch.ApkFileType
 import app.morphe.patcher.patch.AppTarget
 import app.morphe.patcher.patch.Compatibility
+import app.morphe.patcher.patch.SupportedAbi.ARM64_V8A
 
 object Constants {
     val COMPATIBILITY_INSTAGRAM =
@@ -25,20 +26,20 @@ object Constants {
                 listOf(
                     // Stable
                     AppTarget(
-                        version = "423.0.0.47.66",
-                        description = "Instagram Stable version (all archs)",
-                    ),
-                    // Alpha
-                    AppTarget(
-                        version = "425.0.0.0.0",
-                        description = "Instagram Alpha version (arm64-v8a only)",
-                        isExperimental = true,
+                        version = "426.0.0.37.68",
+                        description = "Tested on version code - 383207248, 383207252",
+                        versionCodes =
+                            mapOf(
+                                ARM64_V8A to 383207248,
+                                ARM64_V8A to 383207252,
+                            ),
                     ),
                 ),
         )
 
     // Instagram classes.
     const val FRIENDSHIP_STATUS_CLASS = "Lcom/instagram/user/model/FriendshipStatus;"
+    const val EDIT_MEDIA_INFO_FRAGMENT_CLASS = "Linstagram/features/creation/fragment/EditMediaInfoFragment;"
 
     // Extension classes.
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/instagram"
@@ -56,8 +57,10 @@ object Constants {
     const val LINKS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Links;"
     const val DOWNLOAD_DESCRIPTOR = "$PATCHES_DESCRIPTOR/download"
     const val UI_CONSTANTS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/constants/UI;"
+    const val ENTITY_CLASS = "$INTEGRATIONS_PACKAGE/entity"
 
     const val ACTIVITY_SETTINGS_STATUS_CLASS = "$ACTIVITY_SETTINGS_CLASS/SettingsStatus;"
-    const val ENTITY_CLASS = "$INTEGRATIONS_PACKAGE/entity"
     const val SSTS_DESCRIPTOR = "invoke-static {}, $ACTIVITY_SETTINGS_STATUS_CLASS->%s()V"
+    const val HOOK_FLAGS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/HookFlags;"
+    const val LOAD_FLAGS_DESCRIPTOR = "invoke-static {}, $HOOK_FLAGS_DESCRIPTOR->%s()V"
 }

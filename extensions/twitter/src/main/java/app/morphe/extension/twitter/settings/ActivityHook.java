@@ -20,12 +20,14 @@ import android.app.FragmentTransaction;
 import android.view.View;
 import android.view.Window;
 import androidx.appcompat.widget.Toolbar;
+
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.twitter.settings.featureflags.FeatureFlagsFragment;
 import app.morphe.extension.twitter.settings.fragments.*;
 import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeFragment;
 import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeUtils;
-import static app.morphe.extension.shared.Utils.context;
 
 @SuppressWarnings("deprecation")
 public class ActivityHook {
@@ -83,13 +85,14 @@ public class ActivityHook {
     }
 
     public static void startFragment(Activity act, String activity_name, Fragment fragment, boolean addToBackStack) {
-        act.setContentView(Utils.getResourceIdentifier("preference_fragment_activity", "layout"));
-        toolbar = act.findViewById(Utils.getResourceIdentifier("toolbar", "id"));
-        toolbar.setNavigationIcon(Utils.getResourceIdentifier("ic_vector_arrow_left", "drawable"));
+        act.setContentView(ResourceUtils.getIdentifier(ResourceType.LAYOUT, "preference_fragment_activity"));
+        toolbar = act.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "toolbar"));
+        toolbar.setNavigationIcon(ResourceUtils.getIdentifier(ResourceType.DRAWABLE, "ic_vector_arrow_left"));
         toolbar.setTitle(getTitle(activity_name));
         toolbar.setNavigationOnClickListener(view -> act.onBackPressed());
 
-        FragmentTransaction transaction = act.getFragmentManager().beginTransaction().replace(Utils.getResourceIdentifier("fragment_container", "id"), fragment);
+        FragmentTransaction transaction = act.getFragmentManager().beginTransaction().replace(
+                ResourceUtils.getIdentifier(ResourceType.ID, "fragment_container"), fragment);
         if (addToBackStack) {
             transaction.addToBackStack(null);
         }
@@ -97,46 +100,34 @@ public class ActivityHook {
     }
 
     private static String getTitle(String activity_name){
-        String toolbarText = "piko_title_settings";
-        if (activity_name.equals(Settings.PREMIUM_SECTION)) {
-            toolbarText = "piko_title_premium";
-        }else if (activity_name.equals(Settings.DOWNLOAD_SECTION)) {
-            toolbarText = "piko_title_download";
-        }else if (activity_name.equals(Settings.FLAGS_SECTION)) {
-            toolbarText = "piko_title_feature_flags";
-        }else if (activity_name.equals(Settings.ADS_SECTION)) {
-            toolbarText = "piko_title_ads";
-        }else if (activity_name.equals(Settings.MISC_SECTION)) {
-            toolbarText = "piko_title_misc";
-        }else if (activity_name.equals(Settings.CUSTOMISE_SECTION)) {
-            toolbarText = "piko_title_customisation";
-        }else if (activity_name.equals(Settings.FONT_SECTION)) {
-            toolbarText = "piko_title_font";
-        }else if (activity_name.equals(Settings.TIMELINE_SECTION)) {
-            toolbarText = "piko_title_timeline";
-        }else if (activity_name.equals(Settings.BACKUP_SECTION)) {
-            toolbarText = "piko_title_backup";
-        }else if (activity_name.equals(Settings.NATIVE_SECTION)) {
-            toolbarText = "piko_title_native";
-        }else if (activity_name.equals(Settings.LOGGING_SECTION)) {
-            toolbarText = "piko_title_logging";
-        }else if (activity_name.equals(Settings.READER_MODE_KEY)) {
-            toolbarText = "piko_title_native_reader_mode";
-        }else if (activity_name.equals(Settings.CHANGE_APP_ICON)) {
-            toolbarText = "piko_pref_customisation_change_app_icon";
-        }else if (activity_name.equals(Settings.EXPORT_LOGIN_TOKEN)) {
-            toolbarText = "piko_pref_export_login_token";
-        }
-        return Utils.getResourceString(toolbarText);
+        String toolbarText = switch (activity_name) {
+            case Settings.PREMIUM_SECTION -> "piko_title_premium";
+            case Settings.DOWNLOAD_SECTION -> "piko_title_download";
+            case Settings.FLAGS_SECTION -> "piko_title_feature_flags";
+            case Settings.ADS_SECTION -> "piko_title_ads";
+            case Settings.MISC_SECTION -> "piko_title_misc";
+            case Settings.CUSTOMISE_SECTION -> "piko_title_customisation";
+            case Settings.FONT_SECTION -> "piko_title_font";
+            case Settings.TIMELINE_SECTION -> "piko_title_timeline";
+            case Settings.BACKUP_SECTION -> "piko_title_backup";
+            case Settings.NATIVE_SECTION -> "piko_title_native";
+            case Settings.LOGGING_SECTION -> "piko_title_logging";
+            case Settings.READER_MODE_KEY -> "piko_title_native_reader_mode";
+            case Settings.CHANGE_APP_ICON -> "piko_pref_customisation_change_app_icon";
+            case Settings.EXPORT_LOGIN_TOKEN -> "piko_pref_export_login_token";
+            default -> "piko_title_settings";
+        };
+        return ResourceUtils.getString(toolbarText);
     }
 
     public static void startActivity(String activity_name, Bundle bundle) throws Exception {
-        Intent intent = new Intent(context, Class.forName("com.twitter.android.AuthorizeAppActivity"));
+        Intent intent = new Intent(Utils.getContext(), Class.forName(
+                "com.twitter.android.AuthorizeAppActivity"));
         bundle.putString(Settings.ACT_NAME, activity_name);
         bundle.putBoolean(EXTRA_PIKO, true);
         intent.putExtras(bundle);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        Utils.getContext().startActivity(intent);
     }
 
     public static void startActivity(String activity_name) throws Exception {

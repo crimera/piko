@@ -18,13 +18,17 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import app.morphe.extension.shared.Logger;
-import app.morphe.extension.shared.StringRef;
-import app.morphe.extension.shared.Utils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
+
+import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
+import app.morphe.extension.shared.StringRef;
+import app.morphe.extension.shared.Utils;
 
 public class ImportExportLoginTokenPatch {
     private static final String[] USER_DATA_KEYS = {
@@ -105,11 +109,7 @@ public class ImportExportLoginTokenPatch {
             new AlertDialog.Builder(context)
                     .setTitle(StringRef.str("piko_pref_success"))
                     .setMessage(StringRef.str("piko_login_token_import_success_reopen_required"))
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        if (context instanceof Activity activity)
-                            activity.finish();
-                    })
-                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok, null)
                     .setCancelable(false)
                     .show();
         } catch (JSONException e) {
@@ -125,8 +125,9 @@ public class ImportExportLoginTokenPatch {
     @SuppressWarnings({"deprecation", "unused"})
     public static void initImportButton(View view) {
         try {
-            TextView pikoTextView = view.findViewById(Utils.getResourceIdentifier(view.getContext(), "import_token_text", "id"));
-            pikoTextView.setTextColor(Utils.getResourceColor("twitter_blue"));
+            TextView pikoTextView = view.findViewById(
+                    ResourceUtils.getIdentifier(ResourceType.ID, "import_token_text"));
+            pikoTextView.setTextColor(ResourceUtils.getColor("twitter_blue"));
             pikoTextView.setOnClickListener(v -> {
                 if (v.getContext() instanceof Activity activity) {
                     new ImportLoginTokenDialogFragment().show(activity.getFragmentManager(), null);

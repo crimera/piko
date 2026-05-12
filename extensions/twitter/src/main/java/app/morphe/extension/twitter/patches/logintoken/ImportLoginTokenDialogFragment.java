@@ -15,6 +15,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.StringRef;
@@ -31,7 +32,8 @@ public class ImportLoginTokenDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         String[] items = {
                 StringRef.str("piko_login_token_import_from_text"),
-                StringRef.str("piko_login_token_import_from_file")
+                StringRef.str("piko_login_token_import_from_file"),
+                StringRef.str("piko_login_token_import_about")
         };
 
         AlertDialog dialog = new AlertDialog.Builder(getContext())
@@ -50,6 +52,11 @@ public class ImportLoginTokenDialogFragment extends DialogFragment {
                     intent.addCategory(Intent.CATEGORY_OPENABLE);
                     intent.setType("application/json");
                     startActivityForResult(intent, PICK_FILE_REQUEST_CODE);
+                }
+                case 2 -> { // About this feature
+                    String url = "https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md";
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(intent);
                 }
             }
         });

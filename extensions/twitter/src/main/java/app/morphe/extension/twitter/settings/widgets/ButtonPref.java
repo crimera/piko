@@ -21,17 +21,21 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.util.AttributeSet;
+
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.twitter.Utils;
 import app.morphe.extension.twitter.patches.DatabasePatch;
+import app.morphe.extension.twitter.patches.customise.appIcon.IconSelectorFragment;
+import app.morphe.extension.twitter.patches.customise.font.FontPickerFragment;
+import app.morphe.extension.twitter.patches.customise.font.UpdateFont;
 import app.morphe.extension.twitter.patches.logintoken.ExportLoginTokenFragment;
+import app.morphe.extension.twitter.patches.logintoken.ImportLoginTokenDialogFragment;
+import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeUtils;
 import app.morphe.extension.twitter.settings.ActivityHook;
 import app.morphe.extension.twitter.settings.Settings;
 import app.morphe.extension.twitter.settings.fragments.BackupPrefFragment;
 import app.morphe.extension.twitter.settings.fragments.RestorePrefFragment;
-import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeUtils;
-import app.morphe.extension.twitter.patches.customise.font.FontPickerFragment;
-import app.morphe.extension.twitter.patches.customise.font.UpdateFont;
-import app.morphe.extension.twitter.patches.customise.appIcon.IconSelectorFragment;
 
 public class ButtonPref extends Preference {
     private final Context context;
@@ -70,7 +74,7 @@ public class ButtonPref extends Preference {
 
     private void init() {
         if (iconName != null) {
-            int resId = app.morphe.extension.shared.Utils.getResourceIdentifier(iconName, "drawable");
+            int resId = ResourceUtils.getIdentifier(ResourceType.DRAWABLE, iconName);
             Drawable icon = context.getResources().getDrawable(resId);
 
             int clr = Color.RED;
@@ -117,7 +121,7 @@ public class ButtonPref extends Preference {
                     } else if (key.equals(Settings.PREMIUM_UNDO_POSTS.key)) {
                         Utils.startUndoPostActivity();
                     }  else if (key.equals(Settings.PREMIUM_NAVBAR.key)) {
-                        app.morphe.extension.crimera.Utils.openUrl("https://www.x.com/settings/custom_navigation");
+                        app.morphe.extension.crimera.PikoUtils.openUrl("https://www.x.com/settings/custom_navigation");
                     } else if (key.equals(Settings.RESET_PREF)) {
                         Utils.deleteSharedPrefAB(context, false);
                     } else if (key.equals(Settings.RESET_FLAGS)) {
@@ -128,6 +132,8 @@ public class ButtonPref extends Preference {
                         ReaderModeUtils.clearCache();
                     } else if (key.equals(Settings.CHANGE_APP_ICON)) {
                         fragment = new IconSelectorFragment();
+                    } else if (key.equals(Settings.IMPORT_LOGIN_TOKEN)) {
+                        new ImportLoginTokenDialogFragment().show(((Activity) context).getFragmentManager(), null);
                     } else if (key.equals(Settings.EXPORT_LOGIN_TOKEN)) {
                         fragment = new ExportLoginTokenFragment();
                     } else {
@@ -139,8 +145,8 @@ public class ButtonPref extends Preference {
                         ActivityHook.startFragment((Activity) context, key,fragment, true);
                     }
                 } catch (Exception e) {
-                    app.morphe.extension.crimera.Utils.logger(e);
-                    app.morphe.extension.crimera.Utils.toast(e.toString());
+                    app.morphe.extension.crimera.PikoUtils.logger(e);
+                    app.morphe.extension.crimera.PikoUtils.toast(e.toString());
                 }
 
                 return true;

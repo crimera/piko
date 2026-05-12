@@ -14,6 +14,7 @@ package app.morphe.extension.instagram.entity;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Constructor;
 
 public class Entity {
     protected final Object obj;
@@ -26,8 +27,20 @@ public class Entity {
         this.obj = null;
     }
 
+    public Object getObject(){
+        return this.obj;
+    }
+
     public Class<?> getObjClass() throws ClassNotFoundException {
         return this.obj.getClass();
+    }
+
+    public Entity construct(String className, Class<?>[] paramTypes, Object... params) throws Exception {
+        Class<?> clazz = Class.forName(className);
+        Constructor<?> constructor = clazz.getDeclaredConstructor(paramTypes);
+        constructor.setAccessible(true);
+        Object instance = constructor.newInstance(params);
+        return new Entity(instance);
     }
 
     public Object getField(Class cls, Object clsObj, String fieldName) throws Exception {
@@ -42,6 +55,11 @@ public class Entity {
 
     public Object getField(String fieldName) throws Exception {
         return getField(this.obj, fieldName);
+    }
+
+    public Entity getFieldAsEntity(String fieldName) throws Exception {
+        Object object = getField(fieldName);
+        return new Entity(object);
     }
 
     public Object getMethod(Object clsObj, String methodName, Class<?>[] paramTypes, Object... params) throws Exception {
@@ -76,6 +94,10 @@ public class Entity {
             return this.getMethod(clsObj, methodName, paramTypes, params);
         }
 
+    }
+
+    public Object getMethod(String methodName, Class<?>[] paramTypes, Object... params) throws Exception {
+        return this.getMethod(this.obj, methodName, paramTypes, params);
     }
 
     public Object getMethod(String methodName, Object... params) throws Exception {

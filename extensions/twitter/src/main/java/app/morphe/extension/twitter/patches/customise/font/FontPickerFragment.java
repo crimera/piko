@@ -19,7 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import android.app.Fragment;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.StringRef;
 
 
@@ -55,7 +55,7 @@ public class FontPickerFragment extends Fragment {
                 return true;
             }
         }catch (Exception e){
-            Utils.logger(e);
+            PikoUtils.logger(e);
         }
         return false;
     }
@@ -78,7 +78,7 @@ public class FontPickerFragment extends Fragment {
             return true;
         }
         catch (Exception e){
-            Utils.logger(e);
+            PikoUtils.logger(e);
         }
         return false;
     }
@@ -105,7 +105,7 @@ public class FontPickerFragment extends Fragment {
     }
 
     private static void toast(String msg){
-        Utils.toast(msg);
+        PikoUtils.toast(msg);
     }
 
     @Override

@@ -11,9 +11,14 @@
 package app.crimera.patches.instagram.misc.download
 
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
+import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundDataIntfEntity
+import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
+import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
+import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
@@ -24,12 +29,15 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
@@ -39,7 +47,14 @@ val downloadMediaPatch =
         name = "Download media",
         description = "Adds ability to download posts, reels, stories and highlights",
     ) {
-        dependsOn(settingsPatch, mediaDataEntity, handleStoryButtonPatch)
+        dependsOn(
+            settingsPatch,
+            mediaDataEntity,
+            handleStoryButtonPatch,
+            originalSoundDataIntfEntity,
+            trackDataIntfEntity,
+            hookFlagsPatch,
+        )
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
@@ -62,8 +77,8 @@ val downloadMediaPatch =
             }
 
             val currentViewingMediaFieldData =
-                EditMediaInfoFragmentFingerprint.method.instructions
-                    .last { it.opcode == Opcode.IGET }
+                EditMediaInfoGetCurrentMediaIdFingerprint.method.instructions
+                    .first { it.opcode == Opcode.IGET }
                     .fieldExtractor()
 
             AddFeedButtonFingerprint.method.apply {
@@ -76,16 +91,25 @@ val downloadMediaPatch =
                     checkCastIndex = indexOfFirstInstruction(Opcode.CHECK_CAST)
                     checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
                 } else {
-                    val arrayListIndex =
-                        indexOfFirstInstructionOrThrow {
-                            opcode == Opcode.NEW_INSTANCE &&
-                                getReference<TypeReference>()?.type == "Ljava/util/ArrayList;"
+                    val arrayListInstructions =
+                        instructions.filter {
+                            it.opcode == Opcode.NEW_INSTANCE &&
+                                it.getReference<TypeReference>()?.type == "Ljava/util/ArrayList;"
                         }
 
-                    val arrayInitInstruction = getInstruction(arrayListIndex + 1)
-                    arrayListRegister = arrayInitInstruction.registersUsed[0]
-                    checkCastIndex = indexOfFirstInstruction(arrayListIndex, Opcode.CHECK_CAST)
-                    checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
+                    arrayListInstructions.firstOrNull { instruction ->
+                        val index = instruction.location.index
+                        val nextNextInstructionOpcode = getInstruction(index + 2).opcode
+                        val nextNextNextInstructionOpcode = getInstruction(index + 3).opcode
+                        if (nextNextInstructionOpcode == Opcode.IGET_OBJECT && nextNextNextInstructionOpcode == Opcode.CHECK_CAST) {
+                            val arrayInitInstruction = getInstruction(index + 1)
+                            arrayListRegister = arrayInitInstruction.registersUsed[0]
+                            checkCastIndex = indexOfFirstInstruction(index, Opcode.CHECK_CAST)
+                            checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
+                            true
+                        }
+                        false
+                    }
                 }
 
                 if (arrayListRegister != -1 && checkCastRegister != -1 && checkCastIndex != -1) {
@@ -105,9 +129,10 @@ val downloadMediaPatch =
 
                 val appActivityField = classFields.first { it.type == appActivity }
 
-                val mediaObjectIGetFieldData = instructions[indexOfFirstInstruction(Opcode.IGET_OBJECT)].fieldExtractor()
-                val mediaObjectClass = extensionToClassName(mediaObjectIGetFieldData.returnType)
-                val mediaObjectField = mediaObjectIGetFieldData.name
+                val getMediaObjectMethod =
+                    classDef.methods.first {
+                        AccessFlags.FINAL.isSet(it.accessFlags) && it.implementation?.registerCount == 1
+                    }
 
                 val mediaExtraDataClass = currentViewingMediaFieldData.definingClass
                 val mediaExtraDataField = classDef.fields.first { it.type == extensionToClassName(mediaExtraDataClass) }
@@ -123,7 +148,8 @@ val downloadMediaPatch =
                     
                     move-object/from16 v0, p0
                     iget-object v5, v0, $appActivityField
-                    iget-object v2, v0, $className->$mediaObjectField:$mediaObjectClass
+                    invoke-static {v0}, $getMediaObjectMethod
+                    move-result-object v2
                     iget-object v4, v0, $mediaExtraDataField
                     iget v4, v4, ${mediaExtraDataField.type}->$currentViewingMediaIndexField:I
                     
@@ -159,6 +185,46 @@ val downloadMediaPatch =
                 )
             }
 
+            // Make Save option available for all DM content.
+            DMLongPressButtonAdderFingerprint.method.apply {
+                val allIfNez = instructions.filter { it.opcode == Opcode.IF_NEZ }
+                allIfNez.firstOrNull { instruction ->
+                    val index = instruction.location.index
+                    val opCodeOfPrevInstruction = getInstruction(index - 1).opcode
+                    val opCodeOfNextInstruction = getInstruction(index + 1).opcode
+
+                    if (opCodeOfPrevInstruction == Opcode.IF_EQZ && opCodeOfNextInstruction == Opcode.SGET_OBJECT) {
+                        removeInstruction(index - 1)
+                        true
+                    } else {
+                        false
+                    }
+                }
+            }
+            // DM media downloader.
+            GetDirectThreadMediaSaverModuleNameFingerprint.apply {
+
+                val appActivityField = classDef.fields.first { it.type == "Landroid/app/Activity;" }
+
+                classDef.methods
+                    .first { it.returnType == "V" && it.name != "<init>" }
+                    .apply {
+                        addInstructionsWithLabels(
+                            0,
+                            """
+                            iget-object v0, p1, $appActivityField
+                            move-object v1, p2
+                            invoke-static {v0, v1}, $DOWNLOAD_DESCRIPTOR/MessageUtils;->messageDownloadCheck(Landroid/content/Context;Ljava/lang/Object;)Z
+                            move-result v1
+                            if-nez v1, :piko
+                            return-void
+                            """.trimIndent(),
+                            ExternalLabel("piko", getInstruction(0)),
+                        )
+                    }
+            }
+
             enableSettings("downloadMedia")
+            addFlags("simpleOverflowMenuFlags")
         }
     }

@@ -10,11 +10,10 @@
 
 package app.crimera.patches.instagram.misc.extension
 
-import app.crimera.patches.instagram.misc.extension.hooks.applicationInitHook
-import app.morphe.shared.misc.extension.sharedExtensionPatch
+import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
+import app.morphe.patches.all.misc.extension.sharedExtensionPatch
 
-val sharedExtensionPatch =
-    sharedExtensionPatch(
-        "instagram",
-        applicationInitHook,
-    )
+val sharedExtensionPatch = sharedExtensionPatch(
+    listOf("shared", "instagram"),
+    instagramInitHook,
+)

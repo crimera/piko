@@ -11,10 +11,8 @@
 package app.crimera.patches.instagram.misc.download
 
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CLASS
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.OpcodesFilter
-import com.android.tools.smali.dexlib2.AccessFlags
-import com.android.tools.smali.dexlib2.Opcode
 
 val FEED_BUTTON_DESCRIPTOR = "$DOWNLOAD_DESCRIPTOR/FeedButton;"
 val REEL_BUTTON_DESCRIPTOR = "$DOWNLOAD_DESCRIPTOR/ReelButton;"
@@ -29,11 +27,11 @@ internal object FeedButtonOnClickFingerprint : Fingerprint(
     returnType = "V",
 )
 
-internal object EditMediaInfoFragmentFingerprint : Fingerprint(
-    definingClass = "Linstagram/features/creation/fragment/EditMediaInfoFragment;",
-    returnType = "V",
+// Also used to in description extraction in MediaEntity
+object EditMediaInfoGetCurrentMediaIdFingerprint : Fingerprint(
+    definingClass = EDIT_MEDIA_INFO_FRAGMENT_CLASS,
+    returnType = "Ljava/lang/String;",
     parameters = listOf(),
-    strings = listOf("Required value was null."),
 )
 
 internal object AddReelButtonFingerprint : Fingerprint(
@@ -42,6 +40,17 @@ internal object AddReelButtonFingerprint : Fingerprint(
 
 internal object EnumButtonClassFingerprint : Fingerprint(
     strings = listOf("UNSET_OR_UNRECOGNIZED_ENUM_VALUE", "ACTION", "DESTRUCTIVE"),
+)
+
+internal object GetDirectThreadMediaSaverModuleNameFingerprint : Fingerprint(
+    strings = listOf("DirectThreadMediaSaver"),
+    name = "getModuleName",
+    returnType = "Ljava/lang/String;",
+)
+
+internal object DMLongPressButtonAdderFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("⏰", "userSession"),
 )
 
 internal object GetEnumButtonClassExtensionFingerprint : Fingerprint(

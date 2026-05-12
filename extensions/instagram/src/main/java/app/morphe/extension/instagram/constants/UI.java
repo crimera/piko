@@ -10,49 +10,42 @@
 
 package app.morphe.extension.instagram.constants;
 
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
-import android.widget.ImageView;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.util.TypedValue;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.app.Activity;
-import android.view.ViewGroup.MarginLayoutParams;
-
-import java.util.List;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
+import android.util.TypedValue;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import java.util.ArrayList;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
-import app.morphe.extension.shared.Logger;
-import app.morphe.extension.shared.Utils;
-import app.morphe.extension.instagram.constants.Strings;
-import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.utils.Pref;
+import app.morphe.extension.instagram.settings.Settings;
+import app.morphe.extension.instagram.entity.InstagramButton;
+import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
-import com.instagram.igds.components.button.IgdsButton;
-import app.morphe.extension.instagram.entity.Entity;
+import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
+import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.ui.Dim;
 
 public class UI {
 
     public static int getThemedColour() {
         Context context = Utils.getContext();
         TypedValue typedValue = new TypedValue();
-        int attrId = Utils.getResourceIdentifier("igds_color_primary_icon", "attr");
+        int attrId = ResourceUtils.getIdentifier(ResourceType.ATTR, "igds_color_primary_icon");
         boolean resolved = context.getTheme().resolveAttribute(attrId, typedValue, true);
         return context.getColor(typedValue.resourceId);
     }
 
     public static void setThemedIcon(ImageView imageView, String drawableAttr) {
         try {
-            Context context = Utils.getContext();
-            Drawable drawable = context.getDrawable(Utils.getResourceIdentifier(drawableAttr, "drawable"));
+            Drawable drawable = ResourceUtils.getDrawable(drawableAttr);
             imageView.setImageDrawable(drawable);
             imageView.setColorFilter(new PorterDuffColorFilter(getThemedColour(), PorterDuff.Mode.SRC_ATOP));
 
@@ -61,44 +54,23 @@ public class UI {
         }
     }
 
-
-    private static Object pikoSettingsButtonStyle() throws Exception {
-        Entity e = new Entity();
-        Class<?> styleClass = Class.forName("X.0X3");
-        return e.getMethod(
-                styleClass,
-                "valueOf",
-                "PRIMARY"
-        );
-    }
-
     public static void pikoSettingsButton(ViewGroup viewGroup) throws Exception {
+        boolean isFirstTime = Pref.firstTimePiko();
+
         Context context = viewGroup.getContext();
-        IgdsButton button = new IgdsButton(context);
+        InstagramButton button = new InstagramButton(context);
         button.setText(Strings.PIKO_SETTINGS_TITLE);
-        Object buttonStyle = pikoSettingsButtonStyle();
-        // The function call for adding the button style to the button will be injected here from patches.
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    ActivityHook.startPikoActivity();
-                } catch (Exception ex) {
-                    Logger.printException(() -> "Failed to launch settings: ", ex);
-                }
-            }
-        });
+        button.setStyle(InstagramButtonStyleEnum.SUPER_PRIMARY);
+        button.setOnClickListener(ActivityHook::startPikoActivity);
 
-        int marginPx = Utils.dipToPixels(12);
+        int marginPx = Dim.dp12;
+        button.setMargins(marginPx, marginPx, marginPx, marginPx);
 
-        MarginLayoutParams params = new MarginLayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-        );
-        params.setMargins(marginPx, marginPx, marginPx, marginPx);
-        button.setLayoutParams(params);
-
-        viewGroup.addView(button);
+        viewGroup.addView(button.getIgdsButton());
+        if(isFirstTime){
+            button.startPulseAnimation();
+            Pref.setFirstTimePiko(false);
+        }
     }
 
     public static void restartDialogBox(Context context) {
@@ -120,7 +92,7 @@ public class UI {
 
                     }
                 } catch (Exception e) {
-                    Logger.printException(() -> "Error at downloadDialogBox", e);
+                    Logger.printException(() -> "Error at restartDialogBox", e);
                     Utils.showToastShort(e.getMessage());
                 }
             }
@@ -135,4 +107,36 @@ public class UI {
         dlg.show();
     }
 
+    public static void welcomeDialogBox(Context context) {
+        InstagramDialogBox dialog = new InstagramDialogBox(context);
+
+        ArrayList<String> options = new ArrayList<>();
+        options.add(Strings.GOTO_PIKO_SETTINGS);
+        CharSequence[] items = options.toArray(new CharSequence[0]);
+
+        dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface d, int which) {
+                try {
+                    // Doing like this because options are dynamic.
+                    String selectedOption = options.get(which);
+
+                    if (selectedOption.equals(Strings.GOTO_PIKO_SETTINGS)) {
+                        ActivityHook.openLink("instagram://profile");
+                    }
+                } catch (Exception e) {
+                    Logger.printException(() -> "Error at welcomeDialogBox", e);
+                    Utils.showToastShort(e.getMessage());
+                }
+            }
+        });
+
+        dialog.setTitle(Strings.WELCOME_TITLE);
+        dialog.setMessage(Strings.WELCOME_MESSAGE);
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+
+        Dialog dlg = dialog.getDialog();
+        dlg.show();
+    }
 }

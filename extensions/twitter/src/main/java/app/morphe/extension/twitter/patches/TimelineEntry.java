@@ -18,7 +18,7 @@ import app.morphe.extension.twitter.settings.SettingsStatus;
 import app.morphe.extension.twitter.entity.Video;
 import java.util.List;
 import java.util.ArrayList;
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 public class TimelineEntry {
     public static final boolean hideAds;
@@ -147,7 +147,7 @@ public class TimelineEntry {
             }
 
         }catch(Exception ex){
-            Utils.logger(ex);
+            PikoUtils.logger(ex);
         }
 
         return videoEnities;

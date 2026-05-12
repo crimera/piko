@@ -62,6 +62,9 @@ public class ListPref extends ListPreference {
         if (key == Settings.CUSTOMISE_STORY_TIMESTAMP.key) {
             entries = Arrays.CUSTOMISE_STORY_TIMESTAMP_KEY;
             entriesValues = Arrays.CUSTOMISE_STORY_TIMESTAMP_VAL;
+        } else if (key == Settings.CHANGE_LIKE_ANIMATION.key) {
+            entries = Arrays.CHANGE_LIKE_ANIMATION_KEY;
+            entriesValues = Arrays.CHANGE_LIKE_ANIMATION_VAL;
         }
 
         setEntries(entries);

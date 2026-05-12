@@ -1,12 +1,12 @@
 /*
-    * Copyright (C) 2026 piko <https://github.com/crimera/piko>
-    *
-    * This file is part of piko.
-    *
-    * Any modifications, derivatives, or substantial rewrites of this file
-    * must retain this copyright notice and the piko attribution
-    * in the source code and version control history.
-*/
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
 
 
 package app.morphe.extension.instagram.utils;
@@ -14,15 +14,19 @@ package app.morphe.extension.instagram.utils;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+
 import java.io.File;
+
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.entity.DeveloperOptions;
 
 public class Utils {
 
     public static boolean deleteRecursive(File file) {
         try {
-            if (file == null || !file.exists()){
-                app.morphe.extension.crimera.Utils.toast(Strings.FAIL_NO_FILE);
+            if (file == null || !file.exists()) {
+                PikoUtils.toast(Strings.FAIL_NO_FILE);
                 return false;
             }
 
@@ -36,8 +40,29 @@ public class Utils {
             }
             return file.delete();
         } catch (RuntimeException e) {
-            app.morphe.extension.crimera.Utils.logger(e);
+            PikoUtils.logger(e);
         }
         return false;
+    }
+
+    public static void decompileExperiments(boolean asJson) {
+        String appVersionName = app.morphe.extension.shared.Utils.getAppVersionName();
+        DeveloperOptions developerOptions = new DeveloperOptions();
+
+        String fileName = appVersionName + " Experiments";
+        boolean fileDone = false;
+        String data = "";
+        String fileDoneTxt = " failed";
+
+        if (asJson) {
+            fileName += ".json";
+            data = developerOptions.toJSONObject().toString();
+        } else {
+            fileName += ".txt";
+            data = developerOptions.toString();
+        }
+        fileDone = PikoUtils.pikoWriteFile(fileName, Strings.DEFAULT_PIKO_FOLDER, data, false);
+        fileDoneTxt = fileDone ? " created" : fileDoneTxt;
+        PikoUtils.toast(fileName + fileDoneTxt);
     }
 }

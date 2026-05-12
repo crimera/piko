@@ -10,24 +10,27 @@
 
 package app.crimera.patches.instagram.misc.settings
 
+import app.crimera.patches.instagram.entity.developerOptions.developerOptionsEntity
+import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntity
 import app.crimera.patches.instagram.entity.profileinfo.ProfileUserInfoViewBinderFingerprint
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
+import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
+import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.LOAD_FLAGS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
+import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.utils.changeFirstString
-import app.crimera.utils.classNameToExtension
 import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -40,7 +43,14 @@ val settingsPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(sharedExtensionPatch, addSettingsActivityPatch, profileInfoEntity)
+        dependsOn(
+            sharedExtensionPatch,
+            addSettingsActivityPatch,
+            hookFlagsPatch,
+            profileInfoEntity,
+            instagramButtonEntity,
+            developerOptionsEntity,
+        )
         execute {
 
             ProfileUserInfoViewBinderFingerprint.method.apply {
@@ -53,30 +63,19 @@ val settingsPatch =
                 )
             }
 
-            PikoSettingsButtonExtensionFingerprint.method.apply {
-                val buttonStyleClass =
-                    IgdsButtonSetStyleFingerprint.method.parameters
-                        .first()
-                        .type
-                PikoSettingsButtonStyleExtensionFingerprint.changeFirstString(classNameToExtension(buttonStyleClass))
+            instagramInitHook.fingerprint.method.apply {
 
-                val buttonStyleInstructionIndex = indexOfFirstInstruction(Opcode.INVOKE_STATIC)
-                val dummyRegister = findFreeRegister(buttonStyleInstructionIndex)
-                val buttonRegister = instructions.first { it.opcode == Opcode.NEW_INSTANCE }.registersUsed[0]
+                addInstruction(
+                    0,
+                    SSTS_DESCRIPTOR.format("load"),
+                )
 
-                addInstructions(
-                    buttonStyleInstructionIndex + 1,
-                    """
-                    move-result-object v$dummyRegister
-                    invoke-virtual {v$buttonRegister, v$dummyRegister}, ${IgdsButtonSetStyleFingerprint.definingClass}->setStyle($buttonStyleClass)V
-                    """.trimIndent(),
+                val firstInvokeSuperIndex = indexOfFirstInstruction(Opcode.INVOKE_SUPER)
+                addInstruction(
+                    firstInvokeSuperIndex + 1,
+                    LOAD_FLAGS_DESCRIPTOR.format("load"),
                 )
             }
-
-            ExtensionsUtilsFingerprint.method.addInstruction(
-                0,
-                SSTS_DESCRIPTOR.format("load"),
-            )
 
             // The following handles the signature check while sharing a link externally and opening a link.
             UriTrustingMethodFingerprint.classDef.methods
@@ -102,5 +101,25 @@ val settingsPatch =
                 val firstIGetObject = getInstruction(indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT))
                 SignatureCheckExtensionFingerprint.changeFirstString(firstIGetObject.fieldExtractor().name)
             }
+
+            // For welcome message.
+            MainFeedFragmentOnCreateFingerprint.apply {
+                val strIndex = stringMatches[0].index
+
+                method.apply {
+                    val contextIndex = indexOfFirstInstruction(strIndex, Opcode.MOVE_RESULT_OBJECT)
+                    val contextInstruction = getInstruction(contextIndex)
+                    val contextRegister = contextInstruction.registersUsed[0]
+
+                    addInstruction(
+                        contextIndex + 1,
+                        """
+                        invoke-static{v$contextRegister}, $PATCHES_DESCRIPTOR/WelcomeMessage;->openWelcomeMessage(Landroid/content/Context;)V
+                        """.trimIndent(),
+                    )
+                }
+            }
+
+            addFlags("contactPermissionConsentFlags")
         }
     }

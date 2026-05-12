@@ -17,15 +17,19 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
+import app.crimera.utils.extensionToClassName
+import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal object BindInternalBadgeFingerprint : Fingerprint(
     strings = listOf("bindInternalBadges"),
@@ -54,49 +58,60 @@ val followBackIndicatorPatch =
                 val isStaticMethod = AccessFlags.STATIC.isSet(method.accessFlags)
 
                 method.apply {
+                    val viewType = "Landroid/view/View;"
+
                     val internalBadgeStringIndex = BindInternalBadgeFingerprint.stringMatches[0].index
                     val profileInfoClassType = ProfileUserInfoViewBinderFingerprint.method.parameters[1].type
 
                     // Identify the profile info in the method parameter, which is later passed to our custom hook.
                     var profileInfoParameter = parameters.indexOfFirst { it.type == profileInfoClassType }
 
+                    // Identify the View parameter, which contents all the elements on profile view.
+                    var viewParameter = parameters.indexOfFirst { it.type == viewType }
+
                     // If it is not a static function, then we need to increase the parameter count by one.
                     if (!isStaticMethod) {
                         profileInfoParameter += 1
+                        viewParameter += 1
                     }
 
                     val internalBadgeInstructionIndex =
                         indexOfFirstInstruction(internalBadgeStringIndex, Opcode.IGET_OBJECT)
-                    val internalBadgeInstruction = getInstruction(internalBadgeInstructionIndex)
-                    // Internal badge is an element/view, which is used internally to mark developers.
-                    // We hook and update its text to display the follow back status.
-                    val internalBadgeRegistries = internalBadgeInstruction.registersUsed
-                    val internalBadgeRegistry = internalBadgeRegistries[0]
-                    // User profile page (obfuscated) contains all the elements that are present on the user page.
-                    // We are hooking it in order to find user session, which is used to get info on logged in user.
-//                val userProfilePageRegistry = internalBadgeRegistries[1]
-
-                    // Finding the necessary dummy registries.
-                    val dummyRegistryInstructionIndex =
-                        indexOfFirstInstruction(internalBadgeInstructionIndex + 1, Opcode.IGET_OBJECT)
-                    val dummyRegistry1 = getInstruction(dummyRegistryInstructionIndex).registersUsed[0]
-                    val dummyRegistry2 = getInstruction(internalBadgeStringIndex).registersUsed[0]
+                    val internalBadgeInstructionExtraction = getInstruction(internalBadgeInstructionIndex).fieldExtractor()
+                    val internalBadgeDefiningClassName = extensionToClassName(internalBadgeInstructionExtraction.definingClass)
+                    val internalBadgeFieldName = internalBadgeInstructionExtraction.name
+                    val internalBadgeReturnType = extensionToClassName(internalBadgeInstructionExtraction.returnType)
 
                     // Instruction to which the call needs to transfer after our hook.
-                    val invokeStaticRangeIndex =
-                        indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.INVOKE_STATIC_RANGE)
+                    val moveFrom16Index =
+                        indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.MOVE_FROM16)
 
                     // Added instructions:
-                    // Move the profile info parameter to a suitable registry.
-                    // Call our hook, which will update the badge.
+                    // Bypass the internal badge visibility checks.
                     addInstructionsWithLabels(
                         internalBadgeInstructionIndex + 1,
                         """
-                        move-object/from16 v$dummyRegistry2, p$profileInfoParameter
-                        invoke-static {v$dummyRegistry2, v$internalBadgeRegistry}, ${PATCHES_DESCRIPTOR}/userprofile/FriendshipStatusIndicator;->indicators(Ljava/lang/Object;Ljava/lang/Object;)V
                         goto :piko
                         """.trimIndent(),
-                        ExternalLabel("piko", getInstruction(invokeStaticRangeIndex)),
+                        ExternalLabel("piko", getInstruction(moveFrom16Index)),
+                    )
+
+                    // Added instructions:
+                    // Get the view  and check if its not null
+                    // and then cast it to the profile model class*.
+                    // class the indicator hook.
+                    addInstructionsWithLabels(
+                        0,
+                        """
+                        invoke-virtual/range {p$viewParameter .. p$viewParameter}, $viewType->getTag()Ljava/lang/Object;
+                        move-result-object v1
+                        if-eqz v1, :cond_piko
+                        check-cast v1, $internalBadgeDefiningClassName
+                        iget-object v2, v1, $internalBadgeDefiningClassName->$internalBadgeFieldName:$internalBadgeReturnType
+                        move-object/from16 v0, p$profileInfoParameter
+                        invoke-static {v0, v2}, ${PATCHES_DESCRIPTOR}/userprofile/FriendshipStatusIndicator;->indicators(Ljava/lang/Object;Ljava/lang/Object;)V
+                        """.trimIndent(),
+                        ExternalLabel("cond_piko", getInstruction(0)),
                     )
 
                     enableSettings("followBackIndicator")

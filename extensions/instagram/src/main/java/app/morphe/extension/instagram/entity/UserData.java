@@ -42,6 +42,29 @@ public class UserData extends Entity {
         }
     }
 
+    public String getBio() {
+        try {
+            Object additionalUserInfo = getAdditionalUserInfo();
+            return (String) super.getMethod(additionalUserInfo, "BCu");
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    public String getProfilePictureUrl() {
+        try {
+            Object additionalUserInfo = getAdditionalUserInfo();
+            Object profilePicObject =  super.getMethod(additionalUserInfo, "Bvt");
+            if(profilePicObject!=null){
+                Entity profilePicEntity = new Entity(profilePicObject);
+                return (String) profilePicEntity.getMethod("getUrl");
+            }
+            return null;
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
     public String getUserId() throws Exception {
         return (String) super.getMethod(this.obj, "getId");
     }

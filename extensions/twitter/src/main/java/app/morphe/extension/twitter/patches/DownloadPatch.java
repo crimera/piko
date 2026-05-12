@@ -18,7 +18,8 @@ import android.widget.LinearLayout;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import app.morphe.extension.crimera.Utils;
+import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.shared.Logger;
 import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.shared.StringRef;
 
@@ -44,7 +45,7 @@ public class DownloadPatch {
             }
 
         }catch (Exception e){
-            Utils.toast(e.toString());
+            PikoUtils.toast(e.toString());
         }
     }
 
@@ -56,7 +57,7 @@ public class DownloadPatch {
             downloadClass.invoke(obj1, para1);
         }
         catch (Exception e){
-            Utils.toast(e.toString());
+            PikoUtils.toast(e.toString());
         }
     }
 
@@ -69,7 +70,7 @@ public class DownloadPatch {
             return mediaLink;
         }
         catch (Exception e){
-            Utils.toast(e.toString());
+            PikoUtils.toast(e.toString());
         }
         return "";
     }
@@ -79,20 +80,20 @@ public class DownloadPatch {
 
             String mediaLink = getMediaLink(para1);
             app.morphe.extension.shared.Utils.setClipboard(mediaLink);
-            Utils.toast(strRes("link_copied_to_clipboard"));
+            PikoUtils.toast(strRes("link_copied_to_clipboard"));
         }
         catch (Exception e){
-            Utils.toast(e.toString());
+            PikoUtils.toast(e.toString());
         }
     }
 
     private static void shareMediaLink(Object para1) {
         try{
             String mediaLink = getMediaLink(para1);
-            app.morphe.extension.shared.Utils.shareText(mediaLink);
+            PikoUtils.shareText(mediaLink);
         }
-        catch (Exception e){
-            Utils.toast(e.toString());
+        catch (Exception e) {
+            PikoUtils.toast(e.toString());
         }
     }
 

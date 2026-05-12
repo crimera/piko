@@ -10,10 +10,7 @@
 
 package app.crimera.utils
 
-import app.crimera.patches.twitter.utils.Constants.FSTS_DESCRIPTOR
-import app.crimera.patches.twitter.utils.Constants.SSTS_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
@@ -37,6 +34,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.formats.*
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.Reference
+import jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyle
 import org.w3c.dom.Element
 
 fun ResourcePatchContext.replaceXmlResources(
@@ -129,16 +127,16 @@ fun Reference.extractDescriptors(): List<String> {
     return regex.findAll(this.toString()).map { it.value }.toList()
 }
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.getReference(index: Int): Reference = method.getInstruction<ReferenceInstruction>(index).reference
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.getMethodName(index: Int): String = (getReference(index) as DexBackedMethodReference).name
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.getFieldName(index: Int): String = (getReference(index) as FieldReference).name
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.changeStringAt(
     index: Int,
     value: String,
@@ -149,7 +147,7 @@ fun Fingerprint.changeStringAt(
     }
 }
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.changeFirstString(value: String) {
     changeStringAt(0, value)
 }
