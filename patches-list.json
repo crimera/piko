@@ -1,5 +1,5 @@
 {
-  "version": "3.3.0-dev.8",
+  "version": "3.3.0",
   "patches": [
     {
       "name": "Add ability to copy media link",
