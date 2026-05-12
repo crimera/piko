@@ -8,7 +8,6 @@
  * in the source code and version control history.
  */
 
-
 package app.morphe.extension.instagram.constants.translations;
 
 public class StringsRussian extends DefaultStrings {
@@ -16,8 +15,8 @@ public class StringsRussian extends DefaultStrings {
         this.PIKO_SETTINGS_TITLE = "Настройки Piko";
         this.CATEGORY_ADS = "Реклама";
         this.DISABLE_ADS = "Отключить рекламу";
-        this.HIDE_SUGEESTED_CONTENT = "Скрыть рекомендуемое содержимое";
-        this.HIDE_SUGEESTED_CONTENT_DESC = "Скрывает рекомендуемые истории, reels и threads (предлагаемые записи всё ещё будут показываться)";
+        this.HIDE_SUGEESTED_CONTENT = "Скрыть рекомендуемый контент";
+        this.HIDE_SUGEESTED_CONTENT_DESC = "Скрывает рекомендуемые истории, Reels и Threads (предлагаемые публикации всё ещё будут показываться)";
         this.CATEGORY_DEV_OPTIONS = "Параметры разработчика";
         this.ENABLE_DEV_OPTIONS = "Включить параметры разработчика";
         this.ENABLE_EMP_OPTIONS = "Включить служебные параметры";
@@ -32,7 +31,7 @@ public class StringsRussian extends DefaultStrings {
         this.DIRECTLY_OPEN_METACONFIG = "Открыть настройки MetaConfig сразу";
         this.DIRECTLY_OPEN_METACONFIG_DESC = "Открывает настройки MetaConfig при долгом нажатии на значок «Домой» (требуется включение параметров разработчика)";
         this.CATEGORY_LINKS = "Ссылки";
-        this.OPEN_LINKS_EXTERNALLY = "Открывать ссылки в другом приложении";
+        this.OPEN_LINKS_EXTERNALLY = "Открывать ссылки во внешнем браузере";
         this.OPEN_LINKS_EXTERNALLY_DESC = "Открывать ссылки во внешнем браузере, а не во встроенном";
         this.SANITIZE_SHARE_LINKS = "Очищать ссылки при отправке";
         this.CATEGORY_GHOST = "Невидимка";
@@ -49,7 +48,7 @@ public class StringsRussian extends DefaultStrings {
         this.LIMIT_FOLLOWING_FEED = "Ограничить ленту подписками";
         this.LIMIT_FOLLOWING_FEED_DESC = "Показывать в главной ленте только содержимое от профилей, на которые вы подписаны";
         this.DISABLE_REELS_SCROLLING = "Отключить пролистывание Reels";
-        this.DISABLE_REELS_SCROLLING_DESC = "Отключает бесконечное пролистывание в Reels, не позволяя переходить к следующему ролику. Примечание: при чистой установке анимация «Подсказка» может появиться, но через несколько секунд остановится сама";
+        this.DISABLE_REELS_SCROLLING_DESC = "Отключает бесконечное пролистывание в Reels, не позволяя переходить к следующему видео. Примечание: при чистой установке анимация «Подсказка» может появиться, но через несколько секунд остановится сама";
         this.HIDE_STORIES_TRAY = "Скрыть панель историй";
         this.HIDE_STORIES_TRAY_DESC = "Скрывает панель историй в главной ленте";
         this.HIDE_NOTES_TRAY = "Скрыть панель заметок";
@@ -83,7 +82,7 @@ public class StringsRussian extends DefaultStrings {
         this.IMPROVE_IMAGE_VIEWING_DESC = "Загружать с сервера изображения максимального разрешения";
         this.HIDE_RESHARE_BUTTON = "Скрыть кнопку «Поделиться»";
         this.COPY_COMMENT = "Скопировать комментарий";
-        this.COPY_COMMENT_DESC = "Добавляет кнопку для копирования комментариев в записях и роликах";
+        this.COPY_COMMENT_DESC = "Добавляет кнопку для копирования комментариев в публикациях и Reels";
         this.COMMENT_COPIED_SUCCESS = "Комментарий скопирован";
         this.COMMENT_COPIED_FAILED = "Не найдено текста для копирования";
         this.COPY_USERNAME = "Скопировать имя пользователя";
@@ -101,7 +100,7 @@ public class StringsRussian extends DefaultStrings {
         this.ENABLE_DOWNLOAD = "Включить загрузку";
         this.ENABLE_DIRECT_DOWNLOAD = "Включить прямую загрузку";
         this.ENABLE_DIRECT_DOWNLOAD_DESC = "Загружает просматриваемое медиа без дополнительных вопросов";
-        this.DOWNLOAD_USERNAME_FOLDER = "Разделять медиа по папкам пользователей";
+        this.DOWNLOAD_USERNAME_FOLDER = "Сортировать медиа по папкам пользователей";
         this.DOWNLOAD_USERNAME_FOLDER_DESC = "Создаёт вложенные папки по имени пользователя";
         this.DOWNLOAD_CURRENT_MEDIA = "Загрузить текущее медиа";
         this.DOWNLOAD_AS_IMAGE = "Загрузить как изображение";
@@ -119,7 +118,7 @@ public class StringsRussian extends DefaultStrings {
         this.COPY_POST_OWNER_USERNAME = "Скопировать имя пользователя автора записи";
         this.COPY_POST_OWNER_FULLNAME = "Скопировать полное имя автора записи";
         this.ENABLE_MORE_OPTIONS_ON_POST = "Включить дополнительные действия над записью";
-        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Показывать больше действий при долгом нажатии на запись";
+        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Показывать больше действий при долгом нажатии на публикацию";
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Скрыть кнопки навигации";
         this.HIDE_NAVIGATION_FEED = "Скрыть кнопку «Лента»";
         this.HIDE_NAVIGATION_REELS = "Скрыть кнопку «Reels»";
