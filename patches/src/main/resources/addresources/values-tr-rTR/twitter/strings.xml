@@ -105,6 +105,7 @@
     <string name="piko_pref_search_suggestion_desc">Keşfet bölümündeki arama önerilerini gizle/kaldır</string>
     <string name="piko_disunify_xchat_system">Xchat sistemini ayırma</string>
     <string name="piko_disunify_xchat_system_desc">Mesajlar ve paylaşım sayfası gibi eski özellikleri geri getirir</string>
+    <string name="piko_legacy_share_link">Türkçe</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Özellik bayrakları</string>
     <string name="piko_pref_feature_flags">Özellik bayrağı ekle</string>
@@ -190,6 +191,8 @@
     <string name="piko_pref_import_failed">Hata: %s içe aktarılırken hata oluştu</string>
     <string name="piko_pref_export_no_uri">Hata: Hedef verilmedi</string>
     <string name="piko_pref_import_no_uri">Hata: Dosya verilmedi</string>
+    <string name="piko_pref_export_login_token">Giriş anahtarını dışa aktar</string>
+    <string name="piko_pref_import_login_token">Giriş anahtarını içe aktar</string>
     <!-- About -->
     <string name="piko_title_about">Hakkında</string>
     <string name="piko_pref_app_version">Uygulama sürümü</string>
@@ -256,6 +259,56 @@
     <string name="piko_app_icon_name_summer">Yaz</string>
     <string name="piko_app_icon_name_winter">Kış</string>
     <string name="piko_app_icon_name_beijing_olympics_1">Pekin Olimpiyatları 1</string>
+    <string name="piko_app_icon_name_beijing_olympics_2">Pekin Olimpiyatları 2</string>
+    <string name="piko_app_icon_name_daytona">Daytona</string>
+    <string name="piko_app_icon_name_formulaone">Formula 1</string>
+    <string name="piko_app_icon_name_kentucky_derby">Kentucky Derbisi</string>
+    <string name="piko_app_icon_name_mlb">MLB</string>
+    <string name="piko_app_icon_name_nba">NBA</string>
+    <string name="piko_app_icon_name_nba_2">NBA 2</string>
+    <string name="piko_app_icon_name_ncaa">NCAA</string>
+    <string name="piko_app_icon_name_masters">Masters</string>
+    <string name="piko_app_icon_name_nba_finals">NBA Finalleri</string>
+    <string name="piko_app_icon_name_stanley_cup">Stanley Kupası</string>
+    <string name="piko_app_icon_name_commonwealth">İngiliz Milletler Topluluğu</string>
+    <string name="piko_app_icon_name_mothers_day">Anneler Günü</string>
+    <string name="piko_app_icon_name_womansday">Kadınlar Günü</string>
+    <string name="piko_app_icon_name_halloween_2021">Cadılar Bayramı 2021</string>
+    <string name="piko_app_icon_name_halloween_2022">Cadılar Bayramı 2022</string>
+    <string name="piko_app_icon_name_halloween_2024_1">Cadılar Bayramı 2024 1</string>
+    <string name="piko_app_icon_name_halloween_2024_2">Cadılar Bayramı 2024 2</string>
+    <string name="piko_app_icon_name_halloween_2024_3">Cadılar Bayramı 2024 3</string>
+    <string name="piko_app_icon_name_holi">Holi</string>
+    <string name="piko_app_icon_name_stpatricks_day">Aziz Patrick Günü</string>
+    <string name="piko_app_icon_name_easter">Paskalya</string>
+    <string name="piko_app_icon_name_anzac">Anzac</string>
+    <string name="piko_app_icon_name_ramadan">Ramazan</string>
+    <string name="piko_app_icon_name_black_history">Siyah Tarihi</string>
+    <string name="piko_app_icon_name_eurovisionfinal">Euro Vision Final</string>
+    <string name="piko_app_icon_name_lunar_new_year_1">Ay Takvimi Yeni Yılı 1</string>
+    <string name="piko_app_icon_name_lunar_new_year_2">Ay Takvimi Yeni Yılı 2</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_1">Japon Yeni Yılı 2024 1</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_2">Japon Yeni Yılı 2024 2</string>
+    <string name="piko_app_icon_name_may_the_fourth">4 Mayıs</string>
+    <string name="piko_app_icon_name_barbie">Barbie</string>
+    <string name="piko_app_icon_name_thanksgiving_1">Şükran Günü 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2">Şükran Günü 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_1">Şükran Günü 2024 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_2">Şükran Günü 2024 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_3">Şükran Günü 2024 3</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_4">Şükran Günü 2024 4</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_5">Şükran Günü 2024 5</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_6">Şükran Günü 2024 6</string>
+    <string name="piko_app_icon_name_canada_day">Kanada Günü</string>
+    <string name="piko_app_icon_name_canada_indigenous">Kanada Yerlileri</string>
+    <string name="piko_app_icon_name_earth_hour">Dünya Saati</string>
+    <string name="piko_app_icon_name_euro">Euro</string>
+    <string name="piko_app_icon_name_independence_day">Bağımsızlık Günü</string>
+    <string name="piko_app_icon_name_juneteenth">Kurtuluş Günü</string>
+    <string name="piko_app_icon_name_naidoc">Naidoc</string>
+    <string name="piko_app_icon_name_christmas_2024_1">Noel 2024 1</string>
+    <string name="piko_app_icon_name_christmas_2024_2">Noel 2024 2</string>
+    <string name="piko_app_icon_name_christmas_2024_3">Noel 2024 3</string>
     <string name="piko_app_icon_name_christmas_2024_4">Noel 2024 4</string>
     <string name="piko_app_icon_name_upsidedown">Baş Aşağı</string>
     <string name="piko_app_icon_name_games_chamber">Oyun Odası</string>
@@ -271,4 +324,25 @@
     <string name="piko_app_icon_name_neon_pink">Neon Pembe</string>
     <string name="piko_app_icon_name_tropical_teal">Tropikal Çamurkuşu</string>
     <string name="piko_app_icon_name_vivid_orange">Canlı Turuncu</string>
+    <!-- Import / export login tokens -->
+    <string name="piko_login_token_export_screen_description">"Bu özellik, şu an giriş yapılmış hesap için oturum anahtarlarını dışa aktarır.
+Bunu giriş sayfasından veya \"Yeni hesap oluştur\" sayfasından içe aktarabilirsiniz.
+
+UYARI: Dışa aktarılan anahtarlar son derece gizli bilgilerdir.
+Hiç kimseyle paylaşmayın!
+Eğer birisi bu anahtarı ele geçirirse, siz oturumunuzu kapatana kadar istedikleri gibi hesabınıza erişebilirler.
+
+Daha fazla bilgi için lütfen şu sayfaya bakın.
+https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
+Özelliği kullanmadan önce bunu okumanız önerilir. Bazı önemli notlar içerir."</string>
+    <string name="piko_login_token_select_account">Bir hesap seçin:</string>
+    <string name="piko_login_token_export_copy_to_clipboard">Panoya kopyala</string>
+    <string name="piko_login_token_export_save_to_file">Dosyaya kaydet</string>
+    <string name="piko_login_token_import_token_button_text">Anahtar json\'u ile giriş yap</string>
+    <string name="piko_login_token_import_from_text">Metinden içe aktar</string>
+    <string name="piko_login_token_import_from_file">Dosyadan içe aktar</string>
+    <string name="piko_login_token_import_about">Bu özellik hakkında (Websiteyi aç)</string>
+    <string name="piko_login_token_import_success_reopen_required">Lütfen uygulamayı kapatın ve tekrar açın</string>
+    <string name="piko_login_token_import_failed_missing_info">Hata: Kullanıcı adı, belirteç veya gizli anahtar eksik</string>
+    <string name="piko_login_token_import_failed_already_exist">Hesap eklenemedi (zaten mevcut olabilir)</string>
 </resources>

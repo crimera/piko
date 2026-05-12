@@ -191,6 +191,8 @@
     <string name="piko_pref_import_failed">Erro: Falha ao importar %s</string>
     <string name="piko_pref_export_no_uri">Erro: Nenhum destino fornecido</string>
     <string name="piko_pref_import_no_uri">Erro: Nenhum arquivo fornecido</string>
+    <string name="piko_pref_export_login_token">Exportar token de login</string>
+    <string name="piko_pref_import_login_token">Importar token de login</string>
     <!-- About -->
     <string name="piko_title_about">Sobre</string>
     <string name="piko_pref_app_version">Versão do aplicativo</string>
@@ -258,12 +260,17 @@
     <string name="piko_app_icon_name_winter">Inverno</string>
     <string name="piko_app_icon_name_beijing_olympics_1">Olimpíadas de Pequim 1</string>
     <string name="piko_app_icon_name_beijing_olympics_2">Olimpíadas de Pequim 2</string>
+    <string name="piko_app_icon_name_daytona">Daytona</string>
     <string name="piko_app_icon_name_formulaone">Fórmula 1</string>
+    <string name="piko_app_icon_name_kentucky_derby">Kentucky Derby</string>
     <string name="piko_app_icon_name_mlb">MLB</string>
     <string name="piko_app_icon_name_nba">NBA</string>
     <string name="piko_app_icon_name_nba_2">NBA 2</string>
     <string name="piko_app_icon_name_ncaa">NCAA</string>
+    <string name="piko_app_icon_name_masters">Masters</string>
     <string name="piko_app_icon_name_nba_finals">Finais NBA</string>
+    <string name="piko_app_icon_name_stanley_cup">Copa Stanley</string>
+    <string name="piko_app_icon_name_commonwealth">Commonwealth</string>
     <string name="piko_app_icon_name_mothers_day">Dia das Mães</string>
     <string name="piko_app_icon_name_womansday">Dia da Mulher</string>
     <string name="piko_app_icon_name_halloween_2021">Halloween 2021</string>
@@ -271,14 +278,18 @@
     <string name="piko_app_icon_name_halloween_2024_1">Halloween 2024 1</string>
     <string name="piko_app_icon_name_halloween_2024_2">Halloween 2024 2</string>
     <string name="piko_app_icon_name_halloween_2024_3">Halloween 2024 3</string>
+    <string name="piko_app_icon_name_holi">Holi — Festival das Cores</string>
     <string name="piko_app_icon_name_stpatricks_day">Dia de São Patrício</string>
     <string name="piko_app_icon_name_easter">Páscoa</string>
+    <string name="piko_app_icon_name_anzac">Anzac</string>
     <string name="piko_app_icon_name_ramadan">Ramadã</string>
     <string name="piko_app_icon_name_black_history">História Negra</string>
+    <string name="piko_app_icon_name_eurovisionfinal">Final da Euro Vision</string>
     <string name="piko_app_icon_name_lunar_new_year_1">Ano Novo Lunar 1</string>
     <string name="piko_app_icon_name_lunar_new_year_2">Ano Novo Lunar 2</string>
     <string name="piko_app_icon_name_japanese_new_year_2024_1">Ano Novo Japonês 2024 1</string>
     <string name="piko_app_icon_name_japanese_new_year_2024_2">Ano Novo Japonês 2024 2</string>
+    <string name="piko_app_icon_name_may_the_fourth">Dia de Star Wars</string>
     <string name="piko_app_icon_name_barbie">Barbie</string>
     <string name="piko_app_icon_name_thanksgiving_1">Ação de Graças 1</string>
     <string name="piko_app_icon_name_thanksgiving_2">Ação de Graças 2</string>
@@ -289,19 +300,49 @@
     <string name="piko_app_icon_name_thanksgiving_2024_5">Ação de Graças 2024 5</string>
     <string name="piko_app_icon_name_thanksgiving_2024_6">Ação de Graças 2024 6</string>
     <string name="piko_app_icon_name_canada_day">Dia do Canadá</string>
+    <string name="piko_app_icon_name_canada_indigenous">Canadá Indígena</string>
+    <string name="piko_app_icon_name_earth_hour">Hora do Planeta</string>
     <string name="piko_app_icon_name_euro">Euro</string>
     <string name="piko_app_icon_name_independence_day">Dia da Independência</string>
+    <string name="piko_app_icon_name_juneteenth">Juneteenth — Dia da Liberdade</string>
+    <string name="piko_app_icon_name_naidoc">Naidoc</string>
     <string name="piko_app_icon_name_christmas_2024_1">Natal 2024 1</string>
     <string name="piko_app_icon_name_christmas_2024_2">Natal 2024 2</string>
     <string name="piko_app_icon_name_christmas_2024_3">Natal 2024 3</string>
     <string name="piko_app_icon_name_christmas_2024_4">Natal 2024 4</string>
+    <string name="piko_app_icon_name_upsidedown">Invertido</string>
+    <string name="piko_app_icon_name_games_chamber">Sala de Jogos</string>
     <string name="piko_app_icon_name_pridesouthern">Orgulho do Sul</string>
     <string name="piko_app_icon_name_newzealand_pride_1">Orgulho da Nova Zelândia 1</string>
     <string name="piko_app_icon_name_newzealand_pride_2">Orgulho da Nova Zelândia 2</string>
     <string name="piko_app_icon_name_pride_month">Mês do Orgulho</string>
+    <string name="piko_app_icon_name_fancy">Extravagante</string>
+    <string name="piko_app_icon_name_broken">Quebrado</string>
     <string name="piko_app_icon_name_cyber">Cibernético</string>
     <string name="piko_app_icon_name_soft_pastel_pink">Rosa Pastel Suave</string>
     <string name="piko_app_icon_name_electric_indigo">Índigo Elétrico</string>
     <string name="piko_app_icon_name_neon_pink">Rosa Néon</string>
+    <string name="piko_app_icon_name_tropical_teal">Verde-azulado Tropical</string>
     <string name="piko_app_icon_name_vivid_orange">Laranja Vívido</string>
+    <!-- Import / export login tokens -->
+    <string name="piko_login_token_export_screen_description">"Esta recurso exporta os tokens de sessão da conta que está conectada atualmente.
+Você pode importá-la a partir da tela de login ou da tela \"Criar nova conta\".
+
+AVISO: Os tokens exportados contêm informações altamente confidenciais.
+Nunca compartilhe isso com ninguém!
+Se alguém possuir esse token, poderá acessar sua conta livremente até que você encerre a sessão.
+
+Para obter mais detalhes, consulte esta página.
+https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
+Recomenda-se a leitura deste documento antes de usar este recurso. Ele contém algumas observações importantes."</string>
+    <string name="piko_login_token_select_account">Selecione uma conta:</string>
+    <string name="piko_login_token_export_copy_to_clipboard">Copiar para área de transferência</string>
+    <string name="piko_login_token_export_save_to_file">Salvar para arquivo</string>
+    <string name="piko_login_token_import_token_button_text">Login através de json (token)</string>
+    <string name="piko_login_token_import_from_text">Importar por texto</string>
+    <string name="piko_login_token_import_from_file">Importar de um arquivo</string>
+    <string name="piko_login_token_import_about">Sobre este recurso (Abrir site)</string>
+    <string name="piko_login_token_import_success_reopen_required">Por favor, saia do aplicativo e reabra-o</string>
+    <string name="piko_login_token_import_failed_missing_info">Erro: Nome de usuário ou token ou segredo não encontrado</string>
+    <string name="piko_login_token_import_failed_already_exist">Falha ao adicionar a conta (pode já existir)</string>
 </resources>
