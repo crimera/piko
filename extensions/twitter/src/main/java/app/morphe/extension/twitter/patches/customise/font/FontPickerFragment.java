@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.patches.customise.font;
 
 import android.content.Context;
@@ -9,7 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import android.app.Fragment;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.StringRef;
 
 
@@ -45,7 +55,7 @@ public class FontPickerFragment extends Fragment {
                 return true;
             }
         }catch (Exception e){
-            Utils.logger(e);
+            PikoUtils.logger(e);
         }
         return false;
     }
@@ -68,7 +78,7 @@ public class FontPickerFragment extends Fragment {
             return true;
         }
         catch (Exception e){
-            Utils.logger(e);
+            PikoUtils.logger(e);
         }
         return false;
     }
@@ -82,7 +92,7 @@ public class FontPickerFragment extends Fragment {
                 if (hasValidFontHeader(uri)) {
                     if(copyFont(uri)){
                         toast(StringRef.str("piko_pref_add_font_success"));
-                        Utils.showRestartAppDialog(getActivity());
+                        app.morphe.extension.twitter.Utils.showRestartAppDialog(getActivity());
                     }else{
                         toast(StringRef.str("piko_pref_add_font_fail"));
                     }
@@ -95,7 +105,7 @@ public class FontPickerFragment extends Fragment {
     }
 
     private static void toast(String msg){
-        Utils.toast(msg);
+        PikoUtils.toast(msg);
     }
 
     @Override

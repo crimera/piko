@@ -1,10 +1,24 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.patches.links;
 
 import com.twitter.model.json.core.JsonUrlEntity;
 
 import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.twitter.settings.SettingsStatus;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.PikoUtils;
+import com.x.models.ContextualPost;
+import com.x.models.CanonicalPost;
+import com.x.models.UserResult;
+import com.x.models.XUser;
 import java.net.URL;
 
 public class Urls {
@@ -18,7 +32,7 @@ public class Urls {
                 entity.e = entity.c;
             }
         } catch (Exception ex) {
-            Utils.logger(ex);
+            PikoUtils.logger(ex);
         }
         return entity;
     }
@@ -27,15 +41,32 @@ public class Urls {
         try {
             String customDomainName = Pref.customSharingDomain();
             // Check for domain extension
-            if(!(customDomainName.matches("^[A-Za-z0-9-]{1,63}\\.[A-Za-z]{2,6}$"))) customDomainName+=".com"; //have .com as default extension just for safety reasons
+            if(!(customDomainName.matches("^[A-Za-z0-9-]{1,63}\\.[A-Za-z]{2,6}$"))) {
+                //have .com as default extension just for safety reasons
+                customDomainName += ".com";
+            }
             URL url = new URL(urlString);
             String host = url.getHost();
             if (host.equalsIgnoreCase("x.com") || host.equalsIgnoreCase("twitter.com")) {
                 return new URL(url.getProtocol(), customDomainName, url.getPort(), url.getFile()).toString();
             }
         } catch (Exception ex) {
-            Utils.logger(ex);
+            PikoUtils.logger(ex);
         }
         return urlString;
+    }
+
+    public static String hookShareSheetLink(ContextualPost contextualPost, String link){
+        try {
+            if (SettingsStatus.legacyShareLink) {
+                CanonicalPost canonicalPost = contextualPost.getCanonicalPost();
+                XUser userResult = canonicalPost.getAuthor();
+                String username = userResult.getScreenName();
+                link = link.replace("/i/", "/" + username + "/");
+            }
+        }catch (Exception ex) {
+            PikoUtils.logger(ex);
+        }
+        return changeDomain(link);
     }
 }

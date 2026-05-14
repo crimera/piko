@@ -1,15 +1,25 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.patches.customise;
 
 import java.util.*;
 import java.lang.reflect.Field;
 import app.morphe.extension.twitter.Pref;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import com.twitter.model.json.search.JsonTypeaheadResponse;
 import app.morphe.extension.twitter.entity.Debug;
 public class Customise {
 
     private static void logger(Object j){
-        Utils.logger(j);
+        PikoUtils.logger(j);
     }
 
     public static List navBar(List inp){

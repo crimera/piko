@@ -1,10 +1,22 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.entity
 
 import app.crimera.utils.changeFirstString
+import app.crimera.utils.changeStringAt
 import app.crimera.utils.getFieldName
 import app.crimera.utils.getMethodName
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
 
 val extMediaEntityPatch =
@@ -12,18 +24,15 @@ val extMediaEntityPatch =
         description = "For extended media entity reflection",
     ) {
         execute {
-            ExtMediaHighResVideoMethodFinder.stringMatches?.forEach { match ->
-                val str = match.string
-                if (str == "null cannot be cast to non-null type com.twitter.model.dm.attachment.DMMediaAttachment") {
-                    val inst =
-                        ExtMediaHighResVideoMethodFinder.method.instructions.first {
-                            it.opcode == Opcode.INVOKE_VIRTUAL &&
-                                it.location.index > match.index
-                        }
-                    val methodName = ExtMediaHighResVideoMethodFinder.getMethodName(inst.location.index)
-                    ExtMediaHighResVideoFingerprint.changeFirstString(methodName)
-                    return@forEach
-                }
+
+            MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint.method.apply {
+                val firstIGetObjectIndex = indexOfFirstInstruction(Opcode.IGET_OBJECT)
+                val videoInfoFieldName = MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint.getFieldName(firstIGetObjectIndex)
+                ExtMediaHighResVideoFingerprint.changeFirstString(videoInfoFieldName)
+
+                val secondIGetObjectIndex = indexOfFirstInstruction(firstIGetObjectIndex+1,Opcode.IGET_OBJECT)
+                val videoVariantsFieldName = MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint.getFieldName(secondIGetObjectIndex)
+                ExtMediaHighResVideoFingerprint.changeStringAt(1,videoVariantsFieldName)
             }
 
             // ------------

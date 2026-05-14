@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.utils;
 
 import android.graphics.Bitmap;
@@ -8,7 +18,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import java.io.OutputStream;
 
 public class ViewUtils {
@@ -44,12 +54,12 @@ public class ViewUtils {
             width = Math.round(width * scale);
             height = Math.round(height * scale);
             if (DEBUG) {
-                Utils.logger("Scaling down bitmap to " + width + "x" + height + " (scale: " + scale + ")");
+                PikoUtils.logger("Scaling down bitmap to " + width + "x" + height + " (scale: " + scale + ")");
             }
         }
 
         if (DEBUG) {
-            Utils.logger(String.format("Rendering bitmap: %dx%d%s", 
+            PikoUtils.logger(String.format("Rendering bitmap: %dx%d%s",
                 width, height, clipRect != null ? " (clipping applied)" : ""));
         }
         
@@ -71,13 +81,13 @@ public class ViewUtils {
             
             view.draw(canvas);
         } catch (OutOfMemoryError e) {
-            Utils.logger("OOM while creating bitmap: " + e.getMessage());
+            PikoUtils.logger("OOM while creating bitmap: " + e.getMessage());
             if (bitmap != null) {
                 bitmap.recycle();
                 bitmap = null;
             }
         } catch (Exception e) {
-            Utils.logger("Error rendering bitmap: " + e.getMessage());
+            PikoUtils.logger("Error rendering bitmap: " + e.getMessage());
             if (bitmap != null) {
                 bitmap.recycle();
                 bitmap = null;

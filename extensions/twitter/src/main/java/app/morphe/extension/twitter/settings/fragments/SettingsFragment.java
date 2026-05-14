@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.settings.fragments;
 
 import app.morphe.extension.shared.StringRef;
@@ -32,7 +42,7 @@ public class SettingsFragment extends PreferenceFragment {
         Helper helper = new Helper(context);
         ScreenBuilder screenBuilder = new ScreenBuilder(context, screen, helper);
 
-        boolean isSinglePage = app.morphe.extension.twitter.Utils.getBooleanPerf(Settings.SINGLE_PAGE_SETTINGS);
+        boolean isSinglePage = app.morphe.extension.twitter.Utils.getBooleanPref(Settings.SINGLE_PAGE_SETTINGS);
         if (isSinglePage) {
             boolean buildCategory = true;
             screenBuilder.buildPremiumSection(buildCategory);

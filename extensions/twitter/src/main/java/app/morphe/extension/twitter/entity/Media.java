@@ -1,6 +1,16 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.entity;
 
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 public class Media {
     // 0-img, 1-video
@@ -20,7 +30,7 @@ public class Media {
         try {
             return "Media [type=" + this.type + ", url=" + this.url + ", ext=" + this.ext + "]";
         } catch (Exception e) {
-            Utils.logger(e);
+            PikoUtils.logger(e);
             return e.getMessage();
         }
     }

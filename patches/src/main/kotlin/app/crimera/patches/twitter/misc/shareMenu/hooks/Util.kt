@@ -1,11 +1,20 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.misc.shareMenu.hooks
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.addAction
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.addButtonInstructions
 import app.crimera.patches.twitter.misc.shareMenu.fingerprints.shareMenuButtonFuncCallFingerprint
-import app.crimera.utils.Constants
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants
+import app.crimera.patches.twitter.utils.enableSettings
 import app.crimera.utils.extractDescriptors
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
@@ -14,7 +23,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun shareMenuButtonInjection(
     actionName: String,
     prefFunctionName: String,
@@ -89,5 +98,5 @@ fun shareMenuButtonInjection(
         viewDebugDialogReference,
     )
 
-    SettingsStatusLoadFingerprint.enableSettings(statusFunctionName)
+    enableSettings(statusFunctionName)
 }

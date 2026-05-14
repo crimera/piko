@@ -1,6 +1,18 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter;
 
 import android.util.Log;
+
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.twitter.settings.Settings;
 import com.google.android.material.tabs.TabLayout$g;
 import java.util.*;
@@ -35,67 +47,71 @@ public class Pref {
     public static float setPostFontSize() {
         float fontSize;
         try{
-            fontSize = Float.valueOf(Utils.getStringPref(Settings.CUSTOM_POST_FONT_SIZE));
+            fontSize = Float.parseFloat(Utils.getStringPref(Settings.CUSTOM_POST_FONT_SIZE));
         }catch (Exception ex){
-            fontSize = app.morphe.extension.shared.Utils.getResourceDimension("font_size_normal");
+            fontSize = ResourceUtils.getDimension("font_size_normal");
         }
         return fontSize;
     }
     public static boolean serverResponseLogging() {
-        return Utils.getBooleanPerf(Settings.LOG_RES);
+        return Utils.getBooleanPref(Settings.LOG_RES);
     }
     public static boolean serverResponseLoggingOverwriteFile() {
-        return Utils.getBooleanPerf(Settings.LOG_RES_OVRD);
+        return Utils.getBooleanPref(Settings.LOG_RES_OVRD);
     }
 
     public static boolean showSourceLabel() {
-        return Utils.getBooleanPerf(Settings.TIMELINE_SHOW_SOURCE_LABEL);
+        return Utils.getBooleanPref(Settings.TIMELINE_SHOW_SOURCE_LABEL);
     }
     public static boolean hideCommBadge() {
-        return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_COMM_BADGE);
+        return Utils.getBooleanPref(Settings.TIMELINE_HIDE_COMM_BADGE);
     }
 
     public static boolean showSensitiveMedia() {
-        return Utils.getBooleanPerf(Settings.TIMELINE_SHOW_SENSITIVE_MEDIA);
+        return Utils.getBooleanPref(Settings.TIMELINE_SHOW_SENSITIVE_MEDIA);
     }
 
     public static boolean hideTodaysNews() {
-        return Utils.getBooleanPerf(Settings.ADS_REMOVE_TODAYS_NEW);
+        return Utils.getBooleanPref(Settings.ADS_REMOVE_TODAYS_NEW);
     }
 
     public static boolean enableNativeDownloader() {
-        return Utils.getBooleanPerf(Settings.VID_NATIVE_DOWNLOADER);
+        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER);
+    }
+
+    public static boolean enableInlineDownloadButton() {
+        return Utils.getBooleanPref(Settings.VID_INLINE_DOWNLOAD_BUTTON);
     }
 
     public static boolean browseObject() {
-        return Utils.getBooleanPerf(Settings.BROWSE_OBJECT);
+        return Utils.getBooleanPref(Settings.BROWSE_OBJECT);
     }
 
     public static int natveTranslatorProvider(){
         return Integer.parseInt(Utils.getStringPref(Settings.NATIVE_TRANSLATOR_PROVIDERS));
     }
     public static boolean enableNativeTranslator() {
-        return Utils.getBooleanPerf(Settings.NATIVE_TRANSLATOR);
+        return Utils.getBooleanPref(Settings.NATIVE_TRANSLATOR);
     }
 
     public static boolean enableNativeReaderMode() {
-        return Utils.getBooleanPerf(Settings.NATIVE_READER_MODE);
+        return Utils.getBooleanPref(Settings.NATIVE_READER_MODE);
     }
     public static boolean enableShareImage() {
-        return Utils.getBooleanPerf(Settings.SHARE_IMAGE_ENABLED);
+        return Utils.getBooleanPref(Settings.SHARE_IMAGE_ENABLED);
     }
     public static boolean shareImageAutoCleanup() {
-        return Utils.getBooleanPerf(Settings.SHARE_IMAGE_AUTOCLEANUP);
+        return Utils.getBooleanPref(Settings.SHARE_IMAGE_AUTOCLEANUP);
     }
     public static boolean hideNativeReaderPostTextOnlyMode() {
-        return Utils.getBooleanPerf(Settings.NATIVE_READER_MODE_TEXT_ONLY_MODE);
+        return Utils.getBooleanPref(Settings.NATIVE_READER_MODE_TEXT_ONLY_MODE);
     }
     public static boolean hideNativeReaderHideQuotedPosts() {
-        return Utils.getBooleanPerf(Settings.NATIVE_READER_MODE_HIDE_QUOTED_POST);
+        return Utils.getBooleanPref(Settings.NATIVE_READER_MODE_HIDE_QUOTED_POST);
     }
 
     public static boolean hideNativeReaderNoGrok() {
-        return Utils.getBooleanPerf(Settings.NATIVE_READER_MODE_NO_GROK);
+        return Utils.getBooleanPref(Settings.NATIVE_READER_MODE_NO_GROK);
     }
 
     public static String getNativeReaderTheme() {
@@ -108,15 +124,15 @@ public class Pref {
     public static boolean redirect(TabLayout$g g) {return Utils.redirect(g);}
 
     public static boolean isRoundOffNumbersEnabled() {
-        return Utils.getBooleanPerf(Settings.MISC_ROUND_OFF_NUMBERS);
+        return Utils.getBooleanPref(Settings.MISC_ROUND_OFF_NUMBERS);
     }
 
     public static boolean isChirpFontEnabled() {
-        return Utils.getBooleanPerf(Settings.MISC_FONT);
+        return Utils.getBooleanPref(Settings.MISC_FONT);
     }
 
     public static boolean unShortUrl() {
-        return Utils.getBooleanPerf(Settings.TIMELINE_UNSHORT_URL);
+        return Utils.getBooleanPref(Settings.TIMELINE_UNSHORT_URL);
     }
 
     public static String getPublicFolder() {
@@ -142,21 +158,21 @@ public class Pref {
     }
 
     public static ArrayList hideRecommendedUsers(ArrayList users) {
-        if (Utils.getBooleanPerf(Settings.MISC_HIDE_RECOMMENDED_USERS)) {
+        if (Utils.getBooleanPref(Settings.MISC_HIDE_RECOMMENDED_USERS)) {
             return null;
         }
         return users;
     }
 
     public static ArrayList liveThread(ArrayList fleets) {
-        if (Utils.getBooleanPerf(Settings.TIMELINE_HIDE_LIVETHREADS)) {
+        if (Utils.getBooleanPref(Settings.TIMELINE_HIDE_LIVETHREADS)) {
             return null;
         }
         return fleets;
     }
 
     public static Map polls(Map map) {
-        if (Utils.getBooleanPerf(Settings.TIMELINE_SHOW_POLL_RESULTS)) {
+        if (Utils.getBooleanPref(Settings.TIMELINE_SHOW_POLL_RESULTS)) {
             try {
                 if (map.containsKey("counts_are_final")) {
                     if (map.get("counts_are_final").toString().equals("true")) {
@@ -215,7 +231,7 @@ public class Pref {
     }
 
     public static boolean hideBanner() {
-        return !Utils.getBooleanPerf(Settings.TIMELINE_HIDE_BANNER);
+        return !Utils.getBooleanPref(Settings.TIMELINE_HIDE_BANNER);
     }
 
     public static int timelineTab(int tabId) {
@@ -233,114 +249,114 @@ public class Pref {
     }
 
     public static boolean enableForceTranslate() {
-        return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_FORCE_TRANSLATE);
+        return Utils.getBooleanPref(Settings.TIMELINE_HIDE_FORCE_TRANSLATE);
     }
     public static boolean hidePromoteBtn() {
-        return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_PROMOTE_BUTTON);
+        return Utils.getBooleanPref(Settings.TIMELINE_HIDE_PROMOTE_BUTTON);
     }
     public static boolean hideFAB() {
-        return Utils.getBooleanPerf(Settings.MISC_HIDE_FAB);
+        return Utils.getBooleanPref(Settings.MISC_HIDE_FAB);
     }
 
     public static boolean hideFABBtn() {
-        return !Utils.getBooleanPerf(Settings.MISC_HIDE_FAB_BTN);
+        return !Utils.getBooleanPref(Settings.MISC_HIDE_FAB_BTN);
     }
 
     public static boolean hideCommNotes() {
-        return Utils.getBooleanPerf(Settings.MISC_HIDE_COMM_NOTES);
+        return Utils.getBooleanPref(Settings.MISC_HIDE_COMM_NOTES);
     }
 
     public static boolean hideViewCount() {
-        return !Utils.getBooleanPerf(Settings.MISC_HIDE_VIEW_COUNT);
+        return !Utils.getBooleanPref(Settings.MISC_HIDE_VIEW_COUNT);
     }
 
     public static boolean hideInlineBookmark() {
-        return !Utils.getBooleanPerf(Settings.TIMELINE_HIDE_BMK_ICON);
+        return !Utils.getBooleanPref(Settings.TIMELINE_HIDE_BMK_ICON);
     }
 
     public static boolean hideImmersivePlayer() {
-        return !Utils.getBooleanPerf(Settings.TIMELINE_HIDE_IMMERSIVE_PLAYER);
+        return !Utils.getBooleanPref(Settings.TIMELINE_HIDE_IMMERSIVE_PLAYER);
     }
 
     public static int enableVidAutoAdvance() {
-        if(Utils.getBooleanPerf(Settings.TIMELINE_ENABLE_VID_AUTO_ADVANCE)){
+        if(Utils.getBooleanPref(Settings.TIMELINE_ENABLE_VID_AUTO_ADVANCE)){
             return 1;
         }
         return -1;
     }
 
     public static boolean hideHiddenReplies(boolean bool){
-        if(Utils.getBooleanPerf(Settings.TIMELINE_HIDE_HIDDEN_REPLIES)){
+        if(Utils.getBooleanPref(Settings.TIMELINE_HIDE_HIDDEN_REPLIES)){
             return false;
         }
         return bool;
     }
     public static boolean enableForceHD(){
-        return Utils.getBooleanPerf(Settings.TIMELINE_ENABLE_VID_FORCE_HD);
+        return Utils.getBooleanPref(Settings.TIMELINE_ENABLE_VID_FORCE_HD);
     }
 
     public static boolean hideNudgeButton() {
-        return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_NUDGE_BUTTON);
+        return Utils.getBooleanPref(Settings.TIMELINE_HIDE_NUDGE_BUTTON);
     }
 
     public static boolean hideAds() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_PROMOTED_POSTS);
+        return Utils.getBooleanPref(Settings.ADS_HIDE_PROMOTED_POSTS);
     }
 
     public static boolean hideWTF() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_WHO_TO_FOLLOW);
+        return Utils.getBooleanPref(Settings.ADS_HIDE_WHO_TO_FOLLOW);
     }
 
     public static boolean hideCTS() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_CREATORS_TO_SUB);
+        return Utils.getBooleanPref(Settings.ADS_HIDE_CREATORS_TO_SUB);
     }
 
     public static boolean hideCTJ() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_COMM_TO_JOIN);
+        return Utils.getBooleanPref(Settings.ADS_HIDE_COMM_TO_JOIN);
     }
 
     public static boolean hideRBMK() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_REVISIT_BMK);
+        return Utils.getBooleanPref(Settings.ADS_HIDE_REVISIT_BMK);
     }
 
     public static boolean hideTopPeopleSearch() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_TOP_PEOPLE_SEARCH);
+        return Utils.getBooleanPref(Settings.ADS_HIDE_TOP_PEOPLE_SEARCH);
     }
 
-    public static boolean removePremiumUpsell() {return !Utils.getBooleanPerf(Settings.ADS_REMOVE_PREMIUM_UPSELL);
+    public static boolean removePremiumUpsell() {return !Utils.getBooleanPref(Settings.ADS_REMOVE_PREMIUM_UPSELL);
     }
 
     public static boolean hideRPinnedPosts() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_REVISIT_PINNED_POSTS);
+        return Utils.getBooleanPref(Settings.ADS_HIDE_REVISIT_PINNED_POSTS);
     }
 
     public static boolean hideDetailedPosts() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_DETAILED_POSTS);
+        return Utils.getBooleanPref(Settings.ADS_HIDE_DETAILED_POSTS);
     }
 
     public static boolean hidePremiumPrompt() {
-        return Utils.getBooleanPerf(Settings.ADS_HIDE_PREMIUM_PROMPT);
+        return Utils.getBooleanPref(Settings.ADS_HIDE_PREMIUM_PROMPT);
     }
 
     public static boolean enableUndoPosts() {
-        return Utils.getBooleanPerf(Settings.PREMIUM_UNDO_POSTS);
+        return Utils.getBooleanPref(Settings.PREMIUM_UNDO_POSTS);
     }
 
     public static boolean enableForcePip() {
-        return Utils.getBooleanPerf(Settings.PREMIUM_ENABLE_FORCE_PIP);
+        return Utils.getBooleanPref(Settings.PREMIUM_ENABLE_FORCE_PIP);
     }
 
     public static boolean enableDebugMenu() {
-        return Utils.getBooleanPerf(Settings.MISC_DEBUG_MENU);
+        return Utils.getBooleanPref(Settings.MISC_DEBUG_MENU);
     }
     public static boolean hideSocialProof() {
-        return Utils.getBooleanPerf(Settings.MISC_HIDE_SOCIAL_PROOF);
+        return Utils.getBooleanPref(Settings.MISC_HIDE_SOCIAL_PROOF);
     }
 
     private static ArrayList getList(String key){
         ArrayList<String> arrayList = new ArrayList<String>();
         try{
-            Set<String> ch = Utils.getSetPerf(key,null);
+            Set<String> ch = Utils.getSetPref(key,null);
             if(!ch.isEmpty()) {
                 arrayList = new ArrayList<String>(ch);
             }
@@ -396,27 +412,27 @@ public class Pref {
     }
 
     public static boolean RemoveSearchSuggestions() {
-        return Utils.getBooleanPerf(Settings.MISC_HIDE_SEARCH_SUGGESTIONS);
+        return Utils.getBooleanPref(Settings.MISC_HIDE_SEARCH_SUGGESTIONS);
     }
 
     public static boolean pauseSearchSuggestions() {
-        return Utils.getBooleanPerf(Settings.MISC_PAUSE_SEARCH_SUGGESTIONS);
+        return Utils.getBooleanPref(Settings.MISC_PAUSE_SEARCH_SUGGESTIONS);
     }
 
     public static int navbarBadgeCount(int count){
-        return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_NAVBAR_BADGE) ? 0 : count;
+        return Utils.getBooleanPref(Settings.TIMELINE_HIDE_NAVBAR_BADGE) ? 0 : count;
     }
 
     public static boolean hidePostInlineMetrics(){
-        return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_POST_INLINE_METRICS);
+        return Utils.getBooleanPref(Settings.TIMELINE_HIDE_POST_INLINE_METRICS);
     }
 
     public static boolean hidePostDetailedMetrics(){
-        return Utils.getBooleanPerf(Settings.TIMELINE_HIDE_POST_DETAILED_METRICS);
+        return Utils.getBooleanPref(Settings.TIMELINE_HIDE_POST_DETAILED_METRICS);
     }
 
     public static boolean disUnifyXChatSystem(){
-        return !Utils.getBooleanPerf(Settings.MISC_DISUNIFY_XCHAT_SYSTEM);
+        return !Utils.getBooleanPref(Settings.MISC_DISUNIFY_XCHAT_SYSTEM);
     }
     //end
 }

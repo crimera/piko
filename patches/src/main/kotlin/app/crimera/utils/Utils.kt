@@ -1,9 +1,16 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.utils
 
-import app.crimera.utils.Constants.FSTS_DESCRIPTOR
-import app.crimera.utils.Constants.SSTS_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
@@ -27,6 +34,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.formats.*
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.Reference
+import jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyle
 import org.w3c.dom.Element
 
 fun ResourcePatchContext.replaceXmlResources(
@@ -90,20 +98,28 @@ fun ResourcePatchContext.replaceStringsInFile(
     }
 }
 
-context(BytecodePatchContext)
-fun Fingerprint.enableSettings(functionName: String) {
-    method.addInstruction(
-        0,
-        "$SSTS_DESCRIPTOR->$functionName()V",
-    )
+data class MethodFieldMetadata(
+    val name: String,
+    val definingClass: String,
+    val returnType: String,
+)
+
+fun classNameToExtension(className: String): String = className.removePrefix("L").replace("/", ".").removeSuffix(";")
+
+fun extensionToClassName(className: String): String = "L" + className.replace(".", "/") + ";"
+
+fun Instruction.methodExtractor(): MethodFieldMetadata {
+    val ref = getReference<MethodReference>()
+    val defMethodClassName = classNameToExtension(ref!!.definingClass)
+    val returnTypeClassName = classNameToExtension(ref.returnType)
+    return MethodFieldMetadata(ref.name, defMethodClassName, returnTypeClassName)
 }
 
-context(BytecodePatchContext)
-fun Fingerprint.flagSettings(functionName: String) {
-    method.addInstruction(
-        0,
-        "$FSTS_DESCRIPTOR->$functionName()V",
-    )
+fun Instruction.fieldExtractor(): MethodFieldMetadata {
+    val ref = getReference<FieldReference>()
+    val defMethodClassName = classNameToExtension(ref!!.definingClass)
+    val fieldTypeClassName = classNameToExtension(ref.type)
+    return MethodFieldMetadata(ref.name, defMethodClassName, fieldTypeClassName)
 }
 
 fun Reference.extractDescriptors(): List<String> {
@@ -111,17 +127,16 @@ fun Reference.extractDescriptors(): List<String> {
     return regex.findAll(this.toString()).map { it.value }.toList()
 }
 
-context(BytecodePatchContext)
-fun Fingerprint.getReference(index: Int): Reference =
-    method.getInstruction<ReferenceInstruction>(index).reference
+context(patchContext: BytecodePatchContext)
+fun Fingerprint.getReference(index: Int): Reference = method.getInstruction<ReferenceInstruction>(index).reference
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.getMethodName(index: Int): String = (getReference(index) as DexBackedMethodReference).name
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.getFieldName(index: Int): String = (getReference(index) as FieldReference).name
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.changeStringAt(
     index: Int,
     value: String,
@@ -132,7 +147,7 @@ fun Fingerprint.changeStringAt(
     }
 }
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun Fingerprint.changeFirstString(value: String) {
     changeStringAt(0, value)
 }

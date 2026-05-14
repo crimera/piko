@@ -1,6 +1,16 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.misc.shareMenu.hooks
 
-import app.crimera.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -12,14 +22,15 @@ import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
 internal object ShareMenuButtonAddHook : Fingerprint(
     definingClass = "Lcom/twitter/tweet/action/",
     returnType = "V",
-    parameters = listOf(
-        "Lcom/twitter/model/timeline/",
-        "I",
-        "Lcom/twitter/util/collection/"
-    )
+    parameters =
+        listOf(
+            "Lcom/twitter/model/timeline/",
+            "I",
+            "Lcom/twitter/util/collection/",
+        ),
 )
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun registerButton(
     buttonActionReference: String,
     functionName: String,

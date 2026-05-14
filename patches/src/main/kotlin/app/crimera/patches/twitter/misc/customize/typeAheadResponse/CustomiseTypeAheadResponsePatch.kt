@@ -1,9 +1,19 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.misc.customize.typeAheadResponse
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.CUSTOMISE_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -13,7 +23,7 @@ import com.android.tools.smali.dexlib2.Opcode
 private object CustomiseTypeAheadResponseFingerprint : Fingerprint(
     definingClass = "JsonTypeaheadResponse\$\$JsonObjectMapper;",
     name = "parse",
-    returnType = "Ljava/lang/Object"
+    returnType = "Ljava/lang/Object",
 )
 
 @Suppress("unused")
@@ -21,7 +31,7 @@ val customiseTypeAheadResponsePatch =
     bytecodePatch(
         name = "Customize search suggestions",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
 
         execute {
@@ -38,6 +48,6 @@ val customiseTypeAheadResponsePatch =
             move-result-object p1
             """,
             )
-            SettingsStatusLoadFingerprint.enableSettings("typeaheadCustomisation")
+            enableSettings("typeaheadCustomisation")
         }
     }

@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.entity;
 
 import app.morphe.extension.twitter.entity.ExtMediaEntities;
@@ -5,7 +15,7 @@ import app.morphe.extension.twitter.entity.TweetInfo;
 import app.morphe.extension.twitter.entity.Debug;
 
 import java.util.*;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 // All comments based of 11.14.beta-0
 // Lcom/twitter/model/core/entity/e;
@@ -94,12 +104,12 @@ public class Tweet extends Debug {
                 text = this.getShortText();
             }
             // Replaces text to empty if the text contains only media link.
-            text = text.replaceAll("^pic\\.x\\.com/\\S+$", "");
+            text = text.replaceAll("pic\\.x\\.com/\\S+", "");
             // Replaces links.
             text = text.replaceAll("https?://t\\.co/\\S+", "");
 
         } catch (Exception e) {
-            Utils.logger(e);
+            PikoUtils.logger(e);
             text = e.getMessage();
         }
         return text;
@@ -115,7 +125,7 @@ public class Tweet extends Debug {
                     + this.getTweetLang() + ", getLongText()=" + this.getLongText() + ", getShortText()=" + this.getShortText() + "]";
 
         } catch (Exception e) {
-            Utils.logger(e);
+            PikoUtils.logger(e);
             return e.getMessage();
         }
 

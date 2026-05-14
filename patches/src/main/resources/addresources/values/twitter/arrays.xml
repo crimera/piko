@@ -131,7 +131,6 @@
     <string-array name="piko_array_notificationtabs">
         <item>@string/vit_notifications_tab_all</item>
         <item>@string/vit_notifications_tab_mentions</item>
-        <item>@string/vit_notifications_tab_super_followers</item>
         <item>@string/vit_notifications_tab_verified</item>
     </string-array>
 
@@ -283,7 +282,6 @@
     <string-array name="piko_array_notificationtabs_val">
         <item>all</item>
         <item>mentions</item>
-        <item>super_followers</item>
         <item>verified</item>
     </string-array>
 

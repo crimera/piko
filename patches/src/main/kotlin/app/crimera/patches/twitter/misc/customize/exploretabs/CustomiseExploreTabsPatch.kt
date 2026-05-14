@@ -1,9 +1,19 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.misc.customize.exploretabs
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
-import app.crimera.utils.Constants.CUSTOMISE_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.CUSTOMISE_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -13,9 +23,10 @@ import com.android.tools.smali.dexlib2.Opcode
 
 private object CustomiseExploreTabsFingerprint : Fingerprint(
     definingClass = "JsonPageTabs;",
-    filters = listOf(
-        opcode(Opcode.NEW_INSTANCE)
-    )
+    filters =
+        listOf(
+            opcode(Opcode.NEW_INSTANCE),
+        ),
 )
 
 @Suppress("unused")
@@ -23,7 +34,7 @@ val customiseExploreTabsPatch =
     bytecodePatch(
         name = "Customize explore tabs",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
 
         execute {
@@ -41,6 +52,6 @@ val customiseExploreTabsPatch =
                 move-result-object v1
                 """.trimIndent(),
             )
-            SettingsStatusLoadFingerprint.enableSettings("exploreTabCustomisation")
+            enableSettings("exploreTabCustomisation")
         }
     }

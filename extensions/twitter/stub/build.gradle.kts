@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "app.morphe.extension"
+    namespace = "app.morphe.extension.twitter"
     compileSdk = 34
 
     defaultConfig {

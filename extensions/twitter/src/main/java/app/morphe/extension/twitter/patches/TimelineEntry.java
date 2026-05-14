@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.patches;
 
 import com.twitter.model.json.timeline.urt.JsonTimelineEntry;
@@ -8,7 +18,7 @@ import app.morphe.extension.twitter.settings.SettingsStatus;
 import app.morphe.extension.twitter.entity.Video;
 import java.util.List;
 import java.util.ArrayList;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 public class TimelineEntry {
     public static final boolean hideAds;
@@ -137,7 +147,7 @@ public class TimelineEntry {
             }
 
         }catch(Exception ex){
-            Utils.logger(ex);
+            PikoUtils.logger(ex);
         }
 
         return videoEnities;

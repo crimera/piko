@@ -1,11 +1,22 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.misc.settings
 
 import app.crimera.patches.twitter.misc.extension.sharedExtensionPatch
+import app.crimera.patches.twitter.misc.extension.twitterInitHook
 import app.crimera.patches.twitter.premium.redirectBMNavBar.redirectBMTab
-import app.crimera.utils.Constants.ACTIVITY_HOOK_CLASS
-import app.crimera.utils.Constants.ADD_PREF_DESCRIPTOR
-import app.crimera.utils.Constants.DEEPLINK_HOOK_CLASS
-import app.crimera.utils.Constants.SSTS_DESCRIPTOR
+import app.crimera.patches.twitter.utils.Constants.ACTIVITY_HOOK_CLASS
+import app.crimera.patches.twitter.utils.Constants.ADD_PREF_DESCRIPTOR
+import app.crimera.patches.twitter.utils.Constants.DEEPLINK_HOOK_CLASS
+import app.crimera.patches.twitter.utils.Constants.SSTS_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -18,7 +29,6 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
-import app.morphe.shared.misc.extension.ExtensionsUtilsFingerprint
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
@@ -35,7 +45,7 @@ val settingsPatch =
             sharedExtensionPatch,
             settingsResourcePatch,
             redirectBMTab,
-            addResourcesPatch
+            addResourcesPatch,
         )
 
         execute {
@@ -130,7 +140,7 @@ val settingsPatch =
                 ),
             )
 
-            ExtensionsUtilsFingerprint.method.addInstruction(
+            twitterInitHook.fingerprint.method.addInstruction(
                 0,
                 "$SSTS_DESCRIPTOR->load()V",
             )

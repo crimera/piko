@@ -15,6 +15,8 @@ patches {
 dependencies {
     // Used by JsonGenerator.
     implementation(libs.gson)
+
+    implementation(libs.morphe.patches.library)
 }
 
 tasks {
@@ -43,6 +45,6 @@ tasks {
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs = listOf("-Xcontext-receivers")
+        freeCompilerArgs = listOf("-Xcontext-parameters")
     }
 }

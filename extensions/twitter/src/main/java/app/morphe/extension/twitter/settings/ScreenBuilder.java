@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.settings;
 
 import app.morphe.extension.shared.StringRef;
@@ -255,6 +265,16 @@ public class ScreenBuilder {
                             Settings.VID_NATIVE_DOWNLOADER
                     )
             );
+
+            if (SettingsStatus.inlineDownloadButton) {
+                addPreference(category,
+                        helper.switchPreference(
+                                strRes("piko_pref_native_downloader_inline_button"),
+                                strRes("piko_pref_native_downloader_inline_button_desc"),
+                                Settings.VID_INLINE_DOWNLOAD_BUTTON
+                        )
+                );
+            }
 
             addPreference(category,helper.listPreference(
                     strRes("piko_pref_download_path"),
@@ -1019,6 +1039,26 @@ public class ScreenBuilder {
                 )
         );
 
+       if (SettingsStatus.exportLoginToken) {
+           addPreference(category,
+                   helper.buttonPreference(
+                           StringRef.str("piko_pref_import_login_token"),
+                           "",
+                           Settings.IMPORT_LOGIN_TOKEN,
+                           "ic_vector_passkey",
+                           null
+                   )
+           );
+           addPreference(category,
+                   helper.buttonPreference(
+                           StringRef.str("piko_pref_export_login_token"),
+                           "",
+                           Settings.EXPORT_LOGIN_TOKEN,
+                           "ic_vector_passkey",
+                           null
+                   )
+           );
+       }
     }
 
     public void buildPikoSection(boolean buildCategory){

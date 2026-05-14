@@ -1,0 +1,34 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
+package app.crimera.patches.instagram.utils
+
+import app.crimera.patches.instagram.misc.settings.HookFlagsLoadFingerprint
+import app.crimera.patches.instagram.misc.settings.SettingsStatusLoadFingerprint
+import app.crimera.patches.instagram.utils.Constants.LOAD_FLAGS_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.patch.BytecodePatchContext
+
+context(patchContext: BytecodePatchContext)
+fun enableSettings(functionName: String) {
+    SettingsStatusLoadFingerprint.method.addInstruction(
+        0,
+        SSTS_DESCRIPTOR.format(functionName),
+    )
+}
+
+context(patchContext: BytecodePatchContext)
+fun addFlags(functionName: String) {
+    HookFlagsLoadFingerprint.method.addInstruction(
+        0,
+        LOAD_FLAGS_DESCRIPTOR.format(functionName),
+    )
+}

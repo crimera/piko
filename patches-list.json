@@ -1,64 +1,342 @@
 {
-  "version": "3.0.0-dev.9",
+  "version": "3.3.0",
   "patches": [
     {
       "name": "Add ability to copy media link",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Add settings",
+      "description": "Adds settings to control preferences are patching",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Allow user network certificate",
+      "description": "Allows user network certificate for whitehat testing",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Amoled theme",
+      "description": "Replaces Instagram's dark-mode background greys with pure black for AMOLED displays.",
+      "default": true,
+      "dependencies": [],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Bring back twitter",
       "description": "Bring back old twitter logo and name",
-      "use": false,
+      "default": false,
       "dependencies": [
         "ResourcePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Browse tweet object",
       "description": "Adds an option to browse the tweet object in the share menu.",
-      "use": false,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Change app icon",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "ResourcePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Change like animation",
+      "description": "Change the animation to one from existing Rings like animations",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Change version code",
       "description": "Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version.",
-      "use": true,
+      "default": true,
       "dependencies": [],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        },
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": [
         {
           "key": "versionCode",
@@ -77,375 +355,1772 @@
     {
       "name": "Clear tracking params",
       "description": "Removes tracking parameters when sharing links",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Control video auto scroll",
       "description": "Control video auto scroll in immersive view",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Copy comment",
+      "description": "Adds a button to copy comments on posts and reels.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Custom download folder",
       "description": "Change the download directory for video downloads",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Custom emoji font",
       "description": "Customise emoji font style",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Custom font",
       "description": "Customise font style",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Custom sharing domain",
       "description": "Allows for using domains like fxtwitter when sharing tweets/posts.",
-      "use": true,
-      "dependencies": [
-        "BytecodePatch"
-      ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
-      "options": []
-    },
-    {
-      "name": "Custom translator",
-      "description": "Requires X 11.0.0-release.0 or higher.",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Customise post font size",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Customise story ring size",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Customise story timestamp",
+      "description": "Customise the timestamp that shows when the story was posted",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Customize Inline action Bar items",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Customize Navigation Bar items",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Customize default reply sorting",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Customize explore tabs",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Customize notification tabs",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Customize profile tabs",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Customize search suggestions",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Customize search tab items",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Customize side bar items",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Customize timeline top bar",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Delete from database",
       "description": "Delete entries from database(cache)",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable Reels scrolling",
+      "description": "Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds.",
+      "default": true,
+      "dependencies": [],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable ads",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable analytics",
+      "description": "Block analytics that are sent to Instagram/Facebook servers.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Disable auto timeline scroll on launch",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Disable chirp font",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable comments",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable discover people",
+      "description": "Disables discover people section on user profile",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable double tap like",
+      "description": "Disable double tap like on post, reel, comment and message",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable explore",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable highlights",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable screenshot detection",
+      "description": "Disables screenshots detection in DM",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable stories",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable story flipping",
+      "description": "Disable automatic flipping/moving to next story",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable typing status",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable video autoplay",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Disunify xchat system",
       "description": "Bring back legacy features like messages and share sheet.",
-      "use": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.69.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Download media",
+      "description": "Adds ability to download posts, reels, stories and highlights",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Download patch",
       "description": "Unlocks the ability to download videos and gifs from Twitter/X",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Dynamic color",
       "description": "Replaces the default Twitter Blue with the user's Material You palette.",
-      "use": false,
+      "default": false,
       "dependencies": [],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Enable PiP mode automatically",
       "description": "Enables PiP mode when you close the app",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Enable Undo Posts",
       "description": "Enables ability to undo posts before posting",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Enable debug menu for posts",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Enable force HD videos",
       "description": "Videos will be played in highest quality always",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Export all activities",
       "description": "Makes all app activities exportable.",
-      "use": false,
+      "default": false,
       "dependencies": [],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Follow back indicator",
+      "description": "Adds a label on the profile page, indicating whether a user is follows you back.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Force enable translate",
       "description": "Get translate option for all posts",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Handle custom twitter links",
       "description": "Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. These will have to be manually enabled under the \"Open by default\" section in the app info!",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": [
         {
           "key": "customLinkHosts",
@@ -463,7 +2138,12 @@
             "girlcockx.com",
             "stupidpenisx.com",
             "cunnyx.com",
-            "autistic.kids"
+            "autistic.kids",
+            "gockx.com",
+            "yiffx.com",
+            "mpregx.com",
+            "skibidix.com",
+            "xcancel.com"
           ],
           "values": null
         }
@@ -472,411 +2152,2163 @@
     {
       "name": "Hide Banner",
       "description": "Hide new post banner",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide Community Notes",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide FAB",
       "description": "Adds an option to hide Floating action button",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide FAB Menu Buttons",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide Live Threads",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide Recommended Users",
       "description": "Hide recommended users that pops up when you follow someone",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide badges from navigation bar icons",
       "description": "Hides notification nudges & counts from navigation bar icons",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide bookmark icon in timeline",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide community badges",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide followed by context",
       "description": "Hides followed by context under profile",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide group creation button on sharesheet",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide hidden replies",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide immersive player",
       "description": "Removes swipe up for more videos in video player",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide navigation buttons",
+      "description": "Hides navigation bar buttons, such as the Reels and Create button.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide notes tray",
+      "description": "Hides notes tray in DM section",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide nudge button",
       "description": "Hides follow/subscribe/follow back buttons on posts",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide post metrics",
       "description": "Hides like, reposts etc counts.",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hide promote button",
       "description": "Hides promote button under self posts",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
-      "name": "Hide timeline posts by category",
-      "description": "Hides different post category like who to follow, news today etc from timeline.",
-      "use": true,
+      "name": "Hide recommendation items",
+      "description": "Adds options to hide recommendation items such as \"Who to follow\" and \"Today's news\" in timeline, search, and replies.",
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide reshare button",
+      "description": "Hides the reshare button from both posts and reels.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide stories tray",
+      "description": "Hides stories tray from main feed.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Hide suggested content",
+      "description": "Hides suggested stories, reels, threads (Suggested posts will still be shown).",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Hook feature flag",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "ResourcePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Import/Export login token",
+      "description": "Adds an feature to export and import the token of accounts. This is useful when logging in on your second device or when re-installing piko.",
+      "default": true,
+      "dependencies": [
+        "ResourcePatch",
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Improve image viewing",
+      "description": "Fetches max resolution images from server.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Legacy share links",
+      "description": "Brings back username on post share links. Works post 11.4x.xx",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Limit feed to following profiles",
+      "description": "Filters the home feed to display only content from profiles you follow.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Log server response",
       "description": "Log json responses received from server",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Make ephemeral media permanent",
+      "description": "Changes unexpired view once, view twice media to permanent view.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "More options on post",
+      "description": "Adds more options on post, like copy description by long pressing on post",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "More options on profile",
+      "description": "Adds a new button to handle user related data like copy handle, download profile picture etc",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Native downloader",
       "description": "Requires X 11.0.0-release.0 or higher.",
-      "use": true,
+      "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Native reader mode",
       "description": "Requires X 11.0.0-release.0 or higher.",
-      "use": true,
+      "default": true,
       "dependencies": [
         "ResourcePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Native translator",
+      "description": "Requires X 11.0.0-release.0 or higher.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "No shortened URL",
       "description": "Get rid of t.co short urls.",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Open links externally",
+      "description": "Changes links to always open in your external browser, instead of the in-app browser.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Pause search suggestions",
       "description": "Search suggestions will not be saved locally",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Remove Ads",
       "description": "Removed promoted posts, trends and google ads",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Remove build expired popup",
+      "description": "Removes the popup that appears after a while, when the app version ages.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Remove empty bottom space",
+      "description": "Removes empty space below bottom navigation bar",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Remove premium upsell",
       "description": "Removes premium upsell in home timeline",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Remove search suggestions",
       "description": "Hide/Remove search suggestion in explore section",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Remove view count",
       "description": "Removes the view count from the bottom of tweets",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Round off numbers",
       "description": "Enable or disable rounding off numbers",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Sanitize share links",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Selectable Text",
       "description": "Makes bio and username selectable",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "ResourcePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Share Tweet as Image",
       "description": "Share tweets as rendered image. Requires X 11.0.0-release.0 or higher.",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Show changelogs",
       "description": "Shows changelogs when new a patch is installed.",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Show poll results",
       "description": "Adds an option to show poll results without voting",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Show post source label",
       "description": "Source label will be shown only on public posts",
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
       "options": []
     },
     {
       "name": "Show sensitive media",
       "description": null,
-      "use": true,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
-      "compatiblePackages": {
-        "com.twitter.android": null
-      },
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": [
+            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
+            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
+          ],
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Stories audio autoplay",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Unlock Plus benefits",
+      "description": "Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Unlock developer options",
+      "description": "Unlocks developer option by long pressing home icon",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Unlock employee options",
+      "description": "Unlocks all options using by employee for debugging",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "View DMs anonymously",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "View live anonymously",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "View stories anonymously",
+      "description": null,
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "View story mentions",
+      "description": "Add option to view visible and hidden story mentions.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "426.0.0.37.68",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": "Tested on version code - 383207248, 383207252"
+            }
+          ]
+        }
+      ],
       "options": []
     }
   ]

@@ -1,22 +1,35 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.patches;
 
+import static android.text.Html.FROM_HTML_MODE_COMPACT;
+
+import static app.morphe.extension.shared.requests.Route.Method.GET;
+
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.widget.TextView;
-import android.app.Activity;
 
-import app.morphe.extension.shared.requests.Requester;
+import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
-import org.json.JSONObject;
-import app.morphe.extension.shared.Utils;
-import app.morphe.extension.shared.requests.Route;
-import static app.morphe.extension.shared.requests.Route.Method.GET;
-import app.morphe.extension.twitter.Pref;
-import static android.text.Html.FROM_HTML_MODE_COMPACT;
+
 import app.morphe.extension.shared.StringRef;
+import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.requests.Requester;
+import app.morphe.extension.shared.requests.Route;
+import app.morphe.extension.twitter.Pref;
 
 public class Changelogs {
     private static final String CHANGELOG_PROVIDER = "https://api.github.com/repos/crimera/piko/releases/tags";
@@ -78,7 +91,7 @@ public class Changelogs {
             try {
                 htmlString = getUpdateMessage();
             } catch (Exception ex) {
-                app.morphe.extension.twitter.Utils.logger(ex);
+                app.morphe.extension.crimera.PikoUtils.logger(ex);
                 htmlString = null;
             }
             if (htmlString == null) return;

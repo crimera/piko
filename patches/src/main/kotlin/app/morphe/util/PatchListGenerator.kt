@@ -1,12 +1,13 @@
 /*
  * Copyright 2025 Morphe.
- * https://github.com/MorpheApp/morphe-patches/blob/95e285b9aaa3195fe49fe5326a416043348989e6/patches/src/main/kotlin/app/morphe/util/PatchListGenerator.kt
+ * https://github.com/MorpheApp/morphe-patches
  *
- * File-Specific License Notice (GPLv3 Section 7 Additional Permission).
+ * File-Specific License Notice (GPLv3 Section 7 Terms)
  *
  * This file is part of the Morphe patches project and is licensed under
  * the GNU General Public License version 3 (GPLv3), with the Additional
- * Terms under Section 7 described in the Morphe patches LICENSE file.
+ * Terms under Section 7 described in the Morphe patches
+ * LICENSE file: https://github.com/MorpheApp/morphe-patches/blob/main/NOTICE
  *
  * https://www.gnu.org/licenses/gpl-3.0.html
  *
@@ -40,10 +41,7 @@ import java.io.File
 import java.net.URLClassLoader
 import java.util.jar.Manifest
 
-typealias PackageName = String
-typealias VersionName = String
-
-internal fun main() {
+fun main() {
     val patchFiles = setOf(
         File("build/libs/").listFiles { file ->
             val fileName = file.name
@@ -70,28 +68,48 @@ internal fun main() {
 private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
     val listJson = File("../patches-list.json")
 
-    val patchesMap = patches.sortedBy { it.name }.map {
+    val patchesMap = patches.sortedBy { it.name }.map { patch ->
         JsonPatch(
-            it.name!!,
-            it.description,
-            it.use,
-            it.dependencies.map { dependency -> dependency.javaClass.simpleName },
-            it.compatiblePackages?.associate { (packageName, versions) -> packageName to versions },
-            it.options.values.map { option ->
-                JsonPatch.Option(
-                    option.key,
-                    option.title,
-                    option.description,
-                    option.required,
-                    option.type.toString(),
-                    option.default,
-                    option.values,
+            name = patch.name!!,
+            description = patch.description,
+            default = patch.default,
+            dependencies = patch.dependencies.map { it.javaClass.simpleName },
+            // Map each Compatibility to a JsonCompatibility object with full metadata.
+            // Patches with null compatiblePackages are universal (apply to any app).
+            compatiblePackages = patch.compatibility?.map { compat ->
+                JsonCompatibility(
+                    packageName = compat.packageName!!,
+                    name = compat.name,
+                    description = compat.description,
+                    apkFileType = compat.apkFileType?.name,
+                    // Format as #RRGGBB string for readability; null if not set
+                    appIconColor = compat.appIconColor?.let { "#%06X".format(it) },
+                    signatures = compat.signatures,
+                    targets = compat.targets.map { target ->
+                        JsonCompatibility.Target(
+                            version = target.version,
+                            isExperimental = target.isExperimental,
+                            minSdk = target.minSdk,
+                            description = target.description,
+                        )
+                    },
                 )
             },
+            options = patch.options.values.map { option ->
+                JsonPatch.Option(
+                    key = option.key,
+                    title = option.title,
+                    description = option.description,
+                    required = option.required,
+                    type = option.type.toString(),
+                    default = option.default,
+                    values = option.values,
+                )
+            }
         )
     }
 
-    val gsonBuilder = GsonBuilder()
+    val gson = GsonBuilder()
         .serializeNulls()
         .disableHtmlEscaping()
         .setPrettyPrinting()
@@ -99,20 +117,20 @@ private fun generatePatchList(version: String, patches: Set<Patch<*>>) {
 
     val jsonObject = JsonObject()
     jsonObject.addProperty("version", "v$version")
-    jsonObject.add("patches", gsonBuilder.toJsonTree(patchesMap))
+    jsonObject.add("patches", gson.toJsonTree(patchesMap))
 
-    listJson.writeText(
-        gsonBuilder.toJson(jsonObject)
-    )
+    listJson.writeText(gson.toJson(jsonObject))
 }
 
+/** JSON representation of a patch entry in patches-list.json. */
 @Suppress("unused")
 private class JsonPatch(
     val name: String? = null,
     val description: String? = null,
-    val use: Boolean = true,
+    val default: Boolean = true,
     val dependencies: List<String>,
-    val compatiblePackages: Map<PackageName, Set<VersionName>?>? = null,
+    /** Null means the patch is universal and applies to any app. */
+    val compatiblePackages: List<JsonCompatibility>? = null,
     val options: List<Option>,
 ) {
     class Option(
@@ -126,3 +144,29 @@ private class JsonPatch(
     )
 }
 
+/** JSON representation of a compatible app entry, including name and per-version metadata. */
+@Suppress("unused")
+private class JsonCompatibility(
+    /** Android package name, e.g. com.google.android.youtube. */
+    val packageName: String,
+    /** Human-readable app name declared in Compatibility, e.g. "YouTube". */
+    val name: String?,
+    /** User-facing description of the app. */
+    val description: String?,
+    /** Target unpatched app file type, e.g. APK, APKM. Null if not specified. */
+    val apkFileType: String?,
+    /** App icon background color as #RRGGBB string, or null if not set. */
+    val appIconColor: String?,
+    /** Valid SHA-256 signatures of the app. */
+    val signatures: Set<String>?,
+    val targets: List<Target>,
+) {
+    class Target(
+        val version: String?,
+        val isExperimental: Boolean,
+        /** Minimum device SDK version. Null means any SDK version. */
+        val minSdk: Int?,
+        /** Optional user-facing note about this specific version. */
+        val description: String?,
+    )
+}

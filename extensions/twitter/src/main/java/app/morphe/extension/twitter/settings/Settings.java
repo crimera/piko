@@ -1,11 +1,21 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.settings;
 
-import app.morphe.extension.shared.settings.BaseSettings;
-import app.morphe.extension.shared.settings.BooleanSetting;
-import app.morphe.extension.shared.settings.StringSetting;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
 
-public class Settings extends BaseSettings {
+public class Settings {
     public static final String SHARED_PREF_NAME = "piko_settings";
     public static final String ACT_NAME = "activity_name";
 
@@ -45,6 +55,7 @@ public class Settings extends BaseSettings {
     public static final BooleanSetting ADS_REMOVE_TODAYS_NEW = new BooleanSetting("ads_remove_todays_news", true);
 
     public static final BooleanSetting VID_NATIVE_DOWNLOADER = new BooleanSetting("vid_native_downloader", true);
+    public static final BooleanSetting VID_INLINE_DOWNLOAD_BUTTON = new BooleanSetting("vid_inline_download_button", true);
     public static final BooleanSetting BROWSE_OBJECT = new BooleanSetting("browse_object", true);
     public static final StringSetting VID_NATIVE_DOWNLOADER_FILENAME = new StringSetting("vid_native_downloader_filename", "0");
     public static final BooleanSetting NATIVE_TRANSLATOR = new BooleanSetting("native_translator", true);
@@ -93,7 +104,7 @@ public class Settings extends BaseSettings {
     public static final StringSetting CUSTOM_DEF_REPLY_SORTING = new StringSetting("customisation_def_reply_sorting", "Relevance");
     public static final StringSetting REPLY_SORTING_LAST_FILTER = new StringSetting("reply_sorting_last_filter", "Relevance");
     public static final StringSetting CUSTOM_SEARCH_TYPE_AHEAD = new StringSetting("customisation_search_type_ahead", "");
-    public static final StringSetting CUSTOM_POST_FONT_SIZE = new StringSetting("customisation_post_font_size", String.valueOf(Utils.getResourceDimension("font_size_normal")));
+    public static final StringSetting CUSTOM_POST_FONT_SIZE = new StringSetting("customisation_post_font_size", String.valueOf(ResourceUtils.getDimension("font_size_normal")));
 
     public static final StringSetting LAST_CHANGELOG_VERSION = new StringSetting("last_changelog_version", "0");
     public static final StringSetting LAST_CHANGELOG = new StringSetting("last_changelog", "0");
@@ -115,6 +126,8 @@ public class Settings extends BaseSettings {
     public static final String DELETE_EMOJI_FONT = "delete_emoji_font";
     public static final String RESET_READER_MODE_CACHE = "reader_mode_cache";
     public static final String CHANGE_APP_ICON = "change_app_icon";
+    public static final String IMPORT_LOGIN_TOKEN = "import_login_token";
+    public static final String EXPORT_LOGIN_TOKEN = "export_login_token";
 
     public static final String PREMIUM_SECTION = "premium_section";
     public static final String DOWNLOAD_SECTION = "download_section";

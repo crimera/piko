@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Premium Ayarları -->
+    <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_reader_mode">okuyucu modu</string>
-    <string name="piko_pref_reader_mode_desc">Uzun gönderilerde "okuyucu modu\" etkinleştirir</string>
+    <string name="piko_pref_reader_mode_desc">Uzun gönderilerde \"okuyucu modu\" etkinleştirir</string>
     <string name="piko_pref_undo_posts">gönderiyi geri al</string>
     <string name="piko_pref_undo_posts_desc">Gönderiyi paylaşmadan önce geri alma özelliğini etkinleştirir</string>
     <string name="piko_pref_undo_posts_btn">Gönderiyi geri alma ayarları</string>
     <string name="piko_pref_icon_n_navbar_btn">Uygulama simgesi ve alt çubuk özelleştirme ayarları</string>
     <string name="piko_pref_enable_force_pip">PiP modunu otomatik aç</string>
     <string name="piko_pref_enable_force_pip_desc">Uygulamayı kapattığınızda PiP modunu etkinleştirir</string>
-
-    <!-- İndirme Ayarları -->
+    <!-- Download Settings -->
     <string name="piko_title_download">İndirme</string>
     <string name="piko_pref_video_download">video indirme</string>
     <string name="piko_pref_download">İndirme dizinini değiştir</string>
@@ -25,17 +24,22 @@
     <string name="piko_pref_download_media_link_handle_always_ask">Her zaman sor</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Medya bağlantısını kopyala</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Medya bağlantısını paylaş</string>
-
-    <!-- Yerel (Native) -->
+    <!-- Native -->
     <string name="piko_title_native">Yerel özellikler</string>
     <string name="piko_pref_native_page_desc">Bu Piko yerel özellikleri gönderilerin paylaş menüsünde mevcuttur.</string>
     <string name="piko_title_native_downloader">Yerel indirici</string>
     <string name="piko_title_native_downloader_toggle">Yerel indirmeyi etkinleştir</string>
+    <string name="piko_pref_native_downloader_inline_button">İndirme butonunu satır içinde göster</string>
+    <string name="piko_pref_native_downloader_inline_button_desc">Gönderi işlem çubuğuna doğrudan bir indirme düğmesi ekler</string>
     <string name="piko_pref_native_downloader_alert_title">Medyayı indir</string>
     <string name="piko_pref_native_downloader_download_all">Hepsini indir</string>
     <string name="piko_pref_native_downloader_no_media">Medya bulunamadı</string>
     <string name="piko_pref_native_downloader_filename_title">Dosya adı desenini kaydet</string>
-
+    <string name="piko_browse_object_title">Tweet nesnesine gözat</string>
+    <string name="piko_share_image_title">Tweet\'i Resim Olarak Paylaş</string>
+    <string name="piko_share_image_toggle">Tweet\'i Resim Olarak Paylaş\'ı Etkinleştir</string>
+    <string name="piko_share_image_autocleanup">Yakalamaları otomatik temizle</string>
+    <string name="piko_share_image_autocleanup_desc">Etkinleştirildiğinde 24 saatten eski kayıtlar silinir</string>
     <string name="piko_title_native_translator">Yerel gönderi çevirisi</string>
     <string name="piko_native_translator_toggle">Yerel gönderi çevirisini etkinleştir</string>
     <string name="piko_native_translator_provider">Çeviri sağlayıcıları</string>
@@ -43,7 +47,7 @@
     <string name="piko_native_translator_zero_text">Çevrilecek metin bulunamadı</string>
     <string name="piko_native_translator_google">Google çeviri</string>
     <string name="piko_native_translator_google_v2">Google çeviri V2</string>
-
+    <string name="piko_native_translator_fxtwitter">FxTwitter API</string>
     <string name="piko_title_native_reader_mode">Okuyucu modu</string>
     <string name="piko_native_reader_mode_grok_thread">Bu gönderiyi analiz et</string>
     <string name="piko_native_reader_mode_grok_author">Yazar hakkında daha fazla</string>
@@ -57,15 +61,14 @@
     <string name="piko_native_reader_mode_cache_delete">Okuyucu modu önbelleğini sil</string>
     <string name="piko_native_reader_mode_cache_delete_success">Önbellek başarıyla silindi</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Önbellek silme başarısız</string>
-
-    <!-- Reklam Ayarları -->
+    <!-- Ads Settings -->
     <string name="piko_title_ads">Reklamlar</string>
     <string name="piko_pref_hide_promoted_posts">Sponsorlu gönderiler</string>
-    <string name="piko_pref_wtf_section">"Kimi takip etme\" bölümü</string>
-    <string name="piko_pref_cts_section">"Abone olunacak içerik üreticile\" bölümü</string>
-    <string name="piko_pref_ctj_section">"Katılınacak toplulukl\" bölümü</string>
-    <string name="piko_pref_ryb_section">"Yer işaretlerinizi yeniden ziyaret ed\" bölümü</string>
-    <string name="piko_pref_pinned_posts_section">"Takipçiler tarafından sabitlenmiş gönderil\" bölümü</string>
+    <string name="piko_pref_wtf_section">\"Kimi takip etme\" bölümü</string>
+    <string name="piko_pref_cts_section">\"Abone olunacak içerik üreticile\" bölümü</string>
+    <string name="piko_pref_ctj_section">\"Katılınacak toplulukl\" bölümü</string>
+    <string name="piko_pref_ryb_section">\"Yer işaretlerinizi yeniden ziyaret ed\" bölümü</string>
+    <string name="piko_pref_pinned_posts_section">\"Takipçiler tarafından sabitlenmiş gönderil\" bölümü</string>
     <string name="piko_pref_hide_detailed_posts">İlgili gönderiler (yanıtlarda)</string>
     <string name="piko_pref_hide_premium_prompt">Mesaj istemleri</string>
     <string name="piko_pref_hide_todays_news">Bugünün haberleri</string>
@@ -77,8 +80,7 @@
     <string name="piko_pref_hide_premium_upsell_desc">Ana akışta premium yükseltmeyi kaldırır</string>
     <string name="piko_pref_top_people_search">aramada üst kişiler</string>
     <string name="piko_pref_top_people_search_desc">Aramadan sonra çıkan kişi bölümünü kaldırır</string>
-
-    <!-- Diğer (Misc) Ayarları -->
+    <!-- Misc Settings -->
     <string name="piko_title_misc">Çeşitli</string>
     <string name="piko_pref_chirp_font">chirp fontu</string>
     <string name="piko_pref_hide_fab">yüzen eylem düğmesi</string>
@@ -101,22 +103,23 @@
     <string name="piko_pref_pause_search_suggestion_desc">Arama önerileri yerel olarak kaydedilmez</string>
     <string name="piko_pref_search_suggestion">arama önerileri</string>
     <string name="piko_pref_search_suggestion_desc">Keşfet bölümündeki arama önerilerini gizle/kaldır</string>
-
-    <!-- Özellik Bayrakları Ayarları -->
+    <string name="piko_disunify_xchat_system">Xchat sistemini ayırma</string>
+    <string name="piko_disunify_xchat_system_desc">Mesajlar ve paylaşım sayfası gibi eski özellikleri geri getirir</string>
+    <string name="piko_legacy_share_link">Türkçe</string>
+    <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Özellik bayrakları</string>
     <string name="piko_pref_feature_flags">Özellik bayrağı ekle</string>
     <string name="piko_pref_edit_flag_title">Bayrağı düzenle</string>
     <string name="piko_pref_add_flag_title">Bayrak ekle</string>
     <string name="piko_pref_search_flags">Bayrakları ara</string>
-
-    <!-- Zaman Akışı (Timeline) Ayarları -->
+    <!-- Timeline Settings -->
     <string name="piko_title_timeline">Zaman akışı</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Başlangıçta otomatik akış kaydırmayı devre dışı bırak</string>
     <string name="piko_pref_show_post_source">Gönderi kaynağını göster</string>
     <string name="piko_pref_show_post_source_desc">Gönderi bilgi ekranını açarken gecikme olabilir ve etiket sadece herkese açık gönderilerde görünür</string>
     <string name="piko_pref_hide_live_threads">canlı gönderiler</string>
     <string name="piko_pref_hide_live_threads_desc">Zaman akışındaki canlı bölümünü gizler</string>
-    <string name="piko_pref_hide_banner">banner</string>
+    <string name="piko_pref_hide_banner">afiş</string>
     <string name="piko_pref_hide_banner_desc">yeni gönderi uyarısı</string>
     <string name="piko_pref_hide_bmk_timeline">zaman akışında yer imi simgesi</string>
     <string name="piko_pref_force_translate">Çeviriyi zorla etkinleştir</string>
@@ -127,7 +130,7 @@
     <string name="piko_pref_show_poll_result_desc">Oy vermeden anket sonuçlarını görüntüle</string>
     <string name="piko_pref_hide_immersive_player">immersive oynatıcı</string>
     <string name="piko_pref_hide_immersive_player_desc">Video oynatıcıda yukarı kaydırarak daha fazla video açma özelliğini kaldırır</string>
-    <string name="piko_pref_enable_vid_auto_advance">video otomatik kaydırma</string>
+    <string name="piko_pref_enable_vid_auto_advance">Video otomatik kaydırma</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">Immersive görünümde video otomatik kaydırmayı etkinleştirir</string>
     <string name="piko_pref_hide_hidden_replies">gizli yanıtlar</string>
     <string name="piko_pref_force_hd">HD videoları zorla</string>
@@ -135,19 +138,20 @@
     <string name="piko_pref_hide_nudge_button">Hatırlatma butonunu gizle</string>
     <string name="piko_pref_hide_nudge_button_desc">Gönderilerdeki takip/abone ol/geri takip et butonlarını gizler</string>
     <string name="piko_pref_hide_social_proof">Takip edenler bilgisini gizle</string>
-    <string name="piko_pref_hide_social_proof_desc">Profildeki "şunlar takip ediy\" bilgisini gizler</string>
+    <string name="piko_pref_hide_social_proof_desc">Profildeki \"şunlar takip ediy\" bilgisini gizler</string>
     <string name="piko_pref_hide_community_badge">Topluluk rozetlerini gizle</string>
+    <string name="piko_pref_hide_badge_nav_bar">Gezinme çubuğundaki rozetleri gizle</string>
+    <string name="piko_pref_hide_badge_nav_bar_desc">Bildirim uyarılarını gizler ve gezinme çubuğu simgelerindeki sayıları kaldırır</string>
     <string name="piko_pref_hide_post_inline_metrics">Gönderi satır içi görünüm metriklerini gizle</string>
     <string name="piko_pref_hide_post_inline_metrics_desc">Gönderi satır içi görünüm metriklerini gizle</string>
     <string name="piko_pref_hide_post_detailed_metrics">Gönderi ayrıntılı görünüm metriklerini gizle</string>
     <string name="piko_pref_hide_post_detailed_metrics_desc">Ayrıntılı görünümde beğeni, yeniden paylaşım vb. sayıları gizler</string>
-
-    <!-- Özelleştirme Ayarları -->
+    <!-- Customization Settings -->
     <string name="piko_title_customisation">Özelleştirme</string>
     <string name="piko_pref_customisation_profiletabs">Gizlenecek profil sekmeleri</string>
     <string name="piko_pref_customisation_timelinetabs">Gizlenecek zaman akışı sekmeleri</string>
-    <string name="piko_pref_customisation_timelinetabs_foryou">"Sana öz\"i kaldır</string>
-    <string name="piko_pref_customisation_timelinetabs_following">"Takip edilenl\"i kaldır</string>
+    <string name="piko_pref_customisation_timelinetabs_foryou">\"Sana öz\"i kaldır</string>
+    <string name="piko_pref_customisation_timelinetabs_following">\"Takip edilenl\"i kaldır</string>
     <string name="piko_pref_customisation_timelinetabs_both">Her ikisini göster</string>
     <string name="piko_pref_customisation_sidebartabs">Gizlenecek kenar çubuğu öğeleri</string>
     <string name="piko_pref_customisation_navbartabs">Gizlenecek alt çubuk öğeleri</string>
@@ -160,8 +164,7 @@
     <string name="piko_pref_customisation_post_font_size">Gönderi yazı tipi boyutu</string>
     <string name="piko_pref_customisation_search_type_ahead">Gizlenecek arama önerileri</string>
     <string name="piko_pref_customisation_change_app_icon">Uygulama simgesini değiştir</string>
-
-    <!-- Yazı Tipi Ayarları -->
+    <!-- Font Settings -->
     <string name="piko_title_font">Yazı tipi stili</string>
     <string name="piko_pref_add_font">Yazı tipi ekle</string>
     <string name="piko_pref_add_font_desc">Yazı tipinin .ttf veya .otf türünde olduğundan emin olun</string>
@@ -173,15 +176,13 @@
     <string name="piko_pref_delete_font_success">Yazı tipi başarıyla silindi</string>
     <string name="piko_pref_delete_font_fail">Yazı tipi silme başarısız</string>
     <string name="piko_pref_delete_font_warn">Silinecek özel yazı tipi bulunamadı</string>
-
-    <!-- Günlük (Logging) Ayarları -->
+    <!-- Logging Settings -->
     <string name="piko_title_logging">Günlük kaydı</string>
     <string name="piko_pref_server_response_logging">Sunucu yanıtını kaydet</string>
     <string name="piko_pref_server_response_logging_desc">Sunucudan alınan JSON yanıtlarını \'Download/Piko\' içine kaydeder</string>
     <string name="piko_pref_server_response_logging_file_overwrite">Yanıt kayıt dosyasını üzerine yaz</string>
     <string name="piko_pref_server_response_logging_file_overwrite_desc">Başlangıçta mevcut yanıt kayıt verilerini temizle</string>
-
-    <!-- Yedekleme ve Geri Yükleme -->
+    <!-- Backup and Restore -->
     <string name="piko_title_backup">Yedekle ve geri yükle</string>
     <string name="piko_pref_export">%s dışa aktar</string>
     <string name="piko_pref_import">%s içe aktar</string>
@@ -190,8 +191,9 @@
     <string name="piko_pref_import_failed">Hata: %s içe aktarılırken hata oluştu</string>
     <string name="piko_pref_export_no_uri">Hata: Hedef verilmedi</string>
     <string name="piko_pref_import_no_uri">Hata: Dosya verilmedi</string>
-
-    <!-- Hakkında -->
+    <string name="piko_pref_export_login_token">Giriş anahtarını dışa aktar</string>
+    <string name="piko_pref_import_login_token">Giriş anahtarını içe aktar</string>
+    <!-- About -->
     <string name="piko_title_about">Hakkında</string>
     <string name="piko_pref_app_version">Uygulama sürümü</string>
     <string name="piko_pref_patch_info">Yama Bilgileri</string>
@@ -205,10 +207,142 @@
     <string name="piko_pref_enable">%s etkinleştir</string>
     <string name="piko_single_page_settings">Tek sayfa ayarları</string>
     <string name="piko_single_page_settings_desc">Ayarları tek sayfada görüntüleyin</string>
-
     <string name="piko_pref_search_type_ahead_users">Kullanıcılar</string>
     <string name="piko_pref_search_type_ahead_events">Etkinlikler</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Sıralı bölüm</string>
-
     <string name="piko_settings_supported_links">Desteklenen bağlantıları aç</string>
+    <!-- For arrays-->
+    <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_money">Para</string>
+    <string name="piko_array_xchat">X Sohbet</string>
+    <string name="piko_array_x_lite">Yeni X Android</string>
+    <string name="piko_array_conference">Konferans</string>
+    <string name="piko_array_creator_studio">Oluşturucu stüdyosu</string>
+    <string name="piko_array_jobs">İşler</string>
+    <string name="piko_array_media">Medya</string>
+    <string name="piko_array_light_mode">Aydınlık mod</string>
+    <!-- App icon strings -->
+    <string name="piko_app_icon_thanks">\@NeoFreeBird\'e, iOS uygulama simgeleri için teşekkürler</string>
+    <string name="piko_app_icon_piko_exclusive">(Piko\'ya özel)</string>
+    <!-- Category -->
+    <string name="piko_app_icon_category_legacy">Eski</string>
+    <string name="piko_app_icon_category_seasonal_event">Sezonluk Etkinlikler</string>
+    <string name="piko_app_icon_category_sports">Spor</string>
+    <string name="piko_app_icon_category_cultural_and_celebrations">Kültür ve Kutlamalar</string>
+    <string name="piko_app_icon_category_pride">Onur</string>
+    <string name="piko_app_icon_category_misc">Çeşitli</string>
+    <string name="piko_app_icon_category_space">Uzay</string>
+    <string name="piko_app_icon_category_movies_n_series">Filmler ve Diziler</string>
+    <!-- Icon names -->
+    <string name="piko_app_icon_name_default">Varsayılan</string>
+    <string name="piko_app_icon_name_legacy_icon_1">Eski İkon 1</string>
+    <string name="piko_app_icon_name_legacy_icon_2">Eski İkon 2</string>
+    <string name="piko_app_icon_name_legacy_icon_3">Eski İkon 3</string>
+    <string name="piko_app_icon_name_legacy_icon_4">Eski İkon 4</string>
+    <string name="piko_app_icon_name_legacy_blue">Eski Mavi</string>
+    <string name="piko_app_icon_name_twitter_blue">Twitter Mavi</string>
+    <string name="piko_app_icon_name_earth">Dünya</string>
+    <string name="piko_app_icon_name_moon">Ay</string>
+    <string name="piko_app_icon_name_mars">Mars</string>
+    <string name="piko_app_icon_name_sun">Güneş</string>
+    <string name="piko_app_icon_name_stars">Yıldızlar</string>
+    <string name="piko_app_icon_name_milky_way">Samanyolu</string>
+    <string name="piko_app_icon_name_autumn_2021">Sonbahar 2021</string>
+    <string name="piko_app_icon_name_autumn_2022">Sonbahar 2022</string>
+    <string name="piko_app_icon_name_south_spring_2021">Güney İlkbahar 2021</string>
+    <string name="piko_app_icon_name_south_spring_2022">Güney İlkbahar 2022</string>
+    <string name="piko_app_icon_name_winter_1">Kış 1</string>
+    <string name="piko_app_icon_name_winter_2">Kış 2</string>
+    <string name="piko_app_icon_name_summer_1">Yaz 1</string>
+    <string name="piko_app_icon_name_summer_2">Yaz 2</string>
+    <string name="piko_app_icon_name_autumn_southern">Sonbahar Güney</string>
+    <string name="piko_app_icon_name_summer">Yaz</string>
+    <string name="piko_app_icon_name_winter">Kış</string>
+    <string name="piko_app_icon_name_beijing_olympics_1">Pekin Olimpiyatları 1</string>
+    <string name="piko_app_icon_name_beijing_olympics_2">Pekin Olimpiyatları 2</string>
+    <string name="piko_app_icon_name_daytona">Daytona</string>
+    <string name="piko_app_icon_name_formulaone">Formula 1</string>
+    <string name="piko_app_icon_name_kentucky_derby">Kentucky Derbisi</string>
+    <string name="piko_app_icon_name_mlb">MLB</string>
+    <string name="piko_app_icon_name_nba">NBA</string>
+    <string name="piko_app_icon_name_nba_2">NBA 2</string>
+    <string name="piko_app_icon_name_ncaa">NCAA</string>
+    <string name="piko_app_icon_name_masters">Masters</string>
+    <string name="piko_app_icon_name_nba_finals">NBA Finalleri</string>
+    <string name="piko_app_icon_name_stanley_cup">Stanley Kupası</string>
+    <string name="piko_app_icon_name_commonwealth">İngiliz Milletler Topluluğu</string>
+    <string name="piko_app_icon_name_mothers_day">Anneler Günü</string>
+    <string name="piko_app_icon_name_womansday">Kadınlar Günü</string>
+    <string name="piko_app_icon_name_halloween_2021">Cadılar Bayramı 2021</string>
+    <string name="piko_app_icon_name_halloween_2022">Cadılar Bayramı 2022</string>
+    <string name="piko_app_icon_name_halloween_2024_1">Cadılar Bayramı 2024 1</string>
+    <string name="piko_app_icon_name_halloween_2024_2">Cadılar Bayramı 2024 2</string>
+    <string name="piko_app_icon_name_halloween_2024_3">Cadılar Bayramı 2024 3</string>
+    <string name="piko_app_icon_name_holi">Holi</string>
+    <string name="piko_app_icon_name_stpatricks_day">Aziz Patrick Günü</string>
+    <string name="piko_app_icon_name_easter">Paskalya</string>
+    <string name="piko_app_icon_name_anzac">Anzac</string>
+    <string name="piko_app_icon_name_ramadan">Ramazan</string>
+    <string name="piko_app_icon_name_black_history">Siyah Tarihi</string>
+    <string name="piko_app_icon_name_eurovisionfinal">Euro Vision Final</string>
+    <string name="piko_app_icon_name_lunar_new_year_1">Ay Takvimi Yeni Yılı 1</string>
+    <string name="piko_app_icon_name_lunar_new_year_2">Ay Takvimi Yeni Yılı 2</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_1">Japon Yeni Yılı 2024 1</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_2">Japon Yeni Yılı 2024 2</string>
+    <string name="piko_app_icon_name_may_the_fourth">4 Mayıs</string>
+    <string name="piko_app_icon_name_barbie">Barbie</string>
+    <string name="piko_app_icon_name_thanksgiving_1">Şükran Günü 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2">Şükran Günü 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_1">Şükran Günü 2024 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_2">Şükran Günü 2024 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_3">Şükran Günü 2024 3</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_4">Şükran Günü 2024 4</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_5">Şükran Günü 2024 5</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_6">Şükran Günü 2024 6</string>
+    <string name="piko_app_icon_name_canada_day">Kanada Günü</string>
+    <string name="piko_app_icon_name_canada_indigenous">Kanada Yerlileri</string>
+    <string name="piko_app_icon_name_earth_hour">Dünya Saati</string>
+    <string name="piko_app_icon_name_euro">Euro</string>
+    <string name="piko_app_icon_name_independence_day">Bağımsızlık Günü</string>
+    <string name="piko_app_icon_name_juneteenth">Kurtuluş Günü</string>
+    <string name="piko_app_icon_name_naidoc">Naidoc</string>
+    <string name="piko_app_icon_name_christmas_2024_1">Noel 2024 1</string>
+    <string name="piko_app_icon_name_christmas_2024_2">Noel 2024 2</string>
+    <string name="piko_app_icon_name_christmas_2024_3">Noel 2024 3</string>
+    <string name="piko_app_icon_name_christmas_2024_4">Noel 2024 4</string>
+    <string name="piko_app_icon_name_upsidedown">Baş Aşağı</string>
+    <string name="piko_app_icon_name_games_chamber">Oyun Odası</string>
+    <string name="piko_app_icon_name_pridesouthern">Onur Güney</string>
+    <string name="piko_app_icon_name_newzealand_pride_1">Yeni Zelanda Onur 1</string>
+    <string name="piko_app_icon_name_newzealand_pride_2">Yeni Zelanda Onur 2</string>
+    <string name="piko_app_icon_name_pride_month">Onur Ayı</string>
+    <string name="piko_app_icon_name_fancy">Süslü</string>
+    <string name="piko_app_icon_name_broken">Kırık</string>
+    <string name="piko_app_icon_name_cyber">Siber</string>
+    <string name="piko_app_icon_name_soft_pastel_pink">Yumuşak Pastel Pembe</string>
+    <string name="piko_app_icon_name_electric_indigo">Elektrikli İndigo</string>
+    <string name="piko_app_icon_name_neon_pink">Neon Pembe</string>
+    <string name="piko_app_icon_name_tropical_teal">Tropikal Çamurkuşu</string>
+    <string name="piko_app_icon_name_vivid_orange">Canlı Turuncu</string>
+    <!-- Import / export login tokens -->
+    <string name="piko_login_token_export_screen_description">"Bu özellik, şu an giriş yapılmış hesap için oturum anahtarlarını dışa aktarır.
+Bunu giriş sayfasından veya \"Yeni hesap oluştur\" sayfasından içe aktarabilirsiniz.
+
+UYARI: Dışa aktarılan anahtarlar son derece gizli bilgilerdir.
+Hiç kimseyle paylaşmayın!
+Eğer birisi bu anahtarı ele geçirirse, siz oturumunuzu kapatana kadar istedikleri gibi hesabınıza erişebilirler.
+
+Daha fazla bilgi için lütfen şu sayfaya bakın.
+https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
+Özelliği kullanmadan önce bunu okumanız önerilir. Bazı önemli notlar içerir."</string>
+    <string name="piko_login_token_select_account">Bir hesap seçin:</string>
+    <string name="piko_login_token_export_copy_to_clipboard">Panoya kopyala</string>
+    <string name="piko_login_token_export_save_to_file">Dosyaya kaydet</string>
+    <string name="piko_login_token_import_token_button_text">Anahtar json\'u ile giriş yap</string>
+    <string name="piko_login_token_import_from_text">Metinden içe aktar</string>
+    <string name="piko_login_token_import_from_file">Dosyadan içe aktar</string>
+    <string name="piko_login_token_import_about">Bu özellik hakkında (Websiteyi aç)</string>
+    <string name="piko_login_token_import_success_reopen_required">Lütfen uygulamayı kapatın ve tekrar açın</string>
+    <string name="piko_login_token_import_failed_missing_info">Hata: Kullanıcı adı, belirteç veya gizli anahtar eksik</string>
+    <string name="piko_login_token_import_failed_already_exist">Hesap eklenemedi (zaten mevcut olabilir)</string>
 </resources>

@@ -1,9 +1,19 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.timeline.hideNudgeButtons
 
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.utils.Constants.PREF_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -15,7 +25,7 @@ import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
 
 private object hideNudgeButtonPatchFingerprint : Fingerprint(
     definingClass = "FollowNudgeButtonViewDelegateBinder;",
-    strings = listOf("viewDelegate", "viewModel")
+    strings = listOf("viewDelegate", "viewModel"),
 )
 
 @Suppress("unused")
@@ -24,7 +34,7 @@ val hideNudgeButtonPatch =
         name = "Hide nudge button",
         description = "Hides follow/subscribe/follow back buttons on posts",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
 
         execute {
@@ -56,6 +66,6 @@ val hideNudgeButtonPatch =
                 ),
             )
 
-            SettingsStatusLoadFingerprint.enableSettings("hideNudgeButton")
+            enableSettings("hideNudgeButton")
         }
     }

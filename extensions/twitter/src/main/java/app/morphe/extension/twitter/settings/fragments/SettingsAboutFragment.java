@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.settings.fragments;
 
 import android.text.*;
@@ -108,6 +118,7 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         flags.put(strRes("piko_pref_del_from_db"),SettingsStatus.deleteFromDb);
         flags.put(strRes("piko_pref_video_download"),SettingsStatus.enableVidDownload);
         flags.put(strRes("piko_title_native_downloader"),SettingsStatus.nativeDownloader);
+        flags.put(strRes("piko_pref_native_downloader_inline_button"),SettingsStatus.inlineDownloadButton);
         flags.put(strRes("piko_share_image_title"),SettingsStatus.shareImage);
         flags.put(strRes("piko_browse_object_title"),SettingsStatus.browseObject);
         flags.put(strRes("piko_title_native_reader_mode"),SettingsStatus.nativeReaderMode);
@@ -134,6 +145,8 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         flags.put(strRes("piko_pref_hide_badge_nav_bar"),SettingsStatus.hideNavbarBadge);
         flags.put(strRes("piko_pref_hide_post_inline_metrics"),SettingsStatus.hidePostMetrics);
         flags.put(strRes("piko_disunify_xchat_system"),SettingsStatus.disUnifyXChatSystem);
+        flags.put(strRes("piko_legacy_share_link"),SettingsStatus.legacyShareLink);
+        flags.put(strRes("piko_pref_export_login_token"),SettingsStatus.exportLoginToken);
 
         LegacyTwitterPreferenceCategory patPref = preferenceCategory(strRes("piko_pref_patches"), screen);
 
@@ -191,7 +204,7 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
             Utils.setClipboard(summary);
             Utils.showToastShort(strRes("copied_to_clipboard")+": "+ summary);
         }else if (key.equals(strRes("piko_settings_supported_links"))){
-            app.morphe.extension.twitter.Utils.openDefaultLinks();
+            app.morphe.extension.crimera.PikoUtils.openDefaultLinks();
         }else if (key.equals(strRes("piko_changelogs_title"))){
             Changelogs.showChangelogDialog(context);
         }

@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.patches.customise.appIcon;
 
 import android.content.Context;
@@ -8,6 +18,9 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
+
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import java.util.List;
 
@@ -56,9 +69,11 @@ public class IconListAdapter extends BaseAdapter {
         if (row.isHeader) {
             HeaderViewHolder hv;
             if (convertView == null) {
-                convertView = inflater.inflate(Utils.getResourceIdentifier("section_header", "layout"), parent, false);
+                convertView = inflater.inflate(ResourceUtils.getIdentifier(
+                        ResourceType.LAYOUT, "section_header"), parent, false);
                 hv = new HeaderViewHolder();
-                hv.title = convertView.findViewById(Utils.getResourceIdentifier("section_header_text", "id"));
+                hv.title = convertView.findViewById(ResourceUtils.getIdentifier(
+                        ResourceType.ID, "section_header_text"));
                 convertView.setTag(hv);
             } else {
                 hv = (HeaderViewHolder) convertView.getTag();
@@ -70,12 +85,13 @@ public class IconListAdapter extends BaseAdapter {
         IconViewHolder iv;
         if (convertView == null) {
 
-            convertView = inflater.inflate(Utils.getResourceIdentifier("icon_item", "layout"), parent, false);
+            convertView = inflater.inflate(ResourceUtils.getIdentifier(ResourceType.LAYOUT,
+                    "icon_item"), parent, false);
             iv = new IconViewHolder();
 
-            iv.icon = convertView.findViewById(Utils.getResourceIdentifier("icon_image", "id"));
-            iv.label = convertView.findViewById(Utils.getResourceIdentifier("icon_name", "id"));
-            iv.radio = convertView.findViewById(Utils.getResourceIdentifier("radio_button", "id"));
+            iv.icon = convertView.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "icon_image"));
+            iv.label = convertView.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "icon_name"));
+            iv.radio = convertView.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "radio_button"));
             convertView.setTag(iv);
         } else {
             iv = (IconViewHolder) convertView.getTag();

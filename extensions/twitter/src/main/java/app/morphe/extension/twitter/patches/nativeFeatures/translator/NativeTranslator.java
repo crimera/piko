@@ -1,8 +1,18 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.patches.nativeFeatures.translator;
 
 import android.content.Context;
 
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.twitter.patches.nativeFeatures.translator.providers.Translate;
 import app.morphe.extension.twitter.patches.nativeFeatures.translator.providers.GTranslate;
@@ -21,7 +31,7 @@ public class NativeTranslator {
             Long tweetId = tweet.getTweetId();
             // If text is empty.
             if(text == ""){
-                Utils.logger(StringRef.str("piko_native_translator_zero_text"));
+                PikoUtils.logger(StringRef.str("piko_native_translator_zero_text"));
                 return;
             }
 
@@ -30,7 +40,7 @@ public class NativeTranslator {
 
             // If both the tweet language and requested language are same.
             if(tweetLang.toLowerCase() == toLang.toLowerCase()){
-                Utils.logger(StringRef.str("translate_tweet_same_language",toLang));
+                PikoUtils.logger(StringRef.str("translate_tweet_same_language",toLang));
                 return;
             }
             int providerCode = Pref.natveTranslatorProvider();
@@ -64,11 +74,11 @@ public class NativeTranslator {
                 @Override
                 public void onError(Exception e) {
                     // Handle translation error
-                    Utils.logger("Translation failed: " + e.getMessage());
+                    PikoUtils.logger("Translation failed: " + e.getMessage());
                     }
                 });
         }catch (Exception ex){
-            Utils.logger(ex);
+            PikoUtils.logger(ex);
         }
     }
 }

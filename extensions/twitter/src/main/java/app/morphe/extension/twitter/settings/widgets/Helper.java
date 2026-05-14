@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.settings.widgets;
 
 import android.content.Context;
@@ -6,12 +16,14 @@ import android.preference.Preference;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+
 import androidx.annotation.Nullable;
-import app.morphe.extension.shared.settings.BooleanSetting;
-import app.morphe.extension.shared.settings.StringSetting;
-import app.morphe.extension.twitter.Utils;
 
 import java.util.Set;
+
+import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
+import app.morphe.extension.twitter.Utils;
 
 public class Helper {
     private final Context context;
@@ -105,17 +117,17 @@ public class Helper {
                 String newValClass = newValue.getClass().getSimpleName();
 
                 if (newValClass.equals("Boolean")) {
-                    Utils.setBooleanPerf(key, (Boolean) newValue);
+                    Utils.setBooleanPref(key, (Boolean) newValue);
                 } else if (newValClass.equals("String")) {
                     Utils.setStringPref(key, (String) newValue);
                 } else if (newValClass.equals("HashSet")) {
-                    Utils.setSetPerf(key, (Set) newValue);
+                    Utils.setSetPref(key, (Set) newValue);
                 }
             }
 
         } catch (Exception ex) {
-            Utils.toast(ex.toString());
-            Utils.logger(ex);
+            app.morphe.extension.crimera.PikoUtils.toast(ex.toString());
+            app.morphe.extension.crimera.PikoUtils.logger(ex);
         }
     }
 

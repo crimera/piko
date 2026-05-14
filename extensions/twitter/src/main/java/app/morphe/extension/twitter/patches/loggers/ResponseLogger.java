@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.patches.loggers;
 
 import java.io.BufferedReader;
@@ -6,7 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import app.morphe.extension.twitter.Pref;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 public class ResponseLogger {
     private static final boolean LOG_RES;
@@ -39,7 +49,7 @@ public class ResponseLogger {
 
     private static boolean writeFile(String data,boolean append){
         String fileName = "Server-Response-Log.txt";
-        return Utils.pikoWriteFile(fileName,data,append);
+        return PikoUtils.pikoWriteFile(fileName,data,append);
     }
 
 }

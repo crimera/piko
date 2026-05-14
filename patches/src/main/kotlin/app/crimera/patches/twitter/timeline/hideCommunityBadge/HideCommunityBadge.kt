@@ -1,9 +1,19 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.timeline.hideCommunityBadge
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.misc.settings.SettingsStatusLoadFingerprint
-import app.crimera.utils.Constants.PREF_DESCRIPTOR
-import app.crimera.utils.enableSettings
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.twitter.utils.enableSettings
 import app.crimera.utils.extractDescriptors
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -14,10 +24,11 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction22c
 
 private object CommModelFingerprint : Fingerprint(
-    strings = listOf(
-        "actionResults",
-        "role",
-    )
+    strings =
+        listOf(
+            "actionResults",
+            "role",
+        ),
 )
 
 @Suppress("unused")
@@ -25,7 +36,7 @@ val hideCommunityBadge =
     bytecodePatch(
         name = "Hide community badges",
     ) {
-        compatibleWith("com.twitter.android")
+        compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
 
         execute {
@@ -47,6 +58,6 @@ val hideCommunityBadge =
                 """.trimIndent(),
                 ExternalLabel("piko", iputObj),
             )
-            SettingsStatusLoadFingerprint.enableSettings("hideCommBadge")
+            enableSettings("hideCommBadge")
         }
     }

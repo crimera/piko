@@ -1,9 +1,21 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.settings.widgets;
 
 import android.content.Context;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.util.AttributeSet;
+
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.twitter.settings.Settings;
 
@@ -42,29 +54,29 @@ public class MultiSelectListPref extends MultiSelectListPreference {
         CharSequence[] entries = new CharSequence[]{};
         CharSequence[] entriesValues = new CharSequence[]{};
         if (key == Settings.CUSTOM_PROFILE_TABS.key) {
-            entries = Utils.getResourceStringArray("piko_array_profiletabs");
-            entriesValues = Utils.getResourceStringArray("piko_array_profiletabs_val");
+            entries = ResourceUtils.getStringArray("piko_array_profiletabs");
+            entriesValues = ResourceUtils.getStringArray("piko_array_profiletabs_val");
         }else if (key == Settings.CUSTOM_SIDEBAR_TABS.key) {
-            entries = Utils.getResourceStringArray("piko_array_sidebar");
-            entriesValues = Utils.getResourceStringArray("piko_array_sidebar_val");
+            entries = ResourceUtils.getStringArray("piko_array_sidebar");
+            entriesValues = ResourceUtils.getStringArray("piko_array_sidebar_val");
         }else if (key == Settings.CUSTOM_NAVBAR_TABS.key) {
-            entries = Utils.getResourceStringArray("piko_array_navbar");
-            entriesValues = Utils.getResourceStringArray("piko_array_navbar_val");
+            entries = ResourceUtils.getStringArray("piko_array_navbar");
+            entriesValues = ResourceUtils.getStringArray("piko_array_navbar_val");
         }else if (key == Settings.CUSTOM_INLINE_TABS.key) {
-            entries = Utils.getResourceStringArray("piko_array_inlinetabs");
-            entriesValues = Utils.getResourceStringArray("piko_array_inlinetabs_val");
+            entries = ResourceUtils.getStringArray("piko_array_inlinetabs");
+            entriesValues = ResourceUtils.getStringArray("piko_array_inlinetabs_val");
         }else if (key == Settings.CUSTOM_EXPLORE_TABS.key) {
-            entries = Utils.getResourceStringArray("piko_array_exploretabs");
-            entriesValues = Utils.getResourceStringArray("piko_array_exploretabs_val");
+            entries = ResourceUtils.getStringArray("piko_array_exploretabs");
+            entriesValues = ResourceUtils.getStringArray("piko_array_exploretabs_val");
         }else if (key == Settings.CUSTOM_SEARCH_TYPE_AHEAD.key) {
-            entries = Utils.getResourceStringArray("piko_array_search_type_ahead");
-            entriesValues = Utils.getResourceStringArray("piko_array_search_type_ahead_val");
+            entries = ResourceUtils.getStringArray("piko_array_search_type_ahead");
+            entriesValues = ResourceUtils.getStringArray("piko_array_search_type_ahead_val");
         }else if (key == Settings.CUSTOM_SEARCH_TABS.key) {
-            entries = Utils.getResourceStringArray("piko_array_searchtabs");
-            entriesValues = Utils.getResourceStringArray("piko_array_searchtabs_val");
+            entries = ResourceUtils.getStringArray("piko_array_searchtabs");
+            entriesValues = ResourceUtils.getStringArray("piko_array_searchtabs_val");
         }else if (key == Settings.CUSTOM_NOTIFICATION_TABS.key) {
-            entries = Utils.getResourceStringArray("piko_array_notificationtabs");
-            entriesValues = Utils.getResourceStringArray("piko_array_notificationtabs_val");
+            entries = ResourceUtils.getStringArray("piko_array_notificationtabs");
+            entriesValues = ResourceUtils.getStringArray("piko_array_notificationtabs_val");
         }
         setEntries(entries);
         setEntryValues(entriesValues);

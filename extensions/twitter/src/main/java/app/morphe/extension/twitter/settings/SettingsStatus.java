@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.settings;
 
 import android.os.Build;
@@ -26,6 +36,7 @@ public class SettingsStatus {
     public static boolean hidePromoteButton = false;
     public static boolean roundOffNumbers = false;
     public static boolean enableDebugMenu = false;
+    public static boolean legacyShareLink = false;
 
     public static boolean hideAds = false;
     public static boolean hideGAds = false;
@@ -78,6 +89,10 @@ public class SettingsStatus {
 
     public static boolean customFont = false;
     public static boolean customEmojiFont = false;
+    public static boolean inlineDownloadButton = false;
+    public static void inlineDownloadButton() {
+        inlineDownloadButton = true;
+    }
     public static void showChangelogsPatchEnabled() {
         showChangelogsPatchEnabled = true;
     }
@@ -235,6 +250,9 @@ public class SettingsStatus {
     public static void enableDebugMenu() {
         enableDebugMenu = true;
     }
+    public static void legacyShareLink() {
+        legacyShareLink = true;
+    }
 
 
     public static void hideAds() {
@@ -363,6 +381,11 @@ public class SettingsStatus {
     public static boolean disUnifyXChatSystem = false;
     public static void disUnifyXChatSystem() {
         disUnifyXChatSystem = true;
+    }
+
+    public static boolean exportLoginToken = false;
+    public static void exportLoginToken() {
+        exportLoginToken = true;
     }
 
     public static boolean enableTimelineSection() {

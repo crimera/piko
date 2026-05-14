@@ -1,5 +1,6 @@
 [versions]
-morphe-patcher = "1.1.1"
+morphe-patcher = "1.5.0"
+morphe-patches-library = "1.2.0"
 #noinspection GradleDependency
 smali = "b6365a84f4"
 gson = "2.13.2"
@@ -7,6 +8,8 @@ annotation = "1.9.1"
 appcompat = "1.7.1"
 
 [libraries]
+morphe-patches-library = { module = "app.morphe:morphe-patches-library", version.ref = "morphe-patches-library" }
+morphe-extensions-library = { module = "app.morphe:morphe-extensions-library", version.ref = "morphe-patches-library" }
 annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }

@@ -1,14 +1,24 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution
+ * in the source code and version control history.
+ */
+
 package app.crimera.patches.twitter.misc.shareMenu.hooks
 
-import app.crimera.utils.Constants.UTILS_DESCRIPTOR
+import app.crimera.patches.twitter.utils.Constants.UTILS_DESCRIPTOR
 import app.crimera.utils.instructionToString
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.string
-import app.morphe.shared.misc.mapping.ResourceType
-import app.morphe.shared.misc.mapping.getResourceId
+import app.morphe.patches.all.misc.resources.ResourceType
+import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
@@ -21,7 +31,7 @@ internal object ShareMenuButtonInitHook : Fingerprint(
         ),
 )
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun setButtonText(
     name: String,
     stringId: String,
@@ -37,7 +47,10 @@ fun setButtonText(
                     index in setTextStart..setTextEnd
                 }.mapIndexed { index, ins ->
                     when (index) {
-                        0 -> instructionToString(ins).replace("ViewDebugDialog", name)
+                        0 -> {
+                            instructionToString(ins).replace("ViewDebugDialog", name)
+                        }
+
                         1 -> {
                             ins as Instruction21c
                             """
@@ -47,7 +60,9 @@ fun setButtonText(
                             """.trimIndent()
                         }
 
-                        else -> instructionToString(ins)
+                        else -> {
+                            instructionToString(ins)
+                        }
                     }
                 }.joinToString("\n")
 
@@ -55,7 +70,7 @@ fun setButtonText(
     }
 }
 
-context(BytecodePatchContext)
+context(patchContext: BytecodePatchContext)
 fun setButtonIcon(
     name: String,
     iconStr: String,

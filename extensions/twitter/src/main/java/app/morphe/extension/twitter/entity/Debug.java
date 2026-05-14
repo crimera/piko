@@ -1,9 +1,19 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.entity;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.PikoUtils;
 
 public class Debug {
     protected final Object obj;
@@ -117,8 +127,8 @@ public class Debug {
                 .append("\n" + line + "\n" + line);
         
         String fileName = className+".txt";
-        Utils.pikoWriteFile(fileName,sb.toString(),false);
-        Utils.toast("DONE: "+className);
+        PikoUtils.pikoWriteFile(fileName,sb.toString(),false);
+        PikoUtils.toast("DONE: "+className);
 
     }
 }

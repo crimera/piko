@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.settings.featureflags;
 
 import android.annotation.SuppressLint;
@@ -12,13 +22,17 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.ArrayList;
+
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.twitter.patches.FeatureSwitchPatch;
 import app.morphe.extension.twitter.settings.ActivityHook;
 import app.morphe.extension.twitter.settings.Settings;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import java.util.ArrayList;
 
 @SuppressWarnings("deprecation")
 public class FeatureFlagsFragment extends Fragment {
@@ -42,11 +56,12 @@ public class FeatureFlagsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        ActivityHook.toolbar.setTitle(Utils.getResourceString("piko_pref_feature_flags"));
+        ActivityHook.toolbar.setTitle(ResourceUtils.getString("piko_pref_feature_flags"));
     }
 
     private void saveFlags() {
-        app.morphe.extension.twitter.Utils.setStringPref(Settings.MISC_FEATURE_FLAGS.key, FeatureFlag.toStringPref(flags));
+        app.morphe.extension.twitter.Utils.setStringPref(
+                Settings.MISC_FEATURE_FLAGS.key, FeatureFlag.toStringPref(flags));
     }
 
     public void modifyFlag(FeatureFlagAdapter adapter, int position) {
@@ -54,7 +69,7 @@ public class FeatureFlagsFragment extends Fragment {
             FeatureFlag flag = flags.get(position);
 
             AlertDialog.Builder dia = new AlertDialog.Builder(getContext());
-            dia.setTitle(Utils.getResourceString("piko_pref_edit_flag_title"));
+            dia.setTitle(ResourceUtils.getString("piko_pref_edit_flag_title"));
 
             LinearLayout ln = new LinearLayout(getContext());
             ln.setPadding(50, 50, 50, 50);
@@ -64,7 +79,7 @@ public class FeatureFlagsFragment extends Fragment {
             flagEditText.setText(flag.getName());
             ln.addView(flagEditText);
 
-            dia.setPositiveButton(Utils.getResourceString("save"), (dialogInterface, i) -> {
+            dia.setPositiveButton(ResourceUtils.getString("save"), (dialogInterface, i) -> {
                 String editTextValue = flagEditText.getText().toString();
                 if (!editTextValue.equals(flag.getName())) {
                     flags.set(position, new FeatureFlag(flagEditText.getText().toString(), flag.getEnabled()));
@@ -73,29 +88,32 @@ public class FeatureFlagsFragment extends Fragment {
                 }
             });
 
-            dia.setNeutralButton(Utils.getResourceString("remove"), ((dialogInterface, i) -> {
+            dia.setNeutralButton(ResourceUtils.getString("remove"), ((dialogInterface, i) -> {
                 flags.remove(position);
                 adapter.notifyDataSetChanged();
                 saveFlags();
             }));
 
-            dia.setNegativeButton(Utils.getResourceString("cancel"), null);
+            dia.setNegativeButton(ResourceUtils.getString("cancel"), null);
 
             dia.setView(ln);
 
             dia.create().show();
         } catch (Exception exception){
-            app.morphe.extension.twitter.Utils.toast(exception.toString());
+            Utils.showToastShort(exception.toString());
         }
     }
 
     private void searchFlagsDialog(FeatureFlagAdapter parentAdapter) {
         AlertDialog.Builder dia = new AlertDialog.Builder(getContext());
-        dia.setTitle(Utils.getResourceString("piko_pref_add_flag_title"));
+        dia.setTitle(ResourceUtils.getString("piko_pref_add_flag_title"));
 
-        @SuppressLint({"NewApi", "LocalSuppress"}) View view = getLayoutInflater().inflate(Utils.getResourceIdentifier("search_dialog", "layout"), null);
-        ListView listView = view.findViewById(Utils.getResourceIdentifier("featureFlagsSearchListView", "id"));
-        EditText filter = view.findViewById(Utils.getResourceIdentifier("filterEditText", "id"));
+        @SuppressLint({"NewApi", "LocalSuppress"}) View view = getLayoutInflater().inflate(
+                ResourceUtils.getIdentifier(ResourceType.LAYOUT, "search_dialog"), null);
+        ListView listView = view.findViewById(
+                ResourceUtils.getIdentifier(ResourceType.ID, "featureFlagsSearchListView"));
+        EditText filter = view.findViewById(
+                ResourceUtils.getIdentifier(ResourceType.ID, "filterEditText"));
 
         String[] searchFlags = FeatureSwitchPatch.FLAGS_SEARCH.split(",");
         FeatureFlagSearchAdapter adapter = new FeatureFlagSearchAdapter(getContext(), searchFlags);
@@ -134,7 +152,7 @@ public class FeatureFlagsFragment extends Fragment {
     public void addFlag(FeatureFlagAdapter adapter, Bundle bundle) {
         boolean defaultFlagValue = true;
         AlertDialog.Builder dia = new AlertDialog.Builder(getContext());
-        dia.setTitle(Utils.getResourceString("piko_pref_add_flag_title"));
+        dia.setTitle(ResourceUtils.getString("piko_pref_add_flag_title"));
 
         LinearLayout ln = new LinearLayout(getContext());
         ln.setPadding(50, 50, 50, 50);
@@ -150,7 +168,7 @@ public class FeatureFlagsFragment extends Fragment {
         flagEditText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         ln.addView(flagEditText);
         final boolean flagValue = defaultFlagValue;
-        dia.setPositiveButton(Utils.getResourceString("save"), (dialogInterface, i) -> {
+        dia.setPositiveButton(ResourceUtils.getString("save"), (dialogInterface, i) -> {
             String editTextValue = flagEditText.getText().toString();
             flags.add(new FeatureFlag(editTextValue, flagValue));
             adapter.notifyDataSetChanged();
@@ -158,11 +176,11 @@ public class FeatureFlagsFragment extends Fragment {
         });
 
         // TODO: add string to resources
-        dia.setNeutralButton(Utils.getResourceString("piko_pref_search_flags"), ((dialogInterface, i) -> {
+        dia.setNeutralButton(ResourceUtils.getString("piko_pref_search_flags"), ((dialogInterface, i) -> {
             searchFlagsDialog(adapter);
         }));
 
-        dia.setNegativeButton(Utils.getResourceString("cancel"), null);
+        dia.setNegativeButton(ResourceUtils.getString("cancel"), null);
 
         dia.setView(ln);
 
@@ -173,17 +191,17 @@ public class FeatureFlagsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         Bundle bundle = getArguments(); // Required for deepLink flag addition.
-        View view = inflater.inflate(Utils.getResourceIdentifier("feature_flags_view", "layout"), container, false);
-        FloatingActionButton floatingActionButton = view.findViewById(Utils.getResourceIdentifier("add_flag", "id"));
+        View view = inflater.inflate(ResourceUtils.getIdentifier(ResourceType.LAYOUT, "feature_flags_view"), container, false);
+        FloatingActionButton floatingActionButton = view.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "add_flag"));
 
-        ListView rc = view.findViewById(Utils.getResourceIdentifier("list", "id"));
+        ListView rc = view.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "list"));
         rc.setClipToPadding(false);
         rc.setPadding(0, 0, 0, 200);
 
         FeatureFlagAdapter adapter = new FeatureFlagAdapter(getContext(), flags);
 
         rc.setOnItemClickListener((adapterView, view1, i, l) -> {
-            app.morphe.extension.twitter.Utils.toast(adapter.getItem(i).getName());
+            Utils.showToastShort(adapter.getItem(i).getName());
         });
 
         floatingActionButton.setOnClickListener(view1 -> addFlag(adapter, bundle));

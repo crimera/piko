@@ -1,3 +1,13 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * This file is part of piko.
+ *
+ * Any modifications, derivatives, or substantial rewrites of this file
+ * must retain this copyright notice and the piko attribution 
+ * in the source code and version control history.
+ */
+
 package app.morphe.extension.twitter.settings.widgets;
 
 import android.content.Context;
@@ -29,7 +39,7 @@ public class PikoSettingsButton extends AppCompatButton implements View.OnClickL
     // Initialization method
     private void init() {
         setOnClickListener(this);
-        if (!Utils.getBooleanPerf(Settings.MISC_QUICK_SETTINGS_BUTTON)) {
+        if (!Utils.getBooleanPref(Settings.MISC_QUICK_SETTINGS_BUTTON)) {
             setVisibility(GONE);
         }
     }
@@ -40,7 +50,7 @@ public class PikoSettingsButton extends AppCompatButton implements View.OnClickL
         try {
             ActivityHook.startSettingsActivity();
         } catch (Exception e) {
-            Utils.logger(e);
+            app.morphe.extension.crimera.PikoUtils.logger(e);
         }
 
     }
