@@ -182,6 +182,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DOWNLOAD_USERNAME_FOLDER);
     }
 
+    public static String getCustomDownloadPath() {
+        return SharedPref.getStringPref(Settings.CUSTOM_DOWNLOAD_PATH);
+    }
+
     public static boolean hideNavigationFeed() {
         return SharedPref.getBooleanPref(Settings.HIDE_NAVIGATION_FEED);
     }

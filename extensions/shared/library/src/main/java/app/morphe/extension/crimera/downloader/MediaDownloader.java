@@ -58,6 +58,10 @@ public class MediaDownloader {
     }
 
     public void enqueue(DownloadRequest request) {
+        if (!StorageUtils.checkStoragePermissions()) {
+            StorageUtils.allowStorageAccess();
+            return;
+        }
         queue.add(request);
         processNext();
     }

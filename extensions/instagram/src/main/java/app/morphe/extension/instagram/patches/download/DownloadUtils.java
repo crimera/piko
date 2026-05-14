@@ -35,7 +35,6 @@ import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.crimera.downloader.MediaDownloader;
 import app.morphe.extension.crimera.downloader.DownloadRequest;
 import app.morphe.extension.crimera.downloader.MediaType;
-import app.morphe.extension.crimera.constants.ExtensionStrings;
 
 public class DownloadUtils {
     private static boolean ENABLE_DIRECT_DOWNLOAD;
@@ -46,12 +45,6 @@ public class DownloadUtils {
         ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
         SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
         DEBUG = Pref.pikoDebug();
-
-        ExtensionStrings.setDefaultPikoFolder(Strings.DEFAULT_PIKO_FOLDER);
-        ExtensionStrings.setDownloadOngoing(Strings.DOWNLOADING_MEDIA);
-        ExtensionStrings.setDownloadCompleted(Strings.DOWNLOADED_MEDIA);
-        ExtensionStrings.setDownloadError(Strings.DOWNLOAD_FAILED_MEDIA);
-        ExtensionStrings.setDownloadMediaExists(Strings.MEDIA_EXISTS);
     }
 
     private static void downloadDialogBox(Context context, MediaData mediaInfo, int position) throws Exception {
@@ -142,6 +135,10 @@ public class DownloadUtils {
 
     // Position is set to -1 if we want to download all medias from the media info object.
     public static void downloadMedia(Context context, MediaData mediaInfo, int position, MediaType mediaType) throws Exception {
+        if(!Utils.isNetworkConnected()){
+            Utils.showToastShort(Strings.NO_INTERNET);
+            return;
+        }
         MediaDownloader downloader = new MediaDownloader(context);
         String username = mediaInfo.getUserData().getUsername();
 

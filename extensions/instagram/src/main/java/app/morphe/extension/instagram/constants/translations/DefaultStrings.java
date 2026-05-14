@@ -124,6 +124,12 @@ public class DefaultStrings {
     public static String DOWNLOADED_MEDIA = "Downloaded: ";
     public static String MEDIA_EXISTS = "Media exists";
     public static String DOWNLOAD_FAILED_MEDIA = "Download failed : ";
+    public static String DOWNLOAD_SET_PATH = "Set custom download path";
+    public static String DOWNLOAD_SET_PATH_SUCCESS = "Download directory updated!";
+    public static String DOWNLOAD_SET_PATH_FAILED = "Failed to resolve folder path";
+    public static String DOWNLOAD_GRANT_PERMISSION = "Please grant storage access to continue downloads";
+    public static String DOWNLOAD_GRANT_PERMISSION_FAILED = "Could not open settings. Please grant All Files Access manually";
+
     public static String POST_OPTIONS = "Post options";
     public static String COPY_POST_DESCRIPTION = "Copy post description";
     public static String COPY_POST_OWNER_USERNAME = "Copy post owner username";

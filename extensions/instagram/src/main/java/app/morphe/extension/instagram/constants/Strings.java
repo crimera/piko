@@ -13,6 +13,7 @@ package app.morphe.extension.instagram.constants;
 
 import app.morphe.extension.instagram.constants.translations.DefaultStrings;
 import app.morphe.extension.instagram.constants.translations.LanguageInstance;
+import app.morphe.extension.crimera.constants.ExtensionStrings;
 
 public class Strings {
     private static final DefaultStrings langInstance = LanguageInstance.getLanguageInstance();
@@ -130,8 +131,14 @@ public class Strings {
     public static final String DOWNLOAD_ALL = langInstance.DOWNLOAD_ALL;
     public static final String DOWNLOADING_MEDIA = langInstance.DOWNLOADING_MEDIA;
     public static final String DOWNLOADED_MEDIA = langInstance.DOWNLOADED_MEDIA;
+    public static final String DOWNLOAD_SET_PATH = langInstance.DOWNLOAD_SET_PATH;
     public static final String MEDIA_EXISTS = langInstance.MEDIA_EXISTS;
     public static final String DOWNLOAD_FAILED_MEDIA = langInstance.DOWNLOAD_FAILED_MEDIA;
+    public static final String DOWNLOAD_SET_PATH_SUCCESS = langInstance.DOWNLOAD_SET_PATH_SUCCESS;
+    public static final String DOWNLOAD_SET_PATH_FAILED = langInstance.DOWNLOAD_SET_PATH_FAILED;
+    public static final String DOWNLOAD_GRANT_PERMISSION = langInstance.DOWNLOAD_GRANT_PERMISSION;
+    public static final String DOWNLOAD_GRANT_PERMISSION_FAILED = langInstance.DOWNLOAD_GRANT_PERMISSION_FAILED;
+
     public static final String POST_OPTIONS = langInstance.POST_OPTIONS;
     public static final String COPY_POST_DESCRIPTION = langInstance.COPY_POST_DESCRIPTION;
     public static final String COPY_POST_OWNER_USERNAME = langInstance.COPY_POST_OWNER_USERNAME;
@@ -184,4 +191,16 @@ public class Strings {
     public static String WELCOME_MESSAGE = langInstance.WELCOME_MESSAGE;
     public static String GOTO_PIKO_SETTINGS = langInstance.GOTO_PIKO_SETTINGS;
     public static String NO_INTERNET = langInstance.NO_INTERNET;
+
+    public static void load() {
+        ExtensionStrings.setDefaultPikoFolder(Strings.DEFAULT_PIKO_FOLDER);
+        ExtensionStrings.setDownloadOngoing(Strings.DOWNLOADING_MEDIA);
+        ExtensionStrings.setDownloadCompleted(Strings.DOWNLOADED_MEDIA);
+        ExtensionStrings.setDownloadError(Strings.DOWNLOAD_FAILED_MEDIA);
+        ExtensionStrings.setDownloadMediaExists(Strings.MEDIA_EXISTS);
+        ExtensionStrings.setDownloadSetPathFailed(DOWNLOAD_SET_PATH_FAILED);
+        ExtensionStrings.setDownloadSetPathSuccess(DOWNLOAD_SET_PATH_SUCCESS);
+        ExtensionStrings.setDownloadGrantPermission(DOWNLOAD_GRANT_PERMISSION);
+        ExtensionStrings.setDownloadGrantPermissionFailed(DOWNLOAD_GRANT_PERMISSION_FAILED);
+    }
 }

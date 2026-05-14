@@ -21,6 +21,11 @@ public class ExtensionStrings {
     public static String DOWNLOAD_COMPLETED = "Downloaded: ";
     public static String DOWNLOAD_ERROR = "Download Error: ";
 
+    public static String DOWNLOAD_SET_PATH_FAILED = "Failed to resolve folder path";
+    public static String DOWNLOAD_SET_PATH_SUCCESS = "Download directory updated!";
+    public static String DOWNLOAD_GRANT_PERMISSION = "Please grant storage access to continue downloads";
+    public static String DOWNLOAD_GRANT_PERMISSION_FAILED = "Could not open settings. Please grant All Files Access manually";
+
     public static void setDefaultPikoFolder(String defaultPikoFolder) {
         DEFAULT_PIKO_FOLDER = defaultPikoFolder;
     }
@@ -39,5 +44,21 @@ public class ExtensionStrings {
 
     public static void setDownloadMediaExists(String downloadMediaExists) {
         DOWNLOAD_MEDIA_EXISTS = downloadMediaExists;
+    }
+
+    public static void setDownloadSetPathFailed(String downloadSetPathFailed) {
+        DOWNLOAD_SET_PATH_FAILED = downloadSetPathFailed;
+    }
+
+    public static void setDownloadSetPathSuccess(String downloadSetPathSuccess) {
+        DOWNLOAD_SET_PATH_SUCCESS = downloadSetPathSuccess;
+    }
+
+    public static void setDownloadGrantPermission(String downloadGrantPermission) {
+        DOWNLOAD_GRANT_PERMISSION = downloadGrantPermission;
+    }
+
+    public static void setDownloadGrantPermissionFailed(String downloadGrantPermissionFailed) {
+        DOWNLOAD_GRANT_PERMISSION_FAILED = downloadGrantPermissionFailed;
     }
 }

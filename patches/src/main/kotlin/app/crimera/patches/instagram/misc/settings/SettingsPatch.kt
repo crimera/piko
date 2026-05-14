@@ -18,6 +18,7 @@ import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.Constants.CONSTANTS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.LOAD_FLAGS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
@@ -74,6 +75,11 @@ val settingsPatch =
                 addInstruction(
                     firstInvokeSuperIndex + 1,
                     LOAD_FLAGS_DESCRIPTOR.format("load"),
+                )
+                // Loads strings for common extension.
+                addInstruction(
+                    firstInvokeSuperIndex + 2,
+                    "invoke-static {}, $CONSTANTS_DESCRIPTOR/Strings;->load()V",
                 )
             }
 
