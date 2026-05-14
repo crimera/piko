@@ -83,7 +83,7 @@ public class ProfileMoreOption {
                             String url = userData.getProfilePictureUrl();
                             String username = userData.getUsername();
                             String downloadFilename = "dp.jpg";
-                            DownloadUtils.downloadFile(context, url, username, downloadFilename);
+                            DownloadUtils.downloadMediaUrl(context, url, username, downloadFilename);
                             toCopy = false;
 
                         } else if (selectedOption.equals(Strings.PIKO_DEBUG)) {

@@ -44,7 +44,7 @@ public class OriginalSoundDataIntf extends Entity implements AudioMediaInterface
         String username = userData.getUsername();
         String audioName = this.getAudioName();
         String audioId = this.getAudioId();
-        // Original audio is actually stored as mp4 but forcefully renaming it to mp3.
-        return username + "_" + audioName + "_" + audioId + ".mp3";
+
+        return username + "_" + audioName + "_" + audioId;
     }
 }

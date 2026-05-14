@@ -66,7 +66,6 @@ public class TrackDataIntf extends Entity implements AudioMediaInterface {
     public String getDownloadName() throws Exception {
         String artistName = this.getSongArtistName();
         String songName = this.getSongName();
-        // Original audio is actually stored as mp4 but forcefully renaming it to mp3.
-        return artistName + "_" + songName + ".mp3";
+        return artistName + "_" + songName;
     }
 }

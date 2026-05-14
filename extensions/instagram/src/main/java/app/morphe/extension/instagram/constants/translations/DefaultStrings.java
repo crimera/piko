@@ -120,8 +120,8 @@ public class DefaultStrings {
     public static String COPY_MEDIA_LINK = "Copy media link";
     public static String COPIED_MEDIA_LINK = "Copied media link";
     public static String DOWNLOAD_ALL = "Download all";
-    public static String DOWNLOADING_MEDIA = "Downloading : ";
-    public static String DOWNLOADED_MEDIA = "Downloaded : ";
+    public static String DOWNLOADING_MEDIA = "Downloading: ";
+    public static String DOWNLOADED_MEDIA = "Downloaded: ";
     public static String MEDIA_EXISTS = "Media exists";
     public static String DOWNLOAD_FAILED_MEDIA = "Download failed : ";
     public static String POST_OPTIONS = "Post options";

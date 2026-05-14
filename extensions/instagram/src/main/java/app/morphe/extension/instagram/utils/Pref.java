@@ -13,6 +13,7 @@ package app.morphe.extension.instagram.utils;
 
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.crimera.SharedPref;
 
 @SuppressWarnings("unused")
 public class Pref {

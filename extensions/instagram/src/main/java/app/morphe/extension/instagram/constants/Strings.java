@@ -139,7 +139,6 @@ public class Strings {
     public static final String ENABLE_MORE_OPTIONS_ON_POST = langInstance.ENABLE_MORE_OPTIONS_ON_POST;
     public static final String ENABLE_MORE_OPTIONS_ON_POST_DESC = langInstance.ENABLE_MORE_OPTIONS_ON_POST_DESC;
 
-
     public static final String CATEGORY_HIDE_NAVIGATION_BUTTONS = langInstance.CATEGORY_HIDE_NAVIGATION_BUTTONS;
 
     public static final String HIDE_NAVIGATION_FEED = langInstance.HIDE_NAVIGATION_FEED;
