@@ -10,6 +10,7 @@
 
 package app.crimera.patches.twitter.premium.unlockdownloads
 
+import app.crimera.patches.twitter.entity.MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
@@ -23,19 +24,13 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
 private object DownloadPatchFingerprint : Fingerprint(
-    filters =
-        OpcodesFilter.opcodesToFilters(
-            Opcode.IF_EQ,
-            Opcode.SGET_OBJECT,
-            Opcode.GOTO_16,
-            Opcode.NEW_INSTANCE,
-        ),
     strings =
         listOf(
             "mediaEntity",
@@ -73,43 +68,43 @@ val downloadPatch =
 
         execute {
 
-            val method = DownloadPatchFingerprint.method
-            val instructions = method.instructions
+            DownloadPatchFingerprint.method.apply {
 
-            val first_if_loc = instructions.first { it.opcode == Opcode.IF_EQ }.location.index
-            val reg = method.getInstruction<TwoRegisterInstruction>(first_if_loc)
-            val r1 = reg.registerA
-            val r2 = reg.registerB
+                val first_if_loc = instructions.first { it.opcode == Opcode.IF_EQ }.location.index
+                val reg = getInstruction<TwoRegisterInstruction>(first_if_loc)
+                val r1 = reg.registerA
+                val r2 = reg.registerB
 
-            // //add support for gif
-            method.addInstructionsWithLabels(
-                first_if_loc + 1,
-                """
-               const/4 v$r2, 0x2
-               
-               if-eq v$r1, v$r2, :cond_1212
-            """,
-                ExternalLabel("cond_1212", method.instructions.first { it.opcode == Opcode.NEW_INSTANCE }),
-            )
+                // //add support for gif
+                addInstructionsWithLabels(
+                    first_if_loc + 1,
+                    """
+                       const/4 v$r2, 0x2
+                       
+                       if-eq v$r1, v$r2, :cond_1212
+                    """,
+                    ExternalLabel("cond_1212", instructions.first { it.opcode == Opcode.NEW_INSTANCE }),
+                )
 
-            // enable download for all media
-            instructions.first { it.opcode == Opcode.IGET_BOOLEAN }.location.index.apply {
-                method.removeInstruction(this)
-                method.removeInstruction(this)
+                // enable download for all media
+                instructions.first { it.opcode == Opcode.IGET_BOOLEAN }.location.index.apply {
+                    removeInstruction(this)
+                    removeInstruction(this)
+                }
             }
 
-            val method2 = FileDownloaderFingerprint.method
-            val instructions2 = method2.instructions
-            val first_if2_loc = instructions2.first { it.opcode == Opcode.IF_EQZ }.location.index
-            val r3 = method2.getInstruction<OneRegisterInstruction>(first_if2_loc).registerA
+            MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint.method.apply {
+                val first_if2_loc = instructions.first { it.opcode == Opcode.IF_EQZ }.location.index
+                val r3 = getInstruction(first_if2_loc).registersUsed[0]
 
-            // remove premium restriction
-            method2.addInstructions(
-                first_if2_loc,
-                """
-                const v$r3, true
-                """.trimIndent(),
-            )
+                // remove premium restriction
+                addInstructions(
+                    first_if2_loc,
+                    """
+                    const v$r3, true
+                    """.trimIndent(),
+                )
+            }
 
             // force video downloadable
             val method3 = MediaEntityFingerprint.method
