@@ -33,7 +33,8 @@ public class StringsIndonesian extends DefaultStrings {
 		this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Menghapus popup yang muncul setelah beberapa saat, ketika versi aplikasi menua";
 		this.EXPORT_DEV_OVERRIDES = "Ekspor override";
 		this.IMPORT_DEV_OVERRIDES = "Impor override";
-		this.IMPORT_ID_MAPPING = "Impor file pemetaan";
+		this.IMPORT_ID_MAPPING = "Impor berkas pemetaan";
+		this.DOWNLOAD_ID_MAPPING = "Unduh berkas pemetaan";
 
 		this.CATEGORY_LINKS = "Tautan";
 		this.OPEN_LINKS_EXTERNALLY = "Buka tautan secara eksternal";
@@ -57,7 +58,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DISABLE_REELS_SCROLLING = "Nonaktifkan gulir Reels";
 		this.DISABLE_REELS_SCROLLING_DESC =
             "Menonaktifkan perilaku gulir tak terbatas di Instagram Reels, mencegah usapan ke Reel berikutnya. " +
-            "Catatan: Pada instalasi bersih, animasi 'Tips' mungkin muncul tetapi akan berhenti dengan sendirinya setelah beberapa detik.";
+            "Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan berhenti dengan sendirinya setelah beberapa detik.";
 		this.HIDE_STORIES_TRAY = "Sembunyikan deretan cerita";
 		this.HIDE_STORIES_TRAY_DESC = "Menyembunyikan deretan cerita dari beranda utama";
 		this.HIDE_NOTES_TRAY = "Sembunyikan deretan catatan";
@@ -139,16 +140,16 @@ public class StringsIndonesian extends DefaultStrings {
 		this.HIDE_NAVIGATION_CREATE = "Sembunyikan tombol Buat";
 
 
-		this.PATCH_INFO_TITLE = "Informasi patch";
+		this.PATCH_INFO_TITLE = "Informasi tambalan";
 		this.EXPORT_PIKO_PREF = "Ekspor preferensi piko";
 		this.IMPORT_PIKO_PREF = "Impor preferensi piko";
 		this.APP_VERSION = "Versi aplikasi: %s";
-		this.PATCH_VERSION = "Versi patch: %s";
+		this.PATCH_VERSION = "Versi tambalan: %s";
 
 		this.EXPORT_SUCCESS = "Berhasil diekspor";
 		this.EXPORT_FAIL = "Gagal mengekspor";
 		this.FAIL_NO_PATH = "Tidak ada jalur tujuan yang diberikan";
-		this.FAIL_NO_FILE = "File tidak ditemukan";
+		this.FAIL_NO_FILE = "Berkas tidak ditemukan";
 		this.IMPORT_SUCCESS = "Berhasil diimpor";
 		this.IMPORT_FAIL = "Gagal mengimpor";
 		this.RESTART_APP = "Aplikasi perlu dimulai ulang agar perubahan diterapkan";
@@ -157,6 +158,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.PIKO_DEBUG = "Piko debug";
 		this.PIKO_DEBUG_DESC = "Menambahkan pilihan debug pada beberapa komponen untuk pengujian";
 		this.PIKO_EXPORT_EXPERIMENT_LIST = "Ekspor daftar eksperimen";
+		this.PIKO_EXPORT_EXPERIMENT_MAPPINGS = "Ekspor pemetaan eksperimen";
 
 		this.OPEN_IMAGE_EXTERNALLY = "Buka gambar secara eksternal";
 		this.OPEN_VIDEO_EXTERNALLY = "Buka video secara eksternal";
