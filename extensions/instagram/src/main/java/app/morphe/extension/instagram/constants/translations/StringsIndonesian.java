@@ -53,7 +53,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DISABLE_EXPLORE = "Nonaktifkan eksplorasi";
 		this.DISABLE_COMMENTS = "Nonaktifkan komentar";
 		this.LIMIT_FOLLOWING_FEED = "Batasi beranda hanya untuk profil yang diikuti";
-		this.LIMIT_FOLLOWING_FEED_DESC = "Memfilter beranda untuk hanya menampilkan konten dari profil yang Anda ikuti.";
+		this.LIMIT_FOLLOWING_FEED_DESC = "Menyaring beranda untuk hanya menampilkan konten dari profil yang Anda ikuti.";
 		this.DISABLE_REELS_SCROLLING = "Nonaktifkan gulir Reels";
 		this.DISABLE_REELS_SCROLLING_DESC =
             "Menonaktifkan perilaku gulir tak terbatas di Instagram Reels, mencegah usapan ke Reel berikutnya. " +
@@ -170,5 +170,10 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DEFAULT = "Bawaan";
 		this.ARR_DETAILED_TIMESTAMP = "Stempel waktu detail";
 		this.ARR_TIME_LEFT = "Waktu tersisa";
+		
+		this.WELCOME_TITLE = "Selamat datang di Piko";
+		this.WELCOME_MESSAGE = "Untuk meningkatkan pengalaman Anda menggunakan Piko, silahkan buka pengaturan Piko dan sesuaikan preferensi Anda";
+		this.GOTO_PIKO_SETTINGS = "Ke pengaturan Piko";
+		this.NO_INTERNET = "Silahkan sambungkan ke internet";
 	}
 }
