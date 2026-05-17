@@ -30,6 +30,8 @@ public class LanguageInstance {
             return new StringsTurkish();
         } else if (lang.equals("ru")) {
             return new StringsRussian();
+        } else if (lang.equals("ja")) {
+            return new StringsJapanese();
         } else if (lang.equals("pt")) {
             return new StringsPortugueseBR();
         }
