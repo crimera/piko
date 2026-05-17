@@ -22,8 +22,8 @@ public class LanguageInstance {
             return new StringsHindi();
         } else if (lang.equals("ko")) {
             return new StringsKorean();
-        } else if (lang.equals("in")) {
-            return new StringsIndonesian();
+        } else if (lang.equals("id")) {
+			      return new StringsIndonesian();
         } else if (lang.equals("pl")) {
             return new StringsPolish();
         } else if (lang.equals("tr")) {
