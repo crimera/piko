@@ -8,12 +8,23 @@ package app.crimera.patches.twitter.misc.settings
 
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patches.all.misc.resources.resourceMappingPatch
+import app.morphe.util.getNode
 import org.w3c.dom.Element
 
 internal val settingsResourcePatch =
     resourcePatch {
         dependsOn(resourceMappingPatch)
         execute {
+            // replace the keyword `ripped` from version name back to original format.
+            val versionName = packageMetadata.versionName
+            val rippedKeyword = "-ripped"
+            if (rippedKeyword in versionName) {
+                document("AndroidManifest.xml").use { document ->
+                    val manifestElement = document.getNode("manifest") as Element
+                    manifestElement.setAttribute("android:versionName", versionName.replace(rippedKeyword, ""))
+                }
+            }
+
             document("res/xml/settings_root.xml").use { editor ->
                 val parent = editor.getElementsByTagName("PreferenceScreen").item(0) as Element
 
