@@ -151,7 +151,7 @@ public class DefaultStrings {
     public static String OK = "OK";
     public static String DELETED = "Deleted";
     public static String PIKO_DEBUG = "Piko debug";
-    public static String PIKO_DEBUG_DESC = "Adds debug option on some of the componenets for testing";
+    public static String PIKO_DEBUG_DESC = "Adds debug option on some of the components for testing";
     public static String PIKO_EXPORT_EXPERIMENT_LIST = "Export experiment list";
     public static String PIKO_EXPORT_EXPERIMENT_MAPPINGS = "Export experiment mappings";
 
