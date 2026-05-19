@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 
@@ -22,16 +18,19 @@ public class LanguageInstance {
             return new StringsHindi();
         } else if (lang.equals("ko")) {
             return new StringsKorean();
-        } else if (lang.equals("in")) {
-			return new StringsIndonesian();
+        } else if (lang.equals("id")) {
+			      return new StringsIndonesian();
         } else if (lang.equals("pl")) {
             return new StringsPolish();
-		} else if (lang.equals("tr")) {
+        } else if (lang.equals("tr")) {
             return new StringsTurkish();
         } else if (lang.equals("ru")) {
             return new StringsRussian();
+        } else if (lang.equals("ja")) {
+            return new StringsJapanese();
+        } else if (lang.equals("pt")) {
+            return new StringsPortugueseBR();
         }
-
 
         return new StringsEnglish(); // Default fallback
     }

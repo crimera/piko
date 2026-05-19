@@ -1,5 +1,5 @@
 {
-  "version": "3.3.0",
+  "version": "3.4.0-dev.2",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -34,6 +34,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -164,6 +170,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -207,6 +219,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -247,6 +265,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -314,6 +338,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -388,6 +418,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -427,6 +463,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -500,6 +542,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -540,6 +588,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -586,6 +640,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -629,6 +689,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -668,6 +734,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -767,6 +839,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -806,6 +884,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -851,6 +935,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -890,6 +980,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -935,6 +1031,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -974,6 +1076,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1019,6 +1127,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -1058,6 +1172,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1103,6 +1223,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -1145,6 +1271,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -1184,6 +1316,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1310,6 +1448,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -1350,6 +1494,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1658,6 +1808,12 @@
           ],
           "targets": [
             {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
               "version": "11.82.0-beta.1",
               "isExperimental": false,
               "minSdk": null,
@@ -1754,6 +1910,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -1791,6 +1953,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1836,6 +2004,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -1878,6 +2052,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -1917,6 +2097,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1963,6 +2149,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -2000,6 +2192,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2075,6 +2273,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -2114,6 +2318,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2185,6 +2395,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -2228,6 +2444,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -2267,6 +2489,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2313,6 +2541,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -2352,6 +2586,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2397,6 +2637,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -2436,6 +2682,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2482,6 +2734,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -2524,6 +2782,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -2563,6 +2827,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2635,6 +2905,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -2675,6 +2951,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2774,6 +3056,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -2813,6 +3101,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2859,6 +3153,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -2899,6 +3199,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3027,6 +3333,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -3068,6 +3380,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3141,6 +3459,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -3207,6 +3531,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3336,6 +3666,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -3377,6 +3713,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3423,6 +3765,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -3462,6 +3810,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3534,6 +3888,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -3574,6 +3934,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3673,6 +4039,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -3712,6 +4084,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3758,6 +4136,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -3797,6 +4181,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3870,6 +4260,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -3910,6 +4306,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3955,6 +4357,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -3994,6 +4402,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4039,6 +4453,12 @@
               "isExperimental": false,
               "minSdk": null,
               "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
             }
           ]
         }
@@ -4078,6 +4498,12 @@
             },
             {
               "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.91.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null

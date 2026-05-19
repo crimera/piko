@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.misc.settings
@@ -29,6 +25,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
+import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
@@ -110,35 +107,65 @@ val settingsPatch =
                 ExternalLabel("cont", prefCLickedMethod.getInstruction(constIndex)),
             )
 
-            val authAppMethod = AuthorizeAppActivity.method
-            authAppMethod.addInstructionsWithLabels(
-                1,
-                """
-                invoke-static {p0}, $ACTIVITY_HOOK_CLASS->create(Landroid/app/Activity;)Z
-                move-result v0
-                if-nez v0, :no_piko_settings_init
-                """.trimIndent(),
-                ExternalLabel(
-                    "no_piko_settings_init",
-                    authAppMethod.instructions.first { it.opcode == Opcode.RETURN_VOID },
-                ),
-            )
+            AuthorizeAppActivity.apply {
+                val superClass = classDef.superclass
+                method.apply {
+                    addInstructionsWithLabels(
+                        0,
+                        """
+                        invoke-super {p0,p1}, $superClass->onCreate(Landroid/os/Bundle;)V
+                        invoke-static {p0}, $ACTIVITY_HOOK_CLASS->create(Landroid/app/Activity;)Z
+                        move-result v0
+                        if-eqz v0, :piko
+                        return-void
+                        """.trimIndent(),
+                        ExternalLabel(
+                            "piko",
+                            instructions.first(),
+                        ),
+                    )
+                }
+            }
 
-            val urlInterActMethod = UrlInterpreterActivity.method
-            val instructions = urlInterActMethod.instructions
-            val loc = instructions.first { it.opcode == Opcode.INVOKE_SUPER }.location.index + 1
-            urlInterActMethod.addInstructionsWithLabels(
-                loc,
+            val functionCall =
                 """
                 invoke-static {p0}, $DEEPLINK_HOOK_CLASS->deeplink(Landroid/app/Activity;)Z
                 move-result v0
                 if-nez v0, :deep_link
-                """.trimIndent(),
-                ExternalLabel(
-                    "deep_link",
-                    instructions.first { it.opcode == Opcode.RETURN_VOID },
-                ),
-            )
+                """.trimIndent()
+
+            var deepLinkPatched = false
+            UrlInterpreterActivityFingerprint.method.apply {
+                val invokeSuperInstructionIndex = indexOfFirstInstruction(Opcode.INVOKE_SUPER)
+
+                if (invokeSuperInstructionIndex > 0) {
+                    addInstructionsWithLabels(
+                        invokeSuperInstructionIndex + 1,
+                        functionCall,
+                        ExternalLabel(
+                            "deep_link",
+                            instructions.first { it.opcode == Opcode.RETURN_VOID },
+                        ),
+                    )
+                    deepLinkPatched = true
+                }
+            }
+            if (!deepLinkPatched) {
+                UrlInterpreterActivityPairIPFingerprint.method.apply {
+                    val loc = instructions.last { it.opcode == Opcode.SGET_OBJECT }.location.index
+                    if (loc > 0) {
+                        addInstructionsWithLabels(
+                            loc,
+                            functionCall,
+                            ExternalLabel(
+                                "deep_link",
+                                instructions.first { it.opcode == Opcode.RETURN_VOID },
+                            ),
+                        )
+                        deepLinkPatched = true
+                    }
+                }
+            }
 
             twitterInitHook.fingerprint.method.addInstruction(
                 0,

@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 
@@ -33,7 +29,8 @@ public class StringsIndonesian extends DefaultStrings {
 		this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Menghapus popup yang muncul setelah beberapa saat, ketika versi aplikasi menua";
 		this.EXPORT_DEV_OVERRIDES = "Ekspor override";
 		this.IMPORT_DEV_OVERRIDES = "Impor override";
-		this.IMPORT_ID_MAPPING = "Impor file pemetaan";
+		this.IMPORT_ID_MAPPING = "Impor berkas pemetaan";
+		this.DOWNLOAD_ID_MAPPING = "Unduh berkas pemetaan";
 
 		this.CATEGORY_LINKS = "Tautan";
 		this.OPEN_LINKS_EXTERNALLY = "Buka tautan secara eksternal";
@@ -53,11 +50,11 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DISABLE_EXPLORE = "Nonaktifkan eksplorasi";
 		this.DISABLE_COMMENTS = "Nonaktifkan komentar";
 		this.LIMIT_FOLLOWING_FEED = "Batasi beranda hanya untuk profil yang diikuti";
-		this.LIMIT_FOLLOWING_FEED_DESC = "Memfilter beranda untuk hanya menampilkan konten dari profil yang Anda ikuti.";
+		this.LIMIT_FOLLOWING_FEED_DESC = "Menyaring beranda untuk hanya menampilkan konten dari profil yang Anda ikuti.";
 		this.DISABLE_REELS_SCROLLING = "Nonaktifkan gulir Reels";
 		this.DISABLE_REELS_SCROLLING_DESC =
             "Menonaktifkan perilaku gulir tak terbatas di Instagram Reels, mencegah usapan ke Reel berikutnya. " +
-            "Catatan: Pada instalasi bersih, animasi 'Tips' mungkin muncul tetapi akan berhenti dengan sendirinya setelah beberapa detik.";
+            "Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan berhenti dengan sendirinya setelah beberapa detik.";
 		this.HIDE_STORIES_TRAY = "Sembunyikan deretan cerita";
 		this.HIDE_STORIES_TRAY_DESC = "Menyembunyikan deretan cerita dari beranda utama";
 		this.HIDE_NOTES_TRAY = "Sembunyikan deretan catatan";
@@ -139,16 +136,16 @@ public class StringsIndonesian extends DefaultStrings {
 		this.HIDE_NAVIGATION_CREATE = "Sembunyikan tombol Buat";
 
 
-		this.PATCH_INFO_TITLE = "Informasi patch";
+		this.PATCH_INFO_TITLE = "Informasi tambalan";
 		this.EXPORT_PIKO_PREF = "Ekspor preferensi piko";
 		this.IMPORT_PIKO_PREF = "Impor preferensi piko";
 		this.APP_VERSION = "Versi aplikasi: %s";
-		this.PATCH_VERSION = "Versi patch: %s";
+		this.PATCH_VERSION = "Versi tambalan: %s";
 
 		this.EXPORT_SUCCESS = "Berhasil diekspor";
 		this.EXPORT_FAIL = "Gagal mengekspor";
 		this.FAIL_NO_PATH = "Tidak ada jalur tujuan yang diberikan";
-		this.FAIL_NO_FILE = "File tidak ditemukan";
+		this.FAIL_NO_FILE = "Berkas tidak ditemukan";
 		this.IMPORT_SUCCESS = "Berhasil diimpor";
 		this.IMPORT_FAIL = "Gagal mengimpor";
 		this.RESTART_APP = "Aplikasi perlu dimulai ulang agar perubahan diterapkan";
@@ -157,6 +154,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.PIKO_DEBUG = "Piko debug";
 		this.PIKO_DEBUG_DESC = "Menambahkan pilihan debug pada beberapa komponen untuk pengujian";
 		this.PIKO_EXPORT_EXPERIMENT_LIST = "Ekspor daftar eksperimen";
+		this.PIKO_EXPORT_EXPERIMENT_MAPPINGS = "Ekspor pemetaan eksperimen";
 
 		this.OPEN_IMAGE_EXTERNALLY = "Buka gambar secara eksternal";
 		this.OPEN_VIDEO_EXTERNALLY = "Buka video secara eksternal";
@@ -170,5 +168,10 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DEFAULT = "Bawaan";
 		this.ARR_DETAILED_TIMESTAMP = "Stempel waktu detail";
 		this.ARR_TIME_LEFT = "Waktu tersisa";
+		
+		this.WELCOME_TITLE = "Selamat datang di Piko";
+		this.WELCOME_MESSAGE = "Untuk meningkatkan pengalaman Anda menggunakan Piko, silahkan buka pengaturan Piko dan sesuaikan preferensi Anda";
+		this.GOTO_PIKO_SETTINGS = "Ke pengaturan Piko";
+		this.NO_INTERNET = "Silahkan sambungkan ke internet";
 	}
 }

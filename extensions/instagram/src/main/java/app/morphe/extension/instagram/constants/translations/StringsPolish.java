@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 
@@ -39,7 +35,7 @@ public class StringsPolish extends DefaultStrings {
         this.CATEGORY_LINKS = "Linki";
         this.OPEN_LINKS_EXTERNALLY = "Otwieraj linki zewnętrznie";
         this.OPEN_LINKS_EXTERNALLY_DESC = "Otwiera linki w zewnętrznej przeglądarce zamiast we wbudowanej";
-        this.SANITIZE_SHARE_LINKS = "Oczyszczaj udostępniane linki";
+        this.SANITIZE_SHARE_LINKS = "Oczyść udostępniane linki";
 
         this.CATEGORY_GHOST = "Tryb ducha";
         this.VIEW_STORIES_ANONYMOUSLY = "Oglądaj relacje anonimowo";
@@ -64,10 +60,10 @@ public class StringsPolish extends DefaultStrings {
         this.HIDE_NOTES_TRAY = "Ukryj pasek notatek";
         this.HIDE_NOTES_TRAY_DESC = "Ukrywa pasek notatek w sekcji wiadomości";
         this.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = "Ukryj przycisk tworzenia grupy w menu udostępniania";
-        this.DISABLE_DOUBLE_TAP_LIKE_POST = "Wyłącz polubienie postów dwukrotnym stuknięciem";
-        this.DISABLE_DOUBLE_TAP_LIKE_REEL = "Wyłącz polubienie rolek dwukrotnym stuknięciem";
-        this.DISABLE_DOUBLE_TAP_LIKE_COMMENT = "Wyłącz polubienie komentarzy dwukrotnym stuknięciem";
-        this.DISABLE_DOUBLE_TAP_LIKE_MESSAGE = "Wyłącz polubienie wiadomości dwukrotnym stuknięciem";
+        this.DISABLE_DOUBLE_TAP_LIKE_POST = "Wyłącz polubienie postów podwójnym dotknięciem";
+        this.DISABLE_DOUBLE_TAP_LIKE_REEL = "Wyłącz polubienie rolek podwójnym dotknięciem";
+        this.DISABLE_DOUBLE_TAP_LIKE_COMMENT = "Wyłącz polubienie komentarzy podwójnym dotknięciem";
+        this.DISABLE_DOUBLE_TAP_LIKE_MESSAGE = "Wyłącz polubienie wiadomości podwójnym dotknięciem";
 
         this.CATEGORY_MISC = "Różne";
         this.DISABLE_ANALYTICS = "Wyłącz analitykę";

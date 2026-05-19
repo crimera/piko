@@ -1,3 +1,21 @@
+## [3.4.0-dev.2](https://github.com/crimera/piko/compare/v3.4.0-dev.1...v3.4.0-dev.2) (2026-05-17)
+
+### 🐛 Bug Fixes
+
+* **Twitter:** Added warning during `Disunify xchat system` patch failure ([2035e4c](https://github.com/crimera/piko/commit/2035e4c5f1febcc64959074665c51d28fc7c0cde))
+
+### ✨ New Features
+
+* **Instagram - Translations:** Added `Japanese` Translation ([#1143](https://github.com/crimera/piko/issues/1143)) ([07e62c1](https://github.com/crimera/piko/commit/07e62c1636724a4afa70aad27df17a8fb67ae42c))
+* **Instagram - Translations:** Added `Portuguese` Translation ([#1145](https://github.com/crimera/piko/issues/1145)) ([8d36aaf](https://github.com/crimera/piko/commit/8d36aaf263eb8339f12a403fd3ac2889bfce7d0b))
+
+# [3.4.0-dev.1](https://github.com/crimera/piko/compare/v3.3.0...v3.4.0-dev.1) (2026-05-16)
+
+
+### Features
+
+* **Twitter:** Partial support to 11.91.xx ([6dbca75](https://github.com/crimera/piko/commit/6dbca754d3cfa0cd7aa9826c261b197f534a82f4))
+
 # [3.3.0](https://github.com/crimera/piko/compare/v3.2.0...v3.3.0) (2026-05-12)
 
 

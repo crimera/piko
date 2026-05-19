@@ -35,6 +35,11 @@ object Constants {
                         version = "11.81.0-release.0",
                         description = "Last stable version without PairIP protection",
                     ),
+                    // PairIP version
+                    AppTarget(
+                        version = "11.91.0-release-ripped.0",
+                        description = "Make sure the APK is PairIP bypassed (Check the support group)",
+                    ),
                 ),
         )
     val COMPATIBILITY_X_11_69 =

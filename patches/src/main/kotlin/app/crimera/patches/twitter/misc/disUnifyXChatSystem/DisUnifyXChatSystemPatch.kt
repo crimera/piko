@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.misc.disUnifyXChatSystem
@@ -40,19 +36,30 @@ val disUnifyXchatSystemPatch =
         dependsOn(settingsPatch)
 
         execute {
-            val strIndx = XchatSubSystemUserCheckFingerprint.stringMatches!!.first { it.string == "userId" }.index
-            XchatSubSystemUserCheckFingerprint.method.apply {
-                addInstructionsWithLabels(
-                    0,
-                    """
-                    invoke-static {}, $PREF_DESCRIPTOR;->disUnifyXChatSystem()Z
-                    move-result v0
-                    if-nez v0, :piko
-                    return v0
-                    """.trimIndent(),
-                    ExternalLabel("piko", instructions[strIndx]),
+
+            try {
+
+                XchatSubSystemUserCheckFingerprint
+                    .apply {
+                        val strIndx = stringMatches.first { it.string == "userId" }.index
+                        method.apply {
+                            addInstructionsWithLabels(
+                                0,
+                                """
+                                invoke-static {}, $PREF_DESCRIPTOR;->disUnifyXChatSystem()Z
+                                move-result v0
+                                if-nez v0, :piko
+                                return v0
+                                """.trimIndent(),
+                                ExternalLabel("piko", instructions[strIndx]),
+                            )
+                            enableSettings("disUnifyXChatSystem")
+                        }
+                    }
+            } catch (e: Exception) {
+                println(
+                    "The patch \"Disunify xchat system\" is force succeeded and does not work for any version above 11.69.\nPlease unselect it if you are using an higher version.",
                 )
-                enableSettings("disUnifyXChatSystem")
             }
         }
     }

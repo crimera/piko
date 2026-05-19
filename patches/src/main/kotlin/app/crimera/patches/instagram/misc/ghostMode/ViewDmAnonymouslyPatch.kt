@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.ghostMode
@@ -30,10 +26,11 @@ val viewDmAnonymouslyPatch =
 
         execute {
             DMSeenFingerprint.method.apply {
-                val shouldDisableRegister = getFreeRegisterProvider(
-                    index = 1,
-                    numberOfFreeRegistersNeeded = 1
-                ).getFreeRegister()
+                val shouldDisableRegister =
+                    getFreeRegisterProvider(
+                        index = 1,
+                        numberOfFreeRegistersNeeded = 1,
+                    ).getFreeRegister()
 
                 addInstructionsWithLabels(
                     1,
@@ -42,8 +39,8 @@ val viewDmAnonymouslyPatch =
                     move-result v$shouldDisableRegister
                     if-eqz v$shouldDisableRegister, :piko_continue
                     return-void
-                """.trimIndent(),
-                    ExternalLabel("piko_continue", getInstruction(1))
+                    """.trimIndent(),
+                    ExternalLabel("piko_continue", getInstruction(1)),
                 )
             }
             enableSettings("viewDmAnonymously")
