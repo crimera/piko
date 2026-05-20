@@ -14,6 +14,7 @@ import java.util.HashSet;
 import android.content.Context;
 
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.crimera.downloader.MediaType;
 
 
 public class MediaData extends Entity {
@@ -36,13 +37,37 @@ public class MediaData extends Entity {
         return (String) super.getMethod("methodName");
     }
 
-    // Sometimes I want to forcefully generate file name as an image while saving the video/media as an image file.
-    public String getDownloadFilename(boolean forceAsImage) throws Exception {
-        String extension = this.isVideo() ? ".mp4" : ".jpg";
-        extension = forceAsImage ? ".jpg" : extension;
-        String mediaPkId = this.getMediaPkId();
-        return mediaPkId + extension;
+    public boolean isVideo() throws Exception {
+        return (boolean) super.getMethod(this.obj, "methodName");
+    }
 
+    public boolean hasAudio() throws Exception {
+        return this.getAudioMedia() != null;
+    }
+
+    private String getMediaExtension(MediaType mediaType) throws Exception {
+        String imageExtension = ".jpg";
+        String videoExtension = ".mp4";
+
+        if (mediaType.equals(MediaType.ANY)) {
+            if (this.isVideo()) {
+                return videoExtension;
+            }
+            return imageExtension;
+        }
+
+        if (mediaType.equals(MediaType.IMAGE)) return imageExtension;
+        if (mediaType.equals(MediaType.VIDEO)) return videoExtension;
+
+        // Default fallback just in case.
+        return imageExtension;
+    }
+
+
+    public String getDownloadFilename(MediaType mediaType) throws Exception {
+        String mediaPkId = this.getMediaPkId();
+        String extension = this.getMediaExtension(mediaType);
+        return mediaPkId + extension;
     }
 
     public UserData getUserData() throws Exception {
@@ -93,10 +118,6 @@ public class MediaData extends Entity {
         return result != null ? (String) result : null;
     }
 
-    public boolean isVideo() throws Exception {
-        return (boolean) super.getMethod(this.obj, "methodName");
-    }
-
     public String getMediaLink() throws Exception {
         return this.isVideo() ? this.getVideoLink() : this.getPhotoLink();
     }
@@ -104,7 +125,7 @@ public class MediaData extends Entity {
     private OriginalSoundDataIntf getOriginalSoundDataIntf() throws Exception {
         Class<?> helperClass = this.getHelperClass();
         Object result = super.getMethod(helperClass, "A06", this.obj);
-        if(result!=null){
+        if (result != null) {
             return new OriginalSoundDataIntf(result);
         }
         return null;
@@ -113,7 +134,7 @@ public class MediaData extends Entity {
     private TrackDataIntf getTrackDataIntf() throws Exception {
         Class<?> helperClass = this.getHelperClass();
         Object result = super.getMethod(helperClass, "A0F", this.obj);
-        if(result!=null){
+        if (result != null) {
             return new TrackDataIntf(result);
         }
         return null;
@@ -121,12 +142,12 @@ public class MediaData extends Entity {
 
     public AudioMediaInterface getAudioMedia() throws Exception {
         AudioMediaInterface originalSoundDataIntf = this.getOriginalSoundDataIntf();
-        if(originalSoundDataIntf!=null){
+        if (originalSoundDataIntf != null) {
             return originalSoundDataIntf;
         }
 
         AudioMediaInterface TrackDataIntf = this.getTrackDataIntf();
-        if(TrackDataIntf!=null){
+        if (TrackDataIntf != null) {
             return TrackDataIntf;
         }
         return null;

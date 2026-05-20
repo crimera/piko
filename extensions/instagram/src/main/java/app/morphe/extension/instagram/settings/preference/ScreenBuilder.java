@@ -544,6 +544,14 @@ public class ScreenBuilder {
                         Settings.DOWNLOAD_USERNAME_FOLDER
                 )
         );
+
+        addPreference(category,
+                helper.buttonPreference(
+                        Strings.DOWNLOAD_SET_PATH,
+                        Pref.getCustomDownloadPath(),
+                        Strings.DOWNLOAD_SET_PATH
+                )
+        );
     }
 
     public void buildNavigationSection() {

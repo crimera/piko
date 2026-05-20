@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.utils;
 
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.crimera.SharedPref;
 
 @SuppressWarnings("unused")
 public class Pref {
@@ -175,6 +176,10 @@ public class Pref {
 
     public static boolean downloadUsernameFolder() {
         return SharedPref.getBooleanPref(Settings.DOWNLOAD_USERNAME_FOLDER);
+    }
+
+    public static String getCustomDownloadPath() {
+        return SharedPref.getStringPref(Settings.CUSTOM_DOWNLOAD_PATH);
     }
 
     public static boolean hideNavigationFeed() {
