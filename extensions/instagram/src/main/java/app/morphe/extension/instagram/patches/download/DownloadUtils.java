@@ -39,6 +39,7 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.crimera.ObjectBrowser;
+import app.morphe.extension.crimera.PikoUtils;
 
 public class DownloadUtils {
     private static boolean ENABLE_DIRECT_DOWNLOAD;
@@ -108,6 +109,7 @@ public class DownloadUtils {
 
                     }
                 } catch (Exception e) {
+                    PikoUtils.logger(e);
                     Logger.printException(() -> "Error at downloadDialogBox", e);
                     Utils.showToastShort(e.getMessage());
                 }
@@ -162,6 +164,7 @@ public class DownloadUtils {
             }
 
         } catch (Exception e) {
+            PikoUtils.logger(e);
             Logger.printException(() -> "Error at downloadPost", e);
         }
     }

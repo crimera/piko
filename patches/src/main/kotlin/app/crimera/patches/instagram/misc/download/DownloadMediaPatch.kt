@@ -167,13 +167,14 @@ val downloadMediaPatch =
                 val selfClassRegister = instructions[indexOfFirstInstruction(Opcode.MOVE_OBJECT_FROM16)].registersUsed[0]
                 val buttonAdderInstanceRegister = instructions[indexOfFirstInstruction(Opcode.NEW_INSTANCE)].registersUsed[0]
 
-                val firstIfEqzIndex = indexOfFirstInstruction(Opcode.IF_EQZ)
-                val mediaObjectRegister = instructions[firstIfEqzIndex - 1].registersUsed[0]
+                val sPutIndex = indexOfFirstInstruction(Opcode.SPUT)
+                val mediaObjectFromParameterIndex = indexOfFirstInstruction(sPutIndex, Opcode.MOVE_OBJECT_FROM16)
+                val mediaObjectRegister = instructions[mediaObjectFromParameterIndex].registersUsed[0]
 
-                val freeRegisterOne = instructions[indexOfFirstInstruction(Opcode.MOVE_RESULT_OBJECT)].registersUsed[0]
+                val freeRegisterOne = instructions[indexOfFirstInstruction(mediaObjectFromParameterIndex, Opcode.CONST_4)].registersUsed[0]
 
                 addInstructions(
-                    firstIfEqzIndex,
+                    mediaObjectFromParameterIndex + 1,
                     """
                     iget-object v$freeRegisterOne, v$selfClassRegister, $appActivityField
                     invoke-static {v$freeRegisterOne,v$buttonAdderInstanceRegister,v$mediaObjectRegister},$REEL_BUTTON_DESCRIPTOR->addReelButton(Landroid/content/Context;Ljava/lang/Object;Ljava/lang/Object;)V

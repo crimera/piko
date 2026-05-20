@@ -62,6 +62,16 @@ internal object GetDescriptionTextExtensionFingerprint : Fingerprint(
     name = "getDescriptionText",
 )
 
+internal object GetOriginalSoundDataIntfExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getOriginalSoundDataIntf",
+)
+
+internal object GetTrackDataIntfExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getTrackDataIntf",
+)
+
 internal object ReelsInlineQualitySurveyRelatedFingerprint : Fingerprint(
     strings = listOf("reels_inline_quality_survey"),
 )
@@ -102,4 +112,9 @@ internal object FanClubContentPreviewInteractorImplFingerprint : Fingerprint(
 internal object DirectShareTargetRelatedFingerprint : Fingerprint(
     returnType = "V",
     strings = listOf("https://www.instagram.com/p/", "unknown"),
+)
+
+internal object ClipsAudioUtilGetTitleFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    strings = listOf("title is empty. audio_asset_id = ", "ClipsAudioUtil"),
 )

@@ -35,6 +35,16 @@ val mediaDataEntity =
                         .first { it.parameterTypes.first() == "Landroid/content/Context;" && it.returnType == "Ljava/lang/String;" }
                         .name
                 GetPhotoLinkExtensionFingerprint.changeFirstString(imageExtractionMethodName)
+
+                val originalSoundDataExtractionMethodName =
+                    mediaHelperMethods
+                        .first {
+                            it.returnType.endsWith(
+                                "OriginalSoundDataIntf;",
+                            )
+                        }.name
+
+                GetOriginalSoundDataIntfExtensionFingerprint.changeFirstString(originalSoundDataExtractionMethodName)
             }
 
             // Extracting the get mention set method used media helper class.
@@ -126,6 +136,16 @@ val mediaDataEntity =
 
                 GetDescriptionTextExtensionFingerprint.changeFirstString(getCommentDataFromMediaMethodName)
                 GetDescriptionTextExtensionFingerprint.changeStringAt(1, getCommentTextFieldName)
+            }
+
+            // Extraction of trackInfo
+            ClipsAudioUtilGetTitleFingerprint.classDef.apply {
+                methods.last { it.parameters.size == 3 && it.returnType == "Ljava/lang/String;" }.apply {
+                    val filterInvokeStatic = instructions.filter { it.opcode == Opcode.INVOKE_STATIC }
+
+                    val getTrackInfoFromMediaMethodName = filterInvokeStatic[2].methodExtractor().name
+                    GetTrackDataIntfExtensionFingerprint.changeFirstString(getTrackInfoFromMediaMethodName)
+                }
             }
         }
     }

@@ -20,7 +20,7 @@ val trackDataIntfEntity =
     ) {
         execute {
             val trackDataFromMusicInfoMethodName = TrackDataFromMusicInfoMethodFingerprint.method.name
-            GetTrackDataExtension.changeStringAt(1, trackDataFromMusicInfoMethodName)
+            GetTrackDataExtension.changeFirstString(trackDataFromMusicInfoMethodName)
 
             mutableClassDefBy(IMMUTABLE_PANDO_AUDIO_FILTER_INFO_CLASS_DESCRIPTOR)
                 .methods
