@@ -122,6 +122,7 @@ public class Strings {
     public static final String DOWNLOAD_AS_IMAGE = langInstance.DOWNLOAD_AS_IMAGE;
     public static final String DOWNLOAD_AUDIO = langInstance.DOWNLOAD_AUDIO;
     public static final String DOWNLOAD_OPTIONS = langInstance.DOWNLOAD_OPTIONS;
+    public static final String VIDEO_VARIANTS = langInstance.VIDEO_VARIANTS;
     public static final String COPY_MEDIA_LINK = langInstance.COPY_MEDIA_LINK;
     public static final String COPIED_MEDIA_LINK = langInstance.COPIED_MEDIA_LINK;
     public static final String DOWNLOAD_ALL = langInstance.DOWNLOAD_ALL;

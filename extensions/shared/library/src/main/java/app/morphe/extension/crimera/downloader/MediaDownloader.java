@@ -98,14 +98,15 @@ public class MediaDownloader {
         } else {
             builder = new Notification.Builder(context);
         }
-
+        String downloadStartString = ExtensionStrings.DOWNLOAD_ONGOING + request.fileName;
         builder.setSmallIcon(android.R.drawable.stat_sys_download)
-                .setContentTitle(ExtensionStrings.DOWNLOAD_ONGOING + request.fileName)
+                .setContentTitle(downloadStartString)
                 .setProgress(100, 0, false);
 
         notificationManager.notify(notificationId, builder.build());
 
         try {
+            showToast(downloadStartString);
             URL url = new URL(request.url);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.connect();
@@ -130,12 +131,14 @@ public class MediaDownloader {
             output.close();
             input.close();
 
+            String downloadCompletedString = ExtensionStrings.DOWNLOAD_COMPLETED + request.fileName;
+
             mainHandler.post(() -> {
-                showToast(ExtensionStrings.DOWNLOAD_COMPLETED + request.fileName);
+                showToast(downloadCompletedString);
                 context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(outputFile)));
             });
 
-            builder.setContentText(ExtensionStrings.DOWNLOAD_COMPLETED).setProgress(0, 0, false);
+            builder.setContentText(downloadCompletedString).setProgress(0, 0, false);
             notificationManager.notify(notificationId, builder.build());
         } catch (Exception e) {
             mainHandler.post(() -> showToast(ExtensionStrings.DOWNLOAD_ERROR + e.getMessage()));

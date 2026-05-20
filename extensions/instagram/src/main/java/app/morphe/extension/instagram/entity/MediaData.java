@@ -8,6 +8,7 @@
 package app.morphe.extension.instagram.entity;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -70,6 +71,13 @@ public class MediaData extends Entity {
         return mediaPkId + extension;
     }
 
+    public String getVideoVariantFileName(VideoData videoData) throws Exception {
+        String mediaPkId = this.getMediaPkId();
+        String variantTag = videoData.getVideoVariantTag();
+        String extension = this.getMediaExtension(MediaType.VIDEO);
+        return mediaPkId + "_" +variantTag +extension;
+    }
+
     public UserData getUserData() throws Exception {
         Object userData = super.getMethod(this.getExtendedData(), "methodName");
         return new UserData(userData);
@@ -112,10 +120,26 @@ public class MediaData extends Entity {
         return photoLink != null ? (String) photoLink : null;
     }
 
+    public List getVideoVariants() throws Exception {
+        Object variantObject = super.getMethod(this.getExtendedData(), "methodName");
+        if (variantObject != null){
+            List variantList = (List) variantObject;
+            List<VideoData> videoList = new ArrayList<>();
+
+            variantList.forEach(item -> videoList.add(new VideoData(item)));
+
+            return videoList;
+
+        }
+        return null;
+    }
+
     public String getVideoLink() throws Exception {
-        Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "methodName", this.obj);
-        return result != null ? (String) result : null;
+        List<VideoData> videoDataList = this.getVideoVariants();
+        if(videoDataList!=null){
+            return videoDataList.get(0).getUrl();
+        }
+        return null;
     }
 
     public String getMediaLink() throws Exception {

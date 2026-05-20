@@ -27,9 +27,9 @@ internal object GetPhotoLinkExtensionFingerprint : Fingerprint(
     name = "getPhotoLink",
 )
 
-internal object GetVideoLinkExtensionFingerprint : Fingerprint(
+internal object GetVideoVariantsExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
-    name = "getVideoLink",
+    name = "getVideoVariants",
 )
 
 internal object IsVideoExtensionFingerprint : Fingerprint(
@@ -81,10 +81,9 @@ internal object ReelsMentionDoubleTapFingerprint : Fingerprint(
     strings = listOf("userSession", "direct_add_mention_tap"),
 )
 
-internal object ClipsEditMetadataControllerRunFingerprint : Fingerprint(
-    returnType = "V",
-    name = "run",
-    strings = listOf("ClipsEditMetadataController"),
+internal object VideoMediaInIGTVFeedHasVideoVariantsFingerprint : Fingerprint(
+    returnType = "Z",
+    strings = listOf("id: ", " type: ", "InvalidVideoMediaInIGTVFeed"),
 )
 
 internal object AslSessionRelatedFingerprint : Fingerprint(

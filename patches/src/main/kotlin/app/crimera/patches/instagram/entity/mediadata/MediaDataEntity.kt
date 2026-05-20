@@ -54,10 +54,11 @@ val mediaDataEntity =
                 GetMentionSetExtensionFingerprint.changeFirstString(secondInvokeStaticMethodData.name)
             }
 
-            // Extracting get video link method used media helper class.
-            ClipsEditMetadataControllerRunFingerprint.method.apply {
-                val firstInvokeStaticCallingMethodName = instructions.first { it.opcode == Opcode.INVOKE_STATIC }.methodExtractor().name
-                GetVideoLinkExtensionFingerprint.changeFirstString(firstInvokeStaticCallingMethodName)
+            // Extracting get video variants.
+            VideoMediaInIGTVFeedHasVideoVariantsFingerprint.method.apply {
+                val firstInvokeInterfaceInstruction = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_INTERFACE))
+                val getVideoVariantsMethodName = firstInvokeInterfaceInstruction.methodExtractor().name
+                GetVideoVariantsExtensionFingerprint.changeFirstString(getVideoVariantsMethodName)
             }
 
             // Extracting method is video used in media class.

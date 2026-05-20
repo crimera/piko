@@ -22,6 +22,7 @@ import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.UserData;
+import app.morphe.extension.instagram.entity.VideoData;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.AudioMediaInterface;
 import app.morphe.extension.shared.Logger;
@@ -44,6 +45,42 @@ public class DownloadUtils {
         DEBUG = Pref.pikoDebug();
     }
 
+    private static void buildVideoVariantDialogBox(Context context, MediaData currentMediaData) throws Exception {
+        String username = currentMediaData.getUserData().getUsername();
+        List<VideoData> videoDataList = currentMediaData.getVideoVariants();
+
+        InstagramDialogBox dialog = new InstagramDialogBox(context);
+        ArrayList<String> options = new ArrayList<>();
+        videoDataList.forEach(item -> options.add(item.getVideoVariantTag()));
+        CharSequence[] items = options.toArray(new CharSequence[0]);
+
+        dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface d, int which) {
+                VideoData videoData = videoDataList.get(which);
+
+                try {
+                    String filename = currentMediaData.getVideoVariantFileName(videoData);
+                    String mediaUrl = videoData.getUrl();
+                    downloadMediaUrl(context,mediaUrl,username,filename);
+                } catch (Exception e) {
+                    PikoUtils.logger(e);
+                    Logger.printException(() -> "Error at buildVideoVariantDialogBox", e);
+                    Utils.showToastShort(e.getMessage());
+                }
+
+            }
+        });
+
+        dialog.setTitle(Strings.VIDEO_VARIANTS);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
+
+        Dialog dlg = dialog.getDialog();
+        dlg.show();
+
+    }
+
     private static void downloadDialogBox(Context context, MediaData mediaInfo, int position) throws Exception {
         int carouselSize = mediaInfo.getCarouselSize();
         MediaData currentMediaData = mediaInfo.getMediaAt(position);
@@ -59,6 +96,7 @@ public class DownloadUtils {
         if (currentMediaHasAudio) options.add(Strings.DOWNLOAD_AUDIO);
         options.add(Strings.COPY_MEDIA_LINK);
         if (isCurrentMediaVideo) {
+            options.add(Strings.VIDEO_VARIANTS);
             options.add(Strings.OPEN_VIDEO_EXTERNALLY);
         } else {
             options.add(Strings.OPEN_IMAGE_EXTERNALLY);
@@ -96,6 +134,9 @@ public class DownloadUtils {
 
                     } else if (selectedOption.equals(Strings.DOWNLOAD_AUDIO)) {
                         downloadMedia(context, mediaInfo, position, MediaType.AUDIO);
+
+                    } else if (selectedOption.equals(Strings.VIDEO_VARIANTS)) {
+                        buildVideoVariantDialogBox(context, currentMediaData);
 
                     }
                 } catch (Exception e) {
@@ -175,6 +216,10 @@ public class DownloadUtils {
 
 
     public static void downloadMediaUrl(Context context, String mediaUrl, String username, String fileName) throws Exception {
+        if(!Utils.isNetworkConnected()){
+            Utils.showToastShort(Strings.NO_INTERNET);
+            return;
+        }
         MediaDownloader downloader = new MediaDownloader(context);
         downloader.enqueue(new DownloadRequest(mediaUrl, username, fileName));
     }
