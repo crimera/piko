@@ -179,5 +179,6 @@ public class DefaultStrings {
     public static String WELCOME_MESSAGE = "To improve your experience with Piko, please vist Piko settings and adjust your preference";
     public static String GOTO_PIKO_SETTINGS = "Goto Piko settings";
     public static String NO_INTERNET = "Please connect to internet";
+    public static String TAP_HERE = "Tap here !!";
 
 }

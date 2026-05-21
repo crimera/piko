@@ -13,14 +13,13 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import java.util.ArrayList;
 
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.Settings;
-import app.morphe.extension.instagram.entity.InstagramButton;
-import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.shared.Logger;
@@ -28,6 +27,7 @@ import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.Dim;
+import app.morphe.extension.crimera.constants.TooltipHelper;
 
 public class UI {
 
@@ -50,22 +50,49 @@ public class UI {
         }
     }
 
-    public static void pikoSettingsButton(ViewGroup viewGroup) throws Exception {
-        boolean isFirstTime = Pref.firstTimePiko();
+    public static void pikoSettingsGear(ViewGroup viewGroup) {
+        try {
+            if (viewGroup == null) {
+                return;
+            }
+            boolean isFirstTime = Pref.firstTimePiko();
 
-        Context context = viewGroup.getContext();
-        InstagramButton button = new InstagramButton(context);
-        button.setText(Strings.PIKO_SETTINGS_TITLE);
-        button.setStyle(InstagramButtonStyleEnum.SUPER_PRIMARY);
-        button.setOnClickListener(ActivityHook::startPikoActivity);
+            Context context = viewGroup.getContext();
+            ImageView imageView = new ImageView(context);
 
-        int marginPx = Dim.dp12;
-        button.setMargins(marginPx, marginPx, marginPx, marginPx);
+            setThemedIcon(imageView, "instagram_settings_pano_filled_24");
+            ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            imageView.setLayoutParams(params);
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    try {
+                        ActivityHook.startPikoActivity();
+                    } catch (Exception ex) {
+                        Logger.printException(() -> "pikoSettingsGear click failed: ", ex);
+                    }
+                }
+            });
+            int padding = Dim.dp16;
+            imageView.setPadding(padding, padding, padding, padding);
 
-        viewGroup.addView(button.getIgdsButton());
-        if(isFirstTime){
-            button.startPulseAnimation();
-            Pref.setFirstTimePiko(false);
+            if(isFirstTime) {
+                TooltipHelper.showPersistentTooltip(context, imageView, Strings.TAP_HERE);
+                Pref.setFirstTimePiko(false);
+            }
+
+            int count = viewGroup.getChildCount();
+            int insertIndex = count - 1;
+            if (insertIndex < 0) {
+                insertIndex = 0;
+            }
+
+            viewGroup.addView(imageView, insertIndex);
+        } catch (Exception e) {
+            Logger.printException(() -> "Failed pikoSettingsGear: ", e);
         }
     }
 
@@ -113,17 +140,8 @@ public class UI {
         dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface d, int which) {
-                try {
-                    // Doing like this because options are dynamic.
-                    String selectedOption = options.get(which);
-
-                    if (selectedOption.equals(Strings.GOTO_PIKO_SETTINGS)) {
-                        ActivityHook.openLink("instagram://profile");
-                    }
-                } catch (Exception e) {
-                    Logger.printException(() -> "Error at welcomeDialogBox", e);
-                    Utils.showToastShort(e.getMessage());
-                }
+                // No need to do anything here.
+                // We just want to dismiss the dialog box.
             }
         });
 
