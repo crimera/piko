@@ -34,9 +34,15 @@ val profileInfoEntity =
                             .name
                     GetUserDetailViewModelExtensionFingerprint.changeFirstString(userDetailViewModelFieldName)
 
-                    GetUsernameFromUserDetailViewModelFingerprint.method.apply {
-                        val userObjectFieldName = getInstruction(indexOfFirstInstruction(Opcode.IGET_OBJECT)).fieldExtractor().name
-                        GetUserDataExtensionFingerprint.changeFirstString(userObjectFieldName)
+                    GetUsernameFromUserDetailViewModelFingerprint.apply {
+                        val strIndex = stringMatches.first().index
+                        method.apply {
+                            val userObjectFieldName =
+                                getInstruction(
+                                    indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT),
+                                ).fieldExtractor().name
+                            GetUserDataExtensionFingerprint.changeFirstString(userObjectFieldName)
+                        }
                     }
 
                     val isSelfProfileFieldName =
