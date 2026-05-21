@@ -50,17 +50,16 @@ public class UI {
         }
     }
 
-    public static void pikoSettingsGear(ViewGroup viewGroup) {
+    public static ImageView addGearToViewGroup(ViewGroup viewGroup, String iconDrawable, Runnable action) {
         try {
             if (viewGroup == null) {
-                return;
+                return null;
             }
-            boolean isFirstTime = Pref.firstTimePiko();
 
             Context context = viewGroup.getContext();
             ImageView imageView = new ImageView(context);
 
-            setThemedIcon(imageView, "instagram_settings_pano_filled_24");
+            setThemedIcon(imageView, iconDrawable);
             ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
@@ -70,19 +69,14 @@ public class UI {
                 @Override
                 public void onClick(View v) {
                     try {
-                        ActivityHook.startPikoActivity();
+                        action.run();
                     } catch (Exception ex) {
-                        Logger.printException(() -> "pikoSettingsGear click failed: ", ex);
+                        Logger.printException(() -> "addGearToViewGroup click failed: ", ex);
                     }
                 }
             });
             int padding = Dim.dp16;
             imageView.setPadding(padding, padding, padding, padding);
-
-            if(isFirstTime) {
-                TooltipHelper.showPersistentTooltip(context, imageView, Strings.TAP_HERE);
-                Pref.setFirstTimePiko(false);
-            }
 
             int count = viewGroup.getChildCount();
             int insertIndex = count - 1;
@@ -91,6 +85,30 @@ public class UI {
             }
 
             viewGroup.addView(imageView, insertIndex);
+            return imageView;
+        } catch (Exception e) {
+            Logger.printException(() -> "Failed addGearToViewGroup: ", e);
+        }
+        return null;
+    }
+
+    public static void pikoSettingsGear(ViewGroup viewGroup) {
+        try {
+            if (viewGroup == null) {
+                return;
+            }
+
+            ImageView imageView = UI.addGearToViewGroup(viewGroup, "instagram_settings_pano_filled_24", ActivityHook::startPikoActivity);
+            if (imageView == null) {
+                return;
+            }
+
+            Context context = viewGroup.getContext();
+            boolean isFirstTime = Pref.firstTimePiko();
+            if(isFirstTime) {
+                TooltipHelper.showPersistentTooltip(context, imageView, Strings.TAP_HERE);
+                Pref.setFirstTimePiko(false);
+            }
         } catch (Exception e) {
             Logger.printException(() -> "Failed pikoSettingsGear: ", e);
         }

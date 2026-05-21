@@ -19,7 +19,6 @@ import app.morphe.extension.instagram.constants.UI;
 
 public class MainFeedActionBarButton {
 
-
     public static void addActionBarButton(ViewGroup viewGroup) {
         try {
             UI.pikoSettingsGear(viewGroup);

@@ -14,7 +14,6 @@ import java.util.ArrayList;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.constants.UI;
@@ -22,9 +21,6 @@ import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
-import app.morphe.extension.instagram.entity.InstagramButton;
-import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
-import app.morphe.extension.shared.ui.Dim;
 
 import com.instagram.igds.components.button.IgdsButton;
 
@@ -35,7 +31,7 @@ public class ProfileMoreOption {
         DEBUG = Pref.pikoDebug();
     }
 
-    private static void moreOptionsDailogueBox(Context context, UserData userData) {
+    public static void moreOptionsDailogueBox(Context context, UserData userData) {
 
         try {
             InstagramDialogBox dialog = new InstagramDialogBox(context);
@@ -109,32 +105,19 @@ public class ProfileMoreOption {
         }
     }
 
-    public static void addProfileMoreOptionsButton(ViewGroup viewGroup, Object object) {
+    public static void addProfileMoreOptionsGear(ViewGroup viewGroup, Object userObject){
         try {
-            ProfileInfo profileInfo = new ProfileInfo(object);
-            UserData userData = profileInfo.getUserData();
+            if (viewGroup == null) {
+                return;
+            }
 
             Context context = viewGroup.getContext();
-            InstagramButton button = new InstagramButton(context);
-            button.setText(Strings.MORE_PROFILE_OPTIONS);
-            button.setStyle(InstagramButtonStyleEnum.PRIMARY);
-            button.setOnClickListener(() ->
-                    moreOptionsDailogueBox(context, userData)
-            );
+            UserData userData = new UserData(userObject);
+            UI.addGearToViewGroup(viewGroup, "instagram_info_outline_24", ()->moreOptionsDailogueBox(context, userData));
 
-            int marginPx = Dim.dp12;
-            button.setMargins(marginPx, marginPx, marginPx, marginPx);
-
-            IgdsButton igdsButton = button.getIgdsButton();
-            viewGroup.addView(igdsButton);
-            igdsButton.bringToFront();
-            viewGroup.requestLayout();
-            viewGroup.invalidate();
         } catch (Exception e) {
-            Logger.printException(() -> "Failed to add profile more button: ", e);
+            Logger.printException(() -> "Failed to add profile more options: ", e);
         }
-
     }
-
 }
 
