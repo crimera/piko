@@ -1,5 +1,5 @@
 {
-  "version": "3.4.0",
+  "version": "3.4.1-dev.1",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -15,10 +15,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -39,7 +36,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -148,10 +145,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -172,7 +166,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -188,6 +182,7 @@
       "default": false,
       "dependencies": [
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -197,10 +192,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -221,7 +213,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -246,10 +238,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -270,7 +259,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -319,10 +308,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -343,7 +329,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -396,10 +382,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -420,7 +403,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -444,10 +427,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -468,7 +448,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -520,10 +500,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -544,7 +521,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -569,10 +546,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -593,7 +567,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -618,10 +592,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -642,7 +613,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -667,10 +638,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -691,7 +659,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -715,10 +683,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -739,7 +704,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -817,10 +782,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -841,7 +803,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -865,10 +827,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -889,7 +848,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -913,10 +872,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -937,7 +893,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -961,10 +917,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -985,7 +938,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1009,10 +962,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -1033,7 +983,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1057,10 +1007,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -1081,7 +1028,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1105,10 +1052,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -1129,7 +1073,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1153,10 +1097,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -1177,7 +1118,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1201,10 +1142,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -1225,7 +1163,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1249,10 +1187,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -1273,7 +1208,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1297,10 +1232,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -1321,7 +1253,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1426,10 +1358,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -1450,7 +1379,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1475,10 +1404,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -1499,7 +1425,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1793,6 +1719,7 @@
       "description": "Bring back legacy features like messages and share sheet.",
       "default": false,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1802,13 +1729,10 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1888,10 +1812,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -1912,7 +1833,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1934,10 +1855,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -1958,7 +1876,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1982,10 +1900,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2006,7 +1921,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2030,10 +1945,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2054,7 +1966,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2069,6 +1981,7 @@
       "description": null,
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -2078,10 +1991,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2102,7 +2012,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2127,10 +2037,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2151,7 +2058,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2173,10 +2080,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2197,7 +2101,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2251,10 +2155,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2275,7 +2176,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2299,10 +2200,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2323,7 +2221,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2373,10 +2271,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2397,7 +2292,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2422,10 +2317,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2446,7 +2338,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2470,10 +2362,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2494,7 +2383,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2519,10 +2408,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2543,7 +2429,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2567,10 +2453,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2591,7 +2474,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2615,10 +2498,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2639,7 +2519,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2663,10 +2543,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2687,7 +2564,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2712,10 +2589,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2736,7 +2610,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2760,10 +2634,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2784,7 +2655,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2808,10 +2679,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2832,7 +2700,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2883,10 +2751,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2907,7 +2772,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2932,10 +2797,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -2956,7 +2818,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3034,10 +2896,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3058,7 +2917,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3082,10 +2941,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3106,7 +2962,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3131,10 +2987,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3155,7 +3008,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3180,10 +3033,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3204,7 +3054,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3311,10 +3161,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3335,7 +3182,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3361,10 +3208,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3385,7 +3229,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3437,10 +3281,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3461,7 +3302,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3512,10 +3353,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3536,7 +3374,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3635,6 +3473,7 @@
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -3644,10 +3483,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3668,7 +3504,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3685,6 +3521,7 @@
       "dependencies": [
         "ResourcePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -3694,10 +3531,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3718,7 +3552,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3734,6 +3568,7 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -3743,10 +3578,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3767,7 +3599,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3791,10 +3623,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3815,7 +3644,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3866,10 +3695,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3890,7 +3716,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3915,10 +3741,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -3939,7 +3762,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4017,10 +3840,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -4041,7 +3861,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4065,10 +3885,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -4089,7 +3906,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4114,10 +3931,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -4138,7 +3952,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4162,10 +3976,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -4186,7 +3997,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4238,10 +4049,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -4262,7 +4070,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4278,6 +4086,7 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -4287,10 +4096,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -4311,7 +4117,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4335,10 +4141,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -4359,7 +4162,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4383,10 +4186,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -4407,7 +4207,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4431,10 +4231,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -4455,7 +4252,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4479,10 +4276,7 @@
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
-          "signatures": [
-            "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-            "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f"
-          ],
+          "signatures": null,
           "targets": [
             {
               "version": "11.80.0-alpha.1",
@@ -4503,7 +4297,7 @@
               "description": null
             },
             {
-              "version": "11.91.0-release-ripped.0",
+              "version": "11.93.0-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null

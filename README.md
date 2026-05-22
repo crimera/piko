@@ -47,14 +47,14 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.4.0](https://github.com/crimera/piko/releases/tag/v3.4.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;117 patches total
+> **[v3.4.1-dev.1](https://github.com/crimera/piko/releases/tag/v3.4.1-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;117 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 11.80.0-alpha.1 | 11.82.0-beta.1 | 11.81.0-release.0 | 11.91.0-release-ripped.0 |
+| 11.80.0-alpha.1 | 11.82.0-beta.1 | 11.81.0-release.0 | 11.93.0-release-ripped.0 |
 | :---: | :---: | :---: | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |

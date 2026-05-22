@@ -1,3 +1,18 @@
+## [3.4.1-dev.1](https://github.com/crimera/piko/compare/v3.4.0...v3.4.1-dev.1) (2026-05-22)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** String description ([45b5063](https://github.com/crimera/piko/commit/45b50630563dbe98aba6c774c3c831b1842f3c4a))
+
+### 🚀 Updated App Support
+
+* **Twitter:** Added support for 11.93.xx ([dd7352c](https://github.com/crimera/piko/commit/dd7352cd9485a7af6d32a62b09410d65fd4567d2))
+
+### 🔧 Improvements
+
+* **Twitter:** Added version check for various patches ([6db66b5](https://github.com/crimera/piko/commit/6db66b523b4623762fb5c645343e5b7493024101))
+* **Twitter:** Improve share menu enum logic for newer versions ([0cd809e](https://github.com/crimera/piko/commit/0cd809e979ccdca8c4ddcd195dc9831ac2c1a983))
+
 ## [3.4.0](https://github.com/crimera/piko/compare/v3.3.0...v3.4.0) (2026-05-19)
 
 ### 🐛 Bug Fixes

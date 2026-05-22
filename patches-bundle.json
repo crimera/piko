@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-05-19T12:21:47",
-  "description": "## [3.4.0](https://github.com/crimera/piko/compare/v3.3.0...v3.4.0) (2026-05-19)\n\n### 🐛 Bug Fixes\n\n* **Twitter:** Added warning during `Disunify xchat system` patch failure ([2035e4c](https://github.com/crimera/piko/commit/2035e4c5f1febcc64959074665c51d28fc7c0cde))\n\n### ✨ New Features\n\n* **Instagram - Translations:** Added `Japanese` Translation ([#1143](https://github.com/crimera/piko/issues/1143)) ([07e62c1](https://github.com/crimera/piko/commit/07e62c1636724a4afa70aad27df17a8fb67ae42c))\n* **Instagram - Translations:** Added `Portuguese` Translation ([#1145](https://github.com/crimera/piko/issues/1145)) ([8d36aaf](https://github.com/crimera/piko/commit/8d36aaf263eb8339f12a403fd3ac2889bfce7d0b))\n* **Twitter:** Partial support to 11.91.xx ([6dbca75](https://github.com/crimera/piko/commit/6dbca754d3cfa0cd7aa9826c261b197f534a82f4))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.4.0/patches-3.4.0.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.4.0/patches-3.4.0.mpp.asc",
-  "version": "3.4.0"
+  "created_at": "2026-05-22T17:08:17",
+  "description": "## [3.4.1-dev.1](https://github.com/crimera/piko/compare/v3.4.0...v3.4.1-dev.1) (2026-05-22)\n\n### 🐛 Bug Fixes\n\n* **Instagram:** String description ([45b5063](https://github.com/crimera/piko/commit/45b50630563dbe98aba6c774c3c831b1842f3c4a))\n\n### 🚀 Updated App Support\n\n* **Twitter:** Added support for 11.93.xx ([dd7352c](https://github.com/crimera/piko/commit/dd7352cd9485a7af6d32a62b09410d65fd4567d2))\n\n### 🔧 Improvements\n\n* **Twitter:** Added version check for various patches ([6db66b5](https://github.com/crimera/piko/commit/6db66b523b4623762fb5c645343e5b7493024101))\n* **Twitter:** Improve share menu enum logic for newer versions ([0cd809e](https://github.com/crimera/piko/commit/0cd809e979ccdca8c4ddcd195dc9831ac2c1a983))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.4.1-dev.1/patches-3.4.1-dev.1.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.4.1-dev.1/patches-3.4.1-dev.1.mpp.asc",
+  "version": "3.4.1-dev.1"
 }
