@@ -6,6 +6,7 @@
 
 package app.crimera.patches.twitter.misc.shareMenu.fingerprints
 
+import app.crimera.patches.twitter.utils.is_11_92_stable_or_greater
 import app.crimera.utils.InitMethod
 import app.crimera.utils.indexOfLastFilledNewArrayRange
 import app.crimera.utils.indexOfLastNewInstance
@@ -201,4 +202,10 @@ fun addActionV2(name: String): String {
 }
 
 context(patchContext: BytecodePatchContext)
-fun addAction(name: String): String = addActionV2(name)
+fun addAction(name: String): String {
+    if (is_11_92_stable_or_greater) {
+        return addActionV2(name)
+    } else {
+        return addActionV1(name)
+    }
+}

@@ -10,6 +10,7 @@ import app.crimera.patches.twitter.entity.entityGenerator
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonInjection
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
@@ -19,7 +20,7 @@ val nativeDownloaderPatch =
         description = "Requires X 11.0.0-release.0 or higher.",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, entityGenerator, inlineDownloadButtonPatch)
+        dependsOn(settingsPatch, entityGenerator, inlineDownloadButtonPatch, versionCheckPatch)
 
         execute {
             val actionName = "Download"

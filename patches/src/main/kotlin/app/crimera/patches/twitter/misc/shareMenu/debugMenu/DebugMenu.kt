@@ -11,6 +11,7 @@ import app.crimera.patches.twitter.misc.shareMenu.fingerprints.ActionEnumsFinger
 import app.crimera.patches.twitter.misc.shareMenu.hooks.registerButton
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
+import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
@@ -19,7 +20,7 @@ val debugMenu =
         name = "Enable debug menu for posts",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
+        dependsOn(settingsPatch, versionCheckPatch)
 
         execute {
             val buttonEnumClass = ActionEnumsFingerprint.classDef.toString()
