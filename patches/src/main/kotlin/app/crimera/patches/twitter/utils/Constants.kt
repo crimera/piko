@@ -30,7 +30,7 @@ object Constants {
                     ),
                     // PairIP version
                     AppTarget(
-                        version = "11.91.0-release-ripped.0",
+                        version = "11.93.0-release-ripped.0",
                         description = "Make sure the APK is PairIP bypassed (Check the support group)",
                     ),
                 ),
