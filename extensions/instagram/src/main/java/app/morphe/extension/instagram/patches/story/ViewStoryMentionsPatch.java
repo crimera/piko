@@ -27,13 +27,14 @@ import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.settings.ActivityHook;
 
 
 public class ViewStoryMentionsPatch {
 
     public static void viewMentions(Context ctx, Object mediaObject){
         try {
-            HashSet<Object> mentionSet = new MediaData(mediaObject).getMentionSet();
+            HashSet<UserData> mentionSet = new MediaData(mediaObject).getMentionSet();
             showCopyDialog(ctx,mentionSet);
         } catch (Exception ex){
             Logger.printException(() -> "Failed viewMentions", ex);
@@ -41,7 +42,7 @@ public class ViewStoryMentionsPatch {
         return;
     }
 
-    private static void showCopyDialog(final Context context,HashSet<Object> mentionSet) throws Exception{
+    private static void showCopyDialog(final Context context,HashSet<UserData> mentionSet) throws Exception{
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
         if(mentionSet!=null) {
@@ -49,17 +50,18 @@ public class ViewStoryMentionsPatch {
 
             // Build dialog items from toString()
             CharSequence[] items = new CharSequence[snapshot.length];
+
             for (int i = 0; i < snapshot.length; i++) {
-                Object data = snapshot[i];
-                UserData userData = new UserData(data);
+                UserData userData = (UserData) snapshot[i];
                 items[i] = userData.getFullname()+" ( @"+userData.getUsername()+")";
             }
 
             dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface d, int which) {
-                    Object data =snapshot[which];
-                    Utils.setClipboard(new UserData(data).getUsername());
+                    UserData userData = (UserData) snapshot[which];
+                    String username = userData.getUsername();
+                    ActivityHook.openLink("instagram://user?username="+username);
                 }
             });
         }else{

@@ -49,9 +49,20 @@ val mediaDataEntity =
 
             // Extracting the get mention set method used media helper class.
             ReelsMentionDoubleTapFingerprint.method.apply {
-                val secondInvokeStaticMethodData = instructions.filter { it.opcode == Opcode.INVOKE_STATIC }[1].methodExtractor()
-
-                GetMentionSetExtensionFingerprint.changeFirstString(secondInvokeStaticMethodData.name)
+                val userInteractionListMethodInvoke = instructions.first { it.opcode == Opcode.INVOKE_INTERFACE }.methodExtractor()
+                GetMentionSetExtensionFingerprint.changeFirstString(userInteractionListMethodInvoke.name)
+            }
+            InstagramMainActivityNotificationRelatedFingerprint.apply {
+                val strIndex = stringMatches.last().index
+                method.apply {
+                    val getUserDataInvokeIndex =
+                        instructions.indexOfLast {
+                            it.opcode == Opcode.INVOKE_INTERFACE &&
+                                it.location.index < strIndex
+                        }
+                    val methodName = getInstruction(getUserDataInvokeIndex).methodExtractor().name
+                    GetMentionSetExtensionFingerprint.changeStringAt(1, methodName)
+                }
             }
 
             // Extracting get video variants.

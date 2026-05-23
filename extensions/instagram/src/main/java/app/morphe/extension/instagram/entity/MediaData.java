@@ -86,10 +86,15 @@ public class MediaData extends Entity {
     }
 
     public HashSet getMentionSet() throws Exception {
-        Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "methodName", this.obj);
+        Object result =  super.getMethod(this.getExtendedData(), "methodName");
         if (result != null) {
-            return new HashSet<>((List) result);
+            List userInteractionList = (List) result;
+            HashSet<UserData> userDataHashSet = new HashSet<>();
+            for(Object data:userInteractionList){
+                Object userData = super.getMethod(data, "methodName2");
+                userDataHashSet.add(new UserData(userData));
+            }
+            return userDataHashSet;
         }
         return null;
     }

@@ -87,6 +87,11 @@ internal object ReelsMentionDoubleTapFingerprint : Fingerprint(
     strings = listOf("userSession", "direct_add_mention_tap"),
 )
 
+internal object InstagramMainActivityNotificationRelatedFingerprint : Fingerprint(
+    definingClass = "/InstagramMainActivity;",
+    strings = listOf("nme_ig_post_post_creation_notif", "nme_ig_post_story_creation_notif"),
+)
+
 internal object VideoMediaInIGTVFeedHasVideoVariantsFingerprint : Fingerprint(
     returnType = "Z",
     strings = listOf("id: ", " type: ", "InvalidVideoMediaInIGTVFeed"),
