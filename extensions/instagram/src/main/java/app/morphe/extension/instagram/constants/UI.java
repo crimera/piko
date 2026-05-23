@@ -50,7 +50,7 @@ public class UI {
         }
     }
 
-    public static ImageView addGearToViewGroup(ViewGroup viewGroup, String iconDrawable, Runnable action) {
+    public static ImageView addImageViewToViewGroup(ViewGroup viewGroup, String iconDrawable, Runnable action) {
         try {
             if (viewGroup == null) {
                 return null;
@@ -65,16 +65,18 @@ public class UI {
                     ViewGroup.LayoutParams.WRAP_CONTENT
             );
             imageView.setLayoutParams(params);
-            imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    try {
-                        action.run();
-                    } catch (Exception ex) {
-                        Logger.printException(() -> "addGearToViewGroup click failed: ", ex);
+            if(action!=null) {
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            action.run();
+                        } catch (Exception ex) {
+                            Logger.printException(() -> "addImageViewToViewGroup click failed: ", ex);
+                        }
                     }
-                }
-            });
+                });
+            }
             int padding = Dim.dp16;
             imageView.setPadding(padding, padding, padding, padding);
 
@@ -87,7 +89,7 @@ public class UI {
             viewGroup.addView(imageView, insertIndex);
             return imageView;
         } catch (Exception e) {
-            Logger.printException(() -> "Failed addGearToViewGroup: ", e);
+            Logger.printException(() -> "Failed addImageViewToViewGroup: ", e);
         }
         return null;
     }
@@ -98,7 +100,7 @@ public class UI {
                 return;
             }
 
-            ImageView imageView = UI.addGearToViewGroup(viewGroup, "instagram_settings_pano_filled_24", ActivityHook::startPikoActivity);
+            ImageView imageView = UI.addImageViewToViewGroup(viewGroup, "instagram_settings_pano_filled_24", ActivityHook::startPikoActivity);
             if (imageView == null) {
                 return;
             }

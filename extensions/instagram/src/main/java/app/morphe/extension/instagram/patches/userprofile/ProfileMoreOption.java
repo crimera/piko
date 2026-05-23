@@ -113,7 +113,7 @@ public class ProfileMoreOption {
 
             Context context = viewGroup.getContext();
             UserData userData = new UserData(userObject);
-            UI.addGearToViewGroup(viewGroup, "instagram_info_outline_24", ()->moreOptionsDailogueBox(context, userData));
+            UI.addImageViewToViewGroup(viewGroup, "instagram_info_outline_24", ()->moreOptionsDailogueBox(context, userData));
 
         } catch (Exception e) {
             Logger.printException(() -> "Failed to add profile more options: ", e);

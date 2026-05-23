@@ -42,6 +42,9 @@ public class DefaultStrings {
     public static String DISABLE_TYPING_STATUS = "Disable typing status";
     public static String DISABLE_SCREENSHOT_DETECTION = "Disable screenshot detection";
     public static String VIEW_DM_ANONYMOUSLY = "View direct messages anonymously";
+    public static String TURN_ON_ALL_GHOST_MODES = "Turn on all ghost modes";
+    public static String GHOST_MODES_ON = "Ghost mode: ON";
+    public static String GHOST_MODES_DEFAULT = "Ghost mode: DEFAULT";
 
     public static String CATEGORY_DISTRACTION_FREE = "Distraction free";
     public static String DISABLE_STORIES = "Disable stories";

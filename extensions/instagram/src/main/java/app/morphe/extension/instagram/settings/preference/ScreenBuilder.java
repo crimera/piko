@@ -153,6 +153,14 @@ public class ScreenBuilder {
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_GHOST);
 
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.TURN_ON_ALL_GHOST_MODES,
+                        "",
+                        Settings.TURN_ON_ALL_GHOST_MODES
+                )
+        );
+
         if (SettingsStatus.viewStoriesAnonymously) {
             addPreference(category,
                     helper.switchPreference(

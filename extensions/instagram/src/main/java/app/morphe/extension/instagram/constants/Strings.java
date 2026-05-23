@@ -53,6 +53,9 @@ public class Strings {
     public static final String DISABLE_TYPING_STATUS = langInstance.DISABLE_TYPING_STATUS;
     public static final String DISABLE_SCREENSHOT_DETECTION = langInstance.DISABLE_SCREENSHOT_DETECTION;
     public static final String VIEW_DM_ANONYMOUSLY = langInstance.VIEW_DM_ANONYMOUSLY;
+    public static final String TURN_ON_ALL_GHOST_MODES = langInstance.TURN_ON_ALL_GHOST_MODES;
+    public static final String GHOST_MODES_ON = langInstance.GHOST_MODES_ON;
+    public static final String GHOST_MODES_DEFAULT = langInstance.GHOST_MODES_DEFAULT;
 
     public static final String CATEGORY_DISTRACTION_FREE = langInstance.CATEGORY_DISTRACTION_FREE;
     public static final String DISABLE_STORIES = langInstance.DISABLE_STORIES;
