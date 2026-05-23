@@ -1,5 +1,5 @@
 {
-  "version": "3.4.1-dev.1",
+  "version": "3.5.0-dev.1",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -56,6 +56,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -68,10 +69,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -96,10 +97,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -121,10 +122,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -286,10 +287,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -345,10 +346,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -476,10 +477,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -731,10 +732,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -758,10 +759,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1278,10 +1279,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1306,10 +1307,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1334,10 +1335,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1453,10 +1454,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1481,10 +1482,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1512,10 +1513,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1540,10 +1541,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1568,10 +1569,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1595,10 +1596,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1623,10 +1624,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1650,10 +1651,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1677,10 +1678,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1704,10 +1705,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1776,6 +1777,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1788,10 +1790,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -1834,6 +1836,34 @@
             },
             {
               "version": "11.93.0-release-ripped.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Download voice message",
+      "description": "Enables ability to download voice messages",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2130,10 +2160,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -2727,10 +2757,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -2845,10 +2875,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -2872,10 +2902,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -3081,10 +3111,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -3109,10 +3139,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -3136,10 +3166,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -3256,10 +3286,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -3329,10 +3359,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -3389,6 +3419,8 @@
       "description": "Changes unexpired view once, view twice media to permanent view.",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -3401,10 +3433,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -3428,10 +3460,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -3456,10 +3488,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -3671,10 +3703,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -3789,10 +3821,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -3816,10 +3848,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -4024,10 +4056,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -4324,10 +4356,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -4351,10 +4383,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -4379,10 +4411,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -4407,10 +4439,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -4434,10 +4466,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -4462,10 +4494,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -4490,10 +4522,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
@@ -4521,10 +4553,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "426.0.0.37.68",
+              "version": "430.0.0.53.80",
               "isExperimental": false,
               "minSdk": null,
-              "description": "Tested on version code - 383207248, 383207252"
+              "description": null
             }
           ]
         }
