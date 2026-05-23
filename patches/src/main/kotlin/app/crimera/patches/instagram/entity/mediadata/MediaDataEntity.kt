@@ -148,5 +148,22 @@ val mediaDataEntity =
                     GetTrackDataIntfExtensionFingerprint.changeFirstString(getTrackInfoFromMediaMethodName)
                 }
             }
+
+            // Message audio.
+            IgPlayerControllerRelatedFingerprint.method.apply {
+                val firstInvokeVirtualRangeIndex = indexOfFirstInstruction(Opcode.INVOKE_VIRTUAL_RANGE)
+                val nextInvokeInterface = indexOfFirstInstruction(firstInvokeVirtualRangeIndex, Opcode.INVOKE_INTERFACE)
+                val methodName = getInstruction(nextInvokeInterface).methodExtractor().name
+                GetMessageAudioUrlExtensionFingerprint.changeFirstString(methodName)
+            }
+
+            AudioIntfMapperFingerprint.apply {
+                val strIndex = stringMatches.first { it.string == AUDIO_SRC_KEY }.index
+                method.apply {
+                    val getAudioSrcInvokeIndex = indexOfFirstInstruction(strIndex, Opcode.INVOKE_INTERFACE)
+                    val methodName = getInstruction(getAudioSrcInvokeIndex).methodExtractor().name
+                    GetMessageAudioUrlExtensionFingerprint.changeStringAt(1, methodName)
+                }
+            }
         }
     }

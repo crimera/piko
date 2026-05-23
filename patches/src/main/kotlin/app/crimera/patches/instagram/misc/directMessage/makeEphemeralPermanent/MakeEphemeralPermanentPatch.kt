@@ -4,8 +4,10 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
-package app.crimera.patches.instagram.misc.makeEphemeralPermanent
+package app.crimera.patches.instagram.misc.directMessage.makeEphemeralPermanent
 
+import app.crimera.patches.instagram.entity.messageInfoEntity.messageInfoEntity
+import app.crimera.patches.instagram.misc.directMessage.saveAllMessages.saveAllMessagesPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
@@ -38,7 +40,7 @@ val makeEphemeralPermanentPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(settingsPatch)
+        dependsOn(settingsPatch, messageInfoEntity, saveAllMessagesPatch)
         execute {
 
             EphemeralMediaJsonParserFingerprint.apply {

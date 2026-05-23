@@ -49,6 +49,7 @@ public class MediaData extends Entity {
     private String getMediaExtension(MediaType mediaType) throws Exception {
         String imageExtension = ".jpg";
         String videoExtension = ".mp4";
+        String audioExtension = ".mp3";
 
         if (mediaType.equals(MediaType.ANY)) {
             if (this.isVideo()) {
@@ -59,6 +60,7 @@ public class MediaData extends Entity {
 
         if (mediaType.equals(MediaType.IMAGE)) return imageExtension;
         if (mediaType.equals(MediaType.VIDEO)) return videoExtension;
+        if (mediaType.equals(MediaType.AUDIO)) return audioExtension;
 
         // Default fallback just in case.
         return imageExtension;
@@ -181,6 +183,11 @@ public class MediaData extends Entity {
         Class<?> helperClass = this.getHelperClass();
         Object result = super.getMethod(helperClass, "A0J", this.obj);
         return result != null ? (String) super.getField(result, "A0Z") : null;
+    }
+
+    public String getMessageAudioUrl() throws Exception {
+        Object audioIntfObject = super.getMethod(this.getExtendedData(), "methodName");
+        return audioIntfObject != null ? (String) super.getMethod(audioIntfObject, "BAj") : null;
     }
 
 }

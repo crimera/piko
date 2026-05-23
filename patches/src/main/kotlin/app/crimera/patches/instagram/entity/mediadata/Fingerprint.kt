@@ -10,6 +10,7 @@ import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CLASS
 import app.morphe.patcher.Fingerprint
 
+internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
 
 internal object GetHelperClassExtensionFingerprint : Fingerprint(
@@ -72,6 +73,11 @@ internal object GetTrackDataIntfExtensionFingerprint : Fingerprint(
     name = "getTrackDataIntf",
 )
 
+internal object GetMessageAudioUrlExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getMessageAudioUrl",
+)
+
 internal object ReelsInlineQualitySurveyRelatedFingerprint : Fingerprint(
     strings = listOf("reels_inline_quality_survey"),
 )
@@ -116,4 +122,17 @@ internal object DirectShareTargetRelatedFingerprint : Fingerprint(
 internal object ClipsAudioUtilGetTitleFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     strings = listOf("title is empty. audio_asset_id = ", "ClipsAudioUtil"),
+)
+
+internal object AudioIntfMapperFingerprint : Fingerprint(
+    returnType = "Ljava/util/Map;",
+    strings = listOf(AUDIO_SRC_KEY, "audio_src_expiration_timestamp_us", "codec", "duration", "fallback", "file_format"),
+)
+
+internal object IgPlayerControllerRelatedFingerprint : Fingerprint(
+    strings =
+        listOf(
+            "igPlayerController must be initialized",
+            "audioMetadata must be set before preparing",
+        ),
 )
