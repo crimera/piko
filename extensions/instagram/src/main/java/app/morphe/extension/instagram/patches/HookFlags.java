@@ -42,6 +42,16 @@ public class HookFlags {
         BOOL_FLAGS.put("110800::0", false); //ig_android_controller_migration::use_v2_controller
     }
 
+    // Thanks to @brosssh
+    private static void suggestedContentFlags() {
+        BOOL_FLAGS.put("111509::3", false); //ig_search_ta_nullstate_suggestions::is_android_enabled
+        BOOL_FLAGS.put("82771::0", false); //igx_foundation_litho_stories_tray::is_litho_stories_tray_enabled
+    }
+
+    private static void profileActionBarFlags() {
+        BOOL_FLAGS.put("81826::0", true); //igx_action_bar_service_replacement::is_profile_replaced
+    }
+
     private static void employeeOptionsFlags() {
         if(Pref.enableEmployeeOptions()){
             BOOL_FLAGS.put("28538::0", true); //ig_android_employee_options::is_enabled

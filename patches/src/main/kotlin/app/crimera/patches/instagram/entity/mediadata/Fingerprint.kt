@@ -10,6 +10,7 @@ import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CLASS
 import app.morphe.patcher.Fingerprint
 
+internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
 
 internal object GetHelperClassExtensionFingerprint : Fingerprint(
@@ -27,9 +28,9 @@ internal object GetPhotoLinkExtensionFingerprint : Fingerprint(
     name = "getPhotoLink",
 )
 
-internal object GetVideoLinkExtensionFingerprint : Fingerprint(
+internal object GetVideoVariantsExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
-    name = "getVideoLink",
+    name = "getVideoVariants",
 )
 
 internal object IsVideoExtensionFingerprint : Fingerprint(
@@ -62,6 +63,21 @@ internal object GetDescriptionTextExtensionFingerprint : Fingerprint(
     name = "getDescriptionText",
 )
 
+internal object GetOriginalSoundDataIntfExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getOriginalSoundDataIntf",
+)
+
+internal object GetTrackDataIntfExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getTrackDataIntf",
+)
+
+internal object GetMessageAudioUrlExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getMessageAudioUrl",
+)
+
 internal object ReelsInlineQualitySurveyRelatedFingerprint : Fingerprint(
     strings = listOf("reels_inline_quality_survey"),
 )
@@ -71,10 +87,14 @@ internal object ReelsMentionDoubleTapFingerprint : Fingerprint(
     strings = listOf("userSession", "direct_add_mention_tap"),
 )
 
-internal object ClipsEditMetadataControllerRunFingerprint : Fingerprint(
-    returnType = "V",
-    name = "run",
-    strings = listOf("ClipsEditMetadataController"),
+internal object InstagramMainActivityNotificationRelatedFingerprint : Fingerprint(
+    definingClass = "/InstagramMainActivity;",
+    strings = listOf("nme_ig_post_post_creation_notif", "nme_ig_post_story_creation_notif"),
+)
+
+internal object VideoMediaInIGTVFeedHasVideoVariantsFingerprint : Fingerprint(
+    returnType = "Z",
+    strings = listOf("id: ", " type: ", "InvalidVideoMediaInIGTVFeed"),
 )
 
 internal object AslSessionRelatedFingerprint : Fingerprint(
@@ -102,4 +122,22 @@ internal object FanClubContentPreviewInteractorImplFingerprint : Fingerprint(
 internal object DirectShareTargetRelatedFingerprint : Fingerprint(
     returnType = "V",
     strings = listOf("https://www.instagram.com/p/", "unknown"),
+)
+
+internal object ClipsAudioUtilGetTitleFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    strings = listOf("title is empty. audio_asset_id = ", "ClipsAudioUtil"),
+)
+
+internal object AudioIntfMapperFingerprint : Fingerprint(
+    returnType = "Ljava/util/Map;",
+    strings = listOf(AUDIO_SRC_KEY, "audio_src_expiration_timestamp_us", "codec", "duration", "fallback", "file_format"),
+)
+
+internal object IgPlayerControllerRelatedFingerprint : Fingerprint(
+    strings =
+        listOf(
+            "igPlayerController must be initialized",
+            "audioMetadata must be set before preparing",
+        ),
 )

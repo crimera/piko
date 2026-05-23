@@ -9,11 +9,13 @@ package app.crimera.patches.instagram.ads
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -45,32 +47,29 @@ val hideSuggestedContentPatch =
         dependsOn(settingsPatch)
         execute {
 
-            val fingerprints =
-                listOf(
-                    FeedItemParseFromJsonFingerprint,
-                )
+            FeedItemParseFromJsonFingerprint.apply {
+                val strIndex = stringMatches[0].index
+                method.apply {
+                    val indexOfFirstString = indexOfFirstInstruction(Opcode.CONST_STRING_JUMBO)
 
-            fingerprints.forEach { fingerprint ->
-                fingerprint.apply {
-                    val strIndex = stringMatches[0].index
-                    method.apply {
-                        val moveResultObjectInstruction =
-                            instructions.last {
-                                it.opcode == Opcode.MOVE_RESULT_OBJECT &&
-                                    it.location.index < strIndex
-                            }
-                        val moveResultObjectIndex = moveResultObjectInstruction.location.index
-                        val strRegister = moveResultObjectInstruction.registersUsed[0]
+                    val jsonParserKeyInstruction =
+                        instructions.last {
+                            it.opcode == Opcode.MOVE_RESULT_OBJECT &&
+                                it.location.index < indexOfFirstString
+                        }
+                    val moveResultObjectIndex = jsonParserKeyInstruction.location.index
+                    val strRegister = jsonParserKeyInstruction.registersUsed[0]
 
-                        addInstructions(
-                            moveResultObjectIndex + 1,
-                            """
-                            ${Constants.JSONPARSER_CHECK_DESCRIPTOR.format(strRegister,strRegister)}
-                            """.trimIndent(),
-                        )
-                    }
+                    addInstructions(
+                        moveResultObjectIndex + 1,
+                        """
+                        ${Constants.JSONPARSER_CHECK_DESCRIPTOR.format(strRegister,strRegister)}
+                        """.trimIndent(),
+                    )
                 }
             }
+
             enableSettings("hideSuggestedContent")
+            addFlags("suggestedContentFlags")
         }
     }

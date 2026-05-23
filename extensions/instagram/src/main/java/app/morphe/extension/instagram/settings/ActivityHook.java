@@ -19,6 +19,7 @@ import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.preference.fragments.BackupPrefActivity;
 import app.morphe.extension.instagram.settings.preference.fragments.RestorePrefActivity;
+import app.morphe.extension.crimera.downloader.FolderPickerActivity;
 import app.morphe.extension.shared.Logger;
 
 @SuppressWarnings("deprecation")
@@ -31,6 +32,7 @@ public class ActivityHook {
             context.startActivity(intent);
         } catch (Exception e) {
             Logger.printException(() -> "launchActivity failure", e);
+            PikoUtils.logger(e);
         }
     }
 
@@ -50,6 +52,8 @@ public class ActivityHook {
             intent = new Intent(ctx,BackupPrefActivity.class);
         } else if (bundleKey.equals(Strings.IMPORT_DEV_OVERRIDES) || bundleKey.equals(Strings.IMPORT_ID_MAPPING)  || bundleKey.equals(Strings.IMPORT_PIKO_PREF)) {
             intent = new Intent(ctx,RestorePrefActivity.class);
+        } else if (bundleKey.equals(Strings.DOWNLOAD_SET_PATH)) {
+            intent = new Intent(ctx,FolderPickerActivity.class);
         }
         if(intent!=null){
             intent.putExtra(bundleKey,true);

@@ -8,12 +8,14 @@
 package app.morphe.extension.instagram.entity;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
 import android.content.Context;
 
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.crimera.downloader.MediaType;
 
 
 public class MediaData extends Entity {
@@ -36,13 +38,46 @@ public class MediaData extends Entity {
         return (String) super.getMethod("methodName");
     }
 
-    // Sometimes I want to forcefully generate file name as an image while saving the video/media as an image file.
-    public String getDownloadFilename(boolean forceAsImage) throws Exception {
-        String extension = this.isVideo() ? ".mp4" : ".jpg";
-        extension = forceAsImage ? ".jpg" : extension;
-        String mediaPkId = this.getMediaPkId();
-        return mediaPkId + extension;
+    public boolean isVideo() throws Exception {
+        return (boolean) super.getMethod(this.obj, "methodName");
+    }
 
+    public boolean hasAudio() throws Exception {
+        return this.getAudioMedia() != null;
+    }
+
+    private String getMediaExtension(MediaType mediaType) throws Exception {
+        String imageExtension = ".jpg";
+        String videoExtension = ".mp4";
+        String audioExtension = ".mp3";
+
+        if (mediaType.equals(MediaType.ANY)) {
+            if (this.isVideo()) {
+                return videoExtension;
+            }
+            return imageExtension;
+        }
+
+        if (mediaType.equals(MediaType.IMAGE)) return imageExtension;
+        if (mediaType.equals(MediaType.VIDEO)) return videoExtension;
+        if (mediaType.equals(MediaType.AUDIO)) return audioExtension;
+
+        // Default fallback just in case.
+        return imageExtension;
+    }
+
+
+    public String getDownloadFilename(MediaType mediaType) throws Exception {
+        String mediaPkId = this.getMediaPkId();
+        String extension = this.getMediaExtension(mediaType);
+        return mediaPkId + extension;
+    }
+
+    public String getVideoVariantFileName(VideoData videoData) throws Exception {
+        String mediaPkId = this.getMediaPkId();
+        String variantTag = videoData.getVideoVariantTag();
+        String extension = this.getMediaExtension(MediaType.VIDEO);
+        return mediaPkId + "_" +variantTag +extension;
     }
 
     public UserData getUserData() throws Exception {
@@ -51,10 +86,15 @@ public class MediaData extends Entity {
     }
 
     public HashSet getMentionSet() throws Exception {
-        Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "methodName", this.obj);
+        Object result =  super.getMethod(this.getExtendedData(), "methodName");
         if (result != null) {
-            return new HashSet<>((List) result);
+            List userInteractionList = (List) result;
+            HashSet<UserData> userDataHashSet = new HashSet<>();
+            for(Object data:userInteractionList){
+                Object userData = super.getMethod(data, "methodName2");
+                userDataHashSet.add(new UserData(userData));
+            }
+            return userDataHashSet;
         }
         return null;
     }
@@ -87,14 +127,26 @@ public class MediaData extends Entity {
         return photoLink != null ? (String) photoLink : null;
     }
 
-    public String getVideoLink() throws Exception {
-        Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "methodName", this.obj);
-        return result != null ? (String) result : null;
+    public List getVideoVariants() throws Exception {
+        Object variantObject = super.getMethod(this.getExtendedData(), "methodName");
+        if (variantObject != null){
+            List variantList = (List) variantObject;
+            List<VideoData> videoList = new ArrayList<>();
+
+            variantList.forEach(item -> videoList.add(new VideoData(item)));
+
+            return videoList;
+
+        }
+        return null;
     }
 
-    public boolean isVideo() throws Exception {
-        return (boolean) super.getMethod(this.obj, "methodName");
+    public String getVideoLink() throws Exception {
+        List<VideoData> videoDataList = this.getVideoVariants();
+        if(videoDataList!=null){
+            return videoDataList.get(0).getUrl();
+        }
+        return null;
     }
 
     public String getMediaLink() throws Exception {
@@ -104,7 +156,7 @@ public class MediaData extends Entity {
     private OriginalSoundDataIntf getOriginalSoundDataIntf() throws Exception {
         Class<?> helperClass = this.getHelperClass();
         Object result = super.getMethod(helperClass, "A06", this.obj);
-        if(result!=null){
+        if (result != null) {
             return new OriginalSoundDataIntf(result);
         }
         return null;
@@ -113,7 +165,7 @@ public class MediaData extends Entity {
     private TrackDataIntf getTrackDataIntf() throws Exception {
         Class<?> helperClass = this.getHelperClass();
         Object result = super.getMethod(helperClass, "A0F", this.obj);
-        if(result!=null){
+        if (result != null) {
             return new TrackDataIntf(result);
         }
         return null;
@@ -121,12 +173,12 @@ public class MediaData extends Entity {
 
     public AudioMediaInterface getAudioMedia() throws Exception {
         AudioMediaInterface originalSoundDataIntf = this.getOriginalSoundDataIntf();
-        if(originalSoundDataIntf!=null){
+        if (originalSoundDataIntf != null) {
             return originalSoundDataIntf;
         }
 
         AudioMediaInterface TrackDataIntf = this.getTrackDataIntf();
-        if(TrackDataIntf!=null){
+        if (TrackDataIntf != null) {
             return TrackDataIntf;
         }
         return null;
@@ -136,6 +188,11 @@ public class MediaData extends Entity {
         Class<?> helperClass = this.getHelperClass();
         Object result = super.getMethod(helperClass, "A0J", this.obj);
         return result != null ? (String) super.getField(result, "A0Z") : null;
+    }
+
+    public String getMessageAudioUrl() throws Exception {
+        Object audioIntfObject = super.getMethod(this.getExtendedData(), "methodName");
+        return audioIntfObject != null ? (String) super.getMethod(audioIntfObject, "BAj") : null;
     }
 
 }

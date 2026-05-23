@@ -8,6 +8,7 @@
 package app.morphe.extension.instagram.entity;
 
 import java.util.Map;
+import com.instagram.api.schemas.MusicInfo;
 
 public class TrackDataIntf extends Entity implements AudioMediaInterface {
     private final Object obj;
@@ -17,9 +18,13 @@ public class TrackDataIntf extends Entity implements AudioMediaInterface {
         this.obj = obj;
     }
 
+    private Object getMusicInfo() throws Exception {
+        Object mediatorObject = super.getField("A02");
+        return (MusicInfo) super.getMethod(mediatorObject,"getValue");
+    }
+
     private Object getTrackData() throws Exception {
-        Object musicInfoObject = super.getField("A00");
-        return super.getMethod(musicInfoObject, "CJN");
+        return super.getMethod(this.getMusicInfo(), "CJN");
     }
 
     public Map getMappings() throws Exception {
@@ -62,7 +67,6 @@ public class TrackDataIntf extends Entity implements AudioMediaInterface {
     public String getDownloadName() throws Exception {
         String artistName = this.getSongArtistName();
         String songName = this.getSongName();
-        // Original audio is actually stored as mp4 but forcefully renaming it to mp3.
-        return artistName + "_" + songName + ".mp3";
+        return artistName + "_" + songName;
     }
 }

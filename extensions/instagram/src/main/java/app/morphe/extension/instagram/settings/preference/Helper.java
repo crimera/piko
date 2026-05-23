@@ -14,7 +14,7 @@ package app.morphe.extension.instagram.settings.preference;
 import android.content.Context;
 import android.preference.Preference;
 
-import app.morphe.extension.instagram.utils.SharedPref;
+import app.morphe.extension.crimera.SharedPref;
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;

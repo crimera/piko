@@ -22,17 +22,18 @@ val userDataEntity =
         description = "This patch is used for decoding obfuscated code of the user data",
     ) {
         execute {
-
-            GetMatrixCursorFingerprint.method.apply {
+            OneTapLoginUserInitFingerprint.method.apply {
                 val additionalUserInfoField =
-                    instructions.filter { it.opcode == Opcode.IGET_OBJECT }[1].fieldExtractor()
+                    instructions.first { it.opcode == Opcode.IGET_OBJECT }.fieldExtractor()
 
                 val additionalUserInfoFieldName = additionalUserInfoField.name
                 GetAdditionalUserInfoExtensionFingerprint.changeFirstString(additionalUserInfoFieldName)
 
-                val invokeInterfaceList = instructions.filter { it.opcode == Opcode.INVOKE_INTERFACE }
-                GetUsernameExtensionFingerprint.changeFirstString(invokeInterfaceList[0].methodExtractor().name)
-                GetFullNameExtensionFingerprint.changeFirstString(invokeInterfaceList[1].methodExtractor().name)
+                val firstInvokeInterface = instructions.first { it.opcode == Opcode.INVOKE_INTERFACE }
+                GetUsernameExtensionFingerprint.changeFirstString(firstInvokeInterface.methodExtractor().name)
+
+                val lastInvokeInterface = instructions.last { it.opcode == Opcode.INVOKE_INTERFACE }
+                GetFullNameExtensionFingerprint.changeFirstString(lastInvokeInterface.methodExtractor().name)
 
                 val additionalUserInfoMethods =
                     mutableClassDefBy(extensionToClassName(additionalUserInfoField.returnType))
@@ -47,13 +48,11 @@ val userDataEntity =
                         }.name
 
                 GetUserFriendshipStatusExtensionFingerprint.changeFirstString(friendshipStatusFromUserMethodName)
+            }
 
-                val profilePicUrlInfoMethodName =
-                    additionalUserInfoMethods
-                        .first {
-                            it.returnType == "Lcom/instagram/api/schemas/ProfilePicUrlInfo;"
-                        }.name
-                GetProfilePictureUrlExtensionFingerprint.changeFirstString(profilePicUrlInfoMethodName)
+            DirectStoryViewerFragmentRelatedFingerprint.method.apply {
+                val firstInvokeInterface = instructions.first { it.opcode == Opcode.INVOKE_INTERFACE }.methodExtractor().name
+                GetProfilePictureUrlExtensionFingerprint.changeFirstString(firstInvokeInterface)
             }
 
             EditProfileNuxFragmentOnCreateFingerprint.apply {
