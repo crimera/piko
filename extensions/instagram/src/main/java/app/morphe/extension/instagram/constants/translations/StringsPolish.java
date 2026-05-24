@@ -43,6 +43,9 @@ public class StringsPolish extends DefaultStrings {
         this.DISABLE_TYPING_STATUS = "Wyłącz status pisania";
         this.DISABLE_SCREENSHOT_DETECTION = "Wyłącz wykrywanie zrzutów ekranu";
         this.VIEW_DM_ANONYMOUSLY = "Czytaj wiadomości anonimowo";
+        this.TURN_ON_ALL_GHOST_MODES = "Włącz wszystkie tryby ducha";
+        this.GHOST_MODES_ON = "Tryb ducha: WŁĄCZONY";
+        this.GHOST_MODES_DEFAULT = "Tryb ducha: DOMYŚLNY";
 
         this.CATEGORY_DISTRACTION_FREE = "Bez rozpraszaczy";
         this.DISABLE_STORIES = "Wyłącz relacje";
@@ -112,6 +115,7 @@ public class StringsPolish extends DefaultStrings {
         this.DOWNLOAD_USERNAME_FOLDER_DESC = "Tworzy osobne podfoldery dla każdego twórcy";
         this.DOWNLOAD_CURRENT_MEDIA = "Pobierz aktualny plik";
         this.DOWNLOAD_AS_IMAGE = "Pobierz jako obraz";
+        this.VIDEO_VARIANTS = "Warianty filmu";
         this.DOWNLOAD_AUDIO = "Pobierz sam dźwięk";
         this.DOWNLOAD_OPTIONS = "Opcje pobierania";
         this.COPY_MEDIA_LINK = "Skopiuj link do pliku";
@@ -121,6 +125,12 @@ public class StringsPolish extends DefaultStrings {
         this.DOWNLOADED_MEDIA = "Pobrano: ";
         this.MEDIA_EXISTS = "Plik już istnieje";
         this.DOWNLOAD_FAILED_MEDIA = "Błąd pobierania: ";
+        this.DOWNLOAD_SET_PATH = "Ustaw własny folder pobierania";
+        this.DOWNLOAD_SET_PATH_SUCCESS = "Zaktualizowano folder pobierania";
+        this.DOWNLOAD_SET_PATH_FAILED = "Nie udało się ustalić ścieżki folderu";
+        this.DOWNLOAD_GRANT_PERMISSION = "Przyznaj dostęp do pamięci, aby pobierać pliki";
+        this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Nie udało się otworzyć ustawień. Przyznaj dostęp do wszystkich plików ręcznie";
+
         this.POST_OPTIONS = "Opcje posta";
         this.COPY_POST_DESCRIPTION = "Skopiuj opis posta";
         this.COPY_POST_OWNER_USERNAME = "Skopiuj nazwę twórcy";
@@ -171,6 +181,7 @@ public class StringsPolish extends DefaultStrings {
         this.WELCOME_TITLE = "Witaj w Piko";
         this.WELCOME_MESSAGE = "Aby wyciągnąć z Piko jak najwięcej, zajrzyj do ustawień i dostosuj je pod siebie";
         this.GOTO_PIKO_SETTINGS = "Przejdź do ustawień Piko";
-        this.NO_INTERNET = "Brak połączenia z internetem";        
+        this.NO_INTERNET = "Brak połączenia z internetem";     
+        this.TAP_HERE = "Kliknij tutaj";   
     }
 }
