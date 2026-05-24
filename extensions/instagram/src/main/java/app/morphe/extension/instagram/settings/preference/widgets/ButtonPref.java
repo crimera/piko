@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.morphe.extension.instagram.settings.preference.widgets;
@@ -71,8 +67,9 @@ public class ButtonPref extends Preference {
             public boolean onPreferenceClick(Preference preference) {
                 try {
                     String key = getKey();
-                    if (key.equals(Strings.EXPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_ID_MAPPING)
-                            || key.equals(Strings.EXPORT_PIKO_PREF) || key.equals(Strings.IMPORT_PIKO_PREF)) {
+                    if (key.equals(Strings.EXPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_DEV_OVERRIDES)
+                            || key.equals(Strings.IMPORT_ID_MAPPING) || key.equals(Strings.EXPORT_PIKO_PREF)
+                            || key.equals(Strings.IMPORT_PIKO_PREF) || key.equals(Strings.DOWNLOAD_SET_PATH)) {
                         ActivityHook.launchFragment((Activity) context, key);
 
                     } else if (key.equals(Strings.DELETE_ANALYTICS_CACHE)) {

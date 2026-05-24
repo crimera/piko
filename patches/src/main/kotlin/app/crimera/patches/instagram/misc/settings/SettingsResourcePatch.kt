@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.settings
@@ -20,6 +16,12 @@ val addSettingsActivityPatch =
     ) {
         finalize {
             document("AndroidManifest.xml").use { document ->
+
+                val manifest = document.getNode("manifest")
+                val permission = document.createElement("uses-permission")
+                permission.setAttribute("android:name", "android.permission.MANAGE_EXTERNAL_STORAGE")
+                manifest.appendChild(permission)
+
                 val application = document.getElementsByTagName("application").item(0) as Element
 
                 var activity = document.createElement("activity")
@@ -29,15 +31,16 @@ val addSettingsActivityPatch =
                 activity.setAttribute("android:exported", "false")
                 application.appendChild(activity)
 
-                activity = document.createElement("activity")
-                activity.setAttribute("android:name", "app.morphe.extension.instagram.settings.preference.fragments.BackupPrefActivity")
-                activity.setAttribute("android:exported", "false")
-                application.appendChild(activity)
-
-                activity = document.createElement("activity")
-                activity.setAttribute("android:name", "app.morphe.extension.instagram.settings.preference.fragments.RestorePrefActivity")
-                activity.setAttribute("android:exported", "false")
-                application.appendChild(activity)
+                listOf(
+                    "app.morphe.extension.instagram.settings.preference.fragments.BackupPrefActivity",
+                    "app.morphe.extension.instagram.settings.preference.fragments.RestorePrefActivity",
+                    "app.morphe.extension.crimera.downloader.FolderPickerActivity",
+                ).forEach { activityName ->
+                    activity = document.createElement("activity")
+                    activity.setAttribute("android:name", activityName)
+                    activity.setAttribute("android:exported", "false")
+                    application.appendChild(activity)
+                }
             }
         }
     }

@@ -29,12 +29,17 @@
     <string name="piko_pref_native_page_desc">Queste funzionalità native di Piko sono disponibili nel menu di condivisione dei post.</string>
     <string name="piko_title_native_downloader">Scaricatore nativo</string>
     <string name="piko_title_native_downloader_toggle">Abilita lo scaricatore nativo</string>
+    <string name="piko_pref_native_downloader_inline_button">Aggiungi pulsante download per i post</string>
+    <string name="piko_pref_native_downloader_inline_button_desc">Aggiunge un pulsante di download direttamente alla barra delle azioni del post</string>
     <string name="piko_pref_native_downloader_alert_title">Scarica media</string>
     <string name="piko_pref_native_downloader_download_all">Scarica tutto</string>
     <string name="piko_pref_native_downloader_no_media">Nessun media trovato</string>
     <string name="piko_pref_native_downloader_filename_title">Salva modello del nome del file</string>
+    <string name="piko_browse_object_title">Sfoglia gli \"oggetti\" del tweet</string>
     <string name="piko_share_image_title">Condividi Tweet come Immagine</string>
     <string name="piko_share_image_toggle">Abilità la Condivisione di Tweet come Immagini</string>
+    <string name="piko_share_image_autocleanup">Pulizia automatica delle registrazioni</string>
+    <string name="piko_share_image_autocleanup_desc">Rimuove automaticamente le catture [es. Post scaricati] dopo 24 ore se attivato</string>
     <string name="piko_title_native_translator">Traduzione nativa dei post</string>
     <string name="piko_native_translator_toggle">Abilita la Traduzione nativa dei post</string>
     <string name="piko_native_translator_provider">Fornitori di traduzione</string>
@@ -42,6 +47,7 @@
     <string name="piko_native_translator_zero_text">Nessun testo trovato da scaricare</string>
     <string name="piko_native_translator_google">Google traduttore</string>
     <string name="piko_native_translator_google_v2">Google traduttore V2</string>
+    <string name="piko_native_translator_fxtwitter">FxTwitter API</string>
     <string name="piko_title_native_reader_mode">Modalità lettura</string>
     <string name="piko_native_reader_mode_grok_thread">Analizza questo thread</string>
     <string name="piko_native_reader_mode_grok_author">Più a proposito del\'autore</string>
@@ -97,6 +103,9 @@
     <string name="piko_pref_pause_search_suggestion_desc">I suggerimenti di ricerca non verranno salvati localmente</string>
     <string name="piko_pref_search_suggestion">suggerimenti di ricerca</string>
     <string name="piko_pref_search_suggestion_desc">Nascondi/Rimuovi il suggerimento di ricerca nella sezione Esplora</string>
+    <string name="piko_disunify_xchat_system">Disunifica il sistema chat di X</string>
+    <string name="piko_disunify_xchat_system_desc">Riporta indietro le caratteristiche legacy come i messaggi e il menu condivisione</string>
+    <string name="piko_legacy_share_link">Condivisione dei link legacy</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Flag di funzionalità</string>
     <string name="piko_pref_feature_flags">Aggiungi flag di funzionalità</string>
@@ -182,6 +191,7 @@
     <string name="piko_pref_import_failed">Errore: importazione %s fallita</string>
     <string name="piko_pref_export_no_uri">Errore: Nessuna destinazione fornita</string>
     <string name="piko_pref_import_no_uri">Errore: Nessun file fornito</string>
+    <string name="piko_pref_export_login_token">Esporta token di login</string>
     <!-- About -->
     <string name="piko_title_about">Informazioni</string>
     <string name="piko_pref_app_version">Versione app</string>
@@ -202,14 +212,34 @@
     <string name="piko_settings_supported_links">Apri i link supportati</string>
     <!-- For arrays-->
     <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_money">Soldi</string>
+    <string name="piko_array_xchat">Chat di X</string>
+    <string name="piko_array_x_lite">Nuovo X Android</string>
+    <string name="piko_array_conference">Conferenza</string>
+    <string name="piko_array_creator_studio">Creator studio</string>
+    <string name="piko_array_jobs">Jobs</string>
+    <string name="piko_array_media">Media</string>
     <string name="piko_array_light_mode">Modalità chiara</string>
     <!-- App icon strings -->
+    <string name="piko_app_icon_thanks">Grazie a @NeoFreeBird per le icone app di iOS</string>
+    <string name="piko_app_icon_piko_exclusive">(Esclusive di Piko)</string>
     <!-- Category -->
+    <string name="piko_app_icon_category_legacy">Legacy</string>
     <string name="piko_app_icon_category_seasonal_event">Eventi Stagionali</string>
     <string name="piko_app_icon_category_sports">Sport</string>
+    <string name="piko_app_icon_category_cultural_and_celebrations">Culturali e Celebrazioni</string>
+    <string name="piko_app_icon_category_pride">Pride</string>
     <string name="piko_app_icon_category_misc">Varie</string>
+    <string name="piko_app_icon_category_space">Spazio</string>
     <string name="piko_app_icon_category_movies_n_series">Film e Serie</string>
     <!-- Icon names -->
+    <string name="piko_app_icon_name_default">Predefinito</string>
+    <string name="piko_app_icon_name_legacy_icon_1">Icona Legacy 1</string>
+    <string name="piko_app_icon_name_legacy_icon_2">Icona Legacy 2</string>
+    <string name="piko_app_icon_name_legacy_icon_3">Icona Legacy 3</string>
+    <string name="piko_app_icon_name_legacy_icon_4">Icona Legacy 4</string>
+    <string name="piko_app_icon_name_legacy_blue">Blu Legacy</string>
+    <string name="piko_app_icon_name_twitter_blue">Blu Twitter</string>
     <string name="piko_app_icon_name_earth">Terra</string>
     <string name="piko_app_icon_name_moon">Luna</string>
     <string name="piko_app_icon_name_mars">Marte</string>
@@ -218,18 +248,47 @@
     <string name="piko_app_icon_name_milky_way">Via Lattea</string>
     <string name="piko_app_icon_name_autumn_2021">Autunno 2021</string>
     <string name="piko_app_icon_name_autumn_2022">Autunno 2022</string>
+    <string name="piko_app_icon_name_south_spring_2021">Primavera Del Sud 2021</string>
+    <string name="piko_app_icon_name_south_spring_2022">Primavera Del Sud 2022</string>
+    <string name="piko_app_icon_name_winter_1">Inverno 1</string>
+    <string name="piko_app_icon_name_winter_2">Inverno 2</string>
+    <string name="piko_app_icon_name_summer_1">Estate 1</string>
+    <string name="piko_app_icon_name_summer_2">Estate 2</string>
+    <string name="piko_app_icon_name_autumn_southern">Autunno del Sud</string>
+    <string name="piko_app_icon_name_summer">Estate</string>
+    <string name="piko_app_icon_name_winter">Inverno</string>
+    <string name="piko_app_icon_name_beijing_olympics_1">Olimpiadi Di Pechino 1</string>
+    <string name="piko_app_icon_name_beijing_olympics_2">Olimpiadi Di Pechino 2</string>
+    <string name="piko_app_icon_name_daytona">Daytona</string>
+    <string name="piko_app_icon_name_formulaone">Formula Uno</string>
+    <string name="piko_app_icon_name_kentucky_derby">Derby del Kentucky</string>
+    <string name="piko_app_icon_name_mlb">MLB</string>
+    <string name="piko_app_icon_name_nba">NBA</string>
+    <string name="piko_app_icon_name_nba_2">NB 2</string>
+    <string name="piko_app_icon_name_ncaa">NCAA,</string>
+    <string name="piko_app_icon_name_masters">Masters</string>
+    <string name="piko_app_icon_name_nba_finals">Finali NBA</string>
+    <string name="piko_app_icon_name_stanley_cup">Stanley Cup</string>
     <string name="piko_app_icon_name_commonwealth">Commonwealth</string>
     <string name="piko_app_icon_name_mothers_day">Festa della Mamma</string>
+    <string name="piko_app_icon_name_womansday">Festa Della Donna</string>
     <string name="piko_app_icon_name_halloween_2021">Halloween 2021</string>
     <string name="piko_app_icon_name_halloween_2022">Halloween 2022</string>
     <string name="piko_app_icon_name_halloween_2024_1">Halloween 2024 1</string>
     <string name="piko_app_icon_name_halloween_2024_2">Halloween 2024 2</string>
     <string name="piko_app_icon_name_halloween_2024_3">Halloween 2024 3</string>
+    <string name="piko_app_icon_name_holi">Holi</string>
     <string name="piko_app_icon_name_stpatricks_day">Giorno di San Patrizio</string>
     <string name="piko_app_icon_name_easter">Pasqua</string>
+    <string name="piko_app_icon_name_anzac">Anzac</string>
     <string name="piko_app_icon_name_ramadan">Ramadan</string>
+    <string name="piko_app_icon_name_black_history">Black History</string>
+    <string name="piko_app_icon_name_eurovisionfinal">Finale Dell\'Euro Vision</string>
     <string name="piko_app_icon_name_lunar_new_year_1">Capodanno Lunare 1</string>
     <string name="piko_app_icon_name_lunar_new_year_2">Capodanno Lunare 2</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_1">Capodanno Giapponese 2024 1</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_2">Capodanno Giapponese 2024 2</string>
+    <string name="piko_app_icon_name_may_the_fourth">Il 4 Di Maggio</string>
     <string name="piko_app_icon_name_barbie">Barbie</string>
     <string name="piko_app_icon_name_thanksgiving_1">Ringraziamento 1</string>
     <string name="piko_app_icon_name_thanksgiving_2">Ringraziamento 2</string>
@@ -239,14 +298,48 @@
     <string name="piko_app_icon_name_thanksgiving_2024_4">Ringraziamento 2024 4</string>
     <string name="piko_app_icon_name_thanksgiving_2024_5">Ringraziamento 2024 5</string>
     <string name="piko_app_icon_name_thanksgiving_2024_6">Ringraziamento 2024 6</string>
+    <string name="piko_app_icon_name_canada_day">Festa del Canada</string>
+    <string name="piko_app_icon_name_canada_indigenous">Canada Indigenous</string>
     <string name="piko_app_icon_name_earth_hour">Ora della Terra</string>
     <string name="piko_app_icon_name_euro">Euro</string>
     <string name="piko_app_icon_name_independence_day">Giorno dell\'Indipendenza</string>
     <string name="piko_app_icon_name_juneteenth">Juneteenth</string>
+    <string name="piko_app_icon_name_naidoc">Naidoc</string>
     <string name="piko_app_icon_name_christmas_2024_1">Natale 2024 1</string>
     <string name="piko_app_icon_name_christmas_2024_2">Natale 2024 2</string>
     <string name="piko_app_icon_name_christmas_2024_3">Natale 2024 3</string>
     <string name="piko_app_icon_name_christmas_2024_4">Natale 2024 4</string>
+    <string name="piko_app_icon_name_upsidedown">Sottosopra</string>
+    <string name="piko_app_icon_name_games_chamber">Camera Dei Giochi</string>
+    <string name="piko_app_icon_name_pridesouthern">Pride del Sud</string>
+    <string name="piko_app_icon_name_newzealand_pride_1">Pride Della Nuova Zelanda 1</string>
+    <string name="piko_app_icon_name_newzealand_pride_2">Pride Della Nuova Zelanda 2</string>
     <string name="piko_app_icon_name_pride_month">Pride Month</string>
+    <string name="piko_app_icon_name_fancy">Elegante</string>
+    <string name="piko_app_icon_name_broken">Rotto</string>
     <string name="piko_app_icon_name_cyber">Cyber</string>
+    <string name="piko_app_icon_name_soft_pastel_pink">Rosa Pastello Morbido</string>
+    <string name="piko_app_icon_name_electric_indigo">Indaco Elettrico</string>
+    <string name="piko_app_icon_name_neon_pink">Rosa Neon</string>
+    <string name="piko_app_icon_name_tropical_teal">Verde Petrolio Tropicale</string>
+    <string name="piko_app_icon_name_vivid_orange">Arancione Vivido</string>
+    <!-- Import / export login tokens -->
+    <string name="piko_login_token_export_screen_description">"Questa funzione esporta il token della sessione per l'account attualmente in uso.
+Puoi importarlo dalla schermata di accesso o da quella \"Crea nuovo account\".
+
+ATTENZIONE: I token esportati sono informazioni altamente riservate.
+Non condividerlo mai con nessuno!
+Se qualcuno ha questo token, può accedere liberamente al tuo account fino a quando non ti disconnetterai dalla sessione.
+
+Per ulteriori dettagli, puoi consultare questa pagina.
+https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch. d
+Si consiglia di leggerlo prima di usare questa funzione. Include alcune note importanti."</string>
+    <string name="piko_login_token_select_account">Seleziona un account:</string>
+    <string name="piko_login_token_export_copy_to_clipboard">Copia negli appunti</string>
+    <string name="piko_login_token_export_save_to_file">Salva su file</string>
+    <string name="piko_login_token_import_token_button_text">Accedi tramite token json</string>
+    <string name="piko_login_token_import_from_text">Importa da del testo</string>
+    <string name="piko_login_token_import_from_file">Importa da un file</string>
+    <string name="piko_login_token_import_failed_missing_info">Errore: nome utente, token o segreto mancanti</string>
+    <string name="piko_login_token_import_failed_already_exist">Impossibile aggiungere l\'account (potrebbe già essere stato aggiunto)</string>
 </resources>

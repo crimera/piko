@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.links.misc
@@ -20,23 +16,23 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.findFreeRegister
-import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderSparseSwitchPayload
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.formats.SparseSwitchPayload
 
 // The hash code of the field of interest. It is used as the key of a hashmap
 private val hashedFieldInteger = "enable_media_notes_production".hashCode()
 
-private object FeedResponseMediaParserFingerprint : Fingerprint(
-    strings = listOf("Media:array_out_of_bounds_exception", "Media:null_pointer_exception"),
-    custom = { method, _ ->
-        method.indexOfFirstInstruction {
-            opcode == Opcode.SPARSE_SWITCH_PAYLOAD &&
-                (this as SparseSwitchPayload).switchElements.any { it.key == hashedFieldInteger }
-        } >= 0
+internal object MediaDataParseFromJsonFingerprint : Fingerprint(
+    strings =
+        listOf(
+            "logging_info_token",
+            "is_paid_partnership",
+        ),
+    returnType = "Ljava/lang/Object;",
+    custom = { methodDef, _ ->
+        methodDef.name.lowercase().contains("parsefromjson")
     },
 )
 
@@ -55,7 +51,14 @@ val hideReshareButtonPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            FeedResponseMediaParserFingerprint.method.apply {
+
+            val targetMethod =
+                MediaDataParseFromJsonFingerprint.classDef.methods.first {
+                    it.parameters.size > 2 &&
+                        it.parameterTypes[1] == "Ljava/util/Map;"
+                }
+
+            targetMethod.apply {
                 // Each json field is parsed in a switch statement, where the case of the switch is the hashed field name.
 
                 // First, find the switch payload where our field of interest is being processed. So find the payload that

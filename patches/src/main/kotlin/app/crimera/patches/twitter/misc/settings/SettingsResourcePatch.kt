@@ -1,23 +1,30 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.misc.settings
 
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patches.all.misc.resources.resourceMappingPatch
+import app.morphe.util.getNode
 import org.w3c.dom.Element
 
 internal val settingsResourcePatch =
     resourcePatch {
         dependsOn(resourceMappingPatch)
         execute {
+            // replace the keyword `ripped` from version name back to original format.
+            val versionName = packageMetadata.versionName
+            val rippedKeyword = "-ripped"
+            if (rippedKeyword in versionName) {
+                document("AndroidManifest.xml").use { document ->
+                    val manifestElement = document.getNode("manifest") as Element
+                    manifestElement.setAttribute("android:versionName", versionName.replace(rippedKeyword, ""))
+                }
+            }
+
             document("res/xml/settings_root.xml").use { editor ->
                 val parent = editor.getElementsByTagName("PreferenceScreen").item(0) as Element
 

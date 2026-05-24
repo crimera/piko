@@ -1,23 +1,35 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.userProfile
 
-import app.crimera.patches.instagram.entity.profileinfo.ProfileUserInfoViewBinderFingerprint
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
-import app.crimera.patches.instagram.entity.userfriendshipstatus.userFriendshipStatusEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.instagram.utils.addFlags
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.findFreeRegister
+import app.morphe.util.getReference
+import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+
+internal object ProfileActionBarFingerprint : Fingerprint(
+    definingClass = "Lcom/instagram/profile/actionbar/ProfileActionBar;",
+    strings = listOf("IG_PROFILE"),
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
+)
 
 @Suppress("unused")
 val profileMoreOptionsPatch =
@@ -30,13 +42,50 @@ val profileMoreOptionsPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            ProfileUserInfoViewBinderFingerprint.method.apply {
-                addInstructions(
-                    0,
-                    """
-                    invoke-static {p1,p2}, ${PATCHES_DESCRIPTOR}/userprofile/ProfileMoreOption;->addProfileMoreOptionsButton(Landroid/view/ViewGroup;Ljava/lang/Object;)V
-                    """.trimIndent(),
-                )
+            ProfileActionBarFingerprint.apply {
+                val strIndex = stringMatches.first().index
+                method.apply {
+                    val userIGetObjectIndex =
+                        instructions.indexOfLast {
+                            it.opcode == Opcode.IGET_OBJECT &&
+                                it.location.index < strIndex
+                        }
+                    val userFieldRef = getInstruction(userIGetObjectIndex).getReference<FieldReference>()
+                    val userHelperClassName = userFieldRef!!.definingClass
+
+                    val leftActionBarElementListIteratorIndex = indexOfFirstInstruction(Opcode.INVOKE_INTERFACE)
+                    val actionBarLeftLayout = getInstruction(leftActionBarElementListIteratorIndex - 1)
+                    val layoutRegister = actionBarLeftLayout.registersUsed[0]
+
+                    val getFadeInFollowButtonIndex =
+                        indexOfFirstInstruction(
+                            leftActionBarElementListIteratorIndex,
+                            Opcode.INVOKE_STATIC,
+                        )
+                    val getFadeInFollowButtonInstruction = getInstruction(getFadeInFollowButtonIndex)
+
+                    val userObjectHelperClassParameterIndex =
+                        getFadeInFollowButtonInstruction
+                            .getReference<MethodReference>()!!
+                            .parameterTypes
+                            .indexOf(
+                                userHelperClassName,
+                            )
+                    val userObjectHelperRegistry = getFadeInFollowButtonInstruction.registersUsed[userObjectHelperClassParameterIndex]
+
+                    val freeRegister =
+                        findFreeRegister(leftActionBarElementListIteratorIndex, listOf(userObjectHelperRegistry, layoutRegister))
+
+                    addInstructions(
+                        leftActionBarElementListIteratorIndex,
+                        """
+                        iget-object v$freeRegister, v$userObjectHelperRegistry, $userFieldRef
+                        invoke-static {v$layoutRegister, v$freeRegister}, ${PATCHES_DESCRIPTOR}/userprofile/ProfileMoreOption;->addProfileMoreOptionsGear(Landroid/view/ViewGroup;Ljava/lang/Object;)V
+                        """.trimIndent(),
+                    )
+
+                    addFlags("profileActionBarFlags")
+                }
             }
         }
     }

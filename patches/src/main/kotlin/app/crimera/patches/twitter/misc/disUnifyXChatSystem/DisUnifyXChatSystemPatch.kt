@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.misc.disUnifyXChatSystem
@@ -14,11 +10,14 @@ import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X_11_69
 import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
+import app.crimera.patches.twitter.utils.is_11_69_stable_or_greater
+import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import java.util.logging.Logger
 
 internal object XchatSubSystemUserCheckFingerprint : Fingerprint(
     returnType = "Z",
@@ -37,22 +36,35 @@ val disUnifyXchatSystemPatch =
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_X_11_69)
-        dependsOn(settingsPatch)
+        dependsOn(settingsPatch, versionCheckPatch)
 
         execute {
-            val strIndx = XchatSubSystemUserCheckFingerprint.stringMatches!!.first { it.string == "userId" }.index
-            XchatSubSystemUserCheckFingerprint.method.apply {
-                addInstructionsWithLabels(
-                    0,
-                    """
-                    invoke-static {}, $PREF_DESCRIPTOR;->disUnifyXChatSystem()Z
-                    move-result v0
-                    if-nez v0, :piko
-                    return v0
-                    """.trimIndent(),
-                    ExternalLabel("piko", instructions[strIndx]),
-                )
-                enableSettings("disUnifyXChatSystem")
+
+            if (!is_11_69_stable_or_greater) {
+                XchatSubSystemUserCheckFingerprint
+                    .apply {
+                        val strIndx = stringMatches.first { it.string == "userId" }.index
+                        method.apply {
+                            addInstructionsWithLabels(
+                                0,
+                                """
+                                invoke-static {}, $PREF_DESCRIPTOR;->disUnifyXChatSystem()Z
+                                move-result v0
+                                if-nez v0, :piko
+                                return v0
+                                """.trimIndent(),
+                                ExternalLabel("piko", instructions[strIndx]),
+                            )
+                            enableSettings("disUnifyXChatSystem")
+                        }
+                    }
+            } else {
+                Logger
+                    .getLogger(
+                        this::class.java.name,
+                    ).warning(
+                        "The patch \"Disunify xchat system\" is force succeeded and does not work on any version above 11.69.\nPlease unselect the patch if you are using a version higher than 11.69.",
+                    )
             }
         }
     }

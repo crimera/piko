@@ -29,6 +29,12 @@
     <string name="piko_pref_native_downloader_alert_title">Скачать медиа</string>
     <string name="piko_pref_native_downloader_download_all">Скачать все</string>
     <string name="piko_pref_native_downloader_no_media">Медиа не найдено</string>
+    <string name="piko_native_translator_provider">Сервис перевода</string>
+    <string name="piko_native_translator_to_lang">Перевести на</string>
+    <string name="piko_native_translator_zero_text">Текст для перевода не найден</string>
+    <string name="piko_native_translator_google">Переводчик Google</string>
+    <string name="piko_native_translator_google_v2">Переводчик Google V2</string>
+    <string name="piko_title_native_reader_mode">Режим чтения</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Реклама</string>
     <string name="piko_pref_hide_promoted_posts">продвигаемые посты</string>
@@ -136,7 +142,15 @@
     <string name="piko_single_page_settings">Настройки одной страницей</string>
     <string name="piko_single_page_settings_desc">Показывать все настройки на одной странице</string>
     <!-- For arrays-->
+    <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_xchat">X Чат</string>
     <!-- App icon strings -->
     <!-- Category -->
     <!-- Icon names -->
+    <string name="piko_app_icon_name_default">По умолчанию</string>
+    <string name="piko_app_icon_name_legacy_icon_1">Старая иконка 1</string>
+    <string name="piko_app_icon_name_legacy_icon_2">Старая иконка 2</string>
+    <string name="piko_app_icon_name_legacy_icon_3">Старая иконка 3</string>
+    <string name="piko_app_icon_name_legacy_icon_4">Старая иконка 4</string>
+    <!-- Import / export login tokens -->
 </resources>

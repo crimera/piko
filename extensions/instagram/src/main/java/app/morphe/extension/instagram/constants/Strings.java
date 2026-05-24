@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 
@@ -13,6 +9,7 @@ package app.morphe.extension.instagram.constants;
 
 import app.morphe.extension.instagram.constants.translations.DefaultStrings;
 import app.morphe.extension.instagram.constants.translations.LanguageInstance;
+import app.morphe.extension.crimera.constants.ExtensionStrings;
 
 public class Strings {
     private static final DefaultStrings langInstance = LanguageInstance.getLanguageInstance();
@@ -56,6 +53,9 @@ public class Strings {
     public static final String DISABLE_TYPING_STATUS = langInstance.DISABLE_TYPING_STATUS;
     public static final String DISABLE_SCREENSHOT_DETECTION = langInstance.DISABLE_SCREENSHOT_DETECTION;
     public static final String VIEW_DM_ANONYMOUSLY = langInstance.VIEW_DM_ANONYMOUSLY;
+    public static final String TURN_ON_ALL_GHOST_MODES = langInstance.TURN_ON_ALL_GHOST_MODES;
+    public static final String GHOST_MODES_ON = langInstance.GHOST_MODES_ON;
+    public static final String GHOST_MODES_DEFAULT = langInstance.GHOST_MODES_DEFAULT;
 
     public static final String CATEGORY_DISTRACTION_FREE = langInstance.CATEGORY_DISTRACTION_FREE;
     public static final String DISABLE_STORIES = langInstance.DISABLE_STORIES;
@@ -125,20 +125,26 @@ public class Strings {
     public static final String DOWNLOAD_AS_IMAGE = langInstance.DOWNLOAD_AS_IMAGE;
     public static final String DOWNLOAD_AUDIO = langInstance.DOWNLOAD_AUDIO;
     public static final String DOWNLOAD_OPTIONS = langInstance.DOWNLOAD_OPTIONS;
+    public static final String VIDEO_VARIANTS = langInstance.VIDEO_VARIANTS;
     public static final String COPY_MEDIA_LINK = langInstance.COPY_MEDIA_LINK;
     public static final String COPIED_MEDIA_LINK = langInstance.COPIED_MEDIA_LINK;
     public static final String DOWNLOAD_ALL = langInstance.DOWNLOAD_ALL;
     public static final String DOWNLOADING_MEDIA = langInstance.DOWNLOADING_MEDIA;
     public static final String DOWNLOADED_MEDIA = langInstance.DOWNLOADED_MEDIA;
+    public static final String DOWNLOAD_SET_PATH = langInstance.DOWNLOAD_SET_PATH;
     public static final String MEDIA_EXISTS = langInstance.MEDIA_EXISTS;
     public static final String DOWNLOAD_FAILED_MEDIA = langInstance.DOWNLOAD_FAILED_MEDIA;
+    public static final String DOWNLOAD_SET_PATH_SUCCESS = langInstance.DOWNLOAD_SET_PATH_SUCCESS;
+    public static final String DOWNLOAD_SET_PATH_FAILED = langInstance.DOWNLOAD_SET_PATH_FAILED;
+    public static final String DOWNLOAD_GRANT_PERMISSION = langInstance.DOWNLOAD_GRANT_PERMISSION;
+    public static final String DOWNLOAD_GRANT_PERMISSION_FAILED = langInstance.DOWNLOAD_GRANT_PERMISSION_FAILED;
+
     public static final String POST_OPTIONS = langInstance.POST_OPTIONS;
     public static final String COPY_POST_DESCRIPTION = langInstance.COPY_POST_DESCRIPTION;
     public static final String COPY_POST_OWNER_USERNAME = langInstance.COPY_POST_OWNER_USERNAME;
     public static final String COPY_POST_OWNER_FULLNAME = langInstance.COPY_POST_OWNER_FULLNAME;
     public static final String ENABLE_MORE_OPTIONS_ON_POST = langInstance.ENABLE_MORE_OPTIONS_ON_POST;
     public static final String ENABLE_MORE_OPTIONS_ON_POST_DESC = langInstance.ENABLE_MORE_OPTIONS_ON_POST_DESC;
-
 
     public static final String CATEGORY_HIDE_NAVIGATION_BUTTONS = langInstance.CATEGORY_HIDE_NAVIGATION_BUTTONS;
 
@@ -181,8 +187,21 @@ public class Strings {
     public static final String ARR_DETAILED_TIMESTAMP = langInstance.ARR_DETAILED_TIMESTAMP;
     public static final String ARR_TIME_LEFT = langInstance.ARR_TIME_LEFT;
 
-    public static String WELCOME_TITLE = langInstance.WELCOME_TITLE;
-    public static String WELCOME_MESSAGE = langInstance.WELCOME_MESSAGE;
-    public static String GOTO_PIKO_SETTINGS = langInstance.GOTO_PIKO_SETTINGS;
-    public static String NO_INTERNET = langInstance.NO_INTERNET;
+    public static final String WELCOME_TITLE = langInstance.WELCOME_TITLE;
+    public static final String WELCOME_MESSAGE = langInstance.WELCOME_MESSAGE;
+    public static final String GOTO_PIKO_SETTINGS = langInstance.GOTO_PIKO_SETTINGS;
+    public static final String NO_INTERNET = langInstance.NO_INTERNET;
+    public static final String TAP_HERE = langInstance.TAP_HERE;
+
+    public static void load() {
+        ExtensionStrings.setDefaultPikoFolder(Strings.DEFAULT_PIKO_FOLDER);
+        ExtensionStrings.setDownloadOngoing(Strings.DOWNLOADING_MEDIA);
+        ExtensionStrings.setDownloadCompleted(Strings.DOWNLOADED_MEDIA);
+        ExtensionStrings.setDownloadError(Strings.DOWNLOAD_FAILED_MEDIA);
+        ExtensionStrings.setDownloadMediaExists(Strings.MEDIA_EXISTS);
+        ExtensionStrings.setDownloadSetPathFailed(DOWNLOAD_SET_PATH_FAILED);
+        ExtensionStrings.setDownloadSetPathSuccess(DOWNLOAD_SET_PATH_SUCCESS);
+        ExtensionStrings.setDownloadGrantPermission(DOWNLOAD_GRANT_PERMISSION);
+        ExtensionStrings.setDownloadGrantPermissionFailed(DOWNLOAD_GRANT_PERMISSION_FAILED);
+    }
 }

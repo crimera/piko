@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.download
@@ -46,11 +42,6 @@ internal object GetDirectThreadMediaSaverModuleNameFingerprint : Fingerprint(
     strings = listOf("DirectThreadMediaSaver"),
     name = "getModuleName",
     returnType = "Ljava/lang/String;",
-)
-
-internal object DMLongPressButtonAdderFingerprint : Fingerprint(
-    returnType = "V",
-    strings = listOf("⏰", "userSession"),
 )
 
 internal object GetEnumButtonClassExtensionFingerprint : Fingerprint(

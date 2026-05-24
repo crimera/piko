@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 
@@ -13,6 +9,7 @@ package app.morphe.extension.instagram.utils;
 
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.crimera.SharedPref;
 
 @SuppressWarnings("unused")
 public class Pref {
@@ -47,24 +44,32 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.SANITIZE_SHARE_LINKS);
     }
 
+    public static boolean getTurnOnAllGhostModes() {
+        return SharedPref.getBooleanPref(Settings.TURN_ON_ALL_GHOST_MODES);
+    }
+
+    public static boolean setTurnOnAllGhostModes(boolean bool) {
+        return SharedPref.setBooleanPref(Settings.TURN_ON_ALL_GHOST_MODES.key,bool);
+    }
+
     public static boolean viewStoriesAnonymously() {
-        return SharedPref.getBooleanPref(Settings.VIEW_STORIES_ANONYMOUSLY);
+        return (SharedPref.getBooleanPref(Settings.VIEW_STORIES_ANONYMOUSLY) && SettingsStatus.viewStoriesAnonymously) || Pref.getTurnOnAllGhostModes();
     }
 
     public static boolean viewLiveAnonymously() {
-        return SharedPref.getBooleanPref(Settings.VIEW_LIVE_ANONYMOUSLY);
+        return (SharedPref.getBooleanPref(Settings.VIEW_LIVE_ANONYMOUSLY) && SettingsStatus.viewLiveAnonymously) || Pref.getTurnOnAllGhostModes();
     }
 
     public static boolean disableScreenshotDetection() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_SCREENSHOT_DETECTION);
+        return SharedPref.getBooleanPref(Settings.DISABLE_SCREENSHOT_DETECTION) || Pref.getTurnOnAllGhostModes();
     }
 
     public static boolean disableTypingStatus() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_TYPING_STATUS);
+        return SharedPref.getBooleanPref(Settings.DISABLE_TYPING_STATUS) || Pref.getTurnOnAllGhostModes();
     }
 
     public static boolean viewDmAnonymously() {
-        return SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY);
+        return SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY) || Pref.getTurnOnAllGhostModes();
     }
 
     public static boolean disableVideoAutoplay() {
@@ -179,6 +184,10 @@ public class Pref {
 
     public static boolean downloadUsernameFolder() {
         return SharedPref.getBooleanPref(Settings.DOWNLOAD_USERNAME_FOLDER);
+    }
+
+    public static String getCustomDownloadPath() {
+        return SharedPref.getStringPref(Settings.CUSTOM_DOWNLOAD_PATH);
     }
 
     public static boolean hideNavigationFeed() {

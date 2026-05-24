@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 
@@ -15,9 +11,13 @@ package app.morphe.extension.instagram.patches.download;
 import android.content.Context;
 
 import app.morphe.extension.instagram.entity.MessageInfo;
+import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.utils.Pref;
+import app.morphe.extension.instagram.settings.SettingsStatus;
+
 import app.morphe.extension.crimera.ObjectBrowser;
+import app.morphe.extension.crimera.downloader.MediaType;
 
 public class MessageUtils {
     private static boolean DEBUG;
@@ -37,7 +37,17 @@ public class MessageUtils {
 
             if(messageType == "media" || messageType == "raven_media"){
                 return true;
-            }else {
+
+            } else if (messageType == "voice_media" && SettingsStatus.downloadVoiceMessage) {
+                MediaData audioData = messageInfo.getAudioMedia();
+                String audioUrl = audioData.getMessageAudioUrl();
+                String fileName = audioData.getDownloadFilename(MediaType.AUDIO);
+                DownloadUtils.downloadMediaUrl(context,audioUrl,"DM",fileName);
+
+                // We need to return false since we don't need download action to be taken by Instagram.
+                return false;
+
+            } else {
                 Utils.showToastShort(messageType+" doesnt support downloading");
             }
 

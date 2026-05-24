@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
 */
 
 package app.crimera.patches.instagram.misc.extension.hooks
@@ -16,24 +12,26 @@ import app.morphe.patches.all.misc.extension.ExtensionHook
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
-internal val instagramInitHook = ExtensionHook(
-    fingerprint = Fingerprint(
-        name = "onCreate",
-        custom = { _, classDef ->
-            classDef.endsWith("/InstagramAppShell;")
-        },
-    ),
-    insertIndexResolver = { method ->
-        method.instructions.indexOfFirst { instruction ->
-            instruction.opcode == Opcode.INVOKE_SUPER
-        } + 1
-    },
-    contextRegisterResolver = { method ->
-        val invokeSuperInstruction =
-            method.instructions.first { instruction ->
+internal val instagramInitHook =
+    ExtensionHook(
+        fingerprint =
+            Fingerprint(
+                name = "onCreate",
+                custom = { _, classDef ->
+                    classDef.endsWith("/InstagramAppShell;")
+                },
+            ),
+        insertIndexResolver = { method ->
+            method.instructions.indexOfFirst { instruction ->
                 instruction.opcode == Opcode.INVOKE_SUPER
-            }
+            } + 1
+        },
+        contextRegisterResolver = { method ->
+            val invokeSuperInstruction =
+                method.instructions.first { instruction ->
+                    instruction.opcode == Opcode.INVOKE_SUPER
+                }
 
-        "v${invokeSuperInstruction.registersUsed[0]}"
-    }
-)
+            "v${invokeSuperInstruction.registersUsed[0]}"
+        },
+    )

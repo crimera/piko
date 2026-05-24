@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.misc.shareMenu.fingerprints
@@ -26,15 +22,16 @@ import com.android.tools.smali.dexlib2.iface.reference.Reference
 
 internal object shareMenuButtonFuncCallFingerprint : Fingerprint(
     returnType = "V",
-    strings = listOf(
-        "OK",
-        "Delete Status",
-        "click",
-        "tweet_analytics",
-        "author_moderated_replies_author_enabled",
-        "conversational_replies_android_pinned_replies_creation_enabled",
-        "share_menu_click",
-    )
+    strings =
+        listOf(
+            "OK",
+            "Delete Status",
+            "click",
+            "tweet_analytics",
+            "author_moderated_replies_author_enabled",
+            "conversational_replies_android_pinned_replies_creation_enabled",
+            "share_menu_click",
+        ),
 )
 
 context(patchContext: BytecodePatchContext)

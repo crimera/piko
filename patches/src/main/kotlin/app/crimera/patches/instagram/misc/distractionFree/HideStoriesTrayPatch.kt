@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.distractionFree
@@ -17,6 +13,7 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.ResourceType
@@ -26,11 +23,8 @@ import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
-object ReelsTrayContainerViewGroupFingerprint : Fingerprint(
-    filters =
-        listOf(
-            resourceLiteral(ResourceType.ID, "reels_tray_container"),
-        ),
+object MainFeedStoryTrayBinderGroupViewBinderFingerprint : Fingerprint(
+    strings = listOf("MainFeedStoryTrayBinderGroup", "litho_main_feed_stories_tray", "floating_tray_spacer"),
 )
 
 @Suppress("unused")
@@ -44,23 +38,29 @@ val hideStoriesTrayPatch =
 
         execute {
 
-            ReelsTrayContainerViewGroupFingerprint.method.apply {
-                val iPutObjectIndex = indexOfFirstInstruction(Opcode.IPUT_OBJECT)
-                val iPutObjectInstruction = getInstruction(iPutObjectIndex)
-                val storiesTrayViewGroupRegistry = iPutObjectInstruction.registersUsed[0]
+            MainFeedStoryTrayBinderGroupViewBinderFingerprint.apply {
+                val strIndex = stringMatches.last().index
+                method.apply {
+                    val iGetObjectInstruction = instructions.last { it.opcode == Opcode.IGET_OBJECT && it.location.index < strIndex }
+                    val iGetObjectIndex = iGetObjectInstruction.location.index
+                    val targetIndex = iGetObjectIndex + 1
 
-                addInstructionsWithLabels(
-                    iPutObjectIndex,
-                    """
-                    ${PREF_CALL_DESCRIPTOR}->hideStoriesTray()Z
-                    move-result v2
-                    if-eqz v2, :piko
-                    const v$storiesTrayViewGroupRegistry, 0x0
-                    """.trimIndent(),
-                    ExternalLabel("piko", iPutObjectInstruction),
-                )
+                    val storiesTrayViewGroupRegistry = iGetObjectInstruction.registersUsed[0]
+                    val freeRegister = getInstruction(strIndex).registersUsed[0]
 
-                enableSettings("hideStoriesTray")
+                    addInstructionsWithLabels(
+                        targetIndex,
+                        """
+                        $PREF_CALL_DESCRIPTOR->hideStoriesTray()Z
+                        move-result v$freeRegister
+                        if-eqz v$freeRegister, :piko
+                        const v$storiesTrayViewGroupRegistry, 0x0
+                        """.trimIndent(),
+                        ExternalLabel("piko", getInstruction(targetIndex + 1)),
+                    )
+
+                    enableSettings("hideStoriesTray")
+                }
             }
         }
     }

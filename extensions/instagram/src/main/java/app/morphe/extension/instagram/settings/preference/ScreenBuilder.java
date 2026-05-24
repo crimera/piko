@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 
@@ -156,6 +152,14 @@ public class ScreenBuilder {
         if (!(SettingsStatus.ghostSection())) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_GHOST);
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.TURN_ON_ALL_GHOST_MODES,
+                        "",
+                        Settings.TURN_ON_ALL_GHOST_MODES
+                )
+        );
 
         if (SettingsStatus.viewStoriesAnonymously) {
             addPreference(category,
@@ -546,6 +550,14 @@ public class ScreenBuilder {
                         Strings.DOWNLOAD_USERNAME_FOLDER,
                         Strings.DOWNLOAD_USERNAME_FOLDER_DESC,
                         Settings.DOWNLOAD_USERNAME_FOLDER
+                )
+        );
+
+        addPreference(category,
+                helper.buttonPreference(
+                        Strings.DOWNLOAD_SET_PATH,
+                        Pref.getCustomDownloadPath(),
+                        Strings.DOWNLOAD_SET_PATH
                 )
         );
     }

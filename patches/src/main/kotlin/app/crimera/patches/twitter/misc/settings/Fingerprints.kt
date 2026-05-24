@@ -1,17 +1,15 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution 
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.misc.settings
 
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.string
+
+internal const val URL_INTERPRETER_ACTIVITY_CLASS = "Lcom/twitter/deeplink/implementation/UrlInterpreterActivity"
 
 internal object AuthorizeAppActivity : Fingerprint(
     definingClass = "Lcom/twitter/android/AuthorizeAppActivity;",
@@ -32,7 +30,14 @@ internal object SettingsStatusLoadFingerprint : Fingerprint(
     name = "load",
 )
 
-internal object UrlInterpreterActivity : Fingerprint(
-    definingClass = "Lcom/twitter/deeplink/implementation/UrlInterpreterActivity;",
-    name = "onCreate",
+internal object UrlInterpreterActivityFingerprint : Fingerprint(
+    custom = { method, classDef ->
+        classDef.endsWith("$URL_INTERPRETER_ACTIVITY_CLASS;") && method.name == "onCreate"
+    },
+)
+
+internal object UrlInterpreterActivityPairIPFingerprint : Fingerprint(
+    custom = { method, classDef ->
+        classDef.contains("$URL_INTERPRETER_ACTIVITY_CLASS\$c") && method.name == "onCreate"
+    },
 )

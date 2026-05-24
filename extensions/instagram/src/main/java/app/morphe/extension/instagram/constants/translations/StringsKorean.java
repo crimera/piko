@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 
@@ -47,6 +43,9 @@ public class StringsKorean extends DefaultStrings {
         this.DISABLE_TYPING_STATUS = "입력 중 상태 비활성화";
         this.DISABLE_SCREENSHOT_DETECTION = "스크린샷 감지 비활성화";
         this.VIEW_DM_ANONYMOUSLY = "메시지 몰래보기";
+        this.TURN_ON_ALL_GHOST_MODES = "모든 고스트 모드 켜기";
+        this.GHOST_MODES_ON = "고스트 모드: 켜짐";
+        this.GHOST_MODES_DEFAULT = "고스트 모드: 기본값";
 
         this.CATEGORY_DISTRACTION_FREE = "방해 요소 제거";
         this.DISABLE_STORIES = "스토리 비활성화";
@@ -58,7 +57,7 @@ public class StringsKorean extends DefaultStrings {
         this.DISABLE_REELS_SCROLLING = "릴스 스크롤 비활성화";
         this.DISABLE_REELS_SCROLLING_DESC =
                                       "인스타그램 릴스의 무한 스크롤을 비활성화하여 다음 릴스로 넘길 수 없게 합니다. " +
-                                      "알림: 초기 설치 시 'Tip' 애니메이션이 잠시 표시될 수 있으나 몇 초 후 자동으로 멈춥니다.";
+                                      "알림: 클린 설치한 경우에 ‘Tip’ 애니메이션이 표시될 수 있지만, 몇 초 후 자동으로 멈춥니다.";
         this.HIDE_STORIES_TRAY = "스토리 선반 숨기기";
         this.HIDE_STORIES_TRAY_DESC = "메인 피드에서 스토리 선반을 숨깁니다";
         this.HIDE_NOTES_TRAY = "메모 선반 숨기기";
@@ -116,15 +115,21 @@ public class StringsKorean extends DefaultStrings {
         this.DOWNLOAD_USERNAME_FOLDER_DESC = "사용자 이름 기준으로 하위 폴더를 생성합니다";
         this.DOWNLOAD_CURRENT_MEDIA = "현재 미디어 다운로드";
         this.DOWNLOAD_AS_IMAGE = "이미지로 다운로드";
+        this.VIDEO_VARIANTS = "동영상 변형";
         this.DOWNLOAD_AUDIO = "오디오 다운로드";
         this.DOWNLOAD_OPTIONS = "다운로드 옵션";
         this.COPY_MEDIA_LINK = "미디어 링크 복사";
         this.COPIED_MEDIA_LINK = "미디어 링크를 복사하였습니다";
         this.DOWNLOAD_ALL = "모두 다운로드";
-        this.DOWNLOADING_MEDIA = "다운로드 중 : ";
-        this.DOWNLOADED_MEDIA = "다운로드 완료 : ";
+        this.DOWNLOADING_MEDIA = "다운로드 중: ";
+        this.DOWNLOADED_MEDIA = "다운로드 완료: ";
         this.MEDIA_EXISTS = "이미 존재하는 미디어입니다";
-        this.DOWNLOAD_FAILED_MEDIA = "다운로드 실패 : ";
+        this.DOWNLOAD_FAILED_MEDIA = "다운로드 실패: ";
+        this.DOWNLOAD_SET_PATH = "사용자 정의 다운로드 경로 설정";
+        this.DOWNLOAD_SET_PATH_SUCCESS = "다운로드 디렉터리를 업데이트하였습니다!";
+        this.DOWNLOAD_SET_PATH_FAILED = "폴더 경로를 확인할 수 없습니다";
+        this.DOWNLOAD_GRANT_PERMISSION = "다운로드를 계속하려면 저장소 접근 권한을 허용하세요";
+        this.DOWNLOAD_GRANT_PERMISSION_FAILED = "설정을 열 수 없습니다. 모든 파일 접근 권한을 수동으로 허용하세요";
         this.POST_OPTIONS = "게시물 옵션";
         this.COPY_POST_DESCRIPTION = "게시물 설명 복사";
         this.COPY_POST_OWNER_USERNAME = "작성자 사용자 이름 복사";
@@ -176,5 +181,6 @@ public class StringsKorean extends DefaultStrings {
         this.WELCOME_MESSAGE = "Piko 사용 경험을 개선하려면 Piko 설정으로 이동하여 원하는 대로 설정해 주세요";
         this.GOTO_PIKO_SETTINGS = "Piko 설정으로 이동";
         this.NO_INTERNET = "인터넷에 연결해 주세요";
+        this.TAP_HERE = "여기를 탭하세요 !!"; 
     }
 }

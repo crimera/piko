@@ -185,6 +185,8 @@ public class SettingsStatus {
     //Download section.
     public static boolean downloadMedia = false;
     public static void downloadMedia() {downloadMedia = true;}
+    public static boolean downloadVoiceMessage = false;
+    public static void downloadVoiceMessage() { downloadVoiceMessage = true; }
 
     public static boolean hideNavigationButtons = false;
     public static void hideNavigationButtons() { hideNavigationButtons = true; }

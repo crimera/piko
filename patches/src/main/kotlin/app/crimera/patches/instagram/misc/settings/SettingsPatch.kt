@@ -1,23 +1,20 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.settings
 
 import app.crimera.patches.instagram.entity.developerOptions.developerOptionsEntity
 import app.crimera.patches.instagram.entity.instagramButton.instagramButtonEntity
-import app.crimera.patches.instagram.entity.profileinfo.ProfileUserInfoViewBinderFingerprint
 import app.crimera.patches.instagram.entity.profileinfo.profileInfoEntity
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
+import app.crimera.patches.instagram.misc.mainFeedActionBarButton.addMainFeedActionBarButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.Constants.CONSTANTS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.LOAD_FLAGS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
@@ -26,7 +23,6 @@ import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
@@ -47,21 +43,12 @@ val settingsPatch =
             sharedExtensionPatch,
             addSettingsActivityPatch,
             hookFlagsPatch,
+            addMainFeedActionBarButtonPatch,
             profileInfoEntity,
             instagramButtonEntity,
             developerOptionsEntity,
         )
         execute {
-
-            ProfileUserInfoViewBinderFingerprint.method.apply {
-                val moveResObj = indexOfFirstInstruction(Opcode.MOVE_RESULT_OBJECT)
-                addInstructions(
-                    moveResObj + 1,
-                    """
-                    invoke-static {p1,p2}, ${PATCHES_DESCRIPTOR}/userprofile/PikoSettingsButton;->addPikoSettingsButton(Landroid/view/ViewGroup;Ljava/lang/Object;)V
-                    """.trimIndent(),
-                )
-            }
 
             instagramInitHook.fingerprint.method.apply {
 
@@ -74,6 +61,11 @@ val settingsPatch =
                 addInstruction(
                     firstInvokeSuperIndex + 1,
                     LOAD_FLAGS_DESCRIPTOR.format("load"),
+                )
+                // Loads strings for common extension.
+                addInstruction(
+                    firstInvokeSuperIndex + 2,
+                    "invoke-static {}, $CONSTANTS_DESCRIPTOR/Strings;->load()V",
                 )
             }
 

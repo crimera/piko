@@ -26,8 +26,6 @@ import app.morphe.extension.instagram.settings.ActivityHook;
 @SuppressWarnings("unused")
 public class Links {
     private static final boolean DISABLE_ANALYTICS;
-    private static final boolean VIEW_STORIES_ANONYMOUSLY;
-    private static final boolean VIEW_LIVE_ANONYMOUSLY;
     private static final boolean DISABLE_STORIES;
     private static final boolean DISABLE_EXPLORE;
     private static final boolean DISABLE_COMMENTS;
@@ -37,8 +35,6 @@ public class Links {
 
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
-        VIEW_STORIES_ANONYMOUSLY = Pref.viewStoriesAnonymously() && SettingsStatus.viewStoriesAnonymously;
-        VIEW_LIVE_ANONYMOUSLY = Pref.viewLiveAnonymously() && SettingsStatus.viewLiveAnonymously;
         DISABLE_STORIES = Pref.disableStories() && SettingsStatus.disableStories;
         DISABLE_HIGHLIGHTS = Pref.disableHighlights() && SettingsStatus.disableHighlights;
         DISABLE_EXPLORE = Pref.disableExplore() && SettingsStatus.disableExplore;
@@ -48,7 +44,7 @@ public class Links {
     }
 
     public static boolean setStorySeen(boolean seenStatus){
-        return VIEW_STORIES_ANONYMOUSLY ? true:seenStatus;
+        return Pref.viewStoriesAnonymously() ? true:seenStatus;
     }
 
     public static boolean openExternally(String url) {
@@ -81,9 +77,9 @@ public class Links {
                         || path.contains("/logging_client_events")) {
                     shouldBlockUri = DISABLE_ANALYTICS;
                 } else if (path.contains("/api/v2/media/seen/")) {
-                    shouldBlockUri = VIEW_STORIES_ANONYMOUSLY;
+                    shouldBlockUri = Pref.viewStoriesAnonymously();
                 } else if (path.contains("/heartbeat_and_get_viewer_count/")) {
-                    shouldBlockUri = VIEW_LIVE_ANONYMOUSLY;
+                    shouldBlockUri = Pref.viewLiveAnonymously();
                 } else if (path.contains("/feed/reels_tray/")
                         || path.contains("feed/get_latest_reel_media/")
                         || path.contains("direct_v2/pending_inbox/?visual_message")

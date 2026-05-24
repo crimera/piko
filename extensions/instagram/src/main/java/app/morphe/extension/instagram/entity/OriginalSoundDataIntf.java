@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 
@@ -44,7 +40,7 @@ public class OriginalSoundDataIntf extends Entity implements AudioMediaInterface
         String username = userData.getUsername();
         String audioName = this.getAudioName();
         String audioId = this.getAudioId();
-        // Original audio is actually stored as mp4 but forcefully renaming it to mp3.
-        return username + "_" + audioName + "_" + audioId + ".mp3";
+
+        return username + "_" + audioName + "_" + audioId;
     }
 }

@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.misc.login
@@ -38,63 +34,67 @@ private object OcfCtaStepDynamicLayoutInflateFingerprint : Fingerprint(
     definingClass = "Lcom/twitter/onboarding/ocf/common/",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.CONSTRUCTOR),
     returnType = "V",
-    filters = listOf(
-        literal(getResourceId(ResourceType.LAYOUT, "ocf_cta_step_dynamic")),
-        methodCall(definingClass = "Landroid/view/LayoutInflater;", name = "inflate"),
-        opcode(Opcode.MOVE_RESULT_OBJECT, InstructionLocation.MatchAfterImmediately())
-    )
+    filters =
+        listOf(
+            literal(getResourceId(ResourceType.LAYOUT, "ocf_cta_step_dynamic")),
+            methodCall(definingClass = "Landroid/view/LayoutInflater;", name = "inflate"),
+            opcode(Opcode.MOVE_RESULT_OBJECT, InstructionLocation.MatchAfterImmediately()),
+        ),
 )
 
 @Suppress("unused")
-val importExportLoginTokenPatch = bytecodePatch(
-    name = "Import/Export login token",
-    description = "Adds an feature to export and import the token of accounts. "
-    + "This is useful when logging in on your second device or when re-installing piko.",
-) {
-    compatibleWith(COMPATIBILITY_X)
+val importExportLoginTokenPatch =
+    bytecodePatch(
+        name = "Import/Export login token",
+        description =
+            "Adds an feature to export and import the token of accounts. " +
+                "This is useful when logging in on your second device or when re-installing piko.",
+    ) {
+        compatibleWith(COMPATIBILITY_X)
 
-    dependsOn(
-        resourceMappingPatch,
-        settingsPatch,
-        resourcePatch {
-            execute {
-                document("res/layout/ocf_cta_step_dynamic.xml").use {
-                    val newElement = it.createElement("com.twitter.ui.components.text.legacy.TypefacesTextView").apply {
-                        setAttribute("android:id", "@+id/import_token_text")
-                        setAttribute("android:text", "@string/piko_login_token_import_token_button_text")
-                        setAttribute("android:gravity", "center_vertical")
-                        setAttribute("android:layout_width", "match_parent")
-                        setAttribute("android:layout_height", "wrap_content")
-                        setAttribute("android:layout_marginBottom", "@dimen/ocf_standard_spacing")
-                        setAttribute("android:layout_marginHorizontal", "@dimen/ocf_screen_padding_wide")
-                        setAttribute("android:clickable", "true")
-                        setAttribute("style", "@style/OcfBodyText")
+        dependsOn(
+            resourceMappingPatch,
+            settingsPatch,
+            resourcePatch {
+                execute {
+                    document("res/layout/ocf_cta_step_dynamic.xml").use {
+                        val newElement =
+                            it.createElement("com.twitter.ui.components.text.legacy.TypefacesTextView").apply {
+                                setAttribute("android:id", "@+id/import_token_text")
+                                setAttribute("android:text", "@string/piko_login_token_import_token_button_text")
+                                setAttribute("android:gravity", "center_vertical")
+                                setAttribute("android:layout_width", "match_parent")
+                                setAttribute("android:layout_height", "wrap_content")
+                                setAttribute("android:layout_marginBottom", "@dimen/ocf_standard_spacing")
+                                setAttribute("android:layout_marginHorizontal", "@dimen/ocf_screen_padding_wide")
+                                setAttribute("android:clickable", "true")
+                                setAttribute("style", "@style/OcfBodyText")
+                            }
+                        it.documentElement.appendChild(newElement)
                     }
-                    it.documentElement.appendChild(newElement)
+
+                    copyResources(
+                        "twitter/settings",
+                        ResourceGroup("layout", "fragment_export_token.xml"),
+                    )
                 }
+            },
+        )
 
-                copyResources(
-                    "twitter/settings",
-                    ResourceGroup("layout", "fragment_export_token.xml")
-                )
-            }
-        }
-    )
-
-    execute {
-        OcfCtaStepDynamicLayoutInflateFingerprint.let {
-            it.method.apply {
-                val targetIndex = it.instructionMatches.last().index
-                val targetRegister = getInstruction<OneRegisterInstruction>(targetIndex).registerA
-                addInstructions(
-                    targetIndex + 1,
-                    """
+        execute {
+            OcfCtaStepDynamicLayoutInflateFingerprint.let {
+                it.method.apply {
+                    val targetIndex = it.instructionMatches.last().index
+                    val targetRegister = getInstruction<OneRegisterInstruction>(targetIndex).registerA
+                    addInstructions(
+                        targetIndex + 1,
+                        """
                     invoke-static {v$targetRegister}, $EXTENSIONS_CLASS_DESCRIPTOR->initImportButton(Landroid/view/View;)V
-                """
-                )
+                """,
+                    )
+                }
             }
-        }
 
-        enableSettings("exportLoginToken")
+            enableSettings("exportLoginToken")
+        }
     }
-}

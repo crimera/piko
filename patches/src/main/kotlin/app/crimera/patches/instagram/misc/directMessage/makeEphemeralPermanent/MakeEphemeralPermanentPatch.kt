@@ -1,15 +1,13 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
-package app.crimera.patches.instagram.misc.makeEphemeralPermanent
+package app.crimera.patches.instagram.misc.directMessage.makeEphemeralPermanent
 
+import app.crimera.patches.instagram.entity.messageInfoEntity.messageInfoEntity
+import app.crimera.patches.instagram.misc.directMessage.saveAllMessages.saveAllMessagesPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
@@ -42,7 +40,7 @@ val makeEphemeralPermanentPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(settingsPatch)
+        dependsOn(settingsPatch, messageInfoEntity, saveAllMessagesPatch)
         execute {
 
             EphemeralMediaJsonParserFingerprint.apply {
