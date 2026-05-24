@@ -9,12 +9,17 @@ package app.morphe.extension.instagram.constants.translations;
 public class StringsRussian extends DefaultStrings {
     public StringsRussian() {
         this.PIKO_SETTINGS_TITLE = "Настройки Piko";
+
         this.CATEGORY_ADS = "Реклама";
         this.DISABLE_ADS = "Отключить рекламу";
         this.HIDE_SUGEESTED_CONTENT = "Скрыть рекомендуемый контент";
         this.HIDE_SUGEESTED_CONTENT_DESC = "Скрывает рекомендуемые истории, Reels и Threads (предлагаемые публикации всё ещё будут показываться)";
+
         this.CATEGORY_DEV_OPTIONS = "Параметры разработчика";
         this.ENABLE_DEV_OPTIONS = "Включить параметры разработчика";
+        this.ENABLE_DEV_OPTIONS_DESC = "Разблокирует опцию разработчика при длительном нажатии значка «Домой»";
+        this.DIRECTLY_OPEN_METACONFIG = "Открыть настройки MetaConfig сразу";
+        this.DIRECTLY_OPEN_METACONFIG_DESC = "Открывает настройки MetaConfig при долгом нажатии на значок «Домой» (требуется включение параметров разработчика)";
         this.ENABLE_EMP_OPTIONS = "Включить служебные параметры";
         this.ENABLE_EMP_OPTIONS_DESC = "Открывает все служебные параметры, используемые для тестирования";
         this.ALLOW_USER_NETWORK_CERTIFICATE = "Включить настройки для проверки сети";
@@ -24,18 +29,20 @@ public class StringsRussian extends DefaultStrings {
         this.EXPORT_DEV_OVERRIDES = "Экспорт замещений";
         this.IMPORT_DEV_OVERRIDES = "Импорт замещений";
         this.IMPORT_ID_MAPPING = "Импорт файлов связей";
-        this.DIRECTLY_OPEN_METACONFIG = "Открыть настройки MetaConfig сразу";
-        this.DIRECTLY_OPEN_METACONFIG_DESC = "Открывает настройки MetaConfig при долгом нажатии на значок «Домой» (требуется включение параметров разработчика)";
+        this.DOWNLOAD_ID_MAPPING = "Скачать файл сопоставления";
+
         this.CATEGORY_LINKS = "Ссылки";
         this.OPEN_LINKS_EXTERNALLY = "Открывать ссылки во внешнем браузере";
         this.OPEN_LINKS_EXTERNALLY_DESC = "Открывать ссылки во внешнем браузере, а не во встроенном";
         this.SANITIZE_SHARE_LINKS = "Очищать ссылки при отправке";
+
         this.CATEGORY_GHOST = "Невидимка";
         this.VIEW_STORIES_ANONYMOUSLY = "Смотреть истории анонимно";
         this.VIEW_LIVE_ANONYMOUSLY = "Смотреть прямые эфиры анонимно";
         this.DISABLE_TYPING_STATUS = "Отключить статус набора текста";
         this.DISABLE_SCREENSHOT_DETECTION = "Отключить определение снимков экрана";
         this.VIEW_DM_ANONYMOUSLY = "Читать сообщения анонимно";
+
         this.CATEGORY_DISTRACTION_FREE = "Без отвлечений";
         this.DISABLE_STORIES = "Отключить истории";
         this.DISABLE_HIGHLIGHTS = "Отключить актуальные истории";
@@ -54,6 +61,7 @@ public class StringsRussian extends DefaultStrings {
         this.DISABLE_DOUBLE_TAP_LIKE_REEL = "Отключить двойное нажатие для отметки «Нравится» на ролике";
         this.DISABLE_DOUBLE_TAP_LIKE_COMMENT = "Отключить двойное нажатие для отметки «Нравится» на комментарии";
         this.DISABLE_DOUBLE_TAP_LIKE_MESSAGE = "Отключить двойное нажатие для отметки «Нравится» на сообщении";
+
         this.CATEGORY_MISC = "Разное";
         this.DISABLE_ANALYTICS = "Отключить сбор данных";
         this.DELETE_ANALYTICS_CACHE = "Удалить кэш сбора данных";
@@ -92,6 +100,7 @@ public class StringsRussian extends DefaultStrings {
         this.UNLOCK_PLUS_BENEFITS = "Разблокировать возможности подписки «Плюс»";
         this.UNLOCK_PLUS_BENEFITS_DESC = "Разблокировать преимущества подписки «Плюс», которые проверяются локально. ИСПОЛЬЗУЙТЕ НА СВОЙ СТРАХ И РИСК";
         this.CUSTOMISE_STORY_RING_SIZE = "Настроить размер кольца истории";
+
         this.CATEGORY_DOWNLOAD_MEDIA = "Загрузка медиа";
         this.ENABLE_DOWNLOAD = "Включить загрузку";
         this.ENABLE_DIRECT_DOWNLOAD = "Включить прямую загрузку";
@@ -115,17 +124,20 @@ public class StringsRussian extends DefaultStrings {
         this.COPY_POST_OWNER_FULLNAME = "Скопировать полное имя автора записи";
         this.ENABLE_MORE_OPTIONS_ON_POST = "Включить дополнительные действия над записью";
         this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Показывать больше действий при долгом нажатии на публикацию";
+
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Скрыть кнопки навигации";
         this.HIDE_NAVIGATION_FEED = "Скрыть кнопку «Лента»";
         this.HIDE_NAVIGATION_REELS = "Скрыть кнопку «Reels»";
         this.HIDE_NAVIGATION_DIRECT = "Скрыть кнопку «Сообщения»";
         this.HIDE_NAVIGATION_SEARCH = "Скрыть кнопку «Поиск»";
         this.HIDE_NAVIGATION_CREATE = "Скрыть кнопку «Создать»";
+
         this.PATCH_INFO_TITLE = "Сведения о патче";
         this.EXPORT_PIKO_PREF = "Экспорт настроек Piko";
         this.IMPORT_PIKO_PREF = "Импорт настроек Piko";
         this.APP_VERSION = "Версия приложения: %s";
         this.PATCH_VERSION = "Версия патча: %s";
+
         this.EXPORT_SUCCESS = "Экспорт выполнен успешно";
         this.EXPORT_FAIL = "Не удалось выполнить экспорт";
         this.FAIL_NO_PATH = "Не указан путь для сохранения";
@@ -138,17 +150,24 @@ public class StringsRussian extends DefaultStrings {
         this.PIKO_DEBUG = "Отладка Piko";
         this.PIKO_DEBUG_DESC = "Добавляет отладочные действия к некоторым элементам для проверки";
         this.PIKO_EXPORT_EXPERIMENT_LIST = "Экспорт списка экспериментов";
+        this.PIKO_EXPORT_EXPERIMENT_MAPPINGS = "Экспорт сопоставлений экспериментов";
+
         this.OPEN_IMAGE_EXTERNALLY = "Открыть изображение в другом приложении";
         this.OPEN_VIDEO_EXTERNALLY = "Открыть видео в другом приложении";
         this.OPEN_IMAGE_WITH = "Открыть изображение с помощью";
         this.OPEN_VIDEO_WITH = "Открыть видео с помощью";
+
         this.CHANGE_LIKE_ANIMATION = "Сменить анимацию отметки «Нравится»";
         this.CHANGE_LIKE_ANIMATION_DESC = "Заменить анимацию одной из существующих анимаций колец";
         this.AVAILABLE_LIKE_ANIMATION = "Доступные анимации отметок «Нравится»";
+
         this.DEFAULT = "По умолчанию";
         this.ARR_DETAILED_TIMESTAMP = "Подробная отметка времени";
         this.ARR_TIME_LEFT = "Осталось времени";
-        this.ENABLE_DEV_OPTIONS_DESC = "Разблокирует опцию разработчика при длительном нажатии значка «Домой»";
-        this.DOWNLOAD_ID_MAPPING = "Скачать файл сопоставления";
+
+        this.WELCOME_TITLE = "Добро пожаловать в Piko";
+        this.WELCOME_MESSAGE = "Чтобы улучшить ваш опыт работы с Piko, пожалуйста, перейдите в настройки Piko и скорректируйте свои предпочтения";
+        this.GOTO_PIKO_SETTINGS = "Перейти в настройки Piko";
+        this.NO_INTERNET = "Пожалуйста, подключитесь к интернету";
     }
 }
