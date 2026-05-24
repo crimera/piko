@@ -60,9 +60,10 @@ public class DownloadUtils {
                 VideoData videoData = videoDataList.get(which);
 
                 try {
-                    String filename = currentMediaData.getVideoVariantFileName(videoData);
+                    String filename = username + "_" + currentMediaData.getVideoVariantFileName(videoData);
                     String mediaUrl = videoData.getUrl();
-                    downloadMediaUrl(context,mediaUrl,username,filename);
+                    String subFolder = SPLIT_BY_USERNAME ? username : "";
+                    downloadMediaUrl(context, mediaUrl, subFolder, filename);
                 } catch (Exception e) {
                     PikoUtils.logger(e);
                     Logger.printException(() -> "Error at buildVideoVariantDialogBox", e);
@@ -181,6 +182,7 @@ public class DownloadUtils {
         }
         MediaDownloader downloader = new MediaDownloader(context);
         String username = mediaInfo.getUserData().getUsername();
+        String subFolder = SPLIT_BY_USERNAME ? username : "";
 
         if (mediaType.equals(MediaType.AUDIO)) {
             AudioMediaInterface audioMedia = mediaInfo.getMediaAt(position).getAudioMedia();
@@ -197,7 +199,7 @@ public class DownloadUtils {
                 mediaUrl = mediaData.getMediaLink();
             }
             String fileName = mediaData.getDownloadFilename(mediaType);
-            downloader.enqueue(new DownloadRequest(mediaUrl, username, fileName));
+            downloader.enqueue(new DownloadRequest(mediaUrl, subFolder, username + "_" + fileName));
 
         } else if (position == -1) {
             int carouselSize = mediaInfo.getCarouselSize();
@@ -206,7 +208,7 @@ public class DownloadUtils {
                 MediaData currentMediaData = mediaInfo.getMediaAt(index);
                 String fileName = currentMediaData.getDownloadFilename(MediaType.ANY);
                 String mediaUrl = currentMediaData.getMediaLink();
-                downloader.enqueue(new DownloadRequest(mediaUrl, username, fileName));
+                downloader.enqueue(new DownloadRequest(mediaUrl, subFolder, username + "_" + fileName));
             }
         } else {
             Utils.showToastShort("There is nothing to download");
@@ -215,13 +217,13 @@ public class DownloadUtils {
     }
 
 
-    public static void downloadMediaUrl(Context context, String mediaUrl, String username, String fileName) throws Exception {
+    public static void downloadMediaUrl(Context context, String mediaUrl, String subFolder, String fileName) throws Exception {
         if(!Utils.isNetworkConnected()){
             Utils.showToastShort(Strings.NO_INTERNET);
             return;
         }
         MediaDownloader downloader = new MediaDownloader(context);
-        downloader.enqueue(new DownloadRequest(mediaUrl, username, fileName));
+        downloader.enqueue(new DownloadRequest(mediaUrl, subFolder, fileName));
     }
 
 }

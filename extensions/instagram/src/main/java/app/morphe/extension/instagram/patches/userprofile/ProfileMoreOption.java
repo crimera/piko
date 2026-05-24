@@ -74,8 +74,10 @@ public class ProfileMoreOption {
                         } else if (selectedOption.equals(Strings.DOWNLOAD_PROFILE_PICTURE)) {
                             String url = userData.getProfilePictureUrl();
                             String username = userData.getUsername();
-                            String downloadFilename = "dp.jpg";
-                            DownloadUtils.downloadMediaUrl(context, url, username, downloadFilename);
+                            String downloadFilename = username + "_dp.jpg";
+                            boolean splitByUsername = Pref.downloadUsernameFolder();
+                            String subFolder = splitByUsername ? username : "";
+                            DownloadUtils.downloadMediaUrl(context, url, subFolder, downloadFilename);
                             toCopy = false;
 
                         } else if (selectedOption.equals(Strings.PIKO_DEBUG)) {
