@@ -11,11 +11,15 @@ public class StringsPortugueseBR extends DefaultStrings {
     public StringsPortugueseBR() {
 
         this.PIKO_SETTINGS_TITLE = "Configurações do Piko";
-
+    
+    // Anúncios
+       
         this.CATEGORY_ADS = "Anúncios";
         this.DISABLE_ADS = "Desativar anúncios";
         this.HIDE_SUGEESTED_CONTENT = "Ocultar conteúdo sugerido";
         this.HIDE_SUGEESTED_CONTENT_DESC = "Oculta stories, reels e threads sugeridos (posts sugeridos ainda serão mostrados).";
+    
+    // Opções de desenvolvedor
 
         this.CATEGORY_DEV_OPTIONS = "Opções de desenvolvedor";
         this.ENABLE_DEV_OPTIONS = "Ativar opções de desenvolvedor";
@@ -28,22 +32,28 @@ public class StringsPortugueseBR extends DefaultStrings {
         this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "Permite certificado de rede do usuário para testes whitehat";
         this.REMOVE_BUILD_EXPIRE_POPUP = "Remover popup de versão expirada";
         this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Remove o popup que aparece após um tempo quando a versão do app envelhece";
-        this.EXPORT_DEV_OVERRIDES = "Exportar Backup";
-        this.IMPORT_DEV_OVERRIDES = "Importar Backup";
+        this.EXPORT_DEV_OVERRIDES = "Exportar Backup de comandos";
+        this.IMPORT_DEV_OVERRIDES = "Importar Backup de comandos";
         this.IMPORT_ID_MAPPING = "Importar arquivos de mapeamento";
         this.DOWNLOAD_ID_MAPPING = "Baixar arquivo de mapeamento";
+
+    // Catégoria Links
 
         this.CATEGORY_LINKS = "Links";
         this.OPEN_LINKS_EXTERNALLY = "Abrir links externamente";
         this.OPEN_LINKS_EXTERNALLY_DESC = "Abrir links no navegador externo em vez do navegador interno do app";
         this.SANITIZE_SHARE_LINKS = "Higienizar links compartilhados";
 
-        this.CATEGORY_GHOST = "Fantasma";
+    // Modo Fantasma
+
+        this.CATEGORY_GHOST = "Modo Fantasma";
         this.VIEW_STORIES_ANONYMOUSLY = "Ver stories anonimamente";
         this.VIEW_LIVE_ANONYMOUSLY = "Ver lives anonimamente";
         this.DISABLE_TYPING_STATUS = "Desativar status de digitação";
         this.DISABLE_SCREENSHOT_DETECTION = "Desativar detecção de captura de tela";
-        this.VIEW_DM_ANONYMOUSLY = "Ver mensagens diretas anonimamente";
+        this.VIEW_DM_ANONYMOUSLY = "Ver mensagens no direct anonimamente";
+
+    // Sem Distrações
 
         this.CATEGORY_DISTRACTION_FREE = "Sem distrações";
         this.DISABLE_STORIES = "Desativar stories";
@@ -66,12 +76,14 @@ public class StringsPortugueseBR extends DefaultStrings {
         this.DISABLE_DOUBLE_TAP_LIKE_COMMENT = "Desativar curtida por toque duplo em comentários";
         this.DISABLE_DOUBLE_TAP_LIKE_MESSAGE = "Desativar curtida por toque duplo em mensagens";
 
+    // Diversos
+
         this.CATEGORY_MISC = "Diversos";
         this.DISABLE_ANALYTICS = "Desativar análises";
         this.DELETE_ANALYTICS_CACHE = "Excluir cache de análises";
         this.DISABLE_ANALYTICS_DESC = "Bloqueia análises enviados para os servidores do Instagram/Facebook";
         this.DISABLE_DISCOVER_PEOPLE = "Desativar descobrir pessoas";
-        this.DISABLE_DISCOVER_PEOPLE_DESC = "Desativar a seção descobrir pessoas no perfil";
+        this.DISABLE_DISCOVER_PEOPLE_DESC = "Desativar a seção de descobrir pessoas no perfil";
         this.FOLLOW_BACK_INDICATOR = "Ativar indicador de seguindo de volta";
         this.FBI_FOLLOWS_YOU = "Segue você";
         this.FBI_DOESNT_FOLLOWS_YOU = "Não segue você";
@@ -105,6 +117,8 @@ public class StringsPortugueseBR extends DefaultStrings {
         this.UNLOCK_PLUS_BENEFITS_DESC = "Desbloqueia benefícios da assinatura 'Plus' verificados localmente. USE POR SUA CONTA E RISCO";
         this.CUSTOMISE_STORY_RING_SIZE = "Personalizar tamanho do anel do story";
 
+    // Downloads
+
         this.CATEGORY_DOWNLOAD_MEDIA = "Baixar mídia";
         this.ENABLE_DOWNLOAD = "Ativar download";
         this.ENABLE_DIRECT_DOWNLOAD = "Ativar download direct";
@@ -123,19 +137,28 @@ public class StringsPortugueseBR extends DefaultStrings {
         this.MEDIA_EXISTS = "A mídia já existe";
         this.DOWNLOAD_FAILED_MEDIA = "Falha ao baixar : ";
 
+    // Opções de Donwloads (fora das configurações)
+
         this.POST_OPTIONS = "Opções do post";
         this.COPY_POST_DESCRIPTION = "Copiar descrição do post";
         this.COPY_POST_OWNER_USERNAME = "Copiar usuário do dono do post";
         this.COPY_POST_OWNER_FULLNAME = "Copiar nome completo do dono do post";
+       
+    // Opções de Donwloads (dentro das configurações)
+       
         this.ENABLE_MORE_OPTIONS_ON_POST = "Ativar mais opções no post";
         this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Obtém mais opções ao segurar o post";
 
+    // Ocultar Botões de Navegação
+        
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Ocultar botões de navegação";
         this.HIDE_NAVIGATION_FEED = "Ocultar botão Feed";
         this.HIDE_NAVIGATION_REELS = "Ocultar botão Reels";
         this.HIDE_NAVIGATION_DIRECT = "Ocultar botão Direct";
         this.HIDE_NAVIGATION_SEARCH = "Ocultar botão Pesquisa";
         this.HIDE_NAVIGATION_CREATE = "Ocultar botão Criar";
+
+    // Piko (detalhes técnicos)
 
         this.PATCH_INFO_TITLE = "Informações do patch";
         this.EXPORT_PIKO_PREF = "Exportar preferências do Piko";
@@ -167,8 +190,8 @@ public class StringsPortugueseBR extends DefaultStrings {
         this.AVAILABLE_LIKE_ANIMATION = "Animações de curtida disponíveis";
 
         this.DEFAULT = "Padrão";
-        this.ARR_DETAILED_TIMESTAMP = "Horário detalhado";
-        this.ARR_TIME_LEFT = "Tempo restante";
+        this.ARR_DETAILED_TIMESTAMP = "Horário detalhado (Dia da Semana/Mês/Dia/Hora/Minutos/Segundos)";
+        this.ARR_TIME_LEFT = "Tempo restante (Falta: Hora/Minutos/Segundos)";
 
         this.WELCOME_TITLE = "Bem-vindo ao Piko";
         this.WELCOME_MESSAGE = "Para melhorar sua experiência com o Piko, visite as configurações do Piko e ajuste suas configurações";
