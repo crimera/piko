@@ -1,3 +1,47 @@
+## [3.5.0-dev.1](https://github.com/crimera/piko/compare/v3.4.1-dev.1...v3.5.0-dev.1) (2026-05-23)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix audio extraction logic ([579f559](https://github.com/crimera/piko/commit/579f55951d5cf84af2d23d9cb2f3fac369ff74d2))
+
+### ✨ New Features
+
+* Added support for custom downloader ([344d71f](https://github.com/crimera/piko/commit/344d71f04925336d7cc1f30fec423fb005f606f1))
+* Added support for setting custom download path ([1ad2017](https://github.com/crimera/piko/commit/1ad2017e68a1ee190a740801653bea41de958d57))
+* **Instagram:** Added `Download voice message` patch ([1ebf75c](https://github.com/crimera/piko/commit/1ebf75c2288af120a75bc52dcb0f6a89ed7ea2c8))
+* **Instagram:** Added ability to download video variants ([2baeea8](https://github.com/crimera/piko/commit/2baeea81698d843408c140f29e6d69ce86e2d748))
+* **Instagram:** Added ability to turn on all ghost modes ([6a1c497](https://github.com/crimera/piko/commit/6a1c497d8e9ff761fd9e0e7ea93034b9465d549b))
+* **Instagram:** Move profile more options button to action bar ([068ba4f](https://github.com/crimera/piko/commit/068ba4f5e32073ab52c983910b7a776d3d6bfd0c))
+* **Instagram:** Move settings launcher to main feed action bar ([3ed88ed](https://github.com/crimera/piko/commit/3ed88ede87285c20532dc174b3cf4e4774dedc18))
+
+### 🚀 Updated App Support
+
+* **Instagram:** Bump support for `430.0.0.53.80` ([60a0c1a](https://github.com/crimera/piko/commit/60a0c1a80b38397f95b82d1eb51c053feabb27fa))
+
+### 🔧 Improvements
+
+* **Instagram:** Improve `Hide reshare button` patch fingerprint ([d22764b](https://github.com/crimera/piko/commit/d22764b6ae59c507298dbd0fb683be0ffac3fe88))
+* **Instagram:** Improve profile info entity extractor ([1eae27e](https://github.com/crimera/piko/commit/1eae27e77dad179b88f1279ca6599b9d576dce33))
+* **Instagram:** Improve View story mentions logic ([3a38492](https://github.com/crimera/piko/commit/3a3849259bea1d247f6cbfdb5be072ffe92ec9ac))
+* **Instagram:** Updated `Hide stories tray` patch ([3acbcb5](https://github.com/crimera/piko/commit/3acbcb51ccc6383ef07224f216dd65f352dec670))
+* **Instagram:** Updated `Hide suggested content` patch ([c122e6f](https://github.com/crimera/piko/commit/c122e6fd3319ea1e9972b6707f4a9a3860ba11ea))
+* **Instagram:** Updated user data entity fingerprints ([de2f9d5](https://github.com/crimera/piko/commit/de2f9d56379d60dffe8f3ac7ddcf2ceaa780c7c1))
+
+## [3.4.1-dev.1](https://github.com/crimera/piko/compare/v3.4.0...v3.4.1-dev.1) (2026-05-22)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** String description ([45b5063](https://github.com/crimera/piko/commit/45b50630563dbe98aba6c774c3c831b1842f3c4a))
+
+### 🚀 Updated App Support
+
+* **Twitter:** Added support for 11.93.xx ([dd7352c](https://github.com/crimera/piko/commit/dd7352cd9485a7af6d32a62b09410d65fd4567d2))
+
+### 🔧 Improvements
+
+* **Twitter:** Added version check for various patches ([6db66b5](https://github.com/crimera/piko/commit/6db66b523b4623762fb5c645343e5b7493024101))
+* **Twitter:** Improve share menu enum logic for newer versions ([0cd809e](https://github.com/crimera/piko/commit/0cd809e979ccdca8c4ddcd195dc9831ac2c1a983))
+
 ## [3.4.0](https://github.com/crimera/piko/compare/v3.3.0...v3.4.0) (2026-05-19)
 
 ### 🐛 Bug Fixes

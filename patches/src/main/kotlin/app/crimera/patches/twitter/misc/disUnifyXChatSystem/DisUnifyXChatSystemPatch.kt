@@ -10,11 +10,14 @@ import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X_11_69
 import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
+import app.crimera.patches.twitter.utils.is_11_69_stable_or_greater
+import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import java.util.logging.Logger
 
 internal object XchatSubSystemUserCheckFingerprint : Fingerprint(
     returnType = "Z",
@@ -33,12 +36,11 @@ val disUnifyXchatSystemPatch =
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_X_11_69)
-        dependsOn(settingsPatch)
+        dependsOn(settingsPatch, versionCheckPatch)
 
         execute {
 
-            try {
-
+            if (!is_11_69_stable_or_greater) {
                 XchatSubSystemUserCheckFingerprint
                     .apply {
                         val strIndx = stringMatches.first { it.string == "userId" }.index
@@ -56,10 +58,13 @@ val disUnifyXchatSystemPatch =
                             enableSettings("disUnifyXChatSystem")
                         }
                     }
-            } catch (e: Exception) {
-                println(
-                    "The patch \"Disunify xchat system\" is force succeeded and does not work for any version above 11.69.\nPlease unselect it if you are using an higher version.",
-                )
+            } else {
+                Logger
+                    .getLogger(
+                        this::class.java.name,
+                    ).warning(
+                        "The patch \"Disunify xchat system\" is force succeeded and does not work on any version above 11.69.\nPlease unselect the patch if you are using a version higher than 11.69.",
+                    )
             }
         }
     }

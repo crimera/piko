@@ -9,6 +9,7 @@ package app.crimera.patches.instagram.misc.download
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
 import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundDataIntfEntity
 import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
+import app.crimera.patches.instagram.misc.directMessage.saveAllMessages.saveAllMessagesPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
@@ -25,13 +26,10 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
-import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.indexOfFirstInstructionOrThrow
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -50,6 +48,7 @@ val downloadMediaPatch =
             originalSoundDataIntfEntity,
             trackDataIntfEntity,
             hookFlagsPatch,
+            saveAllMessagesPatch,
         )
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
@@ -167,13 +166,14 @@ val downloadMediaPatch =
                 val selfClassRegister = instructions[indexOfFirstInstruction(Opcode.MOVE_OBJECT_FROM16)].registersUsed[0]
                 val buttonAdderInstanceRegister = instructions[indexOfFirstInstruction(Opcode.NEW_INSTANCE)].registersUsed[0]
 
-                val firstIfEqzIndex = indexOfFirstInstruction(Opcode.IF_EQZ)
-                val mediaObjectRegister = instructions[firstIfEqzIndex - 1].registersUsed[0]
+                val sPutIndex = indexOfFirstInstruction(Opcode.SPUT)
+                val mediaObjectFromParameterIndex = indexOfFirstInstruction(sPutIndex, Opcode.MOVE_OBJECT_FROM16)
+                val mediaObjectRegister = instructions[mediaObjectFromParameterIndex].registersUsed[0]
 
-                val freeRegisterOne = instructions[indexOfFirstInstruction(Opcode.MOVE_RESULT_OBJECT)].registersUsed[0]
+                val freeRegisterOne = instructions[indexOfFirstInstruction(mediaObjectFromParameterIndex, Opcode.CONST_4)].registersUsed[0]
 
                 addInstructions(
-                    firstIfEqzIndex,
+                    mediaObjectFromParameterIndex + 1,
                     """
                     iget-object v$freeRegisterOne, v$selfClassRegister, $appActivityField
                     invoke-static {v$freeRegisterOne,v$buttonAdderInstanceRegister,v$mediaObjectRegister},$REEL_BUTTON_DESCRIPTOR->addReelButton(Landroid/content/Context;Ljava/lang/Object;Ljava/lang/Object;)V
@@ -181,22 +181,6 @@ val downloadMediaPatch =
                 )
             }
 
-            // Make Save option available for all DM content.
-            DMLongPressButtonAdderFingerprint.method.apply {
-                val allIfNez = instructions.filter { it.opcode == Opcode.IF_NEZ }
-                allIfNez.firstOrNull { instruction ->
-                    val index = instruction.location.index
-                    val opCodeOfPrevInstruction = getInstruction(index - 1).opcode
-                    val opCodeOfNextInstruction = getInstruction(index + 1).opcode
-
-                    if (opCodeOfPrevInstruction == Opcode.IF_EQZ && opCodeOfNextInstruction == Opcode.SGET_OBJECT) {
-                        removeInstruction(index - 1)
-                        true
-                    } else {
-                        false
-                    }
-                }
-            }
             // DM media downloader.
             GetDirectThreadMediaSaverModuleNameFingerprint.apply {
 

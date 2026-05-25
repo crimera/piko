@@ -43,6 +43,9 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DISABLE_TYPING_STATUS = "Nonaktifkan status mengetik";
 		this.DISABLE_SCREENSHOT_DETECTION = "Nonaktifkan deteksi tangkapan layar";
 		this.VIEW_DM_ANONYMOUSLY = "Lihat pesan langsung secara anonim";
+		this.TURN_ON_ALL_GHOST_MODES = "Aktifkan semua mode hantu";
+		this.GHOST_MODES_ON = "Mode hantu: ON";
+		this.GHOST_MODES_DEFAULT = "Mode hantu: BAWAAN";
 
 		this.CATEGORY_DISTRACTION_FREE = "Bebas gangguan";
 		this.DISABLE_STORIES = "Nonaktifkan cerita";
@@ -112,15 +115,21 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DOWNLOAD_USERNAME_FOLDER_DESC = "Membuat subfolder berdasarkan nama pengguna";
 		this.DOWNLOAD_CURRENT_MEDIA = "Unduh media saat ini";
 		this.DOWNLOAD_AS_IMAGE = "Unduh sebagai gambar";
+		this.VIDEO_VARIANTS = "Varian video";
 		this.DOWNLOAD_AUDIO = "Unduh audio";
 		this.DOWNLOAD_OPTIONS = "Pilihan unduhan";
 		this.COPY_MEDIA_LINK = "Salin tautan media";
 		this.COPIED_MEDIA_LINK = "Tautan media disalin";
 		this.DOWNLOAD_ALL = "Unduh semua";
-		this.DOWNLOADING_MEDIA = "Mengunduh : ";
-		this.DOWNLOADED_MEDIA = "Diunduh : ";
+		this.DOWNLOADING_MEDIA = "Mengunduh: ";
+		this.DOWNLOADED_MEDIA = "Diunduh: ";
 		this.MEDIA_EXISTS = "Media sudah ada";
 		this.DOWNLOAD_FAILED_MEDIA = "Unduhan gagal : ";
+		this.DOWNLOAD_SET_PATH = "Atur jalur unduhan khusus";
+		this.DOWNLOAD_SET_PATH_SUCCESS = "Direktori unduhan telah diperbarui!";
+		this.DOWNLOAD_SET_PATH_FAILED = "Gagal menemukan jalur folder";
+		this.DOWNLOAD_GRANT_PERMISSION = "Silakan berikan izin penyimpanan untuk melanjutkan pengunduhan";
+		this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Tidak dapat membuka pengaturan. Silakan berikan izin Akses Semua Berkas secara manual";
 		this.POST_OPTIONS = "Pilihan postingan";
 		this.COPY_POST_DESCRIPTION = "Salin deskripsi postingan";
 		this.COPY_POST_OWNER_USERNAME = "Salin nama pengguna pemilik postingan";
@@ -170,8 +179,9 @@ public class StringsIndonesian extends DefaultStrings {
 		this.ARR_TIME_LEFT = "Waktu tersisa";
 		
 		this.WELCOME_TITLE = "Selamat datang di Piko";
-		this.WELCOME_MESSAGE = "Untuk meningkatkan pengalaman Anda menggunakan Piko, silahkan buka pengaturan Piko dan sesuaikan preferensi Anda";
+		this.WELCOME_MESSAGE = "Untuk meningkatkan pengalaman Anda menggunakan Piko, silakan buka pengaturan Piko dan sesuaikan preferensi Anda";
 		this.GOTO_PIKO_SETTINGS = "Ke pengaturan Piko";
-		this.NO_INTERNET = "Silahkan sambungkan ke internet";
+		this.NO_INTERNET = "Silakan sambungkan ke internet";
+		this.TAP_HERE = "Ketuk di sini !!";
 	}
 }

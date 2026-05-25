@@ -42,6 +42,9 @@ public class DefaultStrings {
     public static String DISABLE_TYPING_STATUS = "Disable typing status";
     public static String DISABLE_SCREENSHOT_DETECTION = "Disable screenshot detection";
     public static String VIEW_DM_ANONYMOUSLY = "View direct messages anonymously";
+    public static String TURN_ON_ALL_GHOST_MODES = "Turn on all ghost modes";
+    public static String GHOST_MODES_ON = "Ghost mode: ON";
+    public static String GHOST_MODES_DEFAULT = "Ghost mode: DEFAULT";
 
     public static String CATEGORY_DISTRACTION_FREE = "Distraction free";
     public static String DISABLE_STORIES = "Disable stories";
@@ -111,15 +114,22 @@ public class DefaultStrings {
     public static String DOWNLOAD_USERNAME_FOLDER_DESC = "Creates subfolders based on username";
     public static String DOWNLOAD_CURRENT_MEDIA = "Download current media";
     public static String DOWNLOAD_AS_IMAGE = "Download as image";
+    public static String VIDEO_VARIANTS = "Video variants";
     public static String DOWNLOAD_AUDIO = "Download audio";
     public static String DOWNLOAD_OPTIONS = "Download options";
     public static String COPY_MEDIA_LINK = "Copy media link";
     public static String COPIED_MEDIA_LINK = "Copied media link";
     public static String DOWNLOAD_ALL = "Download all";
-    public static String DOWNLOADING_MEDIA = "Downloading : ";
-    public static String DOWNLOADED_MEDIA = "Downloaded : ";
+    public static String DOWNLOADING_MEDIA = "Downloading: ";
+    public static String DOWNLOADED_MEDIA = "Downloaded: ";
     public static String MEDIA_EXISTS = "Media exists";
     public static String DOWNLOAD_FAILED_MEDIA = "Download failed : ";
+    public static String DOWNLOAD_SET_PATH = "Set custom download path";
+    public static String DOWNLOAD_SET_PATH_SUCCESS = "Download directory updated!";
+    public static String DOWNLOAD_SET_PATH_FAILED = "Failed to resolve folder path";
+    public static String DOWNLOAD_GRANT_PERMISSION = "Please grant storage access to continue downloads";
+    public static String DOWNLOAD_GRANT_PERMISSION_FAILED = "Could not open settings. Please grant All Files Access manually";
+
     public static String POST_OPTIONS = "Post options";
     public static String COPY_POST_DESCRIPTION = "Copy post description";
     public static String COPY_POST_OWNER_USERNAME = "Copy post owner username";
@@ -151,7 +161,7 @@ public class DefaultStrings {
     public static String OK = "OK";
     public static String DELETED = "Deleted";
     public static String PIKO_DEBUG = "Piko debug";
-    public static String PIKO_DEBUG_DESC = "Adds debug option on some of the componenets for testing";
+    public static String PIKO_DEBUG_DESC = "Adds debug option on some of the components for testing";
     public static String PIKO_EXPORT_EXPERIMENT_LIST = "Export experiment list";
     public static String PIKO_EXPORT_EXPERIMENT_MAPPINGS = "Export experiment mappings";
 
@@ -172,5 +182,6 @@ public class DefaultStrings {
     public static String WELCOME_MESSAGE = "To improve your experience with Piko, please vist Piko settings and adjust your preference";
     public static String GOTO_PIKO_SETTINGS = "Goto Piko settings";
     public static String NO_INTERNET = "Please connect to internet";
+    public static String TAP_HERE = "Tap here !!";
 
 }

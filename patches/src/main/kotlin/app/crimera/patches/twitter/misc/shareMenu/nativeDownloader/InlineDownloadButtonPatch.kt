@@ -4,6 +4,7 @@ import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
+import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.getFieldName
 import app.morphe.patcher.Fingerprint
@@ -60,7 +61,7 @@ val inlineDownloadButtonPatch =
         description = "Adds an inline 'Download' button to the tweet inline action bar and registers the extension hook.",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
+        dependsOn(settingsPatch, versionCheckPatch)
 
         execute {
             val onFinishInflateMethod = OnFinishInflateFingerprint.method

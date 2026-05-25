@@ -44,11 +44,6 @@ internal object GetDirectThreadMediaSaverModuleNameFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
 )
 
-internal object DMLongPressButtonAdderFingerprint : Fingerprint(
-    returnType = "V",
-    strings = listOf("⏰", "userSession"),
-)
-
 internal object GetEnumButtonClassExtensionFingerprint : Fingerprint(
     definingClass = FEED_BUTTON_DESCRIPTOR,
     name = "getEnumButtonClass",
