@@ -183,5 +183,7 @@ public class DefaultStrings {
     public static String GOTO_PIKO_SETTINGS = "Goto Piko settings";
     public static String NO_INTERNET = "Please connect to internet";
     public static String TAP_HERE = "Tap here !!";
+    public static String PIKO_SETTINGS_ON_ACTION_BAR = "Piko settings on action bar";
+    public static String PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Move Piko settings entry point to main feed action bar";
 
 }

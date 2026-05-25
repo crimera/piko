@@ -13,6 +13,10 @@ import app.morphe.extension.crimera.SharedPref;
 
 @SuppressWarnings("unused")
 public class Pref {
+    public static boolean pikoSettingsOnActionBar() {
+        return SharedPref.getBooleanPref(Settings.PIKO_SETTINGS_ON_ACTION_BAR);
+    }
+
     public static boolean pikoDebug() {
         return SharedPref.getBooleanPref(Settings.PIKO_DEBUG);
     }

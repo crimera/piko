@@ -21,6 +21,10 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Strings;
 
 public class MainFeedActionBarButton {
+    private static boolean PIKO_SETTINGS_ON_ACTION_BAR;
+    static {
+        PIKO_SETTINGS_ON_ACTION_BAR = Pref.pikoSettingsOnActionBar();
+    }
 
     public static void addActionBarButton(ViewGroup viewGroup) {
         try {
@@ -47,7 +51,9 @@ public class MainFeedActionBarButton {
                 });
             }
 
-            UI.pikoSettingsGear(viewGroup);
+            if(PIKO_SETTINGS_ON_ACTION_BAR) {
+                UI.pikoSettingsGear(viewGroup);
+            }
 
         } catch (Exception e) {
             Logger.printException(() -> "addActionBarButton failure", e);

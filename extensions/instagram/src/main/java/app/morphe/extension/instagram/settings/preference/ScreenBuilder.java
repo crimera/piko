@@ -648,6 +648,14 @@ public class ScreenBuilder {
 
         addPreference(category,
                 helper.switchPreference(
+                        Strings.PIKO_SETTINGS_ON_ACTION_BAR,
+                        Strings.PIKO_SETTINGS_ON_ACTION_BAR_DESC,
+                        Settings.PIKO_SETTINGS_ON_ACTION_BAR
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
                         Strings.PIKO_DEBUG,
                         Strings.PIKO_DEBUG_DESC,
                         Settings.PIKO_DEBUG

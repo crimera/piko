@@ -28,6 +28,8 @@ import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.Dim;
 import app.morphe.extension.crimera.constants.TooltipHelper;
+import app.morphe.extension.instagram.entity.InstagramButton;
+import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 
 public class UI {
 
@@ -160,8 +162,20 @@ public class UI {
         dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface d, int which) {
-                // No need to do anything here.
-                // We just want to dismiss the dialog box.
+                try {
+                    // If settings is placed on action bar, no need to redirect to profile.
+                    if(!Pref.pikoSettingsOnActionBar()) {
+                        // Doing like this because options are dynamic.
+                        String selectedOption = options.get(which);
+
+                        if (selectedOption.equals(Strings.GOTO_PIKO_SETTINGS)) {
+                            ActivityHook.openLink("instagram://profile");
+                        }
+                    }
+                } catch (Exception e) {
+                    Logger.printException(() -> "Error at welcomeDialogBox", e);
+                    Utils.showToastShort(e.getMessage());
+                }
             }
         });
 
@@ -172,5 +186,24 @@ public class UI {
 
         Dialog dlg = dialog.getDialog();
         dlg.show();
+    }
+
+    public static void pikoSettingsButton(ViewGroup viewGroup) throws Exception {
+        boolean isFirstTime = Pref.firstTimePiko();
+
+        Context context = viewGroup.getContext();
+        InstagramButton button = new InstagramButton(context);
+        button.setText(Strings.PIKO_SETTINGS_TITLE);
+        button.setStyle(InstagramButtonStyleEnum.SUPER_PRIMARY);
+        button.setOnClickListener(ActivityHook::startPikoActivity);
+
+        int marginPx = Dim.dp12;
+        button.setMargins(marginPx, marginPx, marginPx, marginPx);
+
+        viewGroup.addView(button.getIgdsButton());
+        if(isFirstTime){
+            button.startPulseAnimation();
+            Pref.setFirstTimePiko(false);
+        }
     }
 }

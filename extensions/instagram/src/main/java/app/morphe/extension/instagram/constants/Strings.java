@@ -192,6 +192,8 @@ public class Strings {
     public static final String GOTO_PIKO_SETTINGS = langInstance.GOTO_PIKO_SETTINGS;
     public static final String NO_INTERNET = langInstance.NO_INTERNET;
     public static final String TAP_HERE = langInstance.TAP_HERE;
+    public static final String PIKO_SETTINGS_ON_ACTION_BAR = langInstance.PIKO_SETTINGS_ON_ACTION_BAR;
+    public static final String PIKO_SETTINGS_ON_ACTION_BAR_DESC = langInstance.PIKO_SETTINGS_ON_ACTION_BAR_DESC;
 
     public static void load() {
         ExtensionStrings.setDefaultPikoFolder(Strings.DEFAULT_PIKO_FOLDER);
