@@ -24,7 +24,6 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
-import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.UserData;
 
@@ -37,25 +36,9 @@ public class MoreOptionsOnPostPatch {
         DEBUG = Pref.pikoDebug();
     }
 
-    private static String contextFieldName() {
-        return "A03";
-    }
-
-    private static String mediaFieldName() {
-        return "A04";
-    }
-
-    private static String currentMediaIndexFieldName() {
-        return "A01";
-    }
-
-    public static void postOnLongPress(Object postObject) {
+    public static void postOnLongPress(Context context, Object mediaObject, int currentMediaIndex) {
         try {
             if (ENABLE_MORE_OPTION) {
-                Entity entity = new Entity(postObject);
-                Context context = (Context) entity.getField(contextFieldName());
-                Object mediaObject = entity.getField(mediaFieldName());
-                int currentMediaIndex = (int) entity.getField(currentMediaIndexFieldName());
                 MediaData mediaData = new MediaData(mediaObject);
 
                 InstagramDialogBox dialog = new InstagramDialogBox(context);
