@@ -6,6 +6,9 @@
 
 package app.crimera.patches.instagram.misc.download
 
+import app.crimera.patches.instagram.entity.decoder.CURRENT_MEDIA_FIELD
+import app.crimera.patches.instagram.entity.decoder.MEDIA_ADD_INFO_CLASS_NAME
+import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
 import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundDataIntfEntity
 import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
@@ -19,8 +22,6 @@ import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
-import app.crimera.utils.extensionToClassName
-import app.crimera.utils.fieldExtractor
 import app.crimera.utils.methodExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -49,6 +50,7 @@ val downloadMediaPatch =
             trackDataIntfEntity,
             hookFlagsPatch,
             saveAllMessagesPatch,
+            decoderEntity,
         )
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
@@ -70,11 +72,6 @@ val downloadMediaPatch =
                 val addingReelButtonMethodName = getInstruction(addingReelButtonMethodCallIndex).methodExtractor().name
                 AddReelButtonExtensionFingerprint.changeFirstString(addingReelButtonMethodName)
             }
-
-            val currentViewingMediaFieldData =
-                EditMediaInfoGetCurrentMediaIdFingerprint.method.instructions
-                    .first { it.opcode == Opcode.IGET }
-                    .fieldExtractor()
 
             AddFeedButtonFingerprint.method.apply {
                 var arrayListRegister = -1
@@ -129,9 +126,7 @@ val downloadMediaPatch =
                         AccessFlags.FINAL.isSet(it.accessFlags) && it.implementation?.registerCount == 1
                     }
 
-                val mediaExtraDataClass = currentViewingMediaFieldData.definingClass
-                val mediaExtraDataField = classDef.fields.first { it.type == extensionToClassName(mediaExtraDataClass) }
-                val currentViewingMediaIndexField = currentViewingMediaFieldData.name
+                val mediaExtraDataField = classDef.fields.first { it.type == MEDIA_ADD_INFO_CLASS_NAME }
 
                 addInstructionsWithLabels(
                     0,
@@ -146,7 +141,7 @@ val downloadMediaPatch =
                     invoke-static {v0}, $getMediaObjectMethod
                     move-result-object v2
                     iget-object v4, v0, $mediaExtraDataField
-                    iget v4, v4, ${mediaExtraDataField.type}->$currentViewingMediaIndexField:I
+                    iget v4, v4, $CURRENT_MEDIA_FIELD
                     
                     invoke-static {v5, v2, v4}, $FEED_BUTTON_DESCRIPTOR->downloadPost(Landroid/content/Context;Ljava/lang/Object;I)V
                     return-void
