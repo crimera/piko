@@ -190,7 +190,7 @@ public class StringsPortugueseBR extends DefaultStrings {
         this.AVAILABLE_LIKE_ANIMATION = "Animações de curtida disponíveis";
 
         this.DEFAULT = "Padrão";
-        this.ARR_DETAILED_TIMESTAMP = "Horário detalhado (Dia da Semana/Mês/Dia/Hora/Minutos/Segundos)";
+        this.ARR_DETAILED_TIMESTAMP = "Horário detalhado (Dia da Semana/Mês/Data/Hora/Minutos/Segundos)";
         this.ARR_TIME_LEFT = "Tempo restante (Falta: Hora/Minutos/Segundos)";
 
         this.WELCOME_TITLE = "Bem-vindo ao Piko";
