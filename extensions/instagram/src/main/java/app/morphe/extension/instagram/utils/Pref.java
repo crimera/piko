@@ -56,6 +56,10 @@ public class Pref {
         return SharedPref.setBooleanPref(Settings.TURN_ON_ALL_GHOST_MODES.key,bool);
     }
 
+    public static boolean enableGhostModeQuickToggle() {
+        return SharedPref.getBooleanPref(Settings.GHOST_MODES_QUICK_TOGGLE);
+    }
+
     public static boolean viewStoriesAnonymously() {
         return (SharedPref.getBooleanPref(Settings.VIEW_STORIES_ANONYMOUSLY) && SettingsStatus.viewStoriesAnonymously) || Pref.getTurnOnAllGhostModes();
     }

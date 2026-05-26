@@ -56,6 +56,8 @@ public class Strings {
     public static final String TURN_ON_ALL_GHOST_MODES = langInstance.TURN_ON_ALL_GHOST_MODES;
     public static final String GHOST_MODES_ON = langInstance.GHOST_MODES_ON;
     public static final String GHOST_MODES_DEFAULT = langInstance.GHOST_MODES_DEFAULT;
+    public static final String GHOST_MODES_QUICK_TOGGLE = langInstance.GHOST_MODES_QUICK_TOGGLE;
+    public static final String GHOST_MODES_QUICK_TOGGLE_DESC = langInstance.GHOST_MODES_QUICK_TOGGLE_DESC;
 
     public static final String CATEGORY_DISTRACTION_FREE = langInstance.CATEGORY_DISTRACTION_FREE;
     public static final String DISABLE_STORIES = langInstance.DISABLE_STORIES;

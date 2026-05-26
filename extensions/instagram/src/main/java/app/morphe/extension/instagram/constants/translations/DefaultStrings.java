@@ -45,6 +45,8 @@ public class DefaultStrings {
     public static String TURN_ON_ALL_GHOST_MODES = "Turn on all ghost modes";
     public static String GHOST_MODES_ON = "Ghost mode: ON";
     public static String GHOST_MODES_DEFAULT = "Ghost mode: DEFAULT";
+    public static String GHOST_MODES_QUICK_TOGGLE = "Enable quick toggle for ghost modes";
+    public static String GHOST_MODES_QUICK_TOGGLE_DESC = "Adds a quick toggle in chat action bar to control ghost modes";
 
     public static String CATEGORY_DISTRACTION_FREE = "Distraction free";
     public static String DISABLE_STORIES = "Disable stories";

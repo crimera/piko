@@ -161,6 +161,14 @@ public class ScreenBuilder {
                 )
         );
 
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.GHOST_MODES_QUICK_TOGGLE,
+                        Strings.GHOST_MODES_QUICK_TOGGLE_DESC,
+                        Settings.GHOST_MODES_QUICK_TOGGLE
+                )
+        );
+
         if (SettingsStatus.viewStoriesAnonymously) {
             addPreference(category,
                     helper.switchPreference(
