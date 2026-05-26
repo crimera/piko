@@ -112,6 +112,8 @@ public class Strings {
     public static final String DOWNLOAD_PROFILE_PICTURE = langInstance.DOWNLOAD_PROFILE_PICTURE;
     public static final String COPIED = langInstance.COPIED;
     public static final String MORE_PROFILE_OPTIONS = langInstance.MORE_PROFILE_OPTIONS;
+    public static final String MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = langInstance.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE;
+    public static final String MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = langInstance.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC;
     public static final String REMOVE_EMPTY_BOTTOM_SPACE = langInstance.REMOVE_EMPTY_BOTTOM_SPACE;
     public static final String UNLOCK_PLUS_BENEFITS = langInstance.UNLOCK_PLUS_BENEFITS;
     public static final String UNLOCK_PLUS_BENEFITS_DESC = langInstance.UNLOCK_PLUS_BENEFITS_DESC;

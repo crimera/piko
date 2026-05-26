@@ -401,6 +401,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.moreOptionsOnProfile) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE,
+                            Strings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC,
+                            Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE
+                    )
+            );
+        }
         if (SettingsStatus.moreOptionsOnPost) {
             addPreference(category,
                     helper.switchPreference(

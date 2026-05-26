@@ -12,6 +12,7 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.patches.userprofile.ProfileMoreOption;
 
 public class UserProfileButton {
     private static boolean PIKO_SETTINGS_ON_ACTION_BAR;
@@ -23,6 +24,10 @@ public class UserProfileButton {
         try {
             ProfileInfo profileInfo = new ProfileInfo(object);
             Boolean isSelfProfile = profileInfo.isSelfProfile();
+
+            if(!Pref.enableMoreOptionsOnProfileQuickToggle()){
+                ProfileMoreOption.addProfileMoreOptionsButton(viewGroup, profileInfo);
+            }
 
             if (isSelfProfile && !PIKO_SETTINGS_ON_ACTION_BAR) {
                 UI.pikoSettingsButton(viewGroup);

@@ -103,6 +103,8 @@ public class DefaultStrings {
     public static String DOWNLOAD_PROFILE_PICTURE = "Download profile picture";
     public static String COPIED = "Copied";
     public static String MORE_PROFILE_OPTIONS = "More profile options";
+    public static String MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "Profile options on action bar";
+    public static String MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "Move profile options button to profile action bar";
     public static String REMOVE_EMPTY_BOTTOM_SPACE = "Remove empty bottom space";
     public static String UNLOCK_PLUS_BENEFITS = "Unlock Plus benefits";
     public static String UNLOCK_PLUS_BENEFITS_DESC = "Unlock 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK";

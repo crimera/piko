@@ -60,6 +60,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.GHOST_MODES_QUICK_TOGGLE);
     }
 
+    public static boolean enableMoreOptionsOnProfileQuickToggle() {
+        return SharedPref.getBooleanPref(Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE) && SettingsStatus.moreOptionsOnProfile;
+    }
+
     public static boolean viewStoriesAnonymously() {
         return (SharedPref.getBooleanPref(Settings.VIEW_STORIES_ANONYMOUSLY) && SettingsStatus.viewStoriesAnonymously) || Pref.getTurnOnAllGhostModes();
     }
