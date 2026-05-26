@@ -8,6 +8,7 @@ package app.crimera.patches.instagram.misc.mainFeedActionBarButton
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.instagram.utils.addFlags
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -45,6 +46,7 @@ val addMainFeedActionBarButtonPatch =
                                 invoke-static {v$layoutRegister}, ${PATCHES_DESCRIPTOR}/feed/MainFeedActionBarButton;->addActionBarButton(Landroid/view/ViewGroup;)V
                                 """.trimIndent(),
                             )
+                            addFlags("mainFeedActionBarFlags")
                             true
                         } else {
                             false
