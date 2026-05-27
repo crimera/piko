@@ -5,7 +5,7 @@
  */
 
 
-package app.morphe.extension.instagram.patches.feed;
+package app.morphe.extension.instagram.patches.actionbar;
 
 import android.view.ViewGroup;
 
@@ -13,7 +13,7 @@ import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.constants.UI;
 
-public class MainFeedActionBarButton {
+public class MainFeedActionBar {
     private static boolean PIKO_SETTINGS_ON_ACTION_BAR;
     static {
         PIKO_SETTINGS_ON_ACTION_BAR = Pref.pikoSettingsOnActionBar();

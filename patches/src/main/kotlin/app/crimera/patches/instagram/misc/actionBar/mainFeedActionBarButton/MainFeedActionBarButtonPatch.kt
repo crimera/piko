@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton
 
+import app.crimera.patches.instagram.utils.Constants.ACTIONBAR_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.addFlags
@@ -22,7 +23,7 @@ object BindMainFeedActionBarFingerprint : Fingerprint(
     returnType = "Ljava/lang/Object;",
 )
 
-val addMainFeedActionBarButtonPatch =
+val mainFeedActionBarButtonPatch =
     bytecodePatch(
         description = "This patch is adds support for adding buttons on main feed action bar.",
     ) {
@@ -43,7 +44,7 @@ val addMainFeedActionBarButtonPatch =
                             addInstruction(
                                 index,
                                 """
-                                invoke-static {v$layoutRegister}, ${PATCHES_DESCRIPTOR}/feed/MainFeedActionBarButton;->addActionBarButton(Landroid/view/ViewGroup;)V
+                                invoke-static {v$layoutRegister}, $ACTIONBAR_DESCRIPTOR/MainFeedActionBar;->addActionBarButton(Landroid/view/ViewGroup;)V
                                 """.trimIndent(),
                             )
                             addFlags("mainFeedActionBarFlags")

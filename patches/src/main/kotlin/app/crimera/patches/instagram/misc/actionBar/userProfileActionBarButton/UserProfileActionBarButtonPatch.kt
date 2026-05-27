@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton
 
+import app.crimera.patches.instagram.utils.Constants.ACTIONBAR_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.addFlags
@@ -78,7 +79,7 @@ val userProfileActionBarButtonPatch =
                         leftActionBarElementListIteratorIndex,
                         """
                         iget-object v$freeRegister, v$userObjectHelperRegistry, $userFieldRef
-                        invoke-static {v$layoutRegister, v$freeRegister}, ${PATCHES_DESCRIPTOR}/userprofile/UserProfileActionBarButton;->addActionBarButton(Landroid/view/ViewGroup;Ljava/lang/Object;)V
+                        invoke-static {v$layoutRegister, v$freeRegister}, $ACTIONBAR_DESCRIPTOR/UserProfileActionBar;->addActionBarButton(Landroid/view/ViewGroup;Ljava/lang/Object;)V
                         """.trimIndent(),
                     )
 

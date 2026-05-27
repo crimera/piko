@@ -5,7 +5,7 @@
  */
 
 
-package app.morphe.extension.instagram.patches.dm;
+package app.morphe.extension.instagram.patches.actionbar;
 
 import android.content.Context;
 import android.view.View;
@@ -17,10 +17,9 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.constants.UI;
-import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Strings;
 
-public class DMActionBarButton {
+public class DMActionBar {
     private static final String HIDE_ICON_NAME = "$avd_hide_password__0";
     private static final String SHOW_ICON_NAME = "$avd_show_password__0";
 
