@@ -103,7 +103,7 @@ public class ImportExportLoginTokenPatch {
             // Since the app begins some process immediately after an account is added,
             // we do not use Utils.restartApp() which calls System.exit(0) for safety.
             new AlertDialog.Builder(context)
-                    .setTitle(StringRef.str("piko_pref_success"))
+                    .setTitle(StringRef.str("piko_pref_import_success"))
                     .setMessage(StringRef.str("piko_login_token_import_success_reopen_required"))
                     .setPositiveButton(android.R.string.ok, null)
                     .setCancelable(false)
