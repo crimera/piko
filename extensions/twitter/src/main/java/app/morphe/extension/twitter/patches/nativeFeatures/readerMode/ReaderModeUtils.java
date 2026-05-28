@@ -6,11 +6,12 @@
 
 package app.morphe.extension.twitter.patches.nativeFeatures.readerMode;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.content.Context;
 
 import app.morphe.extension.twitter.settings.ActivityHook;
 import app.morphe.extension.crimera.PikoUtils;
-import app.morphe.extension.shared.StringRef;
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -163,9 +164,9 @@ public class ReaderModeUtils {
             }
         }
         if (deleted) {
-            PikoUtils.toast(StringRef.str("piko_native_reader_mode_cache_delete_success"));
+            PikoUtils.toast(str("piko_native_reader_mode_cache_delete_success"));
         } else {
-            PikoUtils.toast(StringRef.str("piko_native_reader_mode_cache_delete_failed"));
+            PikoUtils.toast(str("piko_native_reader_mode_cache_delete_failed"));
         }
     }
 

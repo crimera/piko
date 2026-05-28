@@ -6,6 +6,8 @@
 
 package app.morphe.extension.twitter.patches.customise.font;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -87,13 +89,13 @@ public class FontPickerFragment extends Fragment {
                 Uri uri = intent.getData();
                 if (hasValidFontHeader(uri)) {
                     if(copyFont(uri)){
-                        toast(StringRef.str("piko_pref_add_font_success"));
+                        toast(str("piko_pref_add_font_success"));
                         app.morphe.extension.twitter.Utils.showRestartAppDialog(getActivity());
                     }else{
-                        toast(StringRef.str("piko_pref_add_font_fail"));
+                        toast(str("piko_pref_add_font_fail"));
                     }
                 } else {
-                    toast(StringRef.str("piko_pref_add_font_desc"));
+                    toast(str("piko_pref_add_font_desc"));
                 }
             }
         }

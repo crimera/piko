@@ -6,6 +6,8 @@
 
 package app.morphe.extension.twitter.patches.nativeFeatures.translator.providers;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.os.AsyncTask;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -15,7 +17,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import app.morphe.extension.shared.StringRef;
 
 public class GTranslate implements Translate {
     private static final String BASE_URL = "https://translate.googleapis.com/translate_a/single";
@@ -107,7 +108,7 @@ public class GTranslate implements Translate {
 
             return translatedText.toString();
         } catch (Exception e) {
-            return StringRef.str("translate_tweet_error") +": "+ e.getMessage();
+            return str("translate_tweet_error") +": "+ e.getMessage();
         }
     }
 }

@@ -6,6 +6,8 @@
 
 package app.morphe.extension.twitter.settings.fragments;
 
+import app.morphe.extension.shared.StringRef.str;
+
 import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
@@ -17,7 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import app.morphe.extension.twitter.Utils;
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.twitter.settings.Settings;
 
 public class BackupPrefFragment extends Fragment {
@@ -41,9 +42,9 @@ public class BackupPrefFragment extends Fragment {
             OutputStream openOutputStream = getActivity().getContentResolver().openOutputStream(uri);
             openOutputStream.write(bytes);
             openOutputStream.close();
-            toast(StringRef.str("piko_pref_export_success"));
+            toast(str("piko_pref_export_success"));
         } catch (IOException e) {
-            toast(StringRef.str("piko_pref_export_failed",prefTag));
+            toast(str("piko_pref_export_failed",prefTag));
         }
     }
 
@@ -54,7 +55,7 @@ public class BackupPrefFragment extends Fragment {
             uri = intent.getData();
         }
         if (uri == null) {
-            toast(StringRef.str("piko_pref_export_no_uri"));
+            toast(str("piko_pref_export_no_uri"));
 
         }
         else if (i2 == -1) {
@@ -76,11 +77,11 @@ public class BackupPrefFragment extends Fragment {
 
         if (featureFlag) {
             this.prefData = Utils.getStringPref(Settings.MISC_FEATURE_FLAGS);
-            prefTag = StringRef.str("piko_title_feature_flags");
+            prefTag = str("piko_title_feature_flags");
             startIntent("feature_flags", 1);
         } else {
             this.prefData = Utils.getAll(true);
-            prefTag = StringRef.str("notification_settings_preferences_category");
+            prefTag = str("notification_settings_preferences_category");
             startIntent("backup", 1);
         }
     }

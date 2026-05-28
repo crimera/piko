@@ -6,6 +6,7 @@
 
 package app.morphe.extension.twitter.patches.nativeFeatures.readerMode;
 
+import static app.morphe.extension.shared.StringRef.str;
 
 import android.app.Fragment;
 import android.content.Context;
@@ -27,7 +28,6 @@ import java.net.URL;
 
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 
 public class ReaderModeFragment extends Fragment {
@@ -47,7 +47,7 @@ public class ReaderModeFragment extends Fragment {
         @JavascriptInterface
         public void copyText(String text) {
             Utils.setClipboard(text);
-            Utils.showToastShort(StringRef.str("link_copied_to_clipboard"));
+            Utils.showToastShort(str("link_copied_to_clipboard"));
         }
     }
 
