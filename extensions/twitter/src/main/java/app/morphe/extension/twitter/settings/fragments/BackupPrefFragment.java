@@ -6,7 +6,7 @@
 
 package app.morphe.extension.twitter.settings.fragments;
 
-import app.morphe.extension.shared.StringRef.str;
+import static app.morphe.extension.shared.StringRef.str;
 
 import android.app.Fragment;
 import android.content.Intent;
