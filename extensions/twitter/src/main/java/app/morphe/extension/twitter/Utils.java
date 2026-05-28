@@ -122,16 +122,6 @@ public class Utils {
         return value;
     }
 
-    public static String strRes(String tag) {
-        try {
-            return str(tag);
-        } catch (Exception e) {
-
-            app.morphe.extension.shared.Utils.showToastShort(tag + " not found");
-        }
-        return tag;
-    }
-
     public static void showRestartAppDialog(Context context) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(context);
 
