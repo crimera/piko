@@ -71,8 +71,7 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.STORIES_AUDIO_AUTOPLAY);
     }
 
-    public
-    static boolean disableStories() {
+    public static boolean disableStories() {
         return SharedPref.getBooleanPref(Settings.DISABLE_STORIES);
     }
 
@@ -175,6 +174,10 @@ public class Pref {
 
     public static boolean downloadUsernameFolder() {
         return SharedPref.getBooleanPref(Settings.DOWNLOAD_USERNAME_FOLDER);
+    }
+
+    public static boolean downloadPicturesFolder() {
+        return SharedPref.getBooleanPref(Settings.DOWNLOAD_PICTURES_FOLDER);
     }
 
     public static boolean hideNavigationFeed() {

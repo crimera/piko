@@ -126,6 +126,8 @@ public class DefaultStrings {
     public static String COPY_POST_OWNER_FULLNAME = "Copy post owner fullname";
     public static String ENABLE_MORE_OPTIONS_ON_POST = "Enable more option on post";
     public static String ENABLE_MORE_OPTIONS_ON_POST_DESC = "Get more options on long pressing the post";
+    public static String USE_PICTURES_FOLDER = "Use Pictures folder";
+    public static String USE_PICTURES_FOLDER_DESC = "Instead of Downloads";
 
     public static String CATEGORY_HIDE_NAVIGATION_BUTTONS = "Hide navigation buttons";
     public static String HIDE_NAVIGATION_FEED = "Hide Feed button";

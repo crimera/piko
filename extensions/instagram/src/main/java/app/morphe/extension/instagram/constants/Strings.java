@@ -41,6 +41,9 @@ public class Strings {
     public static final String IMPORT_ID_MAPPING = langInstance.IMPORT_ID_MAPPING;
     public static final String DOWNLOAD_ID_MAPPING = langInstance.DOWNLOAD_ID_MAPPING;
 
+    public static final String USE_PICTURES_FOLDER = langInstance.USE_PICTURES_FOLDER;
+    public static final String USE_PICTURES_FOLDER_DESC = langInstance.USE_PICTURES_FOLDER_DESC;
+
     public static final String CATEGORY_LINKS = langInstance.CATEGORY_LINKS;
     public static final String OPEN_LINKS_EXTERNALLY = langInstance.OPEN_LINKS_EXTERNALLY;
     public static final String OPEN_LINKS_EXTERNALLY_DESC = langInstance.OPEN_LINKS_EXTERNALLY_DESC;

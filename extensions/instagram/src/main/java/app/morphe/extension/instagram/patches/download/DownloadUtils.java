@@ -42,12 +42,14 @@ import app.morphe.extension.crimera.ObjectBrowser;
 
 public class DownloadUtils {
     private static boolean ENABLE_DIRECT_DOWNLOAD;
+    private static boolean PICTURES_FOLDER;
     private static boolean SPLIT_BY_USERNAME;
     private static boolean DEBUG;
 
     static {
         ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
         SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
+        PICTURES_FOLDER = Pref.downloadPicturesFolder() && SettingsStatus.downloadMedia;
         DEBUG = Pref.pikoDebug();
     }
 
@@ -179,6 +181,7 @@ public class DownloadUtils {
 
     public static void downloadFile(Context ctx, String url, String username, String downloadFilename) {
         String publicFolder = Environment.DIRECTORY_DOWNLOADS;
+        if (PICTURES_FOLDER) publicFolder = Environment.DIRECTORY_PICTURES;
         String subFolder = Strings.DEFAULT_PIKO_FOLDER;
         boolean isAudioFile = username.equals(Strings.DEFAULT_AUDIO_FOLDER);
         // If it's audio file, then file name need not have username_.

@@ -531,6 +531,14 @@ public class ScreenBuilder {
 
         addPreference(category,
                 helper.switchPreference(
+                        Strings.USE_PICTURES_FOLDER,
+                        Strings.USE_PICTURES_FOLDER_DESC,
+                        Settings.DOWNLOAD_PICTURES_FOLDER
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
                         Strings.ENABLE_DIRECT_DOWNLOAD,
                         Strings.ENABLE_DIRECT_DOWNLOAD_DESC,
                         Settings.ENABLE_DIRECT_DOWNLOAD
