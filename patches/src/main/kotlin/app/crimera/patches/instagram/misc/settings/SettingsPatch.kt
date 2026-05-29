@@ -24,10 +24,12 @@ import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -60,13 +62,25 @@ val settingsPatch =
                 )
 
                 val firstInvokeSuperIndex = indexOfFirstInstruction(Opcode.INVOKE_SUPER)
-                addInstruction(
+                val contextRegister = getInstruction(firstInvokeSuperIndex).registersUsed[0]
+                val freeRegister = findFreeRegister(firstInvokeSuperIndex, listOf(firstInvokeSuperIndex))
+
+                addInstructions(
                     firstInvokeSuperIndex + 1,
+                    """
+                    new-instance v$freeRegister, Lapp/morphe/extension/crimera/CustomCrashHandler;
+                    invoke-direct {v$freeRegister, v$contextRegister}, Lapp/morphe/extension/crimera/CustomCrashHandler;-><init>(Landroid/content/Context;)V
+                    invoke-static {v$freeRegister}, Ljava/lang/Thread;->setDefaultUncaughtExceptionHandler(Ljava/lang/Thread${'$'}UncaughtExceptionHandler;)V
+                    """.trimIndent(),
+                )
+
+                addInstruction(
+                    firstInvokeSuperIndex + 2,
                     LOAD_FLAGS_DESCRIPTOR.format("load"),
                 )
                 // Loads strings for common extension.
                 addInstruction(
-                    firstInvokeSuperIndex + 2,
+                    firstInvokeSuperIndex + 3,
                     "invoke-static {}, $CONSTANTS_DESCRIPTOR/Strings;->load()V",
                 )
             }
