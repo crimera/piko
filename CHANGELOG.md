@@ -1,3 +1,9 @@
+## [3.5.0-dev.2](https://github.com/crimera/piko/compare/v3.5.0-dev.1...v3.5.0-dev.2) (2026-05-27)
+
+### 🔧 Improvements
+
+* **Twitter:** replace dynamic string composition with explicit string resources ([#845](https://github.com/crimera/piko/issues/845)) ([49a7c01](https://github.com/crimera/piko/commit/49a7c018c389135fa8a8e3368514b4e339450522))
+
 ## [3.5.0-dev.1](https://github.com/crimera/piko/compare/v3.4.1-dev.1...v3.5.0-dev.1) (2026-05-23)
 
 ### 🐛 Bug Fixes
