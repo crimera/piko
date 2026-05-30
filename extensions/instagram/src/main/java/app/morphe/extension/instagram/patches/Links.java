@@ -15,6 +15,7 @@ import android.net.Uri;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Arrays;
 
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.settings.SettingsStatus;
@@ -32,6 +33,7 @@ public class Links {
     private static final boolean DISABLE_DISCOVER_PEOPLE;
     private static final boolean DISABLE_ADS;
     private static final boolean DISABLE_HIGHLIGHTS;
+    private static final List<String> META_PACKAGES;
 
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
@@ -41,6 +43,23 @@ public class Links {
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
         DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
         DISABLE_ADS = Pref.disableAds() && SettingsStatus.disableAds;
+
+        META_PACKAGES = Arrays.asList(
+                "com.instagram.android",      // Instagram
+                "com.instagram.lite",         // Instagram Lite
+                "com.instagram.barcelona",    // Threads
+                "com.instagram.basel",        // Edits
+                "com.instagram.moonshot",     // Instants
+                "com.whatsapp",               // WhatsApp
+                "com.whatsapp.w4b",           // WhatsApp Business
+                "com.facebook.katana",        // Facebook
+                "com.facebook.lite",          // Facebook Lite
+                "com.facebook.orca",          // Messenger
+                "com.facebook.mlite",         // Messenger Lite
+                "com.facebook.pages.app",     // Meta Business Suite
+                "com.facebook.adsmanager",    // Meta Ads Manager
+                "com.facebook.messengerkids"  // Messenger Kids
+        );
     }
 
     public static boolean setStorySeen(boolean seenStatus){
@@ -138,9 +157,10 @@ public class Links {
                 String currentAppPackageName = Utils.getContext().getPackageName();
 
                 // The idea behind here is when the package name lists of app identity object
-                // contains only one package name and that is similar to the application's package name,
+                // contains only one package name and that is similar to the application's package name (or any of meta app's),
                 // we need to return true else false
-                if(packageNames.get(0).equals(currentAppPackageName)){
+                String appIdentifierPackageName = packageNames.get(0);
+                if(appIdentifierPackageName.equals(currentAppPackageName) || META_PACKAGES.contains(appIdentifierPackageName)){
                     return true;
                 }
             }

@@ -85,31 +85,6 @@ val settingsPatch =
                 )
             }
 
-            // The following handles the signature check while sharing a link externally and opening a link.
-            UriTrustingMethodFingerprint.classDef.methods
-                .first {
-                    it.returnType == "Z" && it.parameters.size == 2 &&
-                        it.parameterTypes.last() == "Z"
-                }.apply {
-                    addInstructionsWithLabels(
-                        0,
-                        """
-                        invoke-static {p1}, ${LINKS_DESCRIPTOR}->signatureCheck(Ljava/lang/Object;)Z
-                        move-result v0
-                        if-eqz v0, :piko
-                        return v0
-                        """.trimIndent(),
-                        ExternalLabel("piko", getInstruction(0)),
-                    )
-                }
-
-            AppIdentityToStringFingerprint.method.apply {
-                val strIndex = AppIdentityToStringFingerprint.stringMatches[1].index
-
-                val firstIGetObject = getInstruction(indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT))
-                SignatureCheckExtensionFingerprint.changeFirstString(firstIGetObject.fieldExtractor().name)
-            }
-
             // For welcome message.
             MainFeedFragmentOnCreateFingerprint.apply {
                 val strIndex = stringMatches[0].index
