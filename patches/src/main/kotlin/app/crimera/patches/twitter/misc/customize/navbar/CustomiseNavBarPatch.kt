@@ -11,7 +11,7 @@ import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.CUSTOMISE_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.crimera.patches.twitter.utils.flagSettings
-import app.crimera.patches.twitter.utils.is_11_88_stable_or_greater
+import app.crimera.patches.twitter.utils.is_11_88_or_greater
 import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
@@ -141,7 +141,7 @@ val customiseNavBarPatch =
                 }
             }
 
-            if (is_11_88_stable_or_greater) {
+            if (is_11_88_or_greater) {
                 val (listField, mapField) =
                     with(CustomiseNavBarSecondaryInitFingerprint.instructionMatches) {
                         Pair(
