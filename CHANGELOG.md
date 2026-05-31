@@ -1,3 +1,9 @@
+## [3.5.0-dev.4](https://github.com/crimera/piko/compare/v3.5.0-dev.3...v3.5.0-dev.4) (2026-05-31)
+
+### 🔧 Improvements
+
+* **Twitter:** Update check mappings logic ([457ee93](https://github.com/crimera/piko/commit/457ee9333e91479d25e3bf72c4ada4c1978d8d24))
+
 ## [3.5.0-dev.3](https://github.com/crimera/piko/compare/v3.5.0-dev.2...v3.5.0-dev.3) (2026-05-31)
 
 ### 🐛 Bug Fixes
