@@ -19,6 +19,7 @@ public class Strings {
     public static final String SHARED_PREF_NAME = PIKO_SETTINGS;
     public static final String DEFAULT_PIKO_FOLDER = "Piko-Instagram";
     public static final String DEFAULT_AUDIO_FOLDER = "Audio";
+    public static final String DEFAULT_DM_FOLDER = "DM";
 
     public static final String PIKO_SETTINGS_TITLE = langInstance.PIKO_SETTINGS_TITLE;
     public static final String CATEGORY_ADS = langInstance.CATEGORY_ADS;

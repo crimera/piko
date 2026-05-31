@@ -77,7 +77,7 @@ public class ProfileMoreOption {
                         } else if (selectedOption.equals(Strings.DOWNLOAD_PROFILE_PICTURE)) {
                             String url = userData.getProfilePictureUrl();
                             String username = userData.getUsername();
-                            String downloadFilename = "dp.jpg";
+                            String downloadFilename = username+"_dp.jpg";
                             DownloadUtils.downloadMediaUrl(context, url, username, downloadFilename);
                             toCopy = false;
 
