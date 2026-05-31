@@ -37,7 +37,7 @@ val checkMappingsPatch =
                 val targetIndex = ifGezIndex + 1
                 val fragmentRegister = getInstruction(targetIndex).registersUsed[0]
 
-                val firstSGetObject = getInstruction(indexOfFirstInstruction(Opcode.SGET_OBJECT))
+                val firstGoto16 = getInstruction(indexOfFirstInstruction(Opcode.GOTO_16))
 
                 addInstructionsWithLabels(
                     targetIndex,
@@ -45,7 +45,7 @@ val checkMappingsPatch =
                     invoke-static {v$fragmentRegister}, $DOWNLOAD_DESCRIPTOR/DownloadMapping;->checkMappings(Landroidx/fragment/app/Fragment;)V
                     goto: piko
                     """.trimIndent(),
-                    ExternalLabel("piko", firstSGetObject),
+                    ExternalLabel("piko", firstGoto16),
                 )
             }
         }
