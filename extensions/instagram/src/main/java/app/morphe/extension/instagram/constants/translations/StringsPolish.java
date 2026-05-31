@@ -31,6 +31,8 @@ public class StringsPolish extends DefaultStrings {
         this.IMPORT_DEV_OVERRIDES = "Importuj nadpisania";
         this.IMPORT_ID_MAPPING = "Importuj pliki mapowania";
         this.DOWNLOAD_ID_MAPPING = "Pobierz plik mapowania";
+        this.MISSING_MAPPING_FILE = "Brak pliku mapowania";
+        this.MISSING_MAPPING_FILE_DESC = "Bez tego pliku opcje programisty nie będą miały czytelnych nazw. Chcesz go pobrać?";
 
         this.CATEGORY_LINKS = "Linki";
         this.OPEN_LINKS_EXTERNALLY = "Otwieraj linki zewnętrznie";
@@ -46,6 +48,8 @@ public class StringsPolish extends DefaultStrings {
         this.TURN_ON_ALL_GHOST_MODES = "Włącz wszystkie tryby ducha";
         this.GHOST_MODES_ON = "Tryb ducha: WŁĄCZONY";
         this.GHOST_MODES_DEFAULT = "Tryb ducha: DOMYŚLNY";
+        this.GHOST_MODES_QUICK_TOGGLE = "Włącz szybki przełącznik trybu ducha";
+        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Dodaje na pasku akcji czatu przycisk do szybkiego sterowania trybem ducha";
 
         this.CATEGORY_DISTRACTION_FREE = "Bez rozpraszaczy";
         this.DISABLE_STORIES = "Wyłącz relacje";
@@ -102,6 +106,8 @@ public class StringsPolish extends DefaultStrings {
         this.DOWNLOAD_PROFILE_PICTURE = "Pobierz zdjęcie profilowe";
         this.COPIED = "Skopiowano";
         this.MORE_PROFILE_OPTIONS = "Więcej opcji profilu";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "Opcje profilu na pasku akcji";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "Przenosi przycisk opcji profilu na pasek akcji";
         this.REMOVE_EMPTY_BOTTOM_SPACE = "Usuń pustą przestrzeń na dole";
         this.UNLOCK_PLUS_BENEFITS = "Odblokuj korzyści Plus";
         this.UNLOCK_PLUS_BENEFITS_DESC = "Odblokowuje funkcje subskrypcji \"Plus\", które są weryfikowane lokalnie. UŻYWAJ NA WŁASNE RYZYKO";
@@ -159,6 +165,7 @@ public class StringsPolish extends DefaultStrings {
         this.IMPORT_FAIL = "Błąd importu";
         this.RESTART_APP = "Wymagany restart aplikacji, aby zastosować zmiany";
         this.OK = "OK";
+        this.CANCEL = "Anuluj";
         this.DELETED = "Usunięto";
         this.PIKO_DEBUG = "Debugowanie Piko";
         this.PIKO_DEBUG_DESC = "Dodaje opcje debugowania do niektórych komponentów (do testów)";
@@ -181,7 +188,9 @@ public class StringsPolish extends DefaultStrings {
         this.WELCOME_TITLE = "Witaj w Piko";
         this.WELCOME_MESSAGE = "Aby wyciągnąć z Piko jak najwięcej, zajrzyj do ustawień i dostosuj je pod siebie";
         this.GOTO_PIKO_SETTINGS = "Przejdź do ustawień Piko";
-        this.NO_INTERNET = "Brak połączenia z internetem";     
-        this.TAP_HERE = "Kliknij tutaj";   
+        this.NO_INTERNET = "Brak połączenia z internetem";
+        this.TAP_HERE = "Kliknij tutaj";
+        this.PIKO_SETTINGS_ON_ACTION_BAR = "Ustawienia Piko na pasku akcji";
+        this.PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Przenosi skrót do ustawień Piko na pasek akcji strony głównej";
     }
 }
