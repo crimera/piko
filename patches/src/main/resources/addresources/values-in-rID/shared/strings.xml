@@ -2,5 +2,4 @@
 <resources>
     <string name="piko_title_settings">Pengaturan Piko</string>
     <string name="piko_title_piko_patches">Tambalan Piko</string>
-    <string name="piko_title_piko_integrations">Integrasi Piko</string>
 </resources>

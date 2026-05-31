@@ -2,13 +2,11 @@
 <resources>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
-    <string name="piko_pref_reader_mode">tryb czytnika</string>
-    <string name="piko_pref_reader_mode_desc">Włącza tryb czytnika dla długich wątków</string>
-    <string name="piko_pref_undo_posts">cofanie wpisów</string>
+    <string name="piko_pref_undo_posts">Włącz cofanie wpisów</string>
     <string name="piko_pref_undo_posts_desc">Umożliwia cofnięcie wpisu przed jego opublikowaniem</string>
     <string name="piko_pref_undo_posts_btn">Ustawienia cofania wpisów</string>
     <string name="piko_pref_icon_n_navbar_btn">Ustawienia ikony i paska nawigacji</string>
-    <string name="piko_pref_enable_force_pip">automatyczny tryb PiP</string>
+    <string name="piko_pref_enable_force_pip">Wymuś tryb PiP</string>
     <string name="piko_pref_enable_force_pip_desc">Włącza tryb PiP (Obraz w obrazie) po zamknięciu aplikacji</string>
     <!-- Download Settings -->
     <string name="piko_title_download">Pobieranie</string>
@@ -26,7 +24,7 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">Udostępnij link</string>
     <!-- Native -->
     <string name="piko_title_native">Funkcje natywne</string>
-    <string name="piko_pref_native_page_desc">Funkcje natywne Piko są dostępne w menu udostępniania wpisów.</string>
+    <string name="piko_pref_native_page_desc">Funkcje natywne Piko są dostępne w menu posta.</string>
     <string name="piko_title_native_downloader">Pobieranie</string>
     <string name="piko_title_native_downloader_toggle">Włącz natywne pobieranie</string>
     <string name="piko_pref_native_downloader_inline_button">Pokaż przycisk pobierania</string>
@@ -36,6 +34,7 @@
     <string name="piko_pref_native_downloader_no_media">Nie znaleziono multimediów</string>
     <string name="piko_pref_native_downloader_filename_title">Format nazwy pliku</string>
     <string name="piko_browse_object_title">Przeglądaj obiekt tweeta</string>
+    <string name="piko_browse_object_toggle">Włącz przeglądanie obiektów tweeta</string>
     <string name="piko_share_image_title">Udostępnij wpis jako obraz</string>
     <string name="piko_share_image_toggle">Włącz udostępnianie wpisu jako obraz</string>
     <string name="piko_share_image_autocleanup">Automatyczne czyszczenie obrazów</string>
@@ -49,6 +48,7 @@
     <string name="piko_native_translator_google_v2">Tłumacz Google V2</string>
     <string name="piko_native_translator_fxtwitter">FxTwitter API</string>
     <string name="piko_title_native_reader_mode">Tryb czytnika</string>
+    <string name="piko_native_reader_mode_toggle">Włącz tryb czytnika</string>
     <string name="piko_native_reader_mode_grok_thread">Przeanalizuj ten wątek</string>
     <string name="piko_native_reader_mode_grok_author">Więcej o autorze</string>
     <string name="piko_native_reader_mode_source">Źródło</string>
@@ -63,30 +63,39 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Nie udało się wyczyścić pamięci podręcznej</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Reklamy</string>
-    <string name="piko_pref_hide_promoted_posts">promowane wpisy</string>
-    <string name="piko_pref_wtf_section">sekcje \"Kogo obserwować\"</string>
-    <string name="piko_pref_cts_section">sekcje \"Polecani twórcy treści\"</string>
-    <string name="piko_pref_ctj_section">sekcje \"Dołącz do społeczności\"</string>
-    <string name="piko_pref_ryb_section">sekcje \"Przejrzyj zakładki\"</string>
-    <string name="piko_pref_pinned_posts_section">sekcje \"Przypięte wpisy przez obserwujących\"</string>
-    <string name="piko_pref_hide_detailed_posts">powiązane wpisy (w odpowiedziach)</string>
-    <string name="piko_pref_hide_premium_prompt">banery subskrypcji Premium</string>
-    <string name="piko_pref_hide_todays_news">bieżące wiadomości</string>
+    <string name="piko_pref_hide_promoted_posts">Ukryj promowane wpisy</string>
+    <string name="piko_pref_wtf_section">Ukryj sekcję \"Kogo obserwować\"</string>
+    <string name="piko_pref_cts_section">Ukryj sekcję \"Polecani twórcy treści\"</string>
+    <string name="piko_pref_ctj_section">Ukryj sekcję \"Dołącz do społeczności\"</string>
+    <string name="piko_pref_ryb_section">Ukryj sekcję \"Przejrzyj zakładki\"</string>
+    <string name="piko_pref_pinned_posts_section">Ukryj sekcję \"Przypięte wpisy przez obserwujących\"</string>
+    <string name="piko_pref_hide_related_posts">Ukryj powiązane wpisy (w odpowiedziach)</string>
+    <string name="piko_pref_hide_premium_prompt">Ukryj banery subskrypcji Premium</string>
+    <string name="piko_pref_hide_todays_news">Ukryj bieżące wiadomości</string>
     <string name="piko_pref_del_from_db">Usuń wpisy z bazy danych</string>
+    <string name="piko_pref_db_promoted_posts">Promowane wpisy</string>
+    <string name="piko_pref_db_wtf_section">Sekcja \"Kogo obserwować\"</string>
+    <string name="piko_pref_db_cts_section">Sekcja \"Polecani twórcy treści\"</string>
+    <string name="piko_pref_db_ctj_section">Sekcja \"Dołącz do społeczności\"</string>
+    <string name="piko_pref_db_ryb_section">Sekcja \"Przejrzyj zakładki\"</string>
+    <string name="piko_pref_db_pinned_posts_section">Sekcja \"Przypięte wpisy przez obserwujących\"</string>
+    <string name="piko_pref_db_related_posts">Powiązane wpisy (w odpowiedziach)</string>
+    <string name="piko_pref_db_premium_prompt">Banery subskrypcji Premium</string>
+    <string name="piko_pref_db_todays_news">Bieżące wiadomości</string>
     <string name="piko_pref_db_not_found">Nie znaleziono bazy danych</string>
     <string name="piko_pref_db_not_open">Baza danych nie jest otwarta</string>
     <string name="piko_pref_db_del_items">Usunięte elementy</string>
-    <string name="piko_pref_hide_premium_upsell">nagłówek Premium</string>
-    <string name="piko_pref_hide_premium_upsell_desc">Usuwa nagłówek zachęcający do zakupu Premium na osi czasu</string>
-    <string name="piko_pref_top_people_search">sekcje osób w wyszukiwaniu</string>
-    <string name="piko_pref_top_people_search_desc">Usuwa sekcję osób z wyników wyszukiwania</string>
+    <string name="piko_pref_hide_premium_upsell">Ukryj nagłówek Premium</string>
+    <string name="piko_pref_hide_premium_upsell_desc">Ukrywa nagłówek zachęcający do zakupu Premium na osi czasu</string>
+    <string name="piko_pref_top_people_search">Ukryj sekcję osób w wyszukiwaniu</string>
+    <string name="piko_pref_top_people_search_desc">Ukrywa sekcję osób z wyników wyszukiwania</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">Różne</string>
-    <string name="piko_pref_chirp_font">czcionkę Chirp</string>
-    <string name="piko_pref_hide_fab">pływający przycisk akcji</string>
-    <string name="piko_pref_hide_fab_menu">przyciski menu akcji</string>
-    <string name="piko_pref_rec_users">polecanych użytkowników</string>
-    <string name="piko_pref_hide_view_count">licznik wyświetleń</string>
+    <string name="piko_pref_chirp_font">Włącz czcionkę Chirp</string>
+    <string name="piko_pref_hide_fab">Ukryj pływający przycisk akcji</string>
+    <string name="piko_pref_hide_fab_menu">Ukryj przyciski menu akcji</string>
+    <string name="piko_pref_rec_users">Ukryj polecanych użytkowników</string>
+    <string name="piko_pref_hide_view_count">Ukryj licznik wyświetleń</string>
     <string name="piko_pref_custom_share_domain">Własna domena udostępniania</string>
     <string name="piko_pref_custom_share_domain_desc">Domena używana podczas udostępniania wpisów</string>
     <string name="piko_pref_show_sensitive_media">Wyświetlaj wrażliwe treści</string>
@@ -95,13 +104,13 @@
     <string name="piko_pref_unshorten_link">Rozwijaj skrócone linki</string>
     <string name="piko_pref_unshorten_link_desc">Zastępuje linki t.co pełnymi adresami</string>
     <string name="piko_pref_round_off_numbers">Zaokrąglaj liczby</string>
-    <string name="piko_pref_round_off_numbers_desc">Skraca duże liczby do formatu K (tysiące) i M (miliony)</string>
-    <string name="piko_pref_debug_menu">menu debugowania wpisów</string>
+    <string name="piko_pref_round_off_numbers_desc">Zaokrągla liczby do formatu K (tysiące) i M (miliony)</string>
+    <string name="piko_pref_debug_menu">Włącz menu debugowania dla wpisów</string>
     <string name="piko_pref_quick_settings">Włącz szybkie ustawienia</string>
     <string name="piko_pref_quick_settings_summary">Dodaje przycisk szybkich ustawień na pasku bocznym</string>
     <string name="piko_pref_pause_search_suggestion">Wstrzymaj sugestie wyszukiwania</string>
     <string name="piko_pref_pause_search_suggestion_desc">Sugestie wyszukiwania nie będą zapisywane lokalnie</string>
-    <string name="piko_pref_search_suggestion">sugestie wyszukiwania</string>
+    <string name="piko_pref_search_suggestion">Ukryj sugestie wyszukiwania</string>
     <string name="piko_pref_search_suggestion_desc">Ukrywa sugestie wyszukiwania w sekcji przeglądania</string>
     <string name="piko_disunify_xchat_system">Rozdziel system XChat</string>
     <string name="piko_disunify_xchat_system_desc">Przywraca klasyczne funkcje, takie jak wiadomości i menu udostępniania</string>
@@ -112,28 +121,32 @@
     <string name="piko_pref_edit_flag_title">Edytuj flagę</string>
     <string name="piko_pref_add_flag_title">Dodaj flagę</string>
     <string name="piko_pref_search_flags">Szukaj flagi</string>
+    <string name="piko_pref_import_flags">Importuj flagi</string>
+    <string name="piko_pref_export_flags">Eksportuj flagi</string>
+    <string name="piko_pref_reset_flags">Zresetuj flagi</string>
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">Oś czasu</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Wyłącz auto-odświeżanie osi</string>
     <string name="piko_pref_show_post_source">Pokaż źródło wpisu</string>
     <string name="piko_pref_show_post_source_desc">Etykieta jest widoczna tylko przy publicznych wpisach, może wystąpić opóźnienie przy otwieraniu szczegółów</string>
-    <string name="piko_pref_hide_live_threads">wydarzenia na żywo</string>
+    <string name="piko_pref_hide_live_threads">Ukryj wydarzenia na żywo</string>
     <string name="piko_pref_hide_live_threads_desc">Ukrywa transmisje i pokoje na osi czasu</string>
-    <string name="piko_pref_hide_banner">licznik nowych wpisów</string>
-    <string name="piko_pref_hide_banner_desc">pływający przycisk informujący o nowych wpisach</string>
-    <string name="piko_pref_hide_bmk_timeline">ikonę zakładek na osi czasu</string>
+    <string name="piko_pref_hide_banner">Ukryj licznik nowych wpisów</string>
+    <string name="piko_pref_hide_banner_desc">Ukrywa pływający przycisk informujący o nowych wpisach</string>
+    <string name="piko_pref_hide_bmk_timeline">Ukryj ikonę zakładek na osi czasu</string>
     <string name="piko_pref_force_translate">Wymuś przycisk tłumaczenia</string>
     <string name="piko_pref_force_translate_desc">Pokazuje przycisk tłumaczenia przy wszystkich wpisach</string>
-    <string name="piko_pref_hide_quick_promote">przycisk promowania</string>
+    <string name="piko_pref_hide_quick_promote">Ukryj przycisk promowania</string>
     <string name="piko_pref_hide_quick_promote_desc">Ukrywa przycisk promowania pod własnymi wpisami</string>
     <string name="piko_pref_show_poll_result">Pokaż wyniki ankiet</string>
     <string name="piko_pref_show_poll_result_desc">Pozwala zobaczyć wyniki ankiety bez oddawania głosu</string>
-    <string name="piko_pref_hide_immersive_player">odtwarzacz pełnoekranowy</string>
+    <string name="piko_pref_hide_community_notes">Ukryj uwagi społeczności</string>
+    <string name="piko_pref_hide_immersive_player">Ukryj pełnoekranowy odtwarzacz</string>
     <string name="piko_pref_hide_immersive_player_desc">Wyłącza gest przesuwania w górę dla kolejnych filmów</string>
-    <string name="piko_pref_enable_vid_auto_advance">auto-przewijanie filmów</string>
+    <string name="piko_pref_enable_vid_auto_advance">Włącz auto-przewijanie filmów</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">Włącza automatyczne przechodzenie do kolejnego filmu w widoku pełnoekranowym</string>
-    <string name="piko_pref_hide_hidden_replies">ukryte odpowiedzi</string>
-    <string name="piko_pref_force_hd">wymuszenie jakości filmów w HD</string>
+    <string name="piko_pref_hide_hidden_replies">Ukryj ukryte odpowiedzi</string>
+    <string name="piko_pref_force_hd">Wymuś jakość filmów w HD</string>
     <string name="piko_pref_force_hd_desc">Filmy będą zawsze odtwarzane w najwyższej dostępnej jakości</string>
     <string name="piko_pref_hide_nudge_button">Ukryj przycisk sugestii</string>
     <string name="piko_pref_hide_nudge_button_desc">Ukrywa przyciski obserwowania i subskrypcji przy wpisach</string>
@@ -164,6 +177,7 @@
     <string name="piko_pref_customisation_post_font_size">Rozmiar czcionki wpisów</string>
     <string name="piko_pref_customisation_search_type_ahead">Sugestie wyszukiwania do ukrycia</string>
     <string name="piko_pref_customisation_change_app_icon">Zmień ikonę aplikacji</string>
+    <string name="piko_notifications_tab_priority">Priorytet</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Styl czcionki</string>
     <string name="piko_pref_add_font">Dodaj czcionkę</string>
@@ -184,9 +198,11 @@
     <string name="piko_pref_server_response_logging_file_overwrite_desc">Czyści istniejące logi przy każdym starcie aplikacji</string>
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Kopia zapasowa i przywracanie</string>
-    <string name="piko_pref_export">Eksportuj %s</string>
-    <string name="piko_pref_import">Importuj %s</string>
-    <string name="piko_pref_success">powiodło się</string>
+    <string name="piko_pref_import_settings">Importuj ustawienia Piko</string>
+    <string name="piko_pref_export_settings">Eksportuj ustawienia Piko</string>
+    <string name="piko_pref_reset_settings">Zresetuj ustawienia Piko</string>
+    <string name="piko_pref_export_success">Pomyślnie eksportowano</string>
+    <string name="piko_pref_import_success">Pomyślnie importowano</string>
     <string name="piko_pref_export_failed">Błąd: Eksportowanie %s nie powiodło się</string>
     <string name="piko_pref_import_failed">Błąd: Importowanie %s nie powiodło się</string>
     <string name="piko_pref_export_no_uri">Błąd: Nie podano miejsca docelowego</string>
@@ -203,8 +219,8 @@
     <string name="piko_pref_included">Uwzględniono</string>
     <string name="piko_pref_excluded">Wykluczono</string>
     <string name="piko_pref_app_restart_rec">Zalecany jest restart aplikacji</string>
-    <string name="piko_pref_remove">Usuń %s</string>
-    <string name="piko_pref_enable">Włącz %s</string>
+    <string name="piko_dialog_delete_title">Usuń</string>
+    <string name="piko_dialog_delete_message">Usunąć %s?</string>
     <string name="piko_single_page_settings">Pojedyncza strona ustawień</string>
     <string name="piko_single_page_settings_desc">Wyświetla wszystkie opcje na jednej liście</string>
     <string name="piko_pref_search_type_ahead_users">Użytkownicy</string>
