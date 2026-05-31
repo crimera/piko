@@ -23,13 +23,6 @@ internal object FeedButtonOnClickFingerprint : Fingerprint(
     returnType = "V",
 )
 
-// Also used to in description extraction in MediaEntity
-object EditMediaInfoGetCurrentMediaIdFingerprint : Fingerprint(
-    definingClass = EDIT_MEDIA_INFO_FRAGMENT_CLASS,
-    returnType = "Ljava/lang/String;",
-    parameters = listOf(),
-)
-
 internal object AddReelButtonFingerprint : Fingerprint(
     strings = listOf("ClipsOrganicMediaItemViewMoreOptionsController"),
 )

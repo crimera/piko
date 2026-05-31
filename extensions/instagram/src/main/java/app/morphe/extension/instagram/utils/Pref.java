@@ -13,6 +13,10 @@ import app.morphe.extension.crimera.SharedPref;
 
 @SuppressWarnings("unused")
 public class Pref {
+    public static boolean pikoSettingsOnActionBar() {
+        return SharedPref.getBooleanPref(Settings.PIKO_SETTINGS_ON_ACTION_BAR);
+    }
+
     public static boolean pikoDebug() {
         return SharedPref.getBooleanPref(Settings.PIKO_DEBUG);
     }
@@ -50,6 +54,14 @@ public class Pref {
 
     public static boolean setTurnOnAllGhostModes(boolean bool) {
         return SharedPref.setBooleanPref(Settings.TURN_ON_ALL_GHOST_MODES.key,bool);
+    }
+
+    public static boolean enableGhostModeQuickToggle() {
+        return SharedPref.getBooleanPref(Settings.GHOST_MODES_QUICK_TOGGLE);
+    }
+
+    public static boolean enableMoreOptionsOnProfileQuickToggle() {
+        return SharedPref.getBooleanPref(Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE) && SettingsStatus.moreOptionsOnProfile;
     }
 
     public static boolean viewStoriesAnonymously() {
