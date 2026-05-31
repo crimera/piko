@@ -9,8 +9,6 @@ package app.crimera.patches.instagram.misc.internalStuffs.developerOptions
 import app.morphe.patcher.Fingerprint
 import com.android.tools.smali.dexlib2.AccessFlags
 
-internal const val QE_FRAGMENT_DESCRIPTOR = "Lcom/instagram/debug/quickexperiment/QuickExperimentCategoriesFragment;"
-
 internal object FragmentNavigatorTransitionFingerprint : Fingerprint(
     returnType = "V",
     parameters = listOf("Ljava/lang/Integer;"),

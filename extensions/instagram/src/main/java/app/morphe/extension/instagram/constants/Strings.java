@@ -41,6 +41,8 @@ public class Strings {
     public static final String IMPORT_DEV_OVERRIDES = langInstance.IMPORT_DEV_OVERRIDES;
     public static final String IMPORT_ID_MAPPING = langInstance.IMPORT_ID_MAPPING;
     public static final String DOWNLOAD_ID_MAPPING = langInstance.DOWNLOAD_ID_MAPPING;
+    public static final String MISSING_MAPPING_FILE = langInstance.MISSING_MAPPING_FILE;
+    public static final String MISSING_MAPPING_FILE_DESC = langInstance.MISSING_MAPPING_FILE_DESC;
 
     public static final String CATEGORY_LINKS = langInstance.CATEGORY_LINKS;
     public static final String OPEN_LINKS_EXTERNALLY = langInstance.OPEN_LINKS_EXTERNALLY;
@@ -172,6 +174,7 @@ public class Strings {
     public static final String IMPORT_FAIL = langInstance.IMPORT_FAIL;
     public static final String RESTART_APP = langInstance.RESTART_APP;
     public static final String OK = langInstance.OK;
+    public static final String CANCEL = langInstance.CANCEL;
     public static final String DELETED = langInstance.DELETED;
     public static final String PIKO_DEBUG = langInstance.PIKO_DEBUG;
     public static final String PIKO_DEBUG_DESC = langInstance.PIKO_DEBUG_DESC;

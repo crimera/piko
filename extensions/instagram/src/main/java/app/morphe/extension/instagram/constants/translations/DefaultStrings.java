@@ -30,6 +30,8 @@ public class DefaultStrings {
     public static String IMPORT_DEV_OVERRIDES = "Import overrides";
     public static String IMPORT_ID_MAPPING = "Import mapping files";
     public static String DOWNLOAD_ID_MAPPING = "Download mapping file";
+    public static String MISSING_MAPPING_FILE = "Missing mapping file";
+    public static String MISSING_MAPPING_FILE_DESC = "Without mapping file, developer options will not have proper names. Do you want to download it ?";
 
     public static String CATEGORY_LINKS = "Links";
     public static String OPEN_LINKS_EXTERNALLY = "Open links externally";
@@ -163,6 +165,7 @@ public class DefaultStrings {
     public static String IMPORT_FAIL = "Import failed";
     public static String RESTART_APP = "The app needs to be restarted for the changes to reflect";
     public static String OK = "OK";
+    public static String CANCEL = "Cancel";
     public static String DELETED = "Deleted";
     public static String PIKO_DEBUG = "Piko debug";
     public static String PIKO_DEBUG_DESC = "Adds debug option on some of the components for testing";
