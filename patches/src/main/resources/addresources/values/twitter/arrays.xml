@@ -132,6 +132,7 @@
         <item>@string/vit_notifications_tab_all</item>
         <item>@string/vit_notifications_tab_mentions</item>
         <item>@string/vit_notifications_tab_verified</item>
+        <item>@string/piko_notifications_tab_priority</item>
     </string-array>
 
     <string-array name="piko_array_readermode_themes">
@@ -283,6 +284,7 @@
         <item>all</item>
         <item>mentions</item>
         <item>verified</item>
+        <item>priority</item>
     </string-array>
 
     <string-array name="piko_array_readermode_themes_val">
