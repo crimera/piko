@@ -8,7 +8,6 @@ package app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton
 
 import app.crimera.patches.instagram.utils.Constants.ACTIONBAR_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.addFlags
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -22,7 +21,6 @@ import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal object ProfileActionBarFingerprint : Fingerprint(
     definingClass = "Lcom/instagram/profile/actionbar/ProfileActionBar;",
@@ -52,33 +50,37 @@ val userProfileActionBarButtonPatch =
                     val actionBarLeftLayout = getInstruction(leftActionBarElementListIteratorIndex - 1)
                     val layoutRegister = actionBarLeftLayout.registersUsed[0]
 
-                    val getFadeInFollowButtonIndex =
-                        indexOfFirstInstruction(
-                            leftActionBarElementListIteratorIndex,
-                            Opcode.INVOKE_STATIC,
-                        )
-                    val getFadeInFollowButtonInstruction = getInstruction(getFadeInFollowButtonIndex)
+                    // + 1 before the method is not static.
+                    val userHelperClassParameterIndex = parameters.indexOfFirst { it.type == userHelperClassName } + 1
 
-                    val userObjectHelperClassParameterIndex =
-                        getFadeInFollowButtonInstruction
-                            .getReference<MethodReference>()!!
-                            .parameterTypes
-                            .indexOf(
-                                userHelperClassName,
-                            )
-                    val userObjectHelperRegistry =
-                        getFadeInFollowButtonInstruction.registersUsed[userObjectHelperClassParameterIndex]
+//                    val getFadeInFollowButtonIndex =
+//                        indexOfFirstInstruction(
+//                            leftActionBarElementListIteratorIndex,
+//                            Opcode.INVOKE_STATIC,
+//                        )
+//                    val getFadeInFollowButtonInstruction = getInstruction(getFadeInFollowButtonIndex)
+//
+//                    val userObjectHelperClassParameterIndex =
+//                        getFadeInFollowButtonInstruction
+//                            .getReference<MethodReference>()!!
+//                            .parameterTypes
+//                            .indexOf(
+//                                userHelperClassName,
+//                            )
+//                    val userObjectHelperRegistry =
+//                        getFadeInFollowButtonInstruction.registersUsed[userObjectHelperClassParameterIndex]
 
                     val freeRegister =
                         findFreeRegister(
                             leftActionBarElementListIteratorIndex,
-                            listOf(userObjectHelperRegistry, layoutRegister),
+                            listOf(layoutRegister),
                         )
 
                     addInstructions(
                         leftActionBarElementListIteratorIndex,
                         """
-                        iget-object v$freeRegister, v$userObjectHelperRegistry, $userFieldRef
+                        move-object/from16 v$freeRegister, p$userHelperClassParameterIndex
+                        iget-object v$freeRegister, v$freeRegister, $userFieldRef
                         invoke-static {v$layoutRegister, v$freeRegister}, $ACTIONBAR_DESCRIPTOR/UserProfileActionBar;->addActionBarButton(Landroid/view/ViewGroup;Ljava/lang/Object;)V
                         """.trimIndent(),
                     )
