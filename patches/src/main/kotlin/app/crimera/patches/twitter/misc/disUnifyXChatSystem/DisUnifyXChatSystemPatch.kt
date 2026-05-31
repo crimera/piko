@@ -10,7 +10,7 @@ import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X_11_69
 import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
-import app.crimera.patches.twitter.utils.is_11_69_stable_or_greater
+import app.crimera.patches.twitter.utils.is_11_70_or_greater
 import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -39,32 +39,29 @@ val disUnifyXchatSystemPatch =
         dependsOn(settingsPatch, versionCheckPatch)
 
         execute {
+            if (is_11_70_or_greater) {
+                return@execute Logger.getLogger(this::class.java.name).warning(
+                    "The patch \"Disunify xchat system\" is force succeeded and does not work on any version above 11.69.\n" +
+                            "Please unselect the patch if you are using a version higher than 11.69."
+                )
+            }
 
-            if (!is_11_69_stable_or_greater) {
-                XchatSubSystemUserCheckFingerprint
-                    .apply {
-                        val strIndx = stringMatches.first { it.string == "userId" }.index
-                        method.apply {
-                            addInstructionsWithLabels(
-                                0,
-                                """
+            XchatSubSystemUserCheckFingerprint
+                .apply {
+                    val strIndx = stringMatches.first { it.string == "userId" }.index
+                    method.apply {
+                        addInstructionsWithLabels(
+                            0,
+                            """
                                 invoke-static {}, $PREF_DESCRIPTOR;->disUnifyXChatSystem()Z
                                 move-result v0
                                 if-nez v0, :piko
                                 return v0
-                                """.trimIndent(),
-                                ExternalLabel("piko", instructions[strIndx]),
-                            )
-                            enableSettings("disUnifyXChatSystem")
-                        }
+                            """.trimIndent(),
+                            ExternalLabel("piko", instructions[strIndx]),
+                        )
+                        enableSettings("disUnifyXChatSystem")
                     }
-            } else {
-                Logger
-                    .getLogger(
-                        this::class.java.name,
-                    ).warning(
-                        "The patch \"Disunify xchat system\" is force succeeded and does not work on any version above 11.69.\nPlease unselect the patch if you are using a version higher than 11.69.",
-                    )
-            }
+                }
         }
     }

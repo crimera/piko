@@ -11,21 +11,27 @@ import kotlin.properties.Delegates
 
 // Based on https://github.com/MorpheApp/morphe-patches/blob/main/patches/src/main/kotlin/app/morphe/patches/reddit/misc/version/VersionCheckPatch.kt
 
-var is_11_92_stable_or_greater: Boolean by Delegates.notNull()
+// For XChat Subsystem patch.
+var is_11_70_or_greater: Boolean by Delegates.notNull()
     private set
-var is_11_69_stable_or_greater: Boolean by Delegates.notNull()
+
+// For Customize Navigation Bar items patch.
+var is_11_88_or_greater: Boolean by Delegates.notNull()
+    private set
+
+// For share menu button enum init.
+var is_11_92_or_greater: Boolean by Delegates.notNull()
     private set
 
 val versionCheckPatch =
     bytecodePatch {
         execute {
-            val versionName = packageMetadata.versionName
+            val versionCode = packageMetadata.versionCode.toInt()
 
-            fun isEqualsOrGreaterThan(version: String): Boolean = versionName >= version
+            fun isEqualsOrGreaterThan(version: Int): Boolean = versionCode >= version
 
-            // For share menu button enum init.
-            is_11_92_stable_or_greater = isEqualsOrGreaterThan("11.92.0-release.0")
-            // For XChat Subsystem patch.
-            is_11_69_stable_or_greater = isEqualsOrGreaterThan("11.69.0-release.0")
+            is_11_70_or_greater = isEqualsOrGreaterThan(311700000)
+            is_11_88_or_greater = isEqualsOrGreaterThan(311880000)
+            is_11_92_or_greater = isEqualsOrGreaterThan(311920000)
         }
     }
