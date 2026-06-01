@@ -171,5 +171,28 @@ public class StringsTurkish extends DefaultStrings {
         this.WELCOME_MESSAGE = "Piko deneyiminizi iyileştirmek için lütfen Piko ayarlarını ziyaret edin ve tercihlerinizi düzenleyin";
         this.GOTO_PIKO_SETTINGS = "Piko ayarlarına git";
         this.NO_INTERNET = "Lütfen internete bağlanın";
+
+        this.TURN_ON_ALL_GHOST_MODES = "Tüm hayalet modlarını aç";
+        this.GHOST_MODES_ON = "Hayalet modu: AÇIK";
+        this.GHOST_MODES_DEFAULT = "Hayalet modu: VARSAYILAN";
+        this.GHOST_MODES_QUICK_TOGGLE = "Hayalet modları için hızlı geçişi etkinleştir";
+        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Hayalet modlarını kontrol etmek için sohbet işlem çubuğuna hızlı bir geçiş ekler";
+
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "İşlem çubuğunda profil seçenekleri";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "Profil seçenekleri butonunu profil işlem çubuğuna taşır";
+        this.PIKO_SETTINGS_ON_ACTION_BAR = "İşlem çubuğunda Piko ayarları";
+        this.PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Piko ayarları giriş noktasını ana akış işlem çubuğuna taşır";
+
+        this.VIDEO_VARIANTS = "Video varyasyonları";
+        this.DOWNLOAD_SET_PATH = "Özel indirme yolu ayarla";
+        this.DOWNLOAD_SET_PATH_SUCCESS = "İndirme dizini güncellendi!";
+        this.DOWNLOAD_SET_PATH_FAILED = "Klasör yolu çözümlenemedi";
+        this.DOWNLOAD_GRANT_PERMISSION = "İndirmelere devam etmek için lütfen depolama erişim izni verin";
+        this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Ayarlar açılamadı. Lütfen Tüm Dosyalara Erişim iznini manuel olarak verin";
+
+        this.MISSING_MAPPING_FILE = "Eşleme dosyası eksik";
+        this.MISSING_MAPPING_FILE_DESC = "Eşleme dosyası olmadan geliştirici seçenekleri düzgün adlara sahip olmayacaktır. İndirmek ister misiniz?";
+        this.TAP_HERE = "Buraya dokunun !!";
+        this.CANCEL = "İptal";
     }
 }
