@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.links.privacy
 
+import app.crimera.patches.instagram.misc.actionBar.dmActionBarButton.dmActionBarButtonPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
@@ -40,7 +41,7 @@ val disableTypingStatusPatch =
     bytecodePatch(
         name = "Disable typing status",
     ) {
-        dependsOn(settingsPatch)
+        dependsOn(settingsPatch, dmActionBarButtonPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {

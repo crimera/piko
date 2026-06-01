@@ -30,6 +30,8 @@ public class DefaultStrings {
     public static String IMPORT_DEV_OVERRIDES = "Import overrides";
     public static String IMPORT_ID_MAPPING = "Import mapping files";
     public static String DOWNLOAD_ID_MAPPING = "Download mapping file";
+    public static String MISSING_MAPPING_FILE = "Missing mapping file";
+    public static String MISSING_MAPPING_FILE_DESC = "Without mapping file, developer options will not have proper names. Do you want to download it ?";
 
     public static String CATEGORY_LINKS = "Links";
     public static String OPEN_LINKS_EXTERNALLY = "Open links externally";
@@ -45,6 +47,8 @@ public class DefaultStrings {
     public static String TURN_ON_ALL_GHOST_MODES = "Turn on all ghost modes";
     public static String GHOST_MODES_ON = "Ghost mode: ON";
     public static String GHOST_MODES_DEFAULT = "Ghost mode: DEFAULT";
+    public static String GHOST_MODES_QUICK_TOGGLE = "Enable quick toggle for ghost modes";
+    public static String GHOST_MODES_QUICK_TOGGLE_DESC = "Adds a quick toggle in chat action bar to control ghost modes";
 
     public static String CATEGORY_DISTRACTION_FREE = "Distraction free";
     public static String DISABLE_STORIES = "Disable stories";
@@ -101,6 +105,8 @@ public class DefaultStrings {
     public static String DOWNLOAD_PROFILE_PICTURE = "Download profile picture";
     public static String COPIED = "Copied";
     public static String MORE_PROFILE_OPTIONS = "More profile options";
+    public static String MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "Profile options on action bar";
+    public static String MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "Move profile options button to profile action bar";
     public static String REMOVE_EMPTY_BOTTOM_SPACE = "Remove empty bottom space";
     public static String UNLOCK_PLUS_BENEFITS = "Unlock Plus benefits";
     public static String UNLOCK_PLUS_BENEFITS_DESC = "Unlock 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK";
@@ -159,6 +165,7 @@ public class DefaultStrings {
     public static String IMPORT_FAIL = "Import failed";
     public static String RESTART_APP = "The app needs to be restarted for the changes to reflect";
     public static String OK = "OK";
+    public static String CANCEL = "Cancel";
     public static String DELETED = "Deleted";
     public static String PIKO_DEBUG = "Piko debug";
     public static String PIKO_DEBUG_DESC = "Adds debug option on some of the components for testing";
@@ -183,5 +190,7 @@ public class DefaultStrings {
     public static String GOTO_PIKO_SETTINGS = "Goto Piko settings";
     public static String NO_INTERNET = "Please connect to internet";
     public static String TAP_HERE = "Tap here !!";
+    public static String PIKO_SETTINGS_ON_ACTION_BAR = "Piko settings on action bar";
+    public static String PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Move Piko settings entry point to main feed action bar";
 
 }

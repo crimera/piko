@@ -2,17 +2,12 @@
 <resources>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
-    <string name="piko_pref_reader_mode">mode lecture</string>
-    <string name="piko_pref_reader_mode_desc">Active le \"mode lecture\" pour les longs fils de discussion</string>
-    <string name="piko_pref_undo_posts">annuler les publications</string>
     <string name="piko_pref_undo_posts_desc">Active la possibilité d\'annuler les publications avant leur envoi</string>
     <string name="piko_pref_undo_posts_btn">Paramètres d\'annulation des publications</string>
     <string name="piko_pref_icon_n_navbar_btn">Paramètres de personnalisation de l\'icône de l\'application et de la barre de navigation</string>
-    <string name="piko_pref_enable_force_pip">Mode PiP automatique</string>
     <string name="piko_pref_enable_force_pip_desc">Active le mode PiP lorsque vous fermez l\'application</string>
     <!-- Download Settings -->
     <string name="piko_title_download">Téléchargement</string>
-    <string name="piko_pref_video_download">téléchargement de vidéos</string>
     <string name="piko_pref_download">Changer le dossier de téléchargement</string>
     <string name="piko_pref_download_path">Dossier public</string>
     <string name="piko_pref_download_path_desc">Le dossier public à utiliser pour les téléchargements de vidéos</string>
@@ -26,7 +21,6 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">Partager le lien du média</string>
     <!-- Native -->
     <string name="piko_title_native">Fonctionnalités natives</string>
-    <string name="piko_pref_native_page_desc">Ces fonctionnalités natives de Piko sont disponibles dans le menu de partage des publications.</string>
     <string name="piko_title_native_downloader">Téléchargeur natif</string>
     <string name="piko_title_native_downloader_toggle">Activer le téléchargeur natif</string>
     <string name="piko_pref_native_downloader_alert_title">Télécharger le média</string>
@@ -59,30 +53,12 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Échec de la suppression du cache</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Publicités</string>
-    <string name="piko_pref_hide_promoted_posts">Publications sponsorisées</string>
-    <string name="piko_pref_wtf_section">Section \"Qui suivre\"</string>
-    <string name="piko_pref_cts_section">Section \"Créateurs auxquels s\'abonner\"</string>
-    <string name="piko_pref_ctj_section">Section \"Communauté à rejoindre\"</string>
-    <string name="piko_pref_ryb_section">Section \"Revoir vos signets\"</string>
-    <string name="piko_pref_pinned_posts_section">Section \"Publications épinglées par les abonnés\"</string>
-    <string name="piko_pref_hide_detailed_posts">Publications similaires (dans les réponses)</string>
-    <string name="piko_pref_hide_premium_prompt">Invites de messages</string>
-    <string name="piko_pref_hide_todays_news">Actualités du jour</string>
     <string name="piko_pref_del_from_db">Supprimer les entrées de la base de données</string>
     <string name="piko_pref_db_not_found">Base de données non trouvée</string>
     <string name="piko_pref_db_not_open">La base de données n\'est pas ouverte</string>
     <string name="piko_pref_db_del_items">Éléments supprimés</string>
-    <string name="piko_pref_hide_premium_upsell">promotion premium</string>
-    <string name="piko_pref_hide_premium_upsell_desc">Supprime la promotion premium dans le fil d\'accueil</string>
-    <string name="piko_pref_top_people_search">personnes présentées dans la recherche</string>
-    <string name="piko_pref_top_people_search_desc">Supprime la section personnes après la recherche</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">Divers</string>
-    <string name="piko_pref_chirp_font">police chirp</string>
-    <string name="piko_pref_hide_fab">bouton d\'action flottant</string>
-    <string name="piko_pref_hide_fab_menu">boutons du menu d\'action flottant</string>
-    <string name="piko_pref_rec_users">utilisateurs recommandés</string>
-    <string name="piko_pref_hide_view_count">nombre de vues</string>
     <string name="piko_pref_custom_share_domain">Domaine de partage personnalisé</string>
     <string name="piko_pref_custom_share_domain_desc">Le domaine à utiliser lors du partage de publications</string>
     <string name="piko_pref_show_sensitive_media">Afficher les médias sensibles</string>
@@ -91,14 +67,10 @@
     <string name="piko_pref_unshorten_link">Pas d\'URL raccourcie</string>
     <string name="piko_pref_unshorten_link_desc">Se débarrasser des URL courtes t.co</string>
     <string name="piko_pref_round_off_numbers">Arrondir les nombres</string>
-    <string name="piko_pref_round_off_numbers_desc">Arrondit les nombres en K et M</string>
-    <string name="piko_pref_debug_menu">menu de débogage pour les publications</string>
     <string name="piko_pref_quick_settings">Activer les paramètres rapides</string>
     <string name="piko_pref_quick_settings_summary">Ajoute un bouton de paramètres rapides dans la barre latérale</string>
     <string name="piko_pref_pause_search_suggestion">Suspendre les suggestions de recherche</string>
     <string name="piko_pref_pause_search_suggestion_desc">Les suggestions de recherche ne seront pas enregistrées localement</string>
-    <string name="piko_pref_search_suggestion">suggestions de recherche</string>
-    <string name="piko_pref_search_suggestion_desc">Masquer/Supprimer les suggestions de recherche dans la section Explorer</string>
     <string name="piko_disunify_xchat_system">Désactiver le système xchat unifié</string>
     <string name="piko_disunify_xchat_system_desc">Restaurer les anciennes fonctionnalités comme les messages et le menu de partage</string>
     <!-- Feature flags Settings -->
@@ -112,23 +84,14 @@
     <string name="piko_pref_disable_auto_timeline_scroll">Désactiver le défilement automatique du fil au lancement</string>
     <string name="piko_pref_show_post_source">Afficher la source de la publication</string>
     <string name="piko_pref_show_post_source_desc">Il peut y avoir un délai à l\'ouverture des infos de la publication, et la source ne s\'affiche que sur les publications publiques</string>
-    <string name="piko_pref_hide_live_threads">fils en direct</string>
     <string name="piko_pref_hide_live_threads_desc">Masque la section en direct dans le fil d\'actualité</string>
-    <string name="piko_pref_hide_banner">bannière</string>
-    <string name="piko_pref_hide_banner_desc">pastille pour les nouvelles publications</string>
-    <string name="piko_pref_hide_bmk_timeline">icône de signet dans le fil</string>
     <string name="piko_pref_force_translate">Forcer l\'activation de la traduction</string>
     <string name="piko_pref_force_translate_desc">Obtenir l\'option de traduction pour toutes les publications</string>
-    <string name="piko_pref_hide_quick_promote">bouton promouvoir</string>
     <string name="piko_pref_hide_quick_promote_desc">Masque le bouton promouvoir sous ses propres publications</string>
     <string name="piko_pref_show_poll_result">Afficher les résultats du sondage</string>
     <string name="piko_pref_show_poll_result_desc">Voir les résultats du sondage sans voter</string>
-    <string name="piko_pref_hide_immersive_player">lecteur immersif</string>
     <string name="piko_pref_hide_immersive_player_desc">Supprime le balayage vers le haut pour plus de vidéos dans le lecteur vidéo</string>
-    <string name="piko_pref_enable_vid_auto_advance">défilement automatique des vidéos</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">Active le défilement automatique des vidéos en vue immersive</string>
-    <string name="piko_pref_hide_hidden_replies">réponses masquées</string>
-    <string name="piko_pref_force_hd">forcer les vidéos HD</string>
     <string name="piko_pref_force_hd_desc">Les vidéos seront toujours lues dans la plus haute qualité</string>
     <string name="piko_pref_hide_nudge_button">Masquer le bouton d\'incitation</string>
     <string name="piko_pref_hide_nudge_button_desc">Masque les boutons suivre/s\'abonner/suivre en retour sur les publications</string>
@@ -179,9 +142,6 @@
     <string name="piko_pref_server_response_logging_file_overwrite_desc">Effacer les données de journalisation existantes au lancement</string>
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Sauvegarde et restauration</string>
-    <string name="piko_pref_export">Exporter %s</string>
-    <string name="piko_pref_import">Importer %s</string>
-    <string name="piko_pref_success">réussi</string>
     <string name="piko_pref_export_failed">Erreur : L\'exportation de %s a échoué</string>
     <string name="piko_pref_import_failed">Erreur : L\'importation de %s a échoué</string>
     <string name="piko_pref_export_no_uri">Erreur : Aucune destination fournie</string>
@@ -196,8 +156,6 @@
     <string name="piko_pref_included">Inclus</string>
     <string name="piko_pref_excluded">Exclus</string>
     <string name="piko_pref_app_restart_rec">Redémarrage de l\'application recommandé</string>
-    <string name="piko_pref_remove">Supprimer %s</string>
-    <string name="piko_pref_enable">Activer %s</string>
     <string name="piko_single_page_settings">Page de paramètres unique</string>
     <string name="piko_single_page_settings_desc">Afficher les paramètres sur une seule page</string>
     <string name="piko_pref_search_type_ahead_users">Utilisateurs</string>

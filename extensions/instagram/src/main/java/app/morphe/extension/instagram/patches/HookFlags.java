@@ -52,6 +52,11 @@ public class HookFlags {
         BOOL_FLAGS.put("81826::0", true); //igx_action_bar_service_replacement::is_profile_replaced
     }
 
+    private static void mainFeedActionBarFlags() {
+        BOOL_FLAGS.put("81826::1", true); //igx_action_bar_service_replacement::is_main_feed_replaced
+        BOOL_FLAGS.put("81826::4", true); //igx_action_bar_service_replacement::is_main_feed_large_screen_replaced
+    }
+
     private static void employeeOptionsFlags() {
         if(Pref.enableEmployeeOptions()){
             BOOL_FLAGS.put("28538::0", true); //ig_android_employee_options::is_enabled

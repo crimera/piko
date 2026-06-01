@@ -19,6 +19,7 @@ public class Strings {
     public static final String SHARED_PREF_NAME = PIKO_SETTINGS;
     public static final String DEFAULT_PIKO_FOLDER = "Piko-Instagram";
     public static final String DEFAULT_AUDIO_FOLDER = "Audio";
+    public static final String DEFAULT_DM_FOLDER = "DM";
 
     public static final String PIKO_SETTINGS_TITLE = langInstance.PIKO_SETTINGS_TITLE;
     public static final String CATEGORY_ADS = langInstance.CATEGORY_ADS;
@@ -41,6 +42,8 @@ public class Strings {
     public static final String IMPORT_DEV_OVERRIDES = langInstance.IMPORT_DEV_OVERRIDES;
     public static final String IMPORT_ID_MAPPING = langInstance.IMPORT_ID_MAPPING;
     public static final String DOWNLOAD_ID_MAPPING = langInstance.DOWNLOAD_ID_MAPPING;
+    public static final String MISSING_MAPPING_FILE = langInstance.MISSING_MAPPING_FILE;
+    public static final String MISSING_MAPPING_FILE_DESC = langInstance.MISSING_MAPPING_FILE_DESC;
 
     public static final String CATEGORY_LINKS = langInstance.CATEGORY_LINKS;
     public static final String OPEN_LINKS_EXTERNALLY = langInstance.OPEN_LINKS_EXTERNALLY;
@@ -56,6 +59,8 @@ public class Strings {
     public static final String TURN_ON_ALL_GHOST_MODES = langInstance.TURN_ON_ALL_GHOST_MODES;
     public static final String GHOST_MODES_ON = langInstance.GHOST_MODES_ON;
     public static final String GHOST_MODES_DEFAULT = langInstance.GHOST_MODES_DEFAULT;
+    public static final String GHOST_MODES_QUICK_TOGGLE = langInstance.GHOST_MODES_QUICK_TOGGLE;
+    public static final String GHOST_MODES_QUICK_TOGGLE_DESC = langInstance.GHOST_MODES_QUICK_TOGGLE_DESC;
 
     public static final String CATEGORY_DISTRACTION_FREE = langInstance.CATEGORY_DISTRACTION_FREE;
     public static final String DISABLE_STORIES = langInstance.DISABLE_STORIES;
@@ -110,6 +115,8 @@ public class Strings {
     public static final String DOWNLOAD_PROFILE_PICTURE = langInstance.DOWNLOAD_PROFILE_PICTURE;
     public static final String COPIED = langInstance.COPIED;
     public static final String MORE_PROFILE_OPTIONS = langInstance.MORE_PROFILE_OPTIONS;
+    public static final String MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = langInstance.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE;
+    public static final String MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = langInstance.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC;
     public static final String REMOVE_EMPTY_BOTTOM_SPACE = langInstance.REMOVE_EMPTY_BOTTOM_SPACE;
     public static final String UNLOCK_PLUS_BENEFITS = langInstance.UNLOCK_PLUS_BENEFITS;
     public static final String UNLOCK_PLUS_BENEFITS_DESC = langInstance.UNLOCK_PLUS_BENEFITS_DESC;
@@ -168,6 +175,7 @@ public class Strings {
     public static final String IMPORT_FAIL = langInstance.IMPORT_FAIL;
     public static final String RESTART_APP = langInstance.RESTART_APP;
     public static final String OK = langInstance.OK;
+    public static final String CANCEL = langInstance.CANCEL;
     public static final String DELETED = langInstance.DELETED;
     public static final String PIKO_DEBUG = langInstance.PIKO_DEBUG;
     public static final String PIKO_DEBUG_DESC = langInstance.PIKO_DEBUG_DESC;
@@ -192,6 +200,8 @@ public class Strings {
     public static final String GOTO_PIKO_SETTINGS = langInstance.GOTO_PIKO_SETTINGS;
     public static final String NO_INTERNET = langInstance.NO_INTERNET;
     public static final String TAP_HERE = langInstance.TAP_HERE;
+    public static final String PIKO_SETTINGS_ON_ACTION_BAR = langInstance.PIKO_SETTINGS_ON_ACTION_BAR;
+    public static final String PIKO_SETTINGS_ON_ACTION_BAR_DESC = langInstance.PIKO_SETTINGS_ON_ACTION_BAR_DESC;
 
     public static void load() {
         ExtensionStrings.setDefaultPikoFolder(Strings.DEFAULT_PIKO_FOLDER);

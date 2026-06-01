@@ -2,5 +2,4 @@
 <resources>
     <string name="piko_title_settings">إعدادات Piko</string>
     <string name="piko_title_piko_patches">تعديلات Piko</string>
-    <string name="piko_title_piko_integrations">Piko Integrations</string>
 </resources>

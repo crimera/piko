@@ -20,21 +20,7 @@ internal object SettingsStatusLoadFingerprint : Fingerprint(
     definingClass = ACTIVITY_SETTINGS_STATUS_CLASS,
     name = "load",
 )
-
-internal object SignatureCheckExtensionFingerprint : Fingerprint(
-    definingClass = LINKS_DESCRIPTOR,
-    name = "signatureCheck",
-)
-
 // ----------------------
-
-internal object UriTrustingMethodFingerprint : Fingerprint(
-    strings = listOf("\' is not trusted: ", "The provider for uri \'"),
-)
-
-internal object AppIdentityToStringFingerprint : Fingerprint(
-    strings = listOf("AppIdentity{uid=", ", packageNames=", ", sha2=", ", version="),
-)
 
 internal object MainFeedFragmentOnCreateFingerprint : Fingerprint(
     name = "onCreate",

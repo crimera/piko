@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Premium Settings -->
-    <string name="piko_pref_reader_mode">阅读模式</string>
-    <string name="piko_pref_reader_mode_desc">启用长主题推中的阅读模式功能</string>
-    <string name="piko_pref_undo_posts">撤销推文</string>
+    <string name="piko_title_premium">Premium</string>
+    <string name="piko_pref_undo_posts">启用撤销推文</string>
     <string name="piko_pref_undo_posts_desc">启用推文在发布前可以撤销的功能</string>
     <string name="piko_pref_undo_posts_btn">撤销推文设置</string>
-    <string name="piko_pref_icon_n_navbar_btn">应用图标和自定义导航栏设置</string>
-    <string name="piko_pref_enable_force_pip">画中画模式</string>
+    <string name="piko_pref_icon_n_navbar_btn">自定义导航和应用图标</string>
+    <string name="piko_pref_enable_force_pip">强制小窗模式</string>
     <string name="piko_pref_enable_force_pip_desc">观看视频时进入后台可以画中画继续播放</string>
     <!-- Download Settings -->
     <string name="piko_title_download">下载</string>
-    <string name="piko_pref_video_download">启用视频下载</string>
+    <string name="piko_pref_video_download">视频下载</string>
     <string name="piko_pref_download">更改下载目录</string>
     <string name="piko_pref_download_path">主文件夹</string>
     <string name="piko_pref_download_path_desc">下载视频的主文件夹</string>
@@ -25,14 +24,16 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">分享链接</string>
     <!-- Native -->
     <string name="piko_title_native">原生</string>
-    <string name="piko_pref_native_page_desc">这些原生功能可在推文菜单中使用。</string>
     <string name="piko_title_native_downloader">原生下载器</string>
     <string name="piko_title_native_downloader_toggle">启用原生下载器</string>
+    <string name="piko_pref_native_downloader_inline_button">内嵌下载按钮</string>
+    <string name="piko_pref_native_downloader_inline_button_desc">将下载按钮直接添加到帖子操作栏</string>
     <string name="piko_pref_native_downloader_alert_title">下载媒体</string>
     <string name="piko_pref_native_downloader_download_all">下载全部</string>
     <string name="piko_pref_native_downloader_no_media">未找到媒体</string>
     <string name="piko_pref_native_downloader_filename_title">保存文件名模式</string>
     <string name="piko_browse_object_title">浏览推文对象</string>
+    <string name="piko_browse_object_toggle">启用浏览推送对象</string>
     <string name="piko_share_image_title">分享截图</string>
     <string name="piko_share_image_toggle">启用分享截屏</string>
     <string name="piko_share_image_autocleanup">自动清理截屏</string>
@@ -44,7 +45,9 @@
     <string name="piko_native_translator_zero_text">未找到需要翻译的文本</string>
     <string name="piko_native_translator_google">Google 翻译</string>
     <string name="piko_native_translator_google_v2">Google 翻译 V2</string>
+    <string name="piko_native_translator_fxtwitter">FxTwitter API</string>
     <string name="piko_title_native_reader_mode">原生阅读器模式</string>
+    <string name="piko_native_reader_mode_toggle">启用原生阅读器模式</string>
     <string name="piko_native_reader_mode_grok_thread">分析此主题</string>
     <string name="piko_native_reader_mode_grok_author">更多关于作者</string>
     <string name="piko_native_reader_mode_source">来源</string>
@@ -59,29 +62,39 @@
     <string name="piko_native_reader_mode_cache_delete_failed">缓存删除失败</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">广告</string>
-    <string name="piko_pref_hide_promoted_posts">推广帖子</string>
-    <string name="piko_pref_wtf_section">推荐关注</string>
-    <string name="piko_pref_cts_section">创作者推荐</string>
-    <string name="piko_pref_ctj_section">探索社群</string>
-    <string name="piko_pref_ryb_section">重新访问你的书签</string>
-    <string name="piko_pref_pinned_posts_section">已由你关注的人置顶</string>
-    <string name="piko_pref_hide_detailed_posts">帖子回复中的发现更多</string>
-    <string name="piko_pref_hide_premium_prompt">订阅推广</string>
+    <string name="piko_pref_hide_promoted_posts">隐藏推广帖子</string>
+    <string name="piko_pref_wtf_section">隐藏推荐关注</string>
+    <string name="piko_pref_cts_section">隐藏创作者推荐</string>
+    <string name="piko_pref_ctj_section">隐藏探索社群</string>
+    <string name="piko_pref_ryb_section">隐藏重新访问你的书签</string>
+    <string name="piko_pref_pinned_posts_section">隐藏已由你关注的人置顶</string>
+    <string name="piko_pref_hide_related_posts">隐藏相关推文（回复）</string>
+    <string name="piko_pref_hide_premium_prompt">隐藏信息推广</string>
+    <string name="piko_pref_hide_todays_news">隐藏今日新闻</string>
     <string name="piko_pref_del_from_db">从数据库中删除项目</string>
+    <string name="piko_pref_db_promoted_posts">推广帖子</string>
+    <string name="piko_pref_db_wtf_section">推荐关注</string>
+    <string name="piko_pref_db_cts_section">创作者推荐</string>
+    <string name="piko_pref_db_ctj_section">探索社群</string>
+    <string name="piko_pref_db_ryb_section">重新访问你的书签</string>
+    <string name="piko_pref_db_pinned_posts_section">已由你关注的人置顶</string>
+    <string name="piko_pref_db_related_posts">相关推文（回复）</string>
+    <string name="piko_pref_db_premium_prompt">信息推广</string>
+    <string name="piko_pref_db_todays_news">今日新闻</string>
     <string name="piko_pref_db_not_found">未找到数据库</string>
     <string name="piko_pref_db_not_open">未打开数据库</string>
     <string name="piko_pref_db_del_items">删除的项目</string>
-    <string name="piko_pref_hide_premium_upsell">升级订阅</string>
-    <string name="piko_pref_hide_premium_upsell_desc">移除主页顶部升级 Premium 按钮</string>
-    <string name="piko_pref_top_people_search">搜索热门用户</string>
-    <string name="piko_pref_top_people_search_desc">移除搜索结果热门中的用户</string>
+    <string name="piko_pref_hide_premium_upsell">隐藏升级订阅</string>
+    <string name="piko_pref_hide_premium_upsell_desc">移除首页顶部升级 Premium 按钮</string>
+    <string name="piko_pref_top_people_search">隐藏搜索热门用户</string>
+    <string name="piko_pref_top_people_search_desc">隐藏搜索结果热门中的用户</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">杂项</string>
-    <string name="piko_pref_chirp_font">\u00A0chirp 字体</string>
-    <string name="piko_pref_hide_fab">发推按钮</string>
-    <string name="piko_pref_hide_fab_menu">发推按钮菜单</string>
-    <string name="piko_pref_rec_users">推荐用户</string>
-    <string name="piko_pref_hide_view_count">查看次数</string>
+    <string name="piko_pref_chirp_font">启用 chirp 字体</string>
+    <string name="piko_pref_hide_fab">隐藏发推按钮</string>
+    <string name="piko_pref_hide_fab_menu">隐藏发推按钮菜单</string>
+    <string name="piko_pref_rec_users">隐藏推荐用户</string>
+    <string name="piko_pref_hide_view_count">隐藏查看次数</string>
     <string name="piko_pref_custom_share_domain">自定义分享域名</string>
     <string name="piko_pref_custom_share_domain_desc">自定义分享帖子时使用的域名</string>
     <string name="piko_pref_show_sensitive_media">显示敏感媒体</string>
@@ -91,42 +104,47 @@
     <string name="piko_pref_unshorten_link_desc">移除 t.co 短网址</string>
     <string name="piko_pref_round_off_numbers">数字简化显示</string>
     <string name="piko_pref_round_off_numbers_desc">将数字简化为以万为单位显示</string>
-    <string name="piko_pref_debug_menu">帖子 Debug 菜单</string>
+    <string name="piko_pref_debug_menu">启用帖子调试菜单</string>
     <string name="piko_pref_quick_settings">启用快捷设置</string>
     <string name="piko_pref_quick_settings_summary">在侧边栏添加快捷设置按钮</string>
     <string name="piko_pref_pause_search_suggestion">暂停搜索建议</string>
     <string name="piko_pref_pause_search_suggestion_desc">将不会在本地保存搜索建议</string>
-    <string name="piko_pref_search_suggestion">搜索建议</string>
-    <string name="piko_pref_search_suggestion_desc">移除探索页面中的搜索建议</string>
+    <string name="piko_pref_search_suggestion">隐藏搜索建议</string>
+    <string name="piko_pref_search_suggestion_desc">隐藏探索页面中的搜索建议</string>
     <string name="piko_disunify_xchat_system">分离 XChat 系统</string>
     <string name="piko_disunify_xchat_system_desc">恢复旧版功能，如消息和分享面板</string>
+    <string name="piko_legacy_share_link">旧版分享链接</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">功能标志</string>
     <string name="piko_pref_feature_flags">新增功能标志</string>
     <string name="piko_pref_edit_flag_title">编辑标志</string>
     <string name="piko_pref_add_flag_title">添加标志</string>
     <string name="piko_pref_search_flags">搜索标志</string>
+    <string name="piko_pref_import_flags">导入标志</string>
+    <string name="piko_pref_export_flags">导出标志</string>
+    <string name="piko_pref_reset_flags">重置标志</string>
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">时间线</string>
     <string name="piko_pref_disable_auto_timeline_scroll">启动时保持时间线位置</string>
     <string name="piko_pref_show_post_source">显示推文来源标签</string>
     <string name="piko_pref_show_post_source_desc">打开推文信息时可能会有延迟，并且标签仅会在公开推文中显示</string>
-    <string name="piko_pref_hide_live_threads">直播空间</string>
+    <string name="piko_pref_hide_live_threads">隐藏直播空间</string>
     <string name="piko_pref_hide_live_threads_desc">移除顶部直播通知条</string>
-    <string name="piko_pref_hide_banner">新贴提醒</string>
-    <string name="piko_pref_hide_banner_desc">弹出的新帖按钮</string>
-    <string name="piko_pref_hide_bmk_timeline">时间线中书签图标</string>
+    <string name="piko_pref_hide_banner">隐藏新帖子</string>
+    <string name="piko_pref_hide_banner_desc">隐藏弹出的新帖按钮</string>
+    <string name="piko_pref_hide_bmk_timeline">隐藏时间线中的书签图标</string>
     <string name="piko_pref_force_translate">强制显示翻译按钮</string>
     <string name="piko_pref_force_translate_desc">始终为您显示翻译帖子按钮</string>
-    <string name="piko_pref_hide_quick_promote">推广按钮</string>
+    <string name="piko_pref_hide_quick_promote">隐藏推广按钮</string>
     <string name="piko_pref_hide_quick_promote_desc">移除自己帖子下的推广按钮</string>
     <string name="piko_pref_show_poll_result">显示投票结果</string>
     <string name="piko_pref_show_poll_result_desc">无需投票即可查看投票结果</string>
-    <string name="piko_pref_hide_immersive_player">视频滑动切换</string>
+    <string name="piko_pref_hide_community_notes">隐藏社群附注</string>
+    <string name="piko_pref_hide_immersive_player">隐藏沉浸式播放器</string>
     <string name="piko_pref_hide_immersive_player_desc">移除视频向上滑动查看更多</string>
-    <string name="piko_pref_enable_vid_auto_advance">视频自动滚动</string>
+    <string name="piko_pref_enable_vid_auto_advance">启用视频自动滚动</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">启用视频自动滚动查看更多</string>
-    <string name="piko_pref_hide_hidden_replies">帖子隐藏回复</string>
+    <string name="piko_pref_hide_hidden_replies">隐藏隐藏的回复</string>
     <string name="piko_pref_force_hd">强制高清视频</string>
     <string name="piko_pref_force_hd_desc">始终选择播放可用最高画质</string>
     <string name="piko_pref_hide_nudge_button">隐藏社交按钮</string>
@@ -136,10 +154,10 @@
     <string name="piko_pref_hide_community_badge">隐藏社群徽章</string>
     <string name="piko_pref_hide_badge_nav_bar">隐藏导航栏徽章</string>
     <string name="piko_pref_hide_badge_nav_bar_desc">隐藏导航栏图标上的通知提示和计数</string>
-    <string name="piko_pref_hide_post_inline_metrics">隐藏帖子内联视图指标</string>
-    <string name="piko_pref_hide_post_inline_metrics_desc">在内联视图中隐藏点赞、转发等数量</string>
-    <string name="piko_pref_hide_post_detailed_metrics">隐藏帖子详细视图指标</string>
-    <string name="piko_pref_hide_post_detailed_metrics_desc">在详细视图中隐藏点赞、转发等数量</string>
+    <string name="piko_pref_hide_post_inline_metrics">隐藏帖子互动数</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">隐藏帖子点赞、转帖等次数</string>
+    <string name="piko_pref_hide_post_detailed_metrics">隐藏帖子详情页互动量</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">在帖子详情页中隐藏点赞、转帖等次数</string>
     <!-- Customization Settings -->
     <string name="piko_title_customisation">自定义</string>
     <string name="piko_pref_customisation_profiletabs">隐藏个人资料标签</string>
@@ -178,13 +196,17 @@
     <string name="piko_pref_server_response_logging_file_overwrite_desc">启动时清除现有的响应日志数据</string>
     <!-- Backup and Restore -->
     <string name="piko_title_backup">备份和恢复</string>
-    <string name="piko_pref_export">导出%s</string>
-    <string name="piko_pref_import">导入%s</string>
-    <string name="piko_pref_success">成功</string>
+    <string name="piko_pref_import_settings">导入Piko设置</string>
+    <string name="piko_pref_export_settings">导出Piko设置</string>
+    <string name="piko_pref_reset_settings">重置Piko设置</string>
+    <string name="piko_pref_export_success">导出成功</string>
+    <string name="piko_pref_import_success">导入成功</string>
     <string name="piko_pref_export_failed">错误：导出%s失败</string>
     <string name="piko_pref_import_failed">错误：导入%s失败</string>
     <string name="piko_pref_export_no_uri">错误：未提供目标</string>
     <string name="piko_pref_import_no_uri">错误：未提供文件</string>
+    <string name="piko_pref_export_login_token">导出登录令牌</string>
+    <string name="piko_pref_import_login_token">导入登录令牌</string>
     <!-- About -->
     <string name="piko_title_about">关于</string>
     <string name="piko_pref_app_version">App 版本</string>
@@ -195,8 +217,8 @@
     <string name="piko_pref_included">包括</string>
     <string name="piko_pref_excluded">排除</string>
     <string name="piko_pref_app_restart_rec">建议更改后重新启动应用</string>
-    <string name="piko_pref_remove">移除%s</string>
-    <string name="piko_pref_enable">启用%s</string>
+    <string name="piko_dialog_delete_title">删除</string>
+    <string name="piko_dialog_delete_message">删除%s?</string>
     <string name="piko_single_page_settings">单页设置</string>
     <string name="piko_single_page_settings_desc">在单个页面中查看设置</string>
     <string name="piko_pref_search_type_ahead_users">用户</string>
@@ -204,10 +226,137 @@
     <string name="piko_pref_search_type_ahead_ordered_section">订购</string>
     <string name="piko_settings_supported_links">打开支持的链接</string>
     <!-- For arrays-->
+    <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_money">Money</string>
+    <string name="piko_array_xchat">X Chat</string>
+    <string name="piko_array_x_lite">全新 X Android</string>
+    <string name="piko_array_conference">会议</string>
+    <string name="piko_array_creator_studio">创作者工作室</string>
+    <string name="piko_array_jobs">职位</string>
+    <string name="piko_array_media">媒体</string>
+    <string name="piko_array_light_mode">日间模式</string>
     <!-- App icon strings -->
     <string name="piko_app_icon_thanks">感谢 @NeoFreeBird 提供 iOS 应用图标</string>
     <string name="piko_app_icon_piko_exclusive">（Piko 独家）</string>
     <!-- Category -->
+    <string name="piko_app_icon_category_legacy">经典</string>
+    <string name="piko_app_icon_category_seasonal_event">季节活动</string>
+    <string name="piko_app_icon_category_sports">体育</string>
+    <string name="piko_app_icon_category_cultural_and_celebrations">文化和庆典</string>
+    <string name="piko_app_icon_category_pride">骄傲月</string>
+    <string name="piko_app_icon_category_misc">其他​​</string>
+    <string name="piko_app_icon_category_space">太空</string>
+    <string name="piko_app_icon_category_movies_n_series">影视</string>
     <!-- Icon names -->
+    <string name="piko_app_icon_name_default">默认</string>
+    <string name="piko_app_icon_name_legacy_icon_1">经典图标 一</string>
+    <string name="piko_app_icon_name_legacy_icon_2">经典图标 二</string>
+    <string name="piko_app_icon_name_legacy_icon_3">经典图标 三</string>
+    <string name="piko_app_icon_name_legacy_icon_4">经典图标 四</string>
+    <string name="piko_app_icon_name_legacy_blue">经典蓝</string>
+    <string name="piko_app_icon_name_twitter_blue">推特蓝</string>
+    <string name="piko_app_icon_name_earth">地球</string>
+    <string name="piko_app_icon_name_moon">月球</string>
+    <string name="piko_app_icon_name_mars">火星</string>
+    <string name="piko_app_icon_name_sun">太阳</string>
+    <string name="piko_app_icon_name_stars">星星</string>
+    <string name="piko_app_icon_name_milky_way">银河</string>
+    <string name="piko_app_icon_name_autumn_2021">秋天 2021</string>
+    <string name="piko_app_icon_name_autumn_2022">秋天 2022</string>
+    <string name="piko_app_icon_name_south_spring_2021">南春 2021</string>
+    <string name="piko_app_icon_name_south_spring_2022">南春 2022</string>
+    <string name="piko_app_icon_name_winter_1">冬天 1</string>
+    <string name="piko_app_icon_name_winter_2">冬天 2</string>
+    <string name="piko_app_icon_name_summer_1">夏天 1</string>
+    <string name="piko_app_icon_name_summer_2">夏天 2</string>
+    <string name="piko_app_icon_name_autumn_southern">南秋</string>
+    <string name="piko_app_icon_name_summer">夏天</string>
+    <string name="piko_app_icon_name_winter">冬天</string>
+    <string name="piko_app_icon_name_beijing_olympics_1">北京奥运会 1</string>
+    <string name="piko_app_icon_name_beijing_olympics_2">北京奥运会 2</string>
+    <string name="piko_app_icon_name_daytona">戴通纳赛车</string>
+    <string name="piko_app_icon_name_formulaone">F1</string>
+    <string name="piko_app_icon_name_kentucky_derby">肯塔基德比</string>
+    <string name="piko_app_icon_name_mlb">MLB</string>
+    <string name="piko_app_icon_name_nba">NBA</string>
+    <string name="piko_app_icon_name_nba_2">NBA 2</string>
+    <string name="piko_app_icon_name_ncaa">NCAA</string>
+    <string name="piko_app_icon_name_masters">美国大师赛</string>
+    <string name="piko_app_icon_name_nba_finals">NBA 决赛</string>
+    <string name="piko_app_icon_name_stanley_cup">斯坦利杯</string>
+    <string name="piko_app_icon_name_commonwealth">英联邦</string>
+    <string name="piko_app_icon_name_mothers_day">母亲节</string>
+    <string name="piko_app_icon_name_womansday">妇女节</string>
+    <string name="piko_app_icon_name_halloween_2021">万圣节 2021</string>
+    <string name="piko_app_icon_name_halloween_2022">万圣节 2022</string>
+    <string name="piko_app_icon_name_halloween_2024_1">万圣节 2024 1</string>
+    <string name="piko_app_icon_name_halloween_2024_2">万圣节 2024 2</string>
+    <string name="piko_app_icon_name_halloween_2024_3">万圣节 2024 3</string>
+    <string name="piko_app_icon_name_holi">酒红节</string>
+    <string name="piko_app_icon_name_stpatricks_day">圣帕特里克节</string>
+    <string name="piko_app_icon_name_easter">复活节</string>
+    <string name="piko_app_icon_name_anzac">澳新军团</string>
+    <string name="piko_app_icon_name_ramadan">斋月</string>
+    <string name="piko_app_icon_name_black_history">黑色历史</string>
+    <string name="piko_app_icon_name_eurovisionfinal">欧洲歌唱大赛决赛</string>
+    <string name="piko_app_icon_name_lunar_new_year_1">农历新年 1</string>
+    <string name="piko_app_icon_name_lunar_new_year_2">农历新年 2</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_1">日本新年2024 1</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_2">日本新年2024 2</string>
+    <string name="piko_app_icon_name_may_the_fourth">星际大战日</string>
+    <string name="piko_app_icon_name_barbie">芭比</string>
+    <string name="piko_app_icon_name_thanksgiving_1">感恩节 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2">感恩节 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_1">感恩节2024 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_2">感恩节2024 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_3">感恩节2024 3</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_4">感恩节2024 4</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_5">感恩节2024 5</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_6">感恩节2024 6</string>
+    <string name="piko_app_icon_name_canada_day">加拿大日</string>
+    <string name="piko_app_icon_name_canada_indigenous">加拿大土著</string>
+    <string name="piko_app_icon_name_earth_hour">地球一小时</string>
+    <string name="piko_app_icon_name_euro">欧洲</string>
+    <string name="piko_app_icon_name_independence_day">独立日</string>
+    <string name="piko_app_icon_name_juneteenth">解放黑奴纪念日</string>
+    <string name="piko_app_icon_name_naidoc">Naidoc Week</string>
+    <string name="piko_app_icon_name_christmas_2024_1">圣诞节2024 1</string>
+    <string name="piko_app_icon_name_christmas_2024_2">圣诞节2024 2</string>
+    <string name="piko_app_icon_name_christmas_2024_3">圣诞节2024 3</string>
+    <string name="piko_app_icon_name_christmas_2024_4">圣诞节2024 4</string>
+    <string name="piko_app_icon_name_upsidedown">逆世界</string>
+    <string name="piko_app_icon_name_games_chamber">天地逃生</string>
+    <string name="piko_app_icon_name_pridesouthern">南方骄傲组织</string>
+    <string name="piko_app_icon_name_newzealand_pride_1">新西兰的骄傲 1</string>
+    <string name="piko_app_icon_name_newzealand_pride_2">新西兰的骄傲 2</string>
+    <string name="piko_app_icon_name_pride_month">骄傲月</string>
+    <string name="piko_app_icon_name_fancy">Fancy</string>
+    <string name="piko_app_icon_name_broken">碎裂</string>
+    <string name="piko_app_icon_name_cyber">赛博</string>
+    <string name="piko_app_icon_name_soft_pastel_pink">柔粉</string>
+    <string name="piko_app_icon_name_electric_indigo">Electric Indigo</string>
+    <string name="piko_app_icon_name_neon_pink">霓虹粉</string>
+    <string name="piko_app_icon_name_tropical_teal">热带青色</string>
+    <string name="piko_app_icon_name_vivid_orange">鲜活橙</string>
     <!-- Import / export login tokens -->
+    <string name="piko_login_token_export_screen_description">"此功能将导出当前登录账号的会话令牌。
+你可以在登录界面或“创建新账号”界面导入此令牌。
+
+警告：导出的令牌属于高度机密信息。
+切勿与他人共享！
+如果有人获得此令牌，他们则可以自由访问你的账号，直到你退出会话。
+
+更多详情，请参阅此页面：
+https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
+建议在使用此功能之前阅读此页面，它包含一些重要注意事项。"</string>
+    <string name="piko_login_token_select_account">选择账号：</string>
+    <string name="piko_login_token_export_copy_to_clipboard">复制到剪贴板</string>
+    <string name="piko_login_token_export_save_to_file">保存到文件</string>
+    <string name="piko_login_token_import_token_button_text">通过令牌登录</string>
+    <string name="piko_login_token_import_from_text">从文本导入</string>
+    <string name="piko_login_token_import_from_file">从文件导入</string>
+    <string name="piko_login_token_import_about">关于此功能 (打开网站)</string>
+    <string name="piko_login_token_import_success_reopen_required">请退出应用并重新打开</string>
+    <string name="piko_login_token_import_failed_missing_info">错误：缺少用户名或令牌或密钥</string>
+    <string name="piko_login_token_import_failed_already_exist">添加账户失败 (可能已存在)</string>
 </resources>
