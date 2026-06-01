@@ -30,6 +30,8 @@ public class StringsTurkish extends DefaultStrings {
         this.IMPORT_DEV_OVERRIDES = "Geçersiz kılmaları içe aktar";
         this.IMPORT_ID_MAPPING = "Eşleme dosyalarını içe aktar";
         this.DOWNLOAD_ID_MAPPING = "Eşleme dosyasını indir";
+        this.MISSING_MAPPING_FILE = "Eşleme dosyası eksik";
+        this.MISSING_MAPPING_FILE_DESC = "Eşleme dosyası olmadan geliştirici seçenekleri düzgün adlandırılmayacaktır. İndirmek istiyor musunuz?";
 
         this.CATEGORY_LINKS = "Bağlantılar";
         this.OPEN_LINKS_EXTERNALLY = "Bağlantıları harici aç";
@@ -42,6 +44,11 @@ public class StringsTurkish extends DefaultStrings {
         this.DISABLE_TYPING_STATUS = "Yazıyor bilgisini kapat";
         this.DISABLE_SCREENSHOT_DETECTION = "Ekran görüntüsü algılamayı kapat";
         this.VIEW_DM_ANONYMOUSLY = "Mesajları (DM) anonim olarak gör";
+        this.TURN_ON_ALL_GHOST_MODES = "Tüm hayalet modlarını aç";
+        this.GHOST_MODES_ON = "Hayalet modu: AÇIK";
+        this.GHOST_MODES_DEFAULT = "Hayalet modu: VARSAYILAN";
+        this.GHOST_MODES_QUICK_TOGGLE = "Hayalet modları için hızlı geçişi etkinleştir";
+        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Hayalet modlarını kontrol etmek için sohbet işlem çubuğuna hızlı bir geçiş düğmesi ekler";
 
         this.CATEGORY_DISTRACTION_FREE = "Odaklanma Modu";
         this.DISABLE_STORIES = "Hikayeleri devre dışı bırak";
@@ -98,6 +105,8 @@ public class StringsTurkish extends DefaultStrings {
         this.DOWNLOAD_PROFILE_PICTURE = "Profil resmini indir";
         this.COPIED = "Kopyalandı";
         this.MORE_PROFILE_OPTIONS = "Daha fazla profil seçeneği";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "Profil seçenekleri işlem çubuğunda";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "Profil seçenekleri butonunu profil işlem çubuğuna taşır";
         this.REMOVE_EMPTY_BOTTOM_SPACE = "Alt kısımdaki boşluğu kaldır";
         this.UNLOCK_PLUS_BENEFITS = "Plus avantajlarını aç";
         this.UNLOCK_PLUS_BENEFITS_DESC = "Yerel olarak kontrol edilen 'Plus' abonelik avantajlarını açar. RİSK SİZE AİTTİR";
@@ -111,6 +120,7 @@ public class StringsTurkish extends DefaultStrings {
         this.DOWNLOAD_USERNAME_FOLDER_DESC = "Kullanıcı adlarına göre alt klasörler oluşturur";
         this.DOWNLOAD_CURRENT_MEDIA = "Mevcut medyayı indir";
         this.DOWNLOAD_AS_IMAGE = "Resim olarak indir";
+        this.VIDEO_VARIANTS = "Video varyantları";
         this.DOWNLOAD_AUDIO = "Ses olarak indir";
         this.DOWNLOAD_OPTIONS = "İndirme seçenekleri";
         this.COPY_MEDIA_LINK = "Medya bağlantısını kopyala";
@@ -120,6 +130,12 @@ public class StringsTurkish extends DefaultStrings {
         this.DOWNLOADED_MEDIA = "İndirildi: ";
         this.MEDIA_EXISTS = "Medya zaten mevcut";
         this.DOWNLOAD_FAILED_MEDIA = "İndirme başarısız: ";
+        this.DOWNLOAD_SET_PATH = "Özel indirme yolu ayarla";
+        this.DOWNLOAD_SET_PATH_SUCCESS = "İndirme dizini güncellendi!";
+        this.DOWNLOAD_SET_PATH_FAILED = "Klasör yolu çözülemedi";
+        this.DOWNLOAD_GRANT_PERMISSION = "İndirmelere devam etmek için lütfen depolama erişimi izni verin";
+        this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Ayarlar açılamadı. Lütfen Tüm Dosyalara Erişim iznini manuel olarak verin";
+
         this.POST_OPTIONS = "Gönderi seçenekleri";
         this.COPY_POST_DESCRIPTION = "Gönderi açıklamasını kopyala";
         this.COPY_POST_OWNER_USERNAME = "Gönderi sahibinin kullanıcı adını kopyala";
@@ -148,6 +164,7 @@ public class StringsTurkish extends DefaultStrings {
         this.IMPORT_FAIL = "İçe aktarma başarısız";
         this.RESTART_APP = "Değişikliklerin yansıması için uygulamanın yeniden başlatılması gerekiyor";
         this.OK = "Tamam";
+        this.CANCEL = "İptal";
         this.DELETED = "Silindi";
         this.PIKO_DEBUG = "Piko hata ayıklama";
         this.PIKO_DEBUG_DESC = "Test için bazı bileşenlere hata ayıklama seçeneği ekler";
@@ -171,5 +188,8 @@ public class StringsTurkish extends DefaultStrings {
         this.WELCOME_MESSAGE = "Piko deneyiminizi iyileştirmek için lütfen Piko ayarlarını ziyaret edin ve tercihlerinizi düzenleyin";
         this.GOTO_PIKO_SETTINGS = "Piko ayarlarına git";
         this.NO_INTERNET = "Lütfen internete bağlanın";
+        this.TAP_HERE = "Buraya dokun !!";
+        this.PIKO_SETTINGS_ON_ACTION_BAR = "Piko ayarları işlem çubuğunda";
+        this.PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Piko ayarları giriş noktasını ana akış işlem çubuğuna taşır";
     }
 }
