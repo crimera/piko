@@ -30,6 +30,8 @@ public class StringsRussian extends DefaultStrings {
         this.IMPORT_DEV_OVERRIDES = "Импорт замещений";
         this.IMPORT_ID_MAPPING = "Импорт файлов связей";
         this.DOWNLOAD_ID_MAPPING = "Скачать файл сопоставления";
+        this.MISSING_MAPPING_FILE = "Отсутствует файл сопоставления";
+        this.MISSING_MAPPING_FILE_DESC = "Без файла сопоставления параметры разработчика не будут иметь правильных имён. Хотите скачать его?";
 
         this.CATEGORY_LINKS = "Ссылки";
         this.OPEN_LINKS_EXTERNALLY = "Открывать ссылки во внешнем браузере";
@@ -45,6 +47,8 @@ public class StringsRussian extends DefaultStrings {
         this.TURN_ON_ALL_GHOST_MODES = "Включить все режимы невидимки";
         this.GHOST_MODES_ON = "Режим невидимки: ВКЛ";
         this.GHOST_MODES_DEFAULT = "Режим невидимки: ПО УМОЛЧАНИЮ";
+        this.GHOST_MODES_QUICK_TOGGLE = "Включить быстрое переключение режимов невидимки";
+        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Добавляет переключатель в панель действий чата для быстрого управления режимами невидимки";
 
         this.CATEGORY_DISTRACTION_FREE = "Без отвлечений";
         this.DISABLE_STORIES = "Отключить истории";
@@ -99,6 +103,8 @@ public class StringsRussian extends DefaultStrings {
         this.DOWNLOAD_PROFILE_PICTURE = "Загрузить изображение профиля";
         this.COPIED = "Скопировано";
         this.MORE_PROFILE_OPTIONS = "Дополнительные действия с профилем";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "Действия с профилем на панели действий";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "Переместить кнопку действий с профилем на панель действий профиля";
         this.REMOVE_EMPTY_BOTTOM_SPACE = "Убрать пустое пространство внизу";
         this.UNLOCK_PLUS_BENEFITS = "Разблокировать возможности подписки «Плюс»";
         this.UNLOCK_PLUS_BENEFITS_DESC = "Разблокировать преимущества подписки «Плюс», которые проверяются локально. ИСПОЛЬЗУЙТЕ НА СВОЙ СТРАХ И РИСК";
@@ -156,6 +162,7 @@ public class StringsRussian extends DefaultStrings {
         this.IMPORT_FAIL = "Не удалось выполнить импорт";
         this.RESTART_APP = "Для применения изменений необходимо перезапустить приложение";
         this.OK = "Хорошо";
+        this.CANCEL = "Отмена";
         this.DELETED = "Удалено";
         this.PIKO_DEBUG = "Отладка Piko";
         this.PIKO_DEBUG_DESC = "Добавляет отладочные действия к некоторым элементам для проверки";
@@ -180,5 +187,7 @@ public class StringsRussian extends DefaultStrings {
         this.GOTO_PIKO_SETTINGS = "Перейти в настройки Piko";
         this.NO_INTERNET = "Пожалуйста, подключитесь к интернету";
         this.TAP_HERE = "Нажмите здесь !!";
+        this.PIKO_SETTINGS_ON_ACTION_BAR = "Настройки Piko на панели действий";
+        this.PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Переместить точку входа в настройки Piko на панель действий главной ленты";
     }
 }
