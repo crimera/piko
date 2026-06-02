@@ -28,8 +28,8 @@ public class StringsTurkish extends DefaultStrings {
         this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Uygulama sürümü eskidiğinde bir süre sonra görünen açılır pencereyi kaldırır";
         this.EXPORT_DEV_OVERRIDES = "Geçersiz kılmaları dışa aktar";
         this.IMPORT_DEV_OVERRIDES = "Geçersiz kılmaları içe aktar";
-        this.IMPORT_ID_MAPPING = "Eşleme dosyalarını içe aktar";
-        this.DOWNLOAD_ID_MAPPING = "Eşleme dosyasını indir";
+        this.IMPORT_ID_MAPPING = "Mapping dosyalarını içe aktar";
+        this.DOWNLOAD_ID_MAPPING = "Mapping dosyasını indir";
 
         this.CATEGORY_LINKS = "Bağlantılar";
         this.OPEN_LINKS_EXTERNALLY = "Bağlantıları harici aç";
@@ -190,8 +190,8 @@ public class StringsTurkish extends DefaultStrings {
         this.DOWNLOAD_GRANT_PERMISSION = "İndirmelere devam etmek için lütfen depolama erişim izni verin";
         this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Ayarlar açılamadı. Lütfen Tüm Dosyalara Erişim iznini manuel olarak verin";
 
-        this.MISSING_MAPPING_FILE = "Eşleme dosyası eksik";
-        this.MISSING_MAPPING_FILE_DESC = "Eşleme dosyası olmadan geliştirici seçenekleri düzgün adlara sahip olmayacaktır. İndirmek ister misiniz?";
+        this.MISSING_MAPPING_FILE = "Mapping dosyası eksik";
+        this.MISSING_MAPPING_FILE_DESC = "Mapping dosyası olmadan geliştirici seçenekleri düzgün adlara sahip olmayacaktır. İndirmek ister misiniz?";
         this.TAP_HERE = "Buraya dokunun !!";
         this.CANCEL = "İptal";
     }
