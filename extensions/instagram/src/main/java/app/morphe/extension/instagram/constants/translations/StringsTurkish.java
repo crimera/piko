@@ -44,7 +44,7 @@ public class StringsTurkish extends DefaultStrings {
         this.DISABLE_TYPING_STATUS = "Yazıyor bilgisini kapat";
         this.DISABLE_SCREENSHOT_DETECTION = "Ekran görüntüsü algılamayı kapat";
         this.VIEW_DM_ANONYMOUSLY = "Mesajları (DM) anonim olarak gör";
-        this.TURN_ON_ALL_GHOST_MODES = "Tüm hayalet modlarını aç";
+        this.TURN_ON_ALL_GHOST_MODES = "Tüm hayalet modlarını etkinleştir";
         this.GHOST_MODES_ON = "Hayalet modu: AÇIK";
         this.GHOST_MODES_DEFAULT = "Hayalet modu: VARSAYILAN";
         this.GHOST_MODES_QUICK_TOGGLE = "Hayalet modları için hızlı geçişi etkinleştir";
