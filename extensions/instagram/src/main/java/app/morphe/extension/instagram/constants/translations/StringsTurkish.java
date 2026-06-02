@@ -48,7 +48,7 @@ public class StringsTurkish extends DefaultStrings {
         this.GHOST_MODES_ON = "Hayalet modu: AÇIK";
         this.GHOST_MODES_DEFAULT = "Hayalet modu: VARSAYILAN";
         this.GHOST_MODES_QUICK_TOGGLE = "Hayalet modları için hızlı geçişi etkinleştir";
-        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Hayalet modlarını kontrol etmek için sohbet işlem çubuğuna hızlı bir geçiş düğmesi ekler";
+        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Sohbet işlem çubuğuna hayalet modlarını kontrol etmek için bir açma/kapama düğmesi ekler";
 
         this.CATEGORY_DISTRACTION_FREE = "Odaklanma Modu";
         this.DISABLE_STORIES = "Hikayeleri devre dışı bırak";
