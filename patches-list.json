@@ -1,5 +1,5 @@
 {
-  "version": "3.5.0-dev.2",
+  "version": "3.5.0-dev.4",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -36,7 +36,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -53,6 +53,7 @@
       "dependencies": [
         "BytecodePatch",
         "ResourcePatch",
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -167,7 +168,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -214,7 +215,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -260,7 +261,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -330,7 +331,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -404,7 +405,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -449,7 +450,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -522,7 +523,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -568,7 +569,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -614,7 +615,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -660,7 +661,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -705,7 +706,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -804,7 +805,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -819,6 +820,7 @@
       "description": null,
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -849,7 +851,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -894,7 +896,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -939,7 +941,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -984,7 +986,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1029,7 +1031,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1074,7 +1076,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1119,7 +1121,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1164,7 +1166,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1209,7 +1211,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1254,7 +1256,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1380,7 +1382,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1426,7 +1428,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1666,6 +1668,7 @@
       "description": null,
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1733,7 +1736,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1772,6 +1775,7 @@
       "description": "Adds ability to download posts, reels, stories and highlights",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -1835,7 +1839,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1906,7 +1910,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1951,7 +1955,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1996,7 +2000,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2042,7 +2046,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2088,7 +2092,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2131,7 +2135,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2206,7 +2210,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2251,7 +2255,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2322,7 +2326,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2368,7 +2372,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2413,7 +2417,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2459,7 +2463,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2504,7 +2508,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2549,7 +2553,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2594,7 +2598,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2640,7 +2644,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2685,7 +2689,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2730,7 +2734,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2802,7 +2806,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2848,7 +2852,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2947,7 +2951,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2992,7 +2996,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3038,7 +3042,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3084,7 +3088,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3212,7 +3216,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3259,7 +3263,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3332,7 +3336,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3404,7 +3408,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3448,6 +3452,7 @@
       "description": "Adds more options on post, like copy description by long pressing on post",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -3475,6 +3480,7 @@
       "description": "Adds a new button to handle user related data like copy handle, download profile picture etc",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
@@ -3536,7 +3542,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3584,7 +3590,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3631,7 +3637,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3676,7 +3682,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3748,7 +3754,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3794,7 +3800,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3893,7 +3899,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3938,7 +3944,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3984,7 +3990,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4029,7 +4035,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4102,7 +4108,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4149,7 +4155,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4194,7 +4200,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4239,7 +4245,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4284,7 +4290,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4329,7 +4335,7 @@
               "description": null
             },
             {
-              "version": "11.93.0-release-ripped.0",
+              "version": "11.95.1-release-ripped.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -4399,6 +4405,7 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -4427,6 +4434,34 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "430.0.0.53.80",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Validate links",
+      "description": "Fixes app crashing issue while opening links from a different app",
+      "default": true,
+      "dependencies": [
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -4454,6 +4489,7 @@
       "description": null,
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -4482,6 +4518,7 @@
       "default": true,
       "dependencies": [
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -4509,6 +4546,7 @@
       "description": null,
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],

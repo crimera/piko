@@ -47,14 +47,14 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.5.0-dev.2](https://github.com/crimera/piko/releases/tag/v3.5.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;118 patches total
+> **[v3.5.0-dev.4](https://github.com/crimera/piko/releases/tag/v3.5.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;119 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 11.80.0-alpha.1 | 11.82.0-beta.1 | 11.81.0-release.0 | 11.93.0-release-ripped.0 |
+| 11.80.0-alpha.1 | 11.82.0-beta.1 | 11.81.0-release.0 | 11.95.1-release-ripped.0 |
 | :---: | :---: | :---: | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
@@ -134,7 +134,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;47 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;48 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -187,6 +187,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Unlock Plus benefits](#unlock-plus-benefits) | Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK |  |
 | [Unlock developer options](#unlock-developer-options) | Unlocks developer option by long pressing home icon |  |
 | [Unlock employee options](#unlock-employee-options) | Unlocks all options using by employee for debugging |  |
+| [Validate links](#validate-links) | Fixes app crashing issue while opening links from a different app |  |
 | [View DMs anonymously](#view-dms-anonymously) |  |  |
 | [View live anonymously](#view-live-anonymously) |  |  |
 | [View stories anonymously](#view-stories-anonymously) |  |  |

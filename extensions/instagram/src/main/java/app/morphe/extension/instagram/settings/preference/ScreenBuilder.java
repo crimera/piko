@@ -161,6 +161,14 @@ public class ScreenBuilder {
                 )
         );
 
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.GHOST_MODES_QUICK_TOGGLE,
+                        Strings.GHOST_MODES_QUICK_TOGGLE_DESC,
+                        Settings.GHOST_MODES_QUICK_TOGGLE
+                )
+        );
+
         if (SettingsStatus.viewStoriesAnonymously) {
             addPreference(category,
                     helper.switchPreference(
@@ -390,6 +398,15 @@ public class ScreenBuilder {
                             Strings.DELETE_ANALYTICS_CACHE,
                             "",
                             Strings.DELETE_ANALYTICS_CACHE
+                    )
+            );
+        }
+        if (SettingsStatus.moreOptionsOnProfile) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE,
+                            Strings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC,
+                            Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE
                     )
             );
         }
@@ -643,6 +660,14 @@ public class ScreenBuilder {
                         Strings.IMPORT_PIKO_PREF,
                         "",
                         Strings.IMPORT_PIKO_PREF
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.PIKO_SETTINGS_ON_ACTION_BAR,
+                        Strings.PIKO_SETTINGS_ON_ACTION_BAR_DESC,
+                        Settings.PIKO_SETTINGS_ON_ACTION_BAR
                 )
         );
 

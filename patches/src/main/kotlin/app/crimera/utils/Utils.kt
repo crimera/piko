@@ -13,6 +13,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.ResourcePatchContext
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.*
 import app.morphe.util.inputStreamFromBundledResource
 import com.android.tools.smali.dexlib2.HiddenApiRestriction
@@ -218,6 +219,23 @@ val MutableList<BuilderInstruction>.indexOfLastNewInstance
 
 val MutableList<BuilderInstruction>.indexOfLastFilledNewArrayRange
     get() = this.indexOfLast { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }
+
+fun MutableMethod.lastInstruction(
+    beforeIndex: Int = 0,
+    targetOpcode: Opcode,
+): BuilderInstruction? {
+    val instructions = this.implementation?.instructions ?: return null
+
+    var endIndex: Int = beforeIndex
+    if (beforeIndex == 0) endIndex = instructions.size
+
+    val index = instructions.indexOfLast { it.opcode == targetOpcode && it.location.index <= endIndex }
+    if (index < 0) return null
+
+    return getInstruction(index)
+}
+
+fun MutableMethod.lastInstruction(targetOpcode: Opcode): Instruction? = lastInstruction(0, targetOpcode)
 
 class InitMethod(
     private val validator: () -> Unit,

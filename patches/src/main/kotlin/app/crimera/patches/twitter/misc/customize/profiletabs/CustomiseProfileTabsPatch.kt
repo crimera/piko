@@ -25,10 +25,6 @@ private object CustomiseProfileTabsFingerprint : Fingerprint(
     returnType = "Ljava/util/ArrayList;",
     strings =
         listOf(
-            "fragment_page_number",
-            "arg_is_unlimited_timeline",
-            "statuses_count",
-            "tweets",
             "blue_business_affiliates_list_consumption_ui_enabled",
         ),
 )

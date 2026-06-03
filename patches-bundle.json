@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-05-27T14:47:04",
-  "description": "## [3.5.0-dev.2](https://github.com/crimera/piko/compare/v3.5.0-dev.1...v3.5.0-dev.2) (2026-05-27)\n\n### 🔧 Improvements\n\n* **Twitter:** replace dynamic string composition with explicit string resources ([#845](https://github.com/crimera/piko/issues/845)) ([49a7c01](https://github.com/crimera/piko/commit/49a7c018c389135fa8a8e3368514b4e339450522))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.5.0-dev.2/patches-3.5.0-dev.2.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.5.0-dev.2/patches-3.5.0-dev.2.mpp.asc",
-  "version": "3.5.0-dev.2"
+  "created_at": "2026-05-31T11:32:43",
+  "description": "## [3.5.0-dev.4](https://github.com/crimera/piko/compare/v3.5.0-dev.3...v3.5.0-dev.4) (2026-05-31)\n\n### 🔧 Improvements\n\n* **Twitter:** Update check mappings logic ([457ee93](https://github.com/crimera/piko/commit/457ee9333e91479d25e3bf72c4ada4c1978d8d24))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.5.0-dev.4/patches-3.5.0-dev.4.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.5.0-dev.4/patches-3.5.0-dev.4.mpp.asc",
+  "version": "3.5.0-dev.4"
 }

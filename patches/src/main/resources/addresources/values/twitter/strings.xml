@@ -26,7 +26,7 @@
 
     <!-- Native -->
     <string name="piko_title_native">Native features</string>
-    <string name="piko_pref_native_page_desc">These Piko native features are available in the share menu of posts.</string>
+    <string name="piko_pref_native_page_desc">These Piko native features are available in the post menu.</string>
     <string name="piko_title_native_downloader">Native downloader</string>
     <string name="piko_title_native_downloader_toggle">Enable native downloader</string>
     <string name="piko_pref_native_downloader_inline_button">Show download button inline</string>
@@ -186,6 +186,7 @@
     <string name="piko_pref_customisation_post_font_size">Post font size</string>
     <string name="piko_pref_customisation_search_type_ahead">Search suggestions to hide</string>
     <string name="piko_pref_customisation_change_app_icon">Change app icon</string>
+    <string name="piko_notifications_tab_priority">Priority</string>
 
     <!-- Font Settings -->
     <string name="piko_title_font">Font style</string>

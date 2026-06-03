@@ -19,18 +19,20 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import app.morphe.extension.crimera.PikoUtils;
+
 public class InstagramDialogBox{
 
-    private final Object igdsDialog;
-    private final Class<?> igdsClass;
+    private Object igdsDialog;
+    private Class<?> igdsClass;
 
     public InstagramDialogBox(Context context){
         try {
             igdsClass = Class.forName("className");
             Constructor<?> ctor = igdsClass.getConstructor(Context.class);
             igdsDialog = ctor.newInstance(context);
-        } catch (Throwable t) {
-            throw new RuntimeException("Contructor failed");
+        } catch (Exception e) {
+            PikoUtils.logger(e);
         }
     }
 

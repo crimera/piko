@@ -5,7 +5,7 @@
  */
 
 
-package app.morphe.extension.instagram.patches.feed;
+package app.morphe.extension.instagram.patches.actionbar;
 
 import android.content.Context;
 import android.view.View;
@@ -17,24 +17,27 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.constants.UI;
-import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Strings;
 
-public class MainFeedActionBarButton {
+public class DMActionBar {
+    private static final String HIDE_ICON_NAME = "$avd_hide_password__0";
+    private static final String SHOW_ICON_NAME = "$avd_show_password__0";
 
     public static void addActionBarButton(ViewGroup viewGroup) {
         try {
-            if(SettingsStatus.ghostSection()){
+            boolean togglePreference = Pref.enableGhostModeQuickToggle();
+            boolean hasGhostSection = SettingsStatus.ghostSection();
+            if(togglePreference && hasGhostSection){
                 boolean ghostModeToggle = Pref.getTurnOnAllGhostModes();
 
-                String iconStr = ghostModeToggle ? "$avd_show_password__0":"$avd_hide_password__0";
+                String iconStr = ghostModeToggle ? SHOW_ICON_NAME:HIDE_ICON_NAME;
                 ImageView imageView = UI.addImageViewToViewGroup(viewGroup, iconStr, null);
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         try {
                             boolean ghostModeToggle= !Pref.getTurnOnAllGhostModes();
-                            String iconStr = ghostModeToggle ? "$avd_show_password__0":"$avd_hide_password__0";
+                            String iconStr = ghostModeToggle ? SHOW_ICON_NAME:HIDE_ICON_NAME;
                             Pref.setTurnOnAllGhostModes(ghostModeToggle);
                             UI.setThemedIcon(imageView,iconStr);
 
@@ -46,8 +49,6 @@ public class MainFeedActionBarButton {
                     }
                 });
             }
-
-            UI.pikoSettingsGear(viewGroup);
 
         } catch (Exception e) {
             Logger.printException(() -> "addActionBarButton failure", e);

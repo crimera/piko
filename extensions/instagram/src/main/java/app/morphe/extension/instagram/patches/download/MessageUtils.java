@@ -15,6 +15,7 @@ import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.instagram.constants.Strings;
 
 import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.crimera.downloader.MediaType;
@@ -42,7 +43,7 @@ public class MessageUtils {
                 MediaData audioData = messageInfo.getAudioMedia();
                 String audioUrl = audioData.getMessageAudioUrl();
                 String fileName = audioData.getDownloadFilename(MediaType.AUDIO);
-                DownloadUtils.downloadMediaUrl(context,audioUrl,"DM",fileName);
+                DownloadUtils.downloadMediaUrl(context,audioUrl,Strings.DEFAULT_DM_FOLDER,fileName);
 
                 // We need to return false since we don't need download action to be taken by Instagram.
                 return false;

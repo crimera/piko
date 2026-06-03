@@ -6,7 +6,8 @@
 
 package app.crimera.patches.instagram.entity.mediadata
 
-import app.crimera.patches.instagram.misc.download.EditMediaInfoGetCurrentMediaIdFingerprint
+import app.crimera.patches.instagram.entity.decoder.EditMediaInfoGetCurrentMediaIdFingerprint
+import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
 import app.crimera.utils.classNameToExtension
@@ -22,6 +23,7 @@ val mediaDataEntity =
     bytecodePatch(
         description = "This patch is used for decoding obfuscated code of the media data",
     ) {
+        dependsOn(decoderEntity)
         execute {
             // Extracting the media helper class name.
             ReelsInlineQualitySurveyRelatedFingerprint.apply {

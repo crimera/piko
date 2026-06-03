@@ -1,3 +1,39 @@
+## [3.5.0-dev.4](https://github.com/crimera/piko/compare/v3.5.0-dev.3...v3.5.0-dev.4) (2026-05-31)
+
+### 🔧 Improvements
+
+* **Twitter:** Update check mappings logic ([457ee93](https://github.com/crimera/piko/commit/457ee9333e91479d25e3bf72c4ada4c1978d8d24))
+
+## [3.5.0-dev.3](https://github.com/crimera/piko/compare/v3.5.0-dev.2...v3.5.0-dev.3) (2026-05-31)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix crash on clicking mentions ([7896cf3](https://github.com/crimera/piko/commit/7896cf3f91b182e9628ccb7a55794e359e0bec9c))
+* **Instagram:** Fix current media index on more options on post ([bb416c1](https://github.com/crimera/piko/commit/bb416c12884485e080c448ee273c390fd70fafe1))
+* **Instagram:** Fix spilt username folder issue ([b2931c0](https://github.com/crimera/piko/commit/b2931c0ac5ed6a84efa830cd91ee2bb975848da6))
+* **Twitter - Customize Navigation Bar items:** May not work on 11.95.0-alpha.0+ ([d4c5f4e](https://github.com/crimera/piko/commit/d4c5f4e29f633fbdbad9310ce3a45a2600a8814a))
+* **Twitter - Customize Navigation Bar items:** Sometimes the order of navigation buttons is reset ([4790d6c](https://github.com/crimera/piko/commit/4790d6c2f2611463a9b8a54081bf4defcddb4bb2))
+
+### ✨ New Features
+
+* **Instagram:** Added `Validate links` patch ([af31db7](https://github.com/crimera/piko/commit/af31db7b1ecbe5559a7ea8dc684d74819a771777))
+* **Instagram:** Added alert if the mapping file is missing ([dc9b4c2](https://github.com/crimera/piko/commit/dc9b4c2ce682974c3b8fa2df3ef4ed5f01737ba5))
+* **Instagram:** Added custom exception handler and crash logs ([b119727](https://github.com/crimera/piko/commit/b1197279845cad3f1d98f318ed86c144f764194d))
+
+### 🚀 Updated App Support
+
+* **Twitter:** Bump support for `11.95.1-release.0` ([1e12f66](https://github.com/crimera/piko/commit/1e12f66bb86462bddff28f15620ab5cc7e767c97))
+
+### 🔧 Improvements
+
+* **Instagram:** Added download story options to self stories ([9382ee0](https://github.com/crimera/piko/commit/9382ee050fe39457ec58b6efa4a9103f2cf0a946))
+* **Instagram:** Added option to switch profile action between action bar and as button ([bf4f4d5](https://github.com/crimera/piko/commit/bf4f4d5498da66ead398b79bb970702325213482))
+* **Instagram:** Make piko settings on action bar optional ([3b45655](https://github.com/crimera/piko/commit/3b456555e59c76b98f974f7e58a5c31a97658774))
+* **Instagram:** Moved ghost mode toggle to DM action bar ([1d0c9b5](https://github.com/crimera/piko/commit/1d0c9b5fe4e96369ef80b4575f72fce7b14ad0c6))
+* **Instagram:** Potential fix for location blok due to analytics ([87c6195](https://github.com/crimera/piko/commit/87c61958b0c103a81b9a4f95bf18c1979c0a37a7))
+* **Twitter:** Added `Priority tab` to hide notification tabs list ([c83f603](https://github.com/crimera/piko/commit/c83f603da2e14b9f864900f2d95a86cd985dc730))
+* **Twitter:** Update `Customize profile tabs` fingerprint ([da9333e](https://github.com/crimera/piko/commit/da9333e2bf2dfaacbe21ee48a6d5c498869c7218))
+
 ## [3.5.0-dev.2](https://github.com/crimera/piko/compare/v3.5.0-dev.1...v3.5.0-dev.2) (2026-05-27)
 
 ### 🔧 Improvements
