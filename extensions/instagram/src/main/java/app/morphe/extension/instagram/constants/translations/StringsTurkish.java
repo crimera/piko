@@ -13,7 +13,7 @@ public class StringsTurkish extends DefaultStrings {
         this.CATEGORY_ADS = "Reklamlar";
         this.DISABLE_ADS = "Reklamları devre dışı bırak";
         this.HIDE_SUGEESTED_CONTENT = "Önerilen içeriği gizle";
-        this.HIDE_SUGEESTED_CONTENT_DESC = "Önerilen hikayeleri, reel videolarını ve thread'leri gizler (Önerilen gönderiler gösterilmeye devam eder).";
+        this.HIDE_SUGEESTED_CONTENT_DESC = "Önerilen hikayeleri, reels videolarını ve thread'leri gizler (Önerilen gönderiler gösterilmeye devam eder).";
 
         this.CATEGORY_DEV_OPTIONS = "Geliştirici seçenekleri";
         this.ENABLE_DEV_OPTIONS = "Geliştirici seçeneklerini etkinleştir";
@@ -28,8 +28,8 @@ public class StringsTurkish extends DefaultStrings {
         this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Uygulama sürümü eskidiğinde bir süre sonra görünen açılır pencereyi kaldırır";
         this.EXPORT_DEV_OVERRIDES = "Geçersiz kılmaları dışa aktar";
         this.IMPORT_DEV_OVERRIDES = "Geçersiz kılmaları içe aktar";
-        this.IMPORT_ID_MAPPING = "Eşleme dosyalarını içe aktar";
-        this.DOWNLOAD_ID_MAPPING = "Eşleme dosyasını indir";
+        this.IMPORT_ID_MAPPING = "Mapping dosyalarını içe aktar";
+        this.DOWNLOAD_ID_MAPPING = "Mapping dosyasını indir";
 
         this.CATEGORY_LINKS = "Bağlantılar";
         this.OPEN_LINKS_EXTERNALLY = "Bağlantıları harici aç";
@@ -41,7 +41,7 @@ public class StringsTurkish extends DefaultStrings {
         this.VIEW_LIVE_ANONYMOUSLY = "Canlı yayınları anonim olarak izle";
         this.DISABLE_TYPING_STATUS = "Yazıyor bilgisini kapat";
         this.DISABLE_SCREENSHOT_DETECTION = "Ekran görüntüsü algılamayı kapat";
-        this.VIEW_DM_ANONYMOUSLY = "Mesajları (DM) anonim olarak gör";
+        this.VIEW_DM_ANONYMOUSLY = "Mesajları anonim olarak gör";
 
         this.CATEGORY_DISTRACTION_FREE = "Odaklanma Modu";
         this.DISABLE_STORIES = "Hikayeleri devre dışı bırak";
@@ -135,8 +135,8 @@ public class StringsTurkish extends DefaultStrings {
         this.HIDE_NAVIGATION_CREATE = "Oluştur butonunu gizle";
 
         this.PATCH_INFO_TITLE = "Yama bilgisi";
-        this.EXPORT_PIKO_PREF = "Piko tercihlerini dışa aktar";
-        this.IMPORT_PIKO_PREF = "Piko tercihlerini içe aktar";
+        this.EXPORT_PIKO_PREF = "Piko ayarlarını yedekle";
+        this.IMPORT_PIKO_PREF = "Piko ayarlarını geri yükle";
         this.APP_VERSION = "Uygulama sürümü: %s";
         this.PATCH_VERSION = "Yama sürümü: %s";
 
@@ -171,5 +171,28 @@ public class StringsTurkish extends DefaultStrings {
         this.WELCOME_MESSAGE = "Piko deneyiminizi iyileştirmek için lütfen Piko ayarlarını ziyaret edin ve tercihlerinizi düzenleyin";
         this.GOTO_PIKO_SETTINGS = "Piko ayarlarına git";
         this.NO_INTERNET = "Lütfen internete bağlanın";
+
+        this.TURN_ON_ALL_GHOST_MODES = "Tüm hayalet modlarını aç";
+        this.GHOST_MODES_ON = "Hayalet modu: AÇIK";
+        this.GHOST_MODES_DEFAULT = "Hayalet modu: KAPALI";
+        this.GHOST_MODES_QUICK_TOGGLE = "Hayalet modları için hızlı geçişi etkinleştir";
+        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Hayalet modlarını kontrol etmek için sohbet işlem çubuğuna hızlı bir geçiş ekler";
+
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "İşlem çubuğunda profil seçenekleri";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "Profil seçenekleri butonunu profil işlem çubuğuna taşır";
+        this.PIKO_SETTINGS_ON_ACTION_BAR = "İşlem çubuğunda Piko ayarları";
+        this.PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Piko ayarları giriş noktasını ana akış işlem çubuğuna taşır";
+
+        this.VIDEO_VARIANTS = "Video varyasyonları";
+        this.DOWNLOAD_SET_PATH = "Özel indirme yolu ayarla";
+        this.DOWNLOAD_SET_PATH_SUCCESS = "İndirme dizini güncellendi!";
+        this.DOWNLOAD_SET_PATH_FAILED = "Klasör yolu çözümlenemedi";
+        this.DOWNLOAD_GRANT_PERMISSION = "İndirmelere devam etmek için lütfen depolama erişim izni verin";
+        this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Ayarlar açılamadı. Lütfen Tüm Dosyalara Erişim iznini manuel olarak verin";
+
+        this.MISSING_MAPPING_FILE = "Mapping dosyası eksik";
+        this.MISSING_MAPPING_FILE_DESC = "Mapping dosyası olmadan geliştirici seçenekleri düzgün adlara sahip olmayacaktır. İndirmek ister misiniz?";
+        this.TAP_HERE = "Buraya dokunun !!";
+        this.CANCEL = "İptal";
     }
 }
