@@ -11,9 +11,11 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.addFlags
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.findFreeRegister
 import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
@@ -53,36 +55,21 @@ val userProfileActionBarButtonPatch =
                     // + 1 before the method is not static.
                     val userHelperClassParameterIndex = parameters.indexOfFirst { it.type == userHelperClassName } + 1
 
-//                    val getFadeInFollowButtonIndex =
-//                        indexOfFirstInstruction(
-//                            leftActionBarElementListIteratorIndex,
-//                            Opcode.INVOKE_STATIC,
-//                        )
-//                    val getFadeInFollowButtonInstruction = getInstruction(getFadeInFollowButtonIndex)
-//
-//                    val userObjectHelperClassParameterIndex =
-//                        getFadeInFollowButtonInstruction
-//                            .getReference<MethodReference>()!!
-//                            .parameterTypes
-//                            .indexOf(
-//                                userHelperClassName,
-//                            )
-//                    val userObjectHelperRegistry =
-//                        getFadeInFollowButtonInstruction.registersUsed[userObjectHelperClassParameterIndex]
-
                     val freeRegister =
                         findFreeRegister(
                             leftActionBarElementListIteratorIndex,
                             listOf(layoutRegister),
                         )
 
-                    addInstructions(
+                    addInstructionsWithLabels(
                         leftActionBarElementListIteratorIndex,
                         """
                         move-object/from16 v$freeRegister, p$userHelperClassParameterIndex
+                        if-eqz v$freeRegister, :piko
                         iget-object v$freeRegister, v$freeRegister, $userFieldRef
                         invoke-static {v$layoutRegister, v$freeRegister}, $ACTIONBAR_DESCRIPTOR/UserProfileActionBar;->addActionBarButton(Landroid/view/ViewGroup;Ljava/lang/Object;)V
                         """.trimIndent(),
+                        ExternalLabel("piko", getInstruction(leftActionBarElementListIteratorIndex)),
                     )
 
                     addFlags("profileActionBarFlags")
