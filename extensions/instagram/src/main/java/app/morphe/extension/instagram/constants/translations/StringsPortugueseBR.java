@@ -72,7 +72,7 @@ public class StringsPortugueseBR extends DefaultStrings {
         this.DISABLE_REELS_SCROLLING = "Desativar rolagem dos Reels";
         this.DISABLE_REELS_SCROLLING_DESC =
                 "Desativa a rolagem infinita nos Reels do Instagram, impedindo deslizar para o próximo Reel. " +
-                "Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá parar sozinha após alguns segundos.";
+                "Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá sumir sozinha após alguns segundos.";
         this.HIDE_STORIES_TRAY = "Ocultar barra de stories";
         this.HIDE_STORIES_TRAY_DESC = "Oculta a barra de stories do feed principal";
         this.HIDE_NOTES_TRAY = "Ocultar barra de notas";
