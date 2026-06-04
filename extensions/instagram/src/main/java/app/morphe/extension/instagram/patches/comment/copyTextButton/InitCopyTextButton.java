@@ -9,9 +9,8 @@
 */
 
 
-package app.morphe.extension.instagram.patches.comment.copy;
+package app.morphe.extension.instagram.patches.comment.copyTextButton;
 
 @SuppressWarnings("unused")
-public final class CopyButton {
-    public static final CopyButton A00 = new CopyButton();
+public final class InitCopyTextButton {
 }

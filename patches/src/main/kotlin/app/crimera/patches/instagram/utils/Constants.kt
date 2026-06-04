@@ -58,4 +58,6 @@ object Constants {
     const val SSTS_DESCRIPTOR = "invoke-static {}, $ACTIVITY_SETTINGS_STATUS_CLASS->%s()V"
     const val HOOK_FLAGS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/HookFlags;"
     const val LOAD_FLAGS_DESCRIPTOR = "invoke-static {}, $HOOK_FLAGS_DESCRIPTOR->%s()V"
+
+    const val COMMENT_BUTTON_EXTENSION_CLASS = "${PATCHES_DESCRIPTOR}/comment"
 }

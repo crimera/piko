@@ -5,7 +5,7 @@
  */
 
 
-package app.morphe.extension.instagram.patches.comment.copy;
+package app.morphe.extension.instagram.patches.comment;
 
 import java.util.List;
 
@@ -15,20 +15,21 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.crimera.ObjectBrowser;
+import app.morphe.extension.instagram.patches.comment.copyTextButton.CopyTextButton;
 
 // Thanks to MyInsta.
 @SuppressWarnings("unused")
 public class HandleCommentButton {
 
-    public static void addCopyButton(List list) {
+    public static void addButtons(List list) {
         if (Pref.commentCopyButton()) {
-            list.add(CopyButton.A00);
+            list.add(CopyTextButton.A00);
         }
     }
 
     public static boolean checkOnCommentButtonClick(Object button, List list) {
         try {
-            if (button.equals(CopyButton.A00)) {
+            if (button.equals(CopyTextButton.A00)) {
                 if (list.isEmpty()) return false;
 
                 Object commentObject = list.get(0);
