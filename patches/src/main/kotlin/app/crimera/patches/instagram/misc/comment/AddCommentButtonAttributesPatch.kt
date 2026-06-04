@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.misc.comment
 
+import app.crimera.patches.instagram.entity.decoder.COMMENT_BUTTON_CLASS
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
 import app.crimera.utils.methodExtractor
@@ -112,5 +113,5 @@ fun addButtonAttribute(
 context(patchContext: BytecodePatchContext)
 fun addButtonInterface(buttonInstanceFingerprint: Fingerprint) {
     // Dynamically inject interface to our extension class.
-    buttonInstanceFingerprint.classDef.interfaces.add(commentDataObjectClassType)
+    buttonInstanceFingerprint.classDef.interfaces.add(COMMENT_BUTTON_CLASS)
 }

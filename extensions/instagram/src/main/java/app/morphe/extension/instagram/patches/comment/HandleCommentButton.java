@@ -8,39 +8,56 @@
 package app.morphe.extension.instagram.patches.comment;
 
 import java.util.List;
+import android.content.Context;
 
-import app.morphe.extension.instagram.entity.Entity;
-import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.Utils;
+import app.morphe.extension.instagram.entity.CommentData;
+import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.instagram.patches.comment.copyTextButton.CopyTextButton;
+import app.morphe.extension.instagram.patches.comment.debugButton.DebugButton;
 
 // Thanks to MyInsta.
 @SuppressWarnings("unused")
 public class HandleCommentButton {
 
-    public static void addButtons(List list) {
-        if (Pref.commentCopyButton()) {
-            list.add(CopyTextButton.A00);
+    public static void addButtons(List list, Object commentObject) {
+        try {
+            CommentData commentData = new CommentData(commentObject);
+
+            if (commentData.hasText() && Pref.commentCopyButton()) {
+                list.add(CopyTextButton.A00);
+            }
+            if (Pref.pikoDebug()) {
+                list.add(DebugButton.A00);
+            }
+        } catch (Exception e) {
+            PikoUtils.logger(e);
         }
     }
 
     public static boolean checkOnCommentButtonClick(Object button, List list) {
         try {
-            if (button.equals(CopyTextButton.A00)) {
-                if (list.isEmpty()) return false;
+            if (list.isEmpty()) return false;
+            Object commentObject = list.get(0);
 
-                Object commentObject = list.get(0);
-                Entity commentEntity = new Entity(commentObject);
-                String commentText = (String) commentEntity.getField("A0N");
-                if (commentText!=null && commentText.length() > 0) {
+            if (button.equals(CopyTextButton.A00)) {
+                CommentData commentData = new CommentData(commentObject);
+                if (commentData.hasText()) {
+                    String commentText = (String) commentData.getText();
                     app.morphe.extension.shared.Utils.setClipboard(commentText);
                     PikoUtils.toast(Strings.COMMENT_COPIED_SUCCESS);
                 } else {
                     PikoUtils.toast(Strings.COMMENT_COPIED_FAILED);
                 }
+                return true;
+            } else if (button.equals(DebugButton.A00)) {
+                CommentData commentData = new CommentData(commentObject);
+                Context context = (Context) Utils.getActivity();
+                ObjectBrowser.browseObject(context,commentData);
                 return true;
             }
         } catch (Exception e) {

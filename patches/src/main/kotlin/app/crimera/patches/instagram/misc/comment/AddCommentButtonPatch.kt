@@ -15,8 +15,8 @@ import app.morphe.util.findFreeRegister
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
-import kotlin.properties.Delegates
 
 // Thanks to MyInsta.
 @Suppress("unused")
@@ -37,16 +37,17 @@ val addCommentPatch =
                 arrayListInitInstructions.firstOrNull { instruction ->
                     val index = instruction.location.index
                     val nextInstructionOpcode: Opcode = getInstruction(index + 1).opcode
-                    val nextNextInstructionOpcode: Opcode = getInstruction(index + 2).opcode
+                    val nextNextInstruction: Instruction = getInstruction(index + 2)
 
-                    if (nextInstructionOpcode == Opcode.INVOKE_DIRECT && nextNextInstructionOpcode == Opcode.IGET_OBJECT) {
+                    if (nextInstructionOpcode == Opcode.INVOKE_DIRECT && nextNextInstruction.opcode == Opcode.IGET_OBJECT) {
                         val arrayListRegister = instruction.registersUsed[0]
                         val freeRegister = findFreeRegister(index + 1)
+                        var commentObjectDataRegister = nextNextInstruction.registersUsed[1]
 
                         addInstruction(
                             index + 2,
                             """
-                            invoke-static {v$arrayListRegister},${HANDLE_COMMENT_BUTTON_EXTENSION_CLASS}->addButtons(Ljava/util/List;)V
+                            invoke-static {v$arrayListRegister,v$commentObjectDataRegister},${HANDLE_COMMENT_BUTTON_EXTENSION_CLASS}->addButtons(Ljava/util/List;Ljava/lang/Object;)V
                             """.trimIndent(),
                         )
                         true

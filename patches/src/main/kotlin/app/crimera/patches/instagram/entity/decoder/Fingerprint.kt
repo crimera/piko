@@ -15,3 +15,8 @@ object EditMediaInfoGetCurrentMediaIdFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     parameters = listOf(),
 )
+
+object CommentButtonOnClickFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("select_comment_screen_delete_comments_tap", "comment_share_click"),
+)
