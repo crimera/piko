@@ -30,11 +30,9 @@ import com.instagram.igds.components.button.IgdsButton;
 
 public class ProfileMoreOption {
     private static boolean DEBUG;
-    private static boolean SPLIT_BY_USERNAME;
 
     static {
         DEBUG = Pref.pikoDebug();
-        SPLIT_BY_USERNAME = Pref.downloadUsernameFolder();
     }
 
     public static void moreOptionsDailogueBox(Context context, UserData userData) {
@@ -80,7 +78,7 @@ public class ProfileMoreOption {
                             String url = userData.getProfilePictureUrl();
                             String username = userData.getUsername();
                             String downloadFilename = username+"_dp.jpg";
-                            String subFolder = SPLIT_BY_USERNAME ? username : null;
+                            String subFolder = DownloadUtils.getSubfolderName(username);
                             DownloadUtils.downloadMediaUrl(context, url, subFolder, downloadFilename);
                             toCopy = false;
 

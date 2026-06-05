@@ -35,14 +35,15 @@ import app.morphe.extension.crimera.downloader.MediaType;
 import app.morphe.extension.crimera.PikoUtils;
 
 public class DownloadUtils {
-    private static boolean ENABLE_DIRECT_DOWNLOAD;
-    private static boolean SPLIT_BY_USERNAME;
     private static boolean DEBUG;
 
     static {
-        ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
-        SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
         DEBUG = Pref.pikoDebug();
+    }
+
+    public static String getSubfolderName(String username){
+        boolean SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
+        return SPLIT_BY_USERNAME ? username : null;
     }
 
     private static void buildVideoVariantDialogBox(Context context, MediaData currentMediaData) throws Exception {
@@ -62,7 +63,7 @@ public class DownloadUtils {
                 try {
                     String filename = username + "_"+currentMediaData.getVideoVariantFileName(videoData);
                     String mediaUrl = videoData.getUrl();
-                    String subFolder = SPLIT_BY_USERNAME ? username : null;
+                    String subFolder = getSubfolderName(username);
                     downloadMediaUrl(context,mediaUrl,subFolder,filename);
                 } catch (Exception e) {
                     PikoUtils.logger(e);
@@ -160,6 +161,7 @@ public class DownloadUtils {
 
     public static void downloadPost(Context context, Object mediaObject, int position) {
         try {
+            boolean ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
             position = position < 1 ? 0 : position;
             MediaData mediaInfo = new MediaData(mediaObject);
             if (ENABLE_DIRECT_DOWNLOAD) {
@@ -182,7 +184,7 @@ public class DownloadUtils {
         }
         MediaDownloader downloader = new MediaDownloader(context);
         String username = mediaInfo.getUserData().getUsername();
-        String subFolder = SPLIT_BY_USERNAME ? username : null;
+        String subFolder = getSubfolderName(username);
 
         if (mediaType.equals(MediaType.AUDIO)) {
             AudioMediaInterface audioMedia = mediaInfo.getMediaAt(position).getAudioMedia();
