@@ -47,7 +47,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.5.0-dev.4](https://github.com/crimera/piko/releases/tag/v3.5.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;119 patches total
+> **[v3.5.0-dev.5](https://github.com/crimera/piko/releases/tag/v3.5.0-dev.5)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;119 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
 <br>

@@ -1,3 +1,15 @@
+## [3.5.0-dev.5](https://github.com/crimera/piko/compare/v3.5.0-dev.4...v3.5.0-dev.5) (2026-06-05)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix crashing on profile issue ([ff0676f](https://github.com/crimera/piko/commit/ff0676f6e0654038892061f69d44fda7eeea6a7d))
+* **Instagram:** fix downloading dp into sub folder ([6a78dc5](https://github.com/crimera/piko/commit/6a78dc5b12d3f1832e01353b12d939b8e8693325))
+* **Instagram:** Fix persistent downloading notification after completion ([905828d](https://github.com/crimera/piko/commit/905828dd465b9b0aa0afc489bbf624acd8a3faa4))
+
+### 🔧 Improvements
+
+* **Instagram:** Improve `Disable screenshot detection` patch ([b15a697](https://github.com/crimera/piko/commit/b15a6971198332f5e52fb486a97d5110142205cd))
+
 ## [3.5.0-dev.4](https://github.com/crimera/piko/compare/v3.5.0-dev.3...v3.5.0-dev.4) (2026-05-31)
 
 ### 🔧 Improvements
