@@ -177,6 +177,7 @@
     <string name="piko_pref_customisation_post_font_size">Ukuran font postingan</string>
     <string name="piko_pref_customisation_search_type_ahead">Saran pencarian untuk disembunyikan</string>
     <string name="piko_pref_customisation_change_app_icon">Ubah ikon aplikasi</string>
+    <string name="piko_notifications_tab_priority">Prioritas</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Gaya font</string>
     <string name="piko_pref_add_font">Tambahkan font</string>

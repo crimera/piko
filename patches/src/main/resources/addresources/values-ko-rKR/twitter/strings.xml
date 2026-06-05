@@ -26,9 +26,9 @@
     <string name="piko_title_native">기본 기능</string>
     <string name="piko_pref_native_page_desc">이 Piko 기본 기능은 게시물 메뉴에서 사용할 수 있습니다</string>
     <string name="piko_title_native_downloader">기본 다운로더</string>
-    <string name="piko_title_native_downloader_toggle">기본 다운로더</string>
+    <string name="piko_title_native_downloader_toggle">기본 다운로더 활성화하기</string>
     <string name="piko_pref_native_downloader_inline_button">타임라인 게시물에서 다운로드 버튼 표시하기</string>
-    <string name="piko_pref_native_downloader_inline_button_desc">게시물 동작 버튼 바에 즉시 다운로드 버튼을 추가합니다</string>
+    <string name="piko_pref_native_downloader_inline_button_desc">게시물 액션 버튼 바에 즉시 다운로드 버튼을 추가합니다</string>
     <string name="piko_pref_native_downloader_alert_title">미디어 다운로드</string>
     <string name="piko_pref_native_downloader_download_all">모두 다운로드</string>
     <string name="piko_pref_native_downloader_no_media">미디어를 찾을 수 없습니다</string>
@@ -40,7 +40,7 @@
     <string name="piko_share_image_autocleanup">캡처 자동 정리하기</string>
     <string name="piko_share_image_autocleanup_desc">활성화 시 24시간이 지난 캡처를 자동으로 제거합니다</string>
     <string name="piko_title_native_translator">기본 게시물 번역기</string>
-    <string name="piko_native_translator_toggle">기본 게시물 번역기</string>
+    <string name="piko_native_translator_toggle">기본 게시물 번역기 활성화하기</string>
     <string name="piko_native_translator_provider">번역기 제공자</string>
     <string name="piko_native_translator_to_lang">번역할 언어</string>
     <string name="piko_native_translator_zero_text">번역할 텍스트를 찾을 수 없습니다</string>
@@ -92,8 +92,8 @@
     <!-- Misc Settings -->
     <string name="piko_title_misc">기타</string>
     <string name="piko_pref_chirp_font">짹짹이 폰트 활성화하기</string>
-    <string name="piko_pref_hide_fab">플로팅 동작 버튼 숨기기</string>
-    <string name="piko_pref_hide_fab_menu">플로팅 동작 메뉴 버튼 숨기기</string>
+    <string name="piko_pref_hide_fab">플로팅 액션 버튼 숨기기</string>
+    <string name="piko_pref_hide_fab_menu">플로팅 액션 메뉴 버튼 숨기기</string>
     <string name="piko_pref_rec_users">팔로우 추천 숨기기</string>
     <string name="piko_pref_hide_view_count">조회수 숨기기</string>
     <string name="piko_pref_custom_share_domain">사용자 정의 도메인</string>
@@ -117,7 +117,7 @@
     <string name="piko_legacy_share_link">이전 공유 링크</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">기능 플래그</string>
-    <string name="piko_pref_feature_flags">기능 플래그 추가하기</string>
+    <string name="piko_pref_feature_flags">플래그 추가하기</string>
     <string name="piko_pref_edit_flag_title">플래그 수정하기</string>
     <string name="piko_pref_add_flag_title">플래그 추가하기</string>
     <string name="piko_pref_search_flags">플래그 검색하기</string>
@@ -177,6 +177,7 @@
     <string name="piko_pref_customisation_post_font_size">게시물 폰트 사이즈</string>
     <string name="piko_pref_customisation_search_type_ahead">숨겨질 검색어 추천</string>
     <string name="piko_pref_customisation_change_app_icon">앱 아이콘 변경하기</string>
+    <string name="piko_notifications_tab_priority">우선순위</string>
     <!-- Font Settings -->
     <string name="piko_title_font">폰트 스타일</string>
     <string name="piko_pref_add_font">폰트 추가하기</string>

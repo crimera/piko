@@ -24,7 +24,7 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">Udostępnij link</string>
     <!-- Native -->
     <string name="piko_title_native">Funkcje natywne</string>
-    <string name="piko_pref_native_page_desc">Funkcje natywne Piko są dostępne w menu posta.</string>
+    <string name="piko_pref_native_page_desc">Funkcje natywne Piko są dostępne w menu wpisu.</string>
     <string name="piko_title_native_downloader">Pobieranie</string>
     <string name="piko_title_native_downloader_toggle">Włącz natywne pobieranie</string>
     <string name="piko_pref_native_downloader_inline_button">Pokaż przycisk pobierania</string>
