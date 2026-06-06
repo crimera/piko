@@ -15,17 +15,14 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstLiteralInstructionOrThrow
 import app.morphe.util.registersUsed
-
-internal const val HUNDRED = 100.0f
 
 internal object StoryRingBuilderFingerprint : Fingerprint(
     returnType = "V",
     filters =
         listOf(
             literal(66.0f),
-            literal(HUNDRED),
+            literal(100.0f),
             literal(3.75),
         ),
 )
@@ -40,18 +37,20 @@ val customiseStoryRingSizePatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            StoryRingBuilderFingerprint.method.apply {
-                val ringSizeLiteralIndex = indexOfFirstLiteralInstructionOrThrow(HUNDRED)
-                val register = getInstruction(ringSizeLiteralIndex).registersUsed[0]
+            StoryRingBuilderFingerprint.let {
+                it.method.apply {
+                    val ringSizeLiteralIndex = it.instructionMatches[1].index
+                    val register = getInstruction(ringSizeLiteralIndex).registersUsed[0]
 
-                addInstructions(
-                    ringSizeLiteralIndex + 1,
-                    """
-                    $PREF_CALL_DESCRIPTOR->customiseStoryRingSize()F
-                    move-result v$register
-                    """.trimIndent(),
-                )
-                enableSettings("customiseStoryRingSize")
+                    addInstructions(
+                        ringSizeLiteralIndex + 1,
+                        """
+                            $PREF_CALL_DESCRIPTOR->customiseStoryRingSize()F
+                            move-result v$register
+                        """
+                    )
+                    enableSettings("customiseStoryRingSize")
+                }
             }
         }
     }
