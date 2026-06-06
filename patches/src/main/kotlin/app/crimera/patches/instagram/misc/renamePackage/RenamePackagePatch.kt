@@ -40,6 +40,7 @@ private val SKIP_CLASS_REFERENCE_ATTRS: Set<Pair<String, String>> =
 
 private var newPackageName: String? = null
 private var newAppLabel: String? = null
+private var knownInstagramClassNames: Set<String> = emptySet()
 
 /**
  * Internal companion. The main bytecode patch declares this dependsOn, so it
@@ -126,6 +127,7 @@ val renamePackagePatch =
                         type.substring(1, type.length - 1).replace('/', '.')
                 }
             }
+            knownInstagramClassNames = instagramClassNames.toSet()
 
             classDefForEach { classDef ->
                 val hasMatch =
@@ -174,7 +176,10 @@ private fun com.android.tools.smali.dexlib2.iface.instruction.Instruction.constS
  * Walks the element tree and rewrites every attribute value matching the
  * com.instagram word-boundary regex. Skips entries in SKIP_CLASS_REFERENCE_ATTRS,
  * which hold Java class names that must keep pointing at the original
- * com.instagram.* classes in dex.
+ * com.instagram.* classes in dex. Also skips activity-alias android:name when
+ * the value is the FQCN of a real class in the dex — dex code references those
+ * aliases via Class.forName / CONST_CLASS and would resolve to the original
+ * com.instagram.* path regardless of what we put in the manifest.
  */
 private fun rewritePackageReferences(element: Element, newNamespacePrefix: String) {
     val replacement = Regex.escapeReplacement(newNamespacePrefix)
@@ -183,8 +188,13 @@ private fun rewritePackageReferences(element: Element, newNamespacePrefix: Strin
     val attributes = element.attributes
     for (i in 0 until attributes.length) {
         val attribute = attributes.item(i)
-        if ((tagName to attribute.nodeName) in SKIP_CLASS_REFERENCE_ATTRS) continue
+        val attrName = attribute.nodeName
+        if ((tagName to attrName) in SKIP_CLASS_REFERENCE_ATTRS) continue
         val original = attribute.nodeValue ?: continue
+        if (tagName == "activity-alias"
+            && attrName == "android:name"
+            && original in knownInstagramClassNames
+        ) continue
         val rewritten = NAMESPACE_WORD_REGEX.replace(original, replacement)
         if (rewritten != original) attribute.nodeValue = rewritten
     }
