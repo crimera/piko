@@ -234,6 +234,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.COMMENT_COPY_BUTTON) && SettingsStatus.copyCommentButton;
     }
 
+    public static boolean commentSaveMediaButton() {
+        return SharedPref.getBooleanPref(Settings.COMMENT_SAVE_MEDIA_BUTTON) && SettingsStatus.saveMediaCommentButton;
+    }
+
     public static String changeLikeAnimation() {
         return SharedPref.getStringPref(Settings.CHANGE_LIKE_ANIMATION);
     }

@@ -530,6 +530,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.saveMediaCommentButton) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.SAVE_MEDIA_COMMENT,
+                            Strings.SAVE_MEDIA_COMMENT_DESC,
+                            Settings.COMMENT_SAVE_MEDIA_BUTTON
+                    )
+            );
+        }
         if (SettingsStatus.removeEmptyBottomSpace) {
             addPreference(category,
                     helper.switchPreference(

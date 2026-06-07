@@ -98,6 +98,8 @@ public class DefaultStrings {
     public static String COPY_COMMENT_DESC = "Adds a button to copy comments on posts and reels";
     public static String COMMENT_COPIED_SUCCESS = "Comment copied";
     public static String COMMENT_COPIED_FAILED = "No text found to copy";
+    public static String SAVE_MEDIA_COMMENT = "Save media comment";
+    public static String SAVE_MEDIA_COMMENT_DESC = "Adds a button to save media comments on posts and reels";
     public static String COPY_USERNAME = "Copy username";
     public static String COPY_FULL_NAME = "Copy full name";
     public static String COPY_USER_ID = "Copy user id";

@@ -26,6 +26,9 @@ var MEDIA_ADD_INFO_CLASS_NAME: String by Delegates.notNull()
 var CURRENT_MEDIA_FIELD: FieldReference by Delegates.notNull()
     private set
 
+var COMMENT_BUTTON_CLASS: String by Delegates.notNull()
+    private set
+
 val decoderEntity =
     bytecodePatch(
         description = "This patch is used hold class and field names that are commonly used",
@@ -40,5 +43,7 @@ val decoderEntity =
                     ).getReference<FieldReference>()!!
                 MEDIA_ADD_INFO_CLASS_NAME = CURRENT_MEDIA_FIELD.definingClass
             }
+
+            COMMENT_BUTTON_CLASS = CommentButtonOnClickFingerprint.method.parameters[0].type
         }
     }

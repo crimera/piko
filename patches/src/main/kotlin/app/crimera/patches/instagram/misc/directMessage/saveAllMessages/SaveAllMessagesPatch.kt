@@ -8,7 +8,6 @@ package app.crimera.patches.instagram.misc.directMessage.saveAllMessages
 
 import app.crimera.patches.instagram.entity.messageInfoEntity.messageInfoEntity
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
