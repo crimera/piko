@@ -61,7 +61,11 @@ public class Pref {
     }
 
     public static boolean enableMoreOptionsOnProfileQuickToggle() {
-        return SharedPref.getBooleanPref(Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE) && SettingsStatus.moreOptionsOnProfile;
+        return SharedPref.getBooleanPref(Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE) && Pref.isMoreOptionsOnProfilePatched();
+    }
+
+    public static boolean isMoreOptionsOnProfilePatched(){
+        return SettingsStatus.moreOptionsOnProfile;
     }
 
     public static boolean viewStoriesAnonymously() {
