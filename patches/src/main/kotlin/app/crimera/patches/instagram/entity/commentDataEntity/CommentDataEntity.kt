@@ -10,6 +10,7 @@ import app.crimera.patches.instagram.entity.decoder.CommentButtonOnClickFingerpr
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
@@ -28,6 +29,38 @@ val commentDataEntity =
                     val ifEqzIndex = indexOfFirstInstruction(commentShareClickStrIndex, Opcode.IF_EQZ)
                     val commentTextField = getInstruction(ifEqzIndex - 1).fieldExtractor().name
                     GetTextExtension.changeFirstString(commentTextField)
+                }
+
+                RandomGetCommentObjectMediaFingerprint.apply {
+                    val commentObject = method.returnType
+
+                    classDef.methods.first { it.parameters.size == 1 }.apply {
+                        val commentGifObject = returnType
+
+                        val lastIPutObjectInstruction = instructions.last { it.opcode == Opcode.IPUT_OBJECT }
+                        val lastIPutObjectIndex = lastIPutObjectInstruction.location.index
+
+                        val gifCreatorNameFieldName = lastIPutObjectInstruction.fieldExtractor().name
+                        GetGifCreatorNameMediaExtension.changeFirstString(gifCreatorNameFieldName)
+
+                        val webpUrlFieldName = getInstruction(lastIPutObjectIndex - 2).fieldExtractor().name
+                        GetWebpUrlMediaExtension.changeFirstString(webpUrlFieldName)
+
+                        val gifUrlFieldName = getInstruction(lastIPutObjectIndex - 3).fieldExtractor().name
+                        GetGifUrlMediaExtension.changeFirstString(gifUrlFieldName)
+
+                        val gifTagFieldName = getInstruction(indexOfFirstInstruction(Opcode.IPUT) - 1).fieldExtractor().name
+                        GetGifTagMediaExtension.changeFirstString(gifTagFieldName)
+
+                        val gifObjectFieldFromCommentObject =
+                            mutableClassDefBy { it.type == commentObject }
+                                .fields
+                                .first {
+                                    it.type ==
+                                        commentGifObject
+                                }.name
+                        GetGifMediaExtension.changeFirstString(gifObjectFieldFromCommentObject)
+                    }
                 }
             }
         }

@@ -9,6 +9,10 @@ package app.morphe.extension.instagram.entity;
 
 
 public interface GifMediaInterface {
+    public String getGifCreatorName() throws Exception;
+
+    public String getGifTag() throws Exception;
+
     public String getGifUrl() throws Exception;
 
     public String getWebpUrl() throws Exception;

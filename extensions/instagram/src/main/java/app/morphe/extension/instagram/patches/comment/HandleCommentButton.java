@@ -12,13 +12,16 @@ import android.content.Context;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.crimera.ObjectBrowser;
+
 import app.morphe.extension.instagram.entity.CommentData;
 import app.morphe.extension.instagram.utils.Pref;
-import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
-import app.morphe.extension.crimera.ObjectBrowser;
+import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.patches.comment.copyTextButton.CopyTextButton;
 import app.morphe.extension.instagram.patches.comment.debugButton.DebugButton;
+import app.morphe.extension.instagram.patches.comment.saveMediaButton.SaveMediaButton;
 
 // Thanks to MyInsta.
 @SuppressWarnings("unused")
@@ -28,11 +31,14 @@ public class HandleCommentButton {
         try {
             CommentData commentData = new CommentData(commentObject);
 
+            if (Pref.pikoDebug()) {
+                list.add(DebugButton.A00);
+            }
             if (commentData.hasText() && Pref.commentCopyButton()) {
                 list.add(CopyTextButton.A00);
             }
-            if (Pref.pikoDebug()) {
-                list.add(DebugButton.A00);
+            if(commentData.hasGifMedia() && Pref.commentSaveMediaButton()){
+                list.add(SaveMediaButton.A00);
             }
         } catch (Exception e) {
             PikoUtils.logger(e);
@@ -56,10 +62,20 @@ public class HandleCommentButton {
                 return true;
             } else if (button.equals(DebugButton.A00)) {
                 CommentData commentData = new CommentData(commentObject);
+
                 Context context = (Context) Utils.getActivity();
                 ObjectBrowser.browseObject(context,commentData);
                 return true;
+            } else if (button.equals(SaveMediaButton.A00)) {
+                CommentData commentData = new CommentData(commentObject);
+
+                Context context = (Context) Utils.getActivity();
+                String gifUrl = commentData.getGifUrl();
+                String fileName = commentData.getGifDownloadName();
+                DownloadUtils.downloadMediaUrl(context,gifUrl,Strings.DEFAULT_GIF_FOLDER,fileName);
+                return true;
             }
+
         } catch (Exception e) {
             PikoUtils.logger(e);
         }

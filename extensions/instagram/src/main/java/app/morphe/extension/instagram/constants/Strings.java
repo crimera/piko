@@ -20,6 +20,7 @@ public class Strings {
     public static final String DEFAULT_PIKO_FOLDER = "Piko-Instagram";
     public static final String DEFAULT_AUDIO_FOLDER = "Audio";
     public static final String DEFAULT_DM_FOLDER = "DM";
+    public static final String DEFAULT_GIF_FOLDER = "Gif";
 
     public static final String PIKO_SETTINGS_TITLE = langInstance.PIKO_SETTINGS_TITLE;
     public static final String CATEGORY_ADS = langInstance.CATEGORY_ADS;
@@ -108,6 +109,8 @@ public class Strings {
     public static final String COPY_COMMENT_DESC = langInstance.COPY_COMMENT_DESC;
     public static final String COMMENT_COPIED_SUCCESS = langInstance.COMMENT_COPIED_SUCCESS;
     public static final String COMMENT_COPIED_FAILED = langInstance.COMMENT_COPIED_FAILED;
+    public static final String SAVE_MEDIA_COMMENT = langInstance.SAVE_MEDIA_COMMENT;
+    public static final String SAVE_MEDIA_COMMENT_DESC = langInstance.SAVE_MEDIA_COMMENT_DESC;
     public static final String COPY_USERNAME = langInstance.COPY_USERNAME;
     public static final String COPY_FULL_NAME = langInstance.COPY_FULL_NAME;
     public static final String COPY_USER_ID = langInstance.COPY_USER_ID;
