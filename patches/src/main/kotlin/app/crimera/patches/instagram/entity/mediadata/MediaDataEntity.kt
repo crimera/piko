@@ -71,7 +71,7 @@ val mediaDataEntity =
             VideoMediaInIGTVFeedHasVideoVariantsFingerprint.method.apply {
                 val firstInvokeInterfaceInstruction = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_INTERFACE))
                 val getVideoVariantsMethodName = firstInvokeInterfaceInstruction.methodExtractor().name
-                GetVideoVariantsExtensionFingerprint.changeFirstString(getVideoVariantsMethodName)
+                GetVideoVariantsV1ExtensionFingerprint.changeFirstString(getVideoVariantsMethodName)
             }
 
             // Extracting method is video used in media class.
@@ -178,5 +178,22 @@ val mediaDataEntity =
                     GetMessageAudioUrlExtensionFingerprint.changeStringAt(1, methodName)
                 }
             }
+
+            // More extended data.
+            ExtMediaDictVideoInfoMapperFingerprint.apply {
+                val moreExtendedMediaDataFieldName =
+                    LiveTreeMediaDictClinitFingerprint.classDef.fields
+                        .first { it.type == classDef.type }
+                        .name
+                GetMoreExtendedDataExtensionFingerprint.changeFirstString(moreExtendedMediaDataFieldName)
+
+                val strIndex = stringMatches.last().index
+                method.apply {
+                    val videoVariantsListFieldName = getInstruction(strIndex + 2).fieldExtractor().name
+
+                    GetVideoVariantsV2ExtensionFingerprint.changeFirstString(videoVariantsListFieldName)
+                }
+            }
+            // End.
         }
     }
