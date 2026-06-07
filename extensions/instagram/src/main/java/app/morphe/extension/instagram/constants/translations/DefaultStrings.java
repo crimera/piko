@@ -121,6 +121,7 @@ public class DefaultStrings {
     public static String DOWNLOAD_CURRENT_MEDIA = "Download current media";
     public static String DOWNLOAD_AS_IMAGE = "Download as image";
     public static String VIDEO_VARIANTS = "Video variants";
+    public static String IMAGE_VARIANTS = "Image variants";
     public static String DOWNLOAD_AUDIO = "Download audio";
     public static String DOWNLOAD_OPTIONS = "Download options";
     public static String COPY_MEDIA_LINK = "Copy media link";

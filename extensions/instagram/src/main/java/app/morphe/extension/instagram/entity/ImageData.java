@@ -7,31 +7,27 @@
 
 package app.morphe.extension.instagram.entity;
 
-import com.instagram.model.mediasize.VideoVersion;
+import com.instagram.model.mediasize.ExtendedImageUrl;
 import app.morphe.extension.crimera.downloader.MediaType;
 
-public class VideoData implements MediaInterface {
-    private final VideoVersion obj;
+public class ImageData implements MediaInterface {
+    private final ExtendedImageUrl obj;
 
-    public VideoData(Object obj) {
-        this.obj = (VideoVersion) obj;
+    public ImageData(Object obj) {
+        this.obj = (ExtendedImageUrl) obj;
     }
 
     public Integer getHeight() throws Exception {
-        return this.obj.A01;
+        return Integer.valueOf(this.obj.getHeight());
     }
 
     public Integer getWidth() throws Exception {
-        return this.obj.A03;
-    }
-
-    private Integer getCodec() throws Exception {
-        return this.obj.A02;
+        return Integer.valueOf(this.obj.getWidth());
     }
 
     public String getVariantTag() {
         try{
-            return this.getHeight()+"x"+this.getWidth()+"-"+this.getCodec();
+            return this.getHeight()+"x"+this.getWidth();
         } catch (Exception e) {
             return "unknown";
         }
@@ -42,7 +38,7 @@ public class VideoData implements MediaInterface {
     }
 
     public MediaType getMediaType(){
-        return MediaType.VIDEO;
+        return MediaType.IMAGE;
     }
 
 }

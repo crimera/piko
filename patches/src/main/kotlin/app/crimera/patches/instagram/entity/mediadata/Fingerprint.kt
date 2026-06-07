@@ -29,6 +29,11 @@ internal object GetPhotoLinkExtensionFingerprint : Fingerprint(
     name = "getPhotoLink",
 )
 
+internal object GetImageVariantsExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getImageVariants",
+)
+
 internal object GetVideoVariantsV1ExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
     name = "getVideoVariantsV1",
@@ -166,4 +171,13 @@ internal object ExtMediaDictVideoInfoMapperFingerprint : Fingerprint(
 internal object LiveTreeMediaDictClinitFingerprint : Fingerprint(
     name = "<clinit>",
     strings = listOf(VIDEO_INFO_MAPPER_KEY),
+)
+
+internal object ExtMediaDictImageInfoMapperFingerprint : Fingerprint(
+    strings =
+        listOf(
+            "igtv_shopping_info",
+            "image_versions2",
+        ),
+    returnType = "Ljava/util/Map;",
 )

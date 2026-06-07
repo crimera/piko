@@ -35,6 +35,7 @@ object Constants {
     // Instagram classes.
     const val FRIENDSHIP_STATUS_CLASS = "Lcom/instagram/user/model/FriendshipStatus;"
     const val EDIT_MEDIA_INFO_FRAGMENT_CLASS = "Linstagram/features/creation/fragment/EditMediaInfoFragment;"
+    const val EXTENDED_IMAGE_URL_CLASS = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"
 
     // Extension classes.
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/instagram"
