@@ -23,21 +23,23 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DIRECTLY_OPEN_METACONFIG_DESC = "Langsung membuka penggantian MetaConfig dengan menekan lama ikon beranda (pilihan pengembang harus diaktifkan)";
 		this.ENABLE_EMP_OPTIONS = "Aktifkan pilihan karyawan";
 		this.ENABLE_EMP_OPTIONS_DESC = "Membuka semua pilihan karyawan yang digunakan untuk pengujian";
-		this.ALLOW_USER_NETWORK_CERTIFICATE = "Aktifkan pengaturan whitehat";
-		this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "Membuka pengaturan yang digunakan untuk pengujian jaringan";
+		this.ALLOW_USER_NETWORK_CERTIFICATE = "Izinkan sertifikat jaringan pengguna";
+		this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "Mengizinkan sertifikat jaringan pengguna untuk pengujian whitehat";
 		this.REMOVE_BUILD_EXPIRE_POPUP = "Hapus popup build kedaluwarsa";
 		this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Menghapus popup yang muncul setelah beberapa saat, ketika versi aplikasi menua";
 		this.EXPORT_DEV_OVERRIDES = "Ekspor override";
 		this.IMPORT_DEV_OVERRIDES = "Impor override";
 		this.IMPORT_ID_MAPPING = "Impor berkas pemetaan";
 		this.DOWNLOAD_ID_MAPPING = "Unduh berkas pemetaan";
+		this.MISSING_MAPPING_FILE = "Berkas pemetaan tidak ditemukan";
+		this.MISSING_MAPPING_FILE_DESC = "Tanpa berkas pemetaan, pilihan pengembang tidak akan memiliki nama yang benar. Apakah Anda ingin mengunduhnya?";
 
 		this.CATEGORY_LINKS = "Tautan";
 		this.OPEN_LINKS_EXTERNALLY = "Buka tautan secara eksternal";
 		this.OPEN_LINKS_EXTERNALLY_DESC = "Buka tautan di browser eksternal alih-alih browser dalam aplikasi";
 		this.SANITIZE_SHARE_LINKS = "Bersihkan tautan berbagi";
 
-		this.CATEGORY_GHOST = "Mode Hantu";
+		this.CATEGORY_GHOST = "Hantu";
 		this.VIEW_STORIES_ANONYMOUSLY = "Lihat cerita secara anonim";
 		this.VIEW_LIVE_ANONYMOUSLY = "Lihat siaran langsung secara anonim";
 		this.DISABLE_TYPING_STATUS = "Nonaktifkan status mengetik";
@@ -46,6 +48,8 @@ public class StringsIndonesian extends DefaultStrings {
 		this.TURN_ON_ALL_GHOST_MODES = "Aktifkan semua mode hantu";
 		this.GHOST_MODES_ON = "Mode hantu: ON";
 		this.GHOST_MODES_DEFAULT = "Mode hantu: BAWAAN";
+		this.GHOST_MODES_QUICK_TOGGLE = "Aktifkan tombol cepat untuk mode hantu";
+		this.GHOST_MODES_QUICK_TOGGLE_DESC = "Menambahkan tombol cepat di bilah tindakan obrolan untuk mengontrol mode-mode hantu";
 
 		this.CATEGORY_DISTRACTION_FREE = "Bebas gangguan";
 		this.DISABLE_STORIES = "Nonaktifkan cerita";
@@ -54,9 +58,9 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DISABLE_COMMENTS = "Nonaktifkan komentar";
 		this.LIMIT_FOLLOWING_FEED = "Batasi beranda hanya untuk profil yang diikuti";
 		this.LIMIT_FOLLOWING_FEED_DESC = "Menyaring beranda untuk hanya menampilkan konten dari profil yang Anda ikuti.";
-		this.DISABLE_REELS_SCROLLING = "Nonaktifkan gulir Reels";
+		this.DISABLE_REELS_SCROLLING = "Nonaktifkan pengguliran Reels";
 		this.DISABLE_REELS_SCROLLING_DESC =
-            "Menonaktifkan perilaku gulir tak terbatas di Instagram Reels, mencegah usapan ke Reel berikutnya. " +
+            "Menonaktifkan perilaku pengguliran tak terbatas di Instagram Reels, mencegah usapan ke Reel berikutnya. " +
             "Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan berhenti dengan sendirinya setelah beberapa detik.";
 		this.HIDE_STORIES_TRAY = "Sembunyikan deretan cerita";
 		this.HIDE_STORIES_TRAY_DESC = "Menyembunyikan deretan cerita dari beranda utama";
@@ -80,8 +84,8 @@ public class StringsIndonesian extends DefaultStrings {
 		this.VIEW_STORY_MENTIONS = "Lihat sebutan cerita";
 		this.VSM_TITLE = "Sebutan cerita";
 		this.VSM_NO_MENTIONS = "Tidak ada sebutan di cerita ini";
-		this.DISABLE_STORY_FLIPPING = "Nonaktifkan perpindahan cerita";
-		this.DISABLE_STORY_FLIPPING_DESC = "Nonaktifkan perpindahan/gerakan otomatis ke cerita berikutnya";
+		this.DISABLE_STORY_FLIPPING = "Nonaktifkan pembalikan cerita";
+		this.DISABLE_STORY_FLIPPING_DESC = "Nonaktifkan pembalikan/perpindahan otomatis ke cerita berikutnya";
 		this.DISABLE_VIDEO_AUTOPLAY = "Nonaktifkan putar otomatis video";
 		this.STORIES_AUDIO_AUTOPLAY = "Putar otomatis audio cerita";
 		this.CUSTOMISE_STORY_TIMESTAMP = "Sesuaikan stempel waktu cerita";
@@ -102,6 +106,8 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DOWNLOAD_PROFILE_PICTURE = "Unduh foto profil";
 		this.COPIED = "Disalin";
 		this.MORE_PROFILE_OPTIONS = "Pilihan profil lainnya";
+		this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "Pilihan profil di bilah tindakan";
+		this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "Pindahkan tombol pilihan profil ke bilah tindakan profil";
 		this.REMOVE_EMPTY_BOTTOM_SPACE = "Hapus ruang kosong di bagian bawah";
 		this.UNLOCK_PLUS_BENEFITS = "Buka keuntungan Plus";
 		this.UNLOCK_PLUS_BENEFITS_DESC = "Buka keuntungan langganan 'Plus' yang diperiksa secara lokal. GUNAKAN DENGAN RISIKO ANDA SENDIRI";
@@ -130,6 +136,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DOWNLOAD_SET_PATH_FAILED = "Gagal menemukan jalur folder";
 		this.DOWNLOAD_GRANT_PERMISSION = "Silakan berikan izin penyimpanan untuk melanjutkan pengunduhan";
 		this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Tidak dapat membuka pengaturan. Silakan berikan izin Akses Semua Berkas secara manual";
+		
 		this.POST_OPTIONS = "Pilihan postingan";
 		this.COPY_POST_DESCRIPTION = "Salin deskripsi postingan";
 		this.COPY_POST_OWNER_USERNAME = "Salin nama pengguna pemilik postingan";
@@ -138,7 +145,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Dapatkan lebih banyak pilihan dengan menekan lama postingan";
 
 		this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Sembunyikan tombol navigasi";
-		this.HIDE_NAVIGATION_FEED = "Sembunyikan tombol Beranda";
+		this.HIDE_NAVIGATION_FEED = "Sembunyikan tombol Feed";
 		this.HIDE_NAVIGATION_REELS = "Sembunyikan tombol Reels";
 		this.HIDE_NAVIGATION_DIRECT = "Sembunyikan tombol Direct";
 		this.HIDE_NAVIGATION_SEARCH = "Sembunyikan tombol Pencarian";
@@ -158,7 +165,9 @@ public class StringsIndonesian extends DefaultStrings {
 		this.IMPORT_SUCCESS = "Berhasil diimpor";
 		this.IMPORT_FAIL = "Gagal mengimpor";
 		this.RESTART_APP = "Aplikasi perlu dimulai ulang agar perubahan diterapkan";
+		this.RESTART_APP = "Aplikasi perlu dimulai ulang agar perubahan tersebut dapat diterapkan";
 		this.OK = "OKE";
+		this.CANCEL = "Batalkan";
 		this.DELETED = "Dihapus";
 		this.PIKO_DEBUG = "Piko debug";
 		this.PIKO_DEBUG_DESC = "Menambahkan pilihan debug pada beberapa komponen untuk pengujian";
@@ -175,7 +184,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.AVAILABLE_LIKE_ANIMATION = "Animasi suka yang tersedia";
 
 		this.DEFAULT = "Bawaan";
-		this.ARR_DETAILED_TIMESTAMP = "Stempel waktu detail";
+		this.ARR_DETAILED_TIMESTAMP = "Stempel waktu secara terperinci";
 		this.ARR_TIME_LEFT = "Waktu tersisa";
 		
 		this.WELCOME_TITLE = "Selamat datang di Piko";
@@ -183,5 +192,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.GOTO_PIKO_SETTINGS = "Ke pengaturan Piko";
 		this.NO_INTERNET = "Silakan sambungkan ke internet";
 		this.TAP_HERE = "Ketuk di sini !!";
+		this.PIKO_SETTINGS_ON_ACTION_BAR = "Pengaturan Piko di bilah tindakan";
+		this.PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Pindahkan titik masuk pengaturan Piko ke bilah tindakan feed utama";
 	}
 }
