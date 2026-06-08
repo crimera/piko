@@ -60,7 +60,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.LIMIT_FOLLOWING_FEED_DESC = "Menyaring beranda untuk hanya menampilkan konten dari profil yang Anda ikuti.";
 		this.DISABLE_REELS_SCROLLING = "Nonaktifkan pengguliran Reels";
 		this.DISABLE_REELS_SCROLLING_DESC =
-            "Menonaktifkan perilaku pengguliran tak terbatas di Instagram Reels, mencegah usapan ke Reel berikutnya. " +
+            "Menonaktifkan perilaku pengguliran tak terbatas di Instagram Reels, mencegah usapan ke Reels berikutnya. " +
             "Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan berhenti dengan sendirinya setelah beberapa detik.";
 		this.HIDE_STORIES_TRAY = "Sembunyikan deretan cerita";
 		this.HIDE_STORIES_TRAY_DESC = "Menyembunyikan deretan cerita dari beranda utama";
@@ -99,6 +99,8 @@ public class StringsIndonesian extends DefaultStrings {
 		this.COPY_COMMENT_DESC = "Menambahkan tombol untuk menyalin komentar pada postingan dan reel";
 		this.COMMENT_COPIED_SUCCESS = "Komentar disalin";
 		this.COMMENT_COPIED_FAILED = "Tidak ada teks yang ditemukan untuk disalin";
+		this.SAVE_MEDIA_COMMENT = "Simpan komentar media";
+		this.SAVE_MEDIA_COMMENT_DESC = "Menambahkan tombol untuk menyimpan komentar media pada postingan dan reels";
 		this.COPY_USERNAME = "Salin nama pengguna";
 		this.COPY_FULL_NAME = "Salin nama lengkap";
 		this.COPY_USER_ID = "Salin ID pengguna";
@@ -122,6 +124,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DOWNLOAD_CURRENT_MEDIA = "Unduh media saat ini";
 		this.DOWNLOAD_AS_IMAGE = "Unduh sebagai gambar";
 		this.VIDEO_VARIANTS = "Varian video";
+		this.IMAGE_VARIANTS = "Varian gambar";
 		this.DOWNLOAD_AUDIO = "Unduh audio";
 		this.DOWNLOAD_OPTIONS = "Pilihan unduhan";
 		this.COPY_MEDIA_LINK = "Salin tautan media";
