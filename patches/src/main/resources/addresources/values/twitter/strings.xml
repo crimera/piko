@@ -41,6 +41,11 @@
     <string name="piko_share_image_toggle">Enable Share Tweet as Image</string>
     <string name="piko_share_image_autocleanup">Auto-cleanup captures</string>
     <string name="piko_share_image_autocleanup_desc">Remove captures older than 24 hours when enabled</string>
+    <string name="piko_share_image_invalid_context">Invalid context</string>
+    <string name="piko_share_image_capturing">Capturing tweet...</string>
+    <string name="piko_share_image_view_not_found">Tweet view not found</string>
+    <string name="piko_share_image_capture_failed">Failed to capture image</string>
+    <string name="piko_share_image_error">Error: %s</string>
 
     <string name="piko_title_native_translator">Native post translation</string>
     <string name="piko_native_translator_toggle">Enable native post translation</string>

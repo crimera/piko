@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.twitter.Pref;
@@ -48,7 +49,7 @@ public class ShareImageHandler {
 
     public static void shareAsImage(Context context, Object tweetObj) {
         if (!(context instanceof Activity)) {
-            PikoUtils.toast("Invalid context");
+            PikoUtils.toast(StringRef.str("piko_share_image_invalid_context"));
             return;
         }
 
@@ -60,12 +61,12 @@ public class ShareImageHandler {
 
         try {
             Tweet tweet = new Tweet(tweetObj);
-            PikoUtils.toast("Capturing tweet...");
+            PikoUtils.toast(StringRef.str("piko_share_image_capturing"));
             
             View rootView = activity.getWindow().getDecorView().getRootView();
             View tweetView = searchViewTree(rootView, tweet.getTweetId(), 0);
             if (tweetView == null) {
-                PikoUtils.toast("Tweet view not found");
+                PikoUtils.toast(StringRef.str("piko_share_image_view_not_found"));
                 return;
             }
             CaptureTarget target = resolveCaptureTarget(activity, rootView, tweetView);
@@ -95,14 +96,14 @@ public class ShareImageHandler {
             }
             
             if (bitmap == null) {
-                PikoUtils.toast("Failed to capture image");
+                PikoUtils.toast(StringRef.str("piko_share_image_capture_failed"));
                 return;
             }
 
             shareImage(activity, bitmap, "tweet_" + tweet.getTweetId());
         } catch (Exception e) {
             PikoUtils.logger(e);
-            PikoUtils.toast("Error: " + e.getMessage());
+            PikoUtils.toast(StringRef.str("piko_share_image_error", e.getMessage()));
         }
     }
 
