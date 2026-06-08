@@ -1,3 +1,21 @@
+## [3.5.0-dev.6](https://github.com/crimera/piko/compare/v3.5.0-dev.5...v3.5.0-dev.6) (2026-06-08)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Check if `More options on profile` is patched before adding the button ([a8cfbab](https://github.com/crimera/piko/commit/a8cfbab17d75e3c52f0b39ba0d1ec2b8fa8fbf61))
+
+### ✨ New Features
+
+* **Instagram:** Added `Save media comment` patch ([b756d4b](https://github.com/crimera/piko/commit/b756d4bb9dad139d8d996a373e5d98acca855d2e))
+* **Instagram:** Added image variants download option ([5aca4b4](https://github.com/crimera/piko/commit/5aca4b44efe461bebaea397316649f6c5897f076))
+
+### 🔧 Improvements
+
+* **Instagram:**  Customise story ring size - Clarify standard size in the setting ([#1265](https://github.com/crimera/piko/issues/1265)) ([d30a32e](https://github.com/crimera/piko/commit/d30a32e163117b317b25d9eed7a53ff645f92fbe))
+* **Instagram:** Added alternative logic for video variants ([45bf91f](https://github.com/crimera/piko/commit/45bf91ff0ea31930224bae777d7114d7777eb852))
+* **Instagram:** Added Debug option for comments & improved comment button loading ([2c827ed](https://github.com/crimera/piko/commit/2c827ede209e99e3b00cd34ee6e3517144547c6f))
+* **Twitter:** Make unofficial instance links optional for deeplinks ([6dea26b](https://github.com/crimera/piko/commit/6dea26b5435e68068d71adc5d727eefda8273a91))
+
 ## [3.5.0-dev.5](https://github.com/crimera/piko/compare/v3.5.0-dev.4...v3.5.0-dev.5) (2026-06-05)
 
 ### 🐛 Bug Fixes
