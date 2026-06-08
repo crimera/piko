@@ -124,6 +124,7 @@ public class Strings {
     public static final String UNLOCK_PLUS_BENEFITS = langInstance.UNLOCK_PLUS_BENEFITS;
     public static final String UNLOCK_PLUS_BENEFITS_DESC = langInstance.UNLOCK_PLUS_BENEFITS_DESC;
     public static final String CUSTOMISE_STORY_RING_SIZE = langInstance.CUSTOMISE_STORY_RING_SIZE;
+    public static final String CUSTOMISE_STORY_RING_SIZE_DESC = langInstance.CUSTOMISE_STORY_RING_SIZE_DESC;
 
     public static final String CATEGORY_DOWNLOAD_MEDIA = langInstance.CATEGORY_DOWNLOAD_MEDIA;
     public static final String ENABLE_DOWNLOAD = langInstance.ENABLE_DOWNLOAD;
