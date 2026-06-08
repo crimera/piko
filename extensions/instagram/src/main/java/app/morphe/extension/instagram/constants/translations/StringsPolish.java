@@ -99,6 +99,8 @@ public class StringsPolish extends DefaultStrings {
         this.COPY_COMMENT_DESC = "Dodaje przycisk pozwalający skopiować treść komentarza pod postami i rolkami";
         this.COMMENT_COPIED_SUCCESS = "Skopiowano komentarz";
         this.COMMENT_COPIED_FAILED = "Nie znaleziono tekstu do skopiowania";
+        this.SAVE_MEDIA_COMMENT = "Zapisz multimedia z komentarzy";
+        this.SAVE_MEDIA_COMMENT_DESC = "Dodaje przycisk do zapisywania multimediów z komentarzy pod postami i rolkami";
         this.COPY_USERNAME = "Skopiuj nazwę użytkownika";
         this.COPY_FULL_NAME = "Skopiuj wyświetlaną nazwę";
         this.COPY_USER_ID = "Skopiuj ID użytkownika";
@@ -122,6 +124,7 @@ public class StringsPolish extends DefaultStrings {
         this.DOWNLOAD_CURRENT_MEDIA = "Pobierz aktualny plik";
         this.DOWNLOAD_AS_IMAGE = "Pobierz jako obraz";
         this.VIDEO_VARIANTS = "Warianty filmu";
+        this.IMAGE_VARIANTS = "Warianty obrazu";
         this.DOWNLOAD_AUDIO = "Pobierz sam dźwięk";
         this.DOWNLOAD_OPTIONS = "Opcje pobierania";
         this.COPY_MEDIA_LINK = "Skopiuj link do pliku";
