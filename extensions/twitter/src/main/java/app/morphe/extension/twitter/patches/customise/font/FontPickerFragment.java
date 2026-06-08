@@ -18,7 +18,6 @@ import java.io.OutputStream;
 import java.io.FileOutputStream;
 import android.app.Fragment;
 import app.morphe.extension.crimera.PikoUtils;
-import app.morphe.extension.shared.StringRef;
 
 
 public class FontPickerFragment extends Fragment {

@@ -6,6 +6,8 @@
 
 package app.morphe.extension.twitter.patches.nativeFeatures.shareImage;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ContentResolver;
@@ -32,7 +34,6 @@ import java.util.List;
 import java.util.Map;
 
 import app.morphe.extension.crimera.PikoUtils;
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.twitter.Pref;
@@ -49,7 +50,7 @@ public class ShareImageHandler {
 
     public static void shareAsImage(Context context, Object tweetObj) {
         if (!(context instanceof Activity)) {
-            PikoUtils.toast(StringRef.str("piko_share_image_invalid_context"));
+            PikoUtils.toast(str("piko_share_image_invalid_context"));
             return;
         }
 
@@ -61,12 +62,12 @@ public class ShareImageHandler {
 
         try {
             Tweet tweet = new Tweet(tweetObj);
-            PikoUtils.toast(StringRef.str("piko_share_image_capturing"));
+            PikoUtils.toast(str("piko_share_image_capturing"));
             
             View rootView = activity.getWindow().getDecorView().getRootView();
             View tweetView = searchViewTree(rootView, tweet.getTweetId(), 0);
             if (tweetView == null) {
-                PikoUtils.toast(StringRef.str("piko_share_image_view_not_found"));
+                PikoUtils.toast(str("piko_share_image_view_not_found"));
                 return;
             }
             CaptureTarget target = resolveCaptureTarget(activity, rootView, tweetView);
@@ -96,14 +97,14 @@ public class ShareImageHandler {
             }
             
             if (bitmap == null) {
-                PikoUtils.toast(StringRef.str("piko_share_image_capture_failed"));
+                PikoUtils.toast(str("piko_share_image_capture_failed"));
                 return;
             }
 
             shareImage(activity, bitmap, "tweet_" + tweet.getTweetId());
         } catch (Exception e) {
             PikoUtils.logger(e);
-            PikoUtils.toast(StringRef.str("piko_share_image_error", e.getMessage()));
+            PikoUtils.toast(str("piko_share_image_error", e.getMessage()));
         }
     }
 
