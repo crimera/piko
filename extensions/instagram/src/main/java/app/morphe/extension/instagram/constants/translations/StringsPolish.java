@@ -113,7 +113,8 @@ public class StringsPolish extends DefaultStrings {
         this.REMOVE_EMPTY_BOTTOM_SPACE = "Usuń pustą przestrzeń na dole";
         this.UNLOCK_PLUS_BENEFITS = "Odblokuj korzyści Plus";
         this.UNLOCK_PLUS_BENEFITS_DESC = "Odblokowuje funkcje subskrypcji \"Plus\", które są weryfikowane lokalnie. UŻYWAJ NA WŁASNE RYZYKO";
-        this.CUSTOMISE_STORY_RING_SIZE = "Dostosuj rozmiar ramki relacji";
+        this.CUSTOMISE_STORY_RING_SIZE = "Dostosuj rozmiar obwódki relacji";
+        this.CUSTOMISE_STORY_RING_SIZE_DESC = "Zmień rozmiar obwódki relacji w procentach (domyślnie: 100)";
 
         this.CATEGORY_DOWNLOAD_MEDIA = "Pobieranie multimediów";
         this.ENABLE_DOWNLOAD = "Włącz pobieranie";
