@@ -7,6 +7,8 @@
 
 package app.morphe.extension.twitter.patches;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -17,7 +19,6 @@ import java.lang.reflect.Method;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.twitter.Pref;
-import app.morphe.extension.shared.StringRef;
 
 
 public class DownloadPatch {
@@ -76,7 +77,7 @@ public class DownloadPatch {
 
             String mediaLink = getMediaLink(para1);
             app.morphe.extension.shared.Utils.setClipboard(mediaLink);
-            PikoUtils.toast(strRes("link_copied_to_clipboard"));
+            PikoUtils.toast(str("link_copied_to_clipboard"));
         }
         catch (Exception e){
             PikoUtils.toast(e.toString());
@@ -102,9 +103,9 @@ public class DownloadPatch {
         LinearLayout ln = new LinearLayout(context);
         ln.setOrientation(LinearLayout.VERTICAL);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(strRes("piko_pref_download_media_link_handle"));
+        builder.setTitle(str("piko_pref_download_media_link_handle"));
 
-        String[] choices = {strRes("download_video_option"), strRes("piko_pref_download_media_link_handle_copy_media_link"),strRes("piko_pref_download_media_link_handle_share_media_link"), strRes("cancel")};
+        String[] choices = {str("download_video_option"), str("piko_pref_download_media_link_handle_copy_media_link"),str("piko_pref_download_media_link_handle_share_media_link"), str("cancel")};
         builder.setItems(choices, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
@@ -130,8 +131,5 @@ public class DownloadPatch {
         //endfunc
     }
 
-    private static String strRes(String tag) {
-        return StringRef.str(tag);
-    }
     //end
 }

@@ -6,9 +6,10 @@
 
 package app.morphe.extension.twitter.patches.customise.appIcon;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
-import app.morphe.extension.shared.StringRef;
 
 public class RowItem {
     public boolean isHeader;
@@ -21,7 +22,7 @@ public class RowItem {
     public static RowItem header(String titleKey) {
         RowItem r = new RowItem();
         r.isHeader = true;
-        r.headerTitle = StringRef.str(titleKey);
+        r.headerTitle = str(titleKey);
         return r;
     }
 
@@ -29,7 +30,7 @@ public class RowItem {
         RowItem r = new RowItem();
         r.isHeader = false;
         r.iconRes = ResourceUtils.getIdentifier(ResourceType.MIPMAP, iconId);
-        r.iconLabel = StringRef.str(labelKey);
+        r.iconLabel = str(labelKey);
         r.componentName = "app.morphe.extension.twitter.appicon"+iconNum;
         return r;
     }
@@ -42,7 +43,7 @@ public class RowItem {
 
     public static RowItem exclusiveIcon(String labelKey, String iconId, String iconNum) {
         RowItem r = icon(labelKey,iconId,iconNum);
-        r.iconLabel+=" "+StringRef.str("piko_app_icon_piko_exclusive");
+        r.iconLabel+=" "+str("piko_app_icon_piko_exclusive");
         return r;
     }
 }

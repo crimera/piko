@@ -6,24 +6,24 @@
 
 package app.morphe.extension.twitter.patches.nativeFeatures.readerMode;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-
-import app.morphe.extension.shared.StringRef;
 
 import org.json.JSONObject;
 import org.json.JSONArray;
 
 public class ReaderModeTemplate {
 
-  private static final String GROK_ANALYSE_THREAD = StringRef.str("piko_native_reader_mode_grok_thread");
-  private static final String GROK_ANALYSE_AUTHOR = StringRef.str("piko_native_reader_mode_grok_author");
-  private static final String TITLE_SOURCE = StringRef.str("piko_native_reader_mode_source");
-  private static final String TITLE_PUBLISHED = StringRef.str("piko_native_reader_mode_published");
-  private static final String TITLE_TOT_POSTS = StringRef.str("piko_native_reader_mode_total_post");
-  private static final String SHARE_POST = StringRef.str("piko_native_reader_mode_copy_post");
+  private static final String GROK_ANALYSE_THREAD = str("piko_native_reader_mode_grok_thread");
+  private static final String GROK_ANALYSE_AUTHOR = str("piko_native_reader_mode_grok_author");
+  private static final String TITLE_SOURCE = str("piko_native_reader_mode_source");
+  private static final String TITLE_PUBLISHED = str("piko_native_reader_mode_published");
+  private static final String TITLE_TOT_POSTS = str("piko_native_reader_mode_total_post");
+  private static final String SHARE_POST = str("piko_native_reader_mode_copy_post");
 
   private static String getGrokIcon(String slug, String text) {
     return "<a href=\"https://x.com/i/grok?text=" + slug
