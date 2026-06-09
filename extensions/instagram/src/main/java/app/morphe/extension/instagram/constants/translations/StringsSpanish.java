@@ -63,17 +63,17 @@ public class StringsSpanish extends DefaultStrings {
         this.HIDE_STORIES_TRAY = "Ocultar barra de historias";
         this.HIDE_STORIES_TRAY_DESC = "Oculta la barra de historias del feed principal";
         this.HIDE_NOTES_TRAY = "Ocultar barra de notas";
-        this.HIDE_NOTES_TRAY_DESC = "Oculta a barra de notas na seção de mensagens";
-        this.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = "Ocultar botão de criação de grupo na aba de compartilhamento";
-        this.DISABLE_DOUBLE_TAP_LIKE_POST = "Desativar curtida por toque duplo em posts";
-        this.DISABLE_DOUBLE_TAP_LIKE_REEL = "Desativar curtida por toque duplo em reels";
-        this.DISABLE_DOUBLE_TAP_LIKE_COMMENT = "Desativar curtida por toque duplo em comentários";
-        this.DISABLE_DOUBLE_TAP_LIKE_MESSAGE = "Desativar curtida por toque duplo em mensagens";
+        this.HIDE_NOTES_TRAY_DESC = "Oculta la barra de notas en la sección de mensajes";
+        this.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = "Ocultar botón de creación de grupo en la hoja de compartir";
+        this.DISABLE_DOUBLE_TAP_LIKE_POST = "Desactivar dar me gusta con doble toque en publicaciones";
+        this.DISABLE_DOUBLE_TAP_LIKE_REEL = "Desactivar dar me gusta con doble toque en reels";
+        this.DISABLE_DOUBLE_TAP_LIKE_COMMENT = "Desactivar dar me gusta con doble toque en comentarios";
+        this.DISABLE_DOUBLE_TAP_LIKE_MESSAGE = "Desactivar dar me gusta con doble toque en mensajes";
 
-        this.CATEGORY_MISC = "Diversos";
-        this.DISABLE_ANALYTICS = "Desativar análises";
-        this.DELETE_ANALYTICS_CACHE = "Excluir cache de análises";
-        this.DISABLE_ANALYTICS_DESC = "Bloqueia análises enviados para os servidores do Instagram/Facebook";
+        this.CATEGORY_MISC = "Otros";
+        this.DISABLE_ANALYTICS = "Desactivar datos de análisis";
+        this.DELETE_ANALYTICS_CACHE = "Borrar cache de datos de análisis";
+        this.DISABLE_ANALYTICS_DESC = "Bloquear envió de datos de datos de análisis a servidores de Instagram/Facebook";
         this.DISABLE_DISCOVER_PEOPLE = "Desativar descobrir pessoas";
         this.DISABLE_DISCOVER_PEOPLE_DESC = "Desativar a seção descobrir pessoas no perfil";
         this.FOLLOW_BACK_INDICATOR = "Ativar indicador de seguindo de volta";
