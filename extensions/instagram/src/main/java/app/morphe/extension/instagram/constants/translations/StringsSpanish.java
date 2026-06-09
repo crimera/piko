@@ -31,37 +31,37 @@ public class StringsSpanish extends DefaultStrings {
         this.ALLOW_USER_NETWORK_CERTIFICATE = "Permitir certificado de red del usuario";
         this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "Permitir certificado de red del usuario para pruebas de whitehat";
         this.REMOVE_BUILD_EXPIRE_POPUP = "Desactivar panel emergente de versión caduca";
-        this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Remove o popup que aparece após um tempo quando a versão do app envelhece";
+        this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Desactivar panel emergente de versión caduca que aparece cuando la versión de la aplicación envejece";
         this.EXPORT_DEV_OVERRIDES = "Exportar Backup";
         this.IMPORT_DEV_OVERRIDES = "Importar Backup";
-        this.IMPORT_ID_MAPPING = "Importar arquivos de mapeamento";
-        this.DOWNLOAD_ID_MAPPING = "Baixar arquivo de mapeamento";
+        this.IMPORT_ID_MAPPING = "Importar archivos de mapeo";
+        this.DOWNLOAD_ID_MAPPING = "Descargar archivos de mapeo";
 
-        this.CATEGORY_LINKS = "Links";
-        this.OPEN_LINKS_EXTERNALLY = "Abrir links externamente";
-        this.OPEN_LINKS_EXTERNALLY_DESC = "Abrir links no navegador externo em vez do navegador interno do app";
-        this.SANITIZE_SHARE_LINKS = "Higienizar links compartilhados";
+        this.CATEGORY_LINKS = "Enlaces";
+        this.OPEN_LINKS_EXTERNALLY = "Abrir enlaces externamente";
+        this.OPEN_LINKS_EXTERNALLY_DESC = "Abrir enlaces en un navegador externo en lugar del interno de la aplicación";
+        this.SANITIZE_SHARE_LINKS = "Limpiar enlaces compartidos";
 
         this.CATEGORY_GHOST = "Fantasma";
-        this.VIEW_STORIES_ANONYMOUSLY = "Ver stories anonimamente";
-        this.VIEW_LIVE_ANONYMOUSLY = "Ver lives anonimamente";
-        this.DISABLE_TYPING_STATUS = "Desativar status de digitação";
-        this.DISABLE_SCREENSHOT_DETECTION = "Desativar detecção de captura de tela";
-        this.VIEW_DM_ANONYMOUSLY = "Ver mensagens diretas anonimamente";
+        this.VIEW_STORIES_ANONYMOUSLY = "Ver historias anónimamente";
+        this.VIEW_LIVE_ANONYMOUSLY = "Ver transmisiones anónimamente";
+        this.DISABLE_TYPING_STATUS = "Desactivar estado de escritura";
+        this.DISABLE_SCREENSHOT_DETECTION = "Desactivar detección de captura de pantalla";
+        this.VIEW_DM_ANONYMOUSLY = "Ver mensajes directos anónimamente";
 
-        this.CATEGORY_DISTRACTION_FREE = "Sem distrações";
-        this.DISABLE_STORIES = "Desativar stories";
-        this.DISABLE_HIGHLIGHTS = "Desativar destaques";
-        this.DISABLE_EXPLORE = "Desativar pesquisa";
-        this.DISABLE_COMMENTS = "Desativar comentários";
-        this.LIMIT_FOLLOWING_FEED = "Limitar feed aos perfis seguidos";
-        this.LIMIT_FOLLOWING_FEED_DESC = "Filtra o feed inicial para mostrar apenas conteúdo dos perfis que você segue.";
-        this.DISABLE_REELS_SCROLLING = "Desativar rolagem dos Reels";
+        this.CATEGORY_DISTRACTION_FREE = "Libre de distracciones";
+        this.DISABLE_STORIES = "Desactivar historias";
+        this.DISABLE_HIGHLIGHTS = "Desactivar destacados";
+        this.DISABLE_EXPLORE = "Desactivar explorar";
+        this.DISABLE_COMMENTS = "Desactivar comentarios";
+        this.LIMIT_FOLLOWING_FEED = "Limitar feed a perfiles seguidos";
+        this.LIMIT_FOLLOWING_FEED_DESC = "Filtra el feed inicial para mostrar solo el contenido de perfiles que sigues.";
+        this.DISABLE_REELS_SCROLLING = "Desactivar el scroll de Reels";
         this.DISABLE_REELS_SCROLLING_DESC =
-                "Desativa a rolagem infinita nos Reels do Instagram, impedindo deslizar para o próximo Reel. " +
-                "Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá parar sozinha após alguns segundos.";
-        this.HIDE_STORIES_TRAY = "Ocultar barra de stories";
-        this.HIDE_STORIES_TRAY_DESC = "Oculta a barra de stories do feed principal";
+                "Desactiva el scroll infinito de Reels de Instagram, impidiendo desplazarse al siguiente Reel. " +
+                "Nota: En una instalación limpia, la animación de Consejo puede aparecer, pero desaparecerá luego de unos segundos.";
+        this.HIDE_STORIES_TRAY = "Ocultar barra de historias";
+        this.HIDE_STORIES_TRAY_DESC = "Oculta la barra de historias del feed principal";
         this.HIDE_NOTES_TRAY = "Ocultar barra de notas";
         this.HIDE_NOTES_TRAY_DESC = "Oculta a barra de notas na seção de mensagens";
         this.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = "Ocultar botão de criação de grupo na aba de compartilhamento";
