@@ -23,14 +23,14 @@ public class StringsSpanish extends DefaultStrings {
 
         this.CATEGORY_DEV_OPTIONS = "Opciones de desarrollador";
         this.ENABLE_DEV_OPTIONS = "Activar opciones de desarrollador";
-        this.ENABLE_DEV_OPTIONS_DESC = "Desbloquear opciones de desarrollador al manteneder presionsado el botón de inicio";
-        this.DIRECTLY_OPEN_METACONFIG = "Abrir MetaConfig directamente";
-        this.DIRECTLY_OPEN_METACONFIG_DESC = "Abre diretamente o MetaConfig overrides ao segurar o ícone da home (requer opções de desenvolvedor ativadas)";
-        this.ENABLE_EMP_OPTIONS = "Ativar Menu de funcionário";
-        this.ENABLE_EMP_OPTIONS_DESC = "Desbloqueia todas as opções de funcionário usadas para testes";
-        this.ALLOW_USER_NETWORK_CERTIFICATE = "Permitir certificado de rede do usuário";
-        this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "Permite certificado de rede do usuário para testes whitehat";
-        this.REMOVE_BUILD_EXPIRE_POPUP = "Remover popup de versão expirada";
+        this.ENABLE_DEV_OPTIONS_DESC = "Desbloquear opciones de desarrollador al manteneder presionado el botón de inicio";
+        this.DIRECTLY_OPEN_METACONFIG = "Abrir MetaConfig overrides directamente";
+        this.DIRECTLY_OPEN_METACONFIG_DESC = "Abrir directamente MetaConfig overrides al manteneder presionado el botón de inicio (requiere opciones de desarrollador activadas)";
+        this.ENABLE_EMP_OPTIONS = "Activar opciones de Empleado";
+        this.ENABLE_EMP_OPTIONS_DESC = "Desbloquear todas las opciones de Empleado usadas para pruebas";
+        this.ALLOW_USER_NETWORK_CERTIFICATE = "Permitir certificado de red del usuario";
+        this.ALLOW_USER_NETWORK_CERTIFICATE_DESC = "Permitir certificado de red del usuario para pruebas de whitehat";
+        this.REMOVE_BUILD_EXPIRE_POPUP = "Desactivar panel emergente de versión caduca";
         this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Remove o popup que aparece após um tempo quando a versão do app envelhece";
         this.EXPORT_DEV_OVERRIDES = "Exportar Backup";
         this.IMPORT_DEV_OVERRIDES = "Importar Backup";
