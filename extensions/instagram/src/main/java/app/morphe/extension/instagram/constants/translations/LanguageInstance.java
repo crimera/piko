@@ -30,6 +30,8 @@ public class LanguageInstance {
             return new StringsJapanese();
         } else if (lang.equals("pt")) {
             return new StringsPortugueseBR();
+        } else if (lang.equals("es")) {
+            return new StringsSpanish();
         }
 
         return new StringsEnglish(); // Default fallback
