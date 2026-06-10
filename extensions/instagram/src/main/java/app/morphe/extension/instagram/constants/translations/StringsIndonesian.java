@@ -113,7 +113,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.REMOVE_EMPTY_BOTTOM_SPACE = "Hapus ruang kosong di bagian bawah";
 		this.UNLOCK_PLUS_BENEFITS = "Buka keuntungan Plus";
 		this.UNLOCK_PLUS_BENEFITS_DESC = "Buka keuntungan langganan 'Plus' yang diperiksa secara lokal. GUNAKAN DENGAN RISIKO ANDA SENDIRI";
-		this.CUSTOMISE_STORY_RING_SIZE = "Sesuaikan ukuran cincin cerita";
+		this.CUSTOMISE_STORY_RING_SIZE = "Sesuaikan ukuran lingkaran cerita";
 		this.CUSTOMISE_STORY_RING_SIZE_DESC = "Ubah ukuran lingkaran cerita berdasarkan persentase (Nilai bawaan adalah 100)";
 
 		this.CATEGORY_DOWNLOAD_MEDIA = "Unduh media";
