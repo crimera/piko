@@ -1,11 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * This file is part of piko.
- *
- * Any modifications, derivatives, or substantial rewrites of this file
- * must retain this copyright notice and the piko attribution
- * in the source code and version control history.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.morphe.extension.instagram.constants.translations;
@@ -36,6 +32,8 @@ public class StringsSpanish extends DefaultStrings {
         this.IMPORT_DEV_OVERRIDES = "Importar Copia de seguridad";
         this.IMPORT_ID_MAPPING = "Importar archivos de mapeo";
         this.DOWNLOAD_ID_MAPPING = "Descargar archivos de mapeo";
+		this.MISSING_MAPPING_FILE = "Archivos de mapeo no encontrados";
+		this.MISSING_MAPPING_FILE_DESC = "Sin archivos de mapeo, las opciones de desarrollador no tendrán nombres. ¿Desea descargarlos?";
 
         this.CATEGORY_LINKS = "Enlaces";
         this.OPEN_LINKS_EXTERNALLY = "Abrir enlaces externamente";
@@ -48,6 +46,11 @@ public class StringsSpanish extends DefaultStrings {
         this.DISABLE_TYPING_STATUS = "Desactivar estado de escritura";
         this.DISABLE_SCREENSHOT_DETECTION = "Desactivar detección de captura de pantalla";
         this.VIEW_DM_ANONYMOUSLY = "Ver mensajes directos anónimamente";
+		this.TURN_ON_ALL_GHOST_MODES = "Activar todos los modos Fantasma";
+		this.GHOST_MODES_ON = "Modo Fantasma: ON";
+		this.GHOST_MODES_DEFAULT = "Modo Fantasma: POR DEFECTO";
+		this.GHOST_MODES_QUICK_TOGGLE = "Activar cambio rápido para modos Fantasma";
+		this.GHOST_MODES_QUICK_TOGGLE_DESC = "Agrega un boton para cambio rápido de modos Fantasma en la barra de acciones del chat";
 
         this.CATEGORY_DISTRACTION_FREE = "Libre de distracciones";
         this.DISABLE_STORIES = "Desactivar historias";
@@ -97,6 +100,8 @@ public class StringsSpanish extends DefaultStrings {
         this.COPY_COMMENT_DESC = "Agrega un botón para copiar comentarios en posts y reels";
         this.COMMENT_COPIED_SUCCESS = "Comentario copiado";
         this.COMMENT_COPIED_FAILED = "Sin texto encontrado para copiar";
+		this.SAVE_MEDIA_COMMENT = "Guardar comentario multimedia";
+		this.SAVE_MEDIA_COMMENT_DESC = "Agrega un botón para guardar los comentarios multimedias en publicaciones y reels";
         this.COPY_USERNAME = "Copiar nombre de usuario";
         this.COPY_FULL_NAME = "Copiar nombre completo";
         this.COPY_USER_ID = "Copiar ID de usuario";
@@ -104,10 +109,13 @@ public class StringsSpanish extends DefaultStrings {
         this.DOWNLOAD_PROFILE_PICTURE = "Descargar foto de perfil";
         this.COPIED = "Copiado";
         this.MORE_PROFILE_OPTIONS = "Más opciones de perfil";
+		this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "Opciones de perfil en barra de acciones";
+		this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "Mueve las opciones de perfil a la barra de acciones del perfil";
         this.REMOVE_EMPTY_BOTTOM_SPACE = "Quitar espacio inferior vacío";
         this.UNLOCK_PLUS_BENEFITS = "Desbloquear beneficios Plus";
         this.UNLOCK_PLUS_BENEFITS_DESC = "Desbloquea beneficios de suscripción 'Plus' verificados localmente. USAR BAJO TU PROPIO RIESGO";
-        this.CUSTOMISE_STORY_RING_SIZE = "Cambiar el tamaño del anillo de las historias por porcentaje (valor predeterminado 100)";
+        this.CUSTOMISE_STORY_RING_SIZE = "Personalizar tamaño del anillo de historias";
+		this.CUSTOMISE_STORY_RING_SIZE_DESC = "Cambia el tamaño del anillo de las historias en un porcentaje (valor predeterminado 100)";
 
         this.CATEGORY_DOWNLOAD_MEDIA = "Descargar contenido multimedia";
         this.ENABLE_DOWNLOAD = "Activar descargas";
@@ -117,6 +125,8 @@ public class StringsSpanish extends DefaultStrings {
         this.DOWNLOAD_USERNAME_FOLDER_DESC = "Crear subcarpetas basadas en los nombres de usuario";
         this.DOWNLOAD_CURRENT_MEDIA = "Descargar archivo actual";
         this.DOWNLOAD_AS_IMAGE = "Descargar como imagen";
+		this.VIDEO_VARIANTS = "Variantes de video";
+		this.IMAGE_VARIANTS = "Variantes de imagen";
         this.DOWNLOAD_AUDIO = "Descargar audio";
         this.DOWNLOAD_OPTIONS = "Opciones de descarga";
         this.COPY_MEDIA_LINK = "Copiar enlace del archivo";
@@ -126,6 +136,11 @@ public class StringsSpanish extends DefaultStrings {
         this.DOWNLOADED_MEDIA = "Descarga Completa : ";
         this.MEDIA_EXISTS = "Archivo ya existe";
         this.DOWNLOAD_FAILED_MEDIA = "Falla al descargar : ";
+		this.DOWNLOAD_SET_PATH = "Establecer ruta de descarga";
+		this.DOWNLOAD_SET_PATH_SUCCESS = "¡Directorio de descarga actualizado!";
+		this.DOWNLOAD_SET_PATH_FAILED = "Falla al encontrar carpeta de destino";
+		this.DOWNLOAD_GRANT_PERMISSION = "Por favor otorgue permisos de almacenamiento para continuar las descargas";
+		this.DOWNLOAD_GRANT_PERMISSION_FAILED = "No se pudo abrir la configuración. Por favor otorgue manualmente permisos de Acceso a todos los archivos";
 
         this.POST_OPTIONS = "Opciones de publicaciones";
         this.COPY_POST_DESCRIPTION = "Copiar descripción de publicación";
@@ -155,6 +170,7 @@ public class StringsSpanish extends DefaultStrings {
         this.IMPORT_FAIL = "Falla al importar";
         this.RESTART_APP = "La aplicación necesita reiniciarse para aplicar los cambios establecidos";
         this.OK = "OK";
+		this.CANCEL = "Cancelar";
         this.DELETED = "Borrado";
         this.PIKO_DEBUG = "Depuración de Piko";
         this.PIKO_DEBUG_DESC = "Agrega opciones de depuración en algunos componentes para pruebas";
@@ -178,5 +194,8 @@ public class StringsSpanish extends DefaultStrings {
         this.WELCOME_MESSAGE = "Para mejorar su experiencia con Piko, por favor entre a la Configuración de Piko y ajuste las opciones a su gusto";
         this.GOTO_PIKO_SETTINGS = "Ir a Configuración de Piko";
         this.NO_INTERNET = "Por favor conéctese a internet";
+		this.TAP_HERE = "¡¡ Toque aquí !!";
+		this.PIKO_SETTINGS_ON_ACTION_BAR = "Configuración de Piko en barra de acciones";
+		this.PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Mueve el acceso a la Configuración de Piko hacia la barra de acciones del feed principal";
     }
           }
