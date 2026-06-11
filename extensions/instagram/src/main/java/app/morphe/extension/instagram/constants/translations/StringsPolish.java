@@ -99,6 +99,8 @@ public class StringsPolish extends DefaultStrings {
         this.COPY_COMMENT_DESC = "Dodaje przycisk pozwalający skopiować treść komentarza pod postami i rolkami";
         this.COMMENT_COPIED_SUCCESS = "Skopiowano komentarz";
         this.COMMENT_COPIED_FAILED = "Nie znaleziono tekstu do skopiowania";
+        this.SAVE_MEDIA_COMMENT = "Zapisz multimedia z komentarzy";
+        this.SAVE_MEDIA_COMMENT_DESC = "Dodaje przycisk do zapisywania multimediów z komentarzy pod postami i rolkami";
         this.COPY_USERNAME = "Skopiuj nazwę użytkownika";
         this.COPY_FULL_NAME = "Skopiuj wyświetlaną nazwę";
         this.COPY_USER_ID = "Skopiuj ID użytkownika";
@@ -111,7 +113,8 @@ public class StringsPolish extends DefaultStrings {
         this.REMOVE_EMPTY_BOTTOM_SPACE = "Usuń pustą przestrzeń na dole";
         this.UNLOCK_PLUS_BENEFITS = "Odblokuj korzyści Plus";
         this.UNLOCK_PLUS_BENEFITS_DESC = "Odblokowuje funkcje subskrypcji \"Plus\", które są weryfikowane lokalnie. UŻYWAJ NA WŁASNE RYZYKO";
-        this.CUSTOMISE_STORY_RING_SIZE = "Dostosuj rozmiar ramki relacji";
+        this.CUSTOMISE_STORY_RING_SIZE = "Dostosuj rozmiar obwódki relacji";
+        this.CUSTOMISE_STORY_RING_SIZE_DESC = "Zmień rozmiar obwódki relacji w procentach (domyślnie: 100)";
 
         this.CATEGORY_DOWNLOAD_MEDIA = "Pobieranie multimediów";
         this.ENABLE_DOWNLOAD = "Włącz pobieranie";
@@ -122,6 +125,7 @@ public class StringsPolish extends DefaultStrings {
         this.DOWNLOAD_CURRENT_MEDIA = "Pobierz aktualny plik";
         this.DOWNLOAD_AS_IMAGE = "Pobierz jako obraz";
         this.VIDEO_VARIANTS = "Warianty filmu";
+        this.IMAGE_VARIANTS = "Warianty obrazu";
         this.DOWNLOAD_AUDIO = "Pobierz sam dźwięk";
         this.DOWNLOAD_OPTIONS = "Opcje pobierania";
         this.COPY_MEDIA_LINK = "Skopiuj link do pliku";

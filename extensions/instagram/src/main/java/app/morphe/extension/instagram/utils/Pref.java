@@ -244,7 +244,7 @@ public class Pref {
 
     public static float customiseStoryRingSize() {
         try {
-            return Float.valueOf(SharedPref.getStringPref(Settings.CUSTOMISE_STORY_RING_SIZE));
+            return Float.parseFloat(SharedPref.getStringPref(Settings.CUSTOMISE_STORY_RING_SIZE));
         } catch (Exception ex) {
             return 100.0f;
         }

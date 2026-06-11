@@ -487,7 +487,7 @@ public class ScreenBuilder {
             addPreference(category,
                     helper.editTextNumPreference(
                             Strings.CUSTOMISE_STORY_RING_SIZE,
-                            "",
+                            Strings.CUSTOMISE_STORY_RING_SIZE_DESC,
                             Settings.CUSTOMISE_STORY_RING_SIZE
                     ));
         }

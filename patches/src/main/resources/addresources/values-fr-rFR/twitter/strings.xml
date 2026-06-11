@@ -2,12 +2,15 @@
 <resources>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
+    <string name="piko_pref_undo_posts">Activer l\'annulation des publications</string>
     <string name="piko_pref_undo_posts_desc">Active la possibilité d\'annuler les publications avant leur envoi</string>
     <string name="piko_pref_undo_posts_btn">Paramètres d\'annulation des publications</string>
     <string name="piko_pref_icon_n_navbar_btn">Paramètres de personnalisation de l\'icône de l\'application et de la barre de navigation</string>
+    <string name="piko_pref_enable_force_pip">Force PiP mode</string>
     <string name="piko_pref_enable_force_pip_desc">Active le mode PiP lorsque vous fermez l\'application</string>
     <!-- Download Settings -->
     <string name="piko_title_download">Téléchargement</string>
+    <string name="piko_pref_video_download">Téléchargement vidéo</string>
     <string name="piko_pref_download">Changer le dossier de téléchargement</string>
     <string name="piko_pref_download_path">Dossier public</string>
     <string name="piko_pref_download_path_desc">Le dossier public à utiliser pour les téléchargements de vidéos</string>
@@ -21,17 +24,26 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">Partager le lien du média</string>
     <!-- Native -->
     <string name="piko_title_native">Fonctionnalités natives</string>
+    <string name="piko_pref_native_page_desc">Ces fonctionnalités natives de Piko sont disponibles dans le menu de publication.</string>
     <string name="piko_title_native_downloader">Téléchargeur natif</string>
     <string name="piko_title_native_downloader_toggle">Activer le téléchargeur natif</string>
+    <string name="piko_pref_native_downloader_inline_button">Afficher le bouton de téléchargement en ligne</string>
+    <string name="piko_pref_native_downloader_inline_button_desc">Ajoute un bouton de téléchargement directement à la barre d\'action de publication</string>
     <string name="piko_pref_native_downloader_alert_title">Télécharger le média</string>
     <string name="piko_pref_native_downloader_download_all">Tout télécharger</string>
     <string name="piko_pref_native_downloader_no_media">Aucun média trouvé</string>
     <string name="piko_pref_native_downloader_filename_title">Modèle de nom de fichier</string>
     <string name="piko_browse_object_title">Parcourir l\'objet du tweet</string>
+    <string name="piko_browse_object_toggle">Activer l\'objet de navigation dans le tweet</string>
     <string name="piko_share_image_title">Partager le tweet en image</string>
     <string name="piko_share_image_toggle">Activer le partage de tweet en image</string>
     <string name="piko_share_image_autocleanup">Nettoyage automatique des captures</string>
     <string name="piko_share_image_autocleanup_desc">Supprimer les captures de plus de 24 heures</string>
+    <string name="piko_share_image_invalid_context">Contexte invalide</string>
+    <string name="piko_share_image_capturing">Capture d\'un tweet...</string>
+    <string name="piko_share_image_view_not_found">Vue du tweet non trouvée</string>
+    <string name="piko_share_image_capture_failed">Impossible de capturer l\'image</string>
+    <string name="piko_share_image_error">Erreur: %s</string>
     <string name="piko_title_native_translator">Traduction native des publications</string>
     <string name="piko_native_translator_toggle">Activer la traduction native des publications</string>
     <string name="piko_native_translator_provider">Fournisseurs de traduction</string>
@@ -39,9 +51,12 @@
     <string name="piko_native_translator_zero_text">Aucun texte à traduire trouvé</string>
     <string name="piko_native_translator_google">Traducteur Google</string>
     <string name="piko_native_translator_google_v2">Traducteur Google V2</string>
+    <string name="piko_native_translator_fxtwitter">FxTwitter API</string>
     <string name="piko_title_native_reader_mode">Mode lecture</string>
+    <string name="piko_native_reader_mode_toggle">Activer le mode lecteur</string>
     <string name="piko_native_reader_mode_grok_thread">Analyser ce fil</string>
     <string name="piko_native_reader_mode_grok_author">En savoir plus sur l\'auteur</string>
+    <string name="piko_native_reader_mode_source">Source</string>
     <string name="piko_native_reader_mode_published">Publié</string>
     <string name="piko_native_reader_mode_total_post">Total de publications</string>
     <string name="piko_native_reader_mode_pref_text_only_mode">Mode texte uniquement</string>
@@ -53,7 +68,23 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Échec de la suppression du cache</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Publicités</string>
+    <string name="piko_pref_hide_promoted_posts">Masquer les publications promues</string>
+    <string name="piko_pref_wtf_section">Masquer la section \"Qui suivre\"</string>
+    <string name="piko_pref_cts_section">Masquer la section \"Créateurs pour s\'abonner\"</string>
+    <string name="piko_pref_ctj_section">Masquer la section \"Communauté à rejoindre\"</string>
+    <string name="piko_pref_ryb_section">Masquer la section \"Revisitez votre signet\"</string>
+    <string name="piko_pref_pinned_posts_section">Masquer la section \"Publications épinglées par abonnés\"</string>
+    <string name="piko_pref_hide_related_posts">Masquer les messages associés (dans les réponses)</string>
+    <string name="piko_pref_hide_premium_prompt">Masquer les invites de message</string>
+    <string name="piko_pref_hide_todays_news">Cacher les nouvelles d\'aujourd\'hui</string>
     <string name="piko_pref_del_from_db">Supprimer les entrées de la base de données</string>
+    <string name="piko_pref_db_promoted_posts">Postes promus</string>
+    <string name="piko_pref_db_wtf_section">Section \"Qui suivre\"</string>
+    <string name="piko_pref_db_cts_section">Section \"Créateurs à abonner\"</string>
+    <string name="piko_pref_db_ctj_section">Section \"Communauté à rejoindre\"</string>
+    <string name="piko_pref_db_ryb_section">Section \"Revisitez votre signet\"</string>
+    <string name="piko_pref_db_pinned_posts_section">Section \"Publications épinglées par abonnés\"</string>
+    <string name="piko_pref_db_related_posts">Articles connexes (dans les réponses)</string>
     <string name="piko_pref_db_not_found">Base de données non trouvée</string>
     <string name="piko_pref_db_not_open">La base de données n\'est pas ouverte</string>
     <string name="piko_pref_db_del_items">Éléments supprimés</string>

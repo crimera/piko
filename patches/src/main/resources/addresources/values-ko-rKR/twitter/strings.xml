@@ -39,6 +39,11 @@
     <string name="piko_share_image_toggle">트윗을 이미지로 공유 활성화하기</string>
     <string name="piko_share_image_autocleanup">캡처 자동 정리하기</string>
     <string name="piko_share_image_autocleanup_desc">활성화 시 24시간이 지난 캡처를 자동으로 제거합니다</string>
+    <string name="piko_share_image_invalid_context">잘못된 컨텍스트입니다</string>
+    <string name="piko_share_image_capturing">트윗을 캡쳐하는 중...</string>
+    <string name="piko_share_image_view_not_found">\'트윗 보기\'를 찾을 수 없습니다</string>
+    <string name="piko_share_image_capture_failed">이미지를 캡쳐할 수 없습니다</string>
+    <string name="piko_share_image_error">오류: %s</string>
     <string name="piko_title_native_translator">기본 게시물 번역기</string>
     <string name="piko_native_translator_toggle">기본 게시물 번역기 활성화하기</string>
     <string name="piko_native_translator_provider">번역기 제공자</string>

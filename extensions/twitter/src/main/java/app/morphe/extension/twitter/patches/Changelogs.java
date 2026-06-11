@@ -9,6 +9,7 @@ package app.morphe.extension.twitter.patches;
 import static android.text.Html.FROM_HTML_MODE_COMPACT;
 
 import static app.morphe.extension.shared.requests.Route.Method.GET;
+import static app.morphe.extension.shared.StringRef.str;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -21,7 +22,6 @@ import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.requests.Requester;
 import app.morphe.extension.shared.requests.Route;
@@ -71,9 +71,9 @@ public class Changelogs {
             textView.setPadding(40, 40, 40, 40);
 
             AlertDialog dialog = new AlertDialog.Builder(context)
-                    .setTitle(StringRef.str("piko_changelogs_title"))
+                    .setTitle(str("piko_changelogs_title"))
                     .setView(textView)
-                    .setPositiveButton(StringRef.str("ok"), (dialogInterface, i) -> dialogInterface.dismiss())
+                    .setPositiveButton(str("ok"), (dialogInterface, i) -> dialogInterface.dismiss())
                     .create();
 
             dialog.show();

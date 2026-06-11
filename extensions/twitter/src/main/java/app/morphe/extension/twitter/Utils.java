@@ -30,7 +30,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import app.morphe.extension.shared.StringRef;
+import static app.morphe.extension.shared.StringRef.str;
+
+
 import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.crimera.settings.StringSetting;
 import app.morphe.extension.shared.settings.preference.PikoSharedPrefCategory;
@@ -82,7 +84,7 @@ public class Utils {
     public static boolean redirect(TabLayout$g g) {
         try {
             CharSequence tabName = g.c;
-            if (TextUtils.equals(tabName, strRes("bookmarks_title"))) {
+            if (TextUtils.equals(tabName, str("bookmarks_title"))) {
                 startBookmarkActivity();
                 return true;
             }
@@ -121,27 +123,17 @@ public class Utils {
         return value;
     }
 
-    public static String strRes(String tag) {
-        try {
-            return StringRef.str(tag);
-        } catch (Exception e) {
-
-            app.morphe.extension.shared.Utils.showToastShort(tag + " not found");
-        }
-        return tag;
-    }
-
     public static void showRestartAppDialog(Context context) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(context);
 
         LinearLayout ln = new LinearLayout(context);
         ln.setOrientation(LinearLayout.VERTICAL);
 
-        dialog.setTitle(strRes("settings_restart"));
-        dialog.setPositiveButton(strRes("ok"), (dialogInterface, i) -> {
+        dialog.setTitle(str("settings_restart"));
+        dialog.setPositiveButton(str("ok"), (dialogInterface, i) -> {
             app.morphe.extension.shared.Utils.restartApp(context);
         });
-        dialog.setNegativeButton(strRes("cancel"), null);
+        dialog.setNegativeButton(str("cancel"), null);
         dialog.show();
     }
 
@@ -153,10 +145,10 @@ public class Utils {
 
         String content = flag ? "piko_title_feature_flags" : "notification_settings_preferences_category";
 
-        dialog.setTitle(strRes("piko_dialog_delete_title"));
+        dialog.setTitle(str("piko_dialog_delete_title"));
 
-        dialog.setMessage(StringRef.str("piko_dialog_delete_message", strRes(content)));
-        dialog.setPositiveButton(strRes("ok"), (dialogInterface, i) -> {
+        dialog.setMessage(str("piko_dialog_delete_message", str(content)));
+        dialog.setPositiveButton(str("ok"), (dialogInterface, i) -> {
             boolean success = false;
             if (flag) {
                 sp.removeKey(Settings.MISC_FEATURE_FLAGS.key);
@@ -168,7 +160,7 @@ public class Utils {
                 app.morphe.extension.shared.Utils.restartApp(context);
             }
         });
-        dialog.setNegativeButton(strRes("cancel"), null);
+        dialog.setNegativeButton(str("cancel"), null);
         dialog.show();
     }
 
@@ -251,7 +243,7 @@ public class Utils {
                 toast("Failed to rename temp file");
             }
 
-            toast(strRes("exo_download_completed") + ": " + filename);
+            toast(str("exo_download_completed") + ": " + filename);
             ctx.unregisterReceiver(broadcastReceiver);
         }
     }
@@ -277,7 +269,7 @@ public class Utils {
 
         File file = new File(Environment.getExternalStorageDirectory(), getPath(publicFolder, subFolder, filename));
         if (file.exists()) {
-            toast(strRes("exo_download_completed") + ": " + filename);
+            toast(str("exo_download_completed") + ": " + filename);
             return;
         }
 
