@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.widget.LinearLayout;
 
 import com.google.android.material.tabs.TabLayout$g;
@@ -80,8 +81,8 @@ public class Utils {
     // thanks to @Ouxyl
     public static boolean redirect(TabLayout$g g) {
         try {
-            String tabName = g.c.toString();
-            if (tabName == strRes("bookmarks_title")) {
+            CharSequence tabName = g.c;
+            if (TextUtils.equals(tabName, strRes("bookmarks_title"))) {
                 startBookmarkActivity();
                 return true;
             }
@@ -231,9 +232,9 @@ public class Utils {
         return sts;
     }
 
-    public static String[] addPref(String[] prefs, String pref) {
+    public static String[] addPref(String[] prefs) {
         String[] bigger = Arrays.copyOf(prefs, prefs.length + 1);
-        bigger[prefs.length] = pref;
+        bigger[prefs.length] = "pref_mod";
         return bigger;
     }
 

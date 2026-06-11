@@ -10,29 +10,26 @@ import app.crimera.patches.twitter.misc.extension.sharedExtensionPatch
 import app.crimera.patches.twitter.misc.extension.twitterInitHook
 import app.crimera.patches.twitter.premium.redirectBMNavBar.redirectBMTab
 import app.crimera.patches.twitter.utils.Constants.ACTIVITY_HOOK_CLASS
-import app.crimera.patches.twitter.utils.Constants.ADD_PREF_DESCRIPTOR
 import app.crimera.patches.twitter.utils.Constants.DEEPLINK_HOOK_CLASS
 import app.crimera.patches.twitter.utils.Constants.SSTS_DESCRIPTOR
-import app.morphe.patcher.Fingerprint
+import app.crimera.patches.twitter.utils.Constants.UTILS_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
-import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
+import app.morphe.util.findFreeRegister
+import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.indexOfFirstInstructionOrThrow
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction11x
-import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-
-private const val START_ACTIVITY_DESCRIPTOR =
-    "invoke-static {}, $ACTIVITY_HOOK_CLASS->startSettingsActivity()V"
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 val settingsPatch =
     bytecodePatch(
@@ -50,121 +47,92 @@ val settingsPatch =
             addAppResources("shared")
             addAppResources("twitter")
 
-            val initMethod = SettingsFingerprint.method
-            val arrayCreation =
-                initMethod
-                    .instructions
-                    .first { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }
-                    .location.index + 1
+            SettingsFragmentFingerprint.let {
+                it.method.apply {
+                    val index = it.instructionMatches.last().index
+                    val register = getInstruction<OneRegisterInstruction>(index).registerA
 
-            initMethod.getInstruction<BuilderInstruction11x>(arrayCreation).registerA.also { reg ->
-                initMethod.addInstructions(
-                    arrayCreation + 1,
-                    """
-                const-string v1, "pref_mod"
-                invoke-static {v$reg, v1}, $ADD_PREF_DESCRIPTOR
-                move-result-object v$reg
-            """,
-                )
-            }
-
-            val prefCLickedFingerprint =
-                Fingerprint(
-                    returnType = "Z",
-                    parameters = listOf("Landroidx/preference/Preference;"),
-                    filters =
-                        listOf(
-                            opcode(Opcode.CONST_4),
-                        ),
-                ).match(SettingsFingerprint.classDef)
-
-            val prefCLickedMethod = prefCLickedFingerprint.method
-            val constIndex = prefCLickedFingerprint.instructionMatches.first().index
-
-            val igetObjLoc =
-                prefCLickedMethod
-                    .instructions
-                    .first { it.opcode == Opcode.IGET_OBJECT }
-                    .location.index
-            val objFieldName = (prefCLickedMethod.getInstruction<ReferenceInstruction>(igetObjLoc).reference as FieldReference).name
-            prefCLickedMethod.removeInstruction(igetObjLoc)
-
-            prefCLickedMethod.addInstructionsWithLabels(
-                0,
-                """
-            iget-object p1, p1, Landroidx/preference/Preference;->$objFieldName:Ljava/lang/String;
-            const-string v1, "pref_mod" 
-            invoke-virtual {p1, v1}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
-            move-result v2
-
-            if-nez v2, :start
-            goto :cont
-            
-            :start
-            $START_ACTIVITY_DESCRIPTOR
-            const/4 v3, 0x1
-            return v3 
-        """,
-                ExternalLabel("cont", prefCLickedMethod.getInstruction(constIndex)),
-            )
-
-            AuthorizeAppActivity.apply {
-                val superClass = classDef.superclass
-                method.apply {
-                    addInstructionsWithLabels(
-                        0,
+                    addInstructions(
+                        index + 1,
                         """
-                        invoke-super {p0,p1}, $superClass->onCreate(Landroid/os/Bundle;)V
-                        invoke-static {p0}, $ACTIVITY_HOOK_CLASS->create(Landroid/app/Activity;)Z
-                        move-result v0
-                        if-eqz v0, :piko
-                        return-void
-                        """.trimIndent(),
-                        ExternalLabel(
-                            "piko",
-                            instructions.first(),
-                        ),
+                            invoke-static { v$register }, $UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;)[Ljava/lang/String;
+                            move-result-object v$register
+                        """
                     )
                 }
             }
 
-            val functionCall =
-                """
-                invoke-static {p0}, $DEEPLINK_HOOK_CLASS->deeplink(Landroid/app/Activity;)Z
-                move-result v0
-                if-nez v0, :deep_link
-                """.trimIndent()
+            SettingsPreferenceFingerprint.let {
+                it.method.apply {
+                    val index = it.instructionMatches.first().index
+                    val register = getInstruction<TwoRegisterInstruction>(index).registerA
+                    val freeRegister = findFreeRegister(index + 1, register)
 
-            var deepLinkPatched = false
-            UrlInterpreterActivityFingerprint.method.apply {
-                val invokeSuperInstructionIndex = indexOfFirstInstruction(Opcode.INVOKE_SUPER)
-
-                if (invokeSuperInstructionIndex > 0) {
                     addInstructionsWithLabels(
-                        invokeSuperInstructionIndex + 1,
-                        functionCall,
-                        ExternalLabel(
-                            "deep_link",
-                            instructions.first { it.opcode == Opcode.RETURN_VOID },
-                        ),
+                        index + 1,
+                        """
+                            invoke-static { v$register }, $ACTIVITY_HOOK_CLASS->startSettingsActivity(Ljava/lang/String;)Z
+                            move-result v$freeRegister
+                            if-eqz v$freeRegister, :ignore
+                            const/4 v$freeRegister, 0x1
+                            return v$freeRegister
+                            :ignore
+                            nop
+                        """
                     )
-                    deepLinkPatched = true
                 }
             }
-            if (!deepLinkPatched) {
-                UrlInterpreterActivityPairIPFingerprint.method.apply {
-                    val loc = instructions.last { it.opcode == Opcode.SGET_OBJECT }.location.index
-                    if (loc > 0) {
-                        addInstructionsWithLabels(
-                            loc,
-                            functionCall,
-                            ExternalLabel(
-                                "deep_link",
-                                instructions.first { it.opcode == Opcode.RETURN_VOID },
-                            ),
-                        )
-                        deepLinkPatched = true
-                    }
+
+            listOf(
+                Triple(
+                    AuthorizeAppActivityFingerprint,
+                    AuthorizeAppActivityVirtualFingerprint,
+                    "$ACTIVITY_HOOK_CLASS->create(Landroid/app/Activity;)Z"
+                ),
+                Triple(
+                    UrlInterpreterActivityFingerprint,
+                    UrlInterpreterActivityVirtualFingerprint,
+                    "$DEEPLINK_HOOK_CLASS->deeplink(Landroid/app/Activity;)Z"
+                )
+            ).forEach { (originalFingerprint, virtualFingerprint, extensionMethodCall) ->
+                val insertIndex: Int
+                val insertMethod: MutableMethod
+
+                val originalMethod = originalFingerprint.method
+                val overrideIndex = originalMethod.indexOfFirstInstruction {
+                    opcode == Opcode.INVOKE_SUPER &&
+                            getReference<MethodReference>()?.name == "onCreate"
+                } + 1
+
+                if (overrideIndex > 0) {
+                    insertIndex = overrideIndex
+                    insertMethod = originalMethod
+                } else {
+                    insertMethod = virtualFingerprint.method
+                    insertIndex = insertMethod.indexOfFirstInstructionOrThrow {
+                        val reference = getReference<MethodReference>()
+                        opcode == Opcode.INVOKE_STATIC &&
+                                reference?.definingClass == originalMethod.definingClass &&
+                                reference.name.startsWith("onCreate")
+                    } + 1
+                }
+
+                insertMethod.apply {
+                    val activityRegister =
+                        getInstruction<FiveRegisterInstruction>(insertIndex - 1).registerC
+                    val freeRegister = findFreeRegister(insertIndex, activityRegister)
+
+                    addInstructionsWithLabels(
+                        insertIndex,
+                        """
+                            invoke-static { v$activityRegister }, $extensionMethodCall
+                            move-result v$freeRegister
+                            if-eqz v$freeRegister, :ignore
+                            return-void
+                            :ignore
+                            nop
+                        """
+                    )
                 }
             }
 

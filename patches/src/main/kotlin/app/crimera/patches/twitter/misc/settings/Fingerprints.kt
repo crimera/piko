@@ -7,11 +7,15 @@
 package app.crimera.patches.twitter.misc.settings
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
-internal const val URL_INTERPRETER_ACTIVITY_CLASS = "Lcom/twitter/deeplink/implementation/UrlInterpreterActivity"
+internal const val AUTHORIZE_APP_ACTIVITY_CLASS = "Lcom/twitter/android/AuthorizeAppActivity;"
+internal const val URL_INTERPRETER_ACTIVITY_CLASS = "Lcom/twitter/deeplink/implementation/UrlInterpreterActivity;"
 
 internal object ApplicationFingerprint : Fingerprint(
     name = "attachBaseContext",
@@ -27,18 +31,44 @@ internal object ApplicationFingerprint : Fingerprint(
     }
 )
 
-internal object AuthorizeAppActivity : Fingerprint(
-    definingClass = "Lcom/twitter/android/AuthorizeAppActivity;",
+internal object AuthorizeAppActivityFingerprint : Fingerprint(
+    definingClass = AUTHORIZE_APP_ACTIVITY_CLASS,
     name = "onCreate",
+    parameters = listOf("Landroid/os/Bundle;"),
+    returnType = "V"
 )
 
-internal object SettingsFingerprint : Fingerprint(
+internal object AuthorizeAppActivityVirtualFingerprint : Fingerprint(
+    definingClass = $$"Lcom/twitter/android/AuthorizeAppActivity$c",
+    name = "onCreate",
+    parameters = listOf(AUTHORIZE_APP_ACTIVITY_CLASS, "Landroid/os/Bundle;"),
+    returnType = "V"
+)
+
+internal object SettingsFragmentFingerprint : Fingerprint(
     name = "<clinit>",
     returnType = "V",
-    filters =
-        listOf(
-            string("pref_proxy"),
-        ),
+    filters = listOf(
+        string("pref_proxy"),
+        opcode(Opcode.FILLED_NEW_ARRAY_RANGE),
+        opcode(
+            opcode = Opcode.MOVE_RESULT_OBJECT,
+            location = MatchAfterImmediately()
+        )
+    ),
+)
+
+internal object SettingsPreferenceFingerprint : Fingerprint(
+    classFingerprint = SettingsFragmentFingerprint,
+    parameters = listOf("Landroidx/preference/Preference;"),
+    returnType = "Z",
+    filters = listOf(
+        fieldAccess(
+            opcode = Opcode.IGET_OBJECT,
+            definingClass = "Landroidx/preference/Preference;",
+            type = "Ljava/lang/String;"
+        )
+    ),
 )
 
 internal object SettingsStatusLoadFingerprint : Fingerprint(
@@ -47,13 +77,15 @@ internal object SettingsStatusLoadFingerprint : Fingerprint(
 )
 
 internal object UrlInterpreterActivityFingerprint : Fingerprint(
-    custom = { method, classDef ->
-        classDef.endsWith("$URL_INTERPRETER_ACTIVITY_CLASS;") && method.name == "onCreate"
-    },
+    definingClass = URL_INTERPRETER_ACTIVITY_CLASS,
+    name = "onCreate",
+    parameters = listOf("Landroid/os/Bundle;"),
+    returnType = "V"
 )
 
-internal object UrlInterpreterActivityPairIPFingerprint : Fingerprint(
-    custom = { method, classDef ->
-        classDef.contains("$URL_INTERPRETER_ACTIVITY_CLASS\$c") && method.name == "onCreate"
-    },
+internal object UrlInterpreterActivityVirtualFingerprint : Fingerprint(
+    definingClass = $$"Lcom/twitter/deeplink/implementation/UrlInterpreterActivity$c",
+    name = "onCreate",
+    parameters = listOf(URL_INTERPRETER_ACTIVITY_CLASS, "Landroid/os/Bundle;"),
+    returnType = "V"
 )
