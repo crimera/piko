@@ -13,7 +13,7 @@ public class StringsTurkish extends DefaultStrings {
         this.CATEGORY_ADS = "Reklamlar";
         this.DISABLE_ADS = "Reklamları devre dışı bırak";
         this.HIDE_SUGEESTED_CONTENT = "Önerilen içeriği gizle";
-        this.HIDE_SUGEESTED_CONTENT_DESC = "Önerilen hikayeleri, reels videolarını ve thread'leri gizler (Önerilen gönderiler gösterilmeye devam eder).";
+        this.HIDE_SUGEESTED_CONTENT_DESC = "Önerilen hikayeleri, reel videolarını ve thread'leri gizler (Önerilen gönderiler gösterilmeye devam eder).";
 
         this.CATEGORY_DEV_OPTIONS = "Geliştirici seçenekleri";
         this.ENABLE_DEV_OPTIONS = "Geliştirici seçeneklerini etkinleştir";
@@ -28,10 +28,10 @@ public class StringsTurkish extends DefaultStrings {
         this.REMOVE_BUILD_EXPIRE_POPUP_DESC = "Uygulama sürümü eskidiğinde bir süre sonra görünen açılır pencereyi kaldırır";
         this.EXPORT_DEV_OVERRIDES = "Geçersiz kılmaları dışa aktar";
         this.IMPORT_DEV_OVERRIDES = "Geçersiz kılmaları içe aktar";
+        this.IMPORT_ID_MAPPING = "Eşleme dosyalarını içe aktar";
+        this.DOWNLOAD_ID_MAPPING = "Eşleme dosyasını indir";
         this.MISSING_MAPPING_FILE = "Eşleme dosyası eksik";
         this.MISSING_MAPPING_FILE_DESC = "Eşleme dosyası olmadan geliştirici seçenekleri düzgün adlandırılmayacaktır. İndirmek istiyor musunuz?";
-        this.IMPORT_ID_MAPPING = "Mapping dosyalarını içe aktar";
-        this.DOWNLOAD_ID_MAPPING = "Mapping dosyasını indir";
 
         this.CATEGORY_LINKS = "Bağlantılar";
         this.OPEN_LINKS_EXTERNALLY = "Bağlantıları harici aç";
@@ -43,12 +43,12 @@ public class StringsTurkish extends DefaultStrings {
         this.VIEW_LIVE_ANONYMOUSLY = "Canlı yayınları anonim olarak izle";
         this.DISABLE_TYPING_STATUS = "Yazıyor bilgisini kapat";
         this.DISABLE_SCREENSHOT_DETECTION = "Ekran görüntüsü algılamayı kapat";
+        this.VIEW_DM_ANONYMOUSLY = "Mesajları (DM) anonim olarak gör";
         this.TURN_ON_ALL_GHOST_MODES = "Tüm hayalet modlarını etkinleştir";
         this.GHOST_MODES_ON = "Hayalet modu: AÇIK";
         this.GHOST_MODES_DEFAULT = "Hayalet modu: VARSAYILAN";
-        this.GHOST_MODES_QUICK_TOGGLE = "Hayalet modları için açma/kapama düğmesini etkinleştir";
-        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Sohbet işlem çubuğuna hayalet modlarını kontrol etmek için bir açma/kapama düğmesi ekler";
-        this.VIEW_DM_ANONYMOUSLY = "Mesajları anonim olarak gör";
+        this.GHOST_MODES_QUICK_TOGGLE = "Hayalet modları için hızlı geçişi etkinleştir";
+        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Hayalet modlarını kontrol etmek için sohbet işlem çubuğuna hızlı bir açna/kapama düğmesi ekler";
 
         this.CATEGORY_DISTRACTION_FREE = "Odaklanma Modu";
         this.DISABLE_STORIES = "Hikayeleri devre dışı bırak";
@@ -98,6 +98,8 @@ public class StringsTurkish extends DefaultStrings {
         this.COPY_COMMENT_DESC = "Gönderi ve Reels videolarındaki yorumları kopyalamak için bir buton ekler";
         this.COMMENT_COPIED_SUCCESS = "Yorum kopyalandı";
         this.COMMENT_COPIED_FAILED = "Kopyalanacak metin bulunamadı";
+        this.SAVE_MEDIA_COMMENT = "Medya yorumunu kaydet";
+        this.SAVE_MEDIA_COMMENT_DESC = "Gönderiler ve reels videolarındaki medya yorumlarını kaydetmek için bir buton ekler";
         this.COPY_USERNAME = "Kullanıcı adını kopyala";
         this.COPY_FULL_NAME = "Tam adı kopyala";
         this.COPY_USER_ID = "Kullanıcı kimliğini kopyala";
@@ -111,6 +113,7 @@ public class StringsTurkish extends DefaultStrings {
         this.UNLOCK_PLUS_BENEFITS = "Plus avantajlarını aç";
         this.UNLOCK_PLUS_BENEFITS_DESC = "Yerel olarak kontrol edilen 'Plus' abonelik avantajlarını açar. RİSK SİZE AİTTİR";
         this.CUSTOMISE_STORY_RING_SIZE = "Hikaye halka boyutunu özelleştir";
+        this.CUSTOMISE_STORY_RING_SIZE_DESC = "Hikaye halkasının boyutunu yüzde olarak değiştirir (Varsayılan 100'dür)";
 
         this.CATEGORY_DOWNLOAD_MEDIA = "Medyayı indir";
         this.ENABLE_DOWNLOAD = "İndirmeyi etkinleştir";
@@ -121,6 +124,7 @@ public class StringsTurkish extends DefaultStrings {
         this.DOWNLOAD_CURRENT_MEDIA = "Mevcut medyayı indir";
         this.DOWNLOAD_AS_IMAGE = "Resim olarak indir";
         this.VIDEO_VARIANTS = "Video varyantları";
+        this.IMAGE_VARIANTS = "Resim varyantları";
         this.DOWNLOAD_AUDIO = "Ses olarak indir";
         this.DOWNLOAD_OPTIONS = "İndirme seçenekleri";
         this.COPY_MEDIA_LINK = "Medya bağlantısını kopyala";
@@ -151,8 +155,8 @@ public class StringsTurkish extends DefaultStrings {
         this.HIDE_NAVIGATION_CREATE = "Oluştur butonunu gizle";
 
         this.PATCH_INFO_TITLE = "Yama bilgisi";
-        this.EXPORT_PIKO_PREF = "Piko ayarlarını yedekle";
-        this.IMPORT_PIKO_PREF = "Piko ayarlarını geri yükle";
+        this.EXPORT_PIKO_PREF = "Piko tercihlerini dışa aktar";
+        this.IMPORT_PIKO_PREF = "Piko tercihlerini içe aktar";
         this.APP_VERSION = "Uygulama sürümü: %s";
         this.PATCH_VERSION = "Yama sürümü: %s";
 
