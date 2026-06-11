@@ -114,6 +114,7 @@ public class StringsKorean extends DefaultStrings {
         this.UNLOCK_PLUS_BENEFITS = "플러스 혜택 해제";
         this.UNLOCK_PLUS_BENEFITS_DESC = "로컬에서 확인되는 'Plus' 구독 혜택을 활성화합니다. 사용 시 발생하는 모든 위험은 사용자 본인이 감수해야 합니다";
         this.CUSTOMISE_STORY_RING_SIZE = "스토리 링 크기 설정";
+        this.CUSTOMISE_STORY_RING_SIZE_DESC = "스토리 링 크기를 백분율로 변경합니다 (기본값: 100)";
 
         this.CATEGORY_DOWNLOAD_MEDIA = "미디어 다운로드";
         this.ENABLE_DOWNLOAD = "다운로드 활성화";
