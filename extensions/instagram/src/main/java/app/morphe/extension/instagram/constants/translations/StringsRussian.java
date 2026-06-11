@@ -96,6 +96,8 @@ public class StringsRussian extends DefaultStrings {
         this.COPY_COMMENT_DESC = "Добавляет кнопку для копирования комментариев в публикациях и Reels";
         this.COMMENT_COPIED_SUCCESS = "Комментарий скопирован";
         this.COMMENT_COPIED_FAILED = "Не найдено текста для копирования";
+        this.SAVE_MEDIA_COMMENT = "Сохранить медиа-комментарий";
+        this.SAVE_MEDIA_COMMENT_DESC = "Добавляет кнопку для сохранения медиа-комментариев в публикациях и Reels";
         this.COPY_USERNAME = "Скопировать имя пользователя";
         this.COPY_FULL_NAME = "Скопировать полное имя";
         this.COPY_USER_ID = "Скопировать идентификатор пользователя";
@@ -109,6 +111,7 @@ public class StringsRussian extends DefaultStrings {
         this.UNLOCK_PLUS_BENEFITS = "Разблокировать возможности подписки «Плюс»";
         this.UNLOCK_PLUS_BENEFITS_DESC = "Разблокировать преимущества подписки «Плюс», которые проверяются локально. ИСПОЛЬЗУЙТЕ НА СВОЙ СТРАХ И РИСК";
         this.CUSTOMISE_STORY_RING_SIZE = "Настроить размер кольца истории";
+        this.CUSTOMISE_STORY_RING_SIZE_DESC = "Изменить размер кольца истории в процентах (по умолчанию 100)";
 
         this.CATEGORY_DOWNLOAD_MEDIA = "Загрузка медиа";
         this.ENABLE_DOWNLOAD = "Включить загрузку";
@@ -119,6 +122,7 @@ public class StringsRussian extends DefaultStrings {
         this.DOWNLOAD_CURRENT_MEDIA = "Загрузить текущее медиа";
         this.DOWNLOAD_AS_IMAGE = "Загрузить как изображение";
         this.VIDEO_VARIANTS = "Варианты видео";
+        this.IMAGE_VARIANTS = "Варианты изображений";
         this.DOWNLOAD_AUDIO = "Загрузить звук";
         this.DOWNLOAD_OPTIONS = "Настройки загрузки";
         this.COPY_MEDIA_LINK = "Скопировать ссылку на медиа";
