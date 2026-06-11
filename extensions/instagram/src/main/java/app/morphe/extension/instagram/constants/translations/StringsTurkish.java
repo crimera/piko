@@ -13,7 +13,7 @@ public class StringsTurkish extends DefaultStrings {
         this.CATEGORY_ADS = "Reklamlar";
         this.DISABLE_ADS = "Reklamları devre dışı bırak";
         this.HIDE_SUGEESTED_CONTENT = "Önerilen içeriği gizle";
-        this.HIDE_SUGEESTED_CONTENT_DESC = "Önerilen hikayeleri, reel videolarını ve thread'leri gizler (Önerilen gönderiler gösterilmeye devam eder).";
+        this.HIDE_SUGEESTED_CONTENT_DESC = "Önerilen hikayeleri, Reels videolarını ve thread'leri gizler (Önerilen gönderiler gösterilmeye devam eder).";
 
         this.CATEGORY_DEV_OPTIONS = "Geliştirici seçenekleri";
         this.ENABLE_DEV_OPTIONS = "Geliştirici seçeneklerini etkinleştir";
@@ -43,7 +43,7 @@ public class StringsTurkish extends DefaultStrings {
         this.VIEW_LIVE_ANONYMOUSLY = "Canlı yayınları anonim olarak izle";
         this.DISABLE_TYPING_STATUS = "Yazıyor bilgisini kapat";
         this.DISABLE_SCREENSHOT_DETECTION = "Ekran görüntüsü algılamayı kapat";
-        this.VIEW_DM_ANONYMOUSLY = "Mesajları (DM) anonim olarak gör";
+        this.VIEW_DM_ANONYMOUSLY = "Mesajları anonim olarak gör";
         this.TURN_ON_ALL_GHOST_MODES = "Tüm hayalet modlarını etkinleştir";
         this.GHOST_MODES_ON = "Hayalet modu: AÇIK";
         this.GHOST_MODES_DEFAULT = "Hayalet modu: VARSAYILAN";
@@ -64,7 +64,7 @@ public class StringsTurkish extends DefaultStrings {
         this.HIDE_STORIES_TRAY = "Hikaye çubuğunu gizle";
         this.HIDE_STORIES_TRAY_DESC = "Ana akıştaki hikaye çubuğunu gizler";
         this.HIDE_NOTES_TRAY = "Notlar çubuğunu gizle";
-        this.HIDE_NOTES_TRAY_DESC = "DM bölümündeki notlar çubuğunu gizler";
+        this.HIDE_NOTES_TRAY_DESC = "Mesajlar bölümündeki notlar çubuğunu gizler";
         this.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = "Paylaşım sayfasında grup oluşturma butonunu gizle";
         this.DISABLE_DOUBLE_TAP_LIKE_POST = "Gönderide çift tıkla beğenmeyi kapat";
         this.DISABLE_DOUBLE_TAP_LIKE_REEL = "Reels'de çift tıkla beğenmeyi kapat";
@@ -150,13 +150,13 @@ public class StringsTurkish extends DefaultStrings {
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Gezinme butonlarını gizle";
         this.HIDE_NAVIGATION_FEED = "Akış butonunu gizle";
         this.HIDE_NAVIGATION_REELS = "Reels butonunu gizle";
-        this.HIDE_NAVIGATION_DIRECT = "Direct butonunu gizle";
+        this.HIDE_NAVIGATION_DIRECT = "Mesajlar butonunu gizle";
         this.HIDE_NAVIGATION_SEARCH = "Arama butonunu gizle";
         this.HIDE_NAVIGATION_CREATE = "Oluştur butonunu gizle";
 
         this.PATCH_INFO_TITLE = "Yama bilgisi";
-        this.EXPORT_PIKO_PREF = "Piko tercihlerini dışa aktar";
-        this.IMPORT_PIKO_PREF = "Piko tercihlerini içe aktar";
+        this.EXPORT_PIKO_PREF = "Piko ayarlarını dışa aktar";
+        this.IMPORT_PIKO_PREF = "Piko ayarlarını içe aktar";
         this.APP_VERSION = "Uygulama sürümü: %s";
         this.PATCH_VERSION = "Yama sürümü: %s";
 
