@@ -7,6 +7,7 @@
 package app.crimera.patches.twitter.entity
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.string
@@ -58,24 +59,46 @@ internal object TweetShortTextFingerprint : Fingerprint(
     name = "getShortText",
 )
 
-internal object TweetActionsHandlerFingerprint : Fingerprint(
-    strings = listOf("content_author"),
-)
-
-internal class TweetOriginalNameFingerprint(
-    definingClass: String,
-) : Fingerprint(
-        accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
-        returnType = "Ljava/lang/String;",
-        parameters = emptyList(),
-        definingClass = definingClass,
-        filters =
-            listOf(
-                methodCall(definingClass = "this", returnType = "Ljava/lang/String;"),
-                methodCall(definingClass = "this", returnType = "Ljava/lang/String;"),
-                opcode(Opcode.RETURN_OBJECT),
-            ),
+internal object TweetNamesFingerprint : Fingerprint(
+    classFingerprint = TweetObjectFingerprint,
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
+    parameters = listOf(),
+    returnType = "Ljava/lang/String;",
+    filters = listOf(
+        methodCall(
+            opcode = Opcode.INVOKE_VIRTUAL,
+            definingClass = "this",
+            returnType = "Ljava/lang/String;"
+        ),
+        opcode(
+            opcode = Opcode.MOVE_RESULT_OBJECT,
+            location = MatchAfterImmediately()
+        ),
+        methodCall(
+            opcode = Opcode.INVOKE_VIRTUAL,
+            definingClass = "this",
+            returnType = "Ljava/lang/String;",
+            location = MatchAfterImmediately()
+        ),
+        opcode(
+            opcode = Opcode.MOVE_RESULT_OBJECT,
+            location = MatchAfterImmediately()
+        ),
+        methodCall(
+            opcode = Opcode.INVOKE_STATIC,
+            parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;"),
+            returnType = "Ljava/lang/String;"
+        ),
+        opcode(
+            opcode = Opcode.MOVE_RESULT_OBJECT,
+            location = MatchAfterImmediately()
+        ),
+        opcode(
+            opcode = Opcode.RETURN_OBJECT,
+            location = MatchAfterImmediately()
+        )
     )
+)
 
 internal object TweetMediaEntityClassFingerprint : Fingerprint(
     strings = listOf("EntityList{mEntities="),
