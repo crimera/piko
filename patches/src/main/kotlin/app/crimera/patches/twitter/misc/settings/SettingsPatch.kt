@@ -39,6 +39,7 @@ val settingsPatch =
         description = "Adds settings",
     ) {
         dependsOn(
+            checkCompatibilityPatch,
             sharedExtensionPatch,
             settingsResourcePatch,
             redirectBMTab,

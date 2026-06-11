@@ -7,9 +7,25 @@
 package app.crimera.patches.twitter.misc.settings
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
 
 internal const val URL_INTERPRETER_ACTIVITY_CLASS = "Lcom/twitter/deeplink/implementation/UrlInterpreterActivity"
+
+internal object ApplicationFingerprint : Fingerprint(
+    name = "attachBaseContext",
+    filters = listOf(
+        methodCall(
+            opcode = Opcode.INVOKE_STATIC,
+            parameters = listOf("Landroid/content/Context;"),
+            returnType = "V"
+        )
+    ),
+    custom = { _, classDef ->
+        classDef.superclass == "Lcom/twitter/app/TwitterApplication;"
+    }
+)
 
 internal object AuthorizeAppActivity : Fingerprint(
     definingClass = "Lcom/twitter/android/AuthorizeAppActivity;",
