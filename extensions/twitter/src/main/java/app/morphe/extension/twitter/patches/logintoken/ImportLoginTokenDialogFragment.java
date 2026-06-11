@@ -6,6 +6,8 @@
 
 package app.morphe.extension.twitter.patches.logintoken;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -14,7 +16,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.shared.StringRef;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,9 +28,9 @@ public class ImportLoginTokenDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         String[] items = {
-                StringRef.str("piko_login_token_import_from_text"),
-                StringRef.str("piko_login_token_import_from_file"),
-                StringRef.str("piko_login_token_import_about")
+                str("piko_login_token_import_from_text"),
+                str("piko_login_token_import_from_file"),
+                str("piko_login_token_import_about")
         };
 
         AlertDialog dialog = new AlertDialog.Builder(getContext())
@@ -67,7 +68,7 @@ public class ImportLoginTokenDialogFragment extends DialogFragment {
         // Import from file
         if (requestCode == PICK_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (data == null || data.getData() == null) {
-                StringRef.str("piko_pref_import_no_uri");
+                str("piko_pref_import_no_uri");
                 return;
             }
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(getContext().getContentResolver().openInputStream(data.getData())))) {

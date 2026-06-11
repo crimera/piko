@@ -15,6 +15,10 @@ import kotlin.properties.Delegates
 var is_11_70_or_greater: Boolean by Delegates.notNull()
     private set
 
+// For Check compatibility patch.
+var is_11_82_or_greater: Boolean by Delegates.notNull()
+    private set
+
 // For Customize Navigation Bar items patch.
 var is_11_88_or_greater: Boolean by Delegates.notNull()
     private set
@@ -31,6 +35,8 @@ val versionCheckPatch =
             fun isEqualsOrGreaterThan(version: Int): Boolean = versionCode >= version
 
             is_11_70_or_greater = isEqualsOrGreaterThan(311700000)
+            // 11.82.0-beta.1 (311820101) does not have libpairipcore.so, but 11.82.0-release.0 (31182000) has libpairipcore.so.
+            is_11_82_or_greater = versionCode == 311820000 || isEqualsOrGreaterThan(311830000)
             is_11_88_or_greater = isEqualsOrGreaterThan(311880000)
             is_11_92_or_greater = isEqualsOrGreaterThan(311920000)
         }

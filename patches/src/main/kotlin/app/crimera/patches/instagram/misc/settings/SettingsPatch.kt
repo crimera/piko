@@ -22,6 +22,7 @@ import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
@@ -47,6 +48,18 @@ val settingsPatch =
             developerOptionsEntity,
         )
         execute {
+
+            IgFragmentActivityOnCreate.method.apply {
+
+                val returnVoidIndex = indexOfFirstInstruction(Opcode.RETURN_VOID)
+
+                addInstruction(
+                    returnVoidIndex,
+                    """
+                    invoke-static {p0}, Lapp/morphe/extension/shared/Utils;->setActivity(Landroid/app/Activity;)V
+                    """.trimIndent(),
+                )
+            }
 
             instagramInitHook.fingerprint.method.apply {
 

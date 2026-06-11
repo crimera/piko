@@ -20,6 +20,7 @@ public class Strings {
     public static final String DEFAULT_PIKO_FOLDER = "Piko-Instagram";
     public static final String DEFAULT_AUDIO_FOLDER = "Audio";
     public static final String DEFAULT_DM_FOLDER = "DM";
+    public static final String DEFAULT_GIF_FOLDER = "Gif";
 
     public static final String PIKO_SETTINGS_TITLE = langInstance.PIKO_SETTINGS_TITLE;
     public static final String CATEGORY_ADS = langInstance.CATEGORY_ADS;
@@ -108,6 +109,8 @@ public class Strings {
     public static final String COPY_COMMENT_DESC = langInstance.COPY_COMMENT_DESC;
     public static final String COMMENT_COPIED_SUCCESS = langInstance.COMMENT_COPIED_SUCCESS;
     public static final String COMMENT_COPIED_FAILED = langInstance.COMMENT_COPIED_FAILED;
+    public static final String SAVE_MEDIA_COMMENT = langInstance.SAVE_MEDIA_COMMENT;
+    public static final String SAVE_MEDIA_COMMENT_DESC = langInstance.SAVE_MEDIA_COMMENT_DESC;
     public static final String COPY_USERNAME = langInstance.COPY_USERNAME;
     public static final String COPY_FULL_NAME = langInstance.COPY_FULL_NAME;
     public static final String COPY_USER_ID = langInstance.COPY_USER_ID;
@@ -121,6 +124,7 @@ public class Strings {
     public static final String UNLOCK_PLUS_BENEFITS = langInstance.UNLOCK_PLUS_BENEFITS;
     public static final String UNLOCK_PLUS_BENEFITS_DESC = langInstance.UNLOCK_PLUS_BENEFITS_DESC;
     public static final String CUSTOMISE_STORY_RING_SIZE = langInstance.CUSTOMISE_STORY_RING_SIZE;
+    public static final String CUSTOMISE_STORY_RING_SIZE_DESC = langInstance.CUSTOMISE_STORY_RING_SIZE_DESC;
 
     public static final String CATEGORY_DOWNLOAD_MEDIA = langInstance.CATEGORY_DOWNLOAD_MEDIA;
     public static final String ENABLE_DOWNLOAD = langInstance.ENABLE_DOWNLOAD;
@@ -133,6 +137,7 @@ public class Strings {
     public static final String DOWNLOAD_AUDIO = langInstance.DOWNLOAD_AUDIO;
     public static final String DOWNLOAD_OPTIONS = langInstance.DOWNLOAD_OPTIONS;
     public static final String VIDEO_VARIANTS = langInstance.VIDEO_VARIANTS;
+    public static final String IMAGE_VARIANTS = langInstance.IMAGE_VARIANTS;
     public static final String COPY_MEDIA_LINK = langInstance.COPY_MEDIA_LINK;
     public static final String COPIED_MEDIA_LINK = langInstance.COPIED_MEDIA_LINK;
     public static final String DOWNLOAD_ALL = langInstance.DOWNLOAD_ALL;

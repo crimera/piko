@@ -98,6 +98,8 @@ public class DefaultStrings {
     public static String COPY_COMMENT_DESC = "Adds a button to copy comments on posts and reels";
     public static String COMMENT_COPIED_SUCCESS = "Comment copied";
     public static String COMMENT_COPIED_FAILED = "No text found to copy";
+    public static String SAVE_MEDIA_COMMENT = "Save media comment";
+    public static String SAVE_MEDIA_COMMENT_DESC = "Adds a button to save media comments on posts and reels";
     public static String COPY_USERNAME = "Copy username";
     public static String COPY_FULL_NAME = "Copy full name";
     public static String COPY_USER_ID = "Copy user id";
@@ -111,6 +113,7 @@ public class DefaultStrings {
     public static String UNLOCK_PLUS_BENEFITS = "Unlock Plus benefits";
     public static String UNLOCK_PLUS_BENEFITS_DESC = "Unlock 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK";
     public static String CUSTOMISE_STORY_RING_SIZE = "Customise story ring size";
+    public static String CUSTOMISE_STORY_RING_SIZE_DESC = "Change the size of story ring by a percentage (Default is 100)";
 
     public static String CATEGORY_DOWNLOAD_MEDIA = "Download media";
     public static String ENABLE_DOWNLOAD = "Enable download";
@@ -121,6 +124,7 @@ public class DefaultStrings {
     public static String DOWNLOAD_CURRENT_MEDIA = "Download current media";
     public static String DOWNLOAD_AS_IMAGE = "Download as image";
     public static String VIDEO_VARIANTS = "Video variants";
+    public static String IMAGE_VARIANTS = "Image variants";
     public static String DOWNLOAD_AUDIO = "Download audio";
     public static String DOWNLOAD_OPTIONS = "Download options";
     public static String COPY_MEDIA_LINK = "Copy media link";

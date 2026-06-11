@@ -8,20 +8,20 @@
 package app.morphe.extension.instagram.entity;
 
 import com.instagram.model.mediasize.VideoVersion;
+import app.morphe.extension.crimera.downloader.MediaType;
 
-public class VideoData extends Entity {
+public class VideoData implements MediaInterface {
     private final VideoVersion obj;
 
     public VideoData(Object obj) {
-        super(obj);
         this.obj = (VideoVersion) obj;
     }
 
-    private Integer getHeight() throws Exception {
+    public Integer getHeight() throws Exception {
         return this.obj.A01;
     }
 
-    private Integer getWidth() throws Exception {
+    public Integer getWidth() throws Exception {
         return this.obj.A03;
     }
 
@@ -29,16 +29,20 @@ public class VideoData extends Entity {
         return this.obj.A02;
     }
 
-    public String getVideoVariantTag() {
+    public String getVariantTag() {
         try{
             return this.getHeight()+"x"+this.getWidth()+"-"+this.getCodec();
-        } catch (java.lang.Exception e) {
+        } catch (Exception e) {
             return "unknown";
         }
     }
 
     public String getUrl() throws Exception {
         return this.obj.getUrl();
+    }
+
+    public MediaType getMediaType(){
+        return MediaType.VIDEO;
     }
 
 }

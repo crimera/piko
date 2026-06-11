@@ -8,6 +8,7 @@ package app.crimera.patches.instagram.entity.mediadata
 
 import app.crimera.patches.instagram.entity.decoder.EditMediaInfoGetCurrentMediaIdFingerprint
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
+import app.crimera.patches.instagram.utils.Constants.EXTENDED_IMAGE_URL_CLASS
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
 import app.crimera.utils.classNameToExtension
@@ -47,6 +48,16 @@ val mediaDataEntity =
                         }.name
 
                 GetOriginalSoundDataIntfExtensionFingerprint.changeFirstString(originalSoundDataExtractionMethodName)
+
+                mediaHelperMethods
+                    .last {
+                        it.returnType == EXTENDED_IMAGE_URL_CLASS && it.parameters.size > 1 &&
+                            it.parameters[1].type == "Ljava/lang/Long;"
+                    }.apply {
+                        val imageVariantsIndex = indexOfFirstInstruction(Opcode.INVOKE_INTERFACE)
+                        val imageVariantsMethodName = getInstruction(imageVariantsIndex).methodExtractor().name
+                        GetImageVariantsExtensionFingerprint.changeStringAt(1, imageVariantsMethodName)
+                    }
             }
 
             // Extracting the get mention set method used media helper class.
@@ -71,7 +82,7 @@ val mediaDataEntity =
             VideoMediaInIGTVFeedHasVideoVariantsFingerprint.method.apply {
                 val firstInvokeInterfaceInstruction = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_INTERFACE))
                 val getVideoVariantsMethodName = firstInvokeInterfaceInstruction.methodExtractor().name
-                GetVideoVariantsExtensionFingerprint.changeFirstString(getVideoVariantsMethodName)
+                GetVideoVariantsV1ExtensionFingerprint.changeFirstString(getVideoVariantsMethodName)
             }
 
             // Extracting method is video used in media class.
@@ -178,5 +189,30 @@ val mediaDataEntity =
                     GetMessageAudioUrlExtensionFingerprint.changeStringAt(1, methodName)
                 }
             }
+
+            // More extended data.
+            ExtMediaDictVideoInfoMapperFingerprint.apply {
+                val moreExtendedMediaDataFieldName =
+                    LiveTreeMediaDictClinitFingerprint.classDef.fields
+                        .first { it.type == classDef.type }
+                        .name
+                GetMoreExtendedDataExtensionFingerprint.changeFirstString(moreExtendedMediaDataFieldName)
+
+                val strIndex = stringMatches.last().index
+                method.apply {
+                    val videoVariantsListFieldName = getInstruction(strIndex + 2).fieldExtractor().name
+
+                    GetVideoVariantsV2ExtensionFingerprint.changeFirstString(videoVariantsListFieldName)
+                }
+
+                ExtMediaDictImageInfoMapperFingerprint.apply {
+                    val strIndex = stringMatches.first().index
+                    method.apply {
+                        val imageInfoListFieldName = getInstruction(strIndex + 2).fieldExtractor().name
+                        GetImageVariantsExtensionFingerprint.changeFirstString(imageInfoListFieldName)
+                    }
+                }
+            }
+            // End.
         }
     }

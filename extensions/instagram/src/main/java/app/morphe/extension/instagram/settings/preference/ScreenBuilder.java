@@ -487,7 +487,7 @@ public class ScreenBuilder {
             addPreference(category,
                     helper.editTextNumPreference(
                             Strings.CUSTOMISE_STORY_RING_SIZE,
-                            "",
+                            Strings.CUSTOMISE_STORY_RING_SIZE_DESC,
                             Settings.CUSTOMISE_STORY_RING_SIZE
                     ));
         }
@@ -527,6 +527,15 @@ public class ScreenBuilder {
                             Strings.COPY_COMMENT,
                             Strings.COPY_COMMENT_DESC,
                             Settings.COMMENT_COPY_BUTTON
+                    )
+            );
+        }
+        if (SettingsStatus.saveMediaCommentButton) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.SAVE_MEDIA_COMMENT,
+                            Strings.SAVE_MEDIA_COMMENT_DESC,
+                            Settings.COMMENT_SAVE_MEDIA_BUTTON
                     )
             );
         }

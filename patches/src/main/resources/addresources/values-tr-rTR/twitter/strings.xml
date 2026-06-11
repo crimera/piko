@@ -24,6 +24,7 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">Medya bağlantısını paylaş</string>
     <!-- Native -->
     <string name="piko_title_native">Yerel özellikler</string>
+    <string name="piko_pref_native_page_desc">Bu yerleşik piko özellikleri gönderi menüsünde mevcut</string>
     <string name="piko_title_native_downloader">Yerel indirici</string>
     <string name="piko_title_native_downloader_toggle">Yerel indirmeyi etkinleştir</string>
     <string name="piko_pref_native_downloader_inline_button">İndirme butonunu satır içinde göster</string>
@@ -65,6 +66,8 @@
     <string name="piko_pref_hide_promoted_posts">Sponsorlu gönderileri gizle</string>
     <string name="piko_pref_wtf_section">Senin için önerilenler bölümünü gizle</string>
     <string name="piko_pref_cts_section">Önerilen içerik üreticileri bölümünü gizle</string>
+    <string name="piko_pref_ctj_section">\"Önerilen kanallar\" bölmesini gizle</string>
+    <string name="piko_pref_ryb_section">\"Yer imleri\" bölümünu gizle</string>
     <string name="piko_pref_del_from_db">Veritabanından verileri sil</string>
     <string name="piko_pref_db_promoted_posts">Sponsorlu gönderiler</string>
     <string name="piko_pref_db_wtf_section">Senin için önerilenler</string>

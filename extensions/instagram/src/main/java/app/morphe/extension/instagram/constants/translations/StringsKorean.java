@@ -96,9 +96,11 @@ public class StringsKorean extends DefaultStrings {
         this.IMPROVE_IMAGE_VIEWING_DESC = "서버에서 최대 해상도의 이미지를 가져옵니다";
         this.HIDE_RESHARE_BUTTON = "리포스트 버튼 숨기기";
         this.COPY_COMMENT = "댓글 복사";
-        this.COPY_COMMENT_DESC = "게시물 및 릴스 댓글을 복사하는 버튼을 추가합니다";
+        this.COPY_COMMENT_DESC = "게시물 및 릴스에서 댓글을 복사하는 버튼을 추가합니다";
         this.COMMENT_COPIED_SUCCESS = "댓글을 복사하였습니다";
         this.COMMENT_COPIED_FAILED = "복사할 텍스트가 없습니다";
+		this.SAVE_MEDIA_COMMENT = "미디어 댓글 저장";
+        this.SAVE_MEDIA_COMMENT_DESC = "게시물 및 릴스에서 미디어 댓글을 저장하는 버튼을 추가합니다";
         this.COPY_USERNAME = "사용자 이름 복사";
         this.COPY_FULL_NAME = "이름 복사";
         this.COPY_USER_ID = "사용자 ID 복사";
@@ -112,6 +114,7 @@ public class StringsKorean extends DefaultStrings {
         this.UNLOCK_PLUS_BENEFITS = "플러스 혜택 해제";
         this.UNLOCK_PLUS_BENEFITS_DESC = "로컬에서 확인되는 'Plus' 구독 혜택을 활성화합니다. 사용 시 발생하는 모든 위험은 사용자 본인이 감수해야 합니다";
         this.CUSTOMISE_STORY_RING_SIZE = "스토리 링 크기 설정";
+        this.CUSTOMISE_STORY_RING_SIZE_DESC = "스토리 링 크기를 백분율로 변경합니다 (기본값: 100)";
 
         this.CATEGORY_DOWNLOAD_MEDIA = "미디어 다운로드";
         this.ENABLE_DOWNLOAD = "다운로드 활성화";
@@ -122,6 +125,7 @@ public class StringsKorean extends DefaultStrings {
         this.DOWNLOAD_CURRENT_MEDIA = "현재 미디어 다운로드";
         this.DOWNLOAD_AS_IMAGE = "이미지로 다운로드";
         this.VIDEO_VARIANTS = "동영상 변형";
+        this.IMAGE_VARIANTS = "이미지 변형";
         this.DOWNLOAD_AUDIO = "오디오 다운로드";
         this.DOWNLOAD_OPTIONS = "다운로드 옵션";
         this.COPY_MEDIA_LINK = "미디어 링크 복사";

@@ -6,7 +6,8 @@
 
 package app.morphe.extension.twitter.settings.fragments;
 
-import app.morphe.extension.shared.StringRef;
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.*;
@@ -23,7 +24,7 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onResume() {
         super.onResume();
-        ActivityHook.toolbar.setTitle(StringRef.str("piko_title_settings"));
+        ActivityHook.toolbar.setTitle(str("piko_title_settings"));
     }
 
     @Override
