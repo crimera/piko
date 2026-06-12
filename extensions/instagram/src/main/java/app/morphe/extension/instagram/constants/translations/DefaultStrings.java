@@ -113,7 +113,7 @@ public class DefaultStrings {
     public static String UNLOCK_PLUS_BENEFITS = "Unlock Plus benefits";
     public static String UNLOCK_PLUS_BENEFITS_DESC = "Unlock 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK";
     public static String CUSTOMISE_STORY_RING_SIZE = "Customise story ring size";
-    public static String CUSTOMISE_STORY_RING_SIZE_DESC = "Change the size of story ring by a percentage (Default is 100)";
+    public static String CUSTOMISE_STORY_RING_SIZE_DESC = "Change the size of story ring by a percentage (Default: 100)";
 
     public static String CATEGORY_DOWNLOAD_MEDIA = "Download media";
     public static String ENABLE_DOWNLOAD = "Enable download";
