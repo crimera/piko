@@ -7,6 +7,8 @@
 
 package app.morphe.extension.crimera.downloader;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -28,7 +30,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import app.morphe.extension.crimera.constants.ExtensionStrings;
 import app.morphe.extension.crimera.PikoUtils;
 
 public class MediaDownloader {
@@ -83,7 +84,7 @@ public class MediaDownloader {
 
         File outputFile = new File(targetDir, request.fileName);
         if (outputFile.exists()) {
-            showToast(ExtensionStrings.DOWNLOAD_MEDIA_EXISTS);
+            showToast(str("piko_media_exists"));
             isDownloading = false;
             processNext();
             return;
@@ -94,7 +95,7 @@ public class MediaDownloader {
         } else {
             builder = new Notification.Builder(context);
         }
-        String downloadStartString = ExtensionStrings.DOWNLOAD_ONGOING + request.fileName;
+        String downloadStartString = str("piko_downloading_media") + request.fileName;
         builder.setSmallIcon(android.R.drawable.stat_sys_download)
                 .setContentTitle(downloadStartString)
                 .setOngoing(true) // Keeps notification un-swipable during download execution.
@@ -144,7 +145,7 @@ public class MediaDownloader {
             final File finalOutputFile = outputFile;
             final int finalNotificationId = notificationId;
             final String finalFileName = request.fileName;
-            final String downloadCompletedString = ExtensionStrings.DOWNLOAD_COMPLETED + finalFileName;
+            final String downloadCompletedString = str("piko_downloaded_media") + finalFileName;
 
 
             // 2. Trigger the Toast and Media Scanner separately so they can't break the notification update
@@ -168,7 +169,7 @@ public class MediaDownloader {
                 } catch (Exception ignored) {}
             });
         } catch (Exception e) {
-            mainHandler.post(() -> showToast(ExtensionStrings.DOWNLOAD_ERROR + e.getMessage()));
+            mainHandler.post(() -> showToast(str("piko_download_failed_media") + e.getMessage()));
             notificationManager.cancel(notificationId);
             PikoUtils.logger(e);
         } finally {

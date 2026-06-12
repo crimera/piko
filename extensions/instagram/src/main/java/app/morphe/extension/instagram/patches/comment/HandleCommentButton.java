@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.patches.comment;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import java.util.List;
 import android.content.Context;
 
@@ -17,7 +19,6 @@ import app.morphe.extension.crimera.ObjectBrowser;
 
 import app.morphe.extension.instagram.entity.CommentData;
 import app.morphe.extension.instagram.utils.Pref;
-import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.patches.comment.copyTextButton.CopyTextButton;
 import app.morphe.extension.instagram.patches.comment.debugButton.DebugButton;
@@ -55,9 +56,9 @@ public class HandleCommentButton {
                 if (commentData.hasText()) {
                     String commentText = (String) commentData.getText();
                     app.morphe.extension.shared.Utils.setClipboard(commentText);
-                    PikoUtils.toast(Strings.COMMENT_COPIED_SUCCESS);
+                    PikoUtils.toast(str("piko_comment_copied_success"));
                 } else {
-                    PikoUtils.toast(Strings.COMMENT_COPIED_FAILED);
+                    PikoUtils.toast(str("piko_comment_copied_failed"));
                 }
                 return true;
             } else if (button.equals(DebugButton.A00)) {
@@ -72,7 +73,7 @@ public class HandleCommentButton {
                 Context context = (Context) Utils.getActivity();
                 String gifUrl = commentData.getGifUrl();
                 String fileName = commentData.getGifDownloadName();
-                DownloadUtils.downloadMediaUrl(context,gifUrl,Strings.DEFAULT_GIF_FOLDER,fileName);
+                DownloadUtils.downloadMediaUrl(context,gifUrl,"Gif",fileName);
                 return true;
             }
 

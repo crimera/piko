@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.patches.download;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.os.Handler;
 import android.os.Looper;
 import androidx.fragment.app.Fragment;
@@ -22,7 +24,6 @@ import app.morphe.extension.shared.requests.Requester;
 import app.morphe.extension.shared.requests.Route;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.constants.UI;
@@ -36,17 +37,17 @@ public class DownloadMapping {
     private static void getMappingsDialogBox(Context context) {
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
-        dialog.setNegativeButton(Strings.CANCEL,null);
+        dialog.setNegativeButton(str("piko_cancel"),null);
 
-        dialog.setPositiveButton(Strings.DOWNLOAD_ID_MAPPING, new DialogInterface.OnClickListener() {
+        dialog.setPositiveButton(str("piko_download_id_mapping"), new DialogInterface.OnClickListener() {
             public final void onClick(DialogInterface dialogInterface, int i) {
                 DownloadMapping.downloadMapping();
             }
         });
 
 
-        dialog.setTitle(Strings.MISSING_MAPPING_FILE);
-        dialog.setMessage(Strings.MISSING_MAPPING_FILE_DESC);
+        dialog.setTitle(str("piko_missing_mapping_file"));
+        dialog.setMessage(str("piko_missing_mapping_file_desc"));
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
 
@@ -88,7 +89,7 @@ public class DownloadMapping {
         Context context = Utils.getContext();
 
         if (!Utils.isNetworkConnected()) {
-            PikoUtils.toast(Strings.NO_INTERNET);
+            PikoUtils.toast(str("piko_no_internet"));
             return;
         }
         Utils.runOnBackgroundThread(() -> {
@@ -106,13 +107,13 @@ public class DownloadMapping {
                 PikoUtils.writeFile(destinationFile, response.getBytes(), false);
 
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    PikoUtils.toast(Strings.DOWNLOADED_MEDIA + mappings_filename);
+                    PikoUtils.toast(str("piko_downloaded_media") + mappings_filename);
                     Utils.restartApp(context);
                 });
 
             } catch (Exception e) {
                 PikoUtils.logger(e);
-                PikoUtils.toast(Strings.DOWNLOAD_FAILED_MEDIA + mappings_filename);
+                PikoUtils.toast(str("piko_download_failed_media") + mappings_filename);
             }
 
         });

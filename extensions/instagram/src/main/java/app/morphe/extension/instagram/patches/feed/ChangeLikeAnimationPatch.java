@@ -10,7 +10,6 @@ package app.morphe.extension.instagram.patches.feed;
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.instagram.constants.Strings;
 
 public class ChangeLikeAnimationPatch {
     private static String CHANGE_LIKE_ANIMATION;
@@ -20,10 +19,12 @@ public class ChangeLikeAnimationPatch {
 
     public static Object changeLikeAnimation(Object defaultAnimation){
         try {
-            if(CHANGE_LIKE_ANIMATION.equals(Strings.DEFAULT)) return null;
+            if (CHANGE_LIKE_ANIMATION == null || "ARES_LIKE_ACTIVATION".equals(CHANGE_LIKE_ANIMATION)) {
+                return null;
+            }
 
             Entity entity = new Entity();
-            Class<?> animationEnumClass = Class.forName("X.05zO");
+            Class<?> animationEnumClass = Class.forName("X.07tN");
             Object likeAnimation = entity.getMethod(
                     animationEnumClass,
                     "valueOf",

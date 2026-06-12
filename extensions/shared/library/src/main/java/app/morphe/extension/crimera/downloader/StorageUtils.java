@@ -7,6 +7,8 @@
 
 package app.morphe.extension.crimera.downloader;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.os.Environment;
 import android.os.Build;
 import java.io.File;
@@ -15,7 +17,6 @@ import android.net.Uri;
 import android.content.Context;
 
 import app.morphe.extension.crimera.SharedPref;
-import app.morphe.extension.crimera.constants.ExtensionStrings;
 import app.morphe.extension.crimera.PikoUtils;
 
 public class StorageUtils {
@@ -35,7 +36,7 @@ public class StorageUtils {
             }
         }
         return Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + "/" + ExtensionStrings.DEFAULT_PIKO_FOLDER;
+                Environment.DIRECTORY_DOWNLOADS).getAbsolutePath() + "/Piko-Instagram";
     }
 
     public static boolean checkStoragePermissions() {
@@ -52,9 +53,9 @@ public class StorageUtils {
             intent.setData(Uri.fromParts("package", context.getPackageName(), null));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
-            PikoUtils.toast(ExtensionStrings.DOWNLOAD_GRANT_PERMISSION);
+            PikoUtils.toast(str("piko_download_grant_permission"));
         } catch (Exception e) {
-            PikoUtils.toast(ExtensionStrings.DOWNLOAD_GRANT_PERMISSION_FAILED);
+            PikoUtils.toast(str("piko_download_grant_permission_failed"));
         }
     }
 }

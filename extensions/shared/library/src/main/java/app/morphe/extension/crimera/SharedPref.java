@@ -13,7 +13,6 @@ import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.crimera.settings.StringSetting;
 import app.morphe.extension.shared.settings.preference.PikoSharedPrefCategory;
-import app.morphe.extension.crimera.constants.ExtensionStrings;
 
 public class SharedPref {
     private static final Context ctx = Utils.getContext();
@@ -21,7 +20,7 @@ public class SharedPref {
 
     static {
         if (ctx != null) {
-            sp = new PikoSharedPrefCategory(ExtensionStrings.PIKO_SETTINGS);
+            sp = new PikoSharedPrefCategory("piko_settings");
         }
     }
 

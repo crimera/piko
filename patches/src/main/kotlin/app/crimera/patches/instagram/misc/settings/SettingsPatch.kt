@@ -15,7 +15,6 @@ import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
 import app.crimera.patches.instagram.misc.userProfile.userProfileButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.Constants.CONSTANTS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.LOAD_FLAGS_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.SSTS_DESCRIPTOR
@@ -24,6 +23,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patches.all.misc.resources.addAppResources
+import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
@@ -46,8 +47,11 @@ val settingsPatch =
             profileInfoEntity,
             instagramButtonEntity,
             developerOptionsEntity,
+            addResourcesPatch,
         )
         execute {
+            addAppResources("shared")
+            addAppResources("instagram")
 
             IgFragmentActivityOnCreate.method.apply {
 
@@ -84,11 +88,6 @@ val settingsPatch =
                 addInstruction(
                     firstInvokeSuperIndex + 2,
                     LOAD_FLAGS_DESCRIPTOR.format("load"),
-                )
-                // Loads strings for common extension.
-                addInstruction(
-                    firstInvokeSuperIndex + 3,
-                    "invoke-static {}, $CONSTANTS_DESCRIPTOR/Strings;->load()V",
                 )
             }
 

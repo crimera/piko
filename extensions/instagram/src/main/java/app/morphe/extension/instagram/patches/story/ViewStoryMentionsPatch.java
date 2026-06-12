@@ -7,6 +7,7 @@
 
 package app.morphe.extension.instagram.patches.story;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import java.util.HashSet;
 import android.app.Dialog;
@@ -17,7 +18,6 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.MediaData;
-import app.morphe.extension.instagram.constants.Strings;
 
 
 public class ViewStoryMentionsPatch {
@@ -51,10 +51,10 @@ public class ViewStoryMentionsPatch {
                 PikoUtils.openUrl("instagram://user?username="+username);
             });
         }else{
-            dialog.setMessage(Strings.VSM_NO_MENTIONS);
+            dialog.setMessage(str("piko_vsm_no_mentions"));
         }
 
-        dialog.setTitle(Strings.VSM_TITLE);
+        dialog.setTitle(str("piko_vsm_title"));
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
 

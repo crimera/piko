@@ -7,6 +7,8 @@
 
 package app.morphe.extension.crimera.downloader;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -16,7 +18,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.io.File;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.crimera.constants.ExtensionStrings;
 
 public class FolderPickerActivity extends AppCompatActivity {
 
@@ -54,14 +55,14 @@ public class FolderPickerActivity extends AppCompatActivity {
 
                     if (folderPath != null) {
                         StorageUtils.saveCustomPath(folderPath);
-                        toast(ExtensionStrings.DOWNLOAD_SET_PATH_SUCCESS);
+                        toast(str("piko_download_set_path_success"));
 
                         File testDir = new File(folderPath);
                         if (!StorageUtils.checkStoragePermissions()) {
                             StorageUtils.allowStorageAccess();
                         }
                     } else {
-                        toast(ExtensionStrings.DOWNLOAD_SET_PATH_FAILED);
+                        toast(str("piko_download_set_path_failed"));
                     }
                 } catch (Exception e) {
                     Logger.printException(() -> "setting path failure", e);
