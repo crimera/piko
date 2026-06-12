@@ -85,7 +85,7 @@ public class MediaData extends Entity {
         return new UserData(userData);
     }
 
-    public HashSet getMentionSet() throws Exception {
+    public HashSet<UserData> getMentionSet() throws Exception {
         Object result =  super.getMethod(this.getExtendedData(), "methodName");
         if (result != null) {
             List userInteractionList = (List) result;

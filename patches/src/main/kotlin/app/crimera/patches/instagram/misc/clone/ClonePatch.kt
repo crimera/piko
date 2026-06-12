@@ -62,7 +62,7 @@ val clonePatch = resourcePatch(
 
     execute {
         val newPackageName = packageName!!
-        val providerReplacements = mutableSetOf<Pair<String, String>>()
+        val providerReplacements = mutableListOf<Pair<String, String>>()
 
         document("AndroidManifest.xml").use { document ->
             val manifest = document.documentElement
