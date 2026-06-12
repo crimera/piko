@@ -62,6 +62,8 @@ val clonePatch = resourcePatch(
 
     execute {
         val newPackageName = packageName!!
+
+        /** Pairs of the original authority and the renamed authority */
         val providerReplacements = mutableListOf<Pair<String, String>>()
 
         document("AndroidManifest.xml").use { document ->
@@ -123,11 +125,12 @@ val clonePatch = resourcePatch(
                     return@transformStringReferences newPackageName
 
                 val matchedReplacement = providerReplacements.find { string.contains(it.first) }
-                if (matchedReplacement == null)
-                    return@transformStringReferences null
 
-                val (oldAuthority, newAuthority) = matchedReplacement
-                return@transformStringReferences string.replaceFirst(oldAuthority, newAuthority)
+                if (matchedReplacement != null) {
+                    string.replaceFirst(matchedReplacement.first, matchedReplacement.second)
+                } else {
+                    null
+                }
             }
         }
         bytecodePatchContext = null
