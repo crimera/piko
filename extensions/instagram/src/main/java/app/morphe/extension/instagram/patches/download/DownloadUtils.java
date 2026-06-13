@@ -201,7 +201,7 @@ public class DownloadUtils {
             MediaData mediaData = mediaInfo.getMediaAt(position);
             String mediaUrl;
             if (mediaType.equals(MediaType.IMAGE)) {
-                mediaUrl = mediaData.getPhotoLink();
+                mediaUrl = mediaData.getImageLink();
             } else {
                 mediaUrl = mediaData.getMediaLink();
             }

@@ -33,12 +33,6 @@ val mediaDataEntity =
                 // Get all the methods inside media helper class.
                 val mediaHelperMethods = mutableClassDefBy { it.type == classDef.type }.methods
 
-                val imageExtractionMethodName =
-                    mediaHelperMethods
-                        .first { it.parameterTypes.first() == "Landroid/content/Context;" && it.returnType == "Ljava/lang/String;" }
-                        .name
-                GetPhotoLinkExtensionFingerprint.changeFirstString(imageExtractionMethodName)
-
                 val originalSoundDataExtractionMethodName =
                     mediaHelperMethods
                         .first {

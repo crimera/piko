@@ -119,14 +119,6 @@ public class MediaData extends Entity {
         return new MediaData(mediaList.get(safePosition));
     }
 
-    public String getPhotoLink() throws Exception {
-        Context context = Utils.getContext();
-
-        Class<?> helperClass = this.getHelperClass();
-        Object photoLink = super.getMethod(helperClass, "methodName", new Class[]{Context.class, this.obj.getClass()}, context, this.obj);
-        return photoLink != null ? (String) photoLink : null;
-    }
-
     private Object getMoreExtendedData() throws Exception {
         return super.getField(this.getExtendedData(), "fieldName");
     }
@@ -176,9 +168,18 @@ public class MediaData extends Entity {
         }
         return null;
     }
+    
+    public String getImageLink() throws Exception {
+        List<ImageData> imageDataList = this.getImageVariants();
+        if(imageDataList!=null){
+            return imageDataList.get(0).getUrl();
+        }
+        return null;
+    }
+
 
     public String getMediaLink() throws Exception {
-        return this.isVideo() ? this.getVideoLink() : this.getPhotoLink();
+        return this.isVideo() ? this.getVideoLink() : this.getImageLink();
     }
 
     private OriginalSoundDataIntf getOriginalSoundDataIntf() throws Exception {

@@ -24,11 +24,6 @@ internal object GetMentionSetExtensionFingerprint : Fingerprint(
     name = "getMentionSet",
 )
 
-internal object GetPhotoLinkExtensionFingerprint : Fingerprint(
-    definingClass = EXTENSION_CLASS_DESCRIPTOR,
-    name = "getPhotoLink",
-)
-
 internal object GetImageVariantsExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
     name = "getImageVariants",
