@@ -15,6 +15,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
@@ -38,11 +39,15 @@ val customiseSideBarPatch =
 
             val instructions = method.instructions
 
-            var filledNewArrIndex = instructions.last { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }.location.index
-            val return_obj =
+            var filledNewArrIndex = instructions.lastOrNull { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }?.location?.index
+                ?: throw PatchException("Failed to find FILLED_NEW_ARRAY_RANGE in ${customiseNavBarFingerprint.definingClass}")
+
+            val return_obj_instruction =
                 instructions
-                    .first { it.opcode == Opcode.RETURN_OBJECT && it.location.index > filledNewArrIndex }
-                    .location.index
+                    .firstOrNull { it.opcode == Opcode.RETURN_OBJECT && it.location.index > filledNewArrIndex }
+                    ?: throw PatchException("Failed to find RETURN_OBJECT after FILLED_NEW_ARRAY_RANGE in ${customiseNavBarFingerprint.definingClass}")
+
+            val return_obj = return_obj_instruction.location.index
             val r0 = method.getInstruction<OneRegisterInstruction>(return_obj).registerA
 
             val METHOD =

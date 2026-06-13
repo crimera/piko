@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.distractionFree
@@ -15,6 +15,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
@@ -39,14 +40,17 @@ val hideNotesTrayPatch =
         execute {
 
             NotesTrayBuilderConstructorFingerprint.apply {
+                if (stringMatches.isEmpty()) throw PatchException("Failed to find string matches in NotesTrayBuilderConstructorFingerprint")
                 val strIndex = stringMatches[0].index
                 method.apply {
 
                     val notesRecyclerViewIDIndex =
                         instructions
-                            .last { it.location.index < strIndex && it.opcode == Opcode.CONST }
-                            .location.index
+                            .lastOrNull { it.location.index < strIndex && it.opcode == Opcode.CONST }
+                            ?.location?.index ?: throw PatchException("Failed to find CONST before string in NotesTrayBuilderConstructorFingerprint")
+
                     val notesRecyclerViewIndex = indexOfFirstInstruction(notesRecyclerViewIDIndex, Opcode.IPUT_OBJECT)
+                    if (notesRecyclerViewIndex < 0) throw PatchException("Failed to find IPUT_OBJECT in NotesTrayBuilderConstructorFingerprint")
                     val notesRecyclerViewInstruction = getInstruction(notesRecyclerViewIndex)
                     val notesTrayRegister = notesRecyclerViewInstruction.registersUsed[0]
                     val freeRegister = findFreeRegister(notesRecyclerViewIndex)

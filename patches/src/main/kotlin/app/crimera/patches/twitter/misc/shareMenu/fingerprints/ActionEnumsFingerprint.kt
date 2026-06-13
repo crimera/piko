@@ -12,6 +12,7 @@ import app.crimera.utils.indexOfLastNewInstance
 import app.crimera.utils.instructionToString
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
@@ -29,17 +30,22 @@ context(patchContext: BytecodePatchContext)
 fun addAction(name: String): String {
     val field =
         ActionEnumsFingerprint.classDef.fields
-            .last()
-            .toMutable()
+            .lastOrNull()
+            ?.toMutable()
+            ?: throw PatchException("Failed to find any fields in ${ActionEnumsFingerprint.definingClass}")
     field.name = name
     ActionEnumsFingerprint.classDef.fields.add(field)
 
-    // TODO: handle nulls
-    val oldInit = ActionEnumsFingerprint.classDef.methods.first { it.name == "<clinit>" }
+    val oldInit = ActionEnumsFingerprint.classDef.methods.firstOrNull { it.name == "<clinit>" }
+        ?: throw PatchException("Failed to find <clinit> in ${ActionEnumsFingerprint.definingClass}")
 
-    val oldInitInstructions = oldInit.implementation!!.instructions.toMutableList()
+    val oldInitInstructions = oldInit.implementation?.instructions?.toMutableList()
+        ?: throw PatchException("<clinit> has no implementation in ${ActionEnumsFingerprint.definingClass}")
 
-    val lastNewInstance = (oldInitInstructions[oldInitInstructions.indexOfLastNewInstance] as Instruction21c)
+    val lastNewInstanceIdx = oldInitInstructions.indexOfLastNewInstance
+    if (lastNewInstanceIdx == -1) throw PatchException("Failed to find NEW_INSTANCE in <clinit> of ${ActionEnumsFingerprint.definingClass}")
+
+    val lastNewInstance = (oldInitInstructions[lastNewInstanceIdx] as Instruction21c)
     val lastNewInstanceReg = lastNewInstance.registerA
     val stringReg = lastNewInstanceReg + 1
     val constReg = stringReg + 1
@@ -47,6 +53,7 @@ fun addAction(name: String): String {
     val fieldCall = "${lastNewInstance.reference}->$name:${lastNewInstance.reference}"
 
     val newArrayPos = oldInitInstructions.indexOfLastFilledNewArrayRange
+    if (newArrayPos == -1) throw PatchException("Failed to find FILLED_NEW_ARRAY_RANGE in <clinit> of ${ActionEnumsFingerprint.definingClass}")
 
     val arr = oldInitInstructions[newArrayPos] as Instruction3rc
     val arrStartReg = arr.startRegister
@@ -71,7 +78,7 @@ fun addAction(name: String): String {
     invoke-direct {v$lastNewInstanceReg, v$stringReg, v$constReg}, Ljava/lang/Enum;-><init>(Ljava/lang/String;I)V
     sput-object v$lastNewInstanceReg, $fieldCall
     """.trimIndent().toInstructions().forEach {
-        oldInitInstructions.add(oldInitInstructions.indexOfLastNewInstance, it)
+        oldInitInstructions.add(lastNewInstanceIdx, it)
     }
 
     val instructions =
@@ -84,7 +91,6 @@ fun addAction(name: String): String {
         newInitImplementation.addInstruction(ins.toInstruction())
     }
 
-    // TODO: clean this up, we should just pass a method here and make this into an improved MutableMethod class
     val newInit =
         InitMethod(
             validator = { oldInit.validateReference() },

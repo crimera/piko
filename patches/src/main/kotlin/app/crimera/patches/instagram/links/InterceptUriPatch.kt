@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.links
@@ -12,6 +12,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -31,8 +32,10 @@ val interceptUriPatch =
         execute {
             TigonServiceLayerStartRequestFingerprint.method.apply {
                 val firstIfEqzIndex = indexOfFirstInstruction(Opcode.IF_EQZ)
+                if (firstIfEqzIndex < 0) throw PatchException("Failed to find IF_EQZ in TigonServiceLayerStartRequestFingerprint")
 
-                val getUriObjectInstruction = instructions.last { it.opcode == Opcode.IGET_OBJECT && it.location.index < firstIfEqzIndex }
+                val getUriObjectInstruction = instructions.lastOrNull { it.opcode == Opcode.IGET_OBJECT && it.location.index < firstIfEqzIndex }
+                    ?: throw PatchException("Failed to find IGET_OBJECT before IF_EQZ in TigonServiceLayerStartRequestFingerprint")
 
                 val uriRegister = getUriObjectInstruction.registersUsed[0]
 

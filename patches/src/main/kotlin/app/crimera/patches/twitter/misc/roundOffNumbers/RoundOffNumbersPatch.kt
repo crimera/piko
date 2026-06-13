@@ -14,6 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.resourceLiteral
@@ -43,9 +44,16 @@ val roundOffNumbersPatch =
 
         execute {
             RoundOffNumbersFingerprint.method.apply {
-                val move_res_obj = instructions.first { it.opcode == Opcode.MOVE_RESULT_OBJECT }.location.index
-                val inv_vir = instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL }
-                val sget_obj = instructions.first { it.opcode == Opcode.SGET_OBJECT }
+                val move_res_obj_instruction = instructions.firstOrNull { it.opcode == Opcode.MOVE_RESULT_OBJECT }
+                    ?: throw PatchException("Failed to find MOVE_RESULT_OBJECT in ${RoundOffNumbersFingerprint.definingClass}")
+
+                val move_res_obj = move_res_obj_instruction.location.index
+
+                val inv_vir = instructions.lastOrNull { it.opcode == Opcode.INVOKE_VIRTUAL }
+                    ?: throw PatchException("Failed to find INVOKE_VIRTUAL in ${RoundOffNumbersFingerprint.definingClass}")
+
+                val sget_obj = instructions.firstOrNull { it.opcode == Opcode.SGET_OBJECT }
+                    ?: throw PatchException("Failed to find SGET_OBJECT in ${RoundOffNumbersFingerprint.definingClass}")
 
                 addInstructionsWithLabels(
                     move_res_obj + 1,

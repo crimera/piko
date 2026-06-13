@@ -380,6 +380,10 @@ public class SettingsStatus {
     }
 
     public static boolean exportLoginToken = false;
+    public static boolean hideGrok = false;
+    public static void hideGrok() {
+        hideGrok = true;
+    }
     public static void exportLoginToken() {
         exportLoginToken = true;
     }
@@ -393,7 +397,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableAdsSection() {
-        return (hideTodaysNews || hideTopPeopleSearch || hideAds  || hideWTF || hideCTS || hideCTJ || hideDetailedPosts || hideRBMK  || removePremiumUpsell);
+        return (hideGrok || hideTodaysNews || hideTopPeopleSearch || hideAds  || hideWTF || hideCTS || hideCTJ || hideDetailedPosts || hideRBMK  || removePremiumUpsell);
     }
 
     public static boolean enableNativeSection() {

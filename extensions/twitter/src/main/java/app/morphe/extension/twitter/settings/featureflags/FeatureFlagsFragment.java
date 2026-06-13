@@ -159,8 +159,7 @@ public class FeatureFlagsFragment extends Fragment {
             flagEditText.setText(bundle.getString(bundleFlagNameKey));
             defaultFlagValue =  bundle.getBoolean(bundleFlagValueKey, defaultFlagValue);
         }
-        // TODO: add string to resources
-        flagEditText.setHint("flag");
+        flagEditText.setHint(ResourceUtils.getString("piko_pref_flag_hint"));
         flagEditText.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         ln.addView(flagEditText);
         final boolean flagValue = defaultFlagValue;
@@ -171,7 +170,6 @@ public class FeatureFlagsFragment extends Fragment {
             saveFlags();
         });
 
-        // TODO: add string to resources
         dia.setNeutralButton(ResourceUtils.getString("piko_pref_search_flags"), ((dialogInterface, i) -> {
             searchFlagsDialog(adapter);
         }));

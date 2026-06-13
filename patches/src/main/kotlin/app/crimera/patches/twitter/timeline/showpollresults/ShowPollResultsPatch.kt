@@ -1,59 +1,44 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.timeline.showpollresults
 
-import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
-import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
-private object JsonCardInstanceDataFingerprint : Fingerprint(
-    definingClass = "JsonCardInstanceData\$\$JsonObjectMapper;",
-    name = "parseField",
+private object ShowPollResultsFingerprint : Fingerprint(
     filters =
         listOf(
-            string("binding_values"),
+            string("Poll: "),
         ),
 )
 
-@Suppress("unused")
 val showPollResultsPatch =
     bytecodePatch(
         name = "Show poll results",
-        description = "Adds an option to show poll results without voting",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
-
         execute {
-            val method = JsonCardInstanceDataFingerprint.method
+            ShowPollResultsFingerprint.method.apply {
+                val moveResultObject = instructions.firstOrNull { it.opcode == Opcode.MOVE_RESULT_OBJECT }
+                    ?: throw PatchException("Failed to find MOVE_RESULT_OBJECT in ShowPollResultsFingerprint")
 
-            val loc =
-                method.instructions
-                    .first { it.opcode == Opcode.MOVE_RESULT_OBJECT }
-                    .location.index
-
-            val pollDescriptor =
-                "invoke-static {p2}, $PREF_DESCRIPTOR;->polls(Ljava/util/Map;)Ljava/util/Map;"
-
-            method.addInstructions(
-                loc + 1,
-                """
-                $pollDescriptor
-                move-result-object p2
-                """.trimIndent(),
-            )
-
-            enableSettings("enableShowPollResults")
+                addInstructions(
+                    moveResultObject.location.index + 1,
+                    "invoke-static {v0}, $PATCHES_DESCRIPTOR/TimelinePatch;->showPollResults(Ljava/lang/Object;)Ljava/lang/Object;",
+                    "move-result-object v0",
+                )
+            }
+            enableSettings("showPollResults")
         }
     }

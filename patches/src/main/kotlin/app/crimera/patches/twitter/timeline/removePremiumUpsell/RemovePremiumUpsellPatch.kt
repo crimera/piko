@@ -1,48 +1,40 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.timeline.removePremiumUpsell
 
-import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
-import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
-import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
-private object RemovePremiumUpsellPatchFingerprint : Fingerprint(
+private object RemovePremiumUpsellFingerprint : Fingerprint(
     filters =
         listOf(
-            string("subscriptions_upsells_premium_home_nav"),
+            string("getPremiumUpsellConfig"),
         ),
 )
 
-@Suppress("unused")
-val disablePremiumUpsellPatch =
+val removePremiumUpsellPatch =
     bytecodePatch(
         name = "Remove premium upsell",
-        description = "Removes premium upsell in home timeline",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
-
         execute {
-            val PREF = "invoke-static {}, $PREF_DESCRIPTOR;->removePremiumUpsell()Z"
+            RemovePremiumUpsellFingerprint.method.apply {
+                val invokeVirtual = instructions.firstOrNull { it.opcode == Opcode.INVOKE_VIRTUAL }
+                    ?: throw PatchException("Failed to find INVOKE_VIRTUAL in RemovePremiumUpsellFingerprint")
 
-            val methods = RemovePremiumUpsellPatchFingerprint.method
-            val instructions = methods.instructions
-
-            val cond_loc = instructions.first { it.opcode == Opcode.INVOKE_VIRTUAL }.location.index
-
-            methods.addInstruction(cond_loc + 1, PREF)
-
-            enableSettings("removePremiumUpsell")
+                replaceInstruction(
+                    invokeVirtual.location.index,
+                    "const/4 v0, 0x0",
+                )
+            }
         }
     }

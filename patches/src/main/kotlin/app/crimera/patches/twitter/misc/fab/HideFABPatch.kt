@@ -14,6 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
@@ -37,7 +38,8 @@ val hideFABPatch =
         execute {
             val method = HideFABFingerprint.method
             val instructions = method.instructions
-            val constObj = instructions.last { it.opcode == Opcode.CONST_4 }
+            val constObj = instructions.lastOrNull { it.opcode == Opcode.CONST_4 }
+                ?: throw PatchException("Failed to find CONST_4 in ${HideFABFingerprint.definingClass}")
 
             method.addInstructionsWithLabels(
                 0,

@@ -15,6 +15,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -40,7 +41,10 @@ val customiseInlineBarPatch =
             val method = CustomiseInlineBarFingerprint.method
             val instructions = method.instructions
 
-            val returnObj_loc = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
+            val returnObj = instructions.lastOrNull { it.opcode == Opcode.RETURN_OBJECT }
+                ?: throw PatchException("Failed to find RETURN_OBJECT in ${CustomiseInlineBarFingerprint.definingClass}")
+
+            val returnObj_loc = returnObj.location.index
             val r0 = method.getInstruction<OneRegisterInstruction>(returnObj_loc).registerA
 
             val METHOD =

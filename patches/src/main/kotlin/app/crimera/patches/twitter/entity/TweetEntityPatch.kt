@@ -1,92 +1,53 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.entity
 
-import app.crimera.utils.changeFirstString
-import app.crimera.utils.changeStringAt
-import app.crimera.utils.getMethodName
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.patch.PatchException
+import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstInstruction
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
-import com.android.tools.smali.dexlib2.dexbacked.reference.DexBackedMethodReference
+
+private object TweetEntityFingerprint : Fingerprint(
+    filters =
+        listOf(
+            string("extended_entities"),
+        ),
+)
 
 val tweetEntityPatch =
     bytecodePatch(
-        description = "For tweet entity reflection",
+        name = "Tweet entity",
     ) {
+        compatibleWith(COMPATIBILITY_X)
         execute {
-            TweetActionsHandlerFingerprint.run {
-                // matches content_auther
-                stringMatches.firstOrNull()?.let { match ->
-                    val getOriginalUserNameMethod =
-                        (method.instructions[match.index + 1] as BuilderInstruction3rc).reference as DexBackedMethodReference
-                    TweetUsernameFingerprint.changeFirstString(getOriginalUserNameMethod.name)
+            val classDef = TweetEntityFingerprint.classDef
+            val fields = classDef.fields
+            val methods = classDef.methods
 
-                    val method = TweetOriginalNameFingerprint(getOriginalUserNameMethod.definingClass).getMethodName(0)
-                    TweetProfileNameFingerprint.changeFirstString(method)
-                }
-            }
+            val listField = fields.firstOrNull { it.type.contains("List") }
+                ?: throw PatchException("Failed to find List field in ${classDef.type}")
+            val stringField = fields.firstOrNull { it.type == "Ljava/lang/String;" }
+                ?: throw PatchException("Failed to find String field in ${classDef.type}")
+            val longMethod = methods.firstOrNull { it.returnType == "J" }
+                ?: throw PatchException("Failed to find Long method in ${classDef.type}")
 
-            val tweetObjectMethods = TweetObjectFingerprint.classDef.methods
+            val newInstanceIndex = longMethod.instructions.firstOrNull { it.opcode == Opcode.NEW_INSTANCE }?.location?.index
+                ?: throw PatchException("Failed to find NEW_INSTANCE in longMethod")
 
-            val getTweetUserIdMethod =
-                tweetObjectMethods
-                    .last { it.returnType == "J" }
-                    .name
-            TweetUserIdFingerprint.changeFirstString(getTweetUserIdMethod)
+            val lastInvokeVirtualRange = longMethod.instructions.lastOrNull {
+                it.opcode == Opcode.INVOKE_VIRTUAL_RANGE && it.location.index < newInstanceIndex
+            } ?: throw PatchException("Failed to find INVOKE_VIRTUAL_RANGE before NEW_INSTANCE in longMethod")
 
-            val getMediaObjectMethod =
-                tweetObjectMethods.firstOrNull { methodDef ->
-                    methodDef.implementation
-                        ?.instructions
-                        ?.map { it.opcode }
-                        ?.toList() ==
-                        listOf(
-                            Opcode.IGET_OBJECT,
-                            Opcode.IGET_OBJECT,
-                            Opcode.IGET_OBJECT,
-                            Opcode.IGET_OBJECT,
-                            Opcode.RETURN_OBJECT,
-                        )
-                } ?: throw PatchException("getMediaObject not found")
-            TweetMediaFingerprint.changeFirstString(getMediaObjectMethod.name)
-
-            val extMediaListField =
-                TweetMediaEntityClassFingerprint.classDef.fields
-                    .first { it.type.contains("List") }
-                    .name
-            TweetMediaFingerprint.changeStringAt(1, extMediaListField)
-
-            val getNoteTweetMethod =
-                tweetObjectMethods
-                    .firstOrNull { it.returnType.contains("notetweet") }
-                    ?.name
-                    ?: throw PatchException("getNoteTweetMethod not found")
-            TweetLongTextFingerprint.changeFirstString(getNoteTweetMethod)
-
-            val longTextField =
-                LongTweetObjectFingerprint.classDef.fields
-                    .first { it.type == "Ljava/lang/String;" }
-                    .name
-            TweetLongTextFingerprint.changeStringAt(1, longTextField)
-
-            QuotedViewSetAccessibilityFingerprint.method.apply {
-                val newInstanceIndex = indexOfFirstInstruction(Opcode.NEW_INSTANCE)
-                val invokeVirtualRangeInst =
-                    instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL_RANGE && it.location.index < newInstanceIndex }
-                TweetShortTextFingerprint
-                    .changeFirstString(
-                        QuotedViewSetAccessibilityFingerprint.getMethodName(
-                            invokeVirtualRangeInst.location.index,
-                        ),
-                    )
-            }
+            longMethod.replaceInstruction(
+                lastInvokeVirtualRange.location.index,
+                "invoke-static {p0, v0, v1, v2, v3, v4}, Lapp/crimera/piko/patches/twitter/EntityPatch;->tweetEntity(Ljava/lang/Object;JJJJ)V",
+            )
         }
     }

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.privacy
@@ -15,6 +15,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -37,19 +38,20 @@ val disableScreenshotDetection =
 
             // Thanks to MyInsta.
             ScreenshotDetectorFingerprint.apply {
+                if (stringMatches.isEmpty()) throw PatchException("Failed to find string matches in ScreenshotDetectorFingerprint")
                 val strIndex = stringMatches[0].index
 
                 method.apply {
                     val observerStartInvokeInstruction =
-                        instructions.last {
+                        instructions.lastOrNull {
                             it.location.index < strIndex &&
                                 it.opcode == Opcode.INVOKE_VIRTUAL
-                        }
+                        } ?: throw PatchException("Failed to find INVOKE_VIRTUAL before string in ScreenshotDetectorFingerprint")
 
                     val index = observerStartInvokeInstruction.location.index
 
-                    val nextConstInstruction = getInstruction(index + 1)
-                    val freeRegister = nextConstInstruction.registersUsed[0]
+                    val nextInstruction = getInstruction(index + 1)
+                    val freeRegister = nextInstruction.registersUsed[0]
 
                     addInstructionsWithLabels(
                         index,
@@ -58,7 +60,7 @@ val disableScreenshotDetection =
                         move-result v$freeRegister
                         if-nez v$freeRegister, :piko
                         """.trimIndent(),
-                        ExternalLabel("piko", nextConstInstruction),
+                        ExternalLabel("piko", nextInstruction),
                     )
 
                     enableSettings("disableScreenshotDetection")

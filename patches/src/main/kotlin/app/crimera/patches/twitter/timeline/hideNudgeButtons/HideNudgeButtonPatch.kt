@@ -1,67 +1,37 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.timeline.hideNudgeButtons
 
-import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
-import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
-import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
 
-private object hideNudgeButtonPatchFingerprint : Fingerprint(
-    definingClass = "FollowNudgeButtonViewDelegateBinder;",
-    strings = listOf("viewDelegate", "viewModel"),
+private object HideNudgeButtonFingerprint : Fingerprint(
+    filters =
+        listOf(
+            string("nudge_id"),
+        ),
 )
 
-@Suppress("unused")
 val hideNudgeButtonPatch =
     bytecodePatch(
-        name = "Hide nudge button",
-        description = "Hides follow/subscribe/follow back buttons on posts",
+        name = "Hide nudge buttons",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
-
         execute {
-            val HOOK_DESCRIPTOR =
-                "invoke-static {}, $PREF_DESCRIPTOR;->hideNudgeButton()Z"
-
-            val method = hideNudgeButtonPatchFingerprint.method
-            val instructions = method.instructions
-
-            val newInst4 = instructions.filter { it.opcode == Opcode.NEW_INSTANCE }[3]
-            val newInst4Index = newInst4.location.index
-            val dummyReg = method.getInstruction<BuilderInstruction21c>(newInst4Index).registerA
-
-            method.addInstructionsWithLabels(
-                newInst4Index - 2,
-                """
-                $HOOK_DESCRIPTOR
-                move-result v$dummyReg
-                if-eqz v$dummyReg, :piko
-                const/16 v$dummyReg, 0x8
-                invoke-virtual {p1, v$dummyReg}, Landroidx/appcompat/widget/AppCompatButton;->setVisibility(I)V
-                """.trimIndent(),
-                ExternalLabel(
-                    "piko",
-                    instructions.last {
-                        it.opcode == Opcode.INVOKE_STATIC &&
-                            it.location.index < newInst4Index
-                    },
-                ),
-            )
-
-            enableSettings("hideNudgeButton")
+            HideNudgeButtonFingerprint.method.apply {
+                replaceInstructions(
+                    listOf(
+                        "return-void",
+                    ),
+                )
+            }
         }
     }

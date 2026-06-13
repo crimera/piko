@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.premium.unlockdownloads
@@ -19,6 +19,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -66,10 +67,16 @@ val downloadPatch =
 
             DownloadPatchFingerprint.method.apply {
 
-                val first_if_loc = instructions.first { it.opcode == Opcode.IF_EQ }.location.index
+                val first_if_instruction = instructions.firstOrNull { it.opcode == Opcode.IF_EQ }
+                    ?: throw PatchException("Failed to find IF_EQ in ${DownloadPatchFingerprint.definingClass}")
+
+                val first_if_loc = first_if_instruction.location.index
                 val reg = getInstruction<TwoRegisterInstruction>(first_if_loc)
                 val r1 = reg.registerA
                 val r2 = reg.registerB
+
+                val newInstanceInstruction = instructions.firstOrNull { it.opcode == Opcode.NEW_INSTANCE }
+                    ?: throw PatchException("Failed to find NEW_INSTANCE in ${DownloadPatchFingerprint.definingClass}")
 
                 // //add support for gif
                 addInstructionsWithLabels(
@@ -79,18 +86,24 @@ val downloadPatch =
                        
                        if-eq v$r1, v$r2, :cond_1212
                     """,
-                    ExternalLabel("cond_1212", instructions.first { it.opcode == Opcode.NEW_INSTANCE }),
+                    ExternalLabel("cond_1212", newInstanceInstruction),
                 )
 
                 // enable download for all media
-                instructions.first { it.opcode == Opcode.IGET_BOOLEAN }.location.index.apply {
+                val igetBooleanInstruction = instructions.firstOrNull { it.opcode == Opcode.IGET_BOOLEAN }
+                    ?: throw PatchException("Failed to find IGET_BOOLEAN in ${DownloadPatchFingerprint.definingClass}")
+
+                igetBooleanInstruction.location.index.apply {
                     removeInstruction(this)
                     removeInstruction(this)
                 }
             }
 
             MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint.method.apply {
-                val first_if2_loc = instructions.first { it.opcode == Opcode.IF_EQZ }.location.index
+                val first_if2_instruction = instructions.firstOrNull { it.opcode == Opcode.IF_EQZ }
+                    ?: throw PatchException("Failed to find IF_EQZ in ${MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint.definingClass}")
+
+                val first_if2_loc = first_if2_instruction.location.index
                 val r3 = getInstruction(first_if2_loc).registersUsed[0]
 
                 // remove premium restriction
@@ -105,7 +118,10 @@ val downloadPatch =
             // force video downloadable
             val method3 = MediaEntityFingerprint.method
             val instructions3 = method3.instructions
-            val loc = instructions3.last { it.opcode == Opcode.IGET_BOOLEAN }.location.index
+            val igetBooleanInstruction3 = instructions3.lastOrNull { it.opcode == Opcode.IGET_BOOLEAN }
+                ?: throw PatchException("Failed to find IGET_BOOLEAN in ${MediaEntityFingerprint.definingClass}")
+
+            val loc = igetBooleanInstruction3.location.index
             val r4 = method3.getInstruction<TwoRegisterInstruction>(loc).registerA
 
             method3.addInstructions(
@@ -119,7 +135,10 @@ val downloadPatch =
             val method4 = ImmersiveBottomSheetPatchFingerprint.method
             val instructions4 = method4.instructions
 
-            val last_iput_loc = instructions4.last { it.opcode == Opcode.IPUT_BOOLEAN }.location.index
+            val last_iput_instruction = instructions4.lastOrNull { it.opcode == Opcode.IPUT_BOOLEAN }
+                ?: throw PatchException("Failed to find IPUT_BOOLEAN in ${ImmersiveBottomSheetPatchFingerprint.definingClass}")
+
+            val last_iput_loc = last_iput_instruction.location.index
             val iput_reg = method4.getInstruction<OneRegisterInstruction>(last_iput_loc).registerA
             method4.addInstruction(
                 last_iput_loc,

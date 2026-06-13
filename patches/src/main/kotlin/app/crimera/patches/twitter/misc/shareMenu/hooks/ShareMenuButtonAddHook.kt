@@ -11,6 +11,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
@@ -34,9 +35,12 @@ fun registerButton(
     val shareMenuButtonAdd = ShareMenuButtonAddHook.method
     val lastParamIndex = shareMenuButtonAdd.parameters.lastIndex
 
-    // TODO: handle nulls
     val addToCollection =
-        shareMenuButtonAdd.instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL } as Instruction35c
+        shareMenuButtonAdd.instructions.lastOrNull { it.opcode == Opcode.INVOKE_VIRTUAL } as? Instruction35c
+            ?: throw PatchException("Failed to find 'addToCollection' INVOKE_VIRTUAL instruction in ${ShareMenuButtonAddHook.definingClass}")
+
+    val nextLabelInstruction = shareMenuButtonAdd.instructions.firstOrNull { it.opcode == Opcode.INVOKE_STATIC }
+        ?: throw PatchException("Failed to find first INVOKE_STATIC instruction for label 'next' in ${ShareMenuButtonAddHook.definingClass}")
 
     shareMenuButtonAdd.addInstructionsWithLabels(
         0,
@@ -47,6 +51,6 @@ fun registerButton(
         sget-object v0, $buttonActionReference
         invoke-virtual {p$lastParamIndex, v0}, ${addToCollection.reference}
         """.trimIndent(),
-        ExternalLabel("next", shareMenuButtonAdd.instructions.first { it.opcode == Opcode.INVOKE_STATIC }),
+        ExternalLabel("next", nextLabelInstruction),
     )
 }

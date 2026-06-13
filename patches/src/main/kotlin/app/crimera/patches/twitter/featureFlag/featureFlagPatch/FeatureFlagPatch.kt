@@ -1,12 +1,11 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.featureFlag.featureFlagPatch
 
-import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.twitter.misc.extension.twitterInitHook
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
@@ -18,6 +17,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -37,7 +37,8 @@ val featureFlagPatch =
         execute {
 
             val methods = FeatureFlagFingerprint.classDef.methods
-            val booleanMethod = methods.first { it.returnType == "Z" && it.parameters == listOf("Ljava/lang/String;", "Z") }
+            val booleanMethodMatch = methods.firstOrNull { it.returnType == "Z" && it.parameters == listOf("Ljava/lang/String;", "Z") }
+                ?: throw PatchException("Failed to find boolean feature flag method in ${FeatureFlagFingerprint.definingClass}")
 
             val METHOD =
                 """
@@ -45,12 +46,14 @@ val featureFlagPatch =
                 move-result-object v0
                 """.trimIndent()
 
-            val loc =
-                booleanMethod.instructions
-                    .first { it.opcode == Opcode.MOVE_RESULT_OBJECT }
-                    .location.index
+            val firstMoveResultObject =
+                booleanMethodMatch.instructions
+                    .firstOrNull { it.opcode == Opcode.MOVE_RESULT_OBJECT }
+                    ?: throw PatchException("Failed to find MOVE_RESULT_OBJECT in boolean feature flag method")
 
-            booleanMethod.addInstructions(loc + 1, METHOD)
+            val loc = firstMoveResultObject.location.index
+
+            booleanMethodMatch.addInstructions(loc + 1, METHOD)
 
             twitterInitHook.fingerprint.method.addInstruction(
                 0,

@@ -34,8 +34,8 @@ fun shareMenuButtonInjection(
                 .method
                 .implementation
                 ?.instructions
-                ?.last { it.opcode == Opcode.SGET_OBJECT } as Instruction21c
-        ).reference
+                ?.lastOrNull { it.opcode == Opcode.SGET_OBJECT } as? Instruction21c
+        )?.reference ?: throw PatchException("Failed to find viewDebugDialogReference in ${ShareMenuButtonAddHook.definingClass}")
 
     // Add action
     val buttonActionReference = addAction(actionName)
@@ -76,11 +76,14 @@ fun shareMenuButtonInjection(
             buttonFuncMethod
                 .filterIndexed { i, ins ->
                     i > conversationalRepliesLoc && ins.opcode == Opcode.IGET_OBJECT
-                }.firstOrNull() as Instruction22c?
+                }.firstOrNull() as? Instruction22c
         ) ?: throw PatchException("Failed to find timelineRef")
-    val timelineRefReg = (buttonFuncMethod[deleteStatusLoc - 1] as Instruction35c).registerD
 
-    val activityRefReg = (buttonFuncMethod[okLoc - 3] as Instruction35c).registerD
+    val timelineRefReg = (buttonFuncMethod.getOrNull(deleteStatusLoc - 1) as? Instruction35c)?.registerD
+        ?: throw PatchException("Failed to find timelineRefReg at expected index")
+
+    val activityRefReg = (buttonFuncMethod.getOrNull(okLoc - 3) as? Instruction35c)?.registerD
+        ?: throw PatchException("Failed to find activityRefReg at expected index")
 
     // Add Button function
     addButtonInstructions(

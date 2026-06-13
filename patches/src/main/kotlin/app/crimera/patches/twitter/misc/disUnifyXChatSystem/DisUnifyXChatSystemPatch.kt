@@ -14,6 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 
 internal object XchatSubSystemUserCheckFingerprint : Fingerprint(
@@ -41,8 +42,13 @@ val disUnifyXchatSystemPatch =
 
                 XchatSubSystemUserCheckFingerprint
                     .apply {
-                        val strIndx = stringMatches.first { it.string == "userId" }.index
+                        val strMatch = stringMatches.firstOrNull { it.string == "userId" }
+                            ?: throw PatchException("Failed to find 'userId' string in ${XchatSubSystemUserCheckFingerprint.definingClass}")
+
+                        val strIndx = strMatch.index
                         method.apply {
+                            if (strIndx >= instructions.size) throw PatchException("String index out of bounds in ${XchatSubSystemUserCheckFingerprint.definingClass}")
+
                             addInstructionsWithLabels(
                                 0,
                                 """

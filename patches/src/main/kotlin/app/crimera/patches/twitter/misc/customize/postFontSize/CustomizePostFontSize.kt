@@ -14,6 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -36,8 +37,10 @@ val customizePostFontSize =
             val index =
                 method
                     .instructions
-                    .last { it.opcode == Opcode.MOVE_RESULT }
-                    .location.index
+                    .lastOrNull { it.opcode == Opcode.MOVE_RESULT }
+                    ?.location?.index
+                    ?: throw PatchException("Failed to find MOVE_RESULT in ${CustomiseNavBarFingerprint.definingClass}")
+
             method.addInstruction(index + 1, "sget p1, $PREF_DESCRIPTOR;->POST_FONT_SIZE:F")
             enableSettings("customPostFontSize")
         }

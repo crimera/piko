@@ -12,6 +12,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.getResourceId
@@ -32,38 +33,39 @@ fun setButtonText(
     name: String,
     stringId: String,
 ) {
-    ShareMenuButtonInitHook.instructionMatches.first().let {
-        val match = it.index
-        val setTextStart = match - 1
-        val setTextEnd = match + 3
-        val method = ShareMenuButtonInitHook.method
-        val buttonInitInstructions =
-            method.instructions
-                .filterIndexed { index, _ ->
-                    index in setTextStart..setTextEnd
-                }.mapIndexed { index, ins ->
-                    when (index) {
-                        0 -> {
-                            instructionToString(ins).replace("ViewDebugDialog", name)
-                        }
+    val match = ShareMenuButtonInitHook.instructionMatches.firstOrNull()?.index
+        ?: throw PatchException("Failed to find 'Debug' string in ${ShareMenuButtonInitHook.definingClass}")
 
-                        1 -> {
-                            ins as Instruction21c
-                            """
-                            const-string v${ins.registerA}, "$stringId"
-                            invoke-static {v${ins.registerA}},$UTILS_DESCRIPTOR;->strRes(Ljava/lang/String;)Ljava/lang/String;
-                            move-result-object v${ins.registerA}
-                            """.trimIndent()
-                        }
+    val setTextStart = match - 1
+    val setTextEnd = match + 3
+    val method = ShareMenuButtonInitHook.method
 
-                        else -> {
-                            instructionToString(ins)
-                        }
+    val buttonInitInstructions =
+        method.instructions
+            .filterIndexed { index, _ ->
+                index in setTextStart..setTextEnd
+            }.mapIndexed { index, ins ->
+                when (index) {
+                    0 -> {
+                        instructionToString(ins).replace("ViewDebugDialog", name)
                     }
-                }.joinToString("\n")
 
-        method.addInstructions(setTextEnd + 1, buttonInitInstructions)
-    }
+                    1 -> {
+                        if (ins !is Instruction21c) throw PatchException("Expected Instruction21c for string resource injection at index $index")
+                        """
+                        const-string v${ins.registerA}, "$stringId"
+                        invoke-static {v${ins.registerA}},$UTILS_DESCRIPTOR;->strRes(Ljava/lang/String;)Ljava/lang/String;
+                        move-result-object v${ins.registerA}
+                        """.trimIndent()
+                    }
+
+                    else -> {
+                        instructionToString(ins)
+                    }
+                }
+            }.joinToString("\n")
+
+    method.addInstructions(setTextEnd + 1, buttonInitInstructions)
 }
 
 context(patchContext: BytecodePatchContext)
@@ -72,7 +74,8 @@ fun setButtonIcon(
     iconStr: String,
 ) {
     val allMethods = ShareMenuButtonInitHook.classDef.methods
-    val method = allMethods.first { it.returnType == "V" }
+    val method = allMethods.firstOrNull { it.returnType == "V" }
+        ?: throw PatchException("Failed to find method with return type V in ${ShareMenuButtonInitHook.definingClass}")
 
     val iconAdditionStart = method.indexOfFirstInstructionOrThrow(Opcode.MOVE_RESULT_OBJECT) + 1
     val iconAdditionEnd = iconAdditionStart + 4

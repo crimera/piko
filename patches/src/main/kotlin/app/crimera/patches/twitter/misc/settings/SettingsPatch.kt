@@ -22,6 +22,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
@@ -50,11 +51,13 @@ val settingsPatch =
             addAppResources("twitter")
 
             val initMethod = SettingsFingerprint.method
-            val arrayCreation =
+            val arrayCreationInstruction =
                 initMethod
                     .instructions
-                    .first { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }
-                    .location.index + 1
+                    .firstOrNull { it.opcode == Opcode.FILLED_NEW_ARRAY_RANGE }
+                    ?: throw PatchException("Failed to find FILLED_NEW_ARRAY_RANGE in ${SettingsFingerprint.definingClass}")
+
+            val arrayCreation = arrayCreationInstruction.location.index + 1
 
             initMethod.getInstruction<BuilderInstruction11x>(arrayCreation).registerA.also { reg ->
                 initMethod.addInstructions(
@@ -78,13 +81,16 @@ val settingsPatch =
                 ).match(SettingsFingerprint.classDef)
 
             val prefCLickedMethod = prefCLickedFingerprint.method
-            val constIndex = prefCLickedFingerprint.instructionMatches.first().index
+            val constIndex = prefCLickedFingerprint.instructionMatches.firstOrNull()?.index
+                ?: throw PatchException("Failed to find CONST_4 in prefCLickedMethod of ${SettingsFingerprint.definingClass}")
 
-            val igetObjLoc =
+            val igetObjInstruction =
                 prefCLickedMethod
                     .instructions
-                    .first { it.opcode == Opcode.IGET_OBJECT }
-                    .location.index
+                    .firstOrNull { it.opcode == Opcode.IGET_OBJECT }
+                    ?: throw PatchException("Failed to find IGET_OBJECT in prefCLickedMethod of ${SettingsFingerprint.definingClass}")
+
+            val igetObjLoc = igetObjInstruction.location.index
             val objFieldName = (prefCLickedMethod.getInstruction<ReferenceInstruction>(igetObjLoc).reference as FieldReference).name
             prefCLickedMethod.removeInstruction(igetObjLoc)
 
@@ -121,7 +127,7 @@ val settingsPatch =
                         """.trimIndent(),
                         ExternalLabel(
                             "piko",
-                            instructions.first(),
+                            instructions.firstOrNull() ?: throw PatchException("Method has no instructions in AuthorizeAppActivity")
                         ),
                     )
                 }
@@ -139,12 +145,15 @@ val settingsPatch =
                 val invokeSuperInstructionIndex = indexOfFirstInstruction(Opcode.INVOKE_SUPER)
 
                 if (invokeSuperInstructionIndex > 0) {
+                    val returnVoidInstruction = instructions.firstOrNull { it.opcode == Opcode.RETURN_VOID }
+                        ?: throw PatchException("Failed to find RETURN_VOID in UrlInterpreterActivity")
+
                     addInstructionsWithLabels(
                         invokeSuperInstructionIndex + 1,
                         functionCall,
                         ExternalLabel(
                             "deep_link",
-                            instructions.first { it.opcode == Opcode.RETURN_VOID },
+                            returnVoidInstruction,
                         ),
                     )
                     deepLinkPatched = true
@@ -152,14 +161,20 @@ val settingsPatch =
             }
             if (!deepLinkPatched) {
                 UrlInterpreterActivityPairIPFingerprint.method.apply {
-                    val loc = instructions.last { it.opcode == Opcode.SGET_OBJECT }.location.index
+                    val sgetInstruction = instructions.lastOrNull { it.opcode == Opcode.SGET_OBJECT }
+                        ?: throw PatchException("Failed to find SGET_OBJECT in UrlInterpreterActivityPairIP")
+
+                    val loc = sgetInstruction.location.index
                     if (loc > 0) {
+                        val returnVoidInstruction = instructions.firstOrNull { it.opcode == Opcode.RETURN_VOID }
+                            ?: throw PatchException("Failed to find RETURN_VOID in UrlInterpreterActivityPairIP")
+
                         addInstructionsWithLabels(
                             loc,
                             functionCall,
                             ExternalLabel(
                                 "deep_link",
-                                instructions.first { it.opcode == Opcode.RETURN_VOID },
+                                returnVoidInstruction,
                             ),
                         )
                         deepLinkPatched = true
@@ -171,7 +186,5 @@ val settingsPatch =
                 0,
                 "$SSTS_DESCRIPTOR->load()V",
             )
-
-            // execute ends.
         }
     }

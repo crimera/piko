@@ -1,37 +1,38 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.distractionFree.doubleTap
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
 
-object PostOnSingleTapConfirmedFingerprint : Fingerprint(
-    strings = listOf("open_cmon_interstitial"),
-    name = "onSingleTapConfirmed",
+private object DisableDoubleTapOnPostFingerprint : Fingerprint(
+    filters =
+        listOf(
+            string("double_tap_to_like_feed"),
+        ),
 )
 
-@Suppress("unused")
 val disableDoubleTapOnPostPatch =
     bytecodePatch(
-        description = "Disable double tap like on post",
+        name = "Disable double tap on post",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-
         execute {
-
-            PostOnSingleTapConfirmedFingerprint.apply {
-                classDef.methods.first { it.name == "onDoubleTap" }.apply {
-                    addInstructions(
-                        0,
-                        DOUBLE_TAP_PREF_DESCRIPTOR.format("disableDoubleTapPost"),
-                    )
-                }
-            }
+            DisableDoubleTapOnPostFingerprint.classDef.methods.firstOrNull { it.name == "onDoubleTap" }?.apply {
+                replaceInstructions(
+                    listOf(
+                        "const/4 v0, 0x1",
+                        "return v0",
+                    ),
+                )
+            } ?: throw PatchException("Failed to find onDoubleTap method in ${DisableDoubleTapOnPostFingerprint.definingClass}")
         }
     }

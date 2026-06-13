@@ -14,6 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -38,8 +39,13 @@ val customiseNotificationTabsPatch =
         execute {
 
             CustomiseNotificationTabsFingerprint.method.apply {
-                val strIndex = CustomiseNotificationTabsFingerprint.stringMatches[2].index
+                val strMatch = CustomiseNotificationTabsFingerprint.stringMatches.getOrNull(2)
+                    ?: throw PatchException("Failed to find third string match in ${CustomiseNotificationTabsFingerprint.definingClass}")
+
+                val strIndex = strMatch.index
                 val index = indexOfFirstInstruction(strIndex, Opcode.CHECK_CAST)
+                if (index == -1) throw PatchException("Failed to find CHECK_CAST after string match in ${CustomiseNotificationTabsFingerprint.definingClass}")
+
                 val reg = getInstruction(index).registersUsed[0]
 
                 addInstructions(

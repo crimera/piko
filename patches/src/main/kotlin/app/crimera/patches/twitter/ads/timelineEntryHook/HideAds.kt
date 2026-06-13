@@ -16,6 +16,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -45,11 +46,15 @@ val hideAds =
             val method = HidePromotedTrendFingerprint.method
             val instructions = method.instructions
 
-            val return_obj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }
+            val return_obj = instructions.lastOrNull { it.opcode == Opcode.RETURN_OBJECT }
+                ?: throw PatchException("Failed to find RETURN_OBJECT in ${HidePromotedTrendFingerprint.definingClass}")
+
             val return_loc = return_obj.location.index
             val return_reg = method.getInstruction<OneRegisterInstruction>(return_loc).registerA
 
-            val last_new_inst = instructions.last { it.opcode == Opcode.NEW_INSTANCE }.location.index
+            val last_new_inst = instructions.lastOrNull { it.opcode == Opcode.NEW_INSTANCE }?.location?.index
+                ?: throw PatchException("Failed to find NEW_INSTANCE in ${HidePromotedTrendFingerprint.definingClass}")
+
             val loc = last_new_inst + 3
             val reg = method.getInstruction<TwoRegisterInstruction>(loc).registerA
 

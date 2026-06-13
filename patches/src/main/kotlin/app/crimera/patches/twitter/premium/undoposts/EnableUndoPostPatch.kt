@@ -1,93 +1,48 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.premium.undoposts
 
-import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
-import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
-import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.OpcodesFilter
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
-private object UndoPost1Fingerprint : Fingerprint(
-    returnType = "Z",
-    filters = OpcodesFilter.opcodesToFilters(Opcode.MOVE_RESULT_OBJECT),
-    strings =
+private object UndoPostFingerprint : Fingerprint(
+    filters =
         listOf(
-            "subscriptions_feature_1003",
-            "allow_undo_replies",
-            "allow_undo_tweet",
+            string("undo_post_nudge_active"),
         ),
 )
 
-private object UndoPost2Fingerprint : Fingerprint(
-    returnType = "Z",
-    strings =
+private object UndoPostEnabledFingerprint : Fingerprint(
+    filters =
         listOf(
-            "userPreferences",
-            "draftTweet",
-            "subscriptions_feature_1003",
-            "allow_undo_replies",
-            "allow_undo_tweet",
+            string("undo_post_enabled"),
         ),
 )
 
-private object undoPost3Fingerprint : Fingerprint(
-    returnType = "Landroid/content/Intent;",
-    strings =
-        listOf(
-            "subscriptions_feature_1003",
-        ),
-)
-
-@Suppress("unused")
 val enableUndoPostPatch =
     bytecodePatch(
-        name = "Enable Undo Posts",
-        description = "Enables ability to undo posts before posting",
+        name = "Enable undo post",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
-
         execute {
-
-            val PREF = "invoke-static {}, $PREF_DESCRIPTOR;->enableUndoPosts()Z"
-
-            // flag check 1
-            val method1 = UndoPost1Fingerprint.method
-            val loc1 =
-                method1
-                    .instructions
-                    .first { it.opcode == Opcode.IF_EQZ }
-                    .location.index
-            method1.addInstruction(loc1 - 1, PREF.trimIndent())
-
-            // flag check 2
-            val method2 = UndoPost2Fingerprint.method
-            val loc2 =
-                method2
-                    .instructions
-                    .first { it.opcode == Opcode.IF_EQZ }
-                    .location.index
-            method2.addInstruction(loc2 - 1, PREF.trimIndent())
-
-            // flag check 3
-            val method3 = undoPost3Fingerprint.method
-            val loc3 =
-                method3
-                    .instructions
-                    .filter { it.opcode == Opcode.IF_EQZ }[1]
-                    .location.index
-            method3.addInstruction(loc3, PREF.trimIndent())
-
-            enableSettings("enableUndoPosts")
+            UndoPostFingerprint.method.apply {
+                val ifEqz = instructions.firstOrNull { it.opcode == Opcode.IF_EQZ }
+                    ?: throw PatchException("Failed to find IF_EQZ in UndoPostFingerprint")
+                replaceInstruction(ifEqz.location.index, "if-nez v0, :cond_0")
+            }
+            UndoPostEnabledFingerprint.method.apply {
+                val ifEqz = instructions.firstOrNull { it.opcode == Opcode.IF_EQZ }
+                    ?: throw PatchException("Failed to find IF_EQZ in UndoPostEnabledFingerprint")
+                replaceInstruction(ifEqz.location.index, "if-nez v0, :cond_0")
+            }
         }
     }

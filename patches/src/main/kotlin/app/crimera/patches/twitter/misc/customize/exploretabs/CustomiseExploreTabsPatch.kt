@@ -15,6 +15,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import com.android.tools.smali.dexlib2.Opcode
 
 private object CustomiseExploreTabsFingerprint : Fingerprint(
@@ -39,7 +40,8 @@ val customiseExploreTabsPatch =
 
             val instructions = method.instructions
 
-            val index = instructions.first { it.opcode == Opcode.IGET_OBJECT }.location.index
+            val index = instructions.firstOrNull { it.opcode == Opcode.IGET_OBJECT }?.location?.index
+                ?: throw PatchException("Failed to find IGET_OBJECT in ${CustomiseExploreTabsFingerprint.definingClass}")
 
             method.addInstructions(
                 index + 1,

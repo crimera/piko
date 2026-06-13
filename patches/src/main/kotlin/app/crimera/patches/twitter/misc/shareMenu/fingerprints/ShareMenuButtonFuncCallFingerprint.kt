@@ -1,105 +1,36 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.misc.shareMenu.fingerprints
 
+import app.crimera.utils.changeFirstString
+import app.crimera.utils.methodExtractor
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
-import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.BuilderInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction21c
-import com.android.tools.smali.dexlib2.iface.reference.Reference
 
-internal object shareMenuButtonFuncCallFingerprint : Fingerprint(
-    returnType = "V",
-    strings =
-        listOf(
-            "OK",
-            "Delete Status",
-            "click",
-            "tweet_analytics",
-            "author_moderated_replies_author_enabled",
-            "conversational_replies_android_pinned_replies_creation_enabled",
-            "share_menu_click",
-        ),
-)
+val shareMenuButtonFuncCallFingerprint =
+    bytecodePatch(
+        description = "For share menu button function call reflection",
+    ) {
+        execute {
+            ShareMenuButtonFuncCallFingerprint.apply {
+                val match = stringMatches.firstOrNull { it.string == "Delete Status" }
+                    ?: throw PatchException("Failed to find 'Delete Status' string in ShareMenuButtonFuncCallFingerprint")
+                val strIndex = match.index
 
-context(patchContext: BytecodePatchContext)
-fun addButtonInstructions(
-    reference: String,
-    instructions: String,
-    debugDialogReference: Reference,
-) {
-    val fingerprint = shareMenuButtonFuncCallFingerprint
-    fingerprint.method.apply {
-        val deleteStatusLoc =
-            fingerprint.stringMatches!!
-                .first { it.string == "Delete Status" }
-                .index
-        val gotoLoc = deleteStatusLoc + 8
-
-        val condRegisters =
-            getButtonEntry(this.instructions, debugDialogReference)?.let {
-                it as TwoRegisterInstruction
-                listOf(it.registerA, it.registerB)
-            }!!
-
-        addInstructionsWithLabels(
-            gotoLoc,
-            """  
-            sget-object v${condRegisters[1]}, $reference  
-              
-            if-ne v${condRegisters[0]}, v${condRegisters[1]}, :nextbtn  
-              
-            $instructions  
-              
-            return-void  
-            """.trimIndent(),
-            ExternalLabel("nextbtn", getInstruction(gotoLoc)),
-        )
-
-        getButtonEntry(this.instructions, debugDialogReference)?.let {
-            val loc = it.location.index
-
-            addInstructionsWithLabels(
-                loc,
-                "if-ne v${condRegisters[0]}, v${condRegisters[1]}, :downloadbtn",
-                ExternalLabel("downloadbtn", getInstruction(gotoLoc)),
-            )
-
-            removeInstruction(loc + 1)
-        } ?: throw PatchException("Failed to get button EntryPoint")
-    }
-}
-
-private fun getButtonEntry(
-    instructions: MutableList<BuilderInstruction>,
-    reference: Reference,
-): BuilderInstruction? {
-    var out: BuilderInstruction? = null
-    instructions.filter { it.opcode == Opcode.GOTO_16 }.forEach { ins ->
-        val sGet = instructions[ins.location.index + 1]
-
-        if (sGet.opcode == Opcode.SGET_OBJECT && (sGet as Instruction21c).reference == reference) {
-            var index = ins.location.index
-            while (instructions[index].opcode != Opcode.IGET_OBJECT) {
-                val currentIns = instructions[index]
-                if (currentIns.opcode == Opcode.IF_NE) {
-                    out = currentIns
+                method.apply {
+                    val invokeVirtualIndex = indexOfFirstInstruction(strIndex, Opcode.INVOKE_VIRTUAL)
+                    if (invokeVirtualIndex < 0) throw PatchException("Failed to find INVOKE_VIRTUAL after string in ShareMenuButtonFuncCallFingerprint")
+                    val invokeVirtualMatch = getInstruction(invokeVirtualIndex)
+                    ShareMenuButtonFuncCallExtensionFingerprint.changeFirstString(invokeVirtualMatch.methodExtractor().name)
                 }
-                index += 1
             }
         }
     }
-    return out
-}

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.stories
@@ -17,6 +17,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
@@ -50,12 +51,21 @@ val handleStoryButtonPatch =
             var mediaObjectFromReelItemFieldExtraction: MethodFieldMetadata
             // Add button on story bottom sheet.
             AddStoryButtonFingerprint.method.apply {
-                mediaObjectFromReelItemFieldExtraction = instructions.filter { it.opcode == Opcode.IGET_OBJECT }[1].fieldExtractor()
+                val igetObjectList = instructions.filter { it.opcode == Opcode.IGET_OBJECT }
+                val secondIGetObject = igetObjectList.getOrNull(1)
+                    ?: throw PatchException("Failed to find second IGET_OBJECT in ${AddStoryButtonFingerprint.definingClass}")
+
+                mediaObjectFromReelItemFieldExtraction = secondIGetObject.fieldExtractor()
+
                 // The last invoke-virtual instruction is arrayList.add().
-                val lastInvokeVirtualRegisters = instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL }.registersUsed
+                val lastInvokeVirtual = instructions.lastOrNull { it.opcode == Opcode.INVOKE_VIRTUAL }
+                    ?: throw PatchException("Failed to find INVOKE_VIRTUAL in ${AddStoryButtonFingerprint.definingClass}")
+
+                val lastInvokeVirtualRegisters = lastInvokeVirtual.registersUsed
                 val arrayListRegister = lastInvokeVirtualRegisters[0]
 
                 val firstMoveResultObjectInstruction = indexOfFirstInstruction(Opcode.MOVE_RESULT_OBJECT)
+                if (firstMoveResultObjectInstruction == -1) throw PatchException("Failed to find MOVE_RESULT_OBJECT in ${AddStoryButtonFingerprint.definingClass}")
 
                 addInstructions(
                     firstMoveResultObjectInstruction + 1,
@@ -73,14 +83,22 @@ val handleStoryButtonPatch =
                 val charSequence = "Ljava/lang/CharSequence;"
 
                 val classFields = classDef.fields
-                val reelItemFieldName = classFields.first { it.type == reelItemClassName }.name
-                val appActivityFieldName = classFields.first { it.type == appActivity }.name
+                val reelItemField = classFields.firstOrNull { it.type == reelItemClassName }
+                    ?: throw PatchException("Failed to find reelItemField in ${classDef.type}")
+                val reelItemFieldName = reelItemField.name
+
+                val appActivityField = classFields.firstOrNull { it.type == appActivity }
+                    ?: throw PatchException("Failed to find appActivityField in ${classDef.type}")
+                val appActivityFieldName = appActivityField.name
 
                 val characterSequenceParameterIndex =
                     OnCLickStoryButtonFingerprint.method.parameters.indexOfLast {
                         it.type == charSequence
                     }
+                if (characterSequenceParameterIndex == -1) throw PatchException("Failed to find CharSequence parameter")
+
                 val selfClassParameterIndex = OnCLickStoryButtonFingerprint.method.parameters.indexOfLast { it.type == classDef.type }
+                if (selfClassParameterIndex == -1) throw PatchException("Failed to find self class parameter")
 
                 // Hard coding registries as it's going to be the first line in the method.
                 addInstructionsWithLabels(

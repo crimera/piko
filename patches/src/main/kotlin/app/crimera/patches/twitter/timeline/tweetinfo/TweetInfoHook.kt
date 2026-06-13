@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.timeline.tweetinfo
@@ -12,10 +12,11 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import com.android.tools.smali.dexlib2.Opcode
 
 private object TweetInfoHookFingerprint : Fingerprint(
-    definingClass = "Lcom/twitter/api/model/json/core/JsonApiTweet\$\$JsonObjectMapper;",
+    definingClass = "Lcom/twitter/api/model/json/core/JsonApiTweet$$JsonObjectMapper;",
     name = "parse",
     returnType = "Ljava/lang/Object",
 )
@@ -32,7 +33,8 @@ val tweetInfoHook =
             val methods = TweetInfoHookFingerprint.method
             val instructions = methods.instructions
 
-            val returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
+            val returnObj = instructions.lastOrNull { it.opcode == Opcode.RETURN_OBJECT }?.location?.index
+                ?: throw PatchException("Failed to find RETURN_OBJECT in ${TweetInfoHookFingerprint.definingClass}")
 
             methods.addInstructions(
                 returnObj,

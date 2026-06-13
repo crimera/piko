@@ -13,6 +13,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
@@ -36,7 +37,10 @@ val customFontHook =
         execute {
             CustomFontHookFingerprint.method.apply {
 
-                val charSeqReg = (instructions.first { it.opcode == Opcode.INVOKE_INTERFACE } as Instruction35c).registerC
+                val invokeInterface = instructions.firstOrNull { it.opcode == Opcode.INVOKE_INTERFACE } as? Instruction35c
+                    ?: throw PatchException("Failed to find INVOKE_INTERFACE in ${CustomFontHookFingerprint.definingClass}")
+
+                val charSeqReg = invokeInterface.registerC
                 addInstructions(
                     0,
                     """

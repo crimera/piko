@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.moreOptionsOnPost
@@ -17,6 +17,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
@@ -45,9 +46,15 @@ val moreOptionsOnPostPatch =
 
                 val postObjectDefiningClass: String
 
-                classDef.methods.first { it.name == "onDoubleTap" }.apply {
+                val onDoubleTapMethod = classDef.methods.firstOrNull { it.name == "onDoubleTap" }
+                    ?: throw PatchException("Failed to find 'onDoubleTap' in ${classDef.type}")
+
+                onDoubleTapMethod.apply {
                     val firstIGetInstructionIndex = indexOfFirstInstruction(Opcode.IGET_OBJECT)
-                    firstIGetObjFieldInstruction = getInstruction(firstIGetInstructionIndex).getReference<FieldReference>()!!
+                    if (firstIGetInstructionIndex == -1) throw PatchException("Failed to find IGET_OBJECT in onDoubleTap")
+
+                    firstIGetObjFieldInstruction = getInstruction(firstIGetInstructionIndex).getReference<FieldReference>()
+                        ?: throw PatchException("Failed to find field reference in IGET_OBJECT")
 
                     val mediaObjectFieldExtraction = getInstruction(firstIGetInstructionIndex + 2).fieldExtractor()
                     MediaFieldNameExtensionFingerprint.changeFirstString(mediaObjectFieldExtraction.name)
@@ -80,15 +87,22 @@ val moreOptionsOnPostPatch =
                 val postObjectClass = mutableClassDefBy { it.type == extensionToClassName(postObjectDefiningClass) }
                 val postObjectClassFields = postObjectClass.fields
 
-                val contextFieldName = postObjectClassFields.first { it.type == "Landroid/content/Context;" }.name
-                ContextFieldNameExtensionFingerprint.changeFirstString(contextFieldName)
+                val contextField = postObjectClassFields.firstOrNull { it.type == "Landroid/content/Context;" }
+                    ?: throw PatchException("Failed to find Context field in ${postObjectDefiningClass}")
+                ContextFieldNameExtensionFingerprint.changeFirstString(contextField.name)
 
-                val currentMediaIndexFieldName = postObjectClassFields.first { it.type == "I" }.name
-                CurrentMediaIndexFieldNameExtensionFingerprint.changeFirstString(currentMediaIndexFieldName)
+                val currentMediaIndexField = postObjectClassFields.firstOrNull { it.type == "I" }
+                    ?: throw PatchException("Failed to find 'I' field in ${postObjectDefiningClass}")
+                CurrentMediaIndexFieldNameExtensionFingerprint.changeFirstString(currentMediaIndexField.name)
 
                 // Enable long press on all posts.
-                postObjectClass.methods.first().apply {
+                val postObjectFirstMethod = postObjectClass.methods.firstOrNull()
+                    ?: throw PatchException("Failed to find any methods in ${postObjectDefiningClass}")
+
+                postObjectFirstMethod.apply {
                     val firstInvokeVirtualIndex = indexOfFirstInstruction(Opcode.INVOKE_VIRTUAL)
+                    if (firstInvokeVirtualIndex == -1) throw PatchException("Failed to find INVOKE_VIRTUAL in first method of ${postObjectDefiningClass}")
+
                     val firstInvokeVirtualInstruction = getInstruction(firstInvokeVirtualIndex)
 
                     val onLongPressEnableBoolRegister = firstInvokeVirtualInstruction.registersUsed[1]
