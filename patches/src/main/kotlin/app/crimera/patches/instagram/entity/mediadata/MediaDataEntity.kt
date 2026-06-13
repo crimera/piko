@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.entity.mediadata
@@ -15,6 +15,7 @@ import app.crimera.utils.methodExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -30,30 +31,42 @@ val mediaDataEntity =
                 // Get all the methods inside media helper class.
                 val mediaHelperMethods = mutableClassDefBy { it.type == classDef.type }.methods
 
-                val imageExtractionMethodName =
+                val imageExtractionMethod =
                     mediaHelperMethods
-                        .first { it.parameterTypes.first() == "Landroid/content/Context;" && it.returnType == "Ljava/lang/String;" }
-                        .name
-                GetPhotoLinkExtensionFingerprint.changeFirstString(imageExtractionMethodName)
+                        .firstOrNull { it.parameterTypes.firstOrNull() == "Landroid/content/Context;" && it.returnType == "Ljava/lang/String;" }
+                        ?: throw PatchException("Failed to find image extraction method in ${classDef.type}")
+                GetPhotoLinkExtensionFingerprint.changeFirstString(imageExtractionMethod.name)
             }
 
             // Extracting the get mention set method used media helper class.
             ReelsMentionDoubleTapFingerprint.method.apply {
-                val secondInvokeStaticMethodData = instructions.filter { it.opcode == Opcode.INVOKE_STATIC }[1].methodExtractor()
+                val invokeStatics = instructions.filter { it.opcode == Opcode.INVOKE_STATIC }
+                if (invokeStatics.size < 2) {
+                    throw PatchException("Failed to find enough INVOKE_STATIC instructions in ReelsMentionDoubleTapFingerprint")
+                }
+                val secondInvokeStaticMethodData = invokeStatics[1].methodExtractor()
 
                 GetMentionSetExtensionFingerprint.changeFirstString(secondInvokeStaticMethodData.name)
             }
 
             // Extracting get video link method used media helper class.
             ClipsEditMetadataControllerRunFingerprint.method.apply {
-                val firstInvokeStaticCallingMethodName = instructions.first { it.opcode == Opcode.INVOKE_STATIC }.methodExtractor().name
+                val firstInvokeStatic = instructions.firstOrNull { it.opcode == Opcode.INVOKE_STATIC }
+                    ?: throw PatchException("Failed to find INVOKE_STATIC in ClipsEditMetadataControllerRunFingerprint")
+                val firstInvokeStaticCallingMethodName = firstInvokeStatic.methodExtractor().name
                 GetVideoLinkExtensionFingerprint.changeFirstString(firstInvokeStaticCallingMethodName)
             }
 
             // Extracting method is video used in media class.
             AslSessionRelatedFingerprint.method.apply {
+                if (AslSessionRelatedFingerprint.stringMatches.size < 2) {
+                     throw PatchException("Failed to find enough string matches in AslSessionRelatedFingerprint")
+                }
                 val stringIndex = AslSessionRelatedFingerprint.stringMatches[1].index
                 val isVideoVirtualInvokeIndex = indexOfFirstInstruction(stringIndex, Opcode.INVOKE_VIRTUAL)
+                if (isVideoVirtualInvokeIndex < 0) {
+                     throw PatchException("Failed to find INVOKE_VIRTUAL after string match in AslSessionRelatedFingerprint")
+                }
                 val isVideoCallingMethodName = getInstruction(isVideoVirtualInvokeIndex).methodExtractor().name
                 IsVideoExtensionFingerprint.changeFirstString(isVideoCallingMethodName)
             }
@@ -84,44 +97,63 @@ val mediaDataEntity =
                     val firstIfNeIndex = indexOfFirstInstruction(Opcode.IF_NE)
 
                     val extendedDataFieldIndex = indexOfFirstInstruction(firstIfNeIndex, Opcode.IGET_OBJECT)
-                    val extendedDataFieldName =
-                        getInstruction(
-                            extendedDataFieldIndex,
-                        ).fieldExtractor().name
-                    val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
+                    if (extendedDataFieldIndex > 0) {
+                        val extendedDataFieldName =
+                            getInstruction(
+                                extendedDataFieldIndex,
+                            ).fieldExtractor().name
+                        val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
 
-                    GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
-                    GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
-                    foundMediaListMethod = true
+                        GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
+                        GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
+                        foundMediaListMethod = true
+                    }
                 }
             }
 
             // Extraction of media pkid from media class.
             FanClubContentPreviewInteractorImplFingerprint.method.apply {
+                if (FanClubContentPreviewInteractorImplFingerprint.stringMatches.size < 2) {
+                    throw PatchException("Failed to find enough string matches in FanClubContentPreviewInteractorImplFingerprint")
+                }
                 val strIndex = FanClubContentPreviewInteractorImplFingerprint.stringMatches[1].index
-
-                val mediaPkIdMethodName = instructions[indexOfFirstInstruction(strIndex, Opcode.INVOKE_VIRTUAL)].methodExtractor().name
+                val invokeVirtualIndex = indexOfFirstInstruction(strIndex, Opcode.INVOKE_VIRTUAL)
+                if (invokeVirtualIndex < 0) {
+                    throw PatchException("Failed to find INVOKE_VIRTUAL after string match in FanClubContentPreviewInteractorImplFingerprint")
+                }
+                val mediaPkIdMethodName = instructions[invokeVirtualIndex].methodExtractor().name
                 GetMediaPkIdExtensionFingerprint.changeFirstString(mediaPkIdMethodName)
             }
 
             // Extraction of user data used in extended media class.
             DirectShareTargetRelatedFingerprint.method.apply {
                 val firstConst = indexOfFirstInstruction(Opcode.CONST_4)
-                val userDataMethodName = instructions[indexOfFirstInstruction(firstConst, Opcode.INVOKE_INTERFACE)].methodExtractor().name
+                val invokeInterfaceIndex = indexOfFirstInstruction(firstConst, Opcode.INVOKE_INTERFACE)
+                if (invokeInterfaceIndex < 0) {
+                    throw PatchException("Failed to find INVOKE_INTERFACE in DirectShareTargetRelatedFingerprint")
+                }
+                val userDataMethodName = instructions[invokeInterfaceIndex].methodExtractor().name
                 GetUserDataExtensionFingerprint.changeFirstString(userDataMethodName)
             }
 
             // Extraction of description
             EditMediaInfoGetCurrentMediaIdFingerprint.method.apply {
-
+                val lastInvokeStaticIndex = instructions.indexOfLast { it.opcode == Opcode.INVOKE_STATIC }
+                if (lastInvokeStaticIndex < 0) {
+                    throw PatchException("Failed to find INVOKE_STATIC in EditMediaInfoGetCurrentMediaIdFingerprint")
+                }
                 val getCommentDataFromMediaMethodName =
                     getInstruction(
-                        instructions.indexOfLast { it.opcode == Opcode.INVOKE_STATIC },
+                        lastInvokeStaticIndex,
                     ).methodExtractor().name
 
+                val lastIgetObjectIndex = instructions.indexOfLast { it.opcode == Opcode.IGET_OBJECT }
+                if (lastIgetObjectIndex < 0) {
+                     throw PatchException("Failed to find IGET_OBJECT in EditMediaInfoGetCurrentMediaIdFingerprint")
+                }
                 val getCommentTextFieldName =
                     getInstruction(
-                        instructions.indexOfLast { it.opcode == Opcode.IGET_OBJECT },
+                        lastIgetObjectIndex,
                     ).fieldExtractor().name
 
                 GetDescriptionTextExtensionFingerprint.changeFirstString(getCommentDataFromMediaMethodName)

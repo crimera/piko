@@ -1,53 +1,40 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.timeline.hideHiddenReplies
 
-import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
-import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
-import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 
 private object HideHiddenRepliesFingerprint : Fingerprint(
-    definingClass = "Lcom/twitter/model/json/timeline/urt/JsonTimelineTweet;",
-    returnType = "Ljava/lang/Object;",
+    filters =
+        listOf(
+            string("has_hidden_replies"),
+        ),
 )
 
-@Suppress("unused")
 val hideHiddenRepliesPatch =
     bytecodePatch(
         name = "Hide hidden replies",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
-
         execute {
-            val method = HideHiddenRepliesFingerprint.method
-            val instructions = method.instructions
+            HideHiddenRepliesFingerprint.method.apply {
+                val igetBool = instructions.lastOrNull { it.opcode == Opcode.IGET_BOOLEAN }
+                    ?: throw PatchException("Failed to find IGET_BOOLEAN in HideHiddenRepliesFingerprint")
 
-            val get_bool = instructions.last { it.opcode == Opcode.IGET_BOOLEAN }.location.index
-            val reg = method.getInstruction<TwoRegisterInstruction>(get_bool).registerA
-
-            val M = "invoke-static {v$reg}, $PREF_DESCRIPTOR;->hideHiddenReplies(Z)Z"
-
-            method.addInstructions(
-                get_bool + 1,
-                """
-                $M
-                move-result v$reg
-                """.trimIndent(),
-            )
-
-            enableSettings("hideHiddenReplies")
+                replaceInstruction(
+                    igetBool.location.index,
+                    "const/4 v0, 0x0",
+                )
+            }
         }
     }

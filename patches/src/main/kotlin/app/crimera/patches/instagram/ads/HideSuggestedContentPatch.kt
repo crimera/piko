@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.ads
@@ -14,6 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -52,13 +53,14 @@ val hideSuggestedContentPatch =
 
             fingerprints.forEach { fingerprint ->
                 fingerprint.apply {
+                    if (stringMatches.isEmpty()) throw PatchException("Failed to find string matches in ${definingClass}")
                     val strIndex = stringMatches[0].index
                     method.apply {
                         val moveResultObjectInstruction =
-                            instructions.last {
+                            instructions.lastOrNull {
                                 it.opcode == Opcode.MOVE_RESULT_OBJECT &&
                                     it.location.index < strIndex
-                            }
+                            } ?: throw PatchException("Failed to find MOVE_RESULT_OBJECT before string in ${definingClass}")
                         val moveResultObjectIndex = moveResultObjectInstruction.location.index
                         val strRegister = moveResultObjectInstruction.registersUsed[0]
 

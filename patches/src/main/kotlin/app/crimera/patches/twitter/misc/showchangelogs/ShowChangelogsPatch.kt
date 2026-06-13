@@ -13,6 +13,7 @@ import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 
 private object MainActivityFingerprint : Fingerprint(
     definingClass = "Lcom/twitter/app/main/MainActivity;",
@@ -29,12 +30,14 @@ val changelogsPatch =
 
         execute {
 
-            val superClassName = MainActivityFingerprint.classDef.superclass!!
+            val superClassName = MainActivityFingerprint.classDef.superclass
+                ?: throw PatchException("MainActivity has no superclass")
 
             val superclassOnCreateMethod =
                 mutableClassDefBy(superClassName)
                     .methods
-                    .first { it.name == "onCreate" }
+                    .firstOrNull { it.name == "onCreate" }
+                    ?: throw PatchException("Failed to find 'onCreate' in superclass ${superClassName} of MainActivity")
 
             superclassOnCreateMethod.addInstruction(
                 0,

@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.settings
@@ -26,6 +26,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
@@ -51,6 +52,7 @@ val settingsPatch =
 
             ProfileUserInfoViewBinderFingerprint.method.apply {
                 val moveResObj = indexOfFirstInstruction(Opcode.MOVE_RESULT_OBJECT)
+                if (moveResObj < 0) throw PatchException("Failed to find MOVE_RESULT_OBJECT in ProfileUserInfoViewBinderFingerprint")
                 addInstructions(
                     moveResObj + 1,
                     """
@@ -67,6 +69,7 @@ val settingsPatch =
                 )
 
                 val firstInvokeSuperIndex = indexOfFirstInstruction(Opcode.INVOKE_SUPER)
+                if (firstInvokeSuperIndex < 0) throw PatchException("Failed to find INVOKE_SUPER in instagramInitHook")
                 addInstruction(
                     firstInvokeSuperIndex + 1,
                     LOAD_FLAGS_DESCRIPTOR.format("load"),
@@ -75,10 +78,10 @@ val settingsPatch =
 
             // The following handles the signature check while sharing a link externally and opening a link.
             UriTrustingMethodFingerprint.classDef.methods
-                .first {
+                .firstOrNull {
                     it.returnType == "Z" && it.parameters.size == 2 &&
-                        it.parameterTypes.last() == "Z"
-                }.apply {
+                        it.parameterTypes.last().type == "Z"
+                }?.apply {
                     addInstructionsWithLabels(
                         0,
                         """
@@ -89,21 +92,26 @@ val settingsPatch =
                         """.trimIndent(),
                         ExternalLabel("piko", getInstruction(0)),
                     )
-                }
+                } ?: throw PatchException("Failed to find signature check method in ${UriTrustingMethodFingerprint.definingClass}")
 
             AppIdentityToStringFingerprint.method.apply {
+                if (AppIdentityToStringFingerprint.stringMatches.size < 2) throw PatchException("Failed to find enough string matches in AppIdentityToStringFingerprint")
                 val strIndex = AppIdentityToStringFingerprint.stringMatches[1].index
 
-                val firstIGetObject = getInstruction(indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT))
+                val firstIGetObjectIndex = indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT)
+                if (firstIGetObjectIndex < 0) throw PatchException("Failed to find IGET_OBJECT after string in AppIdentityToStringFingerprint")
+                val firstIGetObject = getInstruction(firstIGetObjectIndex)
                 SignatureCheckExtensionFingerprint.changeFirstString(firstIGetObject.fieldExtractor().name)
             }
 
             // For welcome message.
             MainFeedFragmentOnCreateFingerprint.apply {
+                if (stringMatches.isEmpty()) throw PatchException("Failed to find string matches in MainFeedFragmentOnCreateFingerprint")
                 val strIndex = stringMatches[0].index
 
                 method.apply {
                     val contextIndex = indexOfFirstInstruction(strIndex, Opcode.MOVE_RESULT_OBJECT)
+                    if (contextIndex < 0) throw PatchException("Failed to find MOVE_RESULT_OBJECT after string in MainFeedFragmentOnCreateFingerprint")
                     val contextInstruction = getInstruction(contextIndex)
                     val contextRegister = contextInstruction.registersUsed[0]
 

@@ -1,57 +1,42 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.timeline.live
 
-import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
-import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.opcode
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 private object HideLiveThreadsFingerprint : Fingerprint(
-    definingClass = "Lcom/twitter/fleets/api/json/JsonFleetsTimelineResponse;",
     filters =
         listOf(
-            opcode(Opcode.IGET_OBJECT),
+            string("is_live"),
         ),
 )
 
-@Suppress("unused")
 val hideLiveThreadsPatch =
     bytecodePatch(
-        name = "Hide Live Threads",
+        name = "Hide live threads",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
-
         execute {
-            val method = HideLiveThreadsFingerprint.method
-            val instructions = method.instructions
+            HideLiveThreadsFingerprint.method.apply {
+                val igetObj = instructions.firstOrNull { it.opcode == Opcode.IGET_OBJECT }
+                    ?: throw PatchException("Failed to find IGET_OBJECT in HideLiveThreadsFingerprint")
 
-            val loc = instructions.first { it.opcode == Opcode.IGET_OBJECT }.location.index
-            val reg = method.getInstruction<OneRegisterInstruction>(loc).registerA
-
-            val HIDE_LIVE_DESCRIPTOR =
-                "invoke-static {v$reg}, $PREF_DESCRIPTOR;->liveThread(Ljava/util/ArrayList;)Ljava/util/ArrayList;"
-
-            method.addInstructions(
-                loc + 1,
-                """
-                $HIDE_LIVE_DESCRIPTOR
-                move-result-object v$reg
-                """.trimIndent(),
-            )
+                replaceInstruction(
+                    igetObj.location.index,
+                    "invoke-static {p0}, Lapp/crimera/piko/patches/twitter/TimelinePatch;->hideLiveThreads(Ljava/lang/Object;)Ljava/lang/Object;",
+                )
+            }
             enableSettings("hideLiveThreads")
         }
     }

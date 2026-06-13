@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.entity.trackDataIntf
@@ -11,6 +11,7 @@ import app.crimera.utils.changeStringAt
 import app.crimera.utils.methodExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -24,12 +25,14 @@ val trackDataIntfEntity =
 
             mutableClassDefBy(IMMUTABLE_PANDO_AUDIO_FILTER_INFO_CLASS_DESCRIPTOR)
                 .methods
-                .last {
+                .lastOrNull {
                     it.returnType ==
                         "Lcom/facebook/pando/TreeUpdaterJNI;"
-                }.apply {
-                    val mappingMethodInvokeInstruction = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_VIRTUAL))
+                }?.apply {
+                    val invokeVirtualIndex = indexOfFirstInstruction(Opcode.INVOKE_VIRTUAL)
+                    if (invokeVirtualIndex < 0) throw PatchException("Failed to find INVOKE_VIRTUAL in ${IMMUTABLE_PANDO_AUDIO_FILTER_INFO_CLASS_DESCRIPTOR}")
+                    val mappingMethodInvokeInstruction = getInstruction(invokeVirtualIndex)
                     GetMappingsExtension.changeFirstString(mappingMethodInvokeInstruction.methodExtractor().name)
-                }
+                } ?: throw PatchException("Failed to find method returning TreeUpdaterJNI in ${IMMUTABLE_PANDO_AUDIO_FILTER_INFO_CLASS_DESCRIPTOR}")
         }
     }

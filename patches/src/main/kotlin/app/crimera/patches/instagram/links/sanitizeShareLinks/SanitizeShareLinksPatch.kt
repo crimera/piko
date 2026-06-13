@@ -1,71 +1,43 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.links.sanitizeShareLinks
 
-import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
-import app.crimera.patches.instagram.utils.enableSettings
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
-@Suppress("unused")
+private object SanitizeShareLinksFingerprint : Fingerprint(
+    filters =
+        listOf(
+            string("UTF-8"),
+            string("ig_shid"),
+        ),
+)
+
 val sanitizeShareLinksPatch =
     bytecodePatch(
         name = "Sanitize share links",
     ) {
-
-        dependsOn(settingsPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-
         execute {
+            SanitizeShareLinksFingerprint.method.apply {
+                val returnObjectInst = instructions.lastOrNull { it.opcode == Opcode.RETURN_OBJECT }
+                    ?: throw PatchException("Failed to find RETURN_OBJECT in SanitizeShareLinksFingerprint")
 
-            val EXTENSION_METHOD =
-                """
-                invoke-static/range { v%s .. v%s }, ${LINKS_DESCRIPTOR}->sanitizeUrl(Ljava/lang/String;)Ljava/lang/String;
-                move-result-object v%s
-                """.trimIndent()
-
-            val jsonParserFingerprints =
-                listOf(
-                    PermalinkResponseJsonParserFingerprint,
-                    ProfileUrlResponseJsonParserFingerprint,
+                replaceInstruction(
+                    returnObjectInst.location.index,
+                    "invoke-static {v0}, Lapp/crimera/piko/patches/instagram/LinkPatch;->sanitizeShareLinks(Ljava/lang/String;)Ljava/lang/String;",
+                    "move-result-object v0",
+                    "return-object v0",
                 )
-
-            jsonParserFingerprints.forEach { fingerprint ->
-                val strIndex = fingerprint.stringMatches[0].index
-                fingerprint.method.apply {
-                    val strIPutObjectIndex = indexOfFirstInstruction(strIndex, Opcode.IPUT_OBJECT)
-                    val urlRegister = instructions[strIPutObjectIndex].registersUsed[0]
-
-                    addInstructions(strIPutObjectIndex, EXTENSION_METHOD.format(urlRegister, urlRegister, urlRegister))
-                }
             }
-
-            val responseImplFingerprint =
-                listOf(
-                    StoryUrlResponseImplFingerprint,
-                    LiveUrlResponseImplFingerprint,
-                )
-
-            responseImplFingerprint.forEach { fingerprint ->
-                fingerprint.method.apply {
-                    val returnObjectInst = instructions.last { it.opcode == Opcode.RETURN_OBJECT }
-                    val index = returnObjectInst.location.index
-                    val urlRegister = returnObjectInst.registersUsed[0]
-
-                    addInstructions(index, EXTENSION_METHOD.format(urlRegister, urlRegister, urlRegister))
-                }
-            }
-
-            enableSettings("sanitizeShareLinks")
         }
     }

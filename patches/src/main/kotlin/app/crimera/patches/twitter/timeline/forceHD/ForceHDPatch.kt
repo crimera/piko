@@ -1,58 +1,60 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.timeline.forceHD
 
-import app.crimera.patches.twitter.entity.entityGenerator
-import app.crimera.patches.twitter.misc.settings.settingsPatch
-import app.crimera.patches.twitter.utils.Constants
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction35c
 
-private object PlayerSupportFingerprint : Fingerprint(
-    definingClass = "/av/player/support/",
-    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
-    custom = { methodDef, _ ->
-        methodDef.parameters.size == 2
-    },
+private object ForceHDFingerprint : Fingerprint(
+    filters =
+        listOf(
+            string("List"),
+            string("VideoVariant"),
+        ),
 )
 
-@Suppress("unused")
+private object ForceHDFingerprint2 : Fingerprint(
+    filters =
+        listOf(
+            string("variant"),
+        ),
+)
+
 val forceHDPatch =
     bytecodePatch(
-        name = "Enable force HD videos",
-        description = "Videos will be played in highest quality always",
+        name = "Force HD video",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, entityGenerator)
-
         execute {
-
-            PlayerSupportFingerprint.method.apply {
-
-                val listReg = (instructions.first { it.opcode == Opcode.INVOKE_INTERFACE } as BuilderInstruction35c).registerC
-
-                val igetObjIndex = instructions.first { it.opcode == Opcode.IGET_OBJECT }.location.index
-
-                addInstructions(
-                    igetObjIndex + 1,
-                    """
-                    invoke-static {v$listReg},${Constants.PATCHES_DESCRIPTOR}/TimelineEntry;->timelineVideos(Ljava/util/List;)Ljava/util/List;
-                    move-result-object v$listReg
-                    """.trimIndent(),
+            ForceHDFingerprint.method.apply {
+                val invokeInterface = instructions.firstOrNull { it.opcode == Opcode.INVOKE_INTERFACE }
+                    ?: throw PatchException("Failed to find INVOKE_INTERFACE in ForceHDFingerprint")
+                val listReg = (invokeInterface as BuilderInstruction35c).registerC
+                replaceInstruction(
+                    invokeInterface.location.index + 1,
+                    "invoke-static {v$listReg}, Lapp/crimera/piko/patches/twitter/TimelinePatch;->forceHD(Ljava/util/List;)Ljava/util/List;",
+                    "move-result-object v$listReg",
                 )
-
-                enableSettings("enableForceHD")
             }
+            ForceHDFingerprint2.method.apply {
+                val igetObj = instructions.firstOrNull { it.opcode == Opcode.IGET_OBJECT }
+                    ?: throw PatchException("Failed to find IGET_OBJECT in ForceHDFingerprint2")
+                replaceInstruction(
+                    igetObj.location.index,
+                    "invoke-static {p0}, Lapp/crimera/piko/patches/twitter/TimelinePatch;->forceHD(Ljava/lang/Object;)Ljava/lang/Object;",
+                )
+            }
+            enableSettings("forceHD")
         }
     }

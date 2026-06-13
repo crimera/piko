@@ -1,52 +1,42 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.timeline.sensitivemediasettings
 
-import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
-import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
-import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
-// Credits to @Cradlesofashes
-
-private object sensitiveMediaSettingsPatchFingerprint : Fingerprint(
-    definingClass = "Lcom/twitter/model/json/core/JsonSensitiveMediaWarning\$\$JsonObjectMapper;",
-    name = "parse",
-    returnType = "Ljava/lang/Object",
+private object ShowSensitiveMediaFingerprint : Fingerprint(
+    filters =
+        listOf(
+            string("possibly_sensitive"),
+        ),
 )
 
-@Suppress("unused")
-val sensitiveMediaPatch =
+val showSensitiveMediaPatch =
     bytecodePatch(
         name = "Show sensitive media",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
-
         execute {
-            val TIMELINE_ENTRY_DESCRIPTOR = "$PATCHES_DESCRIPTOR/TimelineEntry"
+            ShowSensitiveMediaFingerprint.method.apply {
+                val returnObj = instructions.lastOrNull { it.opcode == Opcode.RETURN_OBJECT }
+                    ?: throw PatchException("Failed to find RETURN_OBJECT in ShowSensitiveMediaFingerprint")
 
-            val methods = sensitiveMediaSettingsPatchFingerprint.method
-            val instructions = methods.instructions
-
-            val returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
-
-            methods.addInstructions(
-                returnObj,
-                """
-                invoke-static {p1}, $TIMELINE_ENTRY_DESCRIPTOR;->sensitiveMedia(Lcom/twitter/model/json/core/JsonSensitiveMediaWarning;)Lcom/twitter/model/json/core/JsonSensitiveMediaWarning;
-                move-result-object p1
-                """.trimIndent(),
-            )
-            enableSettings("showSensitiveMedia")
+                replaceInstruction(
+                    returnObj.location.index,
+                    "invoke-static {v0}, Lapp/crimera/piko/patches/twitter/TimelinePatch;->showSensitiveMedia(Ljava/lang/Object;)Ljava/lang/Object;",
+                    "move-result-object v0",
+                    "return-object v0",
+                )
+            }
         }
     }

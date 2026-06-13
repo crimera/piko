@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.ads.timelineEntryHook
@@ -11,6 +11,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import com.android.tools.smali.dexlib2.Opcode
 
 private object TimelineEntryHookFingerprint : Fingerprint(
@@ -33,7 +34,8 @@ val timelineEntryHookPatch =
             var methods = TimelineEntryHookFingerprint.method
             var instructions = methods.instructions
 
-            var returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
+            var returnObj = instructions.lastOrNull { it.opcode == Opcode.RETURN_OBJECT }?.location?.index
+                ?: throw PatchException("Failed to find RETURN_OBJECT in ${TimelineEntryHookFingerprint.definingClass}")
 
             methods.addInstructions(
                 returnObj,
@@ -46,7 +48,8 @@ val timelineEntryHookPatch =
             methods = TimelineModuleItemHookFingerprint.method
             instructions = methods.instructions
 
-            returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
+            returnObj = instructions.lastOrNull { it.opcode == Opcode.RETURN_OBJECT }?.location?.index
+                ?: throw PatchException("Failed to find RETURN_OBJECT in ${TimelineModuleItemHookFingerprint.definingClass}")
 
             methods.addInstructions(
                 returnObj,
@@ -55,6 +58,5 @@ val timelineEntryHookPatch =
                 move-result-object p1
                 """.trimIndent(),
             )
-            // ends.
         }
     }

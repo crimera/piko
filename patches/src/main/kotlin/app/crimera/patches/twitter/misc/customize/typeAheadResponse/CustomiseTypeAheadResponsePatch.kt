@@ -14,6 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import com.android.tools.smali.dexlib2.Opcode
 
 private object CustomiseTypeAheadResponseFingerprint : Fingerprint(
@@ -35,7 +36,8 @@ val customiseTypeAheadResponsePatch =
 
             val instructions = method.instructions
 
-            val returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
+            val returnObj = instructions.lastOrNull { it.opcode == Opcode.RETURN_OBJECT }?.location?.index
+                ?: throw PatchException("Failed to find RETURN_OBJECT in ${CustomiseTypeAheadResponseFingerprint.definingClass}")
 
             method.addInstructions(
                 returnObj,

@@ -18,9 +18,10 @@ import app.morphe.extension.crimera.PikoUtils;
 
 public class TimelineEntry {
     public static final boolean hideAds;
-    private static final boolean hideWTF,hideCTS,hideCTJ,hideDetailedPosts,hideRBMK,hidePinnedPosts,hidePremiumPrompt,showSensitiveMedia,hideTopPeopleSearch,hideTodaysNews;
+    private static final boolean hideGrok,hideWTF,hideCTS,hideCTJ,hideDetailedPosts,hideRBMK,hidePinnedPosts,hidePremiumPrompt,showSensitiveMedia,hideTopPeopleSearch,hideTodaysNews;
     static {
         hideAds = (Pref.hideAds() && SettingsStatus.hideAds);
+        hideGrok = (Pref.hideGrok() && SettingsStatus.hideGrok);
         hideWTF = (Pref.hideWTF() && SettingsStatus.hideWTF);
         hideCTS = (Pref.hideCTS() && SettingsStatus.hideCTS);
         hideCTJ = (Pref.hideCTJ() && SettingsStatus.hideCTJ);
@@ -37,43 +38,46 @@ public class TimelineEntry {
         String[] split = entryId.split("-");
         String entryId2 = split[0];
         if (!entryId2.equals("cursor") && !entryId2.equals("Guide") && !entryId2.startsWith("semantic_core")) {
-            if (entryId.contains("promoted") || (entryId2.equals("conversationthread") && split.length == 3) && hideAds) {
+            if (hideGrok && (entryId.contains("grok") || entryId.contains("Grok"))) {
                 return true;
             }
-            if ((entryId2.equals("superhero") || entryId2.equals("eventsummary")) && hideAds) {
+            if (hideAds && (entryId.contains("promoted") || (entryId2.equals("conversationthread") && split.length == 3))) {
                 return true;
             }
-            if (entryId.contains("rtb") && hideAds) {
+            if (hideAds && (entryId2.equals("superhero") || entryId2.equals("eventsummary"))) {
                 return true;
             }
-            if (entryId2.equals("tweetdetailrelatedtweets") && hideDetailedPosts) {
+            if (hideAds && entryId.contains("rtb")) {
                 return true;
             }
-            if (entryId2.equals("bookmarked") && hideRBMK) {
+            if (hideDetailedPosts && entryId2.equals("tweetdetailrelatedtweets")) {
                 return true;
             }
-            if (entryId.startsWith("community-to-join") && hideCTJ) {
+            if (hideRBMK && entryId2.equals("bookmarked")) {
                 return true;
             }
-            if (entryId.startsWith("who-to-follow") && hideWTF) {
+            if (hideCTJ && entryId.startsWith("community-to-join")) {
                 return true;
             }
-            if (entryId.startsWith("who-to-subscribe") && hideCTS) {
+            if (hideWTF && entryId.startsWith("who-to-follow")) {
                 return true;
             }
-            if (entryId.startsWith("pinned-tweets") && hidePinnedPosts) {
+            if (hideCTS && entryId.startsWith("who-to-subscribe")) {
                 return true;
             }
-            if (entryId.startsWith("messageprompt-") && hidePremiumPrompt) {
+            if (hidePinnedPosts && entryId.startsWith("pinned-tweets")) {
                 return true;
             }
-            if ((entryId.startsWith("main-event-") || entryId2.equals("pivot")) && hideAds) {
+            if (hidePremiumPrompt && entryId.startsWith("messageprompt-")) {
                 return true;
             }
-            if (entryId2.equals("toptabsrpusermodule") && hideTopPeopleSearch) {
+            if (hideAds && (entryId.startsWith("main-event-") || entryId2.equals("pivot"))) {
                 return true;
             }
-            if (entryId.startsWith("stories") && hideTodaysNews) {
+            if (hideTopPeopleSearch && entryId2.equals("toptabsrpusermodule")) {
+                return true;
+            }
+            if (hideTodaysNews && entryId.startsWith("stories")) {
                 return true;
             }
         }

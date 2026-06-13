@@ -16,6 +16,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
@@ -41,7 +42,9 @@ val hideRecommendedUsers =
             val method = HideRecommendedUsersFingerprint.method
             val instructions = method.instructions
 
-            val check = instructions.last { it.opcode == Opcode.IGET_OBJECT }.location.index
+            val check = instructions.lastOrNull { it.opcode == Opcode.IGET_OBJECT }?.location?.index
+                ?: throw PatchException("Failed to find IGET_OBJECT in ${HideRecommendedUsersFingerprint.definingClass}")
+
             val reg = (method.getInstruction(check) as OneRegisterInstruction).registerA
 
             val HIDE_RECOMMENDED_USERS_DESCRIPTOR =

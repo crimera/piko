@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.removeEmptyBottomSpace
@@ -11,11 +11,11 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
@@ -39,17 +39,19 @@ val removeEmptyBottomSpacePatch =
 
             // Thanks to MyInsta.
             NavigationBarAdjusterFingerprint.apply {
+                if (stringMatches.isEmpty()) throw PatchException("Failed to find string matches in NavigationBarAdjusterFingerprint")
                 val strIndex = stringMatches[0].index
 
                 method.apply {
                     val lastIfGtzInstructionBeforeStr =
-                        instructions.last {
+                        instructions.lastOrNull {
                             it.location.index < strIndex &&
                                 it.opcode == Opcode.IF_GTZ
-                        }
+                        } ?: throw PatchException("Failed to find IF_GTZ before string in NavigationBarAdjusterFingerprint")
                     val index = lastIfGtzInstructionBeforeStr.location.index
 
                     val firstSPutIndexAfterStr = indexOfFirstInstruction(strIndex, Opcode.SPUT)
+                    if (firstSPutIndexAfterStr < 0) throw PatchException("Failed to find SPUT after string in NavigationBarAdjusterFingerprint")
 
                     val freeRegister = getInstruction(index + 1).registersUsed[0]
 

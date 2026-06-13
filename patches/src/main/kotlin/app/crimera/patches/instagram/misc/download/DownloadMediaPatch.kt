@@ -1,22 +1,24 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.download
 
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
-import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundDataIntfEntity
+import app.crimera.patches.instagram.entity.originalsounddata.originalSoundDataIntfEntity
 import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
+import app.crimera.patches.instagram.misc.download.EditMediaInfoGetCurrentMediaIdFingerprint
+import app.crimera.patches.instagram.misc.extension.hooks.handleStoryButtonPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
-import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.FEED_BUTTON_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.REEL_BUTTON_DESCRIPTOR
 import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
@@ -28,10 +30,10 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.indexOfFirstInstructionOrThrow
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -60,13 +62,21 @@ val downloadMediaPatch =
             GetEnumButtonClassExtensionFingerprint.changeFirstString(enumBtnClass)
 
             MediaOptionsOverflowMenuCreatorConstructorFingerprint.classDef.apply {
-                val addingFeedButtonMethodName = methods.first { it.parameters.size > 1 }.name
-                AddFeedButtonExtensionFingerprint.changeFirstString(addingFeedButtonMethodName)
+                val addingFeedButtonMethod = methods.firstOrNull { it.parameters.size > 1 }
+                    ?: throw PatchException("Failed to find addingFeedButtonMethod in ${type}")
+                AddFeedButtonExtensionFingerprint.changeFirstString(addingFeedButtonMethod.name)
             }
 
             FeedReplaceAudioDialogHelperFingerprint.method.apply {
-                val strIndex = FeedReplaceAudioDialogHelperFingerprint.stringMatches[0].index
+                val strMatches = FeedReplaceAudioDialogHelperFingerprint.stringMatches
+                if (strMatches.isEmpty()) {
+                    throw PatchException("Failed to find string matches in FeedReplaceAudioDialogHelperFingerprint")
+                }
+                val strIndex = strMatches[0].index
                 val addingReelButtonMethodCallIndex = indexOfFirstInstruction(strIndex, Opcode.INVOKE_DIRECT_RANGE) + 1
+                if (addingReelButtonMethodCallIndex <= 0) {
+                     throw PatchException("Failed to find INVOKE_DIRECT_RANGE after string in FeedReplaceAudioDialogHelperFingerprint")
+                }
 
                 val addingReelButtonMethodName = getInstruction(addingReelButtonMethodCallIndex).methodExtractor().name
                 AddReelButtonExtensionFingerprint.changeFirstString(addingReelButtonMethodName)
@@ -74,8 +84,9 @@ val downloadMediaPatch =
 
             val currentViewingMediaFieldData =
                 EditMediaInfoGetCurrentMediaIdFingerprint.method.instructions
-                    .first { it.opcode == Opcode.IGET }
-                    .fieldExtractor()
+                    .firstOrNull { it.opcode == Opcode.IGET }
+                    ?.fieldExtractor()
+                    ?: throw PatchException("Failed to find IGET in EditMediaInfoGetCurrentMediaIdFingerprint")
 
             AddFeedButtonFingerprint.method.apply {
                 var arrayListRegister = -1
@@ -85,7 +96,9 @@ val downloadMediaPatch =
                 if (getInstruction(0).opcode == Opcode.INVOKE_STATIC) {
                     arrayListRegister = getInstruction(1).registersUsed[0]
                     checkCastIndex = indexOfFirstInstruction(Opcode.CHECK_CAST)
-                    checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
+                    if (checkCastIndex >= 0) {
+                        checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
+                    }
                 } else {
                     val arrayListInstructions =
                         instructions.filter {
@@ -120,18 +133,19 @@ val downloadMediaPatch =
 
             FeedButtonOnClickFingerprint.method.apply {
                 val classDef = FeedButtonOnClickFingerprint.classDef
-                val className = classDef.type
                 val classFields = classDef.fields
 
-                val appActivityField = classFields.first { it.type == appActivity }
+                val appActivityField = classFields.firstOrNull { it.type == appActivity }
+                    ?: throw PatchException("Failed to find appActivityField in ${classDef.type}")
 
                 val getMediaObjectMethod =
-                    classDef.methods.first {
+                    classDef.methods.firstOrNull {
                         AccessFlags.FINAL.isSet(it.accessFlags) && it.implementation?.registerCount == 1
-                    }
+                    } ?: throw PatchException("Failed to find getMediaObjectMethod in ${classDef.type}")
 
                 val mediaExtraDataClass = currentViewingMediaFieldData.definingClass
-                val mediaExtraDataField = classDef.fields.first { it.type == extensionToClassName(mediaExtraDataClass) }
+                val mediaExtraDataField = classDef.fields.firstOrNull { it.type == extensionToClassName(mediaExtraDataClass) }
+                     ?: throw PatchException("Failed to find mediaExtraDataField in ${classDef.type}")
                 val currentViewingMediaIndexField = currentViewingMediaFieldData.name
 
                 addInstructionsWithLabels(
@@ -159,18 +173,26 @@ val downloadMediaPatch =
 
             AddReelButtonFingerprint.method.apply {
                 val classDef = AddReelButtonFingerprint.classDef
-                val className = classDef.type
                 val classFields = classDef.fields
 
-                val appActivityField = classFields.first { it.type == appActivity }
+                val appActivityField = classFields.firstOrNull { it.type == appActivity }
+                    ?: throw PatchException("Failed to find appActivityField in ${classDef.type}")
 
-                val selfClassRegister = instructions[indexOfFirstInstruction(Opcode.MOVE_OBJECT_FROM16)].registersUsed[0]
-                val buttonAdderInstanceRegister = instructions[indexOfFirstInstruction(Opcode.NEW_INSTANCE)].registersUsed[0]
+                val moveObjectFrom16Index = indexOfFirstInstruction(Opcode.MOVE_OBJECT_FROM16)
+                if (moveObjectFrom16Index < 0) throw PatchException("Failed to find MOVE_OBJECT_FROM16 in AddReelButtonFingerprint")
+                val selfClassRegister = instructions[moveObjectFrom16Index].registersUsed[0]
+
+                val newInstanceIndex = indexOfFirstInstruction(Opcode.NEW_INSTANCE)
+                if (newInstanceIndex < 0) throw PatchException("Failed to find NEW_INSTANCE in AddReelButtonFingerprint")
+                val buttonAdderInstanceRegister = instructions[newInstanceIndex].registersUsed[0]
 
                 val firstIfEqzIndex = indexOfFirstInstruction(Opcode.IF_EQZ)
+                if (firstIfEqzIndex <= 0) throw PatchException("Failed to find IF_EQZ in AddReelButtonFingerprint")
                 val mediaObjectRegister = instructions[firstIfEqzIndex - 1].registersUsed[0]
 
-                val freeRegisterOne = instructions[indexOfFirstInstruction(Opcode.MOVE_RESULT_OBJECT)].registersUsed[0]
+                val moveResultObjectIndex = indexOfFirstInstruction(Opcode.MOVE_RESULT_OBJECT)
+                if (moveResultObjectIndex < 0) throw PatchException("Failed to find MOVE_RESULT_OBJECT in AddReelButtonFingerprint")
+                val freeRegisterOne = instructions[moveResultObjectIndex].registersUsed[0]
 
                 addInstructions(
                     firstIfEqzIndex,
@@ -186,12 +208,16 @@ val downloadMediaPatch =
                 val allIfNez = instructions.filter { it.opcode == Opcode.IF_NEZ }
                 allIfNez.firstOrNull { instruction ->
                     val index = instruction.location.index
-                    val opCodeOfPrevInstruction = getInstruction(index - 1).opcode
-                    val opCodeOfNextInstruction = getInstruction(index + 1).opcode
+                    if (index > 0 && index + 1 < instructions.size) {
+                        val opCodeOfPrevInstruction = getInstruction(index - 1).opcode
+                        val opCodeOfNextInstruction = getInstruction(index + 1).opcode
 
-                    if (opCodeOfPrevInstruction == Opcode.IF_EQZ && opCodeOfNextInstruction == Opcode.SGET_OBJECT) {
-                        removeInstruction(index - 1)
-                        true
+                        if (opCodeOfPrevInstruction == Opcode.IF_EQZ && opCodeOfNextInstruction == Opcode.SGET_OBJECT) {
+                            removeInstruction(index - 1)
+                            true
+                        } else {
+                            false
+                        }
                     } else {
                         false
                     }
@@ -200,24 +226,27 @@ val downloadMediaPatch =
             // DM media downloader.
             GetDirectThreadMediaSaverModuleNameFingerprint.apply {
 
-                val appActivityField = classDef.fields.first { it.type == "Landroid/app/Activity;" }
+                val appActivityField = classDef.fields.firstOrNull { it.type == "Landroid/app/Activity;" }
+                    ?: throw PatchException("Failed to find Activity field in ${classDef.type}")
 
-                classDef.methods
-                    .first { it.returnType == "V" && it.name != "<init>" }
-                    .apply {
-                        addInstructionsWithLabels(
-                            0,
-                            """
-                            iget-object v0, p1, $appActivityField
-                            move-object v1, p2
-                            invoke-static {v0, v1}, $DOWNLOAD_DESCRIPTOR/MessageUtils;->messageDownloadCheck(Landroid/content/Context;Ljava/lang/Object;)Z
-                            move-result v1
-                            if-nez v1, :piko
-                            return-void
-                            """.trimIndent(),
-                            ExternalLabel("piko", getInstruction(0)),
-                        )
-                    }
+                val method = classDef.methods
+                    .firstOrNull { it.returnType == "V" && it.name != "<init>" }
+                    ?: throw PatchException("Failed to find method in ${classDef.type}")
+
+                method.apply {
+                    addInstructionsWithLabels(
+                        0,
+                        """
+                        iget-object v0, p1, $appActivityField
+                        move-object v1, p2
+                        invoke-static {v0, v1}, $DOWNLOAD_DESCRIPTOR/MessageUtils;->messageDownloadCheck(Landroid/content/Context;Ljava/lang/Object;)Z
+                        move-result v1
+                        if-nez v1, :piko
+                        return-void
+                        """.trimIndent(),
+                        ExternalLabel("piko", getInstruction(0)),
+                    )
+                }
             }
 
             enableSettings("downloadMedia")

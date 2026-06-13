@@ -46,5 +46,8 @@ val hideRecommendationItemsPatch =
 
             // Who to follow.
             enableSettings("hideWhoToFollow")
+
+            // Hides Grok from search suggestions and timeline.
+            enableSettings("hideGrok")
         }
     }

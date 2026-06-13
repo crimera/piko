@@ -17,6 +17,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -49,10 +50,15 @@ val customiseNavBarPatch =
 
         execute {
 
-            val method = CustomiseNavBarFingerprint.classDef.methods.last { it.returnType == "Ljava/util/List;" }
+            val method = CustomiseNavBarFingerprint.classDef.methods.lastOrNull { it.returnType == "Ljava/util/List;" }
+                ?: throw PatchException("Failed to find method with return type Ljava/util/List; in ${CustomiseNavBarFingerprint.definingClass}")
+
             val instructions = method.instructions
 
-            val returnObj_loc = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
+            val returnObj = instructions.lastOrNull { it.opcode == Opcode.RETURN_OBJECT }
+                ?: throw PatchException("Failed to find RETURN_OBJECT in ${CustomiseNavBarFingerprint.definingClass}")
+
+            val returnObj_loc = returnObj.location.index
             val r0 = method.getInstruction<OneRegisterInstruction>(returnObj_loc).registerA
 
             val METHOD =
@@ -68,8 +74,10 @@ val customiseNavBarPatch =
             val loc2 =
                 methods2
                     .instructions
-                    .first { it.opcode == Opcode.IF_NEZ }
-                    .location.index
+                    .firstOrNull { it.opcode == Opcode.IF_NEZ }
+                    ?.location?.index
+                    ?: throw PatchException("Failed to find IF_NEZ in ${NavBarFixFingerprint.definingClass}")
+
             methods2.removeInstruction(loc2)
             methods2.removeInstruction(loc2)
             methods2.removeInstruction(loc2)

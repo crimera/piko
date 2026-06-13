@@ -11,13 +11,27 @@ import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.util.AttributeSet;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import app.morphe.extension.shared.ResourceUtils;
-import app.morphe.extension.shared.Utils;
 import app.morphe.extension.twitter.settings.Settings;
 
 
 public class MultiSelectListPref extends MultiSelectListPreference {
     private static Helper helper;
+    private static final Map<String, String> SETTINGS_RESOURCE_MAP = new HashMap<>();
+
+    static {
+        SETTINGS_RESOURCE_MAP.put(Settings.CUSTOM_PROFILE_TABS.key, "piko_array_profiletabs");
+        SETTINGS_RESOURCE_MAP.put(Settings.CUSTOM_SIDEBAR_TABS.key, "piko_array_sidebar");
+        SETTINGS_RESOURCE_MAP.put(Settings.CUSTOM_NAVBAR_TABS.key, "piko_array_navbar");
+        SETTINGS_RESOURCE_MAP.put(Settings.CUSTOM_INLINE_TABS.key, "piko_array_inlinetabs");
+        SETTINGS_RESOURCE_MAP.put(Settings.CUSTOM_EXPLORE_TABS.key, "piko_array_exploretabs");
+        SETTINGS_RESOURCE_MAP.put(Settings.CUSTOM_SEARCH_TYPE_AHEAD.key, "piko_array_search_type_ahead");
+        SETTINGS_RESOURCE_MAP.put(Settings.CUSTOM_SEARCH_TABS.key, "piko_array_searchtabs");
+        SETTINGS_RESOURCE_MAP.put(Settings.CUSTOM_NOTIFICATION_TABS.key, "piko_array_notificationtabs");
+    }
 
     public MultiSelectListPref(Context context) {
         super(context);
@@ -46,35 +60,15 @@ public class MultiSelectListPref extends MultiSelectListPreference {
             }
         });
     }
+
     public void setInitialValue(String key) {
-        CharSequence[] entries = new CharSequence[]{};
-        CharSequence[] entriesValues = new CharSequence[]{};
-        if (key == Settings.CUSTOM_PROFILE_TABS.key) {
-            entries = ResourceUtils.getStringArray("piko_array_profiletabs");
-            entriesValues = ResourceUtils.getStringArray("piko_array_profiletabs_val");
-        }else if (key == Settings.CUSTOM_SIDEBAR_TABS.key) {
-            entries = ResourceUtils.getStringArray("piko_array_sidebar");
-            entriesValues = ResourceUtils.getStringArray("piko_array_sidebar_val");
-        }else if (key == Settings.CUSTOM_NAVBAR_TABS.key) {
-            entries = ResourceUtils.getStringArray("piko_array_navbar");
-            entriesValues = ResourceUtils.getStringArray("piko_array_navbar_val");
-        }else if (key == Settings.CUSTOM_INLINE_TABS.key) {
-            entries = ResourceUtils.getStringArray("piko_array_inlinetabs");
-            entriesValues = ResourceUtils.getStringArray("piko_array_inlinetabs_val");
-        }else if (key == Settings.CUSTOM_EXPLORE_TABS.key) {
-            entries = ResourceUtils.getStringArray("piko_array_exploretabs");
-            entriesValues = ResourceUtils.getStringArray("piko_array_exploretabs_val");
-        }else if (key == Settings.CUSTOM_SEARCH_TYPE_AHEAD.key) {
-            entries = ResourceUtils.getStringArray("piko_array_search_type_ahead");
-            entriesValues = ResourceUtils.getStringArray("piko_array_search_type_ahead_val");
-        }else if (key == Settings.CUSTOM_SEARCH_TABS.key) {
-            entries = ResourceUtils.getStringArray("piko_array_searchtabs");
-            entriesValues = ResourceUtils.getStringArray("piko_array_searchtabs_val");
-        }else if (key == Settings.CUSTOM_NOTIFICATION_TABS.key) {
-            entries = ResourceUtils.getStringArray("piko_array_notificationtabs");
-            entriesValues = ResourceUtils.getStringArray("piko_array_notificationtabs_val");
+        String resourceBaseName = SETTINGS_RESOURCE_MAP.get(key);
+        if (resourceBaseName != null) {
+            setEntries(ResourceUtils.getStringArray(resourceBaseName));
+            setEntryValues(ResourceUtils.getStringArray(resourceBaseName + "_val"));
+        } else {
+            setEntries(new CharSequence[]{});
+            setEntryValues(new CharSequence[]{});
         }
-        setEntries(entries);
-        setEntryValues(entriesValues);
     }
 }

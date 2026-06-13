@@ -1,52 +1,51 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.twitter.timeline.hideSocialProof
 
-import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
-import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
+import app.morphe.patcher.ExternalLabel
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.Opcode
 
-private object HideSocialProofPatchFingerprint : Fingerprint(
-    definingClass = "SocialProofView;",
-    name = "setSocialProofData",
+private object HideSocialProofFingerprint : Fingerprint(
+    filters =
+        listOf(
+            string("SocialContext"),
+        ),
 )
 
-@Suppress("unused")
 val hideSocialProofPatch =
     bytecodePatch(
-        name = "Hide followed by context",
-        description = "Hides followed by context under profile",
+        name = "Hide social proof",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
-
         execute {
-            val HOOK_DESCRIPTOR =
-                "invoke-static {}, $PREF_DESCRIPTOR;->hideSocialProof()Z"
-            val method = HideSocialProofPatchFingerprint.method
-            val instructions = method.instructions
+            HideSocialProofFingerprint.method.apply {
+                val const4 = instructions.firstOrNull { it.opcode == Opcode.CONST_4 }
+                    ?: throw PatchException("Failed to find CONST_4 in HideSocialProofFingerprint")
 
-            method.addInstructionsWithLabels(
-                0,
-                """
-                $HOOK_DESCRIPTOR
-                move-result v0
-                if-eqz v0, :piko
-                return-void
-                """.trimIndent(),
-                ExternalLabel("piko", instructions.first { it.opcode == Opcode.CONST_4 }),
-            )
+                labels =
+                    listOf(
+                        ExternalLabel("piko", const4),
+                    )
+                replaceInstruction(
+                    0,
+                    "invoke-static {}, $PATCHES_DESCRIPTOR/TimelinePatch;->hideSocialProof()Z",
+                    "move-result v0",
+                    "if-nez v0, :piko",
+                    "return-void",
+                )
+            }
             enableSettings("hideSocialProof")
         }
     }

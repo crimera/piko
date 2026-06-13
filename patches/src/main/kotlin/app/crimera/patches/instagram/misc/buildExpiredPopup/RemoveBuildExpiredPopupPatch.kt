@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.buildExpiredPopup
@@ -14,6 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -33,8 +34,12 @@ val removeBuildExpiredPopupPatch =
 
         execute {
             // Get the constructor.
-            SnoozeExpLockoutManagerFlagFingerprint.classDef.methods.first().apply {
-                val lastIPut = instructions.last { it.opcode == Opcode.IPUT }
+            val method = SnoozeExpLockoutManagerFlagFingerprint.classDef.methods.firstOrNull()
+                ?: throw PatchException("Failed to find any method in ${SnoozeExpLockoutManagerFlagFingerprint.definingClass}")
+
+            method.apply {
+                val lastIPut = instructions.lastOrNull { it.opcode == Opcode.IPUT }
+                    ?: throw PatchException("Failed to find IPUT in ${SnoozeExpLockoutManagerFlagFingerprint.definingClass}")
                 val appAgeRegister = lastIPut.registersUsed[0]
 
                 addInstructions(

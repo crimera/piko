@@ -15,6 +15,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import com.android.tools.smali.dexlib2.Opcode
 
 private object HideBannerFingerprint : Fingerprint(
@@ -39,7 +40,8 @@ val hideBannerPatch =
             val method = HideBannerFingerprint.method
             val instuctions = method.instructions
 
-            val loc = instuctions.first { it.opcode == Opcode.IF_NEZ }.location.index
+            val loc = instuctions.firstOrNull { it.opcode == Opcode.IF_NEZ }?.location?.index
+                ?: throw PatchException("Failed to find IF_NEZ in ${HideBannerFingerprint.definingClass}")
 
             val HIDE_BANNER_DESCRIPTOR =
                 "invoke-static {}, $PREF_DESCRIPTOR;->hideBanner()Z"

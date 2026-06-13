@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.makeEphemeralPermanent
@@ -17,6 +17,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
@@ -42,30 +43,32 @@ val makeEphemeralPermanentPatch =
         execute {
 
             EphemeralMediaJsonParserFingerprint.apply {
+                if (stringMatches.size < 2) throw PatchException("Failed to find enough string matches in EphemeralMediaJsonParserFingerprint")
                 val expireAtStringIndex = stringMatches[0].index
                 val viewModeStringIndex = stringMatches[1].index
                 method.apply {
-                    val viewModeIPutObjectInstruction =
-                        getInstruction(
-                            indexOfFirstInstruction(viewModeStringIndex, Opcode.IPUT_OBJECT),
-                        )
+                    val viewModeIPutIndex = indexOfFirstInstruction(viewModeStringIndex, Opcode.IPUT_OBJECT)
+                    if (viewModeIPutIndex < 0) throw PatchException("Failed to find viewMode IPUT_OBJECT in EphemeralMediaJsonParserFingerprint")
+                    val viewModeIPutObjectInstruction = getInstruction(viewModeIPutIndex)
 
                     val viewModeInstructionExtraction = viewModeIPutObjectInstruction.fieldExtractor()
                     val ephemeralMediaClassName = extensionToClassName(viewModeInstructionExtraction.definingClass)
                     val viewModeFieldName = viewModeInstructionExtraction.name
 
-                    val expireAtInstructionExtraction =
-                        instructions
-                            .last {
+                    val expireAtIPut = instructions
+                            .lastOrNull {
                                 it.location.index < viewModeStringIndex &&
                                     it.opcode == Opcode.IPUT_OBJECT
-                            }.fieldExtractor()
-                    val expireAtFieldName = expireAtInstructionExtraction.name
+                            } ?: throw PatchException("Failed to find expireAt IPUT_OBJECT in EphemeralMediaJsonParserFingerprint")
+                    val expireAtFieldName = expireAtIPut.fieldExtractor().name
 
-                    val returnObjectInstruction = instructions.last { it.opcode == Opcode.RETURN_OBJECT }
+                    val returnObjectInstruction = instructions.lastOrNull { it.opcode == Opcode.RETURN_OBJECT }
+                         ?: throw PatchException("Failed to find RETURN_OBJECT in EphemeralMediaJsonParserFingerprint")
                     val ephemeralMediaClassRegister = returnObjectInstruction.registersUsed[0]
 
-                    val midIfEqInstruction = instructions.filter { it.opcode == Opcode.IF_EQ }[1]
+                    val midIfEqInstructions = instructions.filter { it.opcode == Opcode.IF_EQ }
+                    if (midIfEqInstructions.size < 2) throw PatchException("Failed to find enough IF_EQ in EphemeralMediaJsonParserFingerprint")
+                    val midIfEqInstruction = midIfEqInstructions[1]
                     val lastIfEqIndex = midIfEqInstruction.location.index
                     val registers = midIfEqInstruction.registersUsed
                     val registerA = registers[0]

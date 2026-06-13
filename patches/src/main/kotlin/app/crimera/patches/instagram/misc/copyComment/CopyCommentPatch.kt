@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 $7(b) terms that apply to this code.
  */
 
 package app.crimera.patches.instagram.misc.copyComment
@@ -18,6 +18,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.getResourceId
@@ -46,9 +47,18 @@ val copyCommentPatch =
 
             var copyTextDrawableLateral: Long
             var copyTextStringLateral: Long
-            CopyTextChatButtonToStringFingerprint.classDef.methods.first { it.name == "<init>" }.apply {
-                copyTextDrawableLateral = (instructions.first { it.opcode == Opcode.CONST } as Instruction31i).wideLiteral
-                copyTextStringLateral = (instructions.last { it.opcode == Opcode.CONST } as Instruction31i).wideLiteral
+
+            val initMethod = CopyTextChatButtonToStringFingerprint.classDef.methods.firstOrNull { it.name == "<init>" }
+                 ?: throw PatchException("Failed to find constructor in ${CopyTextChatButtonToStringFingerprint.definingClass}")
+
+            initMethod.apply {
+                val firstConst = instructions.firstOrNull { it.opcode == Opcode.CONST }
+                    ?: throw PatchException("Failed to find CONST in constructor")
+                copyTextDrawableLateral = (firstConst as Instruction31i).wideLiteral
+
+                val lastConst = instructions.lastOrNull { it.opcode == Opcode.CONST }
+                    ?: throw PatchException("Failed to find last CONST in constructor")
+                copyTextStringLateral = (lastConst as Instruction31i).wideLiteral
             }
 
             AddCommentButtonFingerprint.method.apply {
@@ -82,27 +92,36 @@ val copyCommentPatch =
                 // Copy button attributes.
                 val drawableId = getResourceId(ResourceType.DRAWABLE, "instagram_eye_off_outline_24")
                 val drawableIndex = indexOfFirstLiteralInstruction(drawableId)
+                if (drawableIndex < 0) throw PatchException("Failed to find drawable ID ${drawableId} in AddCommentButtonFingerprint")
 
-                val arrayAddInstruction = instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL && it.location.index < drawableIndex }
+                val arrayAddInstruction = instructions.lastOrNull { it.opcode == Opcode.INVOKE_VIRTUAL && it.location.index < drawableIndex }
+                     ?: throw PatchException("Failed to find INVOKE_VIRTUAL before drawable in AddCommentButtonFingerprint")
+
                 val existingButtonSGetObjectInstruction =
-                    instructions.last {
+                    instructions.lastOrNull {
                         it.opcode == Opcode.SGET_OBJECT &&
                             it.location.index < drawableIndex
-                    }
+                    } ?: throw PatchException("Failed to find SGET_OBJECT before drawable in AddCommentButtonFingerprint")
 
                 val existingButtonClass = extensionToClassName(existingButtonSGetObjectInstruction.fieldExtractor().definingClass)
 
-                val isEqualsInstruction = instructions.last { it.opcode == Opcode.INVOKE_STATIC && it.location.index < drawableIndex }
+                val isEqualsInstruction = instructions.lastOrNull { it.opcode == Opcode.INVOKE_STATIC && it.location.index < drawableIndex }
+                     ?: throw PatchException("Failed to find areEqual INVOKE_STATIC in AddCommentButtonFingerprint")
+
                 val isEqualsClass = extensionToClassName(isEqualsInstruction.methodExtractor().definingClass)
                 val compareButtonRegister = isEqualsInstruction.registersUsed[0]
                 val ourButtonRegister = isEqualsInstruction.registersUsed[1]
 
-                val buttonStyleInstruction = getInstruction(indexOfFirstInstruction(drawableIndex, Opcode.SGET_OBJECT))
+                val buttonStyleIndex = indexOfFirstInstruction(drawableIndex, Opcode.SGET_OBJECT)
+                if (buttonStyleIndex < 0) throw PatchException("Failed to find buttonStyle SGET_OBJECT in AddCommentButtonFingerprint")
+                val buttonStyleInstruction = getInstruction(buttonStyleIndex)
                 val buttonStyleClass = extensionToClassName(buttonStyleInstruction.fieldExtractor().definingClass)
 
                 val gotoIndex = indexOfFirstInstruction(drawableIndex, Opcode.GOTO)
+                if (gotoIndex <= 0) throw PatchException("Failed to find GOTO in AddCommentButtonFingerprint")
                 val bundleInstruction = getInstruction(gotoIndex - 1)
-                val bundleMethodRef = bundleInstruction.getReference<MethodReference>()!!
+                val bundleMethodRef = bundleInstruction.getReference<MethodReference>()
+                     ?: throw PatchException("Expected MethodReference in bundleInstruction")
                 val bundleClass = bundleMethodRef.definingClass
                 val bundleParameters = bundleMethodRef.parameterTypes
                 val bundleRegisters = bundleInstruction.registersUsed
@@ -154,7 +173,7 @@ val copyCommentPatch =
             }
 
             CommentButtonOnClickFingerprint.apply {
-
+                if (stringMatches.size < 2) throw PatchException("Failed to find enough string matches in CommentButtonOnClickFingerprint")
                 val commentShareClickStrIndex = stringMatches[1].index
 
                 method.apply {
@@ -163,12 +182,13 @@ val copyCommentPatch =
                     mutableClass.interfaces.add(parameters[0].type)
 
                     val firstIfEqzIndex = indexOfFirstInstruction(Opcode.IF_EQZ)
+                    if (firstIfEqzIndex < 0) throw PatchException("Failed to find IF_EQZ in CommentButtonOnClickFingerprint")
                     val freeRegister = getInstruction(firstIfEqzIndex).registersUsed[0]
 
                     val arrayListInstruction =
-                        instructions.last {
+                        instructions.lastOrNull {
                             it.location.index < firstIfEqzIndex && it.opcode == Opcode.MOVE_RESULT_OBJECT
-                        }
+                        } ?: throw PatchException("Failed to find MOVE_RESULT_OBJECT before IF_EQZ in CommentButtonOnClickFingerprint")
                     val arrayListIndex = arrayListInstruction.location.index
                     val arrayListRegister = arrayListInstruction.registersUsed[0]
 
@@ -185,6 +205,7 @@ val copyCommentPatch =
                     )
 
                     val ifEqzIndex = indexOfFirstInstruction(commentShareClickStrIndex, Opcode.IF_EQZ)
+                    if (ifEqzIndex <= 0) throw PatchException("Failed to find IF_EQZ after string in CommentButtonOnClickFingerprint")
                     val commentTextField = getInstruction(ifEqzIndex - 1).fieldExtractor().name
                     CheckOnCommentButtonClickExtensionFingerprint.changeFirstString(commentTextField)
                 }
