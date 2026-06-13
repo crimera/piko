@@ -191,7 +191,7 @@ public class Pref {
     }
 
     public static boolean enableDownload() {
-        return SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD);
+        return SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD) && SettingsStatus.downloadMedia;
     }
 
     public static boolean enableDirectDownload() {
@@ -263,7 +263,7 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE);
     }
     public static boolean moreOptionsOnPost() {
-        return SharedPref.getBooleanPref(Settings.ENABLE_MORE_OPTIONS_ON_POST);
+        return SharedPref.getBooleanPref(Settings.ENABLE_MORE_OPTIONS_ON_POST) && SettingsStatus.moreOptionsOnPost;
     }
 
     //end

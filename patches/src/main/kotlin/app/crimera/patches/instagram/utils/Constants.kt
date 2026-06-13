@@ -33,9 +33,11 @@ object Constants {
         )
 
     // Instagram classes.
+    const val FRAGMENT_ACTIVITY = "Landroidx/fragment/app/FragmentActivity;"
     const val FRIENDSHIP_STATUS_CLASS = "Lcom/instagram/user/model/FriendshipStatus;"
     const val EDIT_MEDIA_INFO_FRAGMENT_CLASS = "Linstagram/features/creation/fragment/EditMediaInfoFragment;"
     const val EXTENDED_IMAGE_URL_CLASS = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"
+    const val MEDIA_OPTIONS_CLASS = "Lcom/instagram/feed/media/mediaoption/MediaOption\$Option;"
 
     // Extension classes.
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/instagram"
@@ -55,6 +57,9 @@ object Constants {
     const val DOWNLOAD_DESCRIPTOR = "$PATCHES_DESCRIPTOR/download"
     const val ACTIONBAR_DESCRIPTOR = "$PATCHES_DESCRIPTOR/actionbar"
 
+    const val OVERFLOW_MENU_BUTTON_CLASS = "$PATCHES_DESCRIPTOR/overflowMenuButton"
+    const val ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS = "$OVERFLOW_MENU_BUTTON_CLASS/reels/AddReelButton;"
+    const val FEED_OVERFLOW_MENU_BUTTON_CLASS = "$OVERFLOW_MENU_BUTTON_CLASS/FeedButton;"
     const val ACTIVITY_SETTINGS_STATUS_CLASS = "$ACTIVITY_SETTINGS_CLASS/SettingsStatus;"
     const val SSTS_DESCRIPTOR = "invoke-static {}, $ACTIVITY_SETTINGS_STATUS_CLASS->%s()V"
     const val HOOK_FLAGS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/HookFlags;"
