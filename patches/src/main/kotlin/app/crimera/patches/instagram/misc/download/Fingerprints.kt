@@ -13,10 +13,6 @@ import app.morphe.patcher.Fingerprint
 val FEED_BUTTON_DESCRIPTOR = "$DOWNLOAD_DESCRIPTOR/FeedButton;"
 val REEL_BUTTON_DESCRIPTOR = "$DOWNLOAD_DESCRIPTOR/ReelButton;"
 
-internal object AddFeedButtonFingerprint : Fingerprint(
-    strings = listOf("TEXT_POST_APP_INACTIVE"),
-)
-
 internal object FeedButtonOnClickFingerprint : Fingerprint(
     parameters = listOf("Lcom/instagram/feed/media/mediaoption/MediaOption\$Option;"),
     strings = listOf("MediaOptionsOverflowHelper"),
@@ -27,29 +23,15 @@ internal object AddReelButtonFingerprint : Fingerprint(
     strings = listOf("ClipsOrganicMediaItemViewMoreOptionsController"),
 )
 
-internal object EnumButtonClassFingerprint : Fingerprint(
-    strings = listOf("UNSET_OR_UNRECOGNIZED_ENUM_VALUE", "ACTION", "DESTRUCTIVE"),
-)
-
 internal object GetDirectThreadMediaSaverModuleNameFingerprint : Fingerprint(
     strings = listOf("DirectThreadMediaSaver"),
     name = "getModuleName",
     returnType = "Ljava/lang/String;",
 )
 
-internal object GetEnumButtonClassExtensionFingerprint : Fingerprint(
-    definingClass = FEED_BUTTON_DESCRIPTOR,
-    name = "getEnumButtonClass",
-)
-
 internal object MediaOptionsOverflowMenuCreatorConstructorFingerprint : Fingerprint(
     returnType = "V",
     strings = listOf("MediaOptionsOverflowMenuCreator"),
-)
-
-internal object AddFeedButtonExtensionFingerprint : Fingerprint(
-    definingClass = FEED_BUTTON_DESCRIPTOR,
-    name = "addButton",
 )
 
 internal object FeedReplaceAudioDialogHelperFingerprint : Fingerprint(

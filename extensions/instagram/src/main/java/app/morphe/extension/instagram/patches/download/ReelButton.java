@@ -16,12 +16,15 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
+import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.Utils;
+
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.entity.MediaData;
-import app.morphe.extension.shared.Logger;
-import app.morphe.extension.shared.Utils;
 
 import com.instagram.feed.media.mediaoption.MediaOption$Option;
 
@@ -47,7 +50,7 @@ public class ReelButton implements View.OnClickListener  {
     public static void addReelButton(Context context, Object helperObject, Object mediaObject){
         try {
             if(ENABLE_DOWNLOAD) {
-                int icon = MediaOption$Option.DOWNLOAD.iconDrawable;
+                int icon = ResourceUtils.getIdentifier(ResourceType.DRAWABLE,"instagram_download_outline_24");
                 ReelButton listener = new ReelButton(context, mediaObject);
 
                 Class<?> clazz = helperObject.getClass();

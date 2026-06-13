@@ -14,14 +14,18 @@ import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundD
 import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
 import app.crimera.patches.instagram.misc.directMessage.saveAllMessages.saveAllMessagesPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
+import app.crimera.patches.instagram.misc.overflowMenuButton.addOverflowMenuButtonAttributes
+import app.crimera.patches.instagram.misc.overflowMenuButton.debugOverflowButton.debugOverflowMenuButtonPatch
+import app.crimera.patches.instagram.misc.overflowMenuButton.hookOverflowMenuButton
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_CLASS
+import app.crimera.patches.instagram.utils.Constants.FRAGMENT_ACTIVITY
 import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.utils.changeFirstString
-import app.crimera.utils.classNameToExtension
 import app.crimera.utils.methodExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -29,12 +33,10 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 @Suppress("unused")
 val downloadMediaPatch =
@@ -51,75 +53,19 @@ val downloadMediaPatch =
             hookFlagsPatch,
             saveAllMessagesPatch,
             decoderEntity,
+            hookOverflowMenuButton,
+            debugOverflowMenuButtonPatch,
         )
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-            val appActivity = "Landroidx/fragment/app/FragmentActivity;"
-
-            val enumBtnClass = classNameToExtension(EnumButtonClassFingerprint.classDef.type)
-            GetEnumButtonClassExtensionFingerprint.changeFirstString(enumBtnClass)
-
-            MediaOptionsOverflowMenuCreatorConstructorFingerprint.classDef.apply {
-                val addingFeedButtonMethodName = methods.first { it.parameters.size > 1 }.name
-                AddFeedButtonExtensionFingerprint.changeFirstString(addingFeedButtonMethodName)
-            }
-
-            FeedReplaceAudioDialogHelperFingerprint.method.apply {
-                val strIndex = FeedReplaceAudioDialogHelperFingerprint.stringMatches[0].index
-                val addingReelButtonMethodCallIndex = indexOfFirstInstruction(strIndex, Opcode.INVOKE_DIRECT_RANGE) + 1
-
-                val addingReelButtonMethodName = getInstruction(addingReelButtonMethodCallIndex).methodExtractor().name
-                AddReelButtonExtensionFingerprint.changeFirstString(addingReelButtonMethodName)
-            }
-
-            AddFeedButtonFingerprint.method.apply {
-                var arrayListRegister = -1
-                var checkCastRegister = -1
-                var checkCastIndex = -1
-
-                if (getInstruction(0).opcode == Opcode.INVOKE_STATIC) {
-                    arrayListRegister = getInstruction(1).registersUsed[0]
-                    checkCastIndex = indexOfFirstInstruction(Opcode.CHECK_CAST)
-                    checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
-                } else {
-                    val arrayListInstructions =
-                        instructions.filter {
-                            it.opcode == Opcode.NEW_INSTANCE &&
-                                it.getReference<TypeReference>()?.type == "Ljava/util/ArrayList;"
-                        }
-
-                    arrayListInstructions.firstOrNull { instruction ->
-                        val index = instruction.location.index
-                        val nextNextInstructionOpcode = getInstruction(index + 2).opcode
-                        val nextNextNextInstructionOpcode = getInstruction(index + 3).opcode
-                        if (nextNextInstructionOpcode == Opcode.IGET_OBJECT && nextNextNextInstructionOpcode == Opcode.CHECK_CAST) {
-                            val arrayInitInstruction = getInstruction(index + 1)
-                            arrayListRegister = arrayInitInstruction.registersUsed[0]
-                            checkCastIndex = indexOfFirstInstruction(index, Opcode.CHECK_CAST)
-                            checkCastRegister = getInstruction(checkCastIndex).registersUsed[0]
-                            true
-                        }
-                        false
-                    }
-                }
-
-                if (arrayListRegister != -1 && checkCastRegister != -1 && checkCastIndex != -1) {
-                    addInstructions(
-                        checkCastIndex + 1,
-                        """
-                        invoke-static {v$checkCastRegister,v$arrayListRegister},$FEED_BUTTON_DESCRIPTOR->addFeedButton(Ljava/lang/Object;Ljava/util/ArrayList;)V
-                        """.trimIndent(),
-                    )
-                }
-            }
+            addOverflowMenuButtonAttributes("PIKO_DOWNLOAD", "downloadOverflowButton")
 
             FeedButtonOnClickFingerprint.method.apply {
                 val classDef = FeedButtonOnClickFingerprint.classDef
-                val className = classDef.type
                 val classFields = classDef.fields
 
-                val appActivityField = classFields.first { it.type == appActivity }
+                val appActivityField = classFields.first { it.type == FRAGMENT_ACTIVITY }
 
                 val getMediaObjectMethod =
                     classDef.methods.first {
@@ -132,7 +78,7 @@ val downloadMediaPatch =
                     0,
                     """
                     move-object/from16 v1, p1
-                    invoke-static {v1}, $FEED_BUTTON_DESCRIPTOR->isDownloadButton(Lcom/instagram/feed/media/mediaoption/MediaOption${'$'}Option;)Z
+                    invoke-static {v1}, $FEED_OVERFLOW_MENU_BUTTON_CLASS->isDownloadButton(Lcom/instagram/feed/media/mediaoption/MediaOption${'$'}Option;)Z
                     move-result v0
                     if-eqz v0, :piko
                     
@@ -143,7 +89,7 @@ val downloadMediaPatch =
                     iget-object v4, v0, $mediaExtraDataField
                     iget v4, v4, $CURRENT_MEDIA_FIELD
                     
-                    invoke-static {v5, v2, v4}, $FEED_BUTTON_DESCRIPTOR->downloadPost(Landroid/content/Context;Ljava/lang/Object;I)V
+                    invoke-static {v5, v2, v4}, $DOWNLOAD_DESCRIPTOR/DownloadUtils;->downloadPost(Landroid/content/Context;Ljava/lang/Object;I)V
                     return-void
                     
                     """.trimIndent(),
@@ -151,12 +97,20 @@ val downloadMediaPatch =
                 )
             }
 
+            FeedReplaceAudioDialogHelperFingerprint.method.apply {
+                val strIndex = FeedReplaceAudioDialogHelperFingerprint.stringMatches[0].index
+                val addingReelButtonMethodCallIndex = indexOfFirstInstruction(strIndex, Opcode.INVOKE_DIRECT_RANGE) + 1
+
+                val addingReelButtonMethodName = getInstruction(addingReelButtonMethodCallIndex).methodExtractor().name
+                AddReelButtonExtensionFingerprint.changeFirstString(addingReelButtonMethodName)
+            }
+
             AddReelButtonFingerprint.method.apply {
                 val classDef = AddReelButtonFingerprint.classDef
                 val className = classDef.type
                 val classFields = classDef.fields
 
-                val appActivityField = classFields.first { it.type == appActivity }
+                val appActivityField = classFields.first { it.type == FRAGMENT_ACTIVITY }
 
                 val selfClassRegister = instructions[indexOfFirstInstruction(Opcode.MOVE_OBJECT_FROM16)].registersUsed[0]
                 val buttonAdderInstanceRegister = instructions[indexOfFirstInstruction(Opcode.NEW_INSTANCE)].registersUsed[0]
