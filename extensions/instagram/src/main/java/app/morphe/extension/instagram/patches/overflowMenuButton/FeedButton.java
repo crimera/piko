@@ -19,6 +19,7 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
+import app.morphe.extension.crimera.ObjectBrowser;
 
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
@@ -26,6 +27,8 @@ import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.patches.download.DownloadUtils;
+import app.morphe.extension.instagram.patches.feed.MoreOptionsOnPostPatch;
 
 import com.instagram.feed.media.mediaoption.MediaOption$Option;
 
@@ -34,18 +37,6 @@ public class FeedButton {
     private static MediaOption$Option initOverflowButton(String tag, int randomIndex, String drawableResName){
         int drawableIconId = ResourceUtils.getIdentifier(ResourceType.DRAWABLE,drawableResName);
         return new MediaOption$Option(tag, randomIndex, drawableIconId);
-    }
-
-    public static MediaOption$Option downloadOverflowButton(){
-        return FeedButton.initOverflowButton("PIKO_DOWNLOAD", 500, UI.DRAWABLE_DOWNLOAD_ICON);
-    }
-
-    public static MediaOption$Option morePostOptionOverflowButton(){
-        return FeedButton.initOverflowButton("PIKO_MORE_POST_OPTION", 501, UI.DRAWABLE_INFO_ICON);
-    }
-
-    public static MediaOption$Option debugOverflowButton(){
-        return FeedButton.initOverflowButton("PIKO_DEBUG", 502, UI.DRAWABLE_DEBUG_ICON);
     }
 
     public static MediaOption$Option[] addToMenuOptionArray() {
@@ -103,6 +94,20 @@ public class FeedButton {
         method.setAccessible(true);
         method.invoke(null, enumNormalButton(), overflowButton, buttonAdderObject, overflowButtonText, buttonlist, false);
     }
+
+    public static MediaOption$Option downloadOverflowButton(){
+        return FeedButton.initOverflowButton("PIKO_DOWNLOAD", 500, UI.DRAWABLE_DOWNLOAD_ICON);
+    }
+
+    public static MediaOption$Option morePostOptionOverflowButton(){
+        return FeedButton.initOverflowButton("PIKO_MORE_POST_OPTION", 501, UI.DRAWABLE_INFO_ICON);
+    }
+
+    public static MediaOption$Option debugOverflowButton(){
+        return FeedButton.initOverflowButton("PIKO_DEBUG", 502, UI.DRAWABLE_DEBUG_ICON);
+    }
+
+
     private static void addDownloadButton(Object buttonAdderObject, ArrayList buttonlist) throws Exception {
         String DOWNLOAD_BUTTON_TEXT = Strings.DOWNLOAD_OPTIONS;
         if(Pref.enableDirectDownload()){
@@ -113,39 +118,45 @@ public class FeedButton {
 
     public static void addFeedOverflowButton(Object buttonAdderObject, ArrayList buttonlist){
         try {
+            if(Pref.pikoDebug()){
+                addButton(MediaOption$Option.PIKO_DEBUG, Strings.PIKO_DEBUG, buttonAdderObject, buttonlist);
+            }
+
             if(Pref.enableDownload()) {
                 addDownloadButton(buttonAdderObject, buttonlist);
             }
             if(Pref.moreOptionsOnPost()) {
                 addButton(MediaOption$Option.PIKO_MORE_POST_OPTION, Strings.POST_OPTIONS, buttonAdderObject, buttonlist);
             }
-            if(Pref.pikoDebug()){
-                addButton(MediaOption$Option.PIKO_DEBUG, Strings.PIKO_DEBUG, buttonAdderObject, buttonlist);
-            }
         } catch (Exception e) {
             Logger.printException(() -> "Error at addReelButton",e);
         }
     }
 
-    private static boolean isButtonPressed(MediaOption$Option buttonToCheck, MediaOption$Option pressedButton){
-        try {
-            return pressedButton.equals(buttonToCheck);
+    public static boolean isCustomButtonPressed(MediaOption$Option pressedButton){
+        return (
+                pressedButton.equals(MediaOption$Option.PIKO_DEBUG) ||
+                pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD) ||
+                pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)
+        );
+    }
+
+    public static void customButtonOnClick(MediaOption$Option pressedButton,Context context, Object mediaObject, int currentMediaIndex){
+        try{
+            if(pressedButton.equals(MediaOption$Option.PIKO_DEBUG)) {
+                ObjectBrowser.browseObject(context, new MediaData(mediaObject));
+
+            } else if (pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD)) {
+                DownloadUtils.downloadPost(context, mediaObject, currentMediaIndex);
+
+            } else if (pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)) {
+                MoreOptionsOnPostPatch.postMoreOptions(context, mediaObject, currentMediaIndex);
+
+            }
+
         } catch (Exception e) {
-            Logger.printException(() -> "Error at isButtonPressed",e);
+            Logger.printException(() -> "Error at customButtonOnClick",e);
         }
-        return false;
-    }
-
-    public static boolean isDownloadButton(MediaOption$Option buttonOption){
-        return FeedButton.isButtonPressed(MediaOption$Option.PIKO_DOWNLOAD, buttonOption);
-    }
-
-    public static boolean isMoreOptionsOnPostButton(MediaOption$Option buttonOption){
-        return FeedButton.isButtonPressed(MediaOption$Option.PIKO_MORE_POST_OPTION, buttonOption);
-    }
-
-    public static boolean isDebugButton(MediaOption$Option buttonOption){
-        return FeedButton.isButtonPressed(MediaOption$Option.PIKO_DEBUG, buttonOption);
     }
 
 }

@@ -4,7 +4,7 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
-package app.crimera.patches.instagram.misc.overflowMenuButton
+package app.crimera.patches.instagram.misc.overflowMenuButton.posts
 
 import app.crimera.patches.instagram.misc.download.MediaOptionsOverflowMenuCreatorConstructorFingerprint
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
@@ -26,7 +26,7 @@ val hookOverflowMenuButton =
     bytecodePatch(
         description = "This patch hooks array values initialisation in overflow menu button constructor.",
     ) {
-        dependsOn(includeButtonsInOverflowMenuArrayPatch)
+        dependsOn(includeButtonsInOverflowMenuArrayPatch, hookOverflowMenuButtonOnClickPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
         execute {
             val enumBtnClass = classNameToExtension(EnumButtonClassFingerprint.classDef.type)

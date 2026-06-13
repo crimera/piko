@@ -6,8 +6,8 @@
 
 package app.crimera.patches.instagram.misc.overflowMenuButton.reels
 
-import app.crimera.patches.instagram.misc.overflowMenuButton.AddReelButtonExtensionFingerprint
-import app.crimera.patches.instagram.misc.overflowMenuButton.FeedReplaceAudioDialogHelperFingerprint
+import app.crimera.patches.instagram.misc.overflowMenuButton.posts.AddReelButtonExtensionFingerprint
+import app.crimera.patches.instagram.misc.overflowMenuButton.posts.FeedReplaceAudioDialogHelperFingerprint
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.methodExtractor

@@ -4,9 +4,8 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
-package app.crimera.patches.instagram.misc.overflowMenuButton
+package app.crimera.patches.instagram.misc.overflowMenuButton.posts
 
-import app.crimera.patches.instagram.misc.download.REEL_BUTTON_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS
 import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_CLASS
 import app.crimera.patches.instagram.utils.Constants.MEDIA_OPTIONS_CLASS

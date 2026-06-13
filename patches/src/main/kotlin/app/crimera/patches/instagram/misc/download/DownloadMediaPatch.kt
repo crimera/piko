@@ -6,38 +6,26 @@
 
 package app.crimera.patches.instagram.misc.download
 
-import app.crimera.patches.instagram.entity.decoder.CURRENT_MEDIA_FIELD
-import app.crimera.patches.instagram.entity.decoder.MEDIA_ADD_INFO_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
 import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundDataIntfEntity
 import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
 import app.crimera.patches.instagram.misc.directMessage.saveAllMessages.saveAllMessagesPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
-import app.crimera.patches.instagram.misc.overflowMenuButton.addOverflowMenuButtonAttributes
-import app.crimera.patches.instagram.misc.overflowMenuButton.debugOverflowButton.debugOverflowMenuButtonPatch
-import app.crimera.patches.instagram.misc.overflowMenuButton.hookOverflowMenuButton
+import app.crimera.patches.instagram.misc.overflowMenuButton.posts.addOverflowMenuButtonAttributes
+import app.crimera.patches.instagram.misc.overflowMenuButton.posts.debugOverflowButton.debugOverflowMenuButtonPatch
+import app.crimera.patches.instagram.misc.overflowMenuButton.posts.hookOverflowMenuButton
 import app.crimera.patches.instagram.misc.overflowMenuButton.reels.hookReelOverflowMenuButton
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
-import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_CLASS
-import app.crimera.patches.instagram.utils.Constants.FRAGMENT_ACTIVITY
 import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
-import app.crimera.utils.changeFirstString
-import app.crimera.utils.methodExtractor
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
-import com.android.tools.smali.dexlib2.AccessFlags
-import com.android.tools.smali.dexlib2.Opcode
 
 @Suppress("unused")
 val downloadMediaPatch =
@@ -61,43 +49,8 @@ val downloadMediaPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
+
             addOverflowMenuButtonAttributes("PIKO_DOWNLOAD", "downloadOverflowButton")
-
-            FeedButtonOnClickFingerprint.method.apply {
-                val classDef = FeedButtonOnClickFingerprint.classDef
-                val classFields = classDef.fields
-
-                val appActivityField = classFields.first { it.type == FRAGMENT_ACTIVITY }
-
-                val getMediaObjectMethod =
-                    classDef.methods.first {
-                        AccessFlags.FINAL.isSet(it.accessFlags) && it.implementation?.registerCount == 1
-                    }
-
-                val mediaExtraDataField = classDef.fields.first { it.type == MEDIA_ADD_INFO_CLASS_NAME }
-
-                addInstructionsWithLabels(
-                    0,
-                    """
-                    move-object/from16 v1, p1
-                    invoke-static {v1}, $FEED_OVERFLOW_MENU_BUTTON_CLASS->isDownloadButton(Lcom/instagram/feed/media/mediaoption/MediaOption${'$'}Option;)Z
-                    move-result v0
-                    if-eqz v0, :piko
-                    
-                    move-object/from16 v0, p0
-                    iget-object v5, v0, $appActivityField
-                    invoke-static {v0}, $getMediaObjectMethod
-                    move-result-object v2
-                    iget-object v4, v0, $mediaExtraDataField
-                    iget v4, v4, $CURRENT_MEDIA_FIELD
-                    
-                    invoke-static {v5, v2, v4}, $DOWNLOAD_DESCRIPTOR/DownloadUtils;->downloadPost(Landroid/content/Context;Ljava/lang/Object;I)V
-                    return-void
-                    
-                    """.trimIndent(),
-                    ExternalLabel("piko", getInstruction(0)),
-                )
-            }
 
             // DM media downloader.
             GetDirectThreadMediaSaverModuleNameFingerprint.apply {
