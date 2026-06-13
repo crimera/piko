@@ -8,6 +8,7 @@ package app.crimera.patches.instagram.entity.mediadata
 
 import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CLASS
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
 
 internal const val AUDIO_SRC_KEY = "audio_src"
@@ -54,9 +55,14 @@ internal object GetExtendedDataExtensionFingerprint : Fingerprint(
     name = "getExtendedData",
 )
 
-internal object GetUserDataExtensionFingerprint : Fingerprint(
+internal object GetUserDataWithoutUserSessionExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
-    name = "getUserData",
+    name = "getUserDataWithoutUserSession",
+)
+
+internal object GetUserDataWithUserSessionExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getUserDataWithUserSession",
 )
 
 internal object GetMediaPkIdExtensionFingerprint : Fingerprint(
@@ -175,4 +181,10 @@ internal object ExtMediaDictImageInfoMapperFingerprint : Fingerprint(
             "image_versions2",
         ),
     returnType = "Ljava/util/Map;",
+)
+
+internal object GetProductTileMediaFromUserSessionFingerprint : Fingerprint(
+    definingClass = "Lcom/instagram/model/shopping/productfeed/ProductTile;",
+    parameters = listOf(USER_SESSION_CLASS),
+    returnType = "Lcom/instagram/model/shopping/productfeed/ProductTileMedia;",
 )

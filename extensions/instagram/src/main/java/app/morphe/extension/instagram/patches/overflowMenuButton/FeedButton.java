@@ -31,6 +31,7 @@ import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.patches.feed.MoreOptionsOnPostPatch;
 
 import com.instagram.feed.media.mediaoption.MediaOption$Option;
+import com.instagram.common.session.UserSession;
 
 public class FeedButton {
 
@@ -141,16 +142,16 @@ public class FeedButton {
         );
     }
 
-    public static void customButtonOnClick(MediaOption$Option pressedButton,Context context, Object mediaObject, int currentMediaIndex){
+    public static void customButtonOnClick(MediaOption$Option pressedButton, UserSession userSession, Context context, Object mediaObject, int currentMediaIndex){
         try{
             if(pressedButton.equals(MediaOption$Option.PIKO_DEBUG)) {
-                ObjectBrowser.browseObject(context, new MediaData(mediaObject));
+                ObjectBrowser.browseObject(context, new MediaData(mediaObject, userSession));
 
             } else if (pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD)) {
-                DownloadUtils.downloadPost(context, mediaObject, currentMediaIndex);
+                DownloadUtils.downloadPost(context, userSession, mediaObject, currentMediaIndex);
 
             } else if (pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)) {
-                MoreOptionsOnPostPatch.postMoreOptions(context, mediaObject, currentMediaIndex);
+                MoreOptionsOnPostPatch.postMoreOptions(context, userSession, mediaObject, currentMediaIndex);
 
             }
 

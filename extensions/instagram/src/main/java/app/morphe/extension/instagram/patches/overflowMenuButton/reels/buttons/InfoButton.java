@@ -18,6 +18,6 @@ public class InfoButton extends ReelButton {
 
     @Override
     public void onClick(View view) {
-        MoreOptionsOnPostPatch.postMoreOptions(this.context, this.mediaObject, 0);
+        MoreOptionsOnPostPatch.postMoreOptions(this.context, null, this.mediaObject, 0);
     }
 }

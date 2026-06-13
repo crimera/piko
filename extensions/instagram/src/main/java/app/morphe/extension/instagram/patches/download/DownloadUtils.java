@@ -35,6 +35,8 @@ import app.morphe.extension.crimera.downloader.DownloadRequest;
 import app.morphe.extension.crimera.downloader.MediaType;
 import app.morphe.extension.crimera.PikoUtils;
 
+import com.instagram.common.session.UserSession;
+
 public class DownloadUtils {
 
     public static String getSubfolderName(String username){
@@ -164,11 +166,11 @@ public class DownloadUtils {
     }
 
 
-    public static void downloadPost(Context context, Object mediaObject, int position) {
+    public static void downloadPost(Context context,  UserSession userSession, Object mediaObject, int position) {
         try {
             boolean ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
             position = position < 1 ? 0 : position;
-            MediaData mediaInfo = new MediaData(mediaObject);
+            MediaData mediaInfo = new MediaData(mediaObject, userSession);
             if (ENABLE_DIRECT_DOWNLOAD) {
                 downloadMedia(context, mediaInfo, position, MediaType.ANY);
             } else {

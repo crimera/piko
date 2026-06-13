@@ -24,11 +24,13 @@ import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.UserData;
 
+import com.instagram.common.session.UserSession;
+
 public class MoreOptionsOnPostPatch {
 
-    public static void postMoreOptions(Context context, Object mediaObject, int currentMediaIndex) {
+    public static void postMoreOptions(Context context,  UserSession userSession, Object mediaObject, int currentMediaIndex) {
         try {
-            MediaData mediaData = new MediaData(mediaObject);
+            MediaData mediaData = new MediaData(mediaObject, userSession);
 
             InstagramDialogBox dialog = new InstagramDialogBox(context);
 
@@ -60,7 +62,7 @@ public class MoreOptionsOnPostPatch {
                             stringToCopy = userData.getFullname();
 
                         } else if (selectedOption.equals(Strings.DOWNLOAD_OPTIONS)) {
-                            DownloadUtils.downloadPost(context, mediaObject, currentMediaIndex);
+                            DownloadUtils.downloadPost(context, userSession, mediaObject, currentMediaIndex);
 
                         }
                         if (stringToCopy != null && stringToCopy.length() > 0) {
