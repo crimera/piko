@@ -33,12 +33,3 @@ internal object MediaOptionsOverflowMenuCreatorConstructorFingerprint : Fingerpr
     returnType = "V",
     strings = listOf("MediaOptionsOverflowMenuCreator"),
 )
-
-internal object FeedReplaceAudioDialogHelperFingerprint : Fingerprint(
-    strings = listOf("FeedReplaceAudioDialogHelper"),
-)
-
-internal object AddReelButtonExtensionFingerprint : Fingerprint(
-    definingClass = REEL_BUTTON_DESCRIPTOR,
-    name = "addReelButton",
-)

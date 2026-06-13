@@ -6,12 +6,18 @@
 
 package app.crimera.patches.instagram.misc.overflowMenuButton
 
+import app.crimera.patches.instagram.misc.download.AddReelButtonFingerprint
+import app.crimera.patches.instagram.misc.download.REEL_BUTTON_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS
 import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_CLASS
+import app.crimera.patches.instagram.utils.Constants.FRAGMENT_ACTIVITY
 import app.crimera.patches.instagram.utils.Constants.MEDIA_OPTIONS_CLASS
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.util.proxy.mutableTypes.MutableField.Companion.toMutable
+import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
 context(patchContext: BytecodePatchContext)

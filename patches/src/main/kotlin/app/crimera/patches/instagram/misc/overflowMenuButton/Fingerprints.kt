@@ -6,6 +6,8 @@
 
 package app.crimera.patches.instagram.misc.overflowMenuButton
 
+import app.crimera.patches.instagram.misc.download.REEL_BUTTON_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS
 import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_CLASS
 import app.crimera.patches.instagram.utils.Constants.MEDIA_OPTIONS_CLASS
 import app.morphe.patcher.Fingerprint
@@ -31,4 +33,13 @@ internal object GetEnumButtonClassExtensionFingerprint : Fingerprint(
 internal object AddFeedButtonExtensionFingerprint : Fingerprint(
     definingClass = FEED_OVERFLOW_MENU_BUTTON_CLASS,
     name = "addButton",
+)
+
+internal object FeedReplaceAudioDialogHelperFingerprint : Fingerprint(
+    strings = listOf("FeedReplaceAudioDialogHelper"),
+)
+
+internal object AddReelButtonExtensionFingerprint : Fingerprint(
+    definingClass = ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS,
+    name = "addReelButton",
 )

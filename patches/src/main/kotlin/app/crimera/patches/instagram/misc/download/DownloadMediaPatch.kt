@@ -17,6 +17,7 @@ import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
 import app.crimera.patches.instagram.misc.overflowMenuButton.addOverflowMenuButtonAttributes
 import app.crimera.patches.instagram.misc.overflowMenuButton.debugOverflowButton.debugOverflowMenuButtonPatch
 import app.crimera.patches.instagram.misc.overflowMenuButton.hookOverflowMenuButton
+import app.crimera.patches.instagram.misc.overflowMenuButton.reels.hookReelOverflowMenuButton
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
@@ -55,6 +56,7 @@ val downloadMediaPatch =
             decoderEntity,
             hookOverflowMenuButton,
             debugOverflowMenuButtonPatch,
+            hookReelOverflowMenuButton,
         )
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
@@ -94,39 +96,6 @@ val downloadMediaPatch =
                     
                     """.trimIndent(),
                     ExternalLabel("piko", getInstruction(0)),
-                )
-            }
-
-            FeedReplaceAudioDialogHelperFingerprint.method.apply {
-                val strIndex = FeedReplaceAudioDialogHelperFingerprint.stringMatches[0].index
-                val addingReelButtonMethodCallIndex = indexOfFirstInstruction(strIndex, Opcode.INVOKE_DIRECT_RANGE) + 1
-
-                val addingReelButtonMethodName = getInstruction(addingReelButtonMethodCallIndex).methodExtractor().name
-                AddReelButtonExtensionFingerprint.changeFirstString(addingReelButtonMethodName)
-            }
-
-            AddReelButtonFingerprint.method.apply {
-                val classDef = AddReelButtonFingerprint.classDef
-                val className = classDef.type
-                val classFields = classDef.fields
-
-                val appActivityField = classFields.first { it.type == FRAGMENT_ACTIVITY }
-
-                val selfClassRegister = instructions[indexOfFirstInstruction(Opcode.MOVE_OBJECT_FROM16)].registersUsed[0]
-                val buttonAdderInstanceRegister = instructions[indexOfFirstInstruction(Opcode.NEW_INSTANCE)].registersUsed[0]
-
-                val sPutIndex = indexOfFirstInstruction(Opcode.SPUT)
-                val mediaObjectFromParameterIndex = indexOfFirstInstruction(sPutIndex, Opcode.MOVE_OBJECT_FROM16)
-                val mediaObjectRegister = instructions[mediaObjectFromParameterIndex].registersUsed[0]
-
-                val freeRegisterOne = instructions[indexOfFirstInstruction(mediaObjectFromParameterIndex, Opcode.CONST_4)].registersUsed[0]
-
-                addInstructions(
-                    mediaObjectFromParameterIndex + 1,
-                    """
-                    iget-object v$freeRegisterOne, v$selfClassRegister, $appActivityField
-                    invoke-static {v$freeRegisterOne,v$buttonAdderInstanceRegister,v$mediaObjectRegister},$REEL_BUTTON_DESCRIPTOR->addReelButton(Landroid/content/Context;Ljava/lang/Object;Ljava/lang/Object;)V
-                    """.trimIndent(),
                 )
             }
 

@@ -26,7 +26,7 @@ import app.morphe.extension.instagram.entity.UserData;
 
 public class MoreOptionsOnPostPatch {
 
-    public static void postOnLongPress(Context context, Object mediaObject, int currentMediaIndex) {
+    public static void postMoreOptions(Context context, Object mediaObject, int currentMediaIndex) {
         try {
             MediaData mediaData = new MediaData(mediaObject);
 
@@ -68,7 +68,7 @@ public class MoreOptionsOnPostPatch {
                             Utils.showToastShort(Strings.COPIED);
                         }
                     } catch (Exception e) {
-                        Logger.printException(() -> "Error at postOnLongPress addDialogMenuItems", e);
+                        Logger.printException(() -> "Error at postMoreOptions addDialogMenuItems", e);
                         Utils.showToastShort(e.getMessage());
                     }
                 }
@@ -83,7 +83,7 @@ public class MoreOptionsOnPostPatch {
 
 
         } catch (Exception e) {
-            Logger.printException(() -> "postOnLongPress failure", e);
+            Logger.printException(() -> "postMoreOptions failure", e);
         }
     }
 

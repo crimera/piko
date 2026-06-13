@@ -13,6 +13,7 @@ import app.crimera.patches.instagram.misc.download.FeedButtonOnClickFingerprint
 import app.crimera.patches.instagram.misc.overflowMenuButton.addOverflowMenuButtonAttributes
 import app.crimera.patches.instagram.misc.overflowMenuButton.debugOverflowButton.debugOverflowMenuButtonPatch
 import app.crimera.patches.instagram.misc.overflowMenuButton.hookOverflowMenuButton
+import app.crimera.patches.instagram.misc.overflowMenuButton.reels.hookReelOverflowMenuButton
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.FEED_OVERFLOW_MENU_BUTTON_CLASS
@@ -33,7 +34,7 @@ val moreOptionsOnPostPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(settingsPatch, decoderEntity, hookOverflowMenuButton, debugOverflowMenuButtonPatch)
+        dependsOn(settingsPatch, decoderEntity, hookOverflowMenuButton, debugOverflowMenuButtonPatch, hookReelOverflowMenuButton)
         execute {
 
             val EXTENSION_CLASS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/feed/MoreOptionsOnPostPatch;"
@@ -68,7 +69,7 @@ val moreOptionsOnPostPatch =
                     iget-object v4, v0, $mediaExtraDataField
                     iget v4, v4, $CURRENT_MEDIA_FIELD
                     
-                    invoke-static {v5, v2, v4}, $EXTENSION_CLASS_DESCRIPTOR->postOnLongPress(Landroid/content/Context;Ljava/lang/Object;I)V
+                    invoke-static {v5, v2, v4}, $EXTENSION_CLASS_DESCRIPTOR->postMoreOptions(Landroid/content/Context;Ljava/lang/Object;I)V
                     return-void
                     """.trimIndent(),
                     ExternalLabel("piko", getInstruction(0)),

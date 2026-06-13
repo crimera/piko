@@ -27,7 +27,7 @@ public class UserProfileActionBar {
 
                 Context context = viewGroup.getContext();
                 UserData userData = new UserData(userObject);
-                UI.addImageViewToViewGroup(viewGroup, "instagram_info_outline_24", () -> ProfileMoreOption.moreOptionsDailogueBox(context, userData));
+                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_INFO_ICON, () -> ProfileMoreOption.moreOptionsDailogueBox(context, userData));
             }
 
         } catch (Exception e) {

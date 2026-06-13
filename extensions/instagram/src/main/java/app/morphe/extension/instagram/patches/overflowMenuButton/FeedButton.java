@@ -25,6 +25,7 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
+import app.morphe.extension.instagram.constants.UI;
 
 import com.instagram.feed.media.mediaoption.MediaOption$Option;
 
@@ -36,15 +37,15 @@ public class FeedButton {
     }
 
     public static MediaOption$Option downloadOverflowButton(){
-        return FeedButton.initOverflowButton("PIKO_DOWNLOAD", 500, "instagram_download_outline_24");
+        return FeedButton.initOverflowButton("PIKO_DOWNLOAD", 500, UI.DRAWABLE_DOWNLOAD_ICON);
     }
 
     public static MediaOption$Option morePostOptionOverflowButton(){
-        return FeedButton.initOverflowButton("PIKO_MORE_POST_OPTION", 501, "instagram_info_outline_24");
+        return FeedButton.initOverflowButton("PIKO_MORE_POST_OPTION", 501, UI.DRAWABLE_INFO_ICON);
     }
 
     public static MediaOption$Option debugOverflowButton(){
-        return FeedButton.initOverflowButton("PIKO_DEBUG", 502, "instagram_app_instagram_pano_outline_24");
+        return FeedButton.initOverflowButton("PIKO_DEBUG", 502, UI.DRAWABLE_DEBUG_ICON);
     }
 
     public static MediaOption$Option[] addToMenuOptionArray() {
@@ -112,10 +113,10 @@ public class FeedButton {
 
     public static void addFeedOverflowButton(Object buttonAdderObject, ArrayList buttonlist){
         try {
-            if(Pref.enableDownload() && SettingsStatus.downloadMedia) {
+            if(Pref.enableDownload()) {
                 addDownloadButton(buttonAdderObject, buttonlist);
             }
-            if(Pref.moreOptionsOnPost() && SettingsStatus.moreOptionsOnPost) {
+            if(Pref.moreOptionsOnPost()) {
                 addButton(MediaOption$Option.PIKO_MORE_POST_OPTION, Strings.POST_OPTIONS, buttonAdderObject, buttonlist);
             }
             if(Pref.pikoDebug()){
