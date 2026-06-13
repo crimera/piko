@@ -10,6 +10,7 @@ import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
 import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundDataIntfEntity
 import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
+import app.crimera.patches.instagram.entity.videoData.videoDataEntity
 import app.crimera.patches.instagram.misc.directMessage.saveAllMessages.saveAllMessagesPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
 import app.crimera.patches.instagram.misc.overflowMenuButton.posts.addOverflowMenuButtonAttributes
@@ -36,6 +37,7 @@ val downloadMediaPatch =
         dependsOn(
             settingsPatch,
             mediaDataEntity,
+            videoDataEntity,
             handleStoryButtonPatch,
             originalSoundDataIntfEntity,
             trackDataIntfEntity,

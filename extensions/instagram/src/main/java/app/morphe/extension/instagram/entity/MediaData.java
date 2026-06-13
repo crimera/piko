@@ -34,6 +34,19 @@ public class MediaData extends Entity {
         return super.getField("fieldName");
     }
 
+    private List<MediaData> getCarouselMediaData() throws Exception {
+        List<MediaData> carouselMediaData = new ArrayList<>();
+        List<Object> mediaList = this.getMediaList();
+        if (mediaList.isEmpty()){
+            carouselMediaData.add(new MediaData(this.obj));
+        } else {
+            mediaList.forEach(item->{
+                carouselMediaData.add(new MediaData(item));
+            });
+        }
+        return carouselMediaData;
+    }
+
     public String getMediaPkId() throws Exception {
         return (String) super.getMethod("methodName");
     }
@@ -112,11 +125,10 @@ public class MediaData extends Entity {
     }
 
     public MediaData getMediaAt(int position) throws Exception {
-        List<Object> mediaList = this.getMediaList();
-        if (mediaList.isEmpty()) return new MediaData(this.obj);
+        List<MediaData> mediaList = this.getCarouselMediaData();
 
         int safePosition = Math.max(0, Math.min(position, mediaList.size() - 1));
-        return new MediaData(mediaList.get(safePosition));
+        return mediaList.get(safePosition);
     }
 
     private Object getMoreExtendedData() throws Exception {
