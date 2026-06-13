@@ -6,7 +6,7 @@ on:
     branches:
       - main
       - dev
-      
+
 permissions:
   contents: read
 

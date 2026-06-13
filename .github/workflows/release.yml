@@ -22,8 +22,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
 
       - name: Cache Gradle
         uses: burrunan/gradle-cache-action@v3
@@ -31,8 +31,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 'lts/*'
-          cache: 'npm'
+          node-version: "lts/*"
+          cache: "npm"
 
       - name: Install dependencies
         run: npm install
@@ -54,5 +54,5 @@ jobs:
         if: steps.release.outputs.new_release_published == 'true'
         uses: actions/attest-build-provenance@v3
         with:
-          subject-name: 'Piko Patches ${{ steps.release.outputs.new_release_git_tag }}'
+          subject-name: "Piko Patches ${{ steps.release.outputs.new_release_git_tag }}"
           subject-path: patches/build/libs/patches-*.mpp
