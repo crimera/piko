@@ -50,6 +50,9 @@ public class StoryButton {
                 buttonList.add(Strings.DOWNLOAD_OPTIONS);
             }
         }
+        if(Pref.downloadWithExternalDownloader()){
+            buttonList.add(Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER);
+        }
 
         return buttonList;
     }
@@ -64,6 +67,10 @@ public class StoryButton {
                 return true;
             } else if (buttonText.equals(Strings.PIKO_DEBUG)) {
                 ObjectBrowser.browseObject(ctx, new MediaData(mediaObject));
+                return true;
+            } else if (buttonText.equals(Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER)) {
+                DownloadUtils.externalDownloader(mediaObject,0);
+
                 return true;
             }
         } catch (Exception ex) {

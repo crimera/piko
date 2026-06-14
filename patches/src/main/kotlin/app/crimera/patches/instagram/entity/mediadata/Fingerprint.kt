@@ -95,6 +95,11 @@ internal object GetMoreExtendedDataExtensionFingerprint : Fingerprint(
     name = "getMoreExtendedData",
 )
 
+internal object GetPostTypeExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getPostType",
+)
+
 // -----------------------------------
 internal object ReelsInlineQualitySurveyRelatedFingerprint : Fingerprint(
     strings = listOf("reels_inline_quality_survey"),
@@ -187,4 +192,14 @@ internal object GetProductTileMediaFromUserSessionFingerprint : Fingerprint(
     definingClass = "Lcom/instagram/model/shopping/productfeed/ProductTile;",
     parameters = listOf(USER_SESSION_CLASS),
     returnType = "Lcom/instagram/model/shopping/productfeed/ProductTileMedia;",
+)
+
+internal object ProductInfoMapperFingerprint : Fingerprint(
+    strings =
+        listOf(
+            "product_suggestions",
+            "product_tags",
+            "product_type",
+        ),
+    returnType = "Ljava/util/Map;",
 )

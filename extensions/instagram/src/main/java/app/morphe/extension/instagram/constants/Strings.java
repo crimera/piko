@@ -21,6 +21,10 @@ public class Strings {
     public static final String DEFAULT_AUDIO_FOLDER = "Audio";
     public static final String DEFAULT_DM_FOLDER = "DM";
     public static final String DEFAULT_GIF_FOLDER = "Gif";
+    public static final String INSTAGRAM_SHARE_LINK = "https://www.instagram.com/%s/%s/";
+    // https://www.instagram.com/p/<short code>/
+    // https://www.instagram.com/reel/<short code>/
+    // https://www.instagram.com/stories/<user name>/<post id>
 
     public static final String PIKO_SETTINGS_TITLE = langInstance.PIKO_SETTINGS_TITLE;
     public static final String CATEGORY_ADS = langInstance.CATEGORY_ADS;
@@ -150,6 +154,9 @@ public class Strings {
     public static final String DOWNLOAD_SET_PATH_FAILED = langInstance.DOWNLOAD_SET_PATH_FAILED;
     public static final String DOWNLOAD_GRANT_PERMISSION = langInstance.DOWNLOAD_GRANT_PERMISSION;
     public static final String DOWNLOAD_GRANT_PERMISSION_FAILED = langInstance.DOWNLOAD_GRANT_PERMISSION_FAILED;
+    public static final String DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = langInstance.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER;
+    public static final String EXTERNAL_DOWNLOADER_PACKAGE_NAME = langInstance.EXTERNAL_DOWNLOADER_PACKAGE_NAME;
+    public static final String EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = langInstance.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND;
 
     public static final String POST_OPTIONS = langInstance.POST_OPTIONS;
     public static final String COPY_POST_DESCRIPTION = langInstance.COPY_POST_DESCRIPTION;

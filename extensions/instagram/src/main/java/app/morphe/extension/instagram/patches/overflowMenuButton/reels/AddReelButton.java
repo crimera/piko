@@ -26,6 +26,7 @@ import app.morphe.extension.instagram.patches.overflowMenuButton.reels.buttons.R
 import app.morphe.extension.instagram.patches.overflowMenuButton.reels.buttons.DownloadButton;
 import app.morphe.extension.instagram.patches.overflowMenuButton.reels.buttons.DebugButton;
 import app.morphe.extension.instagram.patches.overflowMenuButton.reels.buttons.InfoButton;
+import app.morphe.extension.instagram.patches.overflowMenuButton.reels.buttons.ExternalDownloadButton;
 
 public class AddReelButton {
 
@@ -85,12 +86,25 @@ public class AddReelButton {
 
     }
 
+    private static void addExternalDownloadButton(Context context, Object helperObject, Object mediaObject){
+        String icon = UI.DRAWABLE_DOWNLOAD_ICON;
+        ReelButton reelButton = new ExternalDownloadButton(context,mediaObject);
+        String buttonText = Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER;
+
+        ReelOverflowButton reelOverflowButton = new ReelOverflowButton(icon,reelButton,buttonText);
+
+        AddReelButton.addReelButton(context,reelOverflowButton,helperObject);
+    }
+
     public static void includeCustomReelOverflowButtons(Context context, Object helperObject, Object mediaObject){
         if(Pref.pikoDebug()){
             AddReelButton.addDebugButton(context, helperObject, mediaObject);
         }
         if(Pref.enableDownload()){
             AddReelButton.addDownloadButton(context, helperObject, mediaObject);
+        }
+        if(Pref.downloadWithExternalDownloader()){
+            AddReelButton.addExternalDownloadButton(context, helperObject, mediaObject);
         }
         if(Pref.moreOptionsOnPost()){
             AddReelButton.addInfoButton(context, helperObject, mediaObject);

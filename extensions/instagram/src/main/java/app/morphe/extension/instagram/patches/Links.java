@@ -6,18 +6,23 @@
 
 
 package app.morphe.extension.instagram.patches;
-import android.net.Uri;
 
+import android.net.Uri;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Arrays;
 
 import app.morphe.extension.instagram.entity.Entity;
+import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.instagram.constants.PostType;
+import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.crimera.PikoUtils;
+
 import app.morphe.extension.instagram.settings.ActivityHook;
 
 @SuppressWarnings("unused")
@@ -164,6 +169,31 @@ public class Links {
             Logger.printException(() -> "Handle signature failed: ", e);
         }
         return false;
+    }
+
+    public static String generatePostLink(Object mediaObject, int position) throws Exception {
+        MediaData mediaData = new MediaData(mediaObject);
+
+        String postShortCode = mediaData.getShortcode();
+        PostType postType = mediaData.getPostType();
+
+        String shortTag = "p";
+        if(postType.equals(PostType.REEL)){
+            shortTag = "reel";
+        } else if(postType.equals(PostType.STORY)){
+            shortTag = "stories";
+            postShortCode = mediaData.getUserData().getUsername();
+        }
+
+        String link = String.format(Strings.INSTAGRAM_SHARE_LINK, shortTag, postShortCode);
+
+        if(postType.equals(PostType.STORY)){
+            String postID = mediaData.getPostID();
+            link+=postID;
+        } else if(postType.equals(PostType.CAROUSEL)){
+            link+="?img_index="+String.valueOf(position+1);
+        }
+        return link;
     }
 
 }

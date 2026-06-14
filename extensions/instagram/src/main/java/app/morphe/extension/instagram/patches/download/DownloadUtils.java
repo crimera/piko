@@ -29,6 +29,7 @@ import app.morphe.extension.instagram.entity.MediaInterface;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.crimera.downloader.MediaDownloader;
 import app.morphe.extension.crimera.downloader.DownloadRequest;
@@ -236,4 +237,14 @@ public class DownloadUtils {
         downloader.enqueue(new DownloadRequest(mediaUrl, subFolder, fileName));
     }
 
+    public static void externalDownloader(Object mediaObject, int currentMediaIndex){
+        try {
+            String link = Links.generatePostLink(mediaObject, currentMediaIndex);
+            String packageName = Pref.externalDownloaderPackageName();
+            ActivityHook.openLink(link, packageName);
+        } catch (Exception e){
+            PikoUtils.logger(e);
+            Logger.printException(() -> "Error at externalDownloader", e);
+        }
+    }
 }

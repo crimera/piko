@@ -16,6 +16,8 @@ import android.content.Context;
 
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.instagram.constants.PostType;
+
 import com.instagram.common.session.UserSession;
 
 public class MediaData extends Entity {
@@ -40,6 +42,60 @@ public class MediaData extends Entity {
 
     private Object getExtendedData() throws Exception {
         return super.getField("fieldName");
+    }
+
+    public String getShortcode() {
+        long instaId = Long.valueOf(this.getPostID());
+
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+        // Handle the edge case where the ID is 0
+        if (instaId == 0) {
+            return String.valueOf(alphabet.charAt(0));
+        }
+
+        StringBuilder shortCode = new StringBuilder();
+
+        while (instaId > 0) {
+            int remainder = (int) (instaId % 64);
+            shortCode.append(alphabet.charAt(remainder));
+            instaId = instaId / 64;
+        }
+
+        return shortCode.reverse().toString();
+    }
+
+    public String getPostID() {
+        try {
+            String postId_ts = (String) super.getMethod(this.getExtendedData(), "getId");
+            return postId_ts.split("_")[0];
+        } catch (Exception e) {
+        }
+        return "0";
+    }
+
+    public PostType getPostType() {
+        try{
+            String postType = this.getPostTypeKey().toLowerCase();
+            //TODO: for some reason clips are not recogonised.
+            // Need to fix it later.
+            if(postType.equals("clips")){
+                return PostType.REEL;
+            }
+            if(postType.equals("story")){
+                return PostType.STORY;
+            }
+            if(postType.contains("carousel")){
+                return PostType.CAROUSEL;
+            }
+        } catch (Exception e) {
+
+        }
+        return PostType.POST;
+    }
+
+    private String getPostTypeKey() throws Exception {
+        return (String) super.getField(this.getMoreExtendedData(), "A7Q");
     }
 
     private List<MediaData> getCarouselMediaData() throws Exception {
