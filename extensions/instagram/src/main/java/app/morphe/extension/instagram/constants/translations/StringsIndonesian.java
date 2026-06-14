@@ -140,6 +140,9 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DOWNLOAD_SET_PATH_FAILED = "Gagal menemukan jalur folder";
 		this.DOWNLOAD_GRANT_PERMISSION = "Silakan berikan izin penyimpanan untuk melanjutkan pengunduhan";
 		this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Tidak dapat membuka pengaturan. Silakan berikan izin Akses Semua Berkas secara manual";
+		this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Unduh menggunakan pengunduh eksternal";
+		this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "Nama paket pengunduh eksternal";
+		this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "Nama paket pengunduh eksternal tidak ditemukan";
 		
 		this.POST_OPTIONS = "Pilihan postingan";
 		this.COPY_POST_DESCRIPTION = "Salin deskripsi postingan";
@@ -188,8 +191,9 @@ public class StringsIndonesian extends DefaultStrings {
 		this.AVAILABLE_LIKE_ANIMATION = "Animasi suka yang tersedia";
 
 		this.DEFAULT = "Bawaan";
-		this.ARR_DETAILED_TIMESTAMP = "Stempel waktu secara terperinci";
-		this.ARR_TIME_LEFT = "Waktu tersisa";
+		this.ARR_DETAILED_TIMESTAMP = "Stempel waktu terperinci (Hari Kerja/Bulan/Tanggal/Jam/Menit/Detik)";
+		this.ARR_POST_TIME = "Waktu posting (Jam/Menit/Detik)";
+		this.ARR_TIME_LEFT = "Waktu tersisa (Jam/Menit/Detik tersisa)";
 		
 		this.WELCOME_TITLE = "Selamat datang di Piko";
 		this.WELCOME_MESSAGE = "Untuk meningkatkan pengalaman Anda menggunakan Piko, silakan buka pengaturan Piko dan sesuaikan preferensi Anda";
