@@ -11,11 +11,12 @@ import android.preference.EditTextPreference;
 import android.util.AttributeSet;
 import android.preference.Preference;
 import android.text.InputType;
+import android.view.View;
+import android.view.ViewGroup;
 import app.morphe.extension.instagram.settings.preference.Helper;
 
 public class EditTextPref extends EditTextPreference {
     private static Helper helper;
-    private boolean numericOnly = false;
 
     public EditTextPref(Context context) {
         super(context);
@@ -34,7 +35,6 @@ public class EditTextPref extends EditTextPreference {
         init();
     }
     public void setNumericOnly(boolean numericOnly) {
-        this.numericOnly = numericOnly;
         if (numericOnly) {
             getEditText().setInputType(InputType.TYPE_CLASS_NUMBER);
             getEditText().setSingleLine(true);
@@ -52,5 +52,15 @@ public class EditTextPref extends EditTextPreference {
                 return true;
             }
         });
+    }
+
+    @Override
+    protected View onCreateView(ViewGroup parent) {
+        return InstagramPreferenceStyle.createPreferenceView(getContext(), InstagramPreferenceStyle.TRAILING_CHEVRON);
+    }
+
+    @Override
+    protected void onBindView(View view) {
+        InstagramPreferenceStyle.bindText(this, view);
     }
 }

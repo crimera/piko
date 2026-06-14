@@ -40,7 +40,8 @@ public class ScreenBuilder {
     }
 
     private PreferenceCategory addCategory(String title) {
-        PreferenceCategory preferenceCategory = new PreferenceCategory(context);
+        CategoryPref preferenceCategory = new CategoryPref(context);
+        preferenceCategory.setFirstCategory(screen.getPreferenceCount() == 0);
         preferenceCategory.setTitle(title);
         screen.addPreference(preferenceCategory);
         return preferenceCategory;
