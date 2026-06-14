@@ -25,7 +25,7 @@ public class UserProfileButton {
             ProfileInfo profileInfo = new ProfileInfo(object);
             Boolean isSelfProfile = profileInfo.isSelfProfile();
 
-            if(!Pref.enableMoreOptionsOnProfileQuickToggle()){
+            if(!Pref.enableMoreOptionsOnProfileQuickToggle() && Pref.isMoreOptionsOnProfilePatched()){
                 ProfileMoreOption.addProfileMoreOptionsButton(viewGroup, profileInfo);
             }
 

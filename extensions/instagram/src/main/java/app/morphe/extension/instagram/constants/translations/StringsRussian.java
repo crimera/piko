@@ -30,6 +30,8 @@ public class StringsRussian extends DefaultStrings {
         this.IMPORT_DEV_OVERRIDES = "Импорт замещений";
         this.IMPORT_ID_MAPPING = "Импорт файлов связей";
         this.DOWNLOAD_ID_MAPPING = "Скачать файл сопоставления";
+        this.MISSING_MAPPING_FILE = "Отсутствует файл сопоставления";
+        this.MISSING_MAPPING_FILE_DESC = "Без файла сопоставления параметры разработчика не будут иметь правильных имён. Хотите скачать его?";
 
         this.CATEGORY_LINKS = "Ссылки";
         this.OPEN_LINKS_EXTERNALLY = "Открывать ссылки во внешнем браузере";
@@ -45,6 +47,8 @@ public class StringsRussian extends DefaultStrings {
         this.TURN_ON_ALL_GHOST_MODES = "Включить все режимы невидимки";
         this.GHOST_MODES_ON = "Режим невидимки: ВКЛ";
         this.GHOST_MODES_DEFAULT = "Режим невидимки: ПО УМОЛЧАНИЮ";
+        this.GHOST_MODES_QUICK_TOGGLE = "Включить быстрое переключение режимов невидимки";
+        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Добавляет переключатель в панель действий чата для быстрого управления режимами невидимки";
 
         this.CATEGORY_DISTRACTION_FREE = "Без отвлечений";
         this.DISABLE_STORIES = "Отключить истории";
@@ -60,8 +64,8 @@ public class StringsRussian extends DefaultStrings {
         this.HIDE_NOTES_TRAY = "Скрыть панель заметок";
         this.HIDE_NOTES_TRAY_DESC = "Скрывает панель заметок в разделе сообщений";
         this.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = "Скрыть кнопку создания группы в меню отправки";
-        this.DISABLE_DOUBLE_TAP_LIKE_POST = "Отключить двойное нажатие для отметки «Нравится» на записи";
-        this.DISABLE_DOUBLE_TAP_LIKE_REEL = "Отключить двойное нажатие для отметки «Нравится» на ролике";
+        this.DISABLE_DOUBLE_TAP_LIKE_POST = "Отключить двойное нажатие для отметки «Нравится» на публикации";
+        this.DISABLE_DOUBLE_TAP_LIKE_REEL = "Отключить двойное нажатие для отметки «Нравится» на Reels";
         this.DISABLE_DOUBLE_TAP_LIKE_COMMENT = "Отключить двойное нажатие для отметки «Нравится» на комментарии";
         this.DISABLE_DOUBLE_TAP_LIKE_MESSAGE = "Отключить двойное нажатие для отметки «Нравится» на сообщении";
 
@@ -85,13 +89,15 @@ public class StringsRussian extends DefaultStrings {
         this.CUSTOMISE_STORY_TIMESTAMP_DESC = "Настроить отображение времени публикации истории";
         this.UNLIMITED_REPLAYS = "Сделать временное медиа постоянным";
         this.UNLIMITED_REPLAYS_DESC = "Изменяет содержимое с однократным или двукратным просмотром на постоянное";
-        this.IMPROVE_IMAGE_VIEWING = "Улучшить просмотр изображений";
-        this.IMPROVE_IMAGE_VIEWING_DESC = "Загружать с сервера изображения максимального разрешения";
+        this.IMPROVE_IMAGE_VIEWING = "Улучшить качество медиа";
+        this.IMPROVE_IMAGE_VIEWING_DESC = "Загружать с сервера медиафайлы в максимальном качестве";
         this.HIDE_RESHARE_BUTTON = "Скрыть кнопку «Поделиться»";
         this.COPY_COMMENT = "Скопировать комментарий";
         this.COPY_COMMENT_DESC = "Добавляет кнопку для копирования комментариев в публикациях и Reels";
         this.COMMENT_COPIED_SUCCESS = "Комментарий скопирован";
         this.COMMENT_COPIED_FAILED = "Не найдено текста для копирования";
+        this.SAVE_MEDIA_COMMENT = "Сохранить медиа-комментарий";
+        this.SAVE_MEDIA_COMMENT_DESC = "Добавляет кнопку для сохранения медиа-комментариев в публикациях и Reels";
         this.COPY_USERNAME = "Скопировать имя пользователя";
         this.COPY_FULL_NAME = "Скопировать полное имя";
         this.COPY_USER_ID = "Скопировать идентификатор пользователя";
@@ -99,40 +105,44 @@ public class StringsRussian extends DefaultStrings {
         this.DOWNLOAD_PROFILE_PICTURE = "Загрузить изображение профиля";
         this.COPIED = "Скопировано";
         this.MORE_PROFILE_OPTIONS = "Дополнительные действия с профилем";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "Действия с профилем на панели действий";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "Переместить кнопку действий с профилем на панель действий профиля";
         this.REMOVE_EMPTY_BOTTOM_SPACE = "Убрать пустое пространство внизу";
         this.UNLOCK_PLUS_BENEFITS = "Разблокировать возможности подписки «Плюс»";
         this.UNLOCK_PLUS_BENEFITS_DESC = "Разблокировать преимущества подписки «Плюс», которые проверяются локально. ИСПОЛЬЗУЙТЕ НА СВОЙ СТРАХ И РИСК";
         this.CUSTOMISE_STORY_RING_SIZE = "Настроить размер кольца истории";
+        this.CUSTOMISE_STORY_RING_SIZE_DESC = "Изменить размер кольца истории в процентах (по умолчанию 100)";
 
-        this.CATEGORY_DOWNLOAD_MEDIA = "Загрузка медиа";
-        this.ENABLE_DOWNLOAD = "Включить загрузку";
-        this.ENABLE_DIRECT_DOWNLOAD = "Включить прямую загрузку";
-        this.ENABLE_DIRECT_DOWNLOAD_DESC = "Загружает просматриваемое медиа без дополнительных вопросов";
+        this.CATEGORY_DOWNLOAD_MEDIA = "Скачивание медиа";
+        this.ENABLE_DOWNLOAD = "Включить скачивание";
+        this.ENABLE_DIRECT_DOWNLOAD = "Включить прямое скачивание";
+        this.ENABLE_DIRECT_DOWNLOAD_DESC = "Скачивает просматриваемое медиа без дополнительных вопросов";
         this.DOWNLOAD_USERNAME_FOLDER = "Сортировать медиа по папкам пользователей";
         this.DOWNLOAD_USERNAME_FOLDER_DESC = "Создаёт вложенные папки по имени пользователя";
-        this.DOWNLOAD_CURRENT_MEDIA = "Загрузить текущее медиа";
-        this.DOWNLOAD_AS_IMAGE = "Загрузить как изображение";
+        this.DOWNLOAD_CURRENT_MEDIA = "Скачать текущее медиа";
+        this.DOWNLOAD_AS_IMAGE = "Скачать как изображение";
         this.VIDEO_VARIANTS = "Варианты видео";
-        this.DOWNLOAD_AUDIO = "Загрузить звук";
-        this.DOWNLOAD_OPTIONS = "Настройки загрузки";
+        this.IMAGE_VARIANTS = "Варианты изображений";
+        this.DOWNLOAD_AUDIO = "Скачать звук";
+        this.DOWNLOAD_OPTIONS = "Настройки скачивания";
         this.COPY_MEDIA_LINK = "Скопировать ссылку на медиа";
         this.COPIED_MEDIA_LINK = "Ссылка на медиа скопирована";
-        this.DOWNLOAD_ALL = "Загрузить всё";
-        this.DOWNLOADING_MEDIA = "Загрузка: ";
-        this.DOWNLOADED_MEDIA = "Загружено: ";
+        this.DOWNLOAD_ALL = "Скачать всё";
+        this.DOWNLOADING_MEDIA = "Скачивание: ";
+        this.DOWNLOADED_MEDIA = "Скачано: ";
         this.MEDIA_EXISTS = "Медиа существует";
-        this.DOWNLOAD_FAILED_MEDIA = "Ошибка загрузки: ";
-        this.DOWNLOAD_SET_PATH = "Указать свой путь для загрузки";
-        this.DOWNLOAD_SET_PATH_SUCCESS = "Папка для загрузок обновлена!";
+        this.DOWNLOAD_FAILED_MEDIA = "Ошибка скачивания: ";
+        this.DOWNLOAD_SET_PATH = "Указать свой путь для скачивания";
+        this.DOWNLOAD_SET_PATH_SUCCESS = "Папка для скачиваний обновлена!";
         this.DOWNLOAD_SET_PATH_FAILED = "Не удалось определить путь к папке";
-        this.DOWNLOAD_GRANT_PERMISSION = "Предоставьте доступ к хранилищу для продолжения загрузки";
+        this.DOWNLOAD_GRANT_PERMISSION = "Предоставьте доступ к хранилищу для продолжения скачивания";
         this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Не удалось открыть настройки. Пожалуйста, предоставьте доступ ко всем файлам вручную";
 
-        this.POST_OPTIONS = "Действия с записью";
-        this.COPY_POST_DESCRIPTION = "Скопировать описание записи";
-        this.COPY_POST_OWNER_USERNAME = "Скопировать имя пользователя автора записи";
-        this.COPY_POST_OWNER_FULLNAME = "Скопировать полное имя автора записи";
-        this.ENABLE_MORE_OPTIONS_ON_POST = "Включить дополнительные действия над записью";
+        this.POST_OPTIONS = "Действия с публикацией";
+        this.COPY_POST_DESCRIPTION = "Скопировать описание публикации";
+        this.COPY_POST_OWNER_USERNAME = "Скопировать имя пользователя автора публикации";
+        this.COPY_POST_OWNER_FULLNAME = "Скопировать полное имя автора публикации";
+        this.ENABLE_MORE_OPTIONS_ON_POST = "Включить дополнительные действия над публикацией";
         this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Показывать больше действий при долгом нажатии на публикацию";
 
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Скрыть кнопки навигации";
@@ -156,6 +166,7 @@ public class StringsRussian extends DefaultStrings {
         this.IMPORT_FAIL = "Не удалось выполнить импорт";
         this.RESTART_APP = "Для применения изменений необходимо перезапустить приложение";
         this.OK = "Хорошо";
+        this.CANCEL = "Отмена";
         this.DELETED = "Удалено";
         this.PIKO_DEBUG = "Отладка Piko";
         this.PIKO_DEBUG_DESC = "Добавляет отладочные действия к некоторым элементам для проверки";
@@ -180,5 +191,7 @@ public class StringsRussian extends DefaultStrings {
         this.GOTO_PIKO_SETTINGS = "Перейти в настройки Piko";
         this.NO_INTERNET = "Пожалуйста, подключитесь к интернету";
         this.TAP_HERE = "Нажмите здесь !!";
+        this.PIKO_SETTINGS_ON_ACTION_BAR = "Настройки Piko на панели действий";
+        this.PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Переместить точку входа в настройки Piko на панель действий главной ленты";
     }
 }

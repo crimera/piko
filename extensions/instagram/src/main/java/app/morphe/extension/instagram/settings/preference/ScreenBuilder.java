@@ -40,7 +40,8 @@ public class ScreenBuilder {
     }
 
     private PreferenceCategory addCategory(String title) {
-        PreferenceCategory preferenceCategory = new PreferenceCategory(context);
+        CategoryPref preferenceCategory = new CategoryPref(context);
+        preferenceCategory.setFirstCategory(screen.getPreferenceCount() == 0);
         preferenceCategory.setTitle(title);
         screen.addPreference(preferenceCategory);
         return preferenceCategory;
@@ -487,7 +488,7 @@ public class ScreenBuilder {
             addPreference(category,
                     helper.editTextNumPreference(
                             Strings.CUSTOMISE_STORY_RING_SIZE,
-                            "",
+                            Strings.CUSTOMISE_STORY_RING_SIZE_DESC,
                             Settings.CUSTOMISE_STORY_RING_SIZE
                     ));
         }
@@ -527,6 +528,15 @@ public class ScreenBuilder {
                             Strings.COPY_COMMENT,
                             Strings.COPY_COMMENT_DESC,
                             Settings.COMMENT_COPY_BUTTON
+                    )
+            );
+        }
+        if (SettingsStatus.saveMediaCommentButton) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.SAVE_MEDIA_COMMENT,
+                            Strings.SAVE_MEDIA_COMMENT_DESC,
+                            Settings.COMMENT_SAVE_MEDIA_BUTTON
                     )
             );
         }

@@ -73,11 +73,11 @@ public class MediaData extends Entity {
         return mediaPkId + extension;
     }
 
-    public String getVideoVariantFileName(VideoData videoData) throws Exception {
+    public String getVariantFileName(MediaInterface mediaIntfData) throws Exception {
         String mediaPkId = this.getMediaPkId();
-        String variantTag = videoData.getVideoVariantTag();
-        String extension = this.getMediaExtension(MediaType.VIDEO);
-        return mediaPkId + "_" +variantTag +extension;
+        String variantTag = mediaIntfData.getVariantTag();
+        String extension = this.getMediaExtension(mediaIntfData.getMediaType());
+        return mediaPkId + "_" +variantTag + extension;
     }
 
     public UserData getUserData() throws Exception {
@@ -85,7 +85,7 @@ public class MediaData extends Entity {
         return new UserData(userData);
     }
 
-    public HashSet getMentionSet() throws Exception {
+    public HashSet<UserData> getMentionSet() throws Exception {
         Object result =  super.getMethod(this.getExtendedData(), "methodName");
         if (result != null) {
             List userInteractionList = (List) result;
@@ -127,18 +127,46 @@ public class MediaData extends Entity {
         return photoLink != null ? (String) photoLink : null;
     }
 
-    public List getVideoVariants() throws Exception {
+    private Object getMoreExtendedData() throws Exception {
+        return super.getField(this.getExtendedData(), "fieldName");
+    }
+
+    private List getVideoVariantsV1() throws Exception {
         Object variantObject = super.getMethod(this.getExtendedData(), "methodName");
         if (variantObject != null){
             List variantList = (List) variantObject;
+
             List<VideoData> videoList = new ArrayList<>();
-
             variantList.forEach(item -> videoList.add(new VideoData(item)));
-
             return videoList;
 
         }
         return null;
+    }
+
+    private List getVideoVariantsV2() throws Exception {
+        List variantList = (List) super.getField(this.getMoreExtendedData(), "fieldName");
+
+        List<VideoData> videoList = new ArrayList<>();
+        variantList.forEach(item -> videoList.add(new VideoData(item)));
+        return videoList;
+    }
+
+    public List getVideoVariants() throws Exception {
+        try {
+            return this.getVideoVariantsV2();
+        } catch (Exception e) {
+            return this.getVideoVariantsV1();
+        }
+    }
+
+    public List getImageVariants() throws Exception {
+        Object imageInfoObject = (Object) super.getField(this.getMoreExtendedData(), "fieldName");
+        List variantList = (List) super.getMethod(imageInfoObject, "methodName");
+
+        List<ImageData> imageList = new ArrayList<>();
+        variantList.forEach(item -> imageList.add(new ImageData(item)));
+        return imageList;
     }
 
     public String getVideoLink() throws Exception {

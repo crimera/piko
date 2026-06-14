@@ -18,8 +18,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import java.util.ArrayList;
 
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.utils.Pref;
-import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.shared.Logger;
@@ -169,7 +169,7 @@ public class UI {
                         String selectedOption = options.get(which);
 
                         if (selectedOption.equals(Strings.GOTO_PIKO_SETTINGS)) {
-                            ActivityHook.openLink("instagram://profile");
+                            PikoUtils.openUrl("instagram://profile");
                         }
                     }
                 } catch (Exception e) {

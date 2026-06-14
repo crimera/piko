@@ -6,7 +6,9 @@
 
 package app.morphe.extension.twitter.settings;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -17,6 +19,7 @@ import android.view.View;
 import android.view.Window;
 import androidx.appcompat.widget.Toolbar;
 
+import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
@@ -27,9 +30,12 @@ import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderMode
 
 @SuppressWarnings("deprecation")
 public class ActivityHook {
+    @SuppressLint("StaticFieldLeak")
     public static Toolbar toolbar;
+    private static final String AUTHORIZE_ACTIVITY_CLASS = "com.twitter.android.AuthorizeAppActivity";
     private static final String EXTRA_PIKO = "piko";
     private static final String EXTRA_PIKO_SETTINGS = EXTRA_PIKO + "_settings";
+    private static final String PIKO_PREF_KEY = "pref_mod";
 
     public static boolean create(Activity act) {
         Intent intent = act.getIntent();
@@ -39,14 +45,15 @@ public class ActivityHook {
         Window window = act.getWindow();
 
         if (Build.VERSION.SDK_INT >= 35) {
+            View decorView = window.getDecorView();
             int uiMode = act.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
             if (uiMode == Configuration.UI_MODE_NIGHT_YES) {
-                window.getDecorView().setSystemUiVisibility(window.getDecorView().getSystemUiVisibility() & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                decorView.setSystemUiVisibility(decorView.getSystemUiVisibility() & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             } else {
-                window.getDecorView().setSystemUiVisibility(window.getDecorView().getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                decorView.setSystemUiVisibility(decorView.getSystemUiVisibility() | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
             }
 
-            window.getDecorView().setOnApplyWindowInsetsListener((v, insets) -> {
+            decorView.setOnApplyWindowInsetsListener((v, insets) -> {
                 int statusBarHeight = insets.getSystemWindowInsetTop();
                 int navBarHeight = insets.getSystemWindowInsetBottom();
 
@@ -56,28 +63,25 @@ public class ActivityHook {
             });
         }
 
-        Fragment fragment = null;
+        Fragment fragment;
         boolean addToBackStack = false;
         String activity_name = bundle != null ? bundle.getString(Settings.ACT_NAME) : null;
 
-        if (activity_name.equals(EXTRA_PIKO_SETTINGS)) {
+        if (EXTRA_PIKO_SETTINGS.equals(activity_name)) {
             fragment = new SettingsFragment();
-        } else if (activity_name.equals( Settings.FEATURE_FLAGS) ){
+        } else if (Settings.FEATURE_FLAGS.equals(activity_name)) {
             fragment = new FeatureFlagsFragment();
-        } else if (activity_name.equals( Settings.PATCH_INFO)) {
+        } else if (Settings.PATCH_INFO.equals(activity_name)) {
             fragment = new SettingsAboutFragment();
-        }else if (activity_name.equals( Settings.READER_MODE_KEY) ){
+        } else if (Settings.READER_MODE_KEY.equals(activity_name)) {
             fragment = new ReaderModeFragment();
-        }  else {
+        } else {
             fragment = new PageFragment();
         }
 
-        if (fragment != null) {
-            fragment.setArguments(bundle);
-            startFragment(act,activity_name, fragment, addToBackStack);
-            return true;
-        }
-        return false;
+        fragment.setArguments(bundle);
+        startFragment(act, activity_name, fragment, addToBackStack);
+        return true;
     }
 
     public static void startFragment(Activity act, String activity_name, Fragment fragment, boolean addToBackStack) {
@@ -116,30 +120,47 @@ public class ActivityHook {
         return ResourceUtils.getString(toolbarText);
     }
 
-    public static void startActivity(String activity_name, Bundle bundle) throws Exception {
-        Intent intent = new Intent(Utils.getContext(), Class.forName(
-                "com.twitter.android.AuthorizeAppActivity"));
+    public static void startActivity(String activity_name, Bundle bundle) {
+        Context context = Utils.getContext();
+        String packageName = context.getPackageName();
         bundle.putString(Settings.ACT_NAME, activity_name);
         bundle.putBoolean(EXTRA_PIKO, true);
+        Intent intent = new Intent();
+        intent.setClassName(packageName, AUTHORIZE_ACTIVITY_CLASS);
+        intent.setPackage(packageName);
         intent.putExtras(bundle);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        Utils.getContext().startActivity(intent);
+        context.startActivity(intent);
     }
 
-    public static void startActivity(String activity_name) throws Exception {
+    public static void startActivity(String activity_name) {
         Bundle bundle = new Bundle();
         bundle.putString(Settings.ACT_NAME, activity_name);
         bundle.putBoolean(EXTRA_PIKO, true);
         startActivity(activity_name, bundle);
     }
 
-    public static void startReaderMode(String tweetId) throws Exception {
+    public static void startReaderMode(String tweetId) {
         Bundle bundle = new Bundle();
         bundle.putString(ReaderModeUtils.ARG_TWEET_ID, tweetId);
         startActivity(Settings.READER_MODE_KEY, bundle);
     }
 
-    public static void startSettingsActivity() throws Exception {
+    public static void startSettingsActivity() {
         startActivity(EXTRA_PIKO_SETTINGS);
+    }
+
+    @SuppressWarnings("unused")
+    public static boolean startSettingsActivity(String key) {
+        if (PIKO_PREF_KEY.equals(key)) {
+            try {
+                startSettingsActivity();
+                return true;
+            } catch (Exception ex) {
+                Logger.printException(() -> "startSettingsActivity failed", ex);
+            }
+        }
+
+        return false;
     }
 }

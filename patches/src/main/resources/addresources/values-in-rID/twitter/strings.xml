@@ -33,12 +33,17 @@
     <string name="piko_pref_native_downloader_download_all">Unduh semua</string>
     <string name="piko_pref_native_downloader_no_media">Tidak ditemukan media</string>
     <string name="piko_pref_native_downloader_filename_title">Simpan pola nama berkas</string>
-    <string name="piko_browse_object_title">Jelajahi objek tweet</string>
-    <string name="piko_browse_object_toggle">Aktifkan Jelajahi objek tweet</string>
-    <string name="piko_share_image_title">Bagikan Tweet sebagai Gambar</string>
-    <string name="piko_share_image_toggle">Aktifkan Bagikan Tweet sebagai Gambar</string>
+    <string name="piko_browse_object_title">Jelajahi objek cuitan</string>
+    <string name="piko_browse_object_toggle">Aktifkan Jelajahi objek cuitan</string>
+    <string name="piko_share_image_title">Bagikan Cuitan sebagai Gambar</string>
+    <string name="piko_share_image_toggle">Aktifkan Bagikan Cuitan sebagai Gambar</string>
     <string name="piko_share_image_autocleanup">Pembersihan otomatis tangkapan</string>
     <string name="piko_share_image_autocleanup_desc">Hapus tangkapan layar yang berusia lebih dari 24 jam saat fitur ini diaktifkan</string>
+    <string name="piko_share_image_invalid_context">Konteks tidak sah</string>
+    <string name="piko_share_image_capturing">Menangkap cuitan...</string>
+    <string name="piko_share_image_view_not_found">Tampilan cuitan tidak ditemukan</string>
+    <string name="piko_share_image_capture_failed">Gagal mengambil gambar</string>
+    <string name="piko_share_image_error">Kesalahan: %s</string>
     <string name="piko_title_native_translator">Terjemahan postingan bawaan</string>
     <string name="piko_native_translator_toggle">Aktifkan terjemahan posting bawaan</string>
     <string name="piko_native_translator_provider">Penyedia Terjemahan</string>
@@ -97,7 +102,7 @@
     <string name="piko_pref_rec_users">Sembunyikan pengguna yang direkomendasikan</string>
     <string name="piko_pref_hide_view_count">Sembunyikan jumlah penayangan</string>
     <string name="piko_pref_custom_share_domain">Domain berbagi khusus</string>
-    <string name="piko_pref_custom_share_domain_desc">Domain yang digunakan saat berbagi tweet</string>
+    <string name="piko_pref_custom_share_domain_desc">Domain yang digunakan saat berbagi cuitan</string>
     <string name="piko_pref_show_sensitive_media">Tampilkan media sensitif</string>
     <string name="piko_pref_selectable_text">Teks yang dapat dipilih</string>
     <string name="piko_pref_clear_tracking_params">Hapus parameter pelacakan</string>
@@ -177,6 +182,7 @@
     <string name="piko_pref_customisation_post_font_size">Ukuran font postingan</string>
     <string name="piko_pref_customisation_search_type_ahead">Saran pencarian untuk disembunyikan</string>
     <string name="piko_pref_customisation_change_app_icon">Ubah ikon aplikasi</string>
+    <string name="piko_notifications_tab_priority">Prioritas</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Gaya font</string>
     <string name="piko_pref_add_font">Tambahkan font</string>

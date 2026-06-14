@@ -25,6 +25,7 @@ import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.VideoData;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.AudioMediaInterface;
+import app.morphe.extension.instagram.entity.MediaInterface;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.ActivityHook;
@@ -35,45 +36,54 @@ import app.morphe.extension.crimera.downloader.MediaType;
 import app.morphe.extension.crimera.PikoUtils;
 
 public class DownloadUtils {
-    private static boolean ENABLE_DIRECT_DOWNLOAD;
-    private static boolean SPLIT_BY_USERNAME;
     private static boolean DEBUG;
 
     static {
-        ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
-        SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
         DEBUG = Pref.pikoDebug();
     }
 
-    private static void buildVideoVariantDialogBox(Context context, MediaData currentMediaData) throws Exception {
+    public static String getSubfolderName(String username){
+        boolean SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
+        return SPLIT_BY_USERNAME ? username : null;
+    }
+
+    private static void buildVariantDialogBox(Context context, MediaData currentMediaData, MediaType mediaType) throws Exception {
         String username = currentMediaData.getUserData().getUsername();
-        List<VideoData> videoDataList = currentMediaData.getVideoVariants();
+        List<MediaInterface> variantList;
+        String title = "";
+        if(mediaType.equals(MediaType.VIDEO)){
+            title = Strings.VIDEO_VARIANTS;
+            variantList = currentMediaData.getVideoVariants();
+        }else{
+            title = Strings.IMAGE_VARIANTS;
+            variantList = currentMediaData.getImageVariants();
+        }
 
         InstagramDialogBox dialog = new InstagramDialogBox(context);
         ArrayList<String> options = new ArrayList<>();
-        videoDataList.forEach(item -> options.add(item.getVideoVariantTag()));
+        variantList.forEach(item -> options.add(item.getVariantTag()));
         CharSequence[] items = options.toArray(new CharSequence[0]);
 
         dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface d, int which) {
-                VideoData videoData = videoDataList.get(which);
+                MediaInterface data = variantList.get(which);
 
                 try {
-                    String filename = username + "_"+currentMediaData.getVideoVariantFileName(videoData);
-                    String mediaUrl = videoData.getUrl();
-                    String subFolder = SPLIT_BY_USERNAME ? username : null;
+                    String filename = username + "_"+currentMediaData.getVariantFileName(data);
+                    String mediaUrl = data.getUrl();
+                    String subFolder = getSubfolderName(username);
                     downloadMediaUrl(context,mediaUrl,subFolder,filename);
                 } catch (Exception e) {
                     PikoUtils.logger(e);
-                    Logger.printException(() -> "Error at buildVideoVariantDialogBox", e);
+                    Logger.printException(() -> "Error at buildVariantDialogBox", e);
                     Utils.showToastShort(e.getMessage());
                 }
 
             }
         });
 
-        dialog.setTitle(Strings.VIDEO_VARIANTS);
+        dialog.setTitle(title);
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
 
@@ -96,12 +106,14 @@ public class DownloadUtils {
         options.add(Strings.DOWNLOAD_AS_IMAGE);
         if (currentMediaHasAudio) options.add(Strings.DOWNLOAD_AUDIO);
         options.add(Strings.COPY_MEDIA_LINK);
+        options.add(Strings.IMAGE_VARIANTS);
         if (isCurrentMediaVideo) {
             options.add(Strings.VIDEO_VARIANTS);
             options.add(Strings.OPEN_VIDEO_EXTERNALLY);
         } else {
             options.add(Strings.OPEN_IMAGE_EXTERNALLY);
         }
+
         if (carouselSize > 1) options.add(Strings.DOWNLOAD_ALL);
         if (DEBUG) options.add(Strings.PIKO_DEBUG);
 
@@ -137,7 +149,10 @@ public class DownloadUtils {
                         downloadMedia(context, mediaInfo, position, MediaType.AUDIO);
 
                     } else if (selectedOption.equals(Strings.VIDEO_VARIANTS)) {
-                        buildVideoVariantDialogBox(context, currentMediaData);
+                        buildVariantDialogBox(context, currentMediaData, MediaType.VIDEO);
+
+                    } else if (selectedOption.equals(Strings.IMAGE_VARIANTS)) {
+                        buildVariantDialogBox(context, currentMediaData, MediaType.IMAGE);
 
                     }
                 } catch (Exception e) {
@@ -160,6 +175,7 @@ public class DownloadUtils {
 
     public static void downloadPost(Context context, Object mediaObject, int position) {
         try {
+            boolean ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
             position = position < 1 ? 0 : position;
             MediaData mediaInfo = new MediaData(mediaObject);
             if (ENABLE_DIRECT_DOWNLOAD) {
@@ -182,7 +198,7 @@ public class DownloadUtils {
         }
         MediaDownloader downloader = new MediaDownloader(context);
         String username = mediaInfo.getUserData().getUsername();
-        String subFolder = SPLIT_BY_USERNAME ? username : null;
+        String subFolder = getSubfolderName(username);
 
         if (mediaType.equals(MediaType.AUDIO)) {
             AudioMediaInterface audioMedia = mediaInfo.getMediaAt(position).getAudioMedia();

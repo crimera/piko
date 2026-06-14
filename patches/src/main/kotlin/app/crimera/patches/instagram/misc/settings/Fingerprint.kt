@@ -8,7 +8,6 @@ package app.crimera.patches.instagram.misc.settings
 
 import app.crimera.patches.instagram.utils.Constants.ACTIVITY_SETTINGS_STATUS_CLASS
 import app.crimera.patches.instagram.utils.Constants.HOOK_FLAGS_DESCRIPTOR
-import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 
 internal object HookFlagsLoadFingerprint : Fingerprint(
@@ -25,4 +24,9 @@ internal object SettingsStatusLoadFingerprint : Fingerprint(
 internal object MainFeedFragmentOnCreateFingerprint : Fingerprint(
     name = "onCreate",
     strings = listOf("MainFeedFragment.onCreate"),
+)
+
+internal object IgFragmentActivityOnCreate : Fingerprint(
+    name = "onCreate",
+    definingClass = "Lcom/instagram/base/activity/IgFragmentActivity;",
 )

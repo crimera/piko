@@ -31,6 +31,8 @@ public class StringsKorean extends DefaultStrings {
         this.IMPORT_DEV_OVERRIDES = "재정의 가져오기";
         this.IMPORT_ID_MAPPING = "매핑 파일 가져오기";
         this.DOWNLOAD_ID_MAPPING = "매핑 파일 다운로드";
+        this.MISSING_MAPPING_FILE = "매핑 파일이 누락되었습니다";
+        this.MISSING_MAPPING_FILE_DESC = "매핑 파일이 없으면 개발자 옵션에 올바른 이름이 표시되지 않습니다. 다운로드하시겠습니까?";   
 
         this.CATEGORY_LINKS = "링크";
         this.OPEN_LINKS_EXTERNALLY = "외부 브라우저 사용";
@@ -46,6 +48,8 @@ public class StringsKorean extends DefaultStrings {
         this.TURN_ON_ALL_GHOST_MODES = "모든 고스트 모드 켜기";
         this.GHOST_MODES_ON = "고스트 모드: 켜짐";
         this.GHOST_MODES_DEFAULT = "고스트 모드: 기본값";
+        this.GHOST_MODES_QUICK_TOGGLE = "고스트 모드에 대한 빠른 토글 활성화";
+        this.GHOST_MODES_QUICK_TOGGLE_DESC = "고스트 모드를 제어할 수 있는 빠른 토글 버튼을 채팅 액션바에 추가합니다";  
 
         this.CATEGORY_DISTRACTION_FREE = "방해 요소 제거";
         this.DISABLE_STORIES = "스토리 비활성화";
@@ -92,9 +96,11 @@ public class StringsKorean extends DefaultStrings {
         this.IMPROVE_IMAGE_VIEWING_DESC = "서버에서 최대 해상도의 이미지를 가져옵니다";
         this.HIDE_RESHARE_BUTTON = "리포스트 버튼 숨기기";
         this.COPY_COMMENT = "댓글 복사";
-        this.COPY_COMMENT_DESC = "게시물 및 릴스 댓글을 복사하는 버튼을 추가합니다";
+        this.COPY_COMMENT_DESC = "게시물 및 릴스에서 댓글을 복사하는 버튼을 추가합니다";
         this.COMMENT_COPIED_SUCCESS = "댓글을 복사하였습니다";
         this.COMMENT_COPIED_FAILED = "복사할 텍스트가 없습니다";
+		this.SAVE_MEDIA_COMMENT = "미디어 댓글 저장";
+        this.SAVE_MEDIA_COMMENT_DESC = "게시물 및 릴스에서 미디어 댓글을 저장하는 버튼을 추가합니다";
         this.COPY_USERNAME = "사용자 이름 복사";
         this.COPY_FULL_NAME = "이름 복사";
         this.COPY_USER_ID = "사용자 ID 복사";
@@ -102,10 +108,13 @@ public class StringsKorean extends DefaultStrings {
         this.DOWNLOAD_PROFILE_PICTURE = "프로필 사진 다운로드";
         this.COPIED = "복사하였습니다";
         this.MORE_PROFILE_OPTIONS = "프로필 옵션 더보기";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "프로필 옵션을 액션바로 이동";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "프로필 옵션 버튼을 프로필 액션바로 이동합니다";
         this.REMOVE_EMPTY_BOTTOM_SPACE = "하단 빈 공간 제거";
         this.UNLOCK_PLUS_BENEFITS = "플러스 혜택 해제";
         this.UNLOCK_PLUS_BENEFITS_DESC = "로컬에서 확인되는 'Plus' 구독 혜택을 활성화합니다. 사용 시 발생하는 모든 위험은 사용자 본인이 감수해야 합니다";
         this.CUSTOMISE_STORY_RING_SIZE = "스토리 링 크기 설정";
+        this.CUSTOMISE_STORY_RING_SIZE_DESC = "스토리 링 크기를 백분율로 변경합니다 (기본값: 100)";
 
         this.CATEGORY_DOWNLOAD_MEDIA = "미디어 다운로드";
         this.ENABLE_DOWNLOAD = "다운로드 활성화";
@@ -116,6 +125,7 @@ public class StringsKorean extends DefaultStrings {
         this.DOWNLOAD_CURRENT_MEDIA = "현재 미디어 다운로드";
         this.DOWNLOAD_AS_IMAGE = "이미지로 다운로드";
         this.VIDEO_VARIANTS = "동영상 변형";
+        this.IMAGE_VARIANTS = "이미지 변형";
         this.DOWNLOAD_AUDIO = "오디오 다운로드";
         this.DOWNLOAD_OPTIONS = "다운로드 옵션";
         this.COPY_MEDIA_LINK = "미디어 링크 복사";
@@ -158,6 +168,7 @@ public class StringsKorean extends DefaultStrings {
         this.IMPORT_FAIL = "가져올 수 없습니다";
         this.RESTART_APP = "변경 사항을 적용하려면 앱을 다시 시작해야 합니다";
         this.OK = "확인";
+        this.CANCEL = "취소";
         this.DELETED = "삭제하였습니다";
         this.PIKO_DEBUG = "Piko 디버그";
         this.PIKO_DEBUG_DESC = "일부 구성요소에 테스트용 디버그 옵션을 추가합니다";
@@ -182,5 +193,8 @@ public class StringsKorean extends DefaultStrings {
         this.GOTO_PIKO_SETTINGS = "Piko 설정으로 이동";
         this.NO_INTERNET = "인터넷에 연결해 주세요";
         this.TAP_HERE = "여기를 탭하세요 !!"; 
+        this.PIKO_SETTINGS_ON_ACTION_BAR = "Piko 설정을 액션바로 이동";
+        this.PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Piko 설정 진입점을 메인 피드 액션바로 이동합니다";
+            
     }
 }

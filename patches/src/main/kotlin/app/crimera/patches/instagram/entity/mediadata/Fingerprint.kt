@@ -12,6 +12,7 @@ import app.morphe.patcher.Fingerprint
 
 internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
+internal const val VIDEO_INFO_MAPPER_KEY = "video_to_carousel_cut_info"
 
 internal object GetHelperClassExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
@@ -28,9 +29,19 @@ internal object GetPhotoLinkExtensionFingerprint : Fingerprint(
     name = "getPhotoLink",
 )
 
-internal object GetVideoVariantsExtensionFingerprint : Fingerprint(
+internal object GetImageVariantsExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
-    name = "getVideoVariants",
+    name = "getImageVariants",
+)
+
+internal object GetVideoVariantsV1ExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getVideoVariantsV1",
+)
+
+internal object GetVideoVariantsV2ExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getVideoVariantsV2",
 )
 
 internal object IsVideoExtensionFingerprint : Fingerprint(
@@ -78,6 +89,12 @@ internal object GetMessageAudioUrlExtensionFingerprint : Fingerprint(
     name = "getMessageAudioUrl",
 )
 
+internal object GetMoreExtendedDataExtensionFingerprint : Fingerprint(
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+    name = "getMoreExtendedData",
+)
+
+// -----------------------------------
 internal object ReelsInlineQualitySurveyRelatedFingerprint : Fingerprint(
     strings = listOf("reels_inline_quality_survey"),
 )
@@ -140,4 +157,27 @@ internal object IgPlayerControllerRelatedFingerprint : Fingerprint(
             "igPlayerController must be initialized",
             "audioMetadata must be set before preparing",
         ),
+)
+
+internal object ExtMediaDictVideoInfoMapperFingerprint : Fingerprint(
+    strings =
+        listOf(
+            "video_subtitles_uri",
+            VIDEO_INFO_MAPPER_KEY,
+        ),
+    returnType = "Ljava/util/Map;",
+)
+
+internal object LiveTreeMediaDictClinitFingerprint : Fingerprint(
+    name = "<clinit>",
+    strings = listOf(VIDEO_INFO_MAPPER_KEY),
+)
+
+internal object ExtMediaDictImageInfoMapperFingerprint : Fingerprint(
+    strings =
+        listOf(
+            "igtv_shopping_info",
+            "image_versions2",
+        ),
+    returnType = "Ljava/util/Map;",
 )

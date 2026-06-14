@@ -61,7 +61,11 @@ public class Pref {
     }
 
     public static boolean enableMoreOptionsOnProfileQuickToggle() {
-        return SharedPref.getBooleanPref(Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE) && SettingsStatus.moreOptionsOnProfile;
+        return SharedPref.getBooleanPref(Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE) && Pref.isMoreOptionsOnProfilePatched();
+    }
+
+    public static boolean isMoreOptionsOnProfilePatched(){
+        return SettingsStatus.moreOptionsOnProfile;
     }
 
     public static boolean viewStoriesAnonymously() {
@@ -230,13 +234,17 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.COMMENT_COPY_BUTTON) && SettingsStatus.copyCommentButton;
     }
 
+    public static boolean commentSaveMediaButton() {
+        return SharedPref.getBooleanPref(Settings.COMMENT_SAVE_MEDIA_BUTTON) && SettingsStatus.saveMediaCommentButton;
+    }
+
     public static String changeLikeAnimation() {
         return SharedPref.getStringPref(Settings.CHANGE_LIKE_ANIMATION);
     }
 
     public static float customiseStoryRingSize() {
         try {
-            return Float.valueOf(SharedPref.getStringPref(Settings.CUSTOMISE_STORY_RING_SIZE));
+            return Float.parseFloat(SharedPref.getStringPref(Settings.CUSTOMISE_STORY_RING_SIZE));
         } catch (Exception ex) {
             return 100.0f;
         }

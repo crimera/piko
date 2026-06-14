@@ -1,33 +1,23 @@
 /*
-    * Copyright (C) 2026 piko <https://github.com/crimera/piko>
-    *
-    * This file is part of piko.
-    *
-    * Any modifications, derivatives, or substantial rewrites of this file
-    * must retain this copyright notice and the piko attribution
-    * in the source code and version control history.
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
 */
 
 
 package app.morphe.extension.instagram.patches.story;
 
 
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Set;
 import java.util.HashSet;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.MediaData;
-import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.constants.Strings;
-import app.morphe.extension.instagram.settings.ActivityHook;
 
 
 public class ViewStoryMentionsPatch {
@@ -39,10 +29,9 @@ public class ViewStoryMentionsPatch {
         } catch (Exception ex){
             Logger.printException(() -> "Failed viewMentions", ex);
         }
-        return;
     }
 
-    private static void showCopyDialog(final Context context,HashSet<UserData> mentionSet) throws Exception{
+    private static void showCopyDialog(final Context context,HashSet<UserData> mentionSet) {
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
         if(mentionSet!=null) {
@@ -56,13 +45,10 @@ public class ViewStoryMentionsPatch {
                 items[i] = userData.getFullname()+" ( @"+userData.getUsername()+")";
             }
 
-            dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface d, int which) {
-                    UserData userData = (UserData) snapshot[which];
-                    String username = userData.getUsername();
-                    ActivityHook.openLink("instagram://user?username="+username);
-                }
+            dialog.addDialogMenuItems(items, (d, which) -> {
+                UserData userData = (UserData) snapshot[which];
+                String username = userData.getUsername();
+                PikoUtils.openUrl("instagram://user?username="+username);
             });
         }else{
             dialog.setMessage(Strings.VSM_NO_MENTIONS);

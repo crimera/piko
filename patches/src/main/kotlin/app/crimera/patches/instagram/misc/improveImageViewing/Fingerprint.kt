@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.misc.improveImageViewing
 
+import app.crimera.patches.instagram.utils.Constants.EXTENDED_IMAGE_URL_CLASS
 import app.morphe.patcher.Fingerprint
 
 internal object SetDPIMetricsFingerprint : Fingerprint(
@@ -15,6 +16,6 @@ internal object SetDPIMetricsFingerprint : Fingerprint(
 )
 
 internal object ReturnExtendedImageUrlFingerprint : Fingerprint(
-    returnType = "Lcom/instagram/model/mediasize/ExtendedImageUrl;",
+    returnType = EXTENDED_IMAGE_URL_CLASS,
     parameters = listOf("Ljava/lang/Integer;", "Ljava/util/List;", "I"),
 )

@@ -24,7 +24,7 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">Udostępnij link</string>
     <!-- Native -->
     <string name="piko_title_native">Funkcje natywne</string>
-    <string name="piko_pref_native_page_desc">Funkcje natywne Piko są dostępne w menu posta.</string>
+    <string name="piko_pref_native_page_desc">Funkcje natywne Piko są dostępne w menu wpisu.</string>
     <string name="piko_title_native_downloader">Pobieranie</string>
     <string name="piko_title_native_downloader_toggle">Włącz natywne pobieranie</string>
     <string name="piko_pref_native_downloader_inline_button">Pokaż przycisk pobierania</string>
@@ -39,6 +39,11 @@
     <string name="piko_share_image_toggle">Włącz udostępnianie wpisu jako obraz</string>
     <string name="piko_share_image_autocleanup">Automatyczne czyszczenie obrazów</string>
     <string name="piko_share_image_autocleanup_desc">Usuwa obrazy starsze niż 24 godziny, gdy opcja jest włączona</string>
+    <string name="piko_share_image_invalid_context">Wystąpił błąd aplikacji</string>
+    <string name="piko_share_image_capturing">Generowanie obrazu tweeta...</string>
+    <string name="piko_share_image_view_not_found">Nie znaleziono tweeta</string>
+    <string name="piko_share_image_capture_failed">Nie udało się wygenerować obrazu</string>
+    <string name="piko_share_image_error">Błąd: %s</string>
     <string name="piko_title_native_translator">Tłumaczenie wpisów</string>
     <string name="piko_native_translator_toggle">Włącz natywne tłumaczenie wpisów</string>
     <string name="piko_native_translator_provider">Silnik tłumaczenia</string>

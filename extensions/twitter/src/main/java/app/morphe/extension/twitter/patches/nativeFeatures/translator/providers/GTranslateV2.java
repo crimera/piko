@@ -6,6 +6,8 @@
 
 package app.morphe.extension.twitter.patches.nativeFeatures.translator.providers;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.os.AsyncTask;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -15,7 +17,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import org.json.JSONObject;
-import app.morphe.extension.shared.StringRef;
 
 /*
 * Credits:  https://github.com/cuberkam/free_translate_api
@@ -102,7 +103,7 @@ public class GTranslateV2 implements Translate {
             }
             throw new Exception("destination-text not found");
         } catch (Exception e) {
-            return StringRef.str("translate_tweet_error") +": "+ e.getMessage();
+            return str("translate_tweet_error") +": "+ e.getMessage();
         }
     }
 }
