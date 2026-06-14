@@ -16,14 +16,22 @@ import android.content.Context;
 
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.downloader.MediaType;
-
+import com.instagram.common.session.UserSession;
 
 public class MediaData extends Entity {
     private final Object obj;
+    private final UserSession userSession;
 
     public MediaData(Object obj) {
         super(obj);
         this.obj = obj;
+        this.userSession = null;
+    }
+
+    public MediaData(Object obj, UserSession userSession) {
+        super(obj);
+        this.obj = obj;
+        this.userSession = userSession;
     }
 
     private Class<?> getHelperClass() throws Exception {
@@ -32,6 +40,19 @@ public class MediaData extends Entity {
 
     private Object getExtendedData() throws Exception {
         return super.getField("fieldName");
+    }
+
+    private List<MediaData> getCarouselMediaData() throws Exception {
+        List<MediaData> carouselMediaData = new ArrayList<>();
+        List<Object> mediaList = this.getMediaList();
+        if (mediaList.isEmpty()){
+            carouselMediaData.add(new MediaData(this.obj, this.userSession));
+        } else {
+            mediaList.forEach(item->{
+                carouselMediaData.add(new MediaData(item, this.userSession));
+            });
+        }
+        return carouselMediaData;
     }
 
     public String getMediaPkId() throws Exception {
@@ -66,7 +87,6 @@ public class MediaData extends Entity {
         return imageExtension;
     }
 
-
     public String getDownloadFilename(MediaType mediaType) throws Exception {
         String mediaPkId = this.getMediaPkId();
         String extension = this.getMediaExtension(mediaType);
@@ -80,9 +100,23 @@ public class MediaData extends Entity {
         return mediaPkId + "_" +variantTag + extension;
     }
 
-    public UserData getUserData() throws Exception {
+    public UserData getUserDataWithoutUserSession() throws Exception {
         Object userData = super.getMethod(this.getExtendedData(), "methodName");
         return new UserData(userData);
+    }
+
+    public UserData getUserDataWithUserSession() throws Exception {
+        Class<?> helperClass = this.getHelperClass();
+        Object result = super.getMethod(helperClass, "methodname", this.userSession, this.obj);
+        return result != null ? new UserData(result) : null;
+    }
+
+    public UserData getUserData() throws Exception {
+        UserSession userSession = this.userSession;
+        if(userSession!=null){
+            return this.getUserDataWithUserSession();
+        }
+        return this.getUserDataWithoutUserSession();
     }
 
     public HashSet<UserData> getMentionSet() throws Exception {
@@ -112,19 +146,10 @@ public class MediaData extends Entity {
     }
 
     public MediaData getMediaAt(int position) throws Exception {
-        List<Object> mediaList = this.getMediaList();
-        if (mediaList.isEmpty()) return new MediaData(this.obj);
+        List<MediaData> mediaList = this.getCarouselMediaData();
 
         int safePosition = Math.max(0, Math.min(position, mediaList.size() - 1));
-        return new MediaData(mediaList.get(safePosition));
-    }
-
-    public String getPhotoLink() throws Exception {
-        Context context = Utils.getContext();
-
-        Class<?> helperClass = this.getHelperClass();
-        Object photoLink = super.getMethod(helperClass, "methodName", new Class[]{Context.class, this.obj.getClass()}, context, this.obj);
-        return photoLink != null ? (String) photoLink : null;
+        return mediaList.get(safePosition);
     }
 
     private Object getMoreExtendedData() throws Exception {
@@ -176,9 +201,18 @@ public class MediaData extends Entity {
         }
         return null;
     }
+    
+    public String getImageLink() throws Exception {
+        List<ImageData> imageDataList = this.getImageVariants();
+        if(imageDataList!=null){
+            return imageDataList.get(0).getUrl();
+        }
+        return null;
+    }
+
 
     public String getMediaLink() throws Exception {
-        return this.isVideo() ? this.getVideoLink() : this.getPhotoLink();
+        return this.isVideo() ? this.getVideoLink() : this.getImageLink();
     }
 
     private OriginalSoundDataIntf getOriginalSoundDataIntf() throws Exception {

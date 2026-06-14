@@ -9,6 +9,7 @@ package app.crimera.patches.instagram.misc.distractionFree
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.OpcodesFilter
@@ -26,7 +27,7 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 private object InitializeNavigationButtonsListFingerprint : Fingerprint(
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
-    parameters = listOf("Lcom/instagram/common/session/UserSession;", "Z"),
+    parameters = listOf(USER_SESSION_CLASS, "Z"),
     returnType = "Ljava/util/List;",
     filters =
         OpcodesFilter.opcodesToFilters(

@@ -35,12 +35,9 @@ import app.morphe.extension.crimera.downloader.DownloadRequest;
 import app.morphe.extension.crimera.downloader.MediaType;
 import app.morphe.extension.crimera.PikoUtils;
 
-public class DownloadUtils {
-    private static boolean DEBUG;
+import com.instagram.common.session.UserSession;
 
-    static {
-        DEBUG = Pref.pikoDebug();
-    }
+public class DownloadUtils {
 
     public static String getSubfolderName(String username){
         boolean SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
@@ -115,7 +112,6 @@ public class DownloadUtils {
         }
 
         if (carouselSize > 1) options.add(Strings.DOWNLOAD_ALL);
-        if (DEBUG) options.add(Strings.PIKO_DEBUG);
 
         CharSequence[] items = options.toArray(new CharSequence[0]);
 
@@ -141,9 +137,6 @@ public class DownloadUtils {
 
                     } else if (selectedOption.equals(Strings.DOWNLOAD_ALL)) {
                         downloadMedia(context, mediaInfo, -1, MediaType.ANY);
-
-                    } else if (selectedOption.equals(Strings.PIKO_DEBUG)) {
-                        ObjectBrowser.browseObject(context, currentMediaData);
 
                     } else if (selectedOption.equals(Strings.DOWNLOAD_AUDIO)) {
                         downloadMedia(context, mediaInfo, position, MediaType.AUDIO);
@@ -173,11 +166,11 @@ public class DownloadUtils {
     }
 
 
-    public static void downloadPost(Context context, Object mediaObject, int position) {
+    public static void downloadPost(Context context,  UserSession userSession, Object mediaObject, int position) {
         try {
             boolean ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
             position = position < 1 ? 0 : position;
-            MediaData mediaInfo = new MediaData(mediaObject);
+            MediaData mediaInfo = new MediaData(mediaObject, userSession);
             if (ENABLE_DIRECT_DOWNLOAD) {
                 downloadMedia(context, mediaInfo, position, MediaType.ANY);
             } else {
@@ -210,7 +203,7 @@ public class DownloadUtils {
             MediaData mediaData = mediaInfo.getMediaAt(position);
             String mediaUrl;
             if (mediaType.equals(MediaType.IMAGE)) {
-                mediaUrl = mediaData.getPhotoLink();
+                mediaUrl = mediaData.getImageLink();
             } else {
                 mediaUrl = mediaData.getMediaLink();
             }

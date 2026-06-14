@@ -7,8 +7,10 @@
 package app.crimera.patches.instagram.entity.mediadata
 
 import app.crimera.patches.instagram.entity.decoder.EditMediaInfoGetCurrentMediaIdFingerprint
+import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.utils.Constants.EXTENDED_IMAGE_URL_CLASS
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
 import app.crimera.utils.classNameToExtension
@@ -33,12 +35,6 @@ val mediaDataEntity =
                 // Get all the methods inside media helper class.
                 val mediaHelperMethods = mutableClassDefBy { it.type == classDef.type }.methods
 
-                val imageExtractionMethodName =
-                    mediaHelperMethods
-                        .first { it.parameterTypes.first() == "Landroid/content/Context;" && it.returnType == "Ljava/lang/String;" }
-                        .name
-                GetPhotoLinkExtensionFingerprint.changeFirstString(imageExtractionMethodName)
-
                 val originalSoundDataExtractionMethodName =
                     mediaHelperMethods
                         .first {
@@ -58,6 +54,13 @@ val mediaDataEntity =
                         val imageVariantsMethodName = getInstruction(imageVariantsIndex).methodExtractor().name
                         GetImageVariantsExtensionFingerprint.changeStringAt(1, imageVariantsMethodName)
                     }
+            }
+
+            // Extracting get user data using media and user session.
+            GetProductTileMediaFromUserSessionFingerprint.method.apply {
+                val firstInvokeStaticIndex = indexOfFirstInstruction(Opcode.INVOKE_STATIC)
+                val getUserDataMethodName = getInstruction(firstInvokeStaticIndex).methodExtractor().name
+                GetUserDataWithUserSessionExtensionFingerprint.changeFirstString(getUserDataMethodName)
             }
 
             // Extracting the get mention set method used media helper class.
@@ -143,7 +146,7 @@ val mediaDataEntity =
             DirectShareTargetRelatedFingerprint.method.apply {
                 val firstConst = indexOfFirstInstruction(Opcode.CONST_4)
                 val userDataMethodName = instructions[indexOfFirstInstruction(firstConst, Opcode.INVOKE_INTERFACE)].methodExtractor().name
-                GetUserDataExtensionFingerprint.changeFirstString(userDataMethodName)
+                GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(userDataMethodName)
             }
 
             // Extraction of description

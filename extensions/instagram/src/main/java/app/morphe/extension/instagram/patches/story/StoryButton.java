@@ -21,6 +21,8 @@ import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.instagram.entity.MediaData;
 
+import com.instagram.common.session.UserSession;
+
 public class StoryButton {
     private static boolean VIEW_STORY_MENTIONS;
     private static boolean ENABLE_DOWNLOAD;
@@ -58,7 +60,7 @@ public class StoryButton {
                 ViewStoryMentionsPatch.viewMentions(ctx, mediaObject);
                 return true;
             } else if (buttonText.equals(Strings.DOWNLOAD_OPTIONS) || buttonText.equals(Strings.CATEGORY_DOWNLOAD_MEDIA)) {
-                DownloadUtils.downloadPost(ctx,mediaObject,0);
+                DownloadUtils.downloadPost(ctx,null,mediaObject,0);
                 return true;
             } else if (buttonText.equals(Strings.PIKO_DEBUG)) {
                 ObjectBrowser.browseObject(ctx, new MediaData(mediaObject));

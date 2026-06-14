@@ -16,89 +16,76 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.Logger;
 
 import app.morphe.extension.instagram.constants.Strings;
-import app.morphe.extension.instagram.settings.SettingsStatus;
-import app.morphe.extension.instagram.utils.Pref;
-import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
-import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.UserData;
 
+import com.instagram.common.session.UserSession;
+
 public class MoreOptionsOnPostPatch {
-    private static boolean ENABLE_MORE_OPTION;
-    private static boolean DEBUG;
 
-    static {
-        ENABLE_MORE_OPTION = Pref.moreOptionsOnPost() && SettingsStatus.moreOptionsOnPost;
-        DEBUG = Pref.pikoDebug();
-    }
-
-    public static void postOnLongPress(Context context, Object mediaObject, int currentMediaIndex) {
+    public static void postMoreOptions(Context context,  UserSession userSession, Object mediaObject, int currentMediaIndex) {
         try {
-            if (ENABLE_MORE_OPTION) {
-                MediaData mediaData = new MediaData(mediaObject);
+            MediaData mediaData = new MediaData(mediaObject, userSession);
 
-                InstagramDialogBox dialog = new InstagramDialogBox(context);
+            InstagramDialogBox dialog = new InstagramDialogBox(context);
 
-                ArrayList<String> options = new ArrayList<>();
+            ArrayList<String> options = new ArrayList<>();
 
-                options.add(Strings.COPY_POST_DESCRIPTION);
-                options.add(Strings.COPY_POST_OWNER_USERNAME);
-                options.add(Strings.COPY_POST_OWNER_FULLNAME);
-                options.add(Strings.DOWNLOAD_OPTIONS);
-                if (DEBUG) options.add(Strings.PIKO_DEBUG);
-                CharSequence[] items = options.toArray(new CharSequence[0]);
+            options.add(Strings.COPY_POST_DESCRIPTION);
+            options.add(Strings.COPY_POST_OWNER_USERNAME);
+            options.add(Strings.COPY_POST_OWNER_FULLNAME);
+            options.add(Strings.DOWNLOAD_OPTIONS);
+            CharSequence[] items = options.toArray(new CharSequence[0]);
 
-                dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface d, int which) {
-                        try {
-                            // Doing like this because options are dynamic.
-                            String selectedOption = options.get(which);
-                            String stringToCopy = null;
+            dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface d, int which) {
+                    try {
+                        // Doing like this because options are dynamic.
+                        String selectedOption = options.get(which);
+                        String stringToCopy = null;
 
-                            if (selectedOption.equals(Strings.COPY_POST_DESCRIPTION)) {
-                                stringToCopy = mediaData.getDescriptionText();
+                        if (selectedOption.equals(Strings.COPY_POST_DESCRIPTION)) {
+                            stringToCopy = mediaData.getDescriptionText();
 
-                            } else if (selectedOption.equals(Strings.COPY_POST_OWNER_USERNAME)) {
-                                UserData userData = mediaData.getUserData();
-                                stringToCopy = userData.getUsername();
+                        } else if (selectedOption.equals(Strings.COPY_POST_OWNER_USERNAME)) {
+                            UserData userData = mediaData.getUserData();
+                            stringToCopy = userData.getUsername();
 
-                            } else if (selectedOption.equals(Strings.COPY_POST_OWNER_FULLNAME)) {
-                                UserData userData = mediaData.getUserData();
-                                stringToCopy = userData.getFullname();
+                        } else if (selectedOption.equals(Strings.COPY_POST_OWNER_FULLNAME)) {
+                            UserData userData = mediaData.getUserData();
+                            stringToCopy = userData.getFullname();
 
-                            } else if (selectedOption.equals(Strings.DOWNLOAD_OPTIONS)) {
-                                DownloadUtils.downloadPost(context, mediaObject, currentMediaIndex);
+                        } else if (selectedOption.equals(Strings.DOWNLOAD_OPTIONS)) {
+                            DownloadUtils.downloadPost(context, userSession, mediaObject, currentMediaIndex);
 
-                            } else if (selectedOption.equals(Strings.PIKO_DEBUG)) {
-                                ObjectBrowser.browseObject(context, mediaData);
-
-                            }
-                            if (stringToCopy != null && stringToCopy.length() > 0) {
-                                Utils.setClipboard(stringToCopy);
-                                Utils.showToastShort(Strings.COPIED);
-                            }
-                        } catch (Exception e) {
-                            Logger.printException(() -> "Error at postOnLongPress addDialogMenuItems", e);
-                            Utils.showToastShort(e.getMessage());
                         }
+                        if (stringToCopy != null && stringToCopy.length() > 0) {
+                            Utils.setClipboard(stringToCopy);
+                            Utils.showToastShort(Strings.COPIED);
+                        }
+                    } catch (Exception e) {
+                        Logger.printException(() -> "Error at postMoreOptions addDialogMenuItems", e);
+                        Utils.showToastShort(e.getMessage());
                     }
-                });
+                }
+            });
 
-                dialog.setTitle(Strings.POST_OPTIONS);
-                dialog.setCancelable(true);
-                dialog.setCanceledOnTouchOutside(true);
+            dialog.setTitle(Strings.POST_OPTIONS);
+            dialog.setCancelable(true);
+            dialog.setCanceledOnTouchOutside(true);
 
-                Dialog dlg = dialog.getDialog();
-                dlg.show();
-            }
+            Dialog dlg = dialog.getDialog();
+            dlg.show();
+
 
         } catch (Exception e) {
-            Logger.printException(() -> "postOnLongPress failure", e);
+            Logger.printException(() -> "postMoreOptions failure", e);
         }
     }
 
