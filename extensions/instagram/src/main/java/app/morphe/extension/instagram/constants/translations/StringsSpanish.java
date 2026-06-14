@@ -4,10 +4,12 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
-
 package app.morphe.extension.instagram.constants.translations;
 
-public class DefaultStrings {
+public class StringsSpanish extends DefaultStrings {
+
+    public StringsSpanish() {
+
     public static String PIKO_SETTINGS_TITLE = "Ajustes de Piko";
 
     public static String CATEGORY_ADS = "Anuncios";
