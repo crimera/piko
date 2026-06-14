@@ -186,8 +186,9 @@ public class DefaultStrings {
     public static String AVAILABLE_LIKE_ANIMATION = "Available like animations";
 
     public static String DEFAULT = "Default";
-    public static String ARR_DETAILED_TIMESTAMP = "Detailed timestamp";
-    public static String ARR_TIME_LEFT = "Time left";
+    public static String ARR_DETAILED_TIMESTAMP = "Detailed timestamp (Weekday/Month/Date/Hour/Minute/Second)";
+    public static String ARR_POST_TIME = "Post time (Hour/Minute/Second)";
+    public static String ARR_TIME_LEFT = "Time left (Hour/Minute/Second left)";
 
     public static String WELCOME_TITLE = "Welcome to Piko";
     public static String WELCOME_MESSAGE = "To improve your experience with Piko, please vist Piko settings and adjust your preference";
