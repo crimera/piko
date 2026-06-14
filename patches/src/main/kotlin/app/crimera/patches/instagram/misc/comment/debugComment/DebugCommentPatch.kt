@@ -38,7 +38,7 @@ val debugCommentPatch =
             ViewSourcesChatButtonToStringFingerprint.classDef.methods.first { it.name == "<init>" }.apply {
                 stringLateral = (instructions.last { it.opcode == Opcode.CONST } as Instruction31i).wideLiteral
             }
-            var drawableLateral: Long = getResourceId(ResourceType.DRAWABLE, "instagram_settings_outline_24")
+            var drawableLateral: Long = getResourceId(ResourceType.DRAWABLE, "instagram_app_instagram_pano_outline_24")
 
             addButtonAttribute(
                 stringLateral,

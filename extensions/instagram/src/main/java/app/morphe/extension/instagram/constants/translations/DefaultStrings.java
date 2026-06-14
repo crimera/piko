@@ -113,7 +113,7 @@ public class DefaultStrings {
     public static String UNLOCK_PLUS_BENEFITS = "Unlock Plus benefits";
     public static String UNLOCK_PLUS_BENEFITS_DESC = "Unlock 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK";
     public static String CUSTOMISE_STORY_RING_SIZE = "Customise story ring size";
-    public static String CUSTOMISE_STORY_RING_SIZE_DESC = "Change the size of story ring by a percentage (Default is 100)";
+    public static String CUSTOMISE_STORY_RING_SIZE_DESC = "Change the size of story ring by a percentage (Default: 100)";
 
     public static String CATEGORY_DOWNLOAD_MEDIA = "Download media";
     public static String ENABLE_DOWNLOAD = "Enable download";
@@ -139,6 +139,9 @@ public class DefaultStrings {
     public static String DOWNLOAD_SET_PATH_FAILED = "Failed to resolve folder path";
     public static String DOWNLOAD_GRANT_PERMISSION = "Please grant storage access to continue downloads";
     public static String DOWNLOAD_GRANT_PERMISSION_FAILED = "Could not open settings. Please grant All Files Access manually";
+    public static String DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Download with external downloader";
+    public static String EXTERNAL_DOWNLOADER_PACKAGE_NAME = "External downloader package name";
+    public static String EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "External downloader package name not found";
 
     public static String POST_OPTIONS = "Post options";
     public static String COPY_POST_DESCRIPTION = "Copy post description";
@@ -186,8 +189,9 @@ public class DefaultStrings {
     public static String AVAILABLE_LIKE_ANIMATION = "Available like animations";
 
     public static String DEFAULT = "Default";
-    public static String ARR_DETAILED_TIMESTAMP = "Detailed timestamp";
-    public static String ARR_TIME_LEFT = "Time left";
+    public static String ARR_DETAILED_TIMESTAMP = "Detailed timestamp (Weekday/Month/Date/Hour/Minute/Second)";
+    public static String ARR_POST_TIME = "Post time (Hour/Minute/Second)";
+    public static String ARR_TIME_LEFT = "Time left (Hour/Minute/Second left)";
 
     public static String WELCOME_TITLE = "Welcome to Piko";
     public static String WELCOME_MESSAGE = "To improve your experience with Piko, please vist Piko settings and adjust your preference";

@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.patches.hide.navigation;
 import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
@@ -30,18 +31,23 @@ public class HideNavigationButtonsPatch {
         HIDE_CREATE = Pref.hideNavigationCreate() && SettingsStatus.hideNavigationButtons;
     }
 
+    // Credits to brosssh.
+    // https://github.com/brosssh/morphe-patches/blob/27cc95b04b162d0df3b5722542f9fd095f42fd9d/extensions/instagram/src/main/java/app/morphe/extension/instagram/hide/navigation/HideNavigationButtonsPatch.java
     /**
      * Injection point.
-     *
      * @param navigationButtonsList the list of navigation buttons, as an (obfuscated) Enum type
-     * @param enumNameField         the field in the nav button enum class which contains the name of the button
+     * @param buttonNameToRemove the name of the button we want to remove
+     * @param enumNameField the field in the nav button enum class which contains the name of the button
      * @return the patched list of navigation buttons
      */
     public static List<Object> filterNavigationButtons(
             List<Object> navigationButtonsList,
             String enumNameField
     ) throws IllegalAccessException, NoSuchFieldException {
-        Iterator<Object> iterator = navigationButtonsList.iterator();
+        List<Object> mutableList = new ArrayList<>(navigationButtonsList);
+
+        Iterator<Object> iterator = mutableList.iterator();
+
         while (iterator.hasNext()) {
             Object button = iterator.next();
             Field f = button.getClass().getDeclaredField(enumNameField);

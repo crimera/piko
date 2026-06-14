@@ -40,7 +40,8 @@ public class ScreenBuilder {
     }
 
     private PreferenceCategory addCategory(String title) {
-        PreferenceCategory preferenceCategory = new PreferenceCategory(context);
+        CategoryPref preferenceCategory = new CategoryPref(context);
+        preferenceCategory.setFirstCategory(screen.getPreferenceCount() == 0);
         preferenceCategory.setTitle(title);
         screen.addPreference(preferenceCategory);
         return preferenceCategory;
@@ -551,7 +552,7 @@ public class ScreenBuilder {
     }
 
     public void buildDownloadSection() {
-        if (!(SettingsStatus.downloadMedia)) return;
+        if (!(SettingsStatus.downloadMedia || SettingsStatus.downloadWithExternalDownloader)) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_DOWNLOAD_MEDIA);
 
@@ -584,6 +585,22 @@ public class ScreenBuilder {
                         Strings.DOWNLOAD_SET_PATH,
                         Pref.getCustomDownloadPath(),
                         Strings.DOWNLOAD_SET_PATH
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER,
+                        "",
+                        Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER
+                )
+        );
+
+        addPreference(category,
+                helper.editTextPreference(
+                        Strings.EXTERNAL_DOWNLOADER_PACKAGE_NAME,
+                        Pref.externalDownloaderPackageName(),
+                        Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
                 )
         );
     }

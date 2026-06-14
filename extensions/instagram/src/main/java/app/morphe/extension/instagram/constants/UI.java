@@ -18,8 +18,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import java.util.ArrayList;
 
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.utils.Pref;
-import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.shared.Logger;
@@ -32,6 +32,10 @@ import app.morphe.extension.instagram.entity.InstagramButton;
 import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 
 public class UI {
+
+    public static final String DRAWABLE_DOWNLOAD_ICON = "instagram_download_outline_24";
+    public static final String DRAWABLE_INFO_ICON = "instagram_info_outline_24";
+    public static final String DRAWABLE_DEBUG_ICON = "instagram_app_instagram_pano_outline_24";
 
     public static int getThemedColour() {
         Context context = Utils.getContext();
@@ -169,7 +173,7 @@ public class UI {
                         String selectedOption = options.get(which);
 
                         if (selectedOption.equals(Strings.GOTO_PIKO_SETTINGS)) {
-                            ActivityHook.openLink("instagram://profile");
+                            PikoUtils.openUrl("instagram://profile");
                         }
                     }
                 } catch (Exception e) {
