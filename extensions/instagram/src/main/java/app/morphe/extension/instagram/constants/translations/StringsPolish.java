@@ -140,6 +140,9 @@ public class StringsPolish extends DefaultStrings {
         this.DOWNLOAD_SET_PATH_FAILED = "Nie udało się ustalić ścieżki folderu";
         this.DOWNLOAD_GRANT_PERMISSION = "Przyznaj dostęp do pamięci, aby pobierać pliki";
         this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Nie udało się otworzyć ustawień. Przyznaj dostęp do wszystkich plików ręcznie";
+        this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Pobierz przez zewnętrzną aplikację";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "Nazwa pakietu zewnętrznej aplikacji";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "Nie znaleziono pakietu zewnętrznej aplikacji";
 
         this.POST_OPTIONS = "Opcje posta";
         this.COPY_POST_DESCRIPTION = "Skopiuj opis posta";
@@ -186,8 +189,9 @@ public class StringsPolish extends DefaultStrings {
         this.AVAILABLE_LIKE_ANIMATION = "Dostępne animacje polubienia";
 
         this.DEFAULT = "Domyślna";
-        this.ARR_DETAILED_TIMESTAMP = "Szczegółowa data";
-        this.ARR_TIME_LEFT = "Pozostały czas";
+        this.ARR_DETAILED_TIMESTAMP = "Szczegółowy czas (dzień tygodnia/miesiąc/dzień/godzina/minuta/sekunda)";
+        this.ARR_POST_TIME = "Czas publikacji (godzina/minuta/sekunda)";
+        this.ARR_TIME_LEFT = "Pozostały czas (godziny/minuty/sekundy)";
 
         this.WELCOME_TITLE = "Witaj w Piko";
         this.WELCOME_MESSAGE = "Aby wyciągnąć z Piko jak najwięcej, zajrzyj do ustawień i dostosuj je pod siebie";
