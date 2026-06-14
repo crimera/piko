@@ -1,3 +1,32 @@
+## [3.5.0-dev.7](https://github.com/crimera/piko/compare/v3.5.0-dev.6...v3.5.0-dev.7) (2026-06-14)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix ImmutablePandoVideoVersion error while downloading some videos ([dc5dc4e](https://github.com/crimera/piko/commit/dc5dc4e7c7349e8561b3d6710c58cbd5a072f44b))
+* **Instagram:** Fix lower resolution image downloading ([45f8aa0](https://github.com/crimera/piko/commit/45f8aa07a3f7ca636d6f4f17e1d96998e20b89ef))
+* **Instagram:** Fix null userdata from mediadata ([ef8fb7e](https://github.com/crimera/piko/commit/ef8fb7ee09bf744183bb87302e8d36215a873023))
+* **Instagram:** Hide navigation buttons crashing on tablets ([e5b0ddb](https://github.com/crimera/piko/commit/e5b0ddb4b8f612b279f464a99535094d979e906f))
+* **Twitter:** Some patches failed on 11.97.1-release.0+ ([293b16f](https://github.com/crimera/piko/commit/293b16f17edc71d6ad0bc90dc39a7d82d5a38de4))
+
+### ✨ New Features
+
+* **Instagram:** Add `Clone` patch ([#1295](https://github.com/crimera/piko/issues/1295)) ([a6b1fe1](https://github.com/crimera/piko/commit/a6b1fe11f817b94c7c6e6d70b56df9394335d5f8))
+* **Instagram:** Added `External downloader` patch ([5d00775](https://github.com/crimera/piko/commit/5d007751b6ed834c1bc65ef478fa47187b8c7cdd))
+* **Instagram:** Refine Piko settings UI ([#1310](https://github.com/crimera/piko/issues/1310)) ([dd76ee4](https://github.com/crimera/piko/commit/dd76ee4f1a31c8c7810f3247e92ee31894e72f6a))
+* **Translations-Instagram:** Added Spanish translation ([#1288](https://github.com/crimera/piko/issues/1288)) ([023eef8](https://github.com/crimera/piko/commit/023eef8339afa9069173381da280052e72e59f73))
+* **Twitter:** Add compatibility check patch to handle exceptions ([d46c253](https://github.com/crimera/piko/commit/d46c25343c6dc73a60379e8283c8a067c2075799))
+
+### 🚀 Updated App Support
+
+* **Twitter:** Bump support for `11.99.0-release.1` ([b9c578f](https://github.com/crimera/piko/commit/b9c578fabbc9bddaf0cbb30d77bbac2879ebc7f0))
+
+### 🔧 Improvements
+
+* **Instagram:** Added a new timestamp customization option ([#1312](https://github.com/crimera/piko/issues/1312)) ([2a82ac4](https://github.com/crimera/piko/commit/2a82ac4dc430984f34d89194565a12964d512657))
+* **Instagram:** refactor post overflow menu button on click ([2e55b54](https://github.com/crimera/piko/commit/2e55b54e1af223a78113b18c29ac7f0056fecd5e))
+* **Instagram:** Streamline post overflow menu button ([8209a77](https://github.com/crimera/piko/commit/8209a778781a7de73ba838363810de8462e3f19f))
+* **Instagram:** Streamline reels overflow menu button ([50bbef3](https://github.com/crimera/piko/commit/50bbef36bfbd3f76836d35a89a429d32c58f28ae))
+
 ## [3.5.0-dev.6](https://github.com/crimera/piko/compare/v3.5.0-dev.5...v3.5.0-dev.6) (2026-06-08)
 
 ### 🐛 Bug Fixes
