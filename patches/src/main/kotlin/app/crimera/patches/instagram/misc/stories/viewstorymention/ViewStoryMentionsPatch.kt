@@ -9,6 +9,7 @@ package app.crimera.patches.instagram.misc.stories.viewstorymention
 import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxEntity
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
 import app.crimera.patches.instagram.entity.userdata.userDataEntity
+import app.crimera.patches.instagram.entity.videoData.videoDataEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.misc.stories.handleStoryButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
@@ -21,7 +22,7 @@ val viewStoryMentionsPatch =
         name = "View story mentions",
         description = "Add option to view visible and hidden story mentions.",
     ) {
-        dependsOn(settingsPatch, handleStoryButtonPatch, userDataEntity, mediaDataEntity, instagramDialogBoxEntity)
+        dependsOn(settingsPatch, handleStoryButtonPatch, userDataEntity, mediaDataEntity, instagramDialogBoxEntity, videoDataEntity)
 
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 

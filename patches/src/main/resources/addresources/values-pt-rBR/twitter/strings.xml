@@ -24,6 +24,7 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">Compartilhar link da mídia</string>
     <!-- Native -->
     <string name="piko_title_native">Recursos nativos</string>
+    <string name="piko_pref_native_page_desc">Esses recursos nativos do Piko estão disponíveis no menu de publicação.</string>
     <string name="piko_title_native_downloader">Baixador nativo</string>
     <string name="piko_title_native_downloader_toggle">Ativar baixador nativo</string>
     <string name="piko_pref_native_downloader_inline_button">Exibir botão de download embutido</string>
@@ -38,6 +39,11 @@
     <string name="piko_share_image_toggle">Ativar compartilhamento de Tweet como Imagem</string>
     <string name="piko_share_image_autocleanup">Limpar capturas automaticamente</string>
     <string name="piko_share_image_autocleanup_desc">Remova capturas com mais de 24 horas quando ativado</string>
+    <string name="piko_share_image_invalid_context">Contexto inválido</string>
+    <string name="piko_share_image_capturing">Capturando tweet...</string>
+    <string name="piko_share_image_view_not_found">Visualização do tweet não encontrada</string>
+    <string name="piko_share_image_capture_failed">Falha ao capturar a imagem</string>
+    <string name="piko_share_image_error">Erro: %s</string>
     <string name="piko_title_native_translator">Tradução nativa de postagem</string>
     <string name="piko_native_translator_toggle">Ativar tradução nativa de postagem</string>
     <string name="piko_native_translator_provider">Provedores de tradução</string>
@@ -176,6 +182,7 @@
     <string name="piko_pref_customisation_post_font_size">Tamanho da fonte das postagens</string>
     <string name="piko_pref_customisation_search_type_ahead">Sugestões de pesquisa para ocultar</string>
     <string name="piko_pref_customisation_change_app_icon">Alterar o icone do aplicativo</string>
+    <string name="piko_notifications_tab_priority">Prioridade</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Estilo da fonte</string>
     <string name="piko_pref_add_font">Adicionar fonte</string>

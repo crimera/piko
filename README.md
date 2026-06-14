@@ -47,14 +47,14 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.5.0-dev.6](https://github.com/crimera/piko/releases/tag/v3.5.0-dev.6)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;120 patches total
+> **[v3.5.0-dev.7](https://github.com/crimera/piko/releases/tag/v3.5.0-dev.7)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;122 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 11.80.0-alpha.1 | 11.82.0-beta.1 | 11.81.0-release.0 | 11.95.1-release-ripped.0 |
+| 11.80.0-alpha.1 | 11.82.0-beta.1 | 11.81.0-release.0 | 11.99.0-release-ripped.1 |
 | :---: | :---: | :---: | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
@@ -134,7 +134,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;49 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;51 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -149,6 +149,8 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Amoled theme](#amoled-theme) | Replaces Instagram's dark-mode background greys with pure black for AMOLED displays. |  |
 | [Change like animation](#change-like-animation) | Change the animation to one from existing Rings like animations |  |
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
+| [Clone](#clone) | Changes the package name and the app name. This allows you to install the patched app alongside the original Instagram app.
+Caution: Do not select the official Morphe's "Change package name" universal patch. | • Package name<br>• App name |
 | [Copy comment](#copy-comment) | Adds a button to copy comments on posts and reels. |  |
 | [Customise story ring size](#customise-story-ring-size) |  |  |
 | [Customise story timestamp](#customise-story-timestamp) | Customise the timestamp that shows when the story was posted |  |
@@ -167,6 +169,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Disable video autoplay](#disable-video-autoplay) |  |  |
 | [Download media](#download-media) | Adds ability to download posts, reels, stories and highlights |  |
 | [Download voice message](#download-voice-message) | Enables ability to download voice messages |  |
+| [External downloader](#external-downloader) | Adds support to share post links directly to external downloader |  |
 | [Follow back indicator](#follow-back-indicator) | Adds a label on the profile page, indicating whether a user is follows you back. |  |
 | [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) |  |  |
 | [Hide navigation buttons](#hide-navigation-buttons) | Hides navigation bar buttons, such as the Reels and Create button. |  |

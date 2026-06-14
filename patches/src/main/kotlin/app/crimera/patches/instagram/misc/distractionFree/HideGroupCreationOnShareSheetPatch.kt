@@ -9,6 +9,7 @@ package app.crimera.patches.instagram.misc.distractionFree
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -21,7 +22,7 @@ import com.android.tools.smali.dexlib2.Opcode
 
 internal object ShareSheetItemsBinderFingerprint : Fingerprint(
     returnType = "V",
-    parameters = listOf("Ljava/util/List;", "Z", "Lcom/instagram/common/session/UserSession;"),
+    parameters = listOf("Ljava/util/List;", "Z", USER_SESSION_CLASS),
     definingClass = "Lcom/instagram/direct/fragment/sharesheet/view/DirectShareSheetFragmentMessageComposerViewBinder;",
 )
 
