@@ -198,6 +198,7 @@ public class Strings {
 
     public static final String DEFAULT = langInstance.DEFAULT;
     public static final String ARR_DETAILED_TIMESTAMP = langInstance.ARR_DETAILED_TIMESTAMP;
+    public static final String ARR_POST_TIME = langInstance.ARR_POST_TIME;
     public static final String ARR_TIME_LEFT = langInstance.ARR_TIME_LEFT;
 
     public static final String WELCOME_TITLE = langInstance.WELCOME_TITLE;
