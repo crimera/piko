@@ -21,6 +21,7 @@ import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.crimera.ObjectBrowser;
 
+import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Strings;
@@ -29,6 +30,7 @@ import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.patches.feed.MoreOptionsOnPostPatch;
+import app.morphe.extension.instagram.settings.ActivityHook;
 
 import com.instagram.feed.media.mediaoption.MediaOption$Option;
 import com.instagram.common.session.UserSession;
@@ -108,6 +110,10 @@ public class FeedButton {
         return FeedButton.initOverflowButton("PIKO_DEBUG", 502, UI.DRAWABLE_DEBUG_ICON);
     }
 
+    public static MediaOption$Option externalDownloaderOverflowButton(){
+        return FeedButton.initOverflowButton("PIKO_EXTERNAL_DOWNLOADER", 503, UI.DRAWABLE_DOWNLOAD_ICON);
+    }
+
 
     private static void addDownloadButton(Object buttonAdderObject, ArrayList buttonlist) throws Exception {
         String DOWNLOAD_BUTTON_TEXT = Strings.DOWNLOAD_OPTIONS;
@@ -122,9 +128,11 @@ public class FeedButton {
             if(Pref.pikoDebug()){
                 addButton(MediaOption$Option.PIKO_DEBUG, Strings.PIKO_DEBUG, buttonAdderObject, buttonlist);
             }
-
             if(Pref.enableDownload()) {
                 addDownloadButton(buttonAdderObject, buttonlist);
+            }
+            if(Pref.downloadWithExternalDownloader()) {
+                addButton(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER, Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER, buttonAdderObject, buttonlist);
             }
             if(Pref.moreOptionsOnPost()) {
                 addButton(MediaOption$Option.PIKO_MORE_POST_OPTION, Strings.POST_OPTIONS, buttonAdderObject, buttonlist);
@@ -138,6 +146,7 @@ public class FeedButton {
         return (
                 pressedButton.equals(MediaOption$Option.PIKO_DEBUG) ||
                 pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD) ||
+                pressedButton.equals(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER) ||
                 pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)
         );
     }
@@ -152,6 +161,9 @@ public class FeedButton {
 
             } else if (pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)) {
                 MoreOptionsOnPostPatch.postMoreOptions(context, userSession, mediaObject, currentMediaIndex);
+
+            } else if (pressedButton.equals(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER)) {
+                DownloadUtils.externalDownloader(mediaObject,currentMediaIndex);
 
             }
 

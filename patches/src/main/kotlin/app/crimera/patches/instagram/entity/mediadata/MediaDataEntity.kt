@@ -216,6 +216,16 @@ val mediaDataEntity =
                     }
                 }
             }
+
+            ProductInfoMapperFingerprint.apply {
+                val strIndex = stringMatches.last().index
+                method.apply {
+                    val productTypeIGetObjectInstruction = getInstruction(indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT))
+                    val productTypeFieldName = productTypeIGetObjectInstruction.fieldExtractor().name
+                    GetPostTypeExtensionFingerprint.changeFirstString(productTypeFieldName)
+                }
+            }
+
             // End.
         }
     }

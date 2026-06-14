@@ -265,6 +265,13 @@ public class Pref {
     public static boolean moreOptionsOnPost() {
         return SharedPref.getBooleanPref(Settings.ENABLE_MORE_OPTIONS_ON_POST) && SettingsStatus.moreOptionsOnPost;
     }
+    public static boolean downloadWithExternalDownloader() {
+        return SharedPref.getBooleanPref(Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER) && SettingsStatus.downloadWithExternalDownloader;
+    }
+
+    public static String externalDownloaderPackageName() {
+        return SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
+    }
 
     //end
 }
