@@ -88,7 +88,7 @@ public class StringsRussian extends DefaultStrings {
         this.CUSTOMISE_STORY_TIMESTAMP = "Настроить отметку времени истории";
         this.CUSTOMISE_STORY_TIMESTAMP_DESC = "Настроить отображение времени публикации истории";
         this.UNLIMITED_REPLAYS = "Сделать временное медиа постоянным";
-        this.UNLIMITED_REPLAYS_DESC = "Изменяет содержимое с однократным или двукратным просмоrром на постоянное";
+        this.UNLIMITED_REPLAYS_DESC = "Изменяет содержимое с однократным или двукратным просмотром на постоянное";
         this.IMPROVE_IMAGE_VIEWING = "Улучшить качество медиа";
         this.IMPROVE_IMAGE_VIEWING_DESC = "Загружать с сервера медиафайлы в максимальном качестве";
         this.HIDE_RESHARE_BUTTON = "Скрыть кнопку «Поделиться»";
