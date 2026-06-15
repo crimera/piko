@@ -52,6 +52,9 @@ public class FeedButton {
         if(SettingsStatus.moreOptionsOnPost){
             additionalButtonsList.add(MediaOption$Option.PIKO_MORE_POST_OPTION);
         }
+        if(SettingsStatus.downloadWithExternalDownloader){
+            additionalButtonsList.add(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER);
+        }
 
         int additionalButtonListSize = additionalButtonsList.size();
 
@@ -145,9 +148,9 @@ public class FeedButton {
     public static boolean isCustomButtonPressed(MediaOption$Option pressedButton){
         return (
                 pressedButton.equals(MediaOption$Option.PIKO_DEBUG) ||
-                pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD) ||
-                pressedButton.equals(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER) ||
-                pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)
+                (SettingsStatus.downloadMedia && pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD)) ||
+                (SettingsStatus.moreOptionsOnPost && pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)) ||
+                (SettingsStatus.downloadWithExternalDownloader && pressedButton.equals(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER))
         );
     }
 
@@ -156,13 +159,13 @@ public class FeedButton {
             if(pressedButton.equals(MediaOption$Option.PIKO_DEBUG)) {
                 ObjectBrowser.browseObject(context, new MediaData(mediaObject, userSession));
 
-            } else if (pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD)) {
+            } else if (SettingsStatus.downloadMedia && pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD)) {
                 DownloadUtils.downloadPost(context, userSession, mediaObject, currentMediaIndex);
 
-            } else if (pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)) {
+            } else if (SettingsStatus.moreOptionsOnPost && pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)) {
                 MoreOptionsOnPostPatch.postMoreOptions(context, userSession, mediaObject, currentMediaIndex);
 
-            } else if (pressedButton.equals(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER)) {
+            } else if (SettingsStatus.downloadWithExternalDownloader && pressedButton.equals(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER)) {
                 DownloadUtils.externalDownloader(mediaObject,currentMediaIndex);
 
             }
