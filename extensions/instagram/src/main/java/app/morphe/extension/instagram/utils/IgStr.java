@@ -8,7 +8,6 @@ package app.morphe.extension.instagram.utils;
 
 import android.content.Context;
 import android.content.ContextWrapper;
-
 import java.util.concurrent.ConcurrentHashMap;
 
 import app.morphe.extension.shared.Utils;
@@ -16,6 +15,7 @@ import app.morphe.extension.shared.Utils;
 public final class IgStr {
 
     private static final ConcurrentHashMap<String, String> cache = new ConcurrentHashMap<>();
+    private static Context baseContext;
 
     private IgStr() {}
 
@@ -45,13 +45,14 @@ public final class IgStr {
     }
 
     private static Context baseContext() {
-        Context ctx = Utils.getActivity();
-        if (ctx == null) ctx = Utils.getContext();
+        if (baseContext != null) return baseContext;
+        Context ctx = Utils.getContext();
         while (ctx instanceof ContextWrapper) {
             Context base = ((ContextWrapper) ctx).getBaseContext();
             if (base == null || base == ctx) break;
             ctx = base;
         }
-        return ctx;
+        baseContext = ctx;
+        return baseContext;
     }
 }
