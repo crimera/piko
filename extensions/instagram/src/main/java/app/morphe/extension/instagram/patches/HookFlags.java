@@ -31,6 +31,11 @@ public class HookFlags {
         BOOL_FLAGS.put("104772::1", false); //enable_feed_menu
         BOOL_FLAGS.put("104772::2", false); //enable_reels_menu
         BOOL_FLAGS.put("104772::6", false); //enable_reduced_options
+        BOOL_FLAGS.put("117613::0", true); //ig_overflow_menu_icon::use_more_lines_icon
+        BOOL_FLAGS.put("100002::0", true); //ig_igds_android_prism_overflow_sheet::is_enabled
+        BOOL_FLAGS.put("100002::1", true); //ig_igds_android_prism_overflow_sheet::alpha_press_state_enabled
+        BOOL_FLAGS.put("100002::2", true); //ig_igds_android_prism_overflow_sheet::stamps_enabled
+        BOOL_FLAGS.put("100002::4", true); //ig_igds_android_prism_overflow_sheet::is_wide_stamp_enabled Removed in version 434.0.0.0.35
     }
 
     private static void adsFlags() {
@@ -40,6 +45,13 @@ public class HookFlags {
 //        BOOL_FLAGS.put("78046::9", false); //enable_no_invalidation_reason_for_mae_exclusion
 //        BOOL_FLAGS.put("79181::0", false); //ig_reels_ads_1x2_explore_halc_android::is_enabled
         BOOL_FLAGS.put("110800::0", false); //ig_android_controller_migration::use_v2_controller
+        BOOL_FLAGS.put("114983::0", false); //ig_stories_restyle_midcard::is_enable
+        BOOL_FLAGS.put("95150::1", false); //ig_stories_music_midcard::is_enable
+        BOOL_FLAGS.put("84366::12", false); //ig_stories_ayt_midcard::enable_add_yours
+        BOOL_FLAGS.put("120110::0", false); //ig_android_scroll_break::is_enabled
+        BOOL_FLAGS.put("120110::1", false); //ig_android_scroll_break::is_pivot_enabled
+        BOOL_FLAGS.put("120110::2", false); //ig_android_scroll_break::is_feed_enabled
+        BOOL_FLAGS.put("105778::0", false); //ig_android_restyle_post_cap_promo_dialog::is_enable
     }
 
     // Thanks to @brosssh
@@ -50,6 +62,8 @@ public class HookFlags {
 
     private static void profileActionBarFlags() {
         BOOL_FLAGS.put("81826::0", true); //igx_action_bar_service_replacement::is_profile_replaced
+        BOOL_FLAGS.put("58467::20", false); // ig_spain_growth::is_ig_to_p92_app_switcher_enabled_android
+        BOOL_FLAGS.put("89230::0", true); // ig_spain_growth::is_ig_to_p92_app_switcher_enabled_android
     }
 
     private static void mainFeedActionBarFlags() {
