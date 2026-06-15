@@ -149,7 +149,8 @@ public class StringsIndonesian extends DefaultStrings {
 		this.COPY_POST_OWNER_USERNAME = "Salin nama pengguna pemilik postingan";
 		this.COPY_POST_OWNER_FULLNAME = "Salin nama lengkap pemilik postingan";
 		this.ENABLE_MORE_OPTIONS_ON_POST = "Aktifkan lebih banyak pilihan pada postingan";
-		this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Dapatkan lebih banyak pilihan dengan menekan lama postingan";
+		this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Menambahkan tombol menu tambahan untuk menampilkan berbagai pilihan pada postingan/reels, seperti menyalin deskripsi, menyalin nama pengguna, dan sebagainya";
+		this.MORE_OPTIONS = "Pilihan lainnya";
 
 		this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Sembunyikan tombol navigasi";
 		this.HIDE_NAVIGATION_FEED = "Sembunyikan tombol Feed";
