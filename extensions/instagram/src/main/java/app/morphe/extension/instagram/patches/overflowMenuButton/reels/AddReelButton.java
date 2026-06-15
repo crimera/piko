@@ -66,9 +66,9 @@ public class AddReelButton {
     }
 
     private static void addInfoButton(Context context, Object helperObject, Object mediaObject){
-        String icon = UI.DRAWABLE_INFO_ICON;
+        String icon = UI.DRAWABLE_BLUB_ICON;
         ReelButton reelButton = new InfoButton(context,mediaObject);
-        String buttonText = Strings.POST_OPTIONS;
+        String buttonText = Strings.MORE_OPTIONS;
 
         ReelOverflowButton reelOverflowButton = new ReelOverflowButton(icon,reelButton,buttonText);
 

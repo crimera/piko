@@ -20,7 +20,7 @@ import app.morphe.patcher.patch.bytecodePatch
 val moreOptionsOnPostPatch =
     bytecodePatch(
         name = "More options on post",
-        description = "Adds more options on post, like copy description by long pressing on post",
+        description = "Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc",
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)

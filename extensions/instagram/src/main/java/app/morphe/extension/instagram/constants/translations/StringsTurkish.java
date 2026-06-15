@@ -139,6 +139,9 @@ public class StringsTurkish extends DefaultStrings {
         this.DOWNLOAD_SET_PATH_FAILED = "Klasör yolu çözülemedi";
         this.DOWNLOAD_GRANT_PERMISSION = "İndirmelere devam etmek için lütfen depolama erişimi izni verin";
         this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Ayarlar açılamadı. Lütfen Tüm Dosyalara Erişim iznini manuel olarak verin";
+        this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Harici indirici ile indir";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "Harici indirici paket adı";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "Harici indirici paket adı bulunamadı";
 
         this.POST_OPTIONS = "Gönderi seçenekleri";
         this.COPY_POST_DESCRIPTION = "Gönderi açıklamasını kopyala";
@@ -186,6 +189,7 @@ public class StringsTurkish extends DefaultStrings {
 
         this.DEFAULT = "Varsayılan";
         this.ARR_DETAILED_TIMESTAMP = "Ayrıntılı zaman damgası";
+        this.ARR_POST_TIME = "Gönderi zamanı (Saat/Dakika/Saniye)";
         this.ARR_TIME_LEFT = "Kalan süre";
 
         this.WELCOME_TITLE = "Piko'ya Hoş Geldiniz";

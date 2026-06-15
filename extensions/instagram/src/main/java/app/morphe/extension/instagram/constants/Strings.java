@@ -157,6 +157,7 @@ public class Strings {
     public static final String DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = langInstance.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER;
     public static final String EXTERNAL_DOWNLOADER_PACKAGE_NAME = langInstance.EXTERNAL_DOWNLOADER_PACKAGE_NAME;
     public static final String EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = langInstance.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND;
+    public static final String EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET = langInstance.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET;
 
     public static final String POST_OPTIONS = langInstance.POST_OPTIONS;
     public static final String COPY_POST_DESCRIPTION = langInstance.COPY_POST_DESCRIPTION;
@@ -164,6 +165,7 @@ public class Strings {
     public static final String COPY_POST_OWNER_FULLNAME = langInstance.COPY_POST_OWNER_FULLNAME;
     public static final String ENABLE_MORE_OPTIONS_ON_POST = langInstance.ENABLE_MORE_OPTIONS_ON_POST;
     public static final String ENABLE_MORE_OPTIONS_ON_POST_DESC = langInstance.ENABLE_MORE_OPTIONS_ON_POST_DESC;
+    public static final String MORE_OPTIONS = langInstance.MORE_OPTIONS;
 
     public static final String CATEGORY_HIDE_NAVIGATION_BUTTONS = langInstance.CATEGORY_HIDE_NAVIGATION_BUTTONS;
 

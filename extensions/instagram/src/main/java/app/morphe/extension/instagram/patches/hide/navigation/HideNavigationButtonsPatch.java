@@ -64,6 +64,6 @@ public class HideNavigationButtonsPatch {
                 iterator.remove();
             }
         }
-        return navigationButtonsList;
+        return mutableList;
     }
 }

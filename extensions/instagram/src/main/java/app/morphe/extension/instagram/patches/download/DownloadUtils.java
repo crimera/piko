@@ -239,8 +239,13 @@ public class DownloadUtils {
 
     public static void externalDownloader(Object mediaObject, int currentMediaIndex){
         try {
-            String link = Links.generatePostLink(mediaObject, currentMediaIndex);
             String packageName = Pref.externalDownloaderPackageName();
+            packageName = packageName == null ? "" : packageName.trim();
+            if(packageName.isEmpty()){
+                PikoUtils.toast(Strings.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET);
+                return;
+            }
+            String link = Links.generatePostLink(mediaObject, currentMediaIndex);
             ActivityHook.openLink(link, packageName);
         } catch (Exception e){
             PikoUtils.logger(e);

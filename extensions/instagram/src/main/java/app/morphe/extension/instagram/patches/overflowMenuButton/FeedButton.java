@@ -52,6 +52,9 @@ public class FeedButton {
         if(SettingsStatus.moreOptionsOnPost){
             additionalButtonsList.add(MediaOption$Option.PIKO_MORE_POST_OPTION);
         }
+        if(SettingsStatus.downloadWithExternalDownloader){
+            additionalButtonsList.add(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER);
+        }
 
         int additionalButtonListSize = additionalButtonsList.size();
 
@@ -103,7 +106,7 @@ public class FeedButton {
     }
 
     public static MediaOption$Option morePostOptionOverflowButton(){
-        return FeedButton.initOverflowButton("PIKO_MORE_POST_OPTION", 501, UI.DRAWABLE_INFO_ICON);
+        return FeedButton.initOverflowButton("PIKO_MORE_POST_OPTION", 501, UI.DRAWABLE_BLUB_ICON);
     }
 
     public static MediaOption$Option debugOverflowButton(){
@@ -135,7 +138,7 @@ public class FeedButton {
                 addButton(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER, Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER, buttonAdderObject, buttonlist);
             }
             if(Pref.moreOptionsOnPost()) {
-                addButton(MediaOption$Option.PIKO_MORE_POST_OPTION, Strings.POST_OPTIONS, buttonAdderObject, buttonlist);
+                addButton(MediaOption$Option.PIKO_MORE_POST_OPTION, Strings.MORE_OPTIONS, buttonAdderObject, buttonlist);
             }
         } catch (Exception e) {
             Logger.printException(() -> "Error at addReelButton",e);
@@ -145,9 +148,9 @@ public class FeedButton {
     public static boolean isCustomButtonPressed(MediaOption$Option pressedButton){
         return (
                 pressedButton.equals(MediaOption$Option.PIKO_DEBUG) ||
-                pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD) ||
-                pressedButton.equals(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER) ||
-                pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)
+                (SettingsStatus.downloadMedia && pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD)) ||
+                (SettingsStatus.moreOptionsOnPost && pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)) ||
+                (SettingsStatus.downloadWithExternalDownloader && pressedButton.equals(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER))
         );
     }
 
@@ -156,13 +159,13 @@ public class FeedButton {
             if(pressedButton.equals(MediaOption$Option.PIKO_DEBUG)) {
                 ObjectBrowser.browseObject(context, new MediaData(mediaObject, userSession));
 
-            } else if (pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD)) {
+            } else if (SettingsStatus.downloadMedia && pressedButton.equals(MediaOption$Option.PIKO_DOWNLOAD)) {
                 DownloadUtils.downloadPost(context, userSession, mediaObject, currentMediaIndex);
 
-            } else if (pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)) {
+            } else if (SettingsStatus.moreOptionsOnPost && pressedButton.equals(MediaOption$Option.PIKO_MORE_POST_OPTION)) {
                 MoreOptionsOnPostPatch.postMoreOptions(context, userSession, mediaObject, currentMediaIndex);
 
-            } else if (pressedButton.equals(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER)) {
+            } else if (SettingsStatus.downloadWithExternalDownloader && pressedButton.equals(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER)) {
                 DownloadUtils.externalDownloader(mediaObject,currentMediaIndex);
 
             }
