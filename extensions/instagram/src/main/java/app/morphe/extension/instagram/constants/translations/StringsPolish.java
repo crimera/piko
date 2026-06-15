@@ -149,7 +149,8 @@ public class StringsPolish extends DefaultStrings {
         this.COPY_POST_OWNER_USERNAME = "Skopiuj nazwę twórcy";
         this.COPY_POST_OWNER_FULLNAME = "Skopiuj wyświetlaną nazwę twórcy";
         this.ENABLE_MORE_OPTIONS_ON_POST = "Włącz więcej opcji dla postów";
-        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Rozwija dodatkowe opcje po długim naciśnięciu posta";
+        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Dodaje przycisk menu z dodatkowymi opcjami pod postami i rolkami (np. kopiowanie opisu, nazwy użytkownika itp.)";
+        this.MORE_OPTIONS = "Więcej opcji";
 
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Ukrywanie przycisków nawigacji";
         this.HIDE_NAVIGATION_FEED = "Ukryj przycisk Główna";
