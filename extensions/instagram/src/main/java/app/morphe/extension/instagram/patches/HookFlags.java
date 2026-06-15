@@ -30,7 +30,20 @@ public class HookFlags {
         BOOL_FLAGS.put("104772::0", false); //enable_simple_overflow_menu
         BOOL_FLAGS.put("104772::1", false); //enable_feed_menu
         BOOL_FLAGS.put("104772::2", false); //enable_reels_menu
+        BOOL_FLAGS.put("104772::3", false); //enable_tombstone_redesign
+        BOOL_FLAGS.put("104772::4", false); //enable_non_destructive_report
+        BOOL_FLAGS.put("104772::5", false); //enable_non_destructive_styling
         BOOL_FLAGS.put("104772::6", false); //enable_reduced_options
+        BOOL_FLAGS.put("104772::7", false); //ig_ini_nice
+        BOOL_FLAGS.put("104772::10", false); //enable_bottom_profrile_intergrity_options
+        BOOL_FLAGS.put("104772::11", false); //enable_dynamic_chips_for_nice
+        BOOL_FLAGS.put("104772::12", false); //enable_cc_not_interested
+        BOOL_FLAGS.put("104772::13", false); //enable_nice_variant_b
+        BOOL_FLAGS.put("104772::14", false); //enable_nice_variant_full_screen
+        BOOL_FLAGS.put("104772::15", false); //enable_ini_refresh
+        BOOL_FLAGS.put("104772::16", false); //enable_reduced_options_reels
+        BOOL_FLAGS.put("104772::17", false); //enable_reduced_options_feed
+        BOOL_FLAGS.put("104772::18", false); //enable_follow_options_fix
     }
 
     private static void adsFlags() {
