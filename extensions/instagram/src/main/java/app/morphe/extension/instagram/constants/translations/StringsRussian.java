@@ -137,6 +137,9 @@ public class StringsRussian extends DefaultStrings {
         this.DOWNLOAD_SET_PATH_FAILED = "Не удалось определить путь к папке";
         this.DOWNLOAD_GRANT_PERMISSION = "Предоставьте доступ к хранилищу для продолжения скачивания";
         this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Не удалось открыть настройки. Пожалуйста, предоставьте доступ ко всем файлам вручную";
+        this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Скачивать с помощью внешнего загрузчика";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "Имя пакета внешнего загрузчика";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "Имя пакета внешнего загрузчика не найдено";
 
         this.POST_OPTIONS = "Действия с публикацией";
         this.COPY_POST_DESCRIPTION = "Скопировать описание публикации";
@@ -183,8 +186,9 @@ public class StringsRussian extends DefaultStrings {
         this.AVAILABLE_LIKE_ANIMATION = "Доступные анимации отметок «Нравится»";
 
         this.DEFAULT = "По умолчанию";
-        this.ARR_DETAILED_TIMESTAMP = "Подробная отметка времени";
-        this.ARR_TIME_LEFT = "Осталось времени";
+        this.ARR_DETAILED_TIMESTAMP = "Подробная отметка времени (День недели/Месяц/Дата/Час/Минута/Секунда)";
+        this.ARR_POST_TIME = "Время публикации (Час/Минута/Секунда)";
+        this.ARR_TIME_LEFT = "Осталось времени (Осталось часов/минут/секунд)";
 
         this.WELCOME_TITLE = "Добро пожаловать в Piko";
         this.WELCOME_MESSAGE = "Чтобы улучшить ваш опыт работы с Piko, пожалуйста, перейдите в настройки Piko и скорректируйте свои предпочтения";
