@@ -148,7 +148,8 @@ public class DefaultStrings {
     public static String COPY_POST_OWNER_USERNAME = "Copy post owner username";
     public static String COPY_POST_OWNER_FULLNAME = "Copy post owner fullname";
     public static String ENABLE_MORE_OPTIONS_ON_POST = "Enable more option on post";
-    public static String ENABLE_MORE_OPTIONS_ON_POST_DESC = "Get more options on long pressing the post";
+    public static String ENABLE_MORE_OPTIONS_ON_POST_DESC = "Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc";
+    public static String MORE_OPTIONS = "More options";
 
     public static String CATEGORY_HIDE_NAVIGATION_BUTTONS = "Hide navigation buttons";
     public static String HIDE_NAVIGATION_FEED = "Hide Feed button";

@@ -103,7 +103,7 @@ public class FeedButton {
     }
 
     public static MediaOption$Option morePostOptionOverflowButton(){
-        return FeedButton.initOverflowButton("PIKO_MORE_POST_OPTION", 501, UI.DRAWABLE_INFO_ICON);
+        return FeedButton.initOverflowButton("PIKO_MORE_POST_OPTION", 501, UI.DRAWABLE_BLUB_ICON);
     }
 
     public static MediaOption$Option debugOverflowButton(){
@@ -135,7 +135,7 @@ public class FeedButton {
                 addButton(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER, Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER, buttonAdderObject, buttonlist);
             }
             if(Pref.moreOptionsOnPost()) {
-                addButton(MediaOption$Option.PIKO_MORE_POST_OPTION, Strings.POST_OPTIONS, buttonAdderObject, buttonlist);
+                addButton(MediaOption$Option.PIKO_MORE_POST_OPTION, Strings.MORE_OPTIONS, buttonAdderObject, buttonlist);
             }
         } catch (Exception e) {
             Logger.printException(() -> "Error at addReelButton",e);

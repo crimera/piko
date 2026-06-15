@@ -164,6 +164,7 @@ public class Strings {
     public static final String COPY_POST_OWNER_FULLNAME = langInstance.COPY_POST_OWNER_FULLNAME;
     public static final String ENABLE_MORE_OPTIONS_ON_POST = langInstance.ENABLE_MORE_OPTIONS_ON_POST;
     public static final String ENABLE_MORE_OPTIONS_ON_POST_DESC = langInstance.ENABLE_MORE_OPTIONS_ON_POST_DESC;
+    public static final String MORE_OPTIONS = langInstance.MORE_OPTIONS;
 
     public static final String CATEGORY_HIDE_NAVIGATION_BUTTONS = langInstance.CATEGORY_HIDE_NAVIGATION_BUTTONS;
 
