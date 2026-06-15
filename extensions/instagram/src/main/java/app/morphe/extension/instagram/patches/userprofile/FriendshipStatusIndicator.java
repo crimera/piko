@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.patches.userprofile;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import java.util.List;
 import java.util.Arrays;
 import android.widget.TextView;
@@ -14,14 +16,12 @@ import android.view.View;
 
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.utils.Utils;
-import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.entity.UserFriendshipStatus;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.instagram.constants.Strings;
 
 import com.instagram.common.session.UserSession;
 
@@ -54,7 +54,7 @@ public class FriendshipStatusIndicator {
                 UserData viewingUserData = profileInfo.getUserData();
                 UserFriendshipStatus userFriendshipStatus = viewingUserData.getUserFriendshipStatus();
                 Boolean followed_by = userFriendshipStatus.getFollowBackStatus();
-                String indicatorText = followed_by ? Strings.FBI_FOLLOWS_YOU : Strings.FBI_DOESNT_FOLLOWS_YOU;
+                String indicatorText = followed_by ? str("piko_fbi_follows_you") : str("piko_fbi_doesnt_follows_you");
                 setInternalBadgeText(badgeObject, indicatorText);
 
             } catch (Exception ex) {
