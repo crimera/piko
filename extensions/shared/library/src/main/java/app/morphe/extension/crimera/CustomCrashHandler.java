@@ -13,9 +13,12 @@ import android.os.Environment;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import app.morphe.extension.crimera.PikoUtils;
 import android.os.Build;
 import android.util.Log;
+
+import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.crimera.constants.ExtensionStrings;
+import app.morphe.extension.shared.Utils;
 
 public class CustomCrashHandler implements Thread.UncaughtExceptionHandler {
     private final Context context;
@@ -48,15 +51,17 @@ public class CustomCrashHandler implements Thread.UncaughtExceptionHandler {
             report.append("--- App Info ---\n");
             report.append("Package Name: ").append(context.getPackageName()).append("\n");
             report.append("Version Name: ").append(pi.versionName).append("\n");
-            report.append("Version Code: ").append(pi.versionCode).append("\n\n");
+            report.append("Version Code: ").append(pi.versionCode).append("\n");
+            report.append("Patch version: ").append(Utils.getPatchesReleaseVersion()).append("\n\n");
             report.append("--- Stack Trace ---\n").append(stackTrace);
 
             String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.US).format(new Date());
             String fileName = "crash_report_" + timeStamp + ".txt";
+            String folderName = ExtensionStrings.DEFAULT_PIKO_FOLDER;
 
-            boolean isCreated = PikoUtils.pikoWriteFile(fileName,"Piko",report.toString(),false);
+            boolean isCreated = PikoUtils.pikoWriteFile(fileName,folderName,report.toString(),false);
             if(isCreated){
-                PikoUtils.toast("Crashlogs: /Downloads/"+fileName);
+                PikoUtils.toast("Crashlogs: /Downloads/"+folderName+"/"+fileName);
             } else{
                 PikoUtils.toast("Failed to create Crashlogs file");
             }
