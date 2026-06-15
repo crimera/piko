@@ -31,6 +31,8 @@ public class StringsJapanese extends DefaultStrings {
         this.IMPORT_DEV_OVERRIDES = "オーバーライドをインポート";
         this.IMPORT_ID_MAPPING = "マッピングファイルをインポート";
         this.DOWNLOAD_ID_MAPPING = "マッピングファイルをダウンロード";
+        this.MISSING_MAPPING_FILE = "マッピングファイルがありません。";
+        this.MISSING_MAPPING_FILE_DESC = "マッピングファイルがないと、開発者向けオプションの名前が正しく表示されません。ダウンロードしますか？";
 
         this.CATEGORY_LINKS = "リンク";
         this.OPEN_LINKS_EXTERNALLY = "リンクを外部ブラウザで開く";
@@ -43,12 +45,17 @@ public class StringsJapanese extends DefaultStrings {
         this.DISABLE_TYPING_STATUS = "入力状態を非表示";
         this.DISABLE_SCREENSHOT_DETECTION = "スクリーンショットの検出を無効化";
         this.VIEW_DM_ANONYMOUSLY = "DMを匿名で閲覧";
+        this.TURN_ON_ALL_GHOST_MODES = "すべての匿名モードを有効化";
+        this.GHOST_MODES_ON = "匿名モード：有効";
+        this.GHOST_MODES_DEFAULT = "匿名モード：無効";
+        this.GHOST_MODES_QUICK_TOGGLE = "匿名モードのクイック切替を有効化";
+        this.GHOST_MODES_QUICK_TOGGLE_DESC = "チャット画面上部に匿名モードを切り替えるボタンを追加します。";
 
         this.CATEGORY_DISTRACTION_FREE = "集中モード";
         this.DISABLE_STORIES = "ストーリーズを非表示";
         this.DISABLE_HIGHLIGHTS = "ハイライトを非表示";
-        this.DISABLE_EXPLORE = "発見タブを無効化";
-        this.DISABLE_COMMENTS = "コメントを無効化";
+        this.DISABLE_EXPLORE = "発見を無効化";
+        this.DISABLE_COMMENTS = "コメントを非表示";
         this.LIMIT_FOLLOWING_FEED = "フィードにフォロー中のアカウントのみ表示";
         this.LIMIT_FOLLOWING_FEED_DESC = "ホームフィードにフォローしているアカウントの投稿のみ表示します。";
         this.DISABLE_REELS_SCROLLING = "リールのスクロールを無効化";
@@ -92,6 +99,8 @@ public class StringsJapanese extends DefaultStrings {
         this.COPY_COMMENT_DESC = "投稿やリールのコメントをコピーするボタンを追加します。";
         this.COMMENT_COPIED_SUCCESS = "コメントをコピーしました。";
         this.COMMENT_COPIED_FAILED = "コピーするテキストが見つかりません。";
+        this.SAVE_MEDIA_COMMENT = "GIFコメントを保存";
+        this.SAVE_MEDIA_COMMENT_DESC = "投稿やリールのGIFコメントを保存するボタンを追加します。";
         this.COPY_USERNAME = "ユーザーネームをコピー";
         this.COPY_FULL_NAME = "名前をコピー";
         this.COPY_USER_ID = "ユーザーIDをコピー";
@@ -99,10 +108,13 @@ public class StringsJapanese extends DefaultStrings {
         this.DOWNLOAD_PROFILE_PICTURE = "プロフィール画像をダウンロード";
         this.COPIED = "コピーしました。";
         this.MORE_PROFILE_OPTIONS = "プロフィールのオプション";
-        this.REMOVE_EMPTY_BOTTOM_SPACE = "下部の空白を削除";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "プロフィールオプションをアクションバーに表示";
+        this.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "プロフィールオプションボタンをプロフィール画面上部のアクションバーに移動します。";
+        this.REMOVE_EMPTY_BOTTOM_SPACE = "ナビゲーションバー下の空白を削除";
         this.UNLOCK_PLUS_BENEFITS = "Plus特典を有効化";
         this.UNLOCK_PLUS_BENEFITS_DESC = "ローカルで判定される「Plus」サブスクリプション特典を有効化します。自己責任で使用してください。";
         this.CUSTOMISE_STORY_RING_SIZE = "ストーリー欄のアイコンのサイズをカスタマイズ";
+        this.CUSTOMISE_STORY_RING_SIZE_DESC = "ストーリー欄のアイコンのサイズをパーセントで変更します。（デフォルト値：100）";
 
         this.CATEGORY_DOWNLOAD_MEDIA = "メディアのダウンロード";
         this.ENABLE_DOWNLOAD = "ダウンロードを有効化";
@@ -112,6 +124,8 @@ public class StringsJapanese extends DefaultStrings {
         this.DOWNLOAD_USERNAME_FOLDER_DESC = "ユーザーネームごとにサブフォルダを作成します。";
         this.DOWNLOAD_CURRENT_MEDIA = "現在のメディアをダウンロード";
         this.DOWNLOAD_AS_IMAGE = "画像としてダウンロード";
+        this.VIDEO_VARIANTS = "動画の解像度";
+        this.IMAGE_VARIANTS = "画像の解像度";
         this.DOWNLOAD_AUDIO = "音声をダウンロード";
         this.DOWNLOAD_OPTIONS = "ダウンロードのオプション";
         this.COPY_MEDIA_LINK = "メディアリンクをコピー";
@@ -121,6 +135,14 @@ public class StringsJapanese extends DefaultStrings {
         this.DOWNLOADED_MEDIA = "ダウンロード完了：";
         this.MEDIA_EXISTS = "メディアは既に存在します。";
         this.DOWNLOAD_FAILED_MEDIA = "ダウンロード失敗：";
+        this.DOWNLOAD_SET_PATH = "ダウンロード先フォルダを設定";
+        this.DOWNLOAD_SET_PATH_SUCCESS = "ダウンロード先フォルダを更新しました。";
+        this.DOWNLOAD_SET_PATH_FAILED = "フォルダのパスを取得できませんでした。";
+        this.DOWNLOAD_GRANT_PERMISSION = "ダウンロードを続けるにはストレージへのアクセスを許可してください。";
+        this.DOWNLOAD_GRANT_PERMISSION_FAILED = "設定を開けませんでした。手動で「すべてのファイルへのアクセス」を許可してください。";
+        this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "外部ダウンローダーでダウンロード";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "外部ダウンローダーのパッケージ名";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "外部ダウンローダーのパッケージ名が見つかりません。";
         this.POST_OPTIONS = "投稿のオプション";
         this.COPY_POST_DESCRIPTION = "投稿の説明をコピー";
         this.COPY_POST_OWNER_USERNAME = "投稿者のユーザーネームをコピー";
@@ -149,6 +171,7 @@ public class StringsJapanese extends DefaultStrings {
         this.IMPORT_FAIL = "インポートに失敗しました。";
         this.RESTART_APP = "変更を反映するにはアプリの再起動が必要です。";
         this.OK = "OK";
+        this.CANCEL = "キャンセル";
         this.DELETED = "削除しました。";
         this.PIKO_DEBUG = "Pikoデバッグ";
         this.PIKO_DEBUG_DESC = "一部コンポーネントにテスト用のデバッグオプションを追加します。";
@@ -166,11 +189,15 @@ public class StringsJapanese extends DefaultStrings {
 
         this.DEFAULT = "デフォルト";
         this.ARR_DETAILED_TIMESTAMP = "詳細な時刻表示";
+        this.ARR_POST_TIME = "投稿時刻";
         this.ARR_TIME_LEFT = "残り時間";
 
         this.WELCOME_TITLE = "Pikoへようこそ";
         this.WELCOME_MESSAGE = "Pikoをより快適に利用するため、Piko設定でお好みに合わせて設定してください。";
         this.GOTO_PIKO_SETTINGS = "Piko設定へ移動";
         this.NO_INTERNET = "インターネットに接続してください。";
+        this.TAP_HERE = "ここをタップ";
+        this.PIKO_SETTINGS_ON_ACTION_BAR = "Piko設定をアクションバーに表示";
+        this.PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Piko設定をメインフィード上部のアクションバーに移動します。";
     }
 }
