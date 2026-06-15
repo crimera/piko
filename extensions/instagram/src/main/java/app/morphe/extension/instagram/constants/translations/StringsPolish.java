@@ -140,13 +140,17 @@ public class StringsPolish extends DefaultStrings {
         this.DOWNLOAD_SET_PATH_FAILED = "Nie udało się ustalić ścieżki folderu";
         this.DOWNLOAD_GRANT_PERMISSION = "Przyznaj dostęp do pamięci, aby pobierać pliki";
         this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Nie udało się otworzyć ustawień. Przyznaj dostęp do wszystkich plików ręcznie";
+        this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Pobierz przez zewnętrzną aplikację";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "Nazwa pakietu zewnętrznej aplikacji";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "Nie znaleziono pakietu zewnętrznej aplikacji";
 
         this.POST_OPTIONS = "Opcje posta";
         this.COPY_POST_DESCRIPTION = "Skopiuj opis posta";
         this.COPY_POST_OWNER_USERNAME = "Skopiuj nazwę twórcy";
         this.COPY_POST_OWNER_FULLNAME = "Skopiuj wyświetlaną nazwę twórcy";
         this.ENABLE_MORE_OPTIONS_ON_POST = "Włącz więcej opcji dla postów";
-        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Rozwija dodatkowe opcje po długim naciśnięciu posta";
+        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Dodaje przycisk menu z dodatkowymi opcjami pod postami i rolkami (np. kopiowanie opisu, nazwy użytkownika itp.)";
+        this.MORE_OPTIONS = "Więcej opcji";
 
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Ukrywanie przycisków nawigacji";
         this.HIDE_NAVIGATION_FEED = "Ukryj przycisk Główna";
@@ -186,8 +190,9 @@ public class StringsPolish extends DefaultStrings {
         this.AVAILABLE_LIKE_ANIMATION = "Dostępne animacje polubienia";
 
         this.DEFAULT = "Domyślna";
-        this.ARR_DETAILED_TIMESTAMP = "Szczegółowa data";
-        this.ARR_TIME_LEFT = "Pozostały czas";
+        this.ARR_DETAILED_TIMESTAMP = "Szczegółowy czas (dzień tygodnia/miesiąc/dzień/godzina/minuta/sekunda)";
+        this.ARR_POST_TIME = "Czas publikacji (godzina/minuta/sekunda)";
+        this.ARR_TIME_LEFT = "Pozostały czas (godziny/minuty/sekundy)";
 
         this.WELCOME_TITLE = "Witaj w Piko";
         this.WELCOME_MESSAGE = "Aby wyciągnąć z Piko jak najwięcej, zajrzyj do ustawień i dostosuj je pod siebie";
