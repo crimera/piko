@@ -140,13 +140,15 @@ public class StringsRussian extends DefaultStrings {
         this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Скачивать с помощью внешнего загрузчика";
         this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "Имя пакета внешнего загрузчика";
         this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "Имя пакета внешнего загрузчика не найдено";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET = "Укажите имя пакета внешнего загрузчика";
 
         this.POST_OPTIONS = "Действия с публикацией";
         this.COPY_POST_DESCRIPTION = "Скопировать описание публикации";
         this.COPY_POST_OWNER_USERNAME = "Скопировать имя пользователя автора публикации";
         this.COPY_POST_OWNER_FULLNAME = "Скопировать полное имя автора публикации";
         this.ENABLE_MORE_OPTIONS_ON_POST = "Включить дополнительные действия над публикацией";
-        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Показывать больше действий при долгом нажатии на публикацию";
+        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Добавляет дополнительные действия (копирование описания, имени пользователя и т. д.) в трехточечное меню публикации или Reels";
+        this.MORE_OPTIONS = "Дополнительные действия";
 
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Скрыть кнопки навигации";
         this.HIDE_NAVIGATION_FEED = "Скрыть кнопку «Лента»";
