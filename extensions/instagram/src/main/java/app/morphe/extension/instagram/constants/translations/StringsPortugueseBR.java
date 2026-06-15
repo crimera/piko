@@ -169,7 +169,8 @@ public class StringsPortugueseBR extends DefaultStrings {
     // Opções de Donwloads (dentro das configurações)
        
         this.ENABLE_MORE_OPTIONS_ON_POST = "Ativar mais opções no post";
-        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Obtém mais opções ao segurar o post";
+        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Obtém mais opções de menu extra ao pressionar e segurar no post para obter mais opções em posts/reels, como copiar descrição, copiar nome de usuário etc";
+        this.MORE_OPTIONS = "Mais opções";
 
     // Ocultar Botões de Navegação
         
