@@ -10,7 +10,6 @@ package app.morphe.extension.instagram.settings;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.content.ComponentName;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
@@ -83,9 +82,7 @@ public class ActivityHook {
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, url);
         intent.setPackage(packageName);
-
-
-        try {
+         try {
             launchActivity(intent);
         } catch (Exception e) {
             PikoUtils.toast(Strings.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND);

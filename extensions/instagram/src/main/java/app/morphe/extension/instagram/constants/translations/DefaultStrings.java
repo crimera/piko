@@ -142,6 +142,7 @@ public class DefaultStrings {
     public static String DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Download with external downloader";
     public static String EXTERNAL_DOWNLOADER_PACKAGE_NAME = "External downloader package name";
     public static String EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "External downloader package name not found";
+    public static String EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET = "Please set the external downloader package name";
 
     public static String POST_OPTIONS = "Post options";
     public static String COPY_POST_DESCRIPTION = "Copy post description";
