@@ -140,12 +140,17 @@ public class StringsKorean extends DefaultStrings {
         this.DOWNLOAD_SET_PATH_FAILED = "폴더 경로를 확인할 수 없습니다";
         this.DOWNLOAD_GRANT_PERMISSION = "다운로드를 계속하려면 저장소 접근 권한을 허용하세요";
         this.DOWNLOAD_GRANT_PERMISSION_FAILED = "설정을 열 수 없습니다. 모든 파일 접근 권한을 수동으로 허용하세요";
+        this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "외부 다운로더 앱으로 다운로드";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "외부 다운로더 앱 패키지명";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "외부 다운로더 앱 패키지명을 찾을 수 없습니다";        
+		
         this.POST_OPTIONS = "게시물 옵션";
         this.COPY_POST_DESCRIPTION = "게시물 설명 복사";
         this.COPY_POST_OWNER_USERNAME = "작성자 사용자 이름 복사";
         this.COPY_POST_OWNER_FULLNAME = "작성자 이름 복사";
         this.ENABLE_MORE_OPTIONS_ON_POST = "게시물 옵션 더보기 활성화";
-        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "게시물을 길게 탭하였을 경우에 옵션 더보기를 표시합니다";
+        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "게시물/릴스에서 설명 복사, 사용자 이름 복사 등의 더보기 옵션을 실행할 수 있는 오버플로 메뉴 버튼을 추가합니다";
+        this.MORE_OPTIONS = "옵션 더보기";
 
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "하단바 버튼 숨기기";
         this.HIDE_NAVIGATION_FEED = "피드 버튼 숨기기";
@@ -185,8 +190,9 @@ public class StringsKorean extends DefaultStrings {
         this.AVAILABLE_LIKE_ANIMATION = "사용 가능한 애니메이션";
 
         this.DEFAULT = "기본";
-        this.ARR_DETAILED_TIMESTAMP = "상세 시간";
-        this.ARR_TIME_LEFT = "남은 시간";
+        this.ARR_DETAILED_TIMESTAMP = "상세 타임스탬프 (요일/월/일/시/분/초)";
+        this.ARR_POST_TIME = "게시 시간 (시/분/초)";
+        this.ARR_TIME_LEFT = "남은 시간 (시/분/초 left)";
         
         this.WELCOME_TITLE = "Piko에 오신 것을 환영합니다";
         this.WELCOME_MESSAGE = "Piko 사용 경험을 개선하려면 Piko 설정으로 이동하여 원하는 대로 설정해 주세요";
