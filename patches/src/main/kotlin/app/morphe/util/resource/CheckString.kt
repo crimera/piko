@@ -49,6 +49,7 @@ internal fun main(args: Array<String>) {
     val exceptions = mutableListOf<Exception>()
 
     arrayOf(
+        "instagram",
         "shared",
         "twitter",
         "twitter-bring-back",
