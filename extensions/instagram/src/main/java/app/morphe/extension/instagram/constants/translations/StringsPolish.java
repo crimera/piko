@@ -143,6 +143,7 @@ public class StringsPolish extends DefaultStrings {
         this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Pobierz przez zewnętrzną aplikację";
         this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "Nazwa pakietu zewnętrznej aplikacji";
         this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "Nie znaleziono pakietu zewnętrznej aplikacji";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET = "Ustaw nazwę pakietu zewnętrznej aplikacji";
 
         this.POST_OPTIONS = "Opcje posta";
         this.COPY_POST_DESCRIPTION = "Skopiuj opis posta";
