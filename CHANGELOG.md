@@ -1,3 +1,18 @@
+## [3.5.0-dev.8](https://github.com/crimera/piko/compare/v3.5.0-dev.7...v3.5.0-dev.8) (2026-06-16)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Correction to make post time work ([#1338](https://github.com/crimera/piko/issues/1338)) ([b30e1ae](https://github.com/crimera/piko/commit/b30e1aea621d3edb5093255e6a334ec273ab80cf))
+* **Instagram:** Fix navigation buttons not hiding after selecting them ([9bbad36](https://github.com/crimera/piko/commit/9bbad36ef0783abf04d986e764a8b6a964b4372f))
+
+### 🔧 Improvements
+
+* Include patch version on crash logs ([a0f3ec0](https://github.com/crimera/piko/commit/a0f3ec02e0131dee3c8f43879a5c89b4244e67f9))
+* **Instagram:** Fix crashing on clicking overflow menu button ([dee8831](https://github.com/crimera/piko/commit/dee8831cc36786a5fee9d751f3270238f82830c6))
+* **Instagram:** Override flags that trigger new overflow menu ([1b645bb](https://github.com/crimera/piko/commit/1b645bb13da653895a60a3c73079960d4d4db7ec))
+* **Instagram:** Update `More options on post` description and button attributes ([e1d185a](https://github.com/crimera/piko/commit/e1d185a651a579bfa8543996df2831ca9bee97fe))
+* **Instagram:** Warn when external downloader package is unset ([#1333](https://github.com/crimera/piko/issues/1333)) ([898178e](https://github.com/crimera/piko/commit/898178e510b6304dc0dcd6c4afc5c870e329348d))
+
 ## [3.5.0-dev.7](https://github.com/crimera/piko/compare/v3.5.0-dev.6...v3.5.0-dev.7) (2026-06-14)
 
 ### 🐛 Bug Fixes

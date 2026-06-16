@@ -1,5 +1,5 @@
 {
-  "version": "3.5.0-dev.7",
+  "version": "3.5.0-dev.8",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -3508,7 +3508,7 @@
     },
     {
       "name": "More options on post",
-      "description": "Adds more options on post, like copy description by long pressing on post",
+      "description": "Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc",
       "default": true,
       "dependencies": [
         "BytecodePatch",

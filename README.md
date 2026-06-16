@@ -47,7 +47,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.5.0-dev.7](https://github.com/crimera/piko/releases/tag/v3.5.0-dev.7)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;122 patches total
+> **[v3.5.0-dev.8](https://github.com/crimera/piko/releases/tag/v3.5.0-dev.8)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;122 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
 <br>
@@ -180,7 +180,7 @@ Caution: Do not select the official Morphe's "Change package name" universal pat
 | [Improve image viewing](#improve-image-viewing) | Fetches max resolution images from server. |  |
 | [Limit feed to following profiles](#limit-feed-to-following-profiles) | Filters the home feed to display only content from profiles you follow. |  |
 | [Make ephemeral media permanent](#make-ephemeral-media-permanent) | Changes unexpired view once, view twice media to permanent view. |  |
-| [More options on post](#more-options-on-post) | Adds more options on post, like copy description by long pressing on post |  |
+| [More options on post](#more-options-on-post) | Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc |  |
 | [More options on profile](#more-options-on-profile) | Adds a new button to handle user related data like copy handle, download profile picture etc |  |
 | [Open links externally](#open-links-externally) | Changes links to always open in your external browser, instead of the in-app browser. |  |
 | [Remove build expired popup](#remove-build-expired-popup) | Removes the popup that appears after a while, when the app version ages. |  |
