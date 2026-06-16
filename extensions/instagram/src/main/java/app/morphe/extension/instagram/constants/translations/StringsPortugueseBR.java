@@ -112,6 +112,8 @@ public class StringsPortugueseBR extends DefaultStrings {
         this.COPY_COMMENT_DESC = "Adiciona um botão para copiar comentários em posts e reels";
         this.COMMENT_COPIED_SUCCESS = "Comentário copiado";
         this.COMMENT_COPIED_FAILED = "Nenhum texto encontrado para copiar";
+        this.SAVE_MEDIA_COMMENT = "Salvar comentário da mídia";
+        this.SAVE_MEDIA_COMMENT_DESC = "Adiciona um botão para salvar comentários em posts e reels";
         this.COPY_USERNAME = "Copiar nome de usuário";
         this.COPY_FULL_NAME = "Copiar nome completo";
         this.COPY_USER_ID = "Copiar ID do usuário";
@@ -125,6 +127,7 @@ public class StringsPortugueseBR extends DefaultStrings {
         this.UNLOCK_PLUS_BENEFITS = "Desbloquear benefícios Plus";
         this.UNLOCK_PLUS_BENEFITS_DESC = "Desbloqueia benefícios da assinatura 'Plus' verificados localmente. USE POR SUA CONTA E RISCO";
         this.CUSTOMISE_STORY_RING_SIZE = "Personalizar tamanho do anel do story";
+        this.CUSTOMISE_STORY_RING_SIZE_DESC = "Altera o tamanho do anel do story por uma porcentagem (Padrão: 100)";
 
     // Downloads
 
@@ -134,6 +137,7 @@ public class StringsPortugueseBR extends DefaultStrings {
         this.ENABLE_DIRECT_DOWNLOAD_DESC = "Baixa a mídia atual sem pedir opções";
         this.DOWNLOAD_USERNAME_FOLDER = "Separar mídias por nome de usuário";
         this.VIDEO_VARIANTS = "Variantes de vídeo";
+        this.IMAGE_VARIANTS = "Variantes de imagem";
         this.DOWNLOAD_SET_PATH = "Definir caminho personalizado de download";
         this.DOWNLOAD_SET_PATH_SUCCESS = "Diretório de download atualizado";
         this.DOWNLOAD_SET_PATH_FAILED = "Falha ao resolver o caminho da pasta";
@@ -151,6 +155,9 @@ public class StringsPortugueseBR extends DefaultStrings {
         this.DOWNLOADED_MEDIA = "Baixado : ";
         this.MEDIA_EXISTS = "A mídia já existe";
         this.DOWNLOAD_FAILED_MEDIA = "Falha ao baixar : ";
+        this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Baixar com gerenciador externo";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "Nome do pacote do gerenciador externo";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "Nome do pacote do gerenciador externo não encontrado";
 
     // Opções de Donwloads (fora das configurações)
 
@@ -162,7 +169,8 @@ public class StringsPortugueseBR extends DefaultStrings {
     // Opções de Donwloads (dentro das configurações)
        
         this.ENABLE_MORE_OPTIONS_ON_POST = "Ativar mais opções no post";
-        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Obtém mais opções ao segurar o post";
+        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Obtém mais opções de menu extra ao pressionar e segurar no post para obter mais opções em posts/reels, como copiar descrição, copiar nome de usuário etc";
+        this.MORE_OPTIONS = "Mais opções";
 
     // Ocultar Botões de Navegação
         
@@ -207,6 +215,7 @@ public class StringsPortugueseBR extends DefaultStrings {
 
         this.DEFAULT = "Padrão";
         this.ARR_DETAILED_TIMESTAMP = "Horário detalhado (Dia da Semana/Mês/Data/Hora/Minutos/Segundos)";
+        this.ARR_POST_TIME = "Horário da postagem (Hora/Minuto/Segundo)";
         this.ARR_TIME_LEFT = "Tempo restante (Falta: Hora/Minutos/Segundos)";
 
         this.WELCOME_TITLE = "Bem-vindo ao Piko";
