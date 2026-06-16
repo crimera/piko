@@ -8,11 +8,13 @@ package app.morphe.extension.instagram.utils;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import java.util.concurrent.ConcurrentHashMap;
 
 import app.morphe.extension.shared.Utils;
 
 public final class IgStr {
 
+    private static final ConcurrentHashMap<String, Integer> idCache = new ConcurrentHashMap<>();
     private static Context baseContext;
 
     private IgStr() {}
@@ -20,8 +22,10 @@ public final class IgStr {
     public static String str(String name) {
         try {
             Context ctx = baseContext();
-            int id = ctx.getResources().getIdentifier(name, "string", ctx.getPackageName());
+            Integer cached = idCache.get(name);
+            int id = cached != null ? cached : ctx.getResources().getIdentifier(name, "string", ctx.getPackageName());
             if (id == 0) return name;
+            if (cached == null) idCache.put(name, id);
             return ctx.getString(id);
         } catch (Exception e) {
             return name;
