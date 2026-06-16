@@ -33,6 +33,11 @@ object Constants {
                         version = "11.99.0-release-ripped.1",
                         description = "Make sure the APK is PairIP bypassed (Check the support group)",
                     ),
+                    // Shim version
+                    AppTarget(
+                        version = "12.0.0-release.0",
+                        description = "Requires Piko-Shim to be included",
+                    ),
                 ),
         )
     val COMPATIBILITY_X_11_69 =
