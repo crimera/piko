@@ -2,13 +2,11 @@
 <resources>
     <string name="piko_title_settings">Piko Settings</string>
 
-    <!-- Ads Section -->
     <string name="piko_category_ads">Ads</string>
     <string name="piko_disable_ads">Disable ads</string>
     <string name="piko_hide_suggested_content">Hide suggested content</string>
     <string name="piko_hide_suggested_content_desc">Hides suggested stories, reels, threads (Suggested posts will still be shown).</string>
 
-    <!-- Developer Options Section -->
     <string name="piko_category_dev_options">Developer options</string>
     <string name="piko_enable_dev_options">Enable developer options</string>
     <string name="piko_enable_dev_options_desc">Unlocks developer option by long pressing home icon</string>
@@ -27,13 +25,11 @@
     <string name="piko_missing_mapping_file">Missing mapping file</string>
     <string name="piko_missing_mapping_file_desc">Without mapping file, developer options will not have proper names. Do you want to download it ?</string>
 
-    <!-- Links Section -->
     <string name="piko_category_links">Links</string>
     <string name="piko_open_links_externally">Open links externally</string>
     <string name="piko_open_links_externally_desc">Open links in external browser instead of in-app browser</string>
     <string name="piko_sanitize_share_links">Sanitize share links</string>
-    
-    <!-- Ghost Section -->
+
     <string name="piko_category_ghost">Ghost</string>
     <string name="piko_view_stories_anonymously">View stories anonymously</string>
     <string name="piko_view_live_anonymously">View live anonymously</string>
@@ -46,7 +42,6 @@
     <string name="piko_ghost_modes_quick_toggle">Enable quick toggle for ghost modes</string>
     <string name="piko_ghost_modes_quick_toggle_desc">Adds a quick toggle in chat action bar to control ghost modes</string>
 
-    <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">Distraction free</string>
     <string name="piko_disable_stories">Disable stories</string>
     <string name="piko_disable_highlights">Disable highlights</string>
@@ -55,7 +50,9 @@
     <string name="piko_limit_following_feed">Limit feed to following profiles</string>
     <string name="piko_limit_following_feed_desc">Filters the home feed to display only content from profiles you follow.</string>
     <string name="piko_disable_reels_scrolling">Disable Reels scrolling</string>
-    <string name="piko_disable_reels_scrolling_desc">Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the \'Tip\' animation may appear but will stop on its own after a few seconds.</string>
+    <string name="piko_disable_reels_scrolling_desc">"Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel.
+
+Note: On a clean install, the \'Tip\' animation may appear but will stop on its own after a few seconds."</string>
     <string name="piko_hide_stories_tray">Hide stories tray</string>
     <string name="piko_hide_stories_tray_desc">Hide stories tray from main feed</string>
     <string name="piko_hide_notes_tray">Hide notes tray</string>
@@ -65,8 +62,7 @@
     <string name="piko_disable_double_tap_like_reel">Disable double tap like on reel</string>
     <string name="piko_disable_double_tap_like_comment">Disable double tap like on comment</string>
     <string name="piko_disable_double_tap_like_message">Disable double tap like on message</string>
-    
-    <!-- Misc Section -->
+
     <string name="piko_category_misc">Misc</string>
     <string name="piko_disable_analytics">Disable analytics</string>
     <string name="piko_delete_analytics_cache">Delete analytic cache</string>
@@ -111,7 +107,6 @@
     <string name="piko_customise_story_ring_size">Customise story ring size</string>
     <string name="piko_customise_story_ring_size_desc">Change the size of story ring by a percentage (Default: 100)</string>
 
-    <!-- Download Media Section -->
     <string name="piko_category_download_media">Download media</string>
     <string name="piko_enable_download">Enable download</string>
     <string name="piko_enable_direct_download">Enable direct download</string>
@@ -141,7 +136,6 @@
     <string name="piko_external_downloader_package_name_not_found">External downloader package name not found</string>
     <string name="piko_external_downloader_package_name_not_set">Please set the external downloader package name</string>
 
-    <!-- Posts Section -->
     <string name="piko_post_options">Post options</string>
     <string name="piko_copy_post_description">Copy post description</string>
     <string name="piko_copy_post_owner_username">Copy post owner username</string>
@@ -149,8 +143,7 @@
     <string name="piko_enable_more_options_on_post">Enable more option on post</string>
     <string name="piko_enable_more_options_on_post_desc">Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc</string>
     <string name="piko_more_options">More options</string>
-    
-    <!-- Navigation Section -->
+
     <string name="piko_category_hide_navigation_buttons">Hide navigation buttons</string>
     <string name="piko_hide_navigation_feed">Hide Feed button</string>
     <string name="piko_hide_navigation_reels">Hide Reels button</string>
@@ -158,14 +151,12 @@
     <string name="piko_hide_navigation_search">Hide Search button</string>
     <string name="piko_hide_navigation_create">Hide Create button</string>
 
-    <!-- Information Section -->
     <string name="piko_patch_info_title">Patch information</string>
     <string name="piko_export_pref">Export piko preferences</string>
     <string name="piko_import_pref">Import piko preferences</string>
     <string name="piko_app_version">App version: %s</string>
     <string name="piko_patch_version">Patch version: %s</string>
 
-    <!-- Export and Import Section -->
     <string name="piko_export_success">Exported successfully</string>
     <string name="piko_export_fail">Exporting failed</string>
     <string name="piko_fail_no_path">No destination path provided</string>
@@ -181,31 +172,26 @@
     <string name="piko_export_experiment_list">Export experiment list</string>
     <string name="piko_export_experiment_mappings">Export experiment mappings</string>
 
-    <!-- Open With Section -->
     <string name="piko_open_image_externally">Open image externally</string>
     <string name="piko_open_video_externally">Open video externally</string>
     <string name="piko_open_image_with">Open image with</string>
     <string name="piko_open_video_with">Open video with</string>
 
-    <!-- Like Animation Section -->
     <string name="piko_change_like_animation">Change like animation</string>
     <string name="piko_change_like_animation_desc">Change the animation to one from existing Rings like animations</string>
     <string name="piko_available_like_animation">Available like animations</string>
 
-    <!-- For arrays -->
     <string name="piko_array_default">Default</string>
     <string name="piko_array_detailed_timestamp">Detailed timestamp (Weekday/Month/Date/Hour/Minute/Second)</string>
     <string name="piko_array_post_time">Post time (Hour/Minute/Second)</string>
     <string name="piko_array_time_left">Time left (Hour/Minute/Second left)</string>
 
-    <!-- Welcome Message -->
     <string name="piko_welcome_title">Welcome to Piko</string>
     <string name="piko_welcome_message">To improve your experience with Piko, please vist Piko settings and adjust your preference</string>
     <string name="piko_goto_piko_settings">Goto Piko settings</string>
     <string name="piko_no_internet">Please connect to internet</string>
     <string name="piko_tap_here">Tap here !!</string>
-    
-    <!-- Action Bar Section -->
+
     <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
     <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
 </resources>
