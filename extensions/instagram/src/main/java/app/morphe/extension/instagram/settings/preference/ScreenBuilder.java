@@ -40,7 +40,8 @@ public class ScreenBuilder {
     }
 
     private PreferenceCategory addCategory(String title) {
-        PreferenceCategory preferenceCategory = new PreferenceCategory(context);
+        CategoryPref preferenceCategory = new CategoryPref(context);
+        preferenceCategory.setFirstCategory(screen.getPreferenceCount() == 0);
         preferenceCategory.setTitle(title);
         screen.addPreference(preferenceCategory);
         return preferenceCategory;
@@ -152,6 +153,22 @@ public class ScreenBuilder {
         if (!(SettingsStatus.ghostSection())) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_GHOST);
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.TURN_ON_ALL_GHOST_MODES,
+                        "",
+                        Settings.TURN_ON_ALL_GHOST_MODES
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.GHOST_MODES_QUICK_TOGGLE,
+                        Strings.GHOST_MODES_QUICK_TOGGLE_DESC,
+                        Settings.GHOST_MODES_QUICK_TOGGLE
+                )
+        );
 
         if (SettingsStatus.viewStoriesAnonymously) {
             addPreference(category,
@@ -385,6 +402,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.moreOptionsOnProfile) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE,
+                            Strings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC,
+                            Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE
+                    )
+            );
+        }
         if (SettingsStatus.moreOptionsOnPost) {
             addPreference(category,
                     helper.switchPreference(
@@ -462,7 +488,7 @@ public class ScreenBuilder {
             addPreference(category,
                     helper.editTextNumPreference(
                             Strings.CUSTOMISE_STORY_RING_SIZE,
-                            "",
+                            Strings.CUSTOMISE_STORY_RING_SIZE_DESC,
                             Settings.CUSTOMISE_STORY_RING_SIZE
                     ));
         }
@@ -505,6 +531,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.saveMediaCommentButton) {
+            addPreference(category,
+                    helper.switchPreference(
+                            Strings.SAVE_MEDIA_COMMENT,
+                            Strings.SAVE_MEDIA_COMMENT_DESC,
+                            Settings.COMMENT_SAVE_MEDIA_BUTTON
+                    )
+            );
+        }
         if (SettingsStatus.removeEmptyBottomSpace) {
             addPreference(category,
                     helper.switchPreference(
@@ -517,7 +552,7 @@ public class ScreenBuilder {
     }
 
     public void buildDownloadSection() {
-        if (!(SettingsStatus.downloadMedia)) return;
+        if (!(SettingsStatus.downloadMedia || SettingsStatus.downloadWithExternalDownloader)) return;
 
         PreferenceCategory category = category = addCategory(Strings.CATEGORY_DOWNLOAD_MEDIA);
 
@@ -542,6 +577,30 @@ public class ScreenBuilder {
                         Strings.DOWNLOAD_USERNAME_FOLDER,
                         Strings.DOWNLOAD_USERNAME_FOLDER_DESC,
                         Settings.DOWNLOAD_USERNAME_FOLDER
+                )
+        );
+
+        addPreference(category,
+                helper.buttonPreference(
+                        Strings.DOWNLOAD_SET_PATH,
+                        Pref.getCustomDownloadPath(),
+                        Strings.DOWNLOAD_SET_PATH
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER,
+                        "",
+                        Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER
+                )
+        );
+
+        addPreference(category,
+                helper.editTextPreference(
+                        Strings.EXTERNAL_DOWNLOADER_PACKAGE_NAME,
+                        Pref.externalDownloaderPackageName(),
+                        Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
                 )
         );
     }
@@ -627,6 +686,14 @@ public class ScreenBuilder {
                         Strings.IMPORT_PIKO_PREF,
                         "",
                         Strings.IMPORT_PIKO_PREF
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        Strings.PIKO_SETTINGS_ON_ACTION_BAR,
+                        Strings.PIKO_SETTINGS_ON_ACTION_BAR_DESC,
+                        Settings.PIKO_SETTINGS_ON_ACTION_BAR
                 )
         );
 

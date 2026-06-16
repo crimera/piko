@@ -30,6 +30,8 @@ public class DefaultStrings {
     public static String IMPORT_DEV_OVERRIDES = "Import overrides";
     public static String IMPORT_ID_MAPPING = "Import mapping files";
     public static String DOWNLOAD_ID_MAPPING = "Download mapping file";
+    public static String MISSING_MAPPING_FILE = "Missing mapping file";
+    public static String MISSING_MAPPING_FILE_DESC = "Without mapping file, developer options will not have proper names. Do you want to download it ?";
 
     public static String CATEGORY_LINKS = "Links";
     public static String OPEN_LINKS_EXTERNALLY = "Open links externally";
@@ -42,6 +44,11 @@ public class DefaultStrings {
     public static String DISABLE_TYPING_STATUS = "Disable typing status";
     public static String DISABLE_SCREENSHOT_DETECTION = "Disable screenshot detection";
     public static String VIEW_DM_ANONYMOUSLY = "View direct messages anonymously";
+    public static String TURN_ON_ALL_GHOST_MODES = "Turn on all ghost modes";
+    public static String GHOST_MODES_ON = "Ghost mode: ON";
+    public static String GHOST_MODES_DEFAULT = "Ghost mode: DEFAULT";
+    public static String GHOST_MODES_QUICK_TOGGLE = "Enable quick toggle for ghost modes";
+    public static String GHOST_MODES_QUICK_TOGGLE_DESC = "Adds a quick toggle in chat action bar to control ghost modes";
 
     public static String CATEGORY_DISTRACTION_FREE = "Distraction free";
     public static String DISABLE_STORIES = "Disable stories";
@@ -91,6 +98,8 @@ public class DefaultStrings {
     public static String COPY_COMMENT_DESC = "Adds a button to copy comments on posts and reels";
     public static String COMMENT_COPIED_SUCCESS = "Comment copied";
     public static String COMMENT_COPIED_FAILED = "No text found to copy";
+    public static String SAVE_MEDIA_COMMENT = "Save media comment";
+    public static String SAVE_MEDIA_COMMENT_DESC = "Adds a button to save media comments on posts and reels";
     public static String COPY_USERNAME = "Copy username";
     public static String COPY_FULL_NAME = "Copy full name";
     public static String COPY_USER_ID = "Copy user id";
@@ -98,10 +107,13 @@ public class DefaultStrings {
     public static String DOWNLOAD_PROFILE_PICTURE = "Download profile picture";
     public static String COPIED = "Copied";
     public static String MORE_PROFILE_OPTIONS = "More profile options";
+    public static String MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = "Profile options on action bar";
+    public static String MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE_DESC = "Move profile options button to profile action bar";
     public static String REMOVE_EMPTY_BOTTOM_SPACE = "Remove empty bottom space";
     public static String UNLOCK_PLUS_BENEFITS = "Unlock Plus benefits";
     public static String UNLOCK_PLUS_BENEFITS_DESC = "Unlock 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK";
     public static String CUSTOMISE_STORY_RING_SIZE = "Customise story ring size";
+    public static String CUSTOMISE_STORY_RING_SIZE_DESC = "Change the size of story ring by a percentage (Default: 100)";
 
     public static String CATEGORY_DOWNLOAD_MEDIA = "Download media";
     public static String ENABLE_DOWNLOAD = "Enable download";
@@ -111,21 +123,34 @@ public class DefaultStrings {
     public static String DOWNLOAD_USERNAME_FOLDER_DESC = "Creates subfolders based on username";
     public static String DOWNLOAD_CURRENT_MEDIA = "Download current media";
     public static String DOWNLOAD_AS_IMAGE = "Download as image";
+    public static String VIDEO_VARIANTS = "Video variants";
+    public static String IMAGE_VARIANTS = "Image variants";
     public static String DOWNLOAD_AUDIO = "Download audio";
     public static String DOWNLOAD_OPTIONS = "Download options";
     public static String COPY_MEDIA_LINK = "Copy media link";
     public static String COPIED_MEDIA_LINK = "Copied media link";
     public static String DOWNLOAD_ALL = "Download all";
-    public static String DOWNLOADING_MEDIA = "Downloading : ";
-    public static String DOWNLOADED_MEDIA = "Downloaded : ";
+    public static String DOWNLOADING_MEDIA = "Downloading: ";
+    public static String DOWNLOADED_MEDIA = "Downloaded: ";
     public static String MEDIA_EXISTS = "Media exists";
     public static String DOWNLOAD_FAILED_MEDIA = "Download failed : ";
+    public static String DOWNLOAD_SET_PATH = "Set custom download path";
+    public static String DOWNLOAD_SET_PATH_SUCCESS = "Download directory updated!";
+    public static String DOWNLOAD_SET_PATH_FAILED = "Failed to resolve folder path";
+    public static String DOWNLOAD_GRANT_PERMISSION = "Please grant storage access to continue downloads";
+    public static String DOWNLOAD_GRANT_PERMISSION_FAILED = "Could not open settings. Please grant All Files Access manually";
+    public static String DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Download with external downloader";
+    public static String EXTERNAL_DOWNLOADER_PACKAGE_NAME = "External downloader package name";
+    public static String EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "External downloader package name not found";
+    public static String EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET = "Please set the external downloader package name";
+
     public static String POST_OPTIONS = "Post options";
     public static String COPY_POST_DESCRIPTION = "Copy post description";
     public static String COPY_POST_OWNER_USERNAME = "Copy post owner username";
     public static String COPY_POST_OWNER_FULLNAME = "Copy post owner fullname";
     public static String ENABLE_MORE_OPTIONS_ON_POST = "Enable more option on post";
-    public static String ENABLE_MORE_OPTIONS_ON_POST_DESC = "Get more options on long pressing the post";
+    public static String ENABLE_MORE_OPTIONS_ON_POST_DESC = "Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc";
+    public static String MORE_OPTIONS = "More options";
 
     public static String CATEGORY_HIDE_NAVIGATION_BUTTONS = "Hide navigation buttons";
     public static String HIDE_NAVIGATION_FEED = "Hide Feed button";
@@ -149,9 +174,10 @@ public class DefaultStrings {
     public static String IMPORT_FAIL = "Import failed";
     public static String RESTART_APP = "The app needs to be restarted for the changes to reflect";
     public static String OK = "OK";
+    public static String CANCEL = "Cancel";
     public static String DELETED = "Deleted";
     public static String PIKO_DEBUG = "Piko debug";
-    public static String PIKO_DEBUG_DESC = "Adds debug option on some of the componenets for testing";
+    public static String PIKO_DEBUG_DESC = "Adds debug option on some of the components for testing";
     public static String PIKO_EXPORT_EXPERIMENT_LIST = "Export experiment list";
     public static String PIKO_EXPORT_EXPERIMENT_MAPPINGS = "Export experiment mappings";
 
@@ -165,12 +191,16 @@ public class DefaultStrings {
     public static String AVAILABLE_LIKE_ANIMATION = "Available like animations";
 
     public static String DEFAULT = "Default";
-    public static String ARR_DETAILED_TIMESTAMP = "Detailed timestamp";
-    public static String ARR_TIME_LEFT = "Time left";
+    public static String ARR_DETAILED_TIMESTAMP = "Detailed timestamp (Weekday/Month/Date/Hour/Minute/Second)";
+    public static String ARR_POST_TIME = "Post time (Hour/Minute/Second)";
+    public static String ARR_TIME_LEFT = "Time left (Hour/Minute/Second left)";
 
     public static String WELCOME_TITLE = "Welcome to Piko";
     public static String WELCOME_MESSAGE = "To improve your experience with Piko, please vist Piko settings and adjust your preference";
     public static String GOTO_PIKO_SETTINGS = "Goto Piko settings";
     public static String NO_INTERNET = "Please connect to internet";
+    public static String TAP_HERE = "Tap here !!";
+    public static String PIKO_SETTINGS_ON_ACTION_BAR = "Piko settings on action bar";
+    public static String PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Move Piko settings entry point to main feed action bar";
 
 }

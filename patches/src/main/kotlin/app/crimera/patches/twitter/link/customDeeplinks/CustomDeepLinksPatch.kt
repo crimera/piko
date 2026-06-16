@@ -2,9 +2,35 @@ package app.crimera.patches.twitter.link.customDeeplinks
 
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.booleanOption
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.patch.stringsOption
 import app.morphe.util.asSequence
+
+internal val customLinkHostsOption =
+    stringsOption(
+        key = "customLinkHosts",
+        title = "Custom sharing domains",
+        description = "The custom sharing domains to register to be opened in Twitter",
+        required = true,
+        default =
+            listOf(
+                "vxtwitter.com",
+                "fixvx.com",
+                "fxtwitter.com",
+                "fixupx.com",
+                "twittpr.com",
+                "xcancel.com",
+            ),
+    )
+
+internal val unofficialInstanceLinksOption =
+    booleanOption(
+        key = "unofficialInstanceLinks",
+        default = false,
+        title = "Include unofficial vxtwitter/fxtwitter instance links",
+        description = "Links might look unhinged/NSFW",
+    )
 
 @Suppress("unused")
 val customDeepLinksPatch =
@@ -14,37 +40,33 @@ val customDeepLinksPatch =
             "Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. " +
                 "These will have to be manually enabled under the \"Open by default\" section in the app info!",
     ) {
-        val customLinkHosts by stringsOption(
-            key = "customLinkHosts",
-            title = "Custom sharing domains",
-            description = "The custom sharing domains to register to be opened in Twitter",
-            required = true,
-            default =
-                listOf(
-                    // Some of these are absolutely unhinged, but it's all the more reason to skip opening it in a browser
-                    "vxtwitter.com",
-                    "fixvx.com",
-                    "fxtwitter.com",
-                    "fixupx.com",
-                    "twittpr.com",
-                    "hitlerx.com",
-                    "girlcockx.com",
-                    "stupidpenisx.com",
-                    "cunnyx.com",
-                    "autistic.kids",
-                    "gockx.com",
-                    "yiffx.com",
-                    "mpregx.com",
-                    "skibidix.com",
-                    "xcancel.com",
-                ),
-        )
+        val customLinkHosts by customLinkHostsOption
+        val unofficialInstanceLinks by unofficialInstanceLinksOption
 
         compatibleWith(COMPATIBILITY_X)
-
         dependsOn(handleCustomDeepLinksPatch)
 
         execute {
+            var hostLinks = customLinkHosts
+
+            if (unofficialInstanceLinks == true) {
+                // Some of these are absolutely unhinged, but it's all the more reason to skip opening it in a browser.
+                hostLinks =
+                    hostLinks?.plus(
+                        listOf(
+                            "hitlerx.com",
+                            "girlcockx.com",
+                            "stupidpenisx.com",
+                            "cunnyx.com",
+                            "autistic.kids",
+                            "gockx.com",
+                            "yiffx.com",
+                            "mpregx.com",
+                            "skibidix.com",
+                        ),
+                    )
+            }
+
             document("AndroidManifest.xml").use { document ->
                 val deeplinkActivity =
                     document
@@ -83,7 +105,7 @@ val customDeepLinksPatch =
                             .apply { setAttribute("android:pathPattern", "/..*") }
                             .let(::appendChild)
 
-                        for (customHost in customLinkHosts!!) {
+                        for (customHost in hostLinks!!) {
                             document
                                 .createElement("data")
                                 .apply { setAttribute("android:host", customHost) }
@@ -102,7 +124,7 @@ val customDeepLinksPatch =
                 val array =
                     document.createElement("string-array").apply {
                         setAttribute("name", "piko_custom_deeplink_hosts")
-                        for (customHost in customLinkHosts!!) {
+                        for (customHost in hostLinks!!) {
                             document
                                 .createElement("item")
                                 .apply { textContent = customHost }

@@ -34,7 +34,7 @@ Then patch Twitter/X or Instagram:
 2. Download original APKM file from ApkMirror. Do _not_ unspilt or modify the file, Morphe patches APKM directly
 3. Wait for patching to complete, install
 
-> For an up-to-date patching guide, [follow this Reddit guide](https://www.reddit.com/r/MorpheApp/comments/1r4xt24/x_twitter_can_now_be_patched_with_piko_patches/).
+
 
 </details>
 
@@ -44,17 +44,36 @@ Then patch Twitter/X or Instagram:
 java -jar cli.jar patch --patches piko.mpp input.apkm
 ```
 
+**Piko-Shim**
+
+To patch with Twitter/X version 11.88 and above, you must include patches from another repo/project called [Piko-Shim](https://gitlab.com/inotia00/piko-shim/) developed by [@inotia00](https://github.com/inotia00)
+
+[➕ Add Piko-Shim to Morphe](https://morphe.software/add-source?gitlab=inotia00/piko-shim)
+
+⚠️Important steps⚠️
+* Enable `expert mode` in Morphe Manager.
+* You must select all patches from the Piko shim bundle and recommended/preferred patches from Piko. **DO NOT INCLUDE** patches from any other bundles.
+* Select "Proceed anyway" at the prompt warning of using multiple bundles.
+
+⚠️Additional Context⚠️
+
+* An active internet connection is required during patching.
+* XChat decryption and XChat video calls work. 
+* The Piko Shim patch only adds a compatibility shim layer and pairip is not removed.
+
+> For an up-to-date patching guide, [follow this Reddit guide](https://www.reddit.com/r/MorpheApp/comments/1r4xt24/x_twitter_can_now_be_patched_with_piko_patches/).
+
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.4.0](https://github.com/crimera/piko/releases/tag/v3.4.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;117 patches total
+> **[v3.5.0-dev.8](https://github.com/crimera/piko/releases/tag/v3.5.0-dev.8)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;122 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 11.80.0-alpha.1 | 11.82.0-beta.1 | 11.81.0-release.0 | 11.91.0-release-ripped.0 |
+| 11.80.0-alpha.1 | 11.82.0-beta.1 | 11.81.0-release.0 | 11.99.0-release-ripped.1 |
 | :---: | :---: | :---: | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
@@ -93,7 +112,7 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Enable force HD videos](#enable-force-hd-videos) | Videos will be played in highest quality always |  |
 | [Export all activities](#export-all-activities) | Makes all app activities exportable. |  |
 | [Force enable translate](#force-enable-translate) | Get translate option for all posts |  |
-| [Handle custom twitter links](#handle-custom-twitter-links) | Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. These will have to be manually enabled under the "Open by default" section in the app info! | • Custom sharing domains |
+| [Handle custom twitter links](#handle-custom-twitter-links) | Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. These will have to be manually enabled under the "Open by default" section in the app info! |  |
 | [Hide Banner](#hide-banner) | Hide new post banner |  |
 | [Hide Community Notes](#hide-community-notes) |  |  |
 | [Hide FAB](#hide-fab) | Adds an option to hide Floating action button |  |
@@ -134,14 +153,13 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;46 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;51 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 426.0.0.37.68 |
+| 430.0.0.53.80 |
 | :---: |
-| Tested on version code - 383207248, 383207252 |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
@@ -150,6 +168,8 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Amoled theme](#amoled-theme) | Replaces Instagram's dark-mode background greys with pure black for AMOLED displays. |  |
 | [Change like animation](#change-like-animation) | Change the animation to one from existing Rings like animations |  |
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
+| [Clone](#clone) | Changes the package name and the app name. This allows you to install the patched app alongside the original Instagram app.
+Caution: Do not select the official Morphe's "Change package name" universal patch. | • Package name<br>• App name |
 | [Copy comment](#copy-comment) | Adds a button to copy comments on posts and reels. |  |
 | [Customise story ring size](#customise-story-ring-size) |  |  |
 | [Customise story timestamp](#customise-story-timestamp) | Customise the timestamp that shows when the story was posted |  |
@@ -167,6 +187,8 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Disable typing status](#disable-typing-status) |  |  |
 | [Disable video autoplay](#disable-video-autoplay) |  |  |
 | [Download media](#download-media) | Adds ability to download posts, reels, stories and highlights |  |
+| [Download voice message](#download-voice-message) | Enables ability to download voice messages |  |
+| [External downloader](#external-downloader) | Adds support to share post links directly to external downloader |  |
 | [Follow back indicator](#follow-back-indicator) | Adds a label on the profile page, indicating whether a user is follows you back. |  |
 | [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) |  |  |
 | [Hide navigation buttons](#hide-navigation-buttons) | Hides navigation bar buttons, such as the Reels and Create button. |  |
@@ -177,16 +199,18 @@ java -jar cli.jar patch --patches piko.mpp input.apkm
 | [Improve image viewing](#improve-image-viewing) | Fetches max resolution images from server. |  |
 | [Limit feed to following profiles](#limit-feed-to-following-profiles) | Filters the home feed to display only content from profiles you follow. |  |
 | [Make ephemeral media permanent](#make-ephemeral-media-permanent) | Changes unexpired view once, view twice media to permanent view. |  |
-| [More options on post](#more-options-on-post) | Adds more options on post, like copy description by long pressing on post |  |
+| [More options on post](#more-options-on-post) | Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc |  |
 | [More options on profile](#more-options-on-profile) | Adds a new button to handle user related data like copy handle, download profile picture etc |  |
 | [Open links externally](#open-links-externally) | Changes links to always open in your external browser, instead of the in-app browser. |  |
 | [Remove build expired popup](#remove-build-expired-popup) | Removes the popup that appears after a while, when the app version ages. |  |
 | [Remove empty bottom space](#remove-empty-bottom-space) | Removes empty space below bottom navigation bar |  |
 | [Sanitize share links](#sanitize-share-links) |  |  |
+| [Save media comment](#save-media-comment) | Adds a button to save media comments on posts and reels. |  |
 | [Stories audio autoplay](#stories-audio-autoplay) |  |  |
 | [Unlock Plus benefits](#unlock-plus-benefits) | Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK |  |
 | [Unlock developer options](#unlock-developer-options) | Unlocks developer option by long pressing home icon |  |
 | [Unlock employee options](#unlock-employee-options) | Unlocks all options using by employee for debugging |  |
+| [Validate links](#validate-links) | Fixes app crashing issue while opening links from a different app |  |
 | [View DMs anonymously](#view-dms-anonymously) |  |  |
 | [View live anonymously](#view-live-anonymously) |  |  |
 | [View stories anonymously](#view-stories-anonymously) |  |  |

@@ -1,11 +1,7 @@
 /*
-    * Copyright (C) 2026 piko <https://github.com/crimera/piko>
-    *
-    * This file is part of piko.
-    *
-    * Any modifications, derivatives, or substantial rewrites of this file
-    * must retain this copyright notice and the piko attribution
-    * in the source code and version control history.
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
 */
 
 
@@ -24,6 +20,8 @@ import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.instagram.entity.MediaData;
+
+import com.instagram.common.session.UserSession;
 
 public class StoryButton {
     private static boolean VIEW_STORY_MENTIONS;
@@ -52,6 +50,9 @@ public class StoryButton {
                 buttonList.add(Strings.DOWNLOAD_OPTIONS);
             }
         }
+        if(Pref.downloadWithExternalDownloader()){
+            buttonList.add(Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER);
+        }
 
         return buttonList;
     }
@@ -62,10 +63,14 @@ public class StoryButton {
                 ViewStoryMentionsPatch.viewMentions(ctx, mediaObject);
                 return true;
             } else if (buttonText.equals(Strings.DOWNLOAD_OPTIONS) || buttonText.equals(Strings.CATEGORY_DOWNLOAD_MEDIA)) {
-                DownloadUtils.downloadPost(ctx,mediaObject,0);
+                DownloadUtils.downloadPost(ctx,null,mediaObject,0);
                 return true;
             } else if (buttonText.equals(Strings.PIKO_DEBUG)) {
                 ObjectBrowser.browseObject(ctx, new MediaData(mediaObject));
+                return true;
+            } else if (buttonText.equals(Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER)) {
+                DownloadUtils.externalDownloader(mediaObject,0);
+
                 return true;
             }
         } catch (Exception ex) {

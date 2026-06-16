@@ -6,6 +6,8 @@
 
 package app.morphe.extension.twitter.settings.fragments;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -17,7 +19,6 @@ import java.io.InputStreamReader;
 
 import android.app.Fragment;
 import app.morphe.extension.twitter.Utils;
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.twitter.settings.Settings;
 
 public class RestorePrefFragment extends Fragment {
@@ -49,19 +50,19 @@ public class RestorePrefFragment extends Fragment {
     public static void receiveFileForRestore(Uri uri, Context context) {
         String jsonString = readFileContent(uri);
         boolean sts = false;
-        String prefTag = StringRef.str("notification_settings_preferences_category");
+        String prefTag = str("notification_settings_preferences_category");
         if(featureFlag){
             sts = Utils.setStringPref(Settings.MISC_FEATURE_FLAGS.key,jsonString);
-            prefTag = StringRef.str("piko_title_feature_flags");
+            prefTag = str("piko_title_feature_flags");
         }else{
             sts = Utils.setAll(jsonString);
 
         }
         if(sts){
-            toast(StringRef.str("piko_pref_import",StringRef.str("piko_pref_success")));
+            toast(str("piko_pref_import_success"));
         }
         else{
-            toast(StringRef.str("piko_pref_import_failed",prefTag));
+            toast(str("piko_pref_import_failed",prefTag));
         }
 
         Utils.showRestartAppDialog(context);
@@ -79,7 +80,7 @@ public class RestorePrefFragment extends Fragment {
                 receiveFileForRestore(uri,getActivity());
             }
             else {
-                toast(StringRef.str("piko_pref_import_no_uri"));
+                toast(str("piko_pref_import_no_uri"));
             }
         }
         getFragmentManager().popBackStack();

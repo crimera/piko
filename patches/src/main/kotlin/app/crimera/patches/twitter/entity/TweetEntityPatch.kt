@@ -12,27 +12,25 @@ import app.crimera.utils.getMethodName
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction3rc
-import com.android.tools.smali.dexlib2.dexbacked.reference.DexBackedMethodReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 val tweetEntityPatch =
     bytecodePatch(
         description = "For tweet entity reflection",
     ) {
         execute {
-            TweetActionsHandlerFingerprint.run {
-                // matches content_auther
-                stringMatches.firstOrNull()?.let { match ->
-                    val getOriginalUserNameMethod =
-                        (method.instructions[match.index + 1] as BuilderInstruction3rc).reference as DexBackedMethodReference
-                    TweetUsernameFingerprint.changeFirstString(getOriginalUserNameMethod.name)
-
-                    val method = TweetOriginalNameFingerprint(getOriginalUserNameMethod.definingClass).getMethodName(0)
-                    TweetProfileNameFingerprint.changeFirstString(method)
-                }
+            val (profileNameMethod, userNameMethod) = with(TweetNamesFingerprint) {
+                Pair(
+                    instructionMatches[0].instruction.getReference<MethodReference>()!!,
+                    instructionMatches[2].instruction.getReference<MethodReference>()!!
+                )
             }
+
+            TweetUsernameFingerprint.changeFirstString(userNameMethod.name)
+            TweetProfileNameFingerprint.changeFirstString(profileNameMethod.name)
 
             val tweetObjectMethods = TweetObjectFingerprint.classDef.methods
 

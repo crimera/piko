@@ -16,8 +16,24 @@ public class MessageInfo extends Entity {
         this.obj = obj;
     }
 
+    private Entity messageDataInfo() throws Exception{
+        return super.getFieldAsEntity("A00");
+    }
+
     public String getMessageType() throws Exception {
         Entity messageTypeDetailEntity = super.getFieldAsEntity("A01");
         return (String) messageTypeDetailEntity.getField("A00");
+    }
+
+    public MediaData getAudioMedia() throws Exception {
+        Entity messageTypeDetailEntity = this.messageDataInfo();
+        Entity audioDataEntity = messageTypeDetailEntity.getFieldAsEntity("A0O");
+        if(audioDataEntity!=null){
+            Object mediaData = audioDataEntity.getField("A02");
+            if(mediaData!=null)
+                return new MediaData(mediaData);
+        }
+        return null;
+
     }
 }

@@ -11,13 +11,6 @@ object Constants {
             packageName = "com.twitter.android",
             apkFileType = ApkFileType.APKM,
             appIconColor = 0x000000,
-            signatures =
-                setOf(
-                    // APK
-                    "0fd9a0cfb07b65950997b4eaebdc53931392391aa406538a3b04073bc2ce2fe9",
-                    // APKM
-                    "45c53db089fb8d63a1c71154037c414b1b0646a141a73ae6e3bcbf8cd148402f",
-                ),
             targets =
                 listOf(
                     // Beta
@@ -37,8 +30,13 @@ object Constants {
                     ),
                     // PairIP version
                     AppTarget(
-                        version = "11.91.0-release-ripped.0",
+                        version = "11.99.0-release-ripped.1",
                         description = "Make sure the APK is PairIP bypassed (Check the support group)",
+                    ),
+                    // Shim version
+                    AppTarget(
+                        version = "12.0.0-release.0",
+                        description = "Requires Piko-Shim to be included",
                     ),
                 ),
         )
@@ -52,12 +50,11 @@ object Constants {
             ).excluding(null)
 
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/twitter"
+    const val STRING_REF_DESCRIPTOR = "Lapp/morphe/extension/shared/StringRef"
     const val UTILS_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Utils"
     const val ACTIVITY_SETTINGS_CLASS = "$INTEGRATIONS_PACKAGE/settings"
     const val ACTIVITY_HOOK_CLASS = "$ACTIVITY_SETTINGS_CLASS/ActivityHook;"
     const val DEEPLINK_HOOK_CLASS = "$ACTIVITY_SETTINGS_CLASS/DeepLink;"
-    const val ADD_PREF_DESCRIPTOR =
-        "$UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;"
 
     const val PREF_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/Pref"
     const val PATCHES_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/patches"

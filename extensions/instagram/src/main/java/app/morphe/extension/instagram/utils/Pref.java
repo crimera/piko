@@ -9,9 +9,14 @@ package app.morphe.extension.instagram.utils;
 
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.crimera.SharedPref;
 
 @SuppressWarnings("unused")
 public class Pref {
+    public static boolean pikoSettingsOnActionBar() {
+        return SharedPref.getBooleanPref(Settings.PIKO_SETTINGS_ON_ACTION_BAR);
+    }
+
     public static boolean pikoDebug() {
         return SharedPref.getBooleanPref(Settings.PIKO_DEBUG);
     }
@@ -43,24 +48,44 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.SANITIZE_SHARE_LINKS);
     }
 
+    public static boolean getTurnOnAllGhostModes() {
+        return SharedPref.getBooleanPref(Settings.TURN_ON_ALL_GHOST_MODES);
+    }
+
+    public static boolean setTurnOnAllGhostModes(boolean bool) {
+        return SharedPref.setBooleanPref(Settings.TURN_ON_ALL_GHOST_MODES.key,bool);
+    }
+
+    public static boolean enableGhostModeQuickToggle() {
+        return SharedPref.getBooleanPref(Settings.GHOST_MODES_QUICK_TOGGLE);
+    }
+
+    public static boolean enableMoreOptionsOnProfileQuickToggle() {
+        return SharedPref.getBooleanPref(Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE) && Pref.isMoreOptionsOnProfilePatched();
+    }
+
+    public static boolean isMoreOptionsOnProfilePatched(){
+        return SettingsStatus.moreOptionsOnProfile;
+    }
+
     public static boolean viewStoriesAnonymously() {
-        return SharedPref.getBooleanPref(Settings.VIEW_STORIES_ANONYMOUSLY);
+        return (SharedPref.getBooleanPref(Settings.VIEW_STORIES_ANONYMOUSLY) && SettingsStatus.viewStoriesAnonymously) || Pref.getTurnOnAllGhostModes();
     }
 
     public static boolean viewLiveAnonymously() {
-        return SharedPref.getBooleanPref(Settings.VIEW_LIVE_ANONYMOUSLY);
+        return (SharedPref.getBooleanPref(Settings.VIEW_LIVE_ANONYMOUSLY) && SettingsStatus.viewLiveAnonymously) || Pref.getTurnOnAllGhostModes();
     }
 
     public static boolean disableScreenshotDetection() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_SCREENSHOT_DETECTION);
+        return SharedPref.getBooleanPref(Settings.DISABLE_SCREENSHOT_DETECTION) || Pref.getTurnOnAllGhostModes();
     }
 
     public static boolean disableTypingStatus() {
-        return SharedPref.getBooleanPref(Settings.DISABLE_TYPING_STATUS);
+        return SharedPref.getBooleanPref(Settings.DISABLE_TYPING_STATUS) || Pref.getTurnOnAllGhostModes();
     }
 
     public static boolean viewDmAnonymously() {
-        return SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY);
+        return SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY) || Pref.getTurnOnAllGhostModes();
     }
 
     public static boolean disableVideoAutoplay() {
@@ -166,7 +191,7 @@ public class Pref {
     }
 
     public static boolean enableDownload() {
-        return SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD);
+        return SharedPref.getBooleanPref(Settings.ENABLE_DOWNLOAD) && SettingsStatus.downloadMedia;
     }
 
     public static boolean enableDirectDownload() {
@@ -175,6 +200,10 @@ public class Pref {
 
     public static boolean downloadUsernameFolder() {
         return SharedPref.getBooleanPref(Settings.DOWNLOAD_USERNAME_FOLDER);
+    }
+
+    public static String getCustomDownloadPath() {
+        return SharedPref.getStringPref(Settings.CUSTOM_DOWNLOAD_PATH);
     }
 
     public static boolean hideNavigationFeed() {
@@ -205,13 +234,17 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.COMMENT_COPY_BUTTON) && SettingsStatus.copyCommentButton;
     }
 
+    public static boolean commentSaveMediaButton() {
+        return SharedPref.getBooleanPref(Settings.COMMENT_SAVE_MEDIA_BUTTON) && SettingsStatus.saveMediaCommentButton;
+    }
+
     public static String changeLikeAnimation() {
         return SharedPref.getStringPref(Settings.CHANGE_LIKE_ANIMATION);
     }
 
     public static float customiseStoryRingSize() {
         try {
-            return Float.valueOf(SharedPref.getStringPref(Settings.CUSTOMISE_STORY_RING_SIZE));
+            return Float.parseFloat(SharedPref.getStringPref(Settings.CUSTOMISE_STORY_RING_SIZE));
         } catch (Exception ex) {
             return 100.0f;
         }
@@ -230,7 +263,14 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_DOUBLE_TAP_LIKE_MESSAGE);
     }
     public static boolean moreOptionsOnPost() {
-        return SharedPref.getBooleanPref(Settings.ENABLE_MORE_OPTIONS_ON_POST);
+        return SharedPref.getBooleanPref(Settings.ENABLE_MORE_OPTIONS_ON_POST) && SettingsStatus.moreOptionsOnPost;
+    }
+    public static boolean downloadWithExternalDownloader() {
+        return SharedPref.getBooleanPref(Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER) && SettingsStatus.downloadWithExternalDownloader;
+    }
+
+    public static String externalDownloaderPackageName() {
+        return SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
     }
 
     //end

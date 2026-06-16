@@ -1,11 +1,7 @@
 /*
-    * Copyright (C) 2026 piko <https://github.com/crimera/piko>
-    *
-    * This file is part of piko.
-    *
-    * Any modifications, derivatives, or substantial rewrites of this file
-    * must retain this copyright notice and the piko attribution
-    * in the source code and version control history.
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
 */
 
 
@@ -19,6 +15,7 @@ import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.preference.fragments.BackupPrefActivity;
 import app.morphe.extension.instagram.settings.preference.fragments.RestorePrefActivity;
+import app.morphe.extension.crimera.downloader.FolderPickerActivity;
 import app.morphe.extension.shared.Logger;
 
 @SuppressWarnings("deprecation")
@@ -31,6 +28,7 @@ public class ActivityHook {
             context.startActivity(intent);
         } catch (Exception e) {
             Logger.printException(() -> "launchActivity failure", e);
+            PikoUtils.logger(e);
         }
     }
 
@@ -50,6 +48,8 @@ public class ActivityHook {
             intent = new Intent(ctx,BackupPrefActivity.class);
         } else if (bundleKey.equals(Strings.IMPORT_DEV_OVERRIDES) || bundleKey.equals(Strings.IMPORT_ID_MAPPING)  || bundleKey.equals(Strings.IMPORT_PIKO_PREF)) {
             intent = new Intent(ctx,RestorePrefActivity.class);
+        } else if (bundleKey.equals(Strings.DOWNLOAD_SET_PATH)) {
+            intent = new Intent(ctx,FolderPickerActivity.class);
         }
         if(intent!=null){
             intent.putExtra(bundleKey,true);
@@ -75,6 +75,19 @@ public class ActivityHook {
     public static void openLink(String url) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         launchActivity(intent);
+    }
+
+    public static void openLink(String url, String packageName) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, url);
+        intent.setPackage(packageName);
+         try {
+            launchActivity(intent);
+        } catch (Exception e) {
+            PikoUtils.toast(Strings.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND);
+            Logger.printException(() -> "openLink failure", e);
+        }
     }
 
 

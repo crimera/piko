@@ -6,6 +6,8 @@
 
 package app.morphe.extension.twitter.patches;
 
+import static app.morphe.extension.twitter.patches.VersionCheckPatch.IS_11_95_OR_GREATER;
+
 import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.twitter.Utils;
 import app.morphe.extension.twitter.settings.Settings;
@@ -40,6 +42,11 @@ public class FeatureSwitchPatch {
 
     private static void navbarFix() {
         addFlag("subscriptions_feature_1008", true);
+
+        if (IS_11_95_OR_GREATER) {
+            // Added in 11.95.0-aplha.0. This flag should be disabled for the patch to work properly.
+            addFlag("subscriptions_feature_1008_sunset", false);
+        }
     }
 
     private static void immersivePlayer() {

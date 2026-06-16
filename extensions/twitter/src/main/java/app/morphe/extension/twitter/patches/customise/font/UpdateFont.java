@@ -6,9 +6,10 @@
 
 package app.morphe.extension.twitter.patches.customise.font;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.os.Build;
 import app.morphe.extension.crimera.PikoUtils;
-import app.morphe.extension.shared.StringRef;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.text.Spannable;
@@ -68,12 +69,12 @@ public class UpdateFont {
         File fontFile = new File(context.getFilesDir(), filename);
         if (fontFile.exists()) {
             if (fontFile.delete()) {
-                PikoUtils.toast(StringRef.str("piko_pref_delete_font_success"));
+                PikoUtils.toast(str("piko_pref_delete_font_success"));
             } else {
-                PikoUtils.toast(StringRef.str("piko_pref_delete_font_fail"));
+                PikoUtils.toast(str("piko_pref_delete_font_fail"));
             }
         } else {
-            PikoUtils.toast(StringRef.str("piko_pref_delete_font_warn"));
+            PikoUtils.toast(str("piko_pref_delete_font_warn"));
         }
     }
 

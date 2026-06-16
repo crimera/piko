@@ -17,60 +17,102 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Environment;
-
-import java.io.FileOutputStream;
-import java.io.File;
-
-import android.net.Uri;
-
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.entity.UserData;
+import app.morphe.extension.instagram.entity.VideoData;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.AudioMediaInterface;
+import app.morphe.extension.instagram.entity.MediaInterface;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.crimera.ObjectBrowser;
+import app.morphe.extension.crimera.downloader.MediaDownloader;
+import app.morphe.extension.crimera.downloader.DownloadRequest;
+import app.morphe.extension.crimera.downloader.MediaType;
+import app.morphe.extension.crimera.PikoUtils;
+
+import com.instagram.common.session.UserSession;
 
 public class DownloadUtils {
-    private static boolean ENABLE_DIRECT_DOWNLOAD;
-    private static boolean SPLIT_BY_USERNAME;
-    private static boolean DEBUG;
 
-    static {
-        ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
-        SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
-        DEBUG = Pref.pikoDebug();
+    public static String getSubfolderName(String username){
+        boolean SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
+        return SPLIT_BY_USERNAME ? username : null;
+    }
+
+    private static void buildVariantDialogBox(Context context, MediaData currentMediaData, MediaType mediaType) throws Exception {
+        String username = currentMediaData.getUserData().getUsername();
+        List<MediaInterface> variantList;
+        String title = "";
+        if(mediaType.equals(MediaType.VIDEO)){
+            title = Strings.VIDEO_VARIANTS;
+            variantList = currentMediaData.getVideoVariants();
+        }else{
+            title = Strings.IMAGE_VARIANTS;
+            variantList = currentMediaData.getImageVariants();
+        }
+
+        InstagramDialogBox dialog = new InstagramDialogBox(context);
+        ArrayList<String> options = new ArrayList<>();
+        variantList.forEach(item -> options.add(item.getVariantTag()));
+        CharSequence[] items = options.toArray(new CharSequence[0]);
+
+        dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface d, int which) {
+                MediaInterface data = variantList.get(which);
+
+                try {
+                    String filename = username + "_"+currentMediaData.getVariantFileName(data);
+                    String mediaUrl = data.getUrl();
+                    String subFolder = getSubfolderName(username);
+                    downloadMediaUrl(context,mediaUrl,subFolder,filename);
+                } catch (Exception e) {
+                    PikoUtils.logger(e);
+                    Logger.printException(() -> "Error at buildVariantDialogBox", e);
+                    Utils.showToastShort(e.getMessage());
+                }
+
+            }
+        });
+
+        dialog.setTitle(title);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
+
+        Dialog dlg = dialog.getDialog();
+        dlg.show();
+
     }
 
     private static void downloadDialogBox(Context context, MediaData mediaInfo, int position) throws Exception {
         int carouselSize = mediaInfo.getCarouselSize();
         MediaData currentMediaData = mediaInfo.getMediaAt(position);
+        String username = mediaInfo.getUserData().getUsername();
         Boolean isCurrentMediaVideo = currentMediaData.isVideo();
-        AudioMediaInterface audioMedia = currentMediaData.getAudioMedia();
+        Boolean currentMediaHasAudio = currentMediaData.hasAudio();
 
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
         ArrayList<String> options = new ArrayList<>();
         options.add(Strings.DOWNLOAD_CURRENT_MEDIA);
         options.add(Strings.DOWNLOAD_AS_IMAGE);
-        if (audioMedia != null) options.add(Strings.DOWNLOAD_AUDIO);
+        if (currentMediaHasAudio) options.add(Strings.DOWNLOAD_AUDIO);
         options.add(Strings.COPY_MEDIA_LINK);
+        options.add(Strings.IMAGE_VARIANTS);
         if (isCurrentMediaVideo) {
+            options.add(Strings.VIDEO_VARIANTS);
             options.add(Strings.OPEN_VIDEO_EXTERNALLY);
         } else {
             options.add(Strings.OPEN_IMAGE_EXTERNALLY);
         }
+
         if (carouselSize > 1) options.add(Strings.DOWNLOAD_ALL);
-        if (DEBUG) options.add(Strings.PIKO_DEBUG);
 
         CharSequence[] items = options.toArray(new CharSequence[0]);
 
@@ -82,13 +124,10 @@ public class DownloadUtils {
                     String selectedOption = options.get(which);
 
                     if (selectedOption.equals(Strings.DOWNLOAD_CURRENT_MEDIA)) {
-                        downloadMediaAt(context, mediaInfo, position);
+                        downloadMedia(context, mediaInfo, position, MediaType.ANY);
 
                     } else if (selectedOption.equals(Strings.DOWNLOAD_AS_IMAGE)) {
-                        String username = mediaInfo.getUserData().getUsername();
-
-                        String downloadFileName = mediaInfo.getDownloadFilename(true);
-                        downloadFile(context, currentMediaData.getPhotoLink(), username, downloadFileName);
+                        downloadMedia(context, mediaInfo, position, MediaType.IMAGE);
 
                     } else if (selectedOption.equals(Strings.COPY_MEDIA_LINK)) {
                         Utils.setClipboard(currentMediaData.getMediaLink());
@@ -98,16 +137,20 @@ public class DownloadUtils {
                         ActivityHook.handleUrlIntent(isCurrentMediaVideo, currentMediaData.getMediaLink());
 
                     } else if (selectedOption.equals(Strings.DOWNLOAD_ALL)) {
-                        downloadAllMedia(context, mediaInfo);
-
-                    } else if (selectedOption.equals(Strings.PIKO_DEBUG)) {
-                        ObjectBrowser.browseObject(context, currentMediaData);
+                        downloadMedia(context, mediaInfo, -1, MediaType.ANY);
 
                     } else if (selectedOption.equals(Strings.DOWNLOAD_AUDIO)) {
-                        downloadAudio(context, audioMedia);
+                        downloadMedia(context, mediaInfo, position, MediaType.AUDIO);
+
+                    } else if (selectedOption.equals(Strings.VIDEO_VARIANTS)) {
+                        buildVariantDialogBox(context, currentMediaData, MediaType.VIDEO);
+
+                    } else if (selectedOption.equals(Strings.IMAGE_VARIANTS)) {
+                        buildVariantDialogBox(context, currentMediaData, MediaType.IMAGE);
 
                     }
                 } catch (Exception e) {
+                    PikoUtils.logger(e);
                     Logger.printException(() -> "Error at downloadDialogBox", e);
                     Utils.showToastShort(e.getMessage());
                 }
@@ -123,117 +166,90 @@ public class DownloadUtils {
         dlg.show();
     }
 
-    private static void downloadAudio(Context context, AudioMediaInterface audioMedia) throws Exception {
-        String username = Strings.DEFAULT_AUDIO_FOLDER;
-        String downloadFileName = audioMedia.getDownloadName();
-        String audioUrl = audioMedia.getAudioUrl();
 
-        downloadFile(context, audioUrl, username, downloadFileName);
-    }
-
-    public static void downloadMediaAt(Context context, MediaData mediaInfo, int position) throws Exception {
-        MediaData currentMediaData = mediaInfo.getMediaAt(position);
-        String username = mediaInfo.getUserData().getUsername();
-        String downloadFileName = currentMediaData.getDownloadFilename(false);
-
-        downloadFile(context, currentMediaData.getMediaLink(), username, downloadFileName);
-    }
-
-    public static void downloadAllMedia(Context context, MediaData mediaInfo) throws Exception {
-        String username = mediaInfo.getUserData().getUsername();
-        int carouselSize = mediaInfo.getCarouselSize();
-
-        for (int position = 0; position < carouselSize; position++) {
-            MediaData currentMediaData = mediaInfo.getMediaAt(position);
-            String downloadFileName = currentMediaData.getDownloadFilename(false);
-            downloadFile(context, currentMediaData.getMediaLink(), username, downloadFileName);
-        }
-    }
-
-
-    public static void downloadPost(Context context, Object mediaObject, int position) {
+    public static void downloadPost(Context context,  UserSession userSession, Object mediaObject, int position) {
         try {
+            boolean ENABLE_DIRECT_DOWNLOAD = Pref.enableDirectDownload() && SettingsStatus.downloadMedia;
             position = position < 1 ? 0 : position;
-            MediaData mediaInfo = new MediaData(mediaObject);
+            MediaData mediaInfo = new MediaData(mediaObject, userSession);
             if (ENABLE_DIRECT_DOWNLOAD) {
-                downloadMediaAt(context, mediaInfo, position);
+                downloadMedia(context, mediaInfo, position, MediaType.ANY);
             } else {
                 downloadDialogBox(context, mediaInfo, position);
             }
 
         } catch (Exception e) {
+            PikoUtils.logger(e);
             Logger.printException(() -> "Error at downloadPost", e);
         }
     }
 
-
-    private static void downloader(Context context, String filename, File file, File tempFile, Intent intent, long downloadId,
-                                   BroadcastReceiver broadcastReceiver) {
-        long id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-        if (id == downloadId) {
-            tempFile.renameTo(file);
-            Utils.showToastShort(Strings.DOWNLOADED_MEDIA + filename);
-            context.unregisterReceiver(broadcastReceiver);
-        }
-    }
-
-    public static void downloadFile(Context ctx, String url, String username, String downloadFilename) {
-        String publicFolder = Environment.DIRECTORY_DOWNLOADS;
-        String subFolder = Strings.DEFAULT_PIKO_FOLDER;
-        boolean isAudioFile = username.equals(Strings.DEFAULT_AUDIO_FOLDER);
-        // If it's audio file, then file name need not have username_.
-        final String filename = isAudioFile ? downloadFilename : username + "_" + downloadFilename;
-
-        // If it's audio file, it is always stored it in a separate folder.
-        if (SPLIT_BY_USERNAME || isAudioFile) {
-            subFolder += "/" + username;
-        }
-
-        File dir = new File(
-                Environment.getExternalStoragePublicDirectory(publicFolder),
-                subFolder
-        );
-
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-
-        File file = new File(dir, filename);
-        if (file.exists()) {
-            Utils.showToastShort(Strings.MEDIA_EXISTS);
+    // Position is set to -1 if we want to download all medias from the media info object.
+    public static void downloadMedia(Context context, MediaData mediaInfo, int position, MediaType mediaType) throws Exception {
+        if(!Utils.isNetworkConnected()){
+            Utils.showToastShort(Strings.NO_INTERNET);
             return;
         }
+        MediaDownloader downloader = new MediaDownloader(context);
+        String username = mediaInfo.getUserData().getUsername();
+        String subFolder = getSubfolderName(username);
 
-        File temp = new File(
-                Environment.getExternalStoragePublicDirectory(publicFolder),
-                subFolder + "/temp_" + filename
-        );
+        if (mediaType.equals(MediaType.AUDIO)) {
+            AudioMediaInterface audioMedia = mediaInfo.getMediaAt(position).getAudioMedia();
+            String audioUrl = audioMedia.getAudioUrl();
+            String fileName = audioMedia.getDownloadName() + ".mp3";
+            downloader.enqueue(new DownloadRequest(audioUrl, Strings.DEFAULT_AUDIO_FOLDER, fileName));
 
-        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-        request.setDescription(Strings.DOWNLOADING_MEDIA + filename);
-        request.setTitle(filename);
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        } else if (position != -1) {
+            MediaData mediaData = mediaInfo.getMediaAt(position);
+            String mediaUrl;
+            if (mediaType.equals(MediaType.IMAGE)) {
+                mediaUrl = mediaData.getImageLink();
+            } else {
+                mediaUrl = mediaData.getMediaLink();
+            }
+            String fileName = username+"_"+mediaData.getDownloadFilename(mediaType);
 
-        request.setDestinationInExternalPublicDir(publicFolder, subFolder + "/" + filename);
+            downloader.enqueue(new DownloadRequest(mediaUrl, subFolder, fileName));
 
-        DownloadManager manager = (DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
-        long downloadId = manager.enqueue(request);
+        } else if (position == -1) {
+            int carouselSize = mediaInfo.getCarouselSize();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ctx.registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    downloader(ctx, filename, file, temp, intent, downloadId, this);
-                }
-            }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), Context.RECEIVER_EXPORTED);
+            for (int index = 0; index < carouselSize; index++) {
+                MediaData currentMediaData = mediaInfo.getMediaAt(index);
+                String fileName = username+"_"+currentMediaData.getDownloadFilename(MediaType.ANY);
+                String mediaUrl = currentMediaData.getMediaLink();
+                downloader.enqueue(new DownloadRequest(mediaUrl, subFolder, fileName));
+            }
         } else {
-            ctx.registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    downloader(ctx, filename, file, temp, intent, downloadId, this);
-                }
-            }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+            Utils.showToastShort("There is nothing to download");
         }
+
     }
 
+
+    public static void downloadMediaUrl(Context context, String mediaUrl, String subFolder, String fileName) throws Exception {
+        if(!Utils.isNetworkConnected()){
+            Utils.showToastShort(Strings.NO_INTERNET);
+            return;
+        }
+        MediaDownloader downloader = new MediaDownloader(context);
+        downloader.enqueue(new DownloadRequest(mediaUrl, subFolder, fileName));
+    }
+
+    public static void externalDownloader(Object mediaObject, int currentMediaIndex){
+        try {
+            String packageName = Pref.externalDownloaderPackageName();
+            packageName = packageName == null ? "" : packageName.trim();
+            if(packageName.isEmpty()){
+                PikoUtils.toast(Strings.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET);
+                return;
+            }
+            String link = Links.generatePostLink(mediaObject, currentMediaIndex);
+            ActivityHook.openLink(link, packageName);
+        } catch (Exception e){
+            PikoUtils.logger(e);
+            Logger.printException(() -> "Error at externalDownloader", e);
+        }
+    }
 }

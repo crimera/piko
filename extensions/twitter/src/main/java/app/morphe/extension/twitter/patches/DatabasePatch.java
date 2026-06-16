@@ -6,9 +6,10 @@
 
 package app.morphe.extension.twitter.patches;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.ResourceUtils;
-import app.morphe.extension.shared.StringRef;
 import android.content.Context;
 import com.twitter.util.user.UserIdentifier;
 import android.util.*;
@@ -20,7 +21,7 @@ import android.widget.LinearLayout;
 
 
 public class DatabasePatch {
-    private static final String[] listItems = ResourceUtils.getStringArray("piko_array_ads_hooks");
+    private static final String[] listItems = ResourceUtils.getStringArray("piko_array_db_del_items");
 
     private static void logger(Object j){
         Log.d("piko", j.toString());
@@ -36,9 +37,9 @@ public class DatabasePatch {
         LinearLayout ln = new LinearLayout(context);
         ln.setOrientation(LinearLayout.VERTICAL);
 
-        builder.setTitle(StringRef.str("piko_pref_db_del_items"));
+        builder.setTitle(str("piko_pref_db_del_items"));
         builder.setMessage(result);
-        builder.setNegativeButton(StringRef.str("ok"), null);
+        builder.setNegativeButton(str("ok"), null);
         builder.show();
     }
 
@@ -51,16 +52,16 @@ public class DatabasePatch {
         LinearLayout ln = new LinearLayout(context);
         ln.setOrientation(LinearLayout.VERTICAL);
 
-        builder.setTitle(StringRef.str("piko_pref_del_from_db"));
+        builder.setTitle(str("piko_pref_del_from_db"));
         builder.setMultiChoiceItems(listItems, checkedItems, (dialog, which, isChecked) -> {
             checkedItems[which] = isChecked;
             String currentItem = selectedItems.get(which);
         });
-        builder.setPositiveButton(StringRef.str("ok"), (dialogInterface, i) -> {
+        builder.setPositiveButton(str("ok"), (dialogInterface, i) -> {
             StringBuilder items = removeFromDB(checkedItems);
             if(items.length()!=0) showItemDialog(context,items.toString());
         });
-        builder.setNegativeButton(StringRef.str("cancel"), null);
+        builder.setNegativeButton(str("cancel"), null);
         builder.show();
     }
 
@@ -72,7 +73,7 @@ public class DatabasePatch {
             String DATABASE_PATH = getDBPath();
             File f = new File(DATABASE_PATH);
             if (!f.exists() && f.isDirectory()) {
-                PikoUtils.toast(StringRef.str("piko_pref_db_not_found"));
+                PikoUtils.toast(str("piko_pref_db_not_found"));
                 return result;
             }
             database = SQLiteDatabase.openDatabase(DATABASE_PATH, null, SQLiteDatabase.OPEN_READWRITE);
@@ -140,7 +141,7 @@ public class DatabasePatch {
                     }
                 }
             } else {
-                PikoUtils.toast(StringRef.str("piko_pref_db_not_open"));
+                PikoUtils.toast(str("piko_pref_db_not_open"));
             }
 
         }

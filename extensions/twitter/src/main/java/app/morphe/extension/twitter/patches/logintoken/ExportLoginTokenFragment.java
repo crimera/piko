@@ -6,6 +6,8 @@
 
 package app.morphe.extension.twitter.patches.logintoken;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -26,7 +28,6 @@ import androidx.annotation.Nullable;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 
 import java.io.OutputStream;
@@ -59,9 +60,9 @@ public class ExportLoginTokenFragment extends Fragment {
                 Account account = (Account) spinner.getSelectedItem();
                 String jsonString = ImportExportLoginTokenPatch.createAccountJsonText(account);
                 Utils.setClipboard(jsonString);
-                Utils.showToastShort(StringRef.str("copied_to_clipboard"));
+                Utils.showToastShort(str("copied_to_clipboard"));
             } catch (Exception e) {
-                Utils.showToastLong(StringRef.str("piko_pref_export_failed", StringRef.str("accounts_title")));
+                Utils.showToastLong(str("piko_pref_export_failed", str("accounts_title")));
                 Logger.printInfo(() -> "Failed to export account to clipboard", e);
             }
         });
@@ -88,15 +89,15 @@ public class ExportLoginTokenFragment extends Fragment {
          */
         if (requestCode == CREATE_FILE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (data == null || data.getData() == null) {
-                Utils.showToastLong(StringRef.str("piko_pref_export_no_uri"));
+                Utils.showToastLong(str("piko_pref_export_no_uri"));
                 return;
             }
             try (OutputStream outputStream = getContext().getContentResolver().openOutputStream(data.getData())) {
                 byte[] jsonStringByteArray = ImportExportLoginTokenPatch.createAccountJsonText(accountToSaveToFile).getBytes();
                 outputStream.write(jsonStringByteArray);
-                Utils.showToastShort(StringRef.str("piko_pref_success"));
+                Utils.showToastShort(str("piko_pref_export_success"));
             } catch (Exception e) {
-                Utils.showToastLong(StringRef.str("piko_pref_export_failed", StringRef.str("accounts_title")));
+                Utils.showToastLong(str("piko_pref_export_failed", str("accounts_title")));
                 Logger.printInfo(() -> "Failed to export account to a file", e);
             }
         }

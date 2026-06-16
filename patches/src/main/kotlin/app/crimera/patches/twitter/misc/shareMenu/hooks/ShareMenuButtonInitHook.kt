@@ -6,7 +6,7 @@
 
 package app.crimera.patches.twitter.misc.shareMenu.hooks
 
-import app.crimera.patches.twitter.utils.Constants.UTILS_DESCRIPTOR
+import app.crimera.patches.twitter.utils.Constants.STRING_REF_DESCRIPTOR
 import app.crimera.utils.instructionToString
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -51,7 +51,7 @@ fun setButtonText(
                             ins as Instruction21c
                             """
                             const-string v${ins.registerA}, "$stringId"
-                            invoke-static {v${ins.registerA}},$UTILS_DESCRIPTOR;->strRes(Ljava/lang/String;)Ljava/lang/String;
+                            invoke-static {v${ins.registerA}},$STRING_REF_DESCRIPTOR;->str(Ljava/lang/String;)Ljava/lang/String;
                             move-result-object v${ins.registerA}
                             """.trimIndent()
                         }

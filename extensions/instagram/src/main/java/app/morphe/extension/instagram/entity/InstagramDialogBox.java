@@ -1,13 +1,8 @@
 /*
-    * Copyright (C) 2026 piko <https://github.com/crimera/piko>
-    *
-    * This file is part of piko.
-    *
-    * Any modifications, derivatives, or substantial rewrites of this file
-    * must retain this copyright notice and the piko attribution
-    * in the source code and version control history.
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
 */
-
 
 package app.morphe.extension.instagram.entity;
 
@@ -19,18 +14,20 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import app.morphe.extension.crimera.PikoUtils;
+
 public class InstagramDialogBox{
 
-    private final Object igdsDialog;
-    private final Class<?> igdsClass;
+    private Object igdsDialog;
+    private Class<?> igdsClass;
 
     public InstagramDialogBox(Context context){
         try {
             igdsClass = Class.forName("className");
             Constructor<?> ctor = igdsClass.getConstructor(Context.class);
             igdsDialog = ctor.newInstance(context);
-        } catch (Throwable t) {
-            throw new RuntimeException("Contructor failed");
+        } catch (Exception e) {
+            PikoUtils.logger(e);
         }
     }
 

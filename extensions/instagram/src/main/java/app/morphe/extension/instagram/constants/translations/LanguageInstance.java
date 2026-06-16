@@ -19,7 +19,7 @@ public class LanguageInstance {
         } else if (lang.equals("ko")) {
             return new StringsKorean();
         } else if (lang.equals("id")) {
-			      return new StringsIndonesian();
+			return new StringsIndonesian();
         } else if (lang.equals("pl")) {
             return new StringsPolish();
         } else if (lang.equals("tr")) {
@@ -30,6 +30,8 @@ public class LanguageInstance {
             return new StringsJapanese();
         } else if (lang.equals("pt")) {
             return new StringsPortugueseBR();
+        } else if (lang.equals("es")) {
+            return new StringsSpanish();
         }
 
         return new StringsEnglish(); // Default fallback

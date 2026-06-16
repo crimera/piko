@@ -1,11 +1,7 @@
 /*
-    * Copyright (C) 2026 piko <https://github.com/crimera/piko>
-    *
-    * This file is part of piko.
-    *
-    * Any modifications, derivatives, or substantial rewrites of this file
-    * must retain this copyright notice and the piko attribution
-    * in the source code and version control history.
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
 */
 
 
@@ -14,7 +10,7 @@ package app.morphe.extension.instagram.settings.preference;
 import android.content.Context;
 import android.preference.Preference;
 
-import app.morphe.extension.instagram.utils.SharedPref;
+import app.morphe.extension.crimera.SharedPref;
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;

@@ -14,8 +14,8 @@ import java.util.ArrayList;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.instagram.entity.UserData;
+import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.crimera.ObjectBrowser;
@@ -35,8 +35,7 @@ public class ProfileMoreOption {
         DEBUG = Pref.pikoDebug();
     }
 
-    private static void moreOptionsDailogueBox(Context context, UserData userData) {
-
+    public static void moreOptionsDailogueBox(Context context, UserData userData) {
         try {
             InstagramDialogBox dialog = new InstagramDialogBox(context);
 
@@ -78,8 +77,9 @@ public class ProfileMoreOption {
                         } else if (selectedOption.equals(Strings.DOWNLOAD_PROFILE_PICTURE)) {
                             String url = userData.getProfilePictureUrl();
                             String username = userData.getUsername();
-                            String downloadFilename = "dp.jpg";
-                            DownloadUtils.downloadFile(context, url, username, downloadFilename);
+                            String downloadFilename = username+"_dp.jpg";
+                            String subFolder = DownloadUtils.getSubfolderName(username);
+                            DownloadUtils.downloadMediaUrl(context, url, subFolder, downloadFilename);
                             toCopy = false;
 
                         } else if (selectedOption.equals(Strings.PIKO_DEBUG)) {
@@ -109,9 +109,8 @@ public class ProfileMoreOption {
         }
     }
 
-    public static void addProfileMoreOptionsButton(ViewGroup viewGroup, Object object) {
+    public static void addProfileMoreOptionsButton(ViewGroup viewGroup, ProfileInfo profileInfo) {
         try {
-            ProfileInfo profileInfo = new ProfileInfo(object);
             UserData userData = profileInfo.getUserData();
 
             Context context = viewGroup.getContext();
@@ -133,8 +132,6 @@ public class ProfileMoreOption {
         } catch (Exception e) {
             Logger.printException(() -> "Failed to add profile more button: ", e);
         }
-
     }
-
 }
 

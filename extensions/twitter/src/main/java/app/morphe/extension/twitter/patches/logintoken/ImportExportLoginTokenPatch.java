@@ -6,6 +6,8 @@
 
 package app.morphe.extension.twitter.patches.logintoken;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
@@ -23,7 +25,6 @@ import java.util.Iterator;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 
 public class ImportExportLoginTokenPatch {
@@ -75,7 +76,7 @@ public class ImportExportLoginTokenPatch {
             String token = accountJson.optString("token");
             String secret = accountJson.optString("secret");
             if (userName.isEmpty() || token.isEmpty() || secret.isEmpty()) {
-                Utils.showToastLong(StringRef.str("piko_login_token_import_failed_missing_info"));
+                Utils.showToastLong(str("piko_login_token_import_failed_missing_info"));
                 return;
             }
 
@@ -91,7 +92,7 @@ public class ImportExportLoginTokenPatch {
             AccountManager accountManager = AccountManager.get(context);
             boolean succeeded = accountManager.addAccountExplicitly(account, null, newUserData);
             if (!succeeded) {
-                Utils.showToastLong(StringRef.str("piko_login_token_import_failed_already_exist"));
+                Utils.showToastLong(str("piko_login_token_import_failed_already_exist"));
                 return;
             }
 
@@ -103,8 +104,8 @@ public class ImportExportLoginTokenPatch {
             // Since the app begins some process immediately after an account is added,
             // we do not use Utils.restartApp() which calls System.exit(0) for safety.
             new AlertDialog.Builder(context)
-                    .setTitle(StringRef.str("piko_pref_success"))
-                    .setMessage(StringRef.str("piko_login_token_import_success_reopen_required"))
+                    .setTitle(str("piko_pref_import_success"))
+                    .setMessage(str("piko_login_token_import_success_reopen_required"))
                     .setPositiveButton(android.R.string.ok, null)
                     .setCancelable(false)
                     .show();

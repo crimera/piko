@@ -6,10 +6,11 @@
 
 package app.morphe.extension.twitter.patches.nativeFeatures.translator;
 
+import static app.morphe.extension.shared.StringRef.str;
+
 import android.content.Context;
 
 import app.morphe.extension.crimera.PikoUtils;
-import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.twitter.patches.nativeFeatures.translator.providers.Translate;
 import app.morphe.extension.twitter.patches.nativeFeatures.translator.providers.GTranslate;
 import app.morphe.extension.twitter.patches.nativeFeatures.translator.providers.GTranslateV2;
@@ -27,7 +28,7 @@ public class NativeTranslator {
             Long tweetId = tweet.getTweetId();
             // If text is empty.
             if(text == ""){
-                PikoUtils.logger(StringRef.str("piko_native_translator_zero_text"));
+                PikoUtils.logger(str("piko_native_translator_zero_text"));
                 return;
             }
 
@@ -36,7 +37,7 @@ public class NativeTranslator {
 
             // If both the tweet language and requested language are same.
             if(tweetLang.toLowerCase() == toLang.toLowerCase()){
-                PikoUtils.logger(StringRef.str("translate_tweet_same_language",toLang));
+                PikoUtils.logger(str("translate_tweet_same_language",toLang));
                 return;
             }
             int providerCode = Pref.natveTranslatorProvider();
@@ -60,7 +61,7 @@ public class NativeTranslator {
                 public void onTranslationComplete(String translatedText) {
                     // FxTwitter has multiple sources, so provider name is set after API call.
                     String providerName = translator.getProviderName();
-                    String header = StringRef.str("translate_tweet_link_label",tweetLang,providerName);
+                    String header = str("translate_tweet_link_label",tweetLang,providerName);
 
                     // Update UI with translated text
                     DialogBox dialogBox = new DialogBox(activity,header,translatedText);

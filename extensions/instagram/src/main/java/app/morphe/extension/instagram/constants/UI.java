@@ -13,14 +13,13 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import java.util.ArrayList;
 
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.utils.Pref;
-import app.morphe.extension.instagram.settings.Settings;
-import app.morphe.extension.instagram.entity.InstagramButton;
-import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.shared.Logger;
@@ -28,8 +27,16 @@ import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.Dim;
+import app.morphe.extension.crimera.constants.TooltipHelper;
+import app.morphe.extension.instagram.entity.InstagramButton;
+import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 
 public class UI {
+
+    public static final String DRAWABLE_DOWNLOAD_ICON = "instagram_download_outline_24";
+    public static final String DRAWABLE_INFO_ICON = "instagram_info_outline_24";
+    public static final String DRAWABLE_DEBUG_ICON = "instagram_app_instagram_pano_outline_24";
+    public static final String DRAWABLE_BLUB_ICON = "instagram_bulb_outline_24";
 
     public static int getThemedColour() {
         Context context = Utils.getContext();
@@ -50,22 +57,69 @@ public class UI {
         }
     }
 
-    public static void pikoSettingsButton(ViewGroup viewGroup) throws Exception {
-        boolean isFirstTime = Pref.firstTimePiko();
+    public static ImageView addImageViewToViewGroup(ViewGroup viewGroup, String iconDrawable, Runnable action) {
+        try {
+            if (viewGroup == null) {
+                return null;
+            }
 
-        Context context = viewGroup.getContext();
-        InstagramButton button = new InstagramButton(context);
-        button.setText(Strings.PIKO_SETTINGS_TITLE);
-        button.setStyle(InstagramButtonStyleEnum.SUPER_PRIMARY);
-        button.setOnClickListener(ActivityHook::startPikoActivity);
+            Context context = viewGroup.getContext();
+            ImageView imageView = new ImageView(context);
 
-        int marginPx = Dim.dp12;
-        button.setMargins(marginPx, marginPx, marginPx, marginPx);
+            setThemedIcon(imageView, iconDrawable);
+            ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            imageView.setLayoutParams(params);
+            if(action!=null) {
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            action.run();
+                        } catch (Exception ex) {
+                            Logger.printException(() -> "addImageViewToViewGroup click failed: ", ex);
+                        }
+                    }
+                });
+            }
+            int padding = Dim.dp16;
+            imageView.setPadding(padding, padding, padding, padding);
 
-        viewGroup.addView(button.getIgdsButton());
-        if(isFirstTime){
-            button.startPulseAnimation();
-            Pref.setFirstTimePiko(false);
+            int count = viewGroup.getChildCount();
+            int insertIndex = count - 1;
+            if (insertIndex < 0) {
+                insertIndex = 0;
+            }
+
+            viewGroup.addView(imageView, insertIndex);
+            return imageView;
+        } catch (Exception e) {
+            Logger.printException(() -> "Failed addImageViewToViewGroup: ", e);
+        }
+        return null;
+    }
+
+    public static void pikoSettingsGear(ViewGroup viewGroup) {
+        try {
+            if (viewGroup == null) {
+                return;
+            }
+
+            ImageView imageView = UI.addImageViewToViewGroup(viewGroup, "instagram_settings_pano_filled_24", ActivityHook::startPikoActivity);
+            if (imageView == null) {
+                return;
+            }
+
+            Context context = viewGroup.getContext();
+            boolean isFirstTime = Pref.firstTimePiko();
+            if(isFirstTime) {
+                TooltipHelper.showPersistentTooltip(context, imageView, Strings.TAP_HERE);
+                Pref.setFirstTimePiko(false);
+            }
+        } catch (Exception e) {
+            Logger.printException(() -> "Failed pikoSettingsGear: ", e);
         }
     }
 
@@ -114,11 +168,14 @@ public class UI {
             @Override
             public void onClick(DialogInterface d, int which) {
                 try {
-                    // Doing like this because options are dynamic.
-                    String selectedOption = options.get(which);
+                    // If settings is placed on action bar, no need to redirect to profile.
+                    if(!Pref.pikoSettingsOnActionBar()) {
+                        // Doing like this because options are dynamic.
+                        String selectedOption = options.get(which);
 
-                    if (selectedOption.equals(Strings.GOTO_PIKO_SETTINGS)) {
-                        ActivityHook.openLink("instagram://profile");
+                        if (selectedOption.equals(Strings.GOTO_PIKO_SETTINGS)) {
+                            PikoUtils.openUrl("instagram://profile");
+                        }
                     }
                 } catch (Exception e) {
                     Logger.printException(() -> "Error at welcomeDialogBox", e);
@@ -134,5 +191,24 @@ public class UI {
 
         Dialog dlg = dialog.getDialog();
         dlg.show();
+    }
+
+    public static void pikoSettingsButton(ViewGroup viewGroup) throws Exception {
+        boolean isFirstTime = Pref.firstTimePiko();
+
+        Context context = viewGroup.getContext();
+        InstagramButton button = new InstagramButton(context);
+        button.setText(Strings.PIKO_SETTINGS_TITLE);
+        button.setStyle(InstagramButtonStyleEnum.SUPER_PRIMARY);
+        button.setOnClickListener(ActivityHook::startPikoActivity);
+
+        int marginPx = Dim.dp12;
+        button.setMargins(marginPx, marginPx, marginPx, marginPx);
+
+        viewGroup.addView(button.getIgdsButton());
+        if(isFirstTime){
+            button.startPulseAnimation();
+            Pref.setFirstTimePiko(false);
+        }
     }
 }

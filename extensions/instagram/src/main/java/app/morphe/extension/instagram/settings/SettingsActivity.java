@@ -10,6 +10,11 @@ package app.morphe.extension.instagram.settings;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
@@ -17,17 +22,14 @@ import android.preference.PreferenceScreen;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowInsets;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import app.morphe.extension.instagram.constants.Strings;
-import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
-import app.morphe.extension.shared.Utils;
-import app.morphe.extension.shared.ui.Dim;
+import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 
 public class SettingsActivity extends Activity {
 
@@ -45,27 +47,29 @@ public class SettingsActivity extends Activity {
         getFragmentManager().beginTransaction().replace(1001, new SettingsFragment()).commit();
     }
 
-
     @SuppressLint("ResourceType")
     private void createLayout() {
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(this));
+
+        applySystemBarStyle();
+
         // ---------- Toolbar ----------
         toolbar = new LinearLayout(this);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
+        toolbar.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        toolbar.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(this));
 
-        int toolbarPadding = Dim.dp8;
-        toolbar.setPadding(toolbarPadding, toolbarPadding, toolbarPadding, toolbarPadding);
+        int toolbarPadding = InstagramPreferenceStyle.dp(this, 15);
+        toolbar.setPadding(toolbarPadding, InstagramPreferenceStyle.dp(this, 10), toolbarPadding, InstagramPreferenceStyle.dp(this, 8));
 
-        int iconSize = Dim.dp48;
+        int iconSize = InstagramPreferenceStyle.dp(this, 44);
 
-        ImageView back = new ImageView(this);
+        BackArrowView back = new BackArrowView(this);
         LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(iconSize, iconSize);
         backParams.gravity = android.view.Gravity.CENTER_VERTICAL;
         back.setLayoutParams(backParams);
-
-        UI.setThemedIcon(back, "material_ic_keyboard_arrow_left_black_24dp");
-        back.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,33 +79,30 @@ public class SettingsActivity extends Activity {
 
         TextView title = new TextView(this);
         title.setText(Strings.PIKO_SETTINGS_TITLE);
-        int textSize = app.morphe.extension.crimera.PikoUtils.spToPixels(20);
-        title.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26);
+        title.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
+        title.setIncludeFontPadding(false);
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
         titleParams.gravity = android.view.Gravity.CENTER_VERTICAL;
-        titleParams.leftMargin = toolbarPadding / 2;
+        titleParams.leftMargin = InstagramPreferenceStyle.dp(this, 7);
         title.setLayoutParams(titleParams);
-        title.setTextColor(UI.getThemedColour());
+        title.setTextColor(InstagramPreferenceStyle.primaryTextColor(this));
 
         toolbar.addView(back);
         toolbar.addView(title);
 
         // ---------- Content ----------
 
-        ScrollView scrollView = new ScrollView(this);
-        scrollView.setFillViewport(true);
-
         content = new LinearLayout(this);
         content.setId(1001);
         content.setOrientation(LinearLayout.VERTICAL);
+        content.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(this));
 
-        scrollView.addView(content, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-
-        root.addView(toolbar);
-        root.addView(scrollView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
+        root.addView(toolbar, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, InstagramPreferenceStyle.dp(this, 70)));
+        root.addView(content, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
 
         root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
             @Override
@@ -127,6 +128,49 @@ public class SettingsActivity extends Activity {
         setContentView(root);
     }
 
+    private static class BackArrowView extends View {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        BackArrowView(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+
+            float centerY = getHeight() / 2f;
+            float tipX = InstagramPreferenceStyle.dp(getContext(), 2);
+            float endX = InstagramPreferenceStyle.dp(getContext(), 21);
+            float headEndX = InstagramPreferenceStyle.dp(getContext(), 10);
+            float headOffset = InstagramPreferenceStyle.dp(getContext(), 7);
+
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(InstagramPreferenceStyle.dp(getContext(), 1.9f));
+            paint.setStrokeCap(Paint.Cap.ROUND);
+            paint.setStrokeJoin(Paint.Join.ROUND);
+            paint.setColor(InstagramPreferenceStyle.primaryTextColor(getContext()));
+
+            canvas.drawLine(tipX, centerY, endX, centerY, paint);
+            canvas.drawLine(tipX, centerY, headEndX, centerY - headOffset, paint);
+            canvas.drawLine(tipX, centerY, headEndX, centerY + headOffset, paint);
+        }
+    }
+
+    private void applySystemBarStyle() {
+        getWindow().setStatusBarColor(InstagramPreferenceStyle.backgroundColor(this));
+        getWindow().setNavigationBarColor(InstagramPreferenceStyle.backgroundColor(this));
+
+        int flags = getWindow().getDecorView().getSystemUiVisibility();
+        if (InstagramPreferenceStyle.isDark(this)) {
+            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        } else {
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        }
+        getWindow().getDecorView().setSystemUiVisibility(flags);
+    }
 
     public static class SettingsFragment extends PreferenceFragment {
 
@@ -155,6 +199,33 @@ public class SettingsActivity extends Activity {
             screenBuilder.aboutSection();
 
             setPreferenceScreen(screen);
+        }
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+
+            View rootView = getView();
+            ListView listView = null;
+            if (rootView != null) {
+                View list = rootView.findViewById(android.R.id.list);
+                if (list instanceof ListView) {
+                    listView = (ListView) list;
+                }
+            }
+            if (listView != null) {
+                listView.setPadding(0, InstagramPreferenceStyle.dp(context, 10), 0, InstagramPreferenceStyle.dp(context, 10));
+                listView.setClipToPadding(false);
+                listView.setDivider(null);
+                listView.setDividerHeight(0);
+                listView.setSelector(new ColorDrawable(Color.TRANSPARENT));
+                listView.setCacheColorHint(Color.TRANSPARENT);
+                listView.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(context));
+            }
+
+            if (rootView != null) {
+                rootView.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(context));
+            }
         }
     }
 }

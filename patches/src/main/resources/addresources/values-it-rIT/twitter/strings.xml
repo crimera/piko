@@ -2,17 +2,15 @@
 <resources>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
-    <string name="piko_pref_reader_mode">modalità lettura</string>
-    <string name="piko_pref_reader_mode_desc">Abilita \"modalità lettura\" su thread lunghi</string>
-    <string name="piko_pref_undo_posts">annulla i post</string>
+    <string name="piko_pref_undo_posts">Abilita annulla i post</string>
     <string name="piko_pref_undo_posts_desc">Abilita l\'abilità di annullare i post prima di essere postati</string>
     <string name="piko_pref_undo_posts_btn">Impostazioni di annulla i post</string>
     <string name="piko_pref_icon_n_navbar_btn">Impostazioni di Customizzazione dell\'icona dell\'app e la barra di navigazione</string>
-    <string name="piko_pref_enable_force_pip">Modalità PiP automaticamente</string>
+    <string name="piko_pref_enable_force_pip">Forza la modalità PiP</string>
     <string name="piko_pref_enable_force_pip_desc">Abilita la modalità PiP quando chiudi l\'app</string>
     <!-- Download Settings -->
     <string name="piko_title_download">Scaricamento</string>
-    <string name="piko_pref_video_download">scaricamento video</string>
+    <string name="piko_pref_video_download">Scaricamento video</string>
     <string name="piko_pref_download">Cambia cartella di scaricamento</string>
     <string name="piko_pref_download_path">Cartella pubblica</string>
     <string name="piko_pref_download_path_desc">La cartella pubblica viene usata per i video scaricati</string>
@@ -26,7 +24,7 @@
     <string name="piko_pref_download_media_link_handle_share_media_link">Condividi il link del media</string>
     <!-- Native -->
     <string name="piko_title_native">Funzionalità native</string>
-    <string name="piko_pref_native_page_desc">Queste funzionalità native di Piko sono disponibili nel menu di condivisione dei post.</string>
+    <string name="piko_pref_native_page_desc">Queste caratteristiche native di Piko sono disponibili nel menu dei post.</string>
     <string name="piko_title_native_downloader">Scaricatore nativo</string>
     <string name="piko_title_native_downloader_toggle">Abilita lo scaricatore nativo</string>
     <string name="piko_pref_native_downloader_inline_button">Aggiungi pulsante download per i post</string>
@@ -40,6 +38,8 @@
     <string name="piko_share_image_toggle">Abilità la Condivisione di Tweet come Immagini</string>
     <string name="piko_share_image_autocleanup">Pulizia automatica delle registrazioni</string>
     <string name="piko_share_image_autocleanup_desc">Rimuove automaticamente le catture [es. Post scaricati] dopo 24 ore se attivato</string>
+    <string name="piko_share_image_invalid_context">Contesto non valido</string>
+    <string name="piko_share_image_error">Errore: %s</string>
     <string name="piko_title_native_translator">Traduzione nativa dei post</string>
     <string name="piko_native_translator_toggle">Abilita la Traduzione nativa dei post</string>
     <string name="piko_native_translator_provider">Fornitori di traduzione</string>
@@ -49,6 +49,7 @@
     <string name="piko_native_translator_google_v2">Google traduttore V2</string>
     <string name="piko_native_translator_fxtwitter">FxTwitter API</string>
     <string name="piko_title_native_reader_mode">Modalità lettura</string>
+    <string name="piko_native_reader_mode_toggle">Abilita la modalità lettura</string>
     <string name="piko_native_reader_mode_grok_thread">Analizza questo thread</string>
     <string name="piko_native_reader_mode_grok_author">Più a proposito del\'autore</string>
     <string name="piko_native_reader_mode_source">Sorgente</string>
@@ -63,30 +64,13 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Eliminazione della cache fallita</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Annunci</string>
-    <string name="piko_pref_hide_promoted_posts">Post sponsorizzati</string>
-    <string name="piko_pref_wtf_section">Sezione \"Chi segui\"</string>
-    <string name="piko_pref_cts_section">Sezione \"Creatori da iscrive\"</string>
-    <string name="piko_pref_ctj_section">Sezione \"Comunità a cui unir\"</string>
-    <string name="piko_pref_ryb_section">Sezione \"Rivedi il tuo segnalib\"</string>
-    <string name="piko_pref_pinned_posts_section">Sezione \"Post fissati dai follow\"</string>
-    <string name="piko_pref_hide_detailed_posts">Post correlati (nelle risposte)</string>
-    <string name="piko_pref_hide_premium_prompt">Richiesta Messaggi</string>
-    <string name="piko_pref_hide_todays_news">Annunci di oggi</string>
     <string name="piko_pref_del_from_db">Elimina voci dal database</string>
+    <string name="piko_pref_db_promoted_posts">Post sponsorizzati</string>
     <string name="piko_pref_db_not_found">Database non trovato</string>
     <string name="piko_pref_db_not_open">Database non è aperto</string>
     <string name="piko_pref_db_del_items">Elementi eliminati</string>
-    <string name="piko_pref_hide_premium_upsell">Vendita premium</string>
-    <string name="piko_pref_hide_premium_upsell_desc">Rimuove la vendita premium nella cronologia iniziale</string>
-    <string name="piko_pref_top_people_search">Persone migliori nella ricerca</string>
-    <string name="piko_pref_top_people_search_desc">Rimuove la sezione persone dopo la ricerca</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">Varie</string>
-    <string name="piko_pref_chirp_font">font chirp</string>
-    <string name="piko_pref_hide_fab">pulsante volante d\'azione</string>
-    <string name="piko_pref_hide_fab_menu">menu dei pulsanti volanti d\'azione</string>
-    <string name="piko_pref_rec_users">utenti consigliati</string>
-    <string name="piko_pref_hide_view_count">contatore visualizzazioni</string>
     <string name="piko_pref_custom_share_domain">Dominio di condivisione customizzato</string>
     <string name="piko_pref_custom_share_domain_desc">Il dominio da usare quando condividi i tweet</string>
     <string name="piko_pref_show_sensitive_media">Mostra media sensibile</string>
@@ -95,14 +79,10 @@
     <string name="piko_pref_unshorten_link">No URL ridotto</string>
     <string name="piko_pref_unshorten_link_desc">Sbarazzarsi degli url ridotti t.co</string>
     <string name="piko_pref_round_off_numbers">Arrotonda numeri</string>
-    <string name="piko_pref_round_off_numbers_desc">Arrotonda i numeri come K e M </string>
-    <string name="piko_pref_debug_menu">menu debug per i posts</string>
     <string name="piko_pref_quick_settings">Abilita impostazioni rapide</string>
     <string name="piko_pref_quick_settings_summary">Aggiunge un pulsante d\'impostazioni rapide nella barra laterale</string>
     <string name="piko_pref_pause_search_suggestion">Metti in pausa i suggerimenti di ricerca</string>
     <string name="piko_pref_pause_search_suggestion_desc">I suggerimenti di ricerca non verranno salvati localmente</string>
-    <string name="piko_pref_search_suggestion">suggerimenti di ricerca</string>
-    <string name="piko_pref_search_suggestion_desc">Nascondi/Rimuovi il suggerimento di ricerca nella sezione Esplora</string>
     <string name="piko_disunify_xchat_system">Disunifica il sistema chat di X</string>
     <string name="piko_disunify_xchat_system_desc">Riporta indietro le caratteristiche legacy come i messaggi e il menu condivisione</string>
     <string name="piko_legacy_share_link">Condivisione dei link legacy</string>
@@ -112,28 +92,24 @@
     <string name="piko_pref_edit_flag_title">Modifica flag</string>
     <string name="piko_pref_add_flag_title">Aggiungi flag</string>
     <string name="piko_pref_search_flags">Cerca flag</string>
+    <string name="piko_pref_import_flags">Importa le flag</string>
+    <string name="piko_pref_export_flags">Esporta le flag</string>
+    <string name="piko_pref_reset_flags">Ripristina le flag</string>
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">Cronologia</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Disattiva lo scrollimento automatico della cronologia all\'avvio</string>
     <string name="piko_pref_show_post_source">Mostra etichetta della sorgente del post</string>
     <string name="piko_pref_show_post_source_desc">Potrebbe verificarsi un ritardo durante \'apertura delle informazioni di un post e inoltre \'etichetta verrà mostrata solo nei post pubblici</string>
-    <string name="piko_pref_hide_live_threads">discussioni in diretta</string>
     <string name="piko_pref_hide_live_threads_desc">Nascondi la sezione dal vivo nella cronologia</string>
-    <string name="piko_pref_hide_banner">bandiera</string>
-    <string name="piko_pref_hide_banner_desc">pillola dei nuovi post</string>
-    <string name="piko_pref_hide_bmk_timeline">icona del segnalibro nella cronologia</string>
+    <string name="piko_pref_hide_banner">Nascondi il banner</string>
     <string name="piko_pref_force_translate">Abilitazione forzata del traduttore</string>
     <string name="piko_pref_force_translate_desc">Ottieni l\'opzione di traduzione a tutti i post</string>
-    <string name="piko_pref_hide_quick_promote">Pulsante promozionale</string>
     <string name="piko_pref_hide_quick_promote_desc">Nasconde il pulsante promozionale sotto i post personali</string>
     <string name="piko_pref_show_poll_result">Mostra risultati del sondaggio</string>
     <string name="piko_pref_show_poll_result_desc">Mostra i risultati del sondaggio senza votare</string>
-    <string name="piko_pref_hide_immersive_player">riproduttore immersivo</string>
     <string name="piko_pref_hide_immersive_player_desc">Rimuove lo scorrimento verso l\'alto per visualizzare altri video nel lettore video</string>
-    <string name="piko_pref_enable_vid_auto_advance">scorrimento automatico dei video</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">Abilita lo scorrimento automatico dei video nella visione immersiva</string>
-    <string name="piko_pref_hide_hidden_replies">risposte nascoste</string>
-    <string name="piko_pref_force_hd">forza video in HD</string>
+    <string name="piko_pref_force_hd">Forza video in HD</string>
     <string name="piko_pref_force_hd_desc">I video verranno riprodotti sempre a una qualità alta</string>
     <string name="piko_pref_hide_nudge_button">Nascondi il pulsante di spinta</string>
     <string name="piko_pref_hide_nudge_button_desc">Nasconde i pulsanti segui/iscriviti/segui di nuovo nei post</string>
@@ -164,6 +140,7 @@
     <string name="piko_pref_customisation_post_font_size">Dimensione del carattere del post</string>
     <string name="piko_pref_customisation_search_type_ahead">Cerca i suggerimenti da nascondere</string>
     <string name="piko_pref_customisation_change_app_icon">Cambia icona dell\'app</string>
+    <string name="piko_notifications_tab_priority">Priorità</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Stile font</string>
     <string name="piko_pref_add_font">Aggiungi font</string>
@@ -184,14 +161,17 @@
     <string name="piko_pref_server_response_logging_file_overwrite_desc">Cancella i dati del registro delle risposte esistenti all\'avvio</string>
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Backup e ripristino</string>
-    <string name="piko_pref_export">Esporta %s</string>
-    <string name="piko_pref_import">Importa %s</string>
-    <string name="piko_pref_success">Successo</string>
+    <string name="piko_pref_import_settings">Importa impostazioni Piko</string>
+    <string name="piko_pref_export_settings">Esporta impostazioni Piko</string>
+    <string name="piko_pref_reset_settings">Ripristina impostazioni di Piko</string>
+    <string name="piko_pref_export_success">Esportazione riuscita</string>
+    <string name="piko_pref_import_success">Importazione riuscita</string>
     <string name="piko_pref_export_failed">Errore: Esportazione %s fallita</string>
     <string name="piko_pref_import_failed">Errore: importazione %s fallita</string>
     <string name="piko_pref_export_no_uri">Errore: Nessuna destinazione fornita</string>
     <string name="piko_pref_import_no_uri">Errore: Nessun file fornito</string>
     <string name="piko_pref_export_login_token">Esporta token di login</string>
+    <string name="piko_pref_import_login_token">Importa il token di login</string>
     <!-- About -->
     <string name="piko_title_about">Informazioni</string>
     <string name="piko_pref_app_version">Versione app</string>
@@ -202,8 +182,8 @@
     <string name="piko_pref_included">Incluso</string>
     <string name="piko_pref_excluded">Escluso</string>
     <string name="piko_pref_app_restart_rec">Riavvio dell\'app è consigliato</string>
-    <string name="piko_pref_remove">Rimuovi %s</string>
-    <string name="piko_pref_enable">Abilita %s</string>
+    <string name="piko_dialog_delete_title">Elimina</string>
+    <string name="piko_dialog_delete_message">Eliminare %s?</string>
     <string name="piko_single_page_settings">Pagina delle impostazioni singola</string>
     <string name="piko_single_page_settings_desc">Vedi le impostazioni in una singola pagina</string>
     <string name="piko_pref_search_type_ahead_users">Utenti</string>
@@ -340,6 +320,8 @@ Si consiglia di leggerlo prima di usare questa funzione. Include alcune note imp
     <string name="piko_login_token_import_token_button_text">Accedi tramite token json</string>
     <string name="piko_login_token_import_from_text">Importa da del testo</string>
     <string name="piko_login_token_import_from_file">Importa da un file</string>
+    <string name="piko_login_token_import_about">Informazioni su questa funzionalità (Apri sito web)</string>
+    <string name="piko_login_token_import_success_reopen_required">Si prega di uscire dall\'app e riaprirla</string>
     <string name="piko_login_token_import_failed_missing_info">Errore: nome utente, token o segreto mancanti</string>
     <string name="piko_login_token_import_failed_already_exist">Impossibile aggiungere l\'account (potrebbe già essere stato aggiunto)</string>
 </resources>

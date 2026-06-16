@@ -4,14 +4,17 @@ import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
+import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.crimera.utils.changeFirstString
-import app.crimera.utils.getFieldName
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstInstructionOrThrow
+import app.morphe.patcher.string
+import app.morphe.util.getReference
+import app.morphe.util.indexOfFirstInstructionReversedOrThrow
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
@@ -20,12 +23,16 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 private const val INLINE_ACTION_BAR_DESCRIPTOR = "Lcom/twitter/ui/tweet/inlineactions/InlineActionBar;"
 private const val INLINE_ACTION_VIEW_DESCRIPTOR = "Lcom/twitter/ui/tweet/inlineactions/InlineActionView;"
 private const val INLINE_ACTIONS_PACKAGE_PREFIX = "Lcom/twitter/ui/tweet/inlineactions/"
-private const val COLOR_STATE_LIST_DESCRIPTOR = "Landroid/content/res/ColorStateList;"
 private const val BOOLEAN_DESCRIPTOR = "Z"
 private const val RENDER_HINTS_BOOLEAN_COUNT = 6
 private const val FOCAL_TWEET_FIELD_WRITE_INDEX = 4
 
-private fun placeholderFingerprint(value: String) = object : Fingerprint(strings = listOf(value)) {}
+private const val EXTENSION_CLASS = "$PATCHES_DESCRIPTOR/InlineDownloadButton;"
+
+private fun placeholderFingerprint(value: String) = object : Fingerprint(
+    definingClass = EXTENSION_CLASS,
+    strings = listOf(value)
+) {}
 
 private fun isRenderHintsConstructor(method: Method) =
     method.name == "<init>" &&
@@ -41,12 +48,26 @@ private object OnFinishInflateFingerprint : Fingerprint(
 private object SetTweetFingerprint : Fingerprint(
     definingClass = INLINE_ACTION_BAR_DESCRIPTOR,
     returnType = "V",
-    strings = listOf("file:///android_asset/default_heart_v3.json"),
+    filters = listOf(
+        fieldAccess(
+            opcode = Opcode.IPUT_OBJECT,
+            definingClass = "this"
+        ),
+        string("file:///android_asset/default_heart_v3.json")
+    )
 )
 
 private object InlineActionViewConstructorFingerprint : Fingerprint(
     definingClass = INLINE_ACTION_VIEW_DESCRIPTOR,
-    strings = listOf("hal_android_lottie_render_mode"),
+    name = "<init>",
+    filters = listOf(
+        fieldAccess(
+            opcode = Opcode.IPUT_OBJECT,
+            definingClass = "this",
+            type = "Landroid/content/res/ColorStateList;"
+        ),
+        string("hal_android_lottie_render_mode")
+    )
 )
 
 private val inlineDownloadTweetFieldFingerprint = placeholderFingerprint("mTweet")
@@ -60,34 +81,25 @@ val inlineDownloadButtonPatch =
         description = "Adds an inline 'Download' button to the tweet inline action bar and registers the extension hook.",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
+        dependsOn(settingsPatch, versionCheckPatch)
 
         execute {
-            val onFinishInflateMethod = OnFinishInflateFingerprint.method
-            val returnIndex =
-                onFinishInflateMethod.instructions
-                    .indexOfLast { it.opcode == Opcode.RETURN_VOID }
-                    .takeIf { it >= 0 }
-                    ?: throw PatchException("onFinishInflate return not found")
+            OnFinishInflateFingerprint.method.apply {
+                val index = indexOfFirstInstructionReversedOrThrow(Opcode.RETURN_VOID)
 
-            onFinishInflateMethod.addInstruction(
-                returnIndex,
-                "invoke-static {p0}, $PATCHES_DESCRIPTOR/InlineDownloadButton;->onFinishInflate(Landroid/view/ViewGroup;)V",
-            )
+                addInstruction(
+                    index,
+                    "invoke-static { p0 }, $EXTENSION_CLASS->onFinishInflate(Landroid/view/ViewGroup;)V",
+                )
+            }
 
-            val setTweetMethod = SetTweetFingerprint.method
-            val tweetFieldIndex = setTweetMethod.indexOfFirstInstructionOrThrow(Opcode.IPUT_OBJECT)
-            inlineDownloadTweetFieldFingerprint.changeFirstString(SetTweetFingerprint.getFieldName(tweetFieldIndex))
+            val tweetFieldName =
+                SetTweetFingerprint.instructionMatches.first().instruction.getReference<FieldReference>()!!.name
+            inlineDownloadTweetFieldFingerprint.changeFirstString(tweetFieldName)
 
-            val constructorMethod = InlineActionViewConstructorFingerprint.method
-            val iconColorFieldIndex =
-                constructorMethod.indexOfFirstInstructionOrThrow {
-                    opcode == Opcode.IPUT_OBJECT &&
-                        ((this as? ReferenceInstruction)?.reference as? FieldReference)?.type == COLOR_STATE_LIST_DESCRIPTOR
-                }
-            inlineDownloadIconColorFieldFingerprint.changeFirstString(
-                InlineActionViewConstructorFingerprint.getFieldName(iconColorFieldIndex),
-            )
+            val iconColorFieldName =
+                InlineActionViewConstructorFingerprint.instructionMatches.first().instruction.getReference<FieldReference>()!!.name
+            inlineDownloadIconColorFieldFingerprint.changeFirstString(iconColorFieldName)
 
             val inlineActionBarClass =
                 classDefByOrNull(INLINE_ACTION_BAR_DESCRIPTOR)

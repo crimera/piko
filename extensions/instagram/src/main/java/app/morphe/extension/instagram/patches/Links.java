@@ -1,54 +1,70 @@
 /*
-    * Copyright (C) 2026 piko <https://github.com/crimera/piko>
-    *
-    * This file is part of piko.
-    *
-    * Any modifications, derivatives, or substantial rewrites of this file
-    * must retain this copyright notice and the piko attribution
-    * in the source code and version control history.
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
 */
 
 
 package app.morphe.extension.instagram.patches;
-import android.net.Uri;
 
+import android.net.Uri;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Arrays;
 
 import app.morphe.extension.instagram.entity.Entity;
+import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.instagram.constants.PostType;
+import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.crimera.PikoUtils;
+
 import app.morphe.extension.instagram.settings.ActivityHook;
 
 @SuppressWarnings("unused")
 public class Links {
     private static final boolean DISABLE_ANALYTICS;
-    private static final boolean VIEW_STORIES_ANONYMOUSLY;
-    private static final boolean VIEW_LIVE_ANONYMOUSLY;
     private static final boolean DISABLE_STORIES;
     private static final boolean DISABLE_EXPLORE;
     private static final boolean DISABLE_COMMENTS;
     private static final boolean DISABLE_DISCOVER_PEOPLE;
     private static final boolean DISABLE_ADS;
     private static final boolean DISABLE_HIGHLIGHTS;
+    private static final List<String> META_PACKAGES;
 
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
-        VIEW_STORIES_ANONYMOUSLY = Pref.viewStoriesAnonymously() && SettingsStatus.viewStoriesAnonymously;
-        VIEW_LIVE_ANONYMOUSLY = Pref.viewLiveAnonymously() && SettingsStatus.viewLiveAnonymously;
         DISABLE_STORIES = Pref.disableStories() && SettingsStatus.disableStories;
         DISABLE_HIGHLIGHTS = Pref.disableHighlights() && SettingsStatus.disableHighlights;
         DISABLE_EXPLORE = Pref.disableExplore() && SettingsStatus.disableExplore;
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
         DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
         DISABLE_ADS = Pref.disableAds() && SettingsStatus.disableAds;
+
+        META_PACKAGES = Arrays.asList(
+                "com.instagram.android",      // Instagram
+                "com.instagram.lite",         // Instagram Lite
+                "com.instagram.barcelona",    // Threads
+                "com.instagram.basel",        // Edits
+                "com.instagram.moonshot",     // Instants
+                "com.whatsapp",               // WhatsApp
+                "com.whatsapp.w4b",           // WhatsApp Business
+                "com.facebook.katana",        // Facebook
+                "com.facebook.lite",          // Facebook Lite
+                "com.facebook.orca",          // Messenger
+                "com.facebook.mlite",         // Messenger Lite
+                "com.facebook.pages.app",     // Meta Business Suite
+                "com.facebook.adsmanager",    // Meta Ads Manager
+                "com.facebook.messengerkids"  // Messenger Kids
+        );
     }
 
     public static boolean setStorySeen(boolean seenStatus){
-        return VIEW_STORIES_ANONYMOUSLY ? true:seenStatus;
+        return Pref.viewStoriesAnonymously() ? true:seenStatus;
     }
 
     public static boolean openExternally(String url) {
@@ -81,9 +97,9 @@ public class Links {
                         || path.contains("/logging_client_events")) {
                     shouldBlockUri = DISABLE_ANALYTICS;
                 } else if (path.contains("/api/v2/media/seen/")) {
-                    shouldBlockUri = VIEW_STORIES_ANONYMOUSLY;
+                    shouldBlockUri = Pref.viewStoriesAnonymously();
                 } else if (path.contains("/heartbeat_and_get_viewer_count/")) {
-                    shouldBlockUri = VIEW_LIVE_ANONYMOUSLY;
+                    shouldBlockUri = Pref.viewLiveAnonymously();
                 } else if (path.contains("/feed/reels_tray/")
                         || path.contains("feed/get_latest_reel_media/")
                         || path.contains("direct_v2/pending_inbox/?visual_message")
@@ -142,9 +158,10 @@ public class Links {
                 String currentAppPackageName = Utils.getContext().getPackageName();
 
                 // The idea behind here is when the package name lists of app identity object
-                // contains only one package name and that is similar to the application's package name,
+                // contains only one package name and that is similar to the application's package name (or any of meta app's),
                 // we need to return true else false
-                if(packageNames.get(0).equals(currentAppPackageName)){
+                String appIdentifierPackageName = packageNames.get(0);
+                if(appIdentifierPackageName.equals(currentAppPackageName) || META_PACKAGES.contains(appIdentifierPackageName)){
                     return true;
                 }
             }
@@ -152,6 +169,31 @@ public class Links {
             Logger.printException(() -> "Handle signature failed: ", e);
         }
         return false;
+    }
+
+    public static String generatePostLink(Object mediaObject, int position) throws Exception {
+        MediaData mediaData = new MediaData(mediaObject);
+
+        String postShortCode = mediaData.getShortcode();
+        PostType postType = mediaData.getPostType();
+
+        String shortTag = "p";
+        if(postType.equals(PostType.REEL)){
+            shortTag = "reel";
+        } else if(postType.equals(PostType.STORY)){
+            shortTag = "stories";
+            postShortCode = mediaData.getUserData().getUsername();
+        }
+
+        String link = String.format(Strings.INSTAGRAM_SHARE_LINK, shortTag, postShortCode);
+
+        if(postType.equals(PostType.STORY)){
+            String postID = mediaData.getPostID();
+            link+=postID;
+        } else if(postType.equals(PostType.CAROUSEL)){
+            link+="?img_index="+String.valueOf(position+1);
+        }
+        return link;
     }
 
 }

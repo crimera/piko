@@ -8,7 +8,6 @@ package app.crimera.patches.instagram.misc.settings
 
 import app.crimera.patches.instagram.utils.Constants.ACTIVITY_SETTINGS_STATUS_CLASS
 import app.crimera.patches.instagram.utils.Constants.HOOK_FLAGS_DESCRIPTOR
-import app.crimera.patches.instagram.utils.Constants.LINKS_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 
 internal object HookFlagsLoadFingerprint : Fingerprint(
@@ -20,23 +19,14 @@ internal object SettingsStatusLoadFingerprint : Fingerprint(
     definingClass = ACTIVITY_SETTINGS_STATUS_CLASS,
     name = "load",
 )
-
-internal object SignatureCheckExtensionFingerprint : Fingerprint(
-    definingClass = LINKS_DESCRIPTOR,
-    name = "signatureCheck",
-)
-
 // ----------------------
-
-internal object UriTrustingMethodFingerprint : Fingerprint(
-    strings = listOf("\' is not trusted: ", "The provider for uri \'"),
-)
-
-internal object AppIdentityToStringFingerprint : Fingerprint(
-    strings = listOf("AppIdentity{uid=", ", packageNames=", ", sha2=", ", version="),
-)
 
 internal object MainFeedFragmentOnCreateFingerprint : Fingerprint(
     name = "onCreate",
     strings = listOf("MainFeedFragment.onCreate"),
+)
+
+internal object IgFragmentActivityOnCreate : Fingerprint(
+    name = "onCreate",
+    definingClass = "Lcom/instagram/base/activity/IgFragmentActivity;",
 )
