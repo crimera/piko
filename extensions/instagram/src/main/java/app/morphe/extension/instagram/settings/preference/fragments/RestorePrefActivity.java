@@ -47,7 +47,7 @@ public class RestorePrefActivity extends AppCompatActivity {
             } else if (args.containsKey(str("piko_import_id_mapping"))) {
                 destinationFile = new File(context.getFilesDir()+ "/mobileconfig","id_name_mapping.json");
             } else if (args.containsKey(str("piko_import_pref"))) {
-                destinationFile =  new File(context.getApplicationInfo().dataDir + "/shared_prefs",Constants.PIKO_SETTINGS+".xml"); // CHANGED: fix typo (estinationFile → destinationFile)
+                destinationFile =  new File(context.getApplicationInfo().dataDir + "/shared_prefs",Constants.PIKO_SETTINGS+".xml");
             }
             if (destinationFile != null) {
                 requestFileForRestore();

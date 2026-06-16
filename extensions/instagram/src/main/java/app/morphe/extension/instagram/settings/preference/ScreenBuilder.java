@@ -122,28 +122,28 @@ public class ScreenBuilder {
                     helper.buttonPreference(
                             str("piko_export_dev_overrides"),
                             "",
-                            str("piko_export_dev_overrides")
+                            "piko_export_dev_overrides"
                     )
             );
             addPreference(category,
                     helper.buttonPreference(
                             str("piko_import_dev_overrides"),
                             "",
-                            str("piko_import_dev_overrides")
+                            "piko_import_dev_overrides"
                     )
             );
             addPreference(category,
                     helper.buttonPreference(
                             str("piko_import_id_mapping"),
                             "",
-                            str("piko_import_id_mapping")
+                            "piko_import_id_mapping"
                     )
             );
             addPreference(category,
                     helper.buttonPreference(
                             str("piko_download_id_mapping"),
                             "",
-                            str("piko_download_id_mapping")
+                            "piko_download_id_mapping"
                     )
             );
         }
@@ -398,7 +398,7 @@ public class ScreenBuilder {
                     helper.buttonPreference(
                             str("piko_delete_analytics_cache"),
                             "",
-                            str("piko_delete_analytics_cache")
+                            "piko_delete_analytics_cache"
                     )
             );
         }
@@ -584,7 +584,7 @@ public class ScreenBuilder {
                 helper.buttonPreference(
                         str("piko_download_set_path"),
                         Pref.getCustomDownloadPath(),
-                        str("piko_download_set_path")
+                        "piko_download_set_path"
                 )
         );
 
@@ -677,7 +677,7 @@ public class ScreenBuilder {
                 helper.buttonPreference(
                         str("piko_export_pref"),
                         "",
-                        str("piko_export_pref")
+                        "piko_export_pref"
                 )
         );
 
@@ -685,7 +685,7 @@ public class ScreenBuilder {
                 helper.buttonPreference(
                         str("piko_import_pref"),
                         "",
-                        str("piko_import_pref")
+                        "piko_import_pref"
                 )
         );
 
@@ -710,7 +710,7 @@ public class ScreenBuilder {
                     helper.buttonPreference(
                             str("piko_export_experiment_list"),
                             "",
-                            str("piko_export_experiment_list")
+                            "piko_export_experiment_list"
                     )
             );
 
@@ -718,7 +718,7 @@ public class ScreenBuilder {
                     helper.buttonPreference(
                             str("piko_export_experiment_mappings"),
                             "",
-                            str("piko_export_experiment_mappings")
+                            "piko_export_experiment_mappings"
                     )
             );
         }
