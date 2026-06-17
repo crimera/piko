@@ -51,11 +51,11 @@ private static void simpleOverflowMenuFlags() {
     BOOL_FLAGS.put("100002::4", true); //ig_igds_android_prism_overflow_sheet::is_wide_stamp_enabled Removed in version 434.0.0.0.35
 }
     private static void adsFlags() {
-        BOOL_FLAGS.put("58206::0", false); //is_acp_enabled
-        BOOL_FLAGS.put("72396::0", false); //is_mae_exclusion_feed_enabled
-        BOOL_FLAGS.put("78046::0", false); //is_mae_exclusion_feed_enabled
-        BOOL_FLAGS.put("78046::9", false); //enable_no_invalidation_reason_for_mae_exclusion
-        BOOL_FLAGS.put("79181::0", false); //ig_reels_ads_1x2_explore_halc_android::is_enabled
+//        BOOL_FLAGS.put("58206::0", false); //is_acp_enabled
+//        BOOL_FLAGS.put("72396::0", false); //is_mae_exclusion_feed_enabled
+//        BOOL_FLAGS.put("78046::0", false); //is_mae_exclusion_feed_enabled
+//        BOOL_FLAGS.put("78046::9", false); //enable_no_invalidation_reason_for_mae_exclusion
+//        BOOL_FLAGS.put("79181::0", false); //ig_reels_ads_1x2_explore_halc_android::is_enabled
         BOOL_FLAGS.put("110800::0", false); //ig_android_controller_migration::use_v2_controller Removed in version 435.0.0.0.2
         BOOL_FLAGS.put("114983::0", false); //ig_stories_restyle_midcard::is_enable
         BOOL_FLAGS.put("95150::1", false); //ig_stories_music_midcard::is_enable
@@ -69,12 +69,12 @@ private static void simpleOverflowMenuFlags() {
     // Thanks to @brosssh
     private static void suggestedContentFlags() {
         BOOL_FLAGS.put("111509::3", false); //ig_search_ta_nullstate_suggestions::is_android_enabled
+        BOOL_FLAGS.put("58467::20", false); //ig_spain_growth::is_ig_to_p92_app_switcher_enabled_android
         BOOL_FLAGS.put("82771::0", false); //igx_foundation_litho_stories_tray::is_litho_stories_tray_enabled
     }
 
     private static void profileActionBarFlags() {
         BOOL_FLAGS.put("81826::0", true); //igx_action_bar_service_replacement::is_profile_replaced
-        BOOL_FLAGS.put("58467::20", false); //ig_spain_growth::is_ig_to_p92_app_switcher_enabled_android
         BOOL_FLAGS.put("89230::0", true); //ig_android_profile_overflow_menu_redesign_launcher:enabled
     }
 
