@@ -51,6 +51,7 @@ val settingsPatch =
             addResourcesPatch,
         )
         execute {
+            addAppResources("shared")
             addAppResources("instagram")
 
             IgFragmentActivityOnCreate.method.apply {

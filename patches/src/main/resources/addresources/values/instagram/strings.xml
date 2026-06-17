@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="piko_title_settings">Piko Settings</string>
-
     <!-- Ads Section -->
     <string name="piko_category_ads">Ads</string>
     <string name="piko_disable_ads">Disable ads</string>
