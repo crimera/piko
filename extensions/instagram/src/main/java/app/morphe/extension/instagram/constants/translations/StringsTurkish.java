@@ -142,6 +142,7 @@ public class StringsTurkish extends DefaultStrings {
         this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Harici indirici ile indir";
         this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "Harici indirici paket adı";
         this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "Harici indirici paket adı bulunamadı";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET = "Lütfen harici indirici paket adını ayarlayın";
 
         this.POST_OPTIONS = "Gönderi seçenekleri";
         this.COPY_POST_DESCRIPTION = "Gönderi açıklamasını kopyala";
@@ -149,6 +150,7 @@ public class StringsTurkish extends DefaultStrings {
         this.COPY_POST_OWNER_FULLNAME = "Gönderi sahibinin tam adını kopyala";
         this.ENABLE_MORE_OPTIONS_ON_POST = "Gönderide daha fazla seçeneği etkinleştir";
         this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Gönderiye uzun basıldığında daha fazla seçenek sunar";
+        this.MORE_OPTIONS = "Daha fazla seçenek";
 
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Gezinme butonlarını gizle";
         this.HIDE_NAVIGATION_FEED = "Akış butonunu gizle";
