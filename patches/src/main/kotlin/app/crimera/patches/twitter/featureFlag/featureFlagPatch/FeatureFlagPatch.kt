@@ -6,7 +6,6 @@
 
 package app.crimera.patches.twitter.featureFlag.featureFlagPatch
 
-import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.twitter.misc.extension.twitterInitHook
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
