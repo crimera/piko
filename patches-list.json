@@ -1,5 +1,5 @@
 {
-  "version": "3.5.0",
+  "version": "3.5.1-dev.1",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -2558,7 +2558,33 @@
           ]
         }
       ],
-      "options": []
+      "options": [
+        {
+          "key": "customLinkHosts",
+          "title": "Custom sharing domains",
+          "description": "The custom sharing domains to register to be opened in Twitter",
+          "required": true,
+          "type": "kotlin.collections.List<kotlin.String>",
+          "default": [
+            "vxtwitter.com",
+            "fixvx.com",
+            "fxtwitter.com",
+            "fixupx.com",
+            "twittpr.com",
+            "xcancel.com"
+          ],
+          "values": null
+        },
+        {
+          "key": "unofficialInstanceLinks",
+          "title": "Include unofficial vxtwitter/fxtwitter instance links",
+          "description": "Links might look unhinged/NSFW",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Hide Banner",

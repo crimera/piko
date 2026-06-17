@@ -66,7 +66,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.5.0](https://github.com/crimera/piko/releases/tag/v3.5.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;122 patches total
+> **[v3.5.1-dev.1](https://github.com/crimera/piko/releases/tag/v3.5.1-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;122 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
 <br>
@@ -112,7 +112,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Enable force HD videos](#enable-force-hd-videos) | Videos will be played in highest quality always |  |
 | [Export all activities](#export-all-activities) | Makes all app activities exportable. |  |
 | [Force enable translate](#force-enable-translate) | Get translate option for all posts |  |
-| [Handle custom twitter links](#handle-custom-twitter-links) | Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. These will have to be manually enabled under the "Open by default" section in the app info! |  |
+| [Handle custom twitter links](#handle-custom-twitter-links) | Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. These will have to be manually enabled under the "Open by default" section in the app info! | • Custom sharing domains<br>• Include unofficial vxtwitter/fxtwitter instance links |
 | [Hide Banner](#hide-banner) | Hide new post banner |  |
 | [Hide Community Notes](#hide-community-notes) |  |  |
 | [Hide FAB](#hide-fab) | Adds an option to hide Floating action button |  |
