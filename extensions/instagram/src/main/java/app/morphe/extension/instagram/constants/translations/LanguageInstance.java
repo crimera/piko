@@ -32,6 +32,8 @@ public class LanguageInstance {
             return new StringsPortugueseBR();
         } else if (lang.equals("es")) {
             return new StringsSpanish();
+        } else if (lang.equals("bn")) {
+            return new StringsBengali();
         }
 
         return new StringsEnglish(); // Default fallback
