@@ -7,31 +7,6 @@ import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.patch.stringsOption
 import app.morphe.util.asSequence
 
-internal val customLinkHostsOption =
-    stringsOption(
-        key = "customLinkHosts",
-        title = "Custom sharing domains",
-        description = "The custom sharing domains to register to be opened in Twitter",
-        required = true,
-        default =
-            listOf(
-                "vxtwitter.com",
-                "fixvx.com",
-                "fxtwitter.com",
-                "fixupx.com",
-                "twittpr.com",
-                "xcancel.com",
-            ),
-    )
-
-internal val unofficialInstanceLinksOption =
-    booleanOption(
-        key = "unofficialInstanceLinks",
-        default = false,
-        title = "Include unofficial vxtwitter/fxtwitter instance links",
-        description = "Links might look unhinged/NSFW",
-    )
-
 @Suppress("unused")
 val customDeepLinksPatch =
     resourcePatch(
@@ -40,8 +15,27 @@ val customDeepLinksPatch =
             "Adds support for opening custom twitter links such as vxtwitter, fxtwitter, and fixupx within the app. " +
                 "These will have to be manually enabled under the \"Open by default\" section in the app info!",
     ) {
-        val customLinkHosts by customLinkHostsOption
-        val unofficialInstanceLinks by unofficialInstanceLinksOption
+        val customLinkHosts by stringsOption(
+            key = "customLinkHosts",
+            title = "Custom sharing domains",
+            description = "The custom sharing domains to register to be opened in Twitter",
+            required = true,
+            default =
+                listOf(
+                    "vxtwitter.com",
+                    "fixvx.com",
+                    "fxtwitter.com",
+                    "fixupx.com",
+                    "twittpr.com",
+                    "xcancel.com",
+                ),
+        )
+        val unofficialInstanceLinks by booleanOption(
+            key = "unofficialInstanceLinks",
+            default = false,
+            title = "Include unofficial vxtwitter/fxtwitter instance links",
+            description = "Links might look unhinged/NSFW",
+        )
 
         compatibleWith(COMPATIBILITY_X)
         dependsOn(handleCustomDeepLinksPatch)
