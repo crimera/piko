@@ -56,21 +56,21 @@ public class ScreenBuilder {
                     )
             );
 
-            if (SettingsStatus.enableForcePip) {
-                addPreference(category,
-                        helper.switchPreference(
-                                str("piko_pref_enable_force_pip"),
-                                str("piko_pref_enable_force_pip_desc"),
-                                Settings.PREMIUM_ENABLE_FORCE_PIP
-                        )
-                );
-            }
-
             addPreference(category,
                     helper.buttonPreference(
                             str("piko_pref_undo_posts_btn"),
                             "",
                             Settings.PREMIUM_UNDO_POSTS.key
+                    )
+            );
+        }
+
+        if (SettingsStatus.enableForcePip) {
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_enable_force_pip"),
+                            str("piko_pref_enable_force_pip_desc"),
+                            Settings.PREMIUM_ENABLE_FORCE_PIP
                     )
             );
         }

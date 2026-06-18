@@ -27,6 +27,10 @@ var is_11_88_or_greater: Boolean by Delegates.notNull()
 var is_11_92_or_greater: Boolean by Delegates.notNull()
     private set
 
+// For hooks links on modern share sheet.
+var is_11_40_or_greater: Boolean by Delegates.notNull()
+    private set
+
 val versionCheckPatch =
     bytecodePatch {
         execute {
@@ -39,5 +43,6 @@ val versionCheckPatch =
             is_11_82_or_greater = versionCode == 311820000 || isEqualsOrGreaterThan(311830000)
             is_11_88_or_greater = isEqualsOrGreaterThan(311880000)
             is_11_92_or_greater = isEqualsOrGreaterThan(311920000)
+            is_11_40_or_greater = isEqualsOrGreaterThan(311400000)
         }
     }

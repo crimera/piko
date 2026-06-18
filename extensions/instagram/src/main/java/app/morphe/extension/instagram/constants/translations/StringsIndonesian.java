@@ -143,6 +143,7 @@ public class StringsIndonesian extends DefaultStrings {
 		this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Unduh menggunakan pengunduh eksternal";
 		this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "Nama paket pengunduh eksternal";
 		this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "Nama paket pengunduh eksternal tidak ditemukan";
+		this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET = "Silakan atur nama paket pengunduh eksternal";
 		
 		this.POST_OPTIONS = "Pilihan postingan";
 		this.COPY_POST_DESCRIPTION = "Salin deskripsi postingan";
@@ -172,12 +173,11 @@ public class StringsIndonesian extends DefaultStrings {
 		this.FAIL_NO_FILE = "Berkas tidak ditemukan";
 		this.IMPORT_SUCCESS = "Berhasil diimpor";
 		this.IMPORT_FAIL = "Gagal mengimpor";
-		this.RESTART_APP = "Aplikasi perlu dimulai ulang agar perubahan diterapkan";
 		this.RESTART_APP = "Aplikasi perlu dimulai ulang agar perubahan tersebut dapat diterapkan";
 		this.OK = "OKE";
 		this.CANCEL = "Batalkan";
 		this.DELETED = "Dihapus";
-		this.PIKO_DEBUG = "Piko debug";
+		this.PIKO_DEBUG = "Debug Piko";
 		this.PIKO_DEBUG_DESC = "Menambahkan pilihan debug pada beberapa komponen untuk pengujian";
 		this.PIKO_EXPORT_EXPERIMENT_LIST = "Ekspor daftar eksperimen";
 		this.PIKO_EXPORT_EXPERIMENT_MAPPINGS = "Ekspor pemetaan eksperimen";
