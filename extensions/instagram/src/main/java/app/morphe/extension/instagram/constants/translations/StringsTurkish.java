@@ -34,23 +34,23 @@ public class StringsTurkish extends DefaultStrings {
         this.MISSING_MAPPING_FILE_DESC = "Eşleme dosyası olmadan geliştirici seçenekleri düzgün adlandırılmayacaktır. İndirmek istiyor musunuz?";
 
         this.CATEGORY_LINKS = "Bağlantılar";
-        this.OPEN_LINKS_EXTERNALLY = "Bağlantıları harici aç";
+        this.OPEN_LINKS_EXTERNALLY = "Bağlantıları harici tarayıcıda aç";
         this.OPEN_LINKS_EXTERNALLY_DESC = "Bağlantıları uygulama içi tarayıcı yerine harici tarayıcıda açar";
         this.SANITIZE_SHARE_LINKS = "Paylaşım bağlantılarını temizle";
 
-        this.CATEGORY_GHOST = "Hayalet Modu";
+        this.CATEGORY_GHOST = "Hayalet modu";
         this.VIEW_STORIES_ANONYMOUSLY = "Hikayeleri anonim olarak izle";
         this.VIEW_LIVE_ANONYMOUSLY = "Canlı yayınları anonim olarak izle";
         this.DISABLE_TYPING_STATUS = "Yazıyor bilgisini kapat";
-        this.DISABLE_SCREENSHOT_DETECTION = "Ekran görüntüsü algılamayı kapat";
-        this.VIEW_DM_ANONYMOUSLY = "Mesajları anonim olarak gör";
+        this.DISABLE_SCREENSHOT_DETECTION = "Ekran görüntüsü algılamasını kapat";
+        this.VIEW_DM_ANONYMOUSLY = "Mesajları anonim olarak görüntüle";
         this.TURN_ON_ALL_GHOST_MODES = "Tüm hayalet modlarını etkinleştir";
         this.GHOST_MODES_ON = "Hayalet modu: AÇIK";
         this.GHOST_MODES_DEFAULT = "Hayalet modu: VARSAYILAN";
         this.GHOST_MODES_QUICK_TOGGLE = "Hayalet modları için hızlı geçişi etkinleştir";
-        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Hayalet modlarını kontrol etmek için sohbet işlem çubuğuna hızlı bir açna/kapama düğmesi ekler";
+        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Hayalet modlarını kontrol etmek için sohbet işlem çubuğuna hızlı bir açma/kapama düğmesi ekler";
 
-        this.CATEGORY_DISTRACTION_FREE = "Odaklanma Modu";
+        this.CATEGORY_DISTRACTION_FREE = "Dikkat dağıtıcıları gizle";
         this.DISABLE_STORIES = "Hikayeleri devre dışı bırak";
         this.DISABLE_HIGHLIGHTS = "Öne çıkanları devre dışı bırak";
         this.DISABLE_EXPLORE = "Keşfet'i devre dışı bırak";
@@ -66,10 +66,10 @@ public class StringsTurkish extends DefaultStrings {
         this.HIDE_NOTES_TRAY = "Notlar çubuğunu gizle";
         this.HIDE_NOTES_TRAY_DESC = "Mesajlar bölümündeki notlar çubuğunu gizler";
         this.HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = "Paylaşım sayfasında grup oluşturma butonunu gizle";
-        this.DISABLE_DOUBLE_TAP_LIKE_POST = "Gönderide çift tıkla beğenmeyi kapat";
-        this.DISABLE_DOUBLE_TAP_LIKE_REEL = "Reels'de çift tıkla beğenmeyi kapat";
-        this.DISABLE_DOUBLE_TAP_LIKE_COMMENT = "Yorumda çift tıkla beğenmeyi kapat";
-        this.DISABLE_DOUBLE_TAP_LIKE_MESSAGE = "Mesajda çift tıkla beğenmeyi kapat";
+        this.DISABLE_DOUBLE_TAP_LIKE_POST = "Gönderide çift dokunarak beğenmeyi kapat";
+        this.DISABLE_DOUBLE_TAP_LIKE_REEL = "Reels'de çift dokunarak beğenmeyi kapat";
+        this.DISABLE_DOUBLE_TAP_LIKE_COMMENT = "Yorumda çift dokunarak beğenmeyi kapat";
+        this.DISABLE_DOUBLE_TAP_LIKE_MESSAGE = "Mesajda çift dokunarak beğenmeyi kapat";
 
         this.CATEGORY_MISC = "Çeşitli";
         this.DISABLE_ANALYTICS = "Analizleri devre dışı bırak";
@@ -77,12 +77,12 @@ public class StringsTurkish extends DefaultStrings {
         this.DISABLE_ANALYTICS_DESC = "Instagram/Facebook sunucularına gönderilen analizleri engeller";
         this.DISABLE_DISCOVER_PEOPLE = "Kişileri keşfetmeyi kapat";
         this.DISABLE_DISCOVER_PEOPLE_DESC = "Kullanıcı profilindeki kişileri keşfet bölümünü devre dışı bırakır";
-        this.FOLLOW_BACK_INDICATOR = "Geri takip göstergesini etkinleştir";
+        this.FOLLOW_BACK_INDICATOR = "Takip ediyor göstergesini etkinleştir";
         this.FBI_FOLLOWS_YOU = "Seni takip ediyor";
         this.FBI_DOESNT_FOLLOWS_YOU = "Seni takip etmiyor";
         this.VIEW_STORY_MENTIONS = "Hikaye bahsetmelerini gör";
         this.VSM_TITLE = "Hikaye bahsetmeleri";
-        this.VSM_NO_MENTIONS = "Bu hikayede bahsetme yok";
+        this.VSM_NO_MENTIONS = "Bu hikayede bahsetme bulunmuyor";
         this.DISABLE_STORY_FLIPPING = "Hikaye geçişini kapat";
         this.DISABLE_STORY_FLIPPING_DESC = "Sonraki hikayeye otomatik geçişi devre dışı bırakır";
         this.DISABLE_VIDEO_AUTOPLAY = "Video otomatik oynatmayı kapat";
@@ -91,7 +91,7 @@ public class StringsTurkish extends DefaultStrings {
         this.CUSTOMISE_STORY_TIMESTAMP_DESC = "Hikayenin ne zaman paylaşıldığını gösteren zaman damgasını özelleştirir";
         this.UNLIMITED_REPLAYS = "Süreli medyayı kalıcı yap";
         this.UNLIMITED_REPLAYS_DESC = "Süresi dolmamış tek seferlik veya iki seferlik görüntüleme medyalarını kalıcı görüntülemeye çevirir";
-        this.IMPROVE_IMAGE_VIEWING = "Görüntü kalitesini artır";
+        this.IMPROVE_IMAGE_VIEWING = "Görsel kalitesini artır";
         this.IMPROVE_IMAGE_VIEWING_DESC = "Sunucudan maksimum çözünürlüklü görüntüleri çeker";
         this.HIDE_RESHARE_BUTTON = "Yeniden paylaş butonunu gizle";
         this.COPY_COMMENT = "Yorumu kopyala";
@@ -132,23 +132,25 @@ public class StringsTurkish extends DefaultStrings {
         this.DOWNLOAD_ALL = "Tümünü indir";
         this.DOWNLOADING_MEDIA = "İndiriliyor: ";
         this.DOWNLOADED_MEDIA = "İndirildi: ";
-        this.MEDIA_EXISTS = "Medya zaten mevcut";
+        this.MEDIA_EXISTS = "Bu medya zaten mevcut";
         this.DOWNLOAD_FAILED_MEDIA = "İndirme başarısız: ";
         this.DOWNLOAD_SET_PATH = "Özel indirme yolu ayarla";
         this.DOWNLOAD_SET_PATH_SUCCESS = "İndirme dizini güncellendi!";
         this.DOWNLOAD_SET_PATH_FAILED = "Klasör yolu çözülemedi";
         this.DOWNLOAD_GRANT_PERMISSION = "İndirmelere devam etmek için lütfen depolama erişimi izni verin";
-        this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Ayarlar açılamadı. Lütfen Tüm Dosyalara Erişim iznini manuel olarak verin";
+        this.DOWNLOAD_GRANT_PERMISSION_FAILED = "Ayarlar açılamadı. Lütfen tüm dosyalara erişim iznini manuel olarak verin";
         this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "Harici indirici ile indir";
         this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "Harici indirici paket adı";
         this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "Harici indirici paket adı bulunamadı";
+        this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET = "Lütfen harici indirici paket adını ayarlayın";
 
         this.POST_OPTIONS = "Gönderi seçenekleri";
         this.COPY_POST_DESCRIPTION = "Gönderi açıklamasını kopyala";
         this.COPY_POST_OWNER_USERNAME = "Gönderi sahibinin kullanıcı adını kopyala";
         this.COPY_POST_OWNER_FULLNAME = "Gönderi sahibinin tam adını kopyala";
         this.ENABLE_MORE_OPTIONS_ON_POST = "Gönderide daha fazla seçeneği etkinleştir";
-        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Gönderiye uzun basıldığında daha fazla seçenek sunar";
+        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Gönderinin veya Reels videosunun üç noktalı menüsüne ek seçenekler (açıklamayı kopyalama, kullanıcı adı vb.) ekler";
+        this.MORE_OPTIONS = "Daha fazla seçenek";
 
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Gezinme butonlarını gizle";
         this.HIDE_NAVIGATION_FEED = "Akış butonunu gizle";
@@ -178,8 +180,8 @@ public class StringsTurkish extends DefaultStrings {
         this.PIKO_EXPORT_EXPERIMENT_LIST = "Deney listesini dışa aktar";
         this.PIKO_EXPORT_EXPERIMENT_MAPPINGS = "Deney eşlemelerini dışa aktar";
 
-        this.OPEN_IMAGE_EXTERNALLY = "Resmi harici aç";
-        this.OPEN_VIDEO_EXTERNALLY = "Videoyu harici aç";
+        this.OPEN_IMAGE_EXTERNALLY = "Resmi harici uygulamada aç";
+        this.OPEN_VIDEO_EXTERNALLY = "Videoyu harici uygulamada aç";
         this.OPEN_IMAGE_WITH = "Resmi şununla aç";
         this.OPEN_VIDEO_WITH = "Videoyu şununla aç";
 
@@ -188,15 +190,15 @@ public class StringsTurkish extends DefaultStrings {
         this.AVAILABLE_LIKE_ANIMATION = "Mevcut beğeni animasyonları";
 
         this.DEFAULT = "Varsayılan";
-        this.ARR_DETAILED_TIMESTAMP = "Ayrıntılı zaman damgası";
+        this.ARR_DETAILED_TIMESTAMP = "Ayrıntılı zaman damgası (Haftanın Günü/Ay/Tarih/Saat/Dakika/Saniye)";
         this.ARR_POST_TIME = "Gönderi zamanı (Saat/Dakika/Saniye)";
-        this.ARR_TIME_LEFT = "Kalan süre";
+        this.ARR_TIME_LEFT = "Kalan süre (Kalan Saat/Dakika/Saniye)";
 
         this.WELCOME_TITLE = "Piko'ya Hoş Geldiniz";
         this.WELCOME_MESSAGE = "Piko deneyiminizi iyileştirmek için lütfen Piko ayarlarını ziyaret edin ve tercihlerinizi düzenleyin";
         this.GOTO_PIKO_SETTINGS = "Piko ayarlarına git";
         this.NO_INTERNET = "Lütfen internete bağlanın";
-        this.TAP_HERE = "Buraya dokun !!";
+        this.TAP_HERE = "Buraya dokun!!";
         this.PIKO_SETTINGS_ON_ACTION_BAR = "Piko ayarları işlem çubuğunda";
         this.PIKO_SETTINGS_ON_ACTION_BAR_DESC = "Piko ayarları giriş noktasını ana akış işlem çubuğuna taşır";
     }

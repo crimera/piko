@@ -1,5 +1,5 @@
 {
-  "version": "3.5.0",
+  "version": "3.6.0-dev.1",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -130,6 +130,57 @@
           "targets": [
             {
               "version": "430.0.0.53.80",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Block redirecting to X Lite",
+      "description": "Blocks redirecting to the new X Android UI on launch",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "X",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "11.80.0-alpha.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.82.0-beta.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.81.0-release.0",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "11.99.0-release-ripped.1",
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.0.0-release.0",
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2558,7 +2609,33 @@
           ]
         }
       ],
-      "options": []
+      "options": [
+        {
+          "key": "customLinkHosts",
+          "title": "Custom sharing domains",
+          "description": "The custom sharing domains to register to be opened in Twitter",
+          "required": true,
+          "type": "kotlin.collections.List<kotlin.String>",
+          "default": [
+            "vxtwitter.com",
+            "fixvx.com",
+            "fxtwitter.com",
+            "fixupx.com",
+            "twittpr.com",
+            "xcancel.com"
+          ],
+          "values": null
+        },
+        {
+          "key": "unofficialInstanceLinks",
+          "title": "Include unofficial vxtwitter/fxtwitter instance links",
+          "description": "Links might look unhinged/NSFW",
+          "required": false,
+          "type": "kotlin.Boolean",
+          "default": false,
+          "values": null
+        }
+      ]
     },
     {
       "name": "Hide Banner",

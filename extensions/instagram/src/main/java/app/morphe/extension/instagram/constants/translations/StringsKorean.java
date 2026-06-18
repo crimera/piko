@@ -143,7 +143,7 @@ public class StringsKorean extends DefaultStrings {
         this.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER = "외부 다운로더 앱으로 다운로드";
         this.EXTERNAL_DOWNLOADER_PACKAGE_NAME = "외부 다운로더 앱 패키지명";
         this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND = "외부 다운로더 앱 패키지명을 찾을 수 없습니다";        
-		
+		this.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET = "외부 다운로더 앱 패키지명을 설정하세요";
         this.POST_OPTIONS = "게시물 옵션";
         this.COPY_POST_DESCRIPTION = "게시물 설명 복사";
         this.COPY_POST_OWNER_USERNAME = "작성자 사용자 이름 복사";

@@ -6,6 +6,7 @@
 
 package app.crimera.patches.twitter.misc.settings
 
+import app.crimera.patches.twitter.misc.crashLogs.crashLogsPatch
 import app.crimera.patches.twitter.misc.extension.sharedExtensionPatch
 import app.crimera.patches.twitter.misc.extension.twitterInitHook
 import app.crimera.patches.twitter.premium.redirectBMNavBar.redirectBMTab
@@ -41,6 +42,7 @@ val settingsPatch =
             settingsResourcePatch,
             redirectBMTab,
             addResourcesPatch,
+            crashLogsPatch,
         )
 
         execute {
@@ -57,7 +59,7 @@ val settingsPatch =
                         """
                             invoke-static { v$register }, $UTILS_DESCRIPTOR;->addPref([Ljava/lang/String;)[Ljava/lang/String;
                             move-result-object v$register
-                        """
+                        """,
                     )
                 }
             }
@@ -78,7 +80,7 @@ val settingsPatch =
                             return v$freeRegister
                             :ignore
                             nop
-                        """
+                        """,
                     )
                 }
             }
@@ -87,22 +89,23 @@ val settingsPatch =
                 Triple(
                     AuthorizeAppActivityFingerprint,
                     AuthorizeAppActivityVirtualFingerprint,
-                    "$ACTIVITY_HOOK_CLASS->create(Landroid/app/Activity;)Z"
+                    "$ACTIVITY_HOOK_CLASS->create(Landroid/app/Activity;)Z",
                 ),
                 Triple(
                     UrlInterpreterActivityFingerprint,
                     UrlInterpreterActivityVirtualFingerprint,
-                    "$DEEPLINK_HOOK_CLASS->deeplink(Landroid/app/Activity;)Z"
-                )
+                    "$DEEPLINK_HOOK_CLASS->deeplink(Landroid/app/Activity;)Z",
+                ),
             ).forEach { (originalFingerprint, virtualFingerprint, extensionMethodCall) ->
                 val insertIndex: Int
                 val insertMethod: MutableMethod
 
                 val originalMethod = originalFingerprint.method
-                val overrideIndex = originalMethod.indexOfFirstInstruction {
-                    opcode == Opcode.INVOKE_SUPER &&
+                val overrideIndex =
+                    originalMethod.indexOfFirstInstruction {
+                        opcode == Opcode.INVOKE_SUPER &&
                             getReference<MethodReference>()?.name == "onCreate"
-                } + 1
+                    } + 1
 
                 if (overrideIndex > 0) {
                     insertIndex = overrideIndex
@@ -112,8 +115,8 @@ val settingsPatch =
                     insertIndex = insertMethod.indexOfFirstInstructionOrThrow {
                         val reference = getReference<MethodReference>()
                         opcode == Opcode.INVOKE_STATIC &&
-                                reference?.definingClass == originalMethod.definingClass &&
-                                reference.name.startsWith("onCreate")
+                            reference?.definingClass == originalMethod.definingClass &&
+                            reference.name.startsWith("onCreate")
                     } + 1
                 }
 
@@ -131,7 +134,7 @@ val settingsPatch =
                             return-void
                             :ignore
                             nop
-                        """
+                        """,
                     )
                 }
             }

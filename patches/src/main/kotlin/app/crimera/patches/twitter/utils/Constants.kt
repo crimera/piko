@@ -13,25 +13,19 @@ object Constants {
             appIconColor = 0x000000,
             targets =
                 listOf(
-                    // Beta
-                    AppTarget(
-                        version = "11.80.0-alpha.1",
-                        description = "Last alpha version without PairIP protection",
-                    ),
-                    // Beta
-                    AppTarget(
-                        version = "11.82.0-beta.1",
-                        description = "Last beta version without PairIP protection",
-                    ),
-                    // Stable
                     AppTarget(
                         version = "11.81.0-release.0",
                         description = "Last stable version without PairIP protection",
                     ),
-                    // PairIP version
+                    // PairIP-ripped version
                     AppTarget(
                         version = "11.99.0-release-ripped.1",
                         description = "Make sure the APK is PairIP bypassed (Check the support group)",
+                    ),
+                    // Shim version, can be dropped once APKMirror uploads 12.0.0-release.0
+                    AppTarget(
+                        version = "11.99.0-release.1",
+                        description = "Requires Piko-Shim to be included",
                     ),
                     // Shim version
                     AppTarget(
