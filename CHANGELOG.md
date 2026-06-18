@@ -1,3 +1,23 @@
+## [3.6.0](https://github.com/crimera/piko/compare/v3.5.0...v3.6.0) (2026-06-18)
+
+### 🐛 Bug Fixes
+
+* **Twitter:** Fix links handling on modern share sheet ([bdffdd9](https://github.com/crimera/piko/commit/bdffdd9a923dea94fdb6404f88bd087cacf107c6))
+
+### ✨ New Features
+
+* **Twitter:** Added `Block redirecting to X Lite` patch ([68bb954](https://github.com/crimera/piko/commit/68bb954c6dc52943aab1537f8a32f472dd4aad14))
+* **Twitter:** Added `Crash logs` ([ac41501](https://github.com/crimera/piko/commit/ac41501cdd4a1ca5247db8314bd4ed3f4b0e22c1))
+
+### 🚀 Updated App Support
+
+* **Twitter:** Add `11.99.0-release.1` to supported versions list (Requires Piko-Shim) ([#1367](https://github.com/crimera/piko/issues/1367)) ([ee10064](https://github.com/crimera/piko/commit/ee100646a0e8bea517252c76d19c325d43c88301))
+
+### 🔧 Improvements
+
+* **Instagram-Translations:** Added Bengali translation  ([#1352](https://github.com/crimera/piko/issues/1352)) ([ce48398](https://github.com/crimera/piko/commit/ce483984e0a3eb7c1bdb08909e4b85e097d25e3d))
+* **Twitter:** Adjust `Handle custom twitter links` stringsOption and booleanOption ([a7f782f](https://github.com/crimera/piko/commit/a7f782fa7aaddd4a3f83d1e01b2131219a927e45))
+
 ## [3.6.0-dev.1](https://github.com/crimera/piko/compare/v3.5.1-dev.1...v3.6.0-dev.1) (2026-06-18)
 
 ### ✨ New Features
