@@ -48,7 +48,7 @@ public class StringsTurkish extends DefaultStrings {
         this.GHOST_MODES_ON = "Hayalet modu: AÇIK";
         this.GHOST_MODES_DEFAULT = "Hayalet modu: VARSAYILAN";
         this.GHOST_MODES_QUICK_TOGGLE = "Hayalet modları için hızlı geçişi etkinleştir";
-        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Hayalet modlarını kontrol etmek için sohbet işlem çubuğuna hızlı bir açna/kapama düğmesi ekler";
+        this.GHOST_MODES_QUICK_TOGGLE_DESC = "Hayalet modlarını kontrol etmek için sohbet işlem çubuğuna hızlı bir açma/kapama düğmesi ekler";
 
         this.CATEGORY_DISTRACTION_FREE = "Odaklanma Modu";
         this.DISABLE_STORIES = "Hikayeleri devre dışı bırak";
@@ -60,7 +60,7 @@ public class StringsTurkish extends DefaultStrings {
         this.DISABLE_REELS_SCROLLING = "Reels kaydırmayı devre dışı bırak";
         this.DISABLE_REELS_SCROLLING_DESC =
                 "Instagram Reels'deki sonsuz kaydırma özelliğini devre dışı bırakarak bir sonraki videoya geçilmesini engeller. " +
-                "Not: Temiz kurulumda 'İpucu' animasyonu görünebilir ancak birkaç saniye sonra kendiliğinden duracaktır.";
+                "Not: Temiz kurulumda 'İpucu' animasyonu görünebilir ancak birkaç saniye sonra kendiligendinden duracaktır.";
         this.HIDE_STORIES_TRAY = "Hikaye çubuğunu gizle";
         this.HIDE_STORIES_TRAY_DESC = "Ana akıştaki hikaye çubuğunu gizler";
         this.HIDE_NOTES_TRAY = "Notlar çubuğunu gizle";
@@ -149,7 +149,7 @@ public class StringsTurkish extends DefaultStrings {
         this.COPY_POST_OWNER_USERNAME = "Gönderi sahibinin kullanıcı adını kopyala";
         this.COPY_POST_OWNER_FULLNAME = "Gönderi sahibinin tam adını kopyala";
         this.ENABLE_MORE_OPTIONS_ON_POST = "Gönderide daha fazla seçeneği etkinleştir";
-        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Gönderinin veya Reels videosunun 3 noktalı menüsüne ek seçenekler (açıklamayı kopyalama, kullanıcı adı vb.) ekler";
+        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Gönderinin veya Reels videosunun üç noktalı menüsüne ek seçenekler (açıklamayı kopyalama, kullanıcı adı vb.) ekler";
         this.MORE_OPTIONS = "Daha fazla seçenek";
 
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Gezinme butonlarını gizle";
