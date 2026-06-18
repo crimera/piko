@@ -149,7 +149,7 @@ public class StringsTurkish extends DefaultStrings {
         this.COPY_POST_OWNER_USERNAME = "Gönderi sahibinin kullanıcı adını kopyala";
         this.COPY_POST_OWNER_FULLNAME = "Gönderi sahibinin tam adını kopyala";
         this.ENABLE_MORE_OPTIONS_ON_POST = "Gönderide daha fazla seçeneği etkinleştir";
-        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Gönderiye uzun basıldığında daha fazla seçenek sunar";
+        this.ENABLE_MORE_OPTIONS_ON_POST_DESC = "Gönderinin veya Reels videosunun 3 noktalı menüsüne ek seçenekler (açıklamayı kopyalama, kullanıcı adı vb.) ekler";
         this.MORE_OPTIONS = "Daha fazla seçenek";
 
         this.CATEGORY_HIDE_NAVIGATION_BUTTONS = "Gezinme butonlarını gizle";
@@ -190,9 +190,9 @@ public class StringsTurkish extends DefaultStrings {
         this.AVAILABLE_LIKE_ANIMATION = "Mevcut beğeni animasyonları";
 
         this.DEFAULT = "Varsayılan";
-        this.ARR_DETAILED_TIMESTAMP = "Ayrıntılı zaman damgası";
+        this.ARR_DETAILED_TIMESTAMP = "Ayrıntılı zaman damgası (Haftanın Günü/Ay/Tarih/Saat/Dakika/Saniye)";
         this.ARR_POST_TIME = "Gönderi zamanı (Saat/Dakika/Saniye)";
-        this.ARR_TIME_LEFT = "Kalan süre";
+        this.ARR_TIME_LEFT = "Kalan süre (Kalan Saat/Dakika/Saniye)";
 
         this.WELCOME_TITLE = "Piko'ya Hoş Geldiniz";
         this.WELCOME_MESSAGE = "Piko deneyiminizi iyileştirmek için lütfen Piko ayarlarını ziyaret edin ve tercihlerinizi düzenleyin";
