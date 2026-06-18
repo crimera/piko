@@ -66,9 +66,9 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.5.1-dev.1](https://github.com/crimera/piko/releases/tag/v3.5.1-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;122 patches total
+> **[v3.6.0-dev.1](https://github.com/crimera/piko/releases/tag/v3.6.0-dev.1)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;123 patches total
 <details>
-<summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;71 patches</summary>
+<summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;72 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -79,6 +79,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
 | [Add ability to copy media link](#add-ability-to-copy-media-link) |  |  |
+| [Block redirecting to X Lite](#block-redirecting-to-x-lite) | Blocks redirecting to the new X Android UI on launch |  |
 | [Bring back twitter](#bring-back-twitter) | Bring back old twitter logo and name |  |
 | [Browse tweet object](#browse-tweet-object) | Adds an option to browse the tweet object in the share menu. |  |
 | [Change app icon](#change-app-icon) |  |  |

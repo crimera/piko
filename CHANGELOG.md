@@ -1,3 +1,9 @@
+## [3.6.0-dev.1](https://github.com/crimera/piko/compare/v3.5.1-dev.1...v3.6.0-dev.1) (2026-06-18)
+
+### ✨ New Features
+
+* **Twitter:** Added `Block redirecting to X Lite` patch ([68bb954](https://github.com/crimera/piko/commit/68bb954c6dc52943aab1537f8a32f472dd4aad14))
+
 ## [3.5.1-dev.1](https://github.com/crimera/piko/compare/v3.5.0...v3.5.1-dev.1) (2026-06-17)
 
 ### 🐛 Bug Fixes
