@@ -245,6 +245,10 @@ public class DownloadUtils {
                 PikoUtils.toast(Strings.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET);
                 return;
             }
+            if(!PikoUtils.isAppInstalledAndEnabled(packageName)){
+                PikoUtils.toast(Strings.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND);
+                return;
+            }
             String link = Links.generatePostLink(mediaObject, currentMediaIndex);
             ActivityHook.openLink(link, packageName);
         } catch (Exception e){

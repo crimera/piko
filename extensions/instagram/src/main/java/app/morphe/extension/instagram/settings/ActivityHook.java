@@ -82,12 +82,7 @@ public class ActivityHook {
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, url);
         intent.setPackage(packageName);
-         try {
-            launchActivity(intent);
-        } catch (Exception e) {
-            PikoUtils.toast(Strings.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND);
-            Logger.printException(() -> "openLink failure", e);
-        }
+        launchActivity(intent);
     }
 
 
