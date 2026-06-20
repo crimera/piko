@@ -44,22 +44,22 @@ Then patch Twitter/X or Instagram:
 java -jar cli.jar patch --patches piko.mpp input.apkm
 ```
 
-**Piko-Shim**
+**X-Shim**
 
 To patch with Twitter/X version 11.88 and above, you must include patches from another repo/project called [Piko-Shim](https://gitlab.com/inotia00/piko-shim/) developed by [@inotia00](https://github.com/inotia00)
 
-[➕ Add Piko-Shim to Morphe](https://morphe.software/add-source?gitlab=inotia00/piko-shim)
+[➕ Add X-Shim to Morphe](https://morphe.software/add-source?gitlab=inotia00/x-shim)
 
 ⚠️Important steps⚠️
 * Enable `expert mode` in Morphe Manager.
-* You must select all patches from the Piko shim bundle and recommended/preferred patches from Piko. **DO NOT INCLUDE** patches from any other bundles.
+* You must select all patches from the X Shim bundle and recommended/preferred patches from Piko. **DO NOT INCLUDE** patches from any other bundles.
 * Select "Proceed anyway" at the prompt warning of using multiple bundles.
 
 ⚠️Additional Context⚠️
 
 * An active internet connection is required during patching.
 * XChat decryption and XChat video calls work. 
-* The Piko Shim patch only adds a compatibility shim layer and pairip is not removed.
+* The X Shim patch only adds a compatibility shim layer and pairip is not removed.
 
 > For an up-to-date patching guide, [follow this Reddit guide](https://www.reddit.com/r/MorpheApp/comments/1r4xt24/x_twitter_can_now_be_patched_with_piko_patches/).
 
