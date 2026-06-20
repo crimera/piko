@@ -13,29 +13,29 @@ public class LanguageInstance {
 
     public static DefaultStrings getLanguageInstance() {
         String lang = Locale.getDefault().getLanguage();
-
-        if (lang.equals("hi")) {
-            return new StringsHindi();
-        } else if (lang.equals("ko")) {
-            return new StringsKorean();
-        } else if (lang.equals("id")) {
-			return new StringsIndonesian();
-        } else if (lang.equals("pl")) {
-            return new StringsPolish();
-        } else if (lang.equals("tr")) {
-            return new StringsTurkish();
-        } else if (lang.equals("ru")) {
-            return new StringsRussian();
-        } else if (lang.equals("ja")) {
-            return new StringsJapanese();
-        } else if (lang.equals("pt")) {
-            return new StringsPortugueseBR();
-        } else if (lang.equals("es")) {
-            return new StringsSpanish();
-        } else if (lang.equals("bn")) {
-            return new StringsBengali();
+        switch (lang) {
+            case "hi":
+                return new StringsHindi();
+            case "ko":
+                return new StringsKorean();
+            case "id":
+                return new StringsIndonesian();
+            case "pl":
+                return new StringsPolish();
+            case "tr":
+                return new StringsTurkish();
+            case "ru":
+                return new StringsRussian();
+            case "ja":
+                return new StringsJapanese();
+            case "pt":
+                return new StringsPortugueseBR();
+            case "es":
+                return new StringsSpanish();
+            case "bn":
+                return new StringsBengali();
+            default:
+                return new StringsEnglish(); // Default fallback
         }
-
-        return new StringsEnglish(); // Default fallback
     }
 }
