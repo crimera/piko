@@ -13,9 +13,9 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import app.morphe.extension.instagram.settings.Settings;
+import app.morphe.extension.shared.ResourceUtils;
 import android.preference.Preference;
 import app.morphe.extension.instagram.settings.preference.Helper;
-import app.morphe.extension.instagram.constants.Arrays;
 
 public class ListPref extends ListPreference {
     private static Helper helper;
@@ -56,11 +56,11 @@ public class ListPref extends ListPreference {
         CharSequence[] entries = new CharSequence[]{};
         CharSequence[] entriesValues = new CharSequence[]{};
         if (key == Settings.CUSTOMISE_STORY_TIMESTAMP.key) {
-            entries = Arrays.CUSTOMISE_STORY_TIMESTAMP_KEY;
-            entriesValues = Arrays.CUSTOMISE_STORY_TIMESTAMP_VAL;
+            entries = ResourceUtils.getStringArray("piko_array_customise_story_timestamp");
+            entriesValues = ResourceUtils.getStringArray("piko_array_customise_story_timestamp_val");
         } else if (key == Settings.CHANGE_LIKE_ANIMATION.key) {
-            entries = Arrays.CHANGE_LIKE_ANIMATION_KEY;
-            entriesValues = Arrays.CHANGE_LIKE_ANIMATION_VAL;
+            entries = ResourceUtils.getStringArray("piko_array_change_like_animation");
+            entriesValues = ResourceUtils.getStringArray("piko_array_change_like_animation_val");
         }
 
         setEntries(entries);

@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.patches.actionbar;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +19,6 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.constants.UI;
-import app.morphe.extension.instagram.constants.Strings;
 
 public class DMActionBar {
     private static final String HIDE_ICON_NAME = "$avd_hide_password__0";
@@ -41,7 +42,7 @@ public class DMActionBar {
                             Pref.setTurnOnAllGhostModes(ghostModeToggle);
                             UI.setThemedIcon(imageView,iconStr);
 
-                            String toastStr = ghostModeToggle ? Strings.GHOST_MODES_ON : Strings.GHOST_MODES_DEFAULT;
+                            String toastStr = ghostModeToggle ? str("piko_ghost_modes_on") : str("piko_ghost_modes_default");
                             Utils.showToastShort(toastStr);
                         } catch (Exception ex) {
                             Logger.printException(() -> "ghost icon click failed: ", ex);

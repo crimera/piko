@@ -7,11 +7,11 @@
 
 package app.morphe.extension.instagram.patches.story;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import java.util.ArrayList;
 import android.content.Context;
 
-import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.entity.MediaData;
@@ -38,20 +38,20 @@ public class StoryButton {
 
     public static ArrayList addButtons(ArrayList buttonList){
         if(DEBUG){
-            buttonList.add(Strings.PIKO_DEBUG);
+            buttonList.add(str("piko_debug"));
         }
         if(VIEW_STORY_MENTIONS){
-            buttonList.add(Strings.VIEW_STORY_MENTIONS);
+            buttonList.add(str("piko_view_story_mentions"));
         }
         if(ENABLE_DOWNLOAD){
             if(ENABLE_DIRECT_DOWNLOAD){
-                buttonList.add(Strings.CATEGORY_DOWNLOAD_MEDIA);
+                buttonList.add(str("piko_category_download_media"));
             }else{
-                buttonList.add(Strings.DOWNLOAD_OPTIONS);
+                buttonList.add(str("piko_download_options"));
             }
         }
         if(Pref.downloadWithExternalDownloader()){
-            buttonList.add(Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER);
+            buttonList.add(str("piko_download_with_external_downloader"));
         }
 
         return buttonList;
@@ -59,16 +59,16 @@ public class StoryButton {
 
     public static boolean storyButtonAction(CharSequence buttonText, Context ctx, Object mediaObject){
         try {
-            if (buttonText.equals(Strings.VIEW_STORY_MENTIONS)) {
+            if (buttonText.equals(str("piko_view_story_mentions"))) {
                 ViewStoryMentionsPatch.viewMentions(ctx, mediaObject);
                 return true;
-            } else if (buttonText.equals(Strings.DOWNLOAD_OPTIONS) || buttonText.equals(Strings.CATEGORY_DOWNLOAD_MEDIA)) {
+            } else if (buttonText.equals(str("piko_download_options")) || buttonText.equals(str("piko_category_download_media"))) {
                 DownloadUtils.downloadPost(ctx,null,mediaObject,0);
                 return true;
-            } else if (buttonText.equals(Strings.PIKO_DEBUG)) {
+            } else if (buttonText.equals(str("piko_debug"))) {
                 ObjectBrowser.browseObject(ctx, new MediaData(mediaObject));
                 return true;
-            } else if (buttonText.equals(Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER)) {
+            } else if (buttonText.equals(str("piko_download_with_external_downloader"))) {
                 DownloadUtils.externalDownloader(mediaObject,0);
 
                 return true;
