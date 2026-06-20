@@ -24,6 +24,20 @@ public class Constants {
     // https://www.instagram.com/reel/<short code>/
     // https://www.instagram.com/stories/<user name>/<post id>
 
+    public static final String PIKO_FRAGMENT_TITLE = "piko_frag_title";
+    public static final String PIKO_FRAGMENT_NAME = "piko_frag_name";
+
+    public static final String PIKO_FRAGMENT_SETTINGS = "piko_frag_settings";
+    public static final String PIKO_FRAGMENT_ADS = "piko_frag_ads";
+    public static final String PIKO_FRAGMENT_GHOST = "piko_frag_ghost";
+    public static final String PIKO_FRAGMENT_LINKS = "piko_frag_links";
+    public static final String PIKO_FRAGMENT_DISTRACTION_FREE = "piko_frag_distraction_free";
+    public static final String PIKO_FRAGMENT_MISC = "piko_frag_misc";
+    public static final String PIKO_FRAGMENT_DOWNLOAD_MEDIA = "piko_frag_download_media";
+    public static final String PIKO_FRAGMENT_NAV_BTNS = "piko_frag_nav_btns";
+    public static final String PIKO_FRAGMENT_DEV_OPTIONS = "piko_frag_dev_options";
+    public static final String PIKO_FRAGMENT_ABOUT = "piko_frag_about";
+
     public static void load() {
         ExtensionStrings.setDefaultPikoFolder(Constants.DEFAULT_PIKO_FOLDER);
         ExtensionStrings.setDownloadOngoing(str("piko_downloading_media"));

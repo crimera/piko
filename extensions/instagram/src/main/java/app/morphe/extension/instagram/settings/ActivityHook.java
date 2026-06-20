@@ -18,6 +18,7 @@ import app.morphe.extension.instagram.settings.preference.fragments.BackupPrefAc
 import app.morphe.extension.instagram.settings.preference.fragments.RestorePrefActivity;
 import app.morphe.extension.crimera.downloader.FolderPickerActivity;
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.instagram.constants.Constants;
 
 @SuppressWarnings("deprecation")
 public class ActivityHook {
@@ -37,9 +38,11 @@ public class ActivityHook {
         launchActivity(PikoUtils.getContext(),intent);
     }
 
-    public static void startPikoActivity(){
+    public static void startPikoActivity(String fragment_name,String title){
         Context context = PikoUtils.getContext();
         Intent intent = new Intent(context, SettingsActivity.class);
+        intent.putExtra(Constants.PIKO_FRAGMENT_NAME, fragment_name);
+        intent.putExtra(Constants.PIKO_FRAGMENT_TITLE, title);
         launchActivity(context,intent);
     }
 

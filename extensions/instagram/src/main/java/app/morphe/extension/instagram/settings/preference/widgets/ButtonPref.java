@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.settings.preference.fragments.FragmentHook;
 import app.morphe.extension.instagram.patches.Block;
 import app.morphe.extension.instagram.patches.download.DownloadMapping;
 
@@ -49,7 +51,7 @@ public class ButtonPref extends Preference {
             public boolean onPreferenceClick(Preference preference) {
                 try {
                     String key = getKey();
-                    if (key == null || !hasAction(key)) {
+                    if (key == null) {
                         return true;
                     }
 
@@ -70,6 +72,9 @@ public class ButtonPref extends Preference {
                     } else if (key.equals("piko_download_id_mapping")) {
                         DownloadMapping.downloadMapping();
 
+                    } else if (key.startsWith("piko_frag_")) {
+                        FragmentHook.startFragment(key);
+
                     }
                 } catch (Exception e) {
                     Utils.showToastShort(e.getMessage());
@@ -88,10 +93,10 @@ public class ButtonPref extends Preference {
     @Override
     protected void onBindView(View view) {
         InstagramPreferenceStyle.bindText(this, view);
-        InstagramPreferenceStyle.setTrailingVisible(view, hasAction(getKey()));
+        InstagramPreferenceStyle.setTrailingVisible(view, hasVisibleTrail(getKey()));
     }
 
-    private boolean hasAction(String key) {
+    private boolean hasVisibleTrail(String key) {
         return key != null
                 && (key.equals("piko_export_dev_overrides")
                 || key.equals("piko_import_dev_overrides")

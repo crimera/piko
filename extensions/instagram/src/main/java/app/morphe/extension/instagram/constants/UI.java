@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
-import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.settings.preference.fragments.FragmentHook;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
@@ -109,7 +109,7 @@ public class UI {
                 return;
             }
 
-            ImageView imageView = UI.addImageViewToViewGroup(viewGroup, "instagram_settings_pano_filled_24", ActivityHook::startPikoActivity);
+            ImageView imageView = UI.addImageViewToViewGroup(viewGroup, "instagram_settings_pano_filled_24", FragmentHook::startSettings);
             if (imageView == null) {
                 return;
             }
@@ -202,7 +202,7 @@ public class UI {
         InstagramButton button = new InstagramButton(context);
         button.setText(str("piko_title_settings"));
         button.setStyle(InstagramButtonStyleEnum.SUPER_PRIMARY);
-        button.setOnClickListener(ActivityHook::startPikoActivity);
+        button.setOnClickListener(FragmentHook::startSettings);
 
         int marginPx = Dim.dp12;
         button.setMargins(marginPx, marginPx, marginPx, marginPx);

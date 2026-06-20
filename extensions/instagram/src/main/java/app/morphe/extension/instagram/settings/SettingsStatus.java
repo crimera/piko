@@ -191,6 +191,7 @@ public class SettingsStatus {
     public static void downloadVoiceMessage() { downloadVoiceMessage = true; }
     public static boolean downloadWithExternalDownloader = false;
     public static void downloadWithExternalDownloader() { downloadWithExternalDownloader = true; }
+    public static boolean downloadSection(){return (SettingsStatus.downloadMedia || SettingsStatus.downloadWithExternalDownloader);}
 
     public static boolean hideNavigationButtons = false;
     public static void hideNavigationButtons() { hideNavigationButtons = true; }
