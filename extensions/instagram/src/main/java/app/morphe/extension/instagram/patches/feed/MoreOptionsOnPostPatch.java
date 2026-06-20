@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.patches.feed;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.os.Build;
 import android.app.Dialog;
 import android.content.Context;
@@ -18,7 +20,6 @@ import java.util.Arrays;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
-import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.MediaData;
@@ -36,10 +37,10 @@ public class MoreOptionsOnPostPatch {
 
             ArrayList<String> options = new ArrayList<>();
 
-            options.add(Strings.COPY_POST_DESCRIPTION);
-            options.add(Strings.COPY_POST_OWNER_USERNAME);
-            options.add(Strings.COPY_POST_OWNER_FULLNAME);
-            options.add(Strings.DOWNLOAD_OPTIONS);
+            options.add(str("piko_copy_post_description"));
+            options.add(str("piko_copy_post_owner_username"));
+            options.add(str("piko_copy_post_owner_fullname"));
+            options.add(str("piko_download_options"));
             CharSequence[] items = options.toArray(new CharSequence[0]);
 
             dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
@@ -50,24 +51,24 @@ public class MoreOptionsOnPostPatch {
                         String selectedOption = options.get(which);
                         String stringToCopy = null;
 
-                        if (selectedOption.equals(Strings.COPY_POST_DESCRIPTION)) {
+                        if (selectedOption.equals(str("piko_copy_post_description"))) {
                             stringToCopy = mediaData.getDescriptionText();
 
-                        } else if (selectedOption.equals(Strings.COPY_POST_OWNER_USERNAME)) {
+                        } else if (selectedOption.equals(str("piko_copy_post_owner_username"))) {
                             UserData userData = mediaData.getUserData();
                             stringToCopy = userData.getUsername();
 
-                        } else if (selectedOption.equals(Strings.COPY_POST_OWNER_FULLNAME)) {
+                        } else if (selectedOption.equals(str("piko_copy_post_owner_fullname"))) {
                             UserData userData = mediaData.getUserData();
                             stringToCopy = userData.getFullname();
 
-                        } else if (selectedOption.equals(Strings.DOWNLOAD_OPTIONS)) {
+                        } else if (selectedOption.equals(str("piko_download_options"))) {
                             DownloadUtils.downloadPost(context, userSession, mediaObject, currentMediaIndex);
 
                         }
                         if (stringToCopy != null && stringToCopy.length() > 0) {
                             Utils.setClipboard(stringToCopy);
-                            Utils.showToastShort(Strings.COPIED);
+                            Utils.showToastShort(str("piko_copied"));
                         }
                     } catch (Exception e) {
                         Logger.printException(() -> "Error at postMoreOptions addDialogMenuItems", e);
@@ -76,7 +77,7 @@ public class MoreOptionsOnPostPatch {
                 }
             });
 
-            dialog.setTitle(Strings.POST_OPTIONS);
+            dialog.setTitle(str("piko_post_options"));
             dialog.setCancelable(true);
             dialog.setCanceledOnTouchOutside(true);
 

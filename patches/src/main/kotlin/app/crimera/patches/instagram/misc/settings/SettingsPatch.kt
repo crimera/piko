@@ -24,6 +24,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patches.all.misc.resources.addAppResources
+import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
@@ -46,8 +48,11 @@ val settingsPatch =
             profileInfoEntity,
             instagramButtonEntity,
             developerOptionsEntity,
+            addResourcesPatch,
         )
         execute {
+            addAppResources("shared")
+            addAppResources("instagram")
 
             IgFragmentActivityOnCreate.method.apply {
 
@@ -88,7 +93,7 @@ val settingsPatch =
                 // Loads strings for common extension.
                 addInstruction(
                     firstInvokeSuperIndex + 3,
-                    "invoke-static {}, $CONSTANTS_DESCRIPTOR/Strings;->load()V",
+                    "invoke-static {}, $CONSTANTS_DESCRIPTOR/Constants;->load()V",
                 )
             }
 

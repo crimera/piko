@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.utils;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
@@ -14,7 +16,7 @@ import android.util.Log;
 import java.io.File;
 
 import app.morphe.extension.crimera.PikoUtils;
-import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
 
 public class Utils {
@@ -22,7 +24,7 @@ public class Utils {
     public static boolean deleteRecursive(File file) {
         try {
             if (file == null || !file.exists()) {
-                PikoUtils.toast(Strings.FAIL_NO_FILE);
+                PikoUtils.toast(str("piko_fail_no_file"));
                 return false;
             }
 
@@ -57,7 +59,7 @@ public class Utils {
             fileName += ".txt";
             data = developerOptions.toString();
         }
-        fileDone = PikoUtils.pikoWriteFile(fileName, Strings.DEFAULT_PIKO_FOLDER, data, false);
+        fileDone = PikoUtils.pikoWriteFile(fileName, Constants.DEFAULT_PIKO_FOLDER, data, false);
         fileDoneTxt = fileDone ? " created" : fileDoneTxt;
         PikoUtils.toast(fileName + fileDoneTxt);
     }

@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.settings;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -26,7 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
@@ -78,7 +80,7 @@ public class SettingsActivity extends Activity {
         });
 
         TextView title = new TextView(this);
-        title.setText(Strings.PIKO_SETTINGS_TITLE);
+        title.setText(str("piko_title_settings"));
         title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26);
         title.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
         title.setIncludeFontPadding(false);
@@ -183,7 +185,7 @@ public class SettingsActivity extends Activity {
             context = getActivity();
             PreferenceManager preferenceManager = getPreferenceManager();
             PreferenceScreen screen = preferenceManager.createPreferenceScreen(context);
-            preferenceManager.setSharedPreferencesName(Strings.SHARED_PREF_NAME);
+            preferenceManager.setSharedPreferencesName(Constants.SHARED_PREF_NAME);
 
             Helper helper = new Helper(context);
             ScreenBuilder screenBuilder = new ScreenBuilder(context, screen, helper);

@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.patches.overflowMenuButton;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import java.util.ArrayList;
 import java.util.List;
 import android.content.Context;
@@ -24,7 +26,6 @@ import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
-import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.constants.UI;
@@ -119,9 +120,9 @@ public class FeedButton {
 
 
     private static void addDownloadButton(Object buttonAdderObject, ArrayList buttonlist) throws Exception {
-        String DOWNLOAD_BUTTON_TEXT = Strings.DOWNLOAD_OPTIONS;
+        String DOWNLOAD_BUTTON_TEXT = str("piko_download_options");
         if(Pref.enableDirectDownload()){
-            DOWNLOAD_BUTTON_TEXT = Strings.CATEGORY_DOWNLOAD_MEDIA;
+            DOWNLOAD_BUTTON_TEXT = str("piko_category_download_media");
         }
         addButton(MediaOption$Option.PIKO_DOWNLOAD, DOWNLOAD_BUTTON_TEXT, buttonAdderObject, buttonlist);
     }
@@ -129,16 +130,16 @@ public class FeedButton {
     public static void addFeedOverflowButton(Object buttonAdderObject, ArrayList buttonlist){
         try {
             if(Pref.pikoDebug()){
-                addButton(MediaOption$Option.PIKO_DEBUG, Strings.PIKO_DEBUG, buttonAdderObject, buttonlist);
+                addButton(MediaOption$Option.PIKO_DEBUG, str("piko_debug"), buttonAdderObject, buttonlist);
             }
             if(Pref.enableDownload()) {
                 addDownloadButton(buttonAdderObject, buttonlist);
             }
             if(Pref.downloadWithExternalDownloader()) {
-                addButton(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER, Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER, buttonAdderObject, buttonlist);
+                addButton(MediaOption$Option.PIKO_EXTERNAL_DOWNLOADER, str("piko_download_with_external_downloader"), buttonAdderObject, buttonlist);
             }
             if(Pref.moreOptionsOnPost()) {
-                addButton(MediaOption$Option.PIKO_MORE_POST_OPTION, Strings.MORE_OPTIONS, buttonAdderObject, buttonlist);
+                addButton(MediaOption$Option.PIKO_MORE_POST_OPTION, str("piko_more_options"), buttonAdderObject, buttonlist);
             }
         } catch (Exception e) {
             Logger.printException(() -> "Error at addReelButton",e);

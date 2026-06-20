@@ -16,7 +16,6 @@ import android.view.ViewGroup;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.settings.ActivityHook;
-import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.patches.Block;
 import app.morphe.extension.instagram.patches.download.DownloadMapping;
 
@@ -54,21 +53,21 @@ public class ButtonPref extends Preference {
                         return true;
                     }
 
-                    if (key.equals(Strings.EXPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_DEV_OVERRIDES) || key.equals(Strings.IMPORT_ID_MAPPING)
-                            || key.equals(Strings.EXPORT_PIKO_PREF) || key.equals(Strings.IMPORT_PIKO_PREF)
-                            || key.equals(Strings.DOWNLOAD_SET_PATH)) {
+                    if (key.equals("piko_export_dev_overrides") || key.equals("piko_import_dev_overrides") || key.equals("piko_import_id_mapping")
+                            || key.equals("piko_export_pref") || key.equals("piko_import_pref")
+                            || key.equals("piko_download_set_path")) {
                         ActivityHook.launchFragment((Activity) context, key);
 
-                    } else if (key.equals(Strings.DELETE_ANALYTICS_CACHE)) {
+                    } else if (key.equals("piko_delete_analytics_cache")) {
                         Block.deleteAnalyticsCacheFolder();
 
-                    } else if (key.equals(Strings.PIKO_EXPORT_EXPERIMENT_LIST)) {
+                    } else if (key.equals("piko_export_experiment_list")) {
                         app.morphe.extension.instagram.utils.Utils.decompileExperiments(false);
 
-                    } else if (key.equals(Strings.PIKO_EXPORT_EXPERIMENT_MAPPINGS)) {
+                    } else if (key.equals("piko_export_experiment_mappings")) {
                         app.morphe.extension.instagram.utils.Utils.decompileExperiments(true);
 
-                    } else if (key.equals(Strings.DOWNLOAD_ID_MAPPING)) {
+                    } else if (key.equals("piko_download_id_mapping")) {
                         DownloadMapping.downloadMapping();
 
                     }
@@ -94,16 +93,16 @@ public class ButtonPref extends Preference {
 
     private boolean hasAction(String key) {
         return key != null
-                && (key.equals(Strings.EXPORT_DEV_OVERRIDES)
-                || key.equals(Strings.IMPORT_DEV_OVERRIDES)
-                || key.equals(Strings.IMPORT_ID_MAPPING)
-                || key.equals(Strings.EXPORT_PIKO_PREF)
-                || key.equals(Strings.IMPORT_PIKO_PREF)
-                || key.equals(Strings.DOWNLOAD_SET_PATH)
-                || key.equals(Strings.DELETE_ANALYTICS_CACHE)
-                || key.equals(Strings.PIKO_EXPORT_EXPERIMENT_LIST)
-                || key.equals(Strings.PIKO_EXPORT_EXPERIMENT_MAPPINGS)
-                || key.equals(Strings.DOWNLOAD_ID_MAPPING));
+                && (key.equals("piko_export_dev_overrides")
+                || key.equals("piko_import_dev_overrides")
+                || key.equals("piko_import_id_mapping")
+                || key.equals("piko_export_pref")
+                || key.equals("piko_import_pref")
+                || key.equals("piko_download_set_path")
+                || key.equals("piko_delete_analytics_cache")
+                || key.equals("piko_export_experiment_list")
+                || key.equals("piko_export_experiment_mappings")
+                || key.equals("piko_download_id_mapping"));
     }
 
 }
