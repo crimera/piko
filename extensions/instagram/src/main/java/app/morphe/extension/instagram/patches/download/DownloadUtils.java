@@ -248,7 +248,7 @@ public class DownloadUtils {
                 return;
             }
             if(!PikoUtils.isAppInstalledAndEnabled(packageName)){
-                PikoUtils.toast(Strings.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND);
+                PikoUtils.toast(str("piko_external_downloader_package_name_not_found"));
                 return;
             }
             String link = Links.generatePostLink(mediaObject, currentMediaIndex);
