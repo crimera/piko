@@ -86,6 +86,44 @@ public class SavedMessagesHook {
         }
     }
 
+    // The logged-in user's id, used to recognise our own messages. Learned from messages whose
+    // is_sent_by_viewer flag is set (own messages on inbox/thread loads), then persisted — so
+    // even a freshly-sent message (whose flag isn't set yet at capture) is recognised as own by
+    // comparing its sender id. This avoids any UserSession reflection.
+    private static volatile String sMyUserId;
+
+    private static String myUserId() {
+        if (sMyUserId == null) {
+            try {
+                Context ctx = PikoUtils.getContext();
+                if (ctx != null) {
+                    String v = ctx.getSharedPreferences("piko_dm", Context.MODE_PRIVATE)
+                            .getString("my_user_id", null);
+                    if (v != null && !v.isEmpty()) sMyUserId = v;
+                }
+            } catch (Exception ignored) {}
+        }
+        return sMyUserId;
+    }
+
+    private static void rememberMyUserId(String id) {
+        if (id == null || id.isEmpty() || id.equals(sMyUserId)) return;
+        sMyUserId = id;
+        try {
+            Context ctx = PikoUtils.getContext();
+            if (ctx != null) {
+                ctx.getSharedPreferences("piko_dm", Context.MODE_PRIVATE)
+                        .edit().putString("my_user_id", id).apply();
+            }
+        } catch (Exception ignored) {}
+    }
+
+    /** True when senderId is the logged-in user (an own outgoing message). */
+    private static boolean isOwnSender(String senderId) {
+        String me = myUserId();
+        return senderId != null && me != null && senderId.equals(me);
+    }
+
     // -------------------------------------------------------------------------
     // Hook 1 (REST) + Hook 2 (MQTT): called when any DirectItem is finalized.
     // Hook 1 fires from LX/0gL;.parseFromJson (REST thread-history loads).
@@ -147,9 +185,16 @@ public class SavedMessagesHook {
             // All field names are resolved at patch time and baked into DirectItem (see the
             // directItemEntity patch) — nothing is fingerprinted by name at runtime here.
             DirectItem di = new DirectItem(item);
-            // Our own outgoing messages aren't "received" — don't capture or notify for them, so
-            // unsending your own message never raises a "deleted" notification.
-            if (di.isSentByViewer()) return;
+            String senderId = di.getUserId();
+            // Learn our own user id from messages flagged sent-by-viewer (reliable on inbox/thread
+            // loads), then skip our own messages — by flag OR by sender id (the flag isn't set yet
+            // on a just-sent message, but the sender id still matches). So unsending your own
+            // message never captures or notifies.
+            if (di.isSentByViewer()) {
+                rememberMyUserId(senderId);
+                return;
+            }
+            if (isOwnSender(senderId)) return;
             String messageId  = di.getItemId();
             // Deletion state participates in the dedup key: an item first seen alive and later
             // re-delivered as unsent (live in-thread unsend) is a DIFFERENT key, so it is NOT
@@ -159,7 +204,6 @@ public class SavedMessagesHook {
             if (messageId != null
                     && SEEN_ITEM_IDS.put(messageId + (deleted ? ":1" : ":0"), Boolean.TRUE) != null) return;
             String threadId   = di.getThreadId();
-            String senderId   = di.getUserId();
             PikoMessageDb db = PikoMessageDb.getInstance(PikoUtils.getContext());
             // Display name = the chat title recorded for this thread (the participant's name for a
             // 1:1 chat), so it's stored on the row and shown by both the screen and the unsend
@@ -356,13 +400,15 @@ public class SavedMessagesHook {
             // almost certainly OUR OWN outgoing message being unsent — record it but don't notify.
             boolean wasReceived = vault.isStoredAlive(itemId);
             String messageType = vault.getMessageType(itemId);
+            // Never notify for our own unsends (covers stale own rows from older builds too).
+            boolean own = isOwnSender(vault.getSenderId(itemId));
 
             // Ensure a row exists (skeleton if Hook 1/2 somehow missed it) and mark it deleted.
             vault.insertOrIgnore(itemId, "", null, null, null, messageType, System.currentTimeMillis());
             vault.markDeleted(itemId);
 
             // Notify only for messages we actually received (skips our own unsends + uncaptured).
-            if (wasReceived && claimNotification(itemId)) {
+            if (wasReceived && !own && claimNotification(itemId)) {
                 String stored = vault.getStoredContent(itemId);
                 boolean isMedia = stored == null || stored.isEmpty()
                         || stored.startsWith("http") || stored.startsWith("[");
