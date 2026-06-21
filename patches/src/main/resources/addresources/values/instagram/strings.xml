@@ -228,4 +228,19 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_someone">Someone</string>
     <string name="piko_deleted_messages_channel">Deleted messages</string>
     <string name="piko_deleted_messages_channel_desc">Notifies when a received message is unsent</string>
+    <string name="piko_media_label">[%s]</string>
+    <string name="piko_media_deleted">[%s deleted]</string>
+    <string name="piko_media_deleted_generic">[deleted]</string>
+    <string name="piko_media_unknown">media</string>
+    <string name="piko_media_photo">photo</string>
+    <string name="piko_media_disappearing_photo">disappearing photo</string>
+    <string name="piko_media_video">video</string>
+    <string name="piko_media_voice">voice message</string>
+    <string name="piko_media_gif">GIF</string>
+    <string name="piko_media_reel">reel</string>
+    <string name="piko_media_story">story</string>
+    <string name="piko_media_post">post</string>
+    <string name="piko_media_like">like</string>
+    <string name="piko_media_link">link</string>
+    <string name="piko_media_activity">activity</string>
 </resources>

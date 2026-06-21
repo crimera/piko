@@ -160,24 +160,6 @@ public class DeletedMessagesActivity extends Activity {
         setContentView(root);
     }
 
-    private static String mediaLabel(String type) {
-        if (type == null) return "[media]";
-        switch (type) {
-            case "media":
-            case "image":          return "[photo]";
-            case "video":          return "[video]";
-            case "voice_media":
-            case "audio":          return "[voice message]";
-            case "animated_media": return "[GIF]";
-            case "reel_share":     return "[reel]";
-            case "story_share":    return "[story]";
-            case "media_share":    return "[post]";
-            case "clip":
-            case "xma_clip":       return "[reel]";
-            default:               return "[" + type + "]";
-        }
-    }
-
     private class MessageAdapter extends BaseAdapter {
 
         @Override public int getCount() { return messages.size(); }
@@ -242,7 +224,7 @@ public class DeletedMessagesActivity extends Activity {
             senderView.setText(who);
             boolean isMediaUrl = content != null && content.startsWith("http");
             if (isMediaUrl) {
-                contentView.setText(mediaLabel(type) + "  ·  " + str("piko_tap_to_view"));
+                contentView.setText(MediaLabel.label(type) + "  ·  " + str("piko_tap_to_view"));
             } else {
                 contentView.setText(content != null && !content.isEmpty() ? content
                         : (type != null ? "[" + type + "]" : "[deleted]"));

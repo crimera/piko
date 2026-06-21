@@ -317,33 +317,13 @@ public class SavedMessagesHook {
                 String stored = vault.getStoredContent(itemId);
                 boolean isMedia = stored == null || stored.isEmpty()
                         || stored.startsWith("http") || stored.startsWith("[");
-                String notifBody = isMedia ? describeMediaType(messageType) : stored;
+                String notifBody = isMedia ? MediaLabel.deleted(messageType) : stored;
                 String name = vault.getThreadUsername(vault.getThreadIdOf(itemId));
                 if (name == null) name = vault.getSenderDisplay(itemId);
                 notifyDeletion(name, notifBody, messageType);
             }
         } catch (Exception e) {
             piko("SavedMessagesHook.onMessageHiddenFromDb: " + e);
-        }
-    }
-
-    private static String describeMediaType(String type) {
-        if (type == null) return "[deleted]";
-        switch (type) {
-            case "media":
-            case "image":           return "[photo deleted]";
-            case "raven_media":     return "[disappearing photo deleted]";
-            case "video":           return "[video deleted]";
-            case "voice_media":
-            case "audio":           return "[voice message deleted]";
-            case "animated_media":  return "[GIF deleted]";
-            case "reel_share":      return "[reel deleted]";
-            case "story_share":     return "[story reply deleted]";
-            case "media_share":     return "[post share deleted]";
-            case "like":            return "[like deleted]";
-            case "link":            return "[link deleted]";
-            case "action_log":      return "[activity deleted]";
-            default:                return "[" + type + " deleted]";
         }
     }
 }
