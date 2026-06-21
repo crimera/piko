@@ -21,8 +21,8 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.constants.UI;
 
 public class DMActionBar {
-    private static final String HIDE_ICON_NAME = "$avd_hide_password__0";
-    private static final String SHOW_ICON_NAME = "$avd_show_password__0";
+    private static final String HIDE_ICON_NAME = "design_ic_visibility_off";
+    private static final String SHOW_ICON_NAME = "design_ic_visibility";
 
     public static void addActionBarButton(ViewGroup viewGroup) {
         try {
