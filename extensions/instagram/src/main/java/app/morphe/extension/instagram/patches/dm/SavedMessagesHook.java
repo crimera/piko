@@ -8,15 +8,8 @@ package app.morphe.extension.instagram.patches.dm;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-
-import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.db.PikoMessageDb;
@@ -70,44 +63,6 @@ public class SavedMessagesHook {
                         .setThreadUsername(sCurrentThreadId, sCurrentThreadTitle);
             }
         } catch (Exception ignored) {}
-    }
-
-    /** Called when a chat is opened (from the action bar) with the resolved thread_id + title.
-     *  Records both so unsend notifications in this chat can show the sender's name, even if the
-     *  user never opens the deleted-messages screen. */
-    public static void noteThreadOpen(String threadId, String title) {
-        if (threadId != null && !threadId.isEmpty()) sCurrentThreadId = threadId;
-        if (title != null && !title.trim().isEmpty()) {
-            sCurrentThreadTitle = title.trim();
-            try {
-                String tid = (threadId != null && !threadId.isEmpty()) ? threadId : sCurrentThreadId;
-                if (tid != null && !tid.isEmpty()) {
-                    PikoMessageDb.getInstance(PikoUtils.getContext()).setThreadUsername(tid, sCurrentThreadTitle);
-                }
-            } catch (Exception ignored) {}
-        }
-    }
-
-    /** Opens the deleted-messages screen scoped to a specific thread (resolved at click time). */
-    public static void openDeletedMessagesFor(Context ctx, String threadId, String title) {
-        try {
-            if (ctx == null) ctx = PikoUtils.getContext();
-            if (ctx == null) return;
-            if (threadId != null && !threadId.isEmpty()) sCurrentThreadId = threadId;
-            if (title != null && !title.trim().isEmpty()) {
-                sCurrentThreadTitle = title.trim();
-                if (threadId != null && !threadId.isEmpty()) {
-                    PikoMessageDb.getInstance(ctx).setThreadUsername(threadId, sCurrentThreadTitle);
-                }
-            }
-            Intent intent = new Intent(ctx, DeletedMessagesActivity.class);
-            if (sCurrentThreadId != null && !sCurrentThreadId.isEmpty()) intent.putExtra("thread_id", sCurrentThreadId);
-            if (sCurrentThreadTitle != null && !sCurrentThreadTitle.isEmpty()) intent.putExtra("thread_title", sCurrentThreadTitle);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            ctx.startActivity(intent);
-        } catch (Exception e) {
-            piko("SavedMessagesHook.openDeletedMessagesFor: " + e);
-        }
     }
 
     /** Opens the deleted-messages screen for the currently-open thread (or all if unknown). */
@@ -213,13 +168,9 @@ public class SavedMessagesHook {
 
             PikoMessageDb db = PikoMessageDb.getInstance(PikoUtils.getContext());
 
-            // Resolve a display name for the sender: a previously-persisted handle first, then
-            // Instagram's own local user cache (queried by column, not by reflected field name).
+            // Display name for the sender: a previously-persisted handle (populated from the
+            // chat title when the thread is opened). Null is fine — the screen falls back to id.
             String senderUser = (senderId != null) ? db.getUsername(senderId) : null;
-            if (senderUser == null && senderId != null) {
-                senderUser = resolveUsernameFromCache(senderId);
-                if (senderUser != null) db.putUsername(senderId, senderUser);
-            }
 
             if (messageId == null) {
                 // Some modern (E2EE) DMs do not expose a server item_id on the received object.
@@ -339,33 +290,10 @@ public class SavedMessagesHook {
     }
 
     // -------------------------------------------------------------------------
-    // Hook 2: called when MQTT "item_removed" event arrives.
-    // p1 = threadId, p2 = itemId (Instagram's canonical order in the unsend handler).
-    // -------------------------------------------------------------------------
-    public static void onMessageDeleted(String threadId, String itemId) {
-        try {
-            if (!Pref.saveDeletedMessages()) return;
-            if (itemId == null) return;
-
-            PikoMessageDb.getInstance(PikoUtils.getContext()).markDeleted(itemId);
-
-        } catch (Exception e) {
-            piko("SavedMessagesHook.onMessageDeleted: " + e);
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Hook 4: fires at entry of the SQLite DAO method that hides a DirectItem.
-    //
-    // We receive p0 (the DAO), p2 (server_item_id), p3 (client_item_id).
-    // The hook fires BEFORE the DELETE, so Instagram's "messages" table still
-    // has the row with text, thread_id, timestamp, message_type, etc.
-    //
-    // Instagram DB access (smali analysis of LX/0HR;, the direct-msg DB helper):
-    //   LX/0HR; extends SQLiteOpenHelper; holds A00:SQLiteDatabase (instance field).
-    //   LX/0HR;.A06 = static connection-manager (LX/0HS;) → .A00() → LX/0HR; instance.
-    //   Table: "messages"; columns: server_item_id, client_item_id, text,
-    //                               thread_id, user_id, timestamp, message_type.
+    // Hook 4: fires at entry of the SQLite DAO method that hides (unsends) a DirectItem.
+    // We receive p2 (server_item_id) / p3 (client_item_id). Hook 1/2 already captured the
+    // message into our vault as it arrived, so here we just mark it deleted and notify —
+    // no need to read Instagram's own DB (which is empty under MSYS on v426 anyway).
     // -------------------------------------------------------------------------
     public static void onMessageHiddenFromDb(Object dao, String serverId, String clientId) {
         try {
@@ -376,93 +304,24 @@ public class SavedMessagesHook {
 
             PikoMessageDb vault = PikoMessageDb.getInstance(PikoUtils.getContext());
             // Was this message previously RECEIVED (captured alive by Hook 1/2)? If not, this is
-            // almost certainly OUR OWN outgoing message being unsent — we still record it but must
-            // NOT raise a notification for it.
+            // almost certainly OUR OWN outgoing message being unsent — record it but don't notify.
             boolean wasReceived = vault.isStoredAlive(itemId);
+            String messageType = vault.getMessageType(itemId);
 
-            String content     = null;
-            String threadId    = "";
-            String senderId    = null;
-            // Prefer the message_type captured at receive time (Instagram's own "messages" table is
-            // empty under MSYS on v426, so a DB read here usually can't tell text from media).
-            String storedType  = vault.getMessageType(itemId);
-            String messageType = (storedType != null) ? storedType : "text";
-            long   timestamp   = System.currentTimeMillis();
-
-            // --- Read from Instagram's own "messages" table before the DELETE fires ---
-            SQLiteDatabase igDb = getInstagramDb(dao);
-            boolean openedFresh = false; // true if WE opened the handle (must close after)
-            if (igDb == null) {
-                igDb = openInstagramDbFile(PikoUtils.getContext());
-                openedFresh = (igDb != null);
-            }
-            if (igDb != null) {
-                try {
-                    String   where;
-                    String[] args;
-                    if (serverId != null && !serverId.isEmpty() && clientId != null && !clientId.isEmpty()) {
-                        where = "server_item_id = ? OR client_item_id = ?";
-                        args  = new String[]{serverId, clientId};
-                    } else if (serverId != null && !serverId.isEmpty()) {
-                        where = "server_item_id = ?";
-                        args  = new String[]{serverId};
-                    } else {
-                        where = "client_item_id = ?";
-                        args  = new String[]{clientId};
-                    }
-                    Cursor c = igDb.query(
-                        "messages",
-                        new String[]{"text", "thread_id", "user_id", "timestamp", "message_type"},
-                        where, args, null, null, null, "1");
-                    if (c != null) {
-                        if (c.moveToFirst()) {
-                            content     = c.getString(0);
-                            String tId  = c.getString(1);
-                            if (tId  != null && !tId.isEmpty())  threadId    = tId;
-                            senderId    = c.getString(2);
-                            String ts   = c.getString(3);
-                            if (ts   != null && !ts.isEmpty()) {
-                                try { timestamp = Long.parseLong(ts) / 1000L; } catch (Exception ignored) {}
-                            }
-                            String mt   = c.getString(4);
-                            if (mt   != null) messageType = mt;
-                        }
-                        c.close();
-                    }
-                } finally {
-                    if (openedFresh) igDb.close();
-                }
-            }
-
-            if (content != null && !content.isEmpty()) {
-                vault.insertOrIgnore(itemId, threadId, senderId, null, content, messageType, timestamp);
-            } else {
-                // Media / unsupported type — fall back to what Hook 1/2 may have stored
-                // (text, or a media URL captured at receive time).
-                String stored = vault.getStoredContent(itemId);
-                if (stored != null) content = stored;
-                // Still insert a skeleton row so markDeleted has a row to update.
-                vault.insertOrIgnore(itemId, threadId, senderId, null,
-                        describeMediaType(messageType), messageType, timestamp);
-            }
+            // Ensure a row exists (skeleton if Hook 1/2 somehow missed it) and mark it deleted.
+            vault.insertOrIgnore(itemId, "", null, null, null, messageType, System.currentTimeMillis());
             vault.markDeleted(itemId);
-
-            String pikoContent = vault.getStoredContent(itemId);
 
             // Notify only for messages we actually received (skips our own unsends + uncaptured).
             if (wasReceived && claimNotification(itemId)) {
-                // For media the stored content is a URL/label — show a friendly type label, not the URL.
-                boolean isMedia = pikoContent == null || pikoContent.isEmpty()
-                        || pikoContent.startsWith("http") || pikoContent.startsWith("[");
-                String notifBody = isMedia ? describeMediaType(messageType) : pikoContent;
-                // Name = the chat title (display name) recorded for this thread; fall back to
-                // any sender display we have. Matches the "<name> deleted a message" UX.
-                String storedThreadId = vault.getThreadIdOf(itemId);
-                String name = vault.getThreadUsername(storedThreadId);
+                String stored = vault.getStoredContent(itemId);
+                boolean isMedia = stored == null || stored.isEmpty()
+                        || stored.startsWith("http") || stored.startsWith("[");
+                String notifBody = isMedia ? describeMediaType(messageType) : stored;
+                String name = vault.getThreadUsername(vault.getThreadIdOf(itemId));
                 if (name == null) name = vault.getSenderDisplay(itemId);
                 notifyDeletion(name, notifBody, messageType);
             }
-
         } catch (Exception e) {
             piko("SavedMessagesHook.onMessageHiddenFromDb: " + e);
         }
@@ -487,147 +346,4 @@ public class SavedMessagesHook {
             default:                return "[" + type + " deleted]";
         }
     }
-
-    /**
-     * Returns Instagram's live SQLiteDatabase by scanning the DB helper's static singleton.
-     *
-     * Access chain (confirmed from smali of Instagram's direct-message DB helper, LX/0HR;):
-     *   - LX/0HR; extends SQLiteOpenHelper and holds A00:SQLiteDatabase (instance field)
-     *   - LX/0HR;.A06 is a static field holding the connection-manager (LX/0HS;)
-     *   - LX/0HS;.A00() returns the LX/0HR; open-helper instance
-     *
-     * We load the class by binary name ("X.0HR") and scan its fields by TYPE rather than
-     * by hardcoded names so this survives minor ProGuard rename variations.
-     */
-    private static SQLiteDatabase getInstagramDb(Object dao) {
-        try {
-            ClassLoader cl = dao.getClass().getClassLoader();
-            Class<?> helperClass = null;
-            try { helperClass = cl.loadClass("X.0HR"); } catch (Exception ignored) {}
-
-            // If name-load failed, walk DAO superclass static fields for the same pattern.
-            if (helperClass == null) {
-                SQLiteDatabase db = scanForDb(dao.getClass());
-                if (db != null) return db;
-                return null;
-            }
-
-            return scanForDb(helperClass);
-        } catch (Exception e) {
-            piko("SavedMessagesHook.getInstagramDb: " + e);
-            return null;
-        }
-    }
-
-    /** Scans static fields of cls for a singleton that, via a no-arg method, yields
-     *  an object holding a SQLiteDatabase instance field. */
-    private static SQLiteDatabase scanForDb(Class<?> cls) {
-        for (Field sf : cls.getDeclaredFields()) {
-            if (!java.lang.reflect.Modifier.isStatic(sf.getModifiers())) continue;
-            if (sf.getType().isPrimitive()) continue;
-            sf.setAccessible(true);
-            Object mgr;
-            try { mgr = sf.get(null); } catch (Exception e) { continue; }
-            if (mgr == null) continue;
-            for (Method m : mgr.getClass().getDeclaredMethods()) {
-                if (m.getParameterCount() != 0 || m.getReturnType() == Void.TYPE) continue;
-                m.setAccessible(true);
-                Object helper;
-                try { helper = m.invoke(mgr); } catch (Exception e) { continue; }
-                if (helper == null) continue;
-                for (Field df : helper.getClass().getDeclaredFields()) {
-                    if (!SQLiteDatabase.class.isAssignableFrom(df.getType())) continue;
-                    df.setAccessible(true);
-                    Object db;
-                    try { db = df.get(helper); } catch (Exception e) { continue; }
-                    if (db instanceof SQLiteDatabase && ((SQLiteDatabase) db).isOpen())
-                        return (SQLiteDatabase) db;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Fallback: open a read-only handle to Instagram's direct-message DB file.
-     * Scans the app's databases dir and verifies the "messages" table exists.
-     * WAL mode (enabled by Instagram) allows concurrent readers — safe to open.
-     * Caller must close() the returned database.
-     */
-    private static SQLiteDatabase openInstagramDbFile(Context ctx) {
-        if (ctx == null) return null;
-        File dbDir = ctx.getDatabasePath("x").getParentFile();
-        if (dbDir == null || !dbDir.exists()) return null;
-        java.util.List<File> candidates = new java.util.ArrayList<>();
-        for (String n : new String[]{"direct.db", "direct_side_panel.db", "direct_bootstrap.db"}) {
-            File f = new File(dbDir, n); if (f.exists()) candidates.add(f);
-        }
-        File[] all = dbDir.listFiles();
-        if (all != null) {
-            for (File f : all) {
-                if (f.getName().endsWith(".db") && !candidates.contains(f)) candidates.add(f);
-            }
-        }
-        for (File f : candidates) {
-            try {
-                SQLiteDatabase db = SQLiteDatabase.openDatabase(
-                        f.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
-                Cursor chk = db.rawQuery(
-                        "SELECT name FROM sqlite_master WHERE type='table' AND name='messages'", null);
-                boolean ok = chk.moveToFirst(); chk.close();
-                if (ok) return db;
-                db.close();
-            } catch (Exception ignored) {}
-        }
-        piko("SavedMessagesHook: Instagram DM database not found in " + dbDir);
-        return null;
-    }
-
-    /**
-     * Tries to resolve a real username for senderId by querying Instagram's local user
-     * cache databases. IG stores DM participant profiles in SQLite (user.db or similar).
-     * Returns null if the DB isn't found or the user isn't cached.
-     */
-    private static String resolveUsernameFromCache(String senderId) {
-        try {
-            Context ctx = PikoUtils.getContext();
-            if (ctx == null) return null;
-            File dbDir = ctx.getDatabasePath("x").getParentFile();
-            if (dbDir == null) return null;
-            String[] candidates = {"user.db", "users.db", "igdb.db", "instagram.db",
-                                   "user_cache.db", "profile.db", "direct_bootstrap.db"};
-            for (String name : candidates) {
-                File f = new File(dbDir, name);
-                if (!f.exists()) continue;
-                try {
-                    SQLiteDatabase db = SQLiteDatabase.openDatabase(
-                            f.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
-                    for (String[] spec : new String[][]{
-                            {"users", "username", "pk"},
-                            {"users", "username", "id"},
-                            {"user", "username", "pk"},
-                            {"user", "username", "user_id"},
-                            {"participants", "username", "pk"},
-                    }) {
-                        try {
-                            Cursor c = db.query(spec[0], new String[]{spec[1]},
-                                    spec[2] + " = ?", new String[]{senderId},
-                                    null, null, null, "1");
-                            if (c != null) {
-                                String uname = null;
-                                if (c.moveToFirst()) uname = c.getString(0);
-                                c.close();
-                                if (uname != null && !uname.isEmpty()) { db.close(); return uname; }
-                            }
-                        } catch (Exception ignored) {}
-                    }
-                    db.close();
-                } catch (Exception ignored) {}
-            }
-        } catch (Exception e) {
-            piko("resolveUsernameFromCache: " + e);
-        }
-        return null;
-    }
-
 }
