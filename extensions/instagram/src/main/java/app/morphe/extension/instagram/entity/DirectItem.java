@@ -115,6 +115,16 @@ public class DirectItem extends Entity {
         }
     }
 
+    /** True when this message was sent by the logged-in user (an outgoing message). */
+    public boolean isSentByViewer() {
+        try {
+            Object v = this.readBaseField("fieldName");
+            return v instanceof Boolean && (Boolean) v;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     /** Sets/clears the hide_in_thread flag on the item (used by anti-revoke). */
     public void setHideInThread(boolean hidden) {
         try {

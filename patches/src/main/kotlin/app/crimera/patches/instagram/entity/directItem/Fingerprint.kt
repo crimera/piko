@@ -19,6 +19,7 @@ internal object GetTextExtension : Fingerprint(name = "getText", definingClass =
 internal object SetTextExtension : Fingerprint(name = "setText", definingClass = DIRECT_ITEM_CLASS)
 internal object GetTimestampRawExtension : Fingerprint(name = "getTimestampRaw", definingClass = DIRECT_ITEM_CLASS)
 internal object IsHideInThreadExtension : Fingerprint(name = "isHideInThread", definingClass = DIRECT_ITEM_CLASS)
+internal object IsSentByViewerExtension : Fingerprint(name = "isSentByViewer", definingClass = DIRECT_ITEM_CLASS)
 internal object SetHideInThreadExtension : Fingerprint(name = "setHideInThread", definingClass = DIRECT_ITEM_CLASS)
 internal object GetItemTypeExtension : Fingerprint(name = "getItemType", definingClass = DIRECT_ITEM_CLASS)
 internal object GetThreadKeyExtension : Fingerprint(name = "getThreadKey", definingClass = DIRECT_ITEM_CLASS)

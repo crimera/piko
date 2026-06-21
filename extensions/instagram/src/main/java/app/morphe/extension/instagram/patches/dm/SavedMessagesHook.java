@@ -144,18 +144,12 @@ public class SavedMessagesHook {
 
     private static void processReceivedItem(Object item) {
         try {
-            // v426 field names (confirmed from dexdump classes12.dex LX/0gL;.A00):
-            //   item_id        → A13:String
-            //   user_id        → A1M:String (sender ID)
-            //   item_type      → A0Y:enum (toString() for value)
-            //   timestamp      → A1J:String (microseconds)
-            //   text           → A1I:String
-            //   thread_key     → A0W:DirectThreadKey, .A00:String
-            // v408 field names (fallback):
-            //   item_id        → getter A0l(), thread_key → A16/A18
-            // Field names are resolved at patch time and baked into DirectItem (see the
+            // All field names are resolved at patch time and baked into DirectItem (see the
             // directItemEntity patch) — nothing is fingerprinted by name at runtime here.
             DirectItem di = new DirectItem(item);
+            // Our own outgoing messages aren't "received" — don't capture or notify for them, so
+            // unsending your own message never raises a "deleted" notification.
+            if (di.isSentByViewer()) return;
             String messageId  = di.getItemId();
             // Deletion state participates in the dedup key: an item first seen alive and later
             // re-delivered as unsent (live in-thread unsend) is a DIFFERENT key, so it is NOT
@@ -235,6 +229,9 @@ public class SavedMessagesHook {
                 if (liveDeletion && claimNotification(messageId)) {
                     String notifySender = (senderUser != null) ? senderUser
                             : db.getThreadUsername(threadId);
+                    if (notifySender == null && threadId.equals(sCurrentThreadId)) {
+                        notifySender = sCurrentThreadTitle;
+                    }
                     if (notifySender == null) notifySender = db.getSenderDisplay(messageId);
                     String notifyBody   = (content != null && !content.isEmpty())
                             ? content : db.getStoredContent(messageId);
@@ -370,7 +367,11 @@ public class SavedMessagesHook {
                 boolean isMedia = stored == null || stored.isEmpty()
                         || stored.startsWith("http") || stored.startsWith("[");
                 String notifBody = isMedia ? describeMediaType(messageType) : stored;
-                String name = vault.getThreadUsername(vault.getThreadIdOf(itemId));
+                String storedThreadId = vault.getThreadIdOf(itemId);
+                String name = vault.getThreadUsername(storedThreadId);
+                if (name == null && storedThreadId != null && storedThreadId.equals(sCurrentThreadId)) {
+                    name = sCurrentThreadTitle;
+                }
                 if (name == null) name = vault.getSenderDisplay(itemId);
                 notifyDeletion(name, notifBody, messageType);
             }

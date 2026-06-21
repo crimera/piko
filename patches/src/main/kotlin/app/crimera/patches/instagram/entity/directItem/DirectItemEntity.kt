@@ -65,6 +65,8 @@ val directItemEntity =
                 IsHideInThreadExtension.changeFirstString(hideField)
                 SetHideInThreadExtension.changeFirstString(hideField)
 
+                IsSentByViewerExtension.changeFirstString(fieldAfter("is_sent_by_viewer").name)
+
                 GetThreadKeyExtension.changeFirstString(fieldAfter("thread_key").name)
 
                 // item_type enum: the dispatch only stores a raw integer code, but Instagram's own
