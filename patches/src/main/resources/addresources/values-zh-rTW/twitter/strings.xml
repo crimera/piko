@@ -90,7 +90,6 @@
     <string name="piko_pref_top_people_search_desc">隱藏搜尋結果熱門中的人物</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">其他</string>
-    <string name="piko_pref_chirp_font">啟用 chirp 字體</string>
     <string name="piko_pref_hide_fab">隱藏懸浮動作按鈕</string>
     <string name="piko_pref_hide_fab_menu">隱藏懸浮動作選單按鈕</string>
     <string name="piko_pref_rec_users">隱藏推薦使用者</string>
@@ -226,12 +225,50 @@
     <string name="piko_pref_search_type_ahead_ordered_section">訂購</string>
     <string name="piko_settings_supported_links">開啟支援的連結</string>
     <!-- For arrays-->
+    <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_media">媒體</string>
     <string name="piko_array_light_mode">淺色模式</string>
     <!-- App icon strings -->
     <string name="piko_app_icon_thanks">感謝 @NeoFreeBird 提供 iOS 應用圖示</string>
     <string name="piko_app_icon_piko_exclusive">（Piko 獨家）</string>
     <!-- Category -->
+    <string name="piko_app_icon_category_legacy">傳統</string>
+    <string name="piko_app_icon_category_seasonal_event">季節性活動</string>
+    <string name="piko_app_icon_category_sports">體育運動</string>
     <!-- Icon names -->
+    <string name="piko_app_icon_name_default">預設</string>
+    <string name="piko_app_icon_name_milky_way">銀河</string>
+    <string name="piko_app_icon_name_autumn_2021">秋天 2021</string>
+    <string name="piko_app_icon_name_autumn_2022">秋天 2022</string>
+    <string name="piko_app_icon_name_winter_1">冬天 1</string>
+    <string name="piko_app_icon_name_winter_2">冬天 2</string>
+    <string name="piko_app_icon_name_summer_1">夏天 1</string>
+    <string name="piko_app_icon_name_summer_2">夏天 2</string>
+    <string name="piko_app_icon_name_summer">夏天</string>
+    <string name="piko_app_icon_name_winter">冬天</string>
+    <string name="piko_app_icon_name_beijing_olympics_1">北京奧運會 1</string>
+    <string name="piko_app_icon_name_beijing_olympics_2">北京奧運會 2</string>
+    <string name="piko_app_icon_name_mothers_day">母親節</string>
+    <string name="piko_app_icon_name_womansday">婦女節</string>
+    <string name="piko_app_icon_name_halloween_2021">萬聖節 2021</string>
+    <string name="piko_app_icon_name_halloween_2022">萬聖節 2022</string>
+    <string name="piko_app_icon_name_halloween_2024_1">萬聖節 2024 1</string>
+    <string name="piko_app_icon_name_halloween_2024_2">萬聖節 2024 2</string>
+    <string name="piko_app_icon_name_halloween_2024_3">萬聖節 2024 3</string>
+    <string name="piko_app_icon_name_stpatricks_day">聖巴德利爵節</string>
+    <string name="piko_app_icon_name_thanksgiving_1">感恩節 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2">感恩節 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_1">感恩節 2024 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_2">感恩節 2024 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_3">感恩節 2024 3</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_4">感恩節 2024 4</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_5">感恩節 2024 5</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_6">感恩節 2024 6</string>
+    <string name="piko_app_icon_name_earth_hour">地球一小時</string>
+    <string name="piko_app_icon_name_christmas_2024_1">聖誕節 2024 1</string>
+    <string name="piko_app_icon_name_christmas_2024_2">聖誕節 2024 2</string>
+    <string name="piko_app_icon_name_christmas_2024_3">聖誕節 2024 3</string>
+    <string name="piko_app_icon_name_christmas_2024_4">聖誕節 2024 4</string>
     <!-- Import / export login tokens -->
     <string name="piko_login_token_export_screen_description">"此功能會匯出當前登入帳戶的工作權杖。
 你可以在登入界面或“建立新帳戶”界面匯入此權杖。

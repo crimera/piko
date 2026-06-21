@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Premium Settings -->
+    <string name="piko_title_premium">進階版</string>
     <string name="piko_pref_undo_posts">啟用取消推文</string>
     <string name="piko_pref_undo_posts_desc">開啟推文在發佈前可以取消功能</string>
     <string name="piko_pref_undo_posts_btn">取消推文設定</string>
@@ -37,6 +38,7 @@
     <string name="piko_share_image_toggle">啟用分享截圖</string>
     <string name="piko_share_image_autocleanup">自動清理截圖</string>
     <string name="piko_share_image_autocleanup_desc">啟用後將刪除 24 小時前的截圖</string>
+    <string name="piko_share_image_error">錯誤：%s</string>
     <string name="piko_title_native_translator">原生推文翻譯</string>
     <string name="piko_native_translator_toggle">啟用原生推文翻譯</string>
     <string name="piko_native_translator_provider">翻譯服務</string>
@@ -44,6 +46,7 @@
     <string name="piko_native_translator_zero_text">未找到需要翻譯的文字</string>
     <string name="piko_native_translator_google">Google 翻譯</string>
     <string name="piko_native_translator_google_v2">Google 翻譯 V2</string>
+    <string name="piko_native_translator_fxtwitter">FxTwitter API</string>
     <string name="piko_title_native_reader_mode">原生閱讀器模式</string>
     <string name="piko_native_reader_mode_toggle">啟用原生閱讀器模式</string>
     <string name="piko_native_reader_mode_grok_thread">分析該主題</string>
@@ -88,7 +91,6 @@
     <string name="piko_pref_top_people_search_desc">隱藏搜尋結果熱門中的人物</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">其他</string>
-    <string name="piko_pref_chirp_font">啟用 chirp 字體</string>
     <string name="piko_pref_hide_fab">隱藏發推按鈕</string>
     <string name="piko_pref_hide_fab_menu">隱藏發推按鈕選單</string>
     <string name="piko_pref_rec_users">隱藏推薦使用者</string>
@@ -219,12 +221,21 @@
     <string name="piko_dialog_delete_message">刪除%s?</string>
     <string name="piko_single_page_settings">單一設定頁面</string>
     <string name="piko_single_page_settings_desc">在單一頁面中查看設定</string>
+    <string name="piko_pref_search_type_ahead_users">使用者</string>
+    <string name="piko_pref_search_type_ahead_events">活動</string>
     <string name="piko_settings_supported_links">開啟支援的連結</string>
     <!-- For arrays-->
+    <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_media">媒體</string>
     <string name="piko_array_light_mode">淺色模式</string>
     <!-- App icon strings -->
     <!-- Category -->
+    <string name="piko_app_icon_category_legacy">傳統</string>
+    <string name="piko_app_icon_category_seasonal_event">季節性活動</string>
     <!-- Icon names -->
+    <string name="piko_app_icon_name_default">預設</string>
+    <string name="piko_app_icon_name_stpatricks_day">聖博德節</string>
+    <string name="piko_app_icon_name_easter">復活節</string>
     <!-- Import / export login tokens -->
     <string name="piko_login_token_export_screen_description">"此功能會匯出當前登入帳戶的工作權杖。
 你可以在登入界面或“建立新帳戶”界面匯入此權杖。
