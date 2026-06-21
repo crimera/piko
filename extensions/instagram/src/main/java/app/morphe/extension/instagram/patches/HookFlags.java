@@ -69,7 +69,6 @@ private static void simpleOverflowMenuFlags() {
     // Thanks to @brosssh
     private static void suggestedContentFlags() {
         BOOL_FLAGS.put("111509::3", false); //ig_search_ta_nullstate_suggestions::is_android_enabled
-        BOOL_FLAGS.put("58467::20", false); //ig_spain_growth::is_ig_to_p92_app_switcher_enabled_android
         BOOL_FLAGS.put("82771::0", false); //igx_foundation_litho_stories_tray::is_litho_stories_tray_enabled
     }
 
