@@ -68,11 +68,6 @@ val settingsPatch =
 
             instagramInitHook.fingerprint.method.apply {
 
-                addInstruction(
-                    0,
-                    SSTS_DESCRIPTOR.format("load"),
-                )
-
                 val firstInvokeSuperIndex = indexOfFirstInstruction(Opcode.INVOKE_SUPER)
                 val contextRegister = getInstruction(firstInvokeSuperIndex).registersUsed[0]
                 val freeRegister = findFreeRegister(firstInvokeSuperIndex, listOf(firstInvokeSuperIndex))
@@ -83,17 +78,12 @@ val settingsPatch =
                     new-instance v$freeRegister, Lapp/morphe/extension/crimera/CustomCrashHandler;
                     invoke-direct {v$freeRegister, v$contextRegister}, Lapp/morphe/extension/crimera/CustomCrashHandler;-><init>(Landroid/content/Context;)V
                     invoke-static {v$freeRegister}, Ljava/lang/Thread;->setDefaultUncaughtExceptionHandler(Ljava/lang/Thread${'$'}UncaughtExceptionHandler;)V
+                    
+                    ${SSTS_DESCRIPTOR.format("load")}
+                    ${LOAD_FLAGS_DESCRIPTOR.format("load")}
+                    ${LOAD_FLAGS_DESCRIPTOR.format("load")}
+                    invoke-static {}, $CONSTANTS_DESCRIPTOR/Constants;->load()V
                     """.trimIndent(),
-                )
-
-                addInstruction(
-                    firstInvokeSuperIndex + 2,
-                    LOAD_FLAGS_DESCRIPTOR.format("load"),
-                )
-                // Loads strings for common extension.
-                addInstruction(
-                    firstInvokeSuperIndex + 3,
-                    "invoke-static {}, $CONSTANTS_DESCRIPTOR/Constants;->load()V",
                 )
             }
 

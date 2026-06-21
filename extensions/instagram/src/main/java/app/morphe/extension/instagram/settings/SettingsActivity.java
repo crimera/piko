@@ -31,6 +31,7 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
+import app.morphe.extension.instagram.settings.SettingsStatus;
 
 public class SettingsActivity extends Activity {
 
@@ -241,7 +242,7 @@ public class SettingsActivity extends Activity {
             } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_DEV_OPTIONS)) {
                 screenBuilder.buildDeveloperSection();
             } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_ABOUT)) {
-                screenBuilder.aboutSection();
+                screenBuilder.aboutSection(SettingsStatus.FLAGS);
             }
 
             setPreferenceScreen(screen);

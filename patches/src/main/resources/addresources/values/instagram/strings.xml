@@ -65,6 +65,7 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_disable_double_tap_like_reel">Disable double tap like on reel</string>
     <string name="piko_disable_double_tap_like_comment">Disable double tap like on comment</string>
     <string name="piko_disable_double_tap_like_message">Disable double tap like on message</string>
+    <string name="piko_disable_double_tap_to_like">Disable double tap to like</string>
 
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Misc</string>
@@ -140,6 +141,7 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_external_downloader_package_name">External downloader package name</string>
     <string name="piko_external_downloader_package_name_not_found">External downloader package name not found</string>
     <string name="piko_external_downloader_package_name_not_set">Please set the external downloader package name</string>
+    <string name="piko_download_voice_media">Download voice message</string>
 
     <!-- Posts Section -->
     <string name="piko_post_options">Post options</string>
@@ -159,11 +161,14 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_hide_navigation_create">Hide Create button</string>
 
     <!-- Information Section -->
-    <string name="piko_patch_info_title">Patch information</string>
+    <string name="piko_category_about">About</string>
     <string name="piko_export_pref">Export piko preferences</string>
     <string name="piko_import_pref">Import piko preferences</string>
     <string name="piko_app_version">App version: %s</string>
     <string name="piko_patch_version">Patch version: %s</string>
+    <string name="piko_patch_info_title">Patch information</string>
+    <string name="piko_patch_enabled">Enabled</string>
+    <string name="piko_patch_disabled">Disabled</string>
 
     <!-- Export and Import Section -->
     <string name="piko_export_success">Exported successfully</string>
