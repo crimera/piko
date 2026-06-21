@@ -1,3 +1,13 @@
+## [3.7.0-dev.2](https://github.com/crimera/piko/compare/v3.7.0-dev.1...v3.7.0-dev.2) (2026-06-21)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix button press key check (again) ([d0e9933](https://github.com/crimera/piko/commit/d0e9933d96f519c5f4a3c96ea9bc628878c0024b))
+
+### ✨ New Features
+
+* **Instagram:** Added "friendship status" along with followback indicator ([6561341](https://github.com/crimera/piko/commit/656134104098ee2b1afc9530416629cc32ea6e8e))
+
 ## [3.7.0-dev.1](https://github.com/crimera/piko/compare/v3.6.0...v3.7.0-dev.1) (2026-06-21)
 
 ### 🐛 Bug Fixes
