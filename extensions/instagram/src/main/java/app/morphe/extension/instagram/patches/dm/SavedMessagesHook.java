@@ -208,6 +208,11 @@ public class SavedMessagesHook {
             // Display name = the chat title recorded for this thread (the participant's name for a
             // 1:1 chat), so it's stored on the row and shown by both the screen and the unsend
             // notification. Falls back to a name already on the thread, else null (→ sender id).
+            // TODO(pending): resolve the sender's username at PATCH TIME instead of relying on the
+            //   chat title. The sender's profile object is on the item at field A02 (LX/AbP); add a
+            //   DirectItem.getSenderUsername() that reads its username field (resolved by
+            //   directItemEntity), so notifications show the name for ANY chat — no runtime
+            //   reflection (keeps the reviewer's Entity convention). See PR #1387.
             String senderUser = db.getThreadUsername(threadId);
             if (senderUser == null && threadId != null && threadId.equals(sCurrentThreadId)) {
                 senderUser = sCurrentThreadTitle;
