@@ -44,20 +44,22 @@ public class FriendshipStatusIndicator {
 
         Map<String, Boolean> friendshipMap = userFriendshipStatus.getMappings();
 
-        ArrayList<String> options = new ArrayList<>();
+        StringBuilder content = new StringBuilder();
+        content.append("\n\n");
         for (Map.Entry<String, Boolean> entry : friendshipMap.entrySet()) {
             String tag = entry.getKey();
-            boolean sts = (boolean) entry.getValue();
-            tag = tag.replace("_"," ");
-            options.add(tag+": "+Boolean.valueOf(sts));
-        }
-        CharSequence[] items = options.toArray(new CharSequence[0]);
+            Object sts = entry.getValue();
+            if(sts!=null){
+                tag = tag.replace("_"," ");
+                content.append(tag+": "+sts.toString().toUpperCase()+"\n\n");
+            }
 
-        dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface d, int which) {}
         }
-        );
+        // Removes last \n
+        if(content.length()>2)  content.deleteCharAt(content.length() - 2);
+        dialog.setMessage(content.toString());
+
+
 
         Dialog dlg = dialog.getDialog();
         dlg.show();
