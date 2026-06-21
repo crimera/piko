@@ -126,6 +126,7 @@
     <string name="piko_disunify_xchat_system">Disunify xchat system</string>
     <string name="piko_disunify_xchat_system_desc">Bring back legacy features like messages and share sheet</string>
     <string name="piko_legacy_share_link">Legacy share links</string>
+    <string name="piko_block_redirecting_to_x_lite">Block redirecting to X Lite</string>
 
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature flags</string>
