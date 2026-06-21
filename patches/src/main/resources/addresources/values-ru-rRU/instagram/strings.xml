@@ -1,2 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <!-- Ads Section -->
+    <string name="piko_category_ads">Реклама</string>
+    <string name="piko_disable_ads">Отключить рекламу</string>
+    <string name="piko_hide_suggested_content">Скрыть рекомендуемый контент</string>
+    <string name="piko_hide_suggested_content_desc">Скрывает рекомендуемые истории, Reels и Threads (предлагаемые публикации всё ещё будут показываться).</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_dev_options">Параметры разработчика</string>
+    <string name="piko_enable_dev_options">Включить параметры разработчика</string>
+    <string name="piko_enable_dev_options_desc">Разблокирует опцию разработчика при длительном</string>
+    <string name="piko_directly_open_metaconfig">Открыть настройки MetaConfig сразу</string>
+    <string name="piko_directly_open_metaconfig_desc">Открывает настройки MetaConfig при долгом нажатии на значок «Домой» (требуется включение параметров разработчика)</string>
+    <string name="piko_enable_emp_options">Включить служебные параметры</string>
+    <string name="piko_enable_emp_options_desc">Открывает все служебные параметры, используемые для тестирования</string>
+    <string name="piko_allow_user_network_certificate">Разрешить пользовательские сетевые сертификаты</string>
+    <string name="piko_allow_user_network_certificate_desc">Разрешает использование пользовательских сетевых сертификатов для тестирования безопасности</string>
+    <string name="piko_remove_build_expire_popup">Убрать уведомление об устаревании сборки</string>
+    <string name="piko_remove_build_expire_popup_desc">Убирает всплывающее уведомление, которое появляется спустя время после устаревания версии приложения</string>
+    <string name="piko_export_dev_overrides">Экспорт замещений</string>
+    <string name="piko_import_dev_overrides">Импорт замещений</string>
+    <string name="piko_import_id_mapping">Импорт файлов сопоставления</string>
+    <string name="piko_download_id_mapping">Скачать файл сопоставления</string>
+    <string name="piko_missing_mapping_file">Отсутствует файл сопоставления</string>
+    <string name="piko_missing_mapping_file_desc">Без файла сопоставления параметры разработчика не будут иметь правильных имён. Хотите скачать его?</string>
+    <!-- Links Section -->
+    <string name="piko_category_links">Ссылки</string>
+    <string name="piko_open_links_externally">Открывать ссылки во внешнем браузере</string>
+    <string name="piko_open_links_externally_desc">Открывать ссылки во внешнем браузере вместо встроенного браузера приложения</string>
+    <string name="piko_sanitize_share_links">Очищать ссылки при отправке</string>
+    <!-- Ghost Section -->
+    <string name="piko_category_ghost">Режим невидимки</string>
+    <string name="piko_view_stories_anonymously">Смотреть истории анонимно</string>
+    <string name="piko_view_live_anonymously">Смотреть прямые эфиры анонимно</string>
+    <string name="piko_disable_typing_status">Отключить статус набора текста</string>
+    <string name="piko_disable_screenshot_detection">Отключить определение снимков экрана</string>
+    <string name="piko_view_dm_anonymously">Читать сообщения анонимно</string>
+    <string name="piko_turn_on_all_ghost_modes">Включить все режимы невидимки</string>
+    <string name="piko_ghost_modes_on">Режим невидимки: Вкл</string>
+    <string name="piko_ghost_modes_default">Режим невидимки: По умолчанию</string>
+    <!-- Distraction-Free Section -->
+    <!-- Miscellaneous Section -->
+    <!-- Download Media Section -->
+    <!-- Posts Section -->
+    <!-- Navigation Section -->
+    <!-- Information Section -->
+    <!-- Export and Import Section -->
+    <!-- Open With Section -->
+    <!-- Like Animation Section -->
+    <!-- For arrays -->
+    <!-- Welcome Message -->
+    <!-- Action Bar Section -->
+</resources>

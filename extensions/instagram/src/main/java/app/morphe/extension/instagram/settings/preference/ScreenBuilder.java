@@ -14,6 +14,8 @@ import android.content.Intent;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
+import java.util.TreeMap;
+import java.util.Map;
 
 import app.morphe.extension.instagram.patches.dm.DeletedMessagesActivity;
 import app.morphe.extension.instagram.settings.SettingsStatus;
@@ -683,9 +685,8 @@ public class ScreenBuilder {
         );
     }
 
-    public void aboutSection() {
+    public void aboutSection(TreeMap<String, Boolean> flags) {
 
-        // PreferenceCategory category= addCategory(str("piko_patch_info_title"));
         String appVersionText = String.format(str("piko_app_version"), Utils.getAppVersionName());
         String patchVersionText = String.format(str("piko_patch_version"), Utils.getPatchesReleaseVersion());
 
@@ -754,6 +755,25 @@ public class ScreenBuilder {
                     )
             );
         }
+
+        PreferenceCategory category = addCategory(str("piko_patch_info_title"));
+        String enabledStr = str("piko_patch_enabled");
+        String disabledStr = str("piko_patch_disabled");
+
+        for (Map.Entry<String, Boolean> entry : flags.entrySet()) {
+            String resName = entry.getKey();
+            boolean sts = (boolean) entry.getValue();
+            String status = sts ? enabledStr : disabledStr;
+
+            addPreference(category,
+                    helper.buttonPreference(
+                            resName,
+                            status,
+                            resName
+                    )
+            );
+        }
+
     }
 
     public void buildSettingsPage() {
@@ -850,7 +870,7 @@ public class ScreenBuilder {
 
         addPreference(
                 helper.buttonPreference(
-                        str("piko_patch_info_title"),
+                        str("piko_category_about"),
                         "",
                         Constants.PIKO_FRAGMENT_ABOUT
                 )

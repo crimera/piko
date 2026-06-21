@@ -20,6 +20,8 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.preference.fragments.FragmentHook;
 import app.morphe.extension.instagram.patches.Block;
 import app.morphe.extension.instagram.patches.download.DownloadMapping;
+import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.constants.Constants;
 
 public class ButtonPref extends Preference {
     private final Context context;
@@ -87,7 +89,7 @@ public class ButtonPref extends Preference {
 
     @Override
     protected View onCreateView(ViewGroup parent) {
-        return InstagramPreferenceStyle.createPreferenceView(context, InstagramPreferenceStyle.TRAILING_CHEVRON);
+        return InstagramPreferenceStyle.createPreferenceView(context, InstagramPreferenceStyle.TRAILING_CHEVRON,getIconResourceName(getKey()));
     }
 
     @Override
@@ -108,6 +110,37 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_export_experiment_list")
                 || key.equals("piko_export_experiment_mappings")
                 || key.equals("piko_download_id_mapping"));
+    }
+
+    private String getIconResourceName(String key) {
+        if(key.equals(Constants.PIKO_FRAGMENT_ADS)){
+            return UI.DRAWABLE_SHEILD_ICON;
+        }
+        if(key.equals(Constants.PIKO_FRAGMENT_GHOST)){
+            return UI.DRAWABLE_SNAPCHAT_ICON;
+        }
+        if(key.equals(Constants.PIKO_FRAGMENT_LINKS)){
+            return UI.DRAWABLE_LINK_ICON;
+        }
+        if(key.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)){
+            return UI.DRAWABLE_FRAME_CROSSED_ICON;
+        }
+        if(key.equals(Constants.PIKO_FRAGMENT_MISC)){
+            return UI.DRAWABLE_CODE_ICON;
+        }
+        if(key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)){
+            return UI.DRAWABLE_FB_DOWNLOAD_ICON;
+        }
+        if(key.equals(Constants.PIKO_FRAGMENT_NAV_BTNS)){
+            return UI.DRAWABLE_STACK_ICON;
+        }
+        if(key.equals(Constants.PIKO_FRAGMENT_DEV_OPTIONS)){
+            return UI.DRAWABLE_GEAR_ICON;
+        }
+        if(key.equals(Constants.PIKO_FRAGMENT_ABOUT)){
+            return UI.DRAWABLE_DEBUG_ICON;
+        }
+        return null;
     }
 
 }

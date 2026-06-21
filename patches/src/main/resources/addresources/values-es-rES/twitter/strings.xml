@@ -96,7 +96,6 @@
     <string name="piko_pref_top_people_search_desc">Oculta la sección de personas después de la búsqueda</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">Misceláneo</string>
-    <string name="piko_pref_chirp_font">Habilitar fuente chirp</string>
     <string name="piko_pref_hide_fab">Ocultar botón de acción flotante</string>
     <string name="piko_pref_hide_fab_menu">Ocultar los botones del menú de acción flotante</string>
     <string name="piko_pref_rec_users">Ocultar usuarios recomendados</string>

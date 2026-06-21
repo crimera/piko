@@ -19,7 +19,7 @@ public class UserFriendshipStatus extends Entity {
         this.obj = obj;
     }
 
-    private Map<String, Boolean> getMappings(){
+    public Map<String, Boolean> getMappings(){
         try {
             Class<?> helperClass = Class.forName("classname");
             return (Map) super.getMethod(helperClass, "methodname", new Class[]{FriendshipStatus.class}, this.obj);

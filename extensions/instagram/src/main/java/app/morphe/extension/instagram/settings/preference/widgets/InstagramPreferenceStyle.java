@@ -20,11 +20,14 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import app.morphe.extension.instagram.constants.UI;
 
 public final class InstagramPreferenceStyle {
     private static final String TAG_TITLE = "piko_instagram_pref_title";
@@ -72,6 +75,10 @@ public final class InstagramPreferenceStyle {
     }
 
     public static View createPreferenceView(Context context, int trailingType) {
+        return createPreferenceView(context,trailingType,null);
+    }
+
+    public static View createPreferenceView(Context context, int trailingType, String iconResName) {
         PreferenceRow row = new PreferenceRow(context, trailingType);
         row.setOrientation(trailingType == TRAILING_SWITCH ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
@@ -82,6 +89,10 @@ public final class InstagramPreferenceStyle {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         ));
+
+        if(iconResName!=null){
+            row.setIcon(iconResName);
+        }
 
         if (trailingType == TRAILING_SWITCH) {
             LinearLayout titleRow = new LinearLayout(context);
@@ -239,11 +250,40 @@ public final class InstagramPreferenceStyle {
         private boolean switchClickAllowed = true;
         private boolean drawPressedHighlight;
         private boolean switchAccessibilityChecked;
+        private ImageView iconView;
+
 
         PreferenceRow(Context context, int trailingType) {
+            this(context, trailingType, null);
+        }
+
+        PreferenceRow(Context context, int trailingType, String iconResName) {
             super(context);
             this.trailingType = trailingType;
+            setOrientation(LinearLayout.HORIZONTAL);
+            setGravity(Gravity.CENTER_VERTICAL);
             setWillNotDraw(false);
+        }
+
+        private void initIconView(Context context, String iconResName) {
+            iconView = new ImageView(context);
+
+            int iconSize = dp(context, 24);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(iconSize, iconSize);
+
+            params.setMarginStart(dp(context, 16));
+            params.setMarginEnd(dp(context, 16));
+            iconView.setLayoutParams(params);
+
+            UI.setThemedIcon(iconView, iconResName);
+            iconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            addView(iconView, 0);
+        }
+
+        void setIcon(String iconResName) {
+            if (iconResName != null) {
+                initIconView(getContext(), iconResName);
+            }
         }
 
         void setHighlightView(View highlightView) {
