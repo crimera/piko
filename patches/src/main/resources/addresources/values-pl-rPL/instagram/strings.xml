@@ -72,6 +72,7 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_follow_back_indicator">Włącz wskaźnik wzajemnej obserwacji</string>
     <string name="piko_fbi_follows_you">Obserwuje Cię</string>
     <string name="piko_fbi_doesnt_follows_you">Nie obserwuje Cię</string>
+    <string name="piko_friendship_status">Status znajomości</string>
     <string name="piko_view_story_mentions">Wyświetl wzmianki w relacji</string>
     <string name="piko_vsm_title">Wzmianki w relacji</string>
     <string name="piko_vsm_no_mentions">Brak wzmianek w tej relacji</string>

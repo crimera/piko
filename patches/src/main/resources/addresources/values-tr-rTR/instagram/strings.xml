@@ -71,6 +71,7 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_follow_back_indicator">Geri takip et göstergesini etkinleştir</string>
     <string name="piko_fbi_follows_you">Seni takip ediyor</string>
     <string name="piko_fbi_doesnt_follows_you">Seni takip etmiyor</string>
+    <string name="piko_friendship_status">Arkadaşlık durumu</string>
     <string name="piko_view_story_mentions">Hikaye bahsetmelerini görüntüle</string>
     <string name="piko_vsm_title">Hikaye bahsetmeleri</string>
     <string name="piko_vsm_no_mentions">Bu hikayede bahsetme yok</string>

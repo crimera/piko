@@ -27,7 +27,7 @@
     <string name="piko_category_links">링크</string>
     <string name="piko_open_links_externally">외부 링크 열기</string>
     <string name="piko_open_links_externally_desc">외부 링크를 열 경우에 내부 브라우저 대신 외부 브라우저를 사용합니다</string>
-    <string name="piko_sanitize_share_links">공유 링크 정기</string>
+    <string name="piko_sanitize_share_links">공유 링크 정리</string>
     <!-- Ghost Section -->
     <string name="piko_category_ghost">고스트 모드</string>
     <string name="piko_view_stories_anonymously">스토리 몰래보기</string>

@@ -72,6 +72,7 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_follow_back_indicator">Activer l’indicateur de suivi en retour</string>
     <string name="piko_fbi_follows_you">Vous suit</string>
     <string name="piko_fbi_doesnt_follows_you">Ne vous suit pas</string>
+    <string name="piko_friendship_status">Statut d\'amitié</string>
     <string name="piko_view_story_mentions">Voir les mentions de la story</string>
     <string name="piko_vsm_title">Mentions en story</string>
     <string name="piko_vsm_no_mentions">Aucune mention dans cette story</string>
@@ -96,7 +97,7 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_copy_full_name">Copier le nom complet</string>
     <string name="piko_copy_user_id">Copier l\'identifiant utilisateur</string>
     <string name="piko_copy_bio">Copier la bio</string>
-    <string name="piko_download_profile_picture">Télécharger les photos de profil</string>
+    <string name="piko_download_profile_picture">Télécharger la photo de profil</string>
     <string name="piko_copied">Copié</string>
     <string name="piko_more_profile_options">Plus d’options de profil</string>
     <string name="piko_more_profile_options_action_bar_toggle">Options de profil sur la barre d’actions</string>
