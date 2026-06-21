@@ -44,11 +44,11 @@ public class BackupPrefActivity extends AppCompatActivity {
 
         if (args != null) {
 
-            if (args.containsKey(str("piko_export_dev_overrides"))) {
+            if (args.containsKey("piko_export_dev_overrides")) {
                 filename = "mc_overrides";
                 ext = ".json";
                 sourceFile = new File(context.getFilesDir() + "/mobileconfig", filename + ext);
-            } else if (args.containsKey(str("piko_export_pref"))) {
+            } else if (args.containsKey("piko_export_pref")) {
                 filename = Constants.PIKO_SETTINGS;
                 ext = ".xml";
                 sourceFile =  new File(context.getApplicationInfo().dataDir + "/shared_prefs",filename + ext);
