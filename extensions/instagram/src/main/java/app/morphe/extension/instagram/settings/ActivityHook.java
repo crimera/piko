@@ -48,11 +48,11 @@ public class ActivityHook {
 
     public static void launchFragment(Context ctx, String bundleKey){
         Intent intent = null;
-        if (bundleKey.equals(str("piko_export_dev_overrides")) || bundleKey.equals(str("piko_export_pref"))) {
+        if (bundleKey.equals("piko_export_dev_overrides") || bundleKey.equals("piko_export_pref")) {
             intent = new Intent(ctx,BackupPrefActivity.class);
-        } else if (bundleKey.equals(str("piko_import_dev_overrides")) || bundleKey.equals(str("piko_import_id_mapping"))  || bundleKey.equals(str("piko_import_pref"))) {
+        } else if (bundleKey.equals("piko_import_dev_overrides") || bundleKey.equals("piko_import_id_mapping")  || bundleKey.equals("piko_import_pref")) {
             intent = new Intent(ctx,RestorePrefActivity.class);
-        } else if (bundleKey.equals(str("piko_download_set_path"))) {
+        } else if (bundleKey.equals("piko_download_set_path")) {
             intent = new Intent(ctx,FolderPickerActivity.class);
         }
         if(intent!=null){
