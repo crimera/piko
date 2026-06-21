@@ -1,3 +1,24 @@
+## [3.7.0-dev.1](https://github.com/crimera/piko/compare/v3.6.0...v3.7.0-dev.1) (2026-06-21)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix button press key check ([70862d4](https://github.com/crimera/piko/commit/70862d4b50ff4e0b159cadd8ba34dde97929326c))
+* **Instagram:** Show downloader package error on launch failure ([#1377](https://github.com/crimera/piko/issues/1377)) ([c39915e](https://github.com/crimera/piko/commit/c39915e7a2febc409f10227a729f72ff66cd7c6d))
+* **Instagram:** Update chirp font patch string ([5b23848](https://github.com/crimera/piko/commit/5b23848d40286690b215f6923da6a45c1f4c5038))
+* **Instagram:** Update eye icon ([e5b6e3d](https://github.com/crimera/piko/commit/e5b6e3dd78f838279e62e75572b774ca05562a72))
+
+### ✨ New Features
+
+* **Instagram:** Add Crowdin support ([#1327](https://github.com/crimera/piko/issues/1327)) ([f03659b](https://github.com/crimera/piko/commit/f03659b9ee459640bc6df04504dd085544196a52))
+
+### 🔧 Improvements
+
+* **Instagram:** added flags to improve the experience and more stable ([#1348](https://github.com/crimera/piko/issues/1348)) ([a585d21](https://github.com/crimera/piko/commit/a585d21cdc811030c55a8c00c5053d33543a2916))
+* **Instagram:** Added icons to Piko settings ([4f4a070](https://github.com/crimera/piko/commit/4f4a07064fdaed0f29c0d3a8aef193783c48a411))
+* **Instagram:** Added patch info section on about ([a0394e8](https://github.com/crimera/piko/commit/a0394e863c6348bff7d7e3e84aef30cf554d122f))
+* **Instagram:** Make Piko settings multi page ([cb5ef6a](https://github.com/crimera/piko/commit/cb5ef6a1710316a33c0c35db27c037154d8f6372))
+* **Twitter:** Update Tweet user id extraction fingerprint ([2f573d2](https://github.com/crimera/piko/commit/2f573d2025e44728d95332b6e1bb0fea40a06aa4))
+
 ## [3.6.0](https://github.com/crimera/piko/compare/v3.5.0...v3.6.0) (2026-06-18)
 
 ### 🐛 Bug Fixes
