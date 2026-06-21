@@ -68,12 +68,19 @@ public class DirectItem extends Entity {
     }
 
     public String getText() {
+        // REST items store text on the base class. MQTT items leave that null and put the text in
+        // a polymorphic payload field on the subclass — both names are resolved at patch time.
         try {
-            Object v = this.readBaseField("fieldName");
-            return v instanceof String ? (String) v : null;
-        } catch (Exception e) {
-            return null;
+            Object v = this.readBaseField("baseTextField");
+            if (v instanceof CharSequence) return v.toString();
+        } catch (Exception ignored) {
         }
+        try {
+            Object v = super.getField(this.obj, "subTextField");
+            if (v instanceof CharSequence) return v.toString();
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
     /** Raw server timestamp string (microseconds). Use {@link #getTimestampMs()} for millis. */
@@ -118,10 +125,17 @@ public class DirectItem extends Entity {
         }
     }
 
-    /** Restores the message text on the item (used by anti-revoke). */
+    /** Restores the message text on the item (used by anti-revoke). Sets both the base-class text
+     *  field and the MQTT subclass payload field so the message renders on either delivery path. */
     public void setText(String text) {
         try {
-            java.lang.reflect.Field f = this.baseClass().getDeclaredField("fieldName");
+            java.lang.reflect.Field f = this.baseClass().getDeclaredField("baseTextField");
+            f.setAccessible(true);
+            f.set(this.obj, text);
+        } catch (Exception ignored) {
+        }
+        try {
+            java.lang.reflect.Field f = this.obj.getClass().getDeclaredField("subTextField");
             f.setAccessible(true);
             f.set(this.obj, text);
         } catch (Exception ignored) {

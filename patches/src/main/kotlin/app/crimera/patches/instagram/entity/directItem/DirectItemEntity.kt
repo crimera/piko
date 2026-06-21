@@ -7,6 +7,7 @@
 package app.crimera.patches.instagram.entity.directItem
 
 import app.crimera.utils.changeFirstString
+import app.crimera.utils.changeStringAt
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -14,6 +15,8 @@ import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 /**
  * Resolves every obfuscated DirectItem field name at patch time and bakes it into the
@@ -53,8 +56,8 @@ val directItemEntity =
                 GetUserIdExtension.changeFirstString(fieldAfter("user_id").name)
 
                 val textField = fieldAfter("text").name
-                GetTextExtension.changeFirstString(textField)
-                SetTextExtension.changeFirstString(textField)
+                GetTextExtension.changeStringAt(0, textField)
+                SetTextExtension.changeStringAt(0, textField)
 
                 GetTimestampRawExtension.changeFirstString(fieldAfter("timestamp").name)
 
@@ -85,6 +88,37 @@ val directItemEntity =
                         .maxByOrNull { it.name }!!
                         .name
                 GetItemTypeExtension.changeFirstString(itemTypeField)
+
+                // MQTT items leave the base text field null and store the message in a polymorphic
+                // Object payload field on the subclass, set immediately after the item-type setter
+                // (a void method taking the item-type enum). Resolve that field so getText can fall
+                // back to it for live/MQTT messages.
+                val itemTypeEnum = baseClass.fields.first { it.name == itemTypeField }.type
+                val subClass = mutableClassDefBy { it.superclass == baseDescriptor }
+                val subTextField =
+                    subClass.methods.firstNotNullOfOrNull { m ->
+                        val insns = runCatching { m.instructions.toList() }.getOrNull()
+                            ?: return@firstNotNullOfOrNull null
+                        insns.indices.firstNotNullOfOrNull fn@{ i ->
+                            val insn = insns[i]
+                            if (insn.opcode != Opcode.INVOKE_VIRTUAL) return@fn null
+                            val ref = (insn as ReferenceInstruction).reference as? MethodReference
+                            if (ref == null || ref.parameterTypes.size != 1 ||
+                                ref.parameterTypes[0].toString() != itemTypeEnum
+                            ) {
+                                return@fn null
+                            }
+                            insns.drop(i + 1).take(3)
+                                .firstOrNull { it.opcode.name.startsWith("iput", true) }
+                                ?.let { (it as ReferenceInstruction).reference as? FieldReference }
+                                ?.takeIf { it.type == "Ljava/lang/Object;" }
+                                ?.name
+                        }
+                    }
+                subTextField?.let {
+                    GetTextExtension.changeStringAt(1, it)
+                    SetTextExtension.changeStringAt(1, it)
+                }
             }
 
             // DirectThreadKey is a stable (non-obfuscated) class but its thread-id field is
