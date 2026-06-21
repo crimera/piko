@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-06-21T17:26:58",
-  "description": "## [3.7.0-dev.2](https://github.com/crimera/piko/compare/v3.7.0-dev.1...v3.7.0-dev.2) (2026-06-21)\n\n### 🐛 Bug Fixes\n\n* **Instagram:** Fix button press key check (again) ([d0e9933](https://github.com/crimera/piko/commit/d0e9933d96f519c5f4a3c96ea9bc628878c0024b))\n\n### ✨ New Features\n\n* **Instagram:** Added \"friendship status\" along with followback indicator ([6561341](https://github.com/crimera/piko/commit/656134104098ee2b1afc9530416629cc32ea6e8e))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.7.0-dev.2/patches-3.7.0-dev.2.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.7.0-dev.2/patches-3.7.0-dev.2.mpp.asc",
-  "version": "3.7.0-dev.2"
+  "created_at": "2026-06-21T18:28:51",
+  "description": "## [3.7.0-dev.3](https://github.com/crimera/piko/compare/v3.7.0-dev.2...v3.7.0-dev.3) (2026-06-21)\n\n### 🔧 Improvements\n\n* **Instagram:** Update \"Friendship status\" dialog ([b5b727a](https://github.com/crimera/piko/commit/b5b727a21211930182a4293f61288eea5b5ae655))\n* **Twitter:** Added missing patch on patch info ([221fccb](https://github.com/crimera/piko/commit/221fccbf97dfbe62b80faaab2abe0162dc6bcbb8))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.7.0-dev.3/patches-3.7.0-dev.3.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.7.0-dev.3/patches-3.7.0-dev.3.mpp.asc",
+  "version": "3.7.0-dev.3"
 }

@@ -1,3 +1,10 @@
+## [3.7.0-dev.3](https://github.com/crimera/piko/compare/v3.7.0-dev.2...v3.7.0-dev.3) (2026-06-21)
+
+### 🔧 Improvements
+
+* **Instagram:** Update "Friendship status" dialog ([b5b727a](https://github.com/crimera/piko/commit/b5b727a21211930182a4293f61288eea5b5ae655))
+* **Twitter:** Added missing patch on patch info ([221fccb](https://github.com/crimera/piko/commit/221fccbf97dfbe62b80faaab2abe0162dc6bcbb8))
+
 ## [3.7.0-dev.2](https://github.com/crimera/piko/compare/v3.7.0-dev.1...v3.7.0-dev.2) (2026-06-21)
 
 ### 🐛 Bug Fixes
