@@ -214,4 +214,18 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="save_deleted_messages">Save deleted messages</string>
     <string name="save_deleted_messages_desc">Captures incoming DMs locally as they arrive from the server. Marks messages as deleted when unsent, so you can view them even after the sender deletes them.</string>
     <string name="view_deleted_messages">View deleted messages</string>
+    <string name="piko_deleted_in_chat">Deleted in this chat</string>
+    <string name="piko_all_deleted_messages">All deleted messages</string>
+    <string name="piko_clear">Clear</string>
+    <string name="piko_clear_chat_confirm">Clear deleted messages for this chat?</string>
+    <string name="piko_clear_all_confirm">Clear ALL saved deleted messages?</string>
+    <string name="piko_no_deleted_messages">No deleted messages captured yet.\nEnable the feature and messages will be saved as they arrive.</string>
+    <string name="piko_delete_saved_confirm">Delete this saved message?</string>
+    <string name="piko_delete">Delete</string>
+    <string name="piko_unknown">Unknown</string>
+    <string name="piko_tap_to_view">tap to view</string>
+    <string name="piko_deleted_a_message">%s deleted a message</string>
+    <string name="piko_someone">Someone</string>
+    <string name="piko_deleted_messages_channel">Deleted messages</string>
+    <string name="piko_deleted_messages_channel_desc">Notifies when a received message is unsent</string>
 </resources>

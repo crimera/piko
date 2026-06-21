@@ -6,6 +6,8 @@
 
 package app.morphe.extension.instagram.patches.dm;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -18,65 +20,30 @@ import java.lang.reflect.Method;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.db.PikoMessageDb;
+import app.morphe.extension.instagram.entity.DirectItem;
 import app.morphe.extension.instagram.utils.Pref;
 
 /**
  * Runtime hooks for the "Save deleted messages" feature.
  *
- * <h2>v426 Architecture — TWO delivery paths, both must be hooked</h2>
+ * <h2>Two delivery paths, both hooked</h2>
  *
- * <pre>
- * REST / JSON (thread history load)
- *   LX/0gL;.parseFromJson(LX/R0r;)LX/9ZA;    ← classes.dex
- *     └─ LX/AtQ;.parse → LX/0gG;.unsafeParseFromJson (creates LX/0gF; instance)
- *   Hook 1 is injected before RETURN_OBJECT in parseFromJson.
+ * <ul>
+ *   <li><b>REST / JSON</b> (thread history load): hooked before the parser returns the
+ *       fully-populated DirectItem.</li>
+ *   <li><b>MQTT / MSys</b> real-time delivery: hooked at the post-processing step that runs for
+ *       every incoming DirectItem. Real-time messages never pass through the JSON parser, so
+ *       without this path an in-thread send+unsend would be missed entirely.</li>
+ * </ul>
  *
- * MQTT / MSys real-time delivery
- *   LX/0gF;.A02(LX/1kP;, ..., LX/02L;, ...)  ← 24-param constructor, builds from delta
- *   LX/0gF;.A0P(UserSession, LX/02L;)LX/0gF;  ← classes12.dex, post-processing step
- *   Hook 2 is injected before the success RETURN_OBJECT in A0P (offset 0351/0352).
- * </pre>
+ * Both paths hand the DirectItem to {@link #onMessageReceived(Object)} as an {@code Object}; all
+ * field access goes through {@link DirectItem}, whose obfuscated field names were resolved at
+ * patch time (see the {@code directItemEntity} patch). Nothing here discovers field or method
+ * names by reflection at runtime — {@link DirectItem} also defeats the MQTT subclass's field
+ * shadowing by reading every field off the resolved base class.
  *
- * MQTT messages (including real-time send + unsend while in-thread) NEVER go through
- * parseFromJson. Without Hook 2, any message sent and unsent while the user is actively
- * in the thread would be missed entirely.
- *
- * <h2>Class hierarchy</h2>
- *
- * {@code LX/0gF;} (PUBLIC FINAL) extends {@code LX/9ZA;} (DirectItem base class).
- * {@code LX/0gF;} has NO additional instance fields — all data fields are declared on
- * {@code LX/9ZA;}. Every {@code getDeclaredField} call must walk the superclass chain
- * (see {@link #getFieldValue}) or it will silently fail when the runtime type is
- * {@code LX/0gF;} and the field is actually on {@code LX/9ZA;}.
- *
- * <h2>v426 field mapping (confirmed from dexdump classes12.dex)</h2>
- *
- * <pre>
- * JSON key        Obfuscated field   Type                   Class
- * item_id         A13                String                 LX/9ZA;
- * hide_in_thread  A1Y                Z (boolean)            LX/9ZA;
- * user_id         A1M                String                 LX/9ZA;
- * timestamp       A1J                String (microseconds)  LX/9ZA;
- * text            A1I                String                 LX/9ZA;
- * item_type       A0Y                LX/8ot; (enum)         LX/9ZA;
- * thread_key      A0W                DirectThreadKey        LX/9ZA;
- * threadId (key)  A00                String                 DirectThreadKey
- * MSys delta ref  A0V                LX/02L;                LX/9ZA;
- * </pre>
- *
- * v408 fallbacks: item_id via getter {@code A0l()}, hide_in_thread as {@code A2V:Z},
- * thread_key fields {@code A16/A18/A15}.
- *
- * <h2>How to update for a new Instagram version</h2>
- *
- * 1. Install the patched APK (pref on). Open any DM thread.
- * 2. In logcat (tag: piko), find "SavedMessagesHook ObjectBrowser dump" — this lists all
- *    fields on the runtime item, including inherited ones from superclasses.
- * 3. If field names differ from the table above, update the constants in
- *    {@link #onMessageReceived} and the table in Fingerprint.kt.
- * 4. If the hook doesn't fire at all, the fingerprint anchors may have changed:
- *    - Hook 1: grep classes.dex for methods with "item_id" + "hide_in_thread" + returnType Z
- *    - Hook 2: grep classes12.dex for "DirectMessage.postprocess" + "null type" string pair
+ * <p>The fingerprints that locate the two injection points live in
+ * {@code SaveDeletedMessagesPatch} / its {@code Fingerprint.kt}.
  */
 @SuppressWarnings("unused")
 public class SavedMessagesHook {
@@ -220,108 +187,44 @@ public class SavedMessagesHook {
 
     private static void processReceivedItem(Object item) {
         try {
-            // v426 field names (confirmed from dexdump classes12.dex LX/0gL;.A00):
-            //   item_id        → A13:String
-            //   user_id        → A1M:String (sender ID)
-            //   item_type      → A0Y:enum (toString() for value)
-            //   timestamp      → A1J:String (microseconds)
-            //   text           → A1I:String
-            //   thread_key     → A0W:DirectThreadKey, .A00:String
-            // v408 field names (fallback):
-            //   item_id        → getter A0l(), thread_key → A16/A18
-            String messageId  = reflectString(item, "item_id", "A13");
-            if (messageId == null) messageId = reflectStringOrInvoke(item, "item_id", "A0l");
+            // All field names below were resolved at patch time and baked into DirectItem — no
+            // obfuscated name is discovered here. DirectItem reads every field off the resolved
+            // base class, so the REST base type and the MQTT subclass (which shadows some base
+            // fields with different types) both work without per-type special-casing.
+            DirectItem di = new DirectItem(item);
+
+            String messageId = di.getItemId();
             // Deletion state participates in the dedup key: an item first seen alive and later
             // re-delivered as unsent (live in-thread unsend) is a DIFFERENT key, so it is NOT
             // dropped — we still need to mark it deleted and (conditionally) notify.
-            boolean deleted = isHideInThread(item);
-            // Dedup: A0P is called for every historical inbox item on each sync.
+            boolean deleted = di.isHideInThread();
+            // Dedup: the post-process hook is called for every historical inbox item on each sync.
             if (messageId != null
                     && SEEN_ITEM_IDS.put(messageId + (deleted ? ":1" : ":0"), Boolean.TRUE) != null) return;
-            String threadId   = reflectThreadIdFromItem(item);
-            String senderId   = reflectString(item, "user_id", "A1M");
+
+            String threadId  = di.getThreadId();
+            String senderId  = di.getUserId();
+            String content   = di.getText();
+            String type      = di.getItemType();
+            long   timestamp = di.getTimestampMs();
+            // Enum constant names mirror the server tokens ("TEXT", "MEDIA", …); normalise to the
+            // lowercase form describeMediaType / the screen expect.
+            if (type != null) type = type.trim().toLowerCase();
+
             PikoMessageDb db = PikoMessageDb.getInstance(PikoUtils.getContext());
-            // 1. REST items may carry a full UserInfo — extract + persist the handle for reuse.
-            String senderUser = resolveSenderUsername(item, senderId);
-            if (senderUser != null) db.putUsername(senderId, senderUser);
-            // 2. MQTT items carry only sender_id. Reuse a previously-persisted handle…
-            if (senderUser == null && senderId != null) {
-                senderUser = db.getUsername(senderId);
-            }
-            // 3. …or, as a last resort, probe IG's local user cache DBs.
+
+            // Resolve a display name for the sender: a previously-persisted handle first, then
+            // Instagram's own local user cache (queried by column, not by reflected field name).
+            String senderUser = (senderId != null) ? db.getUsername(senderId) : null;
             if (senderUser == null && senderId != null) {
                 senderUser = resolveUsernameFromCache(senderId);
                 if (senderUser != null) db.putUsername(senderId, senderUser);
             }
-            String content    = null;
-            String type       = null;
-            long   timestamp  = System.currentTimeMillis();
-
-            // item_type: v426 stores it as an enum in A0Y — but A0Y is SHADOWED on the MQTT
-            // subclass (X.0gF.A0Y:Media is usually null), so it must be read from the base class
-            // (X.9ZA, the same class that declares the String item_id A13), not via a plain
-            // superclass-chain walk which returns the subclass's null field first.
-            try {
-                Object typeObj = null;
-                Class<?> base = declaringClassOfStringField(item, "A13");
-                if (base != null) typeObj = readFieldOnClass(base, item, "A0Y");
-                if (typeObj == null) typeObj = reflectRaw(item, "item_type", "A0Y");
-                if (typeObj != null) type = typeObj.toString();
-            } catch (Exception ignored) {}
-            if (type == null) type = reflectString(item, "item_type", "A0R");
-            // Normalise the enum's toString() to a stable lowercase token when possible.
-            if (type != null) type = type.trim();
-
-            // timestamp: v426 stores as String microseconds (A1J), v408 as Long (A03)
-            try {
-                String tsStr = reflectString(item, "timestamp", "A1J");
-                if (tsStr != null && !tsStr.isEmpty()) {
-                    timestamp = Long.parseLong(tsStr) / 1000L; // µs → ms
-                } else {
-                    Object ts = reflectRaw(item, "timestamp", "A03");
-                    if (ts instanceof Long)   timestamp = (Long) ts;
-                    if (ts instanceof Number) timestamp = ((Number) ts).longValue();
-                }
-            } catch (Exception ignored) {}
-
-            // text content:
-            //   REST path (X.9ZA base): A1I:String
-            //   MQTT path (X.0gF wrapper): A0o:Object holds the text String directly
-            //   v408: nested text object with A00:String
-            try {
-                content = reflectString(item, "text", "A1I");
-                if (content == null) {
-                    // MQTT wrapper (X.0gF) stores text in A0o on the subclass, not on X.9ZA
-                    Object mqttText = getFieldValue(item, "A0o");
-                    if (mqttText instanceof String) content = (String) mqttText;
-                }
-                if (content == null) {
-                    Object textObj = findFieldByNameHint(item, "text");
-                    if (textObj instanceof String) {
-                        content = (String) textObj;
-                    } else if (textObj != null) {
-                        content = reflectString(textObj, "text", "A00");
-                    }
-                }
-            } catch (Exception ignored) {}
-
-            // Media messages (photo/video/voice/etc.) carry no text — capture the media URL so the
-            // deleted-messages screen can still display/open it after the sender unsends.
-            if ((content == null || content.isEmpty()) && type != null && !type.equals("text")) {
-                String url = deepFindMediaUrl(item);
-                if (url != null) content = url;
-            }
 
             if (messageId == null) {
-                // The legacy obfuscated id fields (A13/A0l) do NOT resolve on the MQTT
-                // subclass (X.0gF) — there A13 is a boolean, not item_id — so modern
-                // (E2EE) DMs would silently fall through here and never be stored,
-                // leaving the deleted-messages list permanently empty.
-                //
-                // Instead of dropping the message, derive a stable synthetic key from
-                // sender + timestamp, so a later unsend maps back to the same row.
-                // This guarantees every received item is captured and, critically, that a
-                // later unsend of the same item maps back to the same row to mark deleted.
+                // Some modern (E2EE) DMs do not expose a server item_id on the received object.
+                // Derive a stable synthetic key from sender + timestamp so a later unsend of the
+                // same item maps back to the same row to mark it deleted.
                 if (senderId != null) {
                     messageId = "syn:" + senderId + ":" + timestamp;
                 } else {
@@ -333,18 +236,12 @@ public class SavedMessagesHook {
             // thread_id is NOT NULL in the schema; fall back to empty when unknown.
             if (threadId == null) threadId = "";
             // Track the most-recently-seen thread so the DM action-bar button can open this
-            // chat's deleted messages. Opening a thread triggers a burst of A0P calls for its
-            // items, so the last non-empty thread id is a good proxy for "the open chat".
+            // chat's deleted messages. Opening a thread triggers a burst of post-process calls
+            // for its items, so the last non-empty thread id is a good proxy for "the open chat".
             if (!threadId.isEmpty() && !threadId.equals(sCurrentThreadId)) {
                 sCurrentThreadId = threadId;
             }
 
-            // Deletion (unsend) detection.
-            // hideInThread field on the domain DirectItem object is ProGuard-obfuscated:
-            //   v426 (LX/9ZA): A1Y:Z  ← confirmed by static RE of v426 smali
-            //   v408 (LX/5jI): A2V:Z  ← confirmed from reference APK analysis
-            // Try obfuscated names first (fast path), then fall back to the stable
-            // protobuf field name "hideInThread_" in case a future build de-obfuscates.
             if (deleted) {
                 // Live-deletion gate: only notify when we previously saw THIS message alive.
                 // A historical unsent item arriving already-hidden during an inbox sync is
@@ -364,13 +261,12 @@ public class SavedMessagesHook {
                     notifyDeletion(notifySender, notifyBody, type);
                 }
 
-                // Anti-revoke in-place: undo the deletion flag on the item object so IG
-                // keeps the message visible in the thread with its original text.
-                // content is null on the unsend event (text is stripped before delivery),
-                // so we look up the previously-stored text from the DB vault.
+                // Anti-revoke in-place: undo the deletion flag on the item object so IG keeps the
+                // message visible with its original text. content is null on the unsend event
+                // (text is stripped before delivery), so look up the stored text from the vault.
                 String storedContent = (content != null && !content.isEmpty())
                         ? content : db.getStoredContent(messageId);
-                antiRevokeItem(item, storedContent);
+                antiRevokeItem(di, storedContent);
             } else {
                 db.insertOrIgnore(messageId, threadId, senderId, senderUser, content, type, timestamp);
             }
@@ -380,127 +276,16 @@ public class SavedMessagesHook {
     }
 
     /**
-     * Anti-revoke in-place: reset the hide_in_thread flag and restore text so IG's thread
-     * UI renders the message normally instead of hiding it. The item object is mutated
-     * in place — the caller's return-object smali instruction sees the modified state.
-     *
-     * Two text paths must be restored on v426:
-     *   REST path (LX/9ZA; base class): text at A1I:String
-     *   MQTT path (LX/0gF; subclass):   text at A0o:Object (holds the String directly)
-     * Both must be set; if only A1I is set, MQTT-delivered items still appear unsent
-     * because Instagram reads from A0o when the runtime type is the MQTT subclass.
+     * Anti-revoke in-place: clear the hide_in_thread flag and restore the text so IG renders the
+     * message normally instead of hiding it. The item is mutated in place — the caller's
+     * return-object instruction sees the modified state. Both the flag and the text field are
+     * patch-resolved base-class fields (see {@link DirectItem}).
      */
-    private static void antiRevokeItem(Object item, String restoredContent) {
-        // Reset hide_in_thread (all known obfuscated names + proto stable name).
-        setField(item, "A1Y", false);           // v426 LX/9ZA; / v4xx LX/9wl;
-        setField(item, "A2V", false);           // v408 LX/5jI;
-        setField(item, "hideInThread_", false); // proto model stable name
-
-        // Restore original text to BOTH text fields.
-        if (restoredContent != null) {
-            setField(item, "A1I", restoredContent); // v426 REST text field (base class)
-            setField(item, "A0o", restoredContent); // v426 MQTT text field (subclass A0o:Object)
+    private static void antiRevokeItem(DirectItem di, String restoredContent) {
+        di.setHideInThread(false);
+        if (restoredContent != null && !restoredContent.isEmpty()) {
+            di.setText(restoredContent);
         }
-    }
-
-    /** Set a field by name on obj, walking the superclass chain. Silently ignores missing fields. */
-    private static void setField(Object obj, String fieldName, Object value) {
-        Class<?> cls = obj.getClass();
-        while (cls != null && cls != Object.class) {
-            try {
-                Field f = cls.getDeclaredField(fieldName);
-                f.setAccessible(true);
-                f.set(obj, value);
-                return;
-            } catch (NoSuchFieldException ignored) {
-                cls = cls.getSuperclass();
-            } catch (Exception ignored) {
-                return;
-            }
-        }
-    }
-
-    /**
-     * Authoritative hide_in_thread (unsend) check.
-     *
-     * <p>The real {@code hide_in_thread} flag is {@code A1Y:Z}, declared on the base
-     * DirectItem class {@code LX/9ZA;} — the SAME class that declares the String
-     * {@code item_id} ({@code A13:String}). The MQTT subclass {@code LX/0gF;} declares its
-     * own unrelated same-named fields (confirmed for {@code A13}, which is a boolean there),
-     * so a naive {@code readBool(item,"A1Y")} can return a shadowing concrete-class boolean
-     * that is {@code true} on perfectly normal messages — firing a bogus "unsent" notification
-     * with null content (rendered as "[null]").
-     *
-     * <p>Fix: locate the base class by the declaring class of {@code A13:String}, then read
-     * {@code A1Y} from THAT class only. If the base class can't be located we deliberately do
-     * NOT fall back to a shadowing-prone plain read — we only trust de-obfuscated proto names.
-     */
-    private static boolean isHideInThread(Object item) {
-        Class<?> base = declaringClassOfStringField(item, "A13");
-        if (base != null) {
-            Boolean v = readBoolOnClass(base, item, "A1Y"); // v426 hide_in_thread on LX/9ZA;
-            if (v != null) return v;
-        }
-        // Stable / de-obfuscated names are not subject to subclass shadowing — safe to read directly.
-        return readBool(item, "A2V")                  // v408 / reference APK
-            || readBool(item, "hideInThread_")        // proto-model stable name
-            || readBool(item, "is_deleted_for_self"); // sibling flag
-    }
-
-    /** Returns the class in obj's hierarchy that declares a field named {@code fieldName} of type String. */
-    private static Class<?> declaringClassOfStringField(Object obj, String fieldName) {
-        Class<?> cls = obj.getClass();
-        while (cls != null && cls != Object.class) {
-            try {
-                Field f = cls.getDeclaredField(fieldName);
-                if (f.getType() == String.class) return cls;
-            } catch (NoSuchFieldException ignored) {}
-            cls = cls.getSuperclass();
-        }
-        return null;
-    }
-
-    /** Read a boolean field declared on a SPECIFIC class (no chain walk). null = absent/non-boolean. */
-    private static Boolean readBoolOnClass(Class<?> cls, Object obj, String fieldName) {
-        try {
-            Field f = cls.getDeclaredField(fieldName);
-            if (f.getType() != boolean.class && f.getType() != Boolean.class) return null;
-            f.setAccessible(true);
-            Object v = f.get(obj);
-            return v instanceof Boolean && (Boolean) v;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /** Read a field declared on a SPECIFIC class (no superclass-chain walk), or null. Used to read
-     *  shadowed fields (e.g. item_type A0Y) from the base class rather than the MQTT subclass. */
-    private static Object readFieldOnClass(Class<?> cls, Object obj, String fieldName) {
-        try {
-            Field f = cls.getDeclaredField(fieldName);
-            f.setAccessible(true);
-            return f.get(obj);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    /** Read a boolean field by exact name, tolerating Boolean/boolean. Walks the superclass chain. */
-    private static boolean readBool(Object obj, String fieldName) {
-        Class<?> cls = obj.getClass();
-        while (cls != null && cls != Object.class) {
-            try {
-                Field f = cls.getDeclaredField(fieldName);
-                f.setAccessible(true);
-                Object v = f.get(obj);
-                return v instanceof Boolean && (Boolean) v;
-            } catch (NoSuchFieldException ignored) {
-                cls = cls.getSuperclass();
-            } catch (Exception e) {
-                return false;
-            }
-        }
-        return false;
     }
 
     /** Post a system notification when a received message is detected as unsent. */
@@ -516,12 +301,13 @@ public class SavedMessagesHook {
             String channelId = "piko_deleted_messages";
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 android.app.NotificationChannel ch = new android.app.NotificationChannel(
-                    channelId, "Deleted messages", android.app.NotificationManager.IMPORTANCE_DEFAULT);
-                ch.setDescription("Notifies when a received message is unsent");
+                    channelId, str("piko_deleted_messages_channel"),
+                    android.app.NotificationManager.IMPORTANCE_DEFAULT);
+                ch.setDescription(str("piko_deleted_messages_channel_desc"));
                 nm.createNotificationChannel(ch);
             }
 
-            String who = (sender != null && !sender.isEmpty()) ? sender : "Someone";
+            String who = (sender != null && !sender.isEmpty()) ? sender : str("piko_someone");
             String body = (content != null && !content.isEmpty())
                     ? content
                     : (type != null && !type.isEmpty()) ? "[" + type + "]" : "[deleted]";
@@ -540,7 +326,7 @@ public class SavedMessagesHook {
                     : new android.app.Notification.Builder(ctx);
             android.app.Notification n = b
                 .setSmallIcon(iconRes != 0 ? iconRes : android.R.drawable.ic_dialog_info)
-                .setContentTitle(who + " deleted a message")
+                .setContentTitle(str("piko_deleted_a_message", who))
                 .setContentText(body)
                 .setAutoCancel(true)
                 .setContentIntent(pi)
@@ -844,297 +630,4 @@ public class SavedMessagesHook {
         return null;
     }
 
-    // -------------------------------------------------------------------------
-    // Reflection helpers
-    // -------------------------------------------------------------------------
-
-    /**
-     * Resolve the sender's username by reflecting the sender UserInfo entity off the DirectItem.
-     *
-     * Historic mapping:
-     *   DirectItem.A02 → sender UserInfo entity, with sub-fields A00 = user_id, A01 = username.
-     * Obfuscated names rotate per build, so we DON'T rely on a single hardcoded name. Strategy:
-     *   1. Try known/candidate UserInfo field names on the item (walking the superclass chain).
-     *   2. If none resolve, scan fields by type for a "UserInfo"/"User" object near the user_id.
-     *   3. On the UserInfo object, try candidate username sub-fields, then fall back to a
-     *      heuristic: a String field that is NOT all-digits (user_id is numeric) and looks like
-     *      a handle. The matching user_id confirms we picked the right entity.
-     *
-     * Returns null if no username can be found (caller stores empty; UI falls back to sender_id).
-     */
-    private static String resolveSenderUsername(Object item, String senderId) {
-        try {
-            if (item == null) return null;
-
-            // 1 + 2: locate the sender UserInfo entity.
-            Object userInfo = null;
-            for (String f : CANDIDATE_USERINFO_FIELDS) {
-                Object v = getFieldValue(item, f);
-                if (v != null && looksLikeUserInfo(v, senderId)) { userInfo = v; break; }
-            }
-            if (userInfo == null) {
-                Object byType = findFieldByType(item, "userinfo");
-                if (looksLikeUserInfo(byType, senderId)) userInfo = byType;
-            }
-            if (userInfo == null) {
-                Object byType = findFieldByType(item, "user");
-                if (looksLikeUserInfo(byType, senderId)) userInfo = byType;
-            }
-            if (userInfo == null) return null;
-
-            // 3: read the username sub-field.
-            for (String f : CANDIDATE_USERNAME_FIELDS) {
-                Object v = getFieldValue(userInfo, f);
-                if (isUsernameLike(v)) return (String) v;
-            }
-            // Heuristic fallback: first non-numeric String field on the UserInfo object.
-            Class<?> cls = userInfo.getClass();
-            while (cls != null && cls != Object.class) {
-                for (Field f : cls.getDeclaredFields()) {
-                    if (f.getType() != String.class) continue;
-                    f.setAccessible(true);
-                    Object v;
-                    try { v = f.get(userInfo); } catch (Exception e) { continue; }
-                    if (isUsernameLike(v)) return (String) v;
-                }
-                cls = cls.getSuperclass();
-            }
-        } catch (Exception ignored) {}
-        return null;
-    }
-
-    // v426 candidate field names — confirm/extend from the ObjectBrowser dump in logcat.
-    private static final String[] CANDIDATE_USERINFO_FIELDS = {"A02", "A1L", "A0X", "A0Z"};
-    private static final String[] CANDIDATE_USERNAME_FIELDS = {"A01", "A0a", "A0Y", "username"};
-
-    /** A UserInfo-like object exposes the matching user_id (when known) on a sub-field. */
-    private static boolean looksLikeUserInfo(Object obj, String senderId) {
-        if (obj == null) return false;
-        if (obj instanceof String || obj instanceof Number || obj instanceof Boolean) return false;
-        if (senderId == null || senderId.isEmpty()) return true; // can't cross-check; accept candidate
-        for (String f : new String[]{"A00", "A01", "id", "pk", "user_id"}) {
-            Object v = getFieldValue(obj, f);
-            if (v != null && senderId.equals(v.toString())) return true;
-        }
-        return false;
-    }
-
-    /** A plausible username: non-empty String that is not purely numeric (those are IDs). */
-    private static boolean isUsernameLike(Object v) {
-        if (!(v instanceof String)) return false;
-        String s = ((String) v).trim();
-        return !s.isEmpty() && !s.matches("\\d+");
-    }
-
-    /** Try known JSON key name first, fall back to ProGuard obfuscated name. */
-    private static String reflectString(Object obj, String jsonKey, String obfName) {
-        // Use type-aware lookup: if the obfuscated name maps to a boolean on the concrete
-        // class but a String on a superclass (e.g. A13 on LX/0gF; vs LX/9ZA;), skip the
-        // wrong-type field and find the String. Falls back to plain lookup for the jsonKey.
-        Object val = getFieldValueByType(obj, obfName, String.class);
-        if (val == null) val = getFieldValue(obj, jsonKey);
-        return val instanceof String ? (String) val : null;
-    }
-
-    /**
-     * Try a field by name first (walking superclass chain), then invoke a zero-arg getter method.
-     * Used for message-id which in v408+ is behind getter A0l() not a direct field.
-     */
-    private static String reflectStringOrInvoke(Object obj, String fieldName, String methodName) {
-        Object v = getFieldValue(obj, fieldName);
-        if (v instanceof String) return (String) v;
-        // Try getter method (walk superclass chain for method too)
-        Class<?> cls = obj.getClass();
-        while (cls != null && cls != Object.class) {
-            try {
-                java.lang.reflect.Method m = cls.getDeclaredMethod(methodName);
-                m.setAccessible(true);
-                Object r = m.invoke(obj);
-                if (r instanceof String) return (String) r;
-            } catch (NoSuchMethodException ignored) {
-                cls = cls.getSuperclass();
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Extract the thread-id string from the DirectItem.
-     * v426: thread_key stored in field A0W (DirectThreadKey), threadId is A00:String.
-     * v408: thread_key in field A16/A18/A15, threadId is A00:String.
-     * Uses getFieldValue to walk the superclass chain (needed when item is LX/0gF;).
-     */
-    private static String reflectThreadIdFromItem(Object item) {
-        for (String keyField : new String[]{"A0W", "A16", "A18", "A15"}) {
-            Object key = getFieldValue(item, keyField);
-            if (key == null) continue;
-            Object v = getFieldValue(key, "A00");
-            if (v instanceof String && ((String) v).matches("\\d{15,}")) return (String) v;
-        }
-        // Fallback: the thread_id is a long numeric "thread fbid" (~39 digits, near 2^128) that
-        // lives deeper in the item graph than the fixed field names above. Deep-search for the
-        // LONGEST all-digit string — thread_id (≈39) outranks message_id (≈35) and user_id (≈11).
-        return deepLongestNumericId(item, 30);
-    }
-
-    /** Bounded BFS over the item graph for a media URL (image/video/audio CDN link). Prefers the
-     *  longest match (usually the highest-resolution variant). Returns null if none found. */
-    private static String deepFindMediaUrl(Object root) {
-        try {
-            java.util.IdentityHashMap<Object, Boolean> seen = new java.util.IdentityHashMap<>();
-            java.util.ArrayDeque<Object> q = new java.util.ArrayDeque<>();
-            q.add(root); seen.put(root, Boolean.TRUE);
-            String best = null;
-            int budget = 6000;
-            while (!q.isEmpty() && budget-- > 0) {
-                Object o = q.poll();
-                Class<?> k = o.getClass();
-                if (k.isArray() && !k.getComponentType().isPrimitive()) {
-                    for (Object el : (Object[]) o) if (el != null && seen.put(el, Boolean.TRUE) == null) q.add(el);
-                    continue;
-                }
-                String kn = k.getName();
-                if (!(kn.startsWith("X.") || kn.startsWith("com.instagram"))) continue;
-                for (Class<?> cc = k; cc != null && cc != Object.class; cc = cc.getSuperclass()) {
-                    for (Field f : cc.getDeclaredFields()) {
-                        if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
-                        if (f.getType().isPrimitive()) continue;
-                        Object v;
-                        try { f.setAccessible(true); v = f.get(o); } catch (Throwable t) { continue; }
-                        if (v == null || seen.put(v, Boolean.TRUE) != null) continue;
-                        if (v instanceof String) {
-                            String s = (String) v;
-                            boolean looksMedia = s.startsWith("http") && (s.contains("cdninstagram") || s.contains("fbcdn")
-                                    || s.matches("(?i).*\\.(jpg|jpeg|webp|heic|mp4|mov|m4a|aac|gif).*"));
-                            // Exclude the sender's profile picture (IG profile-pic CDN namespace /
-                            // small square thumbnails) so we capture the actual message media.
-                            boolean profilePic = s.contains("t51.2885-19") || s.contains("/profile")
-                                    || s.contains("s150x150") || s.contains("s320x320");
-                            if (looksMedia && !profilePic && (best == null || s.length() > best.length())) best = s;
-                            continue;
-                        }
-                        if (v instanceof CharSequence || v instanceof Number || v instanceof Boolean) continue;
-                        q.add(v);
-                    }
-                }
-            }
-            return best;
-        } catch (Throwable t) {
-            return null;
-        }
-    }
-
-    /** Bounded BFS over an IG/obfuscated object graph; returns the longest all-digit String
-     *  with length >= minLen (the thread fbid), or null. */
-    static String deepLongestNumericId(Object root, int minLen) {
-        try {
-            java.util.IdentityHashMap<Object, Boolean> seen = new java.util.IdentityHashMap<>();
-            java.util.ArrayDeque<Object> q = new java.util.ArrayDeque<>();
-            q.add(root); seen.put(root, Boolean.TRUE);
-            String best = null;
-            int budget = 4000;
-            while (!q.isEmpty() && budget-- > 0) {
-                Object o = q.poll();
-                Class<?> k = o.getClass();
-                String kn = k.getName();
-                if (!(kn.startsWith("X.") || kn.startsWith("com.instagram"))) continue;
-                for (Class<?> cc = k; cc != null && cc != Object.class; cc = cc.getSuperclass()) {
-                    for (Field f : cc.getDeclaredFields()) {
-                        if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
-                        if (f.getType().isPrimitive()) continue;
-                        Object v;
-                        try { f.setAccessible(true); v = f.get(o); } catch (Throwable t) { continue; }
-                        if (v == null || seen.put(v, Boolean.TRUE) != null) continue;
-                        if (v instanceof String) {
-                            String s = (String) v;
-                            if (s.length() >= minLen && s.matches("\\d+")
-                                    && (best == null || s.length() > best.length())) best = s;
-                            continue;
-                        }
-                        if (v instanceof CharSequence || v instanceof Number || v instanceof Boolean) continue;
-                        q.add(v);
-                    }
-                }
-            }
-            return best;
-        } catch (Throwable t) {
-            return null;
-        }
-    }
-
-    private static Object reflectRaw(Object obj, String jsonKey, String obfName) {
-        Object v = getFieldValue(obj, jsonKey);
-        if (v != null) return v;
-        return getFieldValue(obj, obfName);
-    }
-
-    /** Walk the full superclass chain to find and read a field by name. */
-    private static Object getFieldValue(Object obj, String fieldName) {
-        Class<?> cls = obj.getClass();
-        while (cls != null && cls != Object.class) {
-            try {
-                Field f = cls.getDeclaredField(fieldName);
-                f.setAccessible(true);
-                return f.get(obj);
-            } catch (NoSuchFieldException ignored) {
-                cls = cls.getSuperclass();
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Like getFieldValue but skips fields whose declared type is not assignable from
-     * expectedType. Needed when the same obfuscated field name appears on both the
-     * concrete class (wrong type, e.g. boolean A13 on LX/0gF;) and a superclass
-     * (correct type, e.g. String A13 on LX/9ZA;). Plain getFieldValue would return
-     * the concrete-class version first, giving the wrong value.
-     */
-    private static Object getFieldValueByType(Object obj, String fieldName, Class<?> expectedType) {
-        Class<?> cls = obj.getClass();
-        while (cls != null && cls != Object.class) {
-            try {
-                Field f = cls.getDeclaredField(fieldName);
-                if (expectedType.isAssignableFrom(f.getType())) {
-                    f.setAccessible(true);
-                    try { return f.get(obj); } catch (IllegalAccessException ignored) {}
-                }
-                // Wrong declared type or inaccessible — skip to superclass
-            } catch (NoSuchFieldException ignored) {}
-            cls = cls.getSuperclass();
-        }
-        return null;
-    }
-
-    private static Object findFieldByType(Object obj, String typeNameHint) {
-        Class<?> cls = obj.getClass();
-        while (cls != null && cls != Object.class) {
-            for (Field f : cls.getDeclaredFields()) {
-                if (f.getType().getSimpleName().toLowerCase().contains(typeNameHint.toLowerCase())) {
-                    f.setAccessible(true);
-                    try { return f.get(obj); } catch (Exception ignored) {}
-                }
-            }
-            cls = cls.getSuperclass();
-        }
-        return null;
-    }
-
-    private static Object findFieldByNameHint(Object obj, String nameHint) {
-        Class<?> cls = obj.getClass();
-        while (cls != null && cls != Object.class) {
-            for (Field f : cls.getDeclaredFields()) {
-                if (f.getName().toLowerCase().contains(nameHint.toLowerCase())) {
-                    f.setAccessible(true);
-                    try { return f.get(obj); } catch (Exception ignored) {}
-                }
-            }
-            cls = cls.getSuperclass();
-        }
-        return null;
-    }
 }

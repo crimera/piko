@@ -6,6 +6,8 @@
 
 package app.morphe.extension.instagram.patches.dm;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -45,7 +47,7 @@ public class DeletedMessagesActivity extends Activity {
             ? PikoMessageDb.getInstance(this).getDeletedMessagesForThread(threadId)
             : PikoMessageDb.getInstance(this).getDeletedMessages();
 
-        String titleText = threadId != null ? "Deleted in this chat" : "All deleted messages";
+        String titleText = threadId != null ? str("piko_deleted_in_chat") : str("piko_all_deleted_messages");
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
@@ -81,7 +83,7 @@ public class DeletedMessagesActivity extends Activity {
         // "Clear" action — wipes this chat's saved messages (or all, from settings entry).
         final String clearThreadId = threadId;
         TextView clear = new TextView(this);
-        clear.setText("Clear");
+        clear.setText(str("piko_clear"));
         clear.setTextSize(TypedValue.COMPLEX_UNIT_PX, PikoUtils.spToPixels(16));
         clear.setTextColor(UI.getThemedColour());
         clear.setPadding(Dim.dp8, Dim.dp8, Dim.dp8, Dim.dp8);
@@ -93,20 +95,20 @@ public class DeletedMessagesActivity extends Activity {
         LinearLayout.LayoutParams titleP = (LinearLayout.LayoutParams) title.getLayoutParams();
         titleP.weight = 1; title.setLayoutParams(titleP);
         clear.setOnClickListener(v -> new android.app.AlertDialog.Builder(this)
-            .setMessage(clearThreadId != null ? "Clear deleted messages for this chat?" : "Clear ALL saved deleted messages?")
-            .setPositiveButton("Clear", (d, w) -> {
+            .setMessage(clearThreadId != null ? str("piko_clear_chat_confirm") : str("piko_clear_all_confirm"))
+            .setPositiveButton(str("piko_clear"), (d, w) -> {
                 PikoMessageDb.getInstance(this).clearSaved(clearThreadId);
                 messages.clear();
                 recreate();
             })
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(str("piko_cancel"), null)
             .show());
         toolbar.addView(clear);
         root.addView(toolbar);
 
         if (messages.isEmpty()) {
             TextView empty = new TextView(this);
-            empty.setText("No deleted messages captured yet.\nEnable the feature and messages will be saved as they arrive.");
+            empty.setText(str("piko_no_deleted_messages"));
             empty.setGravity(Gravity.CENTER);
             empty.setPadding(Dim.dp8 * 2, Dim.dp8 * 4, Dim.dp8 * 2, Dim.dp8 * 4);
             empty.setTextColor(UI.getThemedColour());
@@ -133,13 +135,13 @@ public class DeletedMessagesActivity extends Activity {
             listView.setOnItemLongClickListener((parent, view, pos, idLong) -> {
                 String[] m = messages.get(pos);
                 new android.app.AlertDialog.Builder(this)
-                    .setMessage("Delete this saved message?")
-                    .setPositiveButton("Delete", (d, w) -> {
+                    .setMessage(str("piko_delete_saved_confirm"))
+                    .setPositiveButton(str("piko_delete"), (d, w) -> {
                         PikoMessageDb.getInstance(this).deleteSaved(m[0]); // m[0] = message_id
                         messages.remove(pos);
                         adapter.notifyDataSetChanged();
                     })
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton(str("piko_cancel"), null)
                     .show();
                 return true;
             });
@@ -235,12 +237,12 @@ public class DeletedMessagesActivity extends Activity {
             } else if (senderId != null && !senderId.isEmpty()) {
                 who = "@" + senderId;
             } else {
-                who = "Unknown";
+                who = str("piko_unknown");
             }
             senderView.setText(who);
             boolean isMediaUrl = content != null && content.startsWith("http");
             if (isMediaUrl) {
-                contentView.setText(mediaLabel(type) + "  ·  tap to view");
+                contentView.setText(mediaLabel(type) + "  ·  " + str("piko_tap_to_view"));
             } else {
                 contentView.setText(content != null && !content.isEmpty() ? content
                         : (type != null ? "[" + type + "]" : "[deleted]"));
