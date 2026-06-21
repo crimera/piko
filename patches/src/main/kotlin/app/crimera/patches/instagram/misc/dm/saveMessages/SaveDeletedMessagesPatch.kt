@@ -13,13 +13,17 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.INTEGRATIONS_PACKAGE
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 
 private const val HOOK_CLASS = "$INTEGRATIONS_PACKAGE/patches/dm/SavedMessagesHook;"
+private const val DIRECT_THREAD_KEY = "Lcom/instagram/model/direct/DirectThreadKey;"
 
 @Suppress("unused")
 val saveDeletedMessagesPatch =
@@ -95,6 +99,37 @@ val saveDeletedMessagesPatch =
                     move-object/from16 v$r1, p2
                     move-object/from16 v$r2, p3
                     invoke-static {v$r0, v$r1, v$r2}, $HOOK_CLASS->onMessageHiddenFromDb(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
+                    """.trimIndent(),
+                )
+            }
+
+            // --- Hook 5: record the open chat's thread id at patch time (no runtime walk) ---
+            // The DM action-bar builder constructs the open chat's DirectThreadKey. We read its
+            // thread-id field (the first String field on the stable DirectThreadKey class, the same
+            // one directItemEntity resolves) and hand it to the extension, so the per-chat screen
+            // scopes itself without any runtime object-graph reflection.
+            val threadIdField =
+                mutableClassDefBy { it.type == DIRECT_THREAD_KEY }
+                    .fields
+                    .first {
+                        !AccessFlags.STATIC.isSet(it.accessFlags) && it.type == "Ljava/lang/String;"
+                    }.name
+
+            DMActionBarThreadFingerprint.method.apply {
+                // Anchor on the convergence point: the DirectThreadKey is passed to a constructor
+                // (invoke-direct) after both branches that produce it merge.
+                val keyIndex =
+                    instructions.indexOfFirst {
+                        it.opcode == Opcode.INVOKE_DIRECT &&
+                            (it as ReferenceInstruction).reference.toString().contains(DIRECT_THREAD_KEY)
+                    }
+                val keyRegister = getInstruction(keyIndex).registersUsed[1]
+                val free = getFreeRegisterProvider(keyIndex, 1).getFreeRegister()
+                addInstructions(
+                    keyIndex,
+                    """
+                    iget-object v$free, v$keyRegister, $DIRECT_THREAD_KEY->$threadIdField:Ljava/lang/String;
+                    invoke-static {v$free}, $HOOK_CLASS->noteOpenThreadId(Ljava/lang/String;)V
                     """.trimIndent(),
                 )
             }

@@ -9,10 +9,7 @@ package app.morphe.extension.instagram.patches.dm;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
-import java.io.File;
 import java.lang.reflect.Field;
 
 import app.morphe.extension.crimera.PikoUtils;
@@ -23,60 +20,18 @@ import app.morphe.extension.instagram.utils.Pref;
 /**
  * Runtime hooks for the "Save deleted messages" feature.
  *
- * <h2>v426 Architecture — TWO delivery paths, both must be hooked</h2>
+ * <h2>Two delivery paths, both hooked</h2>
+ * <ul>
+ *   <li><b>REST/JSON</b> thread-history loads, and</li>
+ *   <li><b>MQTT/MSys</b> real-time delivery (also the only path for an in-thread send+unsend).</li>
+ * </ul>
+ * Both hand the DirectItem to {@link #onMessageReceived(Object)}; all fields are read through
+ * {@link DirectItem}, whose obfuscated names are resolved at patch time (see the
+ * {@code directItemEntity} patch). Nothing discovers field/method names by reflection at runtime.
  *
- * <pre>
- * REST / JSON (thread history load)
- *   LX/0gL;.parseFromJson(LX/R0r;)LX/9ZA;    ← classes.dex
- *     └─ LX/AtQ;.parse → LX/0gG;.unsafeParseFromJson (creates LX/0gF; instance)
- *   Hook 1 is injected before RETURN_OBJECT in parseFromJson.
- *
- * MQTT / MSys real-time delivery
- *   LX/0gF;.A02(LX/1kP;, ..., LX/02L;, ...)  ← 24-param constructor, builds from delta
- *   LX/0gF;.A0P(UserSession, LX/02L;)LX/0gF;  ← classes12.dex, post-processing step
- *   Hook 2 is injected before the success RETURN_OBJECT in A0P (offset 0351/0352).
- * </pre>
- *
- * MQTT messages (including real-time send + unsend while in-thread) NEVER go through
- * parseFromJson. Without Hook 2, any message sent and unsent while the user is actively
- * in the thread would be missed entirely.
- *
- * <h2>Class hierarchy</h2>
- *
- * {@code LX/0gF;} (PUBLIC FINAL) extends {@code LX/9ZA;} (DirectItem base class).
- * {@code LX/0gF;} has NO additional instance fields — all data fields are declared on
- * {@code LX/9ZA;}. Every {@code getDeclaredField} call must walk the superclass chain
- * (see {@link #getFieldValue}) or it will silently fail when the runtime type is
- * {@code LX/0gF;} and the field is actually on {@code LX/9ZA;}.
- *
- * <h2>v426 field mapping (confirmed from dexdump classes12.dex)</h2>
- *
- * <pre>
- * JSON key        Obfuscated field   Type                   Class
- * item_id         A13                String                 LX/9ZA;
- * hide_in_thread  A1Y                Z (boolean)            LX/9ZA;
- * user_id         A1M                String                 LX/9ZA;
- * timestamp       A1J                String (microseconds)  LX/9ZA;
- * text            A1I                String                 LX/9ZA;
- * item_type       A0Y                LX/8ot; (enum)         LX/9ZA;
- * thread_key      A0W                DirectThreadKey        LX/9ZA;
- * threadId (key)  A00                String                 DirectThreadKey
- * MSys delta ref  A0V                LX/02L;                LX/9ZA;
- * </pre>
- *
- * v408 fallbacks: item_id via getter {@code A0l()}, hide_in_thread as {@code A2V:Z},
- * thread_key fields {@code A16/A18/A15}.
- *
- * <h2>How to update for a new Instagram version</h2>
- *
- * 1. Install the patched APK (pref on). Open any DM thread.
- * 2. In logcat (tag: piko), find "SavedMessagesHook ObjectBrowser dump" — this lists all
- *    fields on the runtime item, including inherited ones from superclasses.
- * 3. If field names differ from the table above, update the constants in
- *    {@link #onMessageReceived} and the table in Fingerprint.kt.
- * 4. If the hook doesn't fire at all, the fingerprint anchors may have changed:
- *    - Hook 1: grep classes.dex for methods with "item_id" + "hide_in_thread" + returnType Z
- *    - Hook 2: grep classes12.dex for "DirectMessage.postprocess" + "null type" string pair
+ * <p>The open chat's thread id is recorded by {@link #noteOpenThreadId(String)}, injected from
+ * the DM action-bar builder (which already holds the {@code DirectThreadKey}) — so scoping the
+ * per-chat screen needs no runtime object-graph walking either.
  */
 @SuppressWarnings("unused")
 public class SavedMessagesHook {
@@ -105,42 +60,11 @@ public class SavedMessagesHook {
         } catch (Exception ignored) {}
     }
 
-    /** Called when a chat is opened (from the action bar) with the resolved thread_id + title.
-     *  Records both so unsend notifications in this chat can show the sender's name, even if the
-     *  user never opens the deleted-messages screen. */
-    public static void noteThreadOpen(String threadId, String title) {
+    /** Records the open chat's thread id. Injected at patch time from the DM action-bar builder
+     *  (which has the DirectThreadKey), so the open-chat scope is known without any runtime
+     *  reflection. This is the single source of truth for sCurrentThreadId. */
+    public static void noteOpenThreadId(String threadId) {
         if (threadId != null && !threadId.isEmpty()) sCurrentThreadId = threadId;
-        if (title != null && !title.trim().isEmpty()) {
-            sCurrentThreadTitle = title.trim();
-            try {
-                String tid = (threadId != null && !threadId.isEmpty()) ? threadId : sCurrentThreadId;
-                if (tid != null && !tid.isEmpty()) {
-                    PikoMessageDb.getInstance(PikoUtils.getContext()).setThreadUsername(tid, sCurrentThreadTitle);
-                }
-            } catch (Exception ignored) {}
-        }
-    }
-
-    /** Opens the deleted-messages screen scoped to a specific thread (resolved at click time). */
-    public static void openDeletedMessagesFor(Context ctx, String threadId, String title) {
-        try {
-            if (ctx == null) ctx = PikoUtils.getContext();
-            if (ctx == null) return;
-            if (threadId != null && !threadId.isEmpty()) sCurrentThreadId = threadId;
-            if (title != null && !title.trim().isEmpty()) {
-                sCurrentThreadTitle = title.trim();
-                if (threadId != null && !threadId.isEmpty()) {
-                    PikoMessageDb.getInstance(ctx).setThreadUsername(threadId, sCurrentThreadTitle);
-                }
-            }
-            Intent intent = new Intent(ctx, DeletedMessagesActivity.class);
-            if (sCurrentThreadId != null && !sCurrentThreadId.isEmpty()) intent.putExtra("thread_id", sCurrentThreadId);
-            if (sCurrentThreadTitle != null && !sCurrentThreadTitle.isEmpty()) intent.putExtra("thread_title", sCurrentThreadTitle);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            ctx.startActivity(intent);
-        } catch (Exception e) {
-            piko("SavedMessagesHook.openDeletedMessagesFor: " + e);
-        }
     }
 
     /** Opens the deleted-messages screen for the currently-open thread (or all if unknown). */
@@ -241,20 +165,14 @@ public class SavedMessagesHook {
             if (messageId != null
                     && SEEN_ITEM_IDS.put(messageId + (deleted ? ":1" : ":0"), Boolean.TRUE) != null) return;
             String threadId   = di.getThreadId();
-            if (threadId == null || threadId.isEmpty()) threadId = reflectThreadIdFromItem(item);
             String senderId   = di.getUserId();
             PikoMessageDb db = PikoMessageDb.getInstance(PikoUtils.getContext());
-            // 1. REST items may carry a full UserInfo — extract + persist the handle for reuse.
-            String senderUser = resolveSenderUsername(item, senderId);
-            if (senderUser != null) db.putUsername(senderId, senderUser);
-            // 2. MQTT items carry only sender_id. Reuse a previously-persisted handle…
-            if (senderUser == null && senderId != null) {
-                senderUser = db.getUsername(senderId);
-            }
-            // 3. …or, as a last resort, probe IG's local user cache DBs.
-            if (senderUser == null && senderId != null) {
-                senderUser = resolveUsernameFromCache(senderId);
-                if (senderUser != null) db.putUsername(senderId, senderUser);
+            // Display name = the chat title recorded for this thread (the participant's name for a
+            // 1:1 chat), so it's stored on the row and shown by both the screen and the unsend
+            // notification. Falls back to a name already on the thread, else null (→ sender id).
+            String senderUser = db.getThreadUsername(threadId);
+            if (senderUser == null && threadId != null && threadId.equals(sCurrentThreadId)) {
+                senderUser = sCurrentThreadTitle;
             }
             // content (base text + MQTT subclass payload), item_type enum, and timestamp are all
             // read via DirectItem with patch-resolved field names.
@@ -292,14 +210,11 @@ public class SavedMessagesHook {
                 }
             }
 
-            // thread_id is NOT NULL in the schema; fall back to empty when unknown.
+            // thread_id is NOT NULL in the schema; fall back to empty when unknown. The open-chat
+            // scope (sCurrentThreadId) is set authoritatively by noteOpenThreadId from the
+            // action-bar builder — we intentionally do NOT set it from the message stream, since
+            // an inbox load touches every thread and would pollute the scope.
             if (threadId == null) threadId = "";
-            // Track the most-recently-seen thread so the DM action-bar button can open this
-            // chat's deleted messages. Opening a thread triggers a burst of A0P calls for its
-            // items, so the last non-empty thread id is a good proxy for "the open chat".
-            if (!threadId.isEmpty() && !threadId.equals(sCurrentThreadId)) {
-                sCurrentThreadId = threadId;
-            }
 
             // Deletion (unsend) detection.
             // hideInThread field on the domain DirectItem object is ProGuard-obfuscated:
@@ -484,153 +399,6 @@ public class SavedMessagesHook {
         }
     }
 
-    /**
-     * Tries to resolve a real username for senderId by querying Instagram's local user
-     * cache databases. IG stores DM participant profiles in SQLite (user.db or similar).
-     * Returns null if the DB isn't found or the user isn't cached.
-     */
-    private static String resolveUsernameFromCache(String senderId) {
-        try {
-            Context ctx = PikoUtils.getContext();
-            if (ctx == null) return null;
-            File dbDir = ctx.getDatabasePath("x").getParentFile();
-            if (dbDir == null) return null;
-            String[] candidates = {"user.db", "users.db", "igdb.db", "instagram.db",
-                                   "user_cache.db", "profile.db", "direct_bootstrap.db"};
-            for (String name : candidates) {
-                File f = new File(dbDir, name);
-                if (!f.exists()) continue;
-                try {
-                    SQLiteDatabase db = SQLiteDatabase.openDatabase(
-                            f.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
-                    for (String[] spec : new String[][]{
-                            {"users", "username", "pk"},
-                            {"users", "username", "id"},
-                            {"user", "username", "pk"},
-                            {"user", "username", "user_id"},
-                            {"participants", "username", "pk"},
-                    }) {
-                        try {
-                            Cursor c = db.query(spec[0], new String[]{spec[1]},
-                                    spec[2] + " = ?", new String[]{senderId},
-                                    null, null, null, "1");
-                            if (c != null) {
-                                String uname = null;
-                                if (c.moveToFirst()) uname = c.getString(0);
-                                c.close();
-                                if (uname != null && !uname.isEmpty()) { db.close(); return uname; }
-                            }
-                        } catch (Exception ignored) {}
-                    }
-                    db.close();
-                } catch (Exception ignored) {}
-            }
-        } catch (Exception e) {
-            piko("resolveUsernameFromCache: " + e);
-        }
-        return null;
-    }
-
-    // -------------------------------------------------------------------------
-    // Reflection helpers
-    // -------------------------------------------------------------------------
-
-    /**
-     * Resolve the sender's username by reflecting the sender UserInfo entity off the DirectItem.
-     *
-     * Historic mapping:
-     *   DirectItem.A02 → sender UserInfo entity, with sub-fields A00 = user_id, A01 = username.
-     * Obfuscated names rotate per build, so we DON'T rely on a single hardcoded name. Strategy:
-     *   1. Try known/candidate UserInfo field names on the item (walking the superclass chain).
-     *   2. If none resolve, scan fields by type for a "UserInfo"/"User" object near the user_id.
-     *   3. On the UserInfo object, try candidate username sub-fields, then fall back to a
-     *      heuristic: a String field that is NOT all-digits (user_id is numeric) and looks like
-     *      a handle. The matching user_id confirms we picked the right entity.
-     *
-     * Returns null if no username can be found (caller stores empty; UI falls back to sender_id).
-     */
-    private static String resolveSenderUsername(Object item, String senderId) {
-        try {
-            if (item == null) return null;
-
-            // 1 + 2: locate the sender UserInfo entity.
-            Object userInfo = null;
-            for (String f : CANDIDATE_USERINFO_FIELDS) {
-                Object v = getFieldValue(item, f);
-                if (v != null && looksLikeUserInfo(v, senderId)) { userInfo = v; break; }
-            }
-            if (userInfo == null) {
-                Object byType = findFieldByType(item, "userinfo");
-                if (looksLikeUserInfo(byType, senderId)) userInfo = byType;
-            }
-            if (userInfo == null) {
-                Object byType = findFieldByType(item, "user");
-                if (looksLikeUserInfo(byType, senderId)) userInfo = byType;
-            }
-            if (userInfo == null) return null;
-
-            // 3: read the username sub-field.
-            for (String f : CANDIDATE_USERNAME_FIELDS) {
-                Object v = getFieldValue(userInfo, f);
-                if (isUsernameLike(v)) return (String) v;
-            }
-            // Heuristic fallback: first non-numeric String field on the UserInfo object.
-            Class<?> cls = userInfo.getClass();
-            while (cls != null && cls != Object.class) {
-                for (Field f : cls.getDeclaredFields()) {
-                    if (f.getType() != String.class) continue;
-                    f.setAccessible(true);
-                    Object v;
-                    try { v = f.get(userInfo); } catch (Exception e) { continue; }
-                    if (isUsernameLike(v)) return (String) v;
-                }
-                cls = cls.getSuperclass();
-            }
-        } catch (Exception ignored) {}
-        return null;
-    }
-
-    // v426 candidate field names — confirm/extend from the ObjectBrowser dump in logcat.
-    private static final String[] CANDIDATE_USERINFO_FIELDS = {"A02", "A1L", "A0X", "A0Z"};
-    private static final String[] CANDIDATE_USERNAME_FIELDS = {"A01", "A0a", "A0Y", "username"};
-
-    /** A UserInfo-like object exposes the matching user_id (when known) on a sub-field. */
-    private static boolean looksLikeUserInfo(Object obj, String senderId) {
-        if (obj == null) return false;
-        if (obj instanceof String || obj instanceof Number || obj instanceof Boolean) return false;
-        if (senderId == null || senderId.isEmpty()) return true; // can't cross-check; accept candidate
-        for (String f : new String[]{"A00", "A01", "id", "pk", "user_id"}) {
-            Object v = getFieldValue(obj, f);
-            if (v != null && senderId.equals(v.toString())) return true;
-        }
-        return false;
-    }
-
-    /** A plausible username: non-empty String that is not purely numeric (those are IDs). */
-    private static boolean isUsernameLike(Object v) {
-        if (!(v instanceof String)) return false;
-        String s = ((String) v).trim();
-        return !s.isEmpty() && !s.matches("\\d+");
-    }
-
-    /**
-     * Extract the thread-id string from the DirectItem.
-     * v426: thread_key stored in field A0W (DirectThreadKey), threadId is A00:String.
-     * v408: thread_key in field A16/A18/A15, threadId is A00:String.
-     * Uses getFieldValue to walk the superclass chain (needed when item is LX/0gF;).
-     */
-    private static String reflectThreadIdFromItem(Object item) {
-        for (String keyField : new String[]{"A0W", "A16", "A18", "A15"}) {
-            Object key = getFieldValue(item, keyField);
-            if (key == null) continue;
-            Object v = getFieldValue(key, "A00");
-            if (v instanceof String && ((String) v).matches("\\d{15,}")) return (String) v;
-        }
-        // Fallback: the thread_id is a long numeric "thread fbid" (~39 digits, near 2^128) that
-        // lives deeper in the item graph than the fixed field names above. Deep-search for the
-        // LONGEST all-digit string — thread_id (≈39) outranks message_id (≈35) and user_id (≈11).
-        return deepLongestNumericId(item, 30);
-    }
 
     /** Bounded BFS over the item graph for a media URL (image/video/audio CDN link). Prefers the
      *  longest match (usually the highest-resolution variant). Returns null if none found. */
@@ -679,73 +447,5 @@ public class SavedMessagesHook {
         }
     }
 
-    /** Bounded BFS over an IG/obfuscated object graph; returns the longest all-digit String
-     *  with length >= minLen (the thread fbid), or null. */
-    static String deepLongestNumericId(Object root, int minLen) {
-        try {
-            java.util.IdentityHashMap<Object, Boolean> seen = new java.util.IdentityHashMap<>();
-            java.util.ArrayDeque<Object> q = new java.util.ArrayDeque<>();
-            q.add(root); seen.put(root, Boolean.TRUE);
-            String best = null;
-            int budget = 4000;
-            while (!q.isEmpty() && budget-- > 0) {
-                Object o = q.poll();
-                Class<?> k = o.getClass();
-                String kn = k.getName();
-                if (!(kn.startsWith("X.") || kn.startsWith("com.instagram"))) continue;
-                for (Class<?> cc = k; cc != null && cc != Object.class; cc = cc.getSuperclass()) {
-                    for (Field f : cc.getDeclaredFields()) {
-                        if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
-                        if (f.getType().isPrimitive()) continue;
-                        Object v;
-                        try { f.setAccessible(true); v = f.get(o); } catch (Throwable t) { continue; }
-                        if (v == null || seen.put(v, Boolean.TRUE) != null) continue;
-                        if (v instanceof String) {
-                            String s = (String) v;
-                            if (s.length() >= minLen && s.matches("\\d+")
-                                    && (best == null || s.length() > best.length())) best = s;
-                            continue;
-                        }
-                        if (v instanceof CharSequence || v instanceof Number || v instanceof Boolean) continue;
-                        q.add(v);
-                    }
-                }
-            }
-            return best;
-        } catch (Throwable t) {
-            return null;
-        }
-    }
-
-    /** Walk the full superclass chain to find and read a field by name. */
-    private static Object getFieldValue(Object obj, String fieldName) {
-        Class<?> cls = obj.getClass();
-        while (cls != null && cls != Object.class) {
-            try {
-                Field f = cls.getDeclaredField(fieldName);
-                f.setAccessible(true);
-                return f.get(obj);
-            } catch (NoSuchFieldException ignored) {
-                cls = cls.getSuperclass();
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    private static Object findFieldByType(Object obj, String typeNameHint) {
-        Class<?> cls = obj.getClass();
-        while (cls != null && cls != Object.class) {
-            for (Field f : cls.getDeclaredFields()) {
-                if (f.getType().getSimpleName().toLowerCase().contains(typeNameHint.toLowerCase())) {
-                    f.setAccessible(true);
-                    try { return f.get(obj); } catch (Exception ignored) {}
-                }
-            }
-            cls = cls.getSuperclass();
-        }
-        return null;
-    }
 
 }

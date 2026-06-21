@@ -99,3 +99,14 @@ internal object DirectItemDbHideFingerprint : Fingerprint(
     ),
     returnType = "V",
 )
+
+/**
+ * The DM action-bar builder (e.g. LX/2p9;->A01 on v426) — the same method dmActionBarButtonPatch
+ * hooks. It constructs the open chat's DirectThreadKey, so Hook 5 reads the thread id from there
+ * at patch time and records it (noteOpenThreadId), removing the need for a runtime object-graph
+ * walk to find the open chat.
+ */
+internal object DMActionBarThreadFingerprint : Fingerprint(
+    strings = listOf("threadClientInfra", "actionBarListener"),
+    returnType = "V",
+)
