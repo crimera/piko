@@ -41,6 +41,7 @@
     <string name="piko_share_image_autocleanup_desc">これを有効化すると、24時間以上経過したキャプチャを削除します</string>
     <string name="piko_share_image_invalid_context">無効なコンテキストです</string>
     <string name="piko_share_image_capturing">ツイートをキャプチャしています…</string>
+    <string name="piko_share_image_view_not_found">ツイートが見つかりません</string>
     <string name="piko_share_image_capture_failed">画像をキャプチャできませんでした</string>
     <string name="piko_share_image_error">エラー: %s</string>
     <string name="piko_title_native_translator">翻訳</string>
@@ -95,6 +96,7 @@
     <string name="piko_pref_top_people_search_desc">検索結果の一番上にある「ユーザー欄」を非表示にします</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">その他</string>
+    <string name="piko_pref_chirp_font">Chirpフォントを無効化</string>
     <string name="piko_pref_hide_fab">フローティングアクションボタンを削除</string>
     <string name="piko_pref_hide_fab_menu">フローティングアクションメニューを削除</string>
     <string name="piko_pref_rec_users">おすすめのユーザーを削除</string>

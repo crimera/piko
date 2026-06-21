@@ -96,6 +96,7 @@
     <string name="piko_pref_top_people_search_desc">Masque la section personnes après la recherche</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">Divers</string>
+    <string name="piko_pref_chirp_font">Désactiver la police chirp</string>
     <string name="piko_pref_hide_fab">Masquer le bouton d\'action flottant</string>
     <string name="piko_pref_hide_fab_menu">Masquer les boutons du menu d\'action flottant</string>
     <string name="piko_pref_rec_users">Masquer les utilisateurs recommandés</string>

@@ -61,6 +61,7 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_disable_double_tap_like_reel">Désactiver le double appui pour liker sur un reel</string>
     <string name="piko_disable_double_tap_like_comment">Désactiver le double appui pour liker sur un commentaire</string>
     <string name="piko_disable_double_tap_like_message">Désactiver le double appui pour liker sur un message</string>
+    <string name="piko_disable_double_tap_to_like">Désactiver le double appui pour aimer</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Divers</string>
     <string name="piko_disable_analytics">Désactiver les analyses</string>
@@ -134,6 +135,7 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_external_downloader_package_name">Nom du paquet du téléchargeur externe</string>
     <string name="piko_external_downloader_package_name_not_found">Nom du paquet du téléchargement externe introuvable</string>
     <string name="piko_external_downloader_package_name_not_set">Veuillez définir le nom du paquet du téléchargeur externe</string>
+    <string name="piko_download_voice_media">Télécharger le message vocal</string>
     <!-- Posts Section -->
     <string name="piko_post_options">Options de publication</string>
     <string name="piko_copy_post_description">Copier la description de la publication</string>
@@ -150,11 +152,14 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_hide_navigation_search">Masquer le bouton \"Rechercher\"</string>
     <string name="piko_hide_navigation_create">Masquer le bouton \"Créer\"</string>
     <!-- Information Section -->
+    <string name="piko_category_about">À propos</string>
     <string name="piko_export_pref">Exporter les préférences de piko</string>
     <string name="piko_import_pref">Importer les préférences de piko</string>
     <string name="piko_app_version">Version de l\'application: %s</string>
     <string name="piko_patch_version">Version du patch: %s</string>
     <string name="piko_patch_info_title">Informations sur le patch</string>
+    <string name="piko_patch_enabled">Activé</string>
+    <string name="piko_patch_disabled">Désactivé</string>
     <!-- Export and Import Section -->
     <string name="piko_export_success">Exporté avec succès</string>
     <string name="piko_export_fail">Échec de l\'exportation</string>

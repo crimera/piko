@@ -19,7 +19,7 @@
     <string name="piko_remove_build_expire_popup_desc">Uygulama sürümü eskidiğinde, bir süre sonra gözüken pencereyi kaldırır</string>
     <string name="piko_export_dev_overrides">Geçersiz kılmaları dışa aktar</string>
     <string name="piko_import_dev_overrides">Geçersiz kılmaları içe aktar</string>
-    <string name="piko_import_id_mapping">Eşleme dosyalarını içe aktar</string>
+    <string name="piko_import_id_mapping">Mapping dosyasını içe aktar</string>
     <string name="piko_download_id_mapping">Eşleme dosyasını indir</string>
     <string name="piko_missing_mapping_file">Eksik eşleme dosyası</string>
     <string name="piko_missing_mapping_file_desc">Eşleme dosyası olmadan, geliştirici seçenekleri doğru isimlere sahip olmayacaktır. İndirmek ister misiniz?</string>
@@ -155,6 +155,7 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_app_version">Uygulama sürümü: %s</string>
     <string name="piko_patch_version">Yama sürümü: %s</string>
     <string name="piko_patch_info_title">Yama bilgisi</string>
+    <string name="piko_patch_disabled">Etkinleştirilmemiş</string>
     <!-- Export and Import Section -->
     <string name="piko_export_success">Başarıyla dışa aktarıldı</string>
     <string name="piko_export_fail">Dışa aktarma başarısız</string>

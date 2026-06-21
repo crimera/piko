@@ -61,6 +61,7 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_disable_double_tap_like_reel">Wyłącz polubienie rolek podwójnym dotknięciem</string>
     <string name="piko_disable_double_tap_like_comment">Wyłącz polubienie komentarzy podwójnym dotknięciem</string>
     <string name="piko_disable_double_tap_like_message">Wyłącz polubienie wiadomości podwójnym dotknięciem</string>
+    <string name="piko_disable_double_tap_to_like">Wyłącz polubienie podwójnym dotknięciem</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Różne</string>
     <string name="piko_disable_analytics">Wyłącz analitykę</string>
@@ -134,6 +135,7 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_external_downloader_package_name">Nazwa pakietu zewnętrznej aplikacji</string>
     <string name="piko_external_downloader_package_name_not_found">Nie znaleziono pakietu zewnętrznej aplikacji</string>
     <string name="piko_external_downloader_package_name_not_set">Ustaw nazwę pakietu zewnętrznej aplikacji</string>
+    <string name="piko_download_voice_media">Pobierz wiadomość głosową</string>
     <!-- Posts Section -->
     <string name="piko_post_options">Opcje posta</string>
     <string name="piko_copy_post_description">Skopiuj opis posta</string>
@@ -150,11 +152,14 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_hide_navigation_search">Ukryj przycisk Szukaj</string>
     <string name="piko_hide_navigation_create">Ukryj przycisk Utwórz</string>
     <!-- Information Section -->
+    <string name="piko_category_about">Informacje</string>
     <string name="piko_export_pref">Eksportuj ustawienia Piko</string>
     <string name="piko_import_pref">Importuj ustawienia Piko</string>
     <string name="piko_app_version">Wersja aplikacji: %s</string>
     <string name="piko_patch_version">Wersja modyfikacji: %s</string>
     <string name="piko_patch_info_title">Informacje o modyfikacjach</string>
+    <string name="piko_patch_enabled">Włączone</string>
+    <string name="piko_patch_disabled">Wyłączone</string>
     <!-- Export and Import Section -->
     <string name="piko_export_success">Wyeksportowano pomyślnie</string>
     <string name="piko_export_fail">Błąd eksportu</string>

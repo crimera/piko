@@ -63,6 +63,7 @@ Observação: em uma instalação nova, a animação “Dica” pode aparecer, m
     <string name="piko_disable_double_tap_like_reel">Desative a função de duplo toque no Reel</string>
     <string name="piko_disable_double_tap_like_comment">Desative o duplo toque para gostar nos comentários</string>
     <string name="piko_disable_double_tap_like_message">Desativar toque duplo na mensagem</string>
+    <string name="piko_disable_double_tap_to_like">Desative o toque duplo para curtir</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Diversos</string>
     <string name="piko_disable_analytics">Desativar análises</string>
@@ -111,13 +112,92 @@ Observação: em uma instalação nova, a animação “Dica” pode aparecer, m
     <string name="piko_category_download_media">Baixar mídia</string>
     <string name="piko_enable_download">Ativar baixar</string>
     <string name="piko_enable_direct_download">Ativar baixar direto</string>
+    <string name="piko_enable_direct_download_desc">Baixa a mídia de visualização atual sem pedir opções</string>
+    <string name="piko_download_username_folder">Separar mídia por usuário</string>
+    <string name="piko_download_username_folder_desc">Cria subpastas com base no nome de usuário</string>
+    <string name="piko_download_current_media">Baixar a mídia atual</string>
+    <string name="piko_download_as_image">Baixar como imagem</string>
+    <string name="piko_video_variants">Variantes de vídeo</string>
+    <string name="piko_image_variants">Variantes de imagem</string>
+    <string name="piko_download_audio">Baixar áudio</string>
+    <string name="piko_download_options">Opções de download</string>
+    <string name="piko_copy_media_link">Copiar link de mídia</string>
+    <string name="piko_copied_media_link">Link de mídia copiado</string>
+    <string name="piko_download_all">Baixar tudo</string>
+    <string name="piko_downloading_media">Baixando: </string>
+    <string name="piko_downloaded_media">Baixado: </string>
+    <string name="piko_media_exists">A mídia existe</string>
+    <string name="piko_download_failed_media">Download falhou : </string>
+    <string name="piko_download_set_path">Definir caminho personalizado para download</string>
+    <string name="piko_download_set_path_success">Diretório de downloads atualizado!</string>
+    <string name="piko_download_set_path_failed">Falha ao resolver o caminho da pasta</string>
+    <string name="piko_download_grant_permission">Por favor, conceda acesso ao armazenamento para continuar os downloads</string>
+    <string name="piko_download_grant_permission_failed">Não foi possível abrir as configurações. Conceda acesso a todos os arquivos manualmente</string>
+    <string name="piko_download_with_external_downloader">Baixar com um gerenciador de downloads externo</string>
+    <string name="piko_external_downloader_package_name">Nome do pacote de download externo não encontrado</string>
+    <string name="piko_external_downloader_package_name_not_found">Nome do pacote de download externo não encontrado</string>
+    <string name="piko_external_downloader_package_name_not_set">Por favor, defina o nome do pacote de download externo</string>
+    <string name="piko_download_voice_media">Baixar mensagem de voz</string>
     <!-- Posts Section -->
+    <string name="piko_post_options">Opções de postagem</string>
+    <string name="piko_copy_post_description">Copiar descrição da postagem</string>
+    <string name="piko_copy_post_owner_username">Copiar nome do usuário do proprietário</string>
+    <string name="piko_copy_post_owner_fullname">Copiar nome completo do proprietário da publicação</string>
+    <string name="piko_enable_more_options_on_post">Ative mais opções na publicação</string>
+    <string name="piko_enable_more_options_on_post_desc">Adiciona um botão de menu de opções adicionais para exibir mais detalhes nas postagens/reels, como copiar a descrição, copiar o nome de usuário etc</string>
+    <string name="piko_more_options">Mais opções</string>
     <!-- Navigation Section -->
+    <string name="piko_category_hide_navigation_buttons">Ocultar botões de navegação</string>
+    <string name="piko_hide_navigation_feed">Ocultar botão do feed</string>
+    <string name="piko_hide_navigation_reels">Ocultar botão Reels</string>
+    <string name="piko_hide_navigation_direct">Ocultar botão Direct</string>
+    <string name="piko_hide_navigation_search">Ocultar botão pesquisa</string>
+    <string name="piko_hide_navigation_create">Ocultar botão Criar</string>
     <!-- Information Section -->
+    <string name="piko_category_about">Sobre</string>
+    <string name="piko_export_pref">Exportar preferências piko</string>
+    <string name="piko_import_pref">Importar preferências do Piko</string>
+    <string name="piko_app_version">Versão do app: %s</string>
+    <string name="piko_patch_version">Versão do patch: %s</string>
+    <string name="piko_patch_info_title">Informações do patch</string>
+    <string name="piko_patch_enabled">Ativado</string>
+    <string name="piko_patch_disabled">Desativado</string>
     <!-- Export and Import Section -->
+    <string name="piko_export_success">Exportado com sucesso</string>
+    <string name="piko_export_fail">Exportação falhou</string>
+    <string name="piko_fail_no_path">Nenhum caminho de destino fornecido</string>
+    <string name="piko_fail_no_file">Arquivo não encontrado</string>
+    <string name="piko_import_success">Importado com sucesso</string>
+    <string name="piko_import_fail">A importação falhou</string>
+    <string name="piko_restart_app">O aplicativo precisa ser reiniciado para que as alterações sejam aplicadas</string>
+    <string name="piko_ok">Ok</string>
+    <string name="piko_cancel">Cancelar</string>
+    <string name="piko_deleted">Excluído</string>
+    <string name="piko_debug">Debug do Piko</string>
+    <string name="piko_debug_desc">Adiciona opção de depuração em alguns componentes para testes</string>
+    <string name="piko_export_experiment_list">Exportar lista de experimentos</string>
+    <string name="piko_export_experiment_mappings">Exportar mapeamentos de experimentos</string>
     <!-- Open With Section -->
+    <string name="piko_open_image_externally">Abrir imagem externamente</string>
+    <string name="piko_open_video_externally">Abrir vídeo externamente</string>
+    <string name="piko_open_image_with">Abra a imagem com</string>
+    <string name="piko_open_video_with">Abra o vídeo com</string>
     <!-- Like Animation Section -->
+    <string name="piko_change_like_animation">Alterar animação de like</string>
+    <string name="piko_change_like_animation_desc">Alterar a animação para uma das animações existentes no estilo Rings</string>
+    <string name="piko_available_like_animation">Disponível como animações</string>
     <!-- For arrays -->
+    <string name="piko_array_default">Padrão</string>
+    <string name="piko_array_detailed_timestamp">Registro de data e hora detalhado (Dia da semana/Mês/Data/Hora/Minuto/Segundo)</string>
+    <string name="piko_array_post_time">Horário da postagem (hora/minuto/segundo)</string>
+    <string name="piko_array_time_left">Tempo restante (hora/minuto/segundo restante)</string>
     <!-- Welcome Message -->
+    <string name="piko_welcome_title">Bem-vindo ao Piko</string>
+    <string name="piko_welcome_message">Para melhorar sua experiência com o Piko, acesse as configurações do Piko e ajuste suas preferências</string>
+    <string name="piko_goto_piko_settings">Acesse as configurações do Piko</string>
+    <string name="piko_no_internet">Por favor, conecte-se à internet</string>
+    <string name="piko_tap_here">Toque aqui !!</string>
     <!-- Action Bar Section -->
+    <string name="piko_settings_on_action_bar">Configurações do Piko na barra de ação</string>
+    <string name="piko_settings_on_action_bar_desc">Mova o ponto de entrada das configurações do Piko para a barra de ações do feed principal</string>
 </resources>
