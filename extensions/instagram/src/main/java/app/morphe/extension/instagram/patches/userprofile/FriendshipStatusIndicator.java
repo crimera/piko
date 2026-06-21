@@ -10,9 +10,14 @@ package app.morphe.extension.instagram.patches.userprofile;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Arrays;
 import android.widget.TextView;
 import android.view.View;
+import android.content.Context;
+import android.app.Dialog;
+import android.content.DialogInterface;
 
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.utils.Utils;
@@ -21,25 +26,41 @@ import app.morphe.extension.instagram.entity.UserFriendshipStatus;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.ProfileInfo;
+import app.morphe.extension.instagram.entity.InstagramDialogBox;
+
 import app.morphe.extension.shared.Logger;
 
 import com.instagram.common.session.UserSession;
 
 public class FriendshipStatusIndicator {
 
-    /**
-     * Given badge object and text, this function,
-     * sets text to the badge and makes it visible.
-     *
-     * @param badgeObject The viewing profile user object.
-     * @param text String text to set in badge label.
-     * @throws Exception If an exception occurs during the method invocation.
-     **/
-    private static void setInternalBadgeText(Object badgeObject,String text) throws Exception {
-        Entity entity = new Entity(badgeObject);
-        TextView badgeView = (TextView) entity.getMethod("getView");
-        badgeView.setVisibility(View.VISIBLE);
-        badgeView.setText(text);
+    private static void friendshipStatusDialogBox(Context context, UserFriendshipStatus userFriendshipStatus) {
+        InstagramDialogBox dialog = new InstagramDialogBox(context);
+
+        dialog.setNegativeButton(str("piko_cancel"),null);
+        dialog.setTitle(str("piko_friendship_status"));
+        dialog.setCancelable(false);
+        dialog.setCanceledOnTouchOutside(false);
+
+        Map<String, Boolean> friendshipMap = userFriendshipStatus.getMappings();
+
+        ArrayList<String> options = new ArrayList<>();
+        for (Map.Entry<String, Boolean> entry : friendshipMap.entrySet()) {
+            String tag = entry.getKey();
+            boolean sts = (boolean) entry.getValue();
+            tag = tag.replace("_"," ");
+            options.add(tag+": "+Boolean.valueOf(sts));
+        }
+        CharSequence[] items = options.toArray(new CharSequence[0]);
+
+        dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface d, int which) {}
+        }
+        );
+
+        Dialog dlg = dialog.getDialog();
+        dlg.show();
     }
 
     public static void indicators(Object profileInfoObject, Object badgeObject){
@@ -55,7 +76,18 @@ public class FriendshipStatusIndicator {
                 UserFriendshipStatus userFriendshipStatus = viewingUserData.getUserFriendshipStatus();
                 Boolean followed_by = userFriendshipStatus.getFollowBackStatus();
                 String indicatorText = followed_by ? str("piko_fbi_follows_you") : str("piko_fbi_doesnt_follows_you");
-                setInternalBadgeText(badgeObject, indicatorText);
+
+                Entity entity = new Entity(badgeObject);
+                TextView badgeView = (TextView) entity.getMethod("getView");
+                badgeView.setVisibility(View.VISIBLE);
+                badgeView.setText(indicatorText);
+
+                badgeView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        friendshipStatusDialogBox(v.getContext(), userFriendshipStatus);
+                    }
+                });
 
             } catch (Exception ex) {
                 Logger.printException(() -> "Failed follow back indicator", ex);

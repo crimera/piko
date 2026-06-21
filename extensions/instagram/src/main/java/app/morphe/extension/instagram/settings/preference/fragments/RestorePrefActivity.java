@@ -42,7 +42,7 @@ public class RestorePrefActivity extends AppCompatActivity {
         Bundle args = getIntent().getExtras();
 
         if (args != null) {
-            if (args.containsKey(("piko_import_dev_overrides")) {
+            if (args.containsKey("piko_import_dev_overrides")) {
                 destinationFile =new File(context.getFilesDir()+ "/mobileconfig","mc_overrides.json");
             } else if (args.containsKey("piko_import_id_mapping")) {
                 destinationFile = new File(context.getFilesDir()+ "/mobileconfig","id_name_mapping.json");

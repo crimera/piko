@@ -77,6 +77,7 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_follow_back_indicator">Enable follow back indicator</string>
     <string name="piko_fbi_follows_you">Follows you</string>
     <string name="piko_fbi_doesnt_follows_you">Does not follow you</string>
+    <string name="piko_friendship_status">Friendship status</string>
     <string name="piko_view_story_mentions">View story mentions</string>
     <string name="piko_vsm_title">Story mentions</string>
     <string name="piko_vsm_no_mentions">No mentions on this story</string>
