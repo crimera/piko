@@ -273,5 +273,9 @@ public class Pref {
         return SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
     }
 
+    public static boolean saveDeletedMessages() {
+        return SharedPref.getBooleanPref(Settings.SAVE_DELETED_MESSAGES) && SettingsStatus.saveDeletedMessages;
+    }
+
     //end
 }

@@ -208,4 +208,10 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <!-- Action Bar Section -->
     <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
     <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
+
+    <!-- Direct Messages Section -->
+    <string name="piko_category_dm">Direct Messages</string>
+    <string name="save_deleted_messages">Save deleted messages</string>
+    <string name="save_deleted_messages_desc">Captures incoming DMs locally as they arrive from the server. Marks messages as deleted when unsent, so you can view them even after the sender deletes them.</string>
+    <string name="view_deleted_messages">View deleted messages</string>
 </resources>

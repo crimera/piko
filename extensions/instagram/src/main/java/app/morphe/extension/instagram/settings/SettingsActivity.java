@@ -228,6 +228,8 @@ public class SettingsActivity extends Activity {
                 screenBuilder.buildAdsSection();
             } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_GHOST)) {
                 screenBuilder.ghostSection();
+            } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_DM)) {
+                screenBuilder.dmSection();
             } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_LINKS)) {
                 screenBuilder.linksSection();
             } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)) {

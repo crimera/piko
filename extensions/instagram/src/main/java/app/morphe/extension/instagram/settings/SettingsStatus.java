@@ -196,6 +196,9 @@ public class SettingsStatus {
     public static boolean hideNavigationButtons = false;
     public static void hideNavigationButtons() { hideNavigationButtons = true; }
 
+    public static boolean saveDeletedMessages = false;
+    public static void saveDeletedMessages() { saveDeletedMessages = true; }
+
     public static void load() {
     }
 }
