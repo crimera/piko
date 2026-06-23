@@ -20,6 +20,9 @@ import kotlin.properties.Delegates
 var MEDIA_CLASS_NAME: String by Delegates.notNull()
     private set
 
+var USER_MODEL_CLASS_NAME: String by Delegates.notNull()
+    private set
+
 var MEDIA_ADD_INFO_CLASS_NAME: String by Delegates.notNull()
     private set
 
@@ -45,5 +48,7 @@ val decoderEntity =
             }
 
             COMMENT_BUTTON_CLASS = CommentButtonOnClickFingerprint.method.parameters[0].type
+
+            USER_MODEL_CLASS_NAME = UserTagInfoDictInitFingerprint.method.parameters[0].type
         }
     }

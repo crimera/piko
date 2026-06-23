@@ -133,7 +133,7 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
     }
 
-    public static boolean hideReshareButton() {
+    public static Boolean hideReshareButton() {
         return SharedPref.getBooleanPref(Settings.HIDE_RESHARE_BUTTON) && SettingsStatus.hideReshareButton;
     }
 

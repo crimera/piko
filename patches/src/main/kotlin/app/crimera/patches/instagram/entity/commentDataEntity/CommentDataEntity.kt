@@ -7,6 +7,7 @@
 package app.crimera.patches.instagram.entity.commentDataEntity
 
 import app.crimera.patches.instagram.entity.decoder.CommentButtonOnClickFingerprint
+import app.crimera.patches.instagram.misc.comment.copyComment.CopyTextChatButtonToStringFingerprint
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -14,12 +15,17 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
+import kotlin.properties.Delegates
+
+var CHAT_CONTEXT_BUTTON_SUPER_CLASS: String by Delegates.notNull()
+    private set
 
 val commentDataEntity =
     bytecodePatch(
         description = "This patch is used for decoding obfuscated code of comment data",
     ) {
         execute {
+            CHAT_CONTEXT_BUTTON_SUPER_CLASS = CopyTextChatButtonToStringFingerprint.classDef.superclass.toString()
 
             CommentButtonOnClickFingerprint.apply {
                 val commentShareClickStrIndex = stringMatches[1].index
