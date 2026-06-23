@@ -17,7 +17,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
 
 internal object DisableAdsFingerprint : Fingerprint(
-    strings = listOf("SponsoredContentController.insertItem"),
+    strings = listOf("Is ad pod"),
 )
 
 @Suppress("unused")

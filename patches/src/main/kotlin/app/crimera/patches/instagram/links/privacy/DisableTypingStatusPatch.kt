@@ -27,9 +27,12 @@ internal object OnTextChangedFingerprint : Fingerprint(
     returnType = "V",
     filters =
         OpcodesFilter.opcodesToFilters(
+            Opcode.IGET,
+            Opcode.IF_NEZ,
             Opcode.CONST_4,
             Opcode.INVOKE_STATIC,
             Opcode.IGET_OBJECT,
+            Opcode.CHECK_CAST,
             Opcode.INVOKE_VIRTUAL,
             Opcode.MOVE_RESULT_OBJECT,
         ),

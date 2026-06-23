@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.entity.userdata
 
+import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.utils.Constants.FRIENDSHIP_STATUS_CLASS
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.extensionToClassName
@@ -21,6 +22,8 @@ val userDataEntity =
     bytecodePatch(
         description = "This patch is used for decoding obfuscated code of the user data",
     ) {
+        dependsOn(decoderEntity)
+
         execute {
             OneTapLoginUserInitFingerprint.method.apply {
                 val additionalUserInfoField =

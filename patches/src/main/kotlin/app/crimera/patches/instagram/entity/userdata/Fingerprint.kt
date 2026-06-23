@@ -6,6 +6,8 @@
 
 package app.crimera.patches.instagram.entity.userdata
 
+import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
+import app.crimera.patches.instagram.entity.profileinfo.USER_DETAIL_VIEW_MODEL_CLASS
 import app.crimera.patches.instagram.utils.Constants
 import app.morphe.patcher.Fingerprint
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -48,11 +50,9 @@ internal object EditProfileNuxFragmentOnCreateFingerprint : Fingerprint(
 )
 
 internal object OneTapLoginUserInitFingerprint : Fingerprint(
-    strings = listOf("OneTapLoginUser", "OneTapLoginUser was created w/ NULL username - should never happen."),
+    strings = listOf("APP_LEVEL_SPI_NO"),
     returnType = "V",
-    custom = { methodDef, _ ->
-        methodDef.parameters.size == 2
-    },
+    parameters = listOf(USER_MODEL_CLASS_NAME, "Ljava/lang/String;"),
 )
 
 internal object DirectStoryViewerFragmentRelatedFingerprint : Fingerprint(
