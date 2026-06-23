@@ -14,7 +14,57 @@ This is useful in the following cases:
 Tokens and other necessary data will be exported in JSON format.  
 You can import it from the login screen or piko settings.
 
-**Important: This patch does NOT fix the login attestation problem.**
+**This patch does NOT fix the login attestation problem. To get a token, you must first log in to your account using any login method.**
+
+## How to export
+
+Piko settings > Backup and restore > Export login token
+
+## How to import
+
+This varies depending on the version.
+
+### • New login screen
+
+This is for versions 11.90 and above. (But this is rolled out to some users even on v11.81.0 or earlier.)
+
+<img alt="new_login_screen" width="360" src="https://github.com/user-attachments/assets/22d9c2b4-8947-41bb-90a2-c305b02a8833"/>
+
+The "Login through token json" button is not displayed in this version.  
+There are two workarounds.
+
+<details>
+
+<summary>Method A: Using deep link</summary>
+
+You can open the import menu by clicking the deep link.  
+First, set the Piko Twitter app to open x.com links. (App Info > Open by default)  
+Then click the deep link below.
+
+[**\<\<\<CLICK HERE\>\>\>**](https://x.com/i/piko/pref)
+
+</details>
+
+<details>
+
+<summary>Method B: Using very legacy login screen</summary>
+
+The X app still has a very legacy login screen that is no longer in use. Coincidentally, it serves as a loophole for importing tokens.
+
+1. Long press the app icon and select "Search".
+2. Tap "Sign up" in the upper right corner.
+3. The "Import Token" button is there.
+
+</details>
+
+### • Old login screen
+
+This is for most users on versions prior to 11.81.0.  
+Tap the "Login through token json" text.
+
+### • Add second account
+
+If you want to import a second or subsequent account, you can import it simply from Piko settings > Backup and restore > Import login token
 
 ## WARNING
 
@@ -25,7 +75,7 @@ Please also be careful of your clipboard or exported files.
 
 ## How it works
 
-X for Android stores the session token and some cached information into the Android system's AccountManager.  
+X for Android stores the session token into the Android system's AccountManager.  
 This information continues to work even if you clear the app data.  
 (This is also why X still be logged in even after clearing the app data.)
 
@@ -49,24 +99,11 @@ In other words, you just need to prevent the logout request from being sent to t
 Also, when you factory reset your device, you will need to uninstall the Twitter app beforehand.
 It has been reported that the token is logged out when performing a factory reset.
 
-## Regarding the new login screen
-
-Recently, Twitter has been testing a new redesigned login screen for some users.  
-This patch does not yet support this new login screen, and the "Login through token json" button will not be displayed.
-
-<img alt="new_login_screen" width="360" src="https://github.com/user-attachments/assets/22d9c2b4-8947-41bb-90a2-c305b02a8833"/>
-
-As a workaround, you can open the import menu by clicking the deep link.  
-First, set the Piko Twitter app to open x.com links. (App Info > Open by default)  
-Then click the deep link below.
-
-[**\<\<\<CLICK HERE\>\>\>**](https://x.com/i/piko/pref)
-
 ## Troubleshooting
 
 **Q: After importing a token, a notification "You were logged out of @username due to an error." appears immediately.**
 
-A: The session has already been logged out. That token cannot be used.
+A: The session has already been logged out. That token is invalid.
 
 **Q: After importing a token, it's not logged in even after restarting the app, but there is no notification.**
 
@@ -74,11 +111,11 @@ A: Allow notifications for the X app and try again.
 
 **Q: Can I use tokens from the web version of Twitter?**
 
-A: No. Because it is completely different from the Android token.
+A: No. Because it is completely different from the Android tokens.
 
 ## Appendix
 
-### The format of piko's token file
+### The structure of piko's token JSON
 
 ```json
 {
@@ -110,7 +147,9 @@ However, some keys are required. If any required keys are missing when importing
 
 ### Get token from rooted device without piko
 
-If you are using official X instead of piko on a rooted device (e.g., using an Xposed module) and want to export tokens to use with piko, you can extract your tokens and user data without piko using the following method.
+If you are using the official X app (not piko) on a rooted device, you can extract your tokens without installing piko using the following method.
+
+Note that if you don't mind installing piko, you don't need to use this method. Just install piko over the official app using an Xposed module (e.g. Core Patch) to allow app updates across different signatures.
 
 1. Use any file manager app that supports root access
 2. Get `/data/system_ce/0/accounts_ce.db`
