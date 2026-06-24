@@ -17,7 +17,7 @@ import app.morphe.extension.instagram.patches.userprofile.ProfileMoreOption;
 public class UserProfileButton {
     private static boolean PIKO_SETTINGS_ON_ACTION_BAR;
     static {
-        PIKO_SETTINGS_ON_ACTION_BAR = Pref.pikoSettingsOnActionBar();
+        PIKO_SETTINGS_ON_ACTION_BAR = Pref.pikoSettingsOnActionBar() && false;
     }
 
     public static void addButtons(ViewGroup viewGroup, Object object) {
