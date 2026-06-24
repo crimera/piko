@@ -52,13 +52,13 @@ Then click the deep link below.
 
 The X app still contains a very legacy login screen that is no longer in use. Coincidentally, it serves as a loophole for importing tokens.
 
-1. Long press the app icon and select "Search".
+1. Long press the app icon and select "Search". This opens the very legacy login screen.
 <img width="240" src="https://github.com/user-attachments/assets/72dfb2fd-d948-41f0-a28b-2206332f80fc" />
 
 2. Tap "Sign up" in the upper right corner.
 <img width="240" src="https://github.com/user-attachments/assets/1f81b83a-e7a4-49de-b448-e47dbe02cfd0" />
 
-3. The "Import Token" button is there.
+3. The "Login through token json" button is there.
 <img width="240" src="https://github.com/user-attachments/assets/36589f61-acdb-43fb-9601-20c493938e0b" />
 
 </details>
