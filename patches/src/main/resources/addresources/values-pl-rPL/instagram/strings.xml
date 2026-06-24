@@ -69,7 +69,6 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_disable_analytics_desc">Blokuje wysyłanie danych telemetrycznych na serwery Instagrama/Facebooka</string>
     <string name="piko_disable_discover_people">Wyłącz odkrywanie osób</string>
     <string name="piko_disable_discover_people_desc">Wyłącza sekcję sugerowanych osób na profilach użytkowników</string>
-    <string name="piko_follow_back_indicator">Włącz wskaźnik wzajemnej obserwacji</string>
     <string name="piko_fbi_follows_you">Obserwuje Cię</string>
     <string name="piko_fbi_doesnt_follows_you">Nie obserwuje Cię</string>
     <string name="piko_friendship_status">Status znajomości</string>

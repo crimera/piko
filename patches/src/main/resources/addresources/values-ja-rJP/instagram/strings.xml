@@ -4,11 +4,11 @@
     <string name="piko_category_ads">広告</string>
     <string name="piko_disable_ads">広告を無効化</string>
     <string name="piko_hide_suggested_content">おすすめのコンテンツを非表示</string>
-    <string name="piko_hide_suggested_content_desc">すすめのストーリーズ・リール・スレッドを非表示にします。おすすめの投稿は表示されます。</string>
+    <string name="piko_hide_suggested_content_desc">おすすめのストーリーズ・リール・スレッドを非表示にします。おすすめの投稿は表示されます。</string>
     <!-- Developer Options Section -->
     <string name="piko_category_dev_options">開発者オプション</string>
     <string name="piko_enable_dev_options">開発者向けオプションを有効化</string>
-    <string name="piko_enable_dev_options_desc">ホームタブを長押しすると、開発者向けのオプションが開きます。</string>
+    <string name="piko_enable_dev_options_desc">ホームタブを長押しすると、開発者向けのオプションが開きます</string>
     <string name="piko_directly_open_metaconfig">MetaConfigのオーバーライド画面を直接開く</string>
     <string name="piko_directly_open_metaconfig_desc">ホームタブを長押しすると、MetaConfigのオーバーライド画面を直接開きます。開発者向けオプションを有効にする必要があります</string>
     <string name="piko_enable_emp_options">社員向けオプションを有効化</string>
@@ -69,9 +69,9 @@
     <string name="piko_disable_analytics_desc">InstagramとFacebookのサーバーへ送信される分析データをブロックします</string>
     <string name="piko_disable_discover_people">おすすめのユーザーを無効化</string>
     <string name="piko_disable_discover_people_desc">プロフィール内の「おすすめのユーザー」欄を非表示にします</string>
-    <string name="piko_follow_back_indicator">フォローバック表示を有効化</string>
     <string name="piko_fbi_follows_you">フォローされています</string>
     <string name="piko_fbi_doesnt_follows_you">フォローされていません</string>
+    <string name="piko_friendship_status">フレンドの状態</string>
     <string name="piko_view_story_mentions">ストーリーのメンションを表示</string>
     <string name="piko_vsm_title">メンションされたアカウント</string>
     <string name="piko_vsm_no_mentions">このストーリーでメンションされたアカウントはありません</string>
@@ -82,7 +82,7 @@
     <string name="piko_customise_story_timestamp">ストーリーの時刻表示をカスタマイズ</string>
     <string name="piko_customise_story_timestamp_desc">ストーリーに表示される投稿時刻をカスタマイズします</string>
     <string name="piko_unlimited_replays">一時メディアを永続化</string>
-    <string name="piko_unlimited_replays_desc">「1回表示」「2回表示」のメディアを通常の表示に変更します</string>
+    <string name="piko_unlimited_replays_desc">「1回表示」や「2回表示」のメディアを通常の表示に変更します</string>
     <string name="piko_improve_image_viewing">画像表示を改善</string>
     <string name="piko_improve_image_viewing_desc">サーバーから最大解像度の画像を取得します</string>
     <string name="piko_hide_reshare_button">リシェアボタンを非表示</string>
@@ -122,12 +122,12 @@
     <string name="piko_copy_media_link">メディアリンクをコピー</string>
     <string name="piko_copied_media_link">メディアリンクをコピーしました</string>
     <string name="piko_download_all">すべてダウンロード</string>
-    <string name="piko_downloading_media">ダウンロード中：</string>
-    <string name="piko_downloaded_media">ダウンロード完了：</string>
+    <string name="piko_downloading_media">ダウンロード中： </string>
+    <string name="piko_downloaded_media">ダウンロード完了： </string>
     <string name="piko_media_exists">メディアは既に存在します</string>
-    <string name="piko_download_failed_media">ダウンロード失敗：</string>
+    <string name="piko_download_failed_media">ダウンロード失敗： </string>
     <string name="piko_download_set_path">ダウンロード先フォルダを設定</string>
-    <string name="piko_download_set_path_success">ダウンロード先フォルダを更新しました</string>
+    <string name="piko_download_set_path_success">ダウンロード先フォルダを更新しました！</string>
     <string name="piko_download_set_path_failed">フォルダのパスを取得できませんでした</string>
     <string name="piko_download_grant_permission">ダウンロードを続けるにはストレージへのアクセスを許可してください</string>
     <string name="piko_download_grant_permission_failed">設定を開けませんでした。手動で「すべてのファイルへのアクセス」を許可してください</string>
@@ -143,7 +143,7 @@
     <string name="piko_copy_post_owner_fullname">投稿者の名前をコピー</string>
     <string name="piko_enable_more_options_on_post">投稿の追加のオプションを有効化</string>
     <string name="piko_enable_more_options_on_post_desc">投稿を長押ししたときに追加のオプションを表示します</string>
-    <string name="piko_more_options">追加オプション</string>
+    <string name="piko_more_options">追加のオプション</string>
     <!-- Navigation Section -->
     <string name="piko_category_hide_navigation_buttons">ナビゲーションボタンを非表示</string>
     <string name="piko_hide_navigation_feed">フィードボタンを非表示</string>
@@ -152,14 +152,14 @@
     <string name="piko_hide_navigation_search">検索ボタンを非表示</string>
     <string name="piko_hide_navigation_create">作成ボタンを非表示</string>
     <!-- Information Section -->
-    <string name="piko_category_about">Piko Instagramについて</string>
+    <string name="piko_category_about">概要</string>
     <string name="piko_export_pref">Piko設定をエクスポート</string>
     <string name="piko_import_pref">Piko設定をインポート</string>
-    <string name="piko_app_version">アプリバージョン：%s</string>
-    <string name="piko_patch_version">パッチバージョン：%s</string>
+    <string name="piko_app_version">アプリバージョン：v%s</string>
+    <string name="piko_patch_version">パッチバージョン：v%s</string>
     <string name="piko_patch_info_title">パッチ情報</string>
-    <string name="piko_patch_enabled">有効化</string>
-    <string name="piko_patch_disabled">無効化</string>
+    <string name="piko_patch_enabled">有効</string>
+    <string name="piko_patch_disabled">無効</string>
     <!-- Export and Import Section -->
     <string name="piko_export_success">エクスポートしました</string>
     <string name="piko_export_fail">エクスポートに失敗しました</string>
@@ -169,7 +169,7 @@
     <string name="piko_import_fail">インポートに失敗しました</string>
     <string name="piko_restart_app">変更を反映するにはアプリの再起動が必要です</string>
     <string name="piko_ok">OK</string>
-    <string name="piko_cancel">NO</string>
+    <string name="piko_cancel">キャンセル</string>
     <string name="piko_deleted">削除しました</string>
     <string name="piko_debug">Pikoデバッグ</string>
     <string name="piko_debug_desc">一部コンポーネントにテスト用のデバッグオプションを追加します</string>
@@ -194,7 +194,7 @@
     <string name="piko_welcome_message">Pikoをより快適に利用するため、Piko設定でお好みに合わせて設定してください</string>
     <string name="piko_goto_piko_settings">Piko設定へ移動</string>
     <string name="piko_no_internet">インターネットに接続してください</string>
-    <string name="piko_tap_here">ここをタップ</string>
+    <string name="piko_tap_here">ここをタップ！！</string>
     <!-- Action Bar Section -->
     <string name="piko_settings_on_action_bar">Piko設定をアクションバーに表示</string>
     <string name="piko_settings_on_action_bar_desc">Piko設定をメインフィード上部のアクションバーに移動します</string>
