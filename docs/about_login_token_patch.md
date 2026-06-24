@@ -26,7 +26,7 @@ This varies depending on the version.
 
 ### • New login screen
 
-This is for versions 11.90.0 and above. (But this is rolled out to some users even on v11.81.0 or earlier.)  
+This is for versions 11.90.0 and above. (But this is rolled out to some users even on v11.81.0 or below.)  
 It's called `onboarding_new`.
 
 <img alt="new_login_screen" width="360" src="https://github.com/user-attachments/assets/22d9c2b4-8947-41bb-90a2-c305b02a8833"/>
@@ -50,7 +50,7 @@ Then click the deep link below.
 
 <summary>Method B: Using very legacy login screen</summary>
 
-The X app still contains a very legacy login screen that is no longer in use. Coincidentally, it serves as a loophole for importing tokens.
+X still contains a very legacy login screen that no longer functions. Coincidentally, it serves as a loophole for importing tokens.
 
 1. Long press the app icon and select "Search". This opens the very legacy login screen.
 <img width="240" src="https://github.com/user-attachments/assets/72dfb2fd-d948-41f0-a28b-2206332f80fc" />
@@ -60,6 +60,8 @@ The X app still contains a very legacy login screen that is no longer in use. Co
 
 3. The "Login through token json" button is there.
 <img width="240" src="https://github.com/user-attachments/assets/36589f61-acdb-43fb-9601-20c493938e0b" />
+
+(The very legacy login screen can also be opened from device settings > Accounts > Add account > X)
 
 </details>
 
@@ -91,8 +93,8 @@ This also applies when you press "Remove account" in the account manager in the 
 
 There are two ways to remove an account from the app without logging out.
 
-- Press the Logout button in airplane mode. (no internet connections)
-- If the app has only one account currently logged in, just uninstall and reinstall the app.
+- Press the Logout button in airplane mode (no internet connections).
+- If the app has only one account currently logged in, just uninstall the app.
 
 In other words, you just need to prevent the logout request from being sent to the server.
 
@@ -121,14 +123,16 @@ The X for Android app uses the Android system's AccountManager to save accounts.
 The app stores the session token into it.
 
 Data stored in AccountManager remains even if you clear the app data.  
-Therefore, X remains logged in even after the app data is cleared.
+This is why X remains logged in even after the app data is cleared.
 
 This means that login sessions can be restored after reinstallation using the data stored in the AccountManager.
 
 When exporting, this patch uses the AccountManager API to get account data which X stored.  
-When importing, this patch adds an account data to the AccountManager in the same way that X adds accounts at login.
+When importing, this patch adds an account data to the AccountManager in the same way that X adds an account at login.
 
 ### The structure of piko's token JSON files
+
+This is a format specific to piko for saving various data within AccountManager as a single text file.
 
 ```json
 {
@@ -151,9 +155,9 @@ When importing, this patch adds an account data to the AccountManager in the sam
 }
 ```
 
-- "token" is the value of an auth token `com.twitter.android.oauth.token` from AccountManager
-- "secret" is the value of an auth token `com.twitter.android.oauth.token.secret` from AccountManager
-- "userdata" is an array of the user data stored in AccountManager in key-value format
+- "token" is the value of an auth token `com.twitter.android.oauth.token`
+- "secret" is the value of an auth token `com.twitter.android.oauth.token.secret`
+- "userdata" is an array of key-value user data that X stored
 
 Not all keys in "userdata" necessarily exist.  
 However, some keys are required. If any required keys are missing when importing an account, the X app will remove that account immediately after it is imported.
