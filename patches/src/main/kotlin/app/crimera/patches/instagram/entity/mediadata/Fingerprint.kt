@@ -7,7 +7,8 @@
 package app.crimera.patches.instagram.entity.mediadata
 
 import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
-import app.crimera.patches.instagram.entity.decoder.decoderEntity
+import app.crimera.patches.instagram.entity.decoder.ReelsInlineQualitySurveyRelatedFingerprint
+import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CLASS
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
@@ -107,9 +108,6 @@ internal object GetPostTypeExtensionFingerprint : Fingerprint(
 )
 
 // -----------------------------------
-internal object ReelsInlineQualitySurveyRelatedFingerprint : Fingerprint(
-    strings = listOf("reels_inline_quality_survey"),
-)
 
 internal object ReelsMentionDoubleTapFingerprint : Fingerprint(
     returnType = "V",
@@ -158,7 +156,7 @@ internal object DirectShareTargetRelatedFingerprint : Fingerprint(
 
 internal object MusicAudioTypeEnumStringFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
-    parameters = listOf("Landroid/content/Context;", Constants.USER_SESSION_CLASS, MEDIA_CLASS_NAME),
+    parameters = listOf("Landroid/content/Context;", USER_SESSION_CLASS, MEDIA_CLASS_NAME),
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
     filters =
         listOf(
@@ -224,4 +222,15 @@ internal object ProductInfoMapperFingerprint : Fingerprint(
 internal object AyuMidcardMediaHelperImageObjectMethodFingerprint : Fingerprint(
     definingClass = "AyuMidcardMediaHelper;",
     returnType = "Ljava/lang/Object;",
+)
+
+internal object GetOriginalSoundDataIntfFromMediaFingerprint : Fingerprint(
+    classFingerprint = ReelsInlineQualitySurveyRelatedFingerprint,
+    returnType = "OriginalSoundDataIntf;",
+)
+
+internal object GetUserDataFromMediaFingerprint : Fingerprint(
+    classFingerprint = ReelsInlineQualitySurveyRelatedFingerprint,
+    parameters = listOf(USER_SESSION_CLASS, MEDIA_CLASS_NAME),
+    returnType = USER_MODEL_CLASS_NAME,
 )
