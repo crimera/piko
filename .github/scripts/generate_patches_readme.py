@@ -33,7 +33,7 @@ if "/" not in repo_full:
 owner, repo = repo_full.split("/", 1)
 
 
-with open(json_path) as f:
+with open(json_path, encoding="utf-8") as f:
     data = json.load(f)
 
 
@@ -89,7 +89,7 @@ def patches_table(patches):
             opts_cell = "<br>".join(f"• {t}" for t in parts)
         else:
             opts_cell = ""
-        desc = p.get("description") or ""
+        desc = (p.get("description") or "").replace("\n", "<br>")
         rows.append(f"| [{p['name']}](#{a}) | {desc} | {opts_cell} |")
     return "\n".join(rows)
 
@@ -105,15 +105,20 @@ def versions_table(targets):
     cells = []
     for t in targets:
         ver   = t["version"]
+        if ver is None:
+            continue
         label = f"🧪&nbsp;{ver}" if t.get("isExperimental") else ver
         cells.append(label)
 
+    if not cells:
+        return ""
+
     header = "| " + " | ".join(cells) + " |"
-    sep    = "| " + " | ".join(":---:" for _ in cells) + " |"
-    rows   = [header, sep]
+    sep = "| " + " | ".join(":---:" for _ in cells) + " |"
+    rows = [header, sep]
 
     # Optional description row — only rendered if at least one target has one
-    descs = [t.get("description") or "" for t in targets]
+    descs = [(t.get("description") or "").replace("\n", "<br>") for t in targets]
     if any(descs):
         rows.append("| " + " | ".join(descs) + " |")
 
@@ -140,9 +145,9 @@ def spoiler(label, count, targets, tbl, expanded=False):
 def build_content(expanded=False):
     """Build the full generated patches section."""
     lines = [
-                f"> **[v{ver}](https://github.com/{owner}/{repo}/releases/tag/v{ver})**"
-                f"&nbsp;&nbsp;•&nbsp;&nbsp;`{branch}`&nbsp;&nbsp;•&nbsp;&nbsp;"
-                f"{total} patches total"
+        f"> **[v{ver}](https://github.com/{owner}/{repo}/releases/tag/v{ver})**"
+        f"&nbsp;&nbsp;•&nbsp;&nbsp;`{branch}`&nbsp;&nbsp;•&nbsp;&nbsp;"
+        f"{total} patches total"
     ]
 
     # One spoiler per app, in the order they appear in the JSON
