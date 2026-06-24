@@ -1,3 +1,9 @@
+## [3.7.0-dev.5](https://github.com/crimera/piko/compare/v3.7.0-dev.4...v3.7.0-dev.5) (2026-06-24)
+
+### 🔧 Improvements
+
+* **Instagram:** Remove user action bar support temporarily ([8173c82](https://github.com/crimera/piko/commit/8173c82a9af0d935a7838922dab7eab67a0a576f))
+
 ## [3.7.0-dev.4](https://github.com/crimera/piko/compare/v3.7.0-dev.3...v3.7.0-dev.4) (2026-06-24)
 
 ### 🐛 Bug Fixes
