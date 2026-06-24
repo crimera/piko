@@ -381,9 +381,9 @@ WARNING: Exported tokens are highly confidential information.
 Never share it with anyone!
 If someone has this token, they can freely access your account until you log out of the session.
 
-For more details, please refer to this page.
+For details, please refer to this page.
 https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
-It's recommended to read this before using this feature. It includes important notes, such as how to import tokens."</string>
+It's recommended to read this before using this feature. It includes some important information, such as how to import tokens."</string>
     <string name="piko_login_token_select_account">Select an account:</string>
     <string name="piko_login_token_export_copy_to_clipboard">Copy to clipboard</string>
     <string name="piko_login_token_export_save_to_file">Save to file</string>

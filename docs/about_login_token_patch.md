@@ -16,17 +16,17 @@ You can import it from the login screen or piko settings.
 
 **This patch does NOT fix the login attestation problem. To get a token, you must first log in to your account using any login method.**
 
-## How to export
+## How to export tokens
 
 Piko settings > Backup and restore > Export login token
 
-## How to import
+## How to import tokens
 
 This varies depending on the version.
 
 ### • New login screen
 
-This is for versions 11.90 and above. (But this is rolled out to some users even on v11.81.0 or earlier.)  
+This is for versions 11.90.0 and above. (But this is rolled out to some users even on v11.81.0 or earlier.)  
 It's called `onboarding_new`.
 
 <img alt="new_login_screen" width="360" src="https://github.com/user-attachments/assets/22d9c2b4-8947-41bb-90a2-c305b02a8833"/>
@@ -61,16 +61,14 @@ The X app still contains a very legacy login screen that is no longer in use. Co
 3. The "Import Token" button is there.
 <img width="240" src="https://github.com/user-attachments/assets/36589f61-acdb-43fb-9601-20c493938e0b" />
 
-
 </details>
 
 ### • Old login screen
 
-This is for most users of versions prior to 11.81.0.  
+This is for versions prior to 11.81.0.  
 Tap the text "Login through token json".
 
 <img width="240" src="https://github.com/user-attachments/assets/75f5094d-6a56-47af-9768-e1fde3b77207" />
-
 
 ### • Add second account
 
@@ -83,20 +81,12 @@ If a third party obtains this token, they can freely access your account until y
 
 Please also be careful of your clipboard or exported files.
 
-## How it works
-
-X for Android stores the session token into the Android system's AccountManager.  
-This information continues to work even if you clear the app data.  
-(This is also why X still be logged in even after clearing the app data.)
-
-Therefore, you can restore this information and log in after re-installation.
-
 ## A note when removing account from the app
 
 Please be careful if you want to remove an account from one device after importing the token into another device.
 
 Logging out from settings will log out of the session associated with that token.  
-Therefore, if you simply press the logout button in the settings, you will also be logged out of other devices using the same token.
+Therefore, if you simply press the logout button in the settings, you will also be logged out of other devices using the same token.  
 This also applies when you press "Remove account" in the account manager in the device settings app.
 
 There are two ways to remove an account from the app without logging out.
@@ -125,7 +115,20 @@ A: No. Because it is completely different from the Android tokens.
 
 ## Appendix
 
-### The structure of piko's token JSON
+### How this patch works
+
+The X for Android app uses the Android system's AccountManager to save accounts.  
+The app stores the session token into it.
+
+Data stored in AccountManager remains even if you clear the app data.  
+Therefore, X remains logged in even after the app data is cleared.
+
+This means that login sessions can be restored after reinstallation using the data stored in the AccountManager.
+
+When exporting, this patch uses the AccountManager API to get account data which X stored.  
+When importing, this patch adds an account data to the AccountManager in the same way that X adds accounts at login.
+
+### The structure of piko's token JSON files
 
 ```json
 {
