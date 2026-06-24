@@ -25,3 +25,7 @@ internal object UserTagInfoDictInitFingerprint : Fingerprint(
     definingClass = "Lcom/instagram/api/schemas/UserTagInfoDict;",
     name = "<init>",
 )
+
+object ReelsInlineQualitySurveyRelatedFingerprint : Fingerprint(
+    strings = listOf("reels_inline_quality_survey"),
+)

@@ -7,6 +7,7 @@
 package app.crimera.patches.instagram.entity.mediadata
 
 import app.crimera.patches.instagram.entity.decoder.EditMediaInfoGetCurrentMediaIdFingerprint
+import app.crimera.patches.instagram.entity.decoder.MEDIAEXT_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
@@ -26,37 +27,20 @@ val mediaDataEntity =
         dependsOn(decoderEntity)
         execute {
             var mediaHelperClass: String
-            // Extracting the media helper class name.
-            ReelsInlineQualitySurveyRelatedFingerprint.apply {
-                mediaHelperClass = classDef.type
-                GetHelperClassExtensionFingerprint.changeFirstString(classNameToExtension(mediaHelperClass))
 
-                // Get all the methods inside media helper class.
-                val mediaHelperMethods = mutableClassDefBy { it.type == mediaHelperClass }.methods
+            GetHelperClassExtensionFingerprint.changeFirstString(classNameToExtension(MEDIAEXT_CLASS_NAME))
 
-                val originalSoundDataExtractionMethodName =
-                    mediaHelperMethods
-                        .first {
-                            it.returnType.endsWith(
-                                "OriginalSoundDataIntf;",
-                            )
-                        }.name
+            // Extracting get original sound info data using media and user session.
+            GetOriginalSoundDataIntfExtensionFingerprint.changeFirstString(GetOriginalSoundDataIntfFromMediaFingerprint.method.name)
 
-                GetOriginalSoundDataIntfExtensionFingerprint.changeFirstString(originalSoundDataExtractionMethodName)
-            }
+            // Extracting get user data using media and user session.
+            GetUserDataWithUserSessionExtensionFingerprint.changeFirstString(GetUserDataFromMediaFingerprint.method.name)
 
             // Extracting image variants list.
             AyuMidcardMediaHelperImageObjectMethodFingerprint.method.apply {
                 val imageVariantsIndex = instructions.indexOfLast { it.opcode == Opcode.INVOKE_INTERFACE }
                 val imageVariantsMethodName = getInstruction(imageVariantsIndex).methodExtractor().name
                 GetImageVariantsExtensionFingerprint.changeStringAt(1, imageVariantsMethodName)
-            }
-
-            // Extracting get user data using media and user session.
-            GetProductTileMediaFromUserSessionFingerprint.method.apply {
-                val firstInvokeStaticIndex = indexOfFirstInstruction(Opcode.INVOKE_STATIC)
-                val getUserDataMethodName = getInstruction(firstInvokeStaticIndex).methodExtractor().name
-                GetUserDataWithUserSessionExtensionFingerprint.changeFirstString(getUserDataMethodName)
             }
 
             // Extracting the get mention set method used media helper class.
@@ -167,11 +151,13 @@ val mediaDataEntity =
             MusicAudioTypeEnumStringFingerprint.method.apply {
                 instructions.filter { it.opcode == Opcode.INVOKE_STATIC }.firstOrNull {
                     val methodExt = it.methodExtractor()
-                    if (methodExt.definingClass == mediaHelperClass) {
+                    if (methodExt.returnType != "V") {
                         GetTrackDataIntfExtensionFingerprint.changeFirstString(methodExt.name)
+                        println(methodExt.name)
                         true
+                    } else {
+                        false
                     }
-                    false
                 }
             }
 
@@ -179,11 +165,12 @@ val mediaDataEntity =
             IgPlayerControllerRelatedFingerprint.method.apply {
                 instructions.filter { it.opcode == Opcode.INVOKE_INTERFACE }.firstOrNull {
                     val methodExt = it.methodExtractor()
-                    if (methodExt.returnType.endsWith("AudioIntf;")) {
+                    if (methodExt.returnType.endsWith("AudioIntf")) {
                         GetMessageAudioUrlExtensionFingerprint.changeFirstString(methodExt.name)
                         true
+                    } else {
+                        false
                     }
-                    false
                 }
             }
 
