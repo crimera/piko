@@ -1,3 +1,23 @@
+## [3.7.0-dev.4](https://github.com/crimera/piko/compare/v3.7.0-dev.3...v3.7.0-dev.4) (2026-06-24)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix `Change like animation` enum class injection issue ([626d556](https://github.com/crimera/piko/commit/626d556911295562f86d396851159738ab5c065b))
+* **Instagram:** Remove blocking blok fixing your activity page issue ([6d4ce78](https://github.com/crimera/piko/commit/6d4ce78ae0d279bf4570a968258962a3ab47e714))
+
+### 🚀 Updated App Support
+
+* **Instagram:** Bump support for `435.0.0.37.76` ([d53a75a](https://github.com/crimera/piko/commit/d53a75a22ab99e2dbeb647bbe428face2037b16b))
+* **Twitter:** Bump support for `12.2.0-release.0` ([70865fe](https://github.com/crimera/piko/commit/70865fee9c1b10a1fef078e449e44f28aa55f2fb))
+
+### 🔧 Improvements
+
+* **Instagram:** Rename `Follow back indicator` to `Friendship status indicator` patch ([3a5e1ff](https://github.com/crimera/piko/commit/3a5e1ff53a3eaaba7cfa987d741a573970692e55))
+* **Instagram:** Update fingerprints to support v423 ([56d73f6](https://github.com/crimera/piko/commit/56d73f6f1a66b4eb91baabe093562c85c8a6781c))
+* **Instagram:** Update more fingerprints to support v423 ([1ef7d91](https://github.com/crimera/piko/commit/1ef7d912e51d2eeb617d4421caac9ccf4a653cc5))
+* **Twitter:** Add version check for `Block redirecting to X Lite` ([b011267](https://github.com/crimera/piko/commit/b011267781e219c6b641e7dd6bf26a5e9225b331))
+* **Twitter:** Update `Customize Navigation Bar items` fingerprint ([4b77b3d](https://github.com/crimera/piko/commit/4b77b3dc0e919d483d3754f350c88f8bbd6f5fd2))
+
 ## [3.7.0-dev.3](https://github.com/crimera/piko/compare/v3.7.0-dev.2...v3.7.0-dev.3) (2026-06-21)
 
 ### 🔧 Improvements
