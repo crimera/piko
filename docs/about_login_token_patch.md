@@ -26,12 +26,13 @@ This varies depending on the version.
 
 ### • New login screen
 
-This is for versions 11.90 and above. (But this is rolled out to some users even on v11.81.0 or earlier.)
+This is for versions 11.90 and above. (But this is rolled out to some users even on v11.81.0 or earlier.)  
+It's called `onboarding_new`.
 
 <img alt="new_login_screen" width="360" src="https://github.com/user-attachments/assets/22d9c2b4-8947-41bb-90a2-c305b02a8833"/>
 
 The "Login through token json" button is not displayed in this version.  
-There are two workarounds.
+There are two workarounds to import tokens.
 
 <details>
 
@@ -49,18 +50,27 @@ Then click the deep link below.
 
 <summary>Method B: Using very legacy login screen</summary>
 
-The X app still has a very legacy login screen that is no longer in use. Coincidentally, it serves as a loophole for importing tokens.
+The X app still contains a very legacy login screen that is no longer in use. Coincidentally, it serves as a loophole for importing tokens.
 
 1. Long press the app icon and select "Search".
+<img width="240" src="https://github.com/user-attachments/assets/72dfb2fd-d948-41f0-a28b-2206332f80fc" />
+
 2. Tap "Sign up" in the upper right corner.
+<img width="240" src="https://github.com/user-attachments/assets/1f81b83a-e7a4-49de-b448-e47dbe02cfd0" />
+
 3. The "Import Token" button is there.
+<img width="240" src="https://github.com/user-attachments/assets/36589f61-acdb-43fb-9601-20c493938e0b" />
+
 
 </details>
 
 ### • Old login screen
 
-This is for most users on versions prior to 11.81.0.  
-Tap the "Login through token json" text.
+This is for most users of versions prior to 11.81.0.  
+Tap the text "Login through token json".
+
+<img width="240" src="https://github.com/user-attachments/assets/75f5094d-6a56-47af-9768-e1fde3b77207" />
+
 
 ### • Add second account
 
