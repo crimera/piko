@@ -459,7 +459,7 @@ public class ScreenBuilder {
             addPreference(
                     helper.switchPreference(
                             str("piko_follow_back_indicator"),
-                            "",
+                            str("piko_follow_back_indicator_desc"),
                             Settings.FOLLOW_BACK_INDICATOR
                     )
             );
