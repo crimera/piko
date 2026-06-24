@@ -68,7 +68,6 @@
     <string name="piko_disable_analytics_desc">封鎖傳送至 Instagram / Facebook 伺服器的分析資料</string>
     <string name="piko_disable_discover_people">停用「為你推薦」功能</string>
     <string name="piko_disable_discover_people_desc">在其他人主頁中停用「為你推薦」功能</string>
-    <string name="piko_follow_back_indicator">啟用互相追蹤標記</string>
     <string name="piko_fbi_follows_you">已追蹤你</string>
     <string name="piko_fbi_doesnt_follows_you">未追蹤你</string>
     <string name="piko_view_story_mentions">檢視限時動態提及</string>

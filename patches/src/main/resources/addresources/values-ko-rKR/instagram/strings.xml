@@ -29,7 +29,7 @@
     <string name="piko_open_links_externally_desc">외부 링크를 열 경우에 내부 브라우저 대신 외부 브라우저를 사용합니다</string>
     <string name="piko_sanitize_share_links">공유 링크 정리</string>
     <!-- Ghost Section -->
-    <string name="piko_category_ghost">고스트 모드</string>
+    <string name="piko_category_ghost">고스트</string>
     <string name="piko_view_stories_anonymously">스토리 몰래보기</string>
     <string name="piko_view_live_anonymously">라이브 몰래보기</string>
     <string name="piko_disable_typing_status">입력 중 상태 비활성화</string>
@@ -49,9 +49,9 @@
     <string name="piko_limit_following_feed">팔로우한 프로필만 피드에 표시</string>
     <string name="piko_limit_following_feed_desc">홈 피드에 내가 팔로우하는 프로필의 콘텐츠만 표시합니다</string>
     <string name="piko_disable_reels_scrolling">릴스 스크롤 비활성화</string>
-    <string name="piko_disable_reels_scrolling_desc">"인스타그램 릴스의 무한 스크롤을 비활성화하여 다음 릴스로 넘길 수 없게 합니다.
+    <string name="piko_disable_reels_scrolling_desc">"인스타그램 릴스에서 무한 스크롤 동작을 비활성화하여 다음 릴스로 넘길 수 없도록 합니다
 
-알림: 클린 설치한 경우에 ‘Tip’ 애니메이션이 표시될 수 있지만, 몇 초 후 자동으로 멈춥니다."</string>
+알림: 앱을 새로 설치한 경우에 'Tip' 애니메이션이 표시될 수 있지만, 몇 초 후에 자동으로 사라집니다"</string>
     <string name="piko_hide_stories_tray">스토리 선반 숨기기</string>
     <string name="piko_hide_stories_tray_desc">메인 피드에서 스토리 선반을 숨깁니다</string>
     <string name="piko_hide_notes_tray">메모 선반 숨기기</string>
@@ -69,10 +69,11 @@
     <string name="piko_disable_analytics_desc">Instagram/Facebook 서버로 전송되는 분석 데이터를 차단합니다</string>
     <string name="piko_disable_discover_people">사람 찾기 비활성화</string>
     <string name="piko_disable_discover_people_desc">프로필에서 사람 찾아보기 섹션을 비활성화합니다</string>
-    <string name="piko_follow_back_indicator">맞팔 표시기 표시</string>
+    <string name="piko_follow_back_indicator">관계 상태 표시기 활성화</string>
+    <string name="piko_follow_back_indicator_desc">프로필 페이지에 나를 팔로우하는 사용자를 표시하는 라벨을 추가하고, 탭하는 경우에 상세한 관계 상태를 표시합니다</string>
     <string name="piko_fbi_follows_you">나를 팔로우하고 있음</string>
     <string name="piko_fbi_doesnt_follows_you">나를 팔로우하지 않음</string>
-    <string name="piko_friendship_status">친구 상태</string>
+    <string name="piko_friendship_status">관계 상태</string>
     <string name="piko_view_story_mentions">스토리 멘션 보기</string>
     <string name="piko_vsm_title">스토리 멘션</string>
     <string name="piko_vsm_no_mentions">이 스토리에 멘션이 없습니다</string>
@@ -112,7 +113,7 @@
     <string name="piko_enable_download">다운로드 활성화</string>
     <string name="piko_enable_direct_download">즉시 다운로드 활성화</string>
     <string name="piko_enable_direct_download_desc">옵션 선택 없이 현재 보고 있는 미디어를 즉시 다운로드합니다</string>
-    <string name="piko_download_username_folder">사용자별 폴더 분리</string>
+    <string name="piko_download_username_folder">사용자 이름별로 미디어 분류</string>
     <string name="piko_download_username_folder_desc">사용자 이름 기준으로 하위 폴더를 생성합니다</string>
     <string name="piko_download_current_media">현재 미디어 다운로드</string>
     <string name="piko_download_as_image">이미지로 다운로드</string>
@@ -198,5 +199,5 @@
     <string name="piko_tap_here">여기를 탭하세요 !!</string>
     <!-- Action Bar Section -->
     <string name="piko_settings_on_action_bar">Piko 설정을 작업 버튼바로 이동</string>
-    <string name="piko_settings_on_action_bar_desc">Piko 설정 진입점을 메인 피드 작업 버튼바로 이동합니다</string>
+    <string name="piko_settings_on_action_bar_desc">Piko 설정 버튼을 메인 피드 작업 버튼바로 이동합니다</string>
 </resources>
