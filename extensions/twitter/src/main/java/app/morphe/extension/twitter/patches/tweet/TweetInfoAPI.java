@@ -36,6 +36,11 @@ public class TweetInfoAPI {
             connection.setReadTimeout(5000);    // 5 seconds
 
             int responseCode = connection.getResponseCode();
+            // prevents crash when viewing a private tweet
+            if (responseCode == 401) {
+                // there's probably a more elegant solution, but returning an empty json object works
+                return new JSONObject("{}");
+            }
             if (responseCode != HttpURLConnection.HTTP_OK) {
                 throw new Exception("HTTP error code: " + responseCode);
             }
