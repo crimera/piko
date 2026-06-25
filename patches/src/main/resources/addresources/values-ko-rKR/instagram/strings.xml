@@ -70,7 +70,7 @@
     <string name="piko_disable_discover_people">사람 찾기 비활성화</string>
     <string name="piko_disable_discover_people_desc">프로필에서 사람 찾아보기 섹션을 비활성화합니다</string>
     <string name="piko_follow_back_indicator">관계 상태 표시기 활성화</string>
-    <string name="piko_follow_back_indicator_desc">프로필 페이지에 나를 팔로우하는 사용자를 표시하는 라벨을 추가하고, 탭하는 경우에 상세한 관계 상태를 표시합니다</string>
+    <string name="piko_follow_back_indicator_desc">프로필 페이지에 맞팔 상태를 표시하는 라벨을 추가하고, 그 라벨을 탭하는 경우에 상세한 관계 상태 분석을 표시합니다</string>
     <string name="piko_fbi_follows_you">나를 팔로우하고 있음</string>
     <string name="piko_fbi_doesnt_follows_you">나를 팔로우하지 않음</string>
     <string name="piko_friendship_status">관계 상태</string>

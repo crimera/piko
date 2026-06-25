@@ -69,6 +69,8 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_disable_analytics_desc">Instagram/Facebook sunucularına gönderilen analizleri engelle</string>
     <string name="piko_disable_discover_people">Kişileri keşfetmeyi kapat</string>
     <string name="piko_disable_discover_people_desc">Kullanıcı profilindeki Kişileri keşfet bölümünü devre dışı bırak</string>
+    <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>
+    <string name="piko_follow_back_indicator_desc">Profil sayfasına \"geri takip ediyor\" durum etiketi ekler ve tıklandığında ayrıntılı arkadaşlık durumunu gösterir</string>
     <string name="piko_fbi_follows_you">Seni takip ediyor</string>
     <string name="piko_fbi_doesnt_follows_you">Seni takip etmiyor</string>
     <string name="piko_friendship_status">Arkadaşlık durumu</string>

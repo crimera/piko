@@ -69,6 +69,8 @@
     <string name="piko_disable_analytics_desc">Блокировать отправку данных анализа в серверы Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Отключить раздел «Возможные знакомые»</string>
     <string name="piko_disable_discover_people_desc">Отключает раздел «Возможные знакомые» в профиле пользователя</string>
+    <string name="piko_follow_back_indicator">Включить индикатор статуса дружбы</string>
+    <string name="piko_follow_back_indicator_desc">Добавляет на страницу профиля метку «Подписан(а) на вас» и показывает подробную информацию о статусе дружбы при нажатии</string>
     <string name="piko_fbi_follows_you">Подписан на вас</string>
     <string name="piko_fbi_doesnt_follows_you">Не подписан на вас</string>
     <string name="piko_friendship_status">Статус дружбы</string>

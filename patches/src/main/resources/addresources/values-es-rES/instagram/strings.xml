@@ -71,6 +71,8 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_disable_analytics_desc">Bloquear las analíticas enviadas a los servidores de Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Desactivar descubrir personas</string>
     <string name="piko_disable_discover_people_desc">Desactiva la sección de descubrir personas en el perfil de usuario</string>
+    <string name="piko_follow_back_indicator">Habilitar el indicador de estado de amistad</string>
+    <string name="piko_follow_back_indicator_desc">Agrega una etiqueta de estado \"Te sigue de vuelta\" en la página de perfil y muestra un desglose detallado del estado de amistad al hacer clic</string>
     <string name="piko_fbi_follows_you">Te sigue</string>
     <string name="piko_fbi_doesnt_follows_you">No te sigue</string>
     <string name="piko_friendship_status">Estado de amistad</string>

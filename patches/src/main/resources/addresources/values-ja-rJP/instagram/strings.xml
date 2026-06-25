@@ -3,13 +3,13 @@
     <!-- Ads Section -->
     <string name="piko_category_ads">広告</string>
     <string name="piko_disable_ads">広告を無効化</string>
-    <string name="piko_hide_suggested_content">おすすめのコンテンツを非表示</string>
-    <string name="piko_hide_suggested_content_desc">おすすめのストーリーズ・リール・スレッドを非表示にします。おすすめの投稿は表示されます。</string>
+    <string name="piko_hide_suggested_content">「おすすめ」のコンテンツを非表示</string>
+    <string name="piko_hide_suggested_content_desc">「おすすめ」のストーリーズ、リール、スレッドを非表示にします (「おすすめ」の投稿は引き続き表示されます)。</string>
     <!-- Developer Options Section -->
     <string name="piko_category_dev_options">開発者オプション</string>
     <string name="piko_enable_dev_options">開発者向けオプションを有効化</string>
-    <string name="piko_enable_dev_options_desc">ホームタブを長押しすると、開発者向けのオプションが開きます</string>
-    <string name="piko_directly_open_metaconfig">MetaConfigのオーバーライド画面を直接開く</string>
+    <string name="piko_enable_dev_options_desc">[ホーム] タブを長押しすると、開発者向けのオプションが開きます</string>
+    <string name="piko_directly_open_metaconfig">MetaConfig のオーバーライド画面を直接開く</string>
     <string name="piko_directly_open_metaconfig_desc">ホームタブを長押しすると、MetaConfigのオーバーライド画面を直接開きます。開発者向けオプションを有効にする必要があります</string>
     <string name="piko_enable_emp_options">社員向けオプションを有効化</string>
     <string name="piko_enable_emp_options_desc">テスト用の設定をすべて有効にします</string>

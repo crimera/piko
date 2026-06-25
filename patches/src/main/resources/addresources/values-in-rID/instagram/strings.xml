@@ -69,6 +69,8 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_disable_analytics_desc">Blokir analitik yang dikirim ke server Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Nonaktifkan temukan orang</string>
     <string name="piko_disable_discover_people_desc">Menonaktifkan bagian temukan orang di profil pengguna</string>
+    <string name="piko_follow_back_indicator">Aktifkan indikator status pertemanan</string>
+    <string name="piko_follow_back_indicator_desc">Menambahkan label status mengikuti balik di halaman profil dan menampilkan rincian status pertemanan secara terperinci saat diklik</string>
     <string name="piko_fbi_follows_you">Mengikuti Anda</string>
     <string name="piko_fbi_doesnt_follows_you">Tidak mengikuti Anda</string>
     <string name="piko_friendship_status">Status pertemanan</string>
