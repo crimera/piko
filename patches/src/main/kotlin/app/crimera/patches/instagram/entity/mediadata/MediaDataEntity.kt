@@ -153,7 +153,6 @@ val mediaDataEntity =
                     val methodExt = it.methodExtractor()
                     if (methodExt.returnType != "V") {
                         GetTrackDataIntfExtensionFingerprint.changeFirstString(methodExt.name)
-                        println(methodExt.name)
                         true
                     } else {
                         false
