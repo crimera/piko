@@ -113,7 +113,7 @@ public class Links {
                     shouldBlockUri = DISABLE_EXPLORE;
                 } else if (path.contains("/api/v1/media/") && path.contains("comments/")) {
                     shouldBlockUri = DISABLE_COMMENTS;
-                } else if (path.contains("/discover/ayml/")) {
+                } else if (path.contains("/discover/ayml") || path.contains("/discover/chaining")) { // Thanks to  @brosssh
                     shouldBlockUri = DISABLE_DISCOVER_PEOPLE;
                 } else if (path.contains("profile_ads/get_profile_ads/")
                         || path.contains("/async_ads/")
