@@ -18,11 +18,6 @@ import app.morphe.patcher.literal
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
-import app.morphe.util.indexOfFirstInstructionOrThrow
-import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.instruction.BuilderSparseSwitchPayload
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 // Credits: brosssh
 // https://github.com/brosssh/morphe-patches/commit/6a781ef8e0951ad5aa898fa17d094cfbfa5dd9fb
@@ -56,15 +51,16 @@ val hideReshareButtonPatch =
 
         execute {
 
-            val PREF_CALL = "$PREF_CALL_DESCRIPTOR->hideReshareButton()Ljava/lang/Boolean;"
+            val PREF_CALL = "$PREF_CALL_DESCRIPTOR->hideReshareButton()Z"
 
             FeedResponseMediaParserFingerprint.method.apply {
                 addInstructionsWithLabels(
                     0,
                     """
                     $PREF_CALL
-                    move-result-object v0
+                    move-result v0
                     if-eqz v0, :piko
+                    sget-object v0, Ljava/lang/Boolean;->FALSE:Ljava/lang/Boolean;
                     return-object v0
                     """.trimMargin(),
                     ExternalLabel("piko", getInstruction(0)),
@@ -79,8 +75,9 @@ val hideReshareButtonPatch =
                 const v0, $hashedFieldInteger
                 if-ne p1, v0, :nopatch
                 $PREF_CALL
-                move-result-object v0
+                move-result v0
                 if-eqz v0, :nopatch
+                sget-object v0, Ljava/lang/Boolean;->FALSE:Ljava/lang/Boolean;
                 return-object v0
                 :nopatch
                 nop
