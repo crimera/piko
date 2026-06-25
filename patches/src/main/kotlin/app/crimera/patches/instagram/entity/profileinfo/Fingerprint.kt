@@ -7,10 +7,10 @@
 package app.crimera.patches.instagram.entity.profileinfo
 
 import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
+import app.crimera.patches.instagram.utils.Constants.USER_DETAIL_VIEW_MODEL_CLASS
 import app.morphe.patcher.Fingerprint
 
 internal const val EXTENSION_CLASS = "$ENTITY_CLASS/ProfileInfo;"
-internal const val USER_DETAIL_VIEW_MODEL_CLASS = "Lcom/instagram/profile/fragment/UserDetailViewModel;"
 
 internal object GetProfileRelatedDetailsExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS,
