@@ -40,10 +40,12 @@ val dmActionBarButtonPatch =
                         val viewGroupInstruction = getInstruction(indexOfFirstInstruction(Opcode.CHECK_CAST))
                         val viewGroupRegister = viewGroupInstruction.registersUsed[0]
 
-                        val layoutReturnIndex = it.instructionMatches.first().index
+                        val layoutIndex = it.instructionMatches.first().index
+
+                        val fistMoveResultObjectAfterLayoutIndex = indexOfFirstInstruction(layoutIndex, Opcode.MOVE_RESULT_OBJECT)
 
                         addInstruction(
-                            layoutReturnIndex + 1,
+                            fistMoveResultObjectAfterLayoutIndex + 1,
                             """
                             invoke-static {v$viewGroupRegister}, $ACTIONBAR_DESCRIPTOR/DMActionBar;->addActionBarButton(Landroid/view/ViewGroup;)V
                             """.trimIndent(),
