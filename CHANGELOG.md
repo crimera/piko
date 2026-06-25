@@ -1,3 +1,20 @@
+## [3.7.0-dev.6](https://github.com/crimera/piko/compare/v3.7.0-dev.5...v3.7.0-dev.6) (2026-06-25)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix `Allow user network certificate` being shown on Settings even without including ([2dc73cc](https://github.com/crimera/piko/commit/2dc73cc88caf6e44ddeff529a80c35d3e619e38b))
+* **Instagram:** Fix `Disable typing status` on v435 ([e2a5693](https://github.com/crimera/piko/commit/e2a569363eec6dbf1180b8287ebbff4bfecde29e))
+* **Instagram:** Fix `User profile action bar` logic ([252797f](https://github.com/crimera/piko/commit/252797fd30b3b7aac7e1ad03bee14c42ca2ed475))
+* **Instagram:** Fix ghost eye icon position on DM action bar ([83661ff](https://github.com/crimera/piko/commit/83661ffc7760a98cd0d6e7e900392cf300b7156f))
+* **Instagram:** Fix inverse issue of `Hide reshare button` ([85ad73f](https://github.com/crimera/piko/commit/85ad73fe1bc8b0c2968ec3a36e63d537e9bf2636))
+
+### 🔧 Improvements
+
+* **Instagram:** Improve discover user blocking ([6c99846](https://github.com/crimera/piko/commit/6c99846d0f5cd4231f915185e0e526b1f9b1b678))
+* **Instagram:** Improve flags to block `location consent` blok ([a4cf9b7](https://github.com/crimera/piko/commit/a4cf9b7aa1fc0466a645324a77b3e17fe0aadf2c))
+* **Instagram:** Improve hook flags logic ([9a1f1cd](https://github.com/crimera/piko/commit/9a1f1cd177f008a8872742354e48daa27d828709))
+* **Instagram:** Move debug export experiment list into Developer option section ([2567ed5](https://github.com/crimera/piko/commit/2567ed5060f86236f3b883d5930083b15bc31cc0))
+
 ## [3.7.0-dev.5](https://github.com/crimera/piko/compare/v3.7.0-dev.4...v3.7.0-dev.5) (2026-06-24)
 
 ### 🔧 Improvements

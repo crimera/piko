@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.7.0-dev.5",
+  "version": "3.7.0-dev.6",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -3949,6 +3949,7 @@
       "description": "Adds a new button to handle user related data like copy handle, download profile picture etc",
       "default": true,
       "dependencies": [
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch"
       ],
