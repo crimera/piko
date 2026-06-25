@@ -154,6 +154,24 @@ public class ScreenBuilder {
                             "piko_download_id_mapping"
                     )
             );
+
+            if(Pref.pikoDebug()) {
+                addPreference(
+                        helper.buttonPreference(
+                                str("piko_export_experiment_list"),
+                                "",
+                                "piko_export_experiment_list"
+                        )
+                );
+
+                addPreference(
+                        helper.buttonPreference(
+                                str("piko_export_experiment_mappings"),
+                                "",
+                                "piko_export_experiment_mappings"
+                        )
+                );
+            }
         }
     }
 
@@ -711,24 +729,6 @@ public class ScreenBuilder {
                         Settings.PIKO_DEBUG
                 )
         );
-
-        if(Pref.pikoDebug()) {
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_export_experiment_list"),
-                            "",
-                            "piko_export_experiment_list"
-                    )
-            );
-
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_export_experiment_mappings"),
-                            "",
-                            "piko_export_experiment_mappings"
-                    )
-            );
-        }
 
         PreferenceCategory category = addCategory(str("piko_patch_info_title"));
         String enabledStr = str("piko_patch_enabled");
