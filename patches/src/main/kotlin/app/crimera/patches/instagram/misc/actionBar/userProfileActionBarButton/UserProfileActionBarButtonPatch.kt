@@ -101,7 +101,7 @@ val userProfileActionBarButtonPatch =
                                 
                                 invoke-static {v$viewGroupRegister, v$freeRegister}, $ACTIONBAR_DESCRIPTOR/UserProfileActionBar;->addActionBarButton(Landroid/view/ViewGroup;Ljava/lang/Object;)V
                                 """.trimIndent()
-                            println(CODE)
+
                             addInstructionsWithLabels(
                                 index + 1,
                                 CODE,
