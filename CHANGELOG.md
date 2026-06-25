@@ -1,3 +1,9 @@
+## [3.7.0-dev.7](https://github.com/crimera/piko/compare/v3.7.0-dev.6...v3.7.0-dev.7) (2026-06-25)
+
+### 🔧 Improvements
+
+* **Instagram:** Remove debug code ([7646088](https://github.com/crimera/piko/commit/764608824d033f8ab23cc35c19d25872c233d466))
+
 ## [3.7.0-dev.6](https://github.com/crimera/piko/compare/v3.7.0-dev.5...v3.7.0-dev.6) (2026-06-25)
 
 ### 🐛 Bug Fixes
