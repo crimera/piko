@@ -20,10 +20,7 @@ public class HookFlags {
     private static DeveloperOptions developerOptions = new DeveloperOptions();
 
     private static void contactPermissionConsentFlags() {
-        BOOL_FLAGS.put("56295::14", false); //igios_enable_native_new_reconsider_alert_content
-        BOOL_FLAGS.put("56295::15", false); //ig4a_enable_native_new_reconsider_alert_content Removed in version 429.0.0.0.8
-        BOOL_FLAGS.put("56295::29", false); //igios_reconsideration_dialog_for_location_suggestion_hscroll_view
-        BOOL_FLAGS.put("56295::30", false); //igios_reconsideration_dialog_for_prmote_audience_ui_helper Removed in version 429.0.0.0.8
+        BOOL_FLAGS.put("56295", false); //ig_device_permission_consent
     }
 
     private static void simpleOverflowMenuFlags() {
