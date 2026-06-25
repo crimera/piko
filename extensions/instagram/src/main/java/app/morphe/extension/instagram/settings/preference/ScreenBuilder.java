@@ -102,7 +102,7 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.unlockEmployeeOptions) {
+        if (SettingsStatus.allowUserNetworkCertificate) {
             addPreference(
                     helper.switchPreference(
                             str("piko_allow_user_network_certificate"),
