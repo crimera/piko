@@ -1,3 +1,14 @@
+## [3.7.0-dev.8](https://github.com/crimera/piko/compare/v3.7.0-dev.7...v3.7.0-dev.8) (2026-06-26)
+
+### ✨ New Features
+
+* **Instagram:** Added support for downloading Image comments ([18c71da](https://github.com/crimera/piko/commit/18c71daae234a3c4353fa848a6c4c6a3ce1ddcb6))
+
+### 🔧 Improvements
+
+* **Instagram:** Added missing dependencies ([8cced1e](https://github.com/crimera/piko/commit/8cced1e3f04ac880d44149a5f71aae97696a4017))
+* **Instagram:** Update About section action bar title ([bed3146](https://github.com/crimera/piko/commit/bed31460256901c70ce7b89b0f4426f425f1872f))
+
 ## [3.7.0-dev.7](https://github.com/crimera/piko/compare/v3.7.0-dev.6...v3.7.0-dev.7) (2026-06-25)
 
 ### 🔧 Improvements
