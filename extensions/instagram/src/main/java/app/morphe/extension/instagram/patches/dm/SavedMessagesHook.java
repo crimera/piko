@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.db.PikoMessageDb;
 import app.morphe.extension.instagram.entity.DirectItem;
+import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.utils.Pref;
 
 /**
@@ -67,14 +68,120 @@ public class SavedMessagesHook {
         if (threadId != null && !threadId.isEmpty()) sCurrentThreadId = threadId;
     }
 
+    /**
+     * Harvest participant id -> @handle pairs from a parsed DM thread's user list (injected from the
+     * thread deserializer's "users" branch — see Hook 6). Each element is a
+     * {@code com.instagram.user.model.User}; we read id + username through the patch-resolved
+     * {@link UserData} accessors and store them via {@link PikoMessageDb#putUsername}, which backfills
+     * stored rows and feeds the notification's {@code getSenderDisplay}. Runs as the inbox/threads
+     * load, so a sender is named before any unsend arrives. Offloaded to the worker thread.
+     */
+    public static void noteThreadUsers(final java.util.List<?> users) {
+        if (users == null || users.isEmpty()) return;
+        if (!Pref.saveDeletedMessages()) return;
+        final java.util.ArrayList<Object> copy;
+        try { copy = new java.util.ArrayList<Object>(users); } catch (Throwable t) { return; }
+        getWorker().post(new Runnable() { @Override public void run() {
+            try {
+                PikoMessageDb db = PikoMessageDb.getInstance(PikoUtils.getContext());
+                for (Object u : copy) {
+                    if (u == null) continue;
+                    try {
+                        UserData ud = new UserData(u);
+                        String id = ud.getUserId();
+                        if (id == null || !id.matches("\\d{6,14}")) continue;
+                        String name = ud.getUsername();
+                        if (name == null || name.isEmpty()) name = ud.getFullname();
+                        if (name != null && !name.isEmpty()) db.putUsername(id, name);
+                    } catch (Throwable ignored) {}
+                }
+            } catch (Throwable ignored) {}
+        }});
+    }
+
+    /** Most-recent DM action-bar controller (LX/2p9), held weakly so we don't leak the thread UI.
+     *  Injected at the action-bar builder's entry — its object graph holds the open thread's id. */
+    private static java.lang.ref.WeakReference<Object> sOpenThreadController;
+
+    /** Records the open chat's action-bar controller. The thread id is extracted lazily (at button
+     *  click) from its object graph, since a DirectThreadKey isn't materialised on the normal path.
+     *  Also harvests participant usernames from the controller graph into the directory (off the UI
+     *  thread) so received/unsent senders show a real @handle on the screen and in notifications. */
+    public static void noteOpenThreadController(final Object controller) {
+        if (controller == null) return;
+        sOpenThreadController = new java.lang.ref.WeakReference<>(controller);
+        getWorker().post(new Runnable() { @Override public void run() {
+            try { deepHarvestUsers(controller); } catch (Throwable ignored) {}
+        }});
+    }
+
+    /**
+     * Bounded BFS over an object graph harvesting {@code sender_id -> username} pairs into the
+     * directory. A user is recognised by duck-typing through {@link UserData} — whose getId /
+     * getUsername method names are resolved at patch time (the Entity pattern), so this never
+     * guesses obfuscated names at runtime. Non-user objects fail those reflective calls and are
+     * skipped. This is how a sender gets a real @handle even though the MQTT message item carries
+     * only the numeric id: the open chat's participant user objects supply it, and
+     * {@link PikoMessageDb#putUsername} backfills every stored row + the notification path.
+     */
+    private static void deepHarvestUsers(Object root) {
+        if (root == null) return;
+        PikoMessageDb db = PikoMessageDb.getInstance(PikoUtils.getContext());
+        java.util.IdentityHashMap<Object, Boolean> seen = new java.util.IdentityHashMap<>();
+        java.util.ArrayDeque<Object> q = new java.util.ArrayDeque<>();
+        q.add(root); seen.put(root, Boolean.TRUE);
+        int budget = 8000;
+        while (!q.isEmpty() && budget-- > 0) {
+            Object o = q.poll();
+            Class<?> k = o.getClass();
+            if (k.isArray() && !k.getComponentType().isPrimitive()) {
+                for (Object el : (Object[]) o) if (el != null && seen.put(el, Boolean.TRUE) == null) q.add(el);
+                continue;
+            }
+            String kn = k.getName();
+            if (!(kn.startsWith("X.") || kn.startsWith("com.instagram"))) continue;
+            // Duck-type this object as an IG user via the patch-resolved UserData accessors.
+            try {
+                UserData ud = new UserData(o);
+                String id = ud.getUserId();
+                if (id != null && id.matches("\\d{6,14}")) {
+                    String name = ud.getUsername();
+                    if (name == null || name.isEmpty()) name = ud.getFullname();
+                    if (name != null && !name.isEmpty()) db.putUsername(id, name);
+                }
+            } catch (Throwable ignored) {}
+            for (Class<?> cc = k; cc != null && cc != Object.class; cc = cc.getSuperclass()) {
+                for (Field f : cc.getDeclaredFields()) {
+                    if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
+                    if (f.getType().isPrimitive()) continue;
+                    Object v;
+                    try { f.setAccessible(true); v = f.get(o); } catch (Throwable t) { continue; }
+                    if (v == null || seen.put(v, Boolean.TRUE) != null) continue;
+                    if (v instanceof CharSequence || v instanceof Number || v instanceof Boolean) continue;
+                    q.add(v);
+                }
+            }
+        }
+    }
+
+    /** The open thread id, recovered from the most-recent action-bar controller's object graph. */
+    private static String resolveOpenThreadId() {
+        if (sCurrentThreadId != null && !sCurrentThreadId.isEmpty()) return sCurrentThreadId;
+        java.lang.ref.WeakReference<Object> ref = sOpenThreadController;
+        Object controller = (ref != null) ? ref.get() : null;
+        if (controller == null) return null;
+        return deepFindThreadId(controller);
+    }
+
     /** Opens the deleted-messages screen for the currently-open thread (or all if unknown). */
     public static void openDeletedMessages(Context ctx) {
         try {
             if (ctx == null) ctx = PikoUtils.getContext();
             if (ctx == null) return;
+            String openThreadId = resolveOpenThreadId();
             Intent intent = new Intent(ctx, DeletedMessagesActivity.class);
-            if (sCurrentThreadId != null && !sCurrentThreadId.isEmpty()) {
-                intent.putExtra("thread_id", sCurrentThreadId);
+            if (openThreadId != null && !openThreadId.isEmpty()) {
+                intent.putExtra("thread_id", openThreadId);
             }
             if (sCurrentThreadTitle != null && !sCurrentThreadTitle.isEmpty()) {
                 intent.putExtra("thread_title", sCurrentThreadTitle);
@@ -122,6 +229,18 @@ public class SavedMessagesHook {
     private static boolean isOwnSender(String senderId) {
         String me = myUserId();
         return senderId != null && me != null && senderId.equals(me);
+    }
+
+    /**
+     * The open chat's action-bar title, but ONLY when that thread is the currently-open one AND it
+     * is a 1:1 chat (so the title names exactly one sender). In a group the title is the group name,
+     * which names nobody specific — returning it would misattribute every sender to the same name.
+     * Returns null in that case so callers fall through to the per-sender directory / numeric id.
+     */
+    private static String openChatTitleFor(PikoMessageDb db, String threadId) {
+        if (threadId == null || sCurrentThreadTitle == null) return null;
+        if (!threadId.equals(sCurrentThreadId)) return null;
+        return db.getSoleSenderId(threadId) != null ? sCurrentThreadTitle : null;
     }
 
     // -------------------------------------------------------------------------
@@ -208,15 +327,23 @@ public class SavedMessagesHook {
             // Display name = the chat title recorded for this thread (the participant's name for a
             // 1:1 chat), so it's stored on the row and shown by both the screen and the unsend
             // notification. Falls back to a name already on the thread, else null (→ sender id).
-            // TODO(pending): resolve the sender's username at PATCH TIME instead of relying on the
-            //   chat title. The sender's profile object is on the item at field A02 (LX/AbP); add a
-            //   DirectItem.getSenderUsername() that reads its username field (resolved by
-            //   directItemEntity), so notifications show the name for ANY chat — no runtime
-            //   reflection (keeps the reviewer's Entity convention). See PR #1387.
-            String senderUser = db.getThreadUsername(threadId);
-            if (senderUser == null && threadId != null && threadId.equals(sCurrentThreadId)) {
-                senderUser = sCurrentThreadTitle;
-            }
+            // Per-sender username — why this is an id->name lookup, not a patch-time item field:
+            //   RE of v426 (piko-re/re-notes/save-deleted-messages-v426.md) shows the DirectItem
+            //   dispatch parses only the numeric sender `user_id` (A1M); MQTT items (LX/0gF) carry
+            //   NO UserInfo/profile object at all — so there is no reliable per-item profile field
+            //   to read for the live/unsend path. A real @handle therefore comes from the
+            //   sender_id -> username directory (PikoMessageDb): populated from confident 1:1 chats
+            //   below, consulted first in the resolution chain above, and backfilled across every
+            //   stored row + notification by PikoMessageDb.putUsername. See PR #1387.
+            // Display name resolution, most-specific first:
+            //   1) the sender_id -> @handle directory (learned from 1:1 chats, see below) — this is
+            //      the only source that names a sender correctly in GROUP chats and in threads that
+            //      aren't currently open;
+            //   2) any username already recorded on this thread (1:1 chat title);
+            //   3) the open chat's action-bar title, when this message is in the open thread.
+            String senderUser = db.getUsername(senderId);
+            if (senderUser == null) senderUser = db.getThreadUsername(threadId);
+            if (senderUser == null) senderUser = openChatTitleFor(db, threadId);
             // content (base text + MQTT subclass payload), item_type enum, and timestamp are all
             // read via DirectItem with patch-resolved field names.
             String content    = di.getText();
@@ -257,6 +384,13 @@ public class SavedMessagesHook {
             // scope (sCurrentThreadId) is set authoritatively by noteOpenThreadId from the
             // action-bar builder — we intentionally do NOT set it from the message stream, since
             // an inbox load touches every thread and would pollute the scope.
+            // On v426/MSys the item's direct thread_key field is null on the MQTT path, so
+            // di.getThreadId() returns null and the row can't be scoped to a chat. Recover the
+            // thread id from a DirectThreadKey reachable elsewhere in the item's object graph.
+            if (threadId == null || threadId.isEmpty()) {
+                String found = deepFindThreadId(item);
+                if (found != null) threadId = found;
+            }
             if (threadId == null) threadId = "";
 
             // Deletion (unsend) detection.
@@ -278,9 +412,7 @@ public class SavedMessagesHook {
                 if (liveDeletion && claimNotification(messageId)) {
                     String notifySender = (senderUser != null) ? senderUser
                             : db.getThreadUsername(threadId);
-                    if (notifySender == null && threadId.equals(sCurrentThreadId)) {
-                        notifySender = sCurrentThreadTitle;
-                    }
+                    if (notifySender == null) notifySender = openChatTitleFor(db, threadId);
                     if (notifySender == null) notifySender = db.getSenderDisplay(messageId);
                     String notifyBody   = (content != null && !content.isEmpty())
                             ? content : db.getStoredContent(messageId);
@@ -296,6 +428,19 @@ public class SavedMessagesHook {
                 antiRevokeItem(di, storedContent);
             } else {
                 db.insertOrIgnore(messageId, threadId, senderId, senderUser, content, type, timestamp);
+            }
+
+            // Learn this sender's real handle from a 1:1 chat. The MQTT/REST item only carries the
+            // numeric sender_id, never a username — but if the OPEN thread has only this one stored
+            // sender (i.e. it's a 1:1, not a group), the action-bar title IS that sender's name.
+            // Persist sender_id -> name into the directory so the SAME sender shows a real @handle
+            // everywhere afterwards: other threads, group chats, the all-messages screen, and
+            // notifications. The sole-sender guard is what prevents mapping a group's title (which
+            // names no single person) onto an arbitrary sender. (Runs after the row above is stored
+            // so the current message is counted by getSoleSenderId.)
+            if (sCurrentThreadTitle != null && threadId.equals(sCurrentThreadId)
+                    && senderId != null && senderId.equals(db.getSoleSenderId(threadId))) {
+                db.putUsername(senderId, sCurrentThreadTitle);
             }
         } catch (Exception e) {
             piko("SavedMessagesHook.processReceivedItem: " + e);
@@ -420,9 +565,7 @@ public class SavedMessagesHook {
                 String notifBody = isMedia ? describeMediaType(messageType) : stored;
                 String storedThreadId = vault.getThreadIdOf(itemId);
                 String name = vault.getThreadUsername(storedThreadId);
-                if (name == null && storedThreadId != null && storedThreadId.equals(sCurrentThreadId)) {
-                    name = sCurrentThreadTitle;
-                }
+                if (name == null) name = openChatTitleFor(vault, storedThreadId);
                 if (name == null) name = vault.getSenderDisplay(itemId);
                 notifyDeletion(name, notifBody, messageType);
             }
@@ -451,6 +594,76 @@ public class SavedMessagesHook {
         }
     }
 
+
+    /**
+     * Bounded BFS over the item graph for the thread id. On v426/MSys the DirectItem's direct
+     * thread_key field is null on the MQTT path, but a {@code DirectThreadKey} (a stable,
+     * non-obfuscated class) is usually still reachable elsewhere in the item's object graph.
+     * We locate that instance and read its thread-id String (a long numeric, the only digit-only
+     * String field on the key). Returns null if none found.
+     */
+    private static String deepFindThreadId(Object root) {
+        try {
+            java.util.IdentityHashMap<Object, Boolean> seen = new java.util.IdentityHashMap<>();
+            java.util.ArrayDeque<Object> q = new java.util.ArrayDeque<>();
+            q.add(root); seen.put(root, Boolean.TRUE);
+            int budget = 6000;
+            // Fallback when no DirectThreadKey object is in the graph (e.g. the action-bar
+            // controller, where the key is built on-demand): a v426 thread id is a ~39-digit
+            // decimal, distinctly longer than message ids (~35) and user ids (~11). Track the
+            // longest all-digit String of length >= 38 as a candidate.
+            String digitCandidate = null;
+            while (!q.isEmpty() && budget-- > 0) {
+                Object o = q.poll();
+                Class<?> k = o.getClass();
+                if (k.isArray() && !k.getComponentType().isPrimitive()) {
+                    for (Object el : (Object[]) o) if (el != null && seen.put(el, Boolean.TRUE) == null) q.add(el);
+                    continue;
+                }
+                String kn = k.getName();
+                if (!(kn.startsWith("X.") || kn.startsWith("com.instagram"))) continue;
+                // Found a DirectThreadKey: read its digit-only String field (the thread id).
+                if (kn.equals("com.instagram.model.direct.DirectThreadKey")) {
+                    for (Class<?> cc = k; cc != null && cc != Object.class; cc = cc.getSuperclass()) {
+                        for (Field f : cc.getDeclaredFields()) {
+                            if (f.getType() != String.class) continue;
+                            try {
+                                f.setAccessible(true);
+                                Object fv = f.get(o);
+                                if (fv instanceof String) {
+                                    String s = (String) fv;
+                                    if (s.length() >= 15 && s.matches("\\d+")) return s;
+                                }
+                            } catch (Throwable ignored) {}
+                        }
+                    }
+                    continue;
+                }
+                for (Class<?> cc = k; cc != null && cc != Object.class; cc = cc.getSuperclass()) {
+                    for (Field f : cc.getDeclaredFields()) {
+                        if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
+                        if (f.getType().isPrimitive()) continue;
+                        Object v;
+                        try { f.setAccessible(true); v = f.get(o); } catch (Throwable t) { continue; }
+                        if (v == null || seen.put(v, Boolean.TRUE) != null) continue;
+                        if (v instanceof String) {
+                            String s = (String) v;
+                            if (s.length() >= 38 && s.matches("\\d+")
+                                    && (digitCandidate == null || s.length() > digitCandidate.length())) {
+                                digitCandidate = s;
+                            }
+                            continue;
+                        }
+                        if (v instanceof CharSequence || v instanceof Number || v instanceof Boolean) continue;
+                        q.add(v);
+                    }
+                }
+            }
+            return digitCandidate;
+        } catch (Throwable t) {
+            return null;
+        }
+    }
 
     /** Bounded BFS over the item graph for a media URL (image/video/audio CDN link). Prefers the
      *  longest match (usually the highest-resolution variant). Returns null if none found. */

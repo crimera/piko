@@ -46,6 +46,10 @@ public class DeletedMessagesActivity extends Activity {
         // When launched from compose-bar button, filter to that thread only.
         // When launched from Piko settings, show all deleted messages.
         String threadId = getIntent().getStringExtra("thread_id");
+        // An empty thread id can never scope a real chat — treat it like "no scope" (show all)
+        // instead of matching the orphaned thread_id = "" bucket, which would leak unrelated
+        // chats into a per-person screen.
+        if (threadId != null && threadId.isEmpty()) threadId = null;
         threadTitle = getIntent().getStringExtra("thread_title");
         messages = threadId != null
             ? PikoMessageDb.getInstance(this).getDeletedMessagesForThread(threadId)
@@ -231,15 +235,19 @@ public class DeletedMessagesActivity extends Activity {
             long   timestamp = 0;
             try { timestamp = Long.parseLong(msg[5]); } catch (Exception ignored) {}
 
-            // Prefer the resolved username; fall back to the numeric sender id so the row is
-            // still attributable instead of an opaque "Unknown".
+            // Attribute each row by its OWN sender — never by a single screen-level chat title.
+            // Blindly applying the open chat's title to every row (the old second branch) made
+            // different users' messages all show as the same person, both in the all-messages
+            // view and in group chats. Order: stored username → the per-message numeric sender id
+            // (always distinct per user, so it can never misattribute) → chat title only as a last
+            // resort (a 1:1 scoped view where the sender id is somehow missing).
             final String who;
             if (sender != null && !sender.isEmpty()) {
                 who = "@" + sender;
-            } else if (threadTitle != null && !threadTitle.isEmpty()) {
-                who = threadTitle; // chat title from action bar (participant's name)
             } else if (senderId != null && !senderId.isEmpty()) {
                 who = "@" + senderId;
+            } else if (threadTitle != null && !threadTitle.isEmpty()) {
+                who = threadTitle; // chat title from action bar (participant's name)
             } else {
                 who = str("piko_unknown");
             }

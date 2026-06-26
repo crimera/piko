@@ -139,15 +139,18 @@ public class PikoMessageDb extends SQLiteOpenHelper {
             new String[]{senderId});
     }
 
-    /** Backfill sender_username for every row in a thread that still lacks one (1:1 chat title). */
+    /**
+     * Record a chat title as a username — but ONLY for a 1:1 chat, where the title names exactly
+     * one person. In a group the title names no single sender, so blindly applying it to every row
+     * (the old behaviour) made all members' messages show the same name. We therefore resolve the
+     * thread's sole sender and route through the directory (which backfills that sender's rows
+     * everywhere); a group thread (no sole sender) is left untouched.
+     */
     public void setThreadUsername(String threadId, String username) {
         if (threadId == null || threadId.isEmpty() || username == null || username.isEmpty()) return;
-        SQLiteDatabase db = getWritableDatabase();
-        ContentValues cv = new ContentValues();
-        cv.put("sender_username", username);
-        db.update(TABLE, cv,
-            "thread_id = ? AND (sender_username IS NULL OR sender_username = '')",
-            new String[]{threadId});
+        String sole = getSoleSenderId(threadId);
+        if (sole == null) return; // group (or empty) thread → never attribute the title to anyone
+        putUsername(sole, username);
     }
 
     /** Look up a previously-resolved username for a sender_id, or null. */
@@ -250,9 +253,37 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         return (r != null && !r.isEmpty()) ? r : null;
     }
 
-    /** Any non-empty sender_username recorded for a thread (set from the chat title), or null. */
+    /**
+     * The single distinct sender_id in a thread, or null if the thread has zero or more than one
+     * distinct sender. Used to recognise a 1:1 chat, where the action-bar title reliably names
+     * that one sender. Own outgoing messages are never stored, so they never count here — meaning
+     * a 1:1 thread has exactly one stored sender (the other participant), while a group has 2+ as
+     * soon as a second person sends. This is what keeps the username-learning safe in groups.
+     */
+    public String getSoleSenderId(String threadId) {
+        if (threadId == null || threadId.isEmpty()) return null;
+        SQLiteDatabase db = getReadableDatabase();
+        // distinct = true, limit 2: we only need to know whether there is exactly one.
+        Cursor c = db.query(true, TABLE, new String[]{"sender_id"},
+                "thread_id = ? AND sender_id IS NOT NULL AND sender_id != ''",
+                new String[]{threadId}, null, null, null, "2");
+        String sole = null;
+        int n = 0;
+        while (c.moveToNext()) { sole = c.getString(0); n++; }
+        c.close();
+        return n == 1 ? sole : null;
+    }
+
+    /**
+     * Any non-empty sender_username recorded for a thread, or null. Group-safe: returns a value
+     * ONLY for a 1:1 thread (a sole sender). In a group, an arbitrary member's name would otherwise
+     * be returned and applied to a different sender by the resolution chain — the exact bug where
+     * everyone's messages showed as the same person. Callers using this as a name fallback get null
+     * for groups and fall through to the per-sender directory / numeric id instead.
+     */
     public String getThreadUsername(String threadId) {
         if (threadId == null || threadId.isEmpty()) return null;
+        if (getSoleSenderId(threadId) == null) return null; // group thread → no single name
         Cursor c = getReadableDatabase().query(TABLE, new String[]{"sender_username"},
                 "thread_id = ? AND sender_username IS NOT NULL AND sender_username != ''",
                 new String[]{threadId}, null, null, null, "1");
@@ -286,6 +317,9 @@ public class PikoMessageDb extends SQLiteOpenHelper {
 
     public List<String[]> getDeletedMessagesForThread(String threadId) {
         List<String[]> result = new ArrayList<>();
+        // Never scope to the empty-thread bucket: rows stored with thread_id = "" are orphans
+        // (thread id was unknown at capture) and must not surface as a specific chat's history.
+        if (threadId == null || threadId.isEmpty()) return result;
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.query(TABLE, null, "is_deleted = 1 AND thread_id = ?",
             new String[]{threadId}, null, null, "timestamp DESC");
@@ -309,22 +343,39 @@ public class PikoMessageDb extends SQLiteOpenHelper {
     }
 
     private String[] rowToStringArray(Cursor c) {
+        String senderId = c.getString(c.getColumnIndexOrThrow("sender_id"));
         return new String[]{
             c.getString(c.getColumnIndexOrThrow("message_id")),
             c.getString(c.getColumnIndexOrThrow("thread_id")),
-            c.getString(c.getColumnIndexOrThrow("sender_username")),
+            resolveUsername(c.getString(c.getColumnIndexOrThrow("sender_username")), senderId),
             c.getString(c.getColumnIndexOrThrow("content")),
             c.getString(c.getColumnIndexOrThrow("message_type")),
             String.valueOf(c.getLong(c.getColumnIndexOrThrow("timestamp"))),
-            c.getString(c.getColumnIndexOrThrow("sender_id"))
+            senderId
         };
+    }
+
+    /**
+     * The display username for a row: the stored sender_username if present, otherwise the
+     * sender_id → username directory (populated from thread loads / 1:1 chats). Returns the
+     * stored value (possibly empty) when the directory has no entry, so the caller's existing
+     * numeric-id fallback still applies for a sender we have never seen named.
+     */
+    private String resolveUsername(String storedUsername, String senderId) {
+        if (storedUsername != null && !storedUsername.isEmpty()) return storedUsername;
+        if (senderId != null && !senderId.isEmpty()) {
+            String dir = getUsername(senderId);
+            if (dir != null && !dir.isEmpty()) return dir;
+        }
+        return storedUsername;
     }
 
     private String[] rowToStringArrayFull(Cursor c) {
         return new String[]{
             c.getString(c.getColumnIndexOrThrow("message_id")),
             c.getString(c.getColumnIndexOrThrow("thread_id")),
-            c.getString(c.getColumnIndexOrThrow("sender_username")),
+            resolveUsername(c.getString(c.getColumnIndexOrThrow("sender_username")),
+                    c.getString(c.getColumnIndexOrThrow("sender_id"))),
             c.getString(c.getColumnIndexOrThrow("content")),
             c.getString(c.getColumnIndexOrThrow("message_type")),
             String.valueOf(c.getLong(c.getColumnIndexOrThrow("timestamp"))),

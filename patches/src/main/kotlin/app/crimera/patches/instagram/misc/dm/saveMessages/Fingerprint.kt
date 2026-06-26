@@ -110,3 +110,20 @@ internal object DMActionBarThreadFingerprint : Fingerprint(
     strings = listOf("threadClientInfra", "actionBarListener"),
     returnType = "V",
 )
+
+/**
+ * The DM thread/inbox JSON deserializer's per-field dispatch helper
+ * ({@code LX/6o9;.A00(LX/R0r;LX/6oB;Ljava/lang/String;)Z} on v426, classes3.dex) — the thread
+ * analogue of {@code DirectItemFieldParserFingerprint}. When the JSON key is {@code "users"} it
+ * parses the participant list into {@code List<com.instagram.user.model.User>} and stores it on the
+ * thread object. Hook 6 finds that {@code "users"} branch and harvests each participant's
+ * id -> @handle into the username directory as the inbox/thread loads — so a sender is named even
+ * before any unsend, and the unsend notification shows a real name (not the numeric id).
+ *
+ * Anchors are thread-summary JSON keys that co-occur only in this dispatcher; returnType Z selects
+ * the per-field helper (not parseFromJson, which returns the thread object).
+ */
+internal object ThreadUsersDispatchFingerprint : Fingerprint(
+    strings = listOf("users", "admin_user_ids", "left_users", "thread_v2_id", "input_mode"),
+    returnType = "Z",
+)

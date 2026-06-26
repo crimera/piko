@@ -7,6 +7,7 @@
 package app.crimera.patches.instagram.misc.dm.saveMessages
 
 import app.crimera.patches.instagram.entity.directItem.directItemEntity
+import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.actionBar.dmActionBarButton.dmActionBarButtonPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
@@ -31,7 +32,7 @@ val saveDeletedMessagesPatch =
         name = "Save deleted messages",
         description = "Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them.",
     ) {
-        dependsOn(settingsPatch, dmActionBarButtonPatch, directItemEntity)
+        dependsOn(settingsPatch, dmActionBarButtonPatch, directItemEntity, userDataEntity)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
@@ -103,33 +104,53 @@ val saveDeletedMessagesPatch =
                 )
             }
 
-            // --- Hook 5: record the open chat's thread id at patch time (no runtime walk) ---
-            // The DM action-bar builder constructs the open chat's DirectThreadKey. We read its
-            // thread-id field (the first String field on the stable DirectThreadKey class, the same
-            // one directItemEntity resolves) and hand it to the extension, so the per-chat screen
-            // scopes itself without any runtime object-graph reflection.
-            val threadIdField =
-                mutableClassDefBy { it.type == DIRECT_THREAD_KEY }
-                    .fields
-                    .first {
-                        !AccessFlags.STATIC.isSet(it.accessFlags) && it.type == "Ljava/lang/String;"
-                    }.name
-
+            // --- Hook 5: record the open chat's action-bar controller ---
+            // The DM action-bar builder A01(LX/2p9;)V receives the per-thread controller as p0.
+            // The controller's only DirectThreadKey is built on-demand inside a deeply-gated Bloks
+            // feature branch that never runs on a normal chat open, so anchoring on that key (the
+            // old approach) meant noteOpenThreadId never fired. Instead we hand the controller object
+            // (always present as p0) to the extension at method entry; the extension recovers the
+            // open thread id from its object graph (the same bounded search used for message items),
+            // so the per-chat screen can scope itself.
             DMActionBarThreadFingerprint.method.apply {
-                // Anchor on the convergence point: the DirectThreadKey is passed to a constructor
-                // (invoke-direct) after both branches that produce it merge.
-                val keyIndex =
-                    instructions.indexOfFirst {
-                        it.opcode == Opcode.INVOKE_DIRECT &&
-                            (it as ReferenceInstruction).reference.toString().contains(DIRECT_THREAD_KEY)
-                    }
-                val keyRegister = getInstruction(keyIndex).registersUsed[1]
-                val free = getFreeRegisterProvider(keyIndex, 1).getFreeRegister()
+                val reg = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 1).getFreeRegister()
                 addInstructions(
-                    keyIndex,
+                    0,
                     """
-                    iget-object v$free, v$keyRegister, $DIRECT_THREAD_KEY->$threadIdField:Ljava/lang/String;
-                    invoke-static {v$free}, $HOOK_CLASS->noteOpenThreadId(Ljava/lang/String;)V
+                    move-object/from16 v$reg, p0
+                    invoke-static {v$reg}, $HOOK_CLASS->noteOpenThreadController(Ljava/lang/Object;)V
+                    """.trimIndent(),
+                )
+            }
+
+            // --- Hook 6: harvest participant usernames at thread/inbox load (patch-time source) ---
+            // The DM thread deserializer LX/6o9;.A00 parses the "users" JSON key into a
+            // List<com.instagram.user.model.User> and stores it on the thread object. We find that
+            // store and hand the list to the extension, which reads each user's id + @handle via the
+            // patch-resolved UserData accessors and fills the username directory. This runs as the
+            // inbox/threads load (before any unsend), so notifications + the screen show real names.
+            ThreadUsersDispatchFingerprint.method.apply {
+                val insns = instructions.toList()
+                val usersKeyIndex =
+                    insns.indexOfFirst {
+                        (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
+                            (it as ReferenceInstruction).reference.toString() == "users"
+                    }
+                require(usersKeyIndex >= 0) { "const-string 'users' not found in thread dispatch" }
+                // First store of the parsed list after the "users" key: iput-object <list>, ..., :List
+                val listPutInstruction =
+                    insns.drop(usersKeyIndex + 1).first {
+                        it.opcode == Opcode.IPUT_OBJECT &&
+                            (it as ReferenceInstruction).reference.toString().endsWith(":Ljava/util/List;")
+                    }
+                val listRegister = listPutInstruction.registersUsed[0]
+                val putIndex = listPutInstruction.location.index
+                val free = getFreeRegisterProvider(putIndex + 1, 1).getFreeRegister()
+                addInstructions(
+                    putIndex + 1,
+                    """
+                    move-object/from16 v$free, v$listRegister
+                    invoke-static {v$free}, $HOOK_CLASS->noteThreadUsers(Ljava/util/List;)V
                     """.trimIndent(),
                 )
             }
