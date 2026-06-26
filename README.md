@@ -66,7 +66,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.7.0-dev.8](https://github.com/crimera/piko/releases/tag/v3.7.0-dev.8)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;123 patches total
+> **[v3.7.0-dev.9](https://github.com/crimera/piko/releases/tag/v3.7.0-dev.9)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;123 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;72 patches</summary>
 <br>

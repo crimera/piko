@@ -1,3 +1,9 @@
+## [3.7.0-dev.9](https://github.com/crimera/piko/compare/v3.7.0-dev.8...v3.7.0-dev.9) (2026-06-26)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Native comment buttons not working ([ea145d7](https://github.com/crimera/piko/commit/ea145d7759d3b7bf8af78cbab064fe76c6760cd5))
+
 ## [3.7.0-dev.8](https://github.com/crimera/piko/compare/v3.7.0-dev.7...v3.7.0-dev.8) (2026-06-26)
 
 ### ✨ New Features
