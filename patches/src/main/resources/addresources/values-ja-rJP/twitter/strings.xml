@@ -120,6 +120,7 @@
     <string name="piko_disunify_xchat_system">xchatシステムを無効化</string>
     <string name="piko_disunify_xchat_system_desc">メッセージや共有シートなどの従来の機能を復活させます</string>
     <string name="piko_legacy_share_link">旧式の共有リンク</string>
+    <string name="piko_block_redirecting_to_x_lite">X Lite へのリダイレクトを無効化</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">機能フラグ</string>
     <string name="piko_pref_feature_flags">機能フラグを追加</string>

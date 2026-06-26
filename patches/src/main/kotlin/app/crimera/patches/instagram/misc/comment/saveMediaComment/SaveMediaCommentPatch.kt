@@ -44,7 +44,7 @@ val saveMediaCommentPatch =
         execute {
 
             var stringLateral: Long
-            SaveMediaChatButtonToStringFingerprint.classDef.methods.first { it.name == "<init>" }.apply {
+            SaveMediaChatButtonInitFingerprint.method.apply {
                 stringLateral = (instructions.last { it.opcode == Opcode.CONST } as Instruction31i).wideLiteral
             }
 

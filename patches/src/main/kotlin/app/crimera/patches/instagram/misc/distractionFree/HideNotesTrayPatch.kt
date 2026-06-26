@@ -16,15 +16,16 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.patches.all.misc.resources.ResourceType
+import app.morphe.patches.all.misc.resources.resourceLiteral
 import app.morphe.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
 object NotesTrayBuilderConstructorFingerprint : Fingerprint(
-    strings = listOf("NotesTray"),
-    returnType = "V",
-    name = "<init>",
+    filters =
+        listOf(resourceLiteral(ResourceType.ID, "cf_hub_recycler_view")),
 )
 
 @Suppress("unused")
@@ -39,13 +40,10 @@ val hideNotesTrayPatch =
         execute {
 
             NotesTrayBuilderConstructorFingerprint.apply {
-                val strIndex = stringMatches[0].index
+
+                val notesRecyclerViewIDIndex = instructionMatches.first().index
                 method.apply {
 
-                    val notesRecyclerViewIDIndex =
-                        instructions
-                            .last { it.location.index < strIndex && it.opcode == Opcode.CONST }
-                            .location.index
                     val notesRecyclerViewIndex = indexOfFirstInstruction(notesRecyclerViewIDIndex, Opcode.IPUT_OBJECT)
                     val notesRecyclerViewInstruction = getInstruction(notesRecyclerViewIndex)
                     val notesTrayRegister = notesRecyclerViewInstruction.registersUsed[0]
