@@ -11,11 +11,10 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.literal
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.patches.all.misc.resources.resourceLiteral
+import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -31,6 +30,7 @@ val dmActionBarButtonPatch =
         description = "This patch is adds support for adding buttons on DM action bar.",
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
+        dependsOn(resourceMappingPatch)
 
         execute {
 

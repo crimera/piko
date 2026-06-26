@@ -15,6 +15,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.util.registersUsed
 
 internal object StoryRingBuilderFingerprint : Fingerprint(
@@ -33,7 +34,7 @@ val customiseStoryRingSizePatch =
     bytecodePatch(
         name = "Customise story ring size",
     ) {
-        dependsOn(settingsPatch)
+        dependsOn(settingsPatch, resourceMappingPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
@@ -47,7 +48,7 @@ val customiseStoryRingSizePatch =
                         """
                             $PREF_CALL_DESCRIPTOR->customiseStoryRingSize()F
                             move-result v$register
-                        """
+                        """,
                     )
                     enableSettings("customiseStoryRingSize")
                 }
