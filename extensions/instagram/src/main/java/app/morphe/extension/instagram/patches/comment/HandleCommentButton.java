@@ -16,8 +16,11 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.crimera.ObjectBrowser;
+import app.morphe.extension.crimera.downloader.MediaType;
 
 import app.morphe.extension.instagram.entity.CommentData;
+import app.morphe.extension.instagram.entity.MediaData;
+import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
@@ -39,7 +42,7 @@ public class HandleCommentButton {
             if (commentData.hasText() && Pref.commentCopyButton()) {
                 list.add(CopyTextButton.A00);
             }
-            if(commentData.hasGifMedia() && Pref.commentSaveMediaButton()){
+            if(commentData.hasMedia() && Pref.commentSaveMediaButton()){
                 list.add(SaveMediaButton.A00);
             }
         } catch (Exception e) {
@@ -72,16 +75,30 @@ public class HandleCommentButton {
                 CommentData commentData = new CommentData(commentObject);
 
                 Context context = (Context) Utils.getActivity();
-                String gifUrl = commentData.getGifUrl();
-                String fileName = commentData.getGifDownloadName();
-                DownloadUtils.downloadMediaUrl(context,gifUrl,Constants.DEFAULT_GIF_FOLDER,fileName);
-                return true;
+                if(commentData.hasGifMedia()) {
+                    String gifUrl = commentData.getGifUrl();
+                    String fileName = commentData.getGifDownloadName();
+                    DownloadUtils.downloadMediaUrl(context, gifUrl, Constants.DEFAULT_GIF_FOLDER, fileName);
+                    return true;
+                } else if (commentData.hasImageMedia()) {
+                    MediaData imageData = commentData.getImageMedia();
+                    UserData userData = commentData.getCommentUserData();
+
+                    String userName = userData.getUsername();
+                    String mediaLink = imageData.getMediaLink();
+                    String fileName = userName+"_"+imageData.getDownloadFilename(MediaType.IMAGE);
+
+                    String subFolder = DownloadUtils.getSubfolderName(userName);
+
+                    DownloadUtils.downloadMediaUrl(context, mediaLink, subFolder, fileName);
+                    return true;
+                }
             }
 
         } catch (Exception e) {
             PikoUtils.logger(e);
         }
-        return false;
+        return true;
     }
 
 }
