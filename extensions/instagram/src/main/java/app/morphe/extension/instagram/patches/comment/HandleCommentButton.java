@@ -98,7 +98,7 @@ public class HandleCommentButton {
         } catch (Exception e) {
             PikoUtils.logger(e);
         }
-        return true;
+        return false;
     }
 
 }
