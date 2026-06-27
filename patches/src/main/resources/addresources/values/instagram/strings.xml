@@ -42,7 +42,13 @@
     <string name="piko_ghost_modes_on">Ghost mode: ON</string>
     <string name="piko_ghost_modes_default">Ghost mode: DEFAULT</string>
     <string name="piko_ghost_modes_quick_toggle">Enable quick toggle for ghost modes</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">Adds a quick toggle in chat action bar to control ghost modes</string>
+    <string name="piko_ghost_modes_quick_toggle_desc">Shows ghost mode quick toggle buttons in selected locations</string>
+    <string name="piko_ghost_modes_quick_toggle_home">Show quick toggle on home tab</string>
+    <string name="piko_ghost_modes_quick_toggle_home_desc">Adds the ghost mode quick toggle to the home tab action bar</string>
+    <string name="piko_ghost_modes_quick_toggle_direct_inbox">Show quick toggle in messages</string>
+    <string name="piko_ghost_modes_quick_toggle_direct_inbox_desc">Adds the ghost mode quick toggle to the messages action bar</string>
+    <string name="piko_ghost_modes_quick_toggle_direct_thread">Show quick toggle in chats</string>
+    <string name="piko_ghost_modes_quick_toggle_direct_thread_desc">Adds the ghost mode quick toggle to chat action bars</string>
 
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">Distraction free</string>

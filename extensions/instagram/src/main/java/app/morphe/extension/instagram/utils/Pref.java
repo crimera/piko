@@ -60,6 +60,18 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.GHOST_MODES_QUICK_TOGGLE);
     }
 
+    public static boolean showGhostModeQuickToggleHome() {
+        return SharedPref.getBooleanPref(Settings.GHOST_MODE_QUICK_TOGGLE_HOME);
+    }
+
+    public static boolean showGhostModeQuickToggleDirectInbox() {
+        return SharedPref.getBooleanPref(Settings.GHOST_MODE_QUICK_TOGGLE_DIRECT_INBOX);
+    }
+
+    public static boolean showGhostModeQuickToggleDirectThread() {
+        return SharedPref.getBooleanPref(Settings.GHOST_MODE_QUICK_TOGGLE_DIRECT_THREAD);
+    }
+
     public static boolean enableMoreOptionsOnProfileQuickToggle() {
         return SharedPref.getBooleanPref(Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE) && Pref.isMoreOptionsOnProfilePatched();
     }

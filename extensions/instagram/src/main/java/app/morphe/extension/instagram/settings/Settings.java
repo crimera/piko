@@ -27,6 +27,9 @@ public class Settings {
     public static final BooleanSetting DISABLE_ANALYTICS = new BooleanSetting("disable_analytics", true);
     public static final BooleanSetting TURN_ON_ALL_GHOST_MODES = new BooleanSetting("turn_on_all_ghost_modes", false);
     public static final BooleanSetting GHOST_MODES_QUICK_TOGGLE = new BooleanSetting("ghost_mode_quick_toggle", true);
+    public static final BooleanSetting GHOST_MODE_QUICK_TOGGLE_HOME = new BooleanSetting("ghost_mode_quick_toggle_home", true);
+    public static final BooleanSetting GHOST_MODE_QUICK_TOGGLE_DIRECT_INBOX = new BooleanSetting("ghost_mode_quick_toggle_direct_inbox", true);
+    public static final BooleanSetting GHOST_MODE_QUICK_TOGGLE_DIRECT_THREAD = new BooleanSetting("ghost_mode_quick_toggle_direct_thread", true);
     public static final BooleanSetting VIEW_STORIES_ANONYMOUSLY = new BooleanSetting("view_stories_anonymously", false);
     public static final BooleanSetting VIEW_LIVE_ANONYMOUSLY = new BooleanSetting("view_live_anonymously", true);
     public static final BooleanSetting DISABLE_SCREENSHOT_DETECTION = new BooleanSetting("disable_screenshot_detection", true);

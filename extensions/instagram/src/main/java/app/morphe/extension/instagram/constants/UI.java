@@ -47,6 +47,7 @@ public class UI {
     public static final String DRAWABLE_CODE_ICON = "fb_ic_code_outline_24";
     public static final String DRAWABLE_FRAME_CROSSED_ICON = "fb_ic_frames_cross_outline_16";
     public static final String DRAWABLE_LINK_ICON = "fb_ic_link_outline_24";
+    public static final String PIKO_SETTINGS_GEAR_TAG = "piko_settings_action_bar_button";
 
 
     public static int getThemedColour() {
@@ -112,9 +113,29 @@ public class UI {
         return null;
     }
 
+    public static View findDirectChildWithTag(ViewGroup viewGroup, Object tag) {
+        if (viewGroup == null || tag == null) {
+            return null;
+        }
+
+        for (int i = 0; i < viewGroup.getChildCount(); i++) {
+            View child = viewGroup.getChildAt(i);
+            if (tag.equals(child.getTag())) {
+                return child;
+            }
+        }
+
+        return null;
+    }
+
     public static void pikoSettingsGear(ViewGroup viewGroup) {
         try {
             if (viewGroup == null) {
+                return;
+            }
+
+            View existingView = findDirectChildWithTag(viewGroup, PIKO_SETTINGS_GEAR_TAG);
+            if (existingView instanceof ImageView) {
                 return;
             }
 
@@ -122,6 +143,7 @@ public class UI {
             if (imageView == null) {
                 return;
             }
+            imageView.setTag(PIKO_SETTINGS_GEAR_TAG);
 
             Context context = viewGroup.getContext();
             boolean isFirstTime = Pref.firstTimePiko();
