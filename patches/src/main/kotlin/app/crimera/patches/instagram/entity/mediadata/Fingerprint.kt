@@ -6,10 +6,17 @@
 
 package app.crimera.patches.instagram.entity.mediadata
 
+import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
+import app.crimera.patches.instagram.entity.decoder.ReelsInlineQualitySurveyRelatedFingerprint
+import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CLASS
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.opcode
+import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 
 internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
@@ -101,9 +108,6 @@ internal object GetPostTypeExtensionFingerprint : Fingerprint(
 )
 
 // -----------------------------------
-internal object ReelsInlineQualitySurveyRelatedFingerprint : Fingerprint(
-    strings = listOf("reels_inline_quality_survey"),
-)
 
 internal object ReelsMentionDoubleTapFingerprint : Fingerprint(
     returnType = "V",
@@ -144,12 +148,23 @@ internal object FanClubContentPreviewInteractorImplFingerprint : Fingerprint(
 
 internal object DirectShareTargetRelatedFingerprint : Fingerprint(
     returnType = "V",
-    strings = listOf("https://www.instagram.com/p/", "unknown"),
+    strings = listOf("", "https://www.instagram.com/p/"),
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 3 && methodDef.parameters.last().type == "Lcom/instagram/model/direct/DirectShareTarget;"
+    },
 )
 
-internal object ClipsAudioUtilGetTitleFingerprint : Fingerprint(
+internal object MusicAudioTypeEnumStringFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
-    strings = listOf("title is empty. audio_asset_id = ", "ClipsAudioUtil"),
+    parameters = listOf("Landroid/content/Context;", USER_SESSION_CLASS, MEDIA_CLASS_NAME),
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
+    filters =
+        listOf(
+            opcode(
+                opcode = Opcode.IF_EQZ,
+                location = MatchAfterWithin(4),
+            ),
+        ),
 )
 
 internal object AudioIntfMapperFingerprint : Fingerprint(
@@ -202,4 +217,20 @@ internal object ProductInfoMapperFingerprint : Fingerprint(
             "product_type",
         ),
     returnType = "Ljava/util/Map;",
+)
+
+internal object AyuMidcardMediaHelperImageObjectMethodFingerprint : Fingerprint(
+    definingClass = "AyuMidcardMediaHelper;",
+    returnType = "Ljava/lang/Object;",
+)
+
+internal object GetOriginalSoundDataIntfFromMediaFingerprint : Fingerprint(
+    classFingerprint = ReelsInlineQualitySurveyRelatedFingerprint,
+    returnType = "OriginalSoundDataIntf;",
+)
+
+internal object GetUserDataFromMediaFingerprint : Fingerprint(
+    classFingerprint = ReelsInlineQualitySurveyRelatedFingerprint,
+    parameters = listOf(USER_SESSION_CLASS, MEDIA_CLASS_NAME),
+    returnType = USER_MODEL_CLASS_NAME,
 )

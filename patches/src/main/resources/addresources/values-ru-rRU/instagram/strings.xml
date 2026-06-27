@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ads Section -->
+    <string name="piko_category_ads">Реклама</string>
+    <string name="piko_disable_ads">Отключить рекламу</string>
+    <string name="piko_hide_suggested_content">Скрыть рекомендуемый контент</string>
+    <string name="piko_hide_suggested_content_desc">Скрывает рекомендуемые истории, Reels и Threads (предлагаемые публикации всё ещё будут показываться).</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_dev_options">Параметры разработчика</string>
+    <string name="piko_enable_dev_options">Включить параметры разработчика</string>
+    <string name="piko_enable_dev_options_desc">Разблокирует параметры разработчика при долгом нажатии на значок «Домой»</string>
+    <string name="piko_directly_open_metaconfig">Открыть настройки MetaConfig напрямую</string>
+    <string name="piko_directly_open_metaconfig_desc">Открывает настройки MetaConfig при долгом нажатии на значок «Домой» (требуется включение параметров разработчика)</string>
+    <string name="piko_enable_emp_options">Включить служебные параметры</string>
+    <string name="piko_enable_emp_options_desc">Открывает все служебные параметры, используемые для тестирования</string>
+    <string name="piko_allow_user_network_certificate">Разрешить пользовательские сетевые сертификаты</string>
+    <string name="piko_allow_user_network_certificate_desc">Разрешает использование пользовательских сетевых сертификатов для тестирования безопасности</string>
+    <string name="piko_remove_build_expire_popup">Убрать уведомление об устаревании сборки</string>
+    <string name="piko_remove_build_expire_popup_desc">Убирает всплывающее уведомление, которое появляется спустя время после устаревания версии приложения</string>
+    <string name="piko_export_dev_overrides">Экспорт замещений</string>
+    <string name="piko_import_dev_overrides">Импорт замещений</string>
+    <string name="piko_import_id_mapping">Импорт файлов сопоставления</string>
+    <string name="piko_download_id_mapping">Скачать файл сопоставления</string>
+    <string name="piko_missing_mapping_file">Отсутствует файл сопоставления</string>
+    <string name="piko_missing_mapping_file_desc">Без файла сопоставления параметры разработчика не будут иметь правильных имён. Хотите скачать его?</string>
+    <!-- Links Section -->
+    <string name="piko_category_links">Ссылки</string>
+    <string name="piko_open_links_externally">Открывать ссылки во внешнем браузере</string>
+    <string name="piko_open_links_externally_desc">Открывать ссылки во внешнем браузере вместо встроенного браузера приложения</string>
+    <string name="piko_sanitize_share_links">Очищать ссылки при отправке</string>
+    <!-- Ghost Section -->
+    <string name="piko_category_ghost">Режим невидимки</string>
+    <string name="piko_view_stories_anonymously">Смотреть истории анонимно</string>
+    <string name="piko_view_live_anonymously">Смотреть прямые эфиры анонимно</string>
+    <string name="piko_disable_typing_status">Отключить статус набора текста</string>
+    <string name="piko_disable_screenshot_detection">Отключить определение снимков экрана</string>
+    <string name="piko_view_dm_anonymously">Читать сообщения анонимно</string>
+    <string name="piko_turn_on_all_ghost_modes">Включить все режимы невидимки</string>
+    <string name="piko_ghost_modes_on">Режим невидимки: Вкл</string>
+    <string name="piko_ghost_modes_default">Режим невидимки: По умолчанию</string>
+    <string name="piko_ghost_modes_quick_toggle">Включить быстрое переключение режимов невидимки</string>
+    <string name="piko_ghost_modes_quick_toggle_desc">Добавляет переключатель в панель действий чата для быстрого управления режимами невидимки</string>
+    <!-- Distraction-Free Section -->
+    <string name="piko_category_distraction_free">Режим концентрации</string>
+    <string name="piko_disable_stories">Отключить истории</string>
+    <string name="piko_disable_highlights">Отключить актуальные истории</string>
+    <string name="piko_disable_explore">Отключить раздел «Поиск»</string>
+    <string name="piko_disable_comments">Отключить комментарии</string>
+    <string name="piko_limit_following_feed">Ограничить ленту подписками</string>
+    <string name="piko_limit_following_feed_desc">Показывать в главной ленте только содержимое от профилей, на которые вы подписаны.</string>
+    <string name="piko_disable_reels_scrolling">Отключить пролистывание Reels</string>
+    <string name="piko_disable_reels_scrolling_desc">"Отключает бесконечное пролистывание в Reels, не позволяя переходить к следующему видео.
+
+Примечание: при чистой установке анимация «Подсказка» может появиться, но через несколько секунд остановится сама."</string>
+    <string name="piko_hide_stories_tray">Скрыть панель историй</string>
+    <string name="piko_hide_stories_tray_desc">Скрывает панель историй в главной ленте</string>
+    <string name="piko_hide_notes_tray">Скрыть панель заметок</string>
+    <string name="piko_hide_notes_tray_desc">Скрывает панель заметок в разделе сообщений</string>
+    <string name="piko_hide_group_creation_button_on_sharesheet">Скрыть кнопку создания группы в меню отправки</string>
+    <string name="piko_disable_double_tap_like_post">Отключить двойное нажатие для отметки «Нравится» на публикации</string>
+    <string name="piko_disable_double_tap_like_reel">Отключить двойное нажатие для отметки «Нравится» на Reels</string>
+    <string name="piko_disable_double_tap_like_comment">Отключить двойное нажатие для отметки «Нравится» на комментарии</string>
+    <string name="piko_disable_double_tap_like_message">Отключить двойное нажатие для отметки «Нравится» на сообщении</string>
+    <string name="piko_disable_double_tap_to_like">Отключить двойное нажатие для отметки «Нравится»</string>
+    <!-- Miscellaneous Section -->
+    <string name="piko_category_misc">Разное</string>
+    <string name="piko_disable_analytics">Отключить аналитику</string>
+    <string name="piko_delete_analytics_cache">Очистить кэш аналитики</string>
+    <string name="piko_disable_analytics_desc">Блокировать отправку данных анализа в серверы Instagram/Facebook</string>
+    <string name="piko_disable_discover_people">Отключить раздел «Возможные знакомые»</string>
+    <string name="piko_disable_discover_people_desc">Отключает раздел «Возможные знакомые» в профиле пользователя</string>
+    <string name="piko_follow_back_indicator">Включить индикатор статуса дружбы</string>
+    <string name="piko_follow_back_indicator_desc">Добавляет на страницу профиля метку «Подписан(а) на вас» и показывает подробную информацию о статусе дружбы при нажатии</string>
+    <string name="piko_fbi_follows_you">Подписан на вас</string>
+    <string name="piko_fbi_doesnt_follows_you">Не подписан на вас</string>
+    <string name="piko_friendship_status">Статус дружбы</string>
+    <string name="piko_view_story_mentions">Просмотр упоминаний в истории</string>
+    <string name="piko_vsm_title">Упоминания в истории</string>
+    <string name="piko_vsm_no_mentions">В этой истории нет упоминаний</string>
+    <string name="piko_disable_story_flipping">Отключить перелистывание историй</string>
+    <string name="piko_disable_story_flipping_desc">Отключает автоматическое перелистывание к следующей истории</string>
+    <string name="piko_disable_video_autoplay">Отключить автозапуск видео</string>
+    <string name="piko_stories_audio_autoplay">Автозапуск звука в историях</string>
+    <string name="piko_customise_story_timestamp">Настроить отметку времени истории</string>
+    <string name="piko_customise_story_timestamp_desc">Настроить отображение времени публикации истории</string>
+    <string name="piko_unlimited_replays">Сделать временное медиа постоянным</string>
+    <string name="piko_unlimited_replays_desc">Делает медиа с однократным или двукратным просмотром постоянным</string>
+    <string name="piko_improve_image_viewing">Улучшить качество отображения контента</string>
+    <string name="piko_improve_image_viewing_desc">Загружает контент в максимальном качестве с сервера</string>
+    <string name="piko_hide_reshare_button">Скрыть кнопку «Репост»</string>
+    <string name="piko_copy_comment">Скопировать комментарий</string>
+    <string name="piko_copy_comment_desc">Добавляет кнопку для копирования комментариев в публикациях и Reels</string>
+    <string name="piko_comment_copied_success">Комментарий копирован</string>
+    <string name="piko_comment_copied_failed">Не найдено текста для копирования</string>
+    <string name="piko_save_media_comment">Сохранение медиа из комментариев</string>
+    <string name="piko_save_media_comment_desc">Добавляет кнопку для сохранения медиа из комментариев в публикациях и Reels</string>
+    <string name="piko_copy_username">Скопировать имя пользователя</string>
+    <string name="piko_copy_full_name">Скопировать полное имя</string>
+    <string name="piko_copy_user_id">Скопировать id пользователя</string>
+    <string name="piko_copy_bio">Скопировать описание профиля</string>
+    <string name="piko_download_profile_picture">Скачать фото профиля</string>
+    <string name="piko_copied">Скопировано</string>
+    <string name="piko_more_profile_options">Дополнительные действия с профилем</string>
+    <string name="piko_more_profile_options_action_bar_toggle">Кнопка действий с профилем на панели действий</string>
+    <string name="piko_more_profile_options_action_bar_toggle_desc">Перенести кнопку действий с профилем на панель действий</string>
+    <string name="piko_remove_empty_bottom_space">Убрать пустое пространство внизу</string>
+    <string name="piko_unlock_plus_benefits">Разблокировать возможности подписки «Плюс»</string>
+    <string name="piko_unlock_plus_benefits_desc">Разблокирует преимущества подписки «Plus», проверяемые локально. Используйте на свой страх и риск</string>
+    <string name="piko_customise_story_ring_size">Настроить размер кольца истории</string>
+    <string name="piko_customise_story_ring_size_desc">Изменить размер кольца истории в процентах (по умолчанию: 100)</string>
+    <!-- Download Media Section -->
+    <string name="piko_category_download_media">Скачивание медиа</string>
+    <string name="piko_enable_download">Включить скачивание</string>
+    <string name="piko_enable_direct_download">Включить прямое скачивание</string>
+    <string name="piko_enable_direct_download_desc">Скачивает текущий просматриваемый медиафайл без запроса вариантов</string>
+    <string name="piko_download_username_folder">Разделять медиа по имени пользователя</string>
+    <string name="piko_download_username_folder_desc">Создаёт подпапки по имени пользователя</string>
+    <string name="piko_download_current_media">Скачать текущее медиа</string>
+    <string name="piko_download_as_image">Скачать как изображение</string>
+    <string name="piko_video_variants">Варианты видео</string>
+    <string name="piko_image_variants">Варианты изображений</string>
+    <string name="piko_download_audio">Скачать аудио</string>
+    <string name="piko_download_options">Параметры загрузки</string>
+    <string name="piko_copy_media_link">Скопировать ссылку на медиа</string>
+    <string name="piko_copied_media_link">Ссылка на медиа скопирована</string>
+    <string name="piko_download_all">Скачать всё</string>
+    <string name="piko_downloading_media">Скачивание: </string>
+    <string name="piko_downloaded_media">Скачано: </string>
+    <string name="piko_media_exists">Медиа уже существует</string>
+    <string name="piko_download_failed_media">Ошибка скачивания: </string>
+    <string name="piko_download_set_path">Указать свой путь для скачивания</string>
+    <string name="piko_download_set_path_success">Папка для скачиваний обновлена!</string>
+    <string name="piko_download_set_path_failed">Не удалось определить путь к папке</string>
+    <string name="piko_download_grant_permission">Предоставьте доступ к хранилищу для продолжения скачивания</string>
+    <string name="piko_download_grant_permission_failed">Не удалось открыть настройки. Пожалуйста, предоставьте доступ ко всем файлам вручную</string>
+    <string name="piko_download_with_external_downloader">Скачивать с помощью внешнего загрузчика</string>
+    <string name="piko_external_downloader_package_name">Имя пакета внешнего загрузчика</string>
+    <string name="piko_external_downloader_package_name_not_found">Имя пакета внешнего загрузчика не найдено</string>
+    <string name="piko_external_downloader_package_name_not_set">Укажите имя пакета внешнего загрузчика</string>
+    <string name="piko_download_voice_media">Скачать голосовое сообщение</string>
+    <!-- Posts Section -->
+    <string name="piko_post_options">Действия с публикацией</string>
+    <string name="piko_copy_post_description">Скопировать описание публикации</string>
+    <string name="piko_copy_post_owner_username">Скопировать имя пользователя автора публикации</string>
+    <string name="piko_copy_post_owner_fullname">Скопировать полное имя автора публикации</string>
+    <string name="piko_enable_more_options_on_post">Включить дополнительные действия над публикацией</string>
+    <string name="piko_enable_more_options_on_post_desc">Добавляет параметр «Дополнительные действия» в меню публикации и Reels с функциями копирования описания, имени пользователя и др</string>
+    <string name="piko_more_options">Дополнительные параметры</string>
+    <!-- Navigation Section -->
+    <string name="piko_category_hide_navigation_buttons">Скрыть кнопки навигации</string>
+    <string name="piko_hide_navigation_feed">Скрыть кнопку «Лента»</string>
+    <string name="piko_hide_navigation_reels">Скрыть кнопку «Reels»</string>
+    <string name="piko_hide_navigation_direct">Скрыть кнопку «Сообщения»</string>
+    <string name="piko_hide_navigation_search">Скрыть кнопку «Поиск»</string>
+    <string name="piko_hide_navigation_create">Скрыть кнопку «Создать»</string>
+    <!-- Information Section -->
+    <string name="piko_category_about">Информация</string>
+    <string name="piko_export_pref">Экспорт настроек Piko</string>
+    <string name="piko_import_pref">Импорт настроек Piko</string>
+    <string name="piko_app_version">Версия приложения: %s</string>
+    <string name="piko_patch_version">Версия патча: %s</string>
+    <string name="piko_patch_info_title">Информация о патчах</string>
+    <string name="piko_patch_enabled">Применено</string>
+    <string name="piko_patch_disabled">Не применено</string>
+    <!-- Export and Import Section -->
+    <string name="piko_export_success">Экспорт выполнен успешно</string>
+    <string name="piko_export_fail">Не удалось выполнить экспорт</string>
+    <string name="piko_fail_no_path">Не указан путь для сохранения</string>
+    <string name="piko_fail_no_file">Файл не найден</string>
+    <string name="piko_import_success">Импорт выполнен успешно</string>
+    <string name="piko_import_fail">Не удалось выполнить импорт</string>
+    <string name="piko_restart_app">Для применения изменений необходимо перезапустить приложение</string>
+    <string name="piko_ok">ОК</string>
+    <string name="piko_cancel">Отмена</string>
+    <string name="piko_deleted">Удалено</string>
+    <string name="piko_debug">Отладка Piko</string>
+    <string name="piko_debug_desc">Добавляет отладочные (debug) действия к некоторым элементам для проверки</string>
+    <string name="piko_export_experiment_list">Экспорт списка экспериментов</string>
+    <string name="piko_export_experiment_mappings">Экспорт сопоставлений экспериментов</string>
+    <!-- Open With Section -->
+    <string name="piko_open_image_externally">Открыть изображение в другом приложении</string>
+    <string name="piko_open_video_externally">Открыть видео в другом приложении</string>
+    <string name="piko_open_image_with">Открыть изображение с помощью</string>
+    <string name="piko_open_video_with">Открыть видео с помощью</string>
+    <!-- Like Animation Section -->
+    <string name="piko_change_like_animation">Сменить анимацию отметки «Нравится»</string>
+    <string name="piko_change_like_animation_desc">Заменить анимацию одной из существующих анимаций колец</string>
+    <string name="piko_available_like_animation">Доступные анимации отметок «Нравится»</string>
+    <!-- For arrays -->
+    <string name="piko_array_default">По умолчанию</string>
+    <string name="piko_array_detailed_timestamp">Подробная отметка времени (день недели/месяц/дата/час/минута/секунда)</string>
+    <string name="piko_array_post_time">Время публикации (час/минута/секунда)</string>
+    <string name="piko_array_time_left">Осталось времени (Осталось часов/минут/секунд)</string>
+    <!-- Welcome Message -->
+    <string name="piko_welcome_title">Добро пожаловать в Piko</string>
+    <string name="piko_welcome_message">Для более комфортной работы с Piko откройте настройки Piko и настройте их под свои предпочтения</string>
+    <string name="piko_goto_piko_settings">Перейти в настройки Piko</string>
+    <string name="piko_no_internet">Пожалуйста, подключитесь к интернету</string>
+    <string name="piko_tap_here">Нажмите здесь !!</string>
+    <!-- Action Bar Section -->
+    <string name="piko_settings_on_action_bar">Кнопка настроек Piko на панели действий</string>
+    <string name="piko_settings_on_action_bar_desc">Переместить кнопку настроек Piko на панель действий главной ленты</string>
+</resources>

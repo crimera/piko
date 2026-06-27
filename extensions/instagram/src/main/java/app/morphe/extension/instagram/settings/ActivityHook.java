@@ -7,16 +7,18 @@
 
 package app.morphe.extension.instagram.settings;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
 import app.morphe.extension.crimera.PikoUtils;
-import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.settings.preference.fragments.BackupPrefActivity;
 import app.morphe.extension.instagram.settings.preference.fragments.RestorePrefActivity;
 import app.morphe.extension.crimera.downloader.FolderPickerActivity;
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.instagram.constants.Constants;
 
 @SuppressWarnings("deprecation")
 public class ActivityHook {
@@ -36,19 +38,21 @@ public class ActivityHook {
         launchActivity(PikoUtils.getContext(),intent);
     }
 
-    public static void startPikoActivity(){
+    public static void startPikoActivity(String fragment_name,String title){
         Context context = PikoUtils.getContext();
         Intent intent = new Intent(context, SettingsActivity.class);
+        intent.putExtra(Constants.PIKO_FRAGMENT_NAME, fragment_name);
+        intent.putExtra(Constants.PIKO_FRAGMENT_TITLE, title);
         launchActivity(context,intent);
     }
 
     public static void launchFragment(Context ctx, String bundleKey){
         Intent intent = null;
-        if (bundleKey.equals(Strings.EXPORT_DEV_OVERRIDES) || bundleKey.equals(Strings.EXPORT_PIKO_PREF)) {
+        if (bundleKey.equals("piko_export_dev_overrides") || bundleKey.equals("piko_export_pref")) {
             intent = new Intent(ctx,BackupPrefActivity.class);
-        } else if (bundleKey.equals(Strings.IMPORT_DEV_OVERRIDES) || bundleKey.equals(Strings.IMPORT_ID_MAPPING)  || bundleKey.equals(Strings.IMPORT_PIKO_PREF)) {
+        } else if (bundleKey.equals("piko_import_dev_overrides") || bundleKey.equals("piko_import_id_mapping")  || bundleKey.equals("piko_import_pref")) {
             intent = new Intent(ctx,RestorePrefActivity.class);
-        } else if (bundleKey.equals(Strings.DOWNLOAD_SET_PATH)) {
+        } else if (bundleKey.equals("piko_download_set_path")) {
             intent = new Intent(ctx,FolderPickerActivity.class);
         }
         if(intent!=null){
@@ -59,10 +63,10 @@ public class ActivityHook {
 
     public static void handleUrlIntent(Boolean isVideo,String mediaUrl) {
         String dataType = "image/*";
-        String exportHeaderString = Strings.OPEN_IMAGE_WITH;
+        String exportHeaderString = str("piko_open_image_with");
         if(isVideo){
             dataType = "video/*";
-            exportHeaderString = Strings.OPEN_VIDEO_WITH;
+            exportHeaderString = str("piko_open_video_with");
         }
 
         Uri uri = Uri.parse(mediaUrl);
@@ -82,12 +86,7 @@ public class ActivityHook {
         intent.setType("text/plain");
         intent.putExtra(Intent.EXTRA_TEXT, url);
         intent.setPackage(packageName);
-         try {
-            launchActivity(intent);
-        } catch (Exception e) {
-            PikoUtils.toast(Strings.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_FOUND);
-            Logger.printException(() -> "openLink failure", e);
-        }
+        launchActivity(intent);
     }
 
 

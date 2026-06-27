@@ -90,7 +90,6 @@
     <string name="piko_pref_top_people_search_desc">隐藏搜索结果热门中的用户</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">杂项</string>
-    <string name="piko_pref_chirp_font">启用 chirp 字体</string>
     <string name="piko_pref_hide_fab">隐藏发推按钮</string>
     <string name="piko_pref_hide_fab_menu">隐藏发推按钮菜单</string>
     <string name="piko_pref_rec_users">隐藏推荐用户</string>

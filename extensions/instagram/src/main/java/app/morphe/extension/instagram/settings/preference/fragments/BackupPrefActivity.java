@@ -6,6 +6,8 @@
 
 package app.morphe.extension.instagram.settings.preference.fragments;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -22,7 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import app.morphe.extension.crimera.PikoUtils;
-import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.constants.Constants;
 
 public class BackupPrefActivity extends AppCompatActivity {
 
@@ -42,12 +44,12 @@ public class BackupPrefActivity extends AppCompatActivity {
 
         if (args != null) {
 
-            if (args.containsKey(Strings.EXPORT_DEV_OVERRIDES)) {
+            if (args.containsKey("piko_export_dev_overrides")) {
                 filename = "mc_overrides";
                 ext = ".json";
                 sourceFile = new File(context.getFilesDir() + "/mobileconfig", filename + ext);
-            } else if (args.containsKey(Strings.EXPORT_PIKO_PREF)) {
-                filename = Strings.PIKO_SETTINGS;
+            } else if (args.containsKey("piko_export_pref")) {
+                filename = Constants.PIKO_SETTINGS;
                 ext = ".xml";
                 sourceFile =  new File(context.getApplicationInfo().dataDir + "/shared_prefs",filename + ext);
             }
@@ -57,11 +59,11 @@ public class BackupPrefActivity extends AppCompatActivity {
             if (sourceFile.exists()) {
                 startIntent(filename, ext);
             } else {
-                toast(Strings.FAIL_NO_FILE);
+                toast(str("piko_fail_no_file"));
                 finish();
             }
         } else{
-            toast(Strings.IMPORT_FAIL);
+            toast(str("piko_import_fail"));
             finish();
         }
 
@@ -96,11 +98,11 @@ public class BackupPrefActivity extends AppCompatActivity {
             in.close();
             out.close();
 
-            toast(Strings.EXPORT_SUCCESS);
+            toast(str("piko_export_success"));
 
         } catch (IOException e) {
 
-            toast(Strings.EXPORT_FAIL);
+            toast(str("piko_export_fail"));
 
             app.morphe.extension.shared.Logger.printException(() -> "export failure", e);
         }
@@ -118,7 +120,7 @@ public class BackupPrefActivity extends AppCompatActivity {
         }
 
         if (uri == null) {
-            toast(Strings.FAIL_NO_PATH);
+            toast(str("piko_fail_no_path"));
         } else if (res == RESULT_OK) {
             copyFile(uri);
         }

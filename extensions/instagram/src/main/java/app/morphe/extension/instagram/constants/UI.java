@@ -6,6 +6,8 @@
 
 package app.morphe.extension.instagram.constants;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -21,7 +23,7 @@ import java.util.ArrayList;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
-import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.settings.preference.fragments.FragmentHook;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
@@ -34,9 +36,18 @@ import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 public class UI {
 
     public static final String DRAWABLE_DOWNLOAD_ICON = "instagram_download_outline_24";
+    public static final String DRAWABLE_FB_DOWNLOAD_ICON = "fb_ic_download_filled_24";
     public static final String DRAWABLE_INFO_ICON = "instagram_info_outline_24";
     public static final String DRAWABLE_DEBUG_ICON = "instagram_app_instagram_pano_outline_24";
     public static final String DRAWABLE_BLUB_ICON = "instagram_bulb_outline_24";
+    public static final String DRAWABLE_GEAR_ICON = "instagram_settings_pano_filled_24";
+    public static final String DRAWABLE_SHEILD_ICON = "fb_ic_badge_admin_filled_32";
+    public static final String DRAWABLE_SNAPCHAT_ICON = "fb_ic_app_snapchat_filled_16";
+    public static final String DRAWABLE_STACK_ICON = "fb_ic_changed_beliefs_outline_24";
+    public static final String DRAWABLE_CODE_ICON = "fb_ic_code_outline_24";
+    public static final String DRAWABLE_FRAME_CROSSED_ICON = "fb_ic_frames_cross_outline_16";
+    public static final String DRAWABLE_LINK_ICON = "fb_ic_link_outline_24";
+
 
     public static int getThemedColour() {
         Context context = Utils.getContext();
@@ -107,7 +118,7 @@ public class UI {
                 return;
             }
 
-            ImageView imageView = UI.addImageViewToViewGroup(viewGroup, "instagram_settings_pano_filled_24", ActivityHook::startPikoActivity);
+            ImageView imageView = UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_GEAR_ICON, FragmentHook::startSettings);
             if (imageView == null) {
                 return;
             }
@@ -115,7 +126,7 @@ public class UI {
             Context context = viewGroup.getContext();
             boolean isFirstTime = Pref.firstTimePiko();
             if(isFirstTime) {
-                TooltipHelper.showPersistentTooltip(context, imageView, Strings.TAP_HERE);
+                TooltipHelper.showPersistentTooltip(context, imageView, str("piko_tap_here"));
                 Pref.setFirstTimePiko(false);
             }
         } catch (Exception e) {
@@ -127,7 +138,7 @@ public class UI {
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
         ArrayList<String> options = new ArrayList<>();
-        options.add(Strings.OK);
+        options.add(str("piko_ok"));
         CharSequence[] items = options.toArray(new CharSequence[0]);
 
         dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
@@ -137,7 +148,7 @@ public class UI {
                     // Doing like this because options are dynamic.
                     String selectedOption = options.get(which);
 
-                    if (selectedOption.equals(Strings.OK)) {
+                    if (selectedOption.equals(str("piko_ok"))) {
                         Utils.restartApp(context);
 
                     }
@@ -149,7 +160,7 @@ public class UI {
         });
 
 
-        dialog.setTitle(Strings.RESTART_APP);
+        dialog.setTitle(str("piko_restart_app"));
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
 
@@ -161,7 +172,7 @@ public class UI {
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
         ArrayList<String> options = new ArrayList<>();
-        options.add(Strings.GOTO_PIKO_SETTINGS);
+        options.add(str("piko_goto_piko_settings"));
         CharSequence[] items = options.toArray(new CharSequence[0]);
 
         dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
@@ -173,7 +184,7 @@ public class UI {
                         // Doing like this because options are dynamic.
                         String selectedOption = options.get(which);
 
-                        if (selectedOption.equals(Strings.GOTO_PIKO_SETTINGS)) {
+                        if (selectedOption.equals(str("piko_goto_piko_settings"))) {
                             PikoUtils.openUrl("instagram://profile");
                         }
                     }
@@ -184,8 +195,8 @@ public class UI {
             }
         });
 
-        dialog.setTitle(Strings.WELCOME_TITLE);
-        dialog.setMessage(Strings.WELCOME_MESSAGE);
+        dialog.setTitle(str("piko_welcome_title"));
+        dialog.setMessage(str("piko_welcome_message"));
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
 
@@ -198,9 +209,9 @@ public class UI {
 
         Context context = viewGroup.getContext();
         InstagramButton button = new InstagramButton(context);
-        button.setText(Strings.PIKO_SETTINGS_TITLE);
+        button.setText(str("piko_title_settings"));
         button.setStyle(InstagramButtonStyleEnum.SUPER_PRIMARY);
-        button.setOnClickListener(ActivityHook::startPikoActivity);
+        button.setOnClickListener(FragmentHook::startSettings);
 
         int marginPx = Dim.dp12;
         button.setMargins(marginPx, marginPx, marginPx, marginPx);

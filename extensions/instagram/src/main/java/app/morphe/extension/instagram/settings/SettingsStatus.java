@@ -4,10 +4,14 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
 */
 
-
 package app.morphe.extension.instagram.settings;
 
+import java.util.TreeMap;
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 public class SettingsStatus {
+    public static TreeMap<String,Boolean> FLAGS = new TreeMap();
+
     // Developer section.
     public static boolean enableDeveloperOptions = false;
     public static void enableDeveloperOptions() {
@@ -191,10 +195,82 @@ public class SettingsStatus {
     public static void downloadVoiceMessage() { downloadVoiceMessage = true; }
     public static boolean downloadWithExternalDownloader = false;
     public static void downloadWithExternalDownloader() { downloadWithExternalDownloader = true; }
+    public static boolean downloadSection(){return (SettingsStatus.downloadMedia || SettingsStatus.downloadWithExternalDownloader);}
 
     public static boolean hideNavigationButtons = false;
     public static void hideNavigationButtons() { hideNavigationButtons = true; }
 
+    public static void loadStatusMap(){
+        FLAGS.put(str("piko_disable_ads"),SettingsStatus.disableAds);
+        FLAGS.put(str("piko_hide_suggested_content"),SettingsStatus.hideSuggestedContent);
+
+        FLAGS.put(str("piko_category_hide_navigation_buttons"),SettingsStatus.hideNavigationButtons);
+
+        FLAGS.put(str("piko_category_download_media"),SettingsStatus.downloadMedia);
+        FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
+        FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
+        FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
+        FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.moreOptionsOnPost);
+        FLAGS.put(str("piko_stories_audio_autoplay"),SettingsStatus.storiesAudioAutoplay);
+
+        FLAGS.put(str("piko_disable_video_autoplay"),SettingsStatus.disableVideoAutoplay);
+        FLAGS.put(str("piko_remove_empty_bottom_space"),SettingsStatus.removeEmptyBottomSpace);
+        FLAGS.put(str("piko_save_media_comment"),SettingsStatus.saveMediaCommentButton);
+        FLAGS.put(str("piko_copy_comment"),SettingsStatus.copyCommentButton);
+        FLAGS.put(str("piko_hide_reshare_button"),SettingsStatus.hideReshareButton);
+        FLAGS.put(str("piko_improve_image_viewing"),SettingsStatus.improveImageViewing);
+        FLAGS.put(str("piko_unlimited_replays"),SettingsStatus.unlimitedReplaysOnEphemeralMedia);
+
+        FLAGS.put(str("piko_customise_story_timestamp"),SettingsStatus.customiseStoryTimestamp);
+        FLAGS.put(str("piko_disable_story_flipping"),SettingsStatus.disableStoryFlipping);
+        FLAGS.put(str("piko_view_story_mentions"),SettingsStatus.viewStoryMentions);
+        FLAGS.put(str("piko_follow_back_indicator"),SettingsStatus.followBackIndicator);
+        FLAGS.put(str("piko_disable_discover_people"),SettingsStatus.disableDiscoverPeople);
+        FLAGS.put(str("piko_disable_analytics"),SettingsStatus.disableAnalytics);
+        FLAGS.put(str("piko_customise_story_ring_size"),SettingsStatus.customiseStoryRingSize);
+
+        FLAGS.put(str("piko_change_like_animation"),SettingsStatus.changeLikeAnimation);
+        FLAGS.put(str("piko_unlock_plus_benefits"),SettingsStatus.unlockPlusBenefits);
+
+        FLAGS.put(str("piko_disable_double_tap_to_like"),SettingsStatus.disableDoubleTapLike);
+        FLAGS.put(str("piko_hide_group_creation_button_on_sharesheet"),SettingsStatus.hideGroupCreationOnSharesheet);
+        FLAGS.put(str("piko_limit_following_feed"),SettingsStatus.limitFollowingFeed);
+        FLAGS.put(str("piko_hide_notes_tray"),SettingsStatus.hideNotesTray);
+        FLAGS.put(str("piko_hide_stories_tray"),SettingsStatus.hideStoriesTray);
+        FLAGS.put(str("piko_disable_comments"),SettingsStatus.disableComments);
+        FLAGS.put(str("piko_disable_explore"),SettingsStatus.disableExplore);
+        FLAGS.put(str("piko_disable_highlights"),SettingsStatus.disableHighlights);
+        FLAGS.put(str("piko_disable_stories"),SettingsStatus.disableStories);
+
+        FLAGS.put(str("piko_view_dm_anonymously"),SettingsStatus.viewDmAnonymously);
+        FLAGS.put(str("piko_view_live_anonymously"),SettingsStatus.disableScreenshotDetection);
+        FLAGS.put(str("piko_disable_typing_status"),SettingsStatus.disableTypingStatus);
+        FLAGS.put(str("piko_more_profile_options"),SettingsStatus.viewLiveAnonymously);
+        FLAGS.put(str("piko_view_stories_anonymously"),SettingsStatus.viewStoriesAnonymously);
+
+        FLAGS.put(str("piko_sanitize_share_links"),SettingsStatus.sanitizeShareLinks);
+        FLAGS.put(str("piko_open_links_externally"),SettingsStatus.openLinksExternally);
+        FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
+        FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
+        FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
+        FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.moreOptionsOnPost);
+        FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.storiesAudioAutoplay);
+
+        FLAGS.put(str("piko_disable_ads"),SettingsStatus.disableAds);
+        FLAGS.put(str("piko_category_download_media"),SettingsStatus.downloadMedia);
+        FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
+        FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
+        FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
+        FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.moreOptionsOnPost);
+        FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.storiesAudioAutoplay);
+
+        FLAGS.put(str("piko_enable_dev_options"),SettingsStatus.enableDeveloperOptions);
+        FLAGS.put(str("piko_remove_build_expire_popup"),SettingsStatus.removeBuildExpirePopup);
+        FLAGS.put(str("piko_enable_emp_options"),SettingsStatus.unlockEmployeeOptions);
+        FLAGS.put(str("piko_allow_user_network_certificate"),SettingsStatus.allowUserNetworkCertificate);
+    }
+
     public static void load() {
+        loadStatusMap();
     }
 }

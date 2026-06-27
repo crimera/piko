@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.patches.download;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.os.Build;
 import android.app.Dialog;
 import android.content.Context;
@@ -17,7 +19,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.entity.MediaData;
@@ -50,10 +52,10 @@ public class DownloadUtils {
         List<MediaInterface> variantList;
         String title = "";
         if(mediaType.equals(MediaType.VIDEO)){
-            title = Strings.VIDEO_VARIANTS;
+            title = str("piko_video_variants");
             variantList = currentMediaData.getVideoVariants();
         }else{
-            title = Strings.IMAGE_VARIANTS;
+            title = str("piko_image_variants");
             variantList = currentMediaData.getImageVariants();
         }
 
@@ -100,19 +102,19 @@ public class DownloadUtils {
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
         ArrayList<String> options = new ArrayList<>();
-        options.add(Strings.DOWNLOAD_CURRENT_MEDIA);
-        options.add(Strings.DOWNLOAD_AS_IMAGE);
-        if (currentMediaHasAudio) options.add(Strings.DOWNLOAD_AUDIO);
-        options.add(Strings.COPY_MEDIA_LINK);
-        options.add(Strings.IMAGE_VARIANTS);
+        options.add(str("piko_download_current_media"));
+        options.add(str("piko_download_as_image"));
+        if (currentMediaHasAudio) options.add(str("piko_download_audio"));
+        options.add(str("piko_copy_media_link"));
+        options.add(str("piko_image_variants"));
         if (isCurrentMediaVideo) {
-            options.add(Strings.VIDEO_VARIANTS);
-            options.add(Strings.OPEN_VIDEO_EXTERNALLY);
+            options.add(str("piko_video_variants"));
+            options.add(str("piko_open_video_externally"));
         } else {
-            options.add(Strings.OPEN_IMAGE_EXTERNALLY);
+            options.add(str("piko_open_image_externally"));
         }
 
-        if (carouselSize > 1) options.add(Strings.DOWNLOAD_ALL);
+        if (carouselSize > 1) options.add(str("piko_download_all"));
 
         CharSequence[] items = options.toArray(new CharSequence[0]);
 
@@ -123,29 +125,29 @@ public class DownloadUtils {
                     // Doing like this because options are dynamic.
                     String selectedOption = options.get(which);
 
-                    if (selectedOption.equals(Strings.DOWNLOAD_CURRENT_MEDIA)) {
+                    if (selectedOption.equals(str("piko_download_current_media"))) {
                         downloadMedia(context, mediaInfo, position, MediaType.ANY);
 
-                    } else if (selectedOption.equals(Strings.DOWNLOAD_AS_IMAGE)) {
+                    } else if (selectedOption.equals(str("piko_download_as_image"))) {
                         downloadMedia(context, mediaInfo, position, MediaType.IMAGE);
 
-                    } else if (selectedOption.equals(Strings.COPY_MEDIA_LINK)) {
+                    } else if (selectedOption.equals(str("piko_copy_media_link"))) {
                         Utils.setClipboard(currentMediaData.getMediaLink());
-                        Utils.showToastShort(Strings.COPIED_MEDIA_LINK);
+                        Utils.showToastShort(str("piko_copied_media_link"));
 
-                    } else if (selectedOption.equals(Strings.OPEN_VIDEO_EXTERNALLY) || selectedOption.equals(Strings.OPEN_IMAGE_EXTERNALLY)) {
+                    } else if (selectedOption.equals(str("piko_open_video_externally")) || selectedOption.equals(str("piko_open_image_externally"))) {
                         ActivityHook.handleUrlIntent(isCurrentMediaVideo, currentMediaData.getMediaLink());
 
-                    } else if (selectedOption.equals(Strings.DOWNLOAD_ALL)) {
+                    } else if (selectedOption.equals(str("piko_download_all"))) {
                         downloadMedia(context, mediaInfo, -1, MediaType.ANY);
 
-                    } else if (selectedOption.equals(Strings.DOWNLOAD_AUDIO)) {
+                    } else if (selectedOption.equals(str("piko_download_audio"))) {
                         downloadMedia(context, mediaInfo, position, MediaType.AUDIO);
 
-                    } else if (selectedOption.equals(Strings.VIDEO_VARIANTS)) {
+                    } else if (selectedOption.equals(str("piko_video_variants"))) {
                         buildVariantDialogBox(context, currentMediaData, MediaType.VIDEO);
 
-                    } else if (selectedOption.equals(Strings.IMAGE_VARIANTS)) {
+                    } else if (selectedOption.equals(str("piko_image_variants"))) {
                         buildVariantDialogBox(context, currentMediaData, MediaType.IMAGE);
 
                     }
@@ -158,7 +160,7 @@ public class DownloadUtils {
         });
 
 
-        dialog.setTitle(Strings.DOWNLOAD_OPTIONS);
+        dialog.setTitle(str("piko_download_options"));
         dialog.setCancelable(true);
         dialog.setCanceledOnTouchOutside(true);
 
@@ -187,7 +189,7 @@ public class DownloadUtils {
     // Position is set to -1 if we want to download all medias from the media info object.
     public static void downloadMedia(Context context, MediaData mediaInfo, int position, MediaType mediaType) throws Exception {
         if(!Utils.isNetworkConnected()){
-            Utils.showToastShort(Strings.NO_INTERNET);
+            Utils.showToastShort(str("piko_no_internet"));
             return;
         }
         MediaDownloader downloader = new MediaDownloader(context);
@@ -198,7 +200,7 @@ public class DownloadUtils {
             AudioMediaInterface audioMedia = mediaInfo.getMediaAt(position).getAudioMedia();
             String audioUrl = audioMedia.getAudioUrl();
             String fileName = audioMedia.getDownloadName() + ".mp3";
-            downloader.enqueue(new DownloadRequest(audioUrl, Strings.DEFAULT_AUDIO_FOLDER, fileName));
+            downloader.enqueue(new DownloadRequest(audioUrl, Constants.DEFAULT_AUDIO_FOLDER, fileName));
 
         } else if (position != -1) {
             MediaData mediaData = mediaInfo.getMediaAt(position);
@@ -230,7 +232,7 @@ public class DownloadUtils {
 
     public static void downloadMediaUrl(Context context, String mediaUrl, String subFolder, String fileName) throws Exception {
         if(!Utils.isNetworkConnected()){
-            Utils.showToastShort(Strings.NO_INTERNET);
+            Utils.showToastShort(str("piko_no_internet"));
             return;
         }
         MediaDownloader downloader = new MediaDownloader(context);
@@ -242,7 +244,11 @@ public class DownloadUtils {
             String packageName = Pref.externalDownloaderPackageName();
             packageName = packageName == null ? "" : packageName.trim();
             if(packageName.isEmpty()){
-                PikoUtils.toast(Strings.EXTERNAL_DOWNLOADER_PACKAGE_NAME_NOT_SET);
+                PikoUtils.toast(str("piko_external_downloader_package_name_not_set"));
+                return;
+            }
+            if(!PikoUtils.isAppInstalledAndEnabled(packageName)){
+                PikoUtils.toast(str("piko_external_downloader_package_name_not_found"));
                 return;
             }
             String link = Links.generatePostLink(mediaObject, currentMediaIndex);

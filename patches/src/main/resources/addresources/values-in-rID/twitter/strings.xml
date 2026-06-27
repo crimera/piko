@@ -96,7 +96,7 @@
     <string name="piko_pref_top_people_search_desc">Menyembunyikan bagian Orang setelah pencarian</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">Lain-lain</string>
-    <string name="piko_pref_chirp_font">Aktifkan font chirp</string>
+    <string name="piko_pref_chirp_font">Nonaktifkan font chirp</string>
     <string name="piko_pref_hide_fab">Sembunyikan tombol tindakan mengambang</string>
     <string name="piko_pref_hide_fab_menu">Sembunyikan tombol menu tindakan mengambang</string>
     <string name="piko_pref_rec_users">Sembunyikan pengguna yang direkomendasikan</string>
@@ -120,6 +120,7 @@
     <string name="piko_disunify_xchat_system">Memisahkan sistem xchat</string>
     <string name="piko_disunify_xchat_system_desc">Kembalikan fitur-fitur usang seperti pesan dan lembar bagikan</string>
     <string name="piko_legacy_share_link">Tautan berbagi versi lama</string>
+    <string name="piko_block_redirecting_to_x_lite">Blokir pengalihan ke X Lite</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Fitur flag</string>
     <string name="piko_pref_feature_flags">Tambahkan fitur flag</string>

@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ads Section -->
+    <string name="piko_category_ads">广告</string>
+    <string name="piko_disable_ads">关闭广告</string>
+    <string name="piko_hide_suggested_content">隐藏推荐内容</string>
+    <string name="piko_hide_suggested_content_desc">隐藏推荐的快拍，reels，threads（仍将显示推荐的帖子）。</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_dev_options">开发者选项</string>
+    <string name="piko_enable_dev_options">启用开发者选项</string>
+    <string name="piko_enable_dev_options_desc">长按主页图标解锁开发者选项</string>
+    <string name="piko_export_dev_overrides">导出自定义属性</string>
+    <string name="piko_import_dev_overrides">导入自定义属性</string>
+    <string name="piko_import_id_mapping">导入映射文件</string>
+    <string name="piko_download_id_mapping">下载映射文件</string>
+    <string name="piko_missing_mapping_file">缺少映射文件</string>
+    <string name="piko_missing_mapping_file_desc">没有映射文件，开发者选项将没有正确的名称。您想要下载它吗？</string>
+    <!-- Links Section -->
+    <string name="piko_category_links">链接</string>
+    <string name="piko_open_links_externally">在外部浏览器打开链接</string>
+    <string name="piko_open_links_externally_desc">在外部浏览器中打开链接而非应用内浏览器</string>
+    <string name="piko_sanitize_share_links">净化分享链接</string>
+    <!-- Ghost Section -->
+    <string name="piko_category_ghost">幽灵模式</string>
+    <string name="piko_view_stories_anonymously">匿名观看快拍</string>
+    <string name="piko_view_live_anonymously">匿名观看直播</string>
+    <string name="piko_disable_typing_status">禁用输入状态显示</string>
+    <string name="piko_disable_screenshot_detection">禁用截屏检测</string>
+    <string name="piko_view_dm_anonymously">匿名查看私信</string>
+    <string name="piko_turn_on_all_ghost_modes">开启所有幽灵模式</string>
+    <string name="piko_ghost_modes_on">幽灵模式：开启</string>
+    <string name="piko_ghost_modes_default">幽灵模式：默认模式</string>
+    <string name="piko_ghost_modes_quick_toggle">启用幽灵模式快捷开关</string>
+    <string name="piko_ghost_modes_quick_toggle_desc">在聊天操作栏中添加快速切换以控制幽灵模式</string>
+    <!-- Distraction-Free Section -->
+    <string name="piko_category_distraction_free">界面自定义</string>
+    <string name="piko_disable_stories">禁用快拍</string>
+    <string name="piko_disable_highlights">禁用高亮</string>
+    <string name="piko_disable_explore">禁用探索</string>
+    <string name="piko_disable_comments">关闭评论</string>
+    <string name="piko_limit_following_feed">限制主页只看关注</string>
+    <string name="piko_limit_following_feed_desc">过滤主页，只显示您关注的人的内容。</string>
+    <string name="piko_disable_reels_scrolling">禁用Reels 自动滑动</string>
+    <string name="piko_disable_reels_scrolling_desc">"在 Instagram Reels 中禁用自动滑动，防止滑动到下一个 Reel 。
+
+注意：在第一次安装后，提示动画可能会出现，但在几秒钟后将自动停止。"</string>
+    <string name="piko_hide_stories_tray">隐藏快拍托盘</string>
+    <string name="piko_hide_stories_tray_desc">从主页源隐藏快拍托盘</string>
+    <string name="piko_hide_notes_tray">隐藏便笺托盘</string>
+    <string name="piko_hide_notes_tray_desc">在私信中隐藏便笺</string>
+    <string name="piko_disable_double_tap_like_post">禁用双击点赞帖子</string>
+    <string name="piko_disable_double_tap_like_reel">禁用双击点赞 reel</string>
+    <string name="piko_disable_double_tap_like_comment">禁用双击点赞评论</string>
+    <string name="piko_disable_double_tap_like_message">禁用双击点赞消息</string>
+    <string name="piko_disable_double_tap_to_like">禁用双击点赞</string>
+    <!-- Miscellaneous Section -->
+    <string name="piko_category_misc">杂项</string>
+    <string name="piko_disable_analytics">禁用数据分析</string>
+    <string name="piko_delete_analytics_cache">删除分析缓存</string>
+    <string name="piko_fbi_follows_you">关注了你</string>
+    <string name="piko_fbi_doesnt_follows_you">没有关注你</string>
+    <string name="piko_disable_story_flipping">禁用 Story 自动下一个</string>
+    <string name="piko_disable_story_flipping_desc">禁用自动跳转/移动到下个 story</string>
+    <string name="piko_disable_video_autoplay">禁用视频自动播放</string>
+    <string name="piko_stories_audio_autoplay">Story 音频自动播放</string>
+    <string name="piko_customise_story_timestamp">自定义 story 时间戳</string>
+    <string name="piko_copy_comment">复制评论</string>
+    <string name="piko_comment_copied_success">已复制评论</string>
+    <string name="piko_unlock_plus_benefits">解锁 Plus</string>
+    <string name="piko_unlock_plus_benefits_desc">本地解锁Plus。使用风险自负</string>
+    <!-- Download Media Section -->
+    <string name="piko_category_download_media">下载内容</string>
+    <string name="piko_enable_download">启用下载</string>
+    <string name="piko_enable_direct_download">启用直接下载</string>
+    <string name="piko_enable_direct_download_desc">不询问直接下载当前浏览媒体</string>
+    <string name="piko_download_username_folder">按用户名分组下载内容</string>
+    <string name="piko_download_username_folder_desc">基于用户名创建子文件夹</string>
+    <string name="piko_download_current_media">下载当前媒体</string>
+    <string name="piko_download_as_image">保存为图片</string>
+    <string name="piko_video_variants">视频分辨率</string>
+    <string name="piko_image_variants">图片分辨率</string>
+    <string name="piko_download_audio">下载音频</string>
+    <string name="piko_download_options">下载选项</string>
+    <string name="piko_copy_media_link">复制媒体链接</string>
+    <string name="piko_copied_media_link">已复制媒体链接</string>
+    <string name="piko_download_all">下载全部</string>
+    <string name="piko_downloading_media">下载中： </string>
+    <string name="piko_downloaded_media">已下载： </string>
+    <string name="piko_media_exists">媒体已存在</string>
+    <string name="piko_download_failed_media">下载失败： </string>
+    <string name="piko_download_set_path">自定义下载路径</string>
+    <string name="piko_download_set_path_success">下载目录已更新！</string>
+    <string name="piko_download_set_path_failed">无法解析文件夹路径</string>
+    <string name="piko_download_grant_permission">请授予存储访问权限以继续下载</string>
+    <string name="piko_download_grant_permission_failed">无法打开设置。请手动授权所有文件访问权限</string>
+    <string name="piko_download_with_external_downloader">使用外部下载器下载</string>
+    <string name="piko_external_downloader_package_name">外部下载器应用包名</string>
+    <string name="piko_external_downloader_package_name_not_found">找不到外部下载器</string>
+    <string name="piko_external_downloader_package_name_not_set">请设置外部下载软件包名称</string>
+    <string name="piko_download_voice_media">下载语音消息</string>
+    <!-- Posts Section -->
+    <string name="piko_post_options">帖子选项</string>
+    <string name="piko_copy_post_description">复制帖子描述</string>
+    <string name="piko_copy_post_owner_username">复制帖子所有者用户名</string>
+    <string name="piko_copy_post_owner_fullname">复制帖子所有者全名</string>
+    <string name="piko_enable_more_options_on_post">在帖子中启用更多选项</string>
+    <string name="piko_enable_more_options_on_post_desc">在帖子/reels上添加额外的菜单选项获取更多选项，例如复制描述，复制用户名等</string>
+    <string name="piko_more_options">更多选项</string>
+    <!-- Navigation Section -->
+    <string name="piko_category_hide_navigation_buttons">隐藏导航按钮</string>
+    <string name="piko_hide_navigation_feed">隐藏Feed按钮</string>
+    <string name="piko_hide_navigation_reels">隐藏Reels按钮</string>
+    <string name="piko_hide_navigation_direct">隐藏私信按钮</string>
+    <string name="piko_hide_navigation_search">隐藏搜索按钮</string>
+    <string name="piko_hide_navigation_create">隐藏创建按钮</string>
+    <!-- Information Section -->
+    <string name="piko_category_about">关于</string>
+    <string name="piko_export_pref">导出 piko 首选项</string>
+    <string name="piko_import_pref">导入 piko 首选项</string>
+    <string name="piko_app_version">软件版本：%s</string>
+    <string name="piko_patch_version">补丁版本： %s</string>
+    <string name="piko_patch_info_title">补丁信息</string>
+    <string name="piko_patch_enabled">已启用</string>
+    <string name="piko_patch_disabled">已禁用</string>
+    <!-- Export and Import Section -->
+    <string name="piko_export_success">导出成功</string>
+    <string name="piko_export_fail">导出失败</string>
+    <string name="piko_fail_no_path">未提供目标路径</string>
+    <string name="piko_fail_no_file">未找到文件</string>
+    <string name="piko_import_success">导入成功</string>
+    <string name="piko_import_fail">导入失败</string>
+    <string name="piko_restart_app">需要重启应用才能使修改生效</string>
+    <string name="piko_ok">确定</string>
+    <string name="piko_cancel">取消</string>
+    <string name="piko_deleted">删除</string>
+    <string name="piko_debug">Piko debug</string>
+    <string name="piko_export_experiment_list">导出实验功能列表</string>
+    <string name="piko_export_experiment_mappings">导出实验映射</string>
+    <!-- Open With Section -->
+    <string name="piko_open_image_externally">外部打开图像</string>
+    <string name="piko_open_video_externally">外部打开视频</string>
+    <string name="piko_open_image_with">打开图像方式</string>
+    <string name="piko_open_video_with">打开视频方式</string>
+    <!-- Like Animation Section -->
+    <string name="piko_change_like_animation">更改点赞动画</string>
+    <string name="piko_available_like_animation">可用的点赞动画</string>
+    <!-- For arrays -->
+    <string name="piko_array_default">默认</string>
+    <string name="piko_array_detailed_timestamp">详细时间戳(周/月/日/小时/分钟/秒)</string>
+    <string name="piko_array_post_time">发布时间 (小时/分钟/秒)</string>
+    <string name="piko_array_time_left">剩余时间 (小时/分钟/秒)</string>
+    <!-- Welcome Message -->
+    <string name="piko_welcome_title">欢迎使用 Piko</string>
+    <string name="piko_welcome_message">为了改善您在 Piko 上的体验，请访问 Piko 设置并调整您的偏好设置</string>
+    <string name="piko_goto_piko_settings">前往Piko设置</string>
+    <string name="piko_no_internet">请连接到网络</string>
+    <string name="piko_tap_here">点击这里！！</string>
+    <!-- Action Bar Section -->
+    <string name="piko_settings_on_action_bar">操作栏上的 Piko 设置</string>
+    <string name="piko_settings_on_action_bar_desc">移动Piko 设置到主页操作栏</string>
+</resources>

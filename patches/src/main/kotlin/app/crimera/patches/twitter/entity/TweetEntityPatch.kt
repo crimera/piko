@@ -22,12 +22,13 @@ val tweetEntityPatch =
         description = "For tweet entity reflection",
     ) {
         execute {
-            val (profileNameMethod, userNameMethod) = with(TweetNamesFingerprint) {
-                Pair(
-                    instructionMatches[0].instruction.getReference<MethodReference>()!!,
-                    instructionMatches[2].instruction.getReference<MethodReference>()!!
-                )
-            }
+            val (profileNameMethod, userNameMethod) =
+                with(TweetNamesFingerprint) {
+                    Pair(
+                        instructionMatches[0].instruction.getReference<MethodReference>()!!,
+                        instructionMatches[2].instruction.getReference<MethodReference>()!!,
+                    )
+                }
 
             TweetUsernameFingerprint.changeFirstString(userNameMethod.name)
             TweetProfileNameFingerprint.changeFirstString(profileNameMethod.name)
@@ -36,7 +37,7 @@ val tweetEntityPatch =
 
             val getTweetUserIdMethod =
                 tweetObjectMethods
-                    .last { it.returnType == "J" }
+                    .first { it.returnType == "J" }
                     .name
             TweetUserIdFingerprint.changeFirstString(getTweetUserIdMethod)
 

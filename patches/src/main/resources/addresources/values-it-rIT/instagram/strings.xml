@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ads Section -->
+    <string name="piko_category_ads">Annunci</string>
+    <string name="piko_disable_ads">Disabilita annunci</string>
+    <string name="piko_hide_suggested_content">Nascondi contenuti suggeriti</string>
+    <string name="piko_hide_suggested_content_desc">Nascondi le storie, i reel e i threads suggeriti (i post suggeriti saranno comunque mostrati).</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_dev_options">Opzioni sviluppatore</string>
+    <string name="piko_enable_dev_options">Attiva Opzioni sviluppatore</string>
+    <string name="piko_enable_dev_options_desc">Sblocca le opzioni sviluppatore premendo a lungo l\'icona Home</string>
+    <string name="piko_directly_open_metaconfig">Apre direttamente le sovrascritture delle MetaConfig</string>
+    <string name="piko_directly_open_metaconfig_desc">Apre direttamente le sovrascritture delle MetaConfig con una lunga pressione del tasto home (servono le opzioni sviluppatore abilitate)</string>
+    <string name="piko_enable_emp_options">Abilita opzioni dipendenti</string>
+    <string name="piko_enable_emp_options_desc">Sblocca tutte le opzioni per dipendenti utilizzate per i test</string>
+    <string name="piko_allow_user_network_certificate">Consenti certificato di rete utente</string>
+    <string name="piko_allow_user_network_certificate_desc">Consenti certificato di rete utente per i test whitehat</string>
+    <string name="piko_remove_build_expire_popup">Rimuovi popup scadenza build</string>
+    <string name="piko_remove_build_expire_popup_desc">Rimuove il popup che appare dopo un po\', quando la versione dell\'applicazione diventa vecchia</string>
+    <string name="piko_export_dev_overrides">Esporta sovrascritture</string>
+    <string name="piko_import_dev_overrides">Importa sovrascritture</string>
+    <string name="piko_import_id_mapping">Importa file di mappatura</string>
+    <string name="piko_download_id_mapping">Scarica file di mappatura</string>
+    <string name="piko_missing_mapping_file">File di mappatura mancante</string>
+    <string name="piko_missing_mapping_file_desc">Senza il file mapping, le opzioni sviluppatore non avranno nomi corretti. Vuoi scaricarlo?</string>
+    <!-- Links Section -->
+    <string name="piko_category_links">Collegamenti</string>
+    <string name="piko_open_links_externally">Apri collegamenti esternamente</string>
+    <string name="piko_open_links_externally_desc">Apri link nel browser esterno invece che nel browser in-app</string>
+    <string name="piko_sanitize_share_links">Ripulisci il link di condivisione</string>
+    <!-- Ghost Section -->
+    <string name="piko_category_ghost">Fantasma</string>
+    <string name="piko_view_stories_anonymously">Vedi le storie anonimamente</string>
+    <string name="piko_view_live_anonymously">Vedi le dirette anonimamente</string>
+    <string name="piko_disable_typing_status">Disabilita lo stato sta scrivendo</string>
+    <string name="piko_disable_screenshot_detection">Disabilita il rilevamento degli screenshot</string>
+    <string name="piko_view_dm_anonymously">Visualizza i messaggi diretti anonimamente</string>
+    <string name="piko_turn_on_all_ghost_modes">Attiva tutte le modalità fantasma</string>
+    <string name="piko_ghost_modes_on">Modalità fantasma: ON</string>
+    <string name="piko_ghost_modes_default">Modalità fantasma: DEFAULT</string>
+    <string name="piko_ghost_modes_quick_toggle">Abilita interruttore rapido per le modalità fantasma</string>
+    <string name="piko_ghost_modes_quick_toggle_desc">Aggiunge un comando rapido nella barra di azione della chat per controllare le modalità fantasma</string>
+    <!-- Distraction-Free Section -->
+    <string name="piko_category_distraction_free">Senza distrazioni</string>
+    <string name="piko_disable_stories">Disabilita storie</string>
+    <string name="piko_disable_highlights">Disabilita gli highlights</string>
+    <string name="piko_disable_explore">Disabilita esplora</string>
+    <string name="piko_disable_comments">Disattiva commenti</string>
+    <string name="piko_limit_following_feed">Limita il feed ai profili seguiti</string>
+    <string name="piko_limit_following_feed_desc">Filtra la home per visualizzare solo il contenuto dai profili che segui.</string>
+    <string name="piko_disable_reels_scrolling">Disabilita Scorrimento Reels</string>
+    <string name="piko_disable_reels_scrolling_desc">"Disabilita il comportamento di scroll infinito nei Reel di Instagram, impedendo lo scorrimento verso il Reel successivo.
+
+Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma si fermerà da sola dopo pochi secondi."</string>
+    <string name="piko_hide_stories_tray">Nascondi il riquadro delle storie</string>
+    <string name="piko_hide_stories_tray_desc">Nascondi il riquadro delle storie dal feed principale</string>
+    <string name="piko_hide_notes_tray">Nascondi il riquadro delle note</string>
+    <string name="piko_hide_notes_tray_desc">Nasconde il riquadro delle note nella sezione DM</string>
+    <string name="piko_hide_group_creation_button_on_sharesheet">Nascondi il pulsante per la creazione di gruppi nella schermata di condivisione</string>
+    <string name="piko_disable_double_tap_like_post">Disabilita il doppio tocco per mettere like sui post</string>
+    <string name="piko_disable_double_tap_like_reel">Disabilita il doppio tocco per mettere like sui reel</string>
+    <string name="piko_disable_double_tap_like_comment">Disabilita il doppio tocco per mettere like sui commenti</string>
+    <string name="piko_disable_double_tap_like_message">Disabilita il doppio tocco per mettere like sui messaggi</string>
+    <string name="piko_disable_double_tap_to_like">Disabilita il doppio tocco per mettere like</string>
+    <!-- Miscellaneous Section -->
+    <string name="piko_category_misc">Varie</string>
+    <string name="piko_disable_analytics">Disabilita analytics</string>
+    <string name="piko_delete_analytics_cache">Elimina la cache analytics</string>
+    <string name="piko_disable_analytics_desc">Blocca gli analytics che vengono inviati ai server Instagram/Facebook</string>
+    <string name="piko_disable_discover_people">Disabilita scopri le persone</string>
+    <string name="piko_disable_discover_people_desc">Disabilita la sezione scopri le persone sul profilo utente</string>
+    <string name="piko_fbi_follows_you">Ti segue</string>
+    <string name="piko_fbi_doesnt_follows_you">Non ti segue</string>
+    <string name="piko_friendship_status">Stato di amicizia</string>
+    <string name="piko_view_story_mentions">Visualizza le menzioni nella storia</string>
+    <string name="piko_vsm_title">Menzioni nelle storie</string>
+    <string name="piko_vsm_no_mentions">Nessuna menzione in questa storia</string>
+    <string name="piko_disable_story_flipping">Disabilita scorrimento delle storie</string>
+    <string name="piko_disable_story_flipping_desc">Disabilita scorrimento automatico alla storia successiva</string>
+    <string name="piko_disable_video_autoplay">Disabilita la riproduzione automatica dei video</string>
+    <string name="piko_stories_audio_autoplay">Riproduzione automatica audio nelle storie</string>
+    <string name="piko_customise_story_timestamp">Personalizza timestamp della storia</string>
+    <string name="piko_customise_story_timestamp_desc">Personalizza il timestamp che mostra quando la storia è stata pubblicata</string>
+    <string name="piko_unlimited_replays">Rendi permanenti i contenuti temporanei</string>
+    <string name="piko_unlimited_replays_desc">Cambia la visualizzazione non scaduta una volta, visualizza due volte i media per la visualizzazione permanente</string>
+    <string name="piko_improve_image_viewing">Migliora la visualizzazione delle immagini</string>
+    <string name="piko_improve_image_viewing_desc">Recupera immagini alla massima risoluzione dal server</string>
+    <string name="piko_hide_reshare_button">Nascondi pulsante di ricondivisione</string>
+    <string name="piko_copy_comment">Copia commento</string>
+    <string name="piko_copy_comment_desc">Aggiunge un pulsante per copiare i commenti sui post e sui reels</string>
+    <string name="piko_comment_copied_success">Commento copiato</string>
+    <string name="piko_comment_copied_failed">Nessun testo trovato da copiare</string>
+    <string name="piko_save_media_comment">Salva commento multimediale</string>
+    <string name="piko_save_media_comment_desc">Aggiunge un pulsante per salvare i commenti multimediali sui post e sui reels</string>
+    <string name="piko_copy_username">Copia il nome utente</string>
+    <string name="piko_copy_full_name">Copia il nome completo</string>
+    <string name="piko_copy_user_id">Copia id utente</string>
+    <string name="piko_copy_bio">Copia la bio</string>
+    <string name="piko_download_profile_picture">Scarica immagine del profilo</string>
+    <string name="piko_copied">Copiato</string>
+    <string name="piko_more_profile_options">Altre opzioni del profilo</string>
+    <string name="piko_more_profile_options_action_bar_toggle">Opzioni del profilo sulla barra delle azioni</string>
+    <string name="piko_more_profile_options_action_bar_toggle_desc">Sposta il pulsante delle opzioni del profilo nella barra delle azioni del profilo</string>
+    <string name="piko_remove_empty_bottom_space">Rimuovi spazio vuoto in basso</string>
+    <string name="piko_unlock_plus_benefits">Sblocca i vantaggi Plus</string>
+    <string name="piko_unlock_plus_benefits_desc">Sblocca i vantaggi dell\'abbonamento \'Plus\' che vengono controllati in locale. USA A TUO RISCHIO</string>
+    <string name="piko_customise_story_ring_size">Personalizza dimensione cerchio delle storie</string>
+    <string name="piko_customise_story_ring_size_desc">Cambia la dimensione del cerchio delle storie in percentuale (Predefinito: 100)</string>
+    <!-- Download Media Section -->
+    <string name="piko_category_download_media">Scarica file multimediali</string>
+    <string name="piko_enable_download">Abilita download</string>
+    <string name="piko_enable_direct_download">Abilita download diretto</string>
+    <string name="piko_enable_direct_download_desc">Scarica il media attualmente visualizzato senza chiedere per le opzioni</string>
+    <string name="piko_download_username_folder">Dividi i file per nome utente</string>
+    <string name="piko_download_username_folder_desc">Crea sottocartelle in base al nome utente</string>
+    <string name="piko_download_current_media">Scarica il media corrente</string>
+    <string name="piko_download_as_image">Scarica come immagine</string>
+    <string name="piko_video_variants">Varianti video</string>
+    <string name="piko_image_variants">Varianti immagine</string>
+    <string name="piko_download_audio">Scarica audio</string>
+    <string name="piko_download_options">Opzioni di download</string>
+    <string name="piko_copy_media_link">Copia il link del media</string>
+    <string name="piko_copied_media_link">Link multimediale copiato</string>
+    <string name="piko_download_all">Scarica tutto</string>
+    <string name="piko_downloading_media">Scaricando: </string>
+    <string name="piko_downloaded_media">Scaricato: </string>
+    <string name="piko_media_exists">Il file multimediale esiste</string>
+    <string name="piko_download_failed_media">Download fallito: </string>
+    <string name="piko_download_set_path">Imposta percorso di download personalizzato</string>
+    <string name="piko_download_set_path_success">Cartella di download aggiornata!</string>
+    <string name="piko_download_set_path_failed">Impossibile risolvere il percorso della cartella</string>
+    <string name="piko_download_grant_permission">Si prega di concedere l\'accesso all\'archivio per continuare con il download</string>
+    <string name="piko_download_grant_permission_failed">Impossibile aprire le impostazioni. Si prega di concedere l\'accesso a tutti i file manualmente</string>
+    <string name="piko_download_with_external_downloader">Scarica con downloader esterno</string>
+    <string name="piko_external_downloader_package_name">Nome del pacchetto del downloader esterno</string>
+    <string name="piko_external_downloader_package_name_not_found">Nome del pacchetto del downloader esterno non trovato</string>
+    <string name="piko_external_downloader_package_name_not_set">Per favore imposta il nome del pacchetto del downloader esterno</string>
+    <string name="piko_download_voice_media">Scarica messaggio vocale</string>
+    <!-- Posts Section -->
+    <string name="piko_post_options">Opzioni del post</string>
+    <string name="piko_copy_post_description">Copia descrizione post</string>
+    <string name="piko_copy_post_owner_username">Copia nome utente del proprietario del post</string>
+    <string name="piko_copy_post_owner_fullname">Copia nome complete del proprietario del post</string>
+    <string name="piko_enable_more_options_on_post">Abilita più opzioni sul post</string>
+    <string name="piko_enable_more_options_on_post_desc">Aggiunge un pulsante di menù fluttuante per ottenere più opzioni su post/reel, come copia la descrizione, copia nome utente, ecc</string>
+    <string name="piko_more_options">Altre opzioni</string>
+    <!-- Navigation Section -->
+    <string name="piko_category_hide_navigation_buttons">Nascondi pulsanti di navigazione</string>
+    <string name="piko_hide_navigation_feed">Nascondi pulsante Feed</string>
+    <string name="piko_hide_navigation_reels">Nascondi pulsante Reel</string>
+    <string name="piko_hide_navigation_direct">Nascondi pulsante messaggi</string>
+    <string name="piko_hide_navigation_search">Nascondi il pulsante Cerca</string>
+    <string name="piko_hide_navigation_create">Nascondi il pulsante Crea</string>
+    <!-- Information Section -->
+    <string name="piko_category_about">Informazioni</string>
+    <string name="piko_export_pref">Esporta preferenze Piko</string>
+    <string name="piko_import_pref">Importa preferenze Piko</string>
+    <string name="piko_app_version">Versione dell\'app: %s</string>
+    <string name="piko_patch_version">Versione patch: %s</string>
+    <string name="piko_patch_info_title">Informazioni patch</string>
+    <string name="piko_patch_enabled">Abilitato</string>
+    <string name="piko_patch_disabled">Disabilitato</string>
+    <!-- Export and Import Section -->
+    <string name="piko_export_success">Esportato correttamente</string>
+    <string name="piko_export_fail">Esportazione fallita</string>
+    <string name="piko_fail_no_path">Nessun percorso di destinazione specificato</string>
+    <string name="piko_fail_no_file">File non trovato</string>
+    <string name="piko_import_success">Importato con successo</string>
+    <string name="piko_import_fail">Importazione fallita</string>
+    <string name="piko_restart_app">L\'applicazione deve essere riavviata affinché le modifiche abbiano effetto</string>
+    <string name="piko_ok">OK</string>
+    <string name="piko_cancel">Annulla</string>
+    <string name="piko_deleted">Eliminato</string>
+    <string name="piko_debug">Debug Piko</string>
+    <string name="piko_debug_desc">Aggiunge l\'opzione di debug per fare i test su alcuni componenti</string>
+    <string name="piko_export_experiment_list">Esporta elenco sperimentale</string>
+    <string name="piko_export_experiment_mappings">Esporta mappature sperimentali</string>
+    <!-- Open With Section -->
+    <string name="piko_open_image_externally">Apri immagine esternamente</string>
+    <string name="piko_open_video_externally">Apri video esternamente</string>
+    <string name="piko_open_image_with">Apri immagine con</string>
+    <string name="piko_open_video_with">Apri video con</string>
+    <!-- Like Animation Section -->
+    <string name="piko_change_like_animation">Cambia animazione per i like</string>
+    <string name="piko_change_like_animation_desc">Cambia l\'animazione con una di quelle delle animazioni dei like sui cerchi delle storie</string>
+    <string name="piko_available_like_animation">Animazioni per i like disponibili</string>
+    <!-- For arrays -->
+    <string name="piko_array_default">Predefinito</string>
+    <string name="piko_array_detailed_timestamp">Timestamp dettagliato (giorno/mese/data/ora/minuto/secondo)</string>
+    <string name="piko_array_post_time">Ora del post (ora/minuto/secondo)</string>
+    <string name="piko_array_time_left">Tempo rimanente (ora/minuto/secondo a sinistra)</string>
+    <!-- Welcome Message -->
+    <string name="piko_welcome_title">Benvenuto su Piko</string>
+    <string name="piko_welcome_message">Per migliorare la tua esperienza con Piko, consulta le impostazioni Piko e modifica le tue preferenze</string>
+    <string name="piko_goto_piko_settings">Vai alle impostazioni Piko</string>
+    <string name="piko_no_internet">Connettiti a internet</string>
+    <string name="piko_tap_here">Clicca qui!!</string>
+    <!-- Action Bar Section -->
+    <string name="piko_settings_on_action_bar">Impostazioni Piko sulla barra delle azioni</string>
+    <string name="piko_settings_on_action_bar_desc">Sposta l\'apertura delle impostazioni Piko nella barra delle azioni principale del feed</string>
+</resources>

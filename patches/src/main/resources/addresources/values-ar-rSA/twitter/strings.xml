@@ -25,7 +25,7 @@
     <!-- Native -->
     <string name="piko_title_native">الميزات المحلية</string>
     <string name="piko_pref_native_page_desc">تتوفر ميزات Piko المحلية هذه في قائمة المنشور.</string>
-    <string name="piko_title_native_downloader">برنامج التنزيل المحلي</string>
+    <string name="piko_title_native_downloader">أداة التنزيل المحلية</string>
     <string name="piko_title_native_downloader_toggle">تمكين التنزيل المحلي</string>
     <string name="piko_pref_native_downloader_inline_button">عرض زر التنزيل المضمن</string>
     <string name="piko_pref_native_downloader_inline_button_desc">يضيف زر تنزيل مباشرةً إلى شريط إجراءات المنشور</string>
@@ -39,6 +39,11 @@
     <string name="piko_share_image_toggle">تمكين مشاركة التغريدة كصورة</string>
     <string name="piko_share_image_autocleanup">تنظيف اللقطات تلقائيًا</string>
     <string name="piko_share_image_autocleanup_desc">إزالة اللقطات الأقدم من 24 ساعة عند التمكين</string>
+    <string name="piko_share_image_invalid_context">سياق غير صالح</string>
+    <string name="piko_share_image_capturing">التقاط التغريدة...</string>
+    <string name="piko_share_image_view_not_found">لم يتم العثور على عرض التغريدة</string>
+    <string name="piko_share_image_capture_failed">فشل التقاط الصورة</string>
+    <string name="piko_share_image_error">خطأ: %s</string>
     <string name="piko_title_native_translator">المترجم المحلي للمنشورات</string>
     <string name="piko_native_translator_toggle">تمكين ترجمة المنشور المحلي</string>
     <string name="piko_native_translator_provider">مقدمي خدمات الترجمة</string>
@@ -91,7 +96,7 @@
     <string name="piko_pref_top_people_search_desc">يخفي قسم الأشخاص بعد البحث</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">إعدادات متنوعة</string>
-    <string name="piko_pref_chirp_font">تمكين خط Chirp</string>
+    <string name="piko_pref_chirp_font">تعطيل خط Chirp</string>
     <string name="piko_pref_hide_fab">إخفاء زر الإجراء العائم</string>
     <string name="piko_pref_hide_fab_menu">إخفاء زر قائمة الإجراء العائمة</string>
     <string name="piko_pref_rec_users">إخفاء المستخدمين الموصى بهم</string>
@@ -115,6 +120,7 @@
     <string name="piko_disunify_xchat_system">Disunify xchat system</string>
     <string name="piko_disunify_xchat_system_desc">استعادة الميزات القديمة مثل الرسائل و نافذة المشاركة</string>
     <string name="piko_legacy_share_link">روابط المشاركة الكلاسيكية</string>
+    <string name="piko_block_redirecting_to_x_lite">منع التحويل التلقائي إلى X Lite</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature Flags</string>
     <string name="piko_pref_feature_flags">Feature Flags إضافة</string>
@@ -177,6 +183,7 @@
     <string name="piko_pref_customisation_post_font_size">حجم خط المنشور</string>
     <string name="piko_pref_customisation_search_type_ahead">اقتراحات البحث المراد إخفاؤها</string>
     <string name="piko_pref_customisation_change_app_icon">تغيير أيقونة التطبيق</string>
+    <string name="piko_notifications_tab_priority">الأولوية</string>
     <!-- Font Settings -->
     <string name="piko_title_font">نمط الخط</string>
     <string name="piko_pref_add_font">إضافة خط</string>

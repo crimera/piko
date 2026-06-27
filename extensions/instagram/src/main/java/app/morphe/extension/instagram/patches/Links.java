@@ -20,7 +20,7 @@ import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.constants.PostType;
-import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.crimera.PikoUtils;
 
 import app.morphe.extension.instagram.settings.ActivityHook;
@@ -113,7 +113,7 @@ public class Links {
                     shouldBlockUri = DISABLE_EXPLORE;
                 } else if (path.contains("/api/v1/media/") && path.contains("comments/")) {
                     shouldBlockUri = DISABLE_COMMENTS;
-                } else if (path.contains("/discover/ayml/")) {
+                } else if (path.contains("/discover/ayml") || path.contains("/discover/chaining")) { // Thanks to  @brosssh
                     shouldBlockUri = DISABLE_DISCOVER_PEOPLE;
                 } else if (path.contains("profile_ads/get_profile_ads/")
                         || path.contains("/async_ads/")
@@ -185,7 +185,7 @@ public class Links {
             postShortCode = mediaData.getUserData().getUsername();
         }
 
-        String link = String.format(Strings.INSTAGRAM_SHARE_LINK, shortTag, postShortCode);
+        String link = String.format(Constants.INSTAGRAM_SHARE_LINK, shortTag, postShortCode);
 
         if(postType.equals(PostType.STORY)){
             String postID = mediaData.getPostID();

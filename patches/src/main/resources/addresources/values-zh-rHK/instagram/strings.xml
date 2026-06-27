@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ads Section -->
+    <string name="piko_category_ads">廣告</string>
+    <string name="piko_disable_ads">停用廣告</string>
+    <string name="piko_hide_suggested_content">隱藏建議內容</string>
+    <string name="piko_hide_suggested_content_desc">隱藏推薦的限時動態、Reels 和 Threads（推薦貼文仍會顯示）。</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_dev_options">開發者選項</string>
+    <string name="piko_enable_dev_options">啟用開發者選項</string>
+    <string name="piko_enable_dev_options_desc">長按主畫面圖示來開啟開發者選項</string>
+    <string name="piko_directly_open_metaconfig">直接開啟 MetaConfig 設定覆蓋</string>
+    <string name="piko_directly_open_metaconfig_desc">長按主畫面圖示以直接開啟 MetaConfig 設定覆蓋（需啟用開發者選項）</string>
+    <string name="piko_enable_emp_options">啟動員工選項</string>
+    <string name="piko_enable_emp_options_desc">解鎖所有用於測試的員工選項</string>
+    <string name="piko_allow_user_network_certificate">允許使用者網路憑證</string>
+    <string name="piko_allow_user_network_certificate_desc">允許使用者網路憑證進行白帽測試</string>
+    <string name="piko_remove_build_expire_popup">移除版本過期彈窗</string>
+    <string name="piko_remove_build_expire_popup_desc">移除應用程式版本過舊時出現的彈出視窗</string>
+    <string name="piko_export_dev_overrides">匯出設定覆蓋</string>
+    <string name="piko_import_dev_overrides">匯入設定覆蓋</string>
+    <string name="piko_import_id_mapping">匯入映射文件</string>
+    <string name="piko_download_id_mapping">下載映射文件</string>
+    <string name="piko_missing_mapping_file">缺少映射文件</string>
+    <string name="piko_missing_mapping_file_desc">如果沒有映射文件，開發者選項中的名稱將無法正確顯示。您要下載嗎？</string>
+    <!-- Links Section -->
+    <string name="piko_category_links">連結</string>
+    <string name="piko_open_links_externally">在外部開啟連結</string>
+    <string name="piko_open_links_externally_desc">在外部瀏覽器中開啟連結，而非在應用程式內建瀏覽器中開啟</string>
+    <string name="piko_sanitize_share_links">淨化分享連結</string>
+    <!-- Ghost Section -->
+    <string name="piko_category_ghost">幽靈選項</string>
+    <string name="piko_view_stories_anonymously">匿名觀看限時動態</string>
+    <string name="piko_view_live_anonymously">匿名觀看直播</string>
+    <string name="piko_disable_typing_status">隱藏「正在輸入…」狀態</string>
+    <string name="piko_disable_screenshot_detection">停用截圖偵測</string>
+    <string name="piko_view_dm_anonymously">匿名查看私訊</string>
+    <string name="piko_turn_on_all_ghost_modes">開啟所有幽靈模式</string>
+    <string name="piko_ghost_modes_on">幽靈模式：開啟</string>
+    <string name="piko_ghost_modes_default">幽靈模式：預設</string>
+    <string name="piko_ghost_modes_quick_toggle">啟用幽靈模式的快速切換功能</string>
+    <string name="piko_ghost_modes_quick_toggle_desc">在操作列中新增一個切換按鈕以控制幽靈模式</string>
+    <!-- Distraction-Free Section -->
+    <string name="piko_category_distraction_free">免打擾選項</string>
+    <string name="piko_disable_stories">停用限時動態</string>
+    <string name="piko_disable_highlights">停用限時動態精選</string>
+    <string name="piko_disable_explore">停用探索</string>
+    <string name="piko_disable_comments">停用留言</string>
+    <string name="piko_limit_following_feed">僅顯示已追蹤的帳號的動態</string>
+    <string name="piko_limit_following_feed_desc">篩選動態首頁，僅顯示您已追蹤的帳號所發布的內容。</string>
+    <string name="piko_disable_reels_scrolling">停用 Reels 捲動</string>
+    <string name="piko_disable_reels_scrolling_desc">"停用 Instagram Reels 中的無限捲動功能，防止自動滑動至下一則 Reel。
+
+注意：在全新安裝的情況下，可能會出現「提示」動畫，但幾秒鐘後會自動停止。"</string>
+    <string name="piko_hide_stories_tray">隱藏限時動態欄</string>
+    <string name="piko_hide_stories_tray_desc">從動態首頁中限時動態欄</string>
+    <string name="piko_hide_notes_tray">隱藏筆記欄</string>
+    <string name="piko_hide_notes_tray_desc">在私訊中隱藏筆記欄</string>
+    <string name="piko_hide_group_creation_button_on_sharesheet">在分享表單中隱藏「建立群組」按鈕</string>
+    <string name="piko_disable_double_tap_like_post">停用「雙擊點讚貼文」功能</string>
+    <string name="piko_disable_double_tap_like_reel">停用「雙擊點讚 Reel」功能</string>
+    <string name="piko_disable_double_tap_like_comment">停用「雙擊點讚留言」功能</string>
+    <string name="piko_disable_double_tap_like_message">停用「雙擊點讚訊息」功能</string>
+    <!-- Miscellaneous Section -->
+    <string name="piko_category_misc">其他</string>
+    <string name="piko_disable_analytics">停用資料分析</string>
+    <string name="piko_delete_analytics_cache">刪除資料分析快取</string>
+    <string name="piko_disable_analytics_desc">封鎖傳送至 Instagram / Facebook 伺服器的分析資料</string>
+    <string name="piko_disable_discover_people">停用「為你推薦」功能</string>
+    <string name="piko_disable_discover_people_desc">在其他人主頁中停用「為你推薦」功能</string>
+    <string name="piko_fbi_follows_you">已追蹤你</string>
+    <string name="piko_fbi_doesnt_follows_you">未追蹤你</string>
+    <string name="piko_view_story_mentions">檢視限時動態提及</string>
+    <string name="piko_vsm_title">限時動態提及</string>
+    <!-- Download Media Section -->
+    <!-- Posts Section -->
+    <!-- Navigation Section -->
+    <!-- Information Section -->
+    <!-- Export and Import Section -->
+    <!-- Open With Section -->
+    <!-- Like Animation Section -->
+    <!-- For arrays -->
+    <!-- Welcome Message -->
+    <!-- Action Bar Section -->
+</resources>

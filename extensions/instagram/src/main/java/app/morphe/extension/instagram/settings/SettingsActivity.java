@@ -4,8 +4,9 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
-
 package app.morphe.extension.instagram.settings;
+
+import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -26,29 +27,49 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
+import app.morphe.extension.instagram.settings.SettingsStatus;
 
 public class SettingsActivity extends Activity {
 
     private LinearLayout root;
     private LinearLayout toolbar;
     private LinearLayout content;
+    private LinearLayout customContainer;
+    private TextView titleTextView;
 
     @SuppressLint("ResourceType")
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
 
-        createLayout();
+        String displayTitle = null;
 
-        getFragmentManager().beginTransaction().replace(1001, new SettingsFragment()).commit();
+        // Extract both variables safely from the incoming intent bundle
+        if (getIntent() != null && getIntent().getExtras() != null) {
+            displayTitle = str(getIntent().getStringExtra(Constants.PIKO_FRAGMENT_TITLE));
+        }
+
+        // Fallback to default localized string if no custom title was provided in the intent
+        if (displayTitle == null || displayTitle.isEmpty()) {
+            displayTitle = str("piko_title_settings");
+        }
+
+        createLayout( displayTitle);
+
+        SettingsFragment fragment = new SettingsFragment();
+        if (getIntent() != null && getIntent().getExtras() != null) {
+            fragment.setArguments(getIntent().getExtras());
+        }
+
+        getFragmentManager().beginTransaction().replace(1001, fragment).commit();
     }
 
     @SuppressLint("ResourceType")
-    private void createLayout() {
+    private void createLayout(String displayTitle) {
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(this));
@@ -77,31 +98,37 @@ public class SettingsActivity extends Activity {
             }
         });
 
-        TextView title = new TextView(this);
-        title.setText(Strings.PIKO_SETTINGS_TITLE);
-        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26);
-        title.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
-        title.setIncludeFontPadding(false);
+        titleTextView = new TextView(this);
+        titleTextView.setText(displayTitle); // Dynamically bound from intent data
+        titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26);
+        titleTextView.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
+        titleTextView.setIncludeFontPadding(false);
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
         titleParams.gravity = android.view.Gravity.CENTER_VERTICAL;
         titleParams.leftMargin = InstagramPreferenceStyle.dp(this, 7);
-        title.setLayoutParams(titleParams);
-        title.setTextColor(InstagramPreferenceStyle.primaryTextColor(this));
+        titleTextView.setLayoutParams(titleParams);
+        titleTextView.setTextColor(InstagramPreferenceStyle.primaryTextColor(this));
 
         toolbar.addView(back);
-        toolbar.addView(title);
+        toolbar.addView(titleTextView);
+
+        // ---------- Custom Container ----------
+        customContainer = new LinearLayout(this);
+        customContainer.setOrientation(LinearLayout.VERTICAL);
+        customContainer.setBackgroundColor(Color.TRANSPARENT);
+
+        root.addView(toolbar, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, InstagramPreferenceStyle.dp(this, 70)));
+        root.addView(customContainer, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
         // ---------- Content ----------
-
         content = new LinearLayout(this);
         content.setId(1001);
         content.setOrientation(LinearLayout.VERTICAL);
         content.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(this));
 
-        root.addView(toolbar, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, InstagramPreferenceStyle.dp(this, 70)));
         root.addView(content, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
 
         root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
@@ -110,15 +137,13 @@ public class SettingsActivity extends Activity {
                 int topInset = insets.getSystemWindowInsetTop();
                 int bottomInset = insets.getSystemWindowInsetBottom();
 
-                // Apply top inset to root (status bar)
                 v.setPadding(0, topInset, 0, 0);
 
-                // Apply bottom inset to content (gesture nav area)
                 content.setPadding(
-                        content.getPaddingLeft(),
-                        content.getPaddingTop(),
-                        content.getPaddingRight(),
-                        bottomInset
+                content.getPaddingLeft(),
+                content.getPaddingTop(),
+                content.getPaddingRight(),
+                bottomInset
                 );
 
                 return insets;
@@ -128,6 +153,11 @@ public class SettingsActivity extends Activity {
         setContentView(root);
     }
 
+    public LinearLayout getCustomContainer() {
+        return customContainer;
+    }
+
+    // (Keep original BackArrowView & applySystemBarStyle methods unchanged)
     private static class BackArrowView extends View {
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -172,6 +202,7 @@ public class SettingsActivity extends Activity {
         getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
+    // (Keep the nested static SettingsFragment class unchanged)
     public static class SettingsFragment extends PreferenceFragment {
 
         Context context;
@@ -183,20 +214,36 @@ public class SettingsActivity extends Activity {
             context = getActivity();
             PreferenceManager preferenceManager = getPreferenceManager();
             PreferenceScreen screen = preferenceManager.createPreferenceScreen(context);
-            preferenceManager.setSharedPreferencesName(Strings.SHARED_PREF_NAME);
+            preferenceManager.setSharedPreferencesName(Constants.SHARED_PREF_NAME);
 
             Helper helper = new Helper(context);
             ScreenBuilder screenBuilder = new ScreenBuilder(context, screen, helper);
 
-            screenBuilder.buildAdsSection();
-            screenBuilder.ghostSection();
-            screenBuilder.linksSection();
-            screenBuilder.distractionFreeSection();
-            screenBuilder.buildMiscSection();
-            screenBuilder.buildDownloadSection();
-            screenBuilder.buildNavigationSection();
-            screenBuilder.buildDeveloperSection();
-            screenBuilder.aboutSection();
+            String fragment_name = Constants.PIKO_FRAGMENT_SETTINGS;
+            if (getArguments() != null) {
+                fragment_name = getArguments().getString(Constants.PIKO_FRAGMENT_NAME, Constants.PIKO_FRAGMENT_SETTINGS);
+            }
+            if(fragment_name.equals(Constants.PIKO_FRAGMENT_SETTINGS)) {
+                screenBuilder.buildSettingsPage();
+            } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_ADS)) {
+                screenBuilder.buildAdsSection();
+            } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_GHOST)) {
+                screenBuilder.ghostSection();
+            } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_LINKS)) {
+                screenBuilder.linksSection();
+            } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)) {
+                screenBuilder.distractionFreeSection();
+            } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_MISC)) {
+                screenBuilder.buildMiscSection();
+            } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)) {
+                screenBuilder.buildDownloadSection();
+            } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_NAV_BTNS)) {
+                screenBuilder.buildNavigationSection();
+            } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_DEV_OPTIONS)) {
+                screenBuilder.buildDeveloperSection();
+            } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_ABOUT)) {
+                screenBuilder.aboutSection(SettingsStatus.FLAGS);
+            }
 
             setPreferenceScreen(screen);
         }

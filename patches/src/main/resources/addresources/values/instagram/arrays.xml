@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Don't translate any of these -->
+<resources>
+    <string-array name="piko_array_customise_story_timestamp">
+        <item>@string/piko_array_default</item>
+        <item>@string/piko_array_detailed_timestamp</item>
+        <item>@string/piko_array_post_time</item>
+        <item>@string/piko_array_time_left</item>
+    </string-array>
+
+    <string-array name="piko_array_customise_story_timestamp_val">
+        <item>default</item>
+        <item>detailed</item>
+        <item>posttime</item>
+        <item>timeleft</item>
+    </string-array>
+
+    <string-array name="piko_array_change_like_animation">
+        <item>@string/piko_array_default</item>
+        <item>Anyway like activation</item>
+        <item>Adrain</item>
+        <item>Aki kochi</item>
+        <item>Brain</item>
+        <item>Brickley</item>
+        <item>Cole</item>
+        <item>DJAG</item>
+        <item>Dolly</item>
+        <item>Elyse</item>
+        <item>Film</item>
+        <item>Futura</item>
+        <item>Gabriel</item>
+        <item>Golloria</item>
+        <item>Homestead</item>
+        <item>Kids</item>
+        <item>Laufey</item>
+        <item>Linda</item>
+        <item>Mimles</item>
+        <item>Nigel</item>
+        <item>Nina</item>
+        <item>Olivia</item>
+        <item>Seb</item>
+        <item>Twins</item>
+        <item>Tyshawn</item>
+        <item>Zarna</item>
+    </string-array>
+
+    <string-array name="piko_array_change_like_animation_val">
+        <item>ARES_LIKE_ACTIVATION</item>
+        <item>ANYWAY_LIKE_ACTIVATION</item>
+        <item>RINGS_LIKE_ADRIAN</item>
+        <item>RINGS_LIKE_AKI_KOCHI</item>
+        <item>RINGS_LIKE_BRIAN</item>
+        <item>RINGS_LIKE_BRICKLEY</item>
+        <item>RINGS_LIKE_COLE</item>
+        <item>RINGS_LIKE_DJAG</item>
+        <item>RINGS_LIKE_DOLLY</item>
+        <item>RINGS_LIKE_ELYSE</item>
+        <item>RINGS_LIKE_FILM</item>
+        <item>RINGS_LIKE_FUTURA</item>
+        <item>RINGS_LIKE_GABRIEL</item>
+        <item>RINGS_LIKE_GOLLORIA</item>
+        <item>RINGS_LIKE_HOMESTEAD</item>
+        <item>RINGS_LIKE_KIDS</item>
+        <item>RINGS_LIKE_LAUFEY</item>
+        <item>RINGS_LIKE_LINDA</item>
+        <item>RINGS_LIKE_MIMLES</item>
+        <item>RINGS_LIKE_NIGEL</item>
+        <item>RINGS_LIKE_NINA</item>
+        <item>RINGS_LIKE_OLIVIA</item>
+        <item>RINGS_LIKE_SEB</item>
+        <item>RINGS_LIKE_TWINS</item>
+        <item>RINGS_LIKE_TYSHAWN</item>
+        <item>RINGS_LIKE_ZARNA</item>
+    </string-array>
+</resources>

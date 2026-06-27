@@ -384,6 +384,11 @@ public class SettingsStatus {
         exportLoginToken = true;
     }
 
+    public static boolean blockRedirectingToXLite = false;
+    public static void blockRedirectingToXLite() {
+        blockRedirectingToXLite = true;
+    }
+
     public static boolean enableTimelineSection() {
         return ( hidePostMetrics || hideNavbarBadge || showSourceLabel || hideCommBadge || showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD);
     }

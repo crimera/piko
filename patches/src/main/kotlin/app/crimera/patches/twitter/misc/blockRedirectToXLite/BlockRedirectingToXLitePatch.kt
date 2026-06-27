@@ -8,6 +8,9 @@ package app.crimera.patches.twitter.misc.blockRedirectToXLite
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.crimera.patches.twitter.utils.enableSettings
+import app.crimera.patches.twitter.utils.is_11_98_or_greater
+import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -15,6 +18,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import java.util.logging.Logger
 
 private object RedirectingToXLiteFlagCheckFingerprint : Fingerprint(
     returnType = "Z",
@@ -34,22 +38,31 @@ val blockRedirectingToXLitePatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
+        dependsOn(settingsPatch, versionCheckPatch)
 
         execute {
-            RedirectingToXLiteFlagCheckFingerprint.method.apply {
-                val lastMoveResultObjectInstruction = instructions.last { it.opcode == Opcode.MOVE_RESULT_OBJECT }
-                val lastMoveResultObjectIndex = lastMoveResultObjectInstruction.location.index
 
-                val putBooleanIntoSharedPrefIndex = lastMoveResultObjectIndex + 1
-                val putBooleanIntoSharedPrefInstruction = getInstruction(putBooleanIntoSharedPrefIndex)
-                val boolRegister = putBooleanIntoSharedPrefInstruction.registersUsed[2]
+            if (is_11_98_or_greater) {
+                RedirectingToXLiteFlagCheckFingerprint.method.apply {
+                    val lastMoveResultObjectInstruction = instructions.last { it.opcode == Opcode.MOVE_RESULT_OBJECT }
+                    val lastMoveResultObjectIndex = lastMoveResultObjectInstruction.location.index
 
-                addInstruction(
-                    putBooleanIntoSharedPrefIndex,
-                    """
-                    const v$boolRegister, 0x0
-                    """.trimIndent(),
+                    val putBooleanIntoSharedPrefIndex = lastMoveResultObjectIndex + 1
+                    val putBooleanIntoSharedPrefInstruction = getInstruction(putBooleanIntoSharedPrefIndex)
+                    val boolRegister = putBooleanIntoSharedPrefInstruction.registersUsed[2]
+
+                    addInstruction(
+                        putBooleanIntoSharedPrefIndex,
+                        """
+                        const v$boolRegister, 0x0
+                        """.trimIndent(),
+                    )
+                }
+
+                enableSettings("blockRedirectingToXLite")
+            } else {
+                return@execute Logger.getLogger(this::class.java.name).warning(
+                    "The patch \"Block redirecting to X Lite\" is force succeeded and does not work on any version below 11.98.\n",
                 )
             }
         }

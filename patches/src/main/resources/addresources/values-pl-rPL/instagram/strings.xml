@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ads Section -->
+    <string name="piko_category_ads">Reklamy</string>
+    <string name="piko_disable_ads">Wyłącz reklamy</string>
+    <string name="piko_hide_suggested_content">Ukryj proponowane treści</string>
+    <string name="piko_hide_suggested_content_desc">Ukrywa proponowane relacje, rolki i wątki (proponowane posty nadal będą widoczne)</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_dev_options">Opcje programisty</string>
+    <string name="piko_enable_dev_options">Włącz opcje programisty</string>
+    <string name="piko_enable_dev_options_desc">Odblokowuje opcje programisty po przytrzymaniu ikony strony głównej</string>
+    <string name="piko_directly_open_metaconfig">Bezpośrednio otwieraj MetaConfig</string>
+    <string name="piko_directly_open_metaconfig_desc">Otwiera nadpisania MetaConfig po przytrzymaniu ikony strony głównej (wymaga włączonych opcji programisty)</string>
+    <string name="piko_enable_emp_options">Włącz opcje pracownicze</string>
+    <string name="piko_enable_emp_options_desc">Odblokowuje wszystkie opcje pracownicze używane do testów</string>
+    <string name="piko_allow_user_network_certificate">Zezwalaj na certyfikaty użytkownika</string>
+    <string name="piko_allow_user_network_certificate_desc">Umożliwia aplikacji zaufanie certyfikatom sieciowym zainstalowanym przez użytkownika do testów whitehat</string>
+    <string name="piko_remove_build_expire_popup">Usuń powiadomienie o wygasaniu wersji</string>
+    <string name="piko_remove_build_expire_popup_desc">Usuwa powiadomienie, które pojawia się, gdy zainstalowana wersja aplikacji zestarzeje się</string>
+    <string name="piko_export_dev_overrides">Eksportuj nadpisania</string>
+    <string name="piko_import_dev_overrides">Importuj nadpisania</string>
+    <string name="piko_import_id_mapping">Importuj pliki mapowania</string>
+    <string name="piko_download_id_mapping">Pobierz plik mapowania</string>
+    <string name="piko_missing_mapping_file">Brak pliku mapowania</string>
+    <string name="piko_missing_mapping_file_desc">Bez tego pliku opcje programisty nie będą miały czytelnych nazw. Chcesz go pobrać?</string>
+    <!-- Links Section -->
+    <string name="piko_category_links">Linki</string>
+    <string name="piko_open_links_externally">Otwieraj linki zewnętrznie</string>
+    <string name="piko_open_links_externally_desc">Otwiera linki w zewnętrznej przeglądarce zamiast we wbudowanej</string>
+    <string name="piko_sanitize_share_links">Oczyść udostępniane linki</string>
+    <!-- Ghost Section -->
+    <string name="piko_category_ghost">Tryb ducha</string>
+    <string name="piko_view_stories_anonymously">Oglądaj relacje anonimowo</string>
+    <string name="piko_view_live_anonymously">Oglądaj transmisje na żywo anonimowo</string>
+    <string name="piko_disable_typing_status">Wyłącz status pisania</string>
+    <string name="piko_disable_screenshot_detection">Wyłącz wykrywanie zrzutów ekranu</string>
+    <string name="piko_view_dm_anonymously">Czytaj wiadomości anonimowo</string>
+    <string name="piko_turn_on_all_ghost_modes">Włącz wszystkie tryby ducha</string>
+    <string name="piko_ghost_modes_on">Tryb ducha: WŁĄCZONY</string>
+    <string name="piko_ghost_modes_default">Tryb ducha: DOMYŚLNY</string>
+    <string name="piko_ghost_modes_quick_toggle">Włącz szybki przełącznik trybu ducha</string>
+    <string name="piko_ghost_modes_quick_toggle_desc">Dodaje na pasku akcji czatu przycisk do szybkiego sterowania trybem ducha</string>
+    <!-- Distraction-Free Section -->
+    <string name="piko_category_distraction_free">Bez rozpraszaczy</string>
+    <string name="piko_disable_stories">Wyłącz relacje</string>
+    <string name="piko_disable_highlights">Wyłącz wyróżnione relacje</string>
+    <string name="piko_disable_explore">Wyłącz sekcję Eksploruj</string>
+    <string name="piko_disable_comments">Wyłącz komentarze</string>
+    <string name="piko_limit_following_feed">Ogranicz oś czasu do obserwowanych</string>
+    <string name="piko_limit_following_feed_desc">Filtruje oś czasu, wyświetlając tylko treści od profili, które obserwujesz</string>
+    <string name="piko_disable_reels_scrolling">Wyłącz przewijanie rolek</string>
+    <string name="piko_disable_reels_scrolling_desc">"Wyłącza nieskończone przewijanie rolek na Instagramie, blokując przejście do następnej
+
+Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po kilku sekundach sama zniknie"</string>
+    <string name="piko_hide_stories_tray">Ukryj pasek relacji</string>
+    <string name="piko_hide_stories_tray_desc">Ukrywa pasek z relacjami na osi czasu</string>
+    <string name="piko_hide_notes_tray">Ukryj pasek notatek</string>
+    <string name="piko_hide_notes_tray_desc">Ukrywa pasek notatek w sekcji wiadomości</string>
+    <string name="piko_hide_group_creation_button_on_sharesheet">Ukryj przycisk tworzenia grupy w menu udostępniania</string>
+    <string name="piko_disable_double_tap_like_post">Wyłącz polubienie postów podwójnym dotknięciem</string>
+    <string name="piko_disable_double_tap_like_reel">Wyłącz polubienie rolek podwójnym dotknięciem</string>
+    <string name="piko_disable_double_tap_like_comment">Wyłącz polubienie komentarzy podwójnym dotknięciem</string>
+    <string name="piko_disable_double_tap_like_message">Wyłącz polubienie wiadomości podwójnym dotknięciem</string>
+    <string name="piko_disable_double_tap_to_like">Wyłącz polubienie podwójnym dotknięciem</string>
+    <!-- Miscellaneous Section -->
+    <string name="piko_category_misc">Różne</string>
+    <string name="piko_disable_analytics">Wyłącz analitykę</string>
+    <string name="piko_delete_analytics_cache">Usuń pamięć podręczną analityki</string>
+    <string name="piko_disable_analytics_desc">Blokuje wysyłanie danych telemetrycznych na serwery Instagrama/Facebooka</string>
+    <string name="piko_disable_discover_people">Wyłącz odkrywanie osób</string>
+    <string name="piko_disable_discover_people_desc">Wyłącza sekcję sugerowanych osób na profilach użytkowników</string>
+    <string name="piko_follow_back_indicator">Włącz wskaźnik statusu znajomości</string>
+    <string name="piko_follow_back_indicator_desc">Dodaje etykietę ze statusem \"Obserwuje Cię\" na stronie profilu, a po dotknięciu wyświetla szczegółowe zestawienie statusu znajomości</string>
+    <string name="piko_fbi_follows_you">Obserwuje Cię</string>
+    <string name="piko_fbi_doesnt_follows_you">Nie obserwuje Cię</string>
+    <string name="piko_friendship_status">Status znajomości</string>
+    <string name="piko_view_story_mentions">Wyświetl wzmianki w relacji</string>
+    <string name="piko_vsm_title">Wzmianki w relacji</string>
+    <string name="piko_vsm_no_mentions">Brak wzmianek w tej relacji</string>
+    <string name="piko_disable_story_flipping">Wyłącz automatyczne przełączanie relacji</string>
+    <string name="piko_disable_story_flipping_desc">Blokuje automatyczne przejście do następnej relacji po zakończeniu obecnej</string>
+    <string name="piko_disable_video_autoplay">Wyłącz autoodtwarzanie filmu</string>
+    <string name="piko_stories_audio_autoplay">Autoodtwarzanie dźwięku w relacjach</string>
+    <string name="piko_customise_story_timestamp">Dostosuj format czasu relacji</string>
+    <string name="piko_customise_story_timestamp_desc">Zmienia format wyświetlania czasu publikacji relacji</string>
+    <string name="piko_unlimited_replays">Zablokuj znikanie multimediów</string>
+    <string name="piko_unlimited_replays_desc">Zmienia znikające zdjęcia i filmy na widoczne na stałe</string>
+    <string name="piko_improve_image_viewing">Popraw jakość obrazów</string>
+    <string name="piko_improve_image_viewing_desc">Wymusza pobieranie obrazów w maksymalnej rozdzielczości z serwera</string>
+    <string name="piko_hide_reshare_button">Ukryj przycisk Udostępnij</string>
+    <string name="piko_copy_comment">Skopiuj komentarz</string>
+    <string name="piko_copy_comment_desc">Dodaje przycisk pozwalający skopiować treść komentarza pod postami i rolkami</string>
+    <string name="piko_comment_copied_success">Skopiowano komentarz</string>
+    <string name="piko_comment_copied_failed">Nie znaleziono tekstu do skopiowania</string>
+    <string name="piko_save_media_comment">Zapisz multimedia z komentarzy</string>
+    <string name="piko_save_media_comment_desc">Dodaje przycisk do zapisywania multimediów z komentarzy pod postami i rolkami</string>
+    <string name="piko_copy_username">Skopiuj nazwę użytkownika</string>
+    <string name="piko_copy_full_name">Skopiuj wyświetlaną nazwę</string>
+    <string name="piko_copy_user_id">Skopiuj ID użytkownika</string>
+    <string name="piko_copy_bio">Skopiuj biogram</string>
+    <string name="piko_download_profile_picture">Pobierz zdjęcie profilowe</string>
+    <string name="piko_copied">Skopiowano</string>
+    <string name="piko_more_profile_options">Więcej opcji profilu</string>
+    <string name="piko_more_profile_options_action_bar_toggle">Opcje profilu na pasku akcji</string>
+    <string name="piko_more_profile_options_action_bar_toggle_desc">Przenosi przycisk opcji profilu na pasek akcji</string>
+    <string name="piko_remove_empty_bottom_space">Usuń pustą przestrzeń na dole</string>
+    <string name="piko_unlock_plus_benefits">Odblokuj korzyści Plus</string>
+    <string name="piko_unlock_plus_benefits_desc">Odblokowuje funkcje subskrypcji \"Plus\", które są weryfikowane lokalnie. UŻYWAJ NA WŁASNE RYZYKO</string>
+    <string name="piko_customise_story_ring_size">Dostosuj rozmiar obwódki relacji</string>
+    <string name="piko_customise_story_ring_size_desc">Zmień rozmiar obwódki relacji w procentach (domyślnie: 100)</string>
+    <!-- Download Media Section -->
+    <string name="piko_category_download_media">Pobieranie multimediów</string>
+    <string name="piko_enable_download">Włącz pobieranie</string>
+    <string name="piko_enable_direct_download">Włącz bezpośrednie pobieranie</string>
+    <string name="piko_enable_direct_download_desc">Pobiera przeglądane multimedia od razu bez wyświetlania okna opcji</string>
+    <string name="piko_download_username_folder">Grupuj pobrania według nazwy użytkownika</string>
+    <string name="piko_download_username_folder_desc">Tworzy osobne podfoldery dla każdego twórcy</string>
+    <string name="piko_download_current_media">Pobierz aktualny plik</string>
+    <string name="piko_download_as_image">Pobierz jako obraz</string>
+    <string name="piko_video_variants">Warianty filmu</string>
+    <string name="piko_image_variants">Warianty obrazu</string>
+    <string name="piko_download_audio">Pobierz sam dźwięk</string>
+    <string name="piko_download_options">Opcje pobierania</string>
+    <string name="piko_copy_media_link">Skopiuj link do pliku</string>
+    <string name="piko_copied_media_link">Skopiowano link do pliku</string>
+    <string name="piko_download_all">Pobierz wszystko</string>
+    <string name="piko_downloading_media">Pobieranie: </string>
+    <string name="piko_downloaded_media">Pobrano: </string>
+    <string name="piko_media_exists">Plik już istnieje</string>
+    <string name="piko_download_failed_media">Błąd pobierania: </string>
+    <string name="piko_download_set_path">Ustaw własną ścieżkę pobierania</string>
+    <string name="piko_download_set_path_success">Zaktualizowano folder pobierania</string>
+    <string name="piko_download_set_path_failed">Nie udało się ustalić ścieżki folderu</string>
+    <string name="piko_download_grant_permission">Przyznaj dostęp do pamięci, aby pobierać pliki</string>
+    <string name="piko_download_grant_permission_failed">Nie udało się otworzyć ustawień. Przyznaj dostęp do wszystkich plików ręcznie</string>
+    <string name="piko_download_with_external_downloader">Pobierz przez zewnętrzną aplikację</string>
+    <string name="piko_external_downloader_package_name">Nazwa pakietu zewnętrznej aplikacji</string>
+    <string name="piko_external_downloader_package_name_not_found">Nie znaleziono pakietu zewnętrznej aplikacji</string>
+    <string name="piko_external_downloader_package_name_not_set">Ustaw nazwę pakietu zewnętrznej aplikacji</string>
+    <string name="piko_download_voice_media">Pobierz wiadomość głosową</string>
+    <!-- Posts Section -->
+    <string name="piko_post_options">Opcje posta</string>
+    <string name="piko_copy_post_description">Skopiuj opis posta</string>
+    <string name="piko_copy_post_owner_username">Skopiuj nazwę twórcy</string>
+    <string name="piko_copy_post_owner_fullname">Skopiuj wyświetlaną nazwę twórcy</string>
+    <string name="piko_enable_more_options_on_post">Włącz więcej opcji dla postów</string>
+    <string name="piko_enable_more_options_on_post_desc">Dodaje przycisk menu z dodatkowymi opcjami pod postami i rolkami (np. kopiowanie opisu, nazwy użytkownika itp.)</string>
+    <string name="piko_more_options">Więcej opcji</string>
+    <!-- Navigation Section -->
+    <string name="piko_category_hide_navigation_buttons">Ukrywanie przycisków nawigacji</string>
+    <string name="piko_hide_navigation_feed">Ukryj przycisk Główna</string>
+    <string name="piko_hide_navigation_reels">Ukryj przycisk Rolki</string>
+    <string name="piko_hide_navigation_direct">Ukryj przycisk Wiadomości</string>
+    <string name="piko_hide_navigation_search">Ukryj przycisk Szukaj</string>
+    <string name="piko_hide_navigation_create">Ukryj przycisk Utwórz</string>
+    <!-- Information Section -->
+    <string name="piko_category_about">Informacje</string>
+    <string name="piko_export_pref">Eksportuj ustawienia Piko</string>
+    <string name="piko_import_pref">Importuj ustawienia Piko</string>
+    <string name="piko_app_version">Wersja aplikacji: %s</string>
+    <string name="piko_patch_version">Wersja modyfikacji: %s</string>
+    <string name="piko_patch_info_title">Informacje o modyfikacjach</string>
+    <string name="piko_patch_enabled">Włączone</string>
+    <string name="piko_patch_disabled">Wyłączone</string>
+    <!-- Export and Import Section -->
+    <string name="piko_export_success">Wyeksportowano pomyślnie</string>
+    <string name="piko_export_fail">Błąd eksportu</string>
+    <string name="piko_fail_no_path">Nie podano ścieżki docelowej</string>
+    <string name="piko_fail_no_file">Nie znaleziono pliku</string>
+    <string name="piko_import_success">Zaimportowano pomyślnie</string>
+    <string name="piko_import_fail">Błąd importu</string>
+    <string name="piko_restart_app">Wymagany restart aplikacji, aby zastosować zmiany</string>
+    <string name="piko_ok">OK</string>
+    <string name="piko_cancel">Anuluj</string>
+    <string name="piko_deleted">Usunięto</string>
+    <string name="piko_debug">Debugowanie Piko</string>
+    <string name="piko_debug_desc">Dodaje opcje debugowania dla niektórych komponentów do testów</string>
+    <string name="piko_export_experiment_list">Eksportuj listę eksperymentów</string>
+    <string name="piko_export_experiment_mappings">Eksportuj mapowania eksperymentów</string>
+    <!-- Open With Section -->
+    <string name="piko_open_image_externally">Otwórz obraz zewnętrznie</string>
+    <string name="piko_open_video_externally">Otwórz film zewnętrznie</string>
+    <string name="piko_open_image_with">Otwórz obraz za pomocą</string>
+    <string name="piko_open_video_with">Otwórz film za pomocą</string>
+    <!-- Like Animation Section -->
+    <string name="piko_change_like_animation">Zmień animację polubienia</string>
+    <string name="piko_change_like_animation_desc">Zmienia standardową animację na jedną z dostępnych animacji polubienia</string>
+    <string name="piko_available_like_animation">Dostępne animacje polubienia</string>
+    <!-- For arrays -->
+    <string name="piko_array_default">Domyślna</string>
+    <string name="piko_array_detailed_timestamp">Szczegółowy czas (dzień tygodnia/miesiąc/dzień/godzina/minuta/sekunda)</string>
+    <string name="piko_array_post_time">Czas publikacji (godzina/minuta/sekunda)</string>
+    <string name="piko_array_time_left">Pozostały czas (godziny/minuty/sekundy)</string>
+    <!-- Welcome Message -->
+    <string name="piko_welcome_title">Witaj w Piko</string>
+    <string name="piko_welcome_message">Aby wyciągnąć z Piko jak najwięcej, zajrzyj do ustawień i dostosuj je pod siebie</string>
+    <string name="piko_goto_piko_settings">Przejdź do ustawień Piko</string>
+    <string name="piko_no_internet">Połącz się z internetem</string>
+    <string name="piko_tap_here">Dotknij tutaj</string>
+    <!-- Action Bar Section -->
+    <string name="piko_settings_on_action_bar">Ustawienia Piko na pasku akcji</string>
+    <string name="piko_settings_on_action_bar_desc">Przenosi skrót do ustawień Piko na pasek akcji strony głównej</string>
+</resources>

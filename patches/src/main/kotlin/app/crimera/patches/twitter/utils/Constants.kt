@@ -22,14 +22,13 @@ object Constants {
                         version = "11.99.0-release-ripped.1",
                         description = "Make sure the APK is PairIP bypassed (Check the support group)",
                     ),
-                    // Shim version, can be dropped once APKMirror uploads 12.0.0-release.0
-                    AppTarget(
-                        version = "11.99.0-release.1",
-                        description = "Requires Piko-Shim to be included",
-                    ),
-                    // Shim version
+                    // Shim versions
                     AppTarget(
                         version = "12.0.0-release.0",
+                        description = "Requires Piko-Shim to be included",
+                    ),
+                    AppTarget(
+                        version = "12.2.0-release.0",
                         description = "Requires Piko-Shim to be included",
                     ),
                 ),

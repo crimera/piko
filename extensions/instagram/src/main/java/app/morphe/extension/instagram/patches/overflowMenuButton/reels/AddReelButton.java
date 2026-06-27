@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.patches.overflowMenuButton.reels;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.view.View;
 import android.content.Context;
 import java.lang.reflect.Field;
@@ -18,7 +20,6 @@ import app.morphe.extension.shared.ResourceUtils;
 
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
-import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.constants.UI;
 
@@ -55,9 +56,9 @@ public class AddReelButton {
     private static void addDownloadButton(Context context, Object helperObject, Object mediaObject){
         String icon = UI.DRAWABLE_DOWNLOAD_ICON;
         ReelButton reelButton = new DownloadButton(context,mediaObject);
-        String DOWNLOAD_BUTTON_TEXT = Strings.DOWNLOAD_OPTIONS;
+        String DOWNLOAD_BUTTON_TEXT = str("piko_download_options");
         if(Pref.enableDirectDownload()){
-            DOWNLOAD_BUTTON_TEXT = Strings.CATEGORY_DOWNLOAD_MEDIA;
+            DOWNLOAD_BUTTON_TEXT = str("piko_category_download_media");
         }
 
         ReelOverflowButton reelOverflowButton = new ReelOverflowButton(icon,reelButton,DOWNLOAD_BUTTON_TEXT);
@@ -68,7 +69,7 @@ public class AddReelButton {
     private static void addInfoButton(Context context, Object helperObject, Object mediaObject){
         String icon = UI.DRAWABLE_BLUB_ICON;
         ReelButton reelButton = new InfoButton(context,mediaObject);
-        String buttonText = Strings.MORE_OPTIONS;
+        String buttonText = str("piko_more_options");
 
         ReelOverflowButton reelOverflowButton = new ReelOverflowButton(icon,reelButton,buttonText);
 
@@ -78,7 +79,7 @@ public class AddReelButton {
     private static void addDebugButton(Context context, Object helperObject, Object mediaObject) {
         String icon = UI.DRAWABLE_DEBUG_ICON;
         ReelButton reelButton = new DebugButton(context, mediaObject);
-        String buttonText = Strings.PIKO_DEBUG;
+        String buttonText = str("piko_debug");
 
         ReelOverflowButton reelOverflowButton = new ReelOverflowButton(icon, reelButton, buttonText);
 
@@ -89,7 +90,7 @@ public class AddReelButton {
     private static void addExternalDownloadButton(Context context, Object helperObject, Object mediaObject){
         String icon = UI.DRAWABLE_DOWNLOAD_ICON;
         ReelButton reelButton = new ExternalDownloadButton(context,mediaObject);
-        String buttonText = Strings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER;
+        String buttonText = str("piko_download_with_external_downloader");
 
         ReelOverflowButton reelOverflowButton = new ReelOverflowButton(icon,reelButton,buttonText);
 

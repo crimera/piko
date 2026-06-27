@@ -8,6 +8,7 @@ package app.morphe.extension.crimera;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Environment;
@@ -28,6 +29,16 @@ public class PikoUtils {
 
     public static Context getContext() {
         return ctx;
+    }
+
+    // Credits to Morphe:
+    // https://github.com/MorpheApp/morphe-patches/blob/d6a88edcfba71f9b630314c4c8b56347a10c8b2a/extensions/youtube/src/main/java/app/morphe/extension/youtube/settings/preference/ExternalDownloaderPreference.java#L128-L138
+    public static boolean isAppInstalledAndEnabled(String packageName) {
+        try {
+            return ctx.getPackageManager().getApplicationInfo(packageName, 0).enabled;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     public static void openUrl(String url) {

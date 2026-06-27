@@ -22,11 +22,10 @@ object Constants {
                 listOf(
                     // Stable
                     AppTarget(
-                        version = "430.0.0.53.80",
+                        version = "435.0.0.37.76",
                         versionCodes =
                             mapOf(
-                                ARM64_V8A to 383611190,
-                                ARM64_V8A to 383611231,
+                                ARM64_V8A to 384109456,
                             ),
                     ),
                 ),
@@ -39,6 +38,7 @@ object Constants {
     const val EXTENDED_IMAGE_URL_CLASS = "Lcom/instagram/model/mediasize/ExtendedImageUrl;"
     const val MEDIA_OPTIONS_CLASS = "Lcom/instagram/feed/media/mediaoption/MediaOption\$Option;"
     const val USER_SESSION_CLASS = "Lcom/instagram/common/session/UserSession;"
+    const val USER_DETAIL_VIEW_MODEL_CLASS = "Lcom/instagram/profile/fragment/UserDetailViewModel;"
 
     // Extension classes.
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/instagram"

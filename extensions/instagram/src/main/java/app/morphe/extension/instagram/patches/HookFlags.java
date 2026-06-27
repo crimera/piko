@@ -20,39 +20,26 @@ public class HookFlags {
     private static DeveloperOptions developerOptions = new DeveloperOptions();
 
     private static void contactPermissionConsentFlags() {
-        BOOL_FLAGS.put("56295::14", false); //igios_enable_native_new_reconsider_alert_content
-        BOOL_FLAGS.put("56295::15", false); //ig4a_enable_native_new_reconsider_alert_content
-        BOOL_FLAGS.put("56295::29", false); //igios_reconsideration_dialog_for_location_suggestion_hscroll_view
-        BOOL_FLAGS.put("56295::30", false); //igios_reconsideration_dialog_for_prmote_audience_ui_helper
+        BOOL_FLAGS.put("56295", false); //ig_device_permission_consent
     }
 
     private static void simpleOverflowMenuFlags() {
-        BOOL_FLAGS.put("104772::0", false); //enable_simple_overflow_menu
-        BOOL_FLAGS.put("104772::1", false); //enable_feed_menu
-        BOOL_FLAGS.put("104772::2", false); //enable_reels_menu
-        BOOL_FLAGS.put("104772::3", false); //enable_tombstone_redesign
-        BOOL_FLAGS.put("104772::4", false); //enable_non_destructive_report
-        BOOL_FLAGS.put("104772::5", false); //enable_non_destructive_styling
-        BOOL_FLAGS.put("104772::6", false); //enable_reduced_options
-        BOOL_FLAGS.put("104772::7", false); //ig_ini_nice
-        BOOL_FLAGS.put("104772::10", false); //enable_bottom_profrile_intergrity_options
-        BOOL_FLAGS.put("104772::11", false); //enable_dynamic_chips_for_nice
-        BOOL_FLAGS.put("104772::12", false); //enable_cc_not_interested
-        BOOL_FLAGS.put("104772::13", false); //enable_nice_variant_b
-        BOOL_FLAGS.put("104772::14", false); //enable_nice_variant_full_screen
-        BOOL_FLAGS.put("104772::15", false); //enable_ini_refresh
-        BOOL_FLAGS.put("104772::16", false); //enable_reduced_options_reels
-        BOOL_FLAGS.put("104772::17", false); //enable_reduced_options_feed
-        BOOL_FLAGS.put("104772::18", false); //enable_follow_options_fix
+        BOOL_FLAGS.put("104772", false); //ig_ini
+        BOOL_FLAGS.put("117613::0", true); //ig_overflow_menu_icon::use_more_lines_icon
+        BOOL_FLAGS.put("100002", true); //ig_igds_android_prism_overflow_sheet
     }
-
     private static void adsFlags() {
 //        BOOL_FLAGS.put("58206::0", false); //is_acp_enabled
 //        BOOL_FLAGS.put("72396::0", false); //is_mae_exclusion_feed_enabled
 //        BOOL_FLAGS.put("78046::0", false); //is_mae_exclusion_feed_enabled
 //        BOOL_FLAGS.put("78046::9", false); //enable_no_invalidation_reason_for_mae_exclusion
 //        BOOL_FLAGS.put("79181::0", false); //ig_reels_ads_1x2_explore_halc_android::is_enabled
-        BOOL_FLAGS.put("110800::0", false); //ig_android_controller_migration::use_v2_controller
+        BOOL_FLAGS.put("110800::0", false); //ig_android_controller_migration::use_v2_controller Removed in version 435.0.0.0.2
+        BOOL_FLAGS.put("114983::0", false); //ig_stories_restyle_midcard::is_enable
+        BOOL_FLAGS.put("95150::1", false); //ig_stories_music_midcard::is_enable
+        BOOL_FLAGS.put("84366::12", false); //ig_stories_ayt_midcard::enable_add_yours
+        BOOL_FLAGS.put("120110", false); //ig_android_scroll_break
+        BOOL_FLAGS.put("105778::0", false); //ig_android_restyle_post_cap_promo_dialog::is_enable
     }
 
     // Thanks to @brosssh
@@ -62,12 +49,17 @@ public class HookFlags {
     }
 
     private static void profileActionBarFlags() {
-        BOOL_FLAGS.put("81826::0", true); //igx_action_bar_service_replacement::is_profile_replaced
+        if(Pref.enableMoreOptionsOnProfileQuickToggle()) {
+            BOOL_FLAGS.put("81826::0", true); //igx_action_bar_service_replacement::is_profile_replaced
+            BOOL_FLAGS.put("89230::0", true); //ig_android_profile_overflow_menu_redesign_launcher:enabled
+        }
     }
 
     private static void mainFeedActionBarFlags() {
-        BOOL_FLAGS.put("81826::1", true); //igx_action_bar_service_replacement::is_main_feed_replaced
-        BOOL_FLAGS.put("81826::4", true); //igx_action_bar_service_replacement::is_main_feed_large_screen_replaced
+        if(Pref.pikoSettingsOnActionBar()) {
+            BOOL_FLAGS.put("81826::1", true); //igx_action_bar_service_replacement::is_main_feed_replaced
+            BOOL_FLAGS.put("81826::4", true); //igx_action_bar_service_replacement::is_main_feed_large_screen_replaced
+        }
     }
 
     private static void employeeOptionsFlags() {
@@ -84,6 +76,13 @@ public class HookFlags {
     public static Boolean handleBoolFlags(long mobileConfigSpecifier) {
         try {
             DeveloperOptionsItem developerOptionsItem = new DeveloperOptionsItem(mobileConfigSpecifier);
+            // Sometimes I want to block all the subflags inside a universal ID.
+            // In which case I would only add the universal ID in the BOOL_MAP map.
+            // If a boolean value is found then it will return else it will check for for the usual config ID
+            String universalId = developerOptionsItem.getUniversalId();
+            Boolean universalFlag = BOOL_FLAGS.getOrDefault(universalId, null);
+            if(universalFlag!=null) return universalFlag;
+
             String configId = developerOptionsItem.getConfigId();
             return BOOL_FLAGS.getOrDefault(configId, null);
         } catch (Exception e) {

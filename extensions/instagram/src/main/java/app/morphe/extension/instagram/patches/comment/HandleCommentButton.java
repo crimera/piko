@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.patches.comment;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import java.util.List;
 import android.content.Context;
 
@@ -14,10 +16,13 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.crimera.ObjectBrowser;
+import app.morphe.extension.crimera.downloader.MediaType;
 
 import app.morphe.extension.instagram.entity.CommentData;
+import app.morphe.extension.instagram.entity.MediaData;
+import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.utils.Pref;
-import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.instagram.patches.comment.copyTextButton.CopyTextButton;
 import app.morphe.extension.instagram.patches.comment.debugButton.DebugButton;
@@ -37,7 +42,7 @@ public class HandleCommentButton {
             if (commentData.hasText() && Pref.commentCopyButton()) {
                 list.add(CopyTextButton.A00);
             }
-            if(commentData.hasGifMedia() && Pref.commentSaveMediaButton()){
+            if(commentData.hasMedia() && Pref.commentSaveMediaButton()){
                 list.add(SaveMediaButton.A00);
             }
         } catch (Exception e) {
@@ -55,9 +60,9 @@ public class HandleCommentButton {
                 if (commentData.hasText()) {
                     String commentText = (String) commentData.getText();
                     app.morphe.extension.shared.Utils.setClipboard(commentText);
-                    PikoUtils.toast(Strings.COMMENT_COPIED_SUCCESS);
+                    PikoUtils.toast(str("piko_comment_copied_success"));
                 } else {
-                    PikoUtils.toast(Strings.COMMENT_COPIED_FAILED);
+                    PikoUtils.toast(str("piko_comment_copied_failed"));
                 }
                 return true;
             } else if (button.equals(DebugButton.A00)) {
@@ -70,10 +75,24 @@ public class HandleCommentButton {
                 CommentData commentData = new CommentData(commentObject);
 
                 Context context = (Context) Utils.getActivity();
-                String gifUrl = commentData.getGifUrl();
-                String fileName = commentData.getGifDownloadName();
-                DownloadUtils.downloadMediaUrl(context,gifUrl,Strings.DEFAULT_GIF_FOLDER,fileName);
-                return true;
+                if(commentData.hasGifMedia()) {
+                    String gifUrl = commentData.getGifUrl();
+                    String fileName = commentData.getGifDownloadName();
+                    DownloadUtils.downloadMediaUrl(context, gifUrl, Constants.DEFAULT_GIF_FOLDER, fileName);
+                    return true;
+                } else if (commentData.hasImageMedia()) {
+                    MediaData imageData = commentData.getImageMedia();
+                    UserData userData = commentData.getCommentUserData();
+
+                    String userName = userData.getUsername();
+                    String mediaLink = imageData.getMediaLink();
+                    String fileName = userName+"_"+imageData.getDownloadFilename(MediaType.IMAGE);
+
+                    String subFolder = DownloadUtils.getSubfolderName(userName);
+
+                    DownloadUtils.downloadMediaUrl(context, mediaLink, subFolder, fileName);
+                    return true;
+                }
             }
 
         } catch (Exception e) {

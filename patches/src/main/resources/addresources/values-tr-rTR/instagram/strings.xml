@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ads Section -->
+    <string name="piko_category_ads">Reklamlar</string>
+    <string name="piko_disable_ads">Reklamları devre dışı bırak</string>
+    <string name="piko_hide_suggested_content">Önerilen içeriği gizle</string>
+    <string name="piko_hide_suggested_content_desc">Önerilen hikâyeleri, Reels ve Threads içeriklerini gizler (önerilen gönderiler yine gösterilmeye devam eder).</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_dev_options">Geliştirici seçenekleri</string>
+    <string name="piko_enable_dev_options">Geliştirici seçeneklerini etkinleştir</string>
+    <string name="piko_enable_dev_options_desc">Ana sayfa simgesine basılı tutarak geliştirici seçeneklerini etkinleştirir</string>
+    <string name="piko_directly_open_metaconfig">MetaConfig geçersiz kılma ayarlarını doğrudan açar</string>
+    <string name="piko_directly_open_metaconfig_desc">Ana sayfa simgesine uzun basıldığında MetaConfig geçersiz kılma ayarlarını doğrudan açar (Geliştirici seçenekleri etkin olmalıdır).</string>
+    <string name="piko_enable_emp_options">Çalışan seçeneklerini etkinleştir</string>
+    <string name="piko_enable_emp_options_desc">Test için kullanılan tüm çalışan seçeneklerinin kilidini açar</string>
+    <string name="piko_allow_user_network_certificate">Kullanıcı ağ sertifikasına izin ver</string>
+    <string name="piko_allow_user_network_certificate_desc">Beyaz şapka testleri için kullanıcı ağ sertifikasına izin verir</string>
+    <string name="piko_remove_build_expire_popup">Sürüm süresi doldu uyarısını kaldır</string>
+    <string name="piko_remove_build_expire_popup_desc">Uygulama sürümü eskiyince bir süre sonra görünen uyarı penceresini kaldırır</string>
+    <string name="piko_export_dev_overrides">Geçersiz kılma ayarlarını dışa aktar</string>
+    <string name="piko_import_dev_overrides">Geçersiz kılma ayarlarını içe aktar</string>
+    <string name="piko_import_id_mapping">Eşleme dosyalarını içe aktar</string>
+    <string name="piko_download_id_mapping">Eşleme dosyasını indir</string>
+    <string name="piko_missing_mapping_file">Eksik eşleme dosyası</string>
+    <string name="piko_missing_mapping_file_desc">Eşleme dosyası olmadan, geliştirici seçenekleri doğru isimlere sahip olmayacaktır. İndirmek ister misiniz?</string>
+    <!-- Links Section -->
+    <string name="piko_category_links">Bağlantılar</string>
+    <string name="piko_open_links_externally">Bağlantıları harici olarak aç</string>
+    <string name="piko_open_links_externally_desc">Bağlantıları uygulama içi tarayıcı yerine harici tarayıcıda açar</string>
+    <string name="piko_sanitize_share_links">Paylaşım bağlantılarını temizle</string>
+    <!-- Ghost Section -->
+    <string name="piko_category_ghost">Görünmez mod</string>
+    <string name="piko_view_stories_anonymously">Hikayeleri anonim olarak görüntüle</string>
+    <string name="piko_view_live_anonymously">Canlı yayınları anonim olarak görüntüle</string>
+    <string name="piko_disable_typing_status">Yazıyor durumunu devre dışı bırak</string>
+    <string name="piko_disable_screenshot_detection">Ekran görüntüsü tespitini devre dışı bırak</string>
+    <string name="piko_view_dm_anonymously">Mesajları anonim olarak görüntüle</string>
+    <string name="piko_turn_on_all_ghost_modes">Tüm görünmez modları etkinleştir</string>
+    <string name="piko_ghost_modes_on">Görünmez mod: Açık</string>
+    <string name="piko_ghost_modes_default">Görünmez mod: Varsayılan</string>
+    <string name="piko_ghost_modes_quick_toggle">Görünmez modlar için hızlı geçişi etkinleştir</string>
+    <string name="piko_ghost_modes_quick_toggle_desc">Sohbet eylem çubuğuna tüm görünmez modları kontrol eden bir buton ekler</string>
+    <!-- Distraction-Free Section -->
+    <string name="piko_category_distraction_free">Odak modu</string>
+    <string name="piko_disable_stories">Hikayeleri devre dışı bırak</string>
+    <string name="piko_disable_highlights">Öne çıkanları devre dışı bırak</string>
+    <string name="piko_disable_explore">Keşfet\'i devre dışı bırak</string>
+    <string name="piko_disable_comments">Yorumları devre dışı bırak</string>
+    <string name="piko_limit_following_feed">Akışı takip edilen profillerle sınırla</string>
+    <string name="piko_limit_following_feed_desc">Ana sayfa akışını yalnızca takip ettiğiniz profillerin içerikleriyle sınırlar</string>
+    <string name="piko_disable_reels_scrolling">Reels kaydırmayı devre dışı bırak</string>
+    <string name="piko_disable_reels_scrolling_desc">"Instagram Reels'deki sonsuz kaydırma özelliğini devre dışı bırakır, sonraki Reel'e kaydırmayı engeller.
+
+Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye sonra kendiliğinden duracaktır."</string>
+    <string name="piko_hide_stories_tray">Hikayeler tepsisini gizle</string>
+    <string name="piko_hide_stories_tray_desc">Ana akıştan hikayeler tepsisini gizle</string>
+    <string name="piko_hide_notes_tray">Notlar tepsisini gizle</string>
+    <string name="piko_hide_notes_tray_desc">DM kısmındaki notlar tepsisini gizler</string>
+    <string name="piko_hide_group_creation_button_on_sharesheet">Paylaşım menüsündeki grup oluşturma düğmesini gizle</string>
+    <string name="piko_disable_double_tap_like_post">Gönderilerde çift dokunarak beğenmeyi kapat</string>
+    <string name="piko_disable_double_tap_like_reel">Reels\'lerde çift dokunarak beğenmeyi kapat</string>
+    <string name="piko_disable_double_tap_like_comment">Yoruma çift tıklayıp beğenmeyi devre dışı bırak</string>
+    <string name="piko_disable_double_tap_like_message">Mesaja çift tıklayıp beğenmeyi devre dışı bırak</string>
+    <string name="piko_disable_double_tap_to_like">Çift dokunarak beğenmeyi devre dışı bırak</string>
+    <!-- Miscellaneous Section -->
+    <string name="piko_category_misc">Çeşitli</string>
+    <string name="piko_disable_analytics">Analizleri devre dışı bırak</string>
+    <string name="piko_delete_analytics_cache">Analiz önbelleğini sil</string>
+    <string name="piko_disable_analytics_desc">Instagram/Facebook sunucularına gönderilen analizleri engelle</string>
+    <string name="piko_disable_discover_people">Kişileri keşfetmeyi kapat</string>
+    <string name="piko_disable_discover_people_desc">Kullanıcı profilindeki Kişileri keşfet bölümünü devre dışı bırak</string>
+    <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>
+    <string name="piko_follow_back_indicator_desc">Profil sayfasına \"geri takip ediyor\" durum etiketi ekler ve tıklandığında ayrıntılı arkadaşlık durumunu gösterir</string>
+    <string name="piko_fbi_follows_you">Seni takip ediyor</string>
+    <string name="piko_fbi_doesnt_follows_you">Seni takip etmiyor</string>
+    <string name="piko_friendship_status">Arkadaşlık durumu</string>
+    <string name="piko_view_story_mentions">Hikaye bahsetmelerini görüntüle</string>
+    <string name="piko_vsm_title">Hikaye bahsetmeleri</string>
+    <string name="piko_vsm_no_mentions">Bu hikayede bahsetme yok</string>
+    <string name="piko_disable_story_flipping">Hikaye geçişini kapat</string>
+    <string name="piko_disable_story_flipping_desc">Sonraki hikayeye otomatik geçişi devre dışı bırakır</string>
+    <string name="piko_disable_video_autoplay">Video otomatik oynatmayı kapat</string>
+    <string name="piko_stories_audio_autoplay">Hikaye sesini otomatik oynat</string>
+    <string name="piko_customise_story_timestamp">Hikaye zaman damgasını özelleştir</string>
+    <string name="piko_customise_story_timestamp_desc">Hikayenin ne zaman paylaşıldığını gösteren zaman damgasını özelleştir</string>
+    <string name="piko_unlimited_replays">Geçici medyayı kalıcı yap</string>
+    <string name="piko_unlimited_replays_desc">Bir veya iki kez görüntülenebilen medyayı kalıcı görüntülenebilir hale getirir</string>
+    <string name="piko_improve_image_viewing">Görsel kalitesini artır</string>
+    <string name="piko_improve_image_viewing_desc">Sunucudan maksimum çözünürlüklü görüntüleri çeker</string>
+    <string name="piko_hide_reshare_button">Yeniden paylaş butonunu gizle</string>
+    <string name="piko_copy_comment">Yorumu kopyala</string>
+    <string name="piko_copy_comment_desc">Gönderi ve Reels videolarındaki yorumları kopyalamak için bir buton ekler</string>
+    <string name="piko_comment_copied_success">Yorum kopyalandı</string>
+    <string name="piko_comment_copied_failed">Kopyalanacak metin bulunamadı</string>
+    <string name="piko_save_media_comment">Yorum medyasını kaydet</string>
+    <string name="piko_save_media_comment_desc">Gönderi ve Reels yorumlarındaki medya içeriklerini kaydetmek için bir buton ekler</string>
+    <string name="piko_copy_username">Kullanıcı adını kopyala</string>
+    <string name="piko_copy_full_name">Tam adı kopyala</string>
+    <string name="piko_copy_user_id">Kullanıcı kimliğini kopyala</string>
+    <string name="piko_copy_bio">Biyografiyi kopyala</string>
+    <string name="piko_download_profile_picture">Profil resmini indir</string>
+    <string name="piko_copied">Kopyalandı</string>
+    <string name="piko_more_profile_options">Daha fazla profil seçeneği</string>
+    <string name="piko_more_profile_options_action_bar_toggle">Profil seçenekleri eylem çubuğunda</string>
+    <string name="piko_more_profile_options_action_bar_toggle_desc">Profil seçenekleri butonunu profil eylem çubuğuna taşı</string>
+    <string name="piko_remove_empty_bottom_space">Alttaki boş alanı kaldır</string>
+    <string name="piko_unlock_plus_benefits">Plus abonelik avantajlarının kilidini aç</string>
+    <string name="piko_unlock_plus_benefits_desc">Yerel olarak kontrol edilen “Plus” abonelik avantajlarının kilidini açar. ∆ Kendi sorumluluğunuzda kullanın</string>
+    <string name="piko_customise_story_ring_size">Hikaye halkası boyutunu özelleştir</string>
+    <string name="piko_customise_story_ring_size_desc">Hikaye halkasının boyutunu yüzde olarak değiştirin (Varsayılan: 100)</string>
+    <!-- Download Media Section -->
+    <string name="piko_category_download_media">Medya indirme</string>
+    <string name="piko_enable_download">İndirmeyi etkinleştir</string>
+    <string name="piko_enable_direct_download">Doğrudan indirmeyi etkinleştir</string>
+    <string name="piko_enable_direct_download_desc">Mevcut görüntülenen medyayı seçenek sormadan indirir</string>
+    <string name="piko_download_username_folder">Medyayı kullanıcı adına göre ayır</string>
+    <string name="piko_download_username_folder_desc">Kullanıcı adına göre alt klasörler oluşturur</string>
+    <string name="piko_download_current_media">Mevcut medyayı indir</string>
+    <string name="piko_download_as_image">Resim olarak indir</string>
+    <string name="piko_video_variants">Video varyantları</string>
+    <string name="piko_image_variants">Resim varyantları</string>
+    <string name="piko_download_audio">Ses olarak indir</string>
+    <string name="piko_download_options">İndirme seçenekleri</string>
+    <string name="piko_copy_media_link">Medya bağlantısını kopyala</string>
+    <string name="piko_copied_media_link">Medya bağlantısı kopyalandı</string>
+    <string name="piko_download_all">Tümünü indir</string>
+    <string name="piko_downloading_media">İndiriliyor: </string>
+    <string name="piko_downloaded_media">İndirildi: </string>
+    <string name="piko_media_exists">Bu medya zaten mevcut</string>
+    <string name="piko_download_failed_media">İndirme başarısız: </string>
+    <string name="piko_download_set_path">Özel indirme yolu ayarla</string>
+    <string name="piko_download_set_path_success">İndirme klasörü güncellendi!</string>
+    <string name="piko_download_set_path_failed">Klasör yolu çözümlenemedi</string>
+    <string name="piko_download_grant_permission">İndirmelere devam etmek için lütfen depolama erişimi izni verin</string>
+    <string name="piko_download_grant_permission_failed">Ayarlar açılamadı. Lütfen tüm dosyalara erişim iznini manuel olarak verin</string>
+    <string name="piko_download_with_external_downloader">Harici indirici ile indir</string>
+    <string name="piko_external_downloader_package_name">Harici indirici paket adı</string>
+    <string name="piko_external_downloader_package_name_not_found">Harici indirici paket adı bulunamadı</string>
+    <string name="piko_external_downloader_package_name_not_set">Lütfen harici indiricinin paket adını ayarlayın</string>
+    <string name="piko_download_voice_media">Sesli mesajı indir</string>
+    <!-- Posts Section -->
+    <string name="piko_post_options">Gönderi seçenekleri</string>
+    <string name="piko_copy_post_description">Gönderi açıklamasını kopyala</string>
+    <string name="piko_copy_post_owner_username">Gönderi sahibinin kullanıcı adını kopyala</string>
+    <string name="piko_copy_post_owner_fullname">Gönderi sahibinin tam adını kopyala</string>
+    <string name="piko_enable_more_options_on_post">Gönderilerde ek seçenekleri etkinleştir</string>
+    <string name="piko_enable_more_options_on_post_desc">Gönderi ve Reels menüsüne açıklama ve kullanıcı adı kopyalama gibi işlevler içeren “Ek seçenekler” bölümünü ekler</string>
+    <string name="piko_more_options">Daha fazla seçenek</string>
+    <!-- Navigation Section -->
+    <string name="piko_category_hide_navigation_buttons">Gezinme butonlarını gizle</string>
+    <string name="piko_hide_navigation_feed">Akış butonunu gizle</string>
+    <string name="piko_hide_navigation_reels">Reels butonunu gizle</string>
+    <string name="piko_hide_navigation_direct">Mesajlar butonunu gizle</string>
+    <string name="piko_hide_navigation_search">Arama butonunu gizle</string>
+    <string name="piko_hide_navigation_create">Oluştur butonunu gizle</string>
+    <!-- Information Section -->
+    <string name="piko_category_about">Hakkında</string>
+    <string name="piko_export_pref">Piko ayarlarını dışa aktar</string>
+    <string name="piko_import_pref">Piko ayarlarını içe aktar</string>
+    <string name="piko_app_version">Uygulama sürümü: %s</string>
+    <string name="piko_patch_version">Yama sürümü: %s</string>
+    <string name="piko_patch_info_title">Yama bilgisi</string>
+    <string name="piko_patch_enabled">Uygulandı</string>
+    <string name="piko_patch_disabled">Uygulanmadı</string>
+    <!-- Export and Import Section -->
+    <string name="piko_export_success">Başarıyla dışa aktarıldı</string>
+    <string name="piko_export_fail">Dışa aktarma başarısız</string>
+    <string name="piko_fail_no_path">Hedef yol belirtilmedi</string>
+    <string name="piko_fail_no_file">Dosya bulunamadı</string>
+    <string name="piko_import_success">Başarıyla içe aktarıldı</string>
+    <string name="piko_import_fail">İçe aktarma başarısız</string>
+    <string name="piko_restart_app">Değişikliklerin etkili olması için uygulamayı yeniden başlatın</string>
+    <string name="piko_ok">Tamam</string>
+    <string name="piko_cancel">İptal</string>
+    <string name="piko_deleted">Silindi</string>
+    <string name="piko_debug">Piko hata ayıklama</string>
+    <string name="piko_debug_desc">Test için bazı bileşenlere hata ayıklama seçeneği ekler</string>
+    <string name="piko_export_experiment_list">Deneysel özellik listelerini dışa aktar</string>
+    <string name="piko_export_experiment_mappings">Deneysel özellik eşlemelerini dışa aktar</string>
+    <!-- Open With Section -->
+    <string name="piko_open_image_externally">Resmi harici olarak aç</string>
+    <string name="piko_open_video_externally">Videoyu harici olarak aç</string>
+    <string name="piko_open_image_with">Resmi şununla aç</string>
+    <string name="piko_open_video_with">Videoyu şununla aç</string>
+    <!-- Like Animation Section -->
+    <string name="piko_change_like_animation">Beğeni animasyonunu değiştir</string>
+    <string name="piko_change_like_animation_desc">Animasyonu, mevcut halka benzeri animasyonlardan biriyle değiştirin</string>
+    <string name="piko_available_like_animation">Kullanılabilir beğeni animasyonları</string>
+    <!-- For arrays -->
+    <string name="piko_array_default">Varsayılan</string>
+    <string name="piko_array_detailed_timestamp">Detaylı zaman damgası (Hafta günü/Ay/Tarih/Saat/Dakika/Saniye)</string>
+    <string name="piko_array_post_time">Paylaşım zamanı (Saat/Dakika/Saniye)</string>
+    <string name="piko_array_time_left">Kalan süre (Kalan Saat/Dakika/Saniye)</string>
+    <!-- Welcome Message -->
+    <string name="piko_welcome_title">Piko\'ya hoşgeldiniz</string>
+    <string name="piko_welcome_message">Piko deneyiminizi iyileştirmek için lütfen Piko ayarlarına gidin ve tercihlerinizi düzenleyin</string>
+    <string name="piko_goto_piko_settings">Piko ayarlarına git</string>
+    <string name="piko_no_internet">Lütfen internete bağlanın</string>
+    <string name="piko_tap_here">Buraya dokunun !!</string>
+    <!-- Action Bar Section -->
+    <string name="piko_settings_on_action_bar">Piko ayarları eylem çubuğunda</string>
+    <string name="piko_settings_on_action_bar_desc">Piko ayarları butonunu ana akış eylem çubuğuna taşı</string>
+</resources>

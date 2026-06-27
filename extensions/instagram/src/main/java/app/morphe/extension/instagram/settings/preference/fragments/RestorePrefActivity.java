@@ -6,6 +6,8 @@
 
 package app.morphe.extension.instagram.settings.preference.fragments;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,7 +22,7 @@ import java.io.FileOutputStream;
 import android.content.Context;
 
 import app.morphe.extension.instagram.constants.UI;
-import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 
@@ -40,17 +42,17 @@ public class RestorePrefActivity extends AppCompatActivity {
         Bundle args = getIntent().getExtras();
 
         if (args != null) {
-            if (args.containsKey(Strings.IMPORT_DEV_OVERRIDES)) {
+            if (args.containsKey("piko_import_dev_overrides")) {
                 destinationFile =new File(context.getFilesDir()+ "/mobileconfig","mc_overrides.json");
-            } else if (args.containsKey(Strings.IMPORT_ID_MAPPING)) {
+            } else if (args.containsKey("piko_import_id_mapping")) {
                 destinationFile = new File(context.getFilesDir()+ "/mobileconfig","id_name_mapping.json");
-            } else if (args.containsKey(Strings.IMPORT_PIKO_PREF)) {
-                destinationFile =  new File(context.getApplicationInfo().dataDir + "/shared_prefs",Strings.PIKO_SETTINGS+".xml");
+            } else if (args.containsKey("piko_import_pref")) {
+                destinationFile =  new File(context.getApplicationInfo().dataDir + "/shared_prefs",Constants.PIKO_SETTINGS+".xml");
             }
             if (destinationFile != null) {
                 requestFileForRestore();
             } else {
-                toast(Strings.EXPORT_FAIL);
+                toast(str("piko_export_fail"));
                 finish();
             }
         }
@@ -80,11 +82,11 @@ public class RestorePrefActivity extends AppCompatActivity {
 
             in.close();
             out.close();
-            toast(Strings.IMPORT_SUCCESS);
+            toast(str("piko_import_success"));
             Utils.restartApp(ctx);
 
         } catch (Exception e) {
-            toast(Strings.IMPORT_FAIL);
+            toast(str("piko_import_fail"));
             Logger.printException(() -> "import failure", e);
         }
     }
@@ -100,7 +102,7 @@ public class RestorePrefActivity extends AppCompatActivity {
             if (uri != null) {
                 receiveFileForRestore(this, uri);
             } else {
-                toast(Strings.FAIL_NO_PATH);
+                toast(str("piko_fail_no_path"));
             }
         }
         finish();

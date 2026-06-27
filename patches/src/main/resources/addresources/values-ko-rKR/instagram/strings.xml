@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ads Section -->
+    <string name="piko_category_ads">광고</string>
+    <string name="piko_disable_ads">광고 비활성화</string>
+    <string name="piko_hide_suggested_content">추천 콘텐츠 숨기기</string>
+    <string name="piko_hide_suggested_content_desc">추천 스토리, 릴스 그리고 스레드를 숨깁니다 (추천 게시물은 계속 표시됩니다)</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_dev_options">개발자 옵션</string>
+    <string name="piko_enable_dev_options">개발자 옵션 활성화</string>
+    <string name="piko_enable_dev_options_desc">홈 아이콘을 길게 탭하여 개발자 옵션을 엽니다</string>
+    <string name="piko_directly_open_metaconfig">MetaConfig 재정의 바로 열기</string>
+    <string name="piko_directly_open_metaconfig_desc">홈 아이콘을 길게 탭하였을 경우에 MetaConfig 재정의를 바로 엽니다 (개발자 옵션 활성화 필요)</string>
+    <string name="piko_enable_emp_options">직원 옵션 활성화</string>
+    <string name="piko_enable_emp_options_desc">테스트에 사용되는 모든 직원 옵션을 활성화합니다</string>
+    <string name="piko_allow_user_network_certificate">사용자 네트워크 인증서 허용</string>
+    <string name="piko_allow_user_network_certificate_desc">화이트햇 테스트를 위해 사용자 네트워크 인증서를 허용합니다</string>
+    <string name="piko_remove_build_expire_popup">빌드 만료 팝업 제거</string>
+    <string name="piko_remove_build_expire_popup_desc">앱 버전이 오래되었을 경우에 일정 시간이 지나면 표시되는 팝업을 제거합니다</string>
+    <string name="piko_export_dev_overrides">재정의 내보내기</string>
+    <string name="piko_import_dev_overrides">재정의 가져오기</string>
+    <string name="piko_import_id_mapping">매핑 파일 가져오기</string>
+    <string name="piko_download_id_mapping">매핑 파일 다운로드</string>
+    <string name="piko_missing_mapping_file">매핑 파일이 누락되었습니다</string>
+    <string name="piko_missing_mapping_file_desc">매핑 파일이 없으면 개발자 옵션에 올바른 이름이 표시되지 않습니다. 다운로드하시겠습니까?</string>
+    <!-- Links Section -->
+    <string name="piko_category_links">링크</string>
+    <string name="piko_open_links_externally">외부 링크 열기</string>
+    <string name="piko_open_links_externally_desc">외부 링크를 열 경우에 내부 브라우저 대신 외부 브라우저를 사용합니다</string>
+    <string name="piko_sanitize_share_links">공유 링크 정리</string>
+    <!-- Ghost Section -->
+    <string name="piko_category_ghost">고스트</string>
+    <string name="piko_view_stories_anonymously">스토리 몰래보기</string>
+    <string name="piko_view_live_anonymously">라이브 몰래보기</string>
+    <string name="piko_disable_typing_status">입력 중 상태 비활성화</string>
+    <string name="piko_disable_screenshot_detection">스크린샷 감지 비활성</string>
+    <string name="piko_view_dm_anonymously">메시지 몰래보기</string>
+    <string name="piko_turn_on_all_ghost_modes">모든 고스트 모드 켜기</string>
+    <string name="piko_ghost_modes_on">고스트 모드: 켜짐</string>
+    <string name="piko_ghost_modes_default">고스트 모드: 기본값</string>
+    <string name="piko_ghost_modes_quick_toggle">고스트 모드에 대한 빠른 토글 활성화</string>
+    <string name="piko_ghost_modes_quick_toggle_desc">고스트 모드를 제어할 수 있는 빠른 토글 버튼을 채팅 작업 버튼바에 추가합니다</string>
+    <!-- Distraction-Free Section -->
+    <string name="piko_category_distraction_free">방해 요소 제거</string>
+    <string name="piko_disable_stories">스토리 비활성화</string>
+    <string name="piko_disable_highlights">하이라이트 비활성화</string>
+    <string name="piko_disable_explore">탐색 비활성화</string>
+    <string name="piko_disable_comments">댓글 비활성화</string>
+    <string name="piko_limit_following_feed">팔로우한 프로필만 피드에 표시</string>
+    <string name="piko_limit_following_feed_desc">홈 피드에 내가 팔로우하는 프로필의 콘텐츠만 표시합니다</string>
+    <string name="piko_disable_reels_scrolling">릴스 스크롤 비활성화</string>
+    <string name="piko_disable_reels_scrolling_desc">"인스타그램 릴스에서 무한 스크롤 동작을 비활성화하여 다음 릴스로 넘길 수 없도록 합니다
+
+알림: 앱을 새로 설치한 경우에 'Tip' 애니메이션이 표시될 수 있지만, 몇 초 후에 자동으로 사라집니다"</string>
+    <string name="piko_hide_stories_tray">스토리 선반 숨기기</string>
+    <string name="piko_hide_stories_tray_desc">메인 피드에서 스토리 선반을 숨깁니다</string>
+    <string name="piko_hide_notes_tray">메모 선반 숨기기</string>
+    <string name="piko_hide_notes_tray_desc">메시지 섹션에서 메모 선반을 숨깁니다</string>
+    <string name="piko_hide_group_creation_button_on_sharesheet">공유 시트에서 그룹 만들기 버튼 숨기기</string>
+    <string name="piko_disable_double_tap_like_post">게시물 두 번 탭하여 좋아요 비활성화</string>
+    <string name="piko_disable_double_tap_like_reel">릴스 두 번 탭하여 좋아요 비활성화</string>
+    <string name="piko_disable_double_tap_like_comment">댓글 두 번 탭하여 좋아요 비활성화</string>
+    <string name="piko_disable_double_tap_like_message">메시지 두 번 탭하여 좋아요 비활성화</string>
+    <string name="piko_disable_double_tap_to_like">두 번 탭하여 좋아요 비활성화</string>
+    <!-- Miscellaneous Section -->
+    <string name="piko_category_misc">기타</string>
+    <string name="piko_disable_analytics">분석 비활성화</string>
+    <string name="piko_delete_analytics_cache">분석 캐시 삭제</string>
+    <string name="piko_disable_analytics_desc">Instagram/Facebook 서버로 전송되는 분석 데이터를 차단합니다</string>
+    <string name="piko_disable_discover_people">사람 찾기 비활성화</string>
+    <string name="piko_disable_discover_people_desc">프로필에서 사람 찾아보기 섹션을 비활성화합니다</string>
+    <string name="piko_follow_back_indicator">관계 상태 표시기 활성화</string>
+    <string name="piko_follow_back_indicator_desc">프로필 페이지에 맞팔 상태를 표시하는 라벨을 추가하고, 그 라벨을 탭하는 경우에 상세한 관계 상태 분석을 표시합니다</string>
+    <string name="piko_fbi_follows_you">나를 팔로우하고 있음</string>
+    <string name="piko_fbi_doesnt_follows_you">나를 팔로우하지 않음</string>
+    <string name="piko_friendship_status">관계 상태</string>
+    <string name="piko_view_story_mentions">스토리 멘션 보기</string>
+    <string name="piko_vsm_title">스토리 멘션</string>
+    <string name="piko_vsm_no_mentions">이 스토리에 멘션이 없습니다</string>
+    <string name="piko_disable_story_flipping">스토리 자동 넘기기 비활성화</string>
+    <string name="piko_disable_story_flipping_desc">스토리가 자동으로 다음으로 넘어가지 않도록 합니다</string>
+    <string name="piko_disable_video_autoplay">동영상 자동 재생 비활성화</string>
+    <string name="piko_stories_audio_autoplay">스토리 자동 재생</string>
+    <string name="piko_customise_story_timestamp">스토리 시간 표시 설정</string>
+    <string name="piko_customise_story_timestamp_desc">스토리가 게시된 시간을 표시하는 방식을 변경합니다</string>
+    <string name="piko_unlimited_replays">일회성 미디어 영구화</string>
+    <string name="piko_unlimited_replays_desc">1~2 회만 볼 수 있는 미디어를 계속 볼 수 있게 변경합니다</string>
+    <string name="piko_improve_image_viewing">이미지 보기 개선</string>
+    <string name="piko_improve_image_viewing_desc">서버에서 최대 해상도의 이미지를 가져옵니다</string>
+    <string name="piko_hide_reshare_button">리포스트 버튼 숨기기</string>
+    <string name="piko_copy_comment">댓글 복사</string>
+    <string name="piko_copy_comment_desc">게시물 및 릴스에서 댓글을 복사하는 버튼을 추가합니다</string>
+    <string name="piko_comment_copied_success">댓글을 복사하였습니다</string>
+    <string name="piko_comment_copied_failed">복사할 텍스트가 없습니다</string>
+    <string name="piko_save_media_comment">미디어 댓글 저장</string>
+    <string name="piko_save_media_comment_desc">게시물 및 릴스에서 미디어 댓글을 저장하는 버튼을 추가합니다</string>
+    <string name="piko_copy_username">사용자 이름 복사</string>
+    <string name="piko_copy_full_name">이름 복사</string>
+    <string name="piko_copy_user_id">사용자 ID 복사</string>
+    <string name="piko_copy_bio">소개 복사</string>
+    <string name="piko_download_profile_picture">프로필 사진 다운로드</string>
+    <string name="piko_copied">복사하였습니다</string>
+    <string name="piko_more_profile_options">프로필 옵션 더보기</string>
+    <string name="piko_more_profile_options_action_bar_toggle">프로필 옵션을 작업 버튼바로 이동</string>
+    <string name="piko_more_profile_options_action_bar_toggle_desc">프로필 옵션 버튼을 프로필 작업 버튼바로 이동합니다</string>
+    <string name="piko_remove_empty_bottom_space">하단 빈 공간 제거</string>
+    <string name="piko_unlock_plus_benefits">플러스 혜택 해제</string>
+    <string name="piko_unlock_plus_benefits_desc">로컬에서 확인되는 \'Plus\' 구독 혜택을 활성화합니다. 사용 시 발생하는 모든 위험은 사용자 본인이 감수해야 합니다</string>
+    <string name="piko_customise_story_ring_size">스토리 링 크기 설정</string>
+    <string name="piko_customise_story_ring_size_desc">스토리 링 크기를 백분율로 변경합니다 (기본값: 100)</string>
+    <!-- Download Media Section -->
+    <string name="piko_category_download_media">미디어 다운로드</string>
+    <string name="piko_enable_download">다운로드 활성화</string>
+    <string name="piko_enable_direct_download">즉시 다운로드 활성화</string>
+    <string name="piko_enable_direct_download_desc">옵션 선택 없이 현재 보고 있는 미디어를 즉시 다운로드합니다</string>
+    <string name="piko_download_username_folder">사용자 이름별로 미디어 분류</string>
+    <string name="piko_download_username_folder_desc">사용자 이름 기준으로 하위 폴더를 생성합니다</string>
+    <string name="piko_download_current_media">현재 미디어 다운로드</string>
+    <string name="piko_download_as_image">이미지로 다운로드</string>
+    <string name="piko_video_variants">동영상 변형</string>
+    <string name="piko_image_variants">이미지 변형</string>
+    <string name="piko_download_audio">오디오 다운로드</string>
+    <string name="piko_download_options">다운로드 옵션</string>
+    <string name="piko_copy_media_link">미디어 링크 복사</string>
+    <string name="piko_copied_media_link">미디어 링크를 복사하였습니다</string>
+    <string name="piko_download_all">모두 다운로드</string>
+    <string name="piko_downloading_media">다운로드 중: </string>
+    <string name="piko_downloaded_media">다운로드 완료: </string>
+    <string name="piko_media_exists">이미 존재하는 미디어입니다</string>
+    <string name="piko_download_failed_media">다운로드 실패: </string>
+    <string name="piko_download_set_path">사용자 정의 다운로드 경로 설정</string>
+    <string name="piko_download_set_path_success">다운로드 디렉터리를 업데이트하였습니다!</string>
+    <string name="piko_download_set_path_failed">폴더 경로를 확인할 수 없습니다</string>
+    <string name="piko_download_grant_permission">다운로드를 계속하려면 저장소 접근 권한을 허용하세요</string>
+    <string name="piko_download_grant_permission_failed">설정을 열 수 없습니다. 모든 파일 접근 권한을 수동으로 허용하세요</string>
+    <string name="piko_download_with_external_downloader">외부 다운로더 앱으로 다운로드</string>
+    <string name="piko_external_downloader_package_name">외부 다운로더 앱 패키지명</string>
+    <string name="piko_external_downloader_package_name_not_found">외부 다운로더 앱 패키지명을 찾을 수 없습니다</string>
+    <string name="piko_external_downloader_package_name_not_set">외부 다운로더 앱 패키지명을 설정하세요</string>
+    <string name="piko_download_voice_media">음성 메시지 다운로드</string>
+    <!-- Posts Section -->
+    <string name="piko_post_options">게시물 옵션</string>
+    <string name="piko_copy_post_description">게시물 설명 복사</string>
+    <string name="piko_copy_post_owner_username">작성자 사용자 이름 복사</string>
+    <string name="piko_copy_post_owner_fullname">작성자 이름 복사</string>
+    <string name="piko_enable_more_options_on_post">게시물 옵션 더보기 활성화</string>
+    <string name="piko_enable_more_options_on_post_desc">게시물/릴스에서 설명 복사, 사용자 이름 복사 등의 더보기 옵션을 실행할 수 있는 오버플로 메뉴 버튼을 추가합니다</string>
+    <string name="piko_more_options">옵션 더보기</string>
+    <!-- Navigation Section -->
+    <string name="piko_category_hide_navigation_buttons">하단바 버튼 숨기기</string>
+    <string name="piko_hide_navigation_feed">피드 버튼 숨기기</string>
+    <string name="piko_hide_navigation_reels">릴스 버튼 숨기기</string>
+    <string name="piko_hide_navigation_direct">메시지 버튼 숨기기</string>
+    <string name="piko_hide_navigation_search">검색 버튼 숨기기</string>
+    <string name="piko_hide_navigation_create">만들기 버튼 숨기기</string>
+    <!-- Information Section -->
+    <string name="piko_category_about">정보</string>
+    <string name="piko_export_pref">Piko 설정 내보내기</string>
+    <string name="piko_import_pref">Piko 설정 가져오기</string>
+    <string name="piko_app_version">앱 버전: %s</string>
+    <string name="piko_patch_version">패치 버전: %s</string>
+    <string name="piko_patch_info_title">패치 정보</string>
+    <string name="piko_patch_enabled">활성화됨</string>
+    <string name="piko_patch_disabled">비활성화됨</string>
+    <!-- Export and Import Section -->
+    <string name="piko_export_success">성공적으로 내보냈습니다</string>
+    <string name="piko_export_fail">내보낼 수 없습니다</string>
+    <string name="piko_fail_no_path">저장 경로가 지정되지 않았습니다</string>
+    <string name="piko_fail_no_file">파일을 찾을 수 없습니다</string>
+    <string name="piko_import_success">성공적으로 가져왔습니다</string>
+    <string name="piko_import_fail">가져올 수 없습니다</string>
+    <string name="piko_restart_app">변경 사항을 적용하려면 앱을 다시 시작해야 합니다</string>
+    <string name="piko_ok">확인</string>
+    <string name="piko_cancel">취소</string>
+    <string name="piko_deleted">삭제하였습니다</string>
+    <string name="piko_debug">Piko 디버그</string>
+    <string name="piko_debug_desc">일부 구성요소에 테스트용 디버그 옵션을 추가합니다</string>
+    <string name="piko_export_experiment_list">실험 목록 내보내기</string>
+    <string name="piko_export_experiment_mappings">실험 매핑 내보내기</string>
+    <!-- Open With Section -->
+    <string name="piko_open_image_externally">이미지를 외부 앱으로 열기</string>
+    <string name="piko_open_video_externally">동영상을 외부 앱으로 열기</string>
+    <string name="piko_open_image_with">이미지 열기 방식</string>
+    <string name="piko_open_video_with">동영상 열기 방식</string>
+    <!-- Like Animation Section -->
+    <string name="piko_change_like_animation">좋아요 애니메이션 변경</string>
+    <string name="piko_change_like_animation_desc">기존 링 애니메이션 중 하나로 변경합니다</string>
+    <string name="piko_available_like_animation">사용 가능한 애니메이션</string>
+    <!-- For arrays -->
+    <string name="piko_array_default">기본</string>
+    <string name="piko_array_detailed_timestamp">상세 타임스탬프 (요일/월/일/시/분/초)</string>
+    <string name="piko_array_post_time">게시 시간 (시/분/초)</string>
+    <string name="piko_array_time_left">남은 시간 (시/분/초 left)</string>
+    <!-- Welcome Message -->
+    <string name="piko_welcome_title">Piko에 오신 것을 환영합니다</string>
+    <string name="piko_welcome_message">Piko 사용 경험을 개선하려면 Piko 설정으로 이동하여 원하는 대로 설정해 주세요</string>
+    <string name="piko_goto_piko_settings">Piko 설정으로 이동</string>
+    <string name="piko_no_internet">인터넷에 연결해 주세요</string>
+    <string name="piko_tap_here">여기를 탭하세요 !!</string>
+    <!-- Action Bar Section -->
+    <string name="piko_settings_on_action_bar">Piko 설정을 작업 버튼바로 이동</string>
+    <string name="piko_settings_on_action_bar_desc">Piko 설정 버튼을 메인 피드 작업 버튼바로 이동합니다</string>
+</resources>

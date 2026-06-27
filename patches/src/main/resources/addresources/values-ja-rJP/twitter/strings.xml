@@ -39,6 +39,11 @@
     <string name="piko_share_image_toggle">[ツイートを画像として共有] を有効化</string>
     <string name="piko_share_image_autocleanup">キャプチャを自動削除</string>
     <string name="piko_share_image_autocleanup_desc">これを有効化すると、24時間以上経過したキャプチャを削除します</string>
+    <string name="piko_share_image_invalid_context">無効なコンテキストです</string>
+    <string name="piko_share_image_capturing">ツイートをキャプチャしています…</string>
+    <string name="piko_share_image_view_not_found">ツイートが見つかりません</string>
+    <string name="piko_share_image_capture_failed">画像をキャプチャできませんでした</string>
+    <string name="piko_share_image_error">エラー: %s</string>
     <string name="piko_title_native_translator">翻訳</string>
     <string name="piko_native_translator_toggle">共有メニューに翻訳ボタンを追加</string>
     <string name="piko_native_translator_provider">翻訳プロバイダー</string>
@@ -91,7 +96,7 @@
     <string name="piko_pref_top_people_search_desc">検索結果の一番上にある「ユーザー欄」を非表示にします</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">その他</string>
-    <string name="piko_pref_chirp_font">Chirpフォントを有効化</string>
+    <string name="piko_pref_chirp_font">Chirpフォントを無効化</string>
     <string name="piko_pref_hide_fab">フローティングアクションボタンを削除</string>
     <string name="piko_pref_hide_fab_menu">フローティングアクションメニューを削除</string>
     <string name="piko_pref_rec_users">おすすめのユーザーを削除</string>
@@ -115,6 +120,7 @@
     <string name="piko_disunify_xchat_system">xchatシステムを無効化</string>
     <string name="piko_disunify_xchat_system_desc">メッセージや共有シートなどの従来の機能を復活させます</string>
     <string name="piko_legacy_share_link">旧式の共有リンク</string>
+    <string name="piko_block_redirecting_to_x_lite">X Lite へのリダイレクトを無効化</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">機能フラグ</string>
     <string name="piko_pref_feature_flags">機能フラグを追加</string>

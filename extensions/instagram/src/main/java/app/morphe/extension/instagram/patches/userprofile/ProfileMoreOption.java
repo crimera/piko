@@ -6,6 +6,8 @@
 
 package app.morphe.extension.instagram.patches.userprofile;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.content.Context;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -16,7 +18,6 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.ProfileInfo;
-import app.morphe.extension.instagram.constants.Strings;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.instagram.utils.Pref;
@@ -40,12 +41,12 @@ public class ProfileMoreOption {
             InstagramDialogBox dialog = new InstagramDialogBox(context);
 
             ArrayList<String> options = new ArrayList<>();
-            options.add(Strings.COPY_USERNAME);
-            options.add(Strings.COPY_FULL_NAME);
-            options.add(Strings.COPY_USER_ID);
-            options.add(Strings.COPY_BIO);
-            options.add(Strings.DOWNLOAD_PROFILE_PICTURE);
-            if (DEBUG) options.add(Strings.PIKO_DEBUG);
+            options.add(str("piko_copy_username"));
+            options.add(str("piko_copy_full_name"));
+            options.add(str("piko_copy_user_id"));
+            options.add(str("piko_copy_bio"));
+            options.add(str("piko_download_profile_picture"));
+            if (DEBUG) options.add(str("piko_debug"));
 
             CharSequence[] items = options.toArray(new CharSequence[0]);
 
@@ -58,23 +59,23 @@ public class ProfileMoreOption {
                         boolean toCopy = false;
                         String text = null;
 
-                        if (selectedOption.equals(Strings.COPY_USERNAME)) {
+                        if (selectedOption.equals(str("piko_copy_username"))) {
                             text = userData.getUsername();
                             toCopy = true;
 
-                        } else if (selectedOption.equals(Strings.COPY_FULL_NAME)) {
+                        } else if (selectedOption.equals(str("piko_copy_full_name"))) {
                             text = userData.getFullname();
                             toCopy = true;
 
-                        } else if (selectedOption.equals(Strings.COPY_USER_ID)) {
+                        } else if (selectedOption.equals(str("piko_copy_user_id"))) {
                             text = userData.getUserId();
                             toCopy = true;
 
-                        } else if (selectedOption.equals(Strings.COPY_BIO)) {
+                        } else if (selectedOption.equals(str("piko_copy_bio"))) {
                             text = userData.getBio();
                             toCopy = true;
 
-                        } else if (selectedOption.equals(Strings.DOWNLOAD_PROFILE_PICTURE)) {
+                        } else if (selectedOption.equals(str("piko_download_profile_picture"))) {
                             String url = userData.getProfilePictureUrl();
                             String username = userData.getUsername();
                             String downloadFilename = username+"_dp.jpg";
@@ -82,14 +83,14 @@ public class ProfileMoreOption {
                             DownloadUtils.downloadMediaUrl(context, url, subFolder, downloadFilename);
                             toCopy = false;
 
-                        } else if (selectedOption.equals(Strings.PIKO_DEBUG)) {
+                        } else if (selectedOption.equals(str("piko_debug"))) {
                             ObjectBrowser.browseObject(context, userData.getObject());
 
                         }
 
                         if (toCopy && text != null && text.length() > 0) {
                             Utils.setClipboard(text);
-                            Utils.showToastShort(Strings.COPIED);
+                            Utils.showToastShort(str("piko_copied"));
                         }
                     } catch (Exception e) {
                         Logger.printException(() -> "Error at moreOptionsDailogueBox onclick", e);
@@ -97,7 +98,7 @@ public class ProfileMoreOption {
                     }
                 }
             });
-            dialog.setTitle(Strings.MORE_PROFILE_OPTIONS);
+            dialog.setTitle(str("piko_more_profile_options"));
             dialog.setCancelable(true);
             dialog.setCanceledOnTouchOutside(true);
 
@@ -115,7 +116,7 @@ public class ProfileMoreOption {
 
             Context context = viewGroup.getContext();
             InstagramButton button = new InstagramButton(context);
-            button.setText(Strings.MORE_PROFILE_OPTIONS);
+            button.setText(str("piko_more_profile_options"));
             button.setStyle(InstagramButtonStyleEnum.PRIMARY);
             button.setOnClickListener(() ->
                     moreOptionsDailogueBox(context, userData)

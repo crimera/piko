@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ads Section -->
+    <string name="piko_category_ads">広告</string>
+    <string name="piko_disable_ads">広告を無効化</string>
+    <string name="piko_hide_suggested_content">「おすすめ」のコンテンツを非表示</string>
+    <string name="piko_hide_suggested_content_desc">「おすすめ」のストーリーズ、リール、スレッドを非表示にします (「おすすめ」の投稿は引き続き表示されます)。</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_dev_options">開発者オプション</string>
+    <string name="piko_enable_dev_options">開発者向けオプションを有効化</string>
+    <string name="piko_enable_dev_options_desc">[ホーム] タブを長押しすると、開発者向けのオプションが開きます</string>
+    <string name="piko_directly_open_metaconfig">MetaConfig のオーバーライド画面を直接開く</string>
+    <string name="piko_directly_open_metaconfig_desc">ホームタブを長押しすると、MetaConfigのオーバーライド画面を直接開きます。開発者向けオプションを有効にする必要があります</string>
+    <string name="piko_enable_emp_options">社員向けオプションを有効化</string>
+    <string name="piko_enable_emp_options_desc">テスト用の設定をすべて有効にします</string>
+    <string name="piko_allow_user_network_certificate">ユーザーネットワーク証明書を許可</string>
+    <string name="piko_allow_user_network_certificate_desc">セキュリティテスト用にユーザーネットワーク証明書を許可します</string>
+    <string name="piko_remove_build_expire_popup">ビルド期限切れポップアップを非表示</string>
+    <string name="piko_remove_build_expire_popup_desc">アプリのバージョンが古い場合に表示されるポップアップを非表示にします</string>
+    <string name="piko_export_dev_overrides">オーバーライドをエクスポート</string>
+    <string name="piko_import_dev_overrides">オーバーライドをインポート</string>
+    <string name="piko_import_id_mapping">マッピングファイルをインポート</string>
+    <string name="piko_download_id_mapping">マッピングファイルをダウンロード</string>
+    <string name="piko_missing_mapping_file">マッピングファイルがありません</string>
+    <string name="piko_missing_mapping_file_desc">マッピングファイルがないと、開発者向けオプションの名前が正しく表示されません。ダウンロードしますか？</string>
+    <!-- Links Section -->
+    <string name="piko_category_links">リンク</string>
+    <string name="piko_open_links_externally">リンクを外部ブラウザで開く</string>
+    <string name="piko_open_links_externally_desc">アプリ内ブラウザではなく外部ブラウザでリンクを開きます</string>
+    <string name="piko_sanitize_share_links">共有リンクから追跡情報を削除</string>
+    <!-- Ghost Section -->
+    <string name="piko_category_ghost">匿名</string>
+    <string name="piko_view_stories_anonymously">ストーリーを匿名で閲覧</string>
+    <string name="piko_view_live_anonymously">ライブを匿名で視聴</string>
+    <string name="piko_disable_typing_status">入力状態を非表示</string>
+    <string name="piko_disable_screenshot_detection">スクリーンショットの検出を無効化</string>
+    <string name="piko_view_dm_anonymously">DMを匿名で閲覧</string>
+    <string name="piko_turn_on_all_ghost_modes">すべての匿名モードを有効化</string>
+    <string name="piko_ghost_modes_on">匿名モード：有効</string>
+    <string name="piko_ghost_modes_default">匿名モード：無効</string>
+    <string name="piko_ghost_modes_quick_toggle">匿名モードのクイック切替を有効化</string>
+    <string name="piko_ghost_modes_quick_toggle_desc">チャット画面上部に匿名モードを切り替えるボタンを追加します</string>
+    <!-- Distraction-Free Section -->
+    <string name="piko_category_distraction_free">集中モード</string>
+    <string name="piko_disable_stories">ストーリーズを非表示</string>
+    <string name="piko_disable_highlights">ハイライトを非表示</string>
+    <string name="piko_disable_explore">発見を無効化</string>
+    <string name="piko_disable_comments">コメントを非表示</string>
+    <string name="piko_limit_following_feed">フィードにフォロー中のアカウントのみ表示</string>
+    <string name="piko_limit_following_feed_desc">ホームフィードにフォローしているアカウントの投稿のみ表示します。</string>
+    <string name="piko_disable_reels_scrolling">リールのスクロールを無効化</string>
+    <string name="piko_disable_reels_scrolling_desc">"リールでのスクロールを無効化し、次のリールをスワイプして視聴できないようにします。
+
+初めてリールを視聴する際、「上にスワイプしてさらに表示」と表示される場合がありますが、数秒後に自動で停止します。"</string>
+    <string name="piko_hide_stories_tray">ストーリーズ欄を非表示</string>
+    <string name="piko_hide_stories_tray_desc">メインフィードからストーリーズ欄を非表示にします</string>
+    <string name="piko_hide_notes_tray">ノート欄を非表示</string>
+    <string name="piko_hide_notes_tray_desc">DMセクションのノート欄を非表示にします</string>
+    <string name="piko_hide_group_creation_button_on_sharesheet">シェアシートのグループ作成ボタンを非表示</string>
+    <string name="piko_disable_double_tap_like_post">投稿をダブルタップして「いいね！」を無効化</string>
+    <string name="piko_disable_double_tap_like_reel">リールをダブルタップして「いいね！」を無効化</string>
+    <string name="piko_disable_double_tap_like_comment">コメントをダブルタップして「いいね！」を無効化</string>
+    <string name="piko_disable_double_tap_like_message">メッセージをダブルタップして「いいね！」を無効化</string>
+    <string name="piko_disable_double_tap_to_like">ダブルタップして「いいね！」を無効化</string>
+    <!-- Miscellaneous Section -->
+    <string name="piko_category_misc">その他</string>
+    <string name="piko_disable_analytics">分析データの送信を無効化</string>
+    <string name="piko_delete_analytics_cache">分析キャッシュを削除</string>
+    <string name="piko_disable_analytics_desc">InstagramとFacebookのサーバーへ送信される分析データをブロックします</string>
+    <string name="piko_disable_discover_people">おすすめのユーザーを無効化</string>
+    <string name="piko_disable_discover_people_desc">プロフィール内の「おすすめのユーザー」欄を非表示にします</string>
+    <string name="piko_follow_back_indicator">フレンドの状態表示を有効化</string>
+    <string name="piko_follow_back_indicator_desc">プロフィールページに「フォローされています」ステータスを追加し、クリックすると詳細なフォロー関係を表示します</string>
+    <string name="piko_fbi_follows_you">フォローされています</string>
+    <string name="piko_fbi_doesnt_follows_you">フォローされていません</string>
+    <string name="piko_friendship_status">フレンドの状態</string>
+    <string name="piko_view_story_mentions">ストーリーのメンションを表示</string>
+    <string name="piko_vsm_title">メンションされたアカウント</string>
+    <string name="piko_vsm_no_mentions">このストーリーでメンションされたアカウントはありません</string>
+    <string name="piko_disable_story_flipping">ストーリーの自動切り替えを無効化</string>
+    <string name="piko_disable_story_flipping_desc">次のストーリーに自動で移動しないようにします</string>
+    <string name="piko_disable_video_autoplay">動画を自動で再生しない</string>
+    <string name="piko_stories_audio_autoplay">ストーリーズの音声を自動で再生</string>
+    <string name="piko_customise_story_timestamp">ストーリーの時刻表示をカスタマイズ</string>
+    <string name="piko_customise_story_timestamp_desc">ストーリーに表示される投稿時刻をカスタマイズします</string>
+    <string name="piko_unlimited_replays">一時メディアを永続化</string>
+    <string name="piko_unlimited_replays_desc">「1回表示」や「2回表示」のメディアを通常の表示に変更します</string>
+    <string name="piko_improve_image_viewing">画像表示を改善</string>
+    <string name="piko_improve_image_viewing_desc">サーバーから最大解像度の画像を取得します</string>
+    <string name="piko_hide_reshare_button">リシェアボタンを非表示</string>
+    <string name="piko_copy_comment">コメントをコピー</string>
+    <string name="piko_copy_comment_desc">投稿やリールのコメントをコピーするボタンを追加します</string>
+    <string name="piko_comment_copied_success">コメントをコピーしました</string>
+    <string name="piko_comment_copied_failed">コピーするテキストが見つかりません</string>
+    <string name="piko_save_media_comment">GIFコメントを保存</string>
+    <string name="piko_save_media_comment_desc">投稿やリールのGIFコメントを保存するボタンを追加します</string>
+    <string name="piko_copy_username">ユーザーネームをコピー</string>
+    <string name="piko_copy_full_name">名前をコピー</string>
+    <string name="piko_copy_user_id">ユーザーIDをコピー</string>
+    <string name="piko_copy_bio">自己紹介をコピー</string>
+    <string name="piko_download_profile_picture">プロフィール画像をダウンロード</string>
+    <string name="piko_copied">コピーしました</string>
+    <string name="piko_more_profile_options">プロフィールのオプション</string>
+    <string name="piko_more_profile_options_action_bar_toggle">プロフィールオプションをアクションバーに表示</string>
+    <string name="piko_more_profile_options_action_bar_toggle_desc">プロフィールオプションボタンをプロフィール画面上部のアクションバーに移動します</string>
+    <string name="piko_remove_empty_bottom_space">ナビゲーションバー下の空白を削除</string>
+    <string name="piko_unlock_plus_benefits">Plus特典を有効化</string>
+    <string name="piko_unlock_plus_benefits_desc">ローカルで判定される「Plus」サブスクリプション特典を有効化します。自己責任で使用してください</string>
+    <string name="piko_customise_story_ring_size">ストーリー欄のアイコンのサイズをカスタマイズ</string>
+    <string name="piko_customise_story_ring_size_desc">ストーリー欄のアイコンのサイズをパーセントで変更します。（デフォルト値：100）</string>
+    <!-- Download Media Section -->
+    <string name="piko_category_download_media">メディアのダウンロード</string>
+    <string name="piko_enable_download">ダウンロードを有効化</string>
+    <string name="piko_enable_direct_download">直接ダウンロードを有効化</string>
+    <string name="piko_enable_direct_download_desc">オプションを表示せず、現在表示中のメディアを直接ダウンロードします</string>
+    <string name="piko_download_username_folder">ユーザーネームごとにメディアを分ける</string>
+    <string name="piko_download_username_folder_desc">ユーザーネームごとにサブフォルダを作成します</string>
+    <string name="piko_download_current_media">現在のメディアをダウンロード</string>
+    <string name="piko_download_as_image">画像としてダウンロード</string>
+    <string name="piko_video_variants">動画の解像度</string>
+    <string name="piko_image_variants">画像の解像度</string>
+    <string name="piko_download_audio">音声をダウンロード</string>
+    <string name="piko_download_options">ダウンロードのオプション</string>
+    <string name="piko_copy_media_link">メディアリンクをコピー</string>
+    <string name="piko_copied_media_link">メディアリンクをコピーしました</string>
+    <string name="piko_download_all">すべてダウンロード</string>
+    <string name="piko_downloading_media">ダウンロード中： </string>
+    <string name="piko_downloaded_media">ダウンロード完了： </string>
+    <string name="piko_media_exists">メディアは既に存在します</string>
+    <string name="piko_download_failed_media">ダウンロード失敗： </string>
+    <string name="piko_download_set_path">ダウンロード先フォルダを設定</string>
+    <string name="piko_download_set_path_success">ダウンロード先フォルダを更新しました！</string>
+    <string name="piko_download_set_path_failed">フォルダのパスを取得できませんでした</string>
+    <string name="piko_download_grant_permission">ダウンロードを続けるにはストレージへのアクセスを許可してください</string>
+    <string name="piko_download_grant_permission_failed">設定を開けませんでした。手動で「すべてのファイルへのアクセス」を許可してください</string>
+    <string name="piko_download_with_external_downloader">外部ダウンローダーでダウンロード</string>
+    <string name="piko_external_downloader_package_name">外部ダウンローダーのパッケージ名</string>
+    <string name="piko_external_downloader_package_name_not_found">外部ダウンローダーのパッケージ名が見つかりません</string>
+    <string name="piko_external_downloader_package_name_not_set">外部ダウンローダーのパッケージ名を設定してください</string>
+    <string name="piko_download_voice_media">音声メッセージをダウンロード</string>
+    <!-- Posts Section -->
+    <string name="piko_post_options">投稿のオプション</string>
+    <string name="piko_copy_post_description">投稿の説明をコピー</string>
+    <string name="piko_copy_post_owner_username">投稿者のユーザーネームをコピー</string>
+    <string name="piko_copy_post_owner_fullname">投稿者の名前をコピー</string>
+    <string name="piko_enable_more_options_on_post">投稿の追加のオプションを有効化</string>
+    <string name="piko_enable_more_options_on_post_desc">投稿を長押ししたときに追加のオプションを表示します</string>
+    <string name="piko_more_options">追加のオプション</string>
+    <!-- Navigation Section -->
+    <string name="piko_category_hide_navigation_buttons">ナビゲーションボタンを非表示</string>
+    <string name="piko_hide_navigation_feed">フィードボタンを非表示</string>
+    <string name="piko_hide_navigation_reels">リールボタンを非表示</string>
+    <string name="piko_hide_navigation_direct">DMボタンを非表示</string>
+    <string name="piko_hide_navigation_search">検索ボタンを非表示</string>
+    <string name="piko_hide_navigation_create">作成ボタンを非表示</string>
+    <!-- Information Section -->
+    <string name="piko_category_about">概要</string>
+    <string name="piko_export_pref">Piko設定をエクスポート</string>
+    <string name="piko_import_pref">Piko設定をインポート</string>
+    <string name="piko_app_version">アプリバージョン：v%s</string>
+    <string name="piko_patch_version">パッチバージョン：v%s</string>
+    <string name="piko_patch_info_title">パッチ情報</string>
+    <string name="piko_patch_enabled">有効</string>
+    <string name="piko_patch_disabled">無効</string>
+    <!-- Export and Import Section -->
+    <string name="piko_export_success">エクスポートしました</string>
+    <string name="piko_export_fail">エクスポートに失敗しました</string>
+    <string name="piko_fail_no_path">保存先のパスが指定されていません</string>
+    <string name="piko_fail_no_file">ファイルが見つかりません</string>
+    <string name="piko_import_success">インポートしました</string>
+    <string name="piko_import_fail">インポートに失敗しました</string>
+    <string name="piko_restart_app">変更を反映するにはアプリの再起動が必要です</string>
+    <string name="piko_ok">OK</string>
+    <string name="piko_cancel">キャンセル</string>
+    <string name="piko_deleted">削除しました</string>
+    <string name="piko_debug">Pikoデバッグ</string>
+    <string name="piko_debug_desc">一部コンポーネントにテスト用のデバッグオプションを追加します</string>
+    <string name="piko_export_experiment_list">実験リストをエクスポート</string>
+    <string name="piko_export_experiment_mappings">実験マッピングをエクスポート</string>
+    <!-- Open With Section -->
+    <string name="piko_open_image_externally">画像を外部アプリで開く</string>
+    <string name="piko_open_video_externally">動画を外部アプリで開く</string>
+    <string name="piko_open_image_with">画像を別のアプリで開く</string>
+    <string name="piko_open_video_with">動画を別のアプリで開く</string>
+    <!-- Like Animation Section -->
+    <string name="piko_change_like_animation">いいね！のアニメーションを変更</string>
+    <string name="piko_change_like_animation_desc">「いいね！」したときのアニメーションを変更します</string>
+    <string name="piko_available_like_animation">利用可能な「いいね！」のアニメーション</string>
+    <!-- For arrays -->
+    <string name="piko_array_default">デフォルト</string>
+    <string name="piko_array_detailed_timestamp">詳細な時刻表示</string>
+    <string name="piko_array_post_time">投稿時刻(時/分/秒)</string>
+    <string name="piko_array_time_left">残り時間(時/分/秒)</string>
+    <!-- Welcome Message -->
+    <string name="piko_welcome_title">Pikoへようこそ</string>
+    <string name="piko_welcome_message">Pikoをより快適に利用するため、Piko設定でお好みに合わせて設定してください</string>
+    <string name="piko_goto_piko_settings">Piko設定へ移動</string>
+    <string name="piko_no_internet">インターネットに接続してください</string>
+    <string name="piko_tap_here">ここをタップ！！</string>
+    <!-- Action Bar Section -->
+    <string name="piko_settings_on_action_bar">Piko設定をアクションバーに表示</string>
+    <string name="piko_settings_on_action_bar_desc">Piko設定をメインフィード上部のアクションバーに移動します</string>
+</resources>

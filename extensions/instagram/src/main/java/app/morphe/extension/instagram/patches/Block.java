@@ -7,13 +7,15 @@
 
 package app.morphe.extension.instagram.patches;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import java.util.List;
 import java.util.Arrays;
 import java.io.File;
 
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.utils.Utils;
-import app.morphe.extension.instagram.constants.Strings;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 
 public class Block {
@@ -32,14 +34,14 @@ public class Block {
             if (SUGGESTED_CONTENT_KEY.contains(key)) condition = true;
         }
 
-        return condition ? Strings.PIKO : key;
+        return condition ? Constants.PIKO : key;
     }
 
     public static void deleteAnalyticsCacheFolder() {
         File analyticDirectory = new File(app.morphe.extension.shared.Utils.getContext().getDataDir(), "app_analytics");
         Boolean done = Utils.deleteRecursive(analyticDirectory);
         if (done) {
-            app.morphe.extension.crimera.PikoUtils.toast(Strings.DELETED);
+            app.morphe.extension.crimera.PikoUtils.toast(str("piko_deleted"));
         }
     }
 }

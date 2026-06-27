@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.patches.actionbar;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,11 +19,10 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.constants.UI;
-import app.morphe.extension.instagram.constants.Strings;
 
 public class DMActionBar {
-    private static final String HIDE_ICON_NAME = "$avd_hide_password__0";
-    private static final String SHOW_ICON_NAME = "$avd_show_password__0";
+    private static final String HIDE_ICON_NAME = "design_ic_visibility_off";
+    private static final String SHOW_ICON_NAME = "design_ic_visibility";
 
     public static void addActionBarButton(ViewGroup viewGroup) {
         try {
@@ -30,18 +31,18 @@ public class DMActionBar {
             if(togglePreference && hasGhostSection){
                 boolean ghostModeToggle = Pref.getTurnOnAllGhostModes();
 
-                String iconStr = ghostModeToggle ? SHOW_ICON_NAME:HIDE_ICON_NAME;
+                String iconStr = ghostModeToggle ? HIDE_ICON_NAME:SHOW_ICON_NAME;
                 ImageView imageView = UI.addImageViewToViewGroup(viewGroup, iconStr, null);
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         try {
                             boolean ghostModeToggle= !Pref.getTurnOnAllGhostModes();
-                            String iconStr = ghostModeToggle ? SHOW_ICON_NAME:HIDE_ICON_NAME;
+                            String iconStr = ghostModeToggle ? HIDE_ICON_NAME:SHOW_ICON_NAME;
                             Pref.setTurnOnAllGhostModes(ghostModeToggle);
                             UI.setThemedIcon(imageView,iconStr);
 
-                            String toastStr = ghostModeToggle ? Strings.GHOST_MODES_ON : Strings.GHOST_MODES_DEFAULT;
+                            String toastStr = ghostModeToggle ? str("piko_ghost_modes_on") : str("piko_ghost_modes_default");
                             Utils.showToastShort(toastStr);
                         } catch (Exception ex) {
                             Logger.printException(() -> "ghost icon click failed: ", ex);

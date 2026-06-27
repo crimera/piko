@@ -96,7 +96,7 @@
     <string name="piko_pref_top_people_search_desc">Masque la section personnes après la recherche</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">Divers</string>
-    <string name="piko_pref_chirp_font">Activer la police chirp</string>
+    <string name="piko_pref_chirp_font">Désactiver la police chirp</string>
     <string name="piko_pref_hide_fab">Masquer le bouton d\'action flottant</string>
     <string name="piko_pref_hide_fab_menu">Masquer les boutons du menu d\'action flottant</string>
     <string name="piko_pref_rec_users">Masquer les utilisateurs recommandés</string>
@@ -120,6 +120,7 @@
     <string name="piko_disunify_xchat_system">Désactiver le système xchat unifié</string>
     <string name="piko_disunify_xchat_system_desc">Restaurer les anciennes fonctionnalités comme les messages et le menu de partage</string>
     <string name="piko_legacy_share_link">Liens de partage hérités</string>
+    <string name="piko_block_redirecting_to_x_lite">Bloquer la redirection vers X Lite</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Drapeaux de fonctionnalités</string>
     <string name="piko_pref_feature_flags">Ajouter des feature flags</string>
