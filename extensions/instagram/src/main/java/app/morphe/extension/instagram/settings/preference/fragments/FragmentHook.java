@@ -21,6 +21,8 @@ public class FragmentHook {
             startAds();
         }else if(key.equals(Constants.PIKO_FRAGMENT_GHOST)){
             startGhost();
+        }else if(key.equals(Constants.PIKO_FRAGMENT_DM)){
+            startDm();
         }else if(key.equals(Constants.PIKO_FRAGMENT_LINKS)){
             startLinks();
         }else if(key.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)){
@@ -48,6 +50,10 @@ public class FragmentHook {
 
     private static void startGhost(){
         ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_GHOST,"piko_category_ghost");
+    }
+
+    private static void startDm(){
+        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_DM,"piko_category_dm");
     }
 
     private static void startLinks(){

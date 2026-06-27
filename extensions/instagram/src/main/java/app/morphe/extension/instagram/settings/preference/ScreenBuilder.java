@@ -10,12 +10,14 @@ package app.morphe.extension.instagram.settings.preference;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.content.Context;
+import android.content.Intent;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import java.util.TreeMap;
 import java.util.Map;
 
+import app.morphe.extension.instagram.patches.dm.DeletedMessagesActivity;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
@@ -242,6 +244,30 @@ public class ScreenBuilder {
             );
         }
 
+    }
+
+    public void dmSection() {
+        if (!SettingsStatus.saveDeletedMessages) return;
+
+        PreferenceCategory category = addCategory(str("piko_category_dm"));
+
+        addPreference(category,
+            helper.switchPreference(
+                str("save_deleted_messages"),
+                str("save_deleted_messages_desc"),
+                Settings.SAVE_DELETED_MESSAGES
+            )
+        );
+
+        if (SettingsStatus.saveDeletedMessages) {
+            Preference viewBtn = new Preference(context);
+            viewBtn.setTitle(str("view_deleted_messages"));
+            viewBtn.setOnPreferenceClickListener(pref -> {
+                context.startActivity(new Intent(context, DeletedMessagesActivity.class));
+                return true;
+            });
+            addPreference(category, viewBtn);
+        }
     }
 
     public void linksSection() {
@@ -767,6 +793,16 @@ public class ScreenBuilder {
                             str("piko_category_ghost"),
                             "",
                             Constants.PIKO_FRAGMENT_GHOST
+                    )
+            );
+        }
+
+        if (SettingsStatus.saveDeletedMessages){
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_category_dm"),
+                            "",
+                            Constants.PIKO_FRAGMENT_DM
                     )
             );
         }
