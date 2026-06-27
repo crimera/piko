@@ -22,6 +22,8 @@ import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val HOOK_CLASS = "$INTEGRATIONS_PACKAGE/patches/dm/SavedMessagesHook;"
 private const val DIRECT_THREAD_KEY = "Lcom/instagram/model/direct/DirectThreadKey;"
@@ -64,17 +66,58 @@ val saveDeletedMessagesPatch =
             // Confirmed live on mt6855: A0P fires for new incoming DMs.
             // We hook every RETURN_OBJECT that returns a non-null value (p0/this) so that
             // obfuscation-driven instruction reordering doesn't shift which is "last".
+            // Resolve, at patch time, the MSys-delta field that holds the thread id. A0P's second
+            // parameter is the MSys delta (LX/02L). A stable converter
+            // (LX/3Bh;->A00(delta) : DirectThreadKey, invoked inside the action-bar builder) reads
+            // that thread id straight off the delta — its first iget-object of a String off the
+            // delta is the field we want. DirectThreadKey is a non-obfuscated class, so the converter
+            // is found by return type, and the delta field is read out of its body — no hardcoded
+            // obfuscated names, no runtime graph walk.
+            val converterRef =
+                DMActionBarThreadFingerprint.method.instructions
+                    .first {
+                        it.opcode == Opcode.INVOKE_STATIC &&
+                            (it as ReferenceInstruction).reference
+                                .let { r -> r is MethodReference && r.returnType == DIRECT_THREAD_KEY }
+                    }.let { (it as ReferenceInstruction).reference as MethodReference }
+            val deltaThreadIdField =
+                mutableClassDefBy { it.type == converterRef.definingClass }
+                    .methods
+                    .first { it.name == converterRef.name && it.returnType == DIRECT_THREAD_KEY }
+                    .instructions
+                    .first {
+                        it.opcode == Opcode.IGET_OBJECT &&
+                            (it as ReferenceInstruction).reference
+                                .let { r -> r is FieldReference && r.type == "Ljava/lang/String;" }
+                    }.let { (it as ReferenceInstruction).reference as FieldReference }
+            val deltaClass = deltaThreadIdField.definingClass
+            // Sanity-check the delta really is A0P's second parameter before reading it off p2.
+            require(DirectItemPostprocessFingerprint.method.parameterTypes[1] == deltaClass) {
+                "A0P param[1] (${DirectItemPostprocessFingerprint.method.parameterTypes[1]}) != delta $deltaClass"
+            }
+
             DirectItemPostprocessFingerprint.method.apply {
                 // A0P is the MQTT post-processing step called for every incoming DirectItem.
-                // Inject at index 0: `this` (p0) is fully populated before A0P runs.
+                // Inject at index 0: `this` (p0) is fully populated before A0P runs; p2 is the MSys
+                // delta carrying the thread id (read via the patch-resolved field above).
                 // onMessageReceived offloads work to a background HandlerThread so the
                 // MQTT delivery thread is never blocked (critical on MediaTek/mt6855).
-                val reg = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 1).getFreeRegister()
+                val regs = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 3)
+                val rItem = regs.getFreeRegister()
+                val rDelta = regs.getFreeRegister()
+                val rTid = regs.getFreeRegister()
+                // p2 (the MSys delta) is null on some A0P calls — guard before reading the thread id,
+                // and pass a null hint in that case (the extension then leaves the row unscoped).
                 addInstructions(
                     0,
                     """
-                    move-object/from16 v$reg, p0
-                    invoke-static {v$reg}, $HOOK_CLASS->onMessageReceived(Ljava/lang/Object;)V
+                    move-object/from16 v$rItem, p0
+                    const/4 v$rTid, 0x0
+                    move-object/from16 v$rDelta, p2
+                    if-eqz v$rDelta, :piko_no_delta
+                    iget-object v$rTid, v$rDelta, $deltaClass->${deltaThreadIdField.name}:Ljava/lang/String;
+                    :piko_no_delta
+                    invoke-static {v$rItem, v$rTid}, $HOOK_CLASS->onMessageReceived(Ljava/lang/Object;Ljava/lang/String;)V
                     """.trimIndent(),
                 )
             }

@@ -286,7 +286,16 @@ public class SavedMessagesHook {
         return NOTIFIED_IDS.put(messageId, Boolean.TRUE) == null;
     }
 
+    /** Hook 1 (REST): the parsed DirectItem carries its own thread_key, so no hint is needed. */
     public static void onMessageReceived(final Object item) {
+        onMessageReceived(item, null);
+    }
+
+    /**
+     * Hook 2 (MQTT/MSys): the item's thread_key field is null on this path, so the patch passes the
+     * thread id read from the MSys delta (A0P's p2) at patch time as {@code threadIdHint}.
+     */
+    public static void onMessageReceived(final Object item, final String threadIdHint) {
         // Called from the MQTT thread — must return instantly. All reflection/DB work
         // is posted to sWorker (background HandlerThread).
         if (item == null) return;
@@ -295,11 +304,11 @@ public class SavedMessagesHook {
         if (!item.getClass().getName().startsWith("X.")) return;
 
         getWorker().post(new Runnable() { @Override public void run() {
-            processReceivedItem(item);
+            processReceivedItem(item, threadIdHint);
         }});
     }
 
-    private static void processReceivedItem(Object item) {
+    private static void processReceivedItem(Object item, String threadIdHint) {
         try {
             // All field names are resolved at patch time and baked into DirectItem (see the
             // directItemEntity patch) — nothing is fingerprinted by name at runtime here.
@@ -385,11 +394,11 @@ public class SavedMessagesHook {
             // action-bar builder — we intentionally do NOT set it from the message stream, since
             // an inbox load touches every thread and would pollute the scope.
             // On v426/MSys the item's direct thread_key field is null on the MQTT path, so
-            // di.getThreadId() returns null and the row can't be scoped to a chat. Recover the
-            // thread id from a DirectThreadKey reachable elsewhere in the item's object graph.
-            if (threadId == null || threadId.isEmpty()) {
-                String found = deepFindThreadId(item);
-                if (found != null) threadId = found;
+            // di.getThreadId() returns null. The thread id then comes from the MSys delta (A0P's
+            // p2), read at patch time and passed in as threadIdHint — keeping capture patch-time.
+            if ((threadId == null || threadId.isEmpty())
+                    && threadIdHint != null && !threadIdHint.isEmpty()) {
+                threadId = threadIdHint;
             }
             if (threadId == null) threadId = "";
 
