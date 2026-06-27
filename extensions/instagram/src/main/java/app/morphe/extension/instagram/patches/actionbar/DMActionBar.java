@@ -31,14 +31,14 @@ public class DMActionBar {
             if(togglePreference && hasGhostSection){
                 boolean ghostModeToggle = Pref.getTurnOnAllGhostModes();
 
-                String iconStr = ghostModeToggle ? SHOW_ICON_NAME:HIDE_ICON_NAME;
+                String iconStr = ghostModeToggle ? HIDE_ICON_NAME:SHOW_ICON_NAME;
                 ImageView imageView = UI.addImageViewToViewGroup(viewGroup, iconStr, null);
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         try {
                             boolean ghostModeToggle= !Pref.getTurnOnAllGhostModes();
-                            String iconStr = ghostModeToggle ? SHOW_ICON_NAME:HIDE_ICON_NAME;
+                            String iconStr = ghostModeToggle ? HIDE_ICON_NAME:SHOW_ICON_NAME;
                             Pref.setTurnOnAllGhostModes(ghostModeToggle);
                             UI.setThemedIcon(imageView,iconStr);
 
