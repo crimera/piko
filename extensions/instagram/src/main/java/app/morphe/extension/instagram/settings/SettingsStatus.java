@@ -79,6 +79,10 @@ public class SettingsStatus {
     public static void viewDmAnonymously() {
         viewDmAnonymously = true;
     }
+    public static boolean directInboxGhostModeQuickToggle = false;
+    public static void directInboxGhostModeQuickToggle() {
+        directInboxGhostModeQuickToggle = true;
+    }
     public static boolean ghostSection() {
         return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously);
     }
