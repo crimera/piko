@@ -69,6 +69,8 @@
     <string name="piko_disable_analytics_desc">InstagramとFacebookのサーバーへ送信される分析データをブロックします</string>
     <string name="piko_disable_discover_people">おすすめのユーザーを無効化</string>
     <string name="piko_disable_discover_people_desc">プロフィール内の「おすすめのユーザー」欄を非表示にします</string>
+    <string name="piko_follow_back_indicator">フレンドの状態表示を有効化</string>
+    <string name="piko_follow_back_indicator_desc">プロフィールページに「フォローされています」ステータスを追加し、クリックすると詳細なフォロー関係を表示します</string>
     <string name="piko_fbi_follows_you">フォローされています</string>
     <string name="piko_fbi_doesnt_follows_you">フォローされていません</string>
     <string name="piko_friendship_status">フレンドの状態</string>
