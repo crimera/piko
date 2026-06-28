@@ -37,7 +37,8 @@ public class TweetInfoAPI {
 
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new Exception("HTTP error code: " + responseCode);
+                PikoUtils.logger("HTTP error code when fetching tweet source: " + responseCode);
+                return new JSONObject("{}");
             }
 
             reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
