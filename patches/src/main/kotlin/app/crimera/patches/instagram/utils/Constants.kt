@@ -23,11 +23,7 @@ object Constants {
                     // Stable
                     AppTarget(
                         version = "430.0.0.53.80",
-                        versionCodes =
-                            mapOf(
-                                ARM64_V8A to 383611190,
-                                ARM64_V8A to 383611231,
-                            ),
+                        versionCodes = mapOf(ARM64_V8A to 383611194),
                     ),
                 ),
         )

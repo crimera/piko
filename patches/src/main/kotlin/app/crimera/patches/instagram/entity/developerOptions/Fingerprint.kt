@@ -36,6 +36,10 @@ internal object ExperimentsValueBuilderFingerprint : Fingerprint(
     strings = listOf("default[after mc dispose]", "default[before mc init]", "override", "server"),
 )
 
+// "Failed to get config key with specifier:%d" co-located in v426 (X/AUE.A01) but moved
+// to a string-table lookup (LX/000;->A00(I)) in v433+ (X/35z.A02). "ExperimentParameter"
+// remains the only stable const-string anchor and is unique to this abstract class in
+// both classes10.dex (v426) and classes3.dex (v433+).
 internal object ExperimentsGetMobileConfigSpecifier : Fingerprint(
-    strings = listOf("ExperimentParameter", "Failed to get config key with specifier:%d"),
+    strings = listOf("ExperimentParameter"),
 )

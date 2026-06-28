@@ -178,4 +178,28 @@ public class DirectItem extends Entity {
             return null;
         }
     }
+
+    /**
+     * The attached {@code com.instagram.feed.media.Media} object for a photo/video DM, or null.
+     * Lives in a base-class Object field whose obfuscated name is patched in at build time. Voice
+     * media uses a different (obfuscated) type in a separate field and is NOT returned here.
+     */
+    private Object getMediaObject() throws Exception {
+        return this.readBaseField("mediaField");
+    }
+
+    /**
+     * Best-effort media URL (image/video) for a photo/video DM, or null when the item carries no
+     * such media. Reuses {@link MediaData} since the DM media object is the same feed Media class.
+     * Callers should fall back to a heuristic search for shapes this doesn't cover (e.g. voice).
+     */
+    public String getMediaUrl() {
+        try {
+            Object media = this.getMediaObject();
+            if (media == null) return null;
+            return new MediaData(media).getMediaLink();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

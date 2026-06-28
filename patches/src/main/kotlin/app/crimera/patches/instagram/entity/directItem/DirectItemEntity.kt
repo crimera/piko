@@ -29,28 +29,25 @@ val directItemEntity =
     ) {
         execute {
             DirectItemDispatchFingerprint.apply {
-                // For a JSON key string in the dispatch method, the very next iput stores the
-                // parsed value into that key's (obfuscated) field on the DirectItem base class.
+                // Scan all methods: v426 deserializer is A00, v430+ moved it to unsafeParseFromJson.
                 fun fieldAfter(key: String) =
-                    method.run {
-                        val insns = instructions.toList()
-                        val keyIndex =
-                            insns.indexOfFirst {
-                                (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
-                                    (it as ReferenceInstruction).reference.toString() == key
-                            }
-                        require(keyIndex >= 0) { "const-string '$key' not found in dispatch method" }
-                        val iput =
+                    mutableClassDefBy { it.type == method.definingClass }
+                        .methods.firstNotNullOfOrNull { m ->
+                            val insns = runCatching { m.instructions.toList() }.getOrNull()
+                                ?: return@firstNotNullOfOrNull null
+                            val keyIndex =
+                                insns.indexOfFirst {
+                                    (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
+                                        (it as ReferenceInstruction).reference.toString() == key
+                                }
+                            if (keyIndex < 0) return@firstNotNullOfOrNull null
                             insns.drop(keyIndex + 1).firstOrNull {
                                 it.opcode.name.startsWith("iput", ignoreCase = true)
-                            } ?: error("no iput after '$key'")
-                        iput.fieldExtractor()
-                    }
+                            }?.fieldExtractor()
+                        } ?: error("no iput after '$key' in ${method.definingClass}")
 
                 val itemId = fieldAfter("item_id")
                 GetItemIdExtension.changeFirstString(itemId.name)
-                // The item_id field is declared on the DirectItem base class — reuse its binary
-                // name rather than hardcoding the obfuscated class.
                 GetBaseClassNameExtension.changeFirstString(itemId.definingClass)
 
                 GetUserIdExtension.changeFirstString(fieldAfter("user_id").name)
@@ -69,10 +66,7 @@ val directItemEntity =
 
                 GetThreadKeyExtension.changeFirstString(fieldAfter("thread_key").name)
 
-                // item_type enum: the dispatch only stores a raw integer code, but Instagram's own
-                // logic uses an enum field on the base class. The item_type enum is the only enum
-                // type with two fields on the base class (a primary + a vestigial copy); the
-                // primary one sorts last by name. Resolve it without hardcoding the enum class.
+                // item_type: the only enum with 2+ fields on the base class; primary sorts last by name.
                 val baseDescriptor = extensionToClassName(itemId.definingClass)
                 val baseClass = mutableClassDefBy { it.type == baseDescriptor }
 
@@ -91,10 +85,7 @@ val directItemEntity =
                         .name
                 GetItemTypeExtension.changeFirstString(itemTypeField)
 
-                // MQTT items leave the base text field null and store the message in a polymorphic
-                // Object payload field on the subclass, set immediately after the item-type setter
-                // (a void method taking the item-type enum). Resolve that field so getText can fall
-                // back to it for live/MQTT messages.
+                // MQTT items store text in an Object field on the subclass, set after the item-type setter.
                 val itemTypeEnum = baseClass.fields.first { it.name == itemTypeField }.type
                 val subClass = mutableClassDefBy { it.superclass == baseDescriptor }
                 val subTextField =
@@ -121,10 +112,48 @@ val directItemEntity =
                     GetTextExtension.changeStringAt(1, it)
                     SetTextExtension.changeStringAt(1, it)
                 }
+
+                // Media field: best-effort, never fatal. v430+: iput-object directly in dispatch body; v426: inside a setter.
+                val mediaClass = "Lcom/instagram/feed/media/Media;"
+                runCatching {
+                    method.run {
+                        val insns = instructions.toList()
+                        val mediaKeyIndex =
+                            insns.indexOfFirst {
+                                (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
+                                    (it as ReferenceInstruction).reference.toString() == "media"
+                            }
+                        require(mediaKeyIndex >= 0) { "const-string 'media' not found" }
+                        val tail = insns.drop(mediaKeyIndex + 1)
+
+                        tail.firstOrNull {
+                            it.opcode.name.startsWith("iput-object", ignoreCase = true) &&
+                                (it as ReferenceInstruction).reference
+                                    .let { r -> r is FieldReference && r.type == mediaClass }
+                        }?.fieldExtractor()
+                            ?: run {
+                                // v426: iput-object is inside a setter called with the Media arg.
+                                val setterRef =
+                                    tail.asSequence()
+                                        .mapNotNull { (it as? ReferenceInstruction)?.reference as? MethodReference }
+                                        .firstOrNull { r -> r.parameterTypes.any { it.toString() == mediaClass } }
+                                        ?: error("no Media iput or setter after 'media' key")
+                                val setter =
+                                    mutableClassDefBy { it.type == setterRef.definingClass }
+                                        .methods.first {
+                                            it.name == setterRef.name &&
+                                                it.parameterTypes.map(Any::toString) ==
+                                                setterRef.parameterTypes.map(Any::toString)
+                                        }
+                                setter.instructions
+                                    .first { it.opcode.name.startsWith("iput-object", ignoreCase = true) }
+                                    .fieldExtractor()
+                            }
+                    }
+                }.onSuccess { GetMediaObjectExtension.changeFirstString(it.name) }
             }
 
-            // DirectThreadKey is a stable (non-obfuscated) class but its thread-id field is
-            // obfuscated; it is the first declared String instance field.
+            // DirectThreadKey is stable but its thread-id field is obfuscated: first String instance field.
             val threadKeyClass =
                 mutableClassDefBy { it.type == "Lcom/instagram/model/direct/DirectThreadKey;" }
             val threadIdField =

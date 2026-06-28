@@ -24,17 +24,9 @@ internal object SetHideInThreadExtension : Fingerprint(name = "setHideInThread",
 internal object GetItemTypeExtension : Fingerprint(name = "getItemType", definingClass = DIRECT_ITEM_CLASS)
 internal object GetThreadKeyExtension : Fingerprint(name = "getThreadKey", definingClass = DIRECT_ITEM_CLASS)
 internal object GetThreadIdExtension : Fingerprint(name = "getThreadId", definingClass = DIRECT_ITEM_CLASS)
+internal object GetMediaObjectExtension : Fingerprint(name = "getMediaObject", definingClass = DIRECT_ITEM_CLASS)
 
-/**
- * The per-field JSON dispatch helper for DirectItem ({@code LX/0gL;.A00} on v426). Every JSON
- * key string constant is immediately followed by the {@code iput} that stores the parsed value
- * into the matching (obfuscated) field on the DirectItem base class. Walking this method lets us
- * read every real field name straight out of the target APK at patch time — no runtime guessing.
- *
- * The declaring class of the {@code item_id} field is also the DirectItem base class, so we
- * derive the base-class binary name from the same walk instead of hardcoding it.
- */
+// returnType omitted: v426 returns Z, v433+ returns V. const-string → iput pattern is present in both.
 internal object DirectItemDispatchFingerprint : Fingerprint(
     strings = listOf("item_id", "user_id", "text", "timestamp", "hide_in_thread", "thread_key"),
-    returnType = "Z",
 )

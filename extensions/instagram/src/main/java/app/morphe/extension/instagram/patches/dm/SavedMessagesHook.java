@@ -6,7 +6,6 @@
 
 package app.morphe.extension.instagram.patches.dm;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
@@ -367,7 +366,10 @@ public class SavedMessagesHook {
             // Media messages (photo/video/voice/etc.) carry no text — capture the media URL so the
             // deleted-messages screen can still display/open it after the sender unsends.
             if ((content == null || content.isEmpty()) && type != null && !type.equals("text")) {
-                String url = deepFindMediaUrl(item);
+                // Patch-time resolved photo/video media first; fall back to the heuristic graph
+                // walk for shapes it doesn't cover (e.g. voice media, unexpected layouts).
+                String url = di.getMediaUrl();
+                if (url == null) url = deepFindMediaUrl(item);
                 if (url != null) content = url;
             }
 
