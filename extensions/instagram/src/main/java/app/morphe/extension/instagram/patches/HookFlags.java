@@ -25,7 +25,7 @@ public class HookFlags {
 
     private static void simpleOverflowMenuFlags() {
         BOOL_FLAGS.put("104772", false); //ig_ini
-        BOOL_FLAGS.put("117613", true); //ig_overflow_menu_icon
+        BOOL_FLAGS.put("117613::0", true); //ig_overflow_menu_icon::use_more_lines_icon
         BOOL_FLAGS.put("100002", true); //ig_igds_android_prism_overflow_sheet
         BOOL_FLAGS.put("40597::31", false); //ig_feed_favorites_launcher::enable_toggle_favorites_in_feed_overflow_menu
         BOOL_FLAGS.put("31983::9", true); //ig_feed_connected_not_interested_launcher::feed_demote_hide_mute_in_menu
