@@ -60,20 +60,15 @@ val saveDeletedMessagesPatch =
             // Derive delta class from A0P's second parameter, then find the static converter
             // (delta → DirectThreadKey) by signature search — no dependency on DMActionBarBuilderFingerprint.
             val deltaClass = DirectItemPostprocessFingerprint.method.parameterTypes[1].toString()
+            fun isConverter(m: com.android.tools.smali.dexlib2.iface.Method) =
+                AccessFlags.STATIC.isSet(m.accessFlags) &&
+                    m.returnType == DIRECT_THREAD_KEY &&
+                    m.parameterTypes.size == 1 &&
+                    m.parameterTypes[0].toString() == deltaClass
             val deltaThreadIdField =
-                mutableClassDefBy { cd ->
-                    cd.methods.any { m ->
-                        AccessFlags.STATIC.isSet(m.accessFlags) &&
-                            m.returnType == DIRECT_THREAD_KEY &&
-                            m.parameterTypes.size == 1 &&
-                            m.parameterTypes[0].toString() == deltaClass
-                    }
-                }.methods.first { m ->
-                    AccessFlags.STATIC.isSet(m.accessFlags) &&
-                        m.returnType == DIRECT_THREAD_KEY &&
-                        m.parameterTypes.size == 1 &&
-                        m.parameterTypes[0].toString() == deltaClass
-                }.instructions
+                mutableClassDefBy { cd -> cd.methods.any { isConverter(it) } }
+                .methods.first { isConverter(it) }
+                .instructions
                     .first {
                         it.opcode == Opcode.IGET_OBJECT &&
                             (it as ReferenceInstruction).reference
