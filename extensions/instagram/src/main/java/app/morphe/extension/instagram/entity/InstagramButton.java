@@ -33,7 +33,21 @@ public class InstagramButton extends FrameLayout {
     }
 
     public void setText(String text) {
-        this.igdsButton.setText(text);
+        // v426 IgdsButton exposes setText(String) and setText(int) but NOT setText(CharSequence).
+        // The stub binds the call to the CharSequence overload at compile time, which throws
+        // NoSuchMethodError at runtime on v426. Bind to setText(String) via reflection (falling
+        // back to CharSequence for older versions) so it resolves on every build.
+        try {
+            this.igdsButton.getClass().getMethod("setText", String.class).invoke(this.igdsButton, text);
+        } catch (NoSuchMethodException e) {
+            try {
+                this.igdsButton.getClass().getMethod("setText", CharSequence.class).invoke(this.igdsButton, text);
+            } catch (Exception ex) {
+                Logger.printException(() -> "IgdsButton.setText failed", ex);
+            }
+        } catch (Exception e) {
+            Logger.printException(() -> "IgdsButton.setText failed", e);
+        }
     }
 
     public void setOnClickListener(Runnable action) {

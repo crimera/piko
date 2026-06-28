@@ -47,6 +47,7 @@ public class UI {
     public static final String DRAWABLE_CODE_ICON = "fb_ic_code_outline_24";
     public static final String DRAWABLE_FRAME_CROSSED_ICON = "fb_ic_frames_cross_outline_16";
     public static final String DRAWABLE_LINK_ICON = "fb_ic_link_outline_24";
+    public static final String DRAWABLE_DIRECT_MESSAGE_ICON = "instagram_direct_outline_24";
 
 
     public static int getThemedColour() {

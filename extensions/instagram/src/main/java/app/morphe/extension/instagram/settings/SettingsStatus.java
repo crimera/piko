@@ -200,6 +200,9 @@ public class SettingsStatus {
     public static boolean hideNavigationButtons = false;
     public static void hideNavigationButtons() { hideNavigationButtons = true; }
 
+    public static boolean saveDeletedMessages = false;
+    public static void saveDeletedMessages() { saveDeletedMessages = true; }
+
     public static void loadStatusMap(){
         FLAGS.put(str("piko_disable_ads"),SettingsStatus.disableAds);
         FLAGS.put(str("piko_hide_suggested_content"),SettingsStatus.hideSuggestedContent);
@@ -268,6 +271,8 @@ public class SettingsStatus {
         FLAGS.put(str("piko_remove_build_expire_popup"),SettingsStatus.removeBuildExpirePopup);
         FLAGS.put(str("piko_enable_emp_options"),SettingsStatus.unlockEmployeeOptions);
         FLAGS.put(str("piko_allow_user_network_certificate"),SettingsStatus.allowUserNetworkCertificate);
+
+        FLAGS.put(str("save_deleted_messages"),SettingsStatus.saveDeletedMessages);
     }
 
     public static void load() {
