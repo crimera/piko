@@ -13,6 +13,15 @@ import app.morphe.extension.crimera.SharedPref;
 
 @SuppressWarnings("unused")
 public class Pref {
+    private static final String GHOST_MODE_QUICK_TOGGLE_LOCATION_NONE = "none";
+    private static final String GHOST_MODE_QUICK_TOGGLE_LOCATION_ALL = "all";
+    private static final String GHOST_MODE_QUICK_TOGGLE_LOCATION_HOME = "home";
+    private static final String GHOST_MODE_QUICK_TOGGLE_LOCATION_MESSAGES = "messages";
+    private static final String GHOST_MODE_QUICK_TOGGLE_LOCATION_CHATS = "chats";
+    private static final String GHOST_MODE_QUICK_TOGGLE_LOCATION_HOME_MESSAGES = "home_messages";
+    private static final String GHOST_MODE_QUICK_TOGGLE_LOCATION_HOME_CHATS = "home_chats";
+    private static final String GHOST_MODE_QUICK_TOGGLE_LOCATION_MESSAGES_CHATS = "messages_chats";
+
     public static boolean pikoSettingsOnActionBar() {
         return SharedPref.getBooleanPref(Settings.PIKO_SETTINGS_ON_ACTION_BAR);
     }
@@ -57,7 +66,35 @@ public class Pref {
     }
 
     public static boolean enableGhostModeQuickToggle() {
-        return SharedPref.getBooleanPref(Settings.GHOST_MODES_QUICK_TOGGLE);
+        return !GHOST_MODE_QUICK_TOGGLE_LOCATION_NONE.equals(ghostModeQuickToggleLocations());
+    }
+
+    public static boolean showGhostModeQuickToggleHome() {
+        String locations = ghostModeQuickToggleLocations();
+        return GHOST_MODE_QUICK_TOGGLE_LOCATION_ALL.equals(locations)
+                || GHOST_MODE_QUICK_TOGGLE_LOCATION_HOME.equals(locations)
+                || GHOST_MODE_QUICK_TOGGLE_LOCATION_HOME_MESSAGES.equals(locations)
+                || GHOST_MODE_QUICK_TOGGLE_LOCATION_HOME_CHATS.equals(locations);
+    }
+
+    public static boolean showGhostModeQuickToggleDirectInbox() {
+        String locations = ghostModeQuickToggleLocations();
+        return GHOST_MODE_QUICK_TOGGLE_LOCATION_ALL.equals(locations)
+                || GHOST_MODE_QUICK_TOGGLE_LOCATION_MESSAGES.equals(locations)
+                || GHOST_MODE_QUICK_TOGGLE_LOCATION_HOME_MESSAGES.equals(locations)
+                || GHOST_MODE_QUICK_TOGGLE_LOCATION_MESSAGES_CHATS.equals(locations);
+    }
+
+    public static boolean showGhostModeQuickToggleDirectThread() {
+        String locations = ghostModeQuickToggleLocations();
+        return GHOST_MODE_QUICK_TOGGLE_LOCATION_ALL.equals(locations)
+                || GHOST_MODE_QUICK_TOGGLE_LOCATION_CHATS.equals(locations)
+                || GHOST_MODE_QUICK_TOGGLE_LOCATION_HOME_CHATS.equals(locations)
+                || GHOST_MODE_QUICK_TOGGLE_LOCATION_MESSAGES_CHATS.equals(locations);
+    }
+
+    private static String ghostModeQuickToggleLocations() {
+        return SharedPref.getStringPref(Settings.GHOST_MODE_QUICK_TOGGLE_LOCATIONS);
     }
 
     public static boolean enableMoreOptionsOnProfileQuickToggle() {

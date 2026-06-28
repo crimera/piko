@@ -21,9 +21,11 @@ public class MainFeedActionBar {
 
     public static void addActionBarButton(ViewGroup viewGroup) {
         try {
+            GhostModeQuickToggle.addToHomeActionBar(viewGroup);
             if(PIKO_SETTINGS_ON_ACTION_BAR) {
                 UI.pikoSettingsGear(viewGroup);
             }
+            GhostModeQuickToggle.keepActionBarButtonOrderStable(viewGroup);
 
         } catch (Exception e) {
             Logger.printException(() -> "addActionBarButton failure", e);

@@ -16,6 +16,7 @@ import android.preference.PreferenceCategory;
 import java.util.TreeMap;
 import java.util.Map;
 
+import app.morphe.extension.instagram.patches.actionbar.GhostModeQuickToggle;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
@@ -54,6 +55,11 @@ public class ScreenBuilder {
         preferenceCategory.setTitle(title);
         screen.addPreference(preferenceCategory);
         return preferenceCategory;
+    }
+
+    private Preference withOrder(Preference preference, int order) {
+        preference.setOrder(order);
+        return preference;
     }
 
     public void buildAdsSection() {
@@ -179,66 +185,74 @@ public class ScreenBuilder {
         if (!(SettingsStatus.ghostSection())) return;
 
         // PreferenceCategory category= addCategory(str("piko_category_ghost"));
+        int order = 0;
 
         addPreference(
-                helper.switchPreference(
+                withOrder(helper.switchPreference(
                         str("piko_turn_on_all_ghost_modes"),
                         "",
                         Settings.TURN_ON_ALL_GHOST_MODES
-                )
+                ), order++)
         );
 
-        addPreference(
-                helper.switchPreference(
-                        str("piko_ghost_modes_quick_toggle"),
-                        str("piko_ghost_modes_quick_toggle_desc"),
-                        Settings.GHOST_MODES_QUICK_TOGGLE
-                )
-        );
+        Preference quickToggleLocationsPreference = withOrder(helper.listPreference(
+                str("piko_ghost_modes_quick_toggle_locations"),
+                str("piko_ghost_modes_quick_toggle_locations_desc"),
+                Settings.GHOST_MODE_QUICK_TOGGLE_LOCATIONS
+        ), order++);
+        quickToggleLocationsPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                helper.setValue(preference, newValue);
+                GhostModeQuickToggle.refreshActionBarButtons();
+                return true;
+            }
+        });
+        addPreference(quickToggleLocationsPreference);
 
         if (SettingsStatus.viewStoriesAnonymously) {
             addPreference(
-                    helper.switchPreference(
+                    withOrder(helper.switchPreference(
                             str("piko_view_stories_anonymously"),
                             "",
                             Settings.VIEW_STORIES_ANONYMOUSLY
-                    )
+                    ), order++)
             );
         }
         if (SettingsStatus.viewLiveAnonymously) {
             addPreference(
-                    helper.switchPreference(
+                    withOrder(helper.switchPreference(
                             str("piko_view_live_anonymously"),
                             "",
                             Settings.VIEW_LIVE_ANONYMOUSLY
-                    )
+                    ), order++)
             );
         }
         if (SettingsStatus.disableTypingStatus) {
             addPreference(
-                    helper.switchPreference(
+                    withOrder(helper.switchPreference(
                             str("piko_disable_typing_status"),
                             "",
                             Settings.DISABLE_TYPING_STATUS
-                    )
+                    ), order++)
             );
         }
         if (SettingsStatus.disableScreenshotDetection) {
             addPreference(
-                    helper.switchPreference(
+                    withOrder(helper.switchPreference(
                             str("piko_disable_screenshot_detection"),
                             "",
                             Settings.DISABLE_SCREENSHOT_DETECTION
-                    )
+                    ), order++)
             );
         }
         if (SettingsStatus.viewDmAnonymously) {
             addPreference(
-                    helper.switchPreference(
+                    withOrder(helper.switchPreference(
                             str("piko_view_dm_anonymously"),
                             "",
                             Settings.VIEW_DM_ANONYMOUSLY
-                    )
+                    ), order++)
             );
         }
 
