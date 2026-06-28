@@ -27,7 +27,12 @@ public class HookFlags {
         BOOL_FLAGS.put("104772", false); //ig_ini
         BOOL_FLAGS.put("117613::0", true); //ig_overflow_menu_icon::use_more_lines_icon
         BOOL_FLAGS.put("100002", true); //ig_igds_android_prism_overflow_sheet
+        BOOL_FLAGS.put("40597::31", false); //ig_feed_favorites_launcher::enable_toggle_favorites_in_feed_overflow_menu
+        BOOL_FLAGS.put("31983::9", true); //ig_feed_connected_not_interested_launcher::feed_demote_hide_mute_in_menu
+        BOOL_FLAGS.put("31983::10", true); //ig_feed_connected_not_interested_launcher::feed_demote_hide_unfollow_in_menu
+        BOOL_FLAGS.put("45023", false); //ig_android_qr_code_expansion
     }
+   
     private static void adsFlags() {
 //        BOOL_FLAGS.put("58206::0", false); //is_acp_enabled
 //        BOOL_FLAGS.put("72396::0", false); //is_mae_exclusion_feed_enabled
@@ -35,17 +40,19 @@ public class HookFlags {
 //        BOOL_FLAGS.put("78046::9", false); //enable_no_invalidation_reason_for_mae_exclusion
 //        BOOL_FLAGS.put("79181::0", false); //ig_reels_ads_1x2_explore_halc_android::is_enabled
         BOOL_FLAGS.put("110800::0", false); //ig_android_controller_migration::use_v2_controller Removed in version 435.0.0.0.2
-        BOOL_FLAGS.put("114983::0", false); //ig_stories_restyle_midcard::is_enable
-        BOOL_FLAGS.put("95150::1", false); //ig_stories_music_midcard::is_enable
+        BOOL_FLAGS.put("114983", false); //ig_stories_restyle_midcard
+        BOOL_FLAGS.put("95150", false); //ig_stories_music_midcard
         BOOL_FLAGS.put("84366::12", false); //ig_stories_ayt_midcard::enable_add_yours
         BOOL_FLAGS.put("120110", false); //ig_android_scroll_break
-        BOOL_FLAGS.put("105778::0", false); //ig_android_restyle_post_cap_promo_dialog::is_enable
+        BOOL_FLAGS.put("105778", false); //ig_android_restyle_post_cap_promo_dialog
     }
 
     // Thanks to @brosssh
     private static void suggestedContentFlags() {
         BOOL_FLAGS.put("111509::3", false); //ig_search_ta_nullstate_suggestions::is_android_enabled
         BOOL_FLAGS.put("82771::0", false); //igx_foundation_litho_stories_tray::is_litho_stories_tray_enabled
+        BOOL_FLAGS.put("109730", false); //ig_android_ai_discovery_menu
+        BOOL_FLAGS.put("80654", false); //ig_meta_ai_cdd_reels_viewer
     }
 
     private static void profileActionBarFlags() {
