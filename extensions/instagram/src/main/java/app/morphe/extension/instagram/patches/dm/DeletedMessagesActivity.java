@@ -133,11 +133,15 @@ public class DeletedMessagesActivity extends Activity {
             listView.setOnItemClickListener((parent, view, pos, idLong) -> {
                 String[] m = messages.get(pos);
                 String c = m[3];
+                String t = m[4];
                 if (c != null && c.startsWith("http")) {
                     try {
                         startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,
                                 android.net.Uri.parse(c)));
                     } catch (Exception ignored) {}
+                } else if (t != null && !"text".equals(t)) {
+                    android.widget.Toast.makeText(this, str("piko_media_not_available"),
+                            android.widget.Toast.LENGTH_SHORT).show();
                 }
             });
             listView.setOnItemLongClickListener((parent, view, pos, idLong) -> {
