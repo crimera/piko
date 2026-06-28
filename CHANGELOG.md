@@ -1,3 +1,9 @@
+## [3.8.0-dev.2](https://github.com/crimera/piko/compare/v3.8.0-dev.1...v3.8.0-dev.2) (2026-06-28)
+
+### 🐛 Bug Fixes
+
+* **Twitter:** Tweet link pattern ([d2500ea](https://github.com/crimera/piko/commit/d2500ead98dd5bd77ba97f1ef2ac8388f7b559f0))
+
 ## [3.8.0-dev.1](https://github.com/crimera/piko/compare/v3.7.0...v3.8.0-dev.1) (2026-06-28)
 
 ### 🐛 Bug Fixes
