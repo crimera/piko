@@ -83,7 +83,7 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         flags.put(str("piko_pref_ctj_section"),SettingsStatus.hideCTJ);
         flags.put(str("piko_pref_ryb_section"),SettingsStatus.hideRBMK);
         flags.put(str("piko_pref_pinned_posts_section"),SettingsStatus.hideRPinnedPosts);
-        flags.put(str("piko_pref_hide_related_posts"),SettingsStatus.hideDetailedPosts);
+        flags.put(str("piko_pref_hide_unrelated_replies"),SettingsStatus.hideDetailedPosts);
         flags.put(str("piko_pref_chirp_font"),SettingsStatus.enableFontMod);
         flags.put(str("piko_pref_hide_fab"),SettingsStatus.hideFAB);
         flags.put(str("piko_pref_hide_fab_menu"),SettingsStatus.hideFABBtns);

@@ -92,7 +92,7 @@
     <string name="piko_pref_ctj_section">Hide \"Community to join\" section</string>
     <string name="piko_pref_ryb_section">Hide \"Revisit your bookmark\" section</string>
     <string name="piko_pref_pinned_posts_section">Hide \"Pinned posts by followers\" section</string>
-    <string name="piko_pref_hide_related_posts">Hide related posts (in replies)</string>
+    <string name="piko_pref_hide_unrelated_replies">Hide unrelated replies</string>
     <string name="piko_pref_hide_premium_prompt">Hide message prompts</string>
     <string name="piko_pref_hide_todays_news">Hide today\'s news</string>
     <string name="piko_pref_del_from_db">Delete entries from database</string>
@@ -102,7 +102,7 @@
     <string name="piko_pref_db_ctj_section">\"Community to join\" section</string>
     <string name="piko_pref_db_ryb_section">\"Revisit your bookmark\" section</string>
     <string name="piko_pref_db_pinned_posts_section">\"Pinned posts by followers\" section</string>
-    <string name="piko_pref_db_related_posts">Related posts (in replies)</string>
+    <string name="piko_pref_db_unrelated_replies">Unrelated replies</string>
     <string name="piko_pref_db_premium_prompt">Message prompts</string>
     <string name="piko_pref_db_todays_news">Today\'s news</string>
     <string name="piko_pref_db_not_found">Database not found</string>

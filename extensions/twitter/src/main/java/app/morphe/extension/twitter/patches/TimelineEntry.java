@@ -46,7 +46,7 @@ public class TimelineEntry {
             if (entryId.contains("rtb") && hideAds) {
                 return true;
             }
-            if (entryId2.equals("tweetdetailrelatedtweets") && hideDetailedPosts) {
+            if (entryId2.startsWith("tweetdetail") && hideDetailedPosts) {
                 return true;
             }
             if (entryId2.equals("bookmarked") && hideRBMK) {

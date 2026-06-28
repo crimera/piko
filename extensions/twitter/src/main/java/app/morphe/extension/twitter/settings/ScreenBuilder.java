@@ -201,7 +201,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideDetailedPosts) {
             addPreference(category,
                     helper.switchPreference(
-                            str("piko_pref_hide_related_posts"),
+                            str("piko_pref_hide_unrelated_replies"),
                             "",
                             Settings.ADS_HIDE_DETAILED_POSTS
                     )
