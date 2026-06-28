@@ -4,32 +4,29 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
-package app.crimera.patches.twitter.misc.shareMenu.browseObject
+package app.crimera.patches.twitter.misc.shareMenu.externalDownloader
 
 import app.crimera.patches.twitter.entity.entityGenerator
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonInjection
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonOnClickHook
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
-import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
-val browseObjectPatch =
+val externalDownloaderPatch =
     bytecodePatch(
-        name = "Browse tweet object",
-        description = "Adds an option to browse the tweet object in the share menu.",
-        default = false,
+        name = "Support external downloader",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, entityGenerator, versionCheckPatch, shareMenuButtonOnClickHook)
+        dependsOn(settingsPatch, entityGenerator, shareMenuButtonOnClickHook)
 
         execute {
-            val actionName = "BrowseObject"
-            val prefFunctionName = "browseObject"
-            val stringId = "piko_browse_object_title"
-            val iconId = "ic_vector_flask_stroke"
-            val statusFunctionName = "browseObject"
+            val actionName = "ExternalDownload"
+            val prefFunctionName = "enableExternalDownloader"
+            val stringId = "piko_pref_external_downloader_text"
+            val iconId = "ic_vector_incoming"
+            val statusFunctionName = "externalDownloader"
             shareMenuButtonInjection(actionName, prefFunctionName, stringId, iconId, statusFunctionName)
         }
     }

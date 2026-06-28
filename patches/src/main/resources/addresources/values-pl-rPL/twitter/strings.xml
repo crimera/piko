@@ -74,7 +74,6 @@
     <string name="piko_pref_ctj_section">Ukryj sekcję \"Dołącz do społeczności\"</string>
     <string name="piko_pref_ryb_section">Ukryj sekcję \"Przejrzyj zakładki\"</string>
     <string name="piko_pref_pinned_posts_section">Ukryj sekcję \"Przypięte wpisy przez obserwujących\"</string>
-    <string name="piko_pref_hide_related_posts">Ukryj powiązane wpisy (w odpowiedziach)</string>
     <string name="piko_pref_hide_premium_prompt">Ukryj banery subskrypcji Premium</string>
     <string name="piko_pref_hide_todays_news">Ukryj bieżące wiadomości</string>
     <string name="piko_pref_del_from_db">Usuń wpisy z bazy danych</string>
@@ -84,7 +83,6 @@
     <string name="piko_pref_db_ctj_section">Sekcja \"Dołącz do społeczności\"</string>
     <string name="piko_pref_db_ryb_section">Sekcja \"Przejrzyj zakładki\"</string>
     <string name="piko_pref_db_pinned_posts_section">Sekcja \"Przypięte wpisy przez obserwujących\"</string>
-    <string name="piko_pref_db_related_posts">Powiązane wpisy (w odpowiedziach)</string>
     <string name="piko_pref_db_premium_prompt">Banery subskrypcji Premium</string>
     <string name="piko_pref_db_todays_news">Bieżące wiadomości</string>
     <string name="piko_pref_db_not_found">Nie znaleziono bazy danych</string>

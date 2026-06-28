@@ -65,7 +65,6 @@
     <string name="piko_pref_ctj_section">Спрятать \"Обзор сообществ\"</string>
     <string name="piko_pref_ryb_section">Спрятать \"Обзор закладок\"</string>
     <string name="piko_pref_pinned_posts_section">Спрятать \"Закреплено пользователями\"</string>
-    <string name="piko_pref_hide_related_posts">Спрятать \"Похожие твиты\" (в ответах)</string>
     <string name="piko_pref_hide_todays_news">Спрятать новости за сегодня</string>
     <string name="piko_pref_del_from_db">Удалить записи из базы данных</string>
     <string name="piko_pref_db_wtf_section">Панель \"Кого читать\"</string>
@@ -73,7 +72,6 @@
     <string name="piko_pref_db_ctj_section">Панель \"Обзор сообществ\"</string>
     <string name="piko_pref_db_ryb_section">Панель \"Обзор закладок\"</string>
     <string name="piko_pref_db_pinned_posts_section">Панель \"Закреплено пользователями\"</string>
-    <string name="piko_pref_db_related_posts">Панель \"Похожие твиты\" (в ответах)</string>
     <string name="piko_pref_db_todays_news">Новости за сегодня</string>
     <string name="piko_pref_db_not_found">База данных не найдена</string>
     <string name="piko_pref_db_not_open">База данных не открыта</string>

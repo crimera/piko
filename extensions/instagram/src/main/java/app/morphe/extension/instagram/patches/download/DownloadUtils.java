@@ -252,7 +252,7 @@ public class DownloadUtils {
                 return;
             }
             String link = Links.generatePostLink(mediaObject, currentMediaIndex);
-            ActivityHook.openLink(link, packageName);
+            PikoUtils.shareTextToPackageName(link, packageName);
         } catch (Exception e){
             PikoUtils.logger(e);
             Logger.printException(() -> "Error at externalDownloader", e);

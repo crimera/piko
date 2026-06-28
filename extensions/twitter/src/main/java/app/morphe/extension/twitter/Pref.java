@@ -10,6 +10,7 @@ import android.util.Log;
 
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.twitter.settings.Settings;
+import app.morphe.extension.twitter.settings.SettingsStatus;
 import com.google.android.material.tabs.TabLayout$g;
 import java.util.*;
 
@@ -72,7 +73,7 @@ public class Pref {
     }
 
     public static boolean enableNativeDownloader() {
-        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER);
+        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER) && SettingsStatus.nativeDownloader;
     }
 
     public static boolean enableInlineDownloadButton() {
@@ -80,25 +81,24 @@ public class Pref {
     }
 
     public static boolean browseObject() {
-        return Utils.getBooleanPref(Settings.BROWSE_OBJECT);
+        return Utils.getBooleanPref(Settings.BROWSE_OBJECT) && SettingsStatus.browseObject;
     }
 
     public static int natveTranslatorProvider(){
         return Integer.parseInt(Utils.getStringPref(Settings.NATIVE_TRANSLATOR_PROVIDERS));
     }
     public static boolean enableNativeTranslator() {
-        return Utils.getBooleanPref(Settings.NATIVE_TRANSLATOR);
+        return Utils.getBooleanPref(Settings.NATIVE_TRANSLATOR) && SettingsStatus.nativeTranslator;
+    }
+
+    public static String translatorLanguage() {
+        return Utils.getStringPref(Settings.NATIVE_TRANSLATOR_LANG);
     }
 
     public static boolean enableNativeReaderMode() {
-        return Utils.getBooleanPref(Settings.NATIVE_READER_MODE);
+        return Utils.getBooleanPref(Settings.NATIVE_READER_MODE) && SettingsStatus.nativeReaderMode;
     }
-    public static boolean enableShareImage() {
-        return Utils.getBooleanPref(Settings.SHARE_IMAGE_ENABLED);
-    }
-    public static boolean shareImageAutoCleanup() {
-        return Utils.getBooleanPref(Settings.SHARE_IMAGE_AUTOCLEANUP);
-    }
+
     public static boolean hideNativeReaderPostTextOnlyMode() {
         return Utils.getBooleanPref(Settings.NATIVE_READER_MODE_TEXT_ONLY_MODE);
     }
@@ -114,9 +114,13 @@ public class Pref {
         return Utils.getStringPref(Settings.NATIVE_READER_MODE_THEME);
     }
 
-    public static String translatorLanguage() {
-        return Utils.getStringPref(Settings.NATIVE_TRANSLATOR_LANG);
+    public static boolean enableShareImage() {
+        return Utils.getBooleanPref(Settings.SHARE_IMAGE_ENABLED) && SettingsStatus.shareImage;
     }
+    public static boolean shareImageAutoCleanup() {
+        return Utils.getBooleanPref(Settings.SHARE_IMAGE_AUTOCLEANUP);
+    }
+
     public static boolean redirect(TabLayout$g g) {return Utils.redirect(g);}
 
     public static boolean isRoundOffNumbersEnabled() {
@@ -430,5 +434,18 @@ public class Pref {
     public static boolean disUnifyXChatSystem(){
         return !Utils.getBooleanPref(Settings.MISC_DISUNIFY_XCHAT_SYSTEM);
     }
+
+    public static boolean enableNativeShareMenu(){
+        return Utils.getBooleanPref(Settings.NATIVE_SHARE_MENU) && SettingsStatus.enableNativeShareMenu;
+    }
+
+    public static boolean enableExternalDownloader(){
+        return Utils.getBooleanPref(Settings.EXTERNAL_DOWNLOADER) && SettingsStatus.externalDownloader;
+    }
+
+    public static String getExternalDownloaderPackageName(){
+        return Utils.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
+    }
+
     //end
 }

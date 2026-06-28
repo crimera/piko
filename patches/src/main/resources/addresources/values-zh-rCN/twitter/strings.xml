@@ -68,7 +68,6 @@
     <string name="piko_pref_ctj_section">隐藏探索社群</string>
     <string name="piko_pref_ryb_section">隐藏重新访问你的书签</string>
     <string name="piko_pref_pinned_posts_section">隐藏已由你关注的人置顶</string>
-    <string name="piko_pref_hide_related_posts">隐藏相关推文（回复）</string>
     <string name="piko_pref_hide_premium_prompt">隐藏信息推广</string>
     <string name="piko_pref_hide_todays_news">隐藏今日新闻</string>
     <string name="piko_pref_del_from_db">从数据库中删除项目</string>
@@ -78,7 +77,6 @@
     <string name="piko_pref_db_ctj_section">探索社群</string>
     <string name="piko_pref_db_ryb_section">重新访问你的书签</string>
     <string name="piko_pref_db_pinned_posts_section">已由你关注的人置顶</string>
-    <string name="piko_pref_db_related_posts">相关推文（回复）</string>
     <string name="piko_pref_db_premium_prompt">信息推广</string>
     <string name="piko_pref_db_todays_news">今日新闻</string>
     <string name="piko_pref_db_not_found">未找到数据库</string>

@@ -66,9 +66,9 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.7.0](https://github.com/crimera/piko/releases/tag/v3.7.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;123 patches total
+> **[v3.8.0-dev.2](https://github.com/crimera/piko/releases/tag/v3.8.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;125 patches total
 <details>
-<summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;72 patches</summary>
+<summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;74 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -89,6 +89,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Custom download folder](#custom-download-folder) | Change the download directory for video downloads |  |
 | [Custom emoji font](#custom-emoji-font) | Customise emoji font style |  |
 | [Custom font](#custom-font) | Customise font style |  |
+| [Custom share menu](#custom-share-menu) | Overrides existing share menu and adds a new one |  |
 | [Custom sharing domain](#custom-sharing-domain) | Allows for using domains like fxtwitter when sharing tweets/posts. |  |
 | [Customise post font size](#customise-post-font-size) |  |  |
 | [Customize Inline action Bar items](#customize-inline-action-bar-items) |  |  |
@@ -150,6 +151,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Show poll results](#show-poll-results) | Adds an option to show poll results without voting |  |
 | [Show post source label](#show-post-source-label) | Source label will be shown only on public posts |  |
 | [Show sensitive media](#show-sensitive-media) |  |  |
+| [Support external downloader](#support-external-downloader) |  |  |
 
 </details>
 

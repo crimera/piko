@@ -1,3 +1,24 @@
+## [3.8.0-dev.2](https://github.com/crimera/piko/compare/v3.8.0-dev.1...v3.8.0-dev.2) (2026-06-28)
+
+### 🐛 Bug Fixes
+
+* **Twitter:** Tweet link pattern ([d2500ea](https://github.com/crimera/piko/commit/d2500ead98dd5bd77ba97f1ef2ac8388f7b559f0))
+
+## [3.8.0-dev.1](https://github.com/crimera/piko/compare/v3.7.0...v3.8.0-dev.1) (2026-06-28)
+
+### 🐛 Bug Fixes
+
+* **Twitter:** Fix `Custom share menu` crash on image view ([f4d2e53](https://github.com/crimera/piko/commit/f4d2e53171621d02f2b04c0a0d4ff220e2e4c799))
+
+### ✨ New Features
+
+* **Twitter:** Added `Custom share menu` patch ([23f0a32](https://github.com/crimera/piko/commit/23f0a3237b57eea75443062ade78fc3be093fb33))
+* **Twitter:** Added `External downloader` patch ([0e9a9f7](https://github.com/crimera/piko/commit/0e9a9f743364d1132d18d289a21e7e86c929f998))
+
+### 🔧 Improvements
+
+* **Twitter:** Standardise share menu on click handling ([9aecb6b](https://github.com/crimera/piko/commit/9aecb6b68e71c70d3e4075afe2d311efd254f22c))
+
 ## [3.7.0](https://github.com/crimera/piko/compare/v3.6.0...v3.7.0) (2026-06-27)
 
 ### 🐛 Bug Fixes
