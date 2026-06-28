@@ -31,6 +31,12 @@ public class Tweet extends Debug {
         return (String) super.getMethod("userNameMethod");
     }
 
+    public String getTweetLink() throws Exception {
+        Long tweetId = getTweetId();
+        String username = getTweetUsername();
+        return "https://x.com/"+username+"/"+tweetId;
+    }
+
     public String getTweetProfileName() throws Exception {
         return (String) super.getMethod("profileNameMethod");
     }

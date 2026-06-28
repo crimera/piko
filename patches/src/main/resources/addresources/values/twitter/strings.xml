@@ -35,8 +35,10 @@
     <string name="piko_pref_native_downloader_download_all">Download all</string>
     <string name="piko_pref_native_downloader_no_media">No media found</string>
     <string name="piko_pref_native_downloader_filename_title">Save filename pattern</string>
+
     <string name="piko_browse_object_title">Browse tweet object</string>
     <string name="piko_browse_object_toggle">Enable Browse tweet object</string>
+
     <string name="piko_share_image_title">Share Tweet as Image</string>
     <string name="piko_share_image_toggle">Enable Share Tweet as Image</string>
     <string name="piko_share_image_autocleanup">Auto-cleanup captures</string>
@@ -46,6 +48,9 @@
     <string name="piko_share_image_view_not_found">Tweet view not found</string>
     <string name="piko_share_image_capture_failed">Failed to capture image</string>
     <string name="piko_share_image_error">Error: %s</string>
+    <string name="piko_share_image_app_error">%s not found</string>
+    <string name="piko_share_image_instagram_stories">Share to Instagram stories</string>
+    <string name="piko_share_image_whatsapp_status">Share to WhatsApp status</string>
 
     <string name="piko_title_native_translator">Native post translation</string>
     <string name="piko_native_translator_toggle">Enable native post translation</string>
@@ -70,6 +75,9 @@
     <string name="piko_native_reader_mode_cache_delete">Delete reader mode\'s cache</string>
     <string name="piko_native_reader_mode_cache_delete_success">Cache deleted successfully</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Cache deletion failed</string>
+
+    <string name="piko_title_native_share_menu">Native share menu</string>
+    <string name="piko_native_share_menu_toggle">Enable native share menu</string>
 
     <!-- Ads Settings -->
     <string name="piko_title_ads">Ads</string>

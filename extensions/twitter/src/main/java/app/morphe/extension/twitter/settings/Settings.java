@@ -64,6 +64,7 @@ public class Settings {
     public static final StringSetting NATIVE_READER_MODE_THEME = new StringSetting("native_reader_mode_theme", "system");
     public static final BooleanSetting SHARE_IMAGE_ENABLED = new BooleanSetting("share_image_enabled", true);
     public static final BooleanSetting SHARE_IMAGE_AUTOCLEANUP = new BooleanSetting("share_image_autocleanup", true);
+    public static final BooleanSetting NATIVE_SHARE_MENU = new BooleanSetting("native_share_menu", true);
 
     public static final BooleanSetting TIMELINE_DISABLE_AUTO_SCROLL = new BooleanSetting("timeline_disable_auto_scroll", true);
     public static final BooleanSetting TIMELINE_SHOW_SOURCE_LABEL = new BooleanSetting("timeline_show_source_label", false);

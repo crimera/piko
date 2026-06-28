@@ -388,6 +388,18 @@ public class ScreenBuilder {
             );
         }
 
+        category = preferenceCategory(str("piko_title_native_translator"));
+
+        if (SettingsStatus.nativeTranslator) {
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_native_share_menu_toggle"),
+                            "",
+                            Settings.NATIVE_SHARE_MENU
+                    )
+            );
+        }
+
         if (SettingsStatus.browseObject) {
             category = preferenceCategory(str("piko_browse_object_title"));
 
