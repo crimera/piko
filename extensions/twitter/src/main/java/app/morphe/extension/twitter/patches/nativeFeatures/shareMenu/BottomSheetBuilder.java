@@ -41,12 +41,12 @@ public class BottomSheetBuilder {
 
         actions.add(new BottomSheetAction<>("ic_vector_logo_instagram",str("piko_share_image_instagram_stories"),t -> ShareImageHandler.shareAsImage(context, tweetObject,1)));
 
-        if(Pref.enableNativeDownloader()){
-            actions.add(new BottomSheetAction<>("ic_vector_incoming",str("piko_title_native_downloader"),t -> NativeDownloader.downloader(context, tweetObject)));
-        }
-
         if(Pref.enableExternalDownloader()){
             actions.add(new BottomSheetAction<>("ic_vector_incoming",str("piko_pref_external_downloader_text"),t -> ExternalDownloader.sendToExternalDownloader(tweetObject)));
+        }
+
+        if(Pref.enableNativeDownloader()){
+            actions.add(new BottomSheetAction<>("ic_vector_incoming",str("piko_title_native_downloader"),t -> NativeDownloader.downloader(context, tweetObject)));
         }
 
         if(Pref.enableNativeTranslator()){
