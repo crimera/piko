@@ -34,7 +34,7 @@ public class Tweet extends Debug {
     public String getTweetLink() throws Exception {
         Long tweetId = getTweetId();
         String username = getTweetUsername();
-        return "https://x.com/"+username+"/"+tweetId;
+        return "https://x.com/"+username+"/status/"+tweetId;
     }
 
     public String getTweetProfileName() throws Exception {
