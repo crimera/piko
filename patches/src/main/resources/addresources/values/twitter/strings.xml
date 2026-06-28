@@ -71,6 +71,9 @@
     <string name="piko_native_reader_mode_cache_delete_success">Cache deleted successfully</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Cache deletion failed</string>
 
+    <string name="piko_title_native_share_menu">Native share menu</string>
+    <string name="piko_native_share_menu_toggle">Enable native share menu</string>
+
     <!-- Ads Settings -->
     <string name="piko_title_ads">Ads</string>
     <string name="piko_pref_hide_promoted_posts">Hide promoted posts</string>

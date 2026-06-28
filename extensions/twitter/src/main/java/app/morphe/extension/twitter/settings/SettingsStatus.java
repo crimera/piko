@@ -389,6 +389,11 @@ public class SettingsStatus {
         blockRedirectingToXLite = true;
     }
 
+    public static boolean enableNativeShareMenu = false;
+    public static void enableNativeShareMenu() {
+        enableNativeShareMenu = true;
+    }
+
     public static boolean enableTimelineSection() {
         return ( hidePostMetrics || hideNavbarBadge || showSourceLabel || hideCommBadge || showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD);
     }
@@ -402,7 +407,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableNativeSection() {
-        return (nativeDownloader || nativeTranslator || nativeReaderMode || shareImage || browseObject);
+        return ( enableNativeShareMenu || nativeDownloader || nativeTranslator || nativeReaderMode || shareImage || browseObject);
     }
 
     public static boolean enableDownloadSection() {
