@@ -80,6 +80,6 @@ public class FragmentHook {
     }
 
     private static void startAbout(){
-        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_ABOUT,"piko_patch_info_title");
+        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_ABOUT,"piko_category_about");
     }
 }

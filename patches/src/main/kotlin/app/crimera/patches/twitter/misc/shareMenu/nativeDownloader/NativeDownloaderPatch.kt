@@ -9,6 +9,7 @@ package app.crimera.patches.twitter.misc.shareMenu.nativeDownloader
 import app.crimera.patches.twitter.entity.entityGenerator
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonInjection
+import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonOnClickHook
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.patch.bytecodePatch
@@ -20,15 +21,14 @@ val nativeDownloaderPatch =
         description = "Requires X 11.0.0-release.0 or higher.",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, entityGenerator, inlineDownloadButtonPatch, versionCheckPatch)
+        dependsOn(settingsPatch, entityGenerator, inlineDownloadButtonPatch, versionCheckPatch, shareMenuButtonOnClickHook)
 
         execute {
             val actionName = "Download"
             val prefFunctionName = "enableNativeDownloader"
             val stringId = "piko_pref_native_downloader_alert_title"
             val iconId = "ic_vector_incoming"
-            val functionReference = "/downloader/NativeDownloader;->downloader"
             val statusFunctionName = "nativeDownloader"
-            shareMenuButtonInjection(actionName, prefFunctionName, stringId, iconId, functionReference, statusFunctionName)
+            shareMenuButtonInjection(actionName, prefFunctionName, stringId, iconId, statusFunctionName)
         }
     }

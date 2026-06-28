@@ -20,15 +20,14 @@ val nativeTranslatorModePatch =
         description = "Requires X 11.0.0-release.0 or higher.",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, entityGenerator, versionCheckPatch)
+        dependsOn(settingsPatch, entityGenerator, versionCheckPatch, shareMenuButtonOnClickHook)
 
         execute {
             val actionName = "Translate"
             val prefFunctionName = "enableNativeTranslator"
             val stringId = "translate_tweet_show"
             val iconId = "ic_vector_sparkle"
-            val functionReference = "/translator/NativeTranslator;->translate"
             val statusFunctionName = "nativeTranslator"
-            shareMenuButtonInjection(actionName, prefFunctionName, stringId, iconId, functionReference, statusFunctionName)
+            shareMenuButtonInjection(actionName, prefFunctionName, stringId, iconId, statusFunctionName)
         }
     }

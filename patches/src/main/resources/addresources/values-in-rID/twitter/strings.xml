@@ -74,7 +74,6 @@
     <string name="piko_pref_ctj_section">Sembunyikan bagian \"Komunitas yang bisa diikuti\"</string>
     <string name="piko_pref_ryb_section">Sembunyikan bagian \"Kunjungi kembali markah Anda\"</string>
     <string name="piko_pref_pinned_posts_section">Sembunyikan bagian \"Postingan yang disematkan oleh pengikut\"</string>
-    <string name="piko_pref_hide_related_posts">Sembunyikan postingan terkait (dalam balasan)</string>
     <string name="piko_pref_hide_premium_prompt">Sembunyikan munculan pesan</string>
     <string name="piko_pref_hide_todays_news">Sembunyikan berita hari ini</string>
     <string name="piko_pref_del_from_db">Hapus entri dari basis data</string>
@@ -84,7 +83,6 @@
     <string name="piko_pref_db_ctj_section">Bagian \"Komunitas yang bisa diikuti\"</string>
     <string name="piko_pref_db_ryb_section">Bagian \"Kunjungi kembali markah Anda\"</string>
     <string name="piko_pref_db_pinned_posts_section">Bagian \"Postingan yang disematkan oleh pengikut\"</string>
-    <string name="piko_pref_db_related_posts">Postingan terkait (dalam balasan)</string>
     <string name="piko_pref_db_premium_prompt">Munculan pesan</string>
     <string name="piko_pref_db_todays_news">Berita hari ini</string>
     <string name="piko_pref_db_not_found">Basis data tidak ditemukan</string>
@@ -120,6 +118,7 @@
     <string name="piko_disunify_xchat_system">Memisahkan sistem xchat</string>
     <string name="piko_disunify_xchat_system_desc">Kembalikan fitur-fitur usang seperti pesan dan lembar bagikan</string>
     <string name="piko_legacy_share_link">Tautan berbagi versi lama</string>
+    <string name="piko_block_redirecting_to_x_lite">Blokir pengalihan ke X Lite</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Fitur flag</string>
     <string name="piko_pref_feature_flags">Tambahkan fitur flag</string>

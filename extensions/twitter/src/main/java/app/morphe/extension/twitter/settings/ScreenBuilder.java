@@ -17,6 +17,8 @@ import com.twitter.ui.widget.LegacyTwitterPreferenceCategory;
 import app.morphe.extension.twitter.settings.widgets.*;
 import androidx.annotation.Nullable;
 import app.morphe.extension.twitter.Pref;
+
+
 public class ScreenBuilder {
     private final Context context;
     private final PreferenceScreen screen;
@@ -114,6 +116,21 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.externalDownloader) {
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_external_downloader_toggle"),
+                            "",
+                            Settings.EXTERNAL_DOWNLOADER
+                    )
+            );
+
+            addPreference(category,helper.editTextPreference(
+                    str("piko_pref_external_downloader_package_name"),
+                    "",
+                    Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
+            ));
+        }
     }
 
     public void buildAdsSection(boolean buildCategory){
@@ -184,7 +201,7 @@ public class ScreenBuilder {
         if (SettingsStatus.hideDetailedPosts) {
             addPreference(category,
                     helper.switchPreference(
-                            str("piko_pref_hide_related_posts"),
+                            str("piko_pref_hide_unrelated_replies"),
                             "",
                             Settings.ADS_HIDE_DETAILED_POSTS
                     )
@@ -384,6 +401,18 @@ public class ScreenBuilder {
                             str("piko_share_image_autocleanup"),
                             str("piko_share_image_autocleanup_desc"),
                             Settings.SHARE_IMAGE_AUTOCLEANUP
+                    )
+            );
+        }
+
+        category = preferenceCategory(str("piko_title_native_translator"));
+
+        if (SettingsStatus.nativeTranslator) {
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_native_share_menu_toggle"),
+                            "",
+                            Settings.NATIVE_SHARE_MENU
                     )
             );
         }

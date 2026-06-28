@@ -74,7 +74,6 @@
     <string name="piko_pref_ctj_section">إخفاء قسم \"المجتمع المراد الانضمام إليه\"</string>
     <string name="piko_pref_ryb_section">إخفاء قسم \"إعادة النظر في الإشارة المرجعية الخاصة بك\"</string>
     <string name="piko_pref_pinned_posts_section">إخفاء قسم \"مشاركات مثبتة بواسطة المتابَعون\"</string>
-    <string name="piko_pref_hide_related_posts">إخفاء المشاركات التفصيلية (في الردود)</string>
     <string name="piko_pref_hide_premium_prompt">إخفاء رسالة مطالبات Premium</string>
     <string name="piko_pref_hide_todays_news">إخفاء أخبار اليوم</string>
     <string name="piko_pref_del_from_db">حذف الإدخالات من قاعدة البيانات</string>
@@ -84,7 +83,6 @@
     <string name="piko_pref_db_ctj_section">قسم \"المجتمع المراد الانضمام إليه\"</string>
     <string name="piko_pref_db_ryb_section">قسم \"إعادة النظر في الإشارة المرجعية الخاصة بك\"</string>
     <string name="piko_pref_db_pinned_posts_section">قسم \"مشاركات مثبتة بواسطة المتابَعون\"</string>
-    <string name="piko_pref_db_related_posts">المشاركات التفصيلية (في الردود)</string>
     <string name="piko_pref_db_premium_prompt">رسالة مطالبات</string>
     <string name="piko_pref_db_todays_news">أخبار اليوم</string>
     <string name="piko_pref_db_not_found">لم يتم العثور على قاعدة البيانات</string>
@@ -96,6 +94,7 @@
     <string name="piko_pref_top_people_search_desc">يخفي قسم الأشخاص بعد البحث</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">إعدادات متنوعة</string>
+    <string name="piko_pref_chirp_font">تعطيل خط Chirp</string>
     <string name="piko_pref_hide_fab">إخفاء زر الإجراء العائم</string>
     <string name="piko_pref_hide_fab_menu">إخفاء زر قائمة الإجراء العائمة</string>
     <string name="piko_pref_rec_users">إخفاء المستخدمين الموصى بهم</string>
@@ -119,6 +118,7 @@
     <string name="piko_disunify_xchat_system">Disunify xchat system</string>
     <string name="piko_disunify_xchat_system_desc">استعادة الميزات القديمة مثل الرسائل و نافذة المشاركة</string>
     <string name="piko_legacy_share_link">روابط المشاركة الكلاسيكية</string>
+    <string name="piko_block_redirecting_to_x_lite">منع التحويل التلقائي إلى X Lite</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature Flags</string>
     <string name="piko_pref_feature_flags">Feature Flags إضافة</string>

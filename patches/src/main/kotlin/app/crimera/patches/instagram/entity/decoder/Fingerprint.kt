@@ -20,3 +20,12 @@ object CommentButtonOnClickFingerprint : Fingerprint(
     returnType = "V",
     strings = listOf("select_comment_screen_delete_comments_tap", "comment_share_click"),
 )
+
+internal object UserTagInfoDictInitFingerprint : Fingerprint(
+    definingClass = "Lcom/instagram/api/schemas/UserTagInfoDict;",
+    name = "<init>",
+)
+
+object ReelsInlineQualitySurveyRelatedFingerprint : Fingerprint(
+    strings = listOf("reels_inline_quality_survey"),
+)

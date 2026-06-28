@@ -20,22 +20,21 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLa
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
-import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal object BindInternalBadgeFingerprint : Fingerprint(
     strings = listOf("bindInternalBadges"),
 )
 
 @Suppress("unused")
-val followBackIndicatorPatch =
+val friendshipStatusIndicatorPatch =
     bytecodePatch(
-        name = "Follow back indicator",
-        description = "Adds a label on the profile page, indicating whether a user is follows you back.",
+        name = "Friendship status indicator",
+        description =
+            "Adds a follows you back status label on the profile page and" +
+                "shows a detailed friendship status breakdown on click",
     ) {
 
         dependsOn(settingsPatch, userFriendshipStatusEntity, profileInfoEntity)
@@ -80,7 +79,7 @@ val followBackIndicatorPatch =
 
                     // Instruction to which the call needs to transfer after our hook.
                     val moveFrom16Index =
-                        indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.MOVE_FROM16)
+                        indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.MOVE_OBJECT_FROM16)
 
                     // Added instructions:
                     // Bypass the internal badge visibility checks.

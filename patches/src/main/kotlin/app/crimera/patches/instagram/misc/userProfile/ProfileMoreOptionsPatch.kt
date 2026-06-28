@@ -18,7 +18,7 @@ val profileMoreOptionsPatch =
         name = "More options on profile",
         description = "Adds a new button to handle user related data like copy handle, download profile picture etc",
     ) {
-        dependsOn(settingsPatch, userProfileActionBarButtonPatch, userProfileButtonPatch)
+        dependsOn(settingsPatch, userProfileButtonPatch, userProfileActionBarButtonPatch)
 
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 

@@ -74,7 +74,6 @@
     <string name="piko_pref_ctj_section">\"Önerilen kanallar\" bölmesini gizle</string>
     <string name="piko_pref_ryb_section">\"Yer işaretlerinizi tekrardan ziyaret edin\" bölümünü gizle</string>
     <string name="piko_pref_pinned_posts_section">\"Takipçilerinin sabitledikleri\" bölümünü gizle</string>
-    <string name="piko_pref_hide_related_posts">(Yanıtlarda) İlgili gönderileri gizle</string>
     <string name="piko_pref_hide_premium_prompt">Mesaj önerilerini gizle</string>
     <string name="piko_pref_hide_todays_news">Bugünün haberleri\'ni gizle</string>
     <string name="piko_pref_del_from_db">Veritabanından verileri sil</string>
@@ -84,7 +83,6 @@
     <string name="piko_pref_db_ctj_section">Katılabileceğin topluluklar bölümünü gizle</string>
     <string name="piko_pref_db_ryb_section">\"Yer işaretlerinizi tekrardan ziyaret edin\" bölümü</string>
     <string name="piko_pref_db_pinned_posts_section">\"Takipçileriniz sabitledikleri\" bölümü</string>
-    <string name="piko_pref_db_related_posts">(Yanıtlarda) ilgili gönderiler</string>
     <string name="piko_pref_db_premium_prompt">Mesaj önerileri</string>
     <string name="piko_pref_db_todays_news">Bugünün haberleri</string>
     <string name="piko_pref_db_not_found">Veritabanı bulunamadı</string>
@@ -96,6 +94,7 @@
     <string name="piko_pref_top_people_search_desc">Arama sonuçlarındaki kişiler bölümünü gizle</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">Çeşitli</string>
+    <string name="piko_pref_chirp_font">Chirp fontunu kapat</string>
     <string name="piko_pref_hide_fab">Yüzen eylem düğmelerini gizle</string>
     <string name="piko_pref_hide_fab_menu">Yüzen eylem menüsü düğmelerini gizle</string>
     <string name="piko_pref_rec_users">Önerilen kullanıcıları gizle</string>
@@ -119,6 +118,7 @@
     <string name="piko_disunify_xchat_system">Xchat sistemini ayırma</string>
     <string name="piko_disunify_xchat_system_desc">Mesajlar ve paylaşım sayfası gibi eski özellikleri geri getirir</string>
     <string name="piko_legacy_share_link">Türkçe</string>
+    <string name="piko_block_redirecting_to_x_lite">X Lite sürümüne yönlendirmeyi engelle</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Özellik bayrakları</string>
     <string name="piko_pref_feature_flags">Özellik bayrağı ekle</string>

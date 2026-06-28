@@ -51,8 +51,9 @@ val addCommentPatch =
                             """.trimIndent(),
                         )
                         true
+                    } else {
+                        false
                     }
-                    false
                 }
             }
         }

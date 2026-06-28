@@ -69,7 +69,8 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_disable_analytics_desc">Blokuje wysyłanie danych telemetrycznych na serwery Instagrama/Facebooka</string>
     <string name="piko_disable_discover_people">Wyłącz odkrywanie osób</string>
     <string name="piko_disable_discover_people_desc">Wyłącza sekcję sugerowanych osób na profilach użytkowników</string>
-    <string name="piko_follow_back_indicator">Włącz wskaźnik wzajemnej obserwacji</string>
+    <string name="piko_follow_back_indicator">Włącz wskaźnik statusu znajomości</string>
+    <string name="piko_follow_back_indicator_desc">Dodaje etykietę ze statusem \"Obserwuje Cię\" na stronie profilu, a po dotknięciu wyświetla szczegółowe zestawienie statusu znajomości</string>
     <string name="piko_fbi_follows_you">Obserwuje Cię</string>
     <string name="piko_fbi_doesnt_follows_you">Nie obserwuje Cię</string>
     <string name="piko_friendship_status">Status znajomości</string>
@@ -195,7 +196,7 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_welcome_message">Aby wyciągnąć z Piko jak najwięcej, zajrzyj do ustawień i dostosuj je pod siebie</string>
     <string name="piko_goto_piko_settings">Przejdź do ustawień Piko</string>
     <string name="piko_no_internet">Połącz się z internetem</string>
-    <string name="piko_tap_here">Kliknij tutaj</string>
+    <string name="piko_tap_here">Dotknij tutaj</string>
     <!-- Action Bar Section -->
     <string name="piko_settings_on_action_bar">Ustawienia Piko na pasku akcji</string>
     <string name="piko_settings_on_action_bar_desc">Przenosi skrót do ustawień Piko na pasek akcji strony głównej</string>

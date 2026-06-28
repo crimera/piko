@@ -39,7 +39,7 @@ public class ScreenBuilder {
     private void addPreference(Preference pref) {
         addPreference(null,pref);
     }
-    
+
     // Adding preference category might be usedin the future
     // to segregate the preference inside the fragment
     private void addPreference(PreferenceCategory category,  Preference pref) {
@@ -60,7 +60,7 @@ public class ScreenBuilder {
 
     public void buildAdsSection() {
         if (!(SettingsStatus.adsSection())) return;
-        
+
         if (SettingsStatus.disableAds) {
             addPreference(
                     helper.switchPreference(
@@ -104,7 +104,7 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.unlockEmployeeOptions) {
+        if (SettingsStatus.allowUserNetworkCertificate) {
             addPreference(
                     helper.switchPreference(
                             str("piko_allow_user_network_certificate"),
@@ -156,6 +156,24 @@ public class ScreenBuilder {
                             "piko_download_id_mapping"
                     )
             );
+
+            if(Pref.pikoDebug()) {
+                addPreference(
+                        helper.buttonPreference(
+                                str("piko_export_experiment_list"),
+                                "",
+                                "piko_export_experiment_list"
+                        )
+                );
+
+                addPreference(
+                        helper.buttonPreference(
+                                str("piko_export_experiment_mappings"),
+                                "",
+                                "piko_export_experiment_mappings"
+                        )
+                );
+            }
         }
     }
 
@@ -485,7 +503,7 @@ public class ScreenBuilder {
             addPreference(
                     helper.switchPreference(
                             str("piko_follow_back_indicator"),
-                            "",
+                            str("piko_follow_back_indicator_desc"),
                             Settings.FOLLOW_BACK_INDICATOR
                     )
             );
@@ -642,7 +660,7 @@ public class ScreenBuilder {
     public void buildNavigationSection() {
         if (!(SettingsStatus.hideNavigationButtons)) return;
 
-      //  PreferenceCategory category = addCategory(str("piko_category_hide_navigation_buttons"));
+        //  PreferenceCategory category = addCategory(str("piko_category_hide_navigation_buttons"));
 
         addPreference(
                 helper.switchPreference(
@@ -737,24 +755,6 @@ public class ScreenBuilder {
                         Settings.PIKO_DEBUG
                 )
         );
-
-        if(Pref.pikoDebug()) {
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_export_experiment_list"),
-                            "",
-                            "piko_export_experiment_list"
-                    )
-            );
-
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_export_experiment_mappings"),
-                            "",
-                            "piko_export_experiment_mappings"
-                    )
-            );
-        }
 
         PreferenceCategory category = addCategory(str("piko_patch_info_title"));
         String enabledStr = str("piko_patch_enabled");
