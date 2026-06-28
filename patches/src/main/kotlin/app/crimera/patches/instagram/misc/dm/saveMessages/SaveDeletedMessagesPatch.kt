@@ -56,29 +56,28 @@ val saveDeletedMessagesPatch =
             }
 
             // Hook 2: MQTT/MSys real-time path — A0P post-processing step, never touched by REST.
-            // Resolve the delta's thread-id field at patch time via the converter in the action-bar builder.
-            val converterRef =
-                DMActionBarBuilderFingerprint.method.instructions
-                    .first {
-                        it.opcode == Opcode.INVOKE_STATIC &&
-                            (it as ReferenceInstruction).reference
-                                .let { r -> r is MethodReference && r.returnType == DIRECT_THREAD_KEY }
-                    }.let { (it as ReferenceInstruction).reference as MethodReference }
+            // Derive delta class from A0P's second parameter, then find the static converter
+            // (delta → DirectThreadKey) by signature search — no dependency on DMActionBarBuilderFingerprint.
+            val deltaClass = DirectItemPostprocessFingerprint.method.parameterTypes[1].toString()
             val deltaThreadIdField =
-                mutableClassDefBy { it.type == converterRef.definingClass }
-                    .methods
-                    .first { it.name == converterRef.name && it.returnType == DIRECT_THREAD_KEY }
-                    .instructions
+                mutableClassDefBy { cd ->
+                    cd.methods.any { m ->
+                        AccessFlags.STATIC.isSet(m.accessFlags) &&
+                            m.returnType == DIRECT_THREAD_KEY &&
+                            m.parameterTypes.size == 1 &&
+                            m.parameterTypes[0].toString() == deltaClass
+                    }
+                }.methods.first { m ->
+                    AccessFlags.STATIC.isSet(m.accessFlags) &&
+                        m.returnType == DIRECT_THREAD_KEY &&
+                        m.parameterTypes.size == 1 &&
+                        m.parameterTypes[0].toString() == deltaClass
+                }.instructions
                     .first {
                         it.opcode == Opcode.IGET_OBJECT &&
                             (it as ReferenceInstruction).reference
                                 .let { r -> r is FieldReference && r.type == "Ljava/lang/String;" }
                     }.let { (it as ReferenceInstruction).reference as FieldReference }
-            val deltaClass = deltaThreadIdField.definingClass
-            // Sanity-check the delta really is A0P's second parameter before reading it off p2.
-            require(DirectItemPostprocessFingerprint.method.parameterTypes[1] == deltaClass) {
-                "A0P param[1] (${DirectItemPostprocessFingerprint.method.parameterTypes[1]}) != delta $deltaClass"
-            }
 
             DirectItemPostprocessFingerprint.method.apply {
                 val regs = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 3)
@@ -138,12 +137,12 @@ val saveDeletedMessagesPatch =
                         (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
                             (it as ReferenceInstruction).reference.toString() == "users"
                     }
-                require(usersKeyIndex >= 0) { "const-string 'users' not found in thread dispatch" }
+                if (usersKeyIndex < 0) return@apply
                 val listPutInstruction =
-                    insns.drop(usersKeyIndex + 1).first {
+                    insns.drop(usersKeyIndex + 1).firstOrNull {
                         it.opcode == Opcode.IPUT_OBJECT &&
                             (it as ReferenceInstruction).reference.toString().endsWith(":Ljava/util/List;")
-                    }
+                    } ?: return@apply
                 val listRegister = listPutInstruction.registersUsed[0]
                 val putIndex = listPutInstruction.location.index
                 val free = getFreeRegisterProvider(putIndex + 1, 1).getFreeRegister()
