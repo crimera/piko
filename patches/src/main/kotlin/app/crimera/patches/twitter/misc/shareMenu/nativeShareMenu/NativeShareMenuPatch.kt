@@ -21,7 +21,7 @@ val nativeShareMenuPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, entityGenerator, shareMenuButtonOnClickHook)
+        dependsOn(settingsPatch, nativeShareMenuResourcePatch, entityGenerator, shareMenuButtonOnClickHook)
 
         execute {
 

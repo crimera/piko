@@ -8,6 +8,7 @@ package app.morphe.extension.twitter.patches.nativeFeatures.shareMenu;
 
 import android.content.Intent;
 import android.content.Context;
+import java.util.Collections;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +30,15 @@ import app.morphe.extension.twitter.Pref;
 public class BottomSheetBuilder {
 
     private static List<BottomSheetAction<Tweet>> actionList(Context context, Tweet tweet) throws Exception{
-
+        Object tweetObject = tweet.getObject();
         List<BottomSheetAction<Tweet>> actions = new ArrayList<>();
+
         actions.add(new BottomSheetAction<Tweet>("ic_vector_link",str("copy_tweet_link"),t -> copyLink(context, t)));
         actions.add(new BottomSheetAction<>("ic_vector_share_android",str("share_tweet_sheet_title"),t -> shareVia(context, t)));
 
-        Object tweetObject = tweet.getObject();
+        actions.add(new BottomSheetAction<>("ic_vector_compose_dm",str("label_chat"),t -> shareToDM(context, t)));
+
+        actions.add(new BottomSheetAction<>("ic_vector_logo_instagram",str("piko_share_image_instagram_stories"),t -> ShareImageHandler.shareAsImage(context, tweetObject,1)));
 
         if(Pref.enableNativeDownloader()){
             actions.add(new BottomSheetAction<>("ic_vector_incoming",str("piko_title_native_downloader"),t -> NativeDownloader.downloader(context, tweetObject)));
@@ -49,13 +53,14 @@ public class BottomSheetBuilder {
         }
 
         if(Pref.enableShareImage()){
-            actions.add(new BottomSheetAction<>("ic_vector_share",str("piko_share_image_title"),t -> ShareImageHandler.shareAsImage(context, tweetObject)));
+            actions.add(new BottomSheetAction<>("ic_vector_share",str("piko_share_image_title"),t -> ShareImageHandler.shareAsImage(context, tweetObject,0)));
         }
 
         if(Pref.browseObject()){
             actions.add(new BottomSheetAction<>("ic_vector_flask_stroke",str("piko_browse_object_title"),t -> BrowseTweetObjectPatch.browse(context, tweetObject)));
         }
 
+        Collections.reverse(actions);
         return actions;
     }
 
@@ -118,14 +123,18 @@ public class BottomSheetBuilder {
 
     }
 
-    private static void shareToInstaStory(Context ctx, Tweet tweet){
+    private static void shareToDM(Context ctx, Tweet tweet){
         try {
             String link = generateShareLink(tweet);
 
-            Intent intent = new Intent(Intent.ACTION_SEND);
-            intent.setType("text/plain");
+            Intent intent = new Intent("com.twitter.app.dm.DMActivity");
+            intent.setPackage("com.twitter.android");
+
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setAction(Intent.ACTION_SEND);
             intent.putExtra(Intent.EXTRA_TEXT, link);
-            ctx.startActivity(Intent.createChooser(intent,str("room_settings_system_share_via")));
+            intent.setType("text/plain");
+            ctx.startActivity(intent);
 
         } catch (Exception e) {
             PikoUtils.logger(e);

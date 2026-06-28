@@ -34,7 +34,7 @@ public class ButtonPressHandler {
     public static void buttonPressAction(Context context, Object buttonPressed, Object tweetObject){
         try {
             if (buttonCheck(buttonPressed, "ShareImage")) {
-                ShareImageHandler.shareAsImage(context, tweetObject);
+                ShareImageHandler.shareAsImage(context, tweetObject,0);
 
             } else if (buttonCheck(buttonPressed, "ReaderMode")) {
                 ReaderModeUtils.launchReaderMode(context, tweetObject);
