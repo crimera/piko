@@ -74,7 +74,6 @@
     <string name="piko_pref_ctj_section">Ocultar la sección \"Comunidad a la que unirse\"</string>
     <string name="piko_pref_ryb_section">Ocultar la sección \"Revisita tus favoritos\"</string>
     <string name="piko_pref_pinned_posts_section">Ocultar la sección \"Publicaciones fijadas por seguidores\"</string>
-    <string name="piko_pref_hide_related_posts">Ocultar publicaciones relacionadas (en las respuestas)</string>
     <string name="piko_pref_hide_premium_prompt">Ocultar indicaciones de mensajes</string>
     <string name="piko_pref_hide_todays_news">Oculta las noticias de hoy</string>
     <string name="piko_pref_del_from_db">Eliminar entradas de la base de datos</string>
@@ -84,7 +83,6 @@
     <string name="piko_pref_db_ctj_section">Sección \"Comunidad a la que unirse\"</string>
     <string name="piko_pref_db_ryb_section">Sección \"Revisita tus favoritos\"</string>
     <string name="piko_pref_db_pinned_posts_section">Sección \"Publicaciones fijadas por seguidores\"</string>
-    <string name="piko_pref_db_related_posts">Publicaciones relacionadas (en respuestas)</string>
     <string name="piko_pref_db_premium_prompt">Indicaciones de mensaje</string>
     <string name="piko_pref_db_todays_news">Noticias de hoy</string>
     <string name="piko_pref_db_not_found">Base de datos no encontrada</string>

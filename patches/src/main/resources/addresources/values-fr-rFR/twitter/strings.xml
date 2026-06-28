@@ -74,7 +74,6 @@
     <string name="piko_pref_ctj_section">Masquer la section \"Communauté à rejoindre\"</string>
     <string name="piko_pref_ryb_section">Masquer la section \"Revisitez votre signet\"</string>
     <string name="piko_pref_pinned_posts_section">Masquer la section \"Publications épinglées par abonnés\"</string>
-    <string name="piko_pref_hide_related_posts">Masquer les messages associés (dans les réponses)</string>
     <string name="piko_pref_hide_premium_prompt">Masquer les invites de message</string>
     <string name="piko_pref_hide_todays_news">Cacher les nouvelles d\'aujourd\'hui</string>
     <string name="piko_pref_del_from_db">Supprimer les entrées de la base de données</string>
@@ -84,7 +83,6 @@
     <string name="piko_pref_db_ctj_section">Section \"Communauté à rejoindre\"</string>
     <string name="piko_pref_db_ryb_section">Section \"Revisitez votre signet\"</string>
     <string name="piko_pref_db_pinned_posts_section">Section \"Publications épinglées par abonnés\"</string>
-    <string name="piko_pref_db_related_posts">Articles connexes (dans les réponses)</string>
     <string name="piko_pref_db_premium_prompt">Invites de message</string>
     <string name="piko_pref_db_todays_news">Actualités du jour</string>
     <string name="piko_pref_db_not_found">Base de données non trouvée</string>
