@@ -394,6 +394,12 @@ public class SettingsStatus {
         enableNativeShareMenu = true;
     }
 
+    public static boolean externalDownloader = false;
+    public static void externalDownloader() {
+        externalDownloader = true;
+    }
+
+
     public static boolean enableTimelineSection() {
         return ( hidePostMetrics || hideNavbarBadge || showSourceLabel || hideCommBadge || showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD);
     }
@@ -411,7 +417,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableDownloadSection() {
-        return (changeDownloadEnabled || mediaLinkHandle);
+        return (externalDownloader || changeDownloadEnabled || mediaLinkHandle);
     }
 
     public static boolean enablePremiumSection() {

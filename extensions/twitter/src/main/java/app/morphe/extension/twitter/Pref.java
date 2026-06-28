@@ -438,5 +438,14 @@ public class Pref {
     public static boolean enableNativeShareMenu(){
         return Utils.getBooleanPref(Settings.NATIVE_SHARE_MENU) && SettingsStatus.enableNativeShareMenu;
     }
+
+    public static boolean enableExternalDownloader(){
+        return Utils.getBooleanPref(Settings.EXTERNAL_DOWNLOADER) && SettingsStatus.externalDownloader;
+    }
+
+    public static String getExternalDownloaderPackageName(){
+        return Utils.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
+    }
+
     //end
 }

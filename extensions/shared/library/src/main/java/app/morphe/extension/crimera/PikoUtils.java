@@ -22,6 +22,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.Logger;
 
 @SuppressWarnings("unused")
 public class PikoUtils {
@@ -41,17 +42,44 @@ public class PikoUtils {
         }
     }
 
+    public static void launchIntent(Intent intent){
+        try {
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(intent);
+         } catch (Exception e) {
+            Logger.printException(() -> "launchIntent failure", e);
+            logger(e);
+        }
+    }
+
+    public static void shareTextToPackageName(String url, String packageName) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, url);
+        intent.setPackage(packageName);
+        launchIntent(intent);
+    }
+
+    public static void shareText(String txt) {
+        final String appPackageName = ctx.getPackageName();
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, txt);
+        sendIntent.setType("text/plain");
+        launchIntent(sendIntent);
+    }
+
     public static void openUrl(String url) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setPackage(ctx.getPackageName());
-        ctx.startActivity(intent);
+        launchIntent(intent);
+
     }
 
     public static void openDefaultLinks() {
         Intent intent = new Intent(android.provider.Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS);
         intent.setData(Uri.parse("package:" + ctx.getPackageName()));
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         ctx.startActivity(intent);
     }
 
@@ -141,16 +169,5 @@ public class PikoUtils {
                 sp,
                 Resources.getSystem().getDisplayMetrics()
         );
-    }
-
-    public static void shareText(String txt) {
-        Context context = getContext();
-        final String appPackageName = context.getPackageName();
-        Intent sendIntent = new Intent();
-        sendIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, txt);
-        sendIntent.setType("text/plain");
-        context.startActivity(sendIntent);
     }
 }

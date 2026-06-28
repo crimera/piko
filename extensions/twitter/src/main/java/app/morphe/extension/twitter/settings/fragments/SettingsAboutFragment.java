@@ -70,6 +70,7 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         );
 
         TreeMap<String,Boolean> flags = new TreeMap();
+        flags.put(str("piko_pref_external_downloader_toggle"),SettingsStatus.externalDownloader);
         flags.put(str("piko_title_native_share_menu"),SettingsStatus.enableNativeShareMenu);
         flags.put(str("piko_pref_video_download"),SettingsStatus.enableVidDownload);
         flags.put(str("piko_pref_undo_posts"),SettingsStatus.enableUndoPosts);

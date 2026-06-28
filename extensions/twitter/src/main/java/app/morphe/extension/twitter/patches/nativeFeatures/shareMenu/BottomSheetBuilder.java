@@ -22,6 +22,7 @@ import app.morphe.extension.twitter.patches.nativeFeatures.downloader.NativeDown
 import app.morphe.extension.twitter.patches.nativeFeatures.shareImage.ShareImageHandler;
 import app.morphe.extension.twitter.patches.nativeFeatures.translator.NativeTranslator;
 import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeUtils;
+import app.morphe.extension.twitter.patches.links.ExternalDownloader;
 
 import app.morphe.extension.twitter.entity.Tweet;
 import app.morphe.extension.twitter.patches.links.Urls;
@@ -42,6 +43,10 @@ public class BottomSheetBuilder {
 
         if(Pref.enableNativeDownloader()){
             actions.add(new BottomSheetAction<>("ic_vector_incoming",str("piko_title_native_downloader"),t -> NativeDownloader.downloader(context, tweetObject)));
+        }
+
+        if(Pref.enableExternalDownloader()){
+            actions.add(new BottomSheetAction<>("ic_vector_incoming",str("piko_pref_external_downloader_text"),t -> ExternalDownloader.sendToExternalDownloader(tweetObject)));
         }
 
         if(Pref.enableNativeTranslator()){
@@ -65,10 +70,10 @@ public class BottomSheetBuilder {
     }
 
     /**
-     * Shows the "Share post" bottom sheet for {@code post}.
+     * Shows the "Share post" bottom sheet.
      *
      * @param context Activity context (required for dialog creation).
-     * @param post    The post whose actions should be shown.
+     * @param tweetObj    The tweet object.
      */
     public static void showShareSheet(Context context, Object tweetObj) {
         try {

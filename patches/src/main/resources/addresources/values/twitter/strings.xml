@@ -23,6 +23,11 @@
     <string name="piko_pref_download_media_link_handle_always_ask">Always ask</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Copy media link</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Share media link</string>
+    <string name="piko_pref_external_downloader_toggle">Enable external downloader</string>
+    <string name="piko_pref_external_downloader_text">Download with external downloader</string>
+    <string name="piko_pref_external_downloader_package_name">External downloader package name</string>
+    <string name="piko_pref_external_downloader_package_not_set">External downloader package not set</string>
+    <string name="piko_pref_external_downloader_package_not_found">External downloader package not found</string>
 
     <!-- Native -->
     <string name="piko_title_native">Native features</string>

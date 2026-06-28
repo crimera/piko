@@ -14,6 +14,7 @@ import app.morphe.extension.twitter.patches.nativeFeatures.shareImage.ShareImage
 import app.morphe.extension.twitter.patches.nativeFeatures.translator.NativeTranslator;
 import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeUtils;
 import app.morphe.extension.twitter.patches.nativeFeatures.shareMenu.BottomSheetBuilder;
+import app.morphe.extension.twitter.patches.links.ExternalDownloader;
 import app.morphe.extension.twitter.Pref;
 
 import app.morphe.extension.crimera.PikoUtils;
@@ -26,9 +27,12 @@ public class ButtonPressHandler {
     }
     
     public static boolean isButtonPressed(Object buttonPressed){
-        return (buttonCheck(buttonPressed,"ShareImage")) || (buttonCheck(buttonPressed,"ReaderMode")) ||
+        return (
+                (buttonCheck(buttonPressed,"ShareImage")) || (buttonCheck(buttonPressed,"ReaderMode")) ||
                 (buttonCheck(buttonPressed,"Download")) || (buttonCheck(buttonPressed,"Translate")) ||
-                (buttonCheck(buttonPressed,"BrowseObject")) || (buttonCheck(buttonPressed,"TwitterShare") && Pref.enableNativeShareMenu());
+                (buttonCheck(buttonPressed,"BrowseObject")) || (buttonCheck(buttonPressed,"ExternalDownload")) ||
+                (buttonCheck(buttonPressed,"TwitterShare") && Pref.enableNativeShareMenu())
+        );
     }
 
     public static void buttonPressAction(Context context, Object buttonPressed, Object tweetObject){
@@ -50,6 +54,9 @@ public class ButtonPressHandler {
 
             } else if (buttonCheck(buttonPressed, "TwitterShare")) {
                 BottomSheetBuilder.showShareSheet(context, tweetObject);
+
+            } else if (buttonCheck(buttonPressed, "ExternalDownload")) {
+                ExternalDownloader.sendToExternalDownloader(tweetObject);
 
             }
         } catch (Exception e) {

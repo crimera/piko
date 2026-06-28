@@ -17,6 +17,8 @@ import com.twitter.ui.widget.LegacyTwitterPreferenceCategory;
 import app.morphe.extension.twitter.settings.widgets.*;
 import androidx.annotation.Nullable;
 import app.morphe.extension.twitter.Pref;
+
+
 public class ScreenBuilder {
     private final Context context;
     private final PreferenceScreen screen;
@@ -113,6 +115,21 @@ public class ScreenBuilder {
                             Settings.VID_MEDIA_HANDLE
                     )
             );
+        }
+        if (SettingsStatus.externalDownloader) {
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_external_downloader_toggle"),
+                            "",
+                            Settings.EXTERNAL_DOWNLOADER
+                    )
+            );
+
+            addPreference(category,helper.editTextPreference(
+                    str("piko_pref_external_downloader_package_name"),
+                    "",
+                    Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
+            ));
         }
     }
 
