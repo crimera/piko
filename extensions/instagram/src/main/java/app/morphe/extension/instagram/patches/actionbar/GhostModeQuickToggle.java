@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 piko <https://github.com/crimera/piko>
  *
- * See the included NOTICE file for GPLv3 Section 7(b) terms that apply to this code.
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
 package app.morphe.extension.instagram.patches.actionbar;
@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
@@ -42,10 +43,14 @@ public class GhostModeQuickToggle {
     private static final String ACTION_BAR_VIEW_TAG = "piko_ghost_mode_quick_toggle_action_bar";
     private static final int DIRECT_INBOX_MODEL_OFFSET_DP = 10;
     private static final int MAX_NATIVE_ANCHOR_SIZE_DP = 96;
-    private static final String DIRECT_INBOX_LEADING_CLASS_NAME = "X.5Sf";
-    private static final String DIRECT_INBOX_TITLE_CLASS_NAME = "X.L6U";
-    private static final String DIRECT_INBOX_ACTION_CLASS_NAME = "X.5Sp";
-    private static final String DIRECT_INBOX_PLACEMENT_CLASS_NAME = "X.5So";
+    private static final String DIRECT_INBOX_LEADING_CLASS_NAME = "directInboxLeadingClassName";
+    private static final String DIRECT_INBOX_TITLE_CLASS_NAME = "directInboxTitleClassName";
+    private static final String DIRECT_INBOX_ACTION_CLASS_NAME = "directInboxActionClassName";
+    private static final String DIRECT_INBOX_PLACEMENT_CLASS_NAME = "directInboxPlacementClassName";
+    private static final String DIRECT_INBOX_MODEL_LEADING_FIELD_NAME = "directInboxModelLeadingFieldName";
+    private static final String DIRECT_INBOX_MODEL_TITLE_FIELD_NAME = "directInboxModelTitleFieldName";
+    private static final String DIRECT_INBOX_MODEL_ACTIONS_FIELD_NAME = "directInboxModelActionsFieldName";
+    private static final String DIRECT_INBOX_ACTION_PLACEMENT_FIELD_NAME = "directInboxActionPlacementFieldName";
     private static final ArrayList<WeakReference<ImageView>> BUTTONS = new ArrayList<>();
     private static final Set<ViewGroup> HOME_ACTION_BARS =
             Collections.newSetFromMap(new WeakHashMap<ViewGroup, Boolean>());
@@ -202,13 +207,11 @@ public class GhostModeQuickToggle {
             Class<?> actionClass = Class.forName(DIRECT_INBOX_ACTION_CLASS_NAME, false, classLoader);
             Class<?> placementClass = Class.forName(DIRECT_INBOX_PLACEMENT_CLASS_NAME, false, classLoader);
             Object endPlacement = Enum.valueOf((Class<Enum>) placementClass.asSubclass(Enum.class), "END");
-            Field leadingField = declaredUniqueFieldByType(modelClass, leadingClass);
-            Field titleField = declaredUniqueFieldByType(modelClass, titleClass);
-            Field actionsField = declaredActionListField(modelClass, actionBarModel, actionClass);
+            Entity modelEntity = new Entity(actionBarModel);
 
-            Object leading = leadingField.get(actionBarModel);
-            Object title = titleField.get(actionBarModel);
-            Object actionsObject = actionsField.get(actionBarModel);
+            Object leading = modelEntity.getField(DIRECT_INBOX_MODEL_LEADING_FIELD_NAME);
+            Object title = modelEntity.getField(DIRECT_INBOX_MODEL_TITLE_FIELD_NAME);
+            Object actionsObject = modelEntity.getField(DIRECT_INBOX_MODEL_ACTIONS_FIELD_NAME);
             if (!(actionsObject instanceof List)) {
                 return actionBarModel;
             }
@@ -232,7 +235,6 @@ public class GhostModeQuickToggle {
             int insertIndex = findDirectInboxInsertIndex(
                     newActions,
                     actionClass,
-                    placementClass,
                     endPlacement
             );
             newActions.add(insertIndex, pikoAction);
@@ -460,14 +462,13 @@ public class GhostModeQuickToggle {
     private static int findDirectInboxInsertIndex(
             List<?> actions,
             Class<?> actionClass,
-            Class<?> placementClass,
             Object endPlacement
     ) {
         try {
-            Field placementField = declaredUniqueFieldByType(actionClass, placementClass);
             for (int i = actions.size() - 1; i >= 0; i--) {
                 Object action = actions.get(i);
-                if (actionClass.isInstance(action) && endPlacement.equals(placementField.get(action))) {
+                if (actionClass.isInstance(action)
+                        && endPlacement.equals(new Entity(action).getField(DIRECT_INBOX_ACTION_PLACEMENT_FIELD_NAME))) {
                     return i;
                 }
             }
@@ -588,101 +589,6 @@ public class GhostModeQuickToggle {
             ViewGroup viewGroup = (ViewGroup) parent;
             viewGroup.removeView(view);
         }
-    }
-
-    private static Field declaredUniqueFieldByType(Class<?> cls, Class<?> fieldType) throws NoSuchFieldException {
-        Field match = null;
-        for (Field field : cls.getDeclaredFields()) {
-            if (fieldType.isAssignableFrom(field.getType())) {
-                if (match != null) {
-                    throw new NoSuchFieldException("Multiple " + fieldType.getName() + " fields in " + cls.getName());
-                }
-                match = field;
-            }
-        }
-
-        if (match == null) {
-            throw new NoSuchFieldException(fieldType.getName());
-        }
-
-        match.setAccessible(true);
-        return match;
-    }
-
-    private static Field declaredActionListField(
-            Class<?> cls,
-            Object instance,
-            Class<?> actionClass
-    ) throws NoSuchFieldException, IllegalAccessException {
-        Field onlyListField = null;
-        Field onlyEmptyListField = null;
-        int listFieldCount = 0;
-        int emptyListFieldCount = 0;
-
-        for (Field field : cls.getDeclaredFields()) {
-            if (!List.class.isAssignableFrom(field.getType())) {
-                continue;
-            }
-
-            listFieldCount++;
-            field.setAccessible(true);
-            Object value = field.get(instance);
-            if (value instanceof List) {
-                List<?> list = (List<?>) value;
-                if (isNonEmptyActionList(list, directInboxActionListItemClass(actionClass))) {
-                    return field;
-                }
-
-                if (list.isEmpty()) {
-                    emptyListFieldCount++;
-                    onlyEmptyListField = field;
-                }
-            }
-
-            onlyListField = field;
-        }
-
-        if (emptyListFieldCount == 1 && onlyEmptyListField != null) {
-            return onlyEmptyListField;
-        }
-
-        if (listFieldCount == 1 && onlyListField != null) {
-            return onlyListField;
-        }
-
-        throw new NoSuchFieldException("action list in " + cls.getName());
-    }
-
-    private static Class<?> directInboxActionListItemClass(Class<?> actionClass) {
-        for (Class<?> iface : actionClass.getInterfaces()) {
-            String name = iface.getName();
-            if (!name.startsWith("java.") && !name.startsWith("kotlin.")) {
-                return iface;
-            }
-        }
-
-        return actionClass;
-    }
-
-    private static boolean isNonEmptyActionList(List<?> list, Class<?> listItemClass) {
-        if (list.isEmpty()) {
-            return false;
-        }
-
-        boolean hasAction = false;
-        for (Object item : list) {
-            if (item == null) {
-                continue;
-            }
-
-            if (!listItemClass.isInstance(item)) {
-                return false;
-            }
-
-            hasAction = true;
-        }
-
-        return hasAction;
     }
 
     private static int iconResId() {

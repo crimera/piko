@@ -9,26 +9,13 @@ package app.morphe.extension.instagram.settings.preference;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ValueAnimator;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.animation.DecelerateInterpolator;
-import android.widget.AbsListView;
-import android.widget.LinearLayout;
 import java.util.TreeMap;
 import java.util.Map;
 
-import app.morphe.extension.crimera.SharedPref;
-import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.instagram.patches.actionbar.GhostModeQuickToggle;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
@@ -41,7 +28,6 @@ public class ScreenBuilder {
     private final Context context;
     private final PreferenceScreen screen;
     private final Helper helper;
-    private int ghostQuickToggleLocationsVisibilityRequest;
 
     public ScreenBuilder(Context context, PreferenceScreen screen, Helper helper) {
         this.context = context;
@@ -74,56 +60,6 @@ public class ScreenBuilder {
     private Preference withOrder(Preference preference, int order) {
         preference.setOrder(order);
         return preference;
-    }
-
-    private void setGhostQuickToggleLocationsVisible(
-            final GhostQuickToggleLocationsPref preference,
-            boolean visible,
-            boolean animate
-    ) {
-        final int request = ++ghostQuickToggleLocationsVisibilityRequest;
-        if (visible) {
-            addGhostQuickToggleLocationsPreference(preference, animate, request);
-        } else {
-            hideGhostQuickToggleLocationsPreference(preference, animate);
-        }
-    }
-
-    private void addGhostQuickToggleLocationsPreference(
-            final GhostQuickToggleLocationsPref preference,
-            boolean animate,
-            final int request
-    ) {
-        if (screen.findPreference(preference.getKey()) == null) {
-            preference.setExpanded(false, false);
-            addPreference(preference);
-        }
-
-        if (animate) {
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    if (request != ghostQuickToggleLocationsVisibilityRequest || !Pref.enableGhostModeQuickToggle()) {
-                        return;
-                    }
-                    preference.setExpanded(true, true);
-                }
-            });
-        } else {
-            preference.setExpanded(true, false);
-        }
-    }
-
-    private void hideGhostQuickToggleLocationsPreference(
-            final GhostQuickToggleLocationsPref preference,
-            boolean animate
-    ) {
-        if (screen.findPreference(preference.getKey()) == null) {
-            preference.setExpanded(false, false);
-            return;
-        }
-
-        preference.setExpanded(false, animate);
     }
 
     public void buildAdsSection() {
@@ -259,34 +195,20 @@ public class ScreenBuilder {
                 ), order++)
         );
 
-        final int quickToggleOrder = order++;
-        final GhostQuickToggleLocationsPref quickToggleLocationsPreference = new GhostQuickToggleLocationsPref(context);
-        quickToggleLocationsPreference.setOrder(order++);
-
-        Preference quickTogglePreference = withOrder(helper.switchPreference(
-                str("piko_ghost_modes_quick_toggle"),
-                str("piko_ghost_modes_quick_toggle_desc"),
-                Settings.GHOST_MODES_QUICK_TOGGLE
-        ), quickToggleOrder);
-        quickTogglePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        Preference quickToggleLocationsPreference = withOrder(helper.listPreference(
+                str("piko_ghost_modes_quick_toggle_locations"),
+                str("piko_ghost_modes_quick_toggle_locations_desc"),
+                Settings.GHOST_MODE_QUICK_TOGGLE_LOCATIONS
+        ), order++);
+        quickToggleLocationsPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 helper.setValue(preference, newValue);
-                setGhostQuickToggleLocationsVisible(
-                        quickToggleLocationsPreference,
-                        Boolean.TRUE.equals(newValue),
-                        true
-                );
                 GhostModeQuickToggle.refreshActionBarButtons();
                 return true;
             }
         });
-        addPreference(quickTogglePreference);
-        setGhostQuickToggleLocationsVisible(
-                quickToggleLocationsPreference,
-                Pref.enableGhostModeQuickToggle(),
-                false
-        );
+        addPreference(quickToggleLocationsPreference);
 
         if (SettingsStatus.viewStoriesAnonymously) {
             addPreference(
@@ -932,340 +854,6 @@ public class ScreenBuilder {
                 )
         );
 
-    }
-
-    private static class GhostQuickToggleLocationsPref extends Preference {
-        private static final String KEY = "piko_ghost_mode_quick_toggle_locations";
-        private static final long EXPAND_ANIMATION_DURATION_MS = 260L;
-        private static final int LOCATION_ROW_MIN_HEIGHT_DP = 78;
-        private static final int COLLAPSE_TRANSLATION_DP = 10;
-
-        private ExpandableLinearLayout rootView;
-        private LinearLayout contentView;
-        private ValueAnimator animator;
-        private boolean expanded = true;
-        private boolean animateExpansionWhenBound;
-        private float expansionProgress = 1f;
-
-        GhostQuickToggleLocationsPref(Context context) {
-            super(context);
-            setKey(KEY);
-            setSelectable(false);
-        }
-
-        @Override
-        protected View onCreateView(ViewGroup parent) {
-            Context context = getContext();
-            ExpandableLinearLayout root = new ExpandableLinearLayout(context);
-            root.setOrientation(LinearLayout.VERTICAL);
-            root.setClipChildren(true);
-            root.setClipToPadding(true);
-            root.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(context));
-            root.setLayoutParams(new AbsListView.LayoutParams(
-                    AbsListView.LayoutParams.MATCH_PARENT,
-                    expanded ? AbsListView.LayoutParams.WRAP_CONTENT : 0
-            ));
-
-            LinearLayout content = new LinearLayout(context);
-            content.setOrientation(LinearLayout.VERTICAL);
-            root.addView(content, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            ));
-
-            content.addView(createLocationRow(
-                    str("piko_ghost_modes_quick_toggle_home"),
-                    str("piko_ghost_modes_quick_toggle_home_desc"),
-                    Settings.GHOST_MODE_QUICK_TOGGLE_HOME
-            ));
-            if (showDirectInboxLocationRow()) {
-                content.addView(createLocationRow(
-                        str("piko_ghost_modes_quick_toggle_direct_inbox"),
-                        str("piko_ghost_modes_quick_toggle_direct_inbox_desc"),
-                        Settings.GHOST_MODE_QUICK_TOGGLE_DIRECT_INBOX
-                ));
-            }
-            if (showDirectThreadLocationRow()) {
-                content.addView(createLocationRow(
-                        str("piko_ghost_modes_quick_toggle_direct_thread"),
-                        str("piko_ghost_modes_quick_toggle_direct_thread_desc"),
-                        Settings.GHOST_MODE_QUICK_TOGGLE_DIRECT_THREAD
-                ));
-            }
-
-            rootView = root;
-            contentView = content;
-            setExpansionProgress(expansionProgress);
-            return root;
-        }
-
-        @Override
-        protected void onBindView(View view) {
-            if (!(view instanceof ExpandableLinearLayout)) {
-                return;
-            }
-
-            rootView = (ExpandableLinearLayout) view;
-            if (rootView.getChildCount() > 0) {
-                View child = rootView.getChildAt(0);
-                if (child instanceof LinearLayout) {
-                    contentView = (LinearLayout) child;
-                }
-            }
-            setExpansionProgress(expansionProgress);
-            animateExpansionWhenBound();
-        }
-
-        void setExpanded(boolean expanded, boolean animate) {
-            if (this.expanded == expanded && animator == null) {
-                return;
-            }
-
-            this.expanded = expanded;
-            float target = expanded ? 1f : 0f;
-            if (rootView == null) {
-                if (animate && expanded) {
-                    expansionProgress = 0f;
-                    animateExpansionWhenBound = true;
-                } else {
-                    expansionProgress = target;
-                    animateExpansionWhenBound = false;
-                }
-                notifyChanged();
-                return;
-            }
-
-            if (animator != null) {
-                animator.cancel();
-            }
-
-            if (!animate) {
-                animateExpansionWhenBound = false;
-                setExpansionProgress(target);
-                return;
-            }
-
-            animateExpansionTo(target);
-        }
-
-        private void animateExpansionWhenBound() {
-            if (!animateExpansionWhenBound || rootView == null) {
-                return;
-            }
-
-            animateExpansionWhenBound = false;
-            rootView.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (rootView == null) {
-                        return;
-                    }
-                    if (animator != null) {
-                        animator.cancel();
-                    }
-                    animateExpansionTo(expanded ? 1f : 0f);
-                }
-            });
-        }
-
-        private void animateExpansionTo(float target) {
-            final ValueAnimator currentAnimator = ValueAnimator.ofFloat(expansionProgress, target);
-            animator = currentAnimator;
-            currentAnimator.setDuration(EXPAND_ANIMATION_DURATION_MS);
-            currentAnimator.setInterpolator(new DecelerateInterpolator());
-            currentAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    setExpansionProgress((Float) animation.getAnimatedValue());
-                }
-            });
-            currentAnimator.addListener(new AnimatorListenerAdapter() {
-                private boolean cancelled;
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-                    cancelled = true;
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (animator == animation) {
-                        animator = null;
-                    }
-                    if (cancelled) {
-                        return;
-                    }
-                    setExpansionProgress(expanded ? 1f : 0f);
-                }
-            });
-            currentAnimator.start();
-        }
-
-        private View createLocationRow(String title, String summary, final BooleanSetting setting) {
-            Context context = getContext();
-            final View row = InstagramPreferenceStyle.createPreferenceView(
-                    context,
-                    InstagramPreferenceStyle.TRAILING_SWITCH
-            );
-            Preference rowPreference = new Preference(context);
-            rowPreference.setTitle(title);
-            rowPreference.setSummary(summary);
-            InstagramPreferenceStyle.bindText(rowPreference, row);
-            row.setFocusable(true);
-            final InstagramPreferenceStyle.SwitchView switchView = InstagramPreferenceStyle.findSwitch(row);
-            updateLocationRow(row, switchView, setting, false);
-            row.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (!InstagramPreferenceStyle.consumeSwitchClickAllowed(view)) {
-                        return;
-                    }
-
-                    boolean checked = !SharedPref.getBooleanPref(setting);
-                    SharedPref.setBooleanPref(setting.key, checked);
-                    updateLocationRow(view, switchView, setting, true);
-                    GhostModeQuickToggle.refreshActionBarButtons();
-                    view.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
-                }
-            });
-
-            return row;
-        }
-
-        private void updateLocationRow(
-                View row,
-                InstagramPreferenceStyle.SwitchView switchView,
-                BooleanSetting setting,
-                boolean animate
-        ) {
-            boolean checked = SharedPref.getBooleanPref(setting);
-            if (switchView != null) {
-                switchView.setChecked(checked, animate);
-            }
-            InstagramPreferenceStyle.bindSwitchAccessibility(row, checked);
-            row.setSelected(checked);
-            row.setActivated(checked);
-        }
-
-        private boolean showDirectInboxLocationRow() {
-            return SettingsStatus.directInboxGhostModeQuickToggle && showDirectThreadLocationRow();
-        }
-
-        private boolean showDirectThreadLocationRow() {
-            return SettingsStatus.viewStoriesAnonymously
-                    || SettingsStatus.viewLiveAnonymously
-                    || SettingsStatus.disableTypingStatus
-                    || SettingsStatus.viewDmAnonymously;
-        }
-
-        private void setExpansionProgress(float progress) {
-            expansionProgress = Math.max(0f, Math.min(1f, progress));
-            if (rootView == null) {
-                return;
-            }
-
-            int targetHeight = measuredExpandedHeight();
-            ViewGroup.LayoutParams layoutParams = rootView.getLayoutParams();
-            if (layoutParams == null) {
-                layoutParams = new AbsListView.LayoutParams(
-                        AbsListView.LayoutParams.MATCH_PARENT,
-                        AbsListView.LayoutParams.WRAP_CONTENT
-                );
-            }
-
-            if (expansionProgress >= 1f) {
-                rootView.setForcedHeight(-1);
-                layoutParams.height = AbsListView.LayoutParams.WRAP_CONTENT;
-            } else {
-                int animatedHeight = Math.round(targetHeight * expansionProgress);
-                rootView.setForcedHeight(animatedHeight);
-                layoutParams.height = animatedHeight;
-            }
-            rootView.setLayoutParams(layoutParams);
-            rootView.setVisibility(View.VISIBLE);
-            rootView.setEnabled(expansionProgress > 0f);
-            rootView.setAlpha(expansionProgress);
-            rootView.setClickable(expansionProgress > 0f);
-
-            if (contentView != null) {
-                contentView.setVisibility(expansionProgress > 0f ? View.VISIBLE : View.INVISIBLE);
-                contentView.setTranslationY(
-                        -InstagramPreferenceStyle.dp(rootView.getContext(), COLLAPSE_TRANSLATION_DP)
-                                * (1f - expansionProgress)
-                );
-            }
-        }
-
-        private int measuredExpandedHeight() {
-            if (contentView == null) {
-                return fallbackExpandedHeight();
-            }
-
-            int width = rootView != null ? rootView.getWidth() : 0;
-            View parent = rootView != null && rootView.getParent() instanceof View
-                    ? (View) rootView.getParent()
-                    : null;
-            if (width <= 0 && parent != null) {
-                width = parent.getWidth();
-            }
-            if (width <= 0) {
-                width = getContext().getResources().getDisplayMetrics().widthPixels;
-            }
-
-            int widthSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
-            int heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-            contentView.measure(widthSpec, heightSpec);
-            return Math.max(
-                    contentView.getMeasuredHeight(),
-                    fallbackExpandedHeight()
-            );
-        }
-
-        private int fallbackExpandedHeight() {
-            int rowCount = contentView != null
-                    ? Math.max(1, contentView.getChildCount())
-                    : locationRowCount();
-            return InstagramPreferenceStyle.dp(getContext(), LOCATION_ROW_MIN_HEIGHT_DP) * rowCount;
-        }
-
-        private int locationRowCount() {
-            int rowCount = 1;
-            if (showDirectInboxLocationRow()) {
-                rowCount++;
-            }
-            if (showDirectThreadLocationRow()) {
-                rowCount++;
-            }
-            return rowCount;
-        }
-
-        private static class ExpandableLinearLayout extends LinearLayout {
-            private int forcedHeight = -1;
-
-            ExpandableLinearLayout(Context context) {
-                super(context);
-            }
-
-            void setForcedHeight(int height) {
-                if (forcedHeight == height) {
-                    return;
-                }
-                forcedHeight = height;
-                requestLayout();
-            }
-
-            @Override
-            protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-                if (forcedHeight >= 0) {
-                    super.onMeasure(
-                            widthMeasureSpec,
-                            View.MeasureSpec.makeMeasureSpec(forcedHeight, View.MeasureSpec.EXACTLY)
-                    );
-                    return;
-                }
-                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-            }
-        }
     }
 
     //end

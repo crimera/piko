@@ -12,8 +12,6 @@ import android.preference.ListPreference;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import app.morphe.extension.instagram.settings.Settings;
-import app.morphe.extension.shared.ResourceUtils;
 import android.preference.Preference;
 import app.morphe.extension.instagram.settings.preference.Helper;
 
@@ -53,18 +51,13 @@ public class ListPref extends ListPreference {
         super.onSetInitialValue(restoreValue, defaultValue);
         String key = getKey();
 
-        CharSequence[] entries = new CharSequence[]{};
-        CharSequence[] entriesValues = new CharSequence[]{};
-        if (key == Settings.CUSTOMISE_STORY_TIMESTAMP.key) {
-            entries = ResourceUtils.getStringArray("piko_array_customise_story_timestamp");
-            entriesValues = ResourceUtils.getStringArray("piko_array_customise_story_timestamp_val");
-        } else if (key == Settings.CHANGE_LIKE_ANIMATION.key) {
-            entries = ResourceUtils.getStringArray("piko_array_change_like_animation");
-            entriesValues = ResourceUtils.getStringArray("piko_array_change_like_animation_val");
-        }
+        setEntries(getStringArray("piko_array_" + key));
+        setEntryValues(getStringArray("piko_array_" + key + "_val"));
+    }
 
-        setEntries(entries);
-        setEntryValues(entriesValues);
+    private CharSequence[] getStringArray(String name) {
+        int id = getContext().getResources().getIdentifier(name, "array", getContext().getPackageName());
+        return id == 0 ? new CharSequence[]{} : getContext().getResources().getTextArray(id);
     }
 
     @Override

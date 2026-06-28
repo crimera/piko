@@ -15,6 +15,28 @@
         <item>timeleft</item>
     </string-array>
 
+    <string-array name="piko_array_ghost_mode_quick_toggle_locations">
+        <item>@string/piko_array_none</item>
+        <item>@string/piko_array_all_locations</item>
+        <item>@string/piko_array_home_and_messages</item>
+        <item>@string/piko_array_home_and_chats</item>
+        <item>@string/piko_array_messages_and_chats</item>
+        <item>@string/piko_array_home</item>
+        <item>@string/piko_array_messages</item>
+        <item>@string/piko_array_chats</item>
+    </string-array>
+
+    <string-array name="piko_array_ghost_mode_quick_toggle_locations_val">
+        <item>none</item>
+        <item>all</item>
+        <item>home_messages</item>
+        <item>home_chats</item>
+        <item>messages_chats</item>
+        <item>home</item>
+        <item>messages</item>
+        <item>chats</item>
+    </string-array>
+
     <string-array name="piko_array_change_like_animation">
         <item>@string/piko_array_default</item>
         <item>Anyway like activation</item>
