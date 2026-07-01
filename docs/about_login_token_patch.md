@@ -32,7 +32,7 @@ It's called `onboarding_new`.
 <img alt="new_login_screen" width="360" src="https://github.com/user-attachments/assets/22d9c2b4-8947-41bb-90a2-c305b02a8833"/>
 
 The "Login through token json" button is not displayed in this version.  
-There are two workarounds to import tokens.
+There are three workarounds to import tokens.
 
 <details>
 
@@ -113,6 +113,8 @@ In other words, you just need to prevent the logout request from being sent to t
 
 Also, when you factory reset your device, you will need to uninstall the Twitter app beforehand.
 It has been reported that the token is logged out when performing a factory reset.
+
+(When you uninstall the app, you don't need to use airplane mode because a logout request will not be sent to the server.)
 
 ## Troubleshooting
 
