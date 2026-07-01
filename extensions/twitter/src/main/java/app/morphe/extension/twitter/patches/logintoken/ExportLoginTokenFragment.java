@@ -79,6 +79,15 @@ public class ExportLoginTokenFragment extends Fragment {
             intent.putExtra(Intent.EXTRA_TITLE, "piko_account_" + account.name);
             startActivityForResult(intent, CREATE_FILE_REQUEST_CODE);
         });
+
+        if (accounts.length == 0) {
+            // Hide export buttons and show the info message
+            spinner.setVisibility(View.GONE);
+            copyToClipboardButton.setVisibility(View.GONE);
+            saveToFileButton.setVisibility(View.GONE);
+            view.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "no_accounts_message"))
+                    .setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

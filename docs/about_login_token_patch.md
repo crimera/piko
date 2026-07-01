@@ -14,7 +14,80 @@ This is useful in the following cases:
 Tokens and other necessary data will be exported in JSON format.  
 You can import it from the login screen or piko settings.
 
-**Important: This patch does NOT fix the login attestation problem.**
+**This patch does NOT fix the login attestation problem. To get a token, you must first log in to your account using any login method.**
+
+## How to export tokens
+
+Piko settings > Backup and restore > Export login token
+
+## How to import tokens
+
+This varies depending on the version.
+
+### • New login screen
+
+This is for versions 11.90.0 and above. (But this is rolled out to some users even on v11.81.0 or below.)  
+It's called `onboarding_new`.
+
+<img alt="new_login_screen" width="360" src="https://github.com/user-attachments/assets/22d9c2b4-8947-41bb-90a2-c305b02a8833"/>
+
+The "Login through token json" button is not displayed in this version.  
+There are three workarounds to import tokens.
+
+<details>
+
+<summary>Method A: Using deep link</summary>
+
+You can open the import menu by clicking the deep link.  
+First, set the Piko Twitter app to open x.com links. (App Info > Open by default)  
+Then click the deep link below.
+
+[**\<\<\<CLICK HERE\>\>\>**](https://x.com/i/piko/pref)
+
+</details>
+
+<details>
+
+<summary>Method B: Using shortcut</summary>
+
+1. Long press the app icon and select "Piko settings".
+<img width="360" src="https://github.com/user-attachments/assets/04862e6f-268d-4e78-a043-38f6ddae7965" />
+
+2. Select "Backup and restore".
+
+3. Select "Import login token".
+
+</details>
+
+<details>
+
+<summary>Method C: Using very legacy login screen</summary>
+
+X still contains a very legacy login screen that no longer functions. Coincidentally, it serves as a loophole for importing tokens.
+
+1. Long press the app icon and select "Search". This opens the very legacy login screen.
+<img width="240" src="https://github.com/user-attachments/assets/72dfb2fd-d948-41f0-a28b-2206332f80fc" />
+
+2. Tap "Sign up" in the upper right corner.
+<img width="240" src="https://github.com/user-attachments/assets/1f81b83a-e7a4-49de-b448-e47dbe02cfd0" />
+
+3. The "Login through token json" button is there.
+<img width="240" src="https://github.com/user-attachments/assets/36589f61-acdb-43fb-9601-20c493938e0b" />
+
+(The very legacy login screen can also be opened from device settings > Accounts > Add account > X)
+
+</details>
+
+### • Old login screen
+
+This is for versions prior to 11.81.0.  
+Tap the text "Login through token json".
+
+<img width="240" src="https://github.com/user-attachments/assets/75f5094d-6a56-47af-9768-e1fde3b77207" />
+
+### • Add second account
+
+If you want to import a second or subsequent account, you can import it simply from Piko settings > Backup and restore > Import login token
 
 ## WARNING
 
@@ -23,50 +96,31 @@ If a third party obtains this token, they can freely access your account until y
 
 Please also be careful of your clipboard or exported files.
 
-## How it works
-
-X for Android stores the session token and some cached information into the Android system's AccountManager.  
-This information continues to work even if you clear the app data.  
-(This is also why X still be logged in even after clearing the app data.)
-
-Therefore, you can restore this information and log in after re-installation.
-
 ## A note when removing account from the app
 
 Please be careful if you want to remove an account from one device after importing the token into another device.
 
 Logging out from settings will log out of the session associated with that token.  
-Therefore, if you simply press the logout button in the settings, you will also be logged out of other devices using the same token.
+Therefore, if you simply press the logout button in the settings, you will also be logged out of other devices using the same token.  
 This also applies when you press "Remove account" in the account manager in the device settings app.
 
 There are two ways to remove an account from the app without logging out.
 
-- Press the Logout button in airplane mode. (no internet connections)
-- If the app has only one account currently logged in, just uninstall and reinstall the app.
+- Press the Logout button in airplane mode (no internet connections).
+- If the app has only one account currently logged in, just uninstall the app.
 
 In other words, you just need to prevent the logout request from being sent to the server.
 
 Also, when you factory reset your device, you will need to uninstall the Twitter app beforehand.
 It has been reported that the token is logged out when performing a factory reset.
 
-## Regarding the new login screen
-
-Recently, Twitter has been testing a new redesigned login screen for some users.  
-This patch does not yet support this new login screen, and the "Login through token json" button will not be displayed.
-
-<img alt="new_login_screen" width="360" src="https://github.com/user-attachments/assets/22d9c2b4-8947-41bb-90a2-c305b02a8833"/>
-
-As a workaround, you can open the import menu by clicking the deep link.  
-First, set the Piko Twitter app to open x.com links. (App Info > Open by default)  
-Then click the deep link below.
-
-[**\<\<\<CLICK HERE\>\>\>**](https://x.com/i/piko/pref)
+(When you uninstall the app, you don't need to use airplane mode because a logout request will not be sent to the server.)
 
 ## Troubleshooting
 
 **Q: After importing a token, a notification "You were logged out of @username due to an error." appears immediately.**
 
-A: The session has already been logged out. That token cannot be used.
+A: The session has already been logged out. That token is invalid.
 
 **Q: After importing a token, it's not logged in even after restarting the app, but there is no notification.**
 
@@ -74,11 +128,26 @@ A: Allow notifications for the X app and try again.
 
 **Q: Can I use tokens from the web version of Twitter?**
 
-A: No. Because it is completely different from the Android token.
+A: No. Because it is completely different from the Android tokens.
 
 ## Appendix
 
-### The format of piko's token file
+### How this patch works
+
+The X for Android app uses the Android system's AccountManager to save accounts.  
+The app stores the session token into it.
+
+Data stored in AccountManager remains even if you clear the app data.  
+This is why X remains logged in even after the app data is cleared.
+
+This means that login sessions can be restored after reinstallation using the data stored in the AccountManager.
+
+When exporting, this patch uses the AccountManager API to get account data which X stored.  
+When importing, this patch adds an account data to the AccountManager in the same way that X adds an account at login.
+
+### The structure of piko's token JSON files
+
+This is a format specific to piko for saving various data within AccountManager as a single text file.
 
 ```json
 {
@@ -101,16 +170,18 @@ A: No. Because it is completely different from the Android token.
 }
 ```
 
-- "token" is the value of an auth token `com.twitter.android.oauth.token` from AccountManager
-- "secret" is the value of an auth token `com.twitter.android.oauth.token.secret` from AccountManager
-- "userdata" is an array of the user data stored in AccountManager in key-value format
+- "token" is the value of an auth token `com.twitter.android.oauth.token`
+- "secret" is the value of an auth token `com.twitter.android.oauth.token.secret`
+- "userdata" is an array of key-value user data that X stored
 
 Not all keys in "userdata" necessarily exist.  
 However, some keys are required. If any required keys are missing when importing an account, the X app will remove that account immediately after it is imported.
 
 ### Get token from rooted device without piko
 
-If you are using official X instead of piko on a rooted device (e.g., using an Xposed module) and want to export tokens to use with piko, you can extract your tokens and user data without piko using the following method.
+If you are using the official X app (not piko) on a rooted device, you can extract your tokens without installing piko using the following method.
+
+Note that if you don't mind installing piko, you don't need to use this method. Just install piko over the official app using an Xposed module (e.g. Core Patch) to allow app updates across different signatures.
 
 1. Use any file manager app that supports root access
 2. Get `/data/system_ce/0/accounts_ce.db`
