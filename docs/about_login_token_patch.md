@@ -48,7 +48,20 @@ Then click the deep link below.
 
 <details>
 
-<summary>Method B: Using very legacy login screen</summary>
+<summary>Method B: Using shortcut</summary>
+
+1. Long press the app icon and select "Piko settings".
+<img width="360" src="https://github.com/user-attachments/assets/04862e6f-268d-4e78-a043-38f6ddae7965" />
+
+2. Select "Backup and restore".
+
+3. Select "Import login token".
+
+</details>
+
+<details>
+
+<summary>Method C: Using very legacy login screen</summary>
 
 X still contains a very legacy login screen that no longer functions. Coincidentally, it serves as a loophole for importing tokens.
 
