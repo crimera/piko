@@ -2,8 +2,8 @@
 <resources>
     <!-- Premium Settings -->
     <string name="piko_title_premium">進階版</string>
-    <string name="piko_pref_undo_posts">啟用取消推文</string>
-    <string name="piko_pref_undo_posts_desc">開啟推文在發佈前可以取消功能</string>
+    <string name="piko_pref_undo_posts">啟用貼文撤銷功能</string>
+    <string name="piko_pref_undo_posts_desc">開啟貼文在發佈前撤銷貼文的功能</string>
     <string name="piko_pref_undo_posts_btn">取消推文設定</string>
     <string name="piko_pref_icon_n_navbar_btn">自訂導覽和應用程式圖示</string>
     <string name="piko_pref_enable_force_pip">強制子母畫面</string>
@@ -22,6 +22,11 @@
     <string name="piko_pref_download_media_link_handle_always_ask">每次詢問</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">複製多媒體網址</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">分享多媒體網址</string>
+    <string name="piko_pref_external_downloader_toggle">啟用外部下載程式</string>
+    <string name="piko_pref_external_downloader_text">使用外部下載程式下載</string>
+    <string name="piko_pref_external_downloader_package_name">外部下載程式的軟體名稱</string>
+    <string name="piko_pref_external_downloader_package_not_set">未設定外部下載程式軟體名稱</string>
+    <string name="piko_pref_external_downloader_package_not_found">找不到外部下載程式</string>
     <!-- Native -->
     <string name="piko_title_native">原生功能</string>
     <string name="piko_title_native_downloader">原生下載器</string>
@@ -39,6 +44,7 @@
     <string name="piko_share_image_autocleanup">自動清理截圖</string>
     <string name="piko_share_image_autocleanup_desc">啟用後將刪除 24 小時前的截圖</string>
     <string name="piko_share_image_error">錯誤：%s</string>
+    <string name="piko_share_image_app_error">找不到 %s</string>
     <string name="piko_title_native_translator">原生推文翻譯</string>
     <string name="piko_native_translator_toggle">啟用原生推文翻譯</string>
     <string name="piko_native_translator_provider">翻譯服務</string>
@@ -232,8 +238,32 @@
     <string name="piko_app_icon_category_seasonal_event">季節性活動</string>
     <!-- Icon names -->
     <string name="piko_app_icon_name_default">預設</string>
+    <string name="piko_app_icon_name_winter_1">冬天 1</string>
+    <string name="piko_app_icon_name_winter_2">冬天 2</string>
+    <string name="piko_app_icon_name_summer_1">夏天 1</string>
+    <string name="piko_app_icon_name_summer_2">夏天 2</string>
+    <string name="piko_app_icon_name_mothers_day">母親節</string>
+    <string name="piko_app_icon_name_womansday">婦女節</string>
+    <string name="piko_app_icon_name_halloween_2021">萬聖節 2021</string>
+    <string name="piko_app_icon_name_halloween_2022">萬聖節 2022</string>
+    <string name="piko_app_icon_name_halloween_2024_1">萬聖節 2024 1</string>
+    <string name="piko_app_icon_name_halloween_2024_2">萬聖節 2024 2</string>
+    <string name="piko_app_icon_name_halloween_2024_3">萬聖節 2024 3</string>
     <string name="piko_app_icon_name_stpatricks_day">聖博德節</string>
     <string name="piko_app_icon_name_easter">復活節</string>
+    <string name="piko_app_icon_name_thanksgiving_1">感恩節 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2">感恩節 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_1">感恩節 2024 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_2">感恩節 2024 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_3">感恩節 2024 3</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_4">感恩節 2024 4</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_5">感恩節 2024 5</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_6">感恩節 2024 6</string>
+    <string name="piko_app_icon_name_earth_hour">地球一小時</string>
+    <string name="piko_app_icon_name_christmas_2024_1">聖誕節 2024 1</string>
+    <string name="piko_app_icon_name_christmas_2024_2">聖誕節 2024 2</string>
+    <string name="piko_app_icon_name_christmas_2024_3">聖誕節 2024 3</string>
+    <string name="piko_app_icon_name_christmas_2024_4">聖誕節 2024 4</string>
     <!-- Import / export login tokens -->
     <string name="piko_login_token_export_screen_description">"此功能會匯出當前登入帳戶的工作權杖。
 你可以在登入界面或“建立新帳戶”界面匯入此權杖。

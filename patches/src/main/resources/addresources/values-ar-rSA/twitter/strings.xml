@@ -22,6 +22,11 @@
     <string name="piko_pref_download_media_link_handle_always_ask">السؤال دائمًا</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">نسخ رابط الوسائط</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">مشاركة رابط الوسائط</string>
+    <string name="piko_pref_external_downloader_toggle">تمكين التنزيل الخارجي</string>
+    <string name="piko_pref_external_downloader_text">تنزيل بـ أداة تنزيل خارجية</string>
+    <string name="piko_pref_external_downloader_package_name">اسم حزمة أداة التنزيل الخارجي</string>
+    <string name="piko_pref_external_downloader_package_not_set">لم يتم تعيين اسم حزمة أداة التنزيل الخارجي</string>
+    <string name="piko_pref_external_downloader_package_not_found">لم يتم العثور على حزمة أداة التنزيل الخارجي</string>
     <!-- Native -->
     <string name="piko_title_native">الميزات المحلية</string>
     <string name="piko_pref_native_page_desc">تتوفر ميزات Piko المحلية هذه في قائمة المنشور.</string>
@@ -44,6 +49,9 @@
     <string name="piko_share_image_view_not_found">لم يتم العثور على عرض التغريدة</string>
     <string name="piko_share_image_capture_failed">فشل التقاط الصورة</string>
     <string name="piko_share_image_error">خطأ: %s</string>
+    <string name="piko_share_image_app_error">%s لم يعثر عليها</string>
+    <string name="piko_share_image_instagram_stories">مشاركة على قصص Instagram</string>
+    <string name="piko_share_image_whatsapp_status">مشاركة في حالة واتساب</string>
     <string name="piko_title_native_translator">المترجم المحلي للمنشورات</string>
     <string name="piko_native_translator_toggle">تمكين ترجمة المنشور المحلي</string>
     <string name="piko_native_translator_provider">مقدمي خدمات الترجمة</string>
@@ -66,6 +74,8 @@
     <string name="piko_native_reader_mode_cache_delete">حذف ذاكرة التخزين المؤقت لوضع القارئ</string>
     <string name="piko_native_reader_mode_cache_delete_success">تم حذف ذاكرة التخزين المؤقت بنجاح</string>
     <string name="piko_native_reader_mode_cache_delete_failed">فشل حذف ذاكرة التخزين المؤقت</string>
+    <string name="piko_title_native_share_menu">قائمة المشاركة المحلية</string>
+    <string name="piko_native_share_menu_toggle">تمكين قائمة المشاركة المحلية</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">الإعلانات</string>
     <string name="piko_pref_hide_promoted_posts">إخفاء منشورات المحتوى المُروَّج</string>
@@ -74,6 +84,7 @@
     <string name="piko_pref_ctj_section">إخفاء قسم \"المجتمع المراد الانضمام إليه\"</string>
     <string name="piko_pref_ryb_section">إخفاء قسم \"إعادة النظر في الإشارة المرجعية الخاصة بك\"</string>
     <string name="piko_pref_pinned_posts_section">إخفاء قسم \"مشاركات مثبتة بواسطة المتابَعون\"</string>
+    <string name="piko_pref_hide_unrelated_replies">إخفاء الردود غير ذات الصلة</string>
     <string name="piko_pref_hide_premium_prompt">إخفاء رسالة مطالبات Premium</string>
     <string name="piko_pref_hide_todays_news">إخفاء أخبار اليوم</string>
     <string name="piko_pref_del_from_db">حذف الإدخالات من قاعدة البيانات</string>
@@ -83,6 +94,7 @@
     <string name="piko_pref_db_ctj_section">قسم \"المجتمع المراد الانضمام إليه\"</string>
     <string name="piko_pref_db_ryb_section">قسم \"إعادة النظر في الإشارة المرجعية الخاصة بك\"</string>
     <string name="piko_pref_db_pinned_posts_section">قسم \"مشاركات مثبتة بواسطة المتابَعون\"</string>
+    <string name="piko_pref_db_unrelated_replies">الردود غير ذات الصلة</string>
     <string name="piko_pref_db_premium_prompt">رسالة مطالبات</string>
     <string name="piko_pref_db_todays_news">أخبار اليوم</string>
     <string name="piko_pref_db_not_found">لم يتم العثور على قاعدة البيانات</string>

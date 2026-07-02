@@ -22,6 +22,11 @@
     <string name="piko_pref_download_media_link_handle_always_ask">毎回尋ねる</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">メディアリンクをコピー</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">メディアリンクを共有</string>
+    <string name="piko_pref_external_downloader_toggle">外部ダウンローダーを有効化</string>
+    <string name="piko_pref_external_downloader_text">外部ダウンローダーでダウンロード</string>
+    <string name="piko_pref_external_downloader_package_name">外部ダウンローダーのパッケージ名</string>
+    <string name="piko_pref_external_downloader_package_not_set">外部ダウンローダーパッケージが設定されていません</string>
+    <string name="piko_pref_external_downloader_package_not_found">外部ダウンローダーパッケージが見つかりません</string>
     <!-- Native -->
     <string name="piko_title_native">ネイティブ機能</string>
     <string name="piko_pref_native_page_desc">これらのPikoネイティブ機能は、ポストのメニューから使用できます。</string>
@@ -44,6 +49,9 @@
     <string name="piko_share_image_view_not_found">ツイートが見つかりません</string>
     <string name="piko_share_image_capture_failed">画像をキャプチャできませんでした</string>
     <string name="piko_share_image_error">エラー: %s</string>
+    <string name="piko_share_image_app_error">%s が見つかりません</string>
+    <string name="piko_share_image_instagram_stories">Instagramのストーリーとして共有</string>
+    <string name="piko_share_image_whatsapp_status">WhatsAppのステータスとして共有</string>
     <string name="piko_title_native_translator">翻訳</string>
     <string name="piko_native_translator_toggle">共有メニューに翻訳ボタンを追加</string>
     <string name="piko_native_translator_provider">翻訳プロバイダー</string>
@@ -66,6 +74,8 @@
     <string name="piko_native_reader_mode_cache_delete">リーダーモードのキャッシュを削除</string>
     <string name="piko_native_reader_mode_cache_delete_success">キャッシュを削除しました</string>
     <string name="piko_native_reader_mode_cache_delete_failed">キャッシュを削除できませんでした</string>
+    <string name="piko_title_native_share_menu">ネイティブ共有メニュー</string>
+    <string name="piko_native_share_menu_toggle">ネイティブ共有メニューを有効化</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">広告</string>
     <string name="piko_pref_hide_promoted_posts">プロモーションポストを削除</string>
@@ -74,6 +84,7 @@
     <string name="piko_pref_ctj_section">「新しいコミュニティを見つける」を削除</string>
     <string name="piko_pref_ryb_section">「ブックマークに再アクセス」を削除</string>
     <string name="piko_pref_pinned_posts_section">「フォロー中のユーザーが固定」を削除</string>
+    <string name="piko_pref_hide_unrelated_replies">関連のない返信を削除</string>
     <string name="piko_pref_hide_premium_prompt">メッセージプロンプトを削除</string>
     <string name="piko_pref_hide_todays_news">今日のニュースを削除</string>
     <string name="piko_pref_del_from_db">データベースから項目を削除</string>
@@ -83,6 +94,7 @@
     <string name="piko_pref_db_ctj_section">「新しいコミュニティを見つける」</string>
     <string name="piko_pref_db_ryb_section">「ブックマークに再アクセス」</string>
     <string name="piko_pref_db_pinned_posts_section">「フォロー中のユーザーが固定」</string>
+    <string name="piko_pref_db_unrelated_replies">関連のない返信</string>
     <string name="piko_pref_db_premium_prompt">メッセージプロンプト</string>
     <string name="piko_pref_db_todays_news">今日のニュース</string>
     <string name="piko_pref_db_not_found">データベースが見つかりません</string>

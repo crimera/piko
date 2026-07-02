@@ -22,6 +22,11 @@
     <string name="piko_pref_download_media_link_handle_always_ask">항상 물어보기</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">미디어 링크 복사하기</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">미디어 링크 공유하기</string>
+    <string name="piko_pref_external_downloader_toggle">외부 다운로더 활성화하기</string>
+    <string name="piko_pref_external_downloader_text">외부 다운로더 앱으로 다운로드하기</string>
+    <string name="piko_pref_external_downloader_package_name">외부 다운로더 앱 패키지명</string>
+    <string name="piko_pref_external_downloader_package_not_set">외부 다운로더 앱 패키지가 설정되지 않았습니다</string>
+    <string name="piko_pref_external_downloader_package_not_found">외부 다운로더 앱 패키지를 찾을 수 없습니다</string>
     <!-- Native -->
     <string name="piko_title_native">기본 기능</string>
     <string name="piko_pref_native_page_desc">이 Piko 기본 기능은 게시물 메뉴에서 사용할 수 있습니다</string>
@@ -44,6 +49,9 @@
     <string name="piko_share_image_view_not_found">\'트윗 보기\'를 찾을 수 없습니다</string>
     <string name="piko_share_image_capture_failed">이미지를 캡쳐할 수 없습니다</string>
     <string name="piko_share_image_error">오류: %s</string>
+    <string name="piko_share_image_app_error">\'%s\'를 찾을 수 없습니다</string>
+    <string name="piko_share_image_instagram_stories">Instagram 스토리에 공유하기</string>
+    <string name="piko_share_image_whatsapp_status">WhatsApp 상태에 공유하기</string>
     <string name="piko_title_native_translator">기본 게시물 번역기</string>
     <string name="piko_native_translator_toggle">기본 게시물 번역기 활성화하기</string>
     <string name="piko_native_translator_provider">번역기 제공자</string>
@@ -66,6 +74,8 @@
     <string name="piko_native_reader_mode_cache_delete">읽기 모드 캐시 삭제하기</string>
     <string name="piko_native_reader_mode_cache_delete_success">캐시를 성공적으로 삭제하였습니다</string>
     <string name="piko_native_reader_mode_cache_delete_failed">캐시를 삭제할 수 없습니다</string>
+    <string name="piko_title_native_share_menu">기본 공유 메뉴</string>
+    <string name="piko_native_share_menu_toggle">기본 공유 메뉴 활성화하기</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">광고</string>
     <string name="piko_pref_hide_promoted_posts">광고 게시물 숨기기</string>
@@ -74,6 +84,7 @@
     <string name="piko_pref_ctj_section">\'새 커뮤니티 찾기\' 영역 숨기기</string>
     <string name="piko_pref_ryb_section">\'북마크 다시 방문\' 영역 숨기기</string>
     <string name="piko_pref_pinned_posts_section">\'팔로우가 고정한 게시물\' 영역 숨기기</string>
+    <string name="piko_pref_hide_unrelated_replies">관련 없는 답글 숨기기</string>
     <string name="piko_pref_hide_premium_prompt">메시지 프롬프트 숨기기</string>
     <string name="piko_pref_hide_todays_news">Today\'s News 숨기기</string>
     <string name="piko_pref_del_from_db">데이터베이스에서 엔트리 삭제하기</string>
@@ -83,6 +94,7 @@
     <string name="piko_pref_db_ctj_section">\'새 커뮤니티 찾기\' 영역</string>
     <string name="piko_pref_db_ryb_section">\'북마크 다시 방문\' 영역</string>
     <string name="piko_pref_db_pinned_posts_section">\'팔로우가 고정한 게시물\' 영역</string>
+    <string name="piko_pref_db_unrelated_replies">관련 없는 답글</string>
     <string name="piko_pref_db_premium_prompt">메시지 프롬프트</string>
     <string name="piko_pref_db_todays_news">Today\'s News</string>
     <string name="piko_pref_db_not_found">데이터베이스를 찾을 수 없습니다</string>

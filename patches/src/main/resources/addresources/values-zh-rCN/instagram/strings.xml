@@ -9,8 +9,16 @@
     <string name="piko_category_dev_options">开发者选项</string>
     <string name="piko_enable_dev_options">启用开发者选项</string>
     <string name="piko_enable_dev_options_desc">长按主页图标解锁开发者选项</string>
-    <string name="piko_export_dev_overrides">导出自定义属性</string>
-    <string name="piko_import_dev_overrides">导入自定义属性</string>
+    <string name="piko_directly_open_metaconfig">直接打开 MetaConfig 覆盖</string>
+    <string name="piko_directly_open_metaconfig_desc">在长按主页图标时直接打开 MetaConfig 覆盖 (需要启用开发者选项)</string>
+    <string name="piko_enable_emp_options">启用员工选项</string>
+    <string name="piko_enable_emp_options_desc">解锁所有用于测试的员工选项</string>
+    <string name="piko_allow_user_network_certificate">允许用户网络证书</string>
+    <string name="piko_allow_user_network_certificate_desc">允许使用用户网络证书进行白帽测试</string>
+    <string name="piko_remove_build_expire_popup">移除版本过期弹出窗口</string>
+    <string name="piko_remove_build_expire_popup_desc">移除因应用程序版本过旧而弹出的弹窗</string>
+    <string name="piko_export_dev_overrides">导出覆盖</string>
+    <string name="piko_import_dev_overrides">导入覆盖</string>
     <string name="piko_import_id_mapping">导入映射文件</string>
     <string name="piko_download_id_mapping">下载映射文件</string>
     <string name="piko_missing_mapping_file">缺少映射文件</string>
@@ -48,6 +56,7 @@
     <string name="piko_hide_stories_tray_desc">从主页源隐藏快拍托盘</string>
     <string name="piko_hide_notes_tray">隐藏便笺托盘</string>
     <string name="piko_hide_notes_tray_desc">在私信中隐藏便笺</string>
+    <string name="piko_hide_group_creation_button_on_sharesheet">在分享表单中隐藏\"发送到新群聊\"按钮</string>
     <string name="piko_disable_double_tap_like_post">禁用双击点赞帖子</string>
     <string name="piko_disable_double_tap_like_reel">禁用双击点赞 reel</string>
     <string name="piko_disable_double_tap_like_comment">禁用双击点赞评论</string>
@@ -57,17 +66,48 @@
     <string name="piko_category_misc">杂项</string>
     <string name="piko_disable_analytics">禁用数据分析</string>
     <string name="piko_delete_analytics_cache">删除分析缓存</string>
+    <string name="piko_disable_analytics_desc">阻止发送到 Instagram / Facebook 服务器的分析数据</string>
+    <string name="piko_disable_discover_people">禁用\"发现用户\"功能</string>
+    <string name="piko_disable_discover_people_desc">禁用用户个人资料中的“发现用户”栏目</string>
+    <string name="piko_follow_back_indicator">启用友谊状态指示器</string>
+    <string name="piko_follow_back_indicator_desc">在个人资料页面上添加一个关注您的状态标签，并在点击时显示详细的友谊状态明细</string>
     <string name="piko_fbi_follows_you">关注了你</string>
     <string name="piko_fbi_doesnt_follows_you">没有关注你</string>
+    <string name="piko_friendship_status">好友关系状态</string>
+    <string name="piko_view_story_mentions">查看快拍提及</string>
+    <string name="piko_vsm_title">快拍提及</string>
+    <string name="piko_vsm_no_mentions">该快拍中没有提及任何人</string>
     <string name="piko_disable_story_flipping">禁用 Story 自动下一个</string>
     <string name="piko_disable_story_flipping_desc">禁用自动跳转/移动到下个 story</string>
     <string name="piko_disable_video_autoplay">禁用视频自动播放</string>
     <string name="piko_stories_audio_autoplay">Story 音频自动播放</string>
     <string name="piko_customise_story_timestamp">自定义 story 时间戳</string>
+    <string name="piko_customise_story_timestamp_desc">自定义快拍发布时间的时间戳格式</string>
+    <string name="piko_unlimited_replays">让短暂性媒体设为永久</string>
+    <string name="piko_unlimited_replays_desc">将未过期的\"阅后即焚\"媒体更改为無限次檢視</string>
+    <string name="piko_improve_image_viewing">提高图像分辨率</string>
+    <string name="piko_improve_image_viewing_desc">从服务器中获取最高分辨率图片</string>
+    <string name="piko_hide_reshare_button">隐藏转发按钮</string>
     <string name="piko_copy_comment">复制评论</string>
+    <string name="piko_copy_comment_desc">在帖子和 Reels 上添加了一个用于复制评论的按钮</string>
     <string name="piko_comment_copied_success">已复制评论</string>
+    <string name="piko_comment_copied_failed">找不到要复制的文本</string>
+    <string name="piko_save_media_comment">保存媒体评论</string>
+    <string name="piko_save_media_comment_desc">在帖子和 Reels 上添加了一个用于保存媒体评论的按钮</string>
+    <string name="piko_copy_username">复制用户名</string>
+    <string name="piko_copy_full_name">复制全名</string>
+    <string name="piko_copy_user_id">复制用户 ID</string>
+    <string name="piko_copy_bio">复制简介</string>
+    <string name="piko_download_profile_picture">下载个人资料图片</string>
+    <string name="piko_copied">已复制</string>
+    <string name="piko_more_profile_options">更多个人资料选项</string>
+    <string name="piko_more_profile_options_action_bar_toggle">操作栏上的个人资料选项</string>
+    <string name="piko_more_profile_options_action_bar_toggle_desc">移动个人资料选项按钮到配置文件操作栏</string>
+    <string name="piko_remove_empty_bottom_space">删除底部空白区域</string>
     <string name="piko_unlock_plus_benefits">解锁 Plus</string>
     <string name="piko_unlock_plus_benefits_desc">本地解锁Plus。使用风险自负</string>
+    <string name="piko_customise_story_ring_size">自定义快拍环大小</string>
+    <string name="piko_customise_story_ring_size_desc">按百分比调整快拍环的大小（默认：100）</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">下载内容</string>
     <string name="piko_enable_download">启用下载</string>
@@ -126,7 +166,7 @@
     <string name="piko_export_success">导出成功</string>
     <string name="piko_export_fail">导出失败</string>
     <string name="piko_fail_no_path">未提供目标路径</string>
-    <string name="piko_fail_no_file">未找到文件</string>
+    <string name="piko_fail_no_file">找不到文件</string>
     <string name="piko_import_success">导入成功</string>
     <string name="piko_import_fail">导入失败</string>
     <string name="piko_restart_app">需要重启应用才能使修改生效</string>
@@ -134,6 +174,7 @@
     <string name="piko_cancel">取消</string>
     <string name="piko_deleted">删除</string>
     <string name="piko_debug">Piko debug</string>
+    <string name="piko_debug_desc">在某些组件上添加了用于测试的调试选项</string>
     <string name="piko_export_experiment_list">导出实验功能列表</string>
     <string name="piko_export_experiment_mappings">导出实验映射</string>
     <!-- Open With Section -->
@@ -143,6 +184,7 @@
     <string name="piko_open_video_with">打开视频方式</string>
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">更改点赞动画</string>
+    <string name="piko_change_like_animation_desc">将点赞动画更改为现有快拍环动画中的一个</string>
     <string name="piko_available_like_animation">可用的点赞动画</string>
     <!-- For arrays -->
     <string name="piko_array_default">默认</string>

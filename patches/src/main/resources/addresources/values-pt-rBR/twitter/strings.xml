@@ -22,6 +22,11 @@
     <string name="piko_pref_download_media_link_handle_always_ask">Perguntar sempre</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Copiar link da mídia</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Compartilhar link da mídia</string>
+    <string name="piko_pref_external_downloader_toggle">Ativar downloader externo</string>
+    <string name="piko_pref_external_downloader_text">Baixar com programa de download externo</string>
+    <string name="piko_pref_external_downloader_package_name">Nome do pacote de download externo</string>
+    <string name="piko_pref_external_downloader_package_not_set">Pacote de download externo não configurado</string>
+    <string name="piko_pref_external_downloader_package_not_found">Pacote de download externo não encontrado</string>
     <!-- Native -->
     <string name="piko_title_native">Recursos nativos</string>
     <string name="piko_pref_native_page_desc">Esses recursos nativos do Piko estão disponíveis no menu de publicação..</string>
@@ -44,6 +49,9 @@
     <string name="piko_share_image_view_not_found">Visualização do tweet não encontrada</string>
     <string name="piko_share_image_capture_failed">Falha ao capturar a imagem</string>
     <string name="piko_share_image_error">Erro: %s</string>
+    <string name="piko_share_image_app_error">%s não encontrado</string>
+    <string name="piko_share_image_instagram_stories">Compartilhe nos stories do Instagram</string>
+    <string name="piko_share_image_whatsapp_status">Compartilhar no status do WhatsApp</string>
     <string name="piko_title_native_translator">Tradução nativa de postagem</string>
     <string name="piko_native_translator_toggle">Ativar tradução nativa de postagem</string>
     <string name="piko_native_translator_provider">Provedores de tradução</string>
@@ -66,6 +74,8 @@
     <string name="piko_native_reader_mode_cache_delete">Apagar cache do modo leitor</string>
     <string name="piko_native_reader_mode_cache_delete_success">Cache apagado com sucesso</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Falha ao apagar cache</string>
+    <string name="piko_title_native_share_menu">Menu de compartilhamento nativo</string>
+    <string name="piko_native_share_menu_toggle">Ativar menu de compartilhamento nativo</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Anúncios</string>
     <string name="piko_pref_hide_promoted_posts">Ocultar publicações promovidas</string>
@@ -74,6 +84,7 @@
     <string name="piko_pref_ctj_section">Ocultar a seção \"Comunidade para participar\"</string>
     <string name="piko_pref_ryb_section">Ocultar a seção \"Revisitar seus favoritos\"</string>
     <string name="piko_pref_pinned_posts_section">Ocultar a seção \"Publicações fixadas por seguidores\"</string>
+    <string name="piko_pref_hide_unrelated_replies">Ocultar respostas irrelevantes</string>
     <string name="piko_pref_hide_premium_prompt">Ocultar avisos de mensagens</string>
     <string name="piko_pref_hide_todays_news">Ocultar as notícias de hoje</string>
     <string name="piko_pref_del_from_db">Excluir entradas do banco de dados</string>
@@ -83,6 +94,7 @@
     <string name="piko_pref_db_ctj_section">Seção \"Comunidade para participar\"</string>
     <string name="piko_pref_db_ryb_section">Seção “Reveja seus itens salvos”</string>
     <string name="piko_pref_db_pinned_posts_section">Seção \"Publicações fixadas pelos seguidores\"</string>
+    <string name="piko_pref_db_unrelated_replies">Respostas não relacionadas</string>
     <string name="piko_pref_db_premium_prompt">Solicitações de mensagens</string>
     <string name="piko_pref_db_todays_news">Notícias de hoje</string>
     <string name="piko_pref_db_not_found">Banco de dados não encontrado</string>

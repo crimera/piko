@@ -22,6 +22,11 @@
     <string name="piko_pref_download_media_link_handle_always_ask">Selalu tanyakan</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Salin tautan media</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Bagikan tautan media</string>
+    <string name="piko_pref_external_downloader_toggle">Aktifkan pengunduh eksternal</string>
+    <string name="piko_pref_external_downloader_text">Unduh menggunakan pengunduh eksternal</string>
+    <string name="piko_pref_external_downloader_package_name">Nama paket pengunduh eksternal</string>
+    <string name="piko_pref_external_downloader_package_not_set">Paket pengunduh eksternal belum diatur</string>
+    <string name="piko_pref_external_downloader_package_not_found">Paket pengunduh eksternal tidak ditemukan</string>
     <!-- Native -->
     <string name="piko_title_native">Fitur bawaan</string>
     <string name="piko_pref_native_page_desc">Fitur bawaan Piko ini tersedia di menu postingan.</string>
@@ -44,6 +49,9 @@
     <string name="piko_share_image_view_not_found">Tampilan cuitan tidak ditemukan</string>
     <string name="piko_share_image_capture_failed">Gagal mengambil gambar</string>
     <string name="piko_share_image_error">Kesalahan: %s</string>
+    <string name="piko_share_image_app_error">%s tidak ditemukan</string>
+    <string name="piko_share_image_instagram_stories">Bagikan ke cerita Instagram</string>
+    <string name="piko_share_image_whatsapp_status">Bagikan ke status WhatsApp</string>
     <string name="piko_title_native_translator">Terjemahan postingan bawaan</string>
     <string name="piko_native_translator_toggle">Aktifkan terjemahan posting bawaan</string>
     <string name="piko_native_translator_provider">Penyedia Terjemahan</string>
@@ -66,6 +74,8 @@
     <string name="piko_native_reader_mode_cache_delete">Hapus cache mode baca</string>
     <string name="piko_native_reader_mode_cache_delete_success">Cache berhasil dihapus</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Penghapusan cache gagal</string>
+    <string name="piko_title_native_share_menu">Menu berbagi bawaan</string>
+    <string name="piko_native_share_menu_toggle">Aktifkan menu berbagi bawaan</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Iklan</string>
     <string name="piko_pref_hide_promoted_posts">Sembunyikan postingan yang dipromosikan</string>
@@ -74,6 +84,7 @@
     <string name="piko_pref_ctj_section">Sembunyikan bagian \"Komunitas yang bisa diikuti\"</string>
     <string name="piko_pref_ryb_section">Sembunyikan bagian \"Kunjungi kembali markah Anda\"</string>
     <string name="piko_pref_pinned_posts_section">Sembunyikan bagian \"Postingan yang disematkan oleh pengikut\"</string>
+    <string name="piko_pref_hide_unrelated_replies">Sembunyikan balasan yang tidak relevan</string>
     <string name="piko_pref_hide_premium_prompt">Sembunyikan munculan pesan</string>
     <string name="piko_pref_hide_todays_news">Sembunyikan berita hari ini</string>
     <string name="piko_pref_del_from_db">Hapus entri dari basis data</string>
@@ -83,6 +94,7 @@
     <string name="piko_pref_db_ctj_section">Bagian \"Komunitas yang bisa diikuti\"</string>
     <string name="piko_pref_db_ryb_section">Bagian \"Kunjungi kembali markah Anda\"</string>
     <string name="piko_pref_db_pinned_posts_section">Bagian \"Postingan yang disematkan oleh pengikut\"</string>
+    <string name="piko_pref_db_unrelated_replies">Balasan yang tidak relevan</string>
     <string name="piko_pref_db_premium_prompt">Munculan pesan</string>
     <string name="piko_pref_db_todays_news">Berita hari ini</string>
     <string name="piko_pref_db_not_found">Basis data tidak ditemukan</string>
