@@ -28,7 +28,7 @@
     <string name="piko_title_native_downloader">기본 다운로더</string>
     <string name="piko_title_native_downloader_toggle">기본 다운로더 활성화하기</string>
     <string name="piko_pref_native_downloader_inline_button">타임라인 게시물에서 다운로드 버튼 표시하기</string>
-    <string name="piko_pref_native_downloader_inline_button_desc">게시물 액션 버튼 바에 즉시 다운로드 버튼을 추가합니다</string>
+    <string name="piko_pref_native_downloader_inline_button_desc">게시물 작업 버튼 바에 즉시 다운로드 버튼을 추가합니다</string>
     <string name="piko_pref_native_downloader_alert_title">미디어 다운로드</string>
     <string name="piko_pref_native_downloader_download_all">모두 다운로드</string>
     <string name="piko_pref_native_downloader_no_media">미디어를 찾을 수 없습니다</string>
@@ -97,8 +97,8 @@
     <!-- Misc Settings -->
     <string name="piko_title_misc">기타</string>
     <string name="piko_pref_chirp_font">짹짹이 폰트 비활성화하기</string>
-    <string name="piko_pref_hide_fab">플로팅 액션 버튼 숨기기</string>
-    <string name="piko_pref_hide_fab_menu">플로팅 액션 메뉴 버튼 숨기기</string>
+    <string name="piko_pref_hide_fab">플로팅 작업 버튼 숨기기</string>
+    <string name="piko_pref_hide_fab_menu">플로팅 작업 메뉴 버튼 숨기기</string>
     <string name="piko_pref_rec_users">팔로우 추천 숨기기</string>
     <string name="piko_pref_hide_view_count">조회수 숨기기</string>
     <string name="piko_pref_custom_share_domain">사용자 정의 도메인</string>

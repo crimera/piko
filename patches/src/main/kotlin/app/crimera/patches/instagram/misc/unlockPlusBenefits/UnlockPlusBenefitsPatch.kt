@@ -19,7 +19,7 @@ import app.morphe.patcher.util.smali.ExternalLabel
 internal object ActiveBenefitCheckerFingerprint : Fingerprint(
     parameters = listOf("Ljava/lang/String;"),
     returnType = "Z",
-    strings = listOf("isBenefitActive: Is benefit ", " active: "),
+    strings = listOf("is_benefit_active"),
 )
 
 @Suppress("unused")

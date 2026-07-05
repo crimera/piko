@@ -120,6 +120,7 @@
     <string name="piko_disunify_xchat_system">Memisahkan sistem xchat</string>
     <string name="piko_disunify_xchat_system_desc">Kembalikan fitur-fitur usang seperti pesan dan lembar bagikan</string>
     <string name="piko_legacy_share_link">Tautan berbagi versi lama</string>
+    <string name="piko_block_redirecting_to_x_lite">Blokir pengalihan ke X Lite</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Fitur flag</string>
     <string name="piko_pref_feature_flags">Tambahkan fitur flag</string>

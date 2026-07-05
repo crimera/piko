@@ -8,25 +8,24 @@ package app.crimera.patches.instagram.misc.distractionFree.doubleTap
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
-import app.morphe.patcher.InstructionLocation.MatchFirst
-import app.morphe.patcher.OpcodeFilter
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
-import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.AccessFlags
 
-internal object MessageOnKeyFingerprint : Fingerprint(
-    returnType = "Z",
-    name = "onKey",
-    custom = { method, _ ->
-        method.implementation?.registerCount == 6
+internal const val SIMPLE_ON_GESTURE_LISTENER_CLASS = "Landroid/view/GestureDetector\$SimpleOnGestureListener;"
+
+internal object MessageGestureDetectorInitFingerprint : Fingerprint(
+    returnType = "V",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.CONSTRUCTOR),
+    parameters = listOf(SIMPLE_ON_GESTURE_LISTENER_CLASS, "Landroid/view/View;", "Landroid/widget/TextView;", "Z"),
+    custom = { _, classDef ->
+        classDef.superclass == SIMPLE_ON_GESTURE_LISTENER_CLASS
     },
-    filters =
-        listOf(
-            opcode(Opcode.CONST_4, MatchFirst()),
-            opcode(Opcode.INVOKE_STATIC, MatchAfterImmediately()),
-        ),
+)
+
+internal object MessageGestureOnDoubleTapFingerprint : Fingerprint(
+    classFingerprint = MessageGestureDetectorInitFingerprint,
+    name = "onDoubleTap",
 )
 
 @Suppress("unused")
@@ -38,13 +37,10 @@ val disableDoubleTapOnMessagePatch =
 
         execute {
 
-            MessageOnKeyFingerprint.apply {
-                classDef.methods.first { it.name == "onDoubleTap" }.apply {
-                    addInstructions(
-                        0,
-                        DOUBLE_TAP_PREF_DESCRIPTOR.format("disableDoubleTapMessage"),
-                    )
-                }
-            }
+            MessageGestureOnDoubleTapFingerprint.method
+                .addInstructions(
+                    0,
+                    DOUBLE_TAP_PREF_DESCRIPTOR.format("disableDoubleTapMessage"),
+                )
         }
     }

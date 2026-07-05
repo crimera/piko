@@ -61,6 +61,7 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_disable_double_tap_like_reel">Nonaktifkan ketuk dua kali untuk menyukai reel</string>
     <string name="piko_disable_double_tap_like_comment">Nonaktifkan ketuk dua kali untuk menyukai komentar</string>
     <string name="piko_disable_double_tap_like_message">Nonaktifkan ketuk dua kali untuk menyukai pesan</string>
+    <string name="piko_disable_double_tap_to_like">Nonaktifkan ketuk dua kali untuk menyukai</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Lain-lain</string>
     <string name="piko_disable_analytics">Nonaktifkan analitik</string>
@@ -68,9 +69,11 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_disable_analytics_desc">Blokir analitik yang dikirim ke server Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Nonaktifkan temukan orang</string>
     <string name="piko_disable_discover_people_desc">Menonaktifkan bagian temukan orang di profil pengguna</string>
-    <string name="piko_follow_back_indicator">Aktifkan indikator mengikuti balik</string>
+    <string name="piko_follow_back_indicator">Aktifkan indikator status pertemanan</string>
+    <string name="piko_follow_back_indicator_desc">Menambahkan label status mengikuti balik di halaman profil dan menampilkan rincian status pertemanan secara terperinci saat diklik</string>
     <string name="piko_fbi_follows_you">Mengikuti Anda</string>
     <string name="piko_fbi_doesnt_follows_you">Tidak mengikuti Anda</string>
+    <string name="piko_friendship_status">Status pertemanan</string>
     <string name="piko_view_story_mentions">Lihat sebutan cerita</string>
     <string name="piko_vsm_title">Sebutan cerita</string>
     <string name="piko_vsm_no_mentions">Tidak ada sebutan di cerita ini</string>
@@ -134,6 +137,7 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_external_downloader_package_name">Nama paket pengunduh eksternal</string>
     <string name="piko_external_downloader_package_name_not_found">Nama paket pengunduh eksternal tidak ditemukan</string>
     <string name="piko_external_downloader_package_name_not_set">Silakan atur nama paket pengunduh eksternal</string>
+    <string name="piko_download_voice_media">Unduh pesan suara</string>
     <!-- Posts Section -->
     <string name="piko_post_options">Pilihan postingan</string>
     <string name="piko_copy_post_description">Salin deskripsi postingan</string>
@@ -150,11 +154,14 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_hide_navigation_search">Sembunyikan tombol Pencarian</string>
     <string name="piko_hide_navigation_create">Sembunyikan tombol Buat</string>
     <!-- Information Section -->
+    <string name="piko_category_about">Tentang</string>
     <string name="piko_export_pref">Ekspor preferensi piko</string>
     <string name="piko_import_pref">Impor preferensi piko</string>
     <string name="piko_app_version">Versi aplikasi: %s</string>
     <string name="piko_patch_version">Versi tambalan: %s</string>
     <string name="piko_patch_info_title">Informasi tambalan</string>
+    <string name="piko_patch_enabled">Diaktifkan</string>
+    <string name="piko_patch_disabled">Dinonaktifkan</string>
     <!-- Export and Import Section -->
     <string name="piko_export_success">Berhasil diekspor</string>
     <string name="piko_export_fail">Gagal mengekspor</string>

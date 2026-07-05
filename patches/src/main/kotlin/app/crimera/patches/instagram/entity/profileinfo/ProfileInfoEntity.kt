@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.entity.profileinfo
 
+import app.crimera.patches.instagram.utils.Constants.USER_DETAIL_VIEW_MODEL_CLASS
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction

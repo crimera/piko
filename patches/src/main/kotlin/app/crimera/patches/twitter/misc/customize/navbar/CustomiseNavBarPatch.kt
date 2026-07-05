@@ -33,73 +33,78 @@ private const val TAB_CUSTOMIZATION_CLASS_PREFIX = "Lcom/twitter/subscriptions/t
 
 private object CustomiseNavBarParentFingerprint : Fingerprint(
     returnType = "V",
-    strings = listOf(
-        "tabCustomizationPreferences"
-    )
+    strings =
+        listOf(
+            "tabCustomizationPreferences",
+        ),
 )
 
 private object CustomiseNavBarFingerprint : Fingerprint(
     classFingerprint = CustomiseNavBarParentFingerprint,
     returnType = "Ljava/util/List;",
-    filters = listOf(
-        string("subscriptions_feature_1008"),
-        opcode(
-            opcode = Opcode.MOVE_RESULT,
-            location = MatchAfterWithin(5)
+    filters =
+        listOf(
+            string("subscriptions_feature_1008"),
+            opcode(
+                opcode = Opcode.MOVE_RESULT,
+                location = MatchAfterWithin(5),
+            ),
+            checkCast("Ljava/lang/Iterable;"),
+            opcode(Opcode.RETURN_OBJECT),
         ),
-        checkCast("Ljava/lang/Iterable;"),
-        opcode(Opcode.RETURN_OBJECT)
-    )
 )
 
 private object CustomiseNavBarSecondaryFingerprint : Fingerprint(
     returnType = "Ljava/util/List;",
-    filters = listOf(
-        string("subscriptions_feature_1008"),
-        opcode(
-            opcode = Opcode.MOVE_RESULT,
-            location = MatchAfterWithin(5)
+    filters =
+        listOf(
+            string("subscriptions_feature_1008"),
+            opcode(
+                opcode = Opcode.MOVE_RESULT,
+                location = MatchAfterWithin(5),
+            ),
+            string(","),
+            opcode(Opcode.RETURN_OBJECT),
         ),
-        string("currentSelectedElements"),
-        opcode(Opcode.RETURN_OBJECT)
-    )
 )
 
 private object CustomiseNavBarSecondaryInitFingerprint : Fingerprint(
     classFingerprint = CustomiseNavBarSecondaryFingerprint,
     name = "<init>",
-    filters = listOf(
-        fieldAccess(
-            opcode = Opcode.IPUT_OBJECT,
-            definingClass = "this",
-            type = "Ljava/util/ArrayList;"
+    filters =
+        listOf(
+            fieldAccess(
+                opcode = Opcode.IPUT_OBJECT,
+                definingClass = "this",
+                type = "Ljava/util/ArrayList;",
+            ),
+            fieldAccess(
+                opcode = Opcode.IPUT_OBJECT,
+                definingClass = "this",
+                type = "Ljava/util/Map;",
+            ),
         ),
-        fieldAccess(
-            opcode = Opcode.IPUT_OBJECT,
-            definingClass = "this",
-            type = "Ljava/util/Map;"
-        )
-    )
 )
 
 private object CustomiseNavBarSecondaryMapFingerprint : Fingerprint(
     classFingerprint = CustomiseNavBarSecondaryFingerprint,
     parameters = listOf(TAB_CUSTOMIZATION_CLASS_PREFIX),
     returnType = "V",
-    filters = listOf(
-        fieldAccess(
-            opcode = Opcode.IGET_OBJECT,
-            definingClass = TAB_CUSTOMIZATION_CLASS_PREFIX,
-            type = TAB_CUSTOMIZATION_CLASS_PREFIX
+    filters =
+        listOf(
+            fieldAccess(
+                opcode = Opcode.IGET_OBJECT,
+                definingClass = TAB_CUSTOMIZATION_CLASS_PREFIX,
+                type = TAB_CUSTOMIZATION_CLASS_PREFIX,
+            ),
+            fieldAccess(
+                opcode = Opcode.IGET_OBJECT,
+                definingClass = TAB_CUSTOMIZATION_CLASS_PREFIX,
+                type = TAB_CUSTOMIZATION_CLASS_PREFIX,
+                location = MatchAfterWithin(3),
+            ),
+            opcode(Opcode.THROW),
         ),
-        fieldAccess(
-            opcode = Opcode.IGET_OBJECT,
-            definingClass = TAB_CUSTOMIZATION_CLASS_PREFIX,
-            type = TAB_CUSTOMIZATION_CLASS_PREFIX,
-            location = MatchAfterWithin(3)
-        ),
-        opcode(Opcode.THROW)
-    )
 )
 
 @Suppress("unused")
@@ -111,7 +116,7 @@ val customiseNavBarPatch =
 
         dependsOn(
             settingsPatch,
-            versionCheckPatch
+            versionCheckPatch,
         )
 
         execute {
@@ -127,7 +132,7 @@ val customiseNavBarPatch =
                         """
                             invoke-static { v$listRegister }, $CUSTOMISE_DESCRIPTOR;->navBar(Ljava/util/List;)Ljava/util/List;
                             move-result-object v$listRegister
-                        """
+                        """,
                     )
 
                     val booleanIndex = it.instructionMatches[1].index
@@ -136,7 +141,7 @@ val customiseNavBarPatch =
 
                     addInstruction(
                         booleanIndex + 1,
-                        "const/4 v$booleanRegister, 0x1"
+                        "const/4 v$booleanRegister, 0x1",
                     )
                 }
             }
@@ -179,7 +184,7 @@ val customiseNavBarPatch =
                                 invoke-static { v$mapRegister }, $CUSTOMISE_DESCRIPTOR;->navBar(Ljava/util/Map;)Ljava/util/Map;
                                 move-result-object v$mapRegister
                                 iput-object v$mapRegister, p0, $mapField                                
-                            """
+                            """,
                         )
 
                         val booleanIndex = it.instructionMatches[1].index
@@ -188,7 +193,7 @@ val customiseNavBarPatch =
 
                         addInstruction(
                             booleanIndex + 1,
-                            "const/4 v$booleanRegister, 0x1"
+                            "const/4 v$booleanRegister, 0x1",
                         )
                     }
                 }

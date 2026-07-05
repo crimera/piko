@@ -34,6 +34,7 @@
     <string name="piko_pref_native_downloader_filename_title">Сохранить шаблон имени файла</string>
     <string name="piko_share_image_title">Делиться твитом как изображением</string>
     <string name="piko_share_image_toggle">Включить Делиться твитами как изображением</string>
+    <string name="piko_share_image_error">Ошибка: %s</string>
     <string name="piko_title_native_translator">Нативный перевод постов</string>
     <string name="piko_native_translator_toggle">Включить нативный перевод постов</string>
     <string name="piko_native_translator_provider">Сервис перевода</string>

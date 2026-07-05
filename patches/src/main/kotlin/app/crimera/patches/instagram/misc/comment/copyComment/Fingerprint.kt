@@ -24,7 +24,8 @@ internal object InitCopyButtonExtensionFingerprint : Fingerprint(
     definingClass = COPY_BUTTON_EXTENSION_CLASS,
 )
 
-internal object CopyTextChatButtonToStringFingerprint : Fingerprint(
+// Also being used for sale media button.
+object CopyTextChatButtonToStringFingerprint : Fingerprint(
     name = "toString",
     returnType = "Ljava/lang/String;",
     strings = listOf("CopyText"),

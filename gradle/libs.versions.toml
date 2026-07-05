@@ -1,8 +1,8 @@
 [versions]
-morphe-patcher = "1.5.0"
-morphe-patches-library = "1.2.0"
+morphe-patcher = "1.5.2"
+morphe-patches-library = "1.4.1"
 #noinspection GradleDependency
-smali = "b6365a84f4"
+smali = "d92701d947"
 gson = "2.14.0"
 annotation = "1.9.1"
 appcompat = "1.7.1"

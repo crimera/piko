@@ -17,14 +17,19 @@ public class ChangeLikeAnimationPatch {
         CHANGE_LIKE_ANIMATION = Pref.changeLikeAnimation();
     }
 
+    // This is required in order to change the like animation class enum type on runtime.
+    private static boolean checkPrefAnimation(){
+        return CHANGE_LIKE_ANIMATION == null || "ARES_LIKE_ACTIVATION".equals(CHANGE_LIKE_ANIMATION);
+    }
+
     public static Object changeLikeAnimation(Object defaultAnimation){
         try {
-            if (CHANGE_LIKE_ANIMATION == null || "ARES_LIKE_ACTIVATION".equals(CHANGE_LIKE_ANIMATION)) {
+            if (ChangeLikeAnimationPatch.checkPrefAnimation()) {
                 return null;
             }
 
             Entity entity = new Entity();
-            Class<?> animationEnumClass = Class.forName("X.07tN");
+            Class<?> animationEnumClass = Class.forName("className");
             Object likeAnimation = entity.getMethod(
                     animationEnumClass,
                     "valueOf",

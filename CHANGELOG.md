@@ -1,3 +1,52 @@
+## [3.7.0-dev.7](https://github.com/crimera/piko/compare/v3.7.0-dev.6...v3.7.0-dev.7) (2026-06-25)
+
+### 🔧 Improvements
+
+* **Instagram:** Remove debug code ([7646088](https://github.com/crimera/piko/commit/764608824d033f8ab23cc35c19d25872c233d466))
+
+## [3.7.0-dev.6](https://github.com/crimera/piko/compare/v3.7.0-dev.5...v3.7.0-dev.6) (2026-06-25)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix `Allow user network certificate` being shown on Settings even without including ([2dc73cc](https://github.com/crimera/piko/commit/2dc73cc88caf6e44ddeff529a80c35d3e619e38b))
+* **Instagram:** Fix `Disable typing status` on v435 ([e2a5693](https://github.com/crimera/piko/commit/e2a569363eec6dbf1180b8287ebbff4bfecde29e))
+* **Instagram:** Fix `User profile action bar` logic ([252797f](https://github.com/crimera/piko/commit/252797fd30b3b7aac7e1ad03bee14c42ca2ed475))
+* **Instagram:** Fix ghost eye icon position on DM action bar ([83661ff](https://github.com/crimera/piko/commit/83661ffc7760a98cd0d6e7e900392cf300b7156f))
+* **Instagram:** Fix inverse issue of `Hide reshare button` ([85ad73f](https://github.com/crimera/piko/commit/85ad73fe1bc8b0c2968ec3a36e63d537e9bf2636))
+
+### 🔧 Improvements
+
+* **Instagram:** Improve discover user blocking ([6c99846](https://github.com/crimera/piko/commit/6c99846d0f5cd4231f915185e0e526b1f9b1b678))
+* **Instagram:** Improve flags to block `location consent` blok ([a4cf9b7](https://github.com/crimera/piko/commit/a4cf9b7aa1fc0466a645324a77b3e17fe0aadf2c))
+* **Instagram:** Improve hook flags logic ([9a1f1cd](https://github.com/crimera/piko/commit/9a1f1cd177f008a8872742354e48daa27d828709))
+* **Instagram:** Move debug export experiment list into Developer option section ([2567ed5](https://github.com/crimera/piko/commit/2567ed5060f86236f3b883d5930083b15bc31cc0))
+
+## [3.7.0-dev.5](https://github.com/crimera/piko/compare/v3.7.0-dev.4...v3.7.0-dev.5) (2026-06-24)
+
+### 🔧 Improvements
+
+* **Instagram:** Remove user action bar support temporarily ([8173c82](https://github.com/crimera/piko/commit/8173c82a9af0d935a7838922dab7eab67a0a576f))
+
+## [3.7.0-dev.4](https://github.com/crimera/piko/compare/v3.7.0-dev.3...v3.7.0-dev.4) (2026-06-24)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix `Change like animation` enum class injection issue ([626d556](https://github.com/crimera/piko/commit/626d556911295562f86d396851159738ab5c065b))
+* **Instagram:** Remove blocking blok fixing your activity page issue ([6d4ce78](https://github.com/crimera/piko/commit/6d4ce78ae0d279bf4570a968258962a3ab47e714))
+
+### 🚀 Updated App Support
+
+* **Instagram:** Bump support for `435.0.0.37.76` ([d53a75a](https://github.com/crimera/piko/commit/d53a75a22ab99e2dbeb647bbe428face2037b16b))
+* **Twitter:** Bump support for `12.2.0-release.0` ([70865fe](https://github.com/crimera/piko/commit/70865fee9c1b10a1fef078e449e44f28aa55f2fb))
+
+### 🔧 Improvements
+
+* **Instagram:** Rename `Follow back indicator` to `Friendship status indicator` patch ([3a5e1ff](https://github.com/crimera/piko/commit/3a5e1ff53a3eaaba7cfa987d741a573970692e55))
+* **Instagram:** Update fingerprints to support v423 ([56d73f6](https://github.com/crimera/piko/commit/56d73f6f1a66b4eb91baabe093562c85c8a6781c))
+* **Instagram:** Update more fingerprints to support v423 ([1ef7d91](https://github.com/crimera/piko/commit/1ef7d912e51d2eeb617d4421caac9ccf4a653cc5))
+* **Twitter:** Add version check for `Block redirecting to X Lite` ([b011267](https://github.com/crimera/piko/commit/b011267781e219c6b641e7dd6bf26a5e9225b331))
+* **Twitter:** Update `Customize Navigation Bar items` fingerprint ([4b77b3d](https://github.com/crimera/piko/commit/4b77b3dc0e919d483d3754f350c88f8bbd6f5fd2))
+
 ## [3.7.0-dev.3](https://github.com/crimera/piko/compare/v3.7.0-dev.2...v3.7.0-dev.3) (2026-06-21)
 
 ### 🔧 Improvements

@@ -6,6 +6,8 @@
 
 package app.crimera.patches.instagram.misc.comment.saveMediaComment
 
+import app.crimera.patches.instagram.entity.commentDataEntity.CHAT_CONTEXT_BUTTON_SUPER_CLASS
+import app.crimera.patches.instagram.misc.comment.copyComment.CopyTextChatButtonToStringFingerprint
 import app.crimera.patches.instagram.utils.Constants.COMMENT_BUTTON_EXTENSION_CLASS
 import app.morphe.patcher.Fingerprint
 
@@ -28,4 +30,12 @@ internal object SaveMediaChatButtonToStringFingerprint : Fingerprint(
     name = "toString",
     returnType = "Ljava/lang/String;",
     strings = listOf("SaveMedia"),
+    custom = { _, classDef ->
+        classDef.superclass == CHAT_CONTEXT_BUTTON_SUPER_CLASS
+    },
+)
+
+internal object SaveMediaChatButtonInitFingerprint : Fingerprint(
+    classFingerprint = SaveMediaChatButtonToStringFingerprint,
+    name = "<init>",
 )
