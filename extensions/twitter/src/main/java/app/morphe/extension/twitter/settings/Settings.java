@@ -19,6 +19,8 @@ public class Settings {
     public static final StringSetting VID_SUBFOLDER = new StringSetting("vid_subfolder", "Twitter");
     public static final StringSetting VID_MEDIA_HANDLE = new StringSetting("vid_media_handle", "download_media");
     public static final StringSetting CUSTOM_SHARING_DOMAIN = new StringSetting("misc_custom_sharing_domain", "x.com");
+    public static final BooleanSetting EXTERNAL_DOWNLOADER = new BooleanSetting("external_downloader", true);
+    public static final StringSetting EXTERNAL_DOWNLOADER_PACKAGE_NAME = new StringSetting("external_downloader_package_name", "");
 
     public static final BooleanSetting MISC_FONT = new BooleanSetting("misc_font", false);
     public static final BooleanSetting MISC_HIDE_FAB = new BooleanSetting("misc_hide_fab", false);
@@ -64,6 +66,7 @@ public class Settings {
     public static final StringSetting NATIVE_READER_MODE_THEME = new StringSetting("native_reader_mode_theme", "system");
     public static final BooleanSetting SHARE_IMAGE_ENABLED = new BooleanSetting("share_image_enabled", true);
     public static final BooleanSetting SHARE_IMAGE_AUTOCLEANUP = new BooleanSetting("share_image_autocleanup", true);
+    public static final BooleanSetting NATIVE_SHARE_MENU = new BooleanSetting("native_share_menu", true);
 
     public static final BooleanSetting TIMELINE_DISABLE_AUTO_SCROLL = new BooleanSetting("timeline_disable_auto_scroll", true);
     public static final BooleanSetting TIMELINE_SHOW_SOURCE_LABEL = new BooleanSetting("timeline_show_source_label", false);
@@ -101,6 +104,7 @@ public class Settings {
     public static final StringSetting REPLY_SORTING_LAST_FILTER = new StringSetting("reply_sorting_last_filter", "Relevance");
     public static final StringSetting CUSTOM_SEARCH_TYPE_AHEAD = new StringSetting("customisation_search_type_ahead", "");
     public static final StringSetting CUSTOM_POST_FONT_SIZE = new StringSetting("customisation_post_font_size", String.valueOf(ResourceUtils.getDimension("font_size_normal")));
+    public static final BooleanSetting MORE_INFO_ON_PROFILE = new BooleanSetting("more_info_on_profile", true);
 
     public static final StringSetting LAST_CHANGELOG_VERSION = new StringSetting("last_changelog_version", "0");
     public static final StringSetting LAST_CHANGELOG = new StringSetting("last_changelog", "0");

@@ -74,7 +74,6 @@
     <string name="piko_pref_ctj_section">「新しいコミュニティを見つける」を削除</string>
     <string name="piko_pref_ryb_section">「ブックマークに再アクセス」を削除</string>
     <string name="piko_pref_pinned_posts_section">「フォロー中のユーザーが固定」を削除</string>
-    <string name="piko_pref_hide_related_posts">関連ポスト欄(返信内)を削除</string>
     <string name="piko_pref_hide_premium_prompt">メッセージプロンプトを削除</string>
     <string name="piko_pref_hide_todays_news">今日のニュースを削除</string>
     <string name="piko_pref_del_from_db">データベースから項目を削除</string>
@@ -84,7 +83,6 @@
     <string name="piko_pref_db_ctj_section">「新しいコミュニティを見つける」</string>
     <string name="piko_pref_db_ryb_section">「ブックマークに再アクセス」</string>
     <string name="piko_pref_db_pinned_posts_section">「フォロー中のユーザーが固定」</string>
-    <string name="piko_pref_db_related_posts">関連ポスト欄(返信内)</string>
     <string name="piko_pref_db_premium_prompt">メッセージプロンプト</string>
     <string name="piko_pref_db_todays_news">今日のニュース</string>
     <string name="piko_pref_db_not_found">データベースが見つかりません</string>

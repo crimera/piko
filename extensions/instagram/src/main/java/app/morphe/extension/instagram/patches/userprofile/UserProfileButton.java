@@ -7,30 +7,29 @@
 package app.morphe.extension.instagram.patches.userprofile;
 
 import android.view.ViewGroup;
+import java.util.Set;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.userprofile.ProfileMoreOption;
 
 public class UserProfileButton {
-    private static boolean PIKO_SETTINGS_ON_ACTION_BAR;
-    static {
-        PIKO_SETTINGS_ON_ACTION_BAR = Pref.pikoSettingsOnActionBar();
-    }
 
     public static void addButtons(ViewGroup viewGroup, Object object) {
         try {
             ProfileInfo profileInfo = new ProfileInfo(object);
             Boolean isSelfProfile = profileInfo.isSelfProfile();
 
-            if(!Pref.enableMoreOptionsOnProfileQuickToggle() && Pref.isMoreOptionsOnProfilePatched()){
-                ProfileMoreOption.addProfileMoreOptionsButton(viewGroup, profileInfo);
-            }
+            Set<String> userProfileABPref = Pref.userProfileActionBarButtons();
 
-            if (isSelfProfile && !PIKO_SETTINGS_ON_ACTION_BAR) {
+            if (!userProfileABPref.contains(Constants.AB_SETTINGS_ICON) && isSelfProfile){
                 UI.pikoSettingsButton(viewGroup);
+            }
+            if(!userProfileABPref.contains(Constants.AB_PROFILE_INFO_ICON) && Pref.isMoreOptionsOnProfilePatched()){
+                ProfileMoreOption.addProfileMoreOptionsButton(viewGroup, profileInfo);
             }
         } catch (Exception e) {
             Logger.printException(() -> "Failed to add piko button: ", e);

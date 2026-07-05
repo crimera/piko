@@ -7,8 +7,12 @@
 
 package app.morphe.extension.instagram.utils;
 
+import java.util.Set;
+
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.instagram.constants.Constants;
+
 import app.morphe.extension.crimera.SharedPref;
 
 @SuppressWarnings("unused")
@@ -54,14 +58,6 @@ public class Pref {
 
     public static boolean setTurnOnAllGhostModes(boolean bool) {
         return SharedPref.setBooleanPref(Settings.TURN_ON_ALL_GHOST_MODES.key,bool);
-    }
-
-    public static boolean enableGhostModeQuickToggle() {
-        return SharedPref.getBooleanPref(Settings.GHOST_MODES_QUICK_TOGGLE);
-    }
-
-    public static boolean enableMoreOptionsOnProfileQuickToggle() {
-        return SharedPref.getBooleanPref(Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE) && Pref.isMoreOptionsOnProfilePatched();
     }
 
     public static boolean isMoreOptionsOnProfilePatched(){
@@ -271,6 +267,22 @@ public class Pref {
 
     public static String externalDownloaderPackageName() {
         return SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
+    }
+
+    public static Set<String> mainFeedActionBarButtons() {
+        return SharedPref.getSetPref(Settings.ACTION_BAR_MAIN_FEED);
+    }
+
+    public static Set<String> userProfileActionBarButtons() {
+        return SharedPref.getSetPref(Settings.ACTION_BAR_USER_PROFILE);
+    }
+
+    public static Set<String> chatActionBarButtons() {
+        return SharedPref.getSetPref(Settings.ACTION_BAR_CHAT);
+    }
+
+    public static Set<String> inboxActionBarButtons() {
+        return SharedPref.getSetPref(Settings.ACTION_BAR_INBOX);
     }
 
     //end

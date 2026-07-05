@@ -36,6 +36,8 @@ public class Urls {
     public static String changeDomain(String urlString) {
         try {
             String customDomainName = Pref.customSharingDomain();
+            if(customDomainName.length()<1) return urlString;
+
             // Check for domain extension
             if(!(customDomainName.matches("^[A-Za-z0-9-]{1,63}\\.[A-Za-z]{2,6}$"))) {
                 //have .com as default extension just for safety reasons
@@ -48,6 +50,7 @@ public class Urls {
             }
         } catch (Exception ex) {
             PikoUtils.logger(ex);
+            return urlString;
         }
         return urlString;
     }

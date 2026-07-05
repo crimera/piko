@@ -41,6 +41,16 @@ internal object GetGifCreatorNameMediaExtension : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
+internal object GetImageMediaExtension : Fingerprint(
+    name = "getImageMedia",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
+internal object GetCommentUserDataExtension : Fingerprint(
+    name = "getCommentUserData",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
 // --------------------
 
 internal object RandomGetCommentObjectMediaFingerprint : Fingerprint(

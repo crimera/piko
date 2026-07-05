@@ -48,7 +48,7 @@ public class ViewStoryMentionsPatch {
             dialog.addDialogMenuItems(items, (d, which) -> {
                 UserData userData = (UserData) snapshot[which];
                 String username = userData.getUsername();
-                PikoUtils.openUrl("instagram://user?username="+username);
+                PikoUtils.openUrl("instagram://user?username="+username,true);
             });
         }else{
             dialog.setMessage(str("piko_vsm_no_mentions"));

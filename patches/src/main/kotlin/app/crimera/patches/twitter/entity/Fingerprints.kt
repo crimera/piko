@@ -6,6 +6,7 @@
 
 package app.crimera.patches.twitter.entity
 
+import app.crimera.patches.twitter.utils.Constants.ENTITY_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.methodCall
@@ -14,7 +15,8 @@ import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
-private const val ENTITY_TWEET_DEFINING_CLASS = "Lapp/morphe/extension/twitter/entity/Tweet"
+private const val ENTITY_TWEET_DEFINING_CLASS = "${ENTITY_DESCRIPTOR}Tweet"
+private const val ENTITY_EXT_MEDIA_DEFINING_CLASS = "${ENTITY_DESCRIPTOR}ExtMediaEntities"
 
 // --------------- Tweet
 internal object TweetObjectFingerprint : Fingerprint(
@@ -64,40 +66,41 @@ internal object TweetNamesFingerprint : Fingerprint(
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
     parameters = listOf(),
     returnType = "Ljava/lang/String;",
-    filters = listOf(
-        methodCall(
-            opcode = Opcode.INVOKE_VIRTUAL,
-            definingClass = "this",
-            returnType = "Ljava/lang/String;"
+    filters =
+        listOf(
+            methodCall(
+                opcode = Opcode.INVOKE_VIRTUAL,
+                definingClass = "this",
+                returnType = "Ljava/lang/String;",
+            ),
+            opcode(
+                opcode = Opcode.MOVE_RESULT_OBJECT,
+                location = MatchAfterImmediately(),
+            ),
+            methodCall(
+                opcode = Opcode.INVOKE_VIRTUAL,
+                definingClass = "this",
+                returnType = "Ljava/lang/String;",
+                location = MatchAfterImmediately(),
+            ),
+            opcode(
+                opcode = Opcode.MOVE_RESULT_OBJECT,
+                location = MatchAfterImmediately(),
+            ),
+            methodCall(
+                opcode = Opcode.INVOKE_STATIC,
+                parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;"),
+                returnType = "Ljava/lang/String;",
+            ),
+            opcode(
+                opcode = Opcode.MOVE_RESULT_OBJECT,
+                location = MatchAfterImmediately(),
+            ),
+            opcode(
+                opcode = Opcode.RETURN_OBJECT,
+                location = MatchAfterImmediately(),
+            ),
         ),
-        opcode(
-            opcode = Opcode.MOVE_RESULT_OBJECT,
-            location = MatchAfterImmediately()
-        ),
-        methodCall(
-            opcode = Opcode.INVOKE_VIRTUAL,
-            definingClass = "this",
-            returnType = "Ljava/lang/String;",
-            location = MatchAfterImmediately()
-        ),
-        opcode(
-            opcode = Opcode.MOVE_RESULT_OBJECT,
-            location = MatchAfterImmediately()
-        ),
-        methodCall(
-            opcode = Opcode.INVOKE_STATIC,
-            parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;"),
-            returnType = "Ljava/lang/String;"
-        ),
-        opcode(
-            opcode = Opcode.MOVE_RESULT_OBJECT,
-            location = MatchAfterImmediately()
-        ),
-        opcode(
-            opcode = Opcode.RETURN_OBJECT,
-            location = MatchAfterImmediately()
-        )
-    )
 )
 
 internal object TweetMediaEntityClassFingerprint : Fingerprint(
@@ -128,12 +131,12 @@ object MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint : F
 )
 
 internal object ExtMediaHighResVideoFingerprint : Fingerprint(
-    definingClass = "Lapp/morphe/extension/twitter/entity/ExtMediaEntities",
+    definingClass = ENTITY_EXT_MEDIA_DEFINING_CLASS,
     name = "getHighResVideo",
 )
 
 internal object ExtMediaGetImageFingerprint : Fingerprint(
-    definingClass = "Lapp/morphe/extension/twitter/entity/ExtMediaEntities",
+    definingClass = ENTITY_EXT_MEDIA_DEFINING_CLASS,
     name = "getImageUrl",
 )
 
@@ -160,6 +163,6 @@ internal object TweetInfoObjectFingerprint : Fingerprint(
 )
 
 internal object TweetLangFingerprint : Fingerprint(
-    definingClass = "Lapp/morphe/extension/twitter/entity/TweetInfo;",
+    definingClass = "${ENTITY_DESCRIPTOR}TweetInfo;",
     name = "getLang",
 )

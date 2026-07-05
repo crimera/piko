@@ -113,7 +113,7 @@ public class DatabasePatch {
                                 break;
                             }
                             case 6: {
-                                keywords.add("tweetdetailrelatedtweets%");
+                                keywords.add("tweetdetail%");
                                 //entry_id_str = "tweetdetailrelatedtweets%";
                                 break;
                             }

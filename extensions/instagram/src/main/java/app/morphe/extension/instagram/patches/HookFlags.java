@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.patches;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
@@ -49,14 +50,16 @@ public class HookFlags {
     }
 
     private static void profileActionBarFlags() {
-        if(Pref.enableMoreOptionsOnProfileQuickToggle()) {
+        Set<String> pref = Pref.userProfileActionBarButtons();
+        if(!pref.isEmpty()) {
             BOOL_FLAGS.put("81826::0", true); //igx_action_bar_service_replacement::is_profile_replaced
             BOOL_FLAGS.put("89230::0", true); //ig_android_profile_overflow_menu_redesign_launcher:enabled
         }
     }
 
     private static void mainFeedActionBarFlags() {
-        if(Pref.pikoSettingsOnActionBar()) {
+        Set<String> pref = Pref.mainFeedActionBarButtons();
+        if(!pref.isEmpty()) {
             BOOL_FLAGS.put("81826::1", true); //igx_action_bar_service_replacement::is_main_feed_replaced
             BOOL_FLAGS.put("81826::4", true); //igx_action_bar_service_replacement::is_main_feed_large_screen_replaced
         }

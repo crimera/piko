@@ -48,27 +48,17 @@ public class ShareImageHandler {
     private static final String[] CROP_ANCHORS = new String[]{ID_INLINE_ACTIONS, ID_STATS_CONTAINER};
     private static final Map<String, Integer> RESOURCE_IDS = new HashMap<>();
 
-    public static void shareAsImage(Context context, Object tweetObj) {
-        if (!(context instanceof Activity)) {
-            PikoUtils.toast(str("piko_share_image_invalid_context"));
-            return;
-        }
-
-        Activity activity = (Activity) context;
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            activity.runOnUiThread(() -> shareAsImage(activity, tweetObj));
-            return;
-        }
-
+    private static Uri generateImage(Activity activity, Tweet tweet) {
         try {
-            Tweet tweet = new Tweet(tweetObj);
             PikoUtils.toast(str("piko_share_image_capturing"));
-            
+
+            Long tweetId = tweet.getTweetId();
+
             View rootView = activity.getWindow().getDecorView().getRootView();
-            View tweetView = searchViewTree(rootView, tweet.getTweetId(), 0);
+            View tweetView = searchViewTree(rootView, tweetId, 0);
             if (tweetView == null) {
                 PikoUtils.toast(str("piko_share_image_view_not_found"));
-                return;
+                return null;
             }
             CaptureTarget target = resolveCaptureTarget(activity, rootView, tweetView);
 
@@ -76,14 +66,14 @@ public class ShareImageHandler {
 
             if (ViewUtils.DEBUG) {
                 PikoUtils.logger(String.format("Capture: Tweet %d | Density %.1f",
-                    tweet.getTweetId(), activity.getResources().getDisplayMetrics().density));
+                        tweetId, activity.getResources().getDisplayMetrics().density));
                 PikoUtils.logger("Target: " + target.view.getClass().getSimpleName() + " " + target.view.getWidth() + "x" + target.view.getHeight());
-                
+
                 if (target.clipRect != null) {
                     PikoUtils.logger("Clip: " + target.clipRect.toShortString());
                 }
             }
-            
+
             if (ViewUtils.DEBUG) {
                 dumpViewTree(activity, target.view, 0);
             }
@@ -95,24 +85,16 @@ public class ShareImageHandler {
             } finally {
                 ViewUtils.setScrollbarsVisible(target.view, true);
             }
-            
+
             if (bitmap == null) {
                 PikoUtils.toast(str("piko_share_image_capture_failed"));
-                return;
+                return null;
             }
 
-            shareImage(activity, bitmap, "tweet_" + tweet.getTweetId());
-        } catch (Exception e) {
-            PikoUtils.logger(e);
-            PikoUtils.toast(str("piko_share_image_error", e.getMessage()));
-        }
-    }
 
-    private static void shareImage(Activity activity, Bitmap bitmap, String filename) {
-        try {
             cleanupOldFiles(activity);
             ContentResolver resolver = activity.getContentResolver();
-            String displayName = filename + ".png";
+            String displayName = "tweet_"+tweetId+ ".png";
 
             // Overwrite existing
             try {
@@ -130,7 +112,7 @@ public class ShareImageHandler {
             }
 
             Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-            if (uri == null) return;
+            if (uri == null) return null;
 
             try (OutputStream os = resolver.openOutputStream(uri)) {
                 ViewUtils.saveBitmap(bitmap, os);
@@ -144,6 +126,51 @@ public class ShareImageHandler {
                 resolver.update(uri, values, null, null);
             }
 
+            return uri;
+
+            } catch (Exception e) {
+                PikoUtils.logger(e);
+                PikoUtils.toast(str("piko_share_image_error", e.getMessage()));
+                return  null;
+            }
+
+    }
+
+    // shareTo => 0 -> default; 1 -> Instagram stories;
+    public static void shareAsImage(Context context, Object tweetObj, int shareTo) {
+        try{
+            Tweet tweet = new Tweet(tweetObj);
+
+            if (!(context instanceof Activity)) {
+                PikoUtils.toast(str("piko_share_image_invalid_context"));
+                return;
+            }
+
+            Activity activity = (Activity) context;
+            if (Looper.myLooper() != Looper.getMainLooper()) {
+                activity.runOnUiThread(() -> shareAsImage(activity, tweetObj, shareTo));
+                return;
+            }
+
+            Uri uri = generateImage(activity, tweet);
+            if(uri!=null){
+                if(shareTo == 1){
+                    shareImageToInstaStory(activity,uri);
+
+                } else{
+                    shareImage(activity,uri);
+                }
+
+            }
+
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+            PikoUtils.toast(str("piko_share_image_error", e.getMessage()));
+        }
+    }
+
+    private static void shareImage(Activity activity, Uri uri) {
+        try {
             Intent intent = new Intent(Intent.ACTION_SEND)
                     .setType("image/png")
                     .putExtra(Intent.EXTRA_STREAM, uri)
@@ -153,7 +180,7 @@ public class ShareImageHandler {
                 intent.setClipData(ClipData.newRawUri("image", uri));
             }
 
-            Intent chooser = Intent.createChooser(intent, "Share Tweet Image");
+            Intent chooser = Intent.createChooser(intent, str("piko_share_image_title"));
             
             // Grant URI permission to all resolved activities
             PackageManager pm = activity.getPackageManager();
@@ -166,6 +193,28 @@ public class ShareImageHandler {
         } catch (Exception e) {
             PikoUtils.logger(e);
         }
+    }
+
+    private static void shareImageToInstaStory(Activity activity, Uri imageUri) {
+            String packageName = "com.instagram.android";
+
+            if(PikoUtils.isAppInstalledAndEnabled(packageName)) {
+                Intent intent = new Intent("com.instagram.share.ADD_TO_STORY");
+                intent.setPackage(packageName);
+
+                intent.setDataAndType(imageUri, "image/jpeg");
+
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                activity.grantUriPermission(packageName, imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                // Optional: Pass background gradient colors or a custom sticker asset
+                // intent.putExtra("top_background_color", "#333333");
+                // intent.putExtra("bottom_background_color", "#A1A1A1");
+
+                activity.startActivity(intent);
+            } else{
+                str("piko_share_image_app_error", "Instagram");
+            }
     }
 
     private static void cleanupOldFiles(Context context) {

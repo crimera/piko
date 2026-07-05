@@ -93,8 +93,7 @@ public class NativeDownloader {
         builder.show();
     }
 
-    public static void downloader(Context activity, Object tweetObj) throws NoSuchMethodException,
-            InvocationTargetException, IllegalAccessException, NoSuchFieldException, ClassNotFoundException {
+    public static void downloader(Context activity, Object tweetObj) {
         try {
             Tweet tweet = new Tweet(tweetObj);
             ArrayList<Media> media = tweet.getMedias();

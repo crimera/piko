@@ -200,6 +200,7 @@ public class SettingsStatus {
     public static boolean hideNavigationButtons = false;
     public static void hideNavigationButtons() { hideNavigationButtons = true; }
 
+
     public static void loadStatusMap(){
         FLAGS.put(str("piko_disable_ads"),SettingsStatus.disableAds);
         FLAGS.put(str("piko_hide_suggested_content"),SettingsStatus.hideSuggestedContent);

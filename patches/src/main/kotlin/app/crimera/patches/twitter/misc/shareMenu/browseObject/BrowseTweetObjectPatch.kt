@@ -9,6 +9,7 @@ package app.crimera.patches.twitter.misc.shareMenu.browseObject
 import app.crimera.patches.twitter.entity.entityGenerator
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonInjection
+import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonOnClickHook
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.patch.bytecodePatch
@@ -21,15 +22,14 @@ val browseObjectPatch =
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, entityGenerator, versionCheckPatch)
+        dependsOn(settingsPatch, entityGenerator, versionCheckPatch, shareMenuButtonOnClickHook)
 
         execute {
             val actionName = "BrowseObject"
             val prefFunctionName = "browseObject"
             val stringId = "piko_browse_object_title"
             val iconId = "ic_vector_flask_stroke"
-            val functionReference = "/browse/BrowseTweetObjectPatch;->browse"
             val statusFunctionName = "browseObject"
-            shareMenuButtonInjection(actionName, prefFunctionName, stringId, iconId, functionReference, statusFunctionName)
+            shareMenuButtonInjection(actionName, prefFunctionName, stringId, iconId, statusFunctionName)
         }
     }

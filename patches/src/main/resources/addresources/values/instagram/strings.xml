@@ -106,8 +106,6 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_download_profile_picture">Download profile picture</string>
     <string name="piko_copied">Copied</string>
     <string name="piko_more_profile_options">More profile options</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Profile options on action bar</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Move profile options button to profile action bar</string>
     <string name="piko_remove_empty_bottom_space">Remove empty bottom space</string>
     <string name="piko_unlock_plus_benefits">Unlock Plus benefits</string>
     <string name="piko_unlock_plus_benefits_desc">Unlock \'Plus\' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK</string>
@@ -213,6 +211,18 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_tap_here">Tap here !!</string>
 
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Action bar customisation</string>
+    <string name="piko_action_bar_main_feed">Main feed action bar icons</string>
+    <string name="piko_action_bar_user_profile">User profile action bar icons</string>
+    <string name="piko_action_bar_chat">Chat action bar icons</string>
+    <string name="piko_action_bar_chat_desc">Action bar icons inside a DM</string>
+    <string name="piko_action_bar_inbox">Inbox action bar icons</string>
+
+    <string name="piko_action_bar_button_settings_icon">Settings icon</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Ghost mode icon</string>
+    <string name="piko_action_bar_button_profile_info_icon">Profile info icon</string>
+
     <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
     <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
+
 </resources>

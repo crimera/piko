@@ -74,7 +74,6 @@
     <string name="piko_pref_ctj_section">\'새 커뮤니티 찾기\' 영역 숨기기</string>
     <string name="piko_pref_ryb_section">\'북마크 다시 방문\' 영역 숨기기</string>
     <string name="piko_pref_pinned_posts_section">\'팔로우가 고정한 게시물\' 영역 숨기기</string>
-    <string name="piko_pref_hide_related_posts">관련 게시물 (in 답글) 숨기기</string>
     <string name="piko_pref_hide_premium_prompt">메시지 프롬프트 숨기기</string>
     <string name="piko_pref_hide_todays_news">Today\'s News 숨기기</string>
     <string name="piko_pref_del_from_db">데이터베이스에서 엔트리 삭제하기</string>
@@ -84,7 +83,6 @@
     <string name="piko_pref_db_ctj_section">\'새 커뮤니티 찾기\' 영역</string>
     <string name="piko_pref_db_ryb_section">\'북마크 다시 방문\' 영역</string>
     <string name="piko_pref_db_pinned_posts_section">\'팔로우가 고정한 게시물\' 영역</string>
-    <string name="piko_pref_db_related_posts">관련 게시물 (in 답글)</string>
     <string name="piko_pref_db_premium_prompt">메시지 프롬프트</string>
     <string name="piko_pref_db_todays_news">Today\'s News</string>
     <string name="piko_pref_db_not_found">데이터베이스를 찾을 수 없습니다</string>

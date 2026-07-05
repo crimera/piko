@@ -34,10 +34,6 @@ public class ActivityHook {
         }
     }
 
-    private static void launchActivity(Intent intent){
-        launchActivity(PikoUtils.getContext(),intent);
-    }
-
     public static void startPikoActivity(String fragment_name,String title){
         Context context = PikoUtils.getContext();
         Intent intent = new Intent(context, SettingsActivity.class);
@@ -73,21 +69,7 @@ public class ActivityHook {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, dataType);
         Intent chooserIntent = Intent.createChooser(intent, exportHeaderString);
-        launchActivity(chooserIntent);
+        PikoUtils.launchIntent(chooserIntent);
     }
-
-    public static void openLink(String url) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        launchActivity(intent);
-    }
-
-    public static void openLink(String url, String packageName) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, url);
-        intent.setPackage(packageName);
-        launchActivity(intent);
-    }
-
 
 }

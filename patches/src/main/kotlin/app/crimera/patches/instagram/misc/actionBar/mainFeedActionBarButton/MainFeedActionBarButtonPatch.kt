@@ -44,7 +44,7 @@ val mainFeedActionBarButtonPatch =
                             addInstruction(
                                 index,
                                 """
-                                invoke-static {v$layoutRegister}, $ACTIONBAR_DESCRIPTOR/MainFeedActionBar;->addActionBarButton(Landroid/view/ViewGroup;)V
+                                invoke-static {v$layoutRegister}, $ACTIONBAR_DESCRIPTOR->mainFeedActionBarButton(Landroid/view/ViewGroup;)V
                                 """.trimIndent(),
                             )
                             addFlags("mainFeedActionBarFlags")

@@ -140,6 +140,9 @@ public class ButtonPref extends Preference {
         if(key.equals(Constants.PIKO_FRAGMENT_ABOUT)){
             return UI.DRAWABLE_DEBUG_ICON;
         }
+        if(key.equals(Constants.PIKO_FRAGMENT_ACTION_BAR)){
+            return UI.DRAWABLE_COLLECTIONS_ICON;
+        }
         return null;
     }
 

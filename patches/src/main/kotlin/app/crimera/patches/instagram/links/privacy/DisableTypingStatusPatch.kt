@@ -6,7 +6,8 @@
 
 package app.crimera.patches.instagram.links.privacy
 
-import app.crimera.patches.instagram.misc.actionBar.dmActionBarButton.dmActionBarButtonPatch
+import app.crimera.patches.instagram.misc.actionBar.chatActionBarButton.chatActionBarButtonPatch
+import app.crimera.patches.instagram.misc.actionBar.inboxActionBarButton.inboxActionBarButtonPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_CALL_DESCRIPTOR
@@ -18,6 +19,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.literal
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -41,7 +43,7 @@ val disableTypingStatusPatch =
     bytecodePatch(
         name = "Disable typing status",
     ) {
-        dependsOn(settingsPatch, dmActionBarButtonPatch)
+        dependsOn(settingsPatch, resourceMappingPatch, chatActionBarButtonPatch, inboxActionBarButtonPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {

@@ -8,6 +8,8 @@
 package app.morphe.extension.crimera;
 
 import android.content.Context;
+import java.util.Set;
+import java.util.HashSet;
 
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.settings.BooleanSetting;
@@ -69,6 +71,26 @@ public class SharedPref {
 
     public static String getStringPref(StringSetting setting) {
         return SharedPref.getStringPref(setting.key, setting.defaultValue);
+    }
+
+    public static Set<String> getSetPref(StringSetting stringSetting) {
+        Set<String> defVal = new HashSet();
+        if (sp != null) {
+            return sp.getSet(stringSetting.key, defVal);
+        }
+        return defVal;
+    }
+
+    public static Boolean setSetPref(String key, Set<String> value) {
+        try {
+            if (sp != null) {
+                sp.saveSet(key, value);
+                return true;
+            }
+        } catch (Exception ex) {
+            Utils.showToastShort(ex.toString());
+        }
+        return false;
     }
 
 }

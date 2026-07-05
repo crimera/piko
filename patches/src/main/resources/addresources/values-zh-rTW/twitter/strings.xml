@@ -68,7 +68,6 @@
     <string name="piko_pref_ctj_section">隱藏探索新的社群</string>
     <string name="piko_pref_ryb_section">隱藏重新訪問您的書籤</string>
     <string name="piko_pref_pinned_posts_section">隱藏已被你跟隨的人釘選</string>
-    <string name="piko_pref_hide_related_posts">隱藏相關推文（回覆）</string>
     <string name="piko_pref_hide_premium_prompt">隱藏資訊推廣</string>
     <string name="piko_pref_hide_todays_news">隱藏今日新聞</string>
     <string name="piko_pref_del_from_db">從資料庫中刪除記錄</string>
@@ -78,7 +77,6 @@
     <string name="piko_pref_db_ctj_section">探索新的社群</string>
     <string name="piko_pref_db_ryb_section">重新訪問您的書籤</string>
     <string name="piko_pref_db_pinned_posts_section">已被你跟隨的人釘選</string>
-    <string name="piko_pref_db_related_posts">相關貼文（回覆）</string>
     <string name="piko_pref_db_premium_prompt">資訊推廣</string>
     <string name="piko_pref_db_todays_news">今日新聞</string>
     <string name="piko_pref_db_not_found">找不到資料庫</string>

@@ -24,6 +24,10 @@ public class Constants {
     // https://www.instagram.com/reel/<short code>/
     // https://www.instagram.com/stories/<user name>/<post id>
 
+    public static final String AB_SETTINGS_ICON = "SETTINGS_ICON";
+    public static final String AB_GHOST_MODE_ICON = "GHOST_MODE_ICON";
+    public static final String AB_PROFILE_INFO_ICON = "PROFILE_INFO_ICON";
+
     public static final String PIKO_FRAGMENT_TITLE = "piko_frag_title";
     public static final String PIKO_FRAGMENT_NAME = "piko_frag_name";
 
@@ -37,6 +41,7 @@ public class Constants {
     public static final String PIKO_FRAGMENT_NAV_BTNS = "piko_frag_nav_btns";
     public static final String PIKO_FRAGMENT_DEV_OPTIONS = "piko_frag_dev_options";
     public static final String PIKO_FRAGMENT_ABOUT = "piko_frag_about";
+    public static final String PIKO_FRAGMENT_ACTION_BAR = "piko_frag_action_bar";
 
     public static void load() {
         ExtensionStrings.setDefaultPikoFolder(Constants.DEFAULT_PIKO_FOLDER);

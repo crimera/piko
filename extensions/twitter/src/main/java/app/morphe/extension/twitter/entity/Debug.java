@@ -18,6 +18,10 @@ public class Debug {
         this.obj = obj;
     }
 
+    public Object getObject(){
+        return this.obj;
+    }
+
     public Class<?> getObjClass() throws ClassNotFoundException {
         return this.obj.getClass();
     }

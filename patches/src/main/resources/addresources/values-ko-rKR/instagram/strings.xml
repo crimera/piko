@@ -67,7 +67,7 @@
     <string name="piko_disable_analytics">분석 비활성화</string>
     <string name="piko_delete_analytics_cache">분석 캐시 삭제</string>
     <string name="piko_disable_analytics_desc">Instagram/Facebook 서버로 전송되는 분석 데이터를 차단합니다</string>
-    <string name="piko_disable_discover_people">사람 찾기 비활성화</string>
+    <string name="piko_disable_discover_people">사람 찾아보기 비활성화</string>
     <string name="piko_disable_discover_people_desc">프로필에서 사람 찾아보기 섹션을 비활성화합니다</string>
     <string name="piko_follow_back_indicator">관계 상태 표시기 활성화</string>
     <string name="piko_follow_back_indicator_desc">프로필 페이지에 맞팔 상태를 표시하는 라벨을 추가하고, 그 라벨을 탭하는 경우에 상세한 관계 상태 분석을 표시합니다</string>

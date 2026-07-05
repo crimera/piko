@@ -74,7 +74,6 @@
     <string name="piko_pref_ctj_section">Nascondi la sezione \"Comunità a cui unirsi\"</string>
     <string name="piko_pref_ryb_section">Nascondi la sezione \"Rivedi i tuoi segnalibri\"</string>
     <string name="piko_pref_pinned_posts_section">Nascondi la sezione \"Post fissati dai followers\"</string>
-    <string name="piko_pref_hide_related_posts">Nascondi post correlati (nelle risposte)</string>
     <string name="piko_pref_hide_premium_prompt">Nasconti prompt dei messaggi</string>
     <string name="piko_pref_hide_todays_news">Nascondi le notizie di oggi</string>
     <string name="piko_pref_del_from_db">Elimina voci dal database</string>
@@ -84,7 +83,6 @@
     <string name="piko_pref_db_ctj_section">Sezione \"Comunità a cui unirsi\"</string>
     <string name="piko_pref_db_ryb_section">Sezione \"Rivedi i tuoi segnalibri\"</string>
     <string name="piko_pref_db_pinned_posts_section">Sezione \"Post fissati dai followers\"</string>
-    <string name="piko_pref_db_related_posts">Post correlati (nelle risposte)</string>
     <string name="piko_pref_db_premium_prompt">Prompt dei messaggi</string>
     <string name="piko_pref_db_todays_news">Notizie di oggi</string>
     <string name="piko_pref_db_not_found">Database non trovato</string>

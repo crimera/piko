@@ -21,7 +21,7 @@ import app.morphe.extension.twitter.entity.Tweet;
 
 public class NativeTranslator {
 
-    public static void translate(Context activity, Object tweetObj) throws Exception {
+    public static void translate(Context activity, Object tweetObj) {
         try{
             Tweet tweet = new Tweet(tweetObj);
             String text = tweet.getText();
@@ -74,7 +74,7 @@ public class NativeTranslator {
                     PikoUtils.logger("Translation failed: " + e.getMessage());
                     }
                 });
-        }catch (Exception ex){
+        } catch (Exception ex){
             PikoUtils.logger(ex);
         }
     }
