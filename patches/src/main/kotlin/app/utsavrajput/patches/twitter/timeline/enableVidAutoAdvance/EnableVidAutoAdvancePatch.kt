@@ -1,0 +1,50 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ */
+
+package app.utsavrajput.patches.twitter.timeline.enableVidAutoAdvance
+
+import app.utsavrajput.patches.twitter.misc.settings.settingsPatch
+import app.utsavrajput.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.utsavrajput.patches.twitter.utils.Constants.PREF_DESCRIPTOR
+import app.utsavrajput.patches.twitter.utils.enableSettings
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.opcode
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
+
+private object EnableVidAutoAdvancePatchFingerprint : Fingerprint(
+    filters =
+        listOf(
+            string("immersive_video_auto_advance_duration_threshold"),
+            opcode(Opcode.MOVE_RESULT),
+        ),
+)
+
+@Suppress("unused")
+val enableVidAutoAdvancePatch =
+    bytecodePatch(
+        name = "Control video auto scroll",
+        description = "Control video auto scroll in immersive view",
+    ) {
+        compatibleWith(COMPATIBILITY_X)
+        dependsOn(settingsPatch)
+
+        execute {
+            val method = EnableVidAutoAdvancePatchFingerprint.method
+            val matches = EnableVidAutoAdvancePatchFingerprint.instructionMatches
+            val loc = matches[1].index
+            method.addInstruction(
+                loc,
+                """
+                invoke-static {}, $PREF_DESCRIPTOR;->enableVidAutoAdvance()I
+                """.trimIndent(),
+            )
+
+            enableSettings("enableVidAutoAdvance")
+        }
+    }

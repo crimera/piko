@@ -1,17 +1,11 @@
 <div align="center">
 
 <p align="center">
-    <img src="https://socialify.git.ci/crimera/piko/image?forks=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Auto" alt="piko" width="640" height="320" />
+    <img src="https://socialify.git.ci/Utsavrajputt/piko/image?forks=1&language=1&name=1&owner=1&pattern=Circuit%20Board&stargazers=1&theme=Auto" alt="Modx Piko" width="640" height="320" />
 </p>
 
 <h1 align="center">
-    Morphe patches focused on Twitter/X & Instagram<br>
-    <a href="https://t.me/pikopatches">
-        <img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"/>
-    </a>
-    <a href="https://crowdin.com/project/piko">
-        <img src="https://img.shields.io/badge/Crowdin-1B263B?style=for-the-badge&logo=crowdin&logoColor=white"/>
-    </a>
+    Morphe patches focused on Twitter/X & Instagram
 </h1>
 
 </div>
@@ -25,9 +19,9 @@
 <details>
 <summary>Show steps</summary>
 
-Use the deep link to add Piko as a patch source in Morphe Manager:
+Use the deep link to add Modx Piko as a patch source in Morphe Manager:
 
-[➕ Add Piko to Morphe](https://morphe.software/add-source?github=crimera/piko)
+[➕ Add Modx Piko to Morphe](https://morphe.software/add-source?github=Utsavrajputt/piko)
 
 Then patch Twitter/X or Instagram:
 1. Tap X or Instagram app icon in Morphe

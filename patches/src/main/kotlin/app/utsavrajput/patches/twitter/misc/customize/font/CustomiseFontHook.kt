@@ -1,0 +1,49 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ */
+
+package app.utsavrajput.patches.twitter.misc.customize.font
+
+import app.utsavrajput.patches.twitter.misc.settings.settingsPatch
+import app.utsavrajput.patches.twitter.utils.Constants
+import app.utsavrajput.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
+
+private object CustomFontHookFingerprint : Fingerprint(
+    definingClass = "emoji2/text",
+    filters =
+        listOf(
+            string("end should be < than charSequence length"),
+        ),
+)
+
+@Suppress("unused")
+val customFontHook =
+    bytecodePatch(
+        description = "Hook to customise font",
+    ) {
+        compatibleWith(COMPATIBILITY_X)
+        dependsOn(settingsPatch)
+
+        execute {
+            CustomFontHookFingerprint.method.apply {
+
+                val charSeqReg = (instructions.first { it.opcode == Opcode.INVOKE_INTERFACE } as Instruction35c).registerC
+                addInstructions(
+                    0,
+                    """
+                    invoke-static {v$charSeqReg}, ${Constants.PATCHES_DESCRIPTOR}/customise/font/UpdateFont;->process(Ljava/lang/CharSequence;)Landroid/text/Spannable;
+                    move-result-object v$charSeqReg
+                    """.trimIndent(),
+                )
+            }
+        }
+    }

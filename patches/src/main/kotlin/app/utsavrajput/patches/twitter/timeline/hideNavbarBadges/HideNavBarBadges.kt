@@ -1,0 +1,43 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ */
+
+package app.utsavrajput.patches.twitter.timeline.hideNavbarBadges
+
+import app.utsavrajput.patches.twitter.misc.settings.settingsPatch
+import app.utsavrajput.patches.twitter.utils.Constants
+import app.utsavrajput.patches.twitter.utils.Constants.COMPATIBILITY_X
+import app.utsavrajput.patches.twitter.utils.enableSettings
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.patch.bytecodePatch
+
+private object setBadgeNumberFingerprint : Fingerprint(
+    definingClass = "/BadgeableTabView;",
+    name = "setBadgeNumber",
+)
+
+@Suppress("unused")
+val hideNavBarBadgesPatch =
+    bytecodePatch(
+        name = "Hide badges from navigation bar icons",
+        description = "Hides notification nudges & counts from navigation bar icons",
+    ) {
+        compatibleWith(COMPATIBILITY_X)
+        dependsOn(settingsPatch)
+
+        execute {
+            setBadgeNumberFingerprint.method.apply {
+                addInstructions(
+                    0,
+                    """
+                    invoke-static {p1}, ${Constants.PREF_DESCRIPTOR};->navbarBadgeCount(I)I
+                    move-result p1
+                    """.trimIndent(),
+                )
+                enableSettings("hideNavbarBadge")
+            }
+        }
+    }
