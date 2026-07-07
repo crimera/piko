@@ -6,4 +6,7 @@
 
 # These are Windows script files and should use crlf
 *.bat           text eol=crlf
+README.md merge=ours
+.github/workflows/release.yml merge=ours
+.releaserc.json merge=ours
 
