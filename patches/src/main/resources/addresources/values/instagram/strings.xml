@@ -206,13 +206,13 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_array_time_left">Time left (Hour/Minute/Second left)</string>
 
     <!-- Welcome Message -->
-    <string name="piko_welcome_title">Welcome to Modx</string>
-    <string name="piko_welcome_message">To improve your experience with Modx, please vist Modx settings and adjust your preference</string>
-    <string name="piko_goto_piko_settings">Goto Modx settings</string>
+    <string name="piko_welcome_title">Welcome to Piko</string>
+    <string name="piko_welcome_message">To improve your experience with Piko, please vist Piko settings and adjust your preference</string>
+    <string name="piko_goto_piko_settings">Goto Piko settings</string>
     <string name="piko_no_internet">Please connect to internet</string>
     <string name="piko_tap_here">Tap here !!</string>
 
     <!-- Action Bar Section -->
-    <string name="piko_settings_on_action_bar">Modx settings on action bar</string>
-    <string name="piko_settings_on_action_bar_desc">Modx Piko settings entry point to main feed action bar</string>
+    <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
+    <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
 </resources>

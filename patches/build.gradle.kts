@@ -2,12 +2,12 @@ group = "crimera"
 
 patches {
     about {
-        name = "Modx_Piko"
+        name = "Piko"
         description = "Morphe patches focused on Twitter/X"
-        source = "git@github.com:Utsavrajputt/piko.git"
+        source = "git@github.com:crimera/piko.git"
         author = "crimera"
         contact = "na"
-        website = "https://github.com/Utsavrajputt/piko"
+        website = "https://github.com/crimera/piko"
         license = "GNU General Public License v3.0"
     }
 }
