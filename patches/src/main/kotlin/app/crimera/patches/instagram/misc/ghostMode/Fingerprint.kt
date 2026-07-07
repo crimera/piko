@@ -10,7 +10,8 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.AccessFlags
 
-internal object DMSeenFingerprint : Fingerprint(
+// This fingerprint is also used in MarkAsRead patch.
+object DMSeenFingerprint : Fingerprint(
     returnType = "V",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
     filters =

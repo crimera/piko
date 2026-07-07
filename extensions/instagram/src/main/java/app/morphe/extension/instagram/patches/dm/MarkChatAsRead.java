@@ -1,0 +1,115 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ */
+
+
+package app.morphe.extension.instagram.patches.dm;
+
+import java.util.List;
+
+import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.instagram.entity.Entity;
+import app.morphe.extension.instagram.utils.Pref;
+
+import com.instagram.model.direct.DirectThreadKey;
+import com.instagram.common.session.UserSession;
+
+
+@SuppressWarnings("unused")
+public class MarkChatAsRead {
+
+    private static String getButtonEnumClassName(){
+        return "className";
+    }
+
+    private static String getThreadSeenDummyParameterClassName(){
+        return "className";
+    }
+
+    private static String getThreadSeenFunctionClassName(){
+        return "className";
+    }
+
+    private static String getThreadSeenFunctionMethodName(){
+        return "methodName";
+    }
+
+    private static String getMessageCursorFieldName(){
+        return "fieldName";
+    }
+
+    private static Object getButton(String enumTag) throws Exception {
+        Class<?> targetClass = Class.forName(MarkChatAsRead.getButtonEnumClassName());
+        Class<?>[] paramTypes = new Class<?>[] {String.class};
+
+        Entity entity = new Entity();
+        return entity.getMethod(
+                targetClass,
+                "valueOf",
+                paramTypes,
+                enumTag
+        );
+
+    }
+
+    private static void markAsSeenAPICall(UserSession userSession, String threadId, String messageId, String senderId ) throws Exception{
+
+        Class<?> targetClass = Class.forName(MarkChatAsRead.getThreadSeenFunctionClassName());
+        Class<?> userSessionClass = UserSession.class;
+        Class<?> lhClass = Class.forName(MarkChatAsRead.getThreadSeenDummyParameterClassName());
+
+        Class<?>[] paramTypes = new Class<?>[] {
+                userSessionClass,
+                lhClass,
+                String.class,
+                String.class,
+                String.class
+        };
+
+        Entity entity = new Entity();
+        entity.getMethod(
+                targetClass,
+                MarkChatAsRead.getThreadSeenFunctionMethodName(),
+                paramTypes,
+                userSession, null, threadId, messageId, senderId
+        );
+
+    }
+
+    private static String getMessageCursorId(Object unknown) throws Exception{
+        Entity entity = new Entity(unknown).getFieldAsEntity("A01");
+        return (String) entity.getField(MarkChatAsRead.getMessageCursorFieldName());
+    }
+
+    public static void markAsRead(UserSession userSession, Object unknown, DirectThreadKey directThreadKey){
+        try{
+            Pref.setMarkChatAsReadIndicator(true);
+
+            String threadId = directThreadKey.A00;
+            String messageId = MarkChatAsRead.getMessageCursorId(unknown);
+            String senderId = directThreadKey.A02.get(0).toString();
+
+            markAsSeenAPICall(userSession, threadId, messageId, senderId);
+
+            Pref.setMarkChatAsReadIndicator(false);
+
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+        }
+    }
+
+
+    public static List addButton(List buttonList){
+        try{
+            if(Pref.enableMarkChatAsReadOption()){
+                buttonList.add(getButton("MARK_AS_READ"));
+            }
+
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+        }
+        return buttonList;
+    }
+}

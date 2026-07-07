@@ -175,6 +175,52 @@ public class ScreenBuilder {
         }
     }
 
+    public void dmSection() {
+        if (!(SettingsStatus.dmSection())) return;
+
+        if (SettingsStatus.disableTypingStatus) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_disable_typing_status"),
+                            "",
+                            Settings.DISABLE_TYPING_STATUS
+                    )
+            );
+        }
+
+        if (SettingsStatus.viewDmAnonymously) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_view_dm_anonymously"),
+                            "",
+                            Settings.VIEW_DM_ANONYMOUSLY
+                    )
+            );
+        }
+
+        if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_unlimited_replays"),
+                            str("piko_unlimited_replays_desc"),
+                            Settings.UNLIMITED_REPLAYS
+                    )
+            );
+        }
+
+        if (SettingsStatus.markChatAsRead) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_enable_mark_chat_as_read"),
+                            str("piko_enable_mark_chat_as_read_desc"),
+                            Settings.ENABLE_MARK_CHAT_AS_READ
+                    )
+            );
+        }
+
+
+    }
+
     public void ghostSection() {
         if (!(SettingsStatus.ghostSection())) return;
 
@@ -510,16 +556,6 @@ public class ScreenBuilder {
                     ));
         }
 
-        if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_unlimited_replays"),
-                            str("piko_unlimited_replays_desc"),
-                            Settings.UNLIMITED_REPLAYS
-                    )
-            );
-        }
-
         if (SettingsStatus.improveImageViewing) {
             addPreference(
                     helper.switchPreference(
@@ -783,6 +819,16 @@ public class ScreenBuilder {
                             str("piko_category_ads"),
                             "",
                             Constants.PIKO_FRAGMENT_ADS
+                    )
+            );
+        }
+
+        if (SettingsStatus.dmSection()){
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_category_dm"),
+                            "",
+                            Constants.PIKO_FRAGMENT_DM
                     )
             );
         }
