@@ -25,8 +25,12 @@ import java.util.Date;
 import java.util.List;
 
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.db.PikoMessageDb;
+import app.morphe.extension.instagram.entity.InstagramDialogBox;
+import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.Dim;
 
 public class DeletedMessagesActivity extends Activity {
@@ -132,13 +136,11 @@ public class DeletedMessagesActivity extends Activity {
             listView.setDividerHeight(1);
             listView.setOnItemClickListener((parent, view, pos, idLong) -> {
                 String[] m = messages.get(pos);
+                String messageId = m[0];
                 String c = m[3];
                 String t = m[4];
                 if (c != null && c.startsWith("http")) {
-                    try {
-                        startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW,
-                                android.net.Uri.parse(c)));
-                    } catch (Exception ignored) {}
+                    showMediaOptions(messageId, c, t);
                 } else if (t != null && !"text".equals(t)) {
                     android.widget.Toast.makeText(this, str("piko_media_not_available"),
                             android.widget.Toast.LENGTH_SHORT).show();
@@ -170,6 +172,62 @@ public class DeletedMessagesActivity extends Activity {
         });
 
         setContentView(root);
+    }
+
+    /** Extension guess from the captured CDN url, falling back to the stored message type. */
+    private static String guessExtension(String url, String type) {
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("(?i)\\.(jpg|jpeg|webp|heic|png|mp4|mov|m4a|aac|mp3|ogg|gif)(?:\\?.*)?$")
+                .matcher(url);
+        if (m.find()) return "." + m.group(1).toLowerCase();
+        if ("voice_media".equals(type) || "audio".equals(type)) return ".m4a";
+        if ("video".equals(type)) return ".mp4";
+        if ("animated_media".equals(type)) return ".gif";
+        return ".jpg";
+    }
+
+    /** Offers open/download/copy for a captured media url, reusing the same downloader
+     *  (DownloadUtils) already used for live DM media instead of a raw browser intent. */
+    private void showMediaOptions(String messageId, String url, String type) {
+        try {
+            boolean isAudio = "voice_media".equals(type) || "audio".equals(type)
+                    || url.matches("(?i).*\\.(m4a|aac|mp3|ogg)(\\?.*)?$");
+            boolean isVideo = "video".equals(type) || "clip".equals(type) || "xma_clip".equals(type);
+
+            InstagramDialogBox dialog = new InstagramDialogBox(this);
+            List<String> options = new java.util.ArrayList<>();
+            options.add(str("piko_download_current_media"));
+            options.add(isAudio ? str("piko_open_voice_with_player")
+                    : isVideo ? str("piko_open_video_externally")
+                    : str("piko_open_image_externally"));
+            options.add(str("piko_copy_media_link"));
+
+            dialog.addDialogMenuItems(options.toArray(new CharSequence[0]), (d, which) -> {
+                try {
+                    String selected = options.get(which);
+                    if (selected.equals(str("piko_download_current_media"))) {
+                        String fileName = "piko_" + messageId + guessExtension(url, type);
+                        DownloadUtils.downloadMediaUrl(this, url, Constants.DEFAULT_DM_FOLDER, fileName);
+                    } else if (selected.equals(str("piko_copy_media_link"))) {
+                        Utils.setClipboard(url);
+                        Utils.showToastShort(str("piko_copied_media_link"));
+                    } else {
+                        android.content.Intent i = new android.content.Intent(android.content.Intent.ACTION_VIEW,
+                                android.net.Uri.parse(url));
+                        if (isAudio) i.setDataAndType(android.net.Uri.parse(url), "audio/*");
+                        startActivity(android.content.Intent.createChooser(i, null));
+                    }
+                } catch (Exception e) {
+                    PikoUtils.logger(e);
+                }
+            });
+            dialog.setTitle(str("piko_download_options"));
+            dialog.setCancelable(true);
+            dialog.setCanceledOnTouchOutside(true);
+            dialog.getDialog().show();
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+        }
     }
 
     private static String mediaLabel(String type) {

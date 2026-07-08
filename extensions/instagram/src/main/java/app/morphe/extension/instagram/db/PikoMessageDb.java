@@ -106,10 +106,29 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         // rowId == -1 → conflict, row already existed. Backfill any empty columns with the
         // newly-supplied non-empty values.
         if (rowId == -1) {
-            fillIfEmpty(db, messageId, "content", content);
+            // A media url resolved on a later pass must be able to REPLACE an earlier caption /
+            // placeholder — fillIfEmpty alone would keep the caption, leaving the row non-http and
+            // the media untappable ("media not available"). Any http(s) value upgrades the content.
+            if (content != null && content.startsWith("http")) {
+                upgradeContentToUrl(db, messageId, content);
+            } else {
+                fillIfEmpty(db, messageId, "content", content);
+            }
             fillIfEmpty(db, messageId, "sender_username", senderUsername);
             fillIfEmpty(db, messageId, "sender_id", senderId);
         }
+    }
+
+    /** Overwrite stored content with a media url when the stored value isn't already an http link.
+     *  A media DM is often captured first (MQTT real-time) before its CDN url is resolved, so the
+     *  row lands with a caption or empty placeholder; a later pass (REST thread-history) that finds
+     *  the url must be able to replace that so the item stays tappable / downloadable. */
+    private void upgradeContentToUrl(SQLiteDatabase db, String messageId, String url) {
+        ContentValues cv = new ContentValues();
+        cv.put("content", url);
+        db.update(TABLE, cv,
+            "message_id = ? AND (content IS NULL OR content = '' OR content NOT LIKE 'http%')",
+            new String[]{messageId});
     }
 
     /** Update a single column on the existing row only when the new value is non-empty AND

@@ -135,3 +135,6 @@ bin/
 /local.properties
 
 .direnv
+
+# RE scratch tools (smali dumps, APKs, jars) — belongs in piko-re
+.tools/

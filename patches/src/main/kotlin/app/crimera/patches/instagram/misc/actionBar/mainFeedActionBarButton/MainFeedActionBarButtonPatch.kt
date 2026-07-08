@@ -17,6 +17,8 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 object BindMainFeedActionBarFingerprint : Fingerprint(
     strings = listOf("BindMainFeedActionBar"),
@@ -39,16 +41,24 @@ val mainFeedActionBarButtonPatch =
                         val index = it.location.index
                         val prevInstruction = getInstruction(index - 1)
                         val prevInstructionOpcode = prevInstruction.opcode
-                        if (prevInstructionOpcode == Opcode.IGET_OBJECT) {
-                            val layoutRegister = prevInstruction.registersUsed[0]
-                            addInstruction(
-                                index,
-                                """
-                                invoke-static {v$layoutRegister}, $ACTIONBAR_DESCRIPTOR/MainFeedActionBar;->addActionBarButton(Landroid/view/ViewGroup;)V
-                                """.trimIndent(),
-                            )
-                            addFlags("mainFeedActionBarFlags")
-                            true
+                        if (prevInstruction.opcode == Opcode.IGET_OBJECT) {
+                            // Only inject when the field type is a ViewGroup subtype.
+                            // "View" alone is not a ViewGroup; skip List, Map, etc.
+                            val fieldType = ((prevInstruction as ReferenceInstruction).reference as? FieldReference)?.type ?: ""
+                            val isViewGroup = fieldType.contains("ViewGroup") || fieldType.contains("Layout;")
+                            if (isViewGroup) {
+                                val layoutRegister = prevInstruction.registersUsed[0]
+                                addInstruction(
+                                    index,
+                                    """
+                                    invoke-static {v$layoutRegister}, $ACTIONBAR_DESCRIPTOR/MainFeedActionBar;->addActionBarButton(Landroid/view/ViewGroup;)V
+                                    """.trimIndent(),
+                                )
+                                addFlags("mainFeedActionBarFlags")
+                                true
+                            } else {
+                                false
+                            }
                         } else {
                             false
                         }

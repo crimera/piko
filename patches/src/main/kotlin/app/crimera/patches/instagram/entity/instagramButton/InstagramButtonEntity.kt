@@ -9,6 +9,7 @@ package app.crimera.patches.instagram.entity.instagramButton
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.classNameToExtension
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 
 val instagramButtonEntity =
@@ -30,14 +31,26 @@ val instagramButtonEntity =
                 // requires an explicit check-cast before we hand p1 to
                 // setStyle($buttonStyleClass), otherwise the class fails to
                 // verify with "register v1 has type Object but expected …".
-                addInstructions(
-                    0,
-                    """
-                    iget-object v0, p0, $EXTENSION_CLASS_DESCRIPTOR->igdsButton:$IGDS_BUTTON_CLASS_DESCRIPTOR
-                    check-cast p1, $buttonStyleClass
-                    invoke-virtual {v0, p1}, $IGDS_BUTTON_CLASS_DESCRIPTOR->setStyle($buttonStyleClass)V
-                    """.trimIndent(),
-                )
+                //
+                // Guarded against re-entry: this patch has been observed executing
+                // its `execute` block twice in a single patching run (dependency
+                // resolution issue, not yet root-caused), which used to inject this
+                // snippet twice. The second injection clobbered p0 (only 2 registers
+                // in this method) with the IgdsButton instance from the first pass,
+                // so the second iget-object failed ART verification with "cannot
+                // access instance field ... from object of type Reference: IgdsButton".
+                // The original decompiled body is just `return-void` (1 instruction),
+                // so >1 instruction means this method was already patched.
+                if (instructions.count() <= 1) {
+                    addInstructions(
+                        0,
+                        """
+                        iget-object v0, p0, $EXTENSION_CLASS_DESCRIPTOR->igdsButton:$IGDS_BUTTON_CLASS_DESCRIPTOR
+                        check-cast p1, $buttonStyleClass
+                        invoke-virtual {v0, p1}, $IGDS_BUTTON_CLASS_DESCRIPTOR->setStyle($buttonStyleClass)V
+                        """.trimIndent(),
+                    )
+                }
             }
         }
     }

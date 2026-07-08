@@ -249,7 +249,12 @@ public class SavedMessagesHook {
 
             if ("action_log".equals(type) || "expired_placeholder".equals(type)) return;
 
-            if ((content == null || content.isEmpty()) && type != null && !type.equals("text")) {
+            // For any non-text item, capture the CDN url so the media stays recoverable later.
+            // A caption (non-empty getText() that isn't itself a url) must NOT block this: otherwise
+            // media-with-caption stores the caption, the row no longer starts with "http", and it
+            // becomes non-tappable/non-downloadable — the root of the "media not available" reports.
+            if (type != null && !type.equals("text")
+                    && (content == null || content.isEmpty() || !content.startsWith("http"))) {
                 String url = di.getMediaUrl();
                 if (url == null) url = deepFindMediaUrl(item);
                 if (url != null) content = url;

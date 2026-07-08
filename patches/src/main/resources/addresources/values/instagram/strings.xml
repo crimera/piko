@@ -193,6 +193,10 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_open_video_externally">Open video externally</string>
     <string name="piko_open_image_with">Open image with</string>
     <string name="piko_open_video_with">Open video with</string>
+    <string name="piko_open_share_in_instagram">Open in Instagram</string>
+    <string name="piko_open_voice_with_player">Open with music player</string>
+    <string name="piko_shared_content">Shared content</string>
+    <string name="piko_download_complete">Download complete</string>
 
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">Change like animation</string>
