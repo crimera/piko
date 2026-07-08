@@ -7,7 +7,6 @@
 package app.crimera.patches.instagram.misc.dm.saveMessages
 
 import app.crimera.patches.instagram.entity.directItem.directItemEntity
-import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.actionBar.dmActionBarButton.DMActionBarBuilderFingerprint
 import app.crimera.patches.instagram.misc.actionBar.dmActionBarButton.dmActionBarButtonPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
@@ -36,119 +35,148 @@ val saveDeletedMessagesPatch =
         description = "Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them.",
         default = true,
     ) {
-        dependsOn(settingsPatch, dmActionBarButtonPatch, directItemEntity, userDataEntity)
+        // NOTE: userDataEntity is intentionally NOT a hard dependency. It only backs Hook 6's
+        // best-effort username harvesting (UserData reflection), and its resolver is fragile across
+        // Instagram versions (e.g. GetFullNameExtensionFingerprint fails to resolve on v435). Making
+        // it a dependsOn would abort this entire capture feature whenever that resolver breaks. When
+        // userDataEntity IS applied (pulled by another enabled patch) UserData works and Hook 6
+        // enriches names; when it isn't, UserData reflection no-ops and we fall back to thread title
+        // / sender directory. Either way DM capture (Hooks 1/2/4) stays patch-safe.
+        dependsOn(settingsPatch, dmActionBarButtonPatch, directItemEntity)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
 
-            // Hook 1: REST/JSON path — inject at return of parseFromJson (v426) or unsafeParseFromJson (v430+).
-            DirectItemFieldParserFingerprint.classDef.methods
-                .first { it.name == "parseFromJson" || it.name == "unsafeParseFromJson" }.apply {
-                val returnObjInstruction = instructions.last { it.opcode == Opcode.RETURN_OBJECT }
-                val returnObjIndex = returnObjInstruction.location.index
-                val itemRegister = returnObjInstruction.registersUsed[0]
+            // PATCH-TIME SAFETY: each hook is wrapped in runCatching so that if a future Instagram
+            // build renames a method, restructures the MQTT converter, or drops an anchor, ONLY that
+            // hook is skipped — the patch still applies and the remaining hooks (and every other
+            // patch in the session) keep working. This mirrors the "best-effort, never fatal"
+            // resolution used in DirectItemEntity. All anchor strings/resources are verified present
+            // in the current target (v435); the wrapping guards against the NEXT version drifting.
+            // The hooks are independent capture points, so partial success still yields a usable
+            // feature: Hook 1 (REST history) and Hook 2 (MQTT live) each capture messages on their
+            // own, Hook 4 detects DB-level deletes, Hook 5/6 only enrich thread-id and usernames.
 
-                addInstructions(
-                    returnObjIndex,
-                    """
-                    invoke-static {v$itemRegister}, $HOOK_CLASS->onMessageReceived(Ljava/lang/Object;)V
-                    """.trimIndent(),
-                )
+            // Hook 1: REST/JSON path — inject at return of parseFromJson (v426) or unsafeParseFromJson (v430+).
+            runCatching {
+                DirectItemFieldParserFingerprint.classDef.methods
+                    .first { it.name == "parseFromJson" || it.name == "unsafeParseFromJson" }.apply {
+                    val returnObjInstruction = instructions.last { it.opcode == Opcode.RETURN_OBJECT }
+                    val returnObjIndex = returnObjInstruction.location.index
+                    val itemRegister = returnObjInstruction.registersUsed[0]
+
+                    addInstructions(
+                        returnObjIndex,
+                        """
+                        invoke-static {v$itemRegister}, $HOOK_CLASS->onMessageReceived(Ljava/lang/Object;)V
+                        """.trimIndent(),
+                    )
+                }
             }
 
             // Hook 2: MQTT/MSys real-time path — A0P post-processing step, never touched by REST.
             // Derive delta class from A0P's second parameter, then find the static converter
             // (delta → DirectThreadKey) by signature search — no dependency on DMActionBarBuilderFingerprint.
-            val deltaClass = DirectItemPostprocessFingerprint.method.parameterTypes[1].toString()
-            fun isConverter(m: com.android.tools.smali.dexlib2.iface.Method) =
-                AccessFlags.STATIC.isSet(m.accessFlags) &&
-                    m.returnType == DIRECT_THREAD_KEY &&
-                    m.parameterTypes.size == 1 &&
-                    m.parameterTypes[0].toString() == deltaClass
-            val deltaThreadIdField =
-                mutableClassDefBy { cd -> cd.methods.any { isConverter(it) } }
-                .methods.first { isConverter(it) }
-                .instructions
-                    .first {
-                        it.opcode == Opcode.IGET_OBJECT &&
-                            (it as ReferenceInstruction).reference
-                                .let { r -> r is FieldReference && r.type == "Ljava/lang/String;" }
-                    }.let { (it as ReferenceInstruction).reference as FieldReference }
+            // The converter-search / field-derivation is the most version-fragile step, so the entire
+            // Hook 2 resolution AND injection share one runCatching (all-or-nothing for this hook).
+            runCatching {
+                val deltaClass = DirectItemPostprocessFingerprint.method.parameterTypes[1].toString()
+                fun isConverter(m: com.android.tools.smali.dexlib2.iface.Method) =
+                    AccessFlags.STATIC.isSet(m.accessFlags) &&
+                        m.returnType == DIRECT_THREAD_KEY &&
+                        m.parameterTypes.size == 1 &&
+                        m.parameterTypes[0].toString() == deltaClass
+                val deltaThreadIdField =
+                    mutableClassDefBy { cd -> cd.methods.any { isConverter(it) } }
+                    .methods.first { isConverter(it) }
+                    .instructions
+                        .first {
+                            it.opcode == Opcode.IGET_OBJECT &&
+                                (it as ReferenceInstruction).reference
+                                    .let { r -> r is FieldReference && r.type == "Ljava/lang/String;" }
+                        }.let { (it as ReferenceInstruction).reference as FieldReference }
 
-            DirectItemPostprocessFingerprint.method.apply {
-                val regs = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 3)
-                val rItem = regs.getFreeRegister()
-                val rDelta = regs.getFreeRegister()
-                val rTid = regs.getFreeRegister()
-                // p2 (MSys delta) is null on some A0P calls — pass null thread-id hint in that case.
-                addInstructions(
-                    0,
-                    """
-                    move-object/from16 v$rItem, p0
-                    const/4 v$rTid, 0x0
-                    move-object/from16 v$rDelta, p2
-                    if-eqz v$rDelta, :piko_no_delta
-                    iget-object v$rTid, v$rDelta, $deltaClass->${deltaThreadIdField.name}:Ljava/lang/String;
-                    :piko_no_delta
-                    invoke-static {v$rItem, v$rTid}, $HOOK_CLASS->onMessageReceived(Ljava/lang/Object;Ljava/lang/String;)V
-                    """.trimIndent(),
-                )
+                DirectItemPostprocessFingerprint.method.apply {
+                    val regs = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 3)
+                    val rItem = regs.getFreeRegister()
+                    val rDelta = regs.getFreeRegister()
+                    val rTid = regs.getFreeRegister()
+                    // p2 (MSys delta) is null on some A0P calls — pass null thread-id hint in that case.
+                    addInstructions(
+                        0,
+                        """
+                        move-object/from16 v$rItem, p0
+                        const/4 v$rTid, 0x0
+                        move-object/from16 v$rDelta, p2
+                        if-eqz v$rDelta, :piko_no_delta
+                        iget-object v$rTid, v$rDelta, $deltaClass->${deltaThreadIdField.name}:Ljava/lang/String;
+                        :piko_no_delta
+                        invoke-static {v$rItem, v$rTid}, $HOOK_CLASS->onMessageReceived(Ljava/lang/Object;Ljava/lang/String;)V
+                        """.trimIndent(),
+                    )
+                }
             }
 
             // Hook 4: SQLite DAO delete — inject at entry so our DB record is still present when the hook fires.
-            DirectItemDbHideFingerprint.method.apply {
-                val regs = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 3)
-                val r0 = regs.getFreeRegister()
-                val r1 = regs.getFreeRegister()
-                val r2 = regs.getFreeRegister()
+            runCatching {
+                DirectItemDbHideFingerprint.method.apply {
+                    val regs = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 3)
+                    val r0 = regs.getFreeRegister()
+                    val r1 = regs.getFreeRegister()
+                    val r2 = regs.getFreeRegister()
 
-                addInstructions(
-                    0,
-                    """
-                    move-object/from16 v$r0, p0
-                    move-object/from16 v$r1, p2
-                    move-object/from16 v$r2, p3
-                    invoke-static {v$r0, v$r1, v$r2}, $HOOK_CLASS->onMessageHiddenFromDb(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
-                    """.trimIndent(),
-                )
+                    addInstructions(
+                        0,
+                        """
+                        move-object/from16 v$r0, p0
+                        move-object/from16 v$r1, p2
+                        move-object/from16 v$r2, p3
+                        invoke-static {v$r0, v$r1, v$r2}, $HOOK_CLASS->onMessageHiddenFromDb(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
+                        """.trimIndent(),
+                    )
+                }
             }
 
             // Hook 5: pass the action-bar controller (p0) to the extension — thread-id is resolved lazily from its object graph.
-            DMActionBarBuilderFingerprint.method.apply {
-                val reg = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 1).getFreeRegister()
-                addInstructions(
-                    0,
-                    """
-                    move-object/from16 v$reg, p0
-                    invoke-static {v$reg}, $HOOK_CLASS->noteOpenThreadController(Ljava/lang/Object;)V
-                    """.trimIndent(),
-                )
+            runCatching {
+                DMActionBarBuilderFingerprint.method.apply {
+                    val reg = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 1).getFreeRegister()
+                    addInstructions(
+                        0,
+                        """
+                        move-object/from16 v$reg, p0
+                        invoke-static {v$reg}, $HOOK_CLASS->noteOpenThreadController(Ljava/lang/Object;)V
+                        """.trimIndent(),
+                    )
+                }
             }
 
             // Hook 6: harvest participant usernames from the thread deserializer's "users" iput-object.
-            ThreadUsersDispatchFingerprint.method.apply {
-                val insns = instructions.toList()
-                val usersKeyIndex =
-                    insns.indexOfFirst {
-                        (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
-                            (it as ReferenceInstruction).reference.toString() == "users"
-                    }
-                if (usersKeyIndex < 0) return@apply
-                val listPutInstruction =
-                    insns.drop(usersKeyIndex + 1).firstOrNull {
-                        it.opcode == Opcode.IPUT_OBJECT &&
-                            (it as ReferenceInstruction).reference.toString().endsWith(":Ljava/util/List;")
-                    } ?: return@apply
-                val listRegister = listPutInstruction.registersUsed[0]
-                val putIndex = listPutInstruction.location.index
-                val free = getFreeRegisterProvider(putIndex + 1, 1).getFreeRegister()
-                addInstructions(
-                    putIndex + 1,
-                    """
-                    move-object/from16 v$free, v$listRegister
-                    invoke-static {v$free}, $HOOK_CLASS->noteThreadUsers(Ljava/util/List;)V
-                    """.trimIndent(),
-                )
+            runCatching {
+                ThreadUsersDispatchFingerprint.method.apply {
+                    val insns = instructions.toList()
+                    val usersKeyIndex =
+                        insns.indexOfFirst {
+                            (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
+                                (it as ReferenceInstruction).reference.toString() == "users"
+                        }
+                    if (usersKeyIndex < 0) return@apply
+                    val listPutInstruction =
+                        insns.drop(usersKeyIndex + 1).firstOrNull {
+                            it.opcode == Opcode.IPUT_OBJECT &&
+                                (it as ReferenceInstruction).reference.toString().endsWith(":Ljava/util/List;")
+                        } ?: return@apply
+                    val listRegister = listPutInstruction.registersUsed[0]
+                    val putIndex = listPutInstruction.location.index
+                    val free = getFreeRegisterProvider(putIndex + 1, 1).getFreeRegister()
+                    addInstructions(
+                        putIndex + 1,
+                        """
+                        move-object/from16 v$free, v$listRegister
+                        invoke-static {v$free}, $HOOK_CLASS->noteThreadUsers(Ljava/util/List;)V
+                        """.trimIndent(),
+                    )
+                }
             }
 
             enableSettings("saveDeletedMessages")
