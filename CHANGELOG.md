@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/Utsavrajputt/piko/compare/v1.0.0...v1.1.0) (2026-07-08)
+
+### ✨ New Features
+
+* Added auto story download ([98adcd3](https://github.com/Utsavrajputt/piko/commit/98adcd372aaca6b88d13fbe281effea32a66c447))
+
 ## 1.0.0 (2026-07-07)
 
 ### ⚠ BREAKING CHANGES

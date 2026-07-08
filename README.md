@@ -60,7 +60,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v1.0.0](https://github.com/Utsavrajputt/piko/releases/tag/v1.0.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;123 patches total
+> **[v1.1.0](https://github.com/Utsavrajputt/piko/releases/tag/v1.1.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;124 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;72 patches</summary>
 <br>
@@ -148,7 +148,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;51 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;52 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -161,6 +161,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Add settings](#add-settings) | Adds settings to control preferences are patching |  |
 | [Allow user network certificate](#allow-user-network-certificate) | Allows user network certificate for whitehat testing |  |
 | [Amoled theme](#amoled-theme) | Replaces Instagram's dark-mode background greys with pure black for AMOLED displays. |  |
+| [Auto download stories](#auto-download-stories) | Automatically downloads stories for accounts marked via profile 'More options' whenever their story is shown -- no viewer, no button press needed. |  |
 | [Change like animation](#change-like-animation) | Change the animation to one from existing Rings like animations |  |
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
 | [Clone](#clone) | Changes the package name and the app name. This allows you to install the patched app alongside the original Instagram app.<br>Caution: Do not select the official Morphe's "Change package name" universal patch. | • Package name<br>• App name |
