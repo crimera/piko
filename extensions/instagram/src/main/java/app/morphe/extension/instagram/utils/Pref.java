@@ -10,6 +10,7 @@ package app.morphe.extension.instagram.utils;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.crimera.SharedPref;
+import static app.morphe.extension.instagram.utils.IgStr.str;
 
 @SuppressWarnings("unused")
 public class Pref {
@@ -275,14 +276,16 @@ public class Pref {
 
     // --- Auto-download stories (selective, per story-owner) ---
     private static final String AUTO_DOWNLOAD_TARGETS_KEY = "piko_auto_download_targets";
+    private static final String AUTO_DOWNLOAD_NAME_PREFIX = "piko_auto_download_name_"; // + userId
 
     public static boolean isAutoDownloadTarget(String targetUserId) {
         return SharedPref.getRawStringSetPref(AUTO_DOWNLOAD_TARGETS_KEY).contains(targetUserId);
     }
 
-    public static boolean addAutoDownloadTarget(String targetUserId) {
+    public static boolean addAutoDownloadTarget(String targetUserId, String username) {
         java.util.Set<String> targets = new java.util.HashSet<>(SharedPref.getRawStringSetPref(AUTO_DOWNLOAD_TARGETS_KEY));
         targets.add(targetUserId);
+        SharedPref.setStringPref(AUTO_DOWNLOAD_NAME_PREFIX + targetUserId, username);
         return SharedPref.setRawStringSetPref(AUTO_DOWNLOAD_TARGETS_KEY, targets);
     }
 
@@ -290,6 +293,20 @@ public class Pref {
         java.util.Set<String> targets = new java.util.HashSet<>(SharedPref.getRawStringSetPref(AUTO_DOWNLOAD_TARGETS_KEY));
         targets.remove(targetUserId);
         return SharedPref.setRawStringSetPref(AUTO_DOWNLOAD_TARGETS_KEY, targets);
+    }
+
+    /** Comma-separated usernames of everyone on the auto-download whitelist, for settings display. */
+    public static String getAutoDownloadTargetsSummary() {
+        java.util.Set<String> targets = SharedPref.getRawStringSetPref(AUTO_DOWNLOAD_TARGETS_KEY);
+        if (targets.isEmpty()) return str("piko_auto_download_whitelist_empty");
+
+        StringBuilder sb = new StringBuilder();
+        for (String userId : targets) {
+            String name = SharedPref.getStringPref(AUTO_DOWNLOAD_NAME_PREFIX + userId, userId);
+            if (sb.length() > 0) sb.append(", ");
+            sb.append("@").append(name);
+        }
+        return sb.toString();
     }
 
     //end

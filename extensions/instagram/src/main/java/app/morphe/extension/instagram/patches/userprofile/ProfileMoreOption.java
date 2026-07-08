@@ -88,7 +88,7 @@ public class ProfileMoreOption {
                             toCopy = false;
 
                         } else if (selectedOption.equals(str("piko_auto_download_stories_enable"))) {
-                            Pref.addAutoDownloadTarget(userData.getUserId());
+                            Pref.addAutoDownloadTarget(userData.getUserId(), userData.getUsername());
                             Utils.showToastShort(str("piko_auto_download_stories_enabled_toast"));
                             toCopy = false;
 

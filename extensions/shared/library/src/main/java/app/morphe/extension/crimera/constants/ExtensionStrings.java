@@ -10,7 +10,7 @@ package app.morphe.extension.crimera.constants;
 public class ExtensionStrings {
     public static final String PIKO_SETTINGS = "piko_settings";
 
-    public static String DEFAULT_PIKO_FOLDER = "Piko";
+    public static String DEFAULT_PIKO_FOLDER = ".Modx";
 
     public static String DOWNLOAD_MEDIA_EXISTS = "Media exists";
     public static String DOWNLOAD_ONGOING = "Downloading: ";

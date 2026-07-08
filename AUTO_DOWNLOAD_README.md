@@ -49,3 +49,20 @@ actual build against your target APK to 100% confirm it, so:
 Everything else should build and run as-is since it reuses infrastructure
 (`MEDIA_CLASS_NAME`, `UserData`, `MediaData`, `DownloadUtils`) that's already
 working elsewhere in the codebase.
+
+## Update: Whitelist display in settings + hidden download folder
+
+1. **Download folder renamed**: `ExtensionStrings.DEFAULT_PIKO_FOLDER` changed
+   from `"Piko"` to `".Modx"` — the leading dot makes it a hidden folder on
+   Android (won't show in gallery apps / most file managers by default).
+
+2. **Whitelist section added to Piko settings → Download**:
+   `ScreenBuilder.buildDownloadSection()` now shows an "Auto-download
+   whitelist" entry with a summary listing all whitelisted usernames
+   (`@username, @username2, ...`), or a placeholder message if empty.
+   This is read-only/informational — add/remove still happens via the
+   profile "More options" toggle (tap the same option again to remove).
+
+3. `Pref.addAutoDownloadTarget()` now also takes a `username` param (stored
+   separately) so the settings summary can show readable names instead of
+   raw user IDs.

@@ -629,6 +629,14 @@ public class ScreenBuilder {
                         Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
                 )
         );
+
+        addPreference(
+                helper.buttonPreference(
+                        str("piko_auto_download_whitelist"),
+                        Pref.getAutoDownloadTargetsSummary(),
+                        "piko_auto_download_whitelist"
+                )
+        );
     }
 
     public void buildNavigationSection() {

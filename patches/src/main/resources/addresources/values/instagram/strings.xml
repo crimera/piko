@@ -110,6 +110,8 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_auto_download_stories_disable">Disable auto-download stories</string>
     <string name="piko_auto_download_stories_enabled_toast">This account\'s stories will now auto-download</string>
     <string name="piko_auto_download_stories_disabled_toast">Auto-download stopped for this account</string>
+    <string name="piko_auto_download_whitelist">Auto-download whitelist</string>
+    <string name="piko_auto_download_whitelist_empty">No accounts added yet — use "More options" on a profile to add one</string>
     <string name="piko_more_profile_options_action_bar_toggle">Profile options on action bar</string>
     <string name="piko_more_profile_options_action_bar_toggle_desc">Move profile options button to profile action bar</string>
     <string name="piko_remove_empty_bottom_space">Remove empty bottom space</string>
@@ -210,8 +212,8 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_array_time_left">Time left (Hour/Minute/Second left)</string>
 
     <!-- Welcome Message -->
-    <string name="piko_welcome_title">Welcome to Piko Modx</string>
-    <string name="piko_welcome_message">To improve your experience with Piko, please vist Modx settings and adjust your preference</string>
+    <string name="piko_welcome_title">Welcome to Piko</string>
+    <string name="piko_welcome_message">To improve your experience with Piko, please vist Piko settings and adjust your preference</string>
     <string name="piko_goto_piko_settings">Goto Piko settings</string>
     <string name="piko_no_internet">Please connect to internet</string>
     <string name="piko_tap_here">Tap here !!</string>
