@@ -1,3 +1,9 @@
+## [1.2.0](https://github.com/Utsavrajputt/piko/compare/v1.1.0...v1.2.0) (2026-07-08)
+
+### ✨ New Features
+
+* Added auto story download wishlist tab ([61a003c](https://github.com/Utsavrajputt/piko/commit/61a003c07de715c274aab85b41ec5a6f8cf41b76))
+
 ## [1.1.0](https://github.com/Utsavrajputt/piko/compare/v1.0.0...v1.1.0) (2026-07-08)
 
 ### ✨ New Features
