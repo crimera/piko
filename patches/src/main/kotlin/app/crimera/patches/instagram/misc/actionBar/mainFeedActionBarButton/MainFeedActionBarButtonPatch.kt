@@ -41,9 +41,9 @@ val mainFeedActionBarButtonPatch =
                         val index = it.location.index
                         val prevInstruction = getInstruction(index - 1)
                         val prevInstructionOpcode = prevInstruction.opcode
-                        if (prevInstruction.opcode == Opcode.IGET_OBJECT) {
+                        if (prevInstructionOpcode == Opcode.IGET_OBJECT) {
                             // Only inject when the field type is a ViewGroup subtype.
-                            // "View" alone is not a ViewGroup; skip List, Map, etc.
+                            // "View" alone is not a ViewGroup; skip List, Map, etc. (prevents VerifyError).
                             val fieldType = ((prevInstruction as ReferenceInstruction).reference as? FieldReference)?.type ?: ""
                             val isViewGroup = fieldType.contains("ViewGroup") || fieldType.contains("Layout;")
                             if (isViewGroup) {
@@ -51,7 +51,7 @@ val mainFeedActionBarButtonPatch =
                                 addInstruction(
                                     index,
                                     """
-                                    invoke-static {v$layoutRegister}, $ACTIONBAR_DESCRIPTOR/MainFeedActionBar;->addActionBarButton(Landroid/view/ViewGroup;)V
+                                    invoke-static {v$layoutRegister}, $ACTIONBAR_DESCRIPTOR->mainFeedActionBarButton(Landroid/view/ViewGroup;)V
                                     """.trimIndent(),
                                 )
                                 addFlags("mainFeedActionBarFlags")

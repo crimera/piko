@@ -86,6 +86,12 @@ public class SettingsStatus {
     public static boolean customFont = false;
     public static boolean customEmojiFont = false;
     public static boolean inlineDownloadButton = false;
+
+    public static boolean moreInfoOnProfile = false;
+    public static void moreInfoOnProfile() {
+        moreInfoOnProfile = true;
+    }
+
     public static void inlineDownloadButton() {
         inlineDownloadButton = true;
     }
@@ -425,7 +431,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableCustomisationSection() {
-        return (appIconCustomisation || notificationTabCustomisation || searchTabCustomisation || typeaheadCustomisation || exploreTabCustomisation || customPostFontSize || inlineBarCustomisation || navBarCustomisation || sideBarCustomisation || profileTabCustomisation || timelineTabCustomisation || defaultReplySortFilter);
+        return (moreInfoOnProfile || appIconCustomisation || notificationTabCustomisation || searchTabCustomisation || typeaheadCustomisation || exploreTabCustomisation || customPostFontSize || inlineBarCustomisation || navBarCustomisation || sideBarCustomisation || profileTabCustomisation || timelineTabCustomisation || defaultReplySortFilter);
     }
     public static boolean loggingSection() {
         return (serverResponseLogging || serverResponseLoggingOverwriteFile);

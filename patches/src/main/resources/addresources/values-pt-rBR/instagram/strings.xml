@@ -101,8 +101,6 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_download_profile_picture">Baixar foto de perfil</string>
     <string name="piko_copied">Copiado</string>
     <string name="piko_more_profile_options">Mais opções de perfil</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Opções de perfil na barra superior</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Move o botão de \'Opções de perfil\' para ℹ️ na barra superior no perfil.</string>
     <string name="piko_remove_empty_bottom_space">Remova o espaço vazio na parte inferior</string>
     <string name="piko_unlock_plus_benefits">Desbloqueie os benefícios da assinatura do Instagram Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Desbloqueie os benefícios da assinatura do Instagram Plus sendo verificados localmente. USE POR SUA CONTA E RISCO.</string>
@@ -198,6 +196,15 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_no_internet">Conecte-se à internet</string>
     <string name="piko_tap_here">Toque aqui!</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Personalização da barra de ações</string>
+    <string name="piko_action_bar_main_feed">Ícones da barra de ação do feed principal</string>
+    <string name="piko_action_bar_user_profile">Ícones da barra de ações do perfil do usuário</string>
+    <string name="piko_action_bar_chat">Ícones da barra de ações do chat</string>
+    <string name="piko_action_bar_chat_desc">Ícones da barra de ações dentro de uma mensagem direta</string>
+    <string name="piko_action_bar_inbox">Ícones da barra de ação da caixa de entrada</string>
+    <string name="piko_action_bar_button_settings_icon">Ícone de configurações</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Ícone do modo fantasma</string>
+    <string name="piko_action_bar_button_profile_info_icon">Ícone de informações do perfil</string>
     <string name="piko_settings_on_action_bar">Configurações do Piko no feed principal</string>
     <string name="piko_settings_on_action_bar_desc">Mova o acesso às configurações do Piko para a barra superior no feed principal.</string>
 </resources>

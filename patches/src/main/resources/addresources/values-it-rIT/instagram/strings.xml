@@ -99,8 +99,6 @@ Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma s
     <string name="piko_download_profile_picture">Scarica immagine del profilo</string>
     <string name="piko_copied">Copiato</string>
     <string name="piko_more_profile_options">Altre opzioni del profilo</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Opzioni del profilo sulla barra delle azioni</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Sposta il pulsante delle opzioni del profilo nella barra delle azioni del profilo</string>
     <string name="piko_remove_empty_bottom_space">Rimuovi spazio vuoto in basso</string>
     <string name="piko_unlock_plus_benefits">Sblocca i vantaggi Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Sblocca i vantaggi dell\'abbonamento \'Plus\' che vengono controllati in locale. USA A TUO RISCHIO</string>

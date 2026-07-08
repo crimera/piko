@@ -1,3 +1,27 @@
+## [3.8.0-dev.3](https://github.com/crimera/piko/compare/v3.8.0-dev.2...v3.8.0-dev.3) (2026-07-05)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix chat action bar function name ([1401808](https://github.com/crimera/piko/commit/140180878895841fc8437dc21a39ab7941f79540))
+* **Instagram:** Fix opening links ([ba9b4c4](https://github.com/crimera/piko/commit/ba9b4c43af6e4a42ce0654d11aa26a3d28496247))
+* **twitter:** Handle bad response during tweet info API ([#1410](https://github.com/crimera/piko/issues/1410)) ([522f7d1](https://github.com/crimera/piko/commit/522f7d13e9f29bae854073a74c1d82cfe1874950))
+
+### ✨ New Features
+
+* **Twitter:** Add piko settings to the app icon long-press shortcut ([#1412](https://github.com/crimera/piko/issues/1412)) ([2eb970b](https://github.com/crimera/piko/commit/2eb970bfc7160256438fa854e5be0a0513c86877))
+* **Twitter:** Added `More information on profile` patch ([1167728](https://github.com/crimera/piko/commit/116772873059fe2b66b0708524a89cd90acac6e1))
+
+### 🔧 Improvements
+
+* **Instagram:** Added inbox action bar customization ([7f0a219](https://github.com/crimera/piko/commit/7f0a219676976a8832744d889fe563129ea479bb))
+* **Instagram:** Added more flags to improve the user experience ([#1443](https://github.com/crimera/piko/issues/1443)) ([d4835d2](https://github.com/crimera/piko/commit/d4835d26a358136777c6beccf299ab2268ecf709))
+* **Instagram:** Enhance story mention dialog box ([8d77056](https://github.com/crimera/piko/commit/8d7705684809cfa279ca0b517cecfc0911bcc54a))
+* **Instagram:** Handle edge cases of comment button interaction ([fe847cb](https://github.com/crimera/piko/commit/fe847cbce8bc1fac1b324af9ac494b6d17a3ca19))
+* **Instagram:** Improve action bar icon selection options ([a3b2b73](https://github.com/crimera/piko/commit/a3b2b7338659a978adba480595f9e96fc2b0d21f))
+* **Instagram:** Include color friendship indicator ([48f5850](https://github.com/crimera/piko/commit/48f5850322a04c7dce982a1b4c61a9869d3635a2))
+* **Instagram:** Include verification tick on story mention ([92b043b](https://github.com/crimera/piko/commit/92b043bb9a5d708f375bbaf4fe897407311d5bb5))
+* **Instagram:** Story mention dialog width ([68b3c94](https://github.com/crimera/piko/commit/68b3c94f9efa7d6a7868dd63357e5c5a579d11c5))
+
 ## [3.8.0-dev.2](https://github.com/crimera/piko/compare/v3.8.0-dev.1...v3.8.0-dev.2) (2026-06-28)
 
 ### 🐛 Bug Fixes

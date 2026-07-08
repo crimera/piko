@@ -60,7 +60,7 @@ public class MoreOptionsOnPostPatch {
 
                         } else if (selectedOption.equals(str("piko_copy_post_owner_fullname"))) {
                             UserData userData = mediaData.getUserData();
-                            stringToCopy = userData.getFullname();
+                            stringToCopy = userData.getFullName();
 
                         } else if (selectedOption.equals(str("piko_download_options"))) {
                             DownloadUtils.downloadPost(context, userSession, mediaObject, currentMediaIndex);

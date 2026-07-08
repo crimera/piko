@@ -22,6 +22,11 @@
     <string name="piko_pref_download_media_link_handle_always_ask">Zawsze pytaj</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Skopiuj link</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Udostępnij link</string>
+    <string name="piko_pref_external_downloader_toggle">Włącz zewnętrzne pobieranie</string>
+    <string name="piko_pref_external_downloader_text">Pobierz przez zewnętrzną aplikację</string>
+    <string name="piko_pref_external_downloader_package_name">Nazwa pakietu zewnętrznej aplikacji</string>
+    <string name="piko_pref_external_downloader_package_not_set">Nie ustawiono pakietu zewnętrznej aplikacji</string>
+    <string name="piko_pref_external_downloader_package_not_found">Nie znaleziono pakietu zewnętrznej aplikacji</string>
     <!-- Native -->
     <string name="piko_title_native">Funkcje natywne</string>
     <string name="piko_pref_native_page_desc">Funkcje natywne Piko są dostępne w menu wpisu.</string>
@@ -44,6 +49,9 @@
     <string name="piko_share_image_view_not_found">Nie znaleziono tweeta</string>
     <string name="piko_share_image_capture_failed">Nie udało się wygenerować obrazu</string>
     <string name="piko_share_image_error">Błąd: %s</string>
+    <string name="piko_share_image_app_error">Nie znaleziono %s</string>
+    <string name="piko_share_image_instagram_stories">Udostępnij w relacjach na Instagramie</string>
+    <string name="piko_share_image_whatsapp_status">Udostępnij w statusie na WhatsAppie</string>
     <string name="piko_title_native_translator">Tłumaczenie wpisów</string>
     <string name="piko_native_translator_toggle">Włącz natywne tłumaczenie wpisów</string>
     <string name="piko_native_translator_provider">Silnik tłumaczenia</string>
@@ -66,6 +74,8 @@
     <string name="piko_native_reader_mode_cache_delete">Wyczyść pamięć podręczną</string>
     <string name="piko_native_reader_mode_cache_delete_success">Pamięć podręczna została wyczyszczona</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Nie udało się wyczyścić pamięci podręcznej</string>
+    <string name="piko_title_native_share_menu">Natywne menu udostępniania</string>
+    <string name="piko_native_share_menu_toggle">Włącz natywne menu udostępniania</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Reklamy</string>
     <string name="piko_pref_hide_promoted_posts">Ukryj promowane wpisy</string>
@@ -74,6 +84,7 @@
     <string name="piko_pref_ctj_section">Ukryj sekcję \"Dołącz do społeczności\"</string>
     <string name="piko_pref_ryb_section">Ukryj sekcję \"Przejrzyj zakładki\"</string>
     <string name="piko_pref_pinned_posts_section">Ukryj sekcję \"Przypięte wpisy przez obserwujących\"</string>
+    <string name="piko_pref_hide_unrelated_replies">Ukryj niepowiązane odpowiedzi</string>
     <string name="piko_pref_hide_premium_prompt">Ukryj banery subskrypcji Premium</string>
     <string name="piko_pref_hide_todays_news">Ukryj bieżące wiadomości</string>
     <string name="piko_pref_del_from_db">Usuń wpisy z bazy danych</string>
@@ -83,6 +94,7 @@
     <string name="piko_pref_db_ctj_section">Sekcja \"Dołącz do społeczności\"</string>
     <string name="piko_pref_db_ryb_section">Sekcja \"Przejrzyj zakładki\"</string>
     <string name="piko_pref_db_pinned_posts_section">Sekcja \"Przypięte wpisy przez obserwujących\"</string>
+    <string name="piko_pref_db_unrelated_replies">Niepowiązane odpowiedzi</string>
     <string name="piko_pref_db_premium_prompt">Banery subskrypcji Premium</string>
     <string name="piko_pref_db_todays_news">Bieżące wiadomości</string>
     <string name="piko_pref_db_not_found">Nie znaleziono bazy danych</string>
@@ -182,6 +194,9 @@
     <string name="piko_pref_customisation_search_type_ahead">Sugestie wyszukiwania do ukrycia</string>
     <string name="piko_pref_customisation_change_app_icon">Zmień ikonę aplikacji</string>
     <string name="piko_notifications_tab_priority">Priorytet</string>
+    <string name="piko_pref_customisation_more_info_on_profile">Więcej informacji w profilu</string>
+    <string name="piko_pref_customisation_more_info_on_profile_desc">Dodaje więcej szczegółów na stronie profilu</string>
+    <string name="piko_fast_follower">Szybki obserwujący</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Styl czcionki</string>
     <string name="piko_pref_add_font">Dodaj czcionkę</string>
@@ -346,23 +361,23 @@
     <string name="piko_app_icon_name_vivid_orange">Jaskrawa pomarańcz</string>
     <!-- Import / export login tokens -->
     <string name="piko_login_token_export_screen_description">"Ta funkcja eksportuje tokeny sesji dla aktualnie zalogowanego konta.
-Możesz je zaimportować z poziomu ekranu logowania lub ekranu \"Utwórz konto\".
 
 OSTRZEŻENIE: Wyeksportowane tokeny to ściśle poufne dane.
 Nigdy się nimi z nikim nie dziel!
 Jeśli ktoś zdobędzie ten token, uzyska pełny dostęp do Twojego konta, dopóki nie wylogujesz się z tej sesji.
 
-Więcej szczegółów znajdziesz na tej stronie:
+Szczegóły znajdziesz na tej stronie:
 https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
-Zalecamy zapoznanie się z tym dokumentem przed użyciem funkcji, ponieważ zawiera on ważne uwagi."</string>
+Zalecamy zapoznanie się z tym dokumentem przed użyciem funkcji. Zawiera on ważne informacje, między innymi o tym, jak importować tokeny."</string>
     <string name="piko_login_token_select_account">Wybierz konto:</string>
     <string name="piko_login_token_export_copy_to_clipboard">Skopiuj do schowka</string>
     <string name="piko_login_token_export_save_to_file">Zapisz do pliku</string>
+    <string name="piko_login_token_export_no_accounts_message">Uwaga: Nie jesteś zalogowany na żadnym koncie. Aby wyeksportować tokeny, najpierw się zaloguj.</string>
     <string name="piko_login_token_import_token_button_text">Zaloguj przez token JSON</string>
     <string name="piko_login_token_import_from_text">Importuj z tekstu</string>
     <string name="piko_login_token_import_from_file">Importuj z pliku</string>
     <string name="piko_login_token_import_about">O tej funkcji (Otwórz stronę)</string>
-    <string name="piko_login_token_import_success_reopen_required">Zamknij aplikację i uruchom ją ponownie</string>
-    <string name="piko_login_token_import_failed_missing_info">Błąd: Brak nazwy użytkownika, tokenu lub sekretu</string>
+    <string name="piko_login_token_import_success_reopen_required">Otwórz ponownie aplikację</string>
+    <string name="piko_login_token_import_failed_missing_info">Błąd: brakuje \"username\", \"token\" lub \"secret\"</string>
     <string name="piko_login_token_import_failed_already_exist">Nie udało się dodać konta (może już istnieć)</string>
 </resources>

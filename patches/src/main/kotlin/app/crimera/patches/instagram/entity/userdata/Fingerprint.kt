@@ -8,10 +8,18 @@ package app.crimera.patches.instagram.entity.userdata
 
 import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.utils.Constants
+import app.crimera.patches.twitter.logging.responseLogging.JACKSON_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation
+import app.morphe.patcher.literal
+import app.morphe.patcher.opcode
+import app.morphe.patches.all.misc.resources.ResourceType
+import app.morphe.patches.all.misc.resources.resourceLiteral
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/UserData;"
+internal const val LIVE_TREE_USER_DICT_CLASS = "Lcom/instagram/user/model/LiveTreeUserDict;"
 
 internal object GetAdditionalUserInfoExtensionFingerprint : Fingerprint(
     name = "getAdditionalUserInfo",
@@ -24,7 +32,7 @@ internal object GetUsernameExtensionFingerprint : Fingerprint(
 )
 
 internal object GetFullNameExtensionFingerprint : Fingerprint(
-    name = "getFullname",
+    name = "getFullName",
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
@@ -43,26 +51,79 @@ internal object GetProfilePictureUrlExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )
 
-internal object EditProfileNuxFragmentOnCreateFingerprint : Fingerprint(
+internal object GetLowResProfilePictureExtensionFingerprint : Fingerprint(
+    name = "getLowResProfilePicture",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
+internal object IsVerifiedExtensionFingerprint : Fingerprint(
+    name = "isVerified",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
+// -----------------------------------
+
+internal object SelectHighlightsCoverFragmentOnCreateFingerprint : Fingerprint(
+    definingClass = "SelectHighlightsCoverFragment;",
     name = "onCreate",
-    strings = listOf("arg_full_name", "arg_bio"),
 )
 
-internal object OneTapLoginUserInitFingerprint : Fingerprint(
-    strings = listOf("APP_LEVEL_SPI_NO"),
-    returnType = "V",
-    parameters = listOf(USER_MODEL_CLASS_NAME, "Ljava/lang/String;"),
+internal object FullNameLiveTreeUserDictFingerprint : Fingerprint(
+    strings = listOf("full_name"),
+    definingClass = LIVE_TREE_USER_DICT_CLASS,
+    custom = { methodDef, _ ->
+        methodDef.returnType != "V"
+    },
 )
 
-internal object DirectStoryViewerFragmentRelatedFingerprint : Fingerprint(
-    strings =
+internal object UserNameLiveTreeUserDictFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    definingClass = LIVE_TREE_USER_DICT_CLASS,
+    filters =
         listOf(
-            "DirectStoryViewerFragment.ARGUMENTS_THREAD_KEY",
-            "card_gallery_collection_title",
-            "collection_id",
-            "thread_id",
-            "direct_channel_audience_type",
-            "DirectFragment.DIRECT_FRAGMENT_ARGUMENT_THREAD_V2_ID",
+            literal(31),
+            literal(8),
+            literal(0),
         ),
-    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL, AccessFlags.BRIDGE, AccessFlags.SYNTHETIC),
+)
+
+internal object FriendshipStatusLiveTreeUserDictFingerprint : Fingerprint(
+    definingClass = LIVE_TREE_USER_DICT_CLASS,
+    returnType = "FriendshipStatus;",
+)
+
+internal object BiographyLiveTreeUserDictFingerprint : Fingerprint(
+    strings = listOf("biography"),
+    definingClass = LIVE_TREE_USER_DICT_CLASS,
+    custom = { methodDef, _ ->
+        methodDef.returnType != "V"
+    },
+    filters =
+        listOf(
+            opcode(Opcode.CONST_STRING_JUMBO, InstructionLocation.MatchFirst()),
+        ),
+)
+
+internal object LowResProfilePictureUserTreeDictFingerprint : Fingerprint(
+    strings = listOf("profile_pic_url"),
+    definingClass = LIVE_TREE_USER_DICT_CLASS,
+    returnType = "ImageUrl;",
+    filters =
+        listOf(
+            opcode(Opcode.CONST_STRING_JUMBO, InstructionLocation.MatchFirst()),
+        ),
+)
+
+internal object HDProfileInfoUserTreeDictFingerprint : Fingerprint(
+    strings = listOf("hd_profile_pic_url_info"),
+    definingClass = LIVE_TREE_USER_DICT_CLASS,
+    custom = { methodDef, _ ->
+        methodDef.returnType != "V"
+    },
+)
+
+internal object IsVerifiedUserTreeDictFingerprint : Fingerprint(
+    definingClass = LIVE_TREE_USER_DICT_CLASS,
+    strings = listOf("is_verified"),
+    returnType = "Ljava/lang/Boolean;",
 )

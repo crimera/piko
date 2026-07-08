@@ -6,6 +6,7 @@
 
 package app.crimera.patches.twitter.entity.decoder
 
+import app.crimera.patches.twitter.entity.twitterUser.TwitterUserToStringFingerprint
 import app.morphe.patcher.patch.bytecodePatch
 import kotlin.properties.Delegates
 
@@ -13,6 +14,9 @@ var TIMELINE_ITEM_CLASS_NAME: String by Delegates.notNull()
     private set
 
 var TWEET_ITEM_CLASS_NAME: String by Delegates.notNull()
+    private set
+
+var TWITTER_USER_CLASS_NAME: String by Delegates.notNull()
     private set
 
 val decoderEntity =
@@ -23,5 +27,7 @@ val decoderEntity =
             TIMELINE_ITEM_CLASS_NAME = TimelineItemDebugDialogInfoBuilderFingerprint.classDef.type
 
             TWEET_ITEM_CLASS_NAME = ContextualTweetPermaLinkBuilderFingerprint.classDef.type
+
+            TWITTER_USER_CLASS_NAME = TwitterUserToStringFingerprint.classDef.type
         }
     }

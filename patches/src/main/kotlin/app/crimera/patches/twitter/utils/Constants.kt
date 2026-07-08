@@ -56,4 +56,6 @@ object Constants {
 
     const val SSTS_DESCRIPTOR = "invoke-static {}, $ACTIVITY_SETTINGS_CLASS/SettingsStatus;"
     const val FSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/patches/FeatureSwitchPatch;"
+
+    const val ENTITY_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/entity/"
 }

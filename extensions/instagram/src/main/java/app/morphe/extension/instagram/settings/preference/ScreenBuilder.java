@@ -190,14 +190,6 @@ public class ScreenBuilder {
                 )
         );
 
-        addPreference(
-                helper.switchPreference(
-                        str("piko_ghost_modes_quick_toggle"),
-                        str("piko_ghost_modes_quick_toggle_desc"),
-                        Settings.GHOST_MODES_QUICK_TOGGLE
-                )
-        );
-
         if (SettingsStatus.viewStoriesAnonymously) {
             addPreference(
                     helper.switchPreference(
@@ -454,15 +446,6 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.moreOptionsOnProfile) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_more_profile_options_action_bar_toggle"),
-                            str("piko_more_profile_options_action_bar_toggle_desc"),
-                            Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE
-                    )
-            );
-        }
         if (SettingsStatus.moreOptionsOnPost) {
             addPreference(
                     helper.switchPreference(
@@ -505,6 +488,14 @@ public class ScreenBuilder {
                             str("piko_follow_back_indicator"),
                             str("piko_follow_back_indicator_desc"),
                             Settings.FOLLOW_BACK_INDICATOR
+                    )
+            );
+
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_fbi_color_indicator"),
+                            str("piko_fbi_color_indicator_desc"),
+                            Settings.FOLLOW_BACK_COLOR_INDICATOR
                     )
             );
         }
@@ -657,6 +648,41 @@ public class ScreenBuilder {
         );
     }
 
+    public void buildActionBarSection() {
+
+        addPreference(
+                helper.multiSelectListPref(
+                        str("piko_action_bar_main_feed"),
+                        "",
+                        Settings.ACTION_BAR_MAIN_FEED
+                )
+        );
+
+        addPreference(
+                helper.multiSelectListPref(
+                        str("piko_action_bar_user_profile"),
+                        "",
+                        Settings.ACTION_BAR_USER_PROFILE
+                )
+        );
+
+        addPreference(
+                helper.multiSelectListPref(
+                        str("piko_action_bar_inbox"),
+                        "",
+                        Settings.ACTION_BAR_INBOX
+                )
+        );
+
+        addPreference(
+                helper.multiSelectListPref(
+                        str("piko_action_bar_chat"),
+                        str("piko_action_bar_chat_desc"),
+                        Settings.ACTION_BAR_CHAT
+                )
+        );
+    }
+
     public void buildNavigationSection() {
         if (!(SettingsStatus.hideNavigationButtons)) return;
 
@@ -741,10 +767,10 @@ public class ScreenBuilder {
         );
 
         addPreference(
-                helper.switchPreference(
-                        str("piko_settings_on_action_bar"),
-                        str("piko_settings_on_action_bar_desc"),
-                        Settings.PIKO_SETTINGS_ON_ACTION_BAR
+                helper.buttonPreference(
+                        str("piko_reset_pref"),
+                        "",
+                        "piko_reset_pref"
                 )
         );
 
@@ -846,6 +872,14 @@ public class ScreenBuilder {
                     )
             );
         }
+
+        addPreference(
+                helper.buttonPreference(
+                        str("piko_category_action_bar"),
+                        "",
+                        Constants.PIKO_FRAGMENT_ACTION_BAR
+                )
+        );
 
         if (SettingsStatus.hideNavigationButtons){
             addPreference(

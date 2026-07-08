@@ -7,6 +7,7 @@
 
 package app.morphe.extension.instagram.entity;
 
+import com.instagram.common.typedurl.ImageUrl;
 
 public class UserData extends Entity {
     private final Object obj;
@@ -20,45 +21,45 @@ public class UserData extends Entity {
         return super.getField(this.obj, "fieldName");
     }
 
-    public String getUsername() {
-        try {
-            Object additionalUserInfo = getAdditionalUserInfo();
-            return (String) super.getMethod(additionalUserInfo, "methodName");
-        } catch (Exception ex) {
-            return null;
-        }
+    public Boolean isVerified() throws Exception {
+        Object additionalUserInfo = getAdditionalUserInfo();
+        return (Boolean) super.getMethod(additionalUserInfo, "isVerified");
     }
 
-    public String getFullname() {
-        try {
-            Object additionalUserInfo = getAdditionalUserInfo();
-            return (String) super.getMethod(additionalUserInfo, "methodName");
-        } catch (Exception ex) {
-            return null;
-        }
+    public String getUsername() throws Exception {
+        Object additionalUserInfo = getAdditionalUserInfo();
+        return (String) super.getMethod(additionalUserInfo, "methodName");
     }
 
-    public String getBio() {
-        try {
-            Object additionalUserInfo = getAdditionalUserInfo();
-            return (String) super.getMethod(additionalUserInfo, "BCu");
-        } catch (Exception ex) {
-            return null;
+    public String getFullName() throws Exception {
+        Object additionalUserInfo = getAdditionalUserInfo();
+        String name = (String) super.getMethod(additionalUserInfo, "methodName");
+        if(name!=null && !name.isEmpty() && name.length()>0){
+            return name;
         }
+        // Some users don't have fullname, but only username.
+        return this.getUsername();
     }
 
-    public String getProfilePictureUrl() {
-        try {
-            Object additionalUserInfo = getAdditionalUserInfo();
-            Object profilePicObject =  super.getMethod(additionalUserInfo, "Bvt");
-            if(profilePicObject!=null){
-                Entity profilePicEntity = new Entity(profilePicObject);
-                return (String) profilePicEntity.getMethod("getUrl");
-            }
-            return null;
-        } catch (Exception ex) {
-            return null;
+    public String getBio() throws Exception {
+        Object additionalUserInfo = getAdditionalUserInfo();
+        return (String) super.getMethod(additionalUserInfo, "BCu");
+    }
+
+    public String getProfilePictureUrl() throws Exception {
+        Object additionalUserInfo = getAdditionalUserInfo();
+        Object profilePicObject =  super.getMethod(additionalUserInfo, "Bvt");
+        if(profilePicObject!=null){
+            Entity profilePicEntity = new Entity(profilePicObject);
+            return (String) profilePicEntity.getMethod("getUrl");
         }
+        return "";
+    }
+
+    public ImageUrl getLowResProfilePicture() throws Exception {
+        Object additionalUserInfo = getAdditionalUserInfo();
+        Object imageUrlObject =  super.getMethod(additionalUserInfo, "mediaName");
+        return (ImageUrl) imageUrlObject;
     }
 
     public String getUserId() throws Exception {

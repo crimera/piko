@@ -405,7 +405,7 @@ public class ScreenBuilder {
             );
         }
 
-        category = preferenceCategory(str("piko_title_native_translator"));
+        category = preferenceCategory(str("piko_title_native_share_menu"));
 
         if (SettingsStatus.nativeTranslator) {
             addPreference(category,
@@ -737,6 +737,14 @@ public class ScreenBuilder {
                         str("piko_pref_quick_settings"),
                         str("piko_pref_quick_settings_summary"),
                         Settings.MISC_QUICK_SETTINGS_BUTTON
+                )
+        );
+
+        addPreference(category,
+                helper.switchPreference(
+                        str("piko_pref_customisation_more_info_on_profile"),
+                        str("piko_pref_customisation_more_info_on_profile_desc"),
+                        Settings.MORE_INFO_ON_PROFILE
                 )
         );
 

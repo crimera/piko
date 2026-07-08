@@ -65,12 +65,14 @@ public class HandleCommentButton {
                     PikoUtils.toast(str("piko_comment_copied_failed"));
                 }
                 return true;
+
             } else if (button.equals(DebugButton.A00)) {
                 CommentData commentData = new CommentData(commentObject);
 
                 Context context = (Context) Utils.getActivity();
                 ObjectBrowser.browseObject(context,commentData);
                 return true;
+
             } else if (button.equals(SaveMediaButton.A00)) {
                 CommentData commentData = new CommentData(commentObject);
 
@@ -80,6 +82,7 @@ public class HandleCommentButton {
                     String fileName = commentData.getGifDownloadName();
                     DownloadUtils.downloadMediaUrl(context, gifUrl, Constants.DEFAULT_GIF_FOLDER, fileName);
                     return true;
+
                 } else if (commentData.hasImageMedia()) {
                     MediaData imageData = commentData.getImageMedia();
                     UserData userData = commentData.getCommentUserData();
@@ -92,13 +95,19 @@ public class HandleCommentButton {
 
                     DownloadUtils.downloadMediaUrl(context, mediaLink, subFolder, fileName);
                     return true;
+
                 }
+
+                return false;
             }
+
+            return false;
 
         } catch (Exception e) {
             PikoUtils.logger(e);
+            return false;
+
         }
-        return false;
     }
 
 }

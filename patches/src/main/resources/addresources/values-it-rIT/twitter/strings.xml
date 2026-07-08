@@ -44,6 +44,7 @@
     <string name="piko_share_image_view_not_found">Visualizzazione tweet non riuscita</string>
     <string name="piko_share_image_capture_failed">Acquisizione dell\'immagine non riuscita</string>
     <string name="piko_share_image_error">Errore: %s</string>
+    <string name="piko_share_image_app_error">%s non trovata</string>
     <string name="piko_title_native_translator">Traduzione nativa dei post</string>
     <string name="piko_native_translator_toggle">Abilita la Traduzione nativa dei post</string>
     <string name="piko_native_translator_provider">Fornitori di traduzione</string>
@@ -345,16 +346,6 @@
     <string name="piko_app_icon_name_tropical_teal">Verde Petrolio Tropicale</string>
     <string name="piko_app_icon_name_vivid_orange">Arancione Vivido</string>
     <!-- Import / export login tokens -->
-    <string name="piko_login_token_export_screen_description">"Questa funzione esporta il token della sessione per l'account attualmente in uso.
-Puoi importarlo dalla schermata di accesso o da quella \"Crea nuovo account\".
-
-ATTENZIONE: I token esportati sono informazioni altamente riservate.
-Non condividerlo mai con nessuno!
-Se qualcuno ha questo token, può accedere liberamente al tuo account fino a quando non ti disconnetterai dalla sessione.
-
-Per ulteriori dettagli, puoi consultare questa pagina.
-https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch. d
-Si consiglia di leggerlo prima di usare questa funzione. Include alcune note importanti."</string>
     <string name="piko_login_token_select_account">Seleziona un account:</string>
     <string name="piko_login_token_export_copy_to_clipboard">Copia negli appunti</string>
     <string name="piko_login_token_export_save_to_file">Salva su file</string>
@@ -362,7 +353,6 @@ Si consiglia di leggerlo prima di usare questa funzione. Include alcune note imp
     <string name="piko_login_token_import_from_text">Importa da del testo</string>
     <string name="piko_login_token_import_from_file">Importa da un file</string>
     <string name="piko_login_token_import_about">Informazioni su questa funzionalità (Apri sito web)</string>
-    <string name="piko_login_token_import_success_reopen_required">Si prega di uscire dall\'app e riaprirla</string>
-    <string name="piko_login_token_import_failed_missing_info">Errore: nome utente, token o segreto mancanti</string>
+    <string name="piko_login_token_import_success_reopen_required">Riapri l\'app</string>
     <string name="piko_login_token_import_failed_already_exist">Impossibile aggiungere l\'account (potrebbe già essere stato aggiunto)</string>
 </resources>

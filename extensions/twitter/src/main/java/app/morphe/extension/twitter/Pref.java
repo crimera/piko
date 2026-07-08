@@ -447,5 +447,9 @@ public class Pref {
         return Utils.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
     }
 
+    public static boolean moreInfoOnProfile(){
+        return Utils.getBooleanPref(Settings.MORE_INFO_ON_PROFILE) && SettingsStatus.moreInfoOnProfile;
+    }
+
     //end
 }

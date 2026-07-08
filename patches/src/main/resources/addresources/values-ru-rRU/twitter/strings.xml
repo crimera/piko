@@ -22,6 +22,10 @@
     <string name="piko_pref_download_media_link_handle_always_ask">Всегда спрашивать</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Копировать ссылку на медиа</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Поделиться ссылкой на медиа</string>
+    <string name="piko_pref_external_downloader_toggle">Включить внешний загрузчик</string>
+    <string name="piko_pref_external_downloader_text">Скачать внешним загрузчиком</string>
+    <string name="piko_pref_external_downloader_package_name">Имя пакета внешнего загрузчика</string>
+    <string name="piko_pref_external_downloader_package_not_set">Пакет для внешней загрузки не задан</string>
     <!-- Native -->
     <string name="piko_title_native">Нативные функции</string>
     <string name="piko_title_native_downloader">Нативное скачивание</string>
@@ -34,7 +38,11 @@
     <string name="piko_pref_native_downloader_filename_title">Сохранить шаблон имени файла</string>
     <string name="piko_share_image_title">Делиться твитом как изображением</string>
     <string name="piko_share_image_toggle">Включить Делиться твитами как изображением</string>
+    <string name="piko_share_image_autocleanup">Автоочистка снимков</string>
+    <string name="piko_share_image_autocleanup_desc">Удалять снимки старше 24 часов</string>
+    <string name="piko_share_image_invalid_context">Неверный контекст</string>
     <string name="piko_share_image_error">Ошибка: %s</string>
+    <string name="piko_share_image_app_error">%s не найдено</string>
     <string name="piko_title_native_translator">Нативный перевод постов</string>
     <string name="piko_native_translator_toggle">Включить нативный перевод постов</string>
     <string name="piko_native_translator_provider">Сервис перевода</string>
@@ -96,10 +104,15 @@
     <string name="piko_pref_edit_flag_title">Изменить флаг</string>
     <string name="piko_pref_add_flag_title">Добавить флаг</string>
     <string name="piko_pref_search_flags">Поиск флагов</string>
+    <string name="piko_pref_import_flags">Импорт флагов</string>
+    <string name="piko_pref_export_flags">Экспорт флаги</string>
+    <string name="piko_pref_reset_flags">Сброс флагов</string>
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">Лента</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Отключить автопрокрутку ленты</string>
+    <string name="piko_pref_hide_live_threads">Скрыть активные треды</string>
     <string name="piko_pref_hide_live_threads_desc">Баннер прямых эфиров поверх ленты</string>
+    <string name="piko_pref_hide_banner">Скрыть баннер</string>
     <string name="piko_pref_force_translate">Принудительный перевод</string>
     <string name="piko_pref_force_translate_desc">Кнопка перевода текста во всех постах</string>
     <string name="piko_pref_hide_quick_promote_desc">Кнопка продвижения под своими постами</string>

@@ -66,9 +66,9 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.8.0-dev.2](https://github.com/crimera/piko/releases/tag/v3.8.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;125 patches total
+> **[v3.8.0-dev.3](https://github.com/crimera/piko/releases/tag/v3.8.0-dev.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;126 patches total
 <details>
-<summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;74 patches</summary>
+<summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;75 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -135,6 +135,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Import/Export login token](#import-export-login-token) | Adds an feature to export and import the token of accounts. This is useful when logging in on your second device or when re-installing piko. |  |
 | [Legacy share links](#legacy-share-links) | Brings back username on post share links. Works post 11.4x.xx |  |
 | [Log server response](#log-server-response) | Log json responses received from server |  |
+| [More information on profile](#more-information-on-profile) | Adds more details on the profile page |  |
 | [Native downloader](#native-downloader) | Requires X 11.0.0-release.0 or higher. |  |
 | [Native reader mode](#native-reader-mode) | Requires X 11.0.0-release.0 or higher. |  |
 | [Native translator](#native-translator) | Requires X 11.0.0-release.0 or higher. |  |

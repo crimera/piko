@@ -147,7 +147,7 @@ public class MessageUtils {
                 public void onClick(DialogInterface d, int which) {
                     try {
                         if (which == 0 && finalUrl != null) {
-                            PikoUtils.openUrl(finalUrl);
+                            PikoUtils.openUrl(finalUrl, false);
                         } else if ((which == 0 && finalUrl == null) || (which == 1)) {
                             if (finalUrl != null) {
                                 Utils.setClipboard(finalUrl);

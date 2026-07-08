@@ -6,7 +6,7 @@
     <string name="piko_pref_undo_posts_desc">Active la possibilité d\'annuler les publications avant leur envoi</string>
     <string name="piko_pref_undo_posts_btn">Paramètres d\'annulation des publications</string>
     <string name="piko_pref_icon_n_navbar_btn">Paramètres de personnalisation de l\'icône de l\'application et de la barre de navigation</string>
-    <string name="piko_pref_enable_force_pip">Force PiP mode</string>
+    <string name="piko_pref_enable_force_pip">Forcer le mode PiP</string>
     <string name="piko_pref_enable_force_pip_desc">Active le mode PiP lorsque vous fermez l\'application</string>
     <!-- Download Settings -->
     <string name="piko_title_download">Téléchargement</string>
@@ -22,6 +22,11 @@
     <string name="piko_pref_download_media_link_handle_always_ask">Toujours demander</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Copier le lien du média</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Partager le lien du média</string>
+    <string name="piko_pref_external_downloader_toggle">Activer le téléchargeur externe</string>
+    <string name="piko_pref_external_downloader_text">Télécharger avec un téléchargeur externe</string>
+    <string name="piko_pref_external_downloader_package_name">Nom du paquet du téléchargeur externe</string>
+    <string name="piko_pref_external_downloader_package_not_set">Le paquet du téléchargeur externe n\'est pas défini</string>
+    <string name="piko_pref_external_downloader_package_not_found">Le paquet du téléchargeur externe est introuvable</string>
     <!-- Native -->
     <string name="piko_title_native">Fonctionnalités natives</string>
     <string name="piko_pref_native_page_desc">Ces fonctionnalités natives de Piko sont disponibles dans le menu de publication.</string>
@@ -44,6 +49,9 @@
     <string name="piko_share_image_view_not_found">Vue du tweet non trouvée</string>
     <string name="piko_share_image_capture_failed">Impossible de capturer l\'image</string>
     <string name="piko_share_image_error">Erreur: %s</string>
+    <string name="piko_share_image_app_error">%s introuvable</string>
+    <string name="piko_share_image_instagram_stories">Partager en stories Instagram</string>
+    <string name="piko_share_image_whatsapp_status">Partager dans le statut WhatsApp</string>
     <string name="piko_title_native_translator">Traduction native des publications</string>
     <string name="piko_native_translator_toggle">Activer la traduction native des publications</string>
     <string name="piko_native_translator_provider">Fournisseurs de traduction</string>
@@ -66,6 +74,8 @@
     <string name="piko_native_reader_mode_cache_delete">Supprimer le cache du mode lecture</string>
     <string name="piko_native_reader_mode_cache_delete_success">Cache supprimé avec succès</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Échec de la suppression du cache</string>
+    <string name="piko_title_native_share_menu">Menu de partage natif</string>
+    <string name="piko_native_share_menu_toggle">Activer le menu de partage natif</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Publicités</string>
     <string name="piko_pref_hide_promoted_posts">Masquer les publications promues</string>
@@ -74,8 +84,9 @@
     <string name="piko_pref_ctj_section">Masquer la section \"Communauté à rejoindre\"</string>
     <string name="piko_pref_ryb_section">Masquer la section \"Revisitez votre signet\"</string>
     <string name="piko_pref_pinned_posts_section">Masquer la section \"Publications épinglées par abonnés\"</string>
+    <string name="piko_pref_hide_unrelated_replies">Masquer les réponses sans rapport</string>
     <string name="piko_pref_hide_premium_prompt">Masquer les invites de message</string>
-    <string name="piko_pref_hide_todays_news">Cacher les nouvelles d\'aujourd\'hui</string>
+    <string name="piko_pref_hide_todays_news">Masquer les nouvelles d\'aujourd\'hui</string>
     <string name="piko_pref_del_from_db">Supprimer les entrées de la base de données</string>
     <string name="piko_pref_db_promoted_posts">Postes promus</string>
     <string name="piko_pref_db_wtf_section">Section \"Qui suivre\"</string>
@@ -83,13 +94,14 @@
     <string name="piko_pref_db_ctj_section">Section \"Communauté à rejoindre\"</string>
     <string name="piko_pref_db_ryb_section">Section \"Revisitez votre signet\"</string>
     <string name="piko_pref_db_pinned_posts_section">Section \"Publications épinglées par abonnés\"</string>
+    <string name="piko_pref_db_unrelated_replies">Réponses sans rapport</string>
     <string name="piko_pref_db_premium_prompt">Invites de message</string>
     <string name="piko_pref_db_todays_news">Actualités du jour</string>
     <string name="piko_pref_db_not_found">Base de données non trouvée</string>
     <string name="piko_pref_db_not_open">La base de données n\'est pas ouverte</string>
     <string name="piko_pref_db_del_items">Éléments supprimés</string>
     <string name="piko_pref_hide_premium_upsell">Masquer la vente incitative premium</string>
-    <string name="piko_pref_hide_premium_upsell_desc">Masque la vente incitative premium dans la chronologie de la maison</string>
+    <string name="piko_pref_hide_premium_upsell_desc">Masque la vente incitative premium dans le fil d\'accueil</string>
     <string name="piko_pref_top_people_search">Masquer les personnes les plus recherchées</string>
     <string name="piko_pref_top_people_search_desc">Masque la section personnes après la recherche</string>
     <!-- Misc Settings -->
@@ -182,6 +194,9 @@
     <string name="piko_pref_customisation_search_type_ahead">Suggestions de recherche à masquer</string>
     <string name="piko_pref_customisation_change_app_icon">Changer l\'icône de l\'application</string>
     <string name="piko_notifications_tab_priority">Priorité</string>
+    <string name="piko_pref_customisation_more_info_on_profile">Plus d\'informations sur le profil</string>
+    <string name="piko_pref_customisation_more_info_on_profile_desc">Ajoute plus de détails sur la page de profil</string>
+    <string name="piko_fast_follower">Abonné rapide</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Style de police</string>
     <string name="piko_pref_add_font">Ajouter une police</string>
@@ -202,9 +217,9 @@
     <string name="piko_pref_server_response_logging_file_overwrite_desc">Effacer les données de journalisation existantes au lancement</string>
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Sauvegarde et restauration</string>
-    <string name="piko_pref_import_settings">Importer des chaînes Piko</string>
-    <string name="piko_pref_export_settings">Exporter des chaînes Piko</string>
-    <string name="piko_pref_reset_settings">Réinitialiser les chaînes Piko</string>
+    <string name="piko_pref_import_settings">Importer les paramètres Piko</string>
+    <string name="piko_pref_export_settings">Exporter les paramètres Piko</string>
+    <string name="piko_pref_reset_settings">Réinitialiser les paramètres Piko</string>
     <string name="piko_pref_export_success">Exportation réussie</string>
     <string name="piko_pref_import_success">Importation réussie</string>
     <string name="piko_pref_export_failed">Erreur : L\'exportation de %s a échoué</string>
@@ -346,23 +361,23 @@
     <string name="piko_app_icon_name_vivid_orange">Orange vif</string>
     <!-- Import / export login tokens -->
     <string name="piko_login_token_export_screen_description">"Cette fonctionnalité exporte les jetons de session du compte actuellement connecté.
-Vous pouvez les importer depuis l'écran de connexion ou l'écran \"Créer un compte\".
 
 ATTENTION : Les jetons exportés sont des informations hautement confidentielles.
 Ne les partagez jamais !
-Si quelqu'un possède ce jeton, il peut accéder librement à votre compte jusqu'à ce que vous vous déconnectiez.
+Si quelqu'un possède ce jeton, il peut accéder librement à votre compte jusqu'à votre déconnexion.
 
 Pour plus de détails, veuillez consulter cette page :
 https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
-Il est recommandé de lire ce document avant d'utiliser cette fonctionnalité. Il contient des informations importantes."</string>
+Il est recommandé de lire cette page avant d'utiliser cette fonctionnalité. Elle contient des informations importantes, notamment sur la procédure d'importation des jetons."</string>
     <string name="piko_login_token_select_account">Sélectionnez un compte:</string>
     <string name="piko_login_token_export_copy_to_clipboard">Copier dans le presse-papiers</string>
     <string name="piko_login_token_export_save_to_file">Enregistrer dans un fichier</string>
+    <string name="piko_login_token_export_no_accounts_message">Information : Vous n’êtes connecté à aucun compte. Pour exporter des jetons, veuillez d’abord vous connecter à un compte.</string>
     <string name="piko_login_token_import_token_button_text">Connexion via jeton JSON</string>
     <string name="piko_login_token_import_from_text">Importer à partir du texte</string>
     <string name="piko_login_token_import_from_file">Importer à partir d\'un fichier</string>
     <string name="piko_login_token_import_about">À propos de cette fonctionnalité (Ouvrir le site web)</string>
-    <string name="piko_login_token_import_success_reopen_required">Veuillez quitter l\'application et la rouvrir</string>
-    <string name="piko_login_token_import_failed_missing_info">Erreur: Nom d’utilisateur, jeton ou secret manquant</string>
+    <string name="piko_login_token_import_success_reopen_required">Rouvrez l\'application</string>
+    <string name="piko_login_token_import_failed_missing_info">Erreur : \"nom d’utilisateur\", \"jeton\" ou \"secret\" est manquant</string>
     <string name="piko_login_token_import_failed_already_exist">Impossible d\'ajouter le compte (il existe peut-être déjà)</string>
 </resources>

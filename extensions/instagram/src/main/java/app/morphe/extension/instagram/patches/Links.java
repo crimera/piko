@@ -74,7 +74,7 @@ public class Links {
                 String actualUrl = Uri.parse(url).getQueryParameter("u");
                 if (actualUrl != null) {
                     String sanitizedUrl = sanitizeUrl(actualUrl);
-                    PikoUtils.openUrl(sanitizedUrl);
+                    PikoUtils.openUrl(sanitizedUrl,false);
                     return true;
                 }
             }

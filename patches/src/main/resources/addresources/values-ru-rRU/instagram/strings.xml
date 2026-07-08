@@ -71,6 +71,8 @@
     <string name="piko_disable_discover_people_desc">Отключает раздел «Возможные знакомые» в профиле пользователя</string>
     <string name="piko_follow_back_indicator">Включить индикатор статуса дружбы</string>
     <string name="piko_follow_back_indicator_desc">Добавляет на страницу профиля метку «Подписан(а) на вас» и показывает подробную информацию о статусе дружбы при нажатии</string>
+    <string name="piko_fbi_color_indicator">Включить цветной индикатор статуса дружбы</string>
+    <string name="piko_fbi_color_indicator_desc">Индикатор статуса дружбы должен быть включен</string>
     <string name="piko_fbi_follows_you">Подписан на вас</string>
     <string name="piko_fbi_doesnt_follows_you">Не подписан на вас</string>
     <string name="piko_friendship_status">Статус дружбы</string>
@@ -101,8 +103,6 @@
     <string name="piko_download_profile_picture">Скачать фото профиля</string>
     <string name="piko_copied">Скопировано</string>
     <string name="piko_more_profile_options">Дополнительные действия с профилем</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Кнопка действий с профилем на панели действий</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Перенести кнопку действий с профилем на панель действий</string>
     <string name="piko_remove_empty_bottom_space">Убрать пустое пространство внизу</string>
     <string name="piko_unlock_plus_benefits">Разблокировать возможности подписки «Плюс»</string>
     <string name="piko_unlock_plus_benefits_desc">Разблокирует преимущества подписки «Plus», проверяемые локально. Используйте на свой страх и риск</string>

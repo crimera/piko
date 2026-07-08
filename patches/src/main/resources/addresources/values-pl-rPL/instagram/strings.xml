@@ -69,10 +69,13 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_disable_analytics_desc">Blokuje wysyłanie danych telemetrycznych na serwery Instagrama/Facebooka</string>
     <string name="piko_disable_discover_people">Wyłącz odkrywanie osób</string>
     <string name="piko_disable_discover_people_desc">Wyłącza sekcję sugerowanych osób na profilach użytkowników</string>
-    <string name="piko_follow_back_indicator">Włącz wskaźnik statusu znajomości</string>
-    <string name="piko_follow_back_indicator_desc">Dodaje etykietę ze statusem \"Obserwuje Cię\" na stronie profilu, a po dotknięciu wyświetla szczegółowe zestawienie statusu znajomości</string>
+    <string name="piko_follow_back_indicator">Włącz wskaźnik statusu relacji</string>
+    <string name="piko_follow_back_indicator_desc">Dodaje etykietę ze statusem \"Obserwuje Cię\" na stronie profilu, a po dotknięciu wyświetla szczegółowe zestawienie statusu relacji</string>
+    <string name="piko_fbi_color_indicator">Włącz kolorowy wskaźnik statusu relacji</string>
+    <string name="piko_fbi_color_indicator_desc">Wymaga włączonego wskaźnika statusu relacji</string>
     <string name="piko_fbi_follows_you">Obserwuje Cię</string>
     <string name="piko_fbi_doesnt_follows_you">Nie obserwuje Cię</string>
+    <string name="piko_fbi_following_each_other">Obserwujecie się nawzajem</string>
     <string name="piko_friendship_status">Status znajomości</string>
     <string name="piko_view_story_mentions">Wyświetl wzmianki w relacji</string>
     <string name="piko_vsm_title">Wzmianki w relacji</string>
@@ -101,8 +104,6 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_download_profile_picture">Pobierz zdjęcie profilowe</string>
     <string name="piko_copied">Skopiowano</string>
     <string name="piko_more_profile_options">Więcej opcji profilu</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Opcje profilu na pasku akcji</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Przenosi przycisk opcji profilu na pasek akcji</string>
     <string name="piko_remove_empty_bottom_space">Usuń pustą przestrzeń na dole</string>
     <string name="piko_unlock_plus_benefits">Odblokuj korzyści Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Odblokowuje funkcje subskrypcji \"Plus\", które są weryfikowane lokalnie. UŻYWAJ NA WŁASNE RYZYKO</string>
@@ -198,6 +199,15 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_no_internet">Połącz się z internetem</string>
     <string name="piko_tap_here">Dotknij tutaj</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Personalizacja paska akcji</string>
+    <string name="piko_action_bar_main_feed">Ikony paska akcji strony głównej</string>
+    <string name="piko_action_bar_user_profile">Ikony paska akcji profilu użytkownika</string>
+    <string name="piko_action_bar_chat">Ikony paska akcji czatu</string>
+    <string name="piko_action_bar_chat_desc">Ikony paska akcji w wiadomościach prywatnych</string>
+    <string name="piko_action_bar_inbox">Ikony paska akcji skrzynki odbiorczej</string>
+    <string name="piko_action_bar_button_settings_icon">Ikona ustawień</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Ikona trybu ducha</string>
+    <string name="piko_action_bar_button_profile_info_icon">Ikona informacji o profilu</string>
     <string name="piko_settings_on_action_bar">Ustawienia Piko na pasku akcji</string>
     <string name="piko_settings_on_action_bar_desc">Przenosi skrót do ustawień Piko na pasek akcji strony głównej</string>
 </resources>

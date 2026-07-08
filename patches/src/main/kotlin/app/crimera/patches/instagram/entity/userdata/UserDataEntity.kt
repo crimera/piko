@@ -11,12 +11,16 @@ import app.crimera.patches.instagram.utils.Constants.FRIENDSHIP_STATUS_CLASS
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
+import app.crimera.utils.getReference
 import app.crimera.utils.methodExtractor
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.dexbacked.reference.DexBackedMethodReference
+import com.android.tools.smali.dexlib2.iface.reference.Reference
 
 val userDataEntity =
     bytecodePatch(
@@ -25,46 +29,21 @@ val userDataEntity =
         dependsOn(decoderEntity)
 
         execute {
-            OneTapLoginUserInitFingerprint.method.apply {
-                val additionalUserInfoField =
-                    instructions.first { it.opcode == Opcode.IGET_OBJECT }.fieldExtractor()
 
-                val additionalUserInfoFieldName = additionalUserInfoField.name
-                GetAdditionalUserInfoExtensionFingerprint.changeFirstString(additionalUserInfoFieldName)
+            fun Fingerprint.getMethodName(): String = method.name
 
-                val firstInvokeInterface = instructions.first { it.opcode == Opcode.INVOKE_INTERFACE }
-                GetUsernameExtensionFingerprint.changeFirstString(firstInvokeInterface.methodExtractor().name)
+            GetUsernameExtensionFingerprint.changeFirstString(UserNameLiveTreeUserDictFingerprint.getMethodName())
+            GetFullNameExtensionFingerprint.changeFirstString(FullNameLiveTreeUserDictFingerprint.getMethodName())
+            GetUserFriendshipStatusExtensionFingerprint.changeFirstString(FriendshipStatusLiveTreeUserDictFingerprint.getMethodName())
+            GetBioExtensionFingerprint.changeFirstString(BiographyLiveTreeUserDictFingerprint.getMethodName())
+            GetProfilePictureUrlExtensionFingerprint.changeFirstString(HDProfileInfoUserTreeDictFingerprint.getMethodName())
+            GetLowResProfilePictureExtensionFingerprint.changeFirstString(LowResProfilePictureUserTreeDictFingerprint.getMethodName())
+            IsVerifiedExtensionFingerprint.changeFirstString(IsVerifiedUserTreeDictFingerprint.getMethodName())
 
-                val lastInvokeInterface = instructions.last { it.opcode == Opcode.INVOKE_INTERFACE }
-                GetFullNameExtensionFingerprint.changeFirstString(lastInvokeInterface.methodExtractor().name)
-
-                val additionalUserInfoMethods =
-                    mutableClassDefBy(extensionToClassName(additionalUserInfoField.returnType))
-                        .methods
-
-                val friendshipStatusFromUserMethodName =
-                    additionalUserInfoMethods
-                        .first {
-                            it.returnType ==
-                                FRIENDSHIP_STATUS_CLASS &&
-                                it.parameters.isEmpty()
-                        }.name
-
-                GetUserFriendshipStatusExtensionFingerprint.changeFirstString(friendshipStatusFromUserMethodName)
-            }
-
-            DirectStoryViewerFragmentRelatedFingerprint.method.apply {
-                val firstInvokeInterface = instructions.first { it.opcode == Opcode.INVOKE_INTERFACE }.methodExtractor().name
-                GetProfilePictureUrlExtensionFingerprint.changeFirstString(firstInvokeInterface)
-            }
-
-            EditProfileNuxFragmentOnCreateFingerprint.apply {
-                val strIndex = stringMatches[1].index
-                method.apply {
-                    val firstInvokeInterfaceAfterStrIndex = indexOfFirstInstruction(strIndex, Opcode.INVOKE_INTERFACE)
-                    val bioMethod = getInstruction(firstInvokeInterfaceAfterStrIndex).methodExtractor().name
-                    GetBioExtensionFingerprint.changeFirstString(bioMethod)
-                }
+            SelectHighlightsCoverFragmentOnCreateFingerprint.method.apply {
+                val firstIGetObjectIndex = indexOfFirstInstruction(Opcode.IGET_OBJECT)
+                val mutableUserDictIntfFieldName = getInstruction(firstIGetObjectIndex).fieldExtractor().name
+                GetAdditionalUserInfoExtensionFingerprint.changeFirstString(mutableUserDictIntfFieldName)
             }
         }
     }

@@ -103,8 +103,6 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_download_profile_picture">Descargar foto de perfil</string>
     <string name="piko_copied">Copiado</string>
     <string name="piko_more_profile_options">Más opciones de perfil</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Opciones de perfil en la barra superior</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Mueve el botón de opciones de perfil a la barra superior</string>
     <string name="piko_remove_empty_bottom_space">Eliminar espacio inferior vacío</string>
     <string name="piko_unlock_plus_benefits">Desbloquear beneficios Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Desbloquea beneficios de la suscripción \"Plus\" verificados localmente. ÚSALO BAJO TU PROPIO RIESGO</string>
@@ -200,6 +198,15 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_no_internet">Conéctate a Internet</string>
     <string name="piko_tap_here">¡¡Toca aquí!!</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Personalización de la barra de acciones</string>
+    <string name="piko_action_bar_main_feed">Iconos de la barra de acciones del feed principal</string>
+    <string name="piko_action_bar_user_profile">Iconos de la barra de acciones del perfil de usuario</string>
+    <string name="piko_action_bar_chat">Iconos de la barra de acciones de chat</string>
+    <string name="piko_action_bar_chat_desc">Iconos de la barra de acciones dentro de un DM</string>
+    <string name="piko_action_bar_inbox">Iconos de la barra de acciones de la bandeja de entrada</string>
+    <string name="piko_action_bar_button_settings_icon">Icono de configuración</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Icono de modo fantasma</string>
+    <string name="piko_action_bar_button_profile_info_icon">Icono de información de perfil</string>
     <string name="piko_settings_on_action_bar">Ajustes de Piko en el feed principal</string>
     <string name="piko_settings_on_action_bar_desc">Mueve el acceso a los ajustes de Piko a la barra superior en el feed principal</string>
 </resources>

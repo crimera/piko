@@ -116,31 +116,8 @@ public class DMActionBar {
                     } catch (Throwable ignored) {}
                 }, 700);
             }
-
-            boolean togglePreference = Pref.enableGhostModeQuickToggle();
-            boolean hasGhostSection = SettingsStatus.ghostSection();
-            if(togglePreference && hasGhostSection){
-                boolean ghostModeToggle = Pref.getTurnOnAllGhostModes();
-
-                String iconStr = ghostModeToggle ? HIDE_ICON_NAME:SHOW_ICON_NAME;
-                ImageView imageView = UI.addImageViewToViewGroup(viewGroup, iconStr, null);
-                imageView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        try {
-                            boolean ghostModeToggle= !Pref.getTurnOnAllGhostModes();
-                            String iconStr = ghostModeToggle ? HIDE_ICON_NAME:SHOW_ICON_NAME;
-                            Pref.setTurnOnAllGhostModes(ghostModeToggle);
-                            UI.setThemedIcon(imageView,iconStr);
-
-                            String toastStr = ghostModeToggle ? str("piko_ghost_modes_on") : str("piko_ghost_modes_default");
-                            Utils.showToastShort(toastStr);
-                        } catch (Exception ex) {
-                            Logger.printException(() -> "ghost icon click failed: ", ex);
-                        }
-                    }
-                });
-            }
+            // Ghost-mode quick toggle is now provided by upstream's DM action bar system, so it is
+            // no longer added here (doing so would duplicate the button).
 
         } catch (Exception e) {
             Logger.printException(() -> "addActionBarButton failure", e);

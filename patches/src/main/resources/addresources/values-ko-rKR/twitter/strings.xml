@@ -22,13 +22,18 @@
     <string name="piko_pref_download_media_link_handle_always_ask">항상 물어보기</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">미디어 링크 복사하기</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">미디어 링크 공유하기</string>
+    <string name="piko_pref_external_downloader_toggle">외부 다운로더 활성화하기</string>
+    <string name="piko_pref_external_downloader_text">외부 다운로더 앱으로 다운로드하기</string>
+    <string name="piko_pref_external_downloader_package_name">외부 다운로더 앱 패키지명</string>
+    <string name="piko_pref_external_downloader_package_not_set">외부 다운로더 앱 패키지가 설정되지 않았습니다</string>
+    <string name="piko_pref_external_downloader_package_not_found">외부 다운로더 앱 패키지를 찾을 수 없습니다</string>
     <!-- Native -->
     <string name="piko_title_native">기본 기능</string>
     <string name="piko_pref_native_page_desc">이 Piko 기본 기능은 게시물 메뉴에서 사용할 수 있습니다</string>
     <string name="piko_title_native_downloader">기본 다운로더</string>
     <string name="piko_title_native_downloader_toggle">기본 다운로더 활성화하기</string>
     <string name="piko_pref_native_downloader_inline_button">타임라인 게시물에서 다운로드 버튼 표시하기</string>
-    <string name="piko_pref_native_downloader_inline_button_desc">게시물 작업 버튼 바에 즉시 다운로드 버튼을 추가합니다</string>
+    <string name="piko_pref_native_downloader_inline_button_desc">게시물 액션바에 즉시 다운로드 버튼을 추가합니다</string>
     <string name="piko_pref_native_downloader_alert_title">미디어 다운로드</string>
     <string name="piko_pref_native_downloader_download_all">모두 다운로드</string>
     <string name="piko_pref_native_downloader_no_media">미디어를 찾을 수 없습니다</string>
@@ -44,6 +49,9 @@
     <string name="piko_share_image_view_not_found">\'트윗 보기\'를 찾을 수 없습니다</string>
     <string name="piko_share_image_capture_failed">이미지를 캡쳐할 수 없습니다</string>
     <string name="piko_share_image_error">오류: %s</string>
+    <string name="piko_share_image_app_error">\'%s\'를 찾을 수 없습니다</string>
+    <string name="piko_share_image_instagram_stories">Instagram 스토리에 공유하기</string>
+    <string name="piko_share_image_whatsapp_status">WhatsApp 상태에 공유하기</string>
     <string name="piko_title_native_translator">기본 게시물 번역기</string>
     <string name="piko_native_translator_toggle">기본 게시물 번역기 활성화하기</string>
     <string name="piko_native_translator_provider">번역기 제공자</string>
@@ -66,6 +74,8 @@
     <string name="piko_native_reader_mode_cache_delete">읽기 모드 캐시 삭제하기</string>
     <string name="piko_native_reader_mode_cache_delete_success">캐시를 성공적으로 삭제하였습니다</string>
     <string name="piko_native_reader_mode_cache_delete_failed">캐시를 삭제할 수 없습니다</string>
+    <string name="piko_title_native_share_menu">기본 공유 메뉴</string>
+    <string name="piko_native_share_menu_toggle">기본 공유 메뉴 활성화하기</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">광고</string>
     <string name="piko_pref_hide_promoted_posts">광고 게시물 숨기기</string>
@@ -74,6 +84,7 @@
     <string name="piko_pref_ctj_section">\'새 커뮤니티 찾기\' 영역 숨기기</string>
     <string name="piko_pref_ryb_section">\'북마크 다시 방문\' 영역 숨기기</string>
     <string name="piko_pref_pinned_posts_section">\'팔로우가 고정한 게시물\' 영역 숨기기</string>
+    <string name="piko_pref_hide_unrelated_replies">관련 없는 답글 숨기기</string>
     <string name="piko_pref_hide_premium_prompt">메시지 프롬프트 숨기기</string>
     <string name="piko_pref_hide_todays_news">Today\'s News 숨기기</string>
     <string name="piko_pref_del_from_db">데이터베이스에서 엔트리 삭제하기</string>
@@ -83,6 +94,7 @@
     <string name="piko_pref_db_ctj_section">\'새 커뮤니티 찾기\' 영역</string>
     <string name="piko_pref_db_ryb_section">\'북마크 다시 방문\' 영역</string>
     <string name="piko_pref_db_pinned_posts_section">\'팔로우가 고정한 게시물\' 영역</string>
+    <string name="piko_pref_db_unrelated_replies">관련 없는 답글</string>
     <string name="piko_pref_db_premium_prompt">메시지 프롬프트</string>
     <string name="piko_pref_db_todays_news">Today\'s News</string>
     <string name="piko_pref_db_not_found">데이터베이스를 찾을 수 없습니다</string>
@@ -95,8 +107,8 @@
     <!-- Misc Settings -->
     <string name="piko_title_misc">기타</string>
     <string name="piko_pref_chirp_font">짹짹이 폰트 비활성화하기</string>
-    <string name="piko_pref_hide_fab">플로팅 작업 버튼 숨기기</string>
-    <string name="piko_pref_hide_fab_menu">플로팅 작업 메뉴 버튼 숨기기</string>
+    <string name="piko_pref_hide_fab">플로팅 액션 버튼 숨기기</string>
+    <string name="piko_pref_hide_fab_menu">플로팅 액션 메뉴 버튼 숨기기</string>
     <string name="piko_pref_rec_users">팔로우 추천 숨기기</string>
     <string name="piko_pref_hide_view_count">조회수 숨기기</string>
     <string name="piko_pref_custom_share_domain">사용자 정의 도메인</string>
@@ -182,6 +194,9 @@
     <string name="piko_pref_customisation_search_type_ahead">숨겨질 검색어 추천</string>
     <string name="piko_pref_customisation_change_app_icon">앱 아이콘 변경하기</string>
     <string name="piko_notifications_tab_priority">우선순위</string>
+    <string name="piko_pref_customisation_more_info_on_profile">프로필 정보 더보기</string>
+    <string name="piko_pref_customisation_more_info_on_profile_desc">프로필 페이지에 더 자세한 정보를 추가합니다</string>
+    <string name="piko_fast_follower">빠른 팔로워</string>
     <!-- Font Settings -->
     <string name="piko_title_font">폰트 스타일</string>
     <string name="piko_pref_add_font">폰트 추가하기</string>
@@ -345,24 +360,24 @@
     <string name="piko_app_icon_name_tropical_teal">트로피컬 틸</string>
     <string name="piko_app_icon_name_vivid_orange">비비드 오렌지</string>
     <!-- Import / export login tokens -->
-    <string name="piko_login_token_export_screen_description">"현재 로그인된 계정의 세션 토큰을 내보내는 기능입니다.
-이 토큰은 로그인 화면 또는 “계정 만들기” 화면에서 가져올 수 있습니다.
+    <string name="piko_login_token_export_screen_description">"이 기능은 현재 로그인된 계정의 세션 토큰을 내보냅니다
 
-경고: 내보낸 토큰은 매우 민감한 정보입니다.
-절대로 다른 사람과 공유하지 마세요!
-누군가 이 토큰을 가지게 되면, 해당 세션에서 로그아웃하기 전까지 자유롭게 계정에 접근할 수 있습니다.
+경고: 내보낸 토큰은 매우 중요한 비밀 정보입니다. 절대로 다른 사람과 공유하지 마세요! 이 토큰을 가진 사람 은 해당 세션에서 로그아웃할 때까지 계정에 자유롭게 접근할 수 있습니다
 
-자세한 내용은 아래 페이지를 참고하세요:
-https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md⁠
-이 기능을 사용하기 전에 반드시 읽는 것을 권장합니다. 중요한 주의사항이 포함되어 있습니다."</string>
+자세한 내용은 아래 문서를 참고하세요
+
+https://github.com/crimera/piko/blob/dev/docs /about_login_token_patch.md
+
+이 기능을 사용하기 전에 반드시 읽어보는 것을 권장합니다. 토큰을 가져오는 방법 등 중요한 정보가 포함되어 있습니다"</string>
     <string name="piko_login_token_select_account">계정 선택:</string>
     <string name="piko_login_token_export_copy_to_clipboard">클립보드에 복사</string>
     <string name="piko_login_token_export_save_to_file">파일에 저장</string>
+    <string name="piko_login_token_export_no_accounts_message">알림: 로그인된 계정이 없습니다. 토큰을 내보내려면 먼저 계정에 로그인하세요</string>
     <string name="piko_login_token_import_token_button_text">토큰 JSON으로 로그인</string>
     <string name="piko_login_token_import_from_text">텍스트에서 가져오기</string>
     <string name="piko_login_token_import_from_file">파일에서 가져오기</string>
     <string name="piko_login_token_import_about">이 기능에 대한 정보 (웹사이트 열기)</string>
-    <string name="piko_login_token_import_success_reopen_required">앱을 종료하고 다시 실행하세요</string>
-    <string name="piko_login_token_import_failed_missing_info">오류: 사용자 이름, 토큰 또는 비밀 키가 누락되어 있습니다</string>
+    <string name="piko_login_token_import_success_reopen_required">앱 다시 실행</string>
+    <string name="piko_login_token_import_failed_missing_info">오류: \'username\', \'token\'\' 또는 \'secret\'이 누락되었습니다</string>
     <string name="piko_login_token_import_failed_already_exist">계정을 추가할 수 없습니다 (이미 존재할 수 있습니다)</string>
 </resources>

@@ -22,6 +22,11 @@
     <string name="piko_pref_download_media_link_handle_always_ask">Selalu tanyakan</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Salin tautan media</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Bagikan tautan media</string>
+    <string name="piko_pref_external_downloader_toggle">Aktifkan pengunduh eksternal</string>
+    <string name="piko_pref_external_downloader_text">Unduh menggunakan pengunduh eksternal</string>
+    <string name="piko_pref_external_downloader_package_name">Nama paket pengunduh eksternal</string>
+    <string name="piko_pref_external_downloader_package_not_set">Paket pengunduh eksternal belum diatur</string>
+    <string name="piko_pref_external_downloader_package_not_found">Paket pengunduh eksternal tidak ditemukan</string>
     <!-- Native -->
     <string name="piko_title_native">Fitur bawaan</string>
     <string name="piko_pref_native_page_desc">Fitur bawaan Piko ini tersedia di menu postingan.</string>
@@ -44,9 +49,12 @@
     <string name="piko_share_image_view_not_found">Tampilan cuitan tidak ditemukan</string>
     <string name="piko_share_image_capture_failed">Gagal mengambil gambar</string>
     <string name="piko_share_image_error">Kesalahan: %s</string>
+    <string name="piko_share_image_app_error">%s tidak ditemukan</string>
+    <string name="piko_share_image_instagram_stories">Bagikan ke cerita Instagram</string>
+    <string name="piko_share_image_whatsapp_status">Bagikan ke status WhatsApp</string>
     <string name="piko_title_native_translator">Terjemahan postingan bawaan</string>
     <string name="piko_native_translator_toggle">Aktifkan terjemahan posting bawaan</string>
-    <string name="piko_native_translator_provider">Penyedia Terjemahan</string>
+    <string name="piko_native_translator_provider">Penyedia terjemahan</string>
     <string name="piko_native_translator_to_lang">Terjemahkan ke</string>
     <string name="piko_native_translator_zero_text">Tidak ditemukan teks untuk diterjemahkan</string>
     <string name="piko_native_translator_google">Penerjemah Google</string>
@@ -54,7 +62,7 @@
     <string name="piko_native_translator_fxtwitter">API FxTwitter</string>
     <string name="piko_title_native_reader_mode">Mode baca</string>
     <string name="piko_native_reader_mode_toggle">Aktifkan mode pembaca</string>
-    <string name="piko_native_reader_mode_grok_thread">Analisa thread ini</string>
+    <string name="piko_native_reader_mode_grok_thread">Analisa utas ini</string>
     <string name="piko_native_reader_mode_grok_author">Selengkapnya tentang pembuat</string>
     <string name="piko_native_reader_mode_source">Sumber</string>
     <string name="piko_native_reader_mode_published">Dipublikasikan</string>
@@ -66,6 +74,8 @@
     <string name="piko_native_reader_mode_cache_delete">Hapus cache mode baca</string>
     <string name="piko_native_reader_mode_cache_delete_success">Cache berhasil dihapus</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Penghapusan cache gagal</string>
+    <string name="piko_title_native_share_menu">Menu berbagi bawaan</string>
+    <string name="piko_native_share_menu_toggle">Aktifkan menu berbagi bawaan</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Iklan</string>
     <string name="piko_pref_hide_promoted_posts">Sembunyikan postingan yang dipromosikan</string>
@@ -74,6 +84,7 @@
     <string name="piko_pref_ctj_section">Sembunyikan bagian \"Komunitas yang bisa diikuti\"</string>
     <string name="piko_pref_ryb_section">Sembunyikan bagian \"Kunjungi kembali markah Anda\"</string>
     <string name="piko_pref_pinned_posts_section">Sembunyikan bagian \"Postingan yang disematkan oleh pengikut\"</string>
+    <string name="piko_pref_hide_unrelated_replies">Sembunyikan balasan yang tidak relevan</string>
     <string name="piko_pref_hide_premium_prompt">Sembunyikan munculan pesan</string>
     <string name="piko_pref_hide_todays_news">Sembunyikan berita hari ini</string>
     <string name="piko_pref_del_from_db">Hapus entri dari basis data</string>
@@ -83,6 +94,7 @@
     <string name="piko_pref_db_ctj_section">Bagian \"Komunitas yang bisa diikuti\"</string>
     <string name="piko_pref_db_ryb_section">Bagian \"Kunjungi kembali markah Anda\"</string>
     <string name="piko_pref_db_pinned_posts_section">Bagian \"Postingan yang disematkan oleh pengikut\"</string>
+    <string name="piko_pref_db_unrelated_replies">Balasan yang tidak relevan</string>
     <string name="piko_pref_db_premium_prompt">Munculan pesan</string>
     <string name="piko_pref_db_todays_news">Berita hari ini</string>
     <string name="piko_pref_db_not_found">Basis data tidak ditemukan</string>
@@ -182,6 +194,9 @@
     <string name="piko_pref_customisation_search_type_ahead">Saran pencarian untuk disembunyikan</string>
     <string name="piko_pref_customisation_change_app_icon">Ubah ikon aplikasi</string>
     <string name="piko_notifications_tab_priority">Prioritas</string>
+    <string name="piko_pref_customisation_more_info_on_profile">Informasi selengkapnya pada profil</string>
+    <string name="piko_pref_customisation_more_info_on_profile_desc">Menambahkan detail selengkapnya di halaman profil</string>
+    <string name="piko_fast_follower">Pengikut cepat</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Gaya font</string>
     <string name="piko_pref_add_font">Tambahkan font</string>
@@ -346,23 +361,23 @@
     <string name="piko_app_icon_name_vivid_orange">Oranye Cerah</string>
     <!-- Import / export login tokens -->
     <string name="piko_login_token_export_screen_description">"Fitur ini mengekspor token sesi untuk akun yang sedang masuk.
-Anda dapat mengimpornya dari layar masuk atau layar \"Buat akun baru\".
 
 PERINGATAN: Token yang diekspor merupakan informasi yang sangat rahasia.
 Jangan pernah membagikannya kepada siapa pun!
-Jika seseorang memiliki token ini, mereka dapat mengakses akun Anda dengan bebas hingga Anda keluar dari sesi tersebut.
+Jika seseorang memiliki token ini, mereka dapat mengakses akun Anda sesuka hati hingga Anda keluar dari sesi tersebut.
 
-Untuk detail lebih lanjut, silakan lihat halaman ini.
+Untuk detail selengkapnya, silakan lihat halaman ini.
 https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
-Disarankan untuk membaca halaman ini sebelum menggunakan fitur ini. Halaman tersebut berisi beberapa catatan penting."</string>
+Disarankan untuk membaca halaman ini sebelum menggunakan fitur ini. Halaman tersebut berisi beberapa informasi penting, seperti cara mengimpor token."</string>
     <string name="piko_login_token_select_account">Pilih akun:</string>
     <string name="piko_login_token_export_copy_to_clipboard">Salin ke papan klip</string>
     <string name="piko_login_token_export_save_to_file">Simpan ke berkas</string>
+    <string name="piko_login_token_export_no_accounts_message">Info: Anda belum masuk ke akun mana pun. Untuk mengekspor token, silakan masuk ke akun terlebih dahulu.</string>
     <string name="piko_login_token_import_token_button_text">Masuk melalui token json</string>
     <string name="piko_login_token_import_from_text">Impor dari teks</string>
     <string name="piko_login_token_import_from_file">Impor dari berkas</string>
     <string name="piko_login_token_import_about">Tentang fitur ini (Buka Situs Web)</string>
-    <string name="piko_login_token_import_success_reopen_required">Mohon keluar aplikasi dan buka lagi</string>
-    <string name="piko_login_token_import_failed_missing_info">Kesalahan: Nama pengguna atau token atau rahasia tidak ditemukan</string>
+    <string name="piko_login_token_import_success_reopen_required">Buka kembali aplikasi</string>
+    <string name="piko_login_token_import_failed_missing_info">Kesalahan: \"username\" atau \"token\" atau \"secret\" tidak ditemukan</string>
     <string name="piko_login_token_import_failed_already_exist">Gagal menambahkan akun (mungkin sudah ada)</string>
 </resources>

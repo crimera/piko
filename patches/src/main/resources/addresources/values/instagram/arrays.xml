@@ -72,4 +72,47 @@
         <item>RINGS_LIKE_TYSHAWN</item>
         <item>RINGS_LIKE_ZARNA</item>
     </string-array>
+
+    <string-array name="piko_array_action_bar_main_feed">
+        <item>@string/piko_action_bar_button_settings_icon</item>
+        <item>@string/piko_action_bar_button_ghost_mode_icon</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_main_feed_val">
+        <item>SETTINGS_ICON</item>
+        <item>GHOST_MODE_ICON</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_user_profile">
+        <item>@string/piko_action_bar_button_settings_icon</item>
+        <item>@string/piko_action_bar_button_profile_info_icon</item>
+        <item>@string/piko_action_bar_button_ghost_mode_icon</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_user_profile_val">
+        <item>SETTINGS_ICON</item>
+        <item>PROFILE_INFO_ICON</item>
+        <item>GHOST_MODE_ICON</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_chat">
+        <item>@string/piko_action_bar_button_settings_icon</item>
+        <item>@string/piko_action_bar_button_ghost_mode_icon</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_chat_val">
+        <item>SETTINGS_ICON</item>
+        <item>GHOST_MODE_ICON</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_inbox">
+        <item>@string/piko_action_bar_button_settings_icon</item>
+        <item>@string/piko_action_bar_button_ghost_mode_icon</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_inbox_val">
+        <item>SETTINGS_ICON</item>
+        <item>GHOST_MODE_ICON</item>
+    </string-array>
+
 </resources>

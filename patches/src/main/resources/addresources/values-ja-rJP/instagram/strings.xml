@@ -61,7 +61,7 @@
     <string name="piko_disable_double_tap_like_reel">リールをダブルタップして「いいね！」を無効化</string>
     <string name="piko_disable_double_tap_like_comment">コメントをダブルタップして「いいね！」を無効化</string>
     <string name="piko_disable_double_tap_like_message">メッセージをダブルタップして「いいね！」を無効化</string>
-    <string name="piko_disable_double_tap_to_like">ダブルタップして「いいね！」を無効化</string>
+    <string name="piko_disable_double_tap_to_like">ダブルタップでの「いいね！」を無効化</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">その他</string>
     <string name="piko_disable_analytics">分析データの送信を無効化</string>
@@ -70,9 +70,12 @@
     <string name="piko_disable_discover_people">おすすめのユーザーを無効化</string>
     <string name="piko_disable_discover_people_desc">プロフィール内の「おすすめのユーザー」欄を非表示にします</string>
     <string name="piko_follow_back_indicator">フレンドの状態表示を有効化</string>
-    <string name="piko_follow_back_indicator_desc">プロフィールページに「フォローされています」ステータスを追加し、クリックすると詳細なフォロー関係を表示します</string>
+    <string name="piko_follow_back_indicator_desc">プロフィールページに「フォローされています」ステータスを追加し、タップすると詳細なフォロー関係を表示します</string>
+    <string name="piko_fbi_color_indicator">色付きのフレンドの状態表示を有効化</string>
+    <string name="piko_fbi_color_indicator_desc">色付きのフレンドの状態表示を有効にしてください</string>
     <string name="piko_fbi_follows_you">フォローされています</string>
     <string name="piko_fbi_doesnt_follows_you">フォローされていません</string>
+    <string name="piko_fbi_following_each_other">相互フォロー</string>
     <string name="piko_friendship_status">フレンドの状態</string>
     <string name="piko_view_story_mentions">ストーリーのメンションを表示</string>
     <string name="piko_vsm_title">メンションされたアカウント</string>
@@ -101,8 +104,6 @@
     <string name="piko_download_profile_picture">プロフィール画像をダウンロード</string>
     <string name="piko_copied">コピーしました</string>
     <string name="piko_more_profile_options">プロフィールのオプション</string>
-    <string name="piko_more_profile_options_action_bar_toggle">プロフィールオプションをアクションバーに表示</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">プロフィールオプションボタンをプロフィール画面上部のアクションバーに移動します</string>
     <string name="piko_remove_empty_bottom_space">ナビゲーションバー下の空白を削除</string>
     <string name="piko_unlock_plus_benefits">Plus特典を有効化</string>
     <string name="piko_unlock_plus_benefits_desc">ローカルで判定される「Plus」サブスクリプション特典を有効化します。自己責任で使用してください</string>
@@ -193,11 +194,20 @@
     <string name="piko_array_time_left">残り時間(時/分/秒)</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Pikoへようこそ</string>
-    <string name="piko_welcome_message">Pikoをより快適に利用するため、Piko設定でお好みに合わせて設定してください</string>
+    <string name="piko_welcome_message">Pikoをより快適に利用するために、Piko設定でお好みに合わせて設定してください</string>
     <string name="piko_goto_piko_settings">Piko設定へ移動</string>
     <string name="piko_no_internet">インターネットに接続してください</string>
     <string name="piko_tap_here">ここをタップ！！</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">アクションバーをカスタマイズ</string>
+    <string name="piko_action_bar_main_feed">[ホーム] タブに表示するアクション</string>
+    <string name="piko_action_bar_user_profile">[プロフィール] タブに表示するアクション</string>
+    <string name="piko_action_bar_chat">チャットに表示するアクション</string>
+    <string name="piko_action_bar_chat_desc">DMに表示するアクションを設定します</string>
+    <string name="piko_action_bar_inbox">メッセージタブに表示するアクション</string>
+    <string name="piko_action_bar_button_settings_icon">設定</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">匿名モード</string>
+    <string name="piko_action_bar_button_profile_info_icon">プロフィール情報</string>
     <string name="piko_settings_on_action_bar">Piko設定をアクションバーに表示</string>
     <string name="piko_settings_on_action_bar_desc">Piko設定をメインフィード上部のアクションバーに移動します</string>
 </resources>

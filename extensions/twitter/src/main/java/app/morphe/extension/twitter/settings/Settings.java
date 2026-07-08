@@ -104,6 +104,7 @@ public class Settings {
     public static final StringSetting REPLY_SORTING_LAST_FILTER = new StringSetting("reply_sorting_last_filter", "Relevance");
     public static final StringSetting CUSTOM_SEARCH_TYPE_AHEAD = new StringSetting("customisation_search_type_ahead", "");
     public static final StringSetting CUSTOM_POST_FONT_SIZE = new StringSetting("customisation_post_font_size", String.valueOf(ResourceUtils.getDimension("font_size_normal")));
+    public static final BooleanSetting MORE_INFO_ON_PROFILE = new BooleanSetting("more_info_on_profile", true);
 
     public static final StringSetting LAST_CHANGELOG_VERSION = new StringSetting("last_changelog_version", "0");
     public static final StringSetting LAST_CHANGELOG = new StringSetting("last_changelog", "0");

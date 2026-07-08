@@ -4,61 +4,66 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
 */
 
-
 package app.morphe.extension.instagram.patches.story;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import java.util.HashSet;
+import java.util.ArrayList;
 import android.app.Dialog;
 import android.content.Context;
+import android.view.View;
 
-import app.morphe.extension.crimera.PikoUtils;
-import app.morphe.extension.shared.Logger;
-import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.MediaData;
 
+import app.morphe.extension.shared.Logger;
+import app.morphe.extension.crimera.PikoUtils;
+
+import com.instagram.igds.components.peoplecell.IgdsPeopleCell;
+import com.instagram.common.typedurl.ImageUrl;
 
 public class ViewStoryMentionsPatch {
 
-    public static void viewMentions(Context ctx, Object mediaObject){
+    public static void viewMentions(Context context, Object mediaObject){
         try {
             HashSet<UserData> mentionSet = new MediaData(mediaObject).getMentionSet();
-            showCopyDialog(ctx,mentionSet);
+
+            ArrayList<IgdsPeopleCell> peopleCells = new ArrayList<>();
+            if(mentionSet!=null) {
+                mentionSet.forEach(userData -> {
+                    try {
+                        String fullName = userData.getFullName();
+                        String username = userData.getUsername();
+                        ImageUrl lowResDP = userData.getLowResProfilePicture();
+                        boolean isVerified = userData.isVerified();
+
+                        IgdsPeopleCell cell = new IgdsPeopleCell(context);
+
+                        cell.A0A(fullName, isVerified);
+                        cell.A08(username);
+                        cell.A06(lowResDP, null);
+
+                        cell.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                PikoUtils.openUrl("instagram://user?username=" + username, true);
+                            }
+                        });
+
+                        peopleCells.add(cell);
+                    } catch (Exception ex){
+                            Logger.printException(() -> "Failed story mention user extraction", ex);
+                            PikoUtils.logger(ex);
+                    }
+                });
+            }
+            PeopleCellDialogBox.showPeopleDialog(context, peopleCells);
+
         } catch (Exception ex){
             Logger.printException(() -> "Failed viewMentions", ex);
+            PikoUtils.logger(ex);
         }
     }
 
-    private static void showCopyDialog(final Context context,HashSet<UserData> mentionSet) {
-        InstagramDialogBox dialog = new InstagramDialogBox(context);
-
-        if(mentionSet!=null) {
-            final Object[] snapshot = mentionSet.toArray();
-
-            // Build dialog items from toString()
-            CharSequence[] items = new CharSequence[snapshot.length];
-
-            for (int i = 0; i < snapshot.length; i++) {
-                UserData userData = (UserData) snapshot[i];
-                items[i] = userData.getFullname()+" ( @"+userData.getUsername()+")";
-            }
-
-            dialog.addDialogMenuItems(items, (d, which) -> {
-                UserData userData = (UserData) snapshot[which];
-                String username = userData.getUsername();
-                PikoUtils.openUrl("instagram://user?username="+username);
-            });
-        }else{
-            dialog.setMessage(str("piko_vsm_no_mentions"));
-        }
-
-        dialog.setTitle(str("piko_vsm_title"));
-        dialog.setCancelable(true);
-        dialog.setCanceledOnTouchOutside(true);
-
-        Dialog dlg = dialog.getDialog();
-        dlg.show();
-    }
 }

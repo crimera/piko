@@ -71,8 +71,11 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_disable_discover_people_desc">Kullanıcı profilindeki Kişileri keşfet bölümünü devre dışı bırak</string>
     <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>
     <string name="piko_follow_back_indicator_desc">Profil sayfasına \"geri takip ediyor\" durum etiketi ekler ve tıklandığında ayrıntılı arkadaşlık durumunu gösterir</string>
+    <string name="piko_fbi_color_indicator">Renkli arkadaşlık durumu göstergesini etkinleştir</string>
+    <string name="piko_fbi_color_indicator_desc">Arkadaşlık durumu göstergesinin etkinleştirilmesi gerekiyor</string>
     <string name="piko_fbi_follows_you">Seni takip ediyor</string>
     <string name="piko_fbi_doesnt_follows_you">Seni takip etmiyor</string>
+    <string name="piko_fbi_following_each_other">Karşılıklı takip</string>
     <string name="piko_friendship_status">Arkadaşlık durumu</string>
     <string name="piko_view_story_mentions">Hikaye bahsetmelerini görüntüle</string>
     <string name="piko_vsm_title">Hikaye bahsetmeleri</string>
@@ -101,8 +104,6 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_download_profile_picture">Profil resmini indir</string>
     <string name="piko_copied">Kopyalandı</string>
     <string name="piko_more_profile_options">Daha fazla profil seçeneği</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Profil seçenekleri eylem çubuğunda</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Profil seçenekleri butonunu profil eylem çubuğuna taşı</string>
     <string name="piko_remove_empty_bottom_space">Alttaki boş alanı kaldır</string>
     <string name="piko_unlock_plus_benefits">Plus abonelik avantajlarının kilidini aç</string>
     <string name="piko_unlock_plus_benefits_desc">Yerel olarak kontrol edilen “Plus” abonelik avantajlarının kilidini açar. ∆ Kendi sorumluluğunuzda kullanın</string>
@@ -198,6 +199,15 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_no_internet">Lütfen internete bağlanın</string>
     <string name="piko_tap_here">Buraya dokunun !!</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Eylem çubuğu özelleştirmeleri</string>
+    <string name="piko_action_bar_main_feed">Ana akış eylem çubuğu simgeleri</string>
+    <string name="piko_action_bar_user_profile">Profil sayfası eylem çubuğu simgeleri</string>
+    <string name="piko_action_bar_chat">Sohbet eylem çubuğu simgeleri</string>
+    <string name="piko_action_bar_chat_desc">Mesajlar içi eylem çubuğu simgeleri</string>
+    <string name="piko_action_bar_inbox">Gelen kutusu eylem çubuğu simgeleri</string>
+    <string name="piko_action_bar_button_settings_icon">Ayarlar simgesi</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Görünmez mod simgesi</string>
+    <string name="piko_action_bar_button_profile_info_icon">Profil bilgisi simgesi</string>
     <string name="piko_settings_on_action_bar">Piko ayarları eylem çubuğunda</string>
     <string name="piko_settings_on_action_bar_desc">Piko ayarları butonunu ana akış eylem çubuğuna taşı</string>
 </resources>

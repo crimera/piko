@@ -6,8 +6,8 @@
 
 package app.crimera.patches.instagram.misc.actionBar.dmActionBarButton
 
-import app.crimera.patches.instagram.utils.Constants.ACTIONBAR_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -47,7 +47,7 @@ val dmActionBarButtonPatch =
                         addInstruction(
                             fistMoveResultObjectAfterLayoutIndex + 1,
                             """
-                            invoke-static {v$viewGroupRegister}, $ACTIONBAR_DESCRIPTOR/DMActionBar;->addActionBarButton(Landroid/view/ViewGroup;)V
+                            invoke-static {v$viewGroupRegister}, $PATCHES_DESCRIPTOR/actionbar/DMActionBar;->addActionBarButton(Landroid/view/ViewGroup;)V
                             """.trimIndent(),
                         )
                     }

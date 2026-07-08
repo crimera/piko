@@ -101,8 +101,6 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_download_profile_picture">Unduh foto profil</string>
     <string name="piko_copied">Disalin</string>
     <string name="piko_more_profile_options">Pilihan profil lainnya</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Pilihan profil di bilah tindakan</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Pindahkan tombol pilihan profil ke bilah tindakan profil</string>
     <string name="piko_remove_empty_bottom_space">Hapus ruang kosong di bagian bawah</string>
     <string name="piko_unlock_plus_benefits">Buka keuntungan Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Buka keuntungan langganan \'Plus\' yang diperiksa secara lokal. GUNAKAN DENGAN RISIKO ANDA SENDIRI</string>
@@ -198,6 +196,15 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_no_internet">Silakan sambungkan ke internet</string>
     <string name="piko_tap_here">Ketuk di sini !!</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Kustomisasi bilah tindakan</string>
+    <string name="piko_action_bar_main_feed">Ikon bilah tindakan di feed utama</string>
+    <string name="piko_action_bar_user_profile">Ikon bilah tindakan profil pengguna</string>
+    <string name="piko_action_bar_chat">Ikon bilah tindakan obrolan</string>
+    <string name="piko_action_bar_chat_desc">Ikon bilah tindakan di dalam DM</string>
+    <string name="piko_action_bar_inbox">Ikon bilah tindakan kotak masuk</string>
+    <string name="piko_action_bar_button_settings_icon">Ikon pengaturan</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Ikon mode hantu</string>
+    <string name="piko_action_bar_button_profile_info_icon">Ikon info profil</string>
     <string name="piko_settings_on_action_bar">Pengaturan Piko di bilah tindakan</string>
     <string name="piko_settings_on_action_bar_desc">Pindahkan titik masuk pengaturan Piko ke bilah tindakan feed utama</string>
 </resources>

@@ -70,9 +70,11 @@ public class PikoUtils {
         launchIntent(sendIntent);
     }
 
-    public static void openUrl(String url) {
+    public static void openUrl(String url, boolean currentPackageName) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        intent.setPackage(ctx.getPackageName());
+        if(currentPackageName){
+             intent.setPackage(ctx.getPackageName());
+        }
         launchIntent(intent);
 
     }

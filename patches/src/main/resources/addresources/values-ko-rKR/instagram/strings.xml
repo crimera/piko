@@ -39,7 +39,7 @@
     <string name="piko_ghost_modes_on">고스트 모드: 켜짐</string>
     <string name="piko_ghost_modes_default">고스트 모드: 기본값</string>
     <string name="piko_ghost_modes_quick_toggle">고스트 모드에 대한 빠른 토글 활성화</string>
-    <string name="piko_ghost_modes_quick_toggle_desc">고스트 모드를 제어할 수 있는 빠른 토글 버튼을 채팅 작업 버튼바에 추가합니다</string>
+    <string name="piko_ghost_modes_quick_toggle_desc">고스트 모드를 제어할 수 있는 빠른 토글 버튼을 채팅 액션바에 추가합니다</string>
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">방해 요소 제거</string>
     <string name="piko_disable_stories">스토리 비활성화</string>
@@ -71,8 +71,11 @@
     <string name="piko_disable_discover_people_desc">프로필에서 사람 찾아보기 섹션을 비활성화합니다</string>
     <string name="piko_follow_back_indicator">관계 상태 표시기 활성화</string>
     <string name="piko_follow_back_indicator_desc">프로필 페이지에 맞팔 상태를 표시하는 라벨을 추가하고, 그 라벨을 탭하는 경우에 상세한 관계 상태 분석을 표시합니다</string>
+    <string name="piko_fbi_color_indicator">색상이 있는 관계 상태 표시기 활성화</string>
+    <string name="piko_fbi_color_indicator_desc">관계 상태 표시기를 활성화해야 합니다</string>
     <string name="piko_fbi_follows_you">나를 팔로우하고 있음</string>
     <string name="piko_fbi_doesnt_follows_you">나를 팔로우하지 않음</string>
+    <string name="piko_fbi_following_each_other">서로 팔로우하고 있음</string>
     <string name="piko_friendship_status">관계 상태</string>
     <string name="piko_view_story_mentions">스토리 멘션 보기</string>
     <string name="piko_vsm_title">스토리 멘션</string>
@@ -101,8 +104,6 @@
     <string name="piko_download_profile_picture">프로필 사진 다운로드</string>
     <string name="piko_copied">복사하였습니다</string>
     <string name="piko_more_profile_options">프로필 옵션 더보기</string>
-    <string name="piko_more_profile_options_action_bar_toggle">프로필 옵션을 작업 버튼바로 이동</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">프로필 옵션 버튼을 프로필 작업 버튼바로 이동합니다</string>
     <string name="piko_remove_empty_bottom_space">하단 빈 공간 제거</string>
     <string name="piko_unlock_plus_benefits">플러스 혜택 해제</string>
     <string name="piko_unlock_plus_benefits_desc">로컬에서 확인되는 \'Plus\' 구독 혜택을 활성화합니다. 사용 시 발생하는 모든 위험은 사용자 본인이 감수해야 합니다</string>
@@ -198,6 +199,15 @@
     <string name="piko_no_internet">인터넷에 연결해 주세요</string>
     <string name="piko_tap_here">여기를 탭하세요 !!</string>
     <!-- Action Bar Section -->
-    <string name="piko_settings_on_action_bar">Piko 설정을 작업 버튼바로 이동</string>
-    <string name="piko_settings_on_action_bar_desc">Piko 설정 버튼을 메인 피드 작업 버튼바로 이동합니다</string>
+    <string name="piko_category_action_bar">액션바 사용자정의</string>
+    <string name="piko_action_bar_main_feed">메인 피드 액션바 아이콘</string>
+    <string name="piko_action_bar_user_profile">사용자 프로필 액션바 아이콘</string>
+    <string name="piko_action_bar_chat">채팅 액션바 아이콘</string>
+    <string name="piko_action_bar_chat_desc">DM 내부 액션바 아이콘</string>
+    <string name="piko_action_bar_inbox">받은 편지함 액션바 아이콘</string>
+    <string name="piko_action_bar_button_settings_icon">설정 아이콘</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">고스트 모드 아이콘</string>
+    <string name="piko_action_bar_button_profile_info_icon">프로필 정보 아이콘</string>
+    <string name="piko_settings_on_action_bar">Piko 설정을 액션바로 이동</string>
+    <string name="piko_settings_on_action_bar_desc">Piko 설정 버튼을 메인 피드 액션바로 이동합니다</string>
 </resources>

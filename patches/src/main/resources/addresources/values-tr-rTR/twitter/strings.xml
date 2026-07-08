@@ -345,16 +345,6 @@
     <string name="piko_app_icon_name_tropical_teal">Tropikal Çamurkuşu</string>
     <string name="piko_app_icon_name_vivid_orange">Canlı Turuncu</string>
     <!-- Import / export login tokens -->
-    <string name="piko_login_token_export_screen_description">"Bu özellik, şu an giriş yapılmış hesap için oturum anahtarlarını dışa aktarır.
-Bunu giriş sayfasından veya \"Yeni hesap oluştur\" sayfasından içe aktarabilirsiniz.
-
-UYARI: Dışa aktarılan anahtarlar son derece gizli bilgilerdir.
-Hiç kimseyle paylaşmayın!
-Eğer birisi bu anahtarı ele geçirirse, siz oturumunuzu kapatana kadar istedikleri gibi hesabınıza erişebilirler.
-
-Daha fazla bilgi için lütfen şu sayfaya bakın.
-https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
-Özelliği kullanmadan önce bunu okumanız önerilir. Bazı önemli notlar içerir."</string>
     <string name="piko_login_token_select_account">Bir hesap seçin:</string>
     <string name="piko_login_token_export_copy_to_clipboard">Panoya kopyala</string>
     <string name="piko_login_token_export_save_to_file">Dosyaya kaydet</string>
@@ -362,7 +352,5 @@ https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
     <string name="piko_login_token_import_from_text">Metinden içe aktar</string>
     <string name="piko_login_token_import_from_file">Dosyadan içe aktar</string>
     <string name="piko_login_token_import_about">Bu özellik hakkında (Websiteyi aç)</string>
-    <string name="piko_login_token_import_success_reopen_required">Lütfen uygulamayı kapatın ve tekrar açın</string>
-    <string name="piko_login_token_import_failed_missing_info">Hata: Kullanıcı adı, belirteç veya gizli anahtar eksik</string>
     <string name="piko_login_token_import_failed_already_exist">Hesap eklenemedi (zaten mevcut olabilir)</string>
 </resources>

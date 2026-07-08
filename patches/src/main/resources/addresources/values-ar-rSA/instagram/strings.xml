@@ -1,19 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Ads Section -->
+    <string name="piko_category_ads">إعلانات</string>
+    <string name="piko_disable_ads">تعطيل الإعلانات</string>
+    <string name="piko_hide_suggested_content">إخفاء المحتويات المقترحة</string>
+    <string name="piko_hide_suggested_content_desc">يخفي القصص، الريلز، ومواضيع ثريدز المقترحة (ستظل المنشورات المقترحة ظاهرة).</string>
     <!-- Developer Options Section -->
+    <string name="piko_category_dev_options">خيارات المطورين</string>
+    <string name="piko_enable_dev_options">تفعيل خيارات المطورين</string>
+    <string name="piko_enable_dev_options_desc">يفتح خِيار المطور بالضغط المطول على أيقونة الصفحة الرئيسة</string>
+    <string name="piko_directly_open_metaconfig">فتح تجاوزات إعدادات MetaConfig مباشرةً</string>
+    <string name="piko_directly_open_metaconfig_desc">يفتح تجاوزات MetaConfig مباشرةً بالضغط المطول على أيقونة الصفحة الرئيسة (يتطلب تفعيل خيارات المطور)</string>
+    <string name="piko_enable_emp_options">تفعيل خيارات الموظفين</string>
+    <string name="piko_enable_emp_options_desc">يفتح جميع خيارات الموظفين المُستخدمة للاختبار</string>
+    <string name="piko_allow_user_network_certificate">السماح بشهادات الشبكة الخاصة بالمستخدم</string>
+    <string name="piko_allow_user_network_certificate_desc">يسمح بشهادات الشبكة الخاصة بالمستخدم لاختبارات الاختراق الأخلاقي Whitehat</string>
     <!-- Links Section -->
+    <string name="piko_category_links">الروابط</string>
     <!-- Ghost Section -->
+    <string name="piko_category_ghost">شبح</string>
+    <string name="piko_view_stories_anonymously">شاهد القصص بشكل مجهول</string>
+    <string name="piko_view_live_anonymously">شاهد العرض الحي بشكل مجهول</string>
+    <string name="piko_disable_typing_status">تعطيل حالة الكتابة</string>
+    <string name="piko_disable_screenshot_detection">تعطيل الكشف عن لقطة الشاشة</string>
+    <string name="piko_ghost_modes_on">وضع الشبح: قيد التشغيل</string>
+    <string name="piko_ghost_modes_default">وضع الشبح: افتراضي</string>
     <!-- Distraction-Free Section -->
+    <string name="piko_disable_explore">تعطيل صفحة الإستكشاف</string>
     <!-- Miscellaneous Section -->
+    <string name="piko_category_misc">اخرى</string>
+    <string name="piko_fbi_follows_you">يتابعك</string>
+    <string name="piko_copy_comment">نسخ التعليق</string>
+    <string name="piko_copy_username">نسخ إسم المستخدم</string>
+    <string name="piko_copy_full_name">نسخ الإسم الكامل</string>
+    <string name="piko_copy_user_id">نسخ معرف المستخدم</string>
+    <string name="piko_copy_bio">نسخ البيانات</string>
+    <string name="piko_copied">تم النسخ</string>
     <!-- Download Media Section -->
+    <string name="piko_category_download_media">تنزيل الوسائط</string>
+    <string name="piko_download_audio">تنزيل الصوت</string>
+    <string name="piko_download_all">تنزيل الكل</string>
+    <string name="piko_downloading_media">جار تنزيل: </string>
+    <string name="piko_downloaded_media">تم التنزيل: </string>
     <!-- Posts Section -->
+    <string name="piko_post_options">خيارات المنشور</string>
+    <string name="piko_more_options">المزيد من الخيارات</string>
     <!-- Navigation Section -->
     <!-- Information Section -->
+    <string name="piko_category_about">حول</string>
+    <string name="piko_patch_enabled">مفعّل</string>
+    <string name="piko_patch_disabled">مُعطّل</string>
     <!-- Export and Import Section -->
+    <string name="piko_fail_no_file">لم يتم العثور على الملف</string>
+    <string name="piko_import_fail">فشل الاستيراد</string>
+    <string name="piko_ok">موافق</string>
+    <string name="piko_cancel">إلغاء</string>
+    <string name="piko_deleted">تم الحذف</string>
     <!-- Open With Section -->
     <!-- Like Animation Section -->
     <!-- For arrays -->
+    <string name="piko_array_default">الافتراضي</string>
     <!-- Welcome Message -->
+    <string name="piko_tap_here">إضغط هنا !!</string>
     <!-- Action Bar Section -->
+    <string name="piko_action_bar_button_settings_icon">أيقونة الإعدادات</string>
 </resources>

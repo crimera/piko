@@ -20,6 +20,7 @@ import android.util.AttributeSet;
 
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.twitter.Utils;
 import app.morphe.extension.twitter.patches.DatabasePatch;
 import app.morphe.extension.twitter.patches.customise.appIcon.IconSelectorFragment;
@@ -117,7 +118,7 @@ public class ButtonPref extends Preference {
                     } else if (key.equals(Settings.PREMIUM_UNDO_POSTS.key)) {
                         Utils.startUndoPostActivity();
                     }  else if (key.equals(Settings.PREMIUM_NAVBAR.key)) {
-                        app.morphe.extension.crimera.PikoUtils.openUrl("https://www.x.com/settings/custom_navigation");
+                        PikoUtils.openUrl("https://www.x.com/settings/custom_navigation",true);
                     } else if (key.equals(Settings.RESET_PREF)) {
                         Utils.deleteSharedPrefAB(context, false);
                     } else if (key.equals(Settings.RESET_FLAGS)) {

@@ -15,11 +15,13 @@ import android.util.Log;
 
 import java.io.File;
 
-import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
 
-public class Utils {
+import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.shared.Utils;
+
+public class InstaUtils {
 
     public static boolean deleteRecursive(File file) {
         try {
@@ -44,7 +46,7 @@ public class Utils {
     }
 
     public static void decompileExperiments(boolean asJson) {
-        String appVersionName = app.morphe.extension.shared.Utils.getAppVersionName();
+        String appVersionName = Utils.getAppVersionName();
         DeveloperOptions developerOptions = new DeveloperOptions();
 
         String fileName = appVersionName + " Experiments";
@@ -62,5 +64,14 @@ public class Utils {
         fileDone = PikoUtils.pikoWriteFile(fileName, Constants.DEFAULT_PIKO_FOLDER, data, false);
         fileDoneTxt = fileDone ? " created" : fileDoneTxt;
         PikoUtils.toast(fileName + fileDoneTxt);
+    }
+
+    public static void deletePref(){
+        if(Pref.clearAllPreferences()){
+            PikoUtils.toast(str("piko_reset_pref_success"));
+            Utils.restartApp(Utils.getContext());
+        }else{
+            PikoUtils.toast(str("piko_reset_pref_failed"));
+        }
     }
 }

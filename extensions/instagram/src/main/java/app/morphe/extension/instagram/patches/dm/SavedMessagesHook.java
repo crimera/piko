@@ -62,7 +62,7 @@ public class SavedMessagesHook {
                         String id = ud.getUserId();
                         if (id == null || !id.matches("\\d{6,14}")) continue;
                         String name = ud.getUsername();
-                        if (name == null || name.isEmpty()) name = ud.getFullname();
+                        if (name == null || name.isEmpty()) name = ud.getFullName();
                         if (name != null && !name.isEmpty()) db.putUsername(id, name);
                     } catch (Throwable ignored) {}
                 }
