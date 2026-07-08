@@ -71,4 +71,23 @@ public class SharedPref {
         return SharedPref.getStringPref(setting.key, setting.defaultValue);
     }
 
+    public static java.util.Set<String> getRawStringSetPref(String key) {
+        if (sp != null) {
+            return sp.getSet(key, new java.util.HashSet<>());
+        }
+        return new java.util.HashSet<>();
+    }
+
+    public static Boolean setRawStringSetPref(String key, java.util.Set<String> val) {
+        try {
+            if (sp != null) {
+                sp.saveSet(key, val);
+                return true;
+            }
+        } catch (Exception ex) {
+            Utils.showToastShort(ex.toString());
+        }
+        return false;
+    }
+
 }

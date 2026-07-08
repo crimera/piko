@@ -46,6 +46,10 @@ public class ProfileMoreOption {
             options.add(str("piko_copy_user_id"));
             options.add(str("piko_copy_bio"));
             options.add(str("piko_download_profile_picture"));
+            boolean isAutoDownloadTarget = Pref.isAutoDownloadTarget(userData.getUserId());
+            options.add(isAutoDownloadTarget
+                    ? str("piko_auto_download_stories_disable")
+                    : str("piko_auto_download_stories_enable"));
             if (DEBUG) options.add(str("piko_debug"));
 
             CharSequence[] items = options.toArray(new CharSequence[0]);
@@ -81,6 +85,16 @@ public class ProfileMoreOption {
                             String downloadFilename = username+"_dp.jpg";
                             String subFolder = DownloadUtils.getSubfolderName(username);
                             DownloadUtils.downloadMediaUrl(context, url, subFolder, downloadFilename);
+                            toCopy = false;
+
+                        } else if (selectedOption.equals(str("piko_auto_download_stories_enable"))) {
+                            Pref.addAutoDownloadTarget(userData.getUserId());
+                            Utils.showToastShort(str("piko_auto_download_stories_enabled_toast"));
+                            toCopy = false;
+
+                        } else if (selectedOption.equals(str("piko_auto_download_stories_disable"))) {
+                            Pref.removeAutoDownloadTarget(userData.getUserId());
+                            Utils.showToastShort(str("piko_auto_download_stories_disabled_toast"));
                             toCopy = false;
 
                         } else if (selectedOption.equals(str("piko_debug"))) {

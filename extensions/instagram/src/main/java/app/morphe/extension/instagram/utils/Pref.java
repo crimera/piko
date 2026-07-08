@@ -273,5 +273,24 @@ public class Pref {
         return SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
     }
 
+    // --- Auto-download stories (selective, per story-owner) ---
+    private static final String AUTO_DOWNLOAD_TARGETS_KEY = "piko_auto_download_targets";
+
+    public static boolean isAutoDownloadTarget(String targetUserId) {
+        return SharedPref.getRawStringSetPref(AUTO_DOWNLOAD_TARGETS_KEY).contains(targetUserId);
+    }
+
+    public static boolean addAutoDownloadTarget(String targetUserId) {
+        java.util.Set<String> targets = new java.util.HashSet<>(SharedPref.getRawStringSetPref(AUTO_DOWNLOAD_TARGETS_KEY));
+        targets.add(targetUserId);
+        return SharedPref.setRawStringSetPref(AUTO_DOWNLOAD_TARGETS_KEY, targets);
+    }
+
+    public static boolean removeAutoDownloadTarget(String targetUserId) {
+        java.util.Set<String> targets = new java.util.HashSet<>(SharedPref.getRawStringSetPref(AUTO_DOWNLOAD_TARGETS_KEY));
+        targets.remove(targetUserId);
+        return SharedPref.setRawStringSetPref(AUTO_DOWNLOAD_TARGETS_KEY, targets);
+    }
+
     //end
 }
