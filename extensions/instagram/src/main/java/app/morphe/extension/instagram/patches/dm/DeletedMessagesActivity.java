@@ -27,7 +27,6 @@ import java.util.List;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.db.PikoMessageDb;
-import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Utils;
@@ -139,6 +138,7 @@ public class DeletedMessagesActivity extends Activity {
                 String messageId = m[0];
                 String c = m[3];
                 String t = m[4];
+                android.util.Log.d("piko", "deleted-msg tap type=" + t);
                 if (c != null && c.startsWith("http")) {
                     showMediaOptions(messageId, c, t);
                 } else if (t != null && !"text".equals(t)) {
@@ -186,47 +186,64 @@ public class DeletedMessagesActivity extends Activity {
         return ".jpg";
     }
 
-    /** Offers open/download/copy for a captured media url, reusing the same downloader
-     *  (DownloadUtils) already used for live DM media instead of a raw browser intent. */
+    /** Offers open/download/copy for a captured media url. Uses a plain framework AlertDialog
+     *  (this is our own Activity) instead of IG's obfuscated IGDS dialog, so it needs no patch-time
+     *  name resolution and can never silently fail to show across Instagram versions. */
     private void showMediaOptions(String messageId, String url, String type) {
         try {
-            boolean isAudio = "voice_media".equals(type) || "audio".equals(type)
+            final boolean isAudio = "voice_media".equals(type) || "audio".equals(type)
                     || url.matches("(?i).*\\.(m4a|aac|mp3|ogg)(\\?.*)?$");
-            boolean isVideo = "video".equals(type) || "clip".equals(type) || "xma_clip".equals(type);
+            final boolean isVideo = "video".equals(type) || "clip".equals(type) || "xma_clip".equals(type);
 
-            InstagramDialogBox dialog = new InstagramDialogBox(this);
-            List<String> options = new java.util.ArrayList<>();
-            options.add(str("piko_download_current_media"));
-            options.add(isAudio ? str("piko_open_voice_with_player")
-                    : isVideo ? str("piko_open_video_externally")
-                    : str("piko_open_image_externally"));
-            options.add(str("piko_copy_media_link"));
+            final CharSequence[] options = new CharSequence[] {
+                str("piko_download_current_media"),
+                isAudio ? str("piko_open_voice_with_player")
+                        : isVideo ? str("piko_open_video_externally")
+                        : str("piko_open_image_externally"),
+                str("piko_copy_media_link"),
+            };
 
-            dialog.addDialogMenuItems(options.toArray(new CharSequence[0]), (d, which) -> {
-                try {
-                    String selected = options.get(which);
-                    if (selected.equals(str("piko_download_current_media"))) {
-                        String fileName = "piko_" + messageId + guessExtension(url, type);
-                        DownloadUtils.downloadMediaUrl(this, url, Constants.DEFAULT_DM_FOLDER, fileName);
-                    } else if (selected.equals(str("piko_copy_media_link"))) {
-                        Utils.setClipboard(url);
-                        Utils.showToastShort(str("piko_copied_media_link"));
-                    } else {
-                        android.content.Intent i = new android.content.Intent(android.content.Intent.ACTION_VIEW,
-                                android.net.Uri.parse(url));
-                        if (isAudio) i.setDataAndType(android.net.Uri.parse(url), "audio/*");
-                        startActivity(android.content.Intent.createChooser(i, null));
+            new android.app.AlertDialog.Builder(this)
+                .setTitle(str("piko_download_options"))
+                .setItems(options, (d, which) -> {
+                    try {
+                        if (which == 0) {
+                            String fileName = "piko_" + messageId + guessExtension(url, type);
+                            DownloadUtils.downloadMediaUrl(this, url, Constants.DEFAULT_DM_FOLDER, fileName);
+                        } else if (which == 2) {
+                            Utils.setClipboard(url);
+                            Utils.showToastShort(str("piko_copied_media_link"));
+                        } else {
+                            android.net.Uri uri = android.net.Uri.parse(url);
+                            // Reels/posts are stored as instagram.com permalinks — open them inside
+                            // the Instagram app itself (setPackage) so they render natively; only fall
+                            // back to a browser chooser if IG can't handle the link.
+                            boolean igLink = url.contains("instagram.com/reel/")
+                                    || url.contains("instagram.com/p/")
+                                    || url.contains("instagram.com/tv/");
+                            boolean opened = false;
+                            if (igLink) {
+                                try {
+                                    startActivity(new android.content.Intent(
+                                            android.content.Intent.ACTION_VIEW, uri)
+                                            .setPackage("com.instagram.android"));
+                                    opened = true;
+                                } catch (android.content.ActivityNotFoundException ignored) {}
+                            }
+                            if (!opened) {
+                                android.content.Intent i = new android.content.Intent(
+                                        android.content.Intent.ACTION_VIEW, uri);
+                                if (isAudio) i.setDataAndType(uri, "audio/*");
+                                startActivity(android.content.Intent.createChooser(i, null));
+                            }
+                        }
+                    } catch (Exception e) {
+                        android.util.Log.e("piko", "showMediaOptions action: " + e);
                     }
-                } catch (Exception e) {
-                    PikoUtils.logger(e);
-                }
-            });
-            dialog.setTitle(str("piko_download_options"));
-            dialog.setCancelable(true);
-            dialog.setCanceledOnTouchOutside(true);
-            dialog.getDialog().show();
+                })
+                .show();
         } catch (Exception e) {
-            PikoUtils.logger(e);
+            android.util.Log.e("piko", "showMediaOptions: " + e);
         }
     }
 

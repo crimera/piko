@@ -247,7 +247,8 @@ public class SavedMessagesHook {
             if (type != null) type = type.trim().toLowerCase();
             long   timestamp  = di.getTimestampMs();
 
-            if ("action_log".equals(type) || "expired_placeholder".equals(type)) return;
+            if ("action_log".equals(type) || "expired_placeholder".equals(type)
+                    || "placeholder".equals(type)) return;
 
             // For any non-text item, capture the CDN url so the media stays recoverable later.
             // A caption (non-empty getText() that isn't itself a url) must NOT block this: otherwise
@@ -256,7 +257,7 @@ public class SavedMessagesHook {
             if (type != null && !type.equals("text")
                     && (content == null || content.isEmpty() || !content.startsWith("http"))) {
                 String url = di.getMediaUrl();
-                if (url == null) url = deepFindMediaUrl(item);
+                if (url == null) url = deepFindMediaUrl(item, type);
                 if (url != null) content = url;
             }
 
@@ -477,15 +478,21 @@ public class SavedMessagesHook {
         }
     }
 
-    /** Bounded BFS over the item graph for a media URL (image/video/audio CDN link). Prefers the
-     *  longest match (usually the highest-resolution variant). Returns null if none found. */
-    private static String deepFindMediaUrl(Object root) {
+    /** Bounded BFS over the item graph for the best media URL for this item. Traverses object
+     *  fields AND collection contents (Map values / Iterables) — reshared-post media lives inside
+     *  collections, so a field-only walk misses it. Each candidate url is scored by
+     *  {@link #scoreMediaUrl}: reshares prefer the post permalink, direct media prefers the real
+     *  CDN file; profile-pic avatars are rejected. Highest score wins (longer url breaks ties). */
+    private static String deepFindMediaUrl(Object root, String type) {
+        boolean reshare = type != null && (type.startsWith("xma_") || type.endsWith("_share")
+                || type.equals("clip"));
         try {
             java.util.IdentityHashMap<Object, Boolean> seen = new java.util.IdentityHashMap<>();
             java.util.ArrayDeque<Object> q = new java.util.ArrayDeque<>();
             q.add(root); seen.put(root, Boolean.TRUE);
             String best = null;
-            int budget = 6000;
+            int bestScore = 0;
+            int budget = 8000;
             while (!q.isEmpty() && budget-- > 0) {
                 Object o = q.poll();
                 Class<?> k = o.getClass();
@@ -494,7 +501,7 @@ public class SavedMessagesHook {
                     continue;
                 }
                 String kn = k.getName();
-                if (!(kn.startsWith("X.") || kn.startsWith("com.instagram"))) continue;
+                if (!(kn.startsWith("X.") || kn.startsWith("com.instagram") || kn.startsWith("java.util"))) continue;
                 for (Class<?> cc = k; cc != null && cc != Object.class; cc = cc.getSuperclass()) {
                     for (Field f : cc.getDeclaredFields()) {
                         if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
@@ -504,16 +511,24 @@ public class SavedMessagesHook {
                         if (v == null || seen.put(v, Boolean.TRUE) != null) continue;
                         if (v instanceof String) {
                             String s = (String) v;
-                            boolean looksMedia = s.startsWith("http") && (s.contains("cdninstagram") || s.contains("fbcdn")
-                                    || s.matches("(?i).*\\.(jpg|jpeg|webp|heic|mp4|mov|m4a|aac|gif).*"));
-                            // Exclude the sender's profile picture (IG profile-pic CDN namespace /
-                            // small square thumbnails) so we capture the actual message media.
-                            boolean profilePic = s.contains("t51.2885-19") || s.contains("/profile")
-                                    || s.contains("s150x150") || s.contains("s320x320");
-                            if (looksMedia && !profilePic && (best == null || s.length() > best.length())) best = s;
+                            int sc = scoreMediaUrl(s, reshare);
+                            if (sc > bestScore || (sc == bestScore && sc > 0
+                                    && (best == null || s.length() > best.length()))) {
+                                best = s; bestScore = sc;
+                            }
                             continue;
                         }
                         if (v instanceof CharSequence || v instanceof Number || v instanceof Boolean) continue;
+                        if (v instanceof java.util.Map) {
+                            for (Object mv : ((java.util.Map<?, ?>) v).values())
+                                if (mv != null && seen.put(mv, Boolean.TRUE) == null) q.add(mv);
+                            continue;
+                        }
+                        if (v instanceof Iterable) {
+                            for (Object el : (Iterable<?>) v)
+                                if (el != null && seen.put(el, Boolean.TRUE) == null) q.add(el);
+                            continue;
+                        }
                         q.add(v);
                     }
                 }
@@ -522,6 +537,42 @@ public class SavedMessagesHook {
         } catch (Throwable t) {
             return null;
         }
+    }
+
+    /** Ranks a candidate url for use as a saved-message media link. 0 = unusable (reject). Rejects
+     *  profile-pic avatars outright. For reshared posts (reel/story/post shares) the post permalink
+     *  is preferred so tapping opens the original; for direct media the real CDN file wins. The
+     *  {@code direct_v2/media_fallback} endpoint is a stable last resort (needs the app session, so
+     *  it only works via the in-app downloader, not an external browser open). */
+    private static int scoreMediaUrl(String s, boolean reshare) {
+        if (s == null || !s.startsWith("http")) return 0;
+        String low = s.toLowerCase();
+        // Reject avatars/profile pics: IG profile-pic CDN namespaces, the base64 "profile_pic"
+        // vencode tag (efg=...InByb2ZpbGVfcGlj...), and tiny square thumbnails.
+        if (s.contains("t51.2885-19") || s.contains("t51.82787-19")
+                || low.contains("profile_pic") || s.contains("InByb2ZpbGVfcGlj")
+                || low.contains("s150x150") || low.contains("s240x240") || low.contains("s320x320")) {
+            return 0;
+        }
+        boolean cdn = s.contains("cdninstagram") || s.contains("fbcdn") || s.contains("fbsbx");
+        boolean videoAudio = low.contains("audioclip")
+                || low.matches(".*\\.(mp4|mov|m4a|aac|mp3|ogg)(\\?.*)?$");
+        boolean image = cdn && low.matches(".*\\.(jpg|jpeg|webp|heic|gif)(\\?.*)?$");
+        boolean permalink = low.contains("instagram.com/reel/") || low.contains("instagram.com/p/")
+                || low.contains("instagram.com/tv/");
+        boolean fallback = s.contains("direct_v2/media_fallback");
+        if (reshare) {
+            if (permalink) return 100;
+            if (videoAudio) return 80;
+            if (image) return 60;    // thumbnail of the reshared post
+            if (fallback) return 40;
+        } else {
+            if (videoAudio) return 100;
+            if (image) return 80;
+            if (fallback) return 60;
+            if (permalink) return 40;
+        }
+        return 0;
     }
 
 
