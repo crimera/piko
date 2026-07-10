@@ -151,6 +151,9 @@ public class ButtonPref extends Preference {
         if(key.equals(Constants.PIKO_FRAGMENT_ACTION_BAR)){
             return UI.DRAWABLE_COLLECTIONS_ICON;
         }
+        if(key.equals(Constants.PIKO_FRAGMENT_DM)){
+            return UI.DRAWABLE_SHARE_TO_DIRECT;
+        }
         return null;
     }
 

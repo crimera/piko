@@ -41,6 +41,8 @@ public class FragmentHook {
             actionBarTitleKey = "piko_category_about";
         }else if(key.equals(Constants.PIKO_FRAGMENT_ACTION_BAR)){
             actionBarTitleKey = "piko_category_action_bar";
+        }else if(key.equals(Constants.PIKO_FRAGMENT_DM)){
+            actionBarTitleKey = "piko_category_dm";
         }
 
         if(actionBarTitleKey!=null){

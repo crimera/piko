@@ -17,6 +17,14 @@ import app.morphe.extension.crimera.SharedPref;
 
 @SuppressWarnings("unused")
 public class Pref {
+    public static boolean SHOULD_MARK_CHAT_AS_READ;
+    static {
+        SHOULD_MARK_CHAT_AS_READ = false;
+    }
+    public static void setMarkChatAsReadIndicator(boolean bool) {
+        SHOULD_MARK_CHAT_AS_READ = bool;
+    }
+
     public static boolean clearAllPreferences() {
         return SharedPref.clearAll();
     }
@@ -80,7 +88,16 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_TYPING_STATUS) || Pref.getTurnOnAllGhostModes();
     }
 
+    public static boolean enableMarkChatAsReadOption() {
+        return SharedPref.getBooleanPref(Settings.ENABLE_MARK_CHAT_AS_READ) && SettingsStatus.markChatAsRead;
+    }
+
+    // Return false = call the message seen api.
+    // Return true = blocks the message seen api.
     public static boolean viewDmAnonymously() {
+        if(enableMarkChatAsReadOption() && SHOULD_MARK_CHAT_AS_READ){
+            return false;
+        }
         return SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY) || Pref.getTurnOnAllGhostModes();
     }
 

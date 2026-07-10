@@ -81,4 +81,6 @@ public class Settings {
     public static final StringSetting ACTION_BAR_USER_PROFILE = new StringSetting("action_bar_user_profile", "");
     public static final StringSetting ACTION_BAR_CHAT = new StringSetting("action_bar_chat", "");
     public static final StringSetting ACTION_BAR_INBOX = new StringSetting("action_bar_inbox", "");
+
+    public static final BooleanSetting ENABLE_MARK_CHAT_AS_READ = new BooleanSetting("enable_mark_chat_as_read", true);
 }

@@ -91,8 +91,6 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_stories_audio_autoplay">Stories audio autoplay</string>
     <string name="piko_customise_story_timestamp">Customise story timestamp</string>
     <string name="piko_customise_story_timestamp_desc">Customise the timestamp that shows when the story was posted</string>
-    <string name="piko_unlimited_replays">Make ephemeral media permament</string>
-    <string name="piko_unlimited_replays_desc">Changes unexpired view once, view twice media to permanent view</string>
     <string name="piko_improve_image_viewing">Improve image viewing</string>
     <string name="piko_improve_image_viewing_desc">Fetches max resolution images from server</string>
     <string name="piko_hide_reshare_button">Hide reshare button</string>
@@ -114,6 +112,13 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_unlock_plus_benefits_desc">Unlock \'Plus\' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK</string>
     <string name="piko_customise_story_ring_size">Customise story ring size</string>
     <string name="piko_customise_story_ring_size_desc">Change the size of story ring by a percentage (Default: 100)</string>
+
+    <!-- DM Section -->
+    <string name="piko_category_dm">DM</string>
+    <string name="piko_unlimited_replays">Make ephemeral media permanent</string>
+    <string name="piko_unlimited_replays_desc">Changes unexpired view once, view twice media to permanent view</string>
+    <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read</string>
 
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download media</string>

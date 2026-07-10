@@ -177,6 +177,68 @@ public class ScreenBuilder {
         }
     }
 
+    public void dmSection() {
+        if (!(SettingsStatus.dmSection())) return;
+
+        if (SettingsStatus.disableTypingStatus) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_disable_typing_status"),
+                            "",
+                            Settings.DISABLE_TYPING_STATUS
+                    )
+            );
+        }
+
+        if (SettingsStatus.viewDmAnonymously) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_view_dm_anonymously"),
+                            "",
+                            Settings.VIEW_DM_ANONYMOUSLY
+                    )
+            );
+        }
+
+        if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_unlimited_replays"),
+                            str("piko_unlimited_replays_desc"),
+                            Settings.UNLIMITED_REPLAYS
+                    )
+            );
+        }
+
+        if (SettingsStatus.markChatAsRead) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_enable_mark_chat_as_read"),
+                            str("piko_enable_mark_chat_as_read_desc"),
+                            Settings.ENABLE_MARK_CHAT_AS_READ
+                    )
+            );
+        }
+
+        if (SettingsStatus.saveDeletedMessages) {
+            addPreference(
+                    helper.switchPreference(
+                            str("save_deleted_messages"),
+                            str("save_deleted_messages_desc"),
+                            Settings.SAVE_DELETED_MESSAGES
+                    )
+            );
+            Preference viewBtn = new Preference(context);
+            viewBtn.setTitle(str("view_deleted_messages"));
+            viewBtn.setOnPreferenceClickListener(pref -> {
+                context.startActivity(new Intent(context, DeletedMessagesActivity.class));
+                return true;
+            });
+            addPreference(viewBtn);
+        }
+
+    }
+
     public void ghostSection() {
         if (!(SettingsStatus.ghostSection())) return;
 
@@ -236,30 +298,6 @@ public class ScreenBuilder {
             );
         }
 
-    }
-
-    public void dmSection() {
-        if (!SettingsStatus.saveDeletedMessages) return;
-
-        PreferenceCategory category = addCategory(str("piko_category_dm"));
-
-        addPreference(category,
-            helper.switchPreference(
-                str("save_deleted_messages"),
-                str("save_deleted_messages_desc"),
-                Settings.SAVE_DELETED_MESSAGES
-            )
-        );
-
-        if (SettingsStatus.saveDeletedMessages) {
-            Preference viewBtn = new Preference(context);
-            viewBtn.setTitle(str("view_deleted_messages"));
-            viewBtn.setOnPreferenceClickListener(pref -> {
-                context.startActivity(new Intent(context, DeletedMessagesActivity.class));
-                return true;
-            });
-            addPreference(category, viewBtn);
-        }
     }
 
     public void linksSection() {
@@ -534,16 +572,6 @@ public class ScreenBuilder {
                             str("piko_customise_story_ring_size_desc"),
                             Settings.CUSTOMISE_STORY_RING_SIZE
                     ));
-        }
-
-        if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_unlimited_replays"),
-                            str("piko_unlimited_replays_desc"),
-                            Settings.UNLIMITED_REPLAYS
-                    )
-            );
         }
 
         if (SettingsStatus.improveImageViewing) {
@@ -823,7 +851,7 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.saveDeletedMessages){
+        if (SettingsStatus.dmSection()){
             addPreference(
                     helper.buttonPreference(
                             str("piko_category_dm"),
