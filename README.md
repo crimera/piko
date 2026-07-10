@@ -5,7 +5,7 @@
 </p>
 
 <h1 align="center">
-    Morphe patches focused on Twitter/X & Instagram
+    Morphe patches focused on Instagram
 </h1>
 
 </div>
