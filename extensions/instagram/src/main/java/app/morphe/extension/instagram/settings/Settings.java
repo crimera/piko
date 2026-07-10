@@ -36,7 +36,7 @@ public class Settings {
     public static final BooleanSetting HIDE_STORIES_TRAY = new BooleanSetting("hide_stories_tray", false);
     public static final BooleanSetting DISABLE_EXPLORE = new BooleanSetting("disable_explore", false);
     public static final BooleanSetting DISABLE_COMMENTS = new BooleanSetting("disable_comments", false);
-    public static final BooleanSetting FOLLOW_BACK_INDICATOR = new BooleanSetting("follow_back_indicator", true);
+    public static final BooleanSetting FOLLOW_BACK_INDICATOR = new BooleanSetting("follow_back_indicator", false);
     public static final BooleanSetting VIEW_STORY_MENTIONS = new BooleanSetting("view_story_mentions", true);
     public static final BooleanSetting DISABLE_STORY_FLIPPING = new BooleanSetting("disable_story_flipping", false);
     public static final StringSetting CUSTOMISE_STORY_TIMESTAMP = new StringSetting("customise_story_timestamp", "default");
@@ -48,7 +48,7 @@ public class Settings {
     public static final BooleanSetting HIDE_GROUP_CREATION_BUTTON_ON_SHARESHEET = new BooleanSetting("hide_group_creation_button_on_sharesheet", true);
     public static final BooleanSetting DISABLE_REELS_SCROLLING = new BooleanSetting("disable_reels_scrolling", false);
     public static final BooleanSetting REMOVE_EMPTY_BOTTOM_SPACE = new BooleanSetting("remove_empty_bottom_space", true);
-    public static final BooleanSetting MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = new BooleanSetting("more_profile_options_action_bar_toggle", false);
+    public static final BooleanSetting MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE = new BooleanSetting("more_profile_options_action_bar_toggle", true);
     public static final BooleanSetting DISABLE_TYPING_STATUS = new BooleanSetting("disable_typing_status", false);
     public static final BooleanSetting HIDE_NOTES_TRAY = new BooleanSetting("hide_notes_tray", false);
     public static final BooleanSetting DISABLE_VIDEO_AUTOPLAY = new BooleanSetting("disable_video_autoplay", false);

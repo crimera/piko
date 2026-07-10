@@ -9,10 +9,7 @@ package app.morphe.extension.instagram.patches.userprofile;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.content.Context;
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.view.ViewGroup;
-import java.util.ArrayList;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
@@ -22,7 +19,7 @@ import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
-import app.morphe.extension.instagram.entity.InstagramDialogBox;
+import app.morphe.extension.instagram.entity.InstagramBottomSheet;
 import app.morphe.extension.instagram.entity.InstagramButton;
 import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 import app.morphe.extension.shared.ui.Dim;
@@ -38,89 +35,59 @@ public class ProfileMoreOption {
 
     public static void moreOptionsDailogueBox(Context context, UserData userData) {
         try {
-            InstagramDialogBox dialog = new InstagramDialogBox(context);
+            InstagramBottomSheet sheet = new InstagramBottomSheet(context);
 
-            ArrayList<String> options = new ArrayList<>();
-            options.add(str("piko_copy_username"));
-            options.add(str("piko_copy_full_name"));
-            options.add(str("piko_copy_user_id"));
-            options.add(str("piko_copy_bio"));
-            options.add(str("piko_download_profile_picture"));
+            sheet.addItem(str("piko_copy_username"), () ->
+                    copyText(userData.getUsername()));
+
+            sheet.addItem(str("piko_copy_full_name"), () ->
+                    copyText(userData.getFullname()));
+
+            sheet.addItem(str("piko_copy_user_id"), () ->
+                    copyText(userData.getUserId()));
+
+            sheet.addItem(str("piko_copy_bio"), () ->
+                    copyText(userData.getBio()));
+
+            sheet.addItem(str("piko_download_profile_picture"), () -> {
+                String url = userData.getProfilePictureUrl();
+                String username = userData.getUsername();
+                String downloadFilename = username + "_dp.jpg";
+                String subFolder = DownloadUtils.getSubfolderName(username);
+                DownloadUtils.downloadMediaUrl(context, url, subFolder, downloadFilename);
+            });
+
             boolean isAutoDownloadTarget = Pref.isAutoDownloadTarget(userData.getUserId());
-            options.add(isAutoDownloadTarget
-                    ? str("piko_auto_download_stories_disable")
-                    : str("piko_auto_download_stories_enable"));
-            if (DEBUG) options.add(str("piko_debug"));
-
-            CharSequence[] items = options.toArray(new CharSequence[0]);
-
-            dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface d, int which) {
-                    try {
-                        // Doing like this because options are dynamic.
-                        String selectedOption = options.get(which);
-                        boolean toCopy = false;
-                        String text = null;
-
-                        if (selectedOption.equals(str("piko_copy_username"))) {
-                            text = userData.getUsername();
-                            toCopy = true;
-
-                        } else if (selectedOption.equals(str("piko_copy_full_name"))) {
-                            text = userData.getFullname();
-                            toCopy = true;
-
-                        } else if (selectedOption.equals(str("piko_copy_user_id"))) {
-                            text = userData.getUserId();
-                            toCopy = true;
-
-                        } else if (selectedOption.equals(str("piko_copy_bio"))) {
-                            text = userData.getBio();
-                            toCopy = true;
-
-                        } else if (selectedOption.equals(str("piko_download_profile_picture"))) {
-                            String url = userData.getProfilePictureUrl();
-                            String username = userData.getUsername();
-                            String downloadFilename = username+"_dp.jpg";
-                            String subFolder = DownloadUtils.getSubfolderName(username);
-                            DownloadUtils.downloadMediaUrl(context, url, subFolder, downloadFilename);
-                            toCopy = false;
-
-                        } else if (selectedOption.equals(str("piko_auto_download_stories_enable"))) {
-                            Pref.addAutoDownloadTarget(userData.getUserId(), userData.getUsername());
-                            Utils.showToastShort(str("piko_auto_download_stories_enabled_toast"));
-                            toCopy = false;
-
-                        } else if (selectedOption.equals(str("piko_auto_download_stories_disable"))) {
+            sheet.addItem(
+                    isAutoDownloadTarget
+                            ? str("piko_auto_download_stories_disable")
+                            : str("piko_auto_download_stories_enable"),
+                    () -> {
+                        if (isAutoDownloadTarget) {
                             Pref.removeAutoDownloadTarget(userData.getUserId());
                             Utils.showToastShort(str("piko_auto_download_stories_disabled_toast"));
-                            toCopy = false;
-
-                        } else if (selectedOption.equals(str("piko_debug"))) {
-                            ObjectBrowser.browseObject(context, userData.getObject());
-
+                        } else {
+                            Pref.addAutoDownloadTarget(userData.getUserId(), userData.getUsername());
+                            Utils.showToastShort(str("piko_auto_download_stories_enabled_toast"));
                         }
+                    });
 
-                        if (toCopy && text != null && text.length() > 0) {
-                            Utils.setClipboard(text);
-                            Utils.showToastShort(str("piko_copied"));
-                        }
-                    } catch (Exception e) {
-                        Logger.printException(() -> "Error at moreOptionsDailogueBox onclick", e);
-                        Utils.showToastShort(e.getMessage());
-                    }
-                }
-            });
-            dialog.setTitle(str("piko_more_profile_options"));
-            dialog.setCancelable(true);
-            dialog.setCanceledOnTouchOutside(true);
+            if (DEBUG) {
+                sheet.addItem(str("piko_debug"), () ->
+                        ObjectBrowser.browseObject(context, userData.getObject()));
+            }
 
-            Dialog dlg = dialog.getDialog();
-            dlg.show();
+            sheet.show();
         } catch (Exception e) {
             Logger.printException(() -> "Error at moreOptionsDailogueBox", e);
             Utils.showToastShort(e.getMessage());
+        }
+    }
+
+    private static void copyText(String text) {
+        if (text != null && text.length() > 0) {
+            Utils.setClipboard(text);
+            Utils.showToastShort(str("piko_copied"));
         }
     }
 
