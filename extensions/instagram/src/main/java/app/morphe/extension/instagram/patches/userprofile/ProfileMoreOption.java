@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.patches.userprofile;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.ViewGroup;
 
 import app.morphe.extension.shared.Logger;
@@ -36,32 +37,40 @@ public class ProfileMoreOption {
     public static void moreOptionsDailogueBox(Context context, UserData userData) {
         try {
             InstagramBottomSheet sheet = new InstagramBottomSheet(context);
+            sheet.setTitle(str("piko_more_profile_options"));
 
-            sheet.addItem(str("piko_copy_username"), () ->
-                    copyText(userData.getUsername()));
+            sheet.addItem(str("piko_copy_username"),
+                    InstagramBottomSheet.IconSpec.person(Color.parseColor("#5B4EE0")),
+                    () -> copyText(userData.getUsername()));
 
-            sheet.addItem(str("piko_copy_full_name"), () ->
-                    copyText(userData.getFullname()));
+            sheet.addItem(str("piko_copy_full_name"),
+                    InstagramBottomSheet.IconSpec.text("Aa", Color.parseColor("#2F6FE0")),
+                    () -> copyText(userData.getFullname()));
 
-            sheet.addItem(str("piko_copy_user_id"), () ->
-                    copyText(userData.getUserId()));
+            sheet.addItem(str("piko_copy_user_id"),
+                    InstagramBottomSheet.IconSpec.text("ID", Color.parseColor("#159C82")),
+                    () -> copyText(userData.getUserId()));
 
-            sheet.addItem(str("piko_copy_bio"), () ->
-                    copyText(userData.getBio()));
+            sheet.addItem(str("piko_copy_bio"),
+                    InstagramBottomSheet.IconSpec.document(Color.parseColor("#A66A2E")),
+                    () -> copyText(userData.getBio()));
 
-            sheet.addItem(str("piko_download_profile_picture"), () -> {
-                String url = userData.getProfilePictureUrl();
-                String username = userData.getUsername();
-                String downloadFilename = username + "_dp.jpg";
-                String subFolder = DownloadUtils.getSubfolderName(username);
-                DownloadUtils.downloadMediaUrl(context, url, subFolder, downloadFilename);
-            });
+            sheet.addItem(str("piko_download_profile_picture"),
+                    InstagramBottomSheet.IconSpec.download(Color.parseColor("#8C2E3C")),
+                    () -> {
+                        String url = userData.getProfilePictureUrl();
+                        String username = userData.getUsername();
+                        String downloadFilename = username + "_dp.jpg";
+                        String subFolder = DownloadUtils.getSubfolderName(username);
+                        DownloadUtils.downloadMediaUrl(context, url, subFolder, downloadFilename);
+                    });
 
             boolean isAutoDownloadTarget = Pref.isAutoDownloadTarget(userData.getUserId());
             sheet.addItem(
                     isAutoDownloadTarget
                             ? str("piko_auto_download_stories_disable")
                             : str("piko_auto_download_stories_enable"),
+                    InstagramBottomSheet.IconSpec.refresh(Color.parseColor("#189188")),
                     () -> {
                         if (isAutoDownloadTarget) {
                             Pref.removeAutoDownloadTarget(userData.getUserId());

@@ -8,7 +8,11 @@ package app.morphe.extension.instagram.entity;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.util.TypedValue;
@@ -20,10 +24,13 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import app.morphe.extension.shared.Logger;
+
 /**
  * A lightweight bottom-sheet style dialog that visually matches Instagram's native
- * "more options" sheet (rounded top corners, drag handle, slide-up animation, dark theme)
- * without needing to reflect into Instagram's own obfuscated dialog classes.
+ * "more options" sheet (rounded top corners, drag handle, slide-up animation, dark theme,
+ * colored square icons per row) without needing to reflect into Instagram's own obfuscated
+ * dialog classes.
  *
  * Fully self-contained — safe against Instagram app updates/obfuscation changes.
  */
@@ -33,6 +40,33 @@ public class InstagramBottomSheet {
     private static final int HANDLE_COLOR = Color.parseColor("#4D4D4D");
     private static final int TEXT_COLOR = Color.WHITE;
     private static final int DESTRUCTIVE_TEXT_COLOR = Color.parseColor("#ED4956");
+
+    /** Something that can be run when a row is tapped; may throw — caught centrally. */
+    public interface OnItemClick {
+        void onClick() throws Exception;
+    }
+
+    /** What to draw inside a row's colored square icon. */
+    public enum IconType { PERSON, TEXT, DOCUMENT, DOWNLOAD, REFRESH }
+
+    /** Describes a row's leading icon: shape/glyph + background color. */
+    public static class IconSpec {
+        final IconType type;
+        final String label;
+        final int color;
+
+        private IconSpec(IconType type, String label, int color) {
+            this.type = type;
+            this.label = label;
+            this.color = color;
+        }
+
+        public static IconSpec person(int color) { return new IconSpec(IconType.PERSON, null, color); }
+        public static IconSpec text(String label, int color) { return new IconSpec(IconType.TEXT, label, color); }
+        public static IconSpec document(int color) { return new IconSpec(IconType.DOCUMENT, null, color); }
+        public static IconSpec download(int color) { return new IconSpec(IconType.DOWNLOAD, null, color); }
+        public static IconSpec refresh(int color) { return new IconSpec(IconType.REFRESH, null, color); }
+    }
 
     private final Context context;
     private final Dialog dialog;
@@ -47,7 +81,6 @@ public class InstagramBottomSheet {
         container.setBackground(roundedTopBackground());
         container.setPadding(0, dp(8), 0, dp(24));
 
-        // Drag handle, like native IG bottom sheets.
         View handle = new View(context);
         LinearLayout.LayoutParams handleParams = new LinearLayout.LayoutParams(dp(36), dp(4));
         handleParams.gravity = Gravity.CENTER_HORIZONTAL;
@@ -71,32 +104,65 @@ public class InstagramBottomSheet {
         dialog.setCanceledOnTouchOutside(true);
     }
 
-    /** Adds a regular (non-destructive) row. */
-    public void addItem(CharSequence text, Runnable onClick) {
-        addItem(text, onClick, false);
+    /** Optional bold title row at the top (below the drag handle). */
+    public void setTitle(CharSequence title) {
+        TextView titleView = new TextView(context);
+        titleView.setText(title);
+        titleView.setTextColor(TEXT_COLOR);
+        titleView.setTextSize(18);
+        titleView.setTypeface(titleView.getTypeface(), android.graphics.Typeface.BOLD);
+        titleView.setGravity(Gravity.CENTER);
+        titleView.setPadding(dp(24), dp(4), dp(24), dp(14));
+        container.addView(titleView, 1); // right after the drag handle
     }
 
-    /** Adds a row; pass destructive=true for red text (e.g. "Report", "Block"). */
-    public void addItem(CharSequence text, Runnable onClick, boolean destructive) {
-        TextView item = new TextView(context);
-        item.setText(text);
-        item.setTextColor(destructive ? DESTRUCTIVE_TEXT_COLOR : TEXT_COLOR);
-        item.setTextSize(16);
-        item.setGravity(Gravity.CENTER_VERTICAL);
-        item.setPadding(dp(24), dp(14), dp(24), dp(14));
+    /** Row without an icon. */
+    public void addItem(CharSequence text, OnItemClick onClick) {
+        addItem(text, null, onClick, false);
+    }
+
+    /** Row with a colored icon badge. */
+    public void addItem(CharSequence text, IconSpec icon, OnItemClick onClick) {
+        addItem(text, icon, onClick, false);
+    }
+
+    /** Row with a colored icon badge; destructive=true renders the label in red. */
+    public void addItem(CharSequence text, IconSpec icon, OnItemClick onClick, boolean destructive) {
+        LinearLayout row = new LinearLayout(context);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setPadding(dp(24), dp(10), dp(24), dp(10));
 
         TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
         if (outValue.resourceId != 0) {
-            item.setBackgroundResource(outValue.resourceId);
+            row.setBackgroundResource(outValue.resourceId);
         }
 
-        item.setOnClickListener(v -> {
+        if (icon != null) {
+            IconBadge badge = new IconBadge(context, icon);
+            LinearLayout.LayoutParams badgeParams = new LinearLayout.LayoutParams(dp(36), dp(36));
+            badgeParams.rightMargin = dp(16);
+            row.addView(badge, badgeParams);
+        }
+
+        TextView label = new TextView(context);
+        label.setText(text);
+        label.setTextColor(destructive ? DESTRUCTIVE_TEXT_COLOR : TEXT_COLOR);
+        label.setTextSize(16);
+        row.addView(label, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        row.setOnClickListener(v -> {
             dismiss();
-            if (onClick != null) onClick.run();
+            try {
+                if (onClick != null) onClick.onClick();
+            } catch (Exception e) {
+                Logger.printException(() -> "Error handling bottom sheet item click", e);
+            }
         });
 
-        container.addView(item, new LinearLayout.LayoutParams(
+        container.addView(row, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
     }
 
@@ -141,5 +207,108 @@ public class InstagramBottomSheet {
         drawable.setColor(HANDLE_COLOR);
         drawable.setCornerRadius(dp(2));
         return drawable;
+    }
+
+    /** Small square view: colored rounded background + a simple white glyph/letters. */
+    private static class IconBadge extends View {
+        private final IconSpec spec;
+        private final Paint strokePaint;
+        private final Paint fillPaint;
+        private final Paint textPaint;
+
+        IconBadge(Context context, IconSpec spec) {
+            super(context);
+            this.spec = spec;
+
+            GradientDrawable bg = new GradientDrawable();
+            bg.setColor(spec.color);
+            bg.setCornerRadius(applyDimen(context, 9));
+            setBackground(bg);
+
+            strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            strokePaint.setColor(Color.WHITE);
+            strokePaint.setStyle(Paint.Style.STROKE);
+            strokePaint.setStrokeWidth(applyDimen(context, 1.7f));
+            strokePaint.setStrokeCap(Paint.Cap.ROUND);
+            strokePaint.setStrokeJoin(Paint.Join.ROUND);
+
+            fillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            fillPaint.setColor(Color.WHITE);
+            fillPaint.setStyle(Paint.Style.FILL);
+
+            textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            textPaint.setColor(Color.WHITE);
+            textPaint.setTextAlign(Paint.Align.CENTER);
+            textPaint.setFakeBoldText(true);
+        }
+
+        private static float applyDimen(Context context, float dpVal) {
+            return TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP, dpVal, context.getResources().getDisplayMetrics());
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            float w = getWidth();
+            float h = getHeight();
+            float cx = w / 2f;
+            float cy = h / 2f;
+
+            switch (spec.type) {
+                case TEXT: {
+                    textPaint.setTextSize(h * 0.40f);
+                    Paint.FontMetrics fm = textPaint.getFontMetrics();
+                    float ty = cy - (fm.ascent + fm.descent) / 2f;
+                    canvas.drawText(spec.label, cx, ty, textPaint);
+                    break;
+                }
+                case PERSON: {
+                    canvas.drawCircle(cx, cy - h * 0.12f, h * 0.14f, fillPaint);
+                    float bw = w * 0.32f;
+                    float bh = h * 0.20f;
+                    RectF body = new RectF(cx - bw, cy + h * 0.05f, cx + bw, cy + h * 0.05f + bh);
+                    canvas.drawRoundRect(body, bh / 2f, bh / 2f, fillPaint);
+                    break;
+                }
+                case DOCUMENT: {
+                    float dw = w * 0.28f;
+                    float dh = h * 0.34f;
+                    RectF doc = new RectF(cx - dw, cy - dh, cx + dw, cy + dh);
+                    canvas.drawRoundRect(doc, dp2(getContext()), dp2(getContext()), strokePaint);
+                    canvas.drawLine(cx - dw * 0.55f, cy - dh * 0.10f, cx + dw * 0.55f, cy - dh * 0.10f, strokePaint);
+                    canvas.drawLine(cx - dw * 0.55f, cy + dh * 0.45f, cx + dw * 0.55f, cy + dh * 0.45f, strokePaint);
+                    break;
+                }
+                case DOWNLOAD: {
+                    canvas.drawLine(cx, cy - h * 0.22f, cx, cy + h * 0.08f, strokePaint);
+                    Path arrow = new Path();
+                    arrow.moveTo(cx - w * 0.13f, cy - h * 0.04f);
+                    arrow.lineTo(cx, cy + h * 0.12f);
+                    arrow.lineTo(cx + w * 0.13f, cy - h * 0.04f);
+                    canvas.drawPath(arrow, strokePaint);
+                    canvas.drawLine(cx - w * 0.20f, cy + h * 0.24f, cx + w * 0.20f, cy + h * 0.24f, strokePaint);
+                    break;
+                }
+                case REFRESH: {
+                    RectF oval = new RectF(cx - w * 0.20f, cy - h * 0.20f, cx + w * 0.20f, cy + h * 0.20f);
+                    canvas.drawArc(oval, -40, 280, false, strokePaint);
+                    double rad = Math.toRadians(-40);
+                    float ax = (float) (cx + w * 0.20f * Math.cos(rad));
+                    float ay = (float) (cy + h * 0.20f * Math.sin(rad));
+                    Path tri = new Path();
+                    tri.moveTo(ax, ay - h * 0.07f);
+                    tri.lineTo(ax + w * 0.09f, ay);
+                    tri.lineTo(ax - w * 0.02f, ay + h * 0.08f);
+                    tri.close();
+                    canvas.drawPath(tri, fillPaint);
+                    break;
+                }
+            }
+        }
+
+        private static float dp2(Context context) {
+            return applyDimen(context, 2f);
+        }
     }
 }
