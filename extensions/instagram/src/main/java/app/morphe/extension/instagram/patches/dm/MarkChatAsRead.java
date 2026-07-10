@@ -8,6 +8,7 @@
 package app.morphe.extension.instagram.patches.dm;
 
 import java.util.List;
+import android.content.Context;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.entity.Entity;
@@ -83,7 +84,7 @@ public class MarkChatAsRead {
         return (String) entity.getField(MarkChatAsRead.getMessageCursorFieldName());
     }
 
-    public static void markAsRead(UserSession userSession, Object unknown, DirectThreadKey directThreadKey){
+    private static void markAsRead(UserSession userSession, Object unknown, DirectThreadKey directThreadKey){
         try{
             Pref.setMarkChatAsReadIndicator(true);
 
@@ -111,5 +112,19 @@ public class MarkChatAsRead {
             PikoUtils.logger(e);
         }
         return buttonList;
+    }
+
+    // Return true = skip other button press check.
+    // Return false = other button press check.
+    public static boolean buttonAction(Context context, UserSession userSession,Object buttonPressed, Object unknown, DirectThreadKey directThreadKey){
+        try {
+            if(buttonPressed.toString().equals("MARK_AS_READ")){
+               MarkChatAsRead.markAsRead(userSession, unknown, directThreadKey);
+               return true;
+            }
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+        }
+        return false;
     }
 }

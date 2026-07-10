@@ -91,8 +91,11 @@ val markChatAsReadPatch =
 
             ThreadLongPressButtonActionFingerprint.apply {
                 val directThreadKeyClassName = "Lcom/instagram/model/direct/DirectThreadKey;"
+                val context = "Landroid/content/Context;"
 
                 val userSessionFieldRef = classDef.fields.first { it.type == USER_SESSION_CLASS }
+                val contextFieldRef = classDef.fields.first { it.type == context }
+
                 method.apply {
                     val buttonParameterIndex = parameters.indexOfFirst { it.type == buttonEnumClassName } + 1
                     val directThreadKeyParameterIndex = parameters.indexOfFirst { it.type == directThreadKeyClassName } + 1
@@ -104,16 +107,17 @@ val markChatAsReadPatch =
                         0,
                         """
                         move-object/from16 v0, p0
-                        iget-object v0, v0, $userSessionFieldRef
+                        iget-object v1, v0, $contextFieldRef
+                        iget-object v2, v0, $userSessionFieldRef
                         
-                        move-object/from16 v1, p$buttonParameterIndex
-                        sget-object v2, $markAsReadButtonFieldRef
-                        if-ne v1, v2, :piko
+                        move-object/from16 v3, p$buttonParameterIndex
                         
-                        move-object/from16 v1, p$threadInfoParameterIndex
-                        move-object/from16 v2, p$directThreadKeyParameterIndex
+                        move-object/from16 v4, p$threadInfoParameterIndex
+                        move-object/from16 v5, p$directThreadKeyParameterIndex
                         
-                        invoke-static {v0,v1,v2}, $EXTENSION_CLASS_NAME->markAsRead($USER_SESSION_CLASS Ljava/lang/Object;$directThreadKeyClassName)V
+                        invoke-static {v1,v2,v3,v4,v5}, $EXTENSION_CLASS_NAME->buttonAction($context $USER_SESSION_CLASS Ljava/lang/Object;Ljava/lang/Object;$directThreadKeyClassName)Z
+                        move-result v0
+                        if-eqz v0, : piko
                         return-void
                         """.trimIndent(),
                         ExternalLabel("piko", getInstruction(0)),
