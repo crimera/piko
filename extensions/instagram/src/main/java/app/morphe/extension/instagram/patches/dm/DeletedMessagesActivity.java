@@ -248,21 +248,23 @@ public class DeletedMessagesActivity extends Activity {
     }
 
     private static String mediaLabel(String type) {
-        if (type == null) return "[media]";
+        if (type == null) return "[" + str("piko_media_unknown") + "]";
+        String label;
         switch (type) {
             case "media":
-            case "image":          return "[photo]";
-            case "video":          return "[video]";
+            case "image":          label = str("piko_media_photo"); break;
+            case "video":          label = str("piko_media_video"); break;
             case "voice_media":
-            case "audio":          return "[voice message]";
-            case "animated_media": return "[GIF]";
-            case "reel_share":     return "[reel]";
-            case "story_share":    return "[story]";
-            case "media_share":    return "[post]";
+            case "audio":          label = str("piko_media_voice"); break;
+            case "animated_media": label = str("piko_media_gif"); break;
+            case "reel_share":     label = str("piko_media_reel"); break;
+            case "story_share":    label = str("piko_media_story"); break;
+            case "media_share":    label = str("piko_media_post"); break;
             case "clip":
-            case "xma_clip":       return "[reel]";
+            case "xma_clip":       label = str("piko_media_reel"); break;
             default:               return "[" + type + "]";
         }
+        return "[" + label + "]";
     }
 
     private class MessageAdapter extends BaseAdapter {
@@ -336,7 +338,7 @@ public class DeletedMessagesActivity extends Activity {
                 contentView.setText(mediaLabel(type) + "  ·  " + str("piko_tap_to_view"));
             } else {
                 contentView.setText(content != null && !content.isEmpty() ? content
-                        : (type != null ? "[" + type + "]" : "[deleted]"));
+                        : (type != null ? "[" + type + "]" : str("piko_media_deleted_generic")));
             }
             metaView.setText(DateFormat.format("MMM dd, yyyy  HH:mm", new Date(timestamp)));
 
