@@ -113,43 +113,48 @@ val directItemEntity =
                     SetTextExtension.changeStringAt(1, it)
                 }
 
-                // Media field: best-effort, never fatal. v430+: iput-object directly in dispatch body; v426: inside a setter.
+                // Media field: best-effort, never fatal. Scan EVERY method of the class (like the scalar
+                // resolver above), not just the fingerprint-matched method: v435 splits serialization
+                // (A00, iget/JSON-writer) from deserialization (unsafeParseFromJson, the real iput-object),
+                // and the fingerprint may land on the serializer, which carries no field iput.
                 val mediaClass = "Lcom/instagram/feed/media/Media;"
+                fun isMediaIput(insn: com.android.tools.smali.dexlib2.iface.instruction.Instruction) =
+                    insn.opcode.name.startsWith("iput-object", ignoreCase = true) &&
+                        (insn as? ReferenceInstruction)?.reference
+                            .let { r -> r is FieldReference && r.type == mediaClass }
                 runCatching {
-                    method.run {
-                        val insns = instructions.toList()
-                        val mediaKeyIndex =
-                            insns.indexOfFirst {
-                                (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
-                                    (it as ReferenceInstruction).reference.toString() == "media"
-                            }
-                        require(mediaKeyIndex >= 0) { "const-string 'media' not found" }
-                        val tail = insns.drop(mediaKeyIndex + 1)
+                    mutableClassDefBy { it.type == method.definingClass }
+                        .methods.firstNotNullOfOrNull { m ->
+                            val insns = runCatching { m.instructions.toList() }.getOrNull()
+                                ?: return@firstNotNullOfOrNull null
+                            val mediaKeyIndex =
+                                insns.indexOfFirst {
+                                    (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
+                                        (it as ReferenceInstruction).reference.toString() == "media"
+                                }
+                            if (mediaKeyIndex < 0) return@firstNotNullOfOrNull null
+                            val tail = insns.drop(mediaKeyIndex + 1)
 
-                        tail.firstOrNull {
-                            it.opcode.name.startsWith("iput-object", ignoreCase = true) &&
-                                (it as ReferenceInstruction).reference
-                                    .let { r -> r is FieldReference && r.type == mediaClass }
-                        }?.fieldExtractor()
-                            ?: run {
-                                // v426: iput-object is inside a setter called with the Media arg.
-                                val setterRef =
-                                    tail.asSequence()
-                                        .mapNotNull { (it as? ReferenceInstruction)?.reference as? MethodReference }
-                                        .firstOrNull { r -> r.parameterTypes.any { it.toString() == mediaClass } }
-                                        ?: error("no Media iput or setter after 'media' key")
-                                val setter =
+                            // v430+/v435: iput-object of Media type directly after the "media" key.
+                            tail.firstOrNull { isMediaIput(it) }?.fieldExtractor()
+                                ?: run {
+                                    // v426: iput-object is inside a setter called with the Media arg.
+                                    val setterRef =
+                                        tail.asSequence()
+                                            .mapNotNull { (it as? ReferenceInstruction)?.reference as? MethodReference }
+                                            .firstOrNull { r -> r.parameterTypes.any { it.toString() == mediaClass } }
+                                            ?: return@firstNotNullOfOrNull null
                                     mutableClassDefBy { it.type == setterRef.definingClass }
-                                        .methods.first {
+                                        .methods.firstOrNull {
                                             it.name == setterRef.name &&
                                                 it.parameterTypes.map(Any::toString) ==
                                                 setterRef.parameterTypes.map(Any::toString)
                                         }
-                                setter.instructions
-                                    .first { it.opcode.name.startsWith("iput-object", ignoreCase = true) }
-                                    .fieldExtractor()
-                            }
-                    }
+                                        ?.instructions
+                                        ?.firstOrNull { isMediaIput(it) }
+                                        ?.fieldExtractor()
+                                }
+                        } ?: error("no Media field via 'media' key in ${method.definingClass}")
                 }.onSuccess { GetMediaObjectExtension.changeFirstString(it.name) }
             }
 

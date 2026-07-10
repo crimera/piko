@@ -256,9 +256,18 @@ public class SavedMessagesHook {
             // becomes non-tappable/non-downloadable — the root of the "media not available" reports.
             if (type != null && !type.equals("text")
                     && (content == null || content.isEmpty() || !content.startsWith("http"))) {
-                String url = di.getMediaUrl();
-                if (url == null) url = deepFindMediaUrl(item, type);
-                if (url != null) content = url;
+                // Prefer the scored, type-aware search: it picks the instagram.com permalink for
+                // reshares (so the viewer opens them inside Instagram) and the real CDN .jpg/.mp4/.m4a
+                // for direct media (so the external "open with" chooser works), and rejects avatars.
+                // The patch-time entity resolver is a genuine fallback only — it yields a single
+                // unscored url (a CDN thumbnail, never the permalink) that must not displace a better
+                // scored result, or reshares stop opening in-app and non-http values hide the row.
+                String url = deepFindMediaUrl(item, type);
+                if (url == null || !url.startsWith("http")) {
+                    String entityUrl = di.getMediaUrl();
+                    if (entityUrl != null && entityUrl.startsWith("http")) url = entityUrl;
+                }
+                if (url != null && url.startsWith("http")) content = url;
             }
 
             if (messageId == null) {
