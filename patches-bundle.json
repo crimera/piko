@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-07-08T13:09:29",
-  "description": "## [1.2.0](https://github.com/Utsavrajputt/piko/compare/v1.1.0...v1.2.0) (2026-07-08)\n\n### ✨ New Features\n\n* Added auto story download wishlist tab ([61a003c](https://github.com/Utsavrajputt/piko/commit/61a003c07de715c274aab85b41ec5a6f8cf41b76))",
-  "download_url": "https://github.com/Utsavrajputt/piko/releases/download/v1.2.0/patches-1.2.0.mpp",
+  "created_at": "2026-07-10T13:35:59",
+  "description": "## [1.3.0](https://github.com/Utsavrajputt/piko/compare/v1.2.0...v1.3.0) (2026-07-10)\n\n### 🐛 Bug Fixes\n\n* Update project title to focus on Instagram ([4785bc9](https://github.com/Utsavrajputt/piko/commit/4785bc95a1bbe1de9f401c5cf3de377bf2ac2518))\n\n### ✨ New Features\n\n* added colored icons ([4ed42a4](https://github.com/Utsavrajputt/piko/commit/4ed42a4de5b00365831e2d3e32f3222d34164d9f))",
+  "download_url": "https://github.com/Utsavrajputt/piko/releases/download/v1.3.0/patches-1.3.0.mpp",
   "signature_download_url": "",
-  "version": "1.2.0"
+  "version": "1.3.0"
 }

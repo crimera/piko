@@ -1,3 +1,13 @@
+## [1.3.0](https://github.com/Utsavrajputt/piko/compare/v1.2.0...v1.3.0) (2026-07-10)
+
+### 🐛 Bug Fixes
+
+* Update project title to focus on Instagram ([4785bc9](https://github.com/Utsavrajputt/piko/commit/4785bc95a1bbe1de9f401c5cf3de377bf2ac2518))
+
+### ✨ New Features
+
+* added colored icons ([4ed42a4](https://github.com/Utsavrajputt/piko/commit/4ed42a4de5b00365831e2d3e32f3222d34164d9f))
+
 ## [1.2.0](https://github.com/Utsavrajputt/piko/compare/v1.1.0...v1.2.0) (2026-07-08)
 
 ### ✨ New Features
