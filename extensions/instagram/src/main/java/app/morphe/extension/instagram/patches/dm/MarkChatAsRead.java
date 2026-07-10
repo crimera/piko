@@ -11,6 +11,8 @@ import java.util.List;
 import android.content.Context;
 
 import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.crimera.ObjectBrowser;
+
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.utils.Pref;
 
@@ -104,6 +106,9 @@ public class MarkChatAsRead {
 
     public static List addButton(List buttonList){
         try{
+            if(Pref.pikoDebug()){
+                buttonList.add(getButton("THREAD_LEVEL_DEBUG"));
+            }
             if(Pref.enableMarkChatAsReadOption()){
                 buttonList.add(getButton("MARK_AS_READ"));
             }
@@ -118,9 +123,14 @@ public class MarkChatAsRead {
     // Return false = other button press check.
     public static boolean buttonAction(Context context, UserSession userSession,Object buttonPressed, Object unknown, DirectThreadKey directThreadKey){
         try {
-            if(buttonPressed.toString().equals("MARK_AS_READ")){
-               MarkChatAsRead.markAsRead(userSession, unknown, directThreadKey);
-               return true;
+            String buttonEnumTag = buttonPressed.toString();
+
+            if(buttonEnumTag.equals("MARK_AS_READ")){
+                MarkChatAsRead.markAsRead(userSession, unknown, directThreadKey);
+                return true;
+            } else if(buttonEnumTag.equals("THREAD_LEVEL_DEBUG")){
+                ObjectBrowser.browseObject(context, unknown);
+                return true;
             }
         } catch (Exception e) {
             PikoUtils.logger(e);
