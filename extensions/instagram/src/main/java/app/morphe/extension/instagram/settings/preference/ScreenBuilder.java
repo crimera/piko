@@ -823,22 +823,22 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.dmSection()){
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_category_dm"),
-                            "",
-                            Constants.PIKO_FRAGMENT_DM
-                    )
-            );
-        }
-
         if (SettingsStatus.ghostSection()){
             addPreference(
                     helper.buttonPreference(
                             str("piko_category_ghost"),
                             "",
                             Constants.PIKO_FRAGMENT_GHOST
+                    )
+            );
+        }
+
+        if (SettingsStatus.dmSection()){
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_category_dm"),
+                            "",
+                            Constants.PIKO_FRAGMENT_DM
                     )
             );
         }
