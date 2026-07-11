@@ -39,7 +39,7 @@ val moreProfileInfoPatch =
 
             var setTweetViewStatMethodCall: MethodReference
             ProfileStatViewLoaderFingerprint.apply {
-                val filterIndex = instructionMatches.first().index
+                val filterIndex = instructionMatches.last().index
                 method.apply {
 
                     val methodInvokeInstruction = indexOfFirstInstruction(filterIndex, Opcode.INVOKE_STATIC)
