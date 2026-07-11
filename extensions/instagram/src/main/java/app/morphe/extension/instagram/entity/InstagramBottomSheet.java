@@ -47,7 +47,7 @@ public class InstagramBottomSheet {
     }
 
     /** What to draw inside a row's colored square icon. */
-    public enum IconType { PERSON, TEXT, DOCUMENT, DOWNLOAD, REFRESH }
+    public enum IconType { PERSON, TEXT, DOCUMENT, DOWNLOAD, REFRESH, PHOTO, MUSIC, LAYERS }
 
     /** Describes a row's leading icon: shape/glyph + background color. */
     public static class IconSpec {
@@ -66,6 +66,9 @@ public class InstagramBottomSheet {
         public static IconSpec document(int color) { return new IconSpec(IconType.DOCUMENT, null, color); }
         public static IconSpec download(int color) { return new IconSpec(IconType.DOWNLOAD, null, color); }
         public static IconSpec refresh(int color) { return new IconSpec(IconType.REFRESH, null, color); }
+        public static IconSpec photo(int color) { return new IconSpec(IconType.PHOTO, null, color); }
+        public static IconSpec music(int color) { return new IconSpec(IconType.MUSIC, null, color); }
+        public static IconSpec layers(int color) { return new IconSpec(IconType.LAYERS, null, color); }
     }
 
     private final Context context;
@@ -288,6 +291,48 @@ public class InstagramBottomSheet {
                     arrow.lineTo(cx + w * 0.13f, cy - h * 0.04f);
                     canvas.drawPath(arrow, strokePaint);
                     canvas.drawLine(cx - w * 0.20f, cy + h * 0.24f, cx + w * 0.20f, cy + h * 0.24f, strokePaint);
+                    break;
+                }
+                case PHOTO: {
+                    RectF frame = new RectF(cx - w * 0.28f, cy - h * 0.22f, cx + w * 0.28f, cy + h * 0.22f);
+                    canvas.drawRoundRect(frame, dp2(getContext()), dp2(getContext()), strokePaint);
+                    canvas.drawCircle(cx - w * 0.12f, cy - h * 0.08f, h * 0.06f, fillPaint);
+                    Path mountain = new Path();
+                    mountain.moveTo(cx - w * 0.22f, cy + h * 0.18f);
+                    mountain.lineTo(cx - w * 0.02f, cy - h * 0.02f);
+                    mountain.lineTo(cx + w * 0.10f, cy + h * 0.10f);
+                    mountain.lineTo(cx + w * 0.22f, cy - h * 0.06f);
+                    mountain.lineTo(cx + w * 0.22f, cy + h * 0.18f);
+                    mountain.close();
+                    canvas.drawPath(mountain, fillPaint);
+                    break;
+                }
+                case MUSIC: {
+                    canvas.drawCircle(cx - w * 0.14f, cy + h * 0.16f, h * 0.11f, fillPaint);
+                    canvas.drawLine(cx - w * 0.03f, cy + h * 0.16f, cx - w * 0.03f, cy - h * 0.22f, strokePaint);
+                    Path flag = new Path();
+                    flag.moveTo(cx - w * 0.03f, cy - h * 0.22f);
+                    flag.quadTo(cx + w * 0.22f, cy - h * 0.14f, cx - w * 0.03f, cy - h * 0.02f);
+                    canvas.drawPath(flag, strokePaint);
+                    break;
+                }
+                case LAYERS: {
+                    float layerW = w * 0.30f;
+                    float layerH = h * 0.10f;
+                    for (int i = 0; i < 3; i++) {
+                        float offsetY = cy - h * 0.16f + i * (h * 0.16f);
+                        Path diamond = new Path();
+                        diamond.moveTo(cx, offsetY - layerH);
+                        diamond.lineTo(cx + layerW, offsetY);
+                        diamond.lineTo(cx, offsetY + layerH);
+                        diamond.lineTo(cx - layerW, offsetY);
+                        diamond.close();
+                        if (i == 2) {
+                            canvas.drawPath(diamond, fillPaint);
+                        } else {
+                            canvas.drawPath(diamond, strokePaint);
+                        }
+                    }
                     break;
                 }
                 case REFRESH: {

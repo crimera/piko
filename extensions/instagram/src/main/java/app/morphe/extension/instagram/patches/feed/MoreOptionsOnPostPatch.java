@@ -9,81 +9,75 @@ package app.morphe.extension.instagram.patches.feed;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
-import android.os.Build;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
+import android.graphics.Color;
 
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
-import app.morphe.extension.instagram.entity.InstagramDialogBox;
+import app.morphe.extension.instagram.entity.InstagramBottomSheet;
 import app.morphe.extension.instagram.entity.MediaData;
-import app.morphe.extension.instagram.entity.UserData;
+import app.morphe.extension.instagram.constants.PostType;
+import app.morphe.extension.crimera.downloader.MediaType;
 
 import com.instagram.common.session.UserSession;
 
 public class MoreOptionsOnPostPatch {
 
-    public static void postMoreOptions(Context context,  UserSession userSession, Object mediaObject, int currentMediaIndex) {
+    public static void postMoreOptions(Context context, UserSession userSession, Object mediaObject, int currentMediaIndex) {
         try {
-            MediaData mediaData = new MediaData(mediaObject, userSession);
+            MediaData mediaInfo = new MediaData(mediaObject, userSession);
+            int position = currentMediaIndex < 0 ? 0 : currentMediaIndex;
+            MediaData currentMediaData = mediaInfo.getMediaAt(position);
 
-            InstagramDialogBox dialog = new InstagramDialogBox(context);
+            boolean hasAudio = currentMediaData.hasAudio();
+            int carouselSize = mediaInfo.getCarouselSize();
 
-            ArrayList<String> options = new ArrayList<>();
+            PostType postType = mediaInfo.getPostType();
+            String downloadLabel;
+            if (postType.equals(PostType.REEL)) {
+                downloadLabel = str("piko_download_reel");
+            } else if (postType.equals(PostType.STORY)) {
+                downloadLabel = str("piko_download_story");
+            } else {
+                downloadLabel = str("piko_download_post");
+            }
 
-            options.add(str("piko_copy_post_description"));
-            options.add(str("piko_copy_post_owner_username"));
-            options.add(str("piko_copy_post_owner_fullname"));
-            options.add(str("piko_download_options"));
-            CharSequence[] items = options.toArray(new CharSequence[0]);
+            InstagramBottomSheet sheet = new InstagramBottomSheet(context);
+            sheet.setTitle(str("piko_more_options"));
 
-            dialog.addDialogMenuItems(items, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface d, int which) {
-                    try {
-                        // Doing like this because options are dynamic.
-                        String selectedOption = options.get(which);
-                        String stringToCopy = null;
-
-                        if (selectedOption.equals(str("piko_copy_post_description"))) {
-                            stringToCopy = mediaData.getDescriptionText();
-
-                        } else if (selectedOption.equals(str("piko_copy_post_owner_username"))) {
-                            UserData userData = mediaData.getUserData();
-                            stringToCopy = userData.getUsername();
-
-                        } else if (selectedOption.equals(str("piko_copy_post_owner_fullname"))) {
-                            UserData userData = mediaData.getUserData();
-                            stringToCopy = userData.getFullname();
-
-                        } else if (selectedOption.equals(str("piko_download_options"))) {
-                            DownloadUtils.downloadPost(context, userSession, mediaObject, currentMediaIndex);
-
-                        }
-                        if (stringToCopy != null && stringToCopy.length() > 0) {
-                            Utils.setClipboard(stringToCopy);
+            sheet.addItem(str("piko_copy_post_description"),
+                    InstagramBottomSheet.IconSpec.document(Color.parseColor("#5B4EE0")),
+                    () -> {
+                        String description = mediaInfo.getDescriptionText();
+                        if (description != null && description.length() > 0) {
+                            Utils.setClipboard(description);
                             Utils.showToastShort(str("piko_copied"));
                         }
-                    } catch (Exception e) {
-                        Logger.printException(() -> "Error at postMoreOptions addDialogMenuItems", e);
-                        Utils.showToastShort(e.getMessage());
-                    }
-                }
-            });
+                    });
 
-            dialog.setTitle(str("piko_post_options"));
-            dialog.setCancelable(true);
-            dialog.setCanceledOnTouchOutside(true);
+            sheet.addItem(downloadLabel,
+                    InstagramBottomSheet.IconSpec.download(Color.parseColor("#2E8B3D")),
+                    () -> DownloadUtils.downloadMedia(context, mediaInfo, position, MediaType.ANY));
 
-            Dialog dlg = dialog.getDialog();
-            dlg.show();
+            sheet.addItem(str("piko_download_current_image"),
+                    InstagramBottomSheet.IconSpec.photo(Color.parseColor("#2F6FE0")),
+                    () -> DownloadUtils.downloadMedia(context, mediaInfo, position, MediaType.IMAGE));
 
+            if (hasAudio) {
+                sheet.addItem(str("piko_download_audio"),
+                        InstagramBottomSheet.IconSpec.music(Color.parseColor("#C2185B")),
+                        () -> DownloadUtils.downloadMedia(context, mediaInfo, position, MediaType.AUDIO));
+            }
+
+            if (carouselSize > 1) {
+                sheet.addItem(str("piko_download_all_slides"),
+                        InstagramBottomSheet.IconSpec.layers(Color.parseColor("#C77B1E")),
+                        () -> DownloadUtils.downloadMedia(context, mediaInfo, -1, MediaType.ANY));
+            }
+
+            sheet.show();
 
         } catch (Exception e) {
             Logger.printException(() -> "postMoreOptions failure", e);
