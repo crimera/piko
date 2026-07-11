@@ -22,6 +22,7 @@ import app.morphe.extension.instagram.settings.preference.widgets.*;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.constants.UI;
 
 public class ScreenBuilder {
     private final Context context;
@@ -393,52 +394,24 @@ public class ScreenBuilder {
     public void buildMiscSection() {
         if (!(SettingsStatus.miscSection())) return;
 
-        // PreferenceCategory category= addCategory(str("piko_category_misc"));
-        if (SettingsStatus.unlockPlusBenefits) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_unlock_plus_benefits"),
-                            str("piko_unlock_plus_benefits_desc"),
-                            Settings.UNLOCK_PLUS_BENEFITS
-                    )
-            );
-        }
-        if (SettingsStatus.changeLikeAnimation) {
-            addPreference(
-                    helper.listPreference(
-                            str("piko_change_like_animation"),
-                            str("piko_change_like_animation_desc"),
-                            Settings.CHANGE_LIKE_ANIMATION
-                    )
-            );
-        }
-        if (SettingsStatus.disableAnalytics) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_analytics"),
-                            str("piko_disable_analytics_desc"),
-                            Settings.DISABLE_ANALYTICS
-                    )
-            );
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_delete_analytics_cache"),
-                            "",
-                            "piko_delete_analytics_cache"
-                    )
-            );
-        }
+        // --- Profile ---
+        boolean hasProfileItems = SettingsStatus.moreOptionsOnProfile || SettingsStatus.moreOptionsOnPost
+                || SettingsStatus.disableDiscoverPeople || SettingsStatus.followBackIndicator
+                || SettingsStatus.removeEmptyBottomSpace;
+        PreferenceCategory profileCategory = hasProfileItems ? addCategory(str("piko_category_misc_profile")) : null;
+
         if (SettingsStatus.moreOptionsOnProfile) {
-            addPreference(
+            addPreference(profileCategory,
                     helper.switchPreference(
                             str("piko_more_profile_options_action_bar_toggle"),
                             str("piko_more_profile_options_action_bar_toggle_desc"),
-                            Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE
+                            Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE,
+                            UI.DRAWABLE_STACK_ICON
                     )
             );
         }
         if (SettingsStatus.moreOptionsOnPost) {
-            addPreference(
+            addPreference(profileCategory,
                     helper.switchPreference(
                             str("piko_enable_more_options_on_post"),
                             str("piko_enable_more_options_on_post_desc"),
@@ -446,26 +419,8 @@ public class ScreenBuilder {
                     )
             );
         }
-        if (SettingsStatus.disableVideoAutoplay) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_video_autoplay"),
-                            "",
-                            Settings.DISABLE_VIDEO_AUTOPLAY
-                    )
-            );
-        }
-        if (SettingsStatus.storiesAudioAutoplay) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_stories_audio_autoplay"),
-                            "",
-                            Settings.STORIES_AUDIO_AUTOPLAY
-                    )
-            );
-        }
         if (SettingsStatus.disableDiscoverPeople) {
-            addPreference(
+            addPreference(profileCategory,
                     helper.switchPreference(
                             str("piko_disable_discover_people"),
                             str("piko_disable_discover_people_desc"),
@@ -474,25 +429,52 @@ public class ScreenBuilder {
             );
         }
         if (SettingsStatus.followBackIndicator) {
-            addPreference(
+            addPreference(profileCategory,
                     helper.switchPreference(
                             str("piko_follow_back_indicator"),
                             str("piko_follow_back_indicator_desc"),
-                            Settings.FOLLOW_BACK_INDICATOR
+                            Settings.FOLLOW_BACK_INDICATOR,
+                            UI.DRAWABLE_INFO_ICON
+                    )
+            );
+        }
+        if (SettingsStatus.removeEmptyBottomSpace) {
+            addPreference(profileCategory,
+                    helper.switchPreference(
+                            str("piko_remove_empty_bottom_space"),
+                            str("piko_remove_empty_bottom_space_desc"),
+                            Settings.REMOVE_EMPTY_BOTTOM_SPACE
+                    )
+            );
+        }
+
+        // --- Stories ---
+        boolean hasStoriesItems = SettingsStatus.storiesAudioAutoplay || SettingsStatus.viewStoryMentions
+                || SettingsStatus.disableStoryFlipping || SettingsStatus.customiseStoryTimestamp
+                || SettingsStatus.customiseStoryRingSize || SettingsStatus.unlimitedReplaysOnEphemeralMedia;
+        PreferenceCategory storiesCategory = hasStoriesItems ? addCategory(str("piko_category_misc_stories")) : null;
+
+        if (SettingsStatus.storiesAudioAutoplay) {
+            addPreference(storiesCategory,
+                    helper.switchPreference(
+                            str("piko_stories_audio_autoplay"),
+                            str("piko_stories_audio_autoplay_desc"),
+                            Settings.STORIES_AUDIO_AUTOPLAY
                     )
             );
         }
         if (SettingsStatus.viewStoryMentions) {
-            addPreference(
+            addPreference(storiesCategory,
                     helper.switchPreference(
                             str("piko_view_story_mentions"),
-                            "",
-                            Settings.VIEW_STORY_MENTIONS
+                            str("piko_view_story_mentions_desc"),
+                            Settings.VIEW_STORY_MENTIONS,
+                            UI.DRAWABLE_INFO_ICON
                     )
             );
         }
         if (SettingsStatus.disableStoryFlipping) {
-            addPreference(
+            addPreference(storiesCategory,
                     helper.switchPreference(
                             str("piko_disable_story_flipping"),
                             str("piko_disable_story_flipping_desc"),
@@ -500,27 +482,27 @@ public class ScreenBuilder {
                     )
             );
         }
-
         if (SettingsStatus.customiseStoryTimestamp) {
-            addPreference(
+            addPreference(storiesCategory,
                     helper.listPreference(
                             str("piko_customise_story_timestamp"),
                             str("piko_customise_story_timestamp_desc"),
-                            Settings.CUSTOMISE_STORY_TIMESTAMP
+                            Settings.CUSTOMISE_STORY_TIMESTAMP,
+                            UI.DRAWABLE_BLUB_ICON
                     )
             );
         }
-        if(SettingsStatus.customiseStoryRingSize) {
-            addPreference(
+        if (SettingsStatus.customiseStoryRingSize) {
+            addPreference(storiesCategory,
                     helper.editTextNumPreference(
                             str("piko_customise_story_ring_size"),
                             str("piko_customise_story_ring_size_desc"),
-                            Settings.CUSTOMISE_STORY_RING_SIZE
+                            Settings.CUSTOMISE_STORY_RING_SIZE,
+                            UI.DRAWABLE_BLUB_ICON
                     ));
         }
-
         if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
-            addPreference(
+            addPreference(storiesCategory,
                     helper.switchPreference(
                             str("piko_unlimited_replays"),
                             str("piko_unlimited_replays_desc"),
@@ -529,27 +511,46 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.improveImageViewing) {
-            addPreference(
+        // --- Media & viewing ---
+        boolean hasMediaItems = SettingsStatus.disableVideoAutoplay || SettingsStatus.improveImageViewing
+                || SettingsStatus.hideReshareButton;
+        PreferenceCategory mediaCategory = hasMediaItems ? addCategory(str("piko_category_misc_media")) : null;
+
+        if (SettingsStatus.disableVideoAutoplay) {
+            addPreference(mediaCategory,
                     helper.switchPreference(
-                            str("piko_improve_image_viewing"),
-                            str("piko_improve_image_viewing_desc"),
-                            Settings.IMPROVE_IMAGE_VIEWING
+                            str("piko_disable_video_autoplay"),
+                            str("piko_disable_video_autoplay_desc"),
+                            Settings.DISABLE_VIDEO_AUTOPLAY
                     )
             );
         }
-
+        if (SettingsStatus.improveImageViewing) {
+            addPreference(mediaCategory,
+                    helper.switchPreference(
+                            str("piko_improve_image_viewing"),
+                            str("piko_improve_image_viewing_desc"),
+                            Settings.IMPROVE_IMAGE_VIEWING,
+                            UI.DRAWABLE_BLUB_ICON
+                    )
+            );
+        }
         if (SettingsStatus.hideReshareButton) {
-            addPreference(
+            addPreference(mediaCategory,
                     helper.switchPreference(
                             str("piko_hide_reshare_button"),
-                            "",
+                            str("piko_hide_reshare_button_desc"),
                             Settings.HIDE_RESHARE_BUTTON
                     )
             );
         }
+
+        // --- Comments ---
+        boolean hasCommentItems = SettingsStatus.copyCommentButton || SettingsStatus.saveMediaCommentButton;
+        PreferenceCategory commentsCategory = hasCommentItems ? addCategory(str("piko_category_misc_comments")) : null;
+
         if (SettingsStatus.copyCommentButton) {
-            addPreference(
+            addPreference(commentsCategory,
                     helper.switchPreference(
                             str("piko_copy_comment"),
                             str("piko_copy_comment_desc"),
@@ -558,20 +559,55 @@ public class ScreenBuilder {
             );
         }
         if (SettingsStatus.saveMediaCommentButton) {
-            addPreference(
+            addPreference(commentsCategory,
                     helper.switchPreference(
                             str("piko_save_media_comment"),
                             str("piko_save_media_comment_desc"),
-                            Settings.COMMENT_SAVE_MEDIA_BUTTON
+                            Settings.COMMENT_SAVE_MEDIA_BUTTON,
+                            UI.DRAWABLE_DOWNLOAD_ICON
                     )
             );
         }
-        if (SettingsStatus.removeEmptyBottomSpace) {
-            addPreference(
+
+        // --- Interaction ---
+        if (SettingsStatus.changeLikeAnimation) {
+            PreferenceCategory interactionCategory = addCategory(str("piko_category_misc_interaction"));
+            addPreference(interactionCategory,
+                    helper.listPreference(
+                            str("piko_change_like_animation"),
+                            str("piko_change_like_animation_desc"),
+                            Settings.CHANGE_LIKE_ANIMATION
+                    )
+            );
+        }
+
+        // --- Privacy & advanced ---
+        boolean hasAdvancedItems = SettingsStatus.disableAnalytics || SettingsStatus.unlockPlusBenefits;
+        PreferenceCategory advancedCategory = hasAdvancedItems ? addCategory(str("piko_category_misc_advanced")) : null;
+
+        if (SettingsStatus.disableAnalytics) {
+            addPreference(advancedCategory,
                     helper.switchPreference(
-                            str("piko_remove_empty_bottom_space"),
-                            "",
-                            Settings.REMOVE_EMPTY_BOTTOM_SPACE
+                            str("piko_disable_analytics"),
+                            str("piko_disable_analytics_desc"),
+                            Settings.DISABLE_ANALYTICS,
+                            UI.DRAWABLE_SHEILD_ICON
+                    )
+            );
+            addPreference(advancedCategory,
+                    helper.buttonPreference(
+                            str("piko_delete_analytics_cache"),
+                            str("piko_delete_analytics_cache_desc"),
+                            "piko_delete_analytics_cache"
+                    )
+            );
+        }
+        if (SettingsStatus.unlockPlusBenefits) {
+            addPreference(advancedCategory,
+                    helper.switchPreference(
+                            str("piko_unlock_plus_benefits"),
+                            str("piko_unlock_plus_benefits_desc"),
+                            Settings.UNLOCK_PLUS_BENEFITS
                     )
             );
         }

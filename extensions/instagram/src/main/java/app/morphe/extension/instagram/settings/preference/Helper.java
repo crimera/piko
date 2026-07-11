@@ -29,16 +29,25 @@ public class Helper {
     }
 
     public Preference switchPreference(String title, String summary, BooleanSetting setting) {
+        return switchPreference(title, summary, setting, null);
+    }
+
+    public Preference switchPreference(String title, String summary, BooleanSetting setting, String iconResName) {
         SwitchPref preference = new SwitchPref(context);
         preference.setTitle(title);
         preference.setSummary(summary);
         preference.setKey(setting.key);
         preference.setDefaultValue(setting.defaultValue);
         preference.setSingleLineTitle(false);
+        preference.setIconResName(iconResName);
         return preference;
     }
 
     public Preference listPreference(String title, String summary, StringSetting setting) {
+        return listPreference(title, summary, setting, null);
+    }
+
+    public Preference listPreference(String title, String summary, StringSetting setting, String iconResName) {
         ListPref preference = new ListPref(context);
         String key = setting.key;
         preference.setTitle(title);
@@ -47,19 +56,29 @@ public class Helper {
         preference.setKey(key);
         preference.setDefaultValue(setting.defaultValue);
         preference.setSingleLineTitle(false);
+        preference.setIconResName(iconResName);
         return preference;
     }
 
     public Preference buttonPreference(String title, String summary, String setting) {
+        return buttonPreference(title, summary, setting, null);
+    }
+
+    public Preference buttonPreference(String title, String summary, String setting, String iconResName) {
         ButtonPref preference = new ButtonPref(context);
         preference.setTitle(title);
         preference.setSummary(summary);
         preference.setKey(setting);
         preference.setSingleLineTitle(false);
+        preference.setIconResName(iconResName);
         return preference;
     }
 
     public Preference editTextPreference(String title, String summary, StringSetting setting) {
+        return editTextPreference(title, summary, setting, null);
+    }
+
+    public Preference editTextPreference(String title, String summary, StringSetting setting, String iconResName) {
         EditTextPref preference = new EditTextPref(context);
         preference.setTitle(title);
         preference.setDialogTitle(title);
@@ -67,11 +86,16 @@ public class Helper {
         preference.setKey(setting.key);
         preference.setDefaultValue(setting.defaultValue);
         preference.setSingleLineTitle(false);
+        preference.setIconResName(iconResName);
         return preference;
     }
 
     public Preference editTextNumPreference(String title, String summary, StringSetting setting) {
-        EditTextPref preference = (EditTextPref)editTextPreference(title,summary,setting);
+        return editTextNumPreference(title, summary, setting, null);
+    }
+
+    public Preference editTextNumPreference(String title, String summary, StringSetting setting, String iconResName) {
+        EditTextPref preference = (EditTextPref)editTextPreference(title,summary,setting,iconResName);
         preference.setNumericOnly(true);
         preference.setSingleLineTitle(false);
         return preference;

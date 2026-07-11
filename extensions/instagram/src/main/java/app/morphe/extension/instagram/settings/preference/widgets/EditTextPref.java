@@ -17,6 +17,11 @@ import app.morphe.extension.instagram.settings.preference.Helper;
 
 public class EditTextPref extends EditTextPreference {
     private static Helper helper;
+    private String iconResName;
+
+    public void setIconResName(String iconResName) {
+        this.iconResName = iconResName;
+    }
 
     public EditTextPref(Context context) {
         super(context);
@@ -56,7 +61,7 @@ public class EditTextPref extends EditTextPreference {
 
     @Override
     protected View onCreateView(ViewGroup parent) {
-        return InstagramPreferenceStyle.createPreferenceView(getContext(), InstagramPreferenceStyle.TRAILING_CHEVRON);
+        return InstagramPreferenceStyle.createPreferenceView(getContext(), InstagramPreferenceStyle.TRAILING_CHEVRON, iconResName);
     }
 
     @Override

@@ -19,6 +19,11 @@ import app.morphe.extension.instagram.settings.preference.Helper;
 
 public class ListPref extends ListPreference {
     private static Helper helper;
+    private String iconResName;
+
+    public void setIconResName(String iconResName) {
+        this.iconResName = iconResName;
+    }
 
     public ListPref(Context context) {
         super(context);
@@ -69,7 +74,7 @@ public class ListPref extends ListPreference {
 
     @Override
     protected View onCreateView(ViewGroup parent) {
-        return InstagramPreferenceStyle.createPreferenceView(getContext(), InstagramPreferenceStyle.TRAILING_CHEVRON);
+        return InstagramPreferenceStyle.createPreferenceView(getContext(), InstagramPreferenceStyle.TRAILING_CHEVRON, iconResName);
     }
 
     @Override

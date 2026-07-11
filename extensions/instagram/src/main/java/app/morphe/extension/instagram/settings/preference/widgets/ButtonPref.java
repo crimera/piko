@@ -25,6 +25,11 @@ import app.morphe.extension.instagram.constants.Constants;
 
 public class ButtonPref extends Preference {
     private final Context context;
+    private String iconResName;
+
+    public void setIconResName(String iconResName) {
+        this.iconResName = iconResName;
+    }
 
 
     public ButtonPref(Context context) {
@@ -89,7 +94,8 @@ public class ButtonPref extends Preference {
 
     @Override
     protected View onCreateView(ViewGroup parent) {
-        return InstagramPreferenceStyle.createPreferenceView(context, InstagramPreferenceStyle.TRAILING_CHEVRON,getIconResourceName(getKey()));
+        String icon = iconResName != null ? iconResName : getIconResourceName(getKey());
+        return InstagramPreferenceStyle.createPreferenceView(context, InstagramPreferenceStyle.TRAILING_CHEVRON, icon);
     }
 
     @Override
@@ -126,7 +132,9 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_FRAME_CROSSED_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_MISC)){
-            return UI.DRAWABLE_CODE_ICON;
+            // Gear reads as "general settings / catch-all" which fits Misc
+            // better than a code icon (that's more of a dev-options thing).
+            return UI.DRAWABLE_GEAR_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)){
             return UI.DRAWABLE_FB_DOWNLOAD_ICON;
@@ -135,7 +143,9 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_STACK_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_DEV_OPTIONS)){
-            return UI.DRAWABLE_GEAR_ICON;
+            // Code icon is a much clearer signal for "developer options"
+            // than a generic gear (which is now used by Misc).
+            return UI.DRAWABLE_CODE_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_ABOUT)){
             return UI.DRAWABLE_DEBUG_ICON;

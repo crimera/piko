@@ -19,6 +19,7 @@ public class SwitchPref extends SwitchPreference {
     private static Helper helper;
     private View rowView;
     private InstagramPreferenceStyle.SwitchView switchView;
+    private String iconResName;
     private boolean hasPendingAnimation;
     private boolean pendingFromChecked;
     private boolean pendingToChecked;
@@ -53,9 +54,13 @@ public class SwitchPref extends SwitchPreference {
         });
     }
 
+    public void setIconResName(String iconResName) {
+        this.iconResName = iconResName;
+    }
+
     @Override
     protected View onCreateView(ViewGroup parent) {
-        View view = InstagramPreferenceStyle.createPreferenceView(getContext(), InstagramPreferenceStyle.TRAILING_SWITCH);
+        View view = InstagramPreferenceStyle.createPreferenceView(getContext(), InstagramPreferenceStyle.TRAILING_SWITCH, iconResName);
         rowView = view;
         switchView = InstagramPreferenceStyle.findSwitch(view);
         return view;
