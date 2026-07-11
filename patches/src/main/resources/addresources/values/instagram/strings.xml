@@ -134,11 +134,13 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_downloaded_media">Downloaded: </string>
     <string name="piko_media_exists">Media exists</string>
     <string name="piko_download_failed_media">Download failed : </string>
-    <string name="piko_download_set_path">Set custom download path</string>
+    <string name="piko_download_set_path">Choose download folder</string>
     <string name="piko_download_set_path_success">Download directory updated!</string>
-    <string name="piko_download_set_path_failed">Failed to resolve folder path</string>
-    <string name="piko_download_grant_permission">Please grant storage access to continue downloads</string>
-    <string name="piko_download_grant_permission_failed">Could not open settings. Please grant All Files Access manually</string>
+    <string name="piko_download_set_path_failed">Failed to save download folder</string>
+    <string name="piko_download_choose_folder">Choose a download folder to continue</string>
+    <string name="piko_download_choose_folder_failed">Could not open folder picker</string>
+    <string name="piko_download_grant_permission">Choose a download folder to continue</string>
+    <string name="piko_download_grant_permission_failed">Could not open folder picker</string>
     <string name="piko_download_with_external_downloader">Download with external downloader</string>
     <string name="piko_external_downloader_package_name">External downloader package name</string>
     <string name="piko_external_downloader_package_name_not_found">External downloader package name not found</string>

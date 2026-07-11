@@ -7,13 +7,12 @@
 
 package app.morphe.extension.crimera.downloader;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import java.io.File;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.crimera.constants.ExtensionStrings;
@@ -45,26 +44,17 @@ public class FolderPickerActivity extends AppCompatActivity {
             Uri treeUri = data.getData();
             if (treeUri != null) {
                 try {
-                    // Persist access so the app can write here even after a reboot
+                    int flags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                     getContentResolver().takePersistableUriPermission(treeUri,
-                            Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                            flags);
 
-                    // Convert Uri to a physical path string
-                    String folderPath = FilePathHelper.getPathFromUri(this, treeUri);
-
-                    if (folderPath != null) {
-                        StorageUtils.saveCustomPath(folderPath);
-                        toast(ExtensionStrings.DOWNLOAD_SET_PATH_SUCCESS);
-
-                        File testDir = new File(folderPath);
-                        if (!StorageUtils.checkStoragePermissions()) {
-                            StorageUtils.allowStorageAccess();
-                        }
-                    } else {
-                        toast(ExtensionStrings.DOWNLOAD_SET_PATH_FAILED);
-                    }
+                    StorageUtils.saveCustomTreeUri(treeUri);
+                    StorageUtils.saveCustomPath(DocumentsContract.getTreeDocumentId(treeUri));
+                    toast(ExtensionStrings.DOWNLOAD_SET_PATH_SUCCESS);
                 } catch (Exception e) {
                     Logger.printException(() -> "setting path failure", e);
+                    toast(ExtensionStrings.DOWNLOAD_SET_PATH_FAILED);
                 }
             }
         }

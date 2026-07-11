@@ -17,10 +17,10 @@ public class ExtensionStrings {
     public static String DOWNLOAD_COMPLETED = "Downloaded: ";
     public static String DOWNLOAD_ERROR = "Download Error: ";
 
-    public static String DOWNLOAD_SET_PATH_FAILED = "Failed to resolve folder path";
+    public static String DOWNLOAD_SET_PATH_FAILED = "Failed to save download folder";
     public static String DOWNLOAD_SET_PATH_SUCCESS = "Download directory updated!";
-    public static String DOWNLOAD_GRANT_PERMISSION = "Please grant storage access to continue downloads";
-    public static String DOWNLOAD_GRANT_PERMISSION_FAILED = "Could not open settings. Please grant All Files Access manually";
+    public static String DOWNLOAD_GRANT_PERMISSION = "Choose a download folder to continue";
+    public static String DOWNLOAD_GRANT_PERMISSION_FAILED = "Could not open folder picker";
 
     public static void setDefaultPikoFolder(String defaultPikoFolder) {
         DEFAULT_PIKO_FOLDER = defaultPikoFolder;
