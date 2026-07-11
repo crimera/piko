@@ -57,6 +57,8 @@ public class MoreOptionsOnPostPatch {
                         }
                     });
 
+            boolean isStoryOrReel = postType.equals(PostType.REEL) || postType.equals(PostType.STORY);
+
             // Carousels are downloaded per-slide (current photo/video) or fully (all slides)
             // below, so the generic post/reel/story item only applies to single-media posts.
             if (!isCarousel) {
@@ -74,11 +76,19 @@ public class MoreOptionsOnPostPatch {
                         () -> DownloadUtils.downloadMedia(context, mediaInfo, position, MediaType.ANY));
             }
 
-            String currentMediaLabel = isVideo ? str("piko_download_current_video") : str("piko_download_current_photo");
-            MediaType currentMediaType = isVideo ? MediaType.VIDEO : MediaType.IMAGE;
-            sheet.addItem(currentMediaLabel,
-                    InstagramBottomSheet.IconSpec.photo(Color.parseColor("#2F6FE0")),
-                    () -> DownloadUtils.downloadMedia(context, mediaInfo, position, currentMediaType));
+            if (isStoryOrReel) {
+                // Unchanged from before: reel/story keep the plain "current image" item.
+                sheet.addItem(str("piko_download_current_image"),
+                        InstagramBottomSheet.IconSpec.photo(Color.parseColor("#2F6FE0")),
+                        () -> DownloadUtils.downloadMedia(context, mediaInfo, position, MediaType.IMAGE));
+            } else {
+                // Post/carousel: dynamic photo-vs-video label + matching download type.
+                String currentMediaLabel = isVideo ? str("piko_download_current_video") : str("piko_download_current_photo");
+                MediaType currentMediaType = isVideo ? MediaType.VIDEO : MediaType.IMAGE;
+                sheet.addItem(currentMediaLabel,
+                        InstagramBottomSheet.IconSpec.photo(Color.parseColor("#2F6FE0")),
+                        () -> DownloadUtils.downloadMedia(context, mediaInfo, position, currentMediaType));
+            }
 
             if (hasAudio) {
                 sheet.addItem(str("piko_download_audio"),

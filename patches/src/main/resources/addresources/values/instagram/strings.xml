@@ -162,6 +162,7 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_download_post">Download post</string>
     <string name="piko_download_reel">Download reel</string>
     <string name="piko_download_story">Download story</string>
+    <string name="piko_download_current_image">Download current image</string>
     <string name="piko_download_current_photo">Download current photo</string>
     <string name="piko_download_current_video">Download current video</string>
     <string name="piko_download_all_slides">Download all slides</string>
