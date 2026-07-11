@@ -16,12 +16,12 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.findFreeRegister
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction21c
 
-private object hideNudgeButtonPatchFingerprint : Fingerprint(
+private object HideNudgeButtonPatchFingerprint : Fingerprint(
     definingClass = "FollowNudgeButtonViewDelegateBinder;",
-    strings = listOf("viewDelegate", "viewModel"),
+    strings = listOf("viewModel"),
 )
 
 @Suppress("unused")
@@ -34,34 +34,24 @@ val hideNudgeButtonPatch =
         dependsOn(settingsPatch)
 
         execute {
-            val HOOK_DESCRIPTOR =
-                "invoke-static {}, $PREF_DESCRIPTOR;->hideNudgeButton()Z"
 
-            val method = hideNudgeButtonPatchFingerprint.method
-            val instructions = method.instructions
+            HideNudgeButtonPatchFingerprint.method.apply {
+                val toggleButtonIndex = instructions.filter { it.opcode == Opcode.IGET_OBJECT }[1].location.index
+                val dummyReg = findFreeRegister(toggleButtonIndex)
 
-            val newInst4 = instructions.filter { it.opcode == Opcode.NEW_INSTANCE }[3]
-            val newInst4Index = newInst4.location.index
-            val dummyReg = method.getInstruction<BuilderInstruction21c>(newInst4Index).registerA
+                addInstructionsWithLabels(
+                    toggleButtonIndex + 1,
+                    """
+                    invoke-static {}, $PREF_DESCRIPTOR;->hideNudgeButton()Z
+                    move-result v$dummyReg
+                    if-eqz v$dummyReg, :piko
+                    const/16 v$dummyReg, 0x8
+                    invoke-virtual {p1, v$dummyReg}, Landroidx/appcompat/widget/AppCompatButton;->setVisibility(I)V
+                    """.trimIndent(),
+                    ExternalLabel("piko", getInstruction(toggleButtonIndex + 1)),
+                )
 
-            method.addInstructionsWithLabels(
-                newInst4Index - 2,
-                """
-                $HOOK_DESCRIPTOR
-                move-result v$dummyReg
-                if-eqz v$dummyReg, :piko
-                const/16 v$dummyReg, 0x8
-                invoke-virtual {p1, v$dummyReg}, Landroidx/appcompat/widget/AppCompatButton;->setVisibility(I)V
-                """.trimIndent(),
-                ExternalLabel(
-                    "piko",
-                    instructions.last {
-                        it.opcode == Opcode.INVOKE_STATIC &&
-                            it.location.index < newInst4Index
-                    },
-                ),
-            )
-
-            enableSettings("hideNudgeButton")
+                enableSettings("hideNudgeButton")
+            }
         }
     }
