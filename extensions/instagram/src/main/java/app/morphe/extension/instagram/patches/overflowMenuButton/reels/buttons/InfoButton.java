@@ -10,6 +10,7 @@ package app.morphe.extension.instagram.patches.overflowMenuButton.reels.buttons;
 import android.view.View;
 import android.content.Context;
 import app.morphe.extension.instagram.patches.feed.MoreOptionsOnPostPatch;
+import app.morphe.extension.instagram.constants.PostType;
 
 public class InfoButton extends ReelButton {
     public InfoButton(Context context, Object mediaObject) {
@@ -18,6 +19,6 @@ public class InfoButton extends ReelButton {
 
     @Override
     public void onClick(View view) {
-        MoreOptionsOnPostPatch.postMoreOptions(this.context, null, this.mediaObject, 0);
+        MoreOptionsOnPostPatch.postMoreOptions(this.context, null, this.mediaObject, 0, PostType.REEL);
     }
 }

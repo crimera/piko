@@ -732,6 +732,14 @@ public class ScreenBuilder {
 
         addPreference(
                 helper.switchPreference(
+                        str("piko_settings_use_x_icon"),
+                        str("piko_settings_use_x_icon_desc"),
+                        Settings.PIKO_SETTINGS_USE_X_ICON
+                )
+        );
+
+        addPreference(
+                helper.switchPreference(
                         str("piko_debug"),
                         str("piko_debug_desc"),
                         Settings.PIKO_DEBUG

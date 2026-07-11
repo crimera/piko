@@ -15,6 +15,7 @@ import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.patches.userprofile.ProfileMoreOption;
 import app.morphe.extension.instagram.entity.UserData;
+import app.morphe.extension.instagram.entity.ProfileMoreOptionsIcon;
 
 public class UserProfileActionBar {
 
@@ -27,7 +28,7 @@ public class UserProfileActionBar {
 
                 Context context = viewGroup.getContext();
                 UserData userData = new UserData(userObject);
-                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_INFO_ICON, () -> ProfileMoreOption.moreOptionsDailogueBox(context, userData));
+                UI.addImageViewToViewGroup(viewGroup, new ProfileMoreOptionsIcon(context), () -> ProfileMoreOption.moreOptionsDailogueBox(context, userData));
             }
 
         } catch (Exception e) {

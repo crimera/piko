@@ -32,6 +32,7 @@ import app.morphe.extension.shared.ui.Dim;
 import app.morphe.extension.crimera.constants.TooltipHelper;
 import app.morphe.extension.instagram.entity.InstagramButton;
 import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
+import app.morphe.extension.instagram.entity.PikoXIcon;
 
 public class UI {
 
@@ -112,18 +113,69 @@ public class UI {
         return null;
     }
 
+    public static ImageView addImageViewToViewGroup(ViewGroup viewGroup, Drawable customDrawable, Runnable action) {
+        try {
+            if (viewGroup == null) {
+                return null;
+            }
+
+            Context context = viewGroup.getContext();
+            ImageView imageView = new ImageView(context);
+
+            imageView.setImageDrawable(customDrawable);
+            imageView.setColorFilter(new PorterDuffColorFilter(getThemedColour(), PorterDuff.Mode.SRC_ATOP));
+
+            ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            imageView.setLayoutParams(params);
+            if (action != null) {
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            action.run();
+                        } catch (Exception ex) {
+                            Logger.printException(() -> "addImageViewToViewGroup click failed: ", ex);
+                        }
+                    }
+                });
+            }
+            int padding = Dim.dp16;
+            imageView.setPadding(padding, padding, padding, padding);
+
+            int count = viewGroup.getChildCount();
+            int insertIndex = count - 1;
+            if (insertIndex < 0) {
+                insertIndex = 0;
+            }
+
+            viewGroup.addView(imageView, insertIndex);
+            return imageView;
+        } catch (Exception e) {
+            Logger.printException(() -> "Failed addImageViewToViewGroup: ", e);
+        }
+        return null;
+    }
+
     public static void pikoSettingsGear(ViewGroup viewGroup) {
         try {
             if (viewGroup == null) {
                 return;
             }
 
-            ImageView imageView = UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_GEAR_ICON, FragmentHook::startSettings);
+            Context context = viewGroup.getContext();
+            ImageView imageView;
+            if (Pref.pikoSettingsUseXIcon()) {
+                imageView = UI.addImageViewToViewGroup(viewGroup, new PikoXIcon(context), FragmentHook::startSettings);
+            } else {
+                imageView = UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_GEAR_ICON, FragmentHook::startSettings);
+            }
             if (imageView == null) {
                 return;
             }
 
-            Context context = viewGroup.getContext();
             boolean isFirstTime = Pref.firstTimePiko();
             if(isFirstTime) {
                 TooltipHelper.showPersistentTooltip(context, imageView, str("piko_tap_here"));

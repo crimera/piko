@@ -162,7 +162,8 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_download_post">Download post</string>
     <string name="piko_download_reel">Download reel</string>
     <string name="piko_download_story">Download story</string>
-    <string name="piko_download_current_image">Download current image</string>
+    <string name="piko_download_current_photo">Download current photo</string>
+    <string name="piko_download_current_video">Download current video</string>
     <string name="piko_download_all_slides">Download all slides</string>
 
     <!-- Navigation Section -->
@@ -226,4 +227,6 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <!-- Action Bar Section -->
     <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
     <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
+    <string name="piko_settings_use_x_icon">Use X icon for Piko settings</string>
+    <string name="piko_settings_use_x_icon_desc">Show the red X icon instead of the gear icon for the Piko settings button</string>
 </resources>

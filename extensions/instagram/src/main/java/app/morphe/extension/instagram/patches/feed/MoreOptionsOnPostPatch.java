@@ -25,24 +25,24 @@ import com.instagram.common.session.UserSession;
 
 public class MoreOptionsOnPostPatch {
 
-    public static void postMoreOptions(Context context, UserSession userSession, Object mediaObject, int currentMediaIndex) {
+    /**
+     * @param surfaceHint When known at the call site (reel player, story viewer), pass the
+     *                    exact {@link PostType} so the label doesn't depend on reading Instagram's
+     *                    obfuscated post-type field, which is unreliable for reels embedded in feed
+     *                    (see {@link MediaData#getPostType()}). Pass {@code null} to auto-detect.
+     */
+    public static void postMoreOptions(Context context, UserSession userSession, Object mediaObject, int currentMediaIndex, PostType surfaceHint) {
         try {
             MediaData mediaInfo = new MediaData(mediaObject, userSession);
             int position = currentMediaIndex < 0 ? 0 : currentMediaIndex;
             MediaData currentMediaData = mediaInfo.getMediaAt(position);
 
             boolean hasAudio = currentMediaData.hasAudio();
+            boolean isVideo = currentMediaData.isVideo();
             int carouselSize = mediaInfo.getCarouselSize();
+            boolean isCarousel = carouselSize > 1;
 
-            PostType postType = mediaInfo.getPostType();
-            String downloadLabel;
-            if (postType.equals(PostType.REEL)) {
-                downloadLabel = str("piko_download_reel");
-            } else if (postType.equals(PostType.STORY)) {
-                downloadLabel = str("piko_download_story");
-            } else {
-                downloadLabel = str("piko_download_post");
-            }
+            PostType postType = surfaceHint != null ? surfaceHint : mediaInfo.getPostType();
 
             InstagramBottomSheet sheet = new InstagramBottomSheet(context);
             sheet.setTitle(str("piko_more_options"));
@@ -57,13 +57,28 @@ public class MoreOptionsOnPostPatch {
                         }
                     });
 
-            sheet.addItem(downloadLabel,
-                    InstagramBottomSheet.IconSpec.download(Color.parseColor("#2E8B3D")),
-                    () -> DownloadUtils.downloadMedia(context, mediaInfo, position, MediaType.ANY));
+            // Carousels are downloaded per-slide (current photo/video) or fully (all slides)
+            // below, so the generic post/reel/story item only applies to single-media posts.
+            if (!isCarousel) {
+                String downloadLabel;
+                if (postType.equals(PostType.REEL)) {
+                    downloadLabel = str("piko_download_reel");
+                } else if (postType.equals(PostType.STORY)) {
+                    downloadLabel = str("piko_download_story");
+                } else {
+                    downloadLabel = str("piko_download_post");
+                }
 
-            sheet.addItem(str("piko_download_current_image"),
+                sheet.addItem(downloadLabel,
+                        InstagramBottomSheet.IconSpec.download(Color.parseColor("#2E8B3D")),
+                        () -> DownloadUtils.downloadMedia(context, mediaInfo, position, MediaType.ANY));
+            }
+
+            String currentMediaLabel = isVideo ? str("piko_download_current_video") : str("piko_download_current_photo");
+            MediaType currentMediaType = isVideo ? MediaType.VIDEO : MediaType.IMAGE;
+            sheet.addItem(currentMediaLabel,
                     InstagramBottomSheet.IconSpec.photo(Color.parseColor("#2F6FE0")),
-                    () -> DownloadUtils.downloadMedia(context, mediaInfo, position, MediaType.IMAGE));
+                    () -> DownloadUtils.downloadMedia(context, mediaInfo, position, currentMediaType));
 
             if (hasAudio) {
                 sheet.addItem(str("piko_download_audio"),
@@ -71,7 +86,7 @@ public class MoreOptionsOnPostPatch {
                         () -> DownloadUtils.downloadMedia(context, mediaInfo, position, MediaType.AUDIO));
             }
 
-            if (carouselSize > 1) {
+            if (isCarousel) {
                 sheet.addItem(str("piko_download_all_slides"),
                         InstagramBottomSheet.IconSpec.layers(Color.parseColor("#C77B1E")),
                         () -> DownloadUtils.downloadMedia(context, mediaInfo, -1, MediaType.ANY));
@@ -82,6 +97,10 @@ public class MoreOptionsOnPostPatch {
         } catch (Exception e) {
             Logger.printException(() -> "postMoreOptions failure", e);
         }
+    }
+
+    public static void postMoreOptions(Context context, UserSession userSession, Object mediaObject, int currentMediaIndex) {
+        postMoreOptions(context, userSession, mediaObject, currentMediaIndex, null);
     }
 
 }

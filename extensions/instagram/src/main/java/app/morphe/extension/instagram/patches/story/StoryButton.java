@@ -18,6 +18,7 @@ import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.patches.feed.MoreOptionsOnPostPatch;
+import app.morphe.extension.instagram.constants.PostType;
 import app.morphe.extension.crimera.ObjectBrowser;
 
 import com.instagram.common.session.UserSession;
@@ -53,7 +54,7 @@ public class StoryButton {
                 ViewStoryMentionsPatch.viewMentions(ctx, mediaObject);
                 return true;
             } else if (buttonText.equals(str("piko_more_options"))) {
-                MoreOptionsOnPostPatch.postMoreOptions(ctx, null, mediaObject, 0);
+                MoreOptionsOnPostPatch.postMoreOptions(ctx, null, mediaObject, 0, PostType.STORY);
                 return true;
             } else if (buttonText.equals(str("piko_debug"))) {
                 ObjectBrowser.browseObject(ctx, new MediaData(mediaObject));

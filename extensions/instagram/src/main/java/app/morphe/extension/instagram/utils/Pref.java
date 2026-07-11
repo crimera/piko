@@ -18,6 +18,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.PIKO_SETTINGS_ON_ACTION_BAR);
     }
 
+    public static boolean pikoSettingsUseXIcon() {
+        return SharedPref.getBooleanPref(Settings.PIKO_SETTINGS_USE_X_ICON);
+    }
+
     public static boolean pikoDebug() {
         return SharedPref.getBooleanPref(Settings.PIKO_DEBUG);
     }
