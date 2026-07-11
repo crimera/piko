@@ -1,5 +1,15 @@
 ## [1.4.0](https://github.com/Utsavrajputt/piko/compare/v1.3.0...v1.4.0) (2026-07-11)
 
+### 🐛 Bug Fixes
+
+* typo in Morphe Manager heading ([5c00f02](https://github.com/Utsavrajputt/piko/commit/5c00f022975dff38061aa791a37e2e39664f0d50))
+
+### ✨ New Features
+
+* Redesigned more options on post/stories/reel ([b37ee17](https://github.com/Utsavrajputt/piko/commit/b37ee17e3291d8cf0f3614a35ac9103f64c33c0b))
+
+## [1.4.0](https://github.com/Utsavrajputt/piko/compare/v1.3.0...v1.4.0) (2026-07-11)
+
 ### ✨ New Features
 
 * Redesigned more options on post/stories/reel ([b37ee17](https://github.com/Utsavrajputt/piko/commit/b37ee17e3291d8cf0f3614a35ac9103f64c33c0b))
