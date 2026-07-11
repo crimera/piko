@@ -4,7 +4,7 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
-package app.crimera.patches.twitter.entity
+package app.crimera.patches.twitter.entity.tweet
 
 import app.crimera.patches.twitter.utils.Constants.ENTITY_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
@@ -16,9 +16,7 @@ import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
 private const val ENTITY_TWEET_DEFINING_CLASS = "${ENTITY_DESCRIPTOR}Tweet"
-private const val ENTITY_EXT_MEDIA_DEFINING_CLASS = "${ENTITY_DESCRIPTOR}ExtMediaEntities"
 
-// --------------- Tweet
 internal object TweetObjectFingerprint : Fingerprint(
     filters =
         listOf(
@@ -115,54 +113,9 @@ internal object LongTweetObjectFingerprint : Fingerprint(
         ),
 )
 
-internal object QuotedViewSetAccessibilityFingerprint : Fingerprint(
-    definingClass = "Lcom/twitter/tweetview/core/QuoteView;",
-    name = "setAccessibility",
-)
-
-// --------------- Extended Media Entity
-// Also required for download patch.
-object MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint : Fingerprint(
-    returnType = "Z",
-    strings = listOf("url", "video_download"),
-    custom = { _, classDef ->
-        classDef.startsWith("Lcom/twitter/tweetview/core/ui/mediaoptionssheet/")
-    },
-)
-
-internal object ExtMediaHighResVideoFingerprint : Fingerprint(
-    definingClass = ENTITY_EXT_MEDIA_DEFINING_CLASS,
-    name = "getHighResVideo",
-)
-
-internal object ExtMediaGetImageFingerprint : Fingerprint(
-    definingClass = ENTITY_EXT_MEDIA_DEFINING_CLASS,
-    name = "getImageUrl",
-)
-
-internal object ExtMediaGetImageMethodFinder : Fingerprint(
-    definingClass = "Lcom/twitter/model/json/unifiedcard/JsonAppStoreData;",
-    strings =
-        listOf(
-            "type",
-            "id",
-        ),
-)
-
-// --------------- TweetInfo
-internal object TweetInfoObjectFingerprint : Fingerprint(
-    strings =
-        listOf(
-            "flags",
-            "lang",
-            "supplemental_language",
-        ),
-    custom = { methodDef, classDef ->
-        methodDef.parameters.size == 2 && classDef.contains("/tdbh/")
-    },
-)
-
-internal object TweetLangFingerprint : Fingerprint(
-    definingClass = "${ENTITY_DESCRIPTOR}TweetInfo;",
-    name = "getLang",
+internal object GetTextFromTextObjectFingerprint : Fingerprint(
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
+    name = "getText",
+    returnType = "Ljava/lang/CharSequence;",
+    definingClass = "Lcom/twitter/model/core/entity/",
 )
