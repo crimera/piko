@@ -6,7 +6,7 @@
 
 package app.crimera.patches.twitter.premium.unlockdownloads
 
-import app.crimera.patches.twitter.entity.MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint
+import app.crimera.patches.twitter.entity.extMedia.MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings

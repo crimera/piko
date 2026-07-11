@@ -4,12 +4,11 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
-package app.crimera.patches.twitter.entity
+package app.crimera.patches.twitter.entity.extMedia
 
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
 import app.crimera.utils.getFieldName
-import app.crimera.utils.getMethodName
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction

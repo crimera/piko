@@ -51,7 +51,7 @@ public class CategoryPref extends PreferenceCategory {
     protected void onBindView(View view) {
         TextView title = (TextView) view;
         title.setText(getTitle());
-        title.setTextColor(InstagramPreferenceStyle.primaryTextColor(getContext()));
+        title.setTextColor(InstagramPreferenceStyle.primaryTextColor());
         applyCategoryStyle(title);
         title.setEnabled(isEnabled());
     }
@@ -64,6 +64,6 @@ public class CategoryPref extends PreferenceCategory {
                 InstagramPreferenceStyle.dp(getContext(), 24),
                 InstagramPreferenceStyle.dp(getContext(), 10)
         );
-        title.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(getContext()));
+        title.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
     }
 }

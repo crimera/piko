@@ -53,11 +53,10 @@ public class UI {
     public static final String DRAWABLE_EYE_ICON = "design_ic_visibility";
     public static final String DRAWABLE_SHARE_TO_DIRECT = "gallery_share_to_direct_button";
 
-
-    public static int getThemedColour() {
+    public static int getThemedColour(String attrName) {
         Context context = Utils.getContext();
         TypedValue typedValue = new TypedValue();
-        int attrId = ResourceUtils.getIdentifier(ResourceType.ATTR, "igds_color_primary_icon");
+        int attrId = ResourceUtils.getAttrIdentifier(attrName);
         boolean resolved = context.getTheme().resolveAttribute(attrId, typedValue, true);
         return context.getColor(typedValue.resourceId);
     }
@@ -66,7 +65,7 @@ public class UI {
         try {
             Drawable drawable = ResourceUtils.getDrawable(drawableAttr);
             imageView.setImageDrawable(drawable);
-            imageView.setColorFilter(new PorterDuffColorFilter(getThemedColour(), PorterDuff.Mode.SRC_ATOP));
+            imageView.setColorFilter(new PorterDuffColorFilter(getThemedColour("igds_color_primary_icon"), PorterDuff.Mode.SRC_ATOP));
 
         } catch (Exception ex) {
             Logger.printException(() -> "Failed setThemedIcon: ", ex);

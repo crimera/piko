@@ -6,6 +6,9 @@
 
 package app.crimera.patches.twitter.entity
 
+import app.crimera.patches.twitter.entity.extMedia.extMediaEntityPatch
+import app.crimera.patches.twitter.entity.tweet.tweetEntityPatch
+import app.crimera.patches.twitter.entity.tweetInfo.tweetInfoEntityPatch
 import app.morphe.patcher.patch.bytecodePatch
 
 val entityGenerator =

@@ -4,11 +4,16 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
-package app.crimera.patches.twitter.entity
+package app.crimera.patches.twitter.entity.tweet
 
+import app.crimera.patches.twitter.entity.tweetInfo.TweetInfoObjectFingerprint
+import app.crimera.patches.twitter.entity.tweetInfo.TweetLangFingerprint
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
+import app.crimera.utils.extensionToClassName
+import app.crimera.utils.fieldExtractor
 import app.crimera.utils.getMethodName
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -34,6 +39,14 @@ val tweetEntityPatch =
             TweetProfileNameFingerprint.changeFirstString(profileNameMethod.name)
 
             val tweetObjectMethods = TweetObjectFingerprint.classDef.methods
+
+            val getTextObjectFromTweetObjectMethodName =
+                tweetObjectMethods
+                    .first {
+                        it.returnType ==
+                            GetTextFromTextObjectFingerprint.classDef.type
+                    }.name
+            TweetShortTextFingerprint.changeFirstString(getTextObjectFromTweetObjectMethodName)
 
             val getTweetUserIdMethod =
                 tweetObjectMethods
@@ -76,16 +89,18 @@ val tweetEntityPatch =
                     .name
             TweetLongTextFingerprint.changeStringAt(1, longTextField)
 
-            QuotedViewSetAccessibilityFingerprint.method.apply {
-                val newInstanceIndex = indexOfFirstInstruction(Opcode.NEW_INSTANCE)
-                val invokeVirtualRangeInst =
-                    instructions.last { it.opcode == Opcode.INVOKE_VIRTUAL_RANGE && it.location.index < newInstanceIndex }
-                TweetShortTextFingerprint
-                    .changeFirstString(
-                        QuotedViewSetAccessibilityFingerprint.getMethodName(
-                            invokeVirtualRangeInst.location.index,
-                        ),
-                    )
+            TweetInfoObjectFingerprint.apply {
+                val langStrIndex = stringMatches[1].index
+                method.apply {
+                    val className = extensionToClassName(getInstruction(langStrIndex + 1).fieldExtractor().definingClass)
+                    val infoField =
+                        TweetObjectFingerprint.classDef.fields
+                            .first {
+                                it.type == className
+                            }.name
+
+                    TweetInfoFingerprint.changeFirstString(infoField)
+                }
             }
         }
     }

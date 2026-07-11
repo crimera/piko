@@ -19,9 +19,9 @@ internal object ProfileStatViewFormerFingerprint : Fingerprint(
 )
 
 internal object ProfileStatViewLoaderFingerprint : Fingerprint(
-    definingClass = "Landroidx/compose/foundation/text/input/internal/",
     filters =
         listOf(
+            resourceLiteral(ResourceType.ID, "icon"),
             resourceLiteral(ResourceType.PLURALS, "profile_follower_count"),
         ),
 )
