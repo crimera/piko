@@ -1,3 +1,9 @@
+## [1.5.1](https://github.com/Utsavrajputt/piko/compare/v1.5.0...v1.5.1) (2026-07-11)
+
+### 🐛 Bug Fixes
+
+* Branding thing ([d4be2ed](https://github.com/Utsavrajputt/piko/commit/d4be2ed375ea13d4e385aaa6b7593d6de2ccffad))
+
 ## [1.5.0](https://github.com/Utsavrajputt/piko/compare/v1.4.0...v1.5.0) (2026-07-11)
 
 ### ✨ New Features
