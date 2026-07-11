@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-07-11T10:46:03",
-  "description": "## [1.5.0](https://github.com/Utsavrajputt/piko/compare/v1.4.0...v1.5.0) (2026-07-11)\n\n### ✨ New Features\n\n* feat: improve Piko UI icons and download actions ([f9c041b](https://github.com/Utsavrajputt/piko/commit/f9c041b47a260b62332f204481474a3748866f29))",
-  "download_url": "https://github.com/Utsavrajputt/piko/releases/download/v1.5.0/patches-1.5.0.mpp",
+  "created_at": "2026-07-11T11:21:17",
+  "description": "## [1.5.1](https://github.com/Utsavrajputt/piko/compare/v1.5.0...v1.5.1) (2026-07-11)\n\n### 🐛 Bug Fixes\n\n* Branding thing ([d4be2ed](https://github.com/Utsavrajputt/piko/commit/d4be2ed375ea13d4e385aaa6b7593d6de2ccffad))",
+  "download_url": "https://github.com/Utsavrajputt/piko/releases/download/v1.5.1/patches-1.5.1.mpp",
   "signature_download_url": "",
-  "version": "1.5.0"
+  "version": "1.5.1"
 }
