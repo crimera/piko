@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-07-11T05:28:16",
-  "description": "## [1.4.0](https://github.com/Utsavrajputt/piko/compare/v1.3.0...v1.4.0) (2026-07-11)\n\n### 🐛 Bug Fixes\n\n* typo in Morphe Manager heading ([5c00f02](https://github.com/Utsavrajputt/piko/commit/5c00f022975dff38061aa791a37e2e39664f0d50))\n\n### ✨ New Features\n\n* Redesigned more options on post/stories/reel ([b37ee17](https://github.com/Utsavrajputt/piko/commit/b37ee17e3291d8cf0f3614a35ac9103f64c33c0b))",
-  "download_url": "https://github.com/Utsavrajputt/piko/releases/download/v1.4.0/patches-1.4.0.mpp",
+  "created_at": "2026-07-11T10:46:03",
+  "description": "## [1.5.0](https://github.com/Utsavrajputt/piko/compare/v1.4.0...v1.5.0) (2026-07-11)\n\n### ✨ New Features\n\n* feat: improve Piko UI icons and download actions ([f9c041b](https://github.com/Utsavrajputt/piko/commit/f9c041b47a260b62332f204481474a3748866f29))",
+  "download_url": "https://github.com/Utsavrajputt/piko/releases/download/v1.5.0/patches-1.5.0.mpp",
   "signature_download_url": "",
-  "version": "1.4.0"
+  "version": "1.5.0"
 }

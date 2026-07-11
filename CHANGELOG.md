@@ -1,3 +1,9 @@
+## [1.5.0](https://github.com/Utsavrajputt/piko/compare/v1.4.0...v1.5.0) (2026-07-11)
+
+### ✨ New Features
+
+* feat: improve Piko UI icons and download actions ([f9c041b](https://github.com/Utsavrajputt/piko/commit/f9c041b47a260b62332f204481474a3748866f29))
+
 ## [1.4.0](https://github.com/Utsavrajputt/piko/compare/v1.3.0...v1.4.0) (2026-07-11)
 
 ### 🐛 Bug Fixes
