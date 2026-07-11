@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/Utsavrajputt/piko/compare/v1.3.0...v1.4.0) (2026-07-11)
+
+### ✨ New Features
+
+* Redesigned more options on post/stories/reel ([b37ee17](https://github.com/Utsavrajputt/piko/commit/b37ee17e3291d8cf0f3614a35ac9103f64c33c0b))
+
 ## [1.3.0](https://github.com/Utsavrajputt/piko/compare/v1.2.0...v1.3.0) (2026-07-10)
 
 ### 🐛 Bug Fixes
