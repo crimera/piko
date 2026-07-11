@@ -42,15 +42,12 @@ public class MessageUtils {
             MessageInfo messageInfo = new MessageInfo(messageInfoObject);
             String messageType = messageInfo.getMessageType();
 
-            Log.d("piko", "messageDownloadCheck type=" + messageType);
-
             if(DEBUG){
                 ObjectBrowser.browseObject(context, messageInfo);
                 return false;
             }
 
             if("media".equals(messageType) || "raven_media".equals(messageType)){
-                Log.d("piko", "messageDownloadCheck -> let Instagram handle (media)");
                 return true;
 
             } else if ("voice_media".equals(messageType) && SettingsStatus.downloadVoiceMessage) {
@@ -68,7 +65,6 @@ public class MessageUtils {
 
             } else {
                 String label = messageType != null ? messageType : "null";
-                Log.d("piko", "messageDownloadCheck -> unsupported type: " + label);
                 Utils.showToastShort(str("piko_media_unknown") + ": " + label);
             }
 

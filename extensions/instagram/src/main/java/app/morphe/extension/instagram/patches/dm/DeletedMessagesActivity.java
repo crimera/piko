@@ -79,7 +79,7 @@ public class DeletedMessagesActivity extends Activity {
         TextView title = new TextView(this);
         title.setText(titleText);
         title.setTextSize(TypedValue.COMPLEX_UNIT_PX, PikoUtils.spToPixels(20));
-        title.setTextColor(UI.getThemedColour());
+        title.setTextColor(UI.getThemedColour("igds_color_primary_icon"));
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
@@ -96,7 +96,7 @@ public class DeletedMessagesActivity extends Activity {
         TextView clear = new TextView(this);
         clear.setText(str("piko_clear"));
         clear.setTextSize(TypedValue.COMPLEX_UNIT_PX, PikoUtils.spToPixels(16));
-        clear.setTextColor(UI.getThemedColour());
+        clear.setTextColor(UI.getThemedColour("igds_color_primary_icon"));
         clear.setPadding(Dim.dp8, Dim.dp8, Dim.dp8, Dim.dp8);
         LinearLayout.LayoutParams clearParams = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0);
@@ -122,7 +122,7 @@ public class DeletedMessagesActivity extends Activity {
             empty.setText(str("piko_no_deleted_messages"));
             empty.setGravity(Gravity.CENTER);
             empty.setPadding(Dim.dp8 * 2, Dim.dp8 * 4, Dim.dp8 * 2, Dim.dp8 * 4);
-            empty.setTextColor(UI.getThemedColour());
+            empty.setTextColor(UI.getThemedColour("igds_color_primary_icon"));
             root.addView(empty, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -138,7 +138,6 @@ public class DeletedMessagesActivity extends Activity {
                 String messageId = m[0];
                 String c = m[3];
                 String t = m[4];
-                android.util.Log.d("piko", "deleted-msg tap type=" + t);
                 if (c != null && c.startsWith("http")) {
                     showMediaOptions(messageId, c, t);
                 } else if (t != null && !"text".equals(t)) {
@@ -286,7 +285,7 @@ public class DeletedMessagesActivity extends Activity {
 
                 senderView = new TextView(DeletedMessagesActivity.this);
                 senderView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-                senderView.setTextColor(UI.getThemedColour());
+                senderView.setTextColor(UI.getThemedColour("igds_color_primary_icon"));
                 senderView.setTag("s");
 
                 contentView = new TextView(DeletedMessagesActivity.this);
