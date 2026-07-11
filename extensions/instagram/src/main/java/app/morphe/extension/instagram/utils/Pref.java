@@ -305,5 +305,9 @@ public class Pref {
         return SharedPref.getSetPref(Settings.ACTION_BAR_INBOX);
     }
 
+    public static Set<String> filterStoryByType() {
+        return SharedPref.getSetPref(Settings.FILTER_STORY_BY_TYPE);
+    }
+
     //end
 }

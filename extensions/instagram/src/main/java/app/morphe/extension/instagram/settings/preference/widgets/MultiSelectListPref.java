@@ -65,6 +65,10 @@ public class MultiSelectListPref extends MultiSelectListPreference {
             entries = ResourceUtils.getStringArray("piko_array_action_bar_inbox");
             entriesValues = ResourceUtils.getStringArray("piko_array_action_bar_inbox_val");
         }
+        else if (key == Settings.FILTER_STORY_BY_TYPE.key) {
+            entries = ResourceUtils.getStringArray("piko_array_reel_type");
+            entriesValues = ResourceUtils.getStringArray("piko_array_reel_type_val");
+        }
         setEntries(entries);
         setEntryValues(entriesValues);
     }

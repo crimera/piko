@@ -151,6 +151,9 @@ public class ButtonPref extends Preference {
         if(key.equals(Constants.PIKO_FRAGMENT_DM)){
             return UI.DRAWABLE_SHARE_TO_DIRECT;
         }
+        if(key.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)){
+            return UI.DRAWABLE_SHARE_TO_REEL;
+        }
         return null;
     }
 
