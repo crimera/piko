@@ -14,7 +14,7 @@
 
 > Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software).
 
-**Morphe Manager**
+**Morphe Manageru**
 
 <details>
 <summary>Show steps</summary>
