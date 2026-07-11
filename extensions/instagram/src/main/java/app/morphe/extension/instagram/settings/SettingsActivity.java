@@ -72,7 +72,7 @@ public class SettingsActivity extends Activity {
     private void createLayout(String displayTitle) {
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(this));
+        root.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
 
         applySystemBarStyle();
 
@@ -80,7 +80,7 @@ public class SettingsActivity extends Activity {
         toolbar = new LinearLayout(this);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
         toolbar.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        toolbar.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(this));
+        toolbar.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
 
         int toolbarPadding = InstagramPreferenceStyle.dp(this, 15);
         toolbar.setPadding(toolbarPadding, InstagramPreferenceStyle.dp(this, 10), toolbarPadding, InstagramPreferenceStyle.dp(this, 8));
@@ -110,7 +110,7 @@ public class SettingsActivity extends Activity {
         titleParams.gravity = android.view.Gravity.CENTER_VERTICAL;
         titleParams.leftMargin = InstagramPreferenceStyle.dp(this, 7);
         titleTextView.setLayoutParams(titleParams);
-        titleTextView.setTextColor(InstagramPreferenceStyle.primaryTextColor(this));
+        titleTextView.setTextColor(InstagramPreferenceStyle.primaryTextColor());
 
         toolbar.addView(back);
         toolbar.addView(titleTextView);
@@ -127,7 +127,7 @@ public class SettingsActivity extends Activity {
         content = new LinearLayout(this);
         content.setId(1001);
         content.setOrientation(LinearLayout.VERTICAL);
-        content.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(this));
+        content.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
 
         root.addView(content, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
 
@@ -179,7 +179,7 @@ public class SettingsActivity extends Activity {
             paint.setStrokeWidth(InstagramPreferenceStyle.dp(getContext(), 1.9f));
             paint.setStrokeCap(Paint.Cap.ROUND);
             paint.setStrokeJoin(Paint.Join.ROUND);
-            paint.setColor(InstagramPreferenceStyle.primaryTextColor(getContext()));
+            paint.setColor(InstagramPreferenceStyle.primaryTextColor());
 
             canvas.drawLine(tipX, centerY, endX, centerY, paint);
             canvas.drawLine(tipX, centerY, headEndX, centerY - headOffset, paint);
@@ -188,17 +188,17 @@ public class SettingsActivity extends Activity {
     }
 
     private void applySystemBarStyle() {
-        getWindow().setStatusBarColor(InstagramPreferenceStyle.backgroundColor(this));
-        getWindow().setNavigationBarColor(InstagramPreferenceStyle.backgroundColor(this));
+        getWindow().setStatusBarColor(InstagramPreferenceStyle.backgroundColor());
+        getWindow().setNavigationBarColor(InstagramPreferenceStyle.backgroundColor());
 
         int flags = getWindow().getDecorView().getSystemUiVisibility();
-        if (InstagramPreferenceStyle.isDark(this)) {
-            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        } else {
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        }
+//        if (InstagramPreferenceStyle.isDark(this)) {
+//            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+//            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+//        } else {
+//            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+//            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+//        }
         getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
@@ -271,11 +271,11 @@ public class SettingsActivity extends Activity {
                 listView.setDividerHeight(0);
                 listView.setSelector(new ColorDrawable(Color.TRANSPARENT));
                 listView.setCacheColorHint(Color.TRANSPARENT);
-                listView.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(context));
+                listView.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
             }
 
             if (rootView != null) {
-                rootView.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(context));
+                rootView.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
             }
         }
     }
