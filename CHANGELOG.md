@@ -1,3 +1,9 @@
+## [1.5.2](https://github.com/Utsavrajputt/piko/compare/v1.5.1...v1.5.2) (2026-07-11)
+
+### 🐛 Bug Fixes
+
+* misc section in settings ([46033fb](https://github.com/Utsavrajputt/piko/commit/46033fb834f399accb2dc2b0d81f2b611d20f510))
+
 ## [1.5.1](https://github.com/Utsavrajputt/piko/compare/v1.5.0...v1.5.1) (2026-07-11)
 
 ### 🐛 Bug Fixes
