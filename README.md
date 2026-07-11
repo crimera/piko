@@ -14,7 +14,7 @@
 
 > Starting with patches v3.0.0, Piko patches use [Morphe](https://morphe.software).
 
-**Morphe Manager**
+**Morphe Manageru**
 
 <details>
 <summary>Show steps</summary>
@@ -60,7 +60,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v1.3.0](https://github.com/Utsavrajputt/piko/releases/tag/v1.3.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;124 patches total
+> **[v1.4.0](https://github.com/Utsavrajputt/piko/releases/tag/v1.4.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;124 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;72 patches</summary>
 <br>
