@@ -120,10 +120,10 @@ public class ButtonPref extends Preference {
 
     private String getIconResourceName(String key) {
         if(key.equals(Constants.PIKO_FRAGMENT_ADS)){
-            return UI.DRAWABLE_SHEILD_ICON;
+            return UI.DRAWABLE_PIKO_ADS_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_GHOST)){
-            return UI.DRAWABLE_SNAPCHAT_ICON;
+            return UI.DRAWABLE_PIKO_GHOST_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_LINKS)){
             return UI.DRAWABLE_LINK_ICON;
@@ -132,18 +132,16 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_FRAME_CROSSED_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_MISC)){
-            // Gear reads as "general settings / catch-all" which fits Misc
-            // better than a code icon (that's more of a dev-options thing).
-            return UI.DRAWABLE_GEAR_ICON;
+            return UI.DRAWABLE_PIKO_MISC_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_CUSTOMISATION)){
-            return UI.DRAWABLE_BLUB_ICON;
+            return UI.DRAWABLE_PIKO_CUSTOMISATION_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)){
             return UI.DRAWABLE_FB_DOWNLOAD_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_NAV_BTNS)){
-            return UI.DRAWABLE_STACK_ICON;
+            return UI.DRAWABLE_PIKO_NAVIGATION_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_DEV_OPTIONS)){
             // Code icon is a much clearer signal for "developer options"

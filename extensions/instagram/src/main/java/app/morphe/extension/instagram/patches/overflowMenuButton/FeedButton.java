@@ -101,7 +101,8 @@ public class FeedButton {
     }
 
     public static MediaOption$Option morePostOptionOverflowButton(){
-        return FeedButton.initOverflowButton("PIKO_MORE_POST_OPTION", 501, UI.DRAWABLE_BLUB_ICON);
+        String icon = Pref.moreOptionsUseWidgetIcon() ? UI.DRAWABLE_WIDGET_ICON : UI.DRAWABLE_BLUB_ICON;
+        return FeedButton.initOverflowButton("PIKO_MORE_POST_OPTION", 501, icon);
     }
 
     public static MediaOption$Option debugOverflowButton(){

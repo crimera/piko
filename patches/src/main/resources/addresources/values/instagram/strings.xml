@@ -99,6 +99,8 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_category_customisation_stories">Stories</string>
     <string name="piko_monochrome_more_options_icons">Monochrome icons</string>
     <string name="piko_monochrome_more_options_icons_desc">Makes every icon in the story and post/profile \"More options\" sheets the same neutral color instead of each having its own color</string>
+    <string name="piko_more_options_use_widget_icon">Use widget icon for more options</string>
+    <string name="piko_more_options_use_widget_icon_desc">Show the Piko widget icon instead of the bulb icon for the \"More options\" button on posts and reels</string>
 
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Misc</string>

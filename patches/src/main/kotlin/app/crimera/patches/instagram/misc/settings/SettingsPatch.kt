@@ -24,8 +24,11 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
+import app.morphe.util.ResourceGroup
+import app.morphe.util.copyResources
 import app.morphe.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
@@ -49,6 +52,21 @@ val settingsPatch =
             instagramButtonEntity,
             developerOptionsEntity,
             addResourcesPatch,
+            resourcePatch(description = "Adds the custom Piko settings category icons (Ads, Ghost, Misc, Customisation, Navigation).") {
+                execute {
+                    copyResources(
+                        "instagram/settingsicons",
+                        ResourceGroup(
+                            "drawable-xxxhdpi",
+                            "piko_icon_ads.png",
+                            "piko_icon_customisation.png",
+                            "piko_icon_ghost.png",
+                            "piko_icon_misc.png",
+                            "piko_icon_navigation.png",
+                        ),
+                    )
+                }
+            },
         )
         execute {
             addAppResources("shared")

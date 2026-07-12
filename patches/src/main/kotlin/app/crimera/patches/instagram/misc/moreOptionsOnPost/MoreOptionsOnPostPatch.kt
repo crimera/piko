@@ -15,6 +15,9 @@ import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.patch.resourcePatch
+import app.morphe.util.ResourceGroup
+import app.morphe.util.copyResources
 
 @Suppress("unused")
 val moreOptionsOnPostPatch =
@@ -24,7 +27,22 @@ val moreOptionsOnPostPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(settingsPatch, decoderEntity, hookOverflowMenuButton, debugOverflowMenuButtonPatch, hookReelOverflowMenuButton)
+        dependsOn(
+            settingsPatch,
+            decoderEntity,
+            hookOverflowMenuButton,
+            debugOverflowMenuButtonPatch,
+            hookReelOverflowMenuButton,
+            resourcePatch(description = "Adds the custom widgets icon used for the more options button.") {
+                execute {
+                    // Custom "widgets" icon, offered as an alternative to the default bulb icon.
+                    copyResources(
+                        "instagram/moreoptionsicon",
+                        ResourceGroup("drawable", "piko_widgets_outline_24.xml"),
+                    )
+                }
+            },
+        )
         execute {
 
             addOverflowMenuButtonAttributes("PIKO_MORE_POST_OPTION", "morePostOptionOverflowButton")

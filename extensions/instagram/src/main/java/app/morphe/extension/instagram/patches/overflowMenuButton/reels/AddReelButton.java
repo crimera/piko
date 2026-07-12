@@ -52,7 +52,7 @@ public class AddReelButton {
     }
 
     private static void addInfoButton(Context context, Object helperObject, Object mediaObject){
-        String icon = UI.DRAWABLE_BLUB_ICON;
+        String icon = Pref.moreOptionsUseWidgetIcon() ? UI.DRAWABLE_WIDGET_ICON : UI.DRAWABLE_BLUB_ICON;
         ReelButton reelButton = new InfoButton(context,mediaObject);
         String buttonText = str("piko_more_options");
 

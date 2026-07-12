@@ -41,6 +41,7 @@ public class UI {
     public static final String DRAWABLE_INFO_ICON = "instagram_info_outline_24";
     public static final String DRAWABLE_DEBUG_ICON = "instagram_app_instagram_pano_outline_24";
     public static final String DRAWABLE_BLUB_ICON = "instagram_bulb_outline_24";
+    public static final String DRAWABLE_WIDGET_ICON = "piko_widgets_outline_24";
     public static final String DRAWABLE_GEAR_ICON = "instagram_settings_pano_filled_24";
     public static final String DRAWABLE_SHEILD_ICON = "fb_ic_badge_admin_filled_32";
     public static final String DRAWABLE_SNAPCHAT_ICON = "fb_ic_app_snapchat_filled_16";
@@ -48,6 +49,13 @@ public class UI {
     public static final String DRAWABLE_CODE_ICON = "fb_ic_code_outline_24";
     public static final String DRAWABLE_FRAME_CROSSED_ICON = "fb_ic_frames_cross_outline_16";
     public static final String DRAWABLE_LINK_ICON = "fb_ic_link_outline_24";
+
+    // Custom Piko settings category icons (shipped as resources, not native Instagram drawables).
+    public static final String DRAWABLE_PIKO_ADS_ICON = "piko_icon_ads";
+    public static final String DRAWABLE_PIKO_CUSTOMISATION_ICON = "piko_icon_customisation";
+    public static final String DRAWABLE_PIKO_GHOST_ICON = "piko_icon_ghost";
+    public static final String DRAWABLE_PIKO_MISC_ICON = "piko_icon_misc";
+    public static final String DRAWABLE_PIKO_NAVIGATION_ICON = "piko_icon_navigation";
 
 
     public static int getThemedColour() {

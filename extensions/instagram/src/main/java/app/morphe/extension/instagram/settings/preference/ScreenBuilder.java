@@ -617,6 +617,14 @@ public class ScreenBuilder {
                 )
         );
 
+        addPreference(appearanceCategory,
+                helper.switchPreference(
+                        str("piko_more_options_use_widget_icon"),
+                        str("piko_more_options_use_widget_icon_desc"),
+                        Settings.PIKO_MORE_OPTIONS_USE_WIDGET_ICON
+                )
+        );
+
         if (SettingsStatus.changeLikeAnimation) {
             addPreference(appearanceCategory,
                     helper.listPreference(
