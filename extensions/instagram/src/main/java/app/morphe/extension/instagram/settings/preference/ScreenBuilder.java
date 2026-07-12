@@ -602,10 +602,10 @@ public class ScreenBuilder {
         PreferenceCategory appearanceCategory = addCategory(str("piko_category_customisation_appearance"));
 
         addPreference(appearanceCategory,
-                helper.switchPreference(
-                        str("piko_settings_use_x_icon"),
-                        str("piko_settings_use_x_icon_desc"),
-                        Settings.PIKO_SETTINGS_USE_X_ICON
+                helper.listPreference(
+                        str("piko_settings_icon_style"),
+                        str("piko_settings_icon_style_desc"),
+                        Settings.PIKO_SETTINGS_ICON_STYLE
                 )
         );
 

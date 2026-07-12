@@ -71,5 +71,15 @@
         <item>RINGS_LIKE_TWINS</item>
         <item>RINGS_LIKE_TYSHAWN</item>
         <item>RINGS_LIKE_ZARNA</item>
+    <string-array name="piko_array_settings_icon_style">
+        <item>@string/piko_array_settings_icon_gear</item>
+        <item>@string/piko_array_settings_icon_x</item>
+        <item>@string/piko_array_settings_icon_spark</item>
+    </string-array>
+
+    <string-array name="piko_array_settings_icon_style_val">
+        <item>gear</item>
+        <item>x</item>
+        <item>alt</item>
     </string-array>
 </resources>

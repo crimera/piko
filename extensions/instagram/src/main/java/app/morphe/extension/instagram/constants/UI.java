@@ -56,6 +56,12 @@ public class UI {
     public static final String DRAWABLE_PIKO_GHOST_ICON = "piko_icon_ghost";
     public static final String DRAWABLE_PIKO_MISC_ICON = "piko_icon_misc";
     public static final String DRAWABLE_PIKO_NAVIGATION_ICON = "piko_icon_navigation";
+    public static final String DRAWABLE_PIKO_LINKS_ICON = "piko_icon_links";
+    public static final String DRAWABLE_PIKO_DISTRACTION_FREE_ICON = "piko_icon_distraction_free";
+    public static final String DRAWABLE_PIKO_DOWNLOAD_MEDIA_ICON = "piko_icon_download_media";
+    public static final String DRAWABLE_PIKO_DEV_OPTIONS_ICON = "piko_icon_dev_options";
+    public static final String DRAWABLE_PIKO_ABOUT_ICON = "piko_icon_about";
+    public static final String DRAWABLE_PIKO_SETTINGS_ALT_ICON = "piko_settings_alt_icon";
 
 
     public static int getThemedColour() {
@@ -175,7 +181,10 @@ public class UI {
 
             Context context = viewGroup.getContext();
             ImageView imageView;
-            if (Pref.pikoSettingsUseXIcon()) {
+            String iconStyle = Pref.pikoSettingsIconStyle();
+            if ("alt".equals(iconStyle)) {
+                imageView = UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_PIKO_SETTINGS_ALT_ICON, FragmentHook::startSettings);
+            } else if ("x".equals(iconStyle)) {
                 imageView = UI.addImageViewToViewGroup(viewGroup, new PikoXIcon(context), FragmentHook::startSettings);
             } else {
                 imageView = UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_GEAR_ICON, FragmentHook::startSettings);

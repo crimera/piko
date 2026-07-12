@@ -126,10 +126,10 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_PIKO_GHOST_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_LINKS)){
-            return UI.DRAWABLE_LINK_ICON;
+            return UI.DRAWABLE_PIKO_LINKS_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)){
-            return UI.DRAWABLE_FRAME_CROSSED_ICON;
+            return UI.DRAWABLE_PIKO_DISTRACTION_FREE_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_MISC)){
             return UI.DRAWABLE_PIKO_MISC_ICON;
@@ -138,18 +138,16 @@ public class ButtonPref extends Preference {
             return UI.DRAWABLE_PIKO_CUSTOMISATION_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)){
-            return UI.DRAWABLE_FB_DOWNLOAD_ICON;
+            return UI.DRAWABLE_PIKO_DOWNLOAD_MEDIA_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_NAV_BTNS)){
             return UI.DRAWABLE_PIKO_NAVIGATION_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_DEV_OPTIONS)){
-            // Code icon is a much clearer signal for "developer options"
-            // than a generic gear (which is now used by Misc).
-            return UI.DRAWABLE_CODE_ICON;
+            return UI.DRAWABLE_PIKO_DEV_OPTIONS_ICON;
         }
         if(key.equals(Constants.PIKO_FRAGMENT_ABOUT)){
-            return UI.DRAWABLE_DEBUG_ICON;
+            return UI.DRAWABLE_PIKO_ABOUT_ICON;
         }
         return null;
     }

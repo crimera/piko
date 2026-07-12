@@ -38,7 +38,7 @@ val moreOptionsOnPostPatch =
                     // Custom "widgets" icon, offered as an alternative to the default bulb icon.
                     copyResources(
                         "instagram/moreoptionsicon",
-                        ResourceGroup("drawable", "piko_widgets_outline_24.xml"),
+                        ResourceGroup("drawable-xxxhdpi", "piko_widgets_outline_24.png"),
                     )
                 }
             },

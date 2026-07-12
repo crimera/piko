@@ -52,7 +52,7 @@ val settingsPatch =
             instagramButtonEntity,
             developerOptionsEntity,
             addResourcesPatch,
-            resourcePatch(description = "Adds the custom Piko settings category icons (Ads, Ghost, Misc, Customisation, Navigation).") {
+            resourcePatch(description = "Adds the custom Piko settings category icons (Ads, Ghost, Misc, Customisation, Navigation, Links, Distraction Free, Download Media, Dev Options, About) and the alternate Piko settings button icon.") {
                 execute {
                     copyResources(
                         "instagram/settingsicons",
@@ -63,6 +63,12 @@ val settingsPatch =
                             "piko_icon_ghost.png",
                             "piko_icon_misc.png",
                             "piko_icon_navigation.png",
+                            "piko_icon_links.png",
+                            "piko_icon_distraction_free.png",
+                            "piko_icon_download_media.png",
+                            "piko_icon_dev_options.png",
+                            "piko_icon_about.png",
+                            "piko_settings_alt_icon.png",
                         ),
                     )
                 }

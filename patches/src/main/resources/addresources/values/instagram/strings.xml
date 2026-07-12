@@ -283,6 +283,9 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <!-- Action Bar Section -->
     <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
     <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
-    <string name="piko_settings_use_x_icon">Use X icon for Piko settings</string>
-    <string name="piko_settings_use_x_icon_desc">Show the red X icon instead of the gear icon for the Piko settings button</string>
+    <string name="piko_settings_icon_style">Piko settings icon style</string>
+    <string name="piko_settings_icon_style_desc">Choose the icon used for the Piko settings button</string>
+    <string name="piko_array_settings_icon_gear">Gear</string>
+    <string name="piko_array_settings_icon_x">X icon</string>
+    <string name="piko_array_settings_icon_spark">Piko icon</string>
 </resources>

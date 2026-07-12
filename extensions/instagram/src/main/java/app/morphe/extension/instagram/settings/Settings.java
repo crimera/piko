@@ -69,7 +69,7 @@ public class Settings {
     // Should be kept empty by default as its handled in `StorageUtils.java`
     public static final StringSetting CUSTOM_DOWNLOAD_PATH = new StringSetting("custom_download_path", "");
     public static final BooleanSetting PIKO_SETTINGS_ON_ACTION_BAR = new BooleanSetting("piko_settings_on_action_bar", false);
-    public static final BooleanSetting PIKO_SETTINGS_USE_X_ICON = new BooleanSetting("piko_settings_use_x_icon", true);
+    public static final StringSetting PIKO_SETTINGS_ICON_STYLE = new StringSetting("piko_settings_icon_style", "x");
     public static final BooleanSetting MONOCHROME_MORE_OPTIONS_ICONS = new BooleanSetting("monochrome_more_options_icons", false);
     public static final BooleanSetting PIKO_MORE_OPTIONS_USE_WIDGET_ICON = new BooleanSetting("piko_more_options_use_widget_icon", true);
     public static final StringSetting EXTERNAL_DOWNLOADER_PACKAGE_NAME = new StringSetting("external_downloader_package_name", "");

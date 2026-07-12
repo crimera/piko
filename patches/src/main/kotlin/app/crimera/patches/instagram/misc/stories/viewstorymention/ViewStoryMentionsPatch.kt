@@ -21,6 +21,7 @@ val viewStoryMentionsPatch =
     bytecodePatch(
         name = "View story mentions",
         description = "Add option to view visible and hidden story mentions.",
+        default = true,
     ) {
         dependsOn(settingsPatch, handleStoryButtonPatch, userDataEntity, mediaDataEntity, instagramDialogBoxEntity, videoDataEntity)
 

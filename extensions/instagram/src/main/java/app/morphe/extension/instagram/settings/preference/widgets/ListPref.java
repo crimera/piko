@@ -66,6 +66,9 @@ public class ListPref extends ListPreference {
         } else if (key == Settings.CHANGE_LIKE_ANIMATION.key) {
             entries = ResourceUtils.getStringArray("piko_array_change_like_animation");
             entriesValues = ResourceUtils.getStringArray("piko_array_change_like_animation_val");
+        } else if (key == Settings.PIKO_SETTINGS_ICON_STYLE.key) {
+            entries = ResourceUtils.getStringArray("piko_array_settings_icon_style");
+            entriesValues = ResourceUtils.getStringArray("piko_array_settings_icon_style_val");
         }
 
         setEntries(entries);
