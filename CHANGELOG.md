@@ -1,3 +1,30 @@
+## [3.8.0-dev.4](https://github.com/crimera/piko/compare/v3.8.0-dev.3...v3.8.0-dev.4) (2026-07-12)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix Piko settings color issues ([f1f278a](https://github.com/crimera/piko/commit/f1f278a87665be59218dcc54af983b411802fe0f))
+
+### ✨ New Features
+
+* **Instagram:** Added `Filter stories` patch ([c62d02a](https://github.com/crimera/piko/commit/c62d02adf1f0160f8bc72c4eb4e521e06b89c0be))
+* **Instagram:** Added `Mark chat as read manually` patch ([1d267c8](https://github.com/crimera/piko/commit/1d267c8f67d1f7153e50a0166d327056e1643603))
+* **Instagram:** Added ability to remove Piko preference ([3e29d69](https://github.com/crimera/piko/commit/3e29d69e0af53df4c0814bbd5e057ced196633c6))
+* **Instagram:** Include debug option on thread long press ([c9df942](https://github.com/crimera/piko/commit/c9df9426377f62225c8ee63e0872563f99fd7d50))
+
+### 🚀 Updated App Support
+
+* **Twitter:** Bump support to `12.7.1-release.0` ([1d31338](https://github.com/crimera/piko/commit/1d313381d08afb0ba2f40f9f01673fa5cf5b6cce))
+
+### 🔧 Improvements
+
+* **Instagram:** Added more story filters ([bab0fc6](https://github.com/crimera/piko/commit/bab0fc653d2ec9642ee608a0d57cd76380af944b))
+* **Instagram:** Adjust DM section position on piko settings ([4646c7d](https://github.com/crimera/piko/commit/4646c7d24823f31ab530d2b2b85bfe74bae41db3))
+* **Instagram:** Move DM long press button check to java ([b2e4e71](https://github.com/crimera/piko/commit/b2e4e71e1e64fdeb06e0130271e8366d2fc4d200))
+* **Instagram:** Remove unused preference ([232b4d6](https://github.com/crimera/piko/commit/232b4d6584750510088e4fe4e216534b8ce1ed86))
+* **Instagram:** Update download path handling and permissions ([#1500](https://github.com/crimera/piko/issues/1500)) ([76cdcb3](https://github.com/crimera/piko/commit/76cdcb3cfd62fa19cd79cdead1a3a2dd082585b2))
+* **Twitter:** Introduce debug option and streamline About section buttons ([e64a7e0](https://github.com/crimera/piko/commit/e64a7e0a1978757b8c949971f3b0da1e5e4879ed))
+* **Twitter:** Make the tweet-shots have rounded edges ([020589e](https://github.com/crimera/piko/commit/020589e5b1c3681396c7654f9d34604fbbc8f391))
+
 ## [3.8.0-dev.3](https://github.com/crimera/piko/compare/v3.8.0-dev.2...v3.8.0-dev.3) (2026-07-05)
 
 ### 🐛 Bug Fixes

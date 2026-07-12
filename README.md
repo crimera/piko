@@ -66,22 +66,21 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.8.0-dev.3](https://github.com/crimera/piko/releases/tag/v3.8.0-dev.3)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;126 patches total
+> **[v3.8.0-dev.4](https://github.com/crimera/piko/releases/tag/v3.8.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;127 patches total
 <details>
-<summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;75 patches</summary>
+<summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;74 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 11.81.0-release.0 | 11.99.0-release-ripped.1 | 12.0.0-release.0 | 12.2.0-release.0 |
-| :---: | :---: | :---: | :---: |
+| 12.7.1-release.0 |
+| :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
 | [Add ability to copy media link](#add-ability-to-copy-media-link) |  |  |
 | [Block redirecting to X Lite](#block-redirecting-to-x-lite) | Blocks redirecting to the new X Android UI on launch |  |
 | [Bring back twitter](#bring-back-twitter) | Bring back old twitter logo and name |  |
-| [Browse tweet object](#browse-tweet-object) | Adds an option to browse the tweet object in the share menu. |  |
 | [Change app icon](#change-app-icon) |  |  |
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
 | [Clear tracking params](#clear-tracking-params) | Removes tracking parameters when sharing links |  |
@@ -157,7 +156,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;51 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;53 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -192,6 +191,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Download media](#download-media) | Adds ability to download posts, reels, stories and highlights |  |
 | [Download voice message](#download-voice-message) | Enables ability to download voice messages |  |
 | [External downloader](#external-downloader) | Adds support to share post links directly to external downloader |  |
+| [Filter stories](#filter-stories) | Filter stories to hide based on different categories |  |
 | [Friendship status indicator](#friendship-status-indicator) | Adds a follows you back status label on the profile page andshows a detailed friendship status breakdown on click |  |
 | [Hide group creation button on sharesheet](#hide-group-creation-button-on-sharesheet) |  |  |
 | [Hide navigation buttons](#hide-navigation-buttons) | Hides navigation bar buttons, such as the Reels and Create button. |  |
@@ -202,6 +202,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Improve image viewing](#improve-image-viewing) | Fetches max resolution images from server. |  |
 | [Limit feed to following profiles](#limit-feed-to-following-profiles) | Filters the home feed to display only content from profiles you follow. |  |
 | [Make ephemeral media permanent](#make-ephemeral-media-permanent) | Changes unexpired view once, view twice media to permanent view. |  |
+| [Mark chat as read manually](#mark-chat-as-read-manually) | Adds option to mark a thread aka message as read manually |  |
 | [More options on post](#more-options-on-post) | Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc |  |
 | [More options on profile](#more-options-on-profile) | Adds a new button to handle user related data like copy handle, download profile picture etc |  |
 | [Open links externally](#open-links-externally) | Changes links to always open in your external browser, instead of the in-app browser. |  |
