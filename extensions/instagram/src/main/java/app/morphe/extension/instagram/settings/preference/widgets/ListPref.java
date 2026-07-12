@@ -21,7 +21,7 @@ public class ListPref extends ListPreference {
     private static Helper helper;
 
     public ListPref(Context context) {
-        super(context);
+        super(InstagramPreferenceStyle.dialogContext(context));
         helper = new Helper(context);
         init();
     }

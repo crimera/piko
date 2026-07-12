@@ -38,9 +38,15 @@ val themePatch =
                 ),
             title = "Instagram theme",
             description =
-                "Which theme to bake in at patch time. Accepted values: " +
-                    "\"$THEME_MATERIAL\" (Material You dynamic colours) or " +
-                    "\"$THEME_AMOLED\" (pure-black AMOLED). Defaults to \"$THEME_MATERIAL\".",
+                "Which theme to bake in at patch time.\n" +
+                    "\n" +
+                    "• $THEME_MATERIAL — Material You dynamic colours; follows the device's " +
+                    "light/dark setting. (default)\n" +
+                    "• $THEME_AMOLED — pure-black AMOLED.\n" +
+                    "\n" +
+                    "Note: '$THEME_MATERIAL' themes in-app surfaces only. A few server-driven " +
+                    "pages (notifications, DM inbox, About-this-account) and full-screen " +
+                    "media/Reels keep Instagram's own colours in both light and dark mode.",
             required = true,
         ) {
             it?.lowercase() in setOf(THEME_MATERIAL, THEME_AMOLED)
@@ -83,11 +89,17 @@ private fun ResourcePatchContext.applyAmoledTheme() {
 }
 
 private fun ResourcePatchContext.applyMaterialYouTheme() {
+    // piko_dynamic_* alias palette. The alias NAMES are identical in every bucket
+    // (so the token -> alias remaps further down apply uniformly), but the VALUES
+    // differ: light tones in the day buckets, dark tones in the -night buckets, so
+    // the theme follows the device's light/dark setting. The -v31 buckets use the
+    // Android 12+ dynamic palette; the plain buckets carry fixed-hex fallbacks for
+    // older devices.
     listOf(
-        "res/values" to materialYouFallbackAliases,
-        "res/values-night" to materialYouFallbackAliases,
-        "res/values-v31" to materialYouDynamicAliases,
-        "res/values-night-v31" to materialYouDynamicAliases,
+        "res/values" to (materialYouLightFallbackAliases + materialYouNeutralConstantsHex),
+        "res/values-night" to (materialYouDarkFallbackAliases + materialYouNeutralConstantsHex),
+        "res/values-v31" to (materialYouLightDynamicAliases + materialYouNeutralConstantsDynamic),
+        "res/values-night-v31" to (materialYouDarkDynamicAliases + materialYouNeutralConstantsDynamic),
     ).forEach { (directoryPath, aliases) ->
         ensureColorsXml(directoryPath)
 
@@ -152,7 +164,28 @@ private fun Document.findColor(name: String): Element? {
     return null
 }
 
-private val materialYouFallbackAliases =
+// Fixed-hex fallbacks (pre-Android-12, no dynamic palette). LIGHT variant lives in
+// res/values; the DARK variant in res/values-night. prism_black / prism_white are
+// deliberately mode-invariant "constants" (a black-branded element stays dark and a
+// white-branded element stays light in both modes) — every other role flips.
+private val materialYouLightFallbackAliases =
+    mapOf(
+        "piko_dynamic_primary" to "#ff4557a5",
+        "piko_dynamic_primary_pressed" to "#ff36468c",
+        "piko_dynamic_primary_container" to "#ffdde1ff",
+        "piko_dynamic_on_primary" to "#ffffffff",
+        "piko_dynamic_on_primary_container" to "#ff001456",
+        "piko_dynamic_background" to "#ffeef1f8",
+        "piko_dynamic_pressed_background" to "#ffe2e6f0",
+        "piko_dynamic_on_surface" to "#ff1a1c1f",
+        "piko_dynamic_on_surface_variant" to "#ff44474e",
+        "piko_dynamic_outline" to "#ff74777f",
+        "piko_dynamic_outline_variant" to "#ffc4c6d0",
+        "piko_dynamic_prism_black" to "#ff121316",
+        "piko_dynamic_prism_white" to "#ffeef1f8",
+    )
+
+private val materialYouDarkFallbackAliases =
     mapOf(
         "piko_dynamic_primary" to "#ff8ea0ff",
         "piko_dynamic_primary_pressed" to "#ffc0c7ff",
@@ -169,7 +202,38 @@ private val materialYouFallbackAliases =
         "piko_dynamic_prism_white" to "#ffe1e3e6",
     )
 
-private val materialYouDynamicAliases =
+// Android 12+ dynamic palette. Lower tone number = lighter (neutral1_0 ≈ white,
+// neutral1_1000 ≈ black), so the light and dark variants pull opposite ends of the
+// same wallpaper-derived ramp. Surfaces use the NEUTRAL palette (system_neutral1_*)
+// rather than accent, so the background doesn't pick up the wallpaper's colour cast
+// — a calmer backdrop for a photo-first app.
+private val materialYouLightDynamicAliases =
+    mapOf(
+        "piko_dynamic_primary" to "@android:color/system_accent1_600",
+        "piko_dynamic_primary_pressed" to "@android:color/system_accent1_700",
+        "piko_dynamic_primary_container" to "@android:color/system_accent1_100",
+        "piko_dynamic_on_primary" to "@android:color/system_neutral1_10",
+        "piko_dynamic_on_primary_container" to "@android:color/system_accent1_900",
+        // Light surfaces use the PRIMARY accent palette (accent1) at a light tone so
+        // the wallpaper colour is actually visible, instead of the near-white
+        // system_neutral1_10 (reads as plain white) or the muted accent2 (barely
+        // tinted). Both light-surface paths get it — background AND prism_white (the
+        // latter is what the main feed bg, default_bg_color_light -> bds_white,
+        // resolves through) — so the tint is uniform. Dial by tone/palette:
+        // system_accent2_50 = very subtle, system_accent1_50 = current (light tint),
+        // system_accent1_100 = clearly coloured (deeper), system_neutral1_50 = grey/
+        // no colour. on_surface text stays neutral for readable contrast.
+        "piko_dynamic_background" to "@android:color/system_accent1_50",
+        "piko_dynamic_pressed_background" to "@android:color/system_accent1_100",
+        "piko_dynamic_on_surface" to "@android:color/system_neutral1_900",
+        "piko_dynamic_on_surface_variant" to "@android:color/system_neutral2_700",
+        "piko_dynamic_outline" to "@android:color/system_neutral2_500",
+        "piko_dynamic_outline_variant" to "@android:color/system_neutral2_200",
+        "piko_dynamic_prism_black" to "@android:color/system_neutral1_900",
+        "piko_dynamic_prism_white" to "@android:color/system_accent1_50",
+    )
+
+private val materialYouDarkDynamicAliases =
     mapOf(
         "piko_dynamic_primary" to "@android:color/system_accent1_200",
         "piko_dynamic_primary_pressed" to "@android:color/system_accent1_100",
@@ -178,12 +242,10 @@ private val materialYouDynamicAliases =
         "piko_dynamic_primary_container" to "@android:color/system_accent1_800",
         "piko_dynamic_on_primary" to "@android:color/system_neutral1_900",
         "piko_dynamic_on_primary_container" to "@android:color/system_accent1_100",
-        // Background / surfaces use the NEUTRAL tonal palette rather than accent, so
-        // they don't pick up the wallpaper's bright colour cast — a calmer, darker
-        // backdrop for a photo-first app. The dynamic palette only exposes discrete
-        // tones: _900 (≈ dark grey) and _1000 (near-black). To go darker still, flip
-        // the two "…neutral1_900" lines below to "…neutral1_1000" (near-black — close
-        // to the AMOLED theme, but keeps dynamic accents).
+        // The dynamic palette only exposes discrete tones: _900 (≈ dark grey) and
+        // _1000 (near-black). To go darker still, flip the two "…neutral1_900" lines
+        // below to "…neutral1_1000" (near-black — close to the AMOLED theme, but
+        // keeps dynamic accents).
         "piko_dynamic_background" to "@android:color/system_neutral1_900",
         "piko_dynamic_pressed_background" to "@android:color/system_neutral1_800",
         "piko_dynamic_on_surface" to "@android:color/system_neutral1_10",
@@ -194,32 +256,64 @@ private val materialYouDynamicAliases =
         "piko_dynamic_prism_white" to "@android:color/system_neutral1_10",
     )
 
+// Greyscale CONSTANTS — identical in the light and dark buckets (so they do NOT
+// flip with the device theme). Literal grey/black/white *scale* tokens must map to
+// these, never to the mode-flipping aliases above, because Instagram reuses the
+// same literal for OPPOSITE roles per mode: e.g. bds_black is a dark surface in
+// dark mode but dark TEXT/ICONS in light mode (igds_color_primary_icon ->
+// ?igds_color_primary_text -> bds_black in the light theme). A constant keeps such
+// a token the right lightness in both modes; IG's own theme decides which literal
+// to use where. The extremes reuse piko_dynamic_prism_white / prism_black; only
+// three mid-greys are added here. neutral2 tones = the wallpaper-derived neutral
+// ramp (pre-12 hex fallbacks mirror the old dark tones so dark mode is unchanged).
+private val materialYouNeutralConstantsHex =
+    mapOf(
+        "piko_dynamic_neutral_light" to "#ffc1c7cf",
+        "piko_dynamic_neutral_mid" to "#ff8b929b",
+        "piko_dynamic_neutral_dark" to "#ff3f4750",
+    )
+
+private val materialYouNeutralConstantsDynamic =
+    mapOf(
+        "piko_dynamic_neutral_light" to "@android:color/system_neutral2_200",
+        "piko_dynamic_neutral_mid" to "@android:color/system_neutral2_400",
+        "piko_dynamic_neutral_dark" to "@android:color/system_neutral2_700",
+    )
+
+// Literal greyscale tokens (bds_grey_0 lightest .. bds_grey_24 darkest;
+// igds_prism_gray_00 lightest .. _1500 darkest — verified against the 435.x table)
+// map to the fixed CONSTANTS above by lightness, NOT to the mode-flipping aliases.
+// The accent tokens (bds_blue_*, badge/emphasized, prism_indigo) DO flip, because
+// IG uses the same accent literal on both light and dark surfaces and it needs a
+// different tone for contrast in each mode.
 private val materialYouBaseMappings =
     mapOf(
-        "bds_black" to "@color/piko_dynamic_background",
+        "bds_black" to "@color/piko_dynamic_prism_black",
         "bds_white" to "@color/piko_dynamic_prism_white",
-        "bds_grey_1" to "@color/piko_dynamic_on_surface",
-        "bds_grey_2" to "@color/piko_dynamic_on_surface_variant",
-        "bds_grey_3" to "@color/piko_dynamic_on_surface_variant",
-        "bds_grey_4" to "@color/piko_dynamic_outline",
-        "bds_grey_6" to "@color/piko_dynamic_outline_variant",
-        "bds_grey_7" to "@color/piko_dynamic_background",
-        "bds_grey_8" to "@color/piko_dynamic_background",
-        "bds_grey_9" to "@color/piko_dynamic_background",
-        "bds_grey_10" to "@color/piko_dynamic_background",
-        "bds_grey_11" to "@color/piko_dynamic_background",
-        "bds_grey_12" to "@color/piko_dynamic_background",
-        "bds_grey_16" to "@color/piko_dynamic_background",
-        "bds_grey_18" to "@color/piko_dynamic_background",
-        "bds_grey_21" to "@color/piko_dynamic_background",
-        "bds_grey_22" to "@color/piko_dynamic_background",
-        "bds_grey_24" to "@color/piko_dynamic_background",
-        "igds_prism_gray_00" to "@color/piko_dynamic_on_surface",
-        "igds_prism_gray_08" to "@color/piko_dynamic_background",
-        "igds_prism_gray_10" to "@color/piko_dynamic_background",
+        "bds_grey_0" to "@color/piko_dynamic_prism_white",
+        "bds_grey_1" to "@color/piko_dynamic_prism_white",
+        "bds_grey_2" to "@color/piko_dynamic_neutral_light",
+        "bds_grey_3" to "@color/piko_dynamic_neutral_light",
+        "bds_grey_4" to "@color/piko_dynamic_neutral_mid",
+        "bds_grey_6" to "@color/piko_dynamic_neutral_dark",
+        "bds_grey_7" to "@color/piko_dynamic_prism_black",
+        "bds_grey_8" to "@color/piko_dynamic_prism_black",
+        "bds_grey_9" to "@color/piko_dynamic_prism_black",
+        "bds_grey_10" to "@color/piko_dynamic_prism_black",
+        "bds_grey_11" to "@color/piko_dynamic_prism_black",
+        "bds_grey_12" to "@color/piko_dynamic_prism_black",
+        "bds_grey_16" to "@color/piko_dynamic_prism_black",
+        "bds_grey_18" to "@color/piko_dynamic_prism_black",
+        "bds_grey_21" to "@color/piko_dynamic_prism_black",
+        "bds_grey_22" to "@color/piko_dynamic_prism_black",
+        "bds_grey_24" to "@color/piko_dynamic_prism_black",
+        "igds_prism_gray_00" to "@color/piko_dynamic_prism_white",
+        "igds_prism_gray_08" to "@color/piko_dynamic_prism_black",
+        "igds_prism_gray_10" to "@color/piko_dynamic_prism_black",
         "bds_blue_0" to "@color/piko_dynamic_primary",
         "bds_blue_1" to "@color/piko_dynamic_primary_pressed",
         "bds_blue_2" to "@color/piko_dynamic_primary_container",
+        // Semantic snackbar surface — flips with the theme like other surfaces.
         "bottom_sheet_undo_redo_color" to "@color/piko_dynamic_background",
         "emphasized_action_color" to "@color/piko_dynamic_primary",
         "badge_color" to "@color/piko_dynamic_primary",
@@ -315,22 +409,65 @@ private val materialYouSurfaceBaselineMappings =
         // below. prism_gray_08/10 and bds_grey_7..24 were already remapped, but
         // these darker elevated steps were missed, which is why the sheets/dialogs
         // stayed grey no matter what the colour resources said.
-        "igds_prism_gray_07" to "@color/piko_dynamic_background",
-        "igds_prism_gray_09" to "@color/piko_dynamic_background",
-        "igds_prism_gray_13" to "@color/piko_dynamic_background",
-        "igds_prism_gray_14" to "@color/piko_dynamic_background",
-        "igds_prism_gray_1500" to "@color/piko_dynamic_background",
+        // Dark prism-greys: these are dark-mode elevated surfaces, but IG also uses
+        // the mid-dark ones as dark FOREGROUND (icons/secondary text) in light mode,
+        // so they must be a dark CONSTANT, not the mode-flipping background (which
+        // would flip them to near-white and hide them in light mode).
+        "igds_prism_gray_07" to "@color/piko_dynamic_prism_black",
+        "igds_prism_gray_09" to "@color/piko_dynamic_prism_black",
+        "igds_prism_gray_13" to "@color/piko_dynamic_prism_black",
+        "igds_prism_gray_14" to "@color/piko_dynamic_prism_black",
+        "igds_prism_gray_1500" to "@color/piko_dynamic_prism_black",
         // Near-opaque (>=80% alpha) surface/panel variants used for banners,
         // toasts, notifications and the creation menu. Flattening to the opaque
         // dynamic background is imperceptible at these alphas. The low-alpha
         // hover / pressed / scrim tints (…_alpha_50, …_70_transparent,
         // white_*_transparent, bds_black_*_transparent) are deliberately left
         // translucent so ripples and overlays keep working.
-        "igds_prism_gray_09_alpha_95" to "@color/piko_dynamic_background",
-        "igds_prism_gray_10_alpha_95" to "@color/piko_dynamic_background",
-        "bds_grey_9_95_transparent" to "@color/piko_dynamic_background",
-        "bds_grey_10_80_transparent" to "@color/piko_dynamic_background",
-        "bds_grey_10_90_transparent" to "@color/piko_dynamic_background",
+        "igds_prism_gray_09_alpha_95" to "@color/piko_dynamic_prism_black",
+        "igds_prism_gray_10_alpha_95" to "@color/piko_dynamic_prism_black",
+        "bds_grey_9_95_transparent" to "@color/piko_dynamic_prism_black",
+        "bds_grey_10_80_transparent" to "@color/piko_dynamic_prism_black",
+        "bds_grey_10_90_transparent" to "@color/piko_dynamic_prism_black",
+        // LIGHT-mode counterparts of the dark surface leaves above (all confirmed
+        // present in the 435.x resource table). In light mode Instagram resolves the
+        // same attribute chains to the "_light" / non-"_dark" twins, so the day
+        // buckets need them remapped too or light-mode surfaces fall through to stock
+        // white. These stay on the mode-flipping background alias on purpose: in the
+        // light buckets that resolves to the light dynamic surface (correct), and in
+        // the -night buckets it's the dark surface — harmless, since IG doesn't read
+        // the light leaves in dark mode. (The main light window bg, default_bg_color_
+        // light -> bds_white, is already covered by the bds_white constant above.)
+        "gm3_baseline_surface" to "@color/piko_dynamic_background",
+        "gm3_baseline_surface_light" to "@color/piko_dynamic_background",
+        "gm3_baseline_surface_container" to "@color/piko_dynamic_background",
+        "gm3_baseline_surface_container_light" to "@color/piko_dynamic_background",
+        "baseline_neutral_100_with_surface_tint_light_alpha_5" to "@color/piko_dynamic_background",
+        "baseline_neutral_100_with_surface_tint_light_alpha_11" to "@color/piko_dynamic_background",
+        "baseline_neutral_100_with_surface_tint_light_alpha_12" to "@color/piko_dynamic_background",
+        "baseline_neutral_100_with_surface_tint_light_alpha_14" to "@color/piko_dynamic_background",
+        "design_default_color_background" to "@color/piko_dynamic_background",
+        "cardview_light_background" to "@color/piko_dynamic_background",
+        "material_grey_50" to "@color/piko_dynamic_background",
+        "material_grey_100" to "@color/piko_dynamic_background",
+        // The big light-mode gap: in the light theme, MDC colorSurface AND one
+        // igds_color_primary_background variant resolve to abc_decor_view_status_
+        // guard_light (raw #ffffff), and colorBackgroundFloating ->
+        // background_floating_material_light (also raw white). MDC bottom sheets,
+        // alert dialogs and the feed pull colorSurface / colorBackgroundFloating, so
+        // these stayed pure white while every documented igds_/bds_ chain was themed.
+        // (Dark analogues design_dark_default_color_background / cardview_dark_* /
+        // material_grey_850/900 were already mapped above.) Both are light-only
+        // leaves, so mapping them to the mode-flipping background is safe in dark.
+        "abc_decor_view_status_guard_light" to "@color/piko_dynamic_background",
+        "background_floating_material_light" to "@color/piko_dynamic_background",
+        // Light near-white prism-greys used as light-mode surfaces / secondary
+        // panels (stock #f3f5f7 / #e9edf0). Map to the light constant so they follow
+        // the light surface tint (and remain light text in dark mode). prism_gray_03
+        // (#dbdfe4) is a light divider tone -> the light-grey constant.
+        "igds_prism_gray_01" to "@color/piko_dynamic_prism_white",
+        "igds_prism_gray_02" to "@color/piko_dynamic_prism_white",
+        "igds_prism_gray_03" to "@color/piko_dynamic_neutral_light",
     )
 
 private val materialYouNamedMappings =

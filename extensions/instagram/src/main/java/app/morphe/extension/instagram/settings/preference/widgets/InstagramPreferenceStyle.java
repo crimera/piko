@@ -54,6 +54,23 @@ public final class InstagramPreferenceStyle {
         return nightMode == Configuration.UI_MODE_NIGHT_YES;
     }
 
+    /**
+     * A native DialogPreference (list / multi-select / edit-text) builds its dialog
+     * from getContext()'s platform alertDialogTheme. The settings activity is
+     * registered with a fixed dark DeviceDefault theme, so those dialogs render dark
+     * regardless of the device's light/dark setting — it only matched by luck in
+     * dark mode. Wrapping the preference's context in a device-appropriate
+     * DeviceDefault theme makes the native dialogs follow light/dark like the rest of
+     * the screen. Row views are coloured explicitly by this class, so the wrapper
+     * effectively only influences the dialog.
+     */
+    public static Context dialogContext(Context context) {
+        int themeRes = isDark(context)
+                ? android.R.style.Theme_DeviceDefault
+                : android.R.style.Theme_DeviceDefault_Light;
+        return new android.view.ContextThemeWrapper(context, themeRes);
+    }
+
     public static int backgroundColor(Context context) {
         return colorResource(context, "piko_dynamic_background", isDark(context) ? Color.rgb(12, 15, 20) : Color.WHITE);
     }
