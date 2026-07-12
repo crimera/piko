@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -64,6 +64,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "ResourcePatch",
         "ResourcePatch"
       ],
       "compatiblePackages": [
@@ -3953,7 +3954,8 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
-        "BytecodePatch"
+        "BytecodePatch",
+        "ResourcePatch"
       ],
       "compatiblePackages": [
         {
