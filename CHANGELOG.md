@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/Utsavrajputt/piko/compare/v1.6.0...v1.6.1) (2026-07-12)
+
+### 🐛 Bug Fixes
+
+* ICONS IN STTING ([0555329](https://github.com/Utsavrajputt/piko/commit/0555329394aa44d2f46c64bf814cbbe8e4f5cbab))
+
 ## [1.6.0](https://github.com/Utsavrajputt/piko/compare/v1.5.2...v1.6.0) (2026-07-12)
 
 ### ✨ New Features
