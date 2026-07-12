@@ -234,6 +234,7 @@
     <string name="piko_pref_patch_info">Informasi tambalan</string>
     <string name="piko_pref_version_info">Informasi versi</string>
     <string name="piko_changelogs_title">Catatan perubahan</string>
+    <string name="piko_debug">Debug Piko</string>
     <string name="piko_pref_patches">Tambalan</string>
     <string name="piko_pref_included">Disertakan</string>
     <string name="piko_pref_excluded">Dikecualikan</string>

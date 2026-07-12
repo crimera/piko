@@ -83,8 +83,6 @@
     <string name="piko_stories_audio_autoplay">Story 音频自动播放</string>
     <string name="piko_customise_story_timestamp">自定义 story 时间戳</string>
     <string name="piko_customise_story_timestamp_desc">自定义快拍发布时间的时间戳格式</string>
-    <string name="piko_unlimited_replays">让短暂性媒体设为永久</string>
-    <string name="piko_unlimited_replays_desc">将未过期的\"阅后即焚\"媒体更改为無限次檢視</string>
     <string name="piko_improve_image_viewing">提高图像分辨率</string>
     <string name="piko_improve_image_viewing_desc">从服务器中获取最高分辨率图片</string>
     <string name="piko_hide_reshare_button">隐藏转发按钮</string>
@@ -106,6 +104,8 @@
     <string name="piko_unlock_plus_benefits_desc">本地解锁Plus。使用风险自负</string>
     <string name="piko_customise_story_ring_size">自定义快拍环大小</string>
     <string name="piko_customise_story_ring_size_desc">按百分比调整快拍环的大小（默认：100）</string>
+    <!-- DM Section -->
+    <string name="piko_unlimited_replays_desc">将未过期的\"阅后即焚\"媒体更改为無限次檢視</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">下载内容</string>
     <string name="piko_enable_download">启用下载</string>
@@ -126,11 +126,7 @@
     <string name="piko_downloaded_media">已下载： </string>
     <string name="piko_media_exists">媒体已存在</string>
     <string name="piko_download_failed_media">下载失败： </string>
-    <string name="piko_download_set_path">自定义下载路径</string>
     <string name="piko_download_set_path_success">下载目录已更新！</string>
-    <string name="piko_download_set_path_failed">无法解析文件夹路径</string>
-    <string name="piko_download_grant_permission">请授予存储访问权限以继续下载</string>
-    <string name="piko_download_grant_permission_failed">无法打开设置。请手动授权所有文件访问权限</string>
     <string name="piko_download_with_external_downloader">使用外部下载器下载</string>
     <string name="piko_external_downloader_package_name">外部下载器应用包名</string>
     <string name="piko_external_downloader_package_name_not_found">找不到外部下载器</string>
@@ -153,8 +149,6 @@
     <string name="piko_hide_navigation_create">隐藏创建按钮</string>
     <!-- Information Section -->
     <string name="piko_category_about">关于</string>
-    <string name="piko_export_pref">导出 piko 首选项</string>
-    <string name="piko_import_pref">导入 piko 首选项</string>
     <string name="piko_app_version">软件版本：%s</string>
     <string name="piko_patch_version">补丁版本： %s</string>
     <string name="piko_patch_info_title">补丁信息</string>
@@ -196,6 +190,8 @@
     <string name="piko_no_internet">请连接到网络</string>
     <string name="piko_tap_here">点击这里！！</string>
     <!-- Action Bar Section -->
+    <string name="piko_action_bar_button_profile_info_icon">个人资料图标</string>
     <string name="piko_settings_on_action_bar">操作栏上的 Piko 设置</string>
     <string name="piko_settings_on_action_bar_desc">移动Piko 设置到主页操作栏</string>
+    <!-- Story filters -->
 </resources>

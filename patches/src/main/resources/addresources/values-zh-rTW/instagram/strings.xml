@@ -71,8 +71,11 @@
     <string name="piko_disable_discover_people_desc">在其他人主頁中停用「為你推薦」功能</string>
     <string name="piko_follow_back_indicator">啟用好友關係狀態指示器</string>
     <string name="piko_follow_back_indicator_desc">在個人檔案頁面新增「已追蹤你」狀態標籤，並在點擊時顯示詳細的好友關係狀態</string>
+    <string name="piko_fbi_color_indicator">啟用彩色好友狀態指示器</string>
+    <string name="piko_fbi_color_indicator_desc">請啟用好友狀態顯示功能</string>
     <string name="piko_fbi_follows_you">已追蹤你</string>
     <string name="piko_fbi_doesnt_follows_you">未追蹤你</string>
+    <string name="piko_fbi_following_each_other">互相追蹤中</string>
     <string name="piko_friendship_status">好友關係狀態</string>
     <string name="piko_view_story_mentions">檢視限時動態提及</string>
     <string name="piko_vsm_title">限時動態提及</string>
@@ -83,8 +86,6 @@
     <string name="piko_stories_audio_autoplay">限時動態音訊自動播放</string>
     <string name="piko_customise_story_timestamp">自訂限時動態的時間格式</string>
     <string name="piko_customise_story_timestamp_desc">自訂顯示限時動態發佈時間的格式</string>
-    <string name="piko_unlimited_replays">將限時媒體設為永久</string>
-    <string name="piko_unlimited_replays_desc">將未過期的單次或雙次檢視媒體變更為永久檢視</string>
     <string name="piko_improve_image_viewing">提高相片畫質</string>
     <string name="piko_improve_image_viewing_desc">從伺服器擷取最高解析度的圖片</string>
     <string name="piko_hide_reshare_button">隱藏轉發按鈕</string>
@@ -101,11 +102,13 @@
     <string name="piko_download_profile_picture">下載個人頭像</string>
     <string name="piko_copied">已複製</string>
     <string name="piko_more_profile_options">更多個人檔案選項</string>
-    <string name="piko_remove_empty_bottom_space"></string>
+    <string name="piko_remove_empty_bottom_space">移除底部空白區域</string>
     <string name="piko_unlock_plus_benefits">解鎖 Plus 專屬福利</string>
     <string name="piko_unlock_plus_benefits_desc">解鎖在本地驗證的 Plus 專屬福利。使用時請自行承擔風險</string>
     <string name="piko_customise_story_ring_size">自訂限時動態光圈尺寸</string>
     <string name="piko_customise_story_ring_size_desc">按百分比調整限時動態光圈尺寸 (預設值：100)</string>
+    <!-- DM Section -->
+    <string name="piko_unlimited_replays_desc">將未過期的單次或雙次檢視媒體變更為永久檢視</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">下載媒體</string>
     <string name="piko_enable_download">啟用下載</string>
@@ -126,11 +129,7 @@
     <string name="piko_downloaded_media">已下載： </string>
     <string name="piko_media_exists">媒體已存在</string>
     <string name="piko_download_failed_media">下載失敗： </string>
-    <string name="piko_download_set_path">設定自訂下載路徑</string>
     <string name="piko_download_set_path_success">下載路徑已更新！</string>
-    <string name="piko_download_set_path_failed">解析資料夾路徑失敗</string>
-    <string name="piko_download_grant_permission">請授予儲存空間存取權限以繼續下載</string>
-    <string name="piko_download_grant_permission_failed">無法開啟設定。請手動授予「所有檔案存取權」權限</string>
     <string name="piko_download_with_external_downloader">使用外部下載程式下載</string>
     <string name="piko_external_downloader_package_name">外部下載程式的套件名稱</string>
     <string name="piko_external_downloader_package_name_not_found">找不到外部下載程式</string>
@@ -155,6 +154,9 @@
     <string name="piko_category_about">關於</string>
     <string name="piko_export_pref">匯出 Piko 偏好設定</string>
     <string name="piko_import_pref">匯入 Piko 偏好設定</string>
+    <string name="piko_reset_pref">重設 Piko 偏好設定</string>
+    <string name="piko_reset_pref_success">已刪除 Piko 偏好設定</string>
+    <string name="piko_reset_pref_failed">無法刪除 Piko 偏好設定</string>
     <string name="piko_app_version">應用程式版本：%s</string>
     <string name="piko_patch_version">補丁版本：%s</string>
     <string name="piko_patch_info_title">補丁資訊</string>
@@ -163,7 +165,7 @@
     <!-- Export and Import Section -->
     <string name="piko_export_success">匯出成功</string>
     <string name="piko_export_fail">匯出失敗</string>
-    <string name="piko_fail_no_path"></string>
+    <string name="piko_fail_no_path">未提供目的地路徑</string>
     <string name="piko_fail_no_file">找不到檔案</string>
     <string name="piko_import_success">匯入成功</string>
     <string name="piko_import_fail">匯入失敗</string>
@@ -182,7 +184,7 @@
     <string name="piko_open_video_with">使用以下方式開啟影片</string>
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">更改「按讚」動畫</string>
-    <string name="piko_change_like_animation_desc"></string>
+    <string name="piko_change_like_animation_desc">將按讚動畫變更為現有的光圈按讚動畫之一</string>
     <string name="piko_available_like_animation">可用的「按讚」動畫</string>
     <!-- For arrays -->
     <string name="piko_array_default">預設</string>
@@ -196,6 +198,16 @@
     <string name="piko_no_internet">請連接到互聯網</string>
     <string name="piko_tap_here">點這裡！！</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">自訂操作列</string>
+    <string name="piko_action_bar_main_feed">動態首頁操作列圖標</string>
+    <string name="piko_action_bar_user_profile">個人檔案頁面操作列圖標</string>
+    <string name="piko_action_bar_chat">訊息操作列圖標</string>
+    <string name="piko_action_bar_chat_desc">私訊中的操作列圖示</string>
+    <string name="piko_action_bar_inbox">收件匣操作列圖示</string>
+    <string name="piko_action_bar_button_settings_icon">設定圖示</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">幽靈模式圖示</string>
+    <string name="piko_action_bar_button_profile_info_icon">個人檔案圖示</string>
     <string name="piko_settings_on_action_bar">操作列上的 Piko 設定</string>
     <string name="piko_settings_on_action_bar_desc">將 Piko 設定入口移至動態首頁的操作列上</string>
+    <!-- Story filters -->
 </resources>

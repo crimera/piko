@@ -86,8 +86,6 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_stories_audio_autoplay">Hikaye sesini otomatik oynat</string>
     <string name="piko_customise_story_timestamp">Hikaye zaman damgasını özelleştir</string>
     <string name="piko_customise_story_timestamp_desc">Hikayenin ne zaman paylaşıldığını gösteren zaman damgasını özelleştir</string>
-    <string name="piko_unlimited_replays">Geçici medyayı kalıcı yap</string>
-    <string name="piko_unlimited_replays_desc">Bir veya iki kez görüntülenebilen medyayı kalıcı görüntülenebilir hale getirir</string>
     <string name="piko_improve_image_viewing">Görsel kalitesini artır</string>
     <string name="piko_improve_image_viewing_desc">Sunucudan maksimum çözünürlüklü görüntüleri çeker</string>
     <string name="piko_hide_reshare_button">Yeniden paylaş butonunu gizle</string>
@@ -109,6 +107,12 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_unlock_plus_benefits_desc">Yerel olarak kontrol edilen “Plus” abonelik avantajlarının kilidini açar. ∆ Kendi sorumluluğunuzda kullanın</string>
     <string name="piko_customise_story_ring_size">Hikaye halkası boyutunu özelleştir</string>
     <string name="piko_customise_story_ring_size_desc">Hikaye halkasının boyutunu yüzde olarak değiştirin (Varsayılan: 100)</string>
+    <!-- DM Section -->
+    <string name="piko_category_dm">Mesajlar</string>
+    <string name="piko_unlimited_replays">Kaybolan medyaları kalıcı yap</string>
+    <string name="piko_unlimited_replays_desc">Bir veya iki kez görüntülenebilen medyayı kalıcı görüntülenebilir hale getirir</string>
+    <string name="piko_enable_mark_chat_as_read">Sohbeti okundu olarak işaretle seçeneğini etkinleştir</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Sohbetin üzerine basılı tutunca okundu olarak işaretleme seçeneği ekle</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Medya indirme</string>
     <string name="piko_enable_download">İndirmeyi etkinleştir</string>
@@ -129,11 +133,7 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_downloaded_media">İndirildi: </string>
     <string name="piko_media_exists">Bu medya zaten mevcut</string>
     <string name="piko_download_failed_media">İndirme başarısız: </string>
-    <string name="piko_download_set_path">Özel indirme yolu ayarla</string>
     <string name="piko_download_set_path_success">İndirme klasörü güncellendi!</string>
-    <string name="piko_download_set_path_failed">Klasör yolu çözümlenemedi</string>
-    <string name="piko_download_grant_permission">İndirmelere devam etmek için lütfen depolama erişimi izni verin</string>
-    <string name="piko_download_grant_permission_failed">Ayarlar açılamadı. Lütfen tüm dosyalara erişim iznini manuel olarak verin</string>
     <string name="piko_download_with_external_downloader">Harici indirici ile indir</string>
     <string name="piko_external_downloader_package_name">Harici indirici paket adı</string>
     <string name="piko_external_downloader_package_name_not_found">Harici indirici paket adı bulunamadı</string>
@@ -156,8 +156,11 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_hide_navigation_create">Oluştur butonunu gizle</string>
     <!-- Information Section -->
     <string name="piko_category_about">Hakkında</string>
-    <string name="piko_export_pref">Piko ayarlarını dışa aktar</string>
-    <string name="piko_import_pref">Piko ayarlarını içe aktar</string>
+    <string name="piko_export_pref">Piko tercihlerini dışa aktar</string>
+    <string name="piko_import_pref">Piko tercihlerini içe aktar</string>
+    <string name="piko_reset_pref">Piko tercihlerini sıfırla</string>
+    <string name="piko_reset_pref_success">Piko tercihleri silindi</string>
+    <string name="piko_reset_pref_failed">Piko tercihleri silinemedi</string>
     <string name="piko_app_version">Uygulama sürümü: %s</string>
     <string name="piko_patch_version">Yama sürümü: %s</string>
     <string name="piko_patch_info_title">Yama bilgisi</string>
@@ -210,4 +213,5 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_action_bar_button_profile_info_icon">Profil bilgisi simgesi</string>
     <string name="piko_settings_on_action_bar">Piko ayarları eylem çubuğunda</string>
     <string name="piko_settings_on_action_bar_desc">Piko ayarları butonunu ana akış eylem çubuğuna taşı</string>
+    <!-- Story filters -->
 </resources>

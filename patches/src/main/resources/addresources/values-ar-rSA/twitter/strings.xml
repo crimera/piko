@@ -118,8 +118,8 @@
     <string name="piko_pref_clear_tracking_params">مسح معلمات التتبع</string>
     <string name="piko_pref_unshorten_link">لا عنوان URL مختصر</string>
     <string name="piko_pref_unshorten_link_desc">تخلص من عناوين URL القصيرة لـ t.co</string>
-    <string name="piko_pref_round_off_numbers">اختصار الأرقام</string>
-    <string name="piko_pref_round_off_numbers_desc">عرض الأرقام بصيغة K و M</string>
+    <string name="piko_pref_round_off_numbers">إيقاف اختصار الأرقام</string>
+    <string name="piko_pref_round_off_numbers_desc">يوقف عرض الأرقام بصيغة K و M</string>
     <string name="piko_pref_debug_menu">تمكين قائمة Debug للمنشورات</string>
     <string name="piko_pref_quick_settings">تمكين الإعدادات السريعة</string>
     <string name="piko_pref_quick_settings_summary">إضافة زر الإعدادات السريعة في الشريط الجانبي</string>

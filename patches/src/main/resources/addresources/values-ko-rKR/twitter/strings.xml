@@ -234,6 +234,7 @@
     <string name="piko_pref_patch_info">패치 정보</string>
     <string name="piko_pref_version_info">버전 정보</string>
     <string name="piko_changelogs_title">변경 사항</string>
+    <string name="piko_debug">Piko 디버그</string>
     <string name="piko_pref_patches">패치</string>
     <string name="piko_pref_included">포함된 패치</string>
     <string name="piko_pref_excluded">제외된 패치</string>

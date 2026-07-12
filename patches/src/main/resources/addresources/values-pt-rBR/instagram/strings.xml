@@ -71,8 +71,11 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_disable_discover_people_desc">Desativar a seção de descobrir pessoas no perfil.</string>
     <string name="piko_follow_back_indicator">Ativar indicador de status de amizade</string>
     <string name="piko_follow_back_indicator_desc">Adiciona uma etiqueta de \"segue você de volta\" na página do perfil e exibe um resumo detalhado do status de amizade ao clicar.</string>
+    <string name="piko_fbi_color_indicator">Ativar indicador colorido do status de amizade</string>
+    <string name="piko_fbi_color_indicator_desc">É necessário ativar o indicador de status de amizade</string>
     <string name="piko_fbi_follows_you">Segue você</string>
     <string name="piko_fbi_doesnt_follows_you">Não segue você</string>
+    <string name="piko_fbi_following_each_other">Seguindo um ao outro</string>
     <string name="piko_friendship_status">Status de amizade</string>
     <string name="piko_view_story_mentions">Ver menções no stories</string>
     <string name="piko_vsm_title">Menções no stories</string>
@@ -83,8 +86,6 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_stories_audio_autoplay">Reprodução automática de áudio nos stories</string>
     <string name="piko_customise_story_timestamp">Personalizar o formato do horário nos stories</string>
     <string name="piko_customise_story_timestamp_desc">Personalize o formato do horário mostrado de quando o stories foi postado.</string>
-    <string name="piko_unlimited_replays">Tornar video/foto de visualização única permanente</string>
-    <string name="piko_unlimited_replays_desc">Transforma mídias de visualização única ou dupla em visualização permanente.</string>
     <string name="piko_improve_image_viewing">Melhorar qualidade de imagens</string>
     <string name="piko_improve_image_viewing_desc">Obtém imagens na resolução máxima do servidor.</string>
     <string name="piko_hide_reshare_button">Ocultar botão de repostar</string>
@@ -106,6 +107,12 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_unlock_plus_benefits_desc">Desbloqueie os benefícios da assinatura do Instagram Plus sendo verificados localmente. USE POR SUA CONTA E RISCO.</string>
     <string name="piko_customise_story_ring_size">Personalizar tamanho do anel do stories</string>
     <string name="piko_customise_story_ring_size_desc">Altera o tamanho do anel do stories por uma porcentagem (Padrão: 100)</string>
+    <!-- DM Section -->
+    <string name="piko_category_dm">Mensagem direta</string>
+    <string name="piko_unlimited_replays">Tornar permanentes as mídias efêmeras</string>
+    <string name="piko_unlimited_replays_desc">Transforma mídias de visualização única ou dupla em visualização permanente.</string>
+    <string name="piko_enable_mark_chat_as_read">Ativar a opção marcar chat como lido</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Ao pressionar e segurar a mensagem, você terá a opção de marcá-la como lida</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download</string>
     <string name="piko_enable_download">Ativar download de postagens de imagens e vídeos</string>
@@ -126,11 +133,7 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_downloaded_media">Baixado: </string>
     <string name="piko_media_exists">A mídia já existe</string>
     <string name="piko_download_failed_media">Falha ao baixar : </string>
-    <string name="piko_download_set_path">Definir caminho personalizado para download</string>
     <string name="piko_download_set_path_success">Diretório de downloads atualizado!</string>
-    <string name="piko_download_set_path_failed">Falha ao resolver o caminho da pasta</string>
-    <string name="piko_download_grant_permission">Por favor, conceda acesso ao armazenamento para continuar o download</string>
-    <string name="piko_download_grant_permission_failed">Não foi possível abrir as configurações. Conceda acesso total aos arquivos manualmente</string>
     <string name="piko_download_with_external_downloader">Baixar com um gerenciador de downloads externo</string>
     <string name="piko_external_downloader_package_name">Nome do pacote do gerenciador de downloads externo</string>
     <string name="piko_external_downloader_package_name_not_found">Nome do pacote do gerenciador de downloads externo não encontrado</string>
@@ -153,8 +156,11 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_hide_navigation_create">Ocultar botão Criar (+)</string>
     <!-- Information Section -->
     <string name="piko_category_about">Sobre</string>
-    <string name="piko_export_pref">Exportar configuração do menu Piko</string>
-    <string name="piko_import_pref">Importar configuração do menu Piko</string>
+    <string name="piko_export_pref">Preferências de exportação Piko</string>
+    <string name="piko_import_pref">Importar preferências do Piko</string>
+    <string name="piko_reset_pref">Redefinir preferências do Piko</string>
+    <string name="piko_reset_pref_success">Preferências do Piko excluídas</string>
+    <string name="piko_reset_pref_failed">Falha ao excluir as preferências do Piko</string>
     <string name="piko_app_version">Versão do app: %s</string>
     <string name="piko_patch_version">Versão do patch: %s</string>
     <string name="piko_patch_info_title">Informações dos patches apllicado</string>
@@ -207,4 +213,5 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_action_bar_button_profile_info_icon">Ícone de informações do perfil</string>
     <string name="piko_settings_on_action_bar">Configurações do Piko no feed principal</string>
     <string name="piko_settings_on_action_bar_desc">Mova o acesso às configurações do Piko para a barra superior no feed principal.</string>
+    <!-- Story filters -->
 </resources>

@@ -73,8 +73,11 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_disable_discover_people_desc">Desactiva la sección de descubrir personas en el perfil de usuario</string>
     <string name="piko_follow_back_indicator">Habilitar el indicador de estado de amistad</string>
     <string name="piko_follow_back_indicator_desc">Agrega una etiqueta de estado \"Te sigue de vuelta\" en la página de perfil y muestra un desglose detallado del estado de amistad al hacer clic</string>
+    <string name="piko_fbi_color_indicator">Habilite el indicador de estado de amistad de colores</string>
+    <string name="piko_fbi_color_indicator_desc">Es necesario habilitar el indicador de estado de amistad</string>
     <string name="piko_fbi_follows_you">Te sigue</string>
     <string name="piko_fbi_doesnt_follows_you">No te sigue</string>
+    <string name="piko_fbi_following_each_other">Siguiéndose unos a otros</string>
     <string name="piko_friendship_status">Estado de amistad</string>
     <string name="piko_view_story_mentions">Ver menciones de historia</string>
     <string name="piko_vsm_title">Menciones de historia</string>
@@ -85,8 +88,6 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_stories_audio_autoplay">Reproducción automática de audio en historias</string>
     <string name="piko_customise_story_timestamp">Personalizar horario de la historia</string>
     <string name="piko_customise_story_timestamp_desc">Personalizar el horario mostrado de cuando se publicó la historia</string>
-    <string name="piko_unlimited_replays">Hacer medios permanentes</string>
-    <string name="piko_unlimited_replays_desc">Transforma medios de visualización única o doble en visualización permanente</string>
     <string name="piko_improve_image_viewing">Mejorar calidad de imágenes</string>
     <string name="piko_improve_image_viewing_desc">Obtiene imágenes en la resolución máxima del servidor</string>
     <string name="piko_hide_reshare_button">Ocultar botón de republicar</string>
@@ -108,6 +109,12 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_unlock_plus_benefits_desc">Desbloquea beneficios de la suscripción \"Plus\" verificados localmente. ÚSALO BAJO TU PROPIO RIESGO</string>
     <string name="piko_customise_story_ring_size">Personalizar tamaño del anillo de historia</string>
     <string name="piko_customise_story_ring_size_desc">Cambia el tamaño del anillo de historia por un porcentaje (Predeterminado: 100)</string>
+    <!-- DM Section -->
+    <string name="piko_category_dm">Mensaje Directo</string>
+    <string name="piko_unlimited_replays">Convertir los medios efímeros en permanentes</string>
+    <string name="piko_unlimited_replays_desc">Transforma medios de visualización única o doble en visualización permanente</string>
+    <string name="piko_enable_mark_chat_as_read">Habilitar la opción de marcar el chat como leído</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Al mantener pulsado el chat, aparecerá una opción para marcarlo como leído</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Descargar medios</string>
     <string name="piko_enable_download">Activar descarga</string>
@@ -128,11 +135,7 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_downloaded_media">Descargado: </string>
     <string name="piko_media_exists">El medio ya existe</string>
     <string name="piko_download_failed_media">Error al descargar: </string>
-    <string name="piko_download_set_path">Establecer ruta de descarga personalizada</string>
     <string name="piko_download_set_path_success">¡Directorio de descarga actualizado!</string>
-    <string name="piko_download_set_path_failed">Error al resolver la ruta de la carpeta</string>
-    <string name="piko_download_grant_permission">Concede acceso al almacenamiento para continuar las descargas</string>
-    <string name="piko_download_grant_permission_failed">No se pudieron abrir los ajustes. Concede acceso total a los archivos manualmente</string>
     <string name="piko_download_with_external_downloader">Descargar con gestor externo</string>
     <string name="piko_external_downloader_package_name">Nombre del paquete del gestor externo</string>
     <string name="piko_external_downloader_package_name_not_found">Nombre del paquete del gestor externo no encontrado</string>
@@ -155,8 +158,11 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_hide_navigation_create">Ocultar botón Crear</string>
     <!-- Information Section -->
     <string name="piko_category_about">Acerca de</string>
-    <string name="piko_export_pref">Exportar preferencias de piko</string>
-    <string name="piko_import_pref">Importar preferencias de piko</string>
+    <string name="piko_export_pref">Exportar preferencias de Piko</string>
+    <string name="piko_import_pref">Importar preferencias de Piko</string>
+    <string name="piko_reset_pref">Restablecer preferencias de Piko</string>
+    <string name="piko_reset_pref_success">Se eliminaron las preferencias de Piko</string>
+    <string name="piko_reset_pref_failed">No se pudieron eliminar las preferencias de Piko</string>
     <string name="piko_app_version">Versión de la aplicación: %s</string>
     <string name="piko_patch_version">Versión del parche: %s</string>
     <string name="piko_patch_info_title">Información del parche</string>
@@ -209,4 +215,5 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_action_bar_button_profile_info_icon">Icono de información de perfil</string>
     <string name="piko_settings_on_action_bar">Ajustes de Piko en el feed principal</string>
     <string name="piko_settings_on_action_bar_desc">Mueve el acceso a los ajustes de Piko a la barra superior en el feed principal</string>
+    <!-- Story filters -->
 </resources>

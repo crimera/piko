@@ -343,5 +343,6 @@
     <string name="piko_login_token_import_from_text">从文本导入</string>
     <string name="piko_login_token_import_from_file">从文件导入</string>
     <string name="piko_login_token_import_about">关于此功能 (打开网站)</string>
+    <string name="piko_login_token_import_failed_missing_info">错误: \"username\" 或 \"token\" 或 \"secret\" 丢失了</string>
     <string name="piko_login_token_import_failed_already_exist">添加账户失败 (可能已存在)</string>
 </resources>

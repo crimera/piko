@@ -36,6 +36,7 @@
     <string name="piko_copy_user_id">نسخ معرف المستخدم</string>
     <string name="piko_copy_bio">نسخ البيانات</string>
     <string name="piko_copied">تم النسخ</string>
+    <!-- DM Section -->
     <!-- Download Media Section -->
     <string name="piko_category_download_media">تنزيل الوسائط</string>
     <string name="piko_download_audio">تنزيل الصوت</string>
@@ -64,4 +65,5 @@
     <string name="piko_tap_here">إضغط هنا !!</string>
     <!-- Action Bar Section -->
     <string name="piko_action_bar_button_settings_icon">أيقونة الإعدادات</string>
+    <!-- Story filters -->
 </resources>

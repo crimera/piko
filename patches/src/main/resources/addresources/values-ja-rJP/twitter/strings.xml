@@ -234,6 +234,7 @@
     <string name="piko_pref_patch_info">適用されたパッチに関する情報</string>
     <string name="piko_pref_version_info">バージョン情報</string>
     <string name="piko_changelogs_title">変更履歴</string>
+    <string name="piko_debug">Pikoデバッグ</string>
     <string name="piko_pref_patches">パッチ</string>
     <string name="piko_pref_included">適用済み</string>
     <string name="piko_pref_excluded">除外済み</string>
