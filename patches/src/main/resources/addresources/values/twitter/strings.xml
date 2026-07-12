@@ -216,9 +216,9 @@
 
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Backup and restore</string>
-    <string name="piko_pref_import_settings">Import Piko settings</string>
-    <string name="piko_pref_export_settings">Export Piko settings</string>
-    <string name="piko_pref_reset_settings">Reset Piko settings</string>
+    <string name="piko_pref_import_settings">Import Modx settings</string>
+    <string name="piko_pref_export_settings">Export Modx settings</string>
+    <string name="piko_pref_reset_settings">Reset Modx settings</string>
     <string name="piko_pref_export_success">Export successful</string>
     <string name="piko_pref_import_success">Import successful</string>
     <string name="piko_pref_export_failed">Error: Exporting %s failed</string>
@@ -263,7 +263,7 @@
 
     <!-- App icon strings -->
     <string name="piko_app_icon_thanks">Thanks to @NeoFreeBird for app icons from iOS</string>
-    <string name="piko_app_icon_piko_exclusive">(Piko exclusive)</string>
+    <string name="piko_app_icon_piko_exclusive">(MOdx exclusive)</string>
 
     <!-- Category -->
     <string name="piko_app_icon_category_legacy">Legacy</string>

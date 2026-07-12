@@ -100,7 +100,7 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_monochrome_more_options_icons">Monochrome icons</string>
     <string name="piko_monochrome_more_options_icons_desc">Makes every icon in the story and post/profile \"More options\" sheets the same neutral color instead of each having its own color</string>
     <string name="piko_more_options_use_widget_icon">Use widget icon for more options</string>
-    <string name="piko_more_options_use_widget_icon_desc">Show the Piko widget icon instead of the bulb icon for the \"More options\" button on posts and reels</string>
+    <string name="piko_more_options_use_widget_icon_desc">Show the Modx widget icon instead of the bulb icon for the \"More options\" button on posts and reels</string>
 
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Misc</string>
@@ -218,7 +218,7 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_download_all_slides">Download all slides</string>
 
     <!-- Navigation Section -->
-    <string name="piko_category_hide_navigation_buttons">Hide navigation buttons</string>
+    <string name="piko_category_hide_navigation_buttons">Navigation Bar</string>
     <string name="piko_hide_navigation_feed">Hide Feed button</string>
     <string name="piko_hide_navigation_reels">Hide Reels button</string>
     <string name="piko_hide_navigation_direct">Hide Direct button</string>
@@ -229,11 +229,11 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_category_about">About</string>
     <string name="piko_category_about_app">App</string>
     <string name="piko_category_about_backup">Backup</string>
-    <string name="piko_category_about_settings">Piko settings</string>
-    <string name="piko_export_pref_desc">Saves all your Piko preferences to a file</string>
-    <string name="piko_import_pref_desc">Loads Piko preferences from a previously exported file</string>
-    <string name="piko_export_pref">Export piko preferences</string>
-    <string name="piko_import_pref">Import piko preferences</string>
+    <string name="piko_category_about_settings">Modx settings</string>
+    <string name="piko_export_pref_desc">Saves all your Modx preferences to a file</string>
+    <string name="piko_import_pref_desc">Loads Modx preferences from a previously exported file</string>
+    <string name="piko_export_pref">Export Modx preferences</string>
+    <string name="piko_import_pref">Import Modx preferences</string>
     <string name="piko_app_version">App version: %s</string>
     <string name="piko_patch_version">Patch version: %s</string>
     <string name="piko_patch_info_title">Patch information</string>
@@ -251,7 +251,7 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_ok">OK</string>
     <string name="piko_cancel">Cancel</string>
     <string name="piko_deleted">Deleted</string>
-    <string name="piko_debug">Piko debug</string>
+    <string name="piko_debug">Modx debug</string>
     <string name="piko_debug_desc">Adds debug option on some of the components for testing</string>
     <string name="piko_export_experiment_list">Export experiment list</string>
     <string name="piko_export_experiment_mappings">Export experiment mappings</string>
@@ -274,18 +274,18 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_array_time_left">Time left (Hour/Minute/Second left)</string>
 
     <!-- Welcome Message -->
-    <string name="piko_welcome_title">Welcome to Piko</string>
-    <string name="piko_welcome_message">To improve your experience with Piko, please vist Piko settings and adjust your preference</string>
-    <string name="piko_goto_piko_settings">Goto Piko settings</string>
+    <string name="piko_welcome_title">Welcome to Modx</string>
+    <string name="piko_welcome_message">To improve your experience with Modx, please vist Modx settings and adjust your preference</string>
+    <string name="piko_goto_piko_settings">Goto Modx settings</string>
     <string name="piko_no_internet">Please connect to internet</string>
     <string name="piko_tap_here">Tap here !!</string>
 
     <!-- Action Bar Section -->
-    <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
-    <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
-    <string name="piko_settings_icon_style">Piko settings icon style</string>
-    <string name="piko_settings_icon_style_desc">Choose the icon used for the Piko settings button</string>
+    <string name="piko_settings_on_action_bar">Modx settings on action bar</string>
+    <string name="piko_settings_on_action_bar_desc">Move Modx settings entry point to main feed action bar</string>
+    <string name="piko_settings_icon_style">Modx settings icon style</string>
+    <string name="piko_settings_icon_style_desc">Choose the icon used for the Modx settings button</string>
     <string name="piko_array_settings_icon_gear">Gear</string>
     <string name="piko_array_settings_icon_x">X icon</string>
-    <string name="piko_array_settings_icon_spark">Piko icon</string>
+    <string name="piko_array_settings_icon_spark">Modx icon</string>
 </resources>
