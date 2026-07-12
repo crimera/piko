@@ -294,8 +294,8 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_reel_type_user_reel">User reel</string>
 
     <string name="piko_filter_story_user_types_to_hide">User types to hide</string>
-    <string name="piko_user_type_unverified">Verified users</string>
-    <string name="piko_user_type_verified">Unverified users</string>
+    <string name="piko_user_type_unverified">Unverified users</string>
+    <string name="piko_user_type_verified">Verified users</string>
 
     <string name="piko_filter_story_minimum_item_count">Minimum story items</string>
     <string name="piko_filter_story_minimum_item_count_desc">Stories having less than x items will be hidden (default 1)</string>
