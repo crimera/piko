@@ -7,7 +7,6 @@
 package app.crimera.patches.instagram.misc.settings
 
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.util.getNode
 import org.w3c.dom.Element
 
 val addSettingsActivityPatch =
@@ -16,11 +15,6 @@ val addSettingsActivityPatch =
     ) {
         finalize {
             document("AndroidManifest.xml").use { document ->
-
-                val manifest = document.getNode("manifest")
-                val permission = document.createElement("uses-permission")
-                permission.setAttribute("android:name", "android.permission.MANAGE_EXTERNAL_STORAGE")
-                manifest.appendChild(permission)
 
                 val application = document.getElementsByTagName("application").item(0) as Element
 
