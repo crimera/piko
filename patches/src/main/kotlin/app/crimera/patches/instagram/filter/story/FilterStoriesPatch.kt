@@ -7,6 +7,7 @@
 package app.crimera.patches.instagram.filter.story
 
 import app.crimera.patches.instagram.entity.reelResponseItem.reelResponseItemEntity
+import app.crimera.patches.instagram.entity.userdata.userDataEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
@@ -30,7 +31,7 @@ val filterStoriesPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
-        dependsOn(settingsPatch, reelResponseItemEntity)
+        dependsOn(settingsPatch, reelResponseItemEntity, userDataEntity)
         execute {
 
             StoryResponseJsonParserFingerprint.apply {
@@ -46,6 +47,7 @@ val filterStoriesPatch =
                         index + 1,
                         """
                         invoke-static{v$reelResponseItemRegister}, $PATCHES_DESCRIPTOR/filter/story/FilterStory;->filter(Ljava/lang/Object;)Ljava/lang/Object;
+                        move-result-object v$reelResponseItemRegister
                         if-eqz v$reelResponseItemRegister, :piko
                         """.trimIndent(),
                         ExternalLabel("piko", getInstruction(index + 2)),

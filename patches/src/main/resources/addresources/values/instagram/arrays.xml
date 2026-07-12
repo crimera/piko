@@ -217,4 +217,14 @@
         <item>user_reel</item>
     </string-array>
 
+    <string-array name="piko_array_user_type">
+        <item>@string/piko_user_type_unverified</item>
+        <item>@string/piko_user_type_verified</item>
+    </string-array>
+
+    <string-array name="piko_array_user_type_val">
+        <item>unverified</item>
+        <item>verified</item>
+    </string-array>
+
 </resources>

@@ -15,6 +15,14 @@ internal object ReelResponseItemFingerprint : Fingerprint(
     definingClass = "ReelResponseItem;",
 )
 
+internal object ReelResponseItemIntfMapperFingerprint : Fingerprint(
+    returnType = "Ljava/util/Map;",
+    strings = listOf("strong_id__", "media_count"),
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 2 && methodDef.parameters[1].type.endsWith("ReelResponseItemIntf;")
+    },
+)
+
 internal object ReelTypeEnumInitFingerprint : Fingerprint(
     name = "<clinit>",
     strings =
@@ -23,5 +31,15 @@ internal object ReelTypeEnumInitFingerprint : Fingerprint(
 
 internal object GetReelTypeExtensionFingerprint : Fingerprint(
     name = "getReelType",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
+internal object GetUserDataExtensionFingerprint : Fingerprint(
+    name = "getUserData",
+    definingClass = EXTENSION_CLASS_DESCRIPTOR,
+)
+
+internal object GetMediaCountExtensionFingerprint : Fingerprint(
+    name = "getMediaCount",
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
 )

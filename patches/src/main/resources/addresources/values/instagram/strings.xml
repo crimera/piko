@@ -238,7 +238,9 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
 
     <!-- Story filters -->
     <string name="piko_category_filter_content">Filter content</string>
+
     <string name="piko_filter_story">Filter Story</string>
+
     <string name="piko_filter_story_types_to_hide">Story types to hide</string>
     <string name="piko_reel_type_ads_reel">Ads reel</string>
     <string name="piko_reel_type_ar_effect_preview">Ar effect preview</string>
@@ -288,4 +290,13 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_reel_type_third_party_app_story">Third party app story</string>
     <string name="piko_reel_type_typed_container">Typed container</string>
     <string name="piko_reel_type_user_reel">User reel</string>
+
+    <string name="piko_filter_story_user_types_to_hide">User types to hide</string>
+    <string name="piko_user_type_unverified">Verified users</string>
+    <string name="piko_user_type_verified">Unverified users</string>
+
+    <string name="piko_filter_story_minimum_item_count">Minimum story items</string>
+    <string name="piko_filter_story_minimum_item_count_desc">Stories having less than x items will be hidden (default 1)</string>
+    <string name="piko_filter_story_maximum_item_count">Maximum story items</string>
+    <string name="piko_filter_story_maximum_item_count_desc">Stories having more than x items will be hidden (default 9999)</string>
 </resources>

@@ -23,5 +23,17 @@ public class ReelResponseItem extends Entity {
         return reelTypeEnum.toString();
     }
 
+    public UserData getUserData() throws Exception {
+        Object userDataObject = super.getField("fieldName");
+        if(userDataObject!=null){
+            return new UserData(userDataObject);
+        }
+        return null;
+    }
+
+    public int getMediaCount() throws Exception {
+        return (Integer) super.getMethod("methodName");
+    }
+
 
 }
