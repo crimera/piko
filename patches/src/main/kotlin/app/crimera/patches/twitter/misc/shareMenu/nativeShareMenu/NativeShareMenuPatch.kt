@@ -8,6 +8,7 @@ package app.crimera.patches.twitter.misc.shareMenu.nativeShareMenu
 
 import app.crimera.patches.twitter.entity.entityGenerator
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.misc.shareMenu.browseObject.browseObjectPatch
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonOnClickHook
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
@@ -21,7 +22,7 @@ val nativeShareMenuPatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, nativeShareMenuResourcePatch, entityGenerator, shareMenuButtonOnClickHook)
+        dependsOn(settingsPatch, nativeShareMenuResourcePatch, entityGenerator, shareMenuButtonOnClickHook, browseObjectPatch)
 
         execute {
 

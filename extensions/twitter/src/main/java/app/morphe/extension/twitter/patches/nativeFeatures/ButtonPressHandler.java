@@ -8,7 +8,6 @@ package app.morphe.extension.twitter.patches.nativeFeatures;
 
 import android.content.Context;
 
-import app.morphe.extension.twitter.patches.nativeFeatures.browse.BrowseTweetObjectPatch;
 import app.morphe.extension.twitter.patches.nativeFeatures.downloader.NativeDownloader;
 import app.morphe.extension.twitter.patches.nativeFeatures.shareImage.ShareImageHandler;
 import app.morphe.extension.twitter.patches.nativeFeatures.translator.NativeTranslator;
@@ -18,7 +17,7 @@ import app.morphe.extension.twitter.patches.links.ExternalDownloader;
 import app.morphe.extension.twitter.Pref;
 
 import app.morphe.extension.crimera.PikoUtils;
-
+import app.morphe.extension.crimera.ObjectBrowser;
 
 public class ButtonPressHandler {
     
@@ -50,7 +49,7 @@ public class ButtonPressHandler {
                 NativeTranslator.translate(context, tweetObject);
 
             } else if (buttonCheck(buttonPressed, "BrowseObject")) {
-                BrowseTweetObjectPatch.browse(context, tweetObject);
+                ObjectBrowser.browseObject(context, tweetObject);
 
             } else if (buttonCheck(buttonPressed, "TwitterShare")) {
                 BottomSheetBuilder.showShareSheet(context, tweetObject);

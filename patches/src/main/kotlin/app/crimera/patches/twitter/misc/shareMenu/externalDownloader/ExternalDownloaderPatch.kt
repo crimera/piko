@@ -8,6 +8,7 @@ package app.crimera.patches.twitter.misc.shareMenu.externalDownloader
 
 import app.crimera.patches.twitter.entity.entityGenerator
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.misc.shareMenu.browseObject.browseObjectPatch
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonInjection
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonOnClickHook
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
@@ -19,7 +20,7 @@ val externalDownloaderPatch =
         name = "Support external downloader",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, entityGenerator, shareMenuButtonOnClickHook)
+        dependsOn(settingsPatch, entityGenerator, shareMenuButtonOnClickHook, browseObjectPatch)
 
         execute {
             val actionName = "ExternalDownload"

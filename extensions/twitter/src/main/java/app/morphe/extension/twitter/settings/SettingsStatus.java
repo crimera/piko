@@ -419,7 +419,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableNativeSection() {
-        return ( enableNativeShareMenu || nativeDownloader || nativeTranslator || nativeReaderMode || shareImage || browseObject);
+        return ( enableNativeShareMenu || nativeDownloader || nativeTranslator || nativeReaderMode || shareImage);
     }
 
     public static boolean enableDownloadSection() {

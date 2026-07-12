@@ -16,8 +16,8 @@ import java.util.List;
 import static app.morphe.extension.shared.StringRef.str;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.crimera.ObjectBrowser;
 
-import app.morphe.extension.twitter.patches.nativeFeatures.browse.BrowseTweetObjectPatch;
 import app.morphe.extension.twitter.patches.nativeFeatures.downloader.NativeDownloader;
 import app.morphe.extension.twitter.patches.nativeFeatures.shareImage.ShareImageHandler;
 import app.morphe.extension.twitter.patches.nativeFeatures.translator.NativeTranslator;
@@ -61,8 +61,8 @@ public class BottomSheetBuilder {
             actions.add(new BottomSheetAction<>("ic_vector_share",str("piko_share_image_title"),t -> ShareImageHandler.shareAsImage(context, tweetObject,0)));
         }
 
-        if(Pref.browseObject()){
-            actions.add(new BottomSheetAction<>("ic_vector_flask_stroke",str("piko_browse_object_title"),t -> BrowseTweetObjectPatch.browse(context, tweetObject)));
+        if(Pref.pikoDebug()){
+            actions.add(new BottomSheetAction<>("ic_vector_flask_stroke",str("piko_debug"),t -> ObjectBrowser.browseObject(context, tweetObject)));
         }
 
         Collections.reverse(actions);

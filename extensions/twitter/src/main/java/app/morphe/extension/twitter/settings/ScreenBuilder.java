@@ -416,18 +416,6 @@ public class ScreenBuilder {
                     )
             );
         }
-
-        if (SettingsStatus.browseObject) {
-            category = preferenceCategory(str("piko_browse_object_title"));
-
-            addPreference(category,
-                    helper.switchPreference(
-                            str("piko_browse_object_title"),
-                            "",
-                            Settings.BROWSE_OBJECT
-                    )
-            );
-        }
     }
 
     public void buildMiscSection(boolean buildCategory){

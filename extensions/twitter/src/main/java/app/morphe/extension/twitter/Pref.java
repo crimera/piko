@@ -28,6 +28,10 @@ public class Pref {
         HIDE_DETAILED_METRICS = hidePostDetailedMetrics();
     }
 
+    public static boolean pikoDebug() {
+        return Utils.getBooleanPref(Settings.PIKO_DEBUG);
+    }
+
     public static String getLatestChangelogVersion(){
         return Utils.getStringPref(Settings.LAST_CHANGELOG_VERSION);
     }
@@ -78,10 +82,6 @@ public class Pref {
 
     public static boolean enableInlineDownloadButton() {
         return Utils.getBooleanPref(Settings.VID_INLINE_DOWNLOAD_BUTTON);
-    }
-
-    public static boolean browseObject() {
-        return Utils.getBooleanPref(Settings.BROWSE_OBJECT) && SettingsStatus.browseObject;
     }
 
     public static int natveTranslatorProvider(){

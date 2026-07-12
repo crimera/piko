@@ -17,17 +17,15 @@ import app.morphe.patcher.patch.bytecodePatch
 @Suppress("unused")
 val browseObjectPatch =
     bytecodePatch(
-        name = "Browse tweet object",
         description = "Adds an option to browse the tweet object in the share menu.",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch, entityGenerator, versionCheckPatch, shareMenuButtonOnClickHook)
 
         execute {
             val actionName = "BrowseObject"
-            val prefFunctionName = "browseObject"
-            val stringId = "piko_browse_object_title"
+            val prefFunctionName = "pikoDebug"
+            val stringId = "piko_debug"
             val iconId = "ic_vector_flask_stroke"
             val statusFunctionName = "browseObject"
             shareMenuButtonInjection(actionName, prefFunctionName, stringId, iconId, statusFunctionName)

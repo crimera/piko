@@ -15,6 +15,8 @@ public class Settings {
     public static final String SHARED_PREF_NAME = "piko_settings";
     public static final String ACT_NAME = "activity_name";
 
+    public static final BooleanSetting PIKO_DEBUG = new BooleanSetting("piko_debug", false);
+
     public static final StringSetting VID_PUBLIC_FOLDER = new StringSetting("vid_public_folder", "Movies");
     public static final StringSetting VID_SUBFOLDER = new StringSetting("vid_subfolder", "Twitter");
     public static final StringSetting VID_MEDIA_HANDLE = new StringSetting("vid_media_handle", "download_media");
@@ -128,6 +130,10 @@ public class Settings {
     public static final String CHANGE_APP_ICON = "change_app_icon";
     public static final String IMPORT_LOGIN_TOKEN = "import_login_token";
     public static final String EXPORT_LOGIN_TOKEN = "export_login_token";
+    public static final String APP_VERSION = "piko_pref_app_version";
+    public static final String PIKO_PATCHES = "piko_title_piko_patches";
+    public static final String CHANGELOGS_TITLE = "piko_changelogs_title";
+    public static final String SUPPORTED_LINKS = "piko_settings_supported_links";
 
     public static final String PREMIUM_SECTION = "premium_section";
     public static final String DOWNLOAD_SECTION = "download_section";
