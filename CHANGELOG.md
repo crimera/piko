@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/Utsavrajputt/piko/compare/v1.6.3...v1.7.0) (2026-07-12)
+
+### ✨ New Features
+
+* Rebranded Piko as Modx ([d362f8d](https://github.com/Utsavrajputt/piko/commit/d362f8d2d3a4d099cda571b6d895bdff739a1a6a))
+
 ## [1.6.3](https://github.com/Utsavrajputt/piko/compare/v1.6.2...v1.6.3) (2026-07-12)
 
 ### 🐛 Bug Fixes
