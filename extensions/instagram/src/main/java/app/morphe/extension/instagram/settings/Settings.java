@@ -82,4 +82,10 @@ public class Settings {
     public static final StringSetting ACTION_BAR_INBOX = new StringSetting("action_bar_inbox", "");
 
     public static final BooleanSetting ENABLE_MARK_CHAT_AS_READ = new BooleanSetting("enable_mark_chat_as_read", true);
+
+    public static final StringSetting FILTER_STORY_BY_TYPE = new StringSetting("filter_story_by_type", "");
+    public static final StringSetting FILTER_STORY_BY_USER_TYPE = new StringSetting("filter_story_by_user_type", "");
+
+    public static final StringSetting FILTER_STORY_MIN_STORY_ITEMS = new StringSetting("filter_story_min_story_items", "1");
+    public static final StringSetting FILTER_STORY_MAX_STORY_ITEMS = new StringSetting("filter_story_max_story_items", "9999");
 }

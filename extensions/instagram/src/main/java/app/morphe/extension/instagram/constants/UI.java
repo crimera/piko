@@ -51,6 +51,7 @@ public class UI {
     public static final String DRAWABLE_EYE_STROKE_ICON = "design_ic_visibility_off";
     public static final String DRAWABLE_EYE_ICON = "design_ic_visibility";
     public static final String DRAWABLE_SHARE_TO_DIRECT = "gallery_share_to_direct_button";
+    public static final String DRAWABLE_SHARE_TO_REEL = "gallery_share_to_reels_button";
 
     public static int getThemedColour(String attrName) {
         Context context = Utils.getContext();

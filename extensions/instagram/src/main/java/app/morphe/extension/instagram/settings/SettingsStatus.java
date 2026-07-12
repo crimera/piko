@@ -203,8 +203,13 @@ public class SettingsStatus {
     public static boolean hideNavigationButtons = false;
     public static void hideNavigationButtons() { hideNavigationButtons = true; }
 
+    // Filter content
+    public static boolean storyFilters = false;
+    public static void storyFilters(){storyFilters = true;}
+    public static boolean filterContentSection(){return storyFilters; }
 
-    public static void loadStatusMap(){
+
+        public static void loadStatusMap(){
         FLAGS.put(str("piko_disable_ads"),SettingsStatus.disableAds);
         FLAGS.put(str("piko_hide_suggested_content"),SettingsStatus.hideSuggestedContent);
 
@@ -274,6 +279,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_allow_user_network_certificate"),SettingsStatus.allowUserNetworkCertificate);
 
         FLAGS.put(str("piko_enable_mark_chat_as_read"),SettingsStatus.markChatAsRead);
+            FLAGS.put(str("piko_category_filter_content"),SettingsStatus.storyFilters);
     }
 
     public static void load() {

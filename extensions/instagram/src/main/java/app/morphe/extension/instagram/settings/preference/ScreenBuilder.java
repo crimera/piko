@@ -693,6 +693,50 @@ public class ScreenBuilder {
         );
     }
 
+    public void filterContentSection() {
+        if(!SettingsStatus.filterContentSection()) return;
+
+        if(SettingsStatus.storyFilters) {
+            PreferenceCategory category = addCategory(str("piko_filter_story"));
+
+            addPreference(
+                    category,
+                    helper.multiSelectListPref(
+                            str("piko_filter_story_types_to_hide"),
+                            "",
+                            Settings.FILTER_STORY_BY_TYPE
+                    )
+            );
+
+            addPreference(
+                    category,
+                    helper.multiSelectListPref(
+                            str("piko_filter_story_user_types_to_hide"),
+                            "",
+                            Settings.FILTER_STORY_BY_USER_TYPE
+                    )
+            );
+
+            addPreference(
+                    category,
+                    helper.editTextNumPreference(
+                            str("piko_filter_story_minimum_item_count"),
+                            str("piko_filter_story_minimum_item_count_desc"),
+                            Settings.FILTER_STORY_MIN_STORY_ITEMS
+                    )
+            );
+
+            addPreference(
+                    category,
+                    helper.editTextNumPreference(
+                            str("piko_filter_story_maximum_item_count"),
+                            str("piko_filter_story_maximum_item_count_desc"),
+                            Settings.FILTER_STORY_MAX_STORY_ITEMS
+                    )
+            );
+        }
+    }
+
     public void buildNavigationSection() {
         if (!(SettingsStatus.hideNavigationButtons)) return;
 
@@ -819,6 +863,16 @@ public class ScreenBuilder {
                             str("piko_category_ads"),
                             "",
                             Constants.PIKO_FRAGMENT_ADS
+                    )
+            );
+        }
+
+        if (SettingsStatus.filterContentSection()){
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_category_filter_content"),
+                            "",
+                            Constants.PIKO_FRAGMENT_FILTER_CONTENT
                     )
             );
         }

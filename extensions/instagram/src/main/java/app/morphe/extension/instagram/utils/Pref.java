@@ -305,5 +305,21 @@ public class Pref {
         return SharedPref.getSetPref(Settings.ACTION_BAR_INBOX);
     }
 
+    public static Set<String> filterStoryByType() {
+        return SharedPref.getSetPref(Settings.FILTER_STORY_BY_TYPE);
+    }
+
+    public static Set<String> filterStoryByUserType() {
+        return SharedPref.getSetPref(Settings.FILTER_STORY_BY_USER_TYPE);
+    }
+
+    public static Integer filterStoryByMinStoryItems() {
+        return Integer.valueOf(SharedPref.getStringPref(Settings.FILTER_STORY_MIN_STORY_ITEMS));
+    }
+
+    public static Integer filterStoryByMaxStoryItems() {
+        return Integer.valueOf(SharedPref.getStringPref(Settings.FILTER_STORY_MAX_STORY_ITEMS));
+    }
+
     //end
 }
