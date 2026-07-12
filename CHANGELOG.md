@@ -1,3 +1,9 @@
+## [1.6.3](https://github.com/Utsavrajputt/piko/compare/v1.6.2...v1.6.3) (2026-07-12)
+
+### 🐛 Bug Fixes
+
+* Arrays exception ([7d45df8](https://github.com/Utsavrajputt/piko/commit/7d45df8c2e6104bb0a5bf2067545cee0670bd114))
+
 ## [1.6.2](https://github.com/Utsavrajputt/piko/compare/v1.6.1...v1.6.2) (2026-07-12)
 
 ### 🐛 Bug Fixes
