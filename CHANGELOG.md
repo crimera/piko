@@ -1,3 +1,9 @@
+## [1.6.2](https://github.com/Utsavrajputt/piko/compare/v1.6.1...v1.6.2) (2026-07-12)
+
+### 🐛 Bug Fixes
+
+* all icons ([ab2495b](https://github.com/Utsavrajputt/piko/commit/ab2495b4f76b29794d384141260b747383f5fc21))
+
 ## [1.6.1](https://github.com/Utsavrajputt/piko/compare/v1.6.0...v1.6.1) (2026-07-12)
 
 ### 🐛 Bug Fixes
