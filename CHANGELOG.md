@@ -1,3 +1,9 @@
+## [1.6.0](https://github.com/Utsavrajputt/piko/compare/v1.5.2...v1.6.0) (2026-07-12)
+
+### ✨ New Features
+
+* Setting UI rebranded ([ec14dfc](https://github.com/Utsavrajputt/piko/commit/ec14dfcb8dc8253fa8c03360b944e6b2280bee0d))
+
 ## [1.5.2](https://github.com/Utsavrajputt/piko/compare/v1.5.1...v1.5.2) (2026-07-11)
 
 ### 🐛 Bug Fixes
