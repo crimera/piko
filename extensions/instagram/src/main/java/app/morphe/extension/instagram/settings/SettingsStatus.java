@@ -186,7 +186,14 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return (saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || storiesAudioAutoplay || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || unlimitedReplaysOnEphemeralMedia || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
+    public static boolean miscSection() {return (saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || unlockPlusBenefits || storiesAudioAutoplay || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || unlimitedReplaysOnEphemeralMedia || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
+
+    // Customisation section — gathers every "change how it looks/feels" toggle
+    // (like animation, story timestamp/ring style, X icon, monochrome icons)
+    // into one place instead of scattering them across Misc/About.
+    // The X icon and monochrome toggles are always available, so this section
+    // always shows up regardless of which optional patches were built in.
+    public static boolean customisationSection() {return true;}
 
     //Download section.
     public static boolean downloadMedia = false;

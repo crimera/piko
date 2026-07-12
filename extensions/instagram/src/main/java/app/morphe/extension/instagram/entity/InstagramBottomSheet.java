@@ -25,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.instagram.utils.Pref;
 
 /**
  * A lightweight bottom-sheet style dialog that visually matches Instagram's native
@@ -40,6 +41,10 @@ public class InstagramBottomSheet {
     private static final int HANDLE_COLOR = Color.parseColor("#4D4D4D");
     private static final int TEXT_COLOR = Color.WHITE;
     private static final int DESTRUCTIVE_TEXT_COLOR = Color.parseColor("#ED4956");
+    // Neutral badge color used when the user turns on "Monochrome icons" —
+    // keeps every row's icon square the same shade instead of each type
+    // having its own bright color.
+    private static final int MONOCHROME_BADGE_COLOR = Color.parseColor("#3A3A3C");
 
     /** Something that can be run when a row is tapped; may throw — caught centrally. */
     public interface OnItemClick {
@@ -224,7 +229,13 @@ public class InstagramBottomSheet {
             this.spec = spec;
 
             GradientDrawable bg = new GradientDrawable();
-            bg.setColor(spec.color);
+            boolean monochrome = false;
+            try {
+                monochrome = Pref.monochromeMoreOptionsIcons();
+            } catch (Exception ignored) {
+                // Fall back to the per-type color if the pref can't be read for any reason.
+            }
+            bg.setColor(monochrome ? MONOCHROME_BADGE_COLOR : spec.color);
             bg.setCornerRadius(applyDimen(context, 9));
             setBackground(bg);
 

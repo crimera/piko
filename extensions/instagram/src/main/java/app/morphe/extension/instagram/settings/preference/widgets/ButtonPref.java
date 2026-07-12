@@ -136,6 +136,9 @@ public class ButtonPref extends Preference {
             // better than a code icon (that's more of a dev-options thing).
             return UI.DRAWABLE_GEAR_ICON;
         }
+        if(key.equals(Constants.PIKO_FRAGMENT_CUSTOMISATION)){
+            return UI.DRAWABLE_BLUB_ICON;
+        }
         if(key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)){
             return UI.DRAWABLE_FB_DOWNLOAD_ICON;
         }

@@ -90,7 +90,7 @@ public final class InstagramPreferenceStyle {
                 ViewGroup.LayoutParams.WRAP_CONTENT
         ));
 
-        if(iconResName!=null){
+        if(iconResName!=null && trailingType != TRAILING_SWITCH){
             row.setIcon(iconResName);
         }
 
@@ -103,6 +103,10 @@ public final class InstagramPreferenceStyle {
                     LinearLayout.LayoutParams.WRAP_CONTENT
             ));
             row.setHighlightView(titleRow);
+
+            if (iconResName != null) {
+                row.addIconTo(titleRow, iconResName);
+            }
 
             TextView title = new TextView(context);
             title.setTag(TAG_TITLE);
@@ -266,23 +270,40 @@ public final class InstagramPreferenceStyle {
         }
 
         private void initIconView(Context context, String iconResName) {
-            iconView = new ImageView(context);
+            iconView = createIconView(context, iconResName);
+            addView(iconView, 0);
+        }
+
+        private ImageView createIconView(Context context, String iconResName) {
+            ImageView icon = new ImageView(context);
 
             int iconSize = dp(context, 24);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(iconSize, iconSize);
 
             params.setMarginStart(dp(context, 16));
             params.setMarginEnd(dp(context, 16));
-            iconView.setLayoutParams(params);
+            icon.setLayoutParams(params);
 
-            UI.setThemedIcon(iconView, iconResName);
-            iconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            addView(iconView, 0);
+            UI.setThemedIcon(icon, iconResName);
+            icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            return icon;
         }
 
         void setIcon(String iconResName) {
             if (iconResName != null) {
                 initIconView(getContext(), iconResName);
+            }
+        }
+
+        // Inserts the icon as the first child of a specific container (e.g. the
+        // horizontal title+switch row) instead of the outer row, which matters
+        // for layouts where the outer row itself is VERTICAL (switch rows) —
+        // adding it to the outer row there would stack it above the title
+        // instead of sitting next to it.
+        void addIconTo(ViewGroup target, String iconResName) {
+            if (iconResName != null) {
+                iconView = createIconView(getContext(), iconResName);
+                target.addView(iconView, 0);
             }
         }
 

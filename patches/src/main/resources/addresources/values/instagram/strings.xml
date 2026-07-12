@@ -3,11 +3,15 @@
     <!-- Ads Section -->
     <string name="piko_category_ads">Ads</string>
     <string name="piko_disable_ads">Disable ads</string>
+    <string name="piko_disable_ads_desc">Removes sponsored posts and ads from the feed, reels and stories</string>
     <string name="piko_hide_suggested_content">Hide suggested content</string>
     <string name="piko_hide_suggested_content_desc">Hides suggested stories, reels, threads (Suggested posts will still be shown).</string>
 
     <!-- Developer Options Section -->
     <string name="piko_category_dev_options">Developer options</string>
+    <string name="piko_category_dev_options_core">Core</string>
+    <string name="piko_category_dev_options_backup">Backup &amp; mapping</string>
+    <string name="piko_category_dev_options_experiments">Experiments</string>
     <string name="piko_enable_dev_options">Enable developer options</string>
     <string name="piko_enable_dev_options_desc">Unlocks developer option by long pressing home icon</string>
     <string name="piko_directly_open_metaconfig">Directly opens MetaConfig overrides</string>
@@ -19,9 +23,13 @@
     <string name="piko_remove_build_expire_popup">Remove build expire popup</string>
     <string name="piko_remove_build_expire_popup_desc">Removes the popup that appears after a while, when the app version ages</string>
     <string name="piko_export_dev_overrides">Export overrides</string>
+    <string name="piko_export_dev_overrides_desc">Saves your current developer-option overrides to a file</string>
     <string name="piko_import_dev_overrides">Import overrides</string>
+    <string name="piko_import_dev_overrides_desc">Loads developer-option overrides from a previously exported file</string>
     <string name="piko_import_id_mapping">Import mapping files</string>
+    <string name="piko_import_id_mapping_desc">Loads a mapping file so developer option names display properly</string>
     <string name="piko_download_id_mapping">Download mapping file</string>
+    <string name="piko_download_id_mapping_desc">Downloads the mapping file needed to show proper developer option names</string>
     <string name="piko_missing_mapping_file">Missing mapping file</string>
     <string name="piko_missing_mapping_file_desc">Without mapping file, developer options will not have proper names. Do you want to download it ?</string>
 
@@ -30,15 +38,24 @@
     <string name="piko_open_links_externally">Open links externally</string>
     <string name="piko_open_links_externally_desc">Open links in external browser instead of in-app browser</string>
     <string name="piko_sanitize_share_links">Sanitize share links</string>
+    <string name="piko_sanitize_share_links_desc">Strips tracking parameters from links before they're shared</string>
 
     <!-- Ghost Section -->
     <string name="piko_category_ghost">Ghost</string>
+    <string name="piko_category_ghost_quick_actions">Quick actions</string>
+    <string name="piko_category_ghost_individual">Individual controls</string>
     <string name="piko_view_stories_anonymously">View stories anonymously</string>
+    <string name="piko_view_stories_anonymously_desc">Stops your name from showing up in a story's viewer list</string>
     <string name="piko_view_live_anonymously">View live anonymously</string>
+    <string name="piko_view_live_anonymously_desc">Watch live videos without appearing in the viewer count/list</string>
     <string name="piko_disable_typing_status">Disable typing status</string>
+    <string name="piko_disable_typing_status_desc">Stops \"…typing\" from showing to the other person in a chat</string>
     <string name="piko_disable_screenshot_detection">Disable screenshot detection</string>
+    <string name="piko_disable_screenshot_detection_desc">Stops Instagram from notifying others when you screenshot their chat/story</string>
     <string name="piko_view_dm_anonymously">View direct messages anonymously</string>
+    <string name="piko_view_dm_anonymously_desc">Stops messages from being marked as \"Seen\"</string>
     <string name="piko_turn_on_all_ghost_modes">Turn on all ghost modes</string>
+    <string name="piko_turn_on_all_ghost_modes_desc">Enables every ghost mode toggle below in one tap</string>
     <string name="piko_ghost_modes_on">Ghost mode: ON</string>
     <string name="piko_ghost_modes_default">Ghost mode: DEFAULT</string>
     <string name="piko_ghost_modes_quick_toggle">Enable quick toggle for ghost modes</string>
@@ -46,10 +63,18 @@
 
     <!-- Distraction-Free Section -->
     <string name="piko_category_distraction_free">Distraction free</string>
+    <string name="piko_category_distraction_free_visibility">Content visibility</string>
+    <string name="piko_category_distraction_free_feed">Feed behavior</string>
+    <string name="piko_category_distraction_free_sharing">Sharing</string>
+    <string name="piko_category_distraction_free_double_tap">Double-tap like</string>
     <string name="piko_disable_stories">Disable stories</string>
+    <string name="piko_disable_stories_desc">Removes stories entirely, including the tray and story viewer</string>
     <string name="piko_disable_highlights">Disable highlights</string>
+    <string name="piko_disable_highlights_desc">Hides highlight circles from profiles</string>
     <string name="piko_disable_explore">Disable explore</string>
+    <string name="piko_disable_explore_desc">Removes the Explore tab from the app</string>
     <string name="piko_disable_comments">Disable comments</string>
+    <string name="piko_disable_comments_desc">Hides comments on posts and reels</string>
     <string name="piko_limit_following_feed">Limit feed to following profiles</string>
     <string name="piko_limit_following_feed_desc">Filters the home feed to display only content from profiles you follow.</string>
     <string name="piko_disable_reels_scrolling">Disable Reels scrolling</string>
@@ -61,11 +86,19 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_hide_notes_tray">Hide notes tray</string>
     <string name="piko_hide_notes_tray_desc">Hides notes tray in DM section</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">Hide group creation button on sharesheet</string>
+    <string name="piko_hide_group_creation_button_on_sharesheet_desc">Removes the \"Create group\" shortcut from the share sheet</string>
     <string name="piko_disable_double_tap_like_post">Disable double tap like on post</string>
     <string name="piko_disable_double_tap_like_reel">Disable double tap like on reel</string>
     <string name="piko_disable_double_tap_like_comment">Disable double tap like on comment</string>
     <string name="piko_disable_double_tap_like_message">Disable double tap like on message</string>
     <string name="piko_disable_double_tap_to_like">Disable double tap to like</string>
+
+    <!-- Customisation Section -->
+    <string name="piko_category_customisation">Customisation</string>
+    <string name="piko_category_customisation_appearance">Appearance</string>
+    <string name="piko_category_customisation_stories">Stories</string>
+    <string name="piko_monochrome_more_options_icons">Monochrome icons</string>
+    <string name="piko_monochrome_more_options_icons_desc">Makes every icon in the story and post/profile \"More options\" sheets the same neutral color instead of each having its own color</string>
 
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Misc</string>
@@ -73,7 +106,6 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_category_misc_stories">Stories</string>
     <string name="piko_category_misc_media">Media &amp; viewing</string>
     <string name="piko_category_misc_comments">Comments</string>
-    <string name="piko_category_misc_interaction">Interaction</string>
     <string name="piko_category_misc_advanced">Privacy &amp; advanced</string>
     <string name="piko_disable_analytics">Disable analytics</string>
     <string name="piko_delete_analytics_cache">Delete analytics cache</string>
@@ -134,7 +166,10 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
 
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download media</string>
+    <string name="piko_category_download_general">General</string>
+    <string name="piko_category_download_auto_stories">Auto-download stories</string>
     <string name="piko_enable_download">Enable download</string>
+    <string name="piko_enable_download_desc">Adds a download option to posts, reels and stories</string>
     <string name="piko_enable_direct_download">Enable direct download</string>
     <string name="piko_enable_direct_download_desc">Downloads the current viewing media without asking for options</string>
     <string name="piko_download_username_folder">Split media by username</string>
@@ -158,6 +193,7 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_download_grant_permission">Please grant storage access to continue downloads</string>
     <string name="piko_download_grant_permission_failed">Could not open settings. Please grant All Files Access manually</string>
     <string name="piko_download_with_external_downloader">Download with external downloader</string>
+    <string name="piko_download_with_external_downloader_desc">Sends downloads to a third-party downloader app instead of saving directly</string>
     <string name="piko_external_downloader_package_name">External downloader package name</string>
     <string name="piko_external_downloader_package_name_not_found">External downloader package name not found</string>
     <string name="piko_external_downloader_package_name_not_set">Please set the external downloader package name</string>
@@ -189,6 +225,11 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
 
     <!-- Information Section -->
     <string name="piko_category_about">About</string>
+    <string name="piko_category_about_app">App</string>
+    <string name="piko_category_about_backup">Backup</string>
+    <string name="piko_category_about_settings">Piko settings</string>
+    <string name="piko_export_pref_desc">Saves all your Piko preferences to a file</string>
+    <string name="piko_import_pref_desc">Loads Piko preferences from a previously exported file</string>
     <string name="piko_export_pref">Export piko preferences</string>
     <string name="piko_import_pref">Import piko preferences</string>
     <string name="piko_app_version">App version: %s</string>

@@ -27,6 +27,8 @@ public class FragmentHook {
             startDistractionFree();
         }else if(key.equals(Constants.PIKO_FRAGMENT_MISC)){
             startMisc();
+        }else if(key.equals(Constants.PIKO_FRAGMENT_CUSTOMISATION)){
+            startCustomisation();
         }else if(key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)){
             startDownloadMedia();
         }else if(key.equals(Constants.PIKO_FRAGMENT_NAV_BTNS)){
@@ -60,6 +62,10 @@ public class FragmentHook {
 
     private static void startMisc(){
         ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_MISC,"piko_category_misc");
+    }
+
+    private static void startCustomisation(){
+        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_CUSTOMISATION,"piko_category_customisation");
     }
     private static void startDownloadMedia(){
         ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA,"piko_category_download_media");

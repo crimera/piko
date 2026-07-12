@@ -22,6 +22,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.PIKO_SETTINGS_USE_X_ICON);
     }
 
+    public static boolean monochromeMoreOptionsIcons() {
+        return SharedPref.getBooleanPref(Settings.MONOCHROME_MORE_OPTIONS_ICONS);
+    }
+
     public static boolean pikoDebug() {
         return SharedPref.getBooleanPref(Settings.PIKO_DEBUG);
     }

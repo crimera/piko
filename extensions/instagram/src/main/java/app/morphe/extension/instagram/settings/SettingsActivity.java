@@ -235,6 +235,8 @@ public class SettingsActivity extends Activity {
                 screenBuilder.distractionFreeSection();
             } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_MISC)) {
                 screenBuilder.buildMiscSection();
+            } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_CUSTOMISATION)) {
+                screenBuilder.buildCustomisationSection();
             } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)) {
                 screenBuilder.buildDownloadSection();
             } else if(fragment_name.equals(Constants.PIKO_FRAGMENT_NAV_BTNS)) {
