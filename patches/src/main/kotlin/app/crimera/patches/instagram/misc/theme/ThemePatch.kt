@@ -459,15 +459,17 @@ private val materialYouSurfaceBaselineMappings =
         // (Dark analogues design_dark_default_color_background / cardview_dark_* /
         // material_grey_850/900 were already mapped above.)
         //
-        // abc_decor_view_status_guard_light is OVERLOADED: besides the light
-        // colorSurface, igds_color_primary_text_on_media / _icon_on_media /
-        // _primary_button_on_media all resolve to it — i.e. it's also the "white text
-        // on dark media" colour (Watch again / on-video labels), used in BOTH modes.
-        // So it must be the LIGHT CONSTANT (light in every bucket), NOT the
-        // mode-flipping background: background is dark in the -night buckets, which
-        // turned that on-media text dark (invisible on video) in dark mode. As the
-        // light surface it still reads light in light mode, so nothing is lost.
-        "abc_decor_view_status_guard_light" to "@color/piko_dynamic_prism_white",
+        // abc_decor_view_status_guard_light is OVERLOADED and CONFLICTED: it's the
+        // light colorSurface / an igds_color_primary_background variant — a mode-
+        // flipping app SURFACE (must be dark in -night) — AND the on-media text/icon
+        // colour (igds_color_primary_text_on_media/_icon_on_media, wants light always).
+        // The SURFACE role wins: mapping it to a light constant turned the whole app
+        // light in dark mode. So it stays on the mode-flipping background. The cost is
+        // on-media text ("Watch again" / on-video labels) rendering dark in dark mode
+        // — a minor media-overlay issue in the same unreachable class as the
+        // notifications/Bloks surfaces (a single leaf can't be both a dark surface and
+        // light text).
+        "abc_decor_view_status_guard_light" to "@color/piko_dynamic_background",
         // Pure surface (colorBackgroundFloating) — not reused for text — so the
         // mode-flipping background is fine here.
         "background_floating_material_light" to "@color/piko_dynamic_background",
