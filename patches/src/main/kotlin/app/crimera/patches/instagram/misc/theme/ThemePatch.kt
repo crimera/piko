@@ -457,9 +457,19 @@ private val materialYouSurfaceBaselineMappings =
         // alert dialogs and the feed pull colorSurface / colorBackgroundFloating, so
         // these stayed pure white while every documented igds_/bds_ chain was themed.
         // (Dark analogues design_dark_default_color_background / cardview_dark_* /
-        // material_grey_850/900 were already mapped above.) Both are light-only
-        // leaves, so mapping them to the mode-flipping background is safe in dark.
-        "abc_decor_view_status_guard_light" to "@color/piko_dynamic_background",
+        // material_grey_850/900 were already mapped above.)
+        //
+        // abc_decor_view_status_guard_light is OVERLOADED: besides the light
+        // colorSurface, igds_color_primary_text_on_media / _icon_on_media /
+        // _primary_button_on_media all resolve to it — i.e. it's also the "white text
+        // on dark media" colour (Watch again / on-video labels), used in BOTH modes.
+        // So it must be the LIGHT CONSTANT (light in every bucket), NOT the
+        // mode-flipping background: background is dark in the -night buckets, which
+        // turned that on-media text dark (invisible on video) in dark mode. As the
+        // light surface it still reads light in light mode, so nothing is lost.
+        "abc_decor_view_status_guard_light" to "@color/piko_dynamic_prism_white",
+        // Pure surface (colorBackgroundFloating) — not reused for text — so the
+        // mode-flipping background is fine here.
         "background_floating_material_light" to "@color/piko_dynamic_background",
         // Light near-white prism-greys used as light-mode surfaces / secondary
         // panels (stock #f3f5f7 / #e9edf0). Map to the light constant so they follow
