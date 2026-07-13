@@ -18,6 +18,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
+import android.text.BidiFormatter;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -271,7 +272,7 @@ public final class SettingsSearchUIController {
         int iconColor = SettingsSearchColors.current().searchHintColor;
         SearchIconView searchIcon = new SearchIconView(context, iconColor);
         LinearLayout.LayoutParams searchIconParams = new LinearLayout.LayoutParams(dp(context, 26), dp(context, 26));
-        searchIconParams.rightMargin = dp(context, 8);
+        searchIconParams.setMarginEnd(dp(context, 8));
         searchField.addView(searchIcon, searchIconParams);
 
         TextView label = new TextView(context);
@@ -328,7 +329,10 @@ public final class SettingsSearchUIController {
         }
 
         if (settingsSearchEmptyTitle != null && showNoResults) {
-            settingsSearchEmptyTitle.setText(formatSearchNoResults(query));
+            settingsSearchEmptyTitle.setText(formatSearchNoResults(
+                    settingsSearchEmptyTitle.getContext(),
+                    query
+            ));
         }
     }
 
@@ -495,7 +499,7 @@ public final class SettingsSearchUIController {
         LinearLayout search = new LinearLayout(activity);
         search.setOrientation(LinearLayout.HORIZONTAL);
         search.setGravity(Gravity.CENTER_VERTICAL);
-        search.setPadding(dp(activity, 72), 0, dp(activity, 4), 0);
+        search.setPaddingRelative(dp(activity, 72), 0, dp(activity, 4), 0);
 
         toolbarSearchInput = new EditText(activity);
         toolbarSearchInput.setSingleLine(true);
@@ -560,16 +564,23 @@ public final class SettingsSearchUIController {
         }
     }
 
-    private static String formatSearchNoResults(String query) {
+    private static String formatSearchNoResults(Context context, String query) {
         String template = searchString(
                 "piko_settings_search_no_results",
                 "No results for \"%1$s\""
         );
+        String displayQuery = query == null ? "" : query;
+        displayQuery = BidiFormatter.getInstance(isLayoutRtl(context)).unicodeWrap(displayQuery);
         try {
-            return String.format(Locale.getDefault(), template, query == null ? "" : query);
+            return String.format(Locale.getDefault(), template, displayQuery);
         } catch (Throwable ignored) {
-            return "No results for \"" + (query == null ? "" : query) + "\"";
+            return "No results for \"" + displayQuery + "\"";
         }
+    }
+
+    static boolean isLayoutRtl(Context context) {
+        return context != null
+                && context.getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
     }
 
     private static String searchString(String resourceName, String fallback) {

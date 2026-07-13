@@ -1223,7 +1223,10 @@ public class ScreenBuilder {
         for (SearchMatch matchedResult : SettingsSearchMatcher.matchResults(settingsSearchResults(), query)) {
             SearchResult result = matchedResult.result;
 
-            String displaySummary = result.summaryForDisplay(query);
+            String displaySummary = result.summaryForDisplay(
+                    query,
+                    SettingsSearchUIController.isLayoutRtl(context)
+            );
             Preference searchResultPreference = helper.buttonPreference(
                     result.title,
                     displaySummary,

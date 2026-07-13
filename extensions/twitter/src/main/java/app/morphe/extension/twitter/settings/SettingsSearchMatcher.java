@@ -7,6 +7,7 @@
 package app.morphe.extension.twitter.settings;
 
 import android.graphics.Color;
+import android.text.BidiFormatter;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -619,7 +620,7 @@ final class SettingsSearchMatcher {
             return SEARCH_RANK_SUMMARY;
         }
 
-        String summaryForDisplay(String query) {
+        String summaryForDisplay(String query, boolean isRtl) {
             String displaySummary = isEmpty(summary) ? searchSummary : summary;
             String normalizedQuery = normalize(query);
             if (!isEmpty(normalizedQuery)
@@ -633,10 +634,41 @@ final class SettingsSearchMatcher {
                     && matchesSearchText(searchKeywords, normalizedQuery)) {
                 displaySummary = appendSearchHint(displaySummary, query == null ? "" : query.trim());
             }
+            String displaySectionTitle = formatHierarchyText(sectionTitle, isRtl);
             if (isEmpty(displaySummary)) {
-                return sectionTitle;
+                return displaySectionTitle;
             }
-            return sectionTitle + summarySeparator + displaySummary;
+            BidiFormatter formatter = BidiFormatter.getInstance(isRtl);
+            String displaySeparator = textEquals(summarySeparator, NESTED_SEARCH_SUMMARY_SEPARATOR)
+                    ? nestedSearchSummarySeparator(isRtl)
+                    : summarySeparator;
+            return displaySectionTitle
+                    + displaySeparator
+                    + formatter.unicodeWrap(displaySummary);
+        }
+
+        private static String formatHierarchyText(String text, boolean isRtl) {
+            if (isEmpty(text)) {
+                return "";
+            }
+
+            BidiFormatter formatter = BidiFormatter.getInstance(isRtl);
+            String separator = nestedSearchSummarySeparator(isRtl);
+            StringBuilder formatted = new StringBuilder();
+            int segmentStart = 0;
+            int separatorStart = text.indexOf(NESTED_SEARCH_SUMMARY_SEPARATOR);
+            while (separatorStart >= 0) {
+                formatted.append(formatter.unicodeWrap(text.substring(segmentStart, separatorStart)));
+                formatted.append(separator);
+                segmentStart = separatorStart + NESTED_SEARCH_SUMMARY_SEPARATOR.length();
+                separatorStart = text.indexOf(NESTED_SEARCH_SUMMARY_SEPARATOR, segmentStart);
+            }
+            formatted.append(formatter.unicodeWrap(text.substring(segmentStart)));
+            return formatted.toString();
+        }
+
+        private static String nestedSearchSummarySeparator(boolean isRtl) {
+            return isRtl ? " \u2190 " : NESTED_SEARCH_SUMMARY_SEPARATOR;
         }
 
         private boolean visibleTextMatches(String displaySummary, String normalizedQuery) {
