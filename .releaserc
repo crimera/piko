@@ -29,6 +29,9 @@
                     { "type": "perf", "section": "🔧 Improvements",  "hidden": false },
                     { "type": "build", "hidden": true }
                 ]
+            },
+            "writerOpts": {
+                "commitPartial": "* {{#if scope}}**{{scope}}:** {{/if}}{{#if subject}}{{subject}}{{else}}{{header}}{{/if}}{{#if hash}} ([{{shortHash}}]({{commitUrlFormat}})){{/if}}{{#if references}}, closes{{#each references}} [{{#if this.owner}}{{this.owner}}/{{/if}}{{this.repository}}#{{this.issue}}]({{issueUrlFormat}}){{/each}}{{/if}}{{#if authorName}} ({{authorName}}){{else}}{{#if author.name}} ({{author.name}}){{/if}}{{/if}}\n"
             }
             }
         ],
@@ -45,9 +48,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "./gradlew generatePatchesList \
-          && jq '.version=\"${nextRelease.version}\"' patches-list.json > patches-list.json.tmp && mv patches-list.json.tmp patches-list.json \
-          && python3 .github/scripts/generate_patches_readme.py $GITHUB_REPOSITORY $GITHUB_REF_NAME patches-list.json README.md"
+        "prepareCmd": "./gradlew generatePatchesList && jq '.version=\"${nextRelease.version}\"' patches-list.json > patches-list.json.tmp && mv patches-list.json.tmp patches-list.json && python3 .github/scripts/generate_patches_readme.py $GITHUB_REPOSITORY $GITHUB_REF_NAME patches-list.json README.md"
       }
     ],
     [
