@@ -14,6 +14,8 @@ import android.graphics.Color;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.*;
+import android.view.View;
+import android.widget.ListView;
 import java.util.TreeMap;
 import java.util.Map;
 
@@ -22,11 +24,13 @@ import com.twitter.ui.widget.LegacyTwitterPreferenceCategory;
 import app.morphe.extension.twitter.settings.ActivityHook;
 import app.morphe.extension.twitter.settings.SettingsStatus;
 import app.morphe.extension.twitter.settings.Settings;
+import app.morphe.extension.twitter.settings.SettingsSearchNavigator;
 import app.morphe.extension.twitter.settings.widgets.Helper;
 
 @SuppressWarnings("deprecation")
 public class SettingsAboutFragment extends PreferenceFragment {
     private Context context;
+    private Preference searchTargetPreference;
 
     @Override
     public void onResume() {
@@ -182,6 +186,30 @@ public class SettingsAboutFragment extends PreferenceFragment {
         }
 
         setPreferenceScreen(screen);
+        searchTargetPreference = SettingsSearchNavigator.findTargetPreference(screen, getArguments());
+
+    }
+
+    @Override
+    public void onActivityCreated(@org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        scrollToSearchTarget();
+    }
+
+    private void scrollToSearchTarget() {
+        if (searchTargetPreference == null) {
+            return;
+        }
+
+        View view = getView();
+        if (view == null) {
+            return;
+        }
+
+        ListView listView = view.findViewById(android.R.id.list);
+        if (listView != null) {
+            SettingsSearchNavigator.scrollToPreferenceAndHighlight(listView, searchTargetPreference);
+        }
 
     }
 

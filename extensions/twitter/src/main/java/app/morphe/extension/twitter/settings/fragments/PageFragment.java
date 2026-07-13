@@ -9,8 +9,12 @@ package app.morphe.extension.twitter.settings.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.*;
+import android.view.View;
+import android.widget.ListView;
 import androidx.annotation.Nullable;
 
+import app.morphe.extension.twitter.settings.ActivityHook;
+import app.morphe.extension.twitter.settings.SettingsSearchNavigator;
 import app.morphe.extension.twitter.settings.widgets.Helper;
 import app.morphe.extension.twitter.settings.ScreenBuilder;
 import app.morphe.extension.twitter.settings.Settings;
@@ -18,6 +22,7 @@ import app.morphe.extension.twitter.settings.Settings;
 @SuppressWarnings("deprecation")
 public class PageFragment extends PreferenceFragment {
     private Context context;
+    private Preference searchTargetPreference;
 
 //    @Override
 //    public void onResume() {
@@ -29,10 +34,10 @@ public class PageFragment extends PreferenceFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getContext();
-        String toolbarText = "piko_title_settings";
+        Context preferenceContext = ActivityHook.getPreferenceContext(context);
 
         PreferenceManager preferenceManager = getPreferenceManager();
-        PreferenceScreen screen = preferenceManager.createPreferenceScreen(context);
+        PreferenceScreen screen = preferenceManager.createPreferenceScreen(preferenceContext);
         preferenceManager.setSharedPreferencesName(Settings.SHARED_PREF_NAME);
 
         Helper helper = new Helper(context);
@@ -40,32 +45,35 @@ public class PageFragment extends PreferenceFragment {
 
         Bundle bundle = getArguments();
         String activity_name = bundle != null ? bundle.getString(Settings.ACT_NAME) : null;
-        if (activity_name.equals(Settings.PREMIUM_SECTION)) {
-            screenBuilder.buildPremiumSection(false);
-        }else if (activity_name.equals(Settings.DOWNLOAD_SECTION)) {
-            screenBuilder.buildDownloadSection(false);
-        }else if (activity_name.equals(Settings.FLAGS_SECTION)) {
-            screenBuilder.buildFeatureFlagsSection(false);
-        }else if (activity_name.equals(Settings.ADS_SECTION)) {
-            screenBuilder.buildAdsSection(false);
-        }else if (activity_name.equals(Settings.MISC_SECTION)) {
-            screenBuilder.buildMiscSection(false);
-        }else if (activity_name.equals(Settings.CUSTOMISE_SECTION)) {
-            screenBuilder.buildCustomiseSection(false);
-        }else if (activity_name.equals(Settings.FONT_SECTION)) {
-            screenBuilder.buildFontSection(false);
-        }else if (activity_name.equals(Settings.TIMELINE_SECTION)) {
-            screenBuilder.buildTimelineSection(false);
-        }else if (activity_name.equals(Settings.BACKUP_SECTION)) {
-            screenBuilder.buildExportSection(false);
-        }else if (activity_name.equals(Settings.NATIVE_SECTION)) {
-            screenBuilder.buildNativeSection(false);
-        }else if (activity_name.equals(Settings.LOGGING_SECTION)) {
-            screenBuilder.buildLoggingSection(false);
-        }
+        screenBuilder.buildSection(activity_name, false);
 //        setSupportActionBar(ActivityHook.toolbar);
         setPreferenceScreen(screen);
+        searchTargetPreference = SettingsSearchNavigator.findTargetPreference(screen, bundle);
 
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        scrollToSearchTarget();
+    }
+
+    private void scrollToSearchTarget() {
+        if (searchTargetPreference == null) {
+            return;
+        }
+
+        View view = getView();
+        if (view == null) {
+            return;
+        }
+
+        ListView listView = view.findViewById(android.R.id.list);
+        if (listView == null) {
+            return;
+        }
+
+        SettingsSearchNavigator.scrollToPreferenceAndHighlight(listView, searchTargetPreference);
     }
 
 }

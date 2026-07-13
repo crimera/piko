@@ -11,34 +11,135 @@ import static app.morphe.extension.shared.StringRef.str;
 import android.content.Context;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
+import android.text.TextUtils;
 
 import com.twitter.ui.widget.LegacyTwitterPreferenceCategory;
 
+import java.util.List;
+
+import app.morphe.extension.twitter.settings.SettingsSearchMatcher.SearchMatch;
+import app.morphe.extension.twitter.settings.SettingsSearchMatcher.SearchResult;
 import app.morphe.extension.twitter.settings.widgets.*;
 import androidx.annotation.Nullable;
 import app.morphe.extension.twitter.Pref;
 
 
 public class ScreenBuilder {
+    private static final SettingsSection[] SETTINGS_SECTIONS = new SettingsSection[]{
+            new SettingsSection(
+                    "piko_title_premium",
+                    null,
+                    Settings.PREMIUM_SECTION,
+                    "ic_vector_twitter",
+                    SettingsStatus::enablePremiumSection,
+                    ScreenBuilder::buildPremiumSection
+            ),
+            new SettingsSection(
+                    "piko_title_download",
+                    null,
+                    Settings.DOWNLOAD_SECTION,
+                    "ic_vector_incoming",
+                    SettingsStatus::enableDownloadSection,
+                    ScreenBuilder::buildDownloadSection
+            ),
+            new SettingsSection(
+                    "piko_title_feature_flags",
+                    null,
+                    Settings.FLAGS_SECTION,
+                    "ic_vector_flag",
+                    () -> SettingsStatus.featureFlagsEnabled,
+                    ScreenBuilder::buildFeatureFlagsSection
+            ),
+            new SettingsSection(
+                    "piko_title_ads",
+                    null,
+                    Settings.ADS_SECTION,
+                    "ic_vector_accessibility_alt",
+                    SettingsStatus::enableAdsSection,
+                    ScreenBuilder::buildAdsSection
+            ),
+            new SettingsSection(
+                    "piko_title_native",
+                    null,
+                    Settings.NATIVE_SECTION,
+                    "ic_vector_flask_stroke",
+                    SettingsStatus::enableNativeSection,
+                    ScreenBuilder::buildNativeSection
+            ),
+            new SettingsSection(
+                    "piko_title_misc",
+                    null,
+                    Settings.MISC_SECTION,
+                    "ic_vector_heartline",
+                    SettingsStatus::enableMiscSection,
+                    ScreenBuilder::buildMiscSection
+            ),
+            new SettingsSection(
+                    "piko_title_customisation",
+                    null,
+                    Settings.CUSTOMISE_SECTION,
+                    "ic_vector_paintbrush_stroke",
+                    SettingsStatus::enableCustomisationSection,
+                    ScreenBuilder::buildCustomiseSection
+            ),
+            new SettingsSection(
+                    "piko_title_font",
+                    null,
+                    Settings.FONT_SECTION,
+                    "ic_vector_at",
+                    SettingsStatus::fontSection,
+                    ScreenBuilder::buildFontSection
+            ),
+            new SettingsSection(
+                    "piko_title_timeline",
+                    null,
+                    Settings.TIMELINE_SECTION,
+                    "ic_vector_timeline_stroke",
+                    SettingsStatus::enableTimelineSection,
+                    ScreenBuilder::buildTimelineSection
+            ),
+            new SettingsSection(
+                    "piko_title_logging",
+                    null,
+                    Settings.LOGGING_SECTION,
+                    "ic_vector_bug_stroke",
+                    SettingsStatus::loggingSection,
+                    ScreenBuilder::buildLoggingSection
+            ),
+            new SettingsSection(
+                    "piko_title_backup",
+                    null,
+                    Settings.BACKUP_SECTION,
+                    "ic_vector_layers_stroke",
+                    () -> true,
+                    ScreenBuilder::buildExportSection
+            ),
+            new SettingsSection(
+                    "piko_title_about",
+                    "piko_pref_patch_info",
+                    Settings.PATCH_INFO,
+                    "ic_vector_accessibility_circle",
+                    () -> true,
+                    ScreenBuilder::buildPikoSection
+            )
+    };
     private final Context context;
-    private final PreferenceScreen screen;
     private final Helper helper;
+    private final SettingsSearchIndex searchIndex;
+    private PreferenceBuildTarget preferenceTarget;
 
     public ScreenBuilder(Context context,PreferenceScreen screen,Helper helper){
         this.context = context;
-        this.screen = screen;
         this.helper = helper;
+        this.searchIndex = new SettingsSearchIndex();
+        this.preferenceTarget = new PreferenceScreenBuildTarget(screen);
     }
 
     private void addPreference(Preference pref){
-        screen.addPreference(pref);
+        preferenceTarget.addPreference(null, pref);
     }
     private void addPreference(@Nullable LegacyTwitterPreferenceCategory category,Preference pref){
-        if(category!=null){
-            category.addPreference(pref);
-        }else {
-            addPreference(pref);
-        }
+        preferenceTarget.addPreference(category, pref);
     }
 
     public void buildPremiumSection(boolean buildCategory){
@@ -1096,134 +1197,219 @@ public class ScreenBuilder {
     }
 
     public void buildSinglePageSettings(){
-        if (SettingsStatus.enablePremiumSection()) {
+        for (SettingsSection section : SETTINGS_SECTIONS) {
+            if (!section.isEnabled()) {
+                continue;
+            }
+
             addPreference(
                     helper.buttonPreference(
-                            str("piko_title_premium"),
+                            section.rowTitle(),
                             "",
-                            Settings.PREMIUM_SECTION,
-                            "ic_vector_twitter",null
-                    )
-            ); 
-        }
-        if (SettingsStatus.enableDownloadSection()) {
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_title_download"),
-                            "",
-                            Settings.DOWNLOAD_SECTION,
-                            "ic_vector_incoming",null
+                            section.destinationKey,
+                            section.iconName,
+                            null
                     )
             );
         }
-        if (SettingsStatus.featureFlagsEnabled) {
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_title_feature_flags"),
-                            "",
-                            Settings.FLAGS_SECTION,
-                            "ic_vector_flag",null
-                    )
-            );
-        }
-        if (SettingsStatus.enableAdsSection()) {
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_title_ads"),
-                            "",
-                            Settings.ADS_SECTION,
-                            "ic_vector_accessibility_alt",null
-                    )
-            );
-        }
-        if (SettingsStatus.enableNativeSection()) {
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_title_native"),
-                            "",
-                            Settings.NATIVE_SECTION,
-                            "ic_vector_flask_stroke",null
-                    )
-            );
-        }
-        if (SettingsStatus.enableMiscSection()) {
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_title_misc"),
-                            "",
-                            Settings.MISC_SECTION,
-                            "ic_vector_heartline",null
-                    )
-            );
-        }
-        if (SettingsStatus.enableCustomisationSection()) {
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_title_customisation"),
-                            "",
-                            Settings.CUSTOMISE_SECTION,
-                            "ic_vector_paintbrush_stroke",null
-                    )
-            );
-        }
-        if (SettingsStatus.fontSection()) {
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_title_font"),
-                            "",
-                            Settings.FONT_SECTION,
-                            "ic_vector_at",null
-                    )
-            );
+    }
+
+    public int buildSettingsSearchResults(String query) {
+        if (!SettingsSearchMatcher.isSearchQueryReady(query)) {
+            return 0;
         }
 
-        if (SettingsStatus.enableTimelineSection()) {
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_title_timeline"),
-                            "",
-                            Settings.TIMELINE_SECTION,
-                            "ic_vector_timeline_stroke",null
-                    )
+        int addedResults = 0;
+        for (SearchMatch matchedResult : SettingsSearchMatcher.matchResults(settingsSearchResults(), query)) {
+            SearchResult result = matchedResult.result;
+
+            String displaySummary = result.summaryForDisplay(query);
+            Preference searchResultPreference = helper.buttonPreference(
+                    result.title,
+                    displaySummary,
+                    result.destinationKey,
+                    result.iconName,
+                    null
             );
+            searchResultPreference.setTitle(SettingsSearchMatcher.highlightMatches(result.title, query));
+            searchResultPreference.setSummary(SettingsSearchMatcher.highlightMatches(displaySummary, query));
+            searchResultPreference.setOnPreferenceClickListener(preference -> {
+                SettingsSearchNavigator.openResult(context, result);
+                return true;
+            });
+            addPreference(searchResultPreference);
+            addedResults++;
         }
 
-        if (SettingsStatus.loggingSection()) {
-            addPreference(
-                    helper.buttonPreference(
-                            str("piko_title_logging"),
-                            "",
-                            Settings.LOGGING_SECTION,
-                            "ic_vector_bug_stroke",null
-                    )
-            );
+        if (addedResults == 0) {
+            return 0;
         }
-   
-        addPreference(
-                helper.buttonPreference(
-                        str("piko_title_backup"),
-                        "",
-                        Settings.BACKUP_SECTION,
-                        "ic_vector_layers_stroke",null
-                )
-        );
-        
-        addPreference(
-                helper.buttonPreference(
-                        str("piko_pref_patch_info"),
-                        "",
-                        Settings.PATCH_INFO,
-                        "ic_vector_accessibility_circle",null
-                )
-        );
-        
+        return addedResults;
+    }
+
+    public void invalidateSettingsSearchIndex() {
+        searchIndex.invalidate();
+    }
+
+    private List<SearchResult> settingsSearchResults() {
+        List<SearchResult> cachedResults = searchIndex.cachedResults();
+        if (cachedResults != null) {
+            return cachedResults;
+        }
+
+        PreferenceBuildTarget previousTarget = preferenceTarget;
+        preferenceTarget = searchIndex;
+        searchIndex.beginCollection();
+        try {
+            for (SettingsSection section : SETTINGS_SECTIONS) {
+                if (!section.isEnabled()) {
+                    continue;
+                }
+
+                PreferenceBuildTarget.SectionContext sectionContext = new PreferenceBuildTarget.SectionContext(
+                        section.rowTitle(),
+                        section.title(),
+                        section.destinationKey(),
+                        section.iconName()
+                );
+                preferenceTarget.beginSection(sectionContext);
+                try {
+                    if (preferenceTarget.acceptsSectionContents(sectionContext)) {
+                        section.build(this, true);
+                    }
+                } finally {
+                    preferenceTarget.endSection();
+                }
+            }
+            return searchIndex.finishCollection();
+        } catch (RuntimeException | Error throwable) {
+            searchIndex.abortCollection();
+            throw throwable;
+        } finally {
+            preferenceTarget = previousTarget;
+        }
+    }
+
+    public boolean buildSection(String sectionKey, boolean buildCategory) {
+        for (SettingsSection section : SETTINGS_SECTIONS) {
+            if (TextUtils.equals(section.destinationKey(), sectionKey) && section.isEnabled()) {
+                section.build(this, buildCategory);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void buildExpandedSettingsSections(boolean buildCategory) {
+        for (SettingsSection section : SETTINGS_SECTIONS) {
+            if (Settings.FONT_SECTION.equals(section.destinationKey()) || !section.isEnabled()) {
+                continue;
+            }
+            section.build(this, buildCategory);
+        }
+    }
+
+    @Nullable
+    public static String getSectionTitleResourceName(String sectionKey) {
+        if (Settings.PATCH_INFO.equals(sectionKey)) {
+            return null;
+        }
+        for (SettingsSection section : SETTINGS_SECTIONS) {
+            if (TextUtils.equals(section.destinationKey(), sectionKey)) {
+                return section.titleResourceName();
+            }
+        }
+        return null;
+    }
+
+    private interface SectionAvailability {
+        boolean isEnabled();
+    }
+
+    private interface SectionBuilder {
+        void build(ScreenBuilder screenBuilder, boolean buildCategory);
+    }
+
+    static class SettingsSection {
+        private final String titleResourceName;
+        private final String rowTitleResourceName;
+        private final String destinationKey;
+        private final String iconName;
+        private final SectionAvailability availability;
+        private final SectionBuilder builder;
+
+        SettingsSection(
+                String titleResourceName,
+                @Nullable String rowTitleResourceName,
+                String destinationKey,
+                String iconName,
+                SectionAvailability availability,
+                SectionBuilder builder
+        ) {
+            this.titleResourceName = titleResourceName;
+            this.rowTitleResourceName = rowTitleResourceName;
+            this.destinationKey = destinationKey;
+            this.iconName = iconName;
+            this.availability = availability;
+            this.builder = builder;
+        }
+
+        String title() {
+            return str(titleResourceName);
+        }
+
+        String rowTitle() {
+            return TextUtils.isEmpty(rowTitleResourceName) ? title() : str(rowTitleResourceName);
+        }
+
+        String destinationKey() {
+            return destinationKey;
+        }
+
+        String iconName() {
+            return iconName;
+        }
+
+        String titleResourceName() {
+            return titleResourceName;
+        }
+
+        boolean isEnabled() {
+            return availability.isEnabled();
+        }
+
+        void build(ScreenBuilder screenBuilder, boolean buildCategory) {
+            builder.build(screenBuilder, buildCategory);
+        }
     }
 
     public LegacyTwitterPreferenceCategory preferenceCategory(String title) {
         LegacyTwitterPreferenceCategory preferenceCategory = new LegacyTwitterPreferenceCategory(context);
         preferenceCategory.setTitle(title);
-        screen.addPreference(preferenceCategory);
+        preferenceTarget.addCategory(preferenceCategory);
         return preferenceCategory;
+    }
+
+    private static final class PreferenceScreenBuildTarget implements PreferenceBuildTarget {
+        private final PreferenceScreen screen;
+
+        PreferenceScreenBuildTarget(PreferenceScreen screen) {
+            this.screen = screen;
+        }
+
+        @Override
+        public void addCategory(LegacyTwitterPreferenceCategory category) {
+            screen.addPreference(category);
+        }
+
+        @Override
+        public void addPreference(@Nullable LegacyTwitterPreferenceCategory category, Preference preference) {
+            if (category != null) {
+                category.addPreference(preference);
+            } else {
+                screen.addPreference(preference);
+            }
+        }
     }
 
 
