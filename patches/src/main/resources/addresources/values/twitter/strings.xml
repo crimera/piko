@@ -262,9 +262,6 @@
     <string name="piko_pref_app_restart_rec">App restart is recommended</string>
     <string name="piko_dialog_delete_title">Delete</string>
     <string name="piko_dialog_delete_message">Delete %s?</string>
-    <string name="piko_single_page_settings">Single settings page</string>
-    <string name="piko_single_page_settings_desc">View settings in a single page</string>
-
     <string name="piko_pref_search_type_ahead_users">Users</string>
     <string name="piko_pref_search_type_ahead_events">Events</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Ordered section</string>

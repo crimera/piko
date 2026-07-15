@@ -836,14 +836,6 @@ public class ScreenBuilder {
                         Settings.MORE_INFO_ON_PROFILE
                 )
         );
-
-        addPreference(category,
-                helper.switchPreference(
-                        str("piko_single_page_settings"),
-                        str("piko_single_page_settings_desc")+"\n"+str("piko_pref_app_restart_rec"),
-                        Settings.SINGLE_PAGE_SETTINGS
-                )
-        );
     }
 
     public void buildFontSection(boolean buildCategory){
@@ -1196,7 +1188,7 @@ public class ScreenBuilder {
         );
     }
 
-    public void buildSinglePageSettings(){
+    public void buildSettingsCategories(){
         for (SettingsSection section : SETTINGS_SECTIONS) {
             if (!section.isEnabled()) {
                 continue;
@@ -1301,15 +1293,6 @@ public class ScreenBuilder {
             }
         }
         return false;
-    }
-
-    public void buildExpandedSettingsSections(boolean buildCategory) {
-        for (SettingsSection section : SETTINGS_SECTIONS) {
-            if (Settings.FONT_SECTION.equals(section.destinationKey()) || !section.isEnabled()) {
-                continue;
-            }
-            section.build(this, buildCategory);
-        }
     }
 
     @Nullable

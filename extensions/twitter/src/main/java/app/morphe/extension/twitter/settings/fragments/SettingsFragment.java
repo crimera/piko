@@ -23,7 +23,6 @@ public class SettingsFragment extends PreferenceFragment implements SettingsSear
     private Context context;
     private PreferenceScreen screen;
     private ScreenBuilder screenBuilder;
-    private boolean isSinglePage;
 
     @Override
     public void onResume() {
@@ -50,7 +49,6 @@ public class SettingsFragment extends PreferenceFragment implements SettingsSear
         Helper helper = new Helper(context);
         screenBuilder = new ScreenBuilder(context, screen, helper);
 
-        isSinglePage = app.morphe.extension.twitter.Utils.getBooleanPref(Settings.SINGLE_PAGE_SETTINGS);
         rebuildSettings(SettingsSearchUIController.query());
         setPreferenceScreen(screen);
 
@@ -77,7 +75,7 @@ public class SettingsFragment extends PreferenceFragment implements SettingsSear
         screen.removeAll();
         if (!SettingsSearchUIController.isActive()) {
             SettingsSearchUIController.setContentState("", true, false);
-            buildNormalSettings();
+            screenBuilder.buildSettingsCategories();
         } else if (TextUtils.isEmpty(query) || TextUtils.isEmpty(query.trim())) {
             SettingsSearchUIController.setContentState(query, false, false);
         } else {
@@ -85,13 +83,4 @@ public class SettingsFragment extends PreferenceFragment implements SettingsSear
             SettingsSearchUIController.setContentState(query, resultCount > 0, resultCount == 0);
         }
     }
-
-    private void buildNormalSettings() {
-        if (isSinglePage) {
-            screenBuilder.buildExpandedSettingsSections(true);
-        } else {
-            screenBuilder.buildSinglePageSettings();
-        }
-    }
-
 }
