@@ -22,6 +22,7 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.instagram.patches.userprofile.ProfileMoreOption;
+import app.morphe.extension.instagram.patches.dm.SavedMessagesHook;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.constants.Constants;
 
@@ -135,6 +136,12 @@ public class ActionBarPatch {
 
             if(pref.contains(Constants.AB_GHOST_MODE_ICON)) {
                 ghostModeToggle(viewGroup);
+            }
+
+            if(SettingsStatus.saveDeletedMessages) {
+                Context context = viewGroup.getContext();
+                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_HISTORY_ICON,
+                        () -> SavedMessagesHook.openDeletedMessages(context));
             }
 
         } catch (Exception e) {
