@@ -7,6 +7,15 @@
 
 package app.morphe.extension.instagram.utils;
 
+import android.app.LocaleManager;
+import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
+import android.os.LocaleList;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
+
 import java.util.Set;
 
 import app.morphe.extension.instagram.settings.Settings;
@@ -14,6 +23,7 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
 
 import app.morphe.extension.crimera.SharedPref;
+import app.morphe.extension.shared.Utils;
 
 @SuppressWarnings("unused")
 public class Pref {
@@ -218,8 +228,121 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DOWNLOAD_USERNAME_FOLDER);
     }
 
+    static String formatDownloadPathForDisplay(String storedPath, String resolvedStorageLabel) {
+        int separatorIndex = storedPath.indexOf(':');
+        if (separatorIndex < 0) {
+            return storedPath;
+        }
+
+        String storageId = storedPath.substring(0, separatorIndex);
+        String relativePath = storedPath.substring(separatorIndex + 1);
+        String displayStorageLabel = resolvedStorageLabel;
+        if (displayStorageLabel == null || displayStorageLabel.trim().isEmpty()) {
+            displayStorageLabel = isPrimaryStorageId(storageId) ? "" : storageId;
+        }
+
+        if (displayStorageLabel.isEmpty()) {
+            return relativePath;
+        }
+        return relativePath.isEmpty()
+                ? displayStorageLabel
+                : displayStorageLabel + "/" + relativePath;
+    }
+
+    static boolean isPrimaryStorageId(String storageId) {
+        return "primary".equals(storageId);
+    }
+
+    static boolean storageUuidMatches(String storageId, String volumeUuid) {
+        return storageId != null
+                && volumeUuid != null
+                && storageId.equalsIgnoreCase(volumeUuid);
+    }
+
+    private static StorageVolume findStorageVolume(
+            StorageManager storageManager,
+            String storageId
+    ) {
+        if (isPrimaryStorageId(storageId)) {
+            return storageManager.getPrimaryStorageVolume();
+        }
+
+        for (StorageVolume storageVolume : storageManager.getStorageVolumes()) {
+            if (storageUuidMatches(storageId, storageVolume.getUuid())) {
+                return storageVolume;
+            }
+        }
+        return null;
+    }
+
+    private static Context createSystemLocaleContext(Context context) {
+        LocaleList systemLocales = Resources.getSystem()
+                .getConfiguration()
+                .getLocales();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            LocaleManager localeManager = context.getSystemService(LocaleManager.class);
+            if (localeManager != null) {
+                LocaleList localeManagerLocales = localeManager.getSystemLocales();
+                if (!localeManagerLocales.isEmpty()) {
+                    systemLocales = localeManagerLocales;
+                }
+            }
+        }
+
+        if (systemLocales.isEmpty()) {
+            return null;
+        }
+
+        Configuration configuration = new Configuration(
+                context.getResources().getConfiguration()
+        );
+        configuration.setLocales(systemLocales);
+        return context.createConfigurationContext(configuration);
+    }
+
+    private static String resolveStorageLabel(String storageId) {
+        try {
+            Context context = Utils.getContext();
+            if (context == null) {
+                return null;
+            }
+
+            StorageManager storageManager = context.getSystemService(StorageManager.class);
+            if (storageManager == null) {
+                return null;
+            }
+
+            StorageVolume storageVolume = findStorageVolume(storageManager, storageId);
+            if (storageVolume == null) {
+                return null;
+            }
+
+            Context systemLocaleContext = createSystemLocaleContext(context);
+            if (systemLocaleContext == null) {
+                return null;
+            }
+
+            String description = storageVolume.getDescription(systemLocaleContext);
+            return description == null || description.trim().isEmpty()
+                    ? null
+                    : description;
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
     public static String getCustomDownloadPath() {
-        return SharedPref.getStringPref(Settings.CUSTOM_DOWNLOAD_PATH);
+        String storedPath = SharedPref.getStringPref(Settings.CUSTOM_DOWNLOAD_PATH);
+        int separatorIndex = storedPath.indexOf(':');
+        if (separatorIndex < 0) {
+            return storedPath;
+        }
+
+        String storageId = storedPath.substring(0, separatorIndex);
+        return formatDownloadPathForDisplay(
+                storedPath,
+                resolveStorageLabel(storageId)
+        );
     }
 
     public static boolean hideNavigationFeed() {

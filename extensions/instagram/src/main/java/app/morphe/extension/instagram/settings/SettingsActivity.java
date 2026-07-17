@@ -17,6 +17,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
@@ -32,6 +33,7 @@ import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.instagram.utils.Pref;
 
 public class SettingsActivity extends Activity {
 
@@ -206,6 +208,15 @@ public class SettingsActivity extends Activity {
     public static class SettingsFragment extends PreferenceFragment {
 
         Context context;
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            Preference downloadPathPreference = findPreference("piko_download_set_path");
+            if (downloadPathPreference != null) {
+                downloadPathPreference.setSummary(Pref.getCustomDownloadPath());
+            }
+        }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
