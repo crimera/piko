@@ -16,6 +16,7 @@ import android.preference.PreferenceCategory;
 import java.util.TreeMap;
 import java.util.Map;
 
+import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
@@ -636,7 +637,7 @@ public class ScreenBuilder {
         addPreference(
                 helper.buttonPreference(
                         str("piko_download_set_path"),
-                        Pref.getCustomDownloadPath(),
+                        StorageUtils.getCustomPathForDisplay(),
                         "piko_download_set_path"
                 )
         );

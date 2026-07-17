@@ -28,12 +28,14 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.function.Supplier;
+
+import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.instagram.settings.SettingsStatus;
-import app.morphe.extension.instagram.utils.Pref;
 
 public class SettingsActivity extends Activity {
 
@@ -209,13 +211,23 @@ public class SettingsActivity extends Activity {
 
         Context context;
 
+        private void refreshPreferenceSummary(
+                String key,
+                Supplier<CharSequence> summaryProvider
+        ) {
+            Preference preference = findPreference(key);
+            if (preference != null) {
+                preference.setSummary(summaryProvider.get());
+            }
+        }
+
         @Override
         public void onResume() {
             super.onResume();
-            Preference downloadPathPreference = findPreference("piko_download_set_path");
-            if (downloadPathPreference != null) {
-                downloadPathPreference.setSummary(Pref.getCustomDownloadPath());
-            }
+            refreshPreferenceSummary(
+                    "piko_download_set_path",
+                    StorageUtils::getCustomPathForDisplay
+            );
         }
 
         @Override
