@@ -15,6 +15,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OffsetInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -185,6 +186,85 @@ val directItemEntity =
                     wrapped("clip", FieldClipExtension, FieldClipMediaExtension)
                     wrapped("reel_share", FieldReelExtension, FieldReelMediaExtension)
                     wrapped("voice_media", FieldVoiceExtension, FieldVoiceMediaExtension)
+                }
+
+                // xma reshare permalink: best-effort, never fatal. An xma reshare (shared post/reel)
+                // has no Media object; instead the item holds a List of xma elements (built by a
+                // converter method) whose permalink is a String under JSON key "target_url". Resolve
+                // the item's xma List field and the element's permalink field at patch time so the
+                // runtime does named reflection only. If neither can be resolved on a future build,
+                // xma degrades to the "[type]" label (see DirectItem).
+                //
+                // The permalink field is confirmed by the "target_url" -> String iput on the element
+                // class; the item's xma List field is disambiguated (from three sibling List fields
+                // that share the same converter) by following the xma_ dispatch keys' branch target.
+                runCatching {
+                    val itemClass = mutableClassDefBy { it.type == method.definingClass }
+
+                    // On class [clsType], find "target_url" then the next iput-object (before the
+                    // following key) that writes a String on [elementType]. The serializer occurrence
+                    // writes via a call, not an iput, so only the deserializer's iput matches.
+                    fun targetUrlField(clsType: String, elementType: String): FieldReference? {
+                        val cls = runCatching { mutableClassDefBy { it.type == clsType } }.getOrNull()
+                            ?: return null
+                        return cls.methods.firstNotNullOfOrNull { m ->
+                            val insns = runCatching { m.instructions.toList() }.getOrNull()
+                                ?: return@firstNotNullOfOrNull null
+                            val ki = insns.indexOfFirst {
+                                (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
+                                    (it as ReferenceInstruction).reference.toString() == "target_url"
+                            }
+                            if (ki < 0) return@firstNotNullOfOrNull null
+                            insns.drop(ki + 1)
+                                .takeWhile {
+                                    it.opcode != Opcode.CONST_STRING && it.opcode != Opcode.CONST_STRING_JUMBO
+                                }
+                                .firstOrNull {
+                                    it.opcode == Opcode.IPUT_OBJECT &&
+                                        ((it as ReferenceInstruction).reference as? FieldReference)
+                                            ?.let { r -> r.type == "Ljava/lang/String;" && r.definingClass == elementType } == true
+                                }?.let { (it as ReferenceInstruction).reference as FieldReference }
+                        }
+                    }
+
+                    var xmaField: FieldReference? = null
+                    var linkField: FieldReference? = null
+                    run {
+                        for (m in itemClass.methods) {
+                            val insns = runCatching { m.instructions.toList() }.getOrNull() ?: continue
+                            // The item stores four List<xma-element> fields, all built from the same
+                            // converter (so all share "target_url"); only the one reached from the
+                            // "xma_*" reshare keys is the field we want. Each xma_ key does
+                            // equals -> if-nez -> shared handler block, so follow that branch to pin
+                            // the correct block, then read its List iput + converter.
+                            val xmaKeyIdx = insns.indexOfFirst {
+                                (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
+                                    (it as ReferenceInstruction).reference.toString().startsWith("xma_")
+                            }
+                            if (xmaKeyIdx < 0) continue
+                            val ifNez = insns.drop(xmaKeyIdx + 1).firstOrNull { it.opcode == Opcode.IF_NEZ } ?: continue
+                            val targetAddr = ifNez.location.codeAddress + (ifNez as OffsetInstruction).codeOffset
+                            val targetIdx = insns.indexOfFirst { it.location.codeAddress == targetAddr }
+                            if (targetIdx < 0) continue
+                            val block = insns.drop(targetIdx)
+                            val listPut = block.firstOrNull {
+                                it.opcode == Opcode.IPUT_OBJECT &&
+                                    ((it as ReferenceInstruction).reference as? FieldReference)?.type == "Ljava/util/List;"
+                            }?.let { (it as ReferenceInstruction).reference as FieldReference } ?: continue
+                            val conv = block.firstNotNullOfOrNull {
+                                if (it.opcode != Opcode.INVOKE_STATIC) return@firstNotNullOfOrNull null
+                                ((it as ReferenceInstruction).reference as? MethodReference)
+                                    ?.takeIf { r -> r.returnType.startsWith("LX/") && r.definingClass.startsWith("LX/") }
+                            } ?: continue
+                            val lf = targetUrlField(conv.definingClass, conv.returnType) ?: continue
+                            xmaField = listPut
+                            linkField = lf
+                            return@run
+                        }
+                    }
+                    val xf = xmaField ?: error("xma converter not found in ${method.definingClass}")
+                    FieldXmaExtension.changeFirstString(xf.name)
+                    FieldXmaLinkExtension.changeFirstString(linkField!!.name)
                 }
             }
 

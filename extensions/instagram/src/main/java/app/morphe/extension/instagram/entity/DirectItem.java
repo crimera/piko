@@ -241,45 +241,22 @@ public class DirectItem extends Entity {
         return null;
     }
 
-    /**
-     * Permalink for an xma reshare (shared post/reel), e.g. https://www.instagram.com/reel/<code>/.
-     *
-     * Runtime scan, not patch-time resolution: an xma reshare has no Media object, so the only
-     * patch-time anchor would be opcode/iput sequencing that needs re-RE every version. Instead we
-     * scan for the permalink by its value — an instagram.com/p|reel link is a product-level invariant
-     * that barely changes, so the value is a more stable anchor than any obfuscated field name.
-     * Bounded: walk the item's List fields, first element only, no recursion; scoped to xma by caller.
-     */
+    // xma reshare: the item holds a List of xma elements, each with a permalink String
+    // (JSON "target_url").
+    private String fieldXma()     { return "fieldName"; } // xma List on item
+    private String fieldXmaLink() { return "fieldName"; } // permalink on each element
+
+    /** Permalink for a shared post/reel, e.g. https://www.instagram.com/reel/<code>/. */
     public String xmaReshareLink() {
         try {
-            Class<?> c = this.mediaClass();
-            for (java.lang.reflect.Field f : c.getDeclaredFields()) {
-                if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
-                f.setAccessible(true);
-                Object v = f.get(this.obj);
-                if (!(v instanceof java.util.List)) continue;
-                java.util.List<?> list = (java.util.List<?>) v;
-                if (list.isEmpty()) continue;
-                Object element = list.get(0);
+            Object list = super.getField(this.mediaClass(), this.obj, this.fieldXma());
+            if (!(list instanceof java.util.List)) return null;
+            for (Object element : (java.util.List<?>) list) {
                 if (element == null) continue;
-                String link = firstInstagramPermalink(element);
-                if (link != null) return link;
-            }
-        } catch (Exception ignored) {
-        }
-        return null;
-    }
-
-    /** First String field on {@code o} whose value is an instagram.com post/reel permalink, query stripped. */
-    private String firstInstagramPermalink(Object o) {
-        try {
-            for (java.lang.reflect.Field g : o.getClass().getDeclaredFields()) {
-                if (java.lang.reflect.Modifier.isStatic(g.getModifiers())) continue;
-                if (g.getType() != String.class) continue;
-                g.setAccessible(true);
-                Object gv = g.get(o);
-                if (!(gv instanceof String)) continue;
-                String s = (String) gv;
+                Object v = super.getField(element.getClass(), element, this.fieldXmaLink());
+                if (!(v instanceof String)) continue;
+                String s = (String) v;
+                // only actual post/reel links; other xma types (e.g. xma_link) point elsewhere
                 if (s.startsWith("https://www.instagram.com/")
                         && (s.contains("/p/") || s.contains("/reel/") || s.contains("/reels/") || s.contains("/tv/"))) {
                     int q = s.indexOf('?');

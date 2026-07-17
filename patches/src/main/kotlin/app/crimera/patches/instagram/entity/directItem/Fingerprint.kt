@@ -36,6 +36,9 @@ internal object FieldReelExtension : Fingerprint(name = "fieldReel", definingCla
 internal object FieldReelMediaExtension : Fingerprint(name = "fieldReelMedia", definingClass = DIRECT_ITEM_CLASS)
 internal object FieldVoiceExtension : Fingerprint(name = "fieldVoice", definingClass = DIRECT_ITEM_CLASS)
 internal object FieldVoiceMediaExtension : Fingerprint(name = "fieldVoiceMedia", definingClass = DIRECT_ITEM_CLASS)
+// xma reshare: item List field + the permalink String field on each element (JSON key "target_url").
+internal object FieldXmaExtension : Fingerprint(name = "fieldXma", definingClass = DIRECT_ITEM_CLASS)
+internal object FieldXmaLinkExtension : Fingerprint(name = "fieldXmaLink", definingClass = DIRECT_ITEM_CLASS)
 
 // returnType omitted: v426 returns Z, v433+ returns V. const-string → iput pattern is present in both.
 internal object DirectItemDispatchFingerprint : Fingerprint(

@@ -44,13 +44,6 @@ val addSettingsActivityPatch =
                     activity.setAttribute("android:exported", "false")
                     application.appendChild(activity)
                 }
-
-                // Viewer for saved deleted (unsent) direct messages
-                activity = document.createElement("activity")
-                activity.setAttribute("android:name", "app.morphe.extension.instagram.patches.dm.DeletedMessagesActivity")
-                activity.setAttribute("android:theme", "@android:style/Theme.DeviceDefault.NoActionBar")
-                activity.setAttribute("android:exported", "false")
-                application.appendChild(activity)
             }
         }
     }

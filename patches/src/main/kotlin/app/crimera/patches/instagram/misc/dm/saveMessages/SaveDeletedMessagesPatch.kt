@@ -42,7 +42,7 @@ val saveDeletedMessagesPatch =
         // userDataEntity IS applied (pulled by another enabled patch) UserData works and Hook 6
         // enriches names; when it isn't, UserData reflection no-ops and we fall back to thread title
         // / sender directory. Either way DM capture (Hooks 1/2/4) stays patch-safe.
-        dependsOn(settingsPatch, chatActionBarButtonPatch, directItemEntity)
+        dependsOn(settingsPatch, chatActionBarButtonPatch, directItemEntity, deletedMessagesResourcePatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
