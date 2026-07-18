@@ -7,10 +7,17 @@
 
 package app.morphe.extension.crimera.downloader;
 
+import android.app.LocaleManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.content.UriPermission;
+import android.os.Build;
+import android.os.LocaleList;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 
 import app.morphe.extension.crimera.SharedPref;
 import app.morphe.extension.crimera.constants.ExtensionStrings;
@@ -22,6 +29,126 @@ public class StorageUtils {
 
     public static void saveCustomPath(String path) {
         SharedPref.setStringPref(KEY_BASE_PATH, path);
+    }
+
+    public static String getCustomPathForDisplay() {
+        String storedPath = SharedPref.getStringPref(KEY_BASE_PATH, "");
+        int separatorIndex = storedPath.indexOf(':');
+        if (separatorIndex < 0) {
+            return storedPath;
+        }
+
+        String storageId = storedPath.substring(0, separatorIndex);
+        return formatCustomPathForDisplay(
+                storedPath,
+                resolveStorageLabel(storageId)
+        );
+    }
+
+    static String formatCustomPathForDisplay(
+            String storedPath,
+            String resolvedStorageLabel
+    ) {
+        int separatorIndex = storedPath.indexOf(':');
+        if (separatorIndex < 0) {
+            return storedPath;
+        }
+
+        String storageId = storedPath.substring(0, separatorIndex);
+        String relativePath = storedPath.substring(separatorIndex + 1);
+        String displayStorageLabel = resolvedStorageLabel;
+        if (displayStorageLabel == null || displayStorageLabel.trim().isEmpty()) {
+            displayStorageLabel = isPrimaryStorageId(storageId) ? "" : storageId;
+        }
+
+        if (displayStorageLabel.isEmpty()) {
+            return relativePath;
+        }
+        return relativePath.isEmpty()
+                ? displayStorageLabel
+                : displayStorageLabel + "/" + relativePath;
+    }
+
+    private static boolean isPrimaryStorageId(String storageId) {
+        return "primary".equals(storageId);
+    }
+
+    private static boolean storageUuidMatches(String storageId, String volumeUuid) {
+        return storageId != null
+                && volumeUuid != null
+                && storageId.equalsIgnoreCase(volumeUuid);
+    }
+
+    private static StorageVolume findStorageVolume(
+            StorageManager storageManager,
+            String storageId
+    ) {
+        if (isPrimaryStorageId(storageId)) {
+            return storageManager.getPrimaryStorageVolume();
+        }
+
+        for (StorageVolume storageVolume : storageManager.getStorageVolumes()) {
+            if (storageUuidMatches(storageId, storageVolume.getUuid())) {
+                return storageVolume;
+            }
+        }
+        return null;
+    }
+
+    private static Context createSystemLocaleContext(Context context) {
+        LocaleList systemLocales = Resources.getSystem()
+                .getConfiguration()
+                .getLocales();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            LocaleManager localeManager = context.getSystemService(LocaleManager.class);
+            if (localeManager != null) {
+                LocaleList localeManagerLocales = localeManager.getSystemLocales();
+                if (!localeManagerLocales.isEmpty()) {
+                    systemLocales = localeManagerLocales;
+                }
+            }
+        }
+
+        if (systemLocales.isEmpty()) {
+            return null;
+        }
+
+        Configuration configuration = new Configuration(
+                context.getResources().getConfiguration()
+        );
+        configuration.setLocales(systemLocales);
+        return context.createConfigurationContext(configuration);
+    }
+
+    private static String resolveStorageLabel(String storageId) {
+        try {
+            Context context = PikoUtils.getContext();
+            if (context == null) {
+                return null;
+            }
+
+            StorageManager storageManager = context.getSystemService(StorageManager.class);
+            if (storageManager == null) {
+                return null;
+            }
+
+            StorageVolume storageVolume = findStorageVolume(storageManager, storageId);
+            if (storageVolume == null) {
+                return null;
+            }
+
+            Context systemLocaleContext = createSystemLocaleContext(context);
+            if (systemLocaleContext == null) {
+                return null;
+            }
+
+            String description = storageVolume.getDescription(systemLocaleContext);
+            return description == null || description.trim().isEmpty()
+                    ? null
+                    : description;
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     public static void saveCustomTreeUri(Uri treeUri) {

@@ -17,6 +17,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
@@ -27,6 +28,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.function.Supplier;
+
+import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
@@ -220,6 +224,25 @@ public class SettingsActivity extends Activity {
     public static class SettingsFragment extends PreferenceFragment {
 
         Context context;
+
+        private void refreshPreferenceSummary(
+                String key,
+                Supplier<CharSequence> summaryProvider
+        ) {
+            Preference preference = findPreference(key);
+            if (preference != null) {
+                preference.setSummary(summaryProvider.get());
+            }
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            refreshPreferenceSummary(
+                    "piko_download_set_path",
+                    StorageUtils::getCustomPathForDisplay
+            );
+        }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
