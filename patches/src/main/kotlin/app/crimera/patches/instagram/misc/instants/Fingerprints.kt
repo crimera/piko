@@ -6,12 +6,14 @@
 
 package app.crimera.patches.instagram.misc.instants
 
+import app.crimera.patches.instagram.utils.Constants.INSTANTS_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 
-/** Anchors InstantsDownloadHook.names(), whose const-strings are sentinel placeholders for the
- *  obfuscated field/method names the received-instant download path reflects on. Rewritten at patch
- *  time (§11) by instantsDownloadPatch by matching each sentinel's text. */
+/** Anchors InstantsDownloadHook.names(), whose returned array holds the sentinel placeholders for
+ *  the obfuscated field/method names the received-instant download path reflects on. An array-return
+ *  method (not static fields) so R8 can't constant-fold the placeholders away before patch time.
+ *  Rewritten at patch time (§11) by instantsDownloadPatch by matching each sentinel's text. */
 internal object InstantsDownloadNamesFingerprint : Fingerprint(
-    definingClass = "Lapp/morphe/extension/instagram/patches/instants/InstantsDownloadHook;",
+    definingClass = "$INSTANTS_DESCRIPTOR/InstantsDownloadHook;",
     name = "names",
 )

@@ -26,34 +26,46 @@ import app.morphe.extension.shared.Utils;
  *
  * <p>Capture reads the live viewer ViewModel: {@code vm.<A0Q>.getValue().<A03>() -> item.<A01>}
  * (a {@code Media}), then reuses piko's {@link MediaData} entity to pull the image/video url,
- * username and type. All obfuscated names are resolved at patch time (§11, see {@link #names()}).
+ * username and type. All obfuscated names are resolved at patch time (§11).
+ *
+ * <p>The obfuscated names are seeded as sentinel placeholders in {@link #names()}; instantsDownloadPatch
+ * locates each by value and rewrites it from the target dex. They live in a returned array (not
+ * static fields) because R8 minifies this extension and would constant-fold single-assigned string
+ * fields away before the patch runs — the array-return form keeps them as real {@code const-string}s
+ * for the patch to find. {@link Names} maps that array into named fields in one place, so nothing
+ * downstream depends on array position. No last-known-good fallback — obfuscated names rotate on every
+ * R8 run; if resolution didn't run the marker stays unset and capture no-ops.
  */
 @SuppressWarnings("unused")
 public class InstantsDownloadHook {
 
-    // Indices into names(). The patch resolves entries by placeholder text, not position.
-    private static final int N_MARKER = 0;
-    private static final int N_VM_STATE_FIELD = 1;    // 5Ur -> A0Q (StateFlow-like, getValue() -> state)
-    private static final int N_STATE_ITEM_METHOD = 2; // 5VB -> A03 () -> current item (5Xq)
-    private static final int N_ITEM_MEDIA_FIELD = 3;  // 5Xq -> A01 (Lcom/instagram/feed/media/Media;)
-
-    /** Value of N_MARKER once patch-time resolution has committed. */
-    private static final String MARKER_RESOLVED = "1";
-
-    /**
-     * Obfuscated field/method names the capture path reflects on, resolved at patch time (§11) by
-     * instantsDownloadPatch from the target dex. Each entry is a sentinel the resolver locates by
-     * value and rewrites; there is no last-known-good fallback, since obfuscated names rotate on
-     * every R8 run. If resolution didn't run the marker stays unset and capture no-ops.
-     */
+    /** Sentinel placeholders, rewritten at patch time by matching each value (not by position). */
     private static String[] names() {
         return new String[] {
-                "piko.instants.dl.marker",          // patched to "1" — commit flag, written last
+                "piko.instants.dl.marker",          // commit flag — patched to "1" last
                 "piko.instants.dl.vmStateField",    // viewer VM state field (getValue() -> viewer state)
                 "piko.instants.dl.stateItemMethod", // state method returning the current item
                 "piko.instants.dl.itemMediaField",  // current item's Media field
         };
     }
+
+    /** Names as fields, so the reflection path never indexes the array by hand. The only place the
+     *  array order is assumed is right here, next to {@link #names()}. */
+    private static final class Names {
+        final String marker, vmStateField, stateItemMethod, itemMediaField;
+
+        Names(String[] a) {
+            marker = a[0];
+            vmStateField = a[1];
+            stateItemMethod = a[2];
+            itemMediaField = a[3];
+        }
+    }
+
+    private static final Names NAMES = new Names(names());
+
+    /** Value of {@link Names#marker} once patch-time resolution has committed. */
+    private static final String MARKER_RESOLVED = "1";
 
     /** The last media id captured — avoids re-hitting the DB on every VM method call while the same
      *  instant is on screen (noteViewerVm fires very frequently). */
@@ -66,7 +78,7 @@ public class InstantsDownloadHook {
     public static void noteViewerVm(Object vm) {
         try {
             if (vm == null) return;
-            if (!MARKER_RESOLVED.equals(names()[N_MARKER])) return;
+            if (!MARKER_RESOLVED.equals(NAMES.marker)) return;
             if (!SharedPref.getBooleanPref(Settings.INSTANTS_DOWNLOAD)) return;
 
             Object media = currentInstantMedia(vm);
@@ -79,14 +91,13 @@ public class InstantsDownloadHook {
     /** Reads the Media backing the instant currently shown, via the live VM. Null on any mismatch. */
     private static Object currentInstantMedia(Object vm) {
         try {
-            String[] N = names();
-            Object stateHolder = declaredField(vm, N[N_VM_STATE_FIELD]);              // LX/EuU
+            Object stateHolder = declaredField(vm, NAMES.vmStateField);                // LX/EuU
             if (stateHolder == null) return null;
             Object state = publicMethod(stateHolder, "getValue").invoke(stateHolder);  // LX/5VB
             if (state == null) return null;
-            Object item = publicMethod(state, N[N_STATE_ITEM_METHOD]).invoke(state);   // LX/5Xq
+            Object item = publicMethod(state, NAMES.stateItemMethod).invoke(state);    // LX/5Xq
             if (item == null) return null;
-            return declaredField(item, N[N_ITEM_MEDIA_FIELD]);                         // Media
+            return declaredField(item, NAMES.itemMediaField);                         // Media
         } catch (Throwable t) {
             // Off-cycle calls (VM alive but no current item) land here — expected, keep quiet.
             return null;

@@ -8,7 +8,6 @@ package app.morphe.extension.instagram.settings.preference.widgets;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.preference.Preference;
 import android.util.AttributeSet;
 import android.view.View;
@@ -83,10 +82,8 @@ public class ButtonPref extends Preference {
                         DownloadMapping.downloadMapping();
 
                     } else if (key.equals("piko_view_saved_instants")) {
-                        Intent intent = new Intent(context,
+                        ActivityHook.launchActivity(context,
                                 app.morphe.extension.instagram.patches.instants.InstantsVaultActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
 
                     } else if (isFragmentNavigation(key)) {
                         FragmentHook.startFragment(key);

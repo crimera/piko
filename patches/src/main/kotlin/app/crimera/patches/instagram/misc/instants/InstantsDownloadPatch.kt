@@ -6,6 +6,8 @@
 
 package app.crimera.patches.instagram.misc.instants
 
+import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
+import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.INSTANTS_DESCRIPTOR
@@ -28,7 +30,6 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val INSTANTS_DOWNLOAD_HOOK_DESCRIPTOR = "$INSTANTS_DESCRIPTOR/InstantsDownloadHook;"
-private const val MEDIA_TYPE = "Lcom/instagram/feed/media/Media;"
 
 /** The obfuscated names InstantsDownloadHook's pull path reflects on, recovered from the target dex. */
 private data class DownloadNames(
@@ -37,8 +38,8 @@ private data class DownloadNames(
     val itemMediaField: String,
 )
 
-/** Rewrites the InstantsDownloadHook.names() placeholder whose *value* is [placeholder]. Matches on
- *  sentinel text, not index. A missing/duplicated sentinel is a names()/resolver desync — our bug —
+/** Rewrites the InstantsDownloadHook placeholder field whose seed *value* is [placeholder]. Matches
+ *  on sentinel text, not index. A missing/duplicated sentinel is a hook/resolver desync — our bug —
  *  so it throws rather than degrading. */
 context(patchContext: BytecodePatchContext)
 private fun Fingerprint.replacePlaceholder(
@@ -53,8 +54,8 @@ private fun Fingerprint.replacePlaceholder(
 
     if (hits.size != 1) {
         throw PatchException(
-            "InstantsDownloadHook.names(): expected exactly one \"$placeholder\" placeholder, " +
-                "found ${hits.size}. names() and instantsDownloadPatch are out of sync.",
+            "InstantsDownloadHook: expected exactly one \"$placeholder\" placeholder, " +
+                "found ${hits.size}. The hook's placeholder fields and instantsDownloadPatch are out of sync.",
         )
     }
 
@@ -84,7 +85,7 @@ val instantsDownloadPatch =
         name = "Save Instants",
         description = "Captures view-once Instants as you view them so you can re-view and download them later.",
     ) {
-        dependsOn(settingsPatch, instantsDownloadResourcePatch)
+        dependsOn(settingsPatch, instantsDownloadResourcePatch, decoderEntity)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
@@ -238,12 +239,12 @@ private fun resolveDownloadNames(): Pair<DownloadNames, MutableMethod> {
 
     // Media field on the item — must be unambiguous, or we'd read the wrong one.
     val mediaFields =
-        patchContext.mutableClassDefBy { it.type == itemType }.fields.filter { it.type == MEDIA_TYPE }
+        patchContext.mutableClassDefBy { it.type == itemType }.fields.filter { it.type == MEDIA_CLASS_NAME }
     val itemMediaField =
         when (mediaFields.size) {
             1 -> mediaFields.single().name
             else -> throw PatchException(
-                "expected exactly one $MEDIA_TYPE field on the viewer item ($itemType), " +
+                "expected exactly one $MEDIA_CLASS_NAME field on the viewer item ($itemType), " +
                     "found ${mediaFields.size}.",
             )
         }

@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.patches.instants;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -42,6 +43,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.db.PikoInstantsDb;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.shared.Utils;
@@ -76,13 +78,13 @@ public class InstantsVaultActivity extends Activity {
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(0xFF000000);
+        root.setBackgroundColor(themed("igds_color_primary_background", 0xFF000000));
         root.addView(buildToolbar());
 
         if (items.isEmpty()) {
             TextView empty = new TextView(this);
             empty.setText(str("piko_instants_vault_empty"));
-            empty.setTextColor(0xFFB0B0B0);
+            empty.setTextColor(themed("igds_color_secondary_text", 0xFFB0B0B0));
             empty.setGravity(Gravity.CENTER);
             empty.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
             empty.setPadding(dp(24), dp(24), dp(24), dp(24));
@@ -147,7 +149,7 @@ public class InstantsVaultActivity extends Activity {
     private TextView buildHeader(String username) {
         TextView header = new TextView(this);
         header.setText(username);
-        header.setTextColor(0xFFFFFFFF);
+        header.setTextColor(themed("igds_color_primary_text", 0xFFFFFFFF));
         header.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         header.setPadding(dp(14), dp(14), dp(14), dp(6));
         return header;
@@ -161,7 +163,7 @@ public class InstantsVaultActivity extends Activity {
 
         ImageView image = new ImageView(this);
         image.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        image.setBackgroundColor(0xFF1A1A1A);
+        image.setBackgroundColor(themed("igds_color_secondary_background", 0xFF1A1A1A));
         tile.addView(image, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
@@ -184,14 +186,10 @@ public class InstantsVaultActivity extends Activity {
 
         tile.setOnClickListener(v -> showOptions(row));
         tile.setOnLongClickListener(v -> {
-            new android.app.AlertDialog.Builder(this)
-                    .setMessage(str("piko_delete_saved_confirm"))
-                    .setPositiveButton(str("piko_delete"), (d, w) -> {
-                        PikoInstantsDb.getInstance(this).delete(row[0]);
-                        recreate();
-                    })
-                    .setNegativeButton(str("piko_cancel"), null)
-                    .show();
+            confirm(str("piko_delete_saved_confirm"), str("piko_delete"), () -> {
+                PikoInstantsDb.getInstance(this).delete(row[0]);
+                recreate();
+            });
             return true;
         });
         return tile;
@@ -203,11 +201,11 @@ public class InstantsVaultActivity extends Activity {
         bar.setOrientation(LinearLayout.HORIZONTAL);
         bar.setGravity(Gravity.CENTER_VERTICAL);
         bar.setPadding(pad, pad, pad, pad);
-        bar.setBackgroundColor(0xFF101010);
+        bar.setBackgroundColor(themed("igds_color_primary_background", 0xFF101010));
 
         TextView back = new TextView(this);
         back.setText("←");
-        back.setTextColor(0xFFFFFFFF);
+        back.setTextColor(themed("igds_color_primary_text", 0xFFFFFFFF));
         back.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         back.setPadding(0, 0, dp(16), 0);
         back.setOnClickListener(v -> finish());
@@ -215,7 +213,7 @@ public class InstantsVaultActivity extends Activity {
 
         TextView title = new TextView(this);
         title.setText(str("piko_view_saved_instants"));
-        title.setTextColor(0xFFFFFFFF);
+        title.setTextColor(themed("igds_color_primary_text", 0xFFFFFFFF));
         title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         bar.addView(title, new LinearLayout.LayoutParams(0,
                 LinearLayout.LayoutParams.WRAP_CONTENT, 1));
@@ -223,16 +221,13 @@ public class InstantsVaultActivity extends Activity {
         if (!items.isEmpty()) {
             TextView clear = new TextView(this);
             clear.setText(str("piko_clear_all"));
-            clear.setTextColor(0xFFFF5C5C);
+            clear.setTextColor(themed("igds_color_error_or_destructive", 0xFFFF5C5C));
             clear.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-            clear.setOnClickListener(v -> new android.app.AlertDialog.Builder(this)
-                    .setMessage(str("piko_clear_all_confirm"))
-                    .setPositiveButton(str("piko_clear_all"), (d, w) -> {
+            clear.setOnClickListener(v -> confirm(str("piko_clear_all_confirm"), str("piko_clear_all"),
+                    () -> {
                         PikoInstantsDb.getInstance(this).clearAll();
                         recreate();
-                    })
-                    .setNegativeButton(str("piko_cancel"), null)
-                    .show());
+                    }));
             bar.addView(clear);
         }
         return bar;
@@ -259,29 +254,51 @@ public class InstantsVaultActivity extends Activity {
                 isVideo ? str("piko_open_video_externally") : str("piko_open_image_externally"),
                 str("piko_copy_media_link"),
         };
+        DialogInterface.OnClickListener onPick = (d, which) -> {
+            try {
+                if (which == 0) {
+                    String fileName = "piko_instant_" + row[0] + (isVideo ? ".mp4" : ".jpg");
+                    DownloadUtils.downloadMediaUrl(this, url, SUBFOLDER, fileName);
+                } else if (which == 2) {
+                    Utils.setClipboard(url);
+                    Utils.showToastShort(str("piko_copied_media_link"));
+                } else {
+                    startActivity(Intent.createChooser(
+                            new Intent(Intent.ACTION_VIEW, Uri.parse(url)), null));
+                }
+            } catch (Exception e) {
+                PikoUtils.logger(e);
+            }
+        };
+
+        // Plain AlertDialog: the IGDS native box needs an Instagram-themed context, which a
+        // standalone piko activity doesn't have (same as DeletedMessagesActivity).
         new android.app.AlertDialog.Builder(this)
                 .setTitle(str("piko_download_options"))
-                .setItems(options, (d, which) -> {
-                    try {
-                        if (which == 0) {
-                            String fileName = "piko_instant_" + row[0] + (isVideo ? ".mp4" : ".jpg");
-                            DownloadUtils.downloadMediaUrl(this, url, SUBFOLDER, fileName);
-                        } else if (which == 2) {
-                            Utils.setClipboard(url);
-                            Utils.showToastShort(str("piko_copied_media_link"));
-                        } else {
-                            startActivity(Intent.createChooser(
-                                    new Intent(Intent.ACTION_VIEW, Uri.parse(url)), null));
-                        }
-                    } catch (Exception e) {
-                        PikoUtils.logger(e);
-                    }
-                })
+                .setItems(options, onPick)
+                .show();
+    }
+
+    private void confirm(CharSequence message, String positiveText, Runnable onConfirm) {
+        new android.app.AlertDialog.Builder(this)
+                .setMessage(message)
+                .setPositiveButton(positiveText, (d, w) -> onConfirm.run())
+                .setNegativeButton(str("piko_cancel"), null)
                 .show();
     }
 
     private int dp(int v) {
         return (int) (v * density);
+    }
+
+    /** Instagram's native (IGDS) colour for {@code attr}, so the screen tracks their light/dark theme.
+     *  Falls back to {@code fallback} if the attr can't be resolved on this build — never crashes. */
+    private static int themed(String attr, int fallback) {
+        try {
+            return UI.getThemedColour(attr);
+        } catch (Throwable t) {
+            return fallback;
+        }
     }
 
     /** Loads tile thumbnails off the main thread, caches them, and never throws — a failed fetch
