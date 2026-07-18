@@ -142,6 +142,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
     }
 
+    public static boolean disableSwipeToCreate() {
+        return SharedPref.getBooleanPref(Settings.DISABLE_SWIPE_TO_CREATE) && SettingsStatus.disableSwipeToCreate;
+    }
+
     public static boolean makeEphemeralMediaPermanent() {
         return SharedPref.getBooleanPref(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
     }

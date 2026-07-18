@@ -56,6 +56,8 @@
     <string name="piko_disable_reels_scrolling_desc">"Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel.
 
 Note: On a clean install, the \'Tip\' animation may appear but will stop on its own after a few seconds."</string>
+    <string name="piko_disable_swipe_to_create">Disable swipe to create</string>
+    <string name="piko_disable_swipe_to_create_desc">Prevents opening the creation screen by swiping right on the home tab.</string>
     <string name="piko_hide_stories_tray">Hide stories tray</string>
     <string name="piko_hide_stories_tray_desc">Hide stories tray from main feed</string>
     <string name="piko_hide_notes_tray">Hide notes tray</string>
