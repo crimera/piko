@@ -42,9 +42,9 @@ public class DeletedMessagesActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Instagram is a portrait-only app; lock this screen to portrait so it doesn't follow the
-        // device auto-rotate (which looks broken since the layout is built for portrait).
-        setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        // Follow the user's own auto-rotate preference (portrait when they've locked rotation,
+        // landscape when they allow it) instead of forcing portrait — keeps tablets/landscape usable.
+        setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER);
 
         // When launched from compose-bar button, filter to that thread only.
         // When launched from Piko settings, show all deleted messages.

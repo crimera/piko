@@ -89,16 +89,25 @@ public class SavedMessagesHook {
 
     /** Opens the deleted-messages screen for the current thread (or all if unknown). */
     public static void openDeletedMessages(Context ctx) {
+        openDeletedMessages(ctx, true);
+    }
+
+    /**
+     * Opens the deleted-messages screen.
+     * @param scopeToCurrentThread when false (Piko Settings entry point), always shows all
+     * chats, ignoring any stale current-thread state left over from the last opened DM.
+     */
+    public static void openDeletedMessages(Context ctx, boolean scopeToCurrentThread) {
         try {
             if (ctx == null) ctx = PikoUtils.getContext();
             if (ctx == null) return;
-            String openThreadId = resolveOpenThreadId();
+            String openThreadId = scopeToCurrentThread ? resolveOpenThreadId() : null;
             Intent intent = new Intent(ctx, DeletedMessagesActivity.class);
             if (openThreadId != null && !openThreadId.isEmpty()) {
                 intent.putExtra("thread_id", openThreadId);
-            }
-            if (sCurrentThreadTitle != null && !sCurrentThreadTitle.isEmpty()) {
-                intent.putExtra("thread_title", sCurrentThreadTitle);
+                if (sCurrentThreadTitle != null && !sCurrentThreadTitle.isEmpty()) {
+                    intent.putExtra("thread_title", sCurrentThreadTitle);
+                }
             }
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             ctx.startActivity(intent);
