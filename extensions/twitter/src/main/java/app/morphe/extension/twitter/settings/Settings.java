@@ -147,6 +147,4 @@ public class Settings {
     public static final String BACKUP_SECTION = "backup_section";
     public static final String NATIVE_SECTION = "native_section";
     public static final String READER_MODE_KEY = "readerMode";
-
-    public static final BooleanSetting SINGLE_PAGE_SETTINGS = new BooleanSetting("single_page_settings", false);
 }

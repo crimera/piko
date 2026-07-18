@@ -8,15 +8,17 @@ package app.morphe.extension.twitter.settings;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.Fragment;
-import android.app.FragmentTransaction;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.Window;
+
 import androidx.appcompat.widget.Toolbar;
 
 import app.morphe.extension.shared.Logger;
@@ -35,7 +37,18 @@ public class ActivityHook {
     private static final String AUTHORIZE_ACTIVITY_CLASS = "com.twitter.android.AuthorizeAppActivity";
     private static final String EXTRA_PIKO = "piko";
     private static final String EXTRA_PIKO_SETTINGS = EXTRA_PIKO + "_settings";
+    public static final String EXTRA_SETTINGS_SEARCH_TARGET_KEY = EXTRA_PIKO + "_settings_search_target_key";
+    public static final String EXTRA_SETTINGS_SEARCH_TARGET_TITLE = EXTRA_PIKO + "_settings_search_target_title";
+    public static final String EXTRA_SETTINGS_SEARCH_TARGET_SUMMARY = EXTRA_PIKO + "_settings_search_target_summary";
     private static final String PIKO_PREF_KEY = "pref_mod";
+
+    public static Context getPreferenceContext(Context context) {
+        String theme = app.morphe.extension.twitter.Utils.getTheme();
+        int style = ("dark".equals(theme) || "dim".equals(theme))
+                ? android.R.style.Theme_Material_NoActionBar
+                : android.R.style.Theme_Material_Light_NoActionBar;
+        return new ContextThemeWrapper(context, style);
+    }
 
     public static boolean create(Activity act) {
         Intent intent = act.getIntent();
@@ -84,6 +97,12 @@ public class ActivityHook {
         return true;
     }
 
+    static void clearToolbarIfOwnedBy(Toolbar candidate) {
+        if (toolbar == candidate) {
+            toolbar = null;
+        }
+    }
+
     public static void startFragment(Activity act, String activity_name, Fragment fragment, boolean addToBackStack) {
         act.setContentView(ResourceUtils.getIdentifier(ResourceType.LAYOUT, "preference_fragment_activity"));
         toolbar = act.findViewById(ResourceUtils.getIdentifier(ResourceType.ID, "toolbar"));
@@ -91,8 +110,13 @@ public class ActivityHook {
         toolbar.setTitle(getTitle(activity_name));
         toolbar.setNavigationOnClickListener(view -> act.onBackPressed());
 
+        int fragmentContainerId = ResourceUtils.getIdentifier(ResourceType.ID, "fragment_container");
+        if (EXTRA_PIKO_SETTINGS.equals(activity_name)) {
+            SettingsSearchUIController.install(act, toolbar, fragmentContainerId);
+        }
+
         FragmentTransaction transaction = act.getFragmentManager().beginTransaction().replace(
-                ResourceUtils.getIdentifier(ResourceType.ID, "fragment_container"), fragment);
+                fragmentContainerId, fragment);
         if (addToBackStack) {
             transaction.addToBackStack(null);
         }
@@ -100,18 +124,14 @@ public class ActivityHook {
     }
 
     private static String getTitle(String activity_name){
+        if (activity_name == null) {
+            return ResourceUtils.getString("piko_title_settings");
+        }
+        String sectionTitle = ScreenBuilder.getSectionTitleResourceName(activity_name);
+        if (sectionTitle != null) {
+            return ResourceUtils.getString(sectionTitle);
+        }
         String toolbarText = switch (activity_name) {
-            case Settings.PREMIUM_SECTION -> "piko_title_premium";
-            case Settings.DOWNLOAD_SECTION -> "piko_title_download";
-            case Settings.FLAGS_SECTION -> "piko_title_feature_flags";
-            case Settings.ADS_SECTION -> "piko_title_ads";
-            case Settings.MISC_SECTION -> "piko_title_misc";
-            case Settings.CUSTOMISE_SECTION -> "piko_title_customisation";
-            case Settings.FONT_SECTION -> "piko_title_font";
-            case Settings.TIMELINE_SECTION -> "piko_title_timeline";
-            case Settings.BACKUP_SECTION -> "piko_title_backup";
-            case Settings.NATIVE_SECTION -> "piko_title_native";
-            case Settings.LOGGING_SECTION -> "piko_title_logging";
             case Settings.READER_MODE_KEY -> "piko_title_native_reader_mode";
             case Settings.CHANGE_APP_ICON -> "piko_pref_customisation_change_app_icon";
             case Settings.EXPORT_LOGIN_TOKEN -> "piko_pref_export_login_token";
