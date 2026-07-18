@@ -8,6 +8,7 @@ package app.morphe.extension.instagram.settings.preference.widgets;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.preference.Preference;
 import android.util.AttributeSet;
 import android.view.View;
@@ -81,6 +82,12 @@ public class ButtonPref extends Preference {
                     } else if (key.equals("piko_download_id_mapping")) {
                         DownloadMapping.downloadMapping();
 
+                    } else if (key.equals("piko_view_saved_instants")) {
+                        Intent intent = new Intent(context,
+                                app.morphe.extension.instagram.patches.instants.InstantsVaultActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        context.startActivity(intent);
+
                     } else if (isFragmentNavigation(key)) {
                         FragmentHook.startFragment(key);
 
@@ -146,7 +153,8 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_export_experiment_list")
                 || key.equals("piko_export_experiment_mappings")
                 || key.equals("piko_download_id_mapping")
-                || key.equals("piko_rec_flags_refresh_file")));
+                || key.equals("piko_rec_flags_refresh_file")
+                || key.equals("piko_view_saved_instants")));
     }
 
     private static boolean hasPressedHighlight(String key) {
@@ -193,6 +201,9 @@ public class ButtonPref extends Preference {
         }
         if(key.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)){
             return UI.DRAWABLE_SHARE_TO_REEL;
+        }
+        if(key.equals(Constants.PIKO_FRAGMENT_INSTANTS)){
+            return UI.DRAWABLE_COLLECTIONS_ICON;
         }
         return null;
     }

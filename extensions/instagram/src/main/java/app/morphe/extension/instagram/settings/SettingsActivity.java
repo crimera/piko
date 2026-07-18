@@ -274,6 +274,8 @@ public class SettingsActivity extends Activity {
             } else if (fragment_name.equals(Constants.PIKO_FRAGMENT_REC_FLAGS)) {
                 preferenceManager.setSharedPreferencesName(Constants.REC_FLAGS);
                 screenBuilder.buildRecommendedFlagsSection();
+            } else if (fragment_name.equals(Constants.PIKO_FRAGMENT_INSTANTS)) {
+                screenBuilder.buildInstantsSection();
             }
 
             setPreferenceScreen(screen);

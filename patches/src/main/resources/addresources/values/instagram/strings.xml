@@ -321,4 +321,19 @@
     <string name="piko_filter_story_minimum_item_count_desc">Stories having less than x items will be hidden (default 1)</string>
     <string name="piko_filter_story_maximum_item_count">Maximum story items</string>
     <string name="piko_filter_story_maximum_item_count_desc">Stories having more than x items will be hidden (default 9999)</string>
+
+    <!-- Save Instants -->
+    <string name="piko_instants_download">Save Instants</string>
+    <string name="piko_instants_download_desc">Capture view-once Instants as you view them, so you can re-view and download them later from “View saved Instants”.</string>
+    <string name="piko_view_saved_instants">View saved Instants</string>
+    <string name="piko_instants_vault_empty">No saved Instants yet. Open some Instants with capture enabled and they\'ll appear here.</string>
+    <string name="piko_media_not_available">Media link not available.</string>
+    <string name="piko_media_photo">Photo</string>
+    <string name="piko_media_video">Video</string>
+    <string name="piko_media_unknown">Unknown</string>
+    <string name="piko_delete_saved_confirm">Remove this saved Instant?</string>
+    <string name="piko_delete">Delete</string>
+    <string name="piko_clear_all">Clear all</string>
+    <string name="piko_clear_all_confirm">Remove all saved Instants?</string>
+    <string name="piko_instants_title">Instants</string>
 </resources>

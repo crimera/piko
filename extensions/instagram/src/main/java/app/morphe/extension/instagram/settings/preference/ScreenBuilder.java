@@ -460,6 +460,7 @@ public class ScreenBuilder {
         if (!(SettingsStatus.miscSection())) return;
 
         // PreferenceCategory category= addCategory(str("piko_category_misc"));
+        // Instants controls moved to their own screen (buildInstantsSection).
         if (MaterialYouTheme.isAmoledAvailable()) {
             addPreference(
                     helper.switchPreference(
@@ -645,6 +646,25 @@ public class ScreenBuilder {
                             str("piko_remove_empty_bottom_space"),
                             "",
                             Settings.REMOVE_EMPTY_BOTTOM_SPACE
+                    )
+            );
+        }
+    }
+
+    public void buildInstantsSection() {
+        if (SettingsStatus.instantsDownload) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_instants_download"),
+                            str("piko_instants_download_desc"),
+                            Settings.INSTANTS_DOWNLOAD
+                    )
+            );
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_view_saved_instants"),
+                            "",
+                            "piko_view_saved_instants"
                     )
             );
         }
@@ -1015,6 +1035,16 @@ public class ScreenBuilder {
                             str("piko_category_download_media"),
                             "",
                             Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA
+                    )
+            );
+        }
+
+        if (SettingsStatus.instantsDownload){
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_instants_title"),
+                            "",
+                            Constants.PIKO_FRAGMENT_INSTANTS
                     )
             );
         }
