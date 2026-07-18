@@ -9,15 +9,12 @@ package app.crimera.patches.instagram.misc.theme
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.morphe.patcher.patch.ResourcePatchContext
 import app.morphe.patcher.patch.resourcePatch
-import app.morphe.patcher.patch.stringOption
+import app.morphe.patcher.patch.booleanOption
 import app.morphe.util.findElementByAttributeValueOrThrow
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import java.io.FileWriter
 import java.nio.file.Files
-
-private const val THEME_AMOLED = "amoled"
-private const val THEME_MATERIAL = "material"
 
 @Suppress("unused")
 val themePatch =
@@ -28,37 +25,59 @@ val themePatch =
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
-        val theme by stringOption(
-            key = "theme",
-            default = THEME_MATERIAL,
-            values =
-                mapOf(
-                    "Material You" to THEME_MATERIAL,
-                    "AMOLED" to THEME_AMOLED,
-                ),
-            title = "Instagram theme",
-            description =
-                "Which theme to bake in at patch time.\n" +
-                    "\n" +
-                    "• $THEME_MATERIAL — Material You dynamic colours; follows the device's " +
-                    "light/dark setting. (default)\n" +
-                    "• $THEME_AMOLED — pure-black AMOLED.\n" +
-                    "\n" +
-                    "Note: '$THEME_MATERIAL' themes in-app surfaces only. A few server-driven " +
-                    "pages (notifications, DM inbox, About-this-account) and full-screen " +
-                    "media/Reels keep Instagram's own colours in both light and dark mode.",
-            required = true,
-        ) {
-            it?.lowercase() in setOf(THEME_MATERIAL, THEME_AMOLED)
-        }
+        val amoled by booleanOption(
+            key = "amoled",
+            default = false,
+            title = "AMOLED (pure black)",
+            description = "Apply a pure-black AMOLED theme. When off, the Material You " +
+                "dynamic theme is applied, following the device's light/dark setting. " +
+                "Note: a few server-driven pages (notifications, DM inbox, " +
+                "About-this-account) and full-screen media/Reels keep Instagram's own " +
+                "colours in both modes.",
+        )
 
         execute {
-            when (theme!!.lowercase()) {
-                THEME_MATERIAL -> applyMaterialYouTheme()
-                THEME_AMOLED -> applyAmoledTheme()
-            }
+            forceWhiteOnMediaChrome()
+            if (amoled == true) applyAmoledTheme() else applyMaterialYouTheme()
         }
     }
+
+// On-media chrome — the feed post header (username / subtitle / follow / ⋯ menu),
+// "Watch again" and similar labels drawn over photos/video — resolves through
+// igds_color_primary_text_on_media / _icon_on_media / _primary_button_on_media,
+// which all point at abc_decor_view_status_guard_light. That leaf is ALSO the dark
+// app surface (igds_color_primary_background), so it can't be recoloured white
+// (that turns the whole app light in dark mode). Instead repoint the on-media
+// attributes themselves straight to white, leaving the shared surface leaf intact.
+// On-media chrome sits over media (arbitrary/dark), so white is correct in every
+// theme. Guarded so a missing/undecoded styles.xml can never fail the build.
+private val onMediaChromeAttrs =
+    setOf(
+        "igds_color_primary_text_on_media",
+        "igds_color_icon_on_media",
+        "igds_color_primary_button_on_media",
+    )
+
+private fun ResourcePatchContext.forceWhiteOnMediaChrome() {
+    listOf(
+        "res/values/styles.xml",
+        "res/values-night/styles.xml",
+    ).forEach { path ->
+        try {
+            if (!get(path).exists()) return@forEach
+            document(path).use { document ->
+                val items = document.getElementsByTagName("item")
+                for (index in 0 until items.length) {
+                    val item = items.item(index) as? Element ?: continue
+                    if (onMediaChromeAttrs.contains(item.getAttribute("name"))) {
+                        item.textContent = "@color/bds_white"
+                    }
+                }
+            }
+        } catch (_: Exception) {
+        }
+    }
+}
 
 private fun ResourcePatchContext.applyAmoledTheme() {
     val nightOverrides =
