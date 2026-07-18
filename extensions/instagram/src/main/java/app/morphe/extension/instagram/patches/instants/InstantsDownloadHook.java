@@ -130,8 +130,6 @@ public class InstantsDownloadHook {
             String userId = safeStr(() -> md.getUserData().getUserId());
 
             db.insertOrIgnore(id, username, userId, imageUrl, videoUrl, isVideo);
-            Logger.printException(() -> "[piko] instants capture: saved "
-                    + (isVideo ? "video" : "photo") + " from " + username);
         } catch (Throwable t) {
             Logger.printException(() -> "instants capture: captureMedia failed", t);
         }
