@@ -1,3 +1,22 @@
+## [3.8.0-dev.5](https://github.com/crimera/piko/compare/v3.8.0-dev.4...v3.8.0-dev.5) (2026-07-19)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** match piko settings background to amoled patch ([#1543](https://github.com/crimera/piko/issues/1543)) ([56003dc](https://github.com/crimera/piko/commit/56003dc4b68e6969e208570c45b583bcf709ceb3))
+* **instagram:** preserve settings fragment on recreation ([#1546](https://github.com/crimera/piko/issues/1546)) ([f57ddcc](https://github.com/crimera/piko/commit/f57ddcc555dd487f57d959e5adc625f0f15ed80c))
+* **instagram:** Refine piko settings title styling ([#1534](https://github.com/crimera/piko/issues/1534)) ([ce69be6](https://github.com/crimera/piko/commit/ce69be69e8aea7aee04bdf00db5a413bbb849b2f))
+* **Instagram:** Refresh localized download folder path ([#1537](https://github.com/crimera/piko/issues/1537)) ([72ce666](https://github.com/crimera/piko/commit/72ce66602c601a2e1b600367bd04430419dadc59))
+* **instagram:** restore native off switch colors ([#1533](https://github.com/crimera/piko/issues/1533)) ([71b0b00](https://github.com/crimera/piko/commit/71b0b007096756e1c801c14a1e8c21e2f7cada4a))
+* **Twitter:** Fix high resolution image url ([5d07767](https://github.com/crimera/piko/commit/5d07767458b387c85448801851ab4d2de01caf12))
+* **Twitter:** Fix inverted number round off ([c0a04aa](https://github.com/crimera/piko/commit/c0a04aac74604e690cacd8925c8bd9f4d13a4664))
+* **Twitter:** Fix open supported links activity ([8a1db76](https://github.com/crimera/piko/commit/8a1db76b9c9109db02ee4278b5a6891e5cc2b246))
+
+### ✨ New Features
+
+* **instagram:** Disable swipe to create ([#1539](https://github.com/crimera/piko/issues/1539)) ([eaea2e9](https://github.com/crimera/piko/commit/eaea2e9db2db929409247c4a8b0ec865f13e087b))
+* **Twitter:** Add Search Piko settings ([#1516](https://github.com/crimera/piko/issues/1516)) ([fed4f51](https://github.com/crimera/piko/commit/fed4f51e3b88b4f7349af8c13a3ea61ecebb4c7c))
+* **Twitter:** Added new download dialog box ([9fca347](https://github.com/crimera/piko/commit/9fca347fc14da4d95c8c8a1a74fc691f1481077a))
+
 ## [3.8.0-dev.4](https://github.com/crimera/piko/compare/v3.8.0-dev.3...v3.8.0-dev.4) (2026-07-12)
 
 ### 🐛 Bug Fixes

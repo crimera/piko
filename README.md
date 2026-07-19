@@ -66,7 +66,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.8.0-dev.4](https://github.com/crimera/piko/releases/tag/v3.8.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;127 patches total
+> **[v3.8.0-dev.5](https://github.com/crimera/piko/releases/tag/v3.8.0-dev.5)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;128 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;74 patches</summary>
 <br>
@@ -156,7 +156,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;53 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;54 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -186,6 +186,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Disable screenshot detection](#disable-screenshot-detection) | Disables screenshots detection in DM |  |
 | [Disable stories](#disable-stories) |  |  |
 | [Disable story flipping](#disable-story-flipping) | Disable automatic flipping/moving to next story |  |
+| [Disable swipe to create](#disable-swipe-to-create) | Prevents opening the creation screen by swiping right on the home tab. |  |
 | [Disable typing status](#disable-typing-status) |  |  |
 | [Disable video autoplay](#disable-video-autoplay) |  |  |
 | [Download media](#download-media) | Adds ability to download posts, reels, stories and highlights |  |
