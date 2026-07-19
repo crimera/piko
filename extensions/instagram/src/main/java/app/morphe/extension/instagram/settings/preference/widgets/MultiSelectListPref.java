@@ -59,7 +59,7 @@ public class MultiSelectListPref extends MultiSelectListPreference {
         }
         else if (key == Settings.ACTION_BAR_CHAT.key) {
             entries = ResourceUtils.getStringArray("piko_array_action_bar_chat");
-            entriesValues = ResourceUtils.getStringArray("piko_array_action_bar_user_profile_val");
+            entriesValues = ResourceUtils.getStringArray("piko_array_action_bar_chat_val");
         }
         else if (key == Settings.ACTION_BAR_INBOX.key) {
             entries = ResourceUtils.getStringArray("piko_array_action_bar_inbox");

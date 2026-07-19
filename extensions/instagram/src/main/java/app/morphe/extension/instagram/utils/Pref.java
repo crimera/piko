@@ -7,6 +7,7 @@
 
 package app.morphe.extension.instagram.utils;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import app.morphe.extension.instagram.settings.Settings;
@@ -294,7 +295,12 @@ public class Pref {
     }
 
     public static Set<String> chatActionBarButtons() {
-        return SharedPref.getSetPref(Settings.ACTION_BAR_CHAT);
+        Set<String> buttons = new HashSet<>(SharedPref.getSetPref(Settings.ACTION_BAR_CHAT));
+        if (buttons.remove(Constants.AB_PROFILE_INFO_ICON)) {
+            buttons.add(Constants.AB_GHOST_MODE_ICON);
+            SharedPref.setSetPref(Settings.ACTION_BAR_CHAT.key, buttons);
+        }
+        return buttons;
     }
 
     public static Set<String> inboxActionBarButtons() {
