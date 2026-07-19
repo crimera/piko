@@ -58,7 +58,13 @@ public final class InstagramPreferenceStyle {
     }
 
     public static int pressedBackgroundColor() {
-        return UI.getThemedColour("igds_color_secondary_background");
+        int secondaryBackground = UI.getThemedColour("igds_color_secondary_background");
+
+        if (!UI.isDarkMode() || backgroundColor() == Color.BLACK) {
+            return secondaryBackground;
+        }
+
+        return ResourceUtils.getColor("igds_prism_gray_09", secondaryBackground);
     }
 
     public static int primaryTextColor() {
