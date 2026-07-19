@@ -11,6 +11,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
@@ -59,6 +60,10 @@ public class UI {
         int attrId = ResourceUtils.getAttrIdentifier(attrName);
         boolean resolved = context.getTheme().resolveAttribute(attrId, typedValue, true);
         return context.getColor(typedValue.resourceId);
+    }
+
+    public static boolean isDarkMode() {
+        return Color.luminance(getThemedColour("igds_color_primary_background")) < 0.5;
     }
 
     public static void setThemedIcon(ImageView imageView, String drawableAttr) {

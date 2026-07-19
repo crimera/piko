@@ -8,7 +8,6 @@ package app.morphe.extension.instagram.settings.preference.widgets;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -51,7 +50,11 @@ public final class InstagramPreferenceStyle {
     }
 
     public static int backgroundColor() {
-        return UI.getThemedColour("igds_color_primary_background");
+        int primaryBackground = UI.getThemedColour("igds_color_primary_background");
+
+        return UI.isDarkMode()
+                ? ResourceUtils.getColor("igds_prism_black", primaryBackground)
+                : primaryBackground;
     }
 
     public static int pressedBackgroundColor() {
