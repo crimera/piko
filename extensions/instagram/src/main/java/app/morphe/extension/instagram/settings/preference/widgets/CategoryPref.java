@@ -37,8 +37,8 @@ public class CategoryPref extends PreferenceCategory {
     @Override
     protected View onCreateView(ViewGroup parent) {
         TextView title = new TextView(getContext());
-        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        title.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
+        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         applyCategoryStyle(title);
         title.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,

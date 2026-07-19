@@ -17,6 +17,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
@@ -27,6 +28,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.function.Supplier;
+
+import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
@@ -47,10 +51,12 @@ public class SettingsActivity extends Activity {
         super.onCreate(bundle);
 
         String displayTitle = null;
+        String fragmentName = null;
 
         // Extract both variables safely from the incoming intent bundle
         if (getIntent() != null && getIntent().getExtras() != null) {
             displayTitle = str(getIntent().getStringExtra(Constants.PIKO_FRAGMENT_TITLE));
+            fragmentName = getIntent().getStringExtra(Constants.PIKO_FRAGMENT_NAME);
         }
 
         // Fallback to default localized string if no custom title was provided in the intent
@@ -58,7 +64,8 @@ public class SettingsActivity extends Activity {
             displayTitle = str("piko_title_settings");
         }
 
-        createLayout( displayTitle);
+        boolean isRootSettings = fragmentName == null || Constants.PIKO_FRAGMENT_SETTINGS.equals(fragmentName);
+        createLayout(displayTitle, isRootSettings);
 
         SettingsFragment fragment = new SettingsFragment();
         if (getIntent() != null && getIntent().getExtras() != null) {
@@ -69,7 +76,7 @@ public class SettingsActivity extends Activity {
     }
 
     @SuppressLint("ResourceType")
-    private void createLayout(String displayTitle) {
+    private void createLayout(String displayTitle, boolean isRootSettings) {
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
@@ -100,12 +107,23 @@ public class SettingsActivity extends Activity {
 
         titleTextView = new TextView(this);
         titleTextView.setText(displayTitle); // Dynamically bound from intent data
-        titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26);
+        int titleTextSize = isRootSettings ? 25 : 20;
+        titleTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, titleTextSize);
         titleTextView.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
         titleTextView.setIncludeFontPadding(false);
+        titleTextView.setMaxLines(1);
+        if (!isRootSettings) {
+            titleTextView.setAutoSizeTextTypeUniformWithConfiguration(
+                    18,
+                    20,
+                    1,
+                    TypedValue.COMPLEX_UNIT_SP
+            );
+        }
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+                0,
                 LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
+                1.0f
         );
         titleParams.gravity = android.view.Gravity.CENTER_VERTICAL;
         titleParams.leftMargin = InstagramPreferenceStyle.dp(this, 7);
@@ -206,6 +224,25 @@ public class SettingsActivity extends Activity {
     public static class SettingsFragment extends PreferenceFragment {
 
         Context context;
+
+        private void refreshPreferenceSummary(
+                String key,
+                Supplier<CharSequence> summaryProvider
+        ) {
+            Preference preference = findPreference(key);
+            if (preference != null) {
+                preference.setSummary(summaryProvider.get());
+            }
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            refreshPreferenceSummary(
+                    "piko_download_set_path",
+                    StorageUtils::getCustomPathForDisplay
+            );
+        }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {

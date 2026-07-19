@@ -507,8 +507,8 @@ public final class InstagramPreferenceStyle {
             int onTrack = UI.getThemedColour("igds_color_primary_button");
             int onThumb = backgroundColor();
 
-            int offTrack = UI.getThemedColour("igds_color_creation_tools_grey_07");
-            int offThumb = onThumb;
+            int offTrack = ResourceUtils.getColor("material_unselected_track", pressedBackgroundColor());
+            int offThumb = ResourceUtils.getColor("checkbox_unchecked_enabled", secondaryTextColor());
 
             if (!enabled) {
                 onTrack = UI.getThemedColour("igds_color_divider");
@@ -541,7 +541,7 @@ public final class InstagramPreferenceStyle {
 
             int trackColor = blend(offTrack, onTrack, colorProgress);
             int thumbColor = blend(offThumb, onThumb, colorProgress);
-            int stroke = trackColor;
+            int stroke = blend(offThumb, onTrack, colorProgress);
 
             float strokeWidth = dp(getContext(), 2);
             float radius = getHeight() / 2f;
