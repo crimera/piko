@@ -8,11 +8,9 @@ package app.morphe.extension.instagram.patches.instants;
 
 import android.content.Context;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import app.morphe.extension.crimera.SharedPref;
 import app.morphe.extension.instagram.db.PikoInstantsDb;
+import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.shared.Logger;
@@ -88,16 +86,18 @@ public class InstantsDownloadHook {
         }
     }
 
-    /** Reads the Media backing the instant currently shown, via the live VM. Null on any mismatch. */
+    /** Reads the Media backing the instant currently shown, via the live VM, using the repo's
+     *  {@link Entity} helper (getField for field steps, getMethod for the calls) rather than raw
+     *  reflection. Null on any mismatch. */
     private static Object currentInstantMedia(Object vm) {
         try {
-            Object stateHolder = declaredField(vm, NAMES.vmStateField);                // LX/EuU
+            Object stateHolder = new Entity(vm).getField(NAMES.vmStateField);          // LX/EuU
             if (stateHolder == null) return null;
-            Object state = publicMethod(stateHolder, "getValue").invoke(stateHolder);  // LX/5VB
+            Object state = new Entity(stateHolder).getMethod("getValue");              // LX/5VB
             if (state == null) return null;
-            Object item = publicMethod(state, NAMES.stateItemMethod).invoke(state);    // LX/5Xq
+            Object item = new Entity(state).getMethod(NAMES.stateItemMethod);          // LX/5Xq
             if (item == null) return null;
-            return declaredField(item, NAMES.itemMediaField);                         // Media
+            return new Entity(item).getField(NAMES.itemMediaField);                    // Media
         } catch (Throwable t) {
             // Off-cycle calls (VM alive but no current item) land here — expected, keep quiet.
             return null;
@@ -146,17 +146,5 @@ public class InstantsDownloadHook {
 
     private static boolean safeBool(BoolCall c) {
         try { return c.get(); } catch (Throwable t) { return false; }
-    }
-
-    private static Object declaredField(Object obj, String name) throws Exception {
-        Field f = obj.getClass().getDeclaredField(name);
-        f.setAccessible(true);
-        return f.get(obj);
-    }
-
-    private static Method publicMethod(Object obj, String name) throws Exception {
-        Method m = obj.getClass().getMethod(name);
-        m.setAccessible(true);
-        return m;
     }
 }
