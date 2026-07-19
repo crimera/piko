@@ -46,7 +46,7 @@ public class ExtMediaEntities extends Debug{
 
     public String getHighResImageUrl()
             throws Exception {
-        return this.getImageUrl() + "?name=original&format=jpg";
+        return this.getImageUrl() + "?name=orig&format=jpg";
     }
 
     public ArrayList<Media> getVideos() throws Exception {
