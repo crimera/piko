@@ -13,7 +13,9 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import java.util.Collections;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
@@ -31,6 +33,14 @@ import com.instagram.common.session.UserSession;
 
 public class ActionBarPatch {
 
+    private static final Set<ImageView> GHOST_MODE_ICONS = Collections.newSetFromMap(new WeakHashMap<>());
+
+    private static void updateGhostModeIcons(boolean enabled) {
+        String icon = enabled ? UI.DRAWABLE_EYE_STROKE_ICON : UI.DRAWABLE_EYE_ICON;
+        for (ImageView imageView : GHOST_MODE_ICONS) {
+            UI.setThemedIcon(imageView, icon);
+        }
+    }
 
     private static void ghostModeToggle(ViewGroup viewGroup) throws Exception {
         if(SettingsStatus.ghostSection()){
@@ -38,14 +48,14 @@ public class ActionBarPatch {
 
             String iconStr = ghostModeToggle ? UI.DRAWABLE_EYE_STROKE_ICON:UI.DRAWABLE_EYE_ICON;
             ImageView imageView = UI.addImageViewToViewGroup(viewGroup, iconStr, null);
+            GHOST_MODE_ICONS.add(imageView);
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     try {
                         boolean ghostModeToggle= !Pref.getTurnOnAllGhostModes();
-                        String iconStr = ghostModeToggle ? UI.DRAWABLE_EYE_STROKE_ICON:UI.DRAWABLE_EYE_ICON;
                         Pref.setTurnOnAllGhostModes(ghostModeToggle);
-                        UI.setThemedIcon(imageView,iconStr);
+                        updateGhostModeIcons(ghostModeToggle);
 
                         String toastStr = ghostModeToggle ? str("piko_ghost_modes_on") : str("piko_ghost_modes_default");
                         Utils.showToastShort(toastStr);
