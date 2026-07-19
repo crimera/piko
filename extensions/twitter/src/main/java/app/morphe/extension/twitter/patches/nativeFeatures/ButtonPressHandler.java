@@ -15,6 +15,7 @@ import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderMode
 import app.morphe.extension.twitter.patches.nativeFeatures.shareMenu.BottomSheetBuilder;
 import app.morphe.extension.twitter.patches.links.ExternalDownloader;
 import app.morphe.extension.twitter.Pref;
+import app.morphe.extension.twitter.entity.Tweet;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.crimera.ObjectBrowser;
@@ -49,7 +50,7 @@ public class ButtonPressHandler {
                 NativeTranslator.translate(context, tweetObject);
 
             } else if (buttonCheck(buttonPressed, "BrowseObject")) {
-                ObjectBrowser.browseObject(context, tweetObject);
+                ObjectBrowser.browseObject(context, new Tweet(tweetObject));
 
             } else if (buttonCheck(buttonPressed, "TwitterShare")) {
                 BottomSheetBuilder.showShareSheet(context, tweetObject);

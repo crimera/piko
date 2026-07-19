@@ -62,7 +62,7 @@ public class BottomSheetBuilder {
         }
 
         if(Pref.pikoDebug()){
-            actions.add(new BottomSheetAction<>("ic_vector_flask_stroke",str("piko_debug"),t -> ObjectBrowser.browseObject(context, tweetObject)));
+            actions.add(new BottomSheetAction<>("ic_vector_flask_stroke",str("piko_debug"),t -> ObjectBrowser.browseObject(context, tweet)));
         }
 
         Collections.reverse(actions);
