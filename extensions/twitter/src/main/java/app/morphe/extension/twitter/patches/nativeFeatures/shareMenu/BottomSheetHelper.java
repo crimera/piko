@@ -25,6 +25,7 @@ import java.util.List;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ui.SheetBottomDialog;
+import app.morphe.extension.twitter.Utils;
 /**
  * Builds and displays a styled bottom sheet on top of the existing
  * {@link SheetBottomDialog} infrastructure — no new dependencies required.
@@ -77,13 +78,6 @@ public final class BottomSheetHelper {
 
     private BottomSheetHelper() { /* utility class */ }
 
-    private static int resolveColor(@NonNull Context context, String attrName) {
-        TypedValue tv = new TypedValue();
-        int attrId = ResourceUtils.getIdentifier(ResourceType.ATTR, attrName);
-        context.getTheme().resolveAttribute(attrId, tv, true);
-        return tv.data;
-    }
-
     // ------------------------------------------------------------------
     // Public API
     // ------------------------------------------------------------------
@@ -109,7 +103,7 @@ public final class BottomSheetHelper {
         //    This gives us the rounded background + drag handle for free.
 
         SheetBottomDialog.DraggableLinearLayout mainLayout =
-                SheetBottomDialog.createMainLayout(context, resolveColor(context,"coreColorAppBackground"));
+                SheetBottomDialog.createMainLayout(context, Utils.resolveColor(context, "coreColorAppBackground"));
 
         // 2. Optional title row
         if (title != null && !title.trim().isEmpty()) {
@@ -155,7 +149,7 @@ public final class BottomSheetHelper {
         tv.setText(title);
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, TITLE_TEXT_SP);
         tv.setTypeface(tv.getTypeface(), Typeface.BOLD);
-        tv.setTextColor(resolveColor(context, "textColorPrimary"));
+        tv.setTextColor(Utils.resolveColor(context, "textColorPrimary"));
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -202,7 +196,7 @@ public final class BottomSheetHelper {
         icon.setLayoutParams(iconLp);
         int attrId = ResourceUtils.getIdentifier(ResourceType.DRAWABLE, action.iconRes);
         icon.setImageResource(attrId);
-        icon.setColorFilter(resolveColor(context, "textColorSecondary"));
+        icon.setColorFilter(Utils.resolveColor(context, "textColorSecondary"));
         row.addView(icon);
 
         // Gap between icon and label
@@ -216,7 +210,7 @@ public final class BottomSheetHelper {
                 0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
         label.setText(action.label);
         label.setTextSize(TypedValue.COMPLEX_UNIT_SP, LABEL_TEXT_SP);
-        label.setTextColor(resolveColor(context, "textColorPrimary"));
+        label.setTextColor(Utils.resolveColor(context, "textColorPrimary"));
         row.addView(label);
 
         // Click: dismiss the dialog first, then fire the callback

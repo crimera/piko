@@ -13,11 +13,13 @@ public class Media {
     public final int type;
     public final String url;
     public final String ext;
+    public final String resolution;
 
-    public Media(int type, String url, String ext) {
+    public Media(int type, String url, String ext, String resolution) {
         this.type = type;
         this.url = url;
         this.ext = ext;
+        this.resolution = resolution;
     }
 
     @Override

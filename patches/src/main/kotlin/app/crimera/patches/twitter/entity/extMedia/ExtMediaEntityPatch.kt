@@ -26,14 +26,14 @@ val extMediaEntityPatch =
                     MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint.getFieldName(
                         firstIGetObjectIndex,
                     )
-                ExtMediaHighResVideoFingerprint.changeFirstString(videoInfoFieldName)
+                ExtMediaGetVideosFingerprint.changeFirstString(videoInfoFieldName)
 
                 val secondIGetObjectIndex = indexOfFirstInstruction(firstIGetObjectIndex + 1, Opcode.IGET_OBJECT)
                 val videoVariantsFieldName =
                     MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint.getFieldName(
                         secondIGetObjectIndex,
                     )
-                ExtMediaHighResVideoFingerprint.changeStringAt(1, videoVariantsFieldName)
+                ExtMediaGetVideosFingerprint.changeStringAt(1, videoVariantsFieldName)
             }
 
             // ------------
@@ -48,5 +48,13 @@ val extMediaEntityPatch =
                 )
             ExtMediaGetImageFingerprint.changeFirstString(imageFieldName)
 // ------------
+            val mediaResolutionFieldName =
+                ExtMediaGetSensitiveMediaCategoriesFingerprint.classDef.fields
+                    .first {
+                        it.type ==
+                            MediaResolutionToStringFingerprint.classDef.type
+                    }.name
+
+            ExtMediaHighResolutionFingerprint.changeFirstString(mediaResolutionFieldName)
         }
     }
