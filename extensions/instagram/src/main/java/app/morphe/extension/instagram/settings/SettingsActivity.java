@@ -67,12 +67,14 @@ public class SettingsActivity extends Activity {
         boolean isRootSettings = fragmentName == null || Constants.PIKO_FRAGMENT_SETTINGS.equals(fragmentName);
         createLayout(displayTitle, isRootSettings);
 
-        SettingsFragment fragment = new SettingsFragment();
-        if (getIntent() != null && getIntent().getExtras() != null) {
-            fragment.setArguments(getIntent().getExtras());
-        }
+        if (bundle == null) {
+            SettingsFragment fragment = new SettingsFragment();
+            if (getIntent() != null && getIntent().getExtras() != null) {
+                fragment.setArguments(getIntent().getExtras());
+            }
 
-        getFragmentManager().beginTransaction().replace(1001, fragment).commit();
+            getFragmentManager().beginTransaction().replace(1001, fragment).commit();
+        }
     }
 
     @SuppressLint("ResourceType")
