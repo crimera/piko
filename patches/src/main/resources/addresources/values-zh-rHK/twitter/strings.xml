@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings Search -->
     <!-- Premium Settings -->
     <string name="piko_title_premium">進階版</string>
     <string name="piko_pref_undo_posts">啟用貼文撤銷功能</string>
@@ -223,8 +224,6 @@
     <string name="piko_pref_app_restart_rec">建議重新啟動應用程式</string>
     <string name="piko_dialog_delete_title">刪除</string>
     <string name="piko_dialog_delete_message">刪除%s?</string>
-    <string name="piko_single_page_settings">單一設定頁面</string>
-    <string name="piko_single_page_settings_desc">在單一頁面中查看設定</string>
     <string name="piko_pref_search_type_ahead_users">使用者</string>
     <string name="piko_pref_search_type_ahead_events">活動</string>
     <string name="piko_settings_supported_links">開啟支援的連結</string>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings Search -->
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">启用撤销推文</string>
@@ -216,8 +217,6 @@
     <string name="piko_pref_app_restart_rec">建议更改后重新启动应用</string>
     <string name="piko_dialog_delete_title">删除</string>
     <string name="piko_dialog_delete_message">删除%s?</string>
-    <string name="piko_single_page_settings">单页设置</string>
-    <string name="piko_single_page_settings_desc">在单个页面中查看设置</string>
     <string name="piko_pref_search_type_ahead_users">用户</string>
     <string name="piko_pref_search_type_ahead_events">事件</string>
     <string name="piko_pref_search_type_ahead_ordered_section">订购</string>

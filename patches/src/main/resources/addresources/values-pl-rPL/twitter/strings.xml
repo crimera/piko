@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings Search -->
+    <string name="piko_settings_search_hint">Wyszukaj w ustawieniach Piko</string>
+    <string name="piko_settings_search_clear">Wyczyść pole</string>
+    <string name="piko_settings_search_no_results">Brak wyników dla \"%1$s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Włącz cofanie wpisów</string>
@@ -35,6 +39,7 @@
     <string name="piko_pref_native_downloader_inline_button">Pokaż przycisk pobierania</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Dodaje przycisk pobierania bezpośrednio do paska akcji wpisu</string>
     <string name="piko_pref_native_downloader_alert_title">Pobierz multimedia</string>
+    <string name="piko_video_variants">Warianty filmu</string>
     <string name="piko_pref_native_downloader_download_all">Pobierz wszystko</string>
     <string name="piko_pref_native_downloader_no_media">Nie znaleziono multimediów</string>
     <string name="piko_pref_native_downloader_filename_title">Format nazwy pliku</string>
@@ -234,14 +239,13 @@
     <string name="piko_pref_patch_info">Informacje o modyfikacjach</string>
     <string name="piko_pref_version_info">Informacje o wersjach</string>
     <string name="piko_changelogs_title">Lista zmian</string>
+    <string name="piko_debug">Debugowanie Piko</string>
     <string name="piko_pref_patches">Modyfikacje</string>
     <string name="piko_pref_included">Uwzględniono</string>
     <string name="piko_pref_excluded">Wykluczono</string>
     <string name="piko_pref_app_restart_rec">Zalecany jest restart aplikacji</string>
     <string name="piko_dialog_delete_title">Usuń</string>
     <string name="piko_dialog_delete_message">Usunąć %s?</string>
-    <string name="piko_single_page_settings">Pojedyncza strona ustawień</string>
-    <string name="piko_single_page_settings_desc">Wyświetla wszystkie opcje na jednej liście</string>
     <string name="piko_pref_search_type_ahead_users">Użytkownicy</string>
     <string name="piko_pref_search_type_ahead_events">Wydarzenia</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Sekcja uporządkowana</string>
@@ -380,4 +384,6 @@ Zalecamy zapoznanie się z tym dokumentem przed użyciem funkcji. Zawiera on wa�
     <string name="piko_login_token_import_success_reopen_required">Otwórz ponownie aplikację</string>
     <string name="piko_login_token_import_failed_missing_info">Błąd: brakuje \"username\", \"token\" lub \"secret\"</string>
     <string name="piko_login_token_import_failed_already_exist">Nie udało się dodać konta (może już istnieć)</string>
+    <string name="piko_ok">OK</string>
+    <string name="piko_cancel">Anuluj</string>
 </resources>

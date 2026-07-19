@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings Search -->
+    <string name="piko_settings_search_hint">Rechercher des paramètres de Piko</string>
+    <string name="piko_settings_search_clear">Effacer la saisie</string>
+    <string name="piko_settings_search_no_results">Aucun résultat pour \"%1$s\" </string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Activer l\'annulation des publications</string>
@@ -35,6 +39,7 @@
     <string name="piko_pref_native_downloader_inline_button">Afficher le bouton de téléchargement en ligne</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Ajoute un bouton de téléchargement directement à la barre d\'action de publication</string>
     <string name="piko_pref_native_downloader_alert_title">Télécharger le média</string>
+    <string name="piko_video_variants">Variantes vidéo</string>
     <string name="piko_pref_native_downloader_download_all">Tout télécharger</string>
     <string name="piko_pref_native_downloader_no_media">Aucun média trouvé</string>
     <string name="piko_pref_native_downloader_filename_title">Modèle de nom de fichier</string>
@@ -241,8 +246,6 @@
     <string name="piko_pref_app_restart_rec">Redémarrage de l\'application recommandé</string>
     <string name="piko_dialog_delete_title">Supprimer</string>
     <string name="piko_dialog_delete_message">Supprimer %s?</string>
-    <string name="piko_single_page_settings">Page de paramètres unique</string>
-    <string name="piko_single_page_settings_desc">Afficher les paramètres sur une seule page</string>
     <string name="piko_pref_search_type_ahead_users">Utilisateurs</string>
     <string name="piko_pref_search_type_ahead_events">Événements</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Section ordonnée</string>
@@ -381,4 +384,6 @@ Il est recommandé de la lire avant d’utiliser cette fonctionnalité. Elle con
     <string name="piko_login_token_import_success_reopen_required">Rouvrez l\'application</string>
     <string name="piko_login_token_import_failed_missing_info">Erreur : \"nom d’utilisateur\", \"jeton\" ou \"secret\" est manquant</string>
     <string name="piko_login_token_import_failed_already_exist">Impossible d\'ajouter le compte (il existe peut-être déjà)</string>
+    <string name="piko_ok">OK</string>
+    <string name="piko_cancel">Annuler</string>
 </resources>

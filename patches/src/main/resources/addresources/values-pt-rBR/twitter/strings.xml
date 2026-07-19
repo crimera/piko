@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings Search -->
+    <string name="piko_settings_search_hint">Pesquisar configurações do Piko</string>
+    <string name="piko_settings_search_clear">Limpar entrada</string>
+    <string name="piko_settings_search_no_results">Nenhum resultado encontrado para \"%1$s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Ativar desfazer postagens</string>
@@ -234,14 +238,13 @@
     <string name="piko_pref_patch_info">Informações do patch</string>
     <string name="piko_pref_version_info">Informações da versão</string>
     <string name="piko_changelogs_title">Registro de alterações</string>
+    <string name="piko_debug">Debug do Piko</string>
     <string name="piko_pref_patches">Patches</string>
     <string name="piko_pref_included">Incluído</string>
     <string name="piko_pref_excluded">Excluído</string>
     <string name="piko_pref_app_restart_rec">Recomenda-se reiniciar o aplicativo</string>
     <string name="piko_dialog_delete_title">Apagar</string>
     <string name="piko_dialog_delete_message">Apagar %s?</string>
-    <string name="piko_single_page_settings">Página única de configurações</string>
-    <string name="piko_single_page_settings_desc">Visualizar configurações em uma única página.</string>
     <string name="piko_pref_search_type_ahead_users">Usuários</string>
     <string name="piko_pref_search_type_ahead_events">Eventos</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Seção ordenada</string>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings Search -->
     <!-- Premium Settings -->
     <string name="piko_title_premium">Cài đặt Cao Cấp</string>
     <string name="piko_pref_undo_posts">Cho phép hoàn tác bài đăng</string>
@@ -133,8 +134,6 @@
     <string name="piko_pref_patches">Các tính năng đã vá</string>
     <string name="piko_pref_included">Bao gồm</string>
     <string name="piko_pref_excluded">Không bao gồm</string>
-    <string name="piko_single_page_settings">Cài đặt trên 1 trang</string>
-    <string name="piko_single_page_settings_desc">Xem các cài đặt của patch chỉ 1 trang duy nhất</string>
     <string name="piko_pref_search_type_ahead_users">Người dùng</string>
     <string name="piko_pref_search_type_ahead_events">Sự kiện</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Sắp xếp lựa chọn</string>

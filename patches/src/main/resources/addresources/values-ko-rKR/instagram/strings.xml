@@ -34,7 +34,7 @@
     <string name="piko_view_live_anonymously">라이브 몰래보기</string>
     <string name="piko_disable_typing_status">입력 중 상태 비활성화</string>
     <string name="piko_disable_screenshot_detection">스크린샷 감지 비활성화</string>
-    <string name="piko_view_dm_anonymously">메시지 몰래보기</string>
+    <string name="piko_view_dm_anonymously">다이렉트 메시지 몰래보기</string>
     <string name="piko_turn_on_all_ghost_modes">모든 고스트 모드 켜기</string>
     <string name="piko_ghost_modes_on">고스트 모드: 켜짐</string>
     <string name="piko_ghost_modes_default">고스트 모드: 기본값</string>
@@ -52,10 +52,12 @@
     <string name="piko_disable_reels_scrolling_desc">"인스타그램 릴스에서 무한 스크롤 동작을 비활성화하여 다음 릴스로 넘길 수 없도록 합니다
 
 알림: 앱을 새로 설치한 경우에 'Tip' 애니메이션이 표시될 수 있지만, 몇 초 후에 자동으로 사라집니다"</string>
+    <string name="piko_disable_swipe_to_create">스와이프하여 만들기 비활성화</string>
+    <string name="piko_disable_swipe_to_create_desc">홈 탭에서 오른쪽으로 스와이프하여 만들기 화면이 실행되는 것을 방지합니다</string>
     <string name="piko_hide_stories_tray">스토리 선반 숨기기</string>
     <string name="piko_hide_stories_tray_desc">메인 피드에서 스토리 선반을 숨깁니다</string>
     <string name="piko_hide_notes_tray">메모 선반 숨기기</string>
-    <string name="piko_hide_notes_tray_desc">DM 섹션에서 메모 선반을 숨깁니다</string>
+    <string name="piko_hide_notes_tray_desc">메시지 섹션에서 메모 선반을 숨깁니다</string>
     <string name="piko_hide_group_creation_button_on_sharesheet">공유 시트에서 그룹 만들기 버튼 숨기기</string>
     <string name="piko_disable_double_tap_like_post">게시물 두 번 탭하여 좋아요 비활성화</string>
     <string name="piko_disable_double_tap_like_reel">릴스 두 번 탭하여 좋아요 비활성화</string>
@@ -108,7 +110,7 @@
     <string name="piko_customise_story_ring_size">스토리 링 크기 설정</string>
     <string name="piko_customise_story_ring_size_desc">스토리 링 크기를 백분율로 변경합니다 (기본값: 100)</string>
     <!-- DM Section -->
-    <string name="piko_category_dm">DM</string>
+    <string name="piko_category_dm">메시지</string>
     <string name="piko_unlimited_replays">일시적 미디어를 영구 보관</string>
     <string name="piko_unlimited_replays_desc">1~2 회만 볼 수 있는 미디어를 계속 볼 수 있게 변경합니다</string>
     <string name="piko_enable_mark_chat_as_read">채팅을 읽음으로 표시하는 옵션 활성화</string>
@@ -208,11 +210,11 @@
     <string name="piko_no_internet">인터넷에 연결해 주세요</string>
     <string name="piko_tap_here">여기를 탭하세요 !!</string>
     <!-- Action Bar Section -->
-    <string name="piko_category_action_bar">액션바 사용자 정의</string>
+    <string name="piko_category_action_bar">액션바 아이콘 설정</string>
     <string name="piko_action_bar_main_feed">메인 피드 액션바 아이콘</string>
     <string name="piko_action_bar_user_profile">사용자 프로필 액션바 아이콘</string>
     <string name="piko_action_bar_chat">채팅 액션바 아이콘</string>
-    <string name="piko_action_bar_chat_desc">DM 내부 액션바 아이콘</string>
+    <string name="piko_action_bar_chat_desc">메시지 내부 액션바 아이콘</string>
     <string name="piko_action_bar_inbox">받은 편지함 액션바 아이콘</string>
     <string name="piko_action_bar_button_settings_icon">설정 아이콘</string>
     <string name="piko_action_bar_button_ghost_mode_icon">고스트 모드 아이콘</string>
@@ -272,10 +274,10 @@
     <string name="piko_reel_type_typed_container">유형 지정 컨테이너</string>
     <string name="piko_reel_type_user_reel">사용자 릴</string>
     <string name="piko_filter_story_user_types_to_hide">숨겨질 사용자 유형</string>
-    <string name="piko_user_type_unverified">인증된 사용자</string>
-    <string name="piko_user_type_verified">인증되지 않은 사용자</string>
-    <string name="piko_filter_story_minimum_item_count">최저 스토리 항목</string>
-    <string name="piko_filter_story_minimum_item_count_desc">X 개 미만의 항목이 있는 스토리를 숨깁니다 (기본값: 1)</string>
+    <string name="piko_user_type_unverified">인증되지 않은 사용자</string>
+    <string name="piko_user_type_verified">인증된 사용자</string>
+    <string name="piko_filter_story_minimum_item_count">최소 스토리 항목</string>
+    <string name="piko_filter_story_minimum_item_count_desc">사용자가 설정한 개수 미만의 항목이 있는 스토리를 숨깁니다 (기본값: 1)</string>
     <string name="piko_filter_story_maximum_item_count">최대 스토리 항목</string>
-    <string name="piko_filter_story_maximum_item_count_desc">X 개를 초과하는 항목이 있는 스토리를 숨깁니다 (기본값: 9999)</string>
+    <string name="piko_filter_story_maximum_item_count_desc">사용자가 설정한 개수를 초과하는 항목이 있는 스토리를 숨깁니다 (기본값: 9999)</string>
 </resources>

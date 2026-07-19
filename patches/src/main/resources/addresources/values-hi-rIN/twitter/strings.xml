@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings Search -->
     <!-- Premium Settings -->
     <string name="piko_title_premium">प्रीमियम</string>
     <string name="piko_pref_undo_posts_desc">पोस्ट करने से पहले पोस्ट को अन्डू करने की क्षमता सक्षम करें</string>
