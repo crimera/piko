@@ -17,15 +17,30 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.userprofile.ProfileMoreOption;
 
 public class UserProfileButton {
+    private static boolean isSettingsInActionBar;
+    private static Set userProfileABPref;
+
+    static {
+        userProfileABPref = Pref.userProfileActionBarButtons();
+        if(userProfileABPref.contains(Constants.AB_SETTINGS_ICON)){
+            isSettingsInActionBar = true;
+        } else if(Pref.mainFeedActionBarButtons().contains(Constants.AB_SETTINGS_ICON)){
+            isSettingsInActionBar = true;
+        } else if(Pref.chatActionBarButtons().contains(Constants.AB_SETTINGS_ICON)){
+            isSettingsInActionBar = true;
+        } else if(Pref.inboxActionBarButtons().contains(Constants.AB_SETTINGS_ICON)){
+            isSettingsInActionBar = true;
+        } else{
+            isSettingsInActionBar = false;
+        }
+    }
 
     public static void addButtons(ViewGroup viewGroup, Object object) {
         try {
             ProfileInfo profileInfo = new ProfileInfo(object);
             Boolean isSelfProfile = profileInfo.isSelfProfile();
 
-            Set<String> userProfileABPref = Pref.userProfileActionBarButtons();
-
-            if (!userProfileABPref.contains(Constants.AB_SETTINGS_ICON) && isSelfProfile){
+            if (!isSettingsInActionBar && isSelfProfile){
                 UI.pikoSettingsButton(viewGroup);
             }
             if(!userProfileABPref.contains(Constants.AB_PROFILE_INFO_ICON) && Pref.isMoreOptionsOnProfilePatched()){
