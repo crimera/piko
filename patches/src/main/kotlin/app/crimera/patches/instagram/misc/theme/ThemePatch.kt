@@ -20,8 +20,7 @@ import java.nio.file.Files
 val themePatch =
     resourcePatch(
         name = "Theme",
-        description = "Applies one Instagram theme at patch time.",
-        default = true,
+        description = "Applies one Instagram theme at patch time.",        
     ) {
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
