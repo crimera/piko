@@ -53,15 +53,14 @@ public final class InstagramPreferenceStyle {
      * Native list / multi-select / edit-text preference dialogs build from
      * getContext()'s platform alertDialogTheme. The settings activity is registered
      * with a fixed dark DeviceDefault theme, so without this the dialogs are always
-     * dark. Wrapping the preference's context in a device-appropriate DeviceDefault
-     * theme makes them follow the device's light/dark setting — which matches
-     * Instagram whenever IG's in-app theme follows the device (the "System" default)
-     * or is set to match it. This only selects a platform DIALOG theme by device
-     * night mode; it sets no app colour.
+     * dark. Wrapping the preference's context in a matching DeviceDefault theme makes
+     * them follow Instagram's resolved in-app theme, via {@link UI#isDarkMode()} (the
+     * luminance of the themed background), rather than the device's night setting — so
+     * the dialog matches IG even when the device and IG themes disagree. This only
+     * selects a platform DIALOG theme; it sets no app colour.
      */
     public static Context dialogContext(Context context) {
-        int nightMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        int themeRes = nightMode == Configuration.UI_MODE_NIGHT_YES
+        int themeRes = UI.isDarkMode()
                 ? android.R.style.Theme_DeviceDefault
                 : android.R.style.Theme_DeviceDefault_Light;
         return new android.view.ContextThemeWrapper(context, themeRes);

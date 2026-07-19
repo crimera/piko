@@ -27,9 +27,10 @@ val themePatch =
         val amoled by booleanOption(
             key = "amoled",
             default = false,
-            title = "AMOLED (pure black)",
-            description = "Apply a pure-black AMOLED theme. When off, the Material You " +
-                "dynamic theme is applied, following the device's light/dark setting. " +
+            title = "Pure-black AMOLED theme",
+            description = "By default this patch applies a Material You dynamic theme that " +
+                "follows your device's light/dark setting. Turn this on to override it " +
+                "with a pure-black AMOLED theme instead. " +
                 "Note: a few server-driven pages (notifications, DM inbox, " +
                 "About-this-account) and full-screen media/Reels keep Instagram's own " +
                 "colours in both modes.",
