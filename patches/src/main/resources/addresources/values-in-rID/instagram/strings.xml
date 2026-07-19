@@ -133,7 +133,13 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_downloaded_media">Diunduh: </string>
     <string name="piko_media_exists">Media sudah ada</string>
     <string name="piko_download_failed_media">Unduhan gagal : </string>
+    <string name="piko_download_set_path">Pilih folder unduhan</string>
     <string name="piko_download_set_path_success">Direktori unduhan telah diperbarui!</string>
+    <string name="piko_download_set_path_failed">Gagal menyimpan ke folder unduhan</string>
+    <string name="piko_download_choose_folder">Pilih folder unduhan untuk melanjutkan</string>
+    <string name="piko_download_choose_folder_failed">Tidak dapat membuka pemilih folder</string>
+    <string name="piko_download_grant_permission">Pilih folder unduhan untuk melanjutkan</string>
+    <string name="piko_download_grant_permission_failed">Tidak dapat membuka pemilih folder</string>
     <string name="piko_download_with_external_downloader">Unduh menggunakan pengunduh eksternal</string>
     <string name="piko_external_downloader_package_name">Nama paket pengunduh eksternal</string>
     <string name="piko_external_downloader_package_name_not_found">Nama paket pengunduh eksternal tidak ditemukan</string>
@@ -266,8 +272,8 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_reel_type_typed_container">Wadah terstruktur</string>
     <string name="piko_reel_type_user_reel">Reel pengguna</string>
     <string name="piko_filter_story_user_types_to_hide">Jenis pengguna yang disembunyikan</string>
-    <string name="piko_user_type_unverified">Pengguna terverifikasi</string>
-    <string name="piko_user_type_verified">Pengguna tidak terverifikasi</string>
+    <string name="piko_user_type_unverified">Pengguna tidak terverifikasi</string>
+    <string name="piko_user_type_verified">Pengguna terverifikasi</string>
     <string name="piko_filter_story_minimum_item_count">Item cerita minimum</string>
     <string name="piko_filter_story_minimum_item_count_desc">Cerita yang berisi kurang dari x item akan disembunyikan (nilai bawaan 1)</string>
     <string name="piko_filter_story_maximum_item_count">Item cerita maksimum</string>

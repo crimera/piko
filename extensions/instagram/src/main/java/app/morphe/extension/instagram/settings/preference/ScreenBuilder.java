@@ -381,6 +381,15 @@ public class ScreenBuilder {
                             str("piko_disable_reels_scrolling"),
                             str("piko_disable_reels_scrolling_desc"),
                             Settings.DISABLE_REELS_SCROLLING
+                )
+            );
+        }
+        if (SettingsStatus.disableSwipeToCreate) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_disable_swipe_to_create"),
+                            str("piko_disable_swipe_to_create_desc"),
+                            Settings.DISABLE_SWIPE_TO_CREATE
                     )
             );
         }

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings Search -->
+    <string name="piko_settings_search_hint">Piko ayarlarında ara</string>
+    <string name="piko_settings_search_clear">Girişi temizle</string>
+    <string name="piko_settings_search_no_results">\"%1$s\" için sonuç bulunamadı</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Gönderileri geri alma özelliğini etkinleştirin</string>
@@ -234,14 +238,13 @@
     <string name="piko_pref_patch_info">Yama Bilgileri</string>
     <string name="piko_pref_version_info">Sürüm Bilgisi</string>
     <string name="piko_changelogs_title">Değişiklikler</string>
+    <string name="piko_debug">Piko hata ayıklama</string>
     <string name="piko_pref_patches">Yamalar</string>
     <string name="piko_pref_included">Dahil</string>
     <string name="piko_pref_excluded">Hariç</string>
     <string name="piko_pref_app_restart_rec">Uygulamanın yeniden başlatılması önerilir</string>
     <string name="piko_dialog_delete_title">Sil</string>
     <string name="piko_dialog_delete_message">Sil%s?</string>
-    <string name="piko_single_page_settings">Tek sayfa ayarları</string>
-    <string name="piko_single_page_settings_desc">Ayarları tek sayfada görüntüleyin</string>
     <string name="piko_pref_search_type_ahead_users">Kullanıcılar</string>
     <string name="piko_pref_search_type_ahead_events">Etkinlikler</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Sıralı bölüm</string>

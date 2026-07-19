@@ -119,12 +119,16 @@ public class SettingsStatus {
     public static void disableReelsScrolling() {
         disableReelsScrolling = true;
     }
+    public static boolean disableSwipeToCreate = false;
+    public static void disableSwipeToCreate() {
+        disableSwipeToCreate = true;
+    }
     public static boolean disableDoubleTapLike = false;
     public static void disableDoubleTapLike() {
         disableDoubleTapLike = true;
     }
     public static boolean distractionFreeSection() {
-        return (disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling);
+        return (disableDoubleTapLike || hideNotesTray || disableHighlights || disableStories || disableExplore || disableComments || hideStoriesTray || limitFollowingFeed || hideGroupCreationOnSharesheet || disableReelsScrolling || disableSwipeToCreate);
     }
 
     //Misc section.
@@ -250,6 +254,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_disable_explore"),SettingsStatus.disableExplore);
         FLAGS.put(str("piko_disable_highlights"),SettingsStatus.disableHighlights);
         FLAGS.put(str("piko_disable_stories"),SettingsStatus.disableStories);
+        FLAGS.put(str("piko_disable_swipe_to_create"), SettingsStatus.disableSwipeToCreate);
 
         FLAGS.put(str("piko_view_dm_anonymously"),SettingsStatus.viewDmAnonymously);
         FLAGS.put(str("piko_view_live_anonymously"),SettingsStatus.disableScreenshotDetection);

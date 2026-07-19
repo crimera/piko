@@ -82,7 +82,7 @@ public class PikoUtils {
     public static void openDefaultLinks() {
         Intent intent = new Intent(android.provider.Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS);
         intent.setData(Uri.parse("package:" + ctx.getPackageName()));
-        ctx.startActivity(intent);
+        launchIntent(intent);
     }
 
     public static boolean pikoWriteFile(String fileName,String data,boolean append){

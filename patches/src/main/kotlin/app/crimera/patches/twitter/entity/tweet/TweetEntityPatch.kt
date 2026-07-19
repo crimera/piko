@@ -7,18 +7,14 @@
 package app.crimera.patches.twitter.entity.tweet
 
 import app.crimera.patches.twitter.entity.tweetInfo.TweetInfoObjectFingerprint
-import app.crimera.patches.twitter.entity.tweetInfo.TweetLangFingerprint
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
-import app.crimera.utils.getMethodName
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.getReference
-import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
@@ -68,13 +64,13 @@ val tweetEntityPatch =
                             Opcode.RETURN_OBJECT,
                         )
                 } ?: throw PatchException("getMediaObject not found")
-            TweetMediaFingerprint.changeFirstString(getMediaObjectMethod.name)
+            TweetExtMediaEntitiesListFingerprint.changeFirstString(getMediaObjectMethod.name)
 
             val extMediaListField =
                 TweetMediaEntityClassFingerprint.classDef.fields
                     .first { it.type.contains("List") }
                     .name
-            TweetMediaFingerprint.changeStringAt(1, extMediaListField)
+            TweetExtMediaEntitiesListFingerprint.changeStringAt(1, extMediaListField)
 
             val getNoteTweetMethod =
                 tweetObjectMethods

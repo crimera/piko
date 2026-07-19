@@ -8,12 +8,18 @@ package app.crimera.patches.twitter.entity.extMedia
 
 import app.crimera.patches.twitter.utils.Constants.ENTITY_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
+import com.android.tools.smali.dexlib2.AccessFlags
 
 private const val ENTITY_EXT_MEDIA_DEFINING_CLASS = "${ENTITY_DESCRIPTOR}ExtMediaEntities"
 
-internal object ExtMediaHighResVideoFingerprint : Fingerprint(
+internal object ExtMediaGetVideosFingerprint : Fingerprint(
     definingClass = ENTITY_EXT_MEDIA_DEFINING_CLASS,
-    name = "getHighResVideo",
+    name = "getVideos",
+)
+
+internal object ExtMediaHighResolutionFingerprint : Fingerprint(
+    definingClass = ENTITY_EXT_MEDIA_DEFINING_CLASS,
+    name = "getHighestResolution",
 )
 
 internal object ExtMediaGetImageFingerprint : Fingerprint(
@@ -36,5 +42,24 @@ object MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint : F
     strings = listOf("url", "video_download"),
     custom = { _, classDef ->
         classDef.startsWith("Lcom/twitter/tweetview/core/ui/mediaoptionssheet/")
+    },
+)
+
+internal object MediaResolutionToStringFingerprint : Fingerprint(
+    name = "toString",
+    strings =
+        listOf(
+            "Size(width=",
+            ", height=",
+            ")",
+        ),
+)
+
+internal object ExtMediaGetSensitiveMediaCategoriesFingerprint : Fingerprint(
+    name = "getSensitiveMediaCategories",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
+    returnType = "Ljava/util/Set;",
+    custom = { _, classDef ->
+        classDef.type.startsWith("Lcom/twitter/model/core/entity/")
     },
 )

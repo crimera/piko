@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings Search -->
+    <string name="piko_settings_search_hint">البحث في إعدادات Piko</string>
+    <string name="piko_settings_search_clear">مسح الإدخال</string>
+    <string name="piko_settings_search_no_results">لا توجد نتائج ل \"%1$s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">تمكين التراجع عن المنشورات</string>
@@ -35,6 +39,7 @@
     <string name="piko_pref_native_downloader_inline_button">عرض زر التنزيل المضمن</string>
     <string name="piko_pref_native_downloader_inline_button_desc">يضيف زر تنزيل مباشرةً إلى شريط إجراءات المنشور</string>
     <string name="piko_pref_native_downloader_alert_title">تنزيل الوسائط</string>
+    <string name="piko_video_variants">خيارات الفيديو</string>
     <string name="piko_pref_native_downloader_download_all">تنزيل الكل</string>
     <string name="piko_pref_native_downloader_no_media">لم يتم العثور على الوسائط</string>
     <string name="piko_pref_native_downloader_filename_title">نمط حفظ اسم الملف</string>
@@ -118,8 +123,8 @@
     <string name="piko_pref_clear_tracking_params">مسح معلمات التتبع</string>
     <string name="piko_pref_unshorten_link">لا عنوان URL مختصر</string>
     <string name="piko_pref_unshorten_link_desc">تخلص من عناوين URL القصيرة لـ t.co</string>
-    <string name="piko_pref_round_off_numbers">إيقاف اختصار الأرقام</string>
-    <string name="piko_pref_round_off_numbers_desc">يوقف عرض الأرقام بصيغة K و M</string>
+    <string name="piko_pref_round_off_numbers">اختصار الأرقام</string>
+    <string name="piko_pref_round_off_numbers_desc">عرض الأرقام بصيغة K و M</string>
     <string name="piko_pref_debug_menu">تمكين قائمة Debug للمنشورات</string>
     <string name="piko_pref_quick_settings">تمكين الإعدادات السريعة</string>
     <string name="piko_pref_quick_settings_summary">إضافة زر الإعدادات السريعة في الشريط الجانبي</string>
@@ -234,14 +239,13 @@
     <string name="piko_pref_patch_info">معلومات التعديل</string>
     <string name="piko_pref_version_info">معلومات الإصدار</string>
     <string name="piko_changelogs_title">سجل التغييرات</string>
+    <string name="piko_debug">Piko debug</string>
     <string name="piko_pref_patches">التعديلات</string>
     <string name="piko_pref_included">مضمّن</string>
     <string name="piko_pref_excluded">مستبعد</string>
     <string name="piko_pref_app_restart_rec">يوصى بإعادة تشغيل التطبيق</string>
     <string name="piko_dialog_delete_title">حذف</string>
     <string name="piko_dialog_delete_message">حذف %s؟</string>
-    <string name="piko_single_page_settings">صفحة الإعدادات الفردية</string>
-    <string name="piko_single_page_settings_desc">عرض الإعدادات في صفحة واحدة</string>
     <string name="piko_pref_search_type_ahead_users">المستخدمون</string>
     <string name="piko_pref_search_type_ahead_events">الأحداث</string>
     <string name="piko_pref_search_type_ahead_ordered_section">القسم المطلوب</string>
@@ -380,4 +384,6 @@ https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
     <string name="piko_login_token_import_success_reopen_required">أعد فتح التطبيق</string>
     <string name="piko_login_token_import_failed_missing_info">خطأ: \"اسم المستخدم\" أو \"الرمز\" أو \"السري\" مفقود</string>
     <string name="piko_login_token_import_failed_already_exist">فشل إضافة الحساب (قد يكون موجودًا بالفعل)</string>
+    <string name="piko_ok">موافق</string>
+    <string name="piko_cancel">إلغاء</string>
 </resources>

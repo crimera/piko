@@ -7,6 +7,8 @@
 package app.morphe.extension.twitter.entity;
 
 import java.util.List;
+import java.util.Collections;
+import java.util.ArrayList;
 
 import app.morphe.extension.twitter.entity.Video;
 import app.morphe.extension.twitter.entity.Media;
@@ -22,6 +24,19 @@ public class ExtMediaEntities extends Debug{
         this.obj = obj;
     }
 
+    public String getHighestResolution() {
+        try {
+            Debug fieldEntity = new Debug(super.getField("resolutionFieldName"));
+            int width = (int) fieldEntity.getField("a");
+            int height = (int) fieldEntity.getField("b");
+
+            return width + "x" + height;
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+            return "";
+        }
+    }
+
 
     public String getImageUrl()
             throws Exception {
@@ -31,54 +46,69 @@ public class ExtMediaEntities extends Debug{
 
     public String getHighResImageUrl()
             throws Exception {
-        return this.getImageUrl() + "?name=4096x4096&format=jpg";
+        return this.getImageUrl() + "?name=orig&format=jpg";
     }
 
-    public Video getHighResVideo() throws Exception {
+    public ArrayList<Media> getVideos() throws Exception {
+        ArrayList<Media> videoArrayList = new ArrayList<>();
+
         Object mediaVideoInfoEntityObject = super.getField("fieldname");
-        if(mediaVideoInfoEntityObject==null) return null;
+        if(mediaVideoInfoEntityObject==null) return videoArrayList;
 
         Debug mediaVideoInfoEntity = new Debug(mediaVideoInfoEntityObject);
 
         Object videoVariantObject = mediaVideoInfoEntity.getField("c");
-        if(videoVariantObject==null) return null;
+        if(videoVariantObject==null) return videoArrayList;
 
+        int type = 1;
         List videoVariant = (List) videoVariantObject;
-        int maxBitrate = 0;
-        Video maxBitrateVideo = null;
-        for(Object videoObject : videoVariant){
-            Video video = new Video(videoObject);
-            int bitrate = video.getBitrate();
-            if(bitrate >= maxBitrate){
-                maxBitrateVideo = video;
-            }
-        }
+        videoVariant.forEach(item->{
+            try {
+                Video videoData = new Video(item);
+                String ext = videoData.getExtension();
+                if(!ext.equals("m3u8")) {
+                    String url = videoData.getMediaUrl();
+                    String res = videoData.getResolution();
+                    res = res != null ? res : this.getHighestResolution();
 
-        return maxBitrateVideo!=null ?maxBitrateVideo:null;
+                    videoArrayList.add(new Media(type, url, ext, res));
+                }
+            } catch (Exception e) {
+                PikoUtils.logger(e);
+            }
+        });
+        // We want highest resolution first.
+        Collections.reverse(videoArrayList);
+        return videoArrayList;
     }
 
-    public Media getMedia() throws Exception {
-        int type = 0;
-        String url = "";
-        String ext = "jpg";
+    public ArrayList<Media> getMediaList() {
+        try {
+            ArrayList<Media> videoList = this.getVideos();
+            if (!videoList.isEmpty()) {
+                return videoList;
+            } else {
+                ArrayList<Media> imageList = new ArrayList<>();
 
-        Video video = this.getHighResVideo();
+                int type = 0;
+                String url = this.getHighResImageUrl();
+                String ext = "jpg";
+                String res = this.getHighestResolution();
+                imageList.add(new Media(type, url, ext, res));
 
-        if(video!=null){
-            type = 1;
-            url = video.getMediaUrl();
-            ext = video.getExtension();
-        }else{
-            url = this.getHighResImageUrl();
+                return imageList;
+            }
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+            return new ArrayList<>();
         }
-        return new Media(type,url,ext);
     }
 
     @Override
     public String toString(){
         try{
         return "ExtMediaEntities [getImageUrl()=" + this.getImageUrl() + ", getHighResImageUrl()="
-                + this.getHighResImageUrl() + ", getHighResVideo()=" + this.getHighResVideo() + "]";
+                + this.getHighResImageUrl() + ", getMediaList()=" + this.getMediaList() + "]";
         }catch(Exception e){
             PikoUtils.logger(e);
             return e.getMessage();

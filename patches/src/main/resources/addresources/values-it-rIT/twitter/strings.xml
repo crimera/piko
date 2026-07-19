@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings Search -->
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Abilita annulla i post</string>
@@ -240,8 +241,6 @@
     <string name="piko_pref_app_restart_rec">Riavvio dell\'app è consigliato</string>
     <string name="piko_dialog_delete_title">Elimina</string>
     <string name="piko_dialog_delete_message">Eliminare %s?</string>
-    <string name="piko_single_page_settings">Pagina delle impostazioni singola</string>
-    <string name="piko_single_page_settings_desc">Vedi le impostazioni in una singola pagina</string>
     <string name="piko_pref_search_type_ahead_users">Utenti</string>
     <string name="piko_pref_search_type_ahead_events">Eventi</string>
     <string name="piko_pref_search_type_ahead_ordered_section">Sezione ordinata</string>

@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.8.0-dev.4",
+  "version": "3.8.0-dev.5",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -1356,6 +1356,36 @@
     {
       "name": "Disable story flipping",
       "description": "Disable automatic flipping/moving to next story",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "435.0.0.37.76",
+              "versionCodes": {
+                "ARM64_V8A": 384109456
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable swipe to create",
+      "description": "Prevents opening the creation screen by swiping right on the home tab.",
       "default": true,
       "dependencies": [
         "BytecodePatch"

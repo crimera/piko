@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings Search -->
+    <string name="piko_settings_search_hint">Piko設定を検索</string>
+    <string name="piko_settings_search_clear">入力を削除</string>
+    <string name="piko_settings_search_no_results">「%1$s」の検索結果はありません</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">プレミアム</string>
     <string name="piko_pref_undo_posts">ポストの取り消しを有効化</string>
@@ -241,8 +245,6 @@
     <string name="piko_pref_app_restart_rec">アプリの再起動を推奨します</string>
     <string name="piko_dialog_delete_title">削除</string>
     <string name="piko_dialog_delete_message">%sを削除しますか？</string>
-    <string name="piko_single_page_settings">全ての設定を表示</string>
-    <string name="piko_single_page_settings_desc">カテゴリー分けをせずに、1つのページに全てのPiko設定を表示します</string>
     <string name="piko_pref_search_type_ahead_users">ユーザー</string>
     <string name="piko_pref_search_type_ahead_events">イベント</string>
     <string name="piko_pref_search_type_ahead_ordered_section">並び替え</string>

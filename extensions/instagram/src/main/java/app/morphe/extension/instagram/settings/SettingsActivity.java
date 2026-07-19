@@ -32,6 +32,7 @@ import java.util.function.Supplier;
 
 import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
@@ -67,12 +68,14 @@ public class SettingsActivity extends Activity {
         boolean isRootSettings = fragmentName == null || Constants.PIKO_FRAGMENT_SETTINGS.equals(fragmentName);
         createLayout(displayTitle, isRootSettings);
 
-        SettingsFragment fragment = new SettingsFragment();
-        if (getIntent() != null && getIntent().getExtras() != null) {
-            fragment.setArguments(getIntent().getExtras());
-        }
+        if (bundle == null) {
+            SettingsFragment fragment = new SettingsFragment();
+            if (getIntent() != null && getIntent().getExtras() != null) {
+                fragment.setArguments(getIntent().getExtras());
+            }
 
-        getFragmentManager().beginTransaction().replace(1001, fragment).commit();
+            getFragmentManager().beginTransaction().replace(1001, fragment).commit();
+        }
     }
 
     @SuppressLint("ResourceType")
@@ -210,13 +213,13 @@ public class SettingsActivity extends Activity {
         getWindow().setNavigationBarColor(InstagramPreferenceStyle.backgroundColor());
 
         int flags = getWindow().getDecorView().getSystemUiVisibility();
-//        if (InstagramPreferenceStyle.isDark(this)) {
-//            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-//            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-//        } else {
-//            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-//            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-//        }
+        if (UI.isDarkMode()) {
+            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        } else {
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        }
         getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
