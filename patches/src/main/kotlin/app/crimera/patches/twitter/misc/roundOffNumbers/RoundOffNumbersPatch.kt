@@ -52,7 +52,7 @@ val roundOffNumbersPatch =
                     move_res_obj + 1,
                     """
                     sget-boolean v1, $PREF_DESCRIPTOR;->ROUND_OFF_NUMBERS:Z
-                    if-nez v1, :cond
+                    if-eqz v1, :cond
                     goto :here
                     """.trimIndent(),
                     ExternalLabel("here", sget_obj),
