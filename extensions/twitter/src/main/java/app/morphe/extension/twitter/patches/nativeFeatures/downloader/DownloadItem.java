@@ -15,19 +15,25 @@ import app.morphe.extension.twitter.entity.Media;
 public class DownloadItem {
 
     public String labelText;
+    public String subtitleText;
     public String fileName;
     public Media media;
     public List<DownloadItem> variants;
 
-    public DownloadItem(String labelText, String fileName, Media media, List<DownloadItem> variants) {
+    public DownloadItem(String labelText, String subtitleText, String fileName, Media media, List<DownloadItem> variants) {
         this.labelText = labelText;
+        this.subtitleText = subtitleText;
         this.fileName = fileName;
         this.media = media;
         this.variants = variants;
     }
 
+    public DownloadItem(String labelText, String subtitleText, String fileName, Media media) {
+        this(labelText, subtitleText, fileName, media, Collections.<DownloadItem>emptyList());
+    }
+
     public DownloadItem(String labelText, String fileName, Media media) {
-        this(labelText,fileName,media,Collections.<DownloadItem>emptyList());
+        this(labelText, null, fileName, media, Collections.<DownloadItem>emptyList());
     }
 
     public boolean hasVariants() {

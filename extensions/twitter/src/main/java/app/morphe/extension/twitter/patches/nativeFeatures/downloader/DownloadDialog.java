@@ -43,6 +43,7 @@ import app.morphe.extension.shared.ui.Dim;
 import app.morphe.extension.shared.ui.CustomDialog;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.twitter.entity.Media;
 import app.morphe.extension.crimera.PikoUtils;
 
@@ -88,6 +89,7 @@ public class DownloadDialog {
         Window window = dialog.getWindow();
         if (window != null) {
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            window.setDimAmount(0.7f);
 
             ShapeDrawable background = new ShapeDrawable(new RoundRectShape(Dim.roundedCorners(28), null, null));
             background.getPaint().setColor(app.morphe.extension.twitter.Utils.resolveColor(context, "coreColorAppBackground"));
@@ -102,7 +104,7 @@ public class DownloadDialog {
         int accentColor = ResourceUtils.getColor("twitter_blue_fill_pressed");
 
         mainLayout.addView(buildItemList(context, items, accentColor));
-        mainLayout.addView(buildBottomButtons(context, dialog, items, accentColor));
+        mainLayout.addView(buildCloseButtonRow(context, dialog, accentColor, items));
 
         dialog.show();
         return dialog;
@@ -150,35 +152,62 @@ public class DownloadDialog {
         LinearLayout row = new LinearLayout(context);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, Dim.dp8, 0, Dim.dp8);
+        row.setPadding(Dim.dp16, Dim.dp4, Dim.dp8, Dim.dp4);
+        row.setMinimumHeight(dpToPx(context, 56));
 
-        // Label: file name.
+        // Clickable row with ripple.
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, outValue, true);
+        row.setBackgroundResource(outValue.resourceId);
+        row.setOnClickListener(v -> downloadFile(item));
+
+        // Text container for Title + Subtitle
+        LinearLayout textContainer = new LinearLayout(context);
+        textContainer.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+        textParams.setMarginEnd(Dim.dp8);
+        textContainer.setLayoutParams(textParams);
+
+        // Label: Index-based name or Resolution
         TextView nameView = new TextView(context);
         nameView.setText(item.labelText);
         nameView.setTextSize(15);
         nameView.setTextColor(primaryTextColor(context));
         nameView.setSingleLine(true);
         nameView.setEllipsize(TextUtils.TruncateAt.MIDDLE);
-        LinearLayout.LayoutParams nameParams = new LinearLayout.LayoutParams(
-                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-        nameParams.setMarginEnd(Dim.dp8);
-        nameView.setLayoutParams(nameParams);
-        row.addView(nameView);
+        textContainer.addView(nameView);
 
-        // Download. Replace "ic_download" with your actual drawable resource name.
-        row.addView(createIconButton(context, "ic_vector_incoming", accentColor,
-                () -> downloadFile(item)));
+        // Subtitle: Resolution (if not already used as title)
+        if (!TextUtils.isEmpty(item.subtitleText)) {
+            TextView subtitleView = new TextView(context);
+            subtitleView.setText(item.subtitleText);
+            subtitleView.setTextSize(12);
+            subtitleView.setTextColor(secondaryTextColor(context));
+            subtitleView.setSingleLine(true);
+            subtitleView.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+            textContainer.addView(subtitleView);
+        }
 
-        // Copy link. Replace "ic_copy_link" with your actual drawable resource name.
-        row.addView(createIconButton(context, "ic_vector_copy_stroke", accentColor,
-                () -> copyLinkToClipboard(item)));
+        row.addView(textContainer);
 
-        // Variants (only on the top-level list; disabled when the item has none).
-        if (item.hasVariants()) {
+        // Download.
+        if (Pref.nativeDownloaderShowDownloadIcon()) {
+            row.addView(createIconButton(context, "ic_vector_incoming", accentColor,
+                    () -> downloadFile(item)));
+        }
+
+        // Copy link.
+        if (Pref.nativeDownloaderShowCopyIcon()) {
+            row.addView(createIconButton(context, "ic_vector_copy_stroke", accentColor,
+                    () -> copyLinkToClipboard(item)));
+        }
+
+        // Variants (only on the top-level list).
+        if (item.hasVariants() && Pref.nativeDownloaderShowVariantsIcon()) {
             View variantsButton = createIconButton(context, "ic_vector_bulleted_list", accentColor,
                     () -> showVariantsDialog(context, item));
-            variantsButton.setEnabled(item.hasVariants());
-            variantsButton.setAlpha(item.hasVariants() ? 1f : 0.35f);
+            variantsButton.setEnabled(true);
             row.addView(variantsButton);
         }
 
@@ -223,64 +252,72 @@ public class DownloadDialog {
         imageButton.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         imageButton.setPadding(Dim.dp8, Dim.dp8, Dim.dp8, Dim.dp8);
         imageButton.setColorFilter(tint, PorterDuff.Mode.SRC_IN);
-        View button = imageButton;
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(Dim.dp36, Dim.dp36);
         params.setMarginStart(Dim.dp4);
-        button.setLayoutParams(params);
+        imageButton.setLayoutParams(params);
 
-        GradientDrawable circle = new GradientDrawable();
-        circle.setShape(GradientDrawable.OVAL);
-        circle.setColor(Color.TRANSPARENT);
-        int rippleColor = (tint & 0x00FFFFFF) | 0x33000000;
-        RippleDrawable ripple = new RippleDrawable(ColorStateList.valueOf(rippleColor), circle, circle);
-        button.setBackground(ripple);
-        button.setClickable(true);
-        button.setFocusable(true);
+        GradientDrawable mask = new GradientDrawable();
+        mask.setShape(GradientDrawable.OVAL);
+        mask.setColor(Color.BLACK);
 
-        button.setOnClickListener(v -> onClick.run());
-        return button;
+        int rippleColor = Utils.isDarkModeEnabled() ? 0x33FFFFFF : 0x1F000000;
+        RippleDrawable ripple = new RippleDrawable(ColorStateList.valueOf(rippleColor), null, mask);
+        imageButton.setBackground(ripple);
+        imageButton.setClickable(true);
+        imageButton.setFocusable(true);
+
+        imageButton.setOnClickListener(v -> onClick.run());
+        return imageButton;
     }
 
-    private static Button createBottomButton(Context context, Dialog dialog,Integer accentColor, CharSequence buttonText, @Nullable Runnable onClick ){
-        Button button = CustomDialog.createButton(context, dialog, buttonText, onClick, true, true);
-
-        ShapeDrawable background = new ShapeDrawable(new RoundRectShape(Dim.roundedCorners(20), null, null));
-        background.getPaint().setColor(accentColor);
-        button.setBackground(background);
-        button.setTextColor(Color.WHITE);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                Dim.dp36
-        );
-        params.setMargins(0, Dim.dp16, 0, 0);
-
-        button.setLayoutParams(params);
-        return button;
-    }
-
-    private static View buildBottomButtons(Context context, Dialog dialog, List<DownloadItem> items, Integer accentColor) {
+    private static View buildCloseButtonRow(Context context, Dialog dialog, @Nullable Integer accentColor, List<DownloadItem> items) {
         LinearLayout row = new LinearLayout(context);
-        row.setOrientation(LinearLayout.VERTICAL);
+        row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         rowParams.setMargins(0, Dim.dp16, 0, 0);
         row.setLayoutParams(rowParams);
 
-        if(items.size()>1){
-            Runnable downloaddAllFuncCall = () -> {
-                items.forEach(item->{
+        boolean hasMultipleItems = items != null && items.size() > 1;
+
+        Button closeButton = CustomDialog.createButton(context, dialog, str("piko_cancel"), null, !hasMultipleItems, true);
+        if (accentColor != null && !hasMultipleItems) {
+            ShapeDrawable shape = new ShapeDrawable(new RoundRectShape(Dim.roundedCorners(20), null, null));
+            shape.getPaint().setColor(accentColor);
+
+            int rippleColor = 0x33FFFFFF;
+            RippleDrawable ripple = new RippleDrawable(ColorStateList.valueOf(rippleColor), shape, shape);
+            closeButton.setBackground(ripple);
+            closeButton.setTextColor(Color.WHITE);
+        }
+        LinearLayout.LayoutParams closeParams = new LinearLayout.LayoutParams(0, Dim.dp36, 1f);
+        if (hasMultipleItems) {
+            closeParams.setMarginEnd(Dim.dp8);
+        }
+        closeButton.setLayoutParams(closeParams);
+        row.addView(closeButton);
+
+        if (hasMultipleItems) {
+            Button downloadAllButton = CustomDialog.createButton(context, dialog, str("piko_pref_native_downloader_download_all"), () -> {
+                for (DownloadItem item : items) {
                     downloadFile(item);
-                });
-            };
-            Button downloadAllButton = createBottomButton(context,dialog,accentColor,str("piko_pref_native_downloader_download_all"),downloaddAllFuncCall);
+                }
+            }, true, true);
+            if (accentColor != null) {
+                ShapeDrawable shape = new ShapeDrawable(new RoundRectShape(Dim.roundedCorners(20), null, null));
+                shape.getPaint().setColor(accentColor);
+
+                int rippleColor = 0x33FFFFFF; // Light ripple on dark accent
+                RippleDrawable ripple = new RippleDrawable(ColorStateList.valueOf(rippleColor), shape, shape);
+                downloadAllButton.setBackground(ripple);
+                downloadAllButton.setTextColor(Color.WHITE);
+            }
+            downloadAllButton.setLayoutParams(new LinearLayout.LayoutParams(0, Dim.dp36, 1f));
             row.addView(downloadAllButton);
         }
 
-        Button closeButton = createBottomButton(context,dialog,accentColor,str("piko_cancel"),null);
-        row.addView(closeButton);
         return row;
     }
 
@@ -309,6 +346,10 @@ public class DownloadDialog {
 
     private static int primaryTextColor(Context context){
         return app.morphe.extension.twitter.Utils.resolveColor(context, "textColorPrimary");
+    }
+
+    private static int secondaryTextColor(Context context){
+        return app.morphe.extension.twitter.Utils.resolveColor(context, "textColorSecondary");
     }
 
     private static int dpToPx(Context context, int dp) {

@@ -380,6 +380,38 @@ public class ScreenBuilder {
                     )
             );
 
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_native_downloader_autodownload_highest_video_res"),
+                            str("piko_pref_native_downloader_autodownload_highest_video_res_desc"),
+                            Settings.VID_NATIVE_DOWNLOADER_AUTODOWNLOAD_HIGHEST_VIDEO_RES
+                    )
+            );
+
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_native_downloader_show_download_icon"),
+                            "",
+                            Settings.VID_NATIVE_DOWNLOADER_SHOW_DOWNLOAD_ICON
+                    )
+            );
+
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_native_downloader_show_copy_icon"),
+                            "",
+                            Settings.VID_NATIVE_DOWNLOADER_SHOW_COPY_ICON
+                    )
+            );
+
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_native_downloader_show_variants_icon"),
+                            "",
+                            Settings.VID_NATIVE_DOWNLOADER_SHOW_VARIANTS_ICON
+                    )
+            );
+
             if (SettingsStatus.inlineDownloadButton) {
                 addPreference(category,
                         helper.switchPreference(

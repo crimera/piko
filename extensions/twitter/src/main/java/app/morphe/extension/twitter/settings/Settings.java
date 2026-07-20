@@ -55,6 +55,10 @@ public class Settings {
     public static final BooleanSetting ADS_REMOVE_TODAYS_NEW = new BooleanSetting("ads_remove_todays_news", true);
 
     public static final BooleanSetting VID_NATIVE_DOWNLOADER = new BooleanSetting("vid_native_downloader", true);
+    public static final BooleanSetting VID_NATIVE_DOWNLOADER_AUTODOWNLOAD_HIGHEST_VIDEO_RES = new BooleanSetting("vid_native_downloader_autodownload_highest_video_res", false);
+    public static final BooleanSetting VID_NATIVE_DOWNLOADER_SHOW_DOWNLOAD_ICON = new BooleanSetting("vid_native_downloader_show_download_icon", true);
+    public static final BooleanSetting VID_NATIVE_DOWNLOADER_SHOW_COPY_ICON = new BooleanSetting("vid_native_downloader_show_copy_icon", true);
+    public static final BooleanSetting VID_NATIVE_DOWNLOADER_SHOW_VARIANTS_ICON = new BooleanSetting("vid_native_downloader_show_variants_icon", true);
     public static final BooleanSetting VID_INLINE_DOWNLOAD_BUTTON = new BooleanSetting("vid_inline_download_button", true);
     public static final BooleanSetting BROWSE_OBJECT = new BooleanSetting("browse_object", true);
     public static final StringSetting VID_NATIVE_DOWNLOADER_FILENAME = new StringSetting("vid_native_downloader_filename", "0");
