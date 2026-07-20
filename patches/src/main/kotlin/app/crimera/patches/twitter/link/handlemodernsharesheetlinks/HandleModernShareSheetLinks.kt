@@ -98,12 +98,12 @@ val handleModernShareSheetLinks =
 
                 NewShareSheetLinkFingerprint2.method.apply {
                     val firstGoto = indexOfFirstInstruction(Opcode.GOTO)
-                    val linkMergeIndex = getInstruction<BuilderOffsetInstruction>(firstGoto).target.location.index
-                    val linkMergeInstruction = instructions[linkMergeIndex]
 
                     val shareSheetWInstruction = instructions[indexOfFirstInstruction(firstGoto, Opcode.IGET_OBJECT)]
                     val shareSheetWRegister = shareSheetWInstruction.registersUsed[1]
 
+                    val linkMergeIndex = getInstruction<BuilderOffsetInstruction>(firstGoto).target.location.index
+                    val linkMergeInstruction = getInstruction(linkMergeIndex)
                     val linkRegister = linkMergeInstruction.registersUsed[0]
                     val dummyRegister = findFreeRegister(linkMergeIndex + 1, listOf(linkRegister, shareSheetWRegister))
 
