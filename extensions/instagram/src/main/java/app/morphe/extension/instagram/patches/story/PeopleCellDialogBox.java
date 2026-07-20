@@ -8,10 +8,16 @@ package app.morphe.extension.instagram.patches.story;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RoundRectShape;
 import android.util.Pair;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -25,7 +31,8 @@ import java.util.ArrayList;
 
 import com.instagram.igds.components.peoplecell.IgdsPeopleCell;
 
-import app.morphe.extension.shared.Utils;
+import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.ui.CustomDialog;
 import app.morphe.extension.shared.ui.Dim;
 import static app.morphe.extension.instagram.utils.IgStr.str;
@@ -66,6 +73,16 @@ public class PeopleCellDialogBox {
 
         Dialog dialog = result.first;
         LinearLayout mainLayout = result.second;
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+
+        int backgroundColor = resolveDialogBackgroundColor(context);
+        int foregroundColor = resolveThemedColor(context, "igds_color_primary_text");
+        mainLayout.setBackground(createRoundedBackground(backgroundColor, 28));
+        applyDialogColors(mainLayout, foregroundColor, backgroundColor);
 
         View listView = (peopleCells == null || peopleCells.isEmpty())
                 ? createEmptyView(context)
@@ -127,15 +144,60 @@ public class PeopleCellDialogBox {
         return scrollView;
     }
 
-    /**
-     * Simple centered "No data" placeholder shown when the list is empty.
-     */
+    private static int resolveDialogBackgroundColor(@NonNull Context context) {
+        int primaryBackground = resolveThemedColor(context, "igds_color_primary_background");
+
+        return Color.luminance(primaryBackground) < 0.5
+                ? ResourceUtils.getColor("igds_prism_black", primaryBackground)
+                : primaryBackground;
+    }
+
+    private static int resolveThemedColor(@NonNull Context context, @NonNull String attrName) {
+        TypedValue typedValue = new TypedValue();
+        int attrId = ResourceUtils.getAttrIdentifier(attrName);
+
+        if (attrId != 0 && context.getTheme().resolveAttribute(attrId, typedValue, true)) {
+            return typedValue.resourceId != 0
+                    ? context.getColor(typedValue.resourceId)
+                    : typedValue.data;
+        }
+
+        return UI.getThemedColour(attrName);
+    }
+
+    // CustomDialog uses the device theme; reapply Instagram's theme colors.
+    private static void applyDialogColors(@NonNull View view,
+                                          int foregroundColor,
+                                          int backgroundColor) {
+        if (view instanceof Button) {
+            Button button = (Button) view;
+            button.setTextColor(backgroundColor);
+            button.setBackground(createRoundedBackground(foregroundColor, 20));
+        } else if (view instanceof TextView) {
+            ((TextView) view).setTextColor(foregroundColor);
+        }
+
+        if (view instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) view;
+            for (int index = 0; index < viewGroup.getChildCount(); index++) {
+                applyDialogColors(viewGroup.getChildAt(index), foregroundColor, backgroundColor);
+            }
+        }
+    }
+
+    private static ShapeDrawable createRoundedBackground(int color, float radius) {
+        ShapeDrawable background = new ShapeDrawable(
+                new RoundRectShape(Dim.roundedCorners(radius), null, null));
+        background.getPaint().setColor(color);
+        return background;
+    }
+
     private static View createEmptyView(@NonNull Context context) {
         TextView emptyView = new TextView(context);
         emptyView.setText(str("piko_vsm_no_mentions"));
         emptyView.setGravity(Gravity.CENTER);
         emptyView.setTextSize(16);
-        emptyView.setTextColor(Utils.getAppForegroundColor());
+        emptyView.setTextColor(resolveThemedColor(context, "igds_color_primary_text"));
 
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
