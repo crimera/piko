@@ -80,6 +80,22 @@ public class Pref {
         return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER) && SettingsStatus.nativeDownloader;
     }
 
+    public static boolean nativeDownloaderAutodownloadHighestVideoRes() {
+        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER_AUTODOWNLOAD_HIGHEST_VIDEO_RES);
+    }
+
+    public static boolean nativeDownloaderShowDownloadIcon() {
+        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER_SHOW_DOWNLOAD_ICON);
+    }
+
+    public static boolean nativeDownloaderShowCopyIcon() {
+        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER_SHOW_COPY_ICON);
+    }
+
+    public static boolean nativeDownloaderShowVariantsIcon() {
+        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER_SHOW_VARIANTS_ICON);
+    }
+
     public static boolean enableInlineDownloadButton() {
         return Utils.getBooleanPref(Settings.VID_INLINE_DOWNLOAD_BUTTON);
     }
