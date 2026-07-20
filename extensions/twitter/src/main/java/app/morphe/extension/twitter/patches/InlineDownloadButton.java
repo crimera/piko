@@ -240,6 +240,7 @@ public class InlineDownloadButton {
 
             FrameLayout downloadContainer = new FrameLayout(context);
             downloadContainer.setClickable(true);
+            downloadContainer.setLongClickable(true);
             downloadContainer.setFocusable(true);
             downloadContainer.setContentDescription(NativeDownloader.downloadString());
 
@@ -292,6 +293,21 @@ public class InlineDownloadButton {
                 } catch (Exception e) {
                     Logger.printException(() -> "click error", e);
                 }
+            });
+
+            downloadContainer.setOnLongClickListener(v -> {
+                try {
+                    Object tweet = readField(inlineActionBar, getTweetFieldName());
+                    if (tweet == null) {
+                        Utils.showToastShort("No tweet data");
+                        return true;
+                    }
+
+                    NativeDownloader.downloadAllFromTweet(context, tweet);
+                } catch (Exception e) {
+                    Logger.printException(() -> "long-press error", e);
+                }
+                return true;
             });
 
             parent.addView(wrapper, index, originalLayoutParams);
