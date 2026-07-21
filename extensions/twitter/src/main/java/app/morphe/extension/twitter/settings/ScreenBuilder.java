@@ -437,9 +437,9 @@ public class ScreenBuilder {
 
         }
 
-        category = preferenceCategory(str("piko_title_native_reader_mode"));
-
         if (SettingsStatus.nativeReaderMode) {
+            category = preferenceCategory(str("piko_title_native_reader_mode"));
+
             addPreference(category,
                     helper.switchPreference(
                             str("piko_native_reader_mode_toggle"),
@@ -487,7 +487,7 @@ public class ScreenBuilder {
         }
 
         if (SettingsStatus.shareImage) {
-					  category = preferenceCategory(str("piko_share_image_title"));
+            category = preferenceCategory(str("piko_share_image_title"));
 
             addPreference(category,
                     helper.switchPreference(
@@ -506,9 +506,9 @@ public class ScreenBuilder {
             );
         }
 
-        category = preferenceCategory(str("piko_title_native_share_menu"));
-
         if (SettingsStatus.nativeTranslator) {
+            category = preferenceCategory(str("piko_title_native_share_menu"));
+
             addPreference(category,
                     helper.switchPreference(
                             str("piko_native_share_menu_toggle"),
@@ -820,14 +820,15 @@ public class ScreenBuilder {
                     )
             );
         }
-
-        addPreference(category,
-                helper.switchPreference(
-                        str("piko_pref_quick_settings"),
-                        str("piko_pref_quick_settings_summary"),
-                        Settings.MISC_QUICK_SETTINGS_BUTTON
-                )
-        );
+        if (SettingsStatus.moreInfoOnProfile) {
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_quick_settings"),
+                            str("piko_pref_quick_settings_summary"),
+                            Settings.MISC_QUICK_SETTINGS_BUTTON
+                    )
+            );
+        }
 
         addPreference(category,
                 helper.switchPreference(
