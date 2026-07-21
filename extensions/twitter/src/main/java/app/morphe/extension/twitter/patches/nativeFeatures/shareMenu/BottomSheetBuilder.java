@@ -130,7 +130,7 @@ public class BottomSheetBuilder {
 
     private static void shareToDM(Context ctx, Tweet tweet){
         try {
-            String link = generateShareLink(tweet);
+            String link = tweet.getTweetLink();
 
             Intent intent = new Intent("com.twitter.app.dm.DMActivity");
             intent.setPackage("com.twitter.android");
