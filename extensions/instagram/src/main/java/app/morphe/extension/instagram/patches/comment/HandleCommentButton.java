@@ -74,31 +74,33 @@ public class HandleCommentButton {
                 return true;
 
             } else if (button.equals(SaveMediaButton.A00)) {
-                CommentData commentData = new CommentData(commentObject);
+                try {
+                    CommentData commentData = new CommentData(commentObject);
 
-                Context context = (Context) Utils.getActivity();
-                if(commentData.hasGifMedia()) {
-                    String gifUrl = commentData.getGifUrl();
-                    String fileName = commentData.getGifDownloadName();
-                    DownloadUtils.downloadMediaUrl(context, gifUrl, Constants.DEFAULT_GIF_FOLDER, fileName);
-                    return true;
+                    Context context = (Context) Utils.getActivity();
+                    if (commentData.hasGifMedia()) {
+                        String gifUrl = commentData.getGifUrl();
+                        String fileName = commentData.getGifDownloadName();
+                        DownloadUtils.downloadMediaUrl(context, gifUrl, Constants.DEFAULT_GIF_FOLDER, fileName);
+                    } else if (commentData.hasImageMedia()) {
+                        MediaData imageData = commentData.getImageMedia();
+                        UserData userData = commentData.getCommentUserData();
 
-                } else if (commentData.hasImageMedia()) {
-                    MediaData imageData = commentData.getImageMedia();
-                    UserData userData = commentData.getCommentUserData();
+                        String userName = (userData != null) ? userData.getUsername() : "comment";
+                        String mediaLink = imageData.getMediaLink();
+                        String fileName = userName + "_" + imageData.getDownloadFilename(MediaType.ANY);
 
-                    String userName = userData.getUsername();
-                    String mediaLink = imageData.getMediaLink();
-                    String fileName = userName+"_"+imageData.getDownloadFilename(MediaType.IMAGE);
+                        String subFolder = DownloadUtils.getSubfolderName(userName);
 
-                    String subFolder = DownloadUtils.getSubfolderName(userName);
-
-                    DownloadUtils.downloadMediaUrl(context, mediaLink, subFolder, fileName);
-                    return true;
-
+                        DownloadUtils.downloadMediaUrl(context, mediaLink, subFolder, fileName);
+                    } else {
+                        PikoUtils.toast(str("piko_comment_copied_failed"));
+                    }
+                } catch (Exception ex) {
+                    PikoUtils.logger(ex);
+                    PikoUtils.toast(str("piko_comment_copied_failed"));
                 }
-
-                return false;
+                return true;
             }
 
             return false;
