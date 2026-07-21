@@ -102,7 +102,7 @@ public class DownloadDialog {
         int accentColor = ResourceUtils.getColor("twitter_blue_fill_pressed");
 
         mainLayout.addView(buildItemList(context, items, accentColor));
-        mainLayout.addView(buildCloseButtonRow(context, dialog, accentColor));
+        mainLayout.addView(buildBottomButtons(context, dialog, items, accentColor));
 
         dialog.show();
         return dialog;
@@ -242,24 +242,44 @@ public class DownloadDialog {
         return button;
     }
 
-    private static View buildCloseButtonRow(Context context, Dialog dialog, @Nullable Integer accentColor) {
+    private static Button createBottomButton(Context context, Dialog dialog,Integer accentColor, CharSequence buttonText, @Nullable Runnable onClick ){
+        Button button = CustomDialog.createButton(context, dialog, buttonText, onClick, true, true);
+
+        ShapeDrawable background = new ShapeDrawable(new RoundRectShape(Dim.roundedCorners(20), null, null));
+        background.getPaint().setColor(accentColor);
+        button.setBackground(background);
+        button.setTextColor(Color.WHITE);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                Dim.dp36
+        );
+        params.setMargins(0, Dim.dp16, 0, 0);
+
+        button.setLayoutParams(params);
+        return button;
+    }
+
+    private static View buildBottomButtons(Context context, Dialog dialog, List<DownloadItem> items, Integer accentColor) {
         LinearLayout row = new LinearLayout(context);
-        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setOrientation(LinearLayout.VERTICAL);
         row.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         rowParams.setMargins(0, Dim.dp16, 0, 0);
         row.setLayoutParams(rowParams);
 
-        Button closeButton = CustomDialog.createButton(context, dialog, str("piko_cancel"), null, true, true);
-        if (accentColor != null) {
-            ShapeDrawable background = new ShapeDrawable(new RoundRectShape(Dim.roundedCorners(20), null, null));
-            background.getPaint().setColor(accentColor);
-            closeButton.setBackground(background);
-            closeButton.setTextColor(Color.WHITE);
+        if(items.size()>1){
+            Runnable downloaddAllFuncCall = () -> {
+                items.forEach(item->{
+                    downloadFile(item);
+                });
+            };
+            Button downloadAllButton = createBottomButton(context,dialog,accentColor,str("piko_pref_native_downloader_download_all"),downloaddAllFuncCall);
+            row.addView(downloadAllButton);
         }
-        closeButton.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, Dim.dp36));
+
+        Button closeButton = createBottomButton(context,dialog,accentColor,str("piko_cancel"),null);
         row.addView(closeButton);
         return row;
     }
