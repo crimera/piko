@@ -147,7 +147,7 @@ public class PeopleCellDialogBox {
     private static int resolveDialogBackgroundColor(@NonNull Context context) {
         int primaryBackground = resolveThemedColor(context, "igds_color_primary_background");
 
-        return Color.luminance(primaryBackground) < 0.5
+        return UI.isDarkMode()
                 ? ResourceUtils.getColor("igds_prism_black", primaryBackground)
                 : primaryBackground;
     }
