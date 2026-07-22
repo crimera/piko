@@ -370,8 +370,9 @@ public class ScreenBuilder {
             addPreference(nativePageDescription);
         }
 
-        LegacyTwitterPreferenceCategory category = preferenceCategory(str("piko_title_native_downloader"));
+        LegacyTwitterPreferenceCategory category = null;
         if (SettingsStatus.nativeDownloader) {
+            category = preferenceCategory(str("piko_title_native_downloader"));
             addPreference(category,
                     helper.switchPreference(
                             str("piko_title_native_downloader_toggle"),

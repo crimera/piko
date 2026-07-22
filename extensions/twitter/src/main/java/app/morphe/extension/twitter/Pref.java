@@ -81,23 +81,23 @@ public class Pref {
     }
 
     public static boolean nativeDownloaderAutodownloadHighestVideoRes() {
-        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER_AUTODOWNLOAD_HIGHEST_VIDEO_RES);
+        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER_AUTODOWNLOAD_HIGHEST_VIDEO_RES) && enableNativeDownloader();
     }
 
     public static boolean nativeDownloaderShowDownloadIcon() {
-        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER_SHOW_DOWNLOAD_ICON);
+        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER_SHOW_DOWNLOAD_ICON) && enableNativeDownloader();
     }
 
     public static boolean nativeDownloaderShowCopyIcon() {
-        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER_SHOW_COPY_ICON);
+        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER_SHOW_COPY_ICON) && enableNativeDownloader();
     }
 
     public static boolean nativeDownloaderShowVariantsIcon() {
-        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER_SHOW_VARIANTS_ICON);
+        return Utils.getBooleanPref(Settings.VID_NATIVE_DOWNLOADER_SHOW_VARIANTS_ICON) && enableNativeDownloader();
     }
 
     public static boolean enableInlineDownloadButton() {
-        return Utils.getBooleanPref(Settings.VID_INLINE_DOWNLOAD_BUTTON);
+        return Utils.getBooleanPref(Settings.VID_INLINE_DOWNLOAD_BUTTON) && enableNativeDownloader() && SettingsStatus.inlineDownloadButton;
     }
 
     public static int natveTranslatorProvider(){
