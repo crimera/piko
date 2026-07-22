@@ -85,6 +85,7 @@ public class DownloadDialog {
         Dialog dialog = pair.first;
         LinearLayout mainLayout = pair.second;
 
+        // Dialog window requires a transparent background to properly display
         // the rounded corners regardless of theme. Clearing it here fixes that.
         Window window = dialog.getWindow();
         if (window != null) {
@@ -207,7 +208,6 @@ public class DownloadDialog {
         if (item.hasVariants() && Pref.nativeDownloaderShowVariantsIcon()) {
             View variantsButton = createIconButton(context, "ic_vector_bulleted_list", accentColor,
                     () -> showVariantsDialog(context, item));
-            variantsButton.setEnabled(true);
             row.addView(variantsButton);
         }
 
@@ -300,11 +300,7 @@ public class DownloadDialog {
         row.addView(closeButton);
 
         if (hasMultipleItems) {
-            Button downloadAllButton = CustomDialog.createButton(context, dialog, str("piko_pref_native_downloader_download_all"), () -> {
-                for (DownloadItem item : items) {
-                    downloadFile(item);
-                }
-            }, true, true);
+            Button downloadAllButton = CustomDialog.createButton(context, dialog, str("piko_pref_native_downloader_download_all"), () -> downloadAll(items), true, true);
             if (accentColor != null) {
                 ShapeDrawable shape = new ShapeDrawable(new RoundRectShape(Dim.roundedCorners(20), null, null));
                 shape.getPaint().setColor(accentColor);
@@ -324,6 +320,13 @@ public class DownloadDialog {
     // ---------------------------------------------------------------------------------------
     // Actions
     // ---------------------------------------------------------------------------------------
+
+    public static void downloadAll(List<DownloadItem> items) {
+        if (items == null) return;
+        for (DownloadItem item : items) {
+            downloadFile(item);
+        }
+    }
 
     private static void downloadFile(DownloadItem item) {
         PikoUtils.toast(str("download_started"));

@@ -24,21 +24,9 @@ public class NativeDownloader {
     public static String downloadString() {
         return str("piko_pref_native_downloader_alert_title");
     }
-    private static String getExtension(String typ) {
-        if (typ.equals("video/mp4")) {
-            return "mp4";
-        }
-        if (typ.equals("video/webm")) {
-            return "webm";
-        }
-        if (typ.equals("application/x-mpegURL")) {
-            return "m3u8";
-        }
-        return "jpg";
-    }
 
     private static String generateFileName(Tweet tweet) throws Exception {
-        String tweetId = ""+tweet.getTweetId();
+        String tweetId = String.valueOf(tweet.getTweetId());
         int fileNameType = Pref.nativeDownloaderFileNameType();
         switch (fileNameType) {
             case 1:
@@ -113,8 +101,7 @@ public class NativeDownloader {
             Tweet tweet = new Tweet(tweetObj);
             ArrayList<ArrayList<Media>> media = tweet.getMediaList();
 
-            assert media != null;
-            if (media.isEmpty()) {
+            if (media == null || media.isEmpty()) {
                 PikoUtils.toast(str("piko_pref_native_downloader_no_media"));
                 return;
             }

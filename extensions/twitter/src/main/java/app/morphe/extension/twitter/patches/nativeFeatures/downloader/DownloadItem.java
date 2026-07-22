@@ -37,6 +37,6 @@ public class DownloadItem {
     }
 
     public boolean hasVariants() {
-return !variants.isEmpty() && variants.size()>1;
+        return variants != null && variants.size() > 1;
     }
 }
