@@ -52,6 +52,8 @@
     <string name="piko_disable_reels_scrolling_desc">"リールでのスクロールを無効化し、次のリールをスワイプして視聴できないようにします。
 
 初めてリールを視聴する際、「上にスワイプしてさらに表示」と表示される場合がありますが、数秒後に自動で停止します。"</string>
+    <string name="piko_disable_swipe_to_create">作成画面へのスワイプを無効化</string>
+    <string name="piko_disable_swipe_to_create_desc">ホームタブで右にスワイプしても、作成画面が開かないようにします。</string>
     <string name="piko_hide_stories_tray">ストーリーズ欄を非表示</string>
     <string name="piko_hide_stories_tray_desc">メインフィードからストーリーズ欄を非表示にします</string>
     <string name="piko_hide_notes_tray">ノート欄を非表示</string>

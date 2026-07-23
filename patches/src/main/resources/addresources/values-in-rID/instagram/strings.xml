@@ -52,6 +52,8 @@
     <string name="piko_disable_reels_scrolling_desc">"Menonaktifkan perilaku pengguliran tak terbatas di Instagram Reels, mencegah usapan ke Reels berikutnya.
 
 Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan berhenti dengan sendirinya setelah beberapa detik."</string>
+    <string name="piko_disable_swipe_to_create">Nonaktifkan fitur usap untuk membuat</string>
+    <string name="piko_disable_swipe_to_create_desc">Mencegah layar pembuatan terbuka saat mengusap ke kanan pada tab beranda.</string>
     <string name="piko_hide_stories_tray">Sembunyikan deretan cerita</string>
     <string name="piko_hide_stories_tray_desc">Menyembunyikan deretan cerita dari feed beranda utama</string>
     <string name="piko_hide_notes_tray">Sembunyikan deretan catatan</string>

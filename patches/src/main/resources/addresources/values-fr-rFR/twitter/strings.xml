@@ -36,6 +36,11 @@
     <string name="piko_pref_native_page_desc">Ces fonctionnalités natives de Piko sont disponibles dans le menu de publication.</string>
     <string name="piko_title_native_downloader">Téléchargeur natif</string>
     <string name="piko_title_native_downloader_toggle">Activer le téléchargeur natif</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res">Télécharger automatiquement la résolution vidéo la plus élevée</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">Ignorer la boîte de dialogue de sélection et télécharger immédiatement la meilleure résolution disponible pour les vidéos individuelles.</string>
+    <string name="piko_pref_native_downloader_show_download_icon">Afficher l’icône de téléchargement</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">Afficher l’icône de copie</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">Afficher l’icône des variantes</string>
     <string name="piko_pref_native_downloader_inline_button">Afficher le bouton de téléchargement en ligne</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Ajoute un bouton de téléchargement directement à la barre d\'action de publication</string>
     <string name="piko_pref_native_downloader_alert_title">Télécharger le média</string>

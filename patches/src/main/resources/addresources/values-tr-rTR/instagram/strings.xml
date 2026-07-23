@@ -52,6 +52,8 @@
     <string name="piko_disable_reels_scrolling_desc">"Instagram Reels'deki sonsuz kaydırma özelliğini devre dışı bırakır, sonraki Reel'e kaydırmayı engeller.
 
 Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye sonra kendiliğinden duracaktır."</string>
+    <string name="piko_disable_swipe_to_create">Kaydırarak içerik oluşturmayı kapat</string>
+    <string name="piko_disable_swipe_to_create_desc">Ana sekmede sağa kaydırarak oluşturma ekranının açılmasını engeller.</string>
     <string name="piko_hide_stories_tray">Hikayeler tepsisini gizle</string>
     <string name="piko_hide_stories_tray_desc">Ana akıştan hikayeler tepsisini gizle</string>
     <string name="piko_hide_notes_tray">Notlar tepsisini gizle</string>

@@ -52,6 +52,8 @@
     <string name="piko_disable_reels_scrolling_desc">"Wyłącza nieskończone przewijanie rolek na Instagramie, blokując przejście do następnej
 
 Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po kilku sekundach sama zniknie"</string>
+    <string name="piko_disable_swipe_to_create">Wyłącz gest tworzenia</string>
+    <string name="piko_disable_swipe_to_create_desc">Blokuje otwieranie ekranu tworzenia po przesunięciu w prawo na stronie głównej</string>
     <string name="piko_hide_stories_tray">Ukryj pasek relacji</string>
     <string name="piko_hide_stories_tray_desc">Ukrywa pasek z relacjami na osi czasu</string>
     <string name="piko_hide_notes_tray">Ukryj pasek notatek</string>

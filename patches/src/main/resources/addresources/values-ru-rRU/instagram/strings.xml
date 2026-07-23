@@ -52,6 +52,8 @@
     <string name="piko_disable_reels_scrolling_desc">"Отключает бесконечное пролистывание в Reels, не позволяя переходить к следующему видео.
 
 Примечание: при чистой установке анимация «Подсказка» может появиться, но через несколько секунд остановится сама."</string>
+    <string name="piko_disable_swipe_to_create">Отключить создание свайпом</string>
+    <string name="piko_disable_swipe_to_create_desc">Блокирует открытие экрана создания при свайпе вправо на главной вкладке</string>
     <string name="piko_hide_stories_tray">Скрыть панель историй</string>
     <string name="piko_hide_stories_tray_desc">Скрывает панель историй в главной ленте</string>
     <string name="piko_hide_notes_tray">Скрыть панель заметок</string>

@@ -36,6 +36,11 @@
     <string name="piko_pref_native_page_desc">이 Piko 기본 기능은 게시물 메뉴에서 사용할 수 있습니다</string>
     <string name="piko_title_native_downloader">기본 다운로더</string>
     <string name="piko_title_native_downloader_toggle">기본 다운로더 활성화하기</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res">최고 화질 동영상 자동 다운로드</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">단일 동영상은 화질 선택 다이얼로그를 건너뛰고, 사용 가능한 가장 높은 화질으로 즉시 다운로드합니다</string>
+    <string name="piko_pref_native_downloader_show_download_icon">다운로드 아이콘 표시</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">복사 아이콘 표시</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">변형 아이콘 표시</string>
     <string name="piko_pref_native_downloader_inline_button">타임라인 게시물에서 다운로드 버튼 표시하기</string>
     <string name="piko_pref_native_downloader_inline_button_desc">게시물 액션바에 즉시 다운로드 버튼을 추가합니다</string>
     <string name="piko_pref_native_downloader_alert_title">미디어 다운로드</string>

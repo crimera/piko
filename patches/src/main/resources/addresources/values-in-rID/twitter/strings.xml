@@ -36,9 +36,15 @@
     <string name="piko_pref_native_page_desc">Fitur bawaan Piko ini tersedia di menu postingan.</string>
     <string name="piko_title_native_downloader">Pengunduh bawaan</string>
     <string name="piko_title_native_downloader_toggle">Aktifkan pengunduh bawaan</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res">Unduh video dengan resolusi tertinggi secara otomatis</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">Lewati jendela dialog pemilihan dan langsung unduh resolusi terbaik yang tersedia untuk setiap video.</string>
+    <string name="piko_pref_native_downloader_show_download_icon">Tampilkan ikon unduh</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">Tampilkan ikon salin</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">Tampilkan ikon varian</string>
     <string name="piko_pref_native_downloader_inline_button">Tampilkan tombol unduh pada halaman</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Menambahkan tombol unduh langsung ke bilah tindakan postingan</string>
     <string name="piko_pref_native_downloader_alert_title">Unduh media</string>
+    <string name="piko_video_variants">Varian video</string>
     <string name="piko_pref_native_downloader_download_all">Unduh semua</string>
     <string name="piko_pref_native_downloader_no_media">Tidak ditemukan media</string>
     <string name="piko_pref_native_downloader_filename_title">Simpan pola nama berkas</string>
@@ -383,4 +389,6 @@ Disarankan untuk membaca halaman ini sebelum menggunakan fitur ini. Halaman ters
     <string name="piko_login_token_import_success_reopen_required">Buka kembali aplikasi</string>
     <string name="piko_login_token_import_failed_missing_info">Kesalahan: \"username\" atau \"token\" atau \"secret\" tidak ditemukan</string>
     <string name="piko_login_token_import_failed_already_exist">Gagal menambahkan akun (mungkin sudah ada)</string>
+    <string name="piko_ok">OKE</string>
+    <string name="piko_cancel">Batalkan</string>
 </resources>

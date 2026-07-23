@@ -39,6 +39,7 @@
     <string name="piko_pref_native_downloader_inline_button">インラインバーにダウンロードボタンを表示</string>
     <string name="piko_pref_native_downloader_inline_button_desc">インラインバーにダウンロードボタンを追加します</string>
     <string name="piko_pref_native_downloader_alert_title">メディアをダウンロード</string>
+    <string name="piko_video_variants">動画の解像度</string>
     <string name="piko_pref_native_downloader_download_all">すべてダウンロード</string>
     <string name="piko_pref_native_downloader_no_media">メディアが見つかりません</string>
     <string name="piko_pref_native_downloader_filename_title">ファイル名のパターンを選択</string>
@@ -383,4 +384,6 @@ https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
     <string name="piko_login_token_import_success_reopen_required">アプリを再起動してください</string>
     <string name="piko_login_token_import_failed_missing_info">エラー:「username」、「token」、または「secret」が見つかりません。</string>
     <string name="piko_login_token_import_failed_already_exist">アカウントの追加に失敗しました(既に存在している可能性があります)</string>
+    <string name="piko_ok">OK</string>
+    <string name="piko_cancel">キャンセル</string>
 </resources>
