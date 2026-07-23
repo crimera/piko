@@ -1,3 +1,21 @@
+## [3.8.0-dev.6](https://github.com/crimera/piko/compare/v3.8.0-dev.5...v3.8.0-dev.6) (2026-07-23)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Match piko settings highlight to theme ([#1548](https://github.com/crimera/piko/issues/1548)) ([c428e7e](https://github.com/crimera/piko/commit/c428e7ea762cf2ec94e5e9a9f17ea207a976176f))
+* **Instagram:** Match story mention dialog to Instagram theme ([#1554](https://github.com/crimera/piko/issues/1554)) ([08563ca](https://github.com/crimera/piko/commit/08563ca54d486585e5fc4bc7c432d6f5f19e6d28))
+* **Instagram:** Restore and sync ghost action bar icons ([#1545](https://github.com/crimera/piko/issues/1545)) ([1240faf](https://github.com/crimera/piko/commit/1240faf55fa68867e9517bbd017e1cd1978cfa72))
+* **Twitter - Native Downloader:** Add missing downloadAll method and fix null checks ([ba9d036](https://github.com/crimera/piko/commit/ba9d036e7e01a2455e291504ec4984c9b94cda94))
+* **Twitter - Native Downloader:** Clean stale temp file before download and auto-retry legacy resolution if orig fails ([a9d9bd1](https://github.com/crimera/piko/commit/a9d9bd15f9895d723a3bb9eea1ea2d56cd6aa3e4))
+* **Twitter - Settings:** Guard native downloader preferences and category by patch status ([d2ac7a0](https://github.com/crimera/piko/commit/d2ac7a08f9ac2679e7b3a1cb999f79e11fae2e76))
+* **Twitter:** Apply custom sharing domain to copied links ([#1555](https://github.com/crimera/piko/issues/1555)) ([8e9bec8](https://github.com/crimera/piko/commit/8e9bec895638b5de3c585647496676915b610040))
+* **Twitter:** Create category only if the patch is patched ([f3538a3](https://github.com/crimera/piko/commit/f3538a30d2c1d98a3c56e1fe0a7b5222b1ba35ae))
+
+### ✨ New Features
+
+* **instagram:** Material You theme ([#1509](https://github.com/crimera/piko/issues/1509)) ([9d97f59](https://github.com/crimera/piko/commit/9d97f590cd17e79c66a39deeedcb12a2f9f510f8))
+* **Twitter - Native Downloader:** Add long-press to download all inline button ([f3d11e6](https://github.com/crimera/piko/commit/f3d11e653fd90176cdb2edc21d375447f63a4c39))
+
 ## [3.8.0-dev.5](https://github.com/crimera/piko/compare/v3.8.0-dev.4...v3.8.0-dev.5) (2026-07-19)
 
 ### 🐛 Bug Fixes

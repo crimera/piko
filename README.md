@@ -66,7 +66,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.8.0-dev.5](https://github.com/crimera/piko/releases/tag/v3.8.0-dev.5)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;128 patches total
+> **[v3.8.0-dev.6](https://github.com/crimera/piko/releases/tag/v3.8.0-dev.6)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;128 patches total
 <details>
 <summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;74 patches</summary>
 <br>
@@ -168,7 +168,6 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 |----------|----------------|-----------|
 | [Add settings](#add-settings) | Adds settings to control preferences are patching |  |
 | [Allow user network certificate](#allow-user-network-certificate) | Allows user network certificate for whitehat testing |  |
-| [Amoled theme](#amoled-theme) | Replaces Instagram's dark-mode background greys with pure black for AMOLED displays. |  |
 | [Change like animation](#change-like-animation) | Change the animation to one from existing Rings like animations |  |
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
 | [Clone](#clone) | Changes the package name and the app name. This allows you to install the patched app alongside the original Instagram app.<br>Caution: Do not select the official Morphe's "Change package name" universal patch. | • Package name<br>• App name |
@@ -212,6 +211,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Sanitize share links](#sanitize-share-links) |  |  |
 | [Save media comment](#save-media-comment) | Adds a button to save media comments on posts and reels. |  |
 | [Stories audio autoplay](#stories-audio-autoplay) |  |  |
+| [Theme](#theme) | Applies either amoled or material you theme for Instagram at patch time. [default = material you] | • Pure-black AMOLED theme |
 | [Unlock Plus benefits](#unlock-plus-benefits) | Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK |  |
 | [Unlock developer options](#unlock-developer-options) | Unlocks developer option by long pressing home icon |  |
 | [Unlock employee options](#unlock-employee-options) | Unlocks all options using by employee for debugging |  |
