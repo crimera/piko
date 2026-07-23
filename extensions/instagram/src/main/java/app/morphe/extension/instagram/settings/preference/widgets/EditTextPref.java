@@ -19,7 +19,7 @@ public class EditTextPref extends EditTextPreference {
     private static Helper helper;
 
     public EditTextPref(Context context) {
-        super(context);
+        super(InstagramPreferenceStyle.dialogContext(context));
         helper = new Helper(context);
         init();
     }

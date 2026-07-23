@@ -49,6 +49,23 @@ public final class InstagramPreferenceStyle {
         );
     }
 
+    /**
+     * Native list / multi-select / edit-text preference dialogs build from
+     * getContext()'s platform alertDialogTheme. The settings activity is registered
+     * with a fixed dark DeviceDefault theme, so without this the dialogs are always
+     * dark. Wrapping the preference's context in a matching DeviceDefault theme makes
+     * them follow Instagram's resolved in-app theme, via {@link UI#isDarkMode()} (the
+     * luminance of the themed background), rather than the device's night setting — so
+     * the dialog matches IG even when the device and IG themes disagree. This only
+     * selects a platform DIALOG theme; it sets no app colour.
+     */
+    public static Context dialogContext(Context context) {
+        int themeRes = UI.isDarkMode()
+                ? android.R.style.Theme_DeviceDefault
+                : android.R.style.Theme_DeviceDefault_Light;
+        return new android.view.ContextThemeWrapper(context, themeRes);
+    }
+
     public static int backgroundColor() {
         int primaryBackground = UI.getThemedColour("igds_color_primary_background");
 
@@ -495,7 +512,7 @@ public final class InstagramPreferenceStyle {
 
             boolean enabled = isEnabled();
 
-            int onTrack = primaryTextColor();
+            int onTrack = UI.getThemedColour("igds_color_primary_button");
             int onThumb = backgroundColor();
 
             int offTrack = ResourceUtils.getColor("material_unselected_track", pressedBackgroundColor());
@@ -594,6 +611,34 @@ public final class InstagramPreferenceStyle {
             paint.setStyle(Paint.Style.FILL);
             paint.setColor(thumbColor);
             canvas.drawCircle(cx, cy, thumbRadius, paint);
+
+            // Checkmark on the thumb when enabled, drawn in the accent colour so it
+            // reads against the surface-coloured thumb. Fades in with colorProgress.
+            if (enabled && colorProgress > 0f) {
+                int checkColor = UI.getThemedColour("igds_color_primary_button");
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(dp(getContext(), 2));
+                paint.setStrokeCap(Paint.Cap.ROUND);
+                paint.setStrokeJoin(Paint.Join.ROUND);
+                paint.setColor(Color.argb(
+                        Math.round(Color.alpha(checkColor) * colorProgress),
+                        Color.red(checkColor),
+                        Color.green(checkColor),
+                        Color.blue(checkColor)
+                ));
+
+                float checkSize = thumbRadius * 0.82f;
+                float startX = cx - (checkSize * 0.34f);
+                float startY = cy - (checkSize * 0.03f);
+                float midX = cx - (checkSize * 0.09f);
+                float midY = cy + (checkSize * 0.23f);
+                float endX = cx + (checkSize * 0.38f);
+                float endY = cy - (checkSize * 0.27f);
+                canvas.drawLine(startX, startY, midX, midY, paint);
+                canvas.drawLine(midX, midY, endX, endY, paint);
+                paint.setStrokeCap(Paint.Cap.BUTT);
+                paint.setStrokeJoin(Paint.Join.MITER);
+            }
         }
 
         private float lerp(float from, float to, float amount) {
