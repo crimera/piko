@@ -13,6 +13,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 @Suppress("unused")
@@ -22,6 +23,28 @@ val xLiteDownloadPatch =
         description = "Unlocks media downloads in X-Lite timeline and subscription features.",
     ) {
         execute {
+            // New X-Lite video-player UI: bypass the checker branch in the
+            // VideoDownloadClicked handler. This is separate from p4's timeline path.
+            XLitePremiumSubscriptionCheckerFingerprint.matchAllOrNull()?.forEach { match ->
+                match.method.addInstructions(
+                    0,
+                    """
+                    const/4 v0, 0x1
+                    return v0
+                    """.trimIndent(),
+                )
+            }
+
+            XLiteVideoTabDownloadHandlerFingerprint.matchAll().forEach { match ->
+                val premiumResult = match.instructionMatches[1]
+                val premiumRegister =
+                    (premiumResult.instruction as OneRegisterInstruction).registerA
+                match.method.addInstruction(
+                    premiumResult.index + 1,
+                    "const/16 v$premiumRegister, 0x1",
+                )
+            }
+
             // Target 1: Bypass timeline download event handler premium gate (p4.smali)
             XLiteDownloadEventHandlerFingerprint.method.apply {
                 val invokeLocations = instructions.filter { inst ->
