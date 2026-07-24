@@ -11,6 +11,8 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import java.util.List;
 import android.content.Context;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
@@ -87,7 +89,7 @@ public class HandleCommentButton {
                         MediaData imageData = commentData.getImageMedia();
                         UserData userData = commentData.getCommentUserData();
 
-                        String userName = (userData != null) ? userData.getUsername() : "comment";
+                        String userName = (userData != null) ? userData.getUsername() : "comment_"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
                         String mediaLink = imageData.getMediaLink();
                         String fileName = userName + "_" + imageData.getDownloadFilename(MediaType.ANY);
 
