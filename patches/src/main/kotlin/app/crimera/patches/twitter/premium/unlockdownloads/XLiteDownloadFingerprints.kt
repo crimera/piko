@@ -24,9 +24,9 @@ internal object XLiteDownloadEventHandlerFingerprint : Fingerprint(
 
 /**
  * New X-Lite video-player handler, distinct from the URT timeline handler above.
- * It gates VideoDownloadClicked with an injected checker before isDownloadable().
- * The method/class names are obfuscated; the preserved model method and control-flow
- * shape are the stable anchors.
+ * It handles both VideoDownloadClicked and VideoAddToOfflineClicked. The download
+ * branch's preserved model calls and control-flow shape identify the obfuscated handler;
+ * direct SubscriptionsFeatures checks in that handler gate offline-video availability.
  */
 internal object XLiteVideoTabDownloadHandlerFingerprint : Fingerprint(
     parameters = listOf("L"),
