@@ -13,6 +13,7 @@ import app.crimera.patches.twitter.misc.extension.twitterInitHook
 import app.crimera.patches.twitter.premium.redirectBMNavBar.redirectBMTab
 import app.crimera.patches.twitter.utils.Constants.ACTIVITY_HOOK_CLASS
 import app.crimera.patches.twitter.utils.Constants.ACTIVITY_SETTINGS_CLASS
+import app.crimera.patches.twitter.utils.Constants.COMPOSE_SETTINGS_HOOK_CLASS
 import app.crimera.patches.twitter.utils.Constants.DEEPLINK_HOOK_CLASS
 import app.crimera.patches.twitter.utils.Constants.SSTS_DESCRIPTOR
 import app.crimera.patches.twitter.utils.Constants.UTILS_DESCRIPTOR
@@ -60,6 +61,48 @@ val settingsPatch =
         execute {
             addAppResources("shared")
             addAppResources("twitter")
+
+            val composeSettingsMatches = ComposeSettingsBasicItemFingerprint.matchAll()
+            if (composeSettingsMatches.size != 1) {
+                throw PatchException(
+                    "Expected one X-Lite Compose settings row renderer, found ${composeSettingsMatches.size}",
+                )
+            }
+
+            composeSettingsMatches.single().let { match ->
+                val originalMethod = match.originalMethod
+                val rendererReference =
+                    "${originalMethod.definingClass}->${originalMethod.name}(" +
+                        originalMethod.parameterTypes.joinToString("") +
+                        ")${originalMethod.returnType}"
+                val predicateRegister = match.method.findFreeRegister(0)
+                val descriptionRegister = match.method.findFreeRegister(0, predicateRegister)
+                val clickRegister =
+                    match.method.findFreeRegister(0, listOf(predicateRegister, descriptionRegister))
+
+                match.method.addInstructionsWithLabels(
+                    0,
+                    """
+                        invoke-static/range { p0 .. p0 }, $COMPOSE_SETTINGS_HOOK_CLASS->isAdditionalResourcesTitle(Ljava/lang/String;)Z
+                        move-result v$predicateRegister
+                        if-eqz v$predicateRegister, :piko_compose_settings_original
+                        move-object/from16 v$predicateRegister, p0
+                        move-object/from16 v$descriptionRegister, p1
+                        move-object/from16 v$clickRegister, p3
+                        invoke-static {}, $COMPOSE_SETTINGS_HOOK_CLASS->getPikoSettingsTitle()Ljava/lang/String;
+                        move-result-object p0
+                        const/16 p1, 0x0
+                        invoke-static {}, $COMPOSE_SETTINGS_HOOK_CLASS->getPikoSettingsClickHandler()Lkotlin/jvm/functions/Function0;
+                        move-result-object p3
+                        invoke-static/range { p0 .. p11 }, $rendererReference
+                        move-object/from16 p0, v$predicateRegister
+                        move-object/from16 p1, v$descriptionRegister
+                        move-object/from16 p3, v$clickRegister
+                        :piko_compose_settings_original
+                        nop
+                    """.trimIndent(),
+                )
+            }
 
             SettingsFragmentFingerprint.let {
                 it.method.apply {
