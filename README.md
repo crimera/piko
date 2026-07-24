@@ -44,8 +44,12 @@ Then patch Twitter/X or Instagram:
 java -jar cli.jar patch --patches piko.mpp input.apkm
 ```
 
+
 **X-Shim**
 
+Starting `12.5.0-release.0` **you need not** apply X-Shim along with Piko patches. X login and XChat will work fine without X-Shim patches.
+
+<del>
 To patch with Twitter/X version 11.88 and above, you must include patches from another repo/project called [Piko-Shim](https://gitlab.com/inotia00/piko-shim/) developed by [@inotia00](https://github.com/inotia00)
 
 [➕ Add X-Shim to Morphe](https://morphe.software/add-source?gitlab=inotia00/x-shim)
@@ -62,6 +66,8 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 * The X Shim patch only adds a compatibility shim layer and pairip is not removed.
 
 > For an up-to-date patching guide, [follow this Reddit guide](https://www.reddit.com/r/MorpheApp/comments/1r4xt24/x_twitter_can_now_be_patched_with_piko_patches/).
+
+</del>
 
 ## ⚙️ Patch Details
 
