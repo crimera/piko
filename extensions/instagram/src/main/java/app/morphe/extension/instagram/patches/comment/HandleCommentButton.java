@@ -50,6 +50,8 @@ public class HandleCommentButton {
         }
     }
 
+    // return true = Piko button clicked no need to check Instagram's buttons.
+    // return false = Piko button not clicked, check Instagram's buttons.
     public static boolean checkOnCommentButtonClick(Object button, List list) {
         try {
             if (list.isEmpty()) return false;
@@ -74,7 +76,6 @@ public class HandleCommentButton {
                 return true;
 
             } else if (button.equals(SaveMediaButton.A00)) {
-                try {
                     CommentData commentData = new CommentData(commentObject);
 
                     Context context = (Context) Utils.getActivity();
@@ -93,23 +94,18 @@ public class HandleCommentButton {
                         String subFolder = DownloadUtils.getSubfolderName(userName);
 
                         DownloadUtils.downloadMediaUrl(context, mediaLink, subFolder, fileName);
-                    } else {
-                        PikoUtils.toast(str("piko_comment_copied_failed"));
                     }
-                } catch (Exception ex) {
-                    PikoUtils.logger(ex);
-                    PikoUtils.toast(str("piko_comment_copied_failed"));
-                }
+                
                 return true;
             }
 
-            return false;
-
         } catch (Exception e) {
             PikoUtils.logger(e);
-            return false;
-
+            PikoUtils.toast(e.getMessage());
+            // If exception happens, we need not check Instagram's button.
+            return true;
         }
+        return false;
     }
 
 }
