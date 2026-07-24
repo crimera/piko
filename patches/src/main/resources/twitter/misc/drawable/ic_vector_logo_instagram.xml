@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="512dp"
+    android:height="512dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+    <path
+        android:fillColor="#000000"
+        android:pathData="
+          M 344,0
+          L 168,0
+          C 75.4,0 0,75.4 0,168
+          L 0,344
+          C 0,436.6 75.4,512 168,512
+          L 344,512
+          C 436.6,512 512,436.6 512,344
+          L 512,168
+          C 512,75.4 436.6,0 344,0
+          Z
+          M 464,344
+          C 464,410.2 410.2,464 344,464
+          L 168,464
+          C 101.8,464 48,410.2 48,344
+          L 48,168
+          C 48,101.8 101.8,48 168,48
+          L 344,48
+          C 410.2,48 464,101.8 464,168
+          Z" />
+
+    <!-- Camera lens (large circle ring) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="
+          M 256,129
+          C 186.4,129 129,186.4 129,256
+          C 129,325.6 186.4,383 256,383
+          C 325.6,383 383,325.6 383,256
+          C 383,186.4 325.6,129 256,129
+          Z
+          M 256,335
+          C 212.8,335 177,299.2 177,256
+          C 177,212.8 212.8,177 256,177
+          C 299.2,177 335,212.8 335,256
+          C 335,299.2 299.2,335 256,335
+          Z" />
+
+    <!-- Viewfinder dot (top-right) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="
+          M 388,94
+          C 373.1,94 361,106.1 361,121
+          C 361,135.9 373.1,148 388,148
+          C 402.9,148 415,135.9 415,121
+          C 415,106.1 402.9,94 388,94
+          Z" />
+
+</vector>

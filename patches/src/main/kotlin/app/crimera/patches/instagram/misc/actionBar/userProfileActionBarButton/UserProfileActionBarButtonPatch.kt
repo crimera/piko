@@ -8,9 +8,11 @@ package app.crimera.patches.instagram.misc.actionBar.userProfileActionBarButton
 
 import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
+import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.ACTIONBAR_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.USER_DETAIL_VIEW_MODEL_CLASS
+import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.utils.methodExtractor
 import app.morphe.patcher.Fingerprint
@@ -65,11 +67,11 @@ val userProfileActionBarButtonPatch =
                     it.type == USER_DETAIL_VIEW_MODEL_CLASS
                 }
 
-            val userDataFieldInUserDetailClass =
-                classDefBy { it.type == USER_DETAIL_VIEW_MODEL_CLASS }.fields.first {
-                    it.type ==
-                        USER_MODEL_CLASS_NAME
-                }
+            val userDetailsClassFields = classDefBy { it.type == USER_DETAIL_VIEW_MODEL_CLASS }.fields
+
+            val userDataFieldInUserDetailClass = userDetailsClassFields.first { it.type == USER_MODEL_CLASS_NAME }
+
+            val userSessionFieldInUserDetailClass = userDetailsClassFields.first { it.type == USER_SESSION_CLASS }
 
             ProfileActionBarFingerprint
                 .method
@@ -87,6 +89,7 @@ val userProfileActionBarButtonPatch =
                             val invokeStaticAfterGoto = indexOfFirstInstruction(gotoIndexAfterTarget, Opcode.INVOKE_STATIC)
 
                             val actionBarRelatedObjectParameterRegister = getInstruction(invokeStaticAfterGoto).registersUsed[2]
+                            val userSessionRegister = getInstruction(invokeStaticAfterGoto).registersUsed[1]
 
                             val CODE =
                                 """
@@ -99,7 +102,7 @@ val userProfileActionBarButtonPatch =
                                 if-eqz v$freeRegister, :piko
                                 iget-object v$freeRegister,v$freeRegister, $userDataFieldInUserDetailClass
                                 
-                                invoke-static {v$viewGroupRegister, v$freeRegister}, $ACTIONBAR_DESCRIPTOR/UserProfileActionBar;->addActionBarButton(Landroid/view/ViewGroup;Ljava/lang/Object;)V
+                                invoke-static {v$viewGroupRegister, v$userSessionRegister, v$freeRegister}, $ACTIONBAR_DESCRIPTOR->userProfileActionBarButton(Landroid/view/ViewGroup;${USER_SESSION_CLASS}Ljava/lang/Object;)V
                                 """.trimIndent()
 
                             addInstructionsWithLabels(

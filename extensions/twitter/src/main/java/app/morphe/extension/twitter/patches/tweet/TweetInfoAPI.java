@@ -23,8 +23,12 @@ public class TweetInfoAPI {
     private static JSONObject fetchStatusById(String id) {
         HttpURLConnection connection = null;
         BufferedReader reader = null;
+
+        // empty object returned on error, because null would be indistinguishable from no response at all
+        JSONObject empty = new JSONObject();
+
         if(!app.morphe.extension.shared.Utils.isNetworkConnected()){
-            return null;
+            return empty;
         }
         try {
             String apiUrl = "https://api.fxtwitter.com/x/status/" + id;
@@ -37,7 +41,8 @@ public class TweetInfoAPI {
 
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new Exception("HTTP error code: " + responseCode);
+                PikoUtils.logger("HTTP error code when fetching tweet source: " + responseCode);
+                return empty;
             }
 
             reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -51,7 +56,7 @@ public class TweetInfoAPI {
 
         } catch (Exception e) {
             PikoUtils.logger(e);
-            return null;
+            return empty;
 
         } finally {
             try {

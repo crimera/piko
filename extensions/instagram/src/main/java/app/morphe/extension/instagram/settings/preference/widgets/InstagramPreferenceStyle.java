@@ -8,7 +8,6 @@ package app.morphe.extension.instagram.settings.preference.widgets;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -28,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.shared.ResourceUtils;
 
 public final class InstagramPreferenceStyle {
     private static final String TAG_TITLE = "piko_instagram_pref_title";
@@ -49,29 +49,51 @@ public final class InstagramPreferenceStyle {
         );
     }
 
-    public static boolean isDark(Context context) {
-        int nightMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        return nightMode == Configuration.UI_MODE_NIGHT_YES;
+    /**
+     * Native list / multi-select / edit-text preference dialogs build from
+     * getContext()'s platform alertDialogTheme. The settings activity is registered
+     * with a fixed dark DeviceDefault theme, so without this the dialogs are always
+     * dark. Wrapping the preference's context in a matching DeviceDefault theme makes
+     * them follow Instagram's resolved in-app theme, via {@link UI#isDarkMode()} (the
+     * luminance of the themed background), rather than the device's night setting — so
+     * the dialog matches IG even when the device and IG themes disagree. This only
+     * selects a platform DIALOG theme; it sets no app colour.
+     */
+    public static Context dialogContext(Context context) {
+        int themeRes = UI.isDarkMode()
+                ? android.R.style.Theme_DeviceDefault
+                : android.R.style.Theme_DeviceDefault_Light;
+        return new android.view.ContextThemeWrapper(context, themeRes);
     }
 
-    public static int backgroundColor(Context context) {
-        return isDark(context) ? Color.rgb(12, 15, 20) : Color.WHITE;
+    public static int backgroundColor() {
+        int primaryBackground = UI.getThemedColour("igds_color_primary_background");
+
+        return UI.isDarkMode()
+                ? ResourceUtils.getColor("igds_prism_black", primaryBackground)
+                : primaryBackground;
     }
 
-    public static int pressedBackgroundColor(Context context) {
-        return isDark(context) ? Color.rgb(35, 38, 43) : Color.rgb(239, 239, 240);
+    public static int pressedBackgroundColor() {
+        int secondaryBackground = UI.getThemedColour("igds_color_secondary_background");
+
+        if (!UI.isDarkMode() || backgroundColor() == Color.BLACK) {
+            return secondaryBackground;
+        }
+
+        return ResourceUtils.getColor("igds_prism_gray_09", secondaryBackground);
     }
 
-    public static int primaryTextColor(Context context) {
-        return isDark(context) ? Color.rgb(245, 245, 245) : Color.rgb(9, 12, 16);
+    public static int primaryTextColor() {
+        return UI.getThemedColour("igds_color_primary_text");
     }
 
-    public static int secondaryTextColor(Context context) {
-        return isDark(context) ? Color.rgb(166, 169, 176) : Color.rgb(104, 107, 115);
+    public static int secondaryTextColor() {
+        return UI.getThemedColour("igds_color_secondary_text");
     }
 
-    public static int disabledTextColor(Context context) {
-        return isDark(context) ? Color.rgb(53, 57, 64) : Color.rgb(198, 199, 204);
+    public static int disabledTextColor() {
+        return UI.getThemedColour("igds_color_separator");
     }
 
     public static View createPreferenceView(Context context, int trailingType) {
@@ -84,7 +106,7 @@ public final class InstagramPreferenceStyle {
         row.setGravity(Gravity.CENTER_VERTICAL);
         row.setMinimumHeight(dp(context, 78));
         row.setPadding(dp(context, 17), dp(context, 10), dp(context, 17), dp(context, 10));
-        row.setBackgroundColor(backgroundColor(context));
+        row.setBackgroundColor(backgroundColor());
         row.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -107,7 +129,7 @@ public final class InstagramPreferenceStyle {
             TextView title = new TextView(context);
             title.setTag(TAG_TITLE);
             title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-            title.setTextColor(primaryTextColor(context));
+            title.setTextColor(primaryTextColor());
             title.setIncludeFontPadding(true);
             title.setSingleLine(false);
             LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
@@ -125,7 +147,7 @@ public final class InstagramPreferenceStyle {
             TextView summary = new TextView(context);
             summary.setTag(TAG_SUMMARY);
             summary.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-            summary.setTextColor(secondaryTextColor(context));
+            summary.setTextColor(secondaryTextColor());
             summary.setLineSpacing(dp(context, 1), 1.0f);
             summary.setPadding(0, dp(context, 10), 0, 0);
             row.addView(summary, new LinearLayout.LayoutParams(
@@ -151,7 +173,7 @@ public final class InstagramPreferenceStyle {
         TextView title = new TextView(context);
         title.setTag(TAG_TITLE);
         title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-        title.setTextColor(primaryTextColor(context));
+        title.setTextColor(primaryTextColor());
         title.setIncludeFontPadding(true);
         title.setSingleLine(false);
         textColumn.addView(title, new LinearLayout.LayoutParams(
@@ -162,7 +184,7 @@ public final class InstagramPreferenceStyle {
         TextView summary = new TextView(context);
         summary.setTag(TAG_SUMMARY);
         summary.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        summary.setTextColor(secondaryTextColor(context));
+        summary.setTextColor(secondaryTextColor());
         summary.setLineSpacing(dp(context, 1), 1.0f);
         summary.setPadding(0, dp(context, 10), 0, 0);
         textColumn.addView(summary, new LinearLayout.LayoutParams(
@@ -187,8 +209,8 @@ public final class InstagramPreferenceStyle {
         TextView summary = view.findViewWithTag(TAG_SUMMARY);
         View trailing = view.findViewWithTag(TAG_TRAILING);
 
-        int titleColor = enabled ? primaryTextColor(context) : disabledTextColor(context);
-        int summaryColor = enabled ? secondaryTextColor(context) : disabledTextColor(context);
+        int titleColor = enabled ? primaryTextColor() : disabledTextColor();
+        int summaryColor = enabled ? secondaryTextColor() : disabledTextColor();
 
         if (title != null) {
             title.setText(preference.getTitle());
@@ -342,7 +364,7 @@ public final class InstagramPreferenceStyle {
         protected void dispatchDraw(Canvas canvas) {
             if (drawPressedHighlight && highlightView != null) {
                 pressedPaint.setStyle(Paint.Style.FILL);
-                pressedPaint.setColor(pressedBackgroundColor(getContext()));
+                pressedPaint.setColor(pressedBackgroundColor());
                 int top = highlightTop();
                 int bottom = highlightBottom();
                 canvas.drawRect(0, top, getWidth(), bottom, pressedPaint);
@@ -425,7 +447,7 @@ public final class InstagramPreferenceStyle {
             paint.setStrokeWidth(dp(getContext(), 1.9f));
             paint.setStrokeCap(Paint.Cap.ROUND);
             paint.setStrokeJoin(Paint.Join.ROUND);
-            paint.setColor(isEnabled() ? secondaryTextColor(getContext()) : disabledTextColor(getContext()));
+            paint.setColor(isEnabled() ? secondaryTextColor() : disabledTextColor());
 
             canvas.drawLine(armX, centerY - armOffset, tipX, centerY, paint);
             canvas.drawLine(tipX, centerY, armX, centerY + armOffset, paint);
@@ -488,21 +510,20 @@ public final class InstagramPreferenceStyle {
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
 
-            boolean dark = isDark(getContext());
             boolean enabled = isEnabled();
 
-            int offTrack = dark ? Color.rgb(95, 99, 110) : Color.rgb(220, 222, 230);
-            int onTrack = dark ? Color.rgb(220, 222, 230) : Color.BLACK;
-            int offThumb = dark ? Color.rgb(145, 150, 162) : Color.rgb(108, 114, 123);
-            int onThumb = dark ? Color.BLACK : Color.WHITE;
-            int stroke = dark ? Color.rgb(145, 150, 162) : Color.rgb(108, 114, 123);
+            int onTrack = UI.getThemedColour("igds_color_primary_button");
+            int onThumb = backgroundColor();
+
+            int offTrack = ResourceUtils.getColor("material_unselected_track", pressedBackgroundColor());
+            int offThumb = ResourceUtils.getColor("checkbox_unchecked_enabled", secondaryTextColor());
 
             if (!enabled) {
-                offTrack = dark ? Color.rgb(40, 44, 50) : Color.rgb(238, 239, 242);
-                onTrack = offTrack;
-                offThumb = disabledTextColor(getContext());
-                onThumb = offThumb;
-                stroke = disabledTextColor(getContext());
+                onTrack = UI.getThemedColour("igds_color_divider");
+                onThumb = UI.getThemedColour("igds_color_creation_tools_grey_04");
+
+                offTrack = onTrack;
+                offThumb = onThumb;
             }
 
             boolean animating = isAnimating();
@@ -528,6 +549,7 @@ public final class InstagramPreferenceStyle {
 
             int trackColor = blend(offTrack, onTrack, colorProgress);
             int thumbColor = blend(offThumb, onThumb, colorProgress);
+            int stroke = blend(offThumb, onTrack, colorProgress);
 
             float strokeWidth = dp(getContext(), 2);
             float radius = getHeight() / 2f;
@@ -537,14 +559,12 @@ public final class InstagramPreferenceStyle {
             canvas.drawRoundRect(0, 0, getWidth(), getHeight(), radius, radius, paint);
 
             float strokeProgress;
-            if (dark) {
-                strokeProgress = 1f - colorProgress;
-            } else if (animating) {
+            if (animating) {
                 strokeProgress = smoothStep(clamp01((0.62f - colorProgress) / 0.42f));
             } else {
                 strokeProgress = 1f - progress;
             }
-            float strokeOpacity = dark ? strokeProgress * strokeProgress : strokeProgress;
+            float strokeOpacity =  strokeProgress;
             int strokeAlpha = Math.round(Color.alpha(stroke) * strokeOpacity);
             if (strokeAlpha > 0) {
                 paint.setStyle(Paint.Style.STROKE);
@@ -591,6 +611,34 @@ public final class InstagramPreferenceStyle {
             paint.setStyle(Paint.Style.FILL);
             paint.setColor(thumbColor);
             canvas.drawCircle(cx, cy, thumbRadius, paint);
+
+            // Checkmark on the thumb when enabled, drawn in the accent colour so it
+            // reads against the surface-coloured thumb. Fades in with colorProgress.
+            if (enabled && colorProgress > 0f) {
+                int checkColor = UI.getThemedColour("igds_color_primary_button");
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(dp(getContext(), 2));
+                paint.setStrokeCap(Paint.Cap.ROUND);
+                paint.setStrokeJoin(Paint.Join.ROUND);
+                paint.setColor(Color.argb(
+                        Math.round(Color.alpha(checkColor) * colorProgress),
+                        Color.red(checkColor),
+                        Color.green(checkColor),
+                        Color.blue(checkColor)
+                ));
+
+                float checkSize = thumbRadius * 0.82f;
+                float startX = cx - (checkSize * 0.34f);
+                float startY = cy - (checkSize * 0.03f);
+                float midX = cx - (checkSize * 0.09f);
+                float midY = cy + (checkSize * 0.23f);
+                float endX = cx + (checkSize * 0.38f);
+                float endY = cy - (checkSize * 0.27f);
+                canvas.drawLine(startX, startY, midX, midY, paint);
+                canvas.drawLine(midX, midY, endX, endY, paint);
+                paint.setStrokeCap(Paint.Cap.BUTT);
+                paint.setStrokeJoin(Paint.Join.MITER);
+            }
         }
 
         private float lerp(float from, float to, float amount) {

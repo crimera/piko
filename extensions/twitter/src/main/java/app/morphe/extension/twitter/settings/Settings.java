@@ -15,10 +15,14 @@ public class Settings {
     public static final String SHARED_PREF_NAME = "piko_settings";
     public static final String ACT_NAME = "activity_name";
 
+    public static final BooleanSetting PIKO_DEBUG = new BooleanSetting("piko_debug", false);
+
     public static final StringSetting VID_PUBLIC_FOLDER = new StringSetting("vid_public_folder", "Movies");
     public static final StringSetting VID_SUBFOLDER = new StringSetting("vid_subfolder", "Twitter");
     public static final StringSetting VID_MEDIA_HANDLE = new StringSetting("vid_media_handle", "download_media");
     public static final StringSetting CUSTOM_SHARING_DOMAIN = new StringSetting("misc_custom_sharing_domain", "x.com");
+    public static final BooleanSetting EXTERNAL_DOWNLOADER = new BooleanSetting("external_downloader", true);
+    public static final StringSetting EXTERNAL_DOWNLOADER_PACKAGE_NAME = new StringSetting("external_downloader_package_name", "");
 
     public static final BooleanSetting MISC_FONT = new BooleanSetting("misc_font", false);
     public static final BooleanSetting MISC_HIDE_FAB = new BooleanSetting("misc_hide_fab", false);
@@ -51,6 +55,10 @@ public class Settings {
     public static final BooleanSetting ADS_REMOVE_TODAYS_NEW = new BooleanSetting("ads_remove_todays_news", true);
 
     public static final BooleanSetting VID_NATIVE_DOWNLOADER = new BooleanSetting("vid_native_downloader", true);
+    public static final BooleanSetting VID_NATIVE_DOWNLOADER_AUTODOWNLOAD_HIGHEST_VIDEO_RES = new BooleanSetting("vid_native_downloader_autodownload_highest_video_res", false);
+    public static final BooleanSetting VID_NATIVE_DOWNLOADER_SHOW_DOWNLOAD_ICON = new BooleanSetting("vid_native_downloader_show_download_icon", true);
+    public static final BooleanSetting VID_NATIVE_DOWNLOADER_SHOW_COPY_ICON = new BooleanSetting("vid_native_downloader_show_copy_icon", true);
+    public static final BooleanSetting VID_NATIVE_DOWNLOADER_SHOW_VARIANTS_ICON = new BooleanSetting("vid_native_downloader_show_variants_icon", true);
     public static final BooleanSetting VID_INLINE_DOWNLOAD_BUTTON = new BooleanSetting("vid_inline_download_button", true);
     public static final BooleanSetting BROWSE_OBJECT = new BooleanSetting("browse_object", true);
     public static final StringSetting VID_NATIVE_DOWNLOADER_FILENAME = new StringSetting("vid_native_downloader_filename", "0");
@@ -64,6 +72,7 @@ public class Settings {
     public static final StringSetting NATIVE_READER_MODE_THEME = new StringSetting("native_reader_mode_theme", "system");
     public static final BooleanSetting SHARE_IMAGE_ENABLED = new BooleanSetting("share_image_enabled", true);
     public static final BooleanSetting SHARE_IMAGE_AUTOCLEANUP = new BooleanSetting("share_image_autocleanup", true);
+    public static final BooleanSetting NATIVE_SHARE_MENU = new BooleanSetting("native_share_menu", true);
 
     public static final BooleanSetting TIMELINE_DISABLE_AUTO_SCROLL = new BooleanSetting("timeline_disable_auto_scroll", true);
     public static final BooleanSetting TIMELINE_SHOW_SOURCE_LABEL = new BooleanSetting("timeline_show_source_label", false);
@@ -101,6 +110,7 @@ public class Settings {
     public static final StringSetting REPLY_SORTING_LAST_FILTER = new StringSetting("reply_sorting_last_filter", "Relevance");
     public static final StringSetting CUSTOM_SEARCH_TYPE_AHEAD = new StringSetting("customisation_search_type_ahead", "");
     public static final StringSetting CUSTOM_POST_FONT_SIZE = new StringSetting("customisation_post_font_size", String.valueOf(ResourceUtils.getDimension("font_size_normal")));
+    public static final BooleanSetting MORE_INFO_ON_PROFILE = new BooleanSetting("more_info_on_profile", true);
 
     public static final StringSetting LAST_CHANGELOG_VERSION = new StringSetting("last_changelog_version", "0");
     public static final StringSetting LAST_CHANGELOG = new StringSetting("last_changelog", "0");
@@ -124,6 +134,10 @@ public class Settings {
     public static final String CHANGE_APP_ICON = "change_app_icon";
     public static final String IMPORT_LOGIN_TOKEN = "import_login_token";
     public static final String EXPORT_LOGIN_TOKEN = "export_login_token";
+    public static final String APP_VERSION = "piko_pref_app_version";
+    public static final String PIKO_PATCHES = "piko_title_piko_patches";
+    public static final String CHANGELOGS_TITLE = "piko_changelogs_title";
+    public static final String SUPPORTED_LINKS = "piko_settings_supported_links";
 
     public static final String PREMIUM_SECTION = "premium_section";
     public static final String DOWNLOAD_SECTION = "download_section";
@@ -137,6 +151,4 @@ public class Settings {
     public static final String BACKUP_SECTION = "backup_section";
     public static final String NATIVE_SECTION = "native_section";
     public static final String READER_MODE_KEY = "readerMode";
-
-    public static final BooleanSetting SINGLE_PAGE_SETTINGS = new BooleanSetting("single_page_settings", false);
 }

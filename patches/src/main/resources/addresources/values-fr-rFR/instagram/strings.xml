@@ -52,6 +52,8 @@
     <string name="piko_disable_reels_scrolling_desc">"Désactive le défilement infini dans les Reels Instagram, empêchant de passer au Reel suivant par balayage.
 
 Remarque : Lors d’une installation propre, l’animation 'Astuce' peut apparaître, mais elle s’arrêtera d’elle-même après quelques secondes."</string>
+    <string name="piko_disable_swipe_to_create">Désactiver le balayage pour créer</string>
+    <string name="piko_disable_swipe_to_create_desc">Empêche l\'ouverture de l\'écran de création en balayant vers la droite depuis l\'onglet accueil</string>
     <string name="piko_hide_stories_tray">Masquer le bandeau des stories</string>
     <string name="piko_hide_stories_tray_desc">Masquer le bandeau des stories dans le fil principal</string>
     <string name="piko_hide_notes_tray">Masquer le bandeau des notes</string>
@@ -71,8 +73,11 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_disable_discover_people_desc">Désactive la section “Découvrir des personnes” sur le profil utilisateur</string>
     <string name="piko_follow_back_indicator">Activer l\'indicateur de statut d\'amitié</string>
     <string name="piko_follow_back_indicator_desc">Ajoute un libellé indiquant qu’un utilisateur vous suit en retour sur sa page de profil et affiche un aperçu détaillé du statut de votre relation lorsqu’on clique dessus</string>
+    <string name="piko_fbi_color_indicator">Activer l\'indicateur de statut d\'amitié coloré</string>
+    <string name="piko_fbi_color_indicator_desc">L\'indicateur de statut d\'amitié doit être activé</string>
     <string name="piko_fbi_follows_you">Vous suit</string>
     <string name="piko_fbi_doesnt_follows_you">Ne vous suit pas</string>
+    <string name="piko_fbi_following_each_other">Suivi mutuel</string>
     <string name="piko_friendship_status">Statut d\'amitié</string>
     <string name="piko_view_story_mentions">Voir les mentions de la story</string>
     <string name="piko_vsm_title">Mentions en story</string>
@@ -83,8 +88,6 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_stories_audio_autoplay">Lecture automatique de l’audio des stories</string>
     <string name="piko_customise_story_timestamp">Personnaliser l’horodatage de story</string>
     <string name="piko_customise_story_timestamp_desc">Personnaliser l’horodatage qui indique quand la story a été publiée</string>
-    <string name="piko_unlimited_replays">Rendre les contenus éphémères permanents</string>
-    <string name="piko_unlimited_replays_desc">Modifie les contenus à vue unique ou à double vue non expirés en vue permanente</string>
     <string name="piko_improve_image_viewing">Améliorer la visualisation des images</string>
     <string name="piko_improve_image_viewing_desc">Récupère les images en résolution maximale depuis le serveur</string>
     <string name="piko_hide_reshare_button">Masquer le bouton de repartage</string>
@@ -101,13 +104,17 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_download_profile_picture">Télécharger la photo de profil</string>
     <string name="piko_copied">Copié</string>
     <string name="piko_more_profile_options">Plus d’options de profil</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Options de profil sur la barre d’actions</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Déplacer le bouton des options de profil vers la barre d’actions du profil</string>
     <string name="piko_remove_empty_bottom_space">Supprimer l’espace vide en bas</string>
     <string name="piko_unlock_plus_benefits">Débloquer les avantages \"Plus\"</string>
     <string name="piko_unlock_plus_benefits_desc">Débloquez les avantages de l’abonnement “Plus” vérifiés localement. UTILISEZ-LE À VOS PROPRES RISQUES</string>
     <string name="piko_customise_story_ring_size">Personnaliser la taille de l’anneau de story</string>
     <string name="piko_customise_story_ring_size_desc">Modifier la taille de l’anneau de story en pourcentage (Par défaut : 100)</string>
+    <!-- DM Section -->
+    <string name="piko_category_dm">Messages privés</string>
+    <string name="piko_unlimited_replays">Rendre les médias éphémères permanents</string>
+    <string name="piko_unlimited_replays_desc">Modifie les contenus à vue unique ou à double vue non expirés en vue permanente</string>
+    <string name="piko_enable_mark_chat_as_read">Activer l\'option marquer la discussion comme lue</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Ajouter une option, lors d\'un appui long sur une discussion, permettant de la marquer comme lue</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Télécharger le média</string>
     <string name="piko_enable_download">Activer le téléchargement</string>
@@ -128,11 +135,13 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_downloaded_media">Téléchargé: </string>
     <string name="piko_media_exists">Le média existe</string>
     <string name="piko_download_failed_media">Échec du téléchargement : </string>
-    <string name="piko_download_set_path">Définir un chemin de téléchargement personnalisé</string>
+    <string name="piko_download_set_path">Choisir le dossier de téléchargement</string>
     <string name="piko_download_set_path_success">Répertoire de téléchargement mis à jour!</string>
-    <string name="piko_download_set_path_failed">Échec de la résolution du chemin du dossier</string>
-    <string name="piko_download_grant_permission">Veuillez autoriser l’accès au stockage pour continuer les téléchargements</string>
-    <string name="piko_download_grant_permission_failed">Impossible d’ouvrir les paramètres. Veuillez accorder manuellement l’accès à tous les fichiers</string>
+    <string name="piko_download_set_path_failed">Échec de l’enregistrement du dossier de téléchargement</string>
+    <string name="piko_download_choose_folder">Choisissez un dossier de téléchargement pour continuer</string>
+    <string name="piko_download_choose_folder_failed">Impossible d’ouvrir le sélecteur de dossier</string>
+    <string name="piko_download_grant_permission">Choisissez un dossier de téléchargement pour continuer</string>
+    <string name="piko_download_grant_permission_failed">Impossible d’ouvrir le sélecteur de dossier</string>
     <string name="piko_download_with_external_downloader">Télécharger avec un téléchargeur externe</string>
     <string name="piko_external_downloader_package_name">Nom du paquet du téléchargeur externe</string>
     <string name="piko_external_downloader_package_name_not_found">Nom du paquet du téléchargement externe introuvable</string>
@@ -155,8 +164,11 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_hide_navigation_create">Masquer le bouton \"Créer\"</string>
     <!-- Information Section -->
     <string name="piko_category_about">À propos</string>
-    <string name="piko_export_pref">Exporter les préférences de piko</string>
-    <string name="piko_import_pref">Importer les préférences de piko</string>
+    <string name="piko_export_pref">Exporter les préférences de Piko</string>
+    <string name="piko_import_pref">Importer les préférences de Piko</string>
+    <string name="piko_reset_pref">Réinitialiser les préférences de Piko</string>
+    <string name="piko_reset_pref_success">Préférences de Piko supprimées</string>
+    <string name="piko_reset_pref_failed">Échec de la suppression des préférences de Piko</string>
     <string name="piko_app_version">Version de l\'application: %s</string>
     <string name="piko_patch_version">Version du patch: %s</string>
     <string name="piko_patch_info_title">Informations sur le patch</string>
@@ -198,6 +210,74 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_no_internet">Veuillez vous connecter à Internet</string>
     <string name="piko_tap_here">Appuyez ici !!</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Personnalisation de la barre d\'actions</string>
+    <string name="piko_action_bar_main_feed">Icônes de la barre d\'actions du fil principal</string>
+    <string name="piko_action_bar_user_profile">Icônes de la barre d\'actions du profil utilisateur</string>
+    <string name="piko_action_bar_chat">Icônes de la barre d\'actions du chat</string>
+    <string name="piko_action_bar_chat_desc">Icônes de la barre d\'actions dans les messages privés</string>
+    <string name="piko_action_bar_inbox">Icônes de la barre d\'actions de la boîte de réception</string>
+    <string name="piko_action_bar_button_settings_icon">Icône des paramètres</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Icône du mode fantôme</string>
+    <string name="piko_action_bar_button_profile_info_icon">Icône des informations du profil</string>
     <string name="piko_settings_on_action_bar">Paramètres de Piko sur la barre d’actions</string>
     <string name="piko_settings_on_action_bar_desc">Déplacer le point d’entrée des paramètres de Piko vers la barre d’actions du fil principal</string>
+    <!-- Story filters -->
+    <string name="piko_category_filter_content">Filtrer le contenu</string>
+    <string name="piko_filter_story">Filtrer la story</string>
+    <string name="piko_filter_story_types_to_hide">Types de story à masquer</string>
+    <string name="piko_reel_type_ads_reel">Publicités reel</string>
+    <string name="piko_reel_type_ar_effect_preview">Aperçu de l\'effet AR</string>
+    <string name="piko_reel_type_archive_day_media_reel">Reel média du jour d’archive</string>
+    <string name="piko_reel_type_archive_day_reel">Reel d’archive du jour</string>
+    <string name="piko_reel_type_archive_friend_reel">Reel d’archive d’ami</string>
+    <string name="piko_reel_type_archive_map_reel">Reel de carte d’archive</string>
+    <string name="piko_reel_type_archive_scheduled_for_deletion_reel">Reel d’archive programmé pour suppression</string>
+    <string name="piko_reel_type_archive_shop_reel">Reel de boutique d’archive</string>
+    <string name="piko_reel_type_axe_reel">Reel Axe</string>
+    <string name="piko_reel_type_birthday_highlights">Highlights d’anniversaire</string>
+    <string name="piko_reel_type_bloks">Blox</string>
+    <string name="piko_reel_type_broadcast_reel">Reel de diffusion</string>
+    <string name="piko_reel_type_daily_snapshot_reel">Reel instantané du jour</string>
+    <string name="piko_reel_type_election_reel">Reel électoral</string>
+    <string name="piko_reel_type_empty_story_state_reel">Reel d’état vide de story</string>
+    <string name="piko_reel_type_end_of_year">Fin d’année</string>
+    <string name="piko_reel_type_expiring_story_reel">Reel de story expirante</string>
+    <string name="piko_reel_type_fan_club_story">Story du fan club</string>
+    <string name="piko_reel_type_follow_versaries">Anniversaires de suivi</string>
+    <string name="piko_reel_type_friend_map_reel">Reel de carte d’ami</string>
+    <string name="piko_reel_type_group_mention">Mention de groupe</string>
+    <string name="piko_reel_type_group_reel">Reel de groupe</string>
+    <string name="piko_reel_type_hallpass_reel">Reel hall pass</string>
+    <string name="piko_reel_type_highlight_reel">Reel d\'highlight</string>
+    <string name="piko_reel_type_highlight_rewind_reel">Reel de rétrospective d\'highlight</string>
+    <string name="piko_reel_type_inactive_hallpass_reel">Reel hallpass inactif</string>
+    <string name="piko_reel_type_mas_reel">Reel Mas</string>
+    <string name="piko_reel_type_media_reshare">Repartage de média</string>
+    <string name="piko_reel_type_memory_reel">Reel souvenir</string>
+    <string name="piko_reel_type_my_week_reel">Reel de ma semaine</string>
+    <string name="piko_reel_type_netego_reel">Reel Net ego</string>
+    <string name="piko_reel_type_nux_reel">Reel Nux</string>
+    <string name="piko_reel_type_private_story">Story privée</string>
+    <string name="piko_reel_type_prompt_sticker_reel">Reel de sticker d’invite</string>
+    <string name="piko_reel_type_reconsideration_injected_story">Story de réexamen injectée</string>
+    <string name="piko_reel_type_shopping_auto_highlight_reel">Reel de shopping intelligent</string>
+    <string name="piko_reel_type_shopping_pdp_reel">Reel de shopping pdp</string>
+    <string name="piko_reel_type_shopping_smart_reel">Reel de shopping intelligent</string>
+    <string name="piko_reel_type_stars_welcome_reel">Reel de bienvenue des Stars</string>
+    <string name="piko_reel_type_story_stationary_timeline_reel">Reel de la timeline story stationnaire</string>
+    <string name="piko_reel_type_subscription_shoutout_mention">Mention de mise en avant d\'abonnement</string>
+    <string name="piko_reel_type_suggested_creator_reel">Reel de créateur suggéré</string>
+    <string name="piko_reel_type_suggested_user">Utilisateurs suggérés</string>
+    <string name="piko_reel_type_suggested_user_reel">Reel d\'utilisateur suggéré</string>
+    <string name="piko_reel_type_superlative_reel">Reel superlatif</string>
+    <string name="piko_reel_type_third_party_app_story">Story d\'une application tierce</string>
+    <string name="piko_reel_type_typed_container">Conteneur typé</string>
+    <string name="piko_reel_type_user_reel">Reel d’utilisateur</string>
+    <string name="piko_filter_story_user_types_to_hide">Types d’utilisateurs à masquer</string>
+    <string name="piko_user_type_unverified">Utilisateurs non vérifiés</string>
+    <string name="piko_user_type_verified">Utilisateurs vérifiés</string>
+    <string name="piko_filter_story_minimum_item_count">Nombre minimal d’éléments par story</string>
+    <string name="piko_filter_story_minimum_item_count_desc">Les stories contenant moins de x éléments seront masquées (par défaut : 1)</string>
+    <string name="piko_filter_story_maximum_item_count">Nombre maximal d’éléments par story</string>
+    <string name="piko_filter_story_maximum_item_count_desc">Les stories contenant plus de x éléments seront masquées (par défaut : 9999) </string>
 </resources>

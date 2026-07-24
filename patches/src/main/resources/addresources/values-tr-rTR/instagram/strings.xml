@@ -52,6 +52,8 @@
     <string name="piko_disable_reels_scrolling_desc">"Instagram Reels'deki sonsuz kaydırma özelliğini devre dışı bırakır, sonraki Reel'e kaydırmayı engeller.
 
 Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye sonra kendiliğinden duracaktır."</string>
+    <string name="piko_disable_swipe_to_create">Kaydırarak içerik oluşturmayı kapat</string>
+    <string name="piko_disable_swipe_to_create_desc">Ana sekmede sağa kaydırarak oluşturma ekranının açılmasını engeller.</string>
     <string name="piko_hide_stories_tray">Hikayeler tepsisini gizle</string>
     <string name="piko_hide_stories_tray_desc">Ana akıştan hikayeler tepsisini gizle</string>
     <string name="piko_hide_notes_tray">Notlar tepsisini gizle</string>
@@ -71,8 +73,11 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_disable_discover_people_desc">Kullanıcı profilindeki Kişileri keşfet bölümünü devre dışı bırak</string>
     <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>
     <string name="piko_follow_back_indicator_desc">Profil sayfasına \"geri takip ediyor\" durum etiketi ekler ve tıklandığında ayrıntılı arkadaşlık durumunu gösterir</string>
+    <string name="piko_fbi_color_indicator">Renkli arkadaşlık durumu göstergesini etkinleştir</string>
+    <string name="piko_fbi_color_indicator_desc">Arkadaşlık durumu göstergesinin etkinleştirilmesi gerekiyor</string>
     <string name="piko_fbi_follows_you">Seni takip ediyor</string>
     <string name="piko_fbi_doesnt_follows_you">Seni takip etmiyor</string>
+    <string name="piko_fbi_following_each_other">Karşılıklı takip</string>
     <string name="piko_friendship_status">Arkadaşlık durumu</string>
     <string name="piko_view_story_mentions">Hikaye bahsetmelerini görüntüle</string>
     <string name="piko_vsm_title">Hikaye bahsetmeleri</string>
@@ -83,8 +88,6 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_stories_audio_autoplay">Hikaye sesini otomatik oynat</string>
     <string name="piko_customise_story_timestamp">Hikaye zaman damgasını özelleştir</string>
     <string name="piko_customise_story_timestamp_desc">Hikayenin ne zaman paylaşıldığını gösteren zaman damgasını özelleştir</string>
-    <string name="piko_unlimited_replays">Geçici medyayı kalıcı yap</string>
-    <string name="piko_unlimited_replays_desc">Bir veya iki kez görüntülenebilen medyayı kalıcı görüntülenebilir hale getirir</string>
     <string name="piko_improve_image_viewing">Görsel kalitesini artır</string>
     <string name="piko_improve_image_viewing_desc">Sunucudan maksimum çözünürlüklü görüntüleri çeker</string>
     <string name="piko_hide_reshare_button">Yeniden paylaş butonunu gizle</string>
@@ -101,13 +104,17 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_download_profile_picture">Profil resmini indir</string>
     <string name="piko_copied">Kopyalandı</string>
     <string name="piko_more_profile_options">Daha fazla profil seçeneği</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Profil seçenekleri eylem çubuğunda</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Profil seçenekleri butonunu profil eylem çubuğuna taşı</string>
     <string name="piko_remove_empty_bottom_space">Alttaki boş alanı kaldır</string>
     <string name="piko_unlock_plus_benefits">Plus abonelik avantajlarının kilidini aç</string>
     <string name="piko_unlock_plus_benefits_desc">Yerel olarak kontrol edilen “Plus” abonelik avantajlarının kilidini açar. ∆ Kendi sorumluluğunuzda kullanın</string>
     <string name="piko_customise_story_ring_size">Hikaye halkası boyutunu özelleştir</string>
     <string name="piko_customise_story_ring_size_desc">Hikaye halkasının boyutunu yüzde olarak değiştirin (Varsayılan: 100)</string>
+    <!-- DM Section -->
+    <string name="piko_category_dm">Mesajlar</string>
+    <string name="piko_unlimited_replays">Kaybolan medyaları kalıcı yap</string>
+    <string name="piko_unlimited_replays_desc">Bir veya iki kez görüntülenebilen medyayı kalıcı görüntülenebilir hale getirir</string>
+    <string name="piko_enable_mark_chat_as_read">Sohbeti okundu olarak işaretle seçeneğini etkinleştir</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Sohbetin üzerine basılı tutunca okundu olarak işaretleme seçeneği ekle</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Medya indirme</string>
     <string name="piko_enable_download">İndirmeyi etkinleştir</string>
@@ -128,11 +135,13 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_downloaded_media">İndirildi: </string>
     <string name="piko_media_exists">Bu medya zaten mevcut</string>
     <string name="piko_download_failed_media">İndirme başarısız: </string>
-    <string name="piko_download_set_path">Özel indirme yolu ayarla</string>
+    <string name="piko_download_set_path">İndirme klasörünü seçin</string>
     <string name="piko_download_set_path_success">İndirme klasörü güncellendi!</string>
-    <string name="piko_download_set_path_failed">Klasör yolu çözümlenemedi</string>
-    <string name="piko_download_grant_permission">İndirmelere devam etmek için lütfen depolama erişimi izni verin</string>
-    <string name="piko_download_grant_permission_failed">Ayarlar açılamadı. Lütfen tüm dosyalara erişim iznini manuel olarak verin</string>
+    <string name="piko_download_set_path_failed">İndirme klasörü kaydedilemedi</string>
+    <string name="piko_download_choose_folder">Devam etmek için bir indirme klasörü seçin</string>
+    <string name="piko_download_choose_folder_failed">Klasör seçici açılamadı</string>
+    <string name="piko_download_grant_permission">Devam etmek için bir indirme klasörü seçin</string>
+    <string name="piko_download_grant_permission_failed">Klasör seçici açılamadı</string>
     <string name="piko_download_with_external_downloader">Harici indirici ile indir</string>
     <string name="piko_external_downloader_package_name">Harici indirici paket adı</string>
     <string name="piko_external_downloader_package_name_not_found">Harici indirici paket adı bulunamadı</string>
@@ -155,8 +164,11 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_hide_navigation_create">Oluştur butonunu gizle</string>
     <!-- Information Section -->
     <string name="piko_category_about">Hakkında</string>
-    <string name="piko_export_pref">Piko ayarlarını dışa aktar</string>
-    <string name="piko_import_pref">Piko ayarlarını içe aktar</string>
+    <string name="piko_export_pref">Piko tercihlerini dışa aktar</string>
+    <string name="piko_import_pref">Piko tercihlerini içe aktar</string>
+    <string name="piko_reset_pref">Piko tercihlerini sıfırla</string>
+    <string name="piko_reset_pref_success">Piko tercihleri silindi</string>
+    <string name="piko_reset_pref_failed">Piko tercihleri silinemedi</string>
     <string name="piko_app_version">Uygulama sürümü: %s</string>
     <string name="piko_patch_version">Yama sürümü: %s</string>
     <string name="piko_patch_info_title">Yama bilgisi</string>
@@ -198,6 +210,74 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_no_internet">Lütfen internete bağlanın</string>
     <string name="piko_tap_here">Buraya dokunun !!</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Araç Çubuğu Ayarları</string>
+    <string name="piko_action_bar_main_feed">Ana akış eylem çubuğu simgeleri</string>
+    <string name="piko_action_bar_user_profile">Profil sayfası eylem çubuğu simgeleri</string>
+    <string name="piko_action_bar_chat">Sohbet eylem çubuğu simgeleri</string>
+    <string name="piko_action_bar_chat_desc">Mesajlar içi eylem çubuğu simgeleri</string>
+    <string name="piko_action_bar_inbox">Gelen kutusu eylem çubuğu simgeleri</string>
+    <string name="piko_action_bar_button_settings_icon">Ayarlar simgesi</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Görünmez mod simgesi</string>
+    <string name="piko_action_bar_button_profile_info_icon">Profil bilgisi simgesi</string>
     <string name="piko_settings_on_action_bar">Piko ayarları eylem çubuğunda</string>
     <string name="piko_settings_on_action_bar_desc">Piko ayarları butonunu ana akış eylem çubuğuna taşı</string>
+    <!-- Story filters -->
+    <string name="piko_category_filter_content">İçeriği filtrele</string>
+    <string name="piko_filter_story">Hikaye filtrele</string>
+    <string name="piko_filter_story_types_to_hide">Gizlenecek hikaye türleri</string>
+    <string name="piko_reel_type_ads_reel">Reklam Reels\'ları</string>
+    <string name="piko_reel_type_ar_effect_preview">AR efekti önizlemesi</string>
+    <string name="piko_reel_type_archive_day_media_reel">Günlük medya arşiv Reels\'ları</string>
+    <string name="piko_reel_type_archive_day_reel">Günlük arşiv Reels\'ları</string>
+    <string name="piko_reel_type_archive_friend_reel">Arkadaş arşiv Reels\'ları</string>
+    <string name="piko_reel_type_archive_map_reel">Harita arşiv Reels\'ları</string>
+    <string name="piko_reel_type_archive_scheduled_for_deletion_reel">Silinmek üzere olan arşiv Reels\'ları</string>
+    <string name="piko_reel_type_archive_shop_reel">Mağaza arşiv Reels\'ları</string>
+    <string name="piko_reel_type_axe_reel">\"Axe\" (Kaldırılan) Reels\'ları</string>
+    <string name="piko_reel_type_birthday_highlights">Doğum günü öne çıkanları</string>
+    <string name="piko_reel_type_bloks">Blox</string>
+    <string name="piko_reel_type_broadcast_reel">Yayın Reels\'ları</string>
+    <string name="piko_reel_type_daily_snapshot_reel">Günlük anlık görüntü Reels\'ları</string>
+    <string name="piko_reel_type_election_reel">Seçim makarası</string>
+    <string name="piko_reel_type_empty_story_state_reel">Boş hikaye durumu Reels\'ları</string>
+    <string name="piko_reel_type_end_of_year">Yıl sonu</string>
+    <string name="piko_reel_type_expiring_story_reel">Süresi dolan hikaye Reels\'ları</string>
+    <string name="piko_reel_type_fan_club_story">Hayran kulübü hikayesi</string>
+    <string name="piko_reel_type_follow_versaries">Takip yıl dönümleri</string>
+    <string name="piko_reel_type_friend_map_reel">Arkadaş haritası Reels\'ları</string>
+    <string name="piko_reel_type_group_mention">Grup bahsetmesi</string>
+    <string name="piko_reel_type_group_reel">Grup Reels\'ları</string>
+    <string name="piko_reel_type_hallpass_reel">\"Hall pass\" (İzin/Geçiş) Reels\'ları</string>
+    <string name="piko_reel_type_highlight_reel">Öne çıkan Reels\'ları</string>
+    <string name="piko_reel_type_highlight_rewind_reel">Öne çıkanlar özeti Reels\'ları</string>
+    <string name="piko_reel_type_inactive_hallpass_reel">Pasif \"Hall pass\" Reels\'ları</string>
+    <string name="piko_reel_type_mas_reel">Mas Reels\'ları</string>
+    <string name="piko_reel_type_media_reshare">Medya yeniden paylaşımı</string>
+    <string name="piko_reel_type_memory_reel">Anılar Reels\'ları</string>
+    <string name="piko_reel_type_my_week_reel">Haftam Reels\'ları</string>
+    <string name="piko_reel_type_netego_reel">Net ego Reels\'ları</string>
+    <string name="piko_reel_type_nux_reel">NUX (Yeni kullanıcı deneyimi) Reels\'ları</string>
+    <string name="piko_reel_type_private_story">Özel hikaye</string>
+    <string name="piko_reel_type_prompt_sticker_reel">Etiket yönlendirmeli Reels\'lar</string>
+    <string name="piko_reel_type_reconsideration_injected_story">\"Tekrar değerlendirme\" enjekte edilmiş hikaye</string>
+    <string name="piko_reel_type_shopping_auto_highlight_reel">Öne çıkan akıllı alışveriş Reels\'ları</string>
+    <string name="piko_reel_type_shopping_pdp_reel">Ürün detay sayfası (PDP) Reels\'ları</string>
+    <string name="piko_reel_type_shopping_smart_reel">Akıllı alışveriş Reels\'ları</string>
+    <string name="piko_reel_type_stars_welcome_reel">\"Stars\" karşılama Reels\'ları</string>
+    <string name="piko_reel_type_story_stationary_timeline_reel">Hikaye sabit zaman çizelgesi Reels\'ları</string>
+    <string name="piko_reel_type_subscription_shoutout_mention">Abonelik duyurusu</string>
+    <string name="piko_reel_type_suggested_creator_reel">Önerilen içerik üretici Reels\'ları</string>
+    <string name="piko_reel_type_suggested_user">Önerilen kullanıcı</string>
+    <string name="piko_reel_type_suggested_user_reel">Önerilen kullanıcı Reels\'ları</string>
+    <string name="piko_reel_type_superlative_reel">\"Süperlatif\" (En iyi) Reels\'ları</string>
+    <string name="piko_reel_type_third_party_app_story">Üçüncü taraf uygulama hikayesi</string>
+    <string name="piko_reel_type_typed_container">Türlü kapsayıcı</string>
+    <string name="piko_reel_type_user_reel">Kullanıcı Reels\'ları</string>
+    <string name="piko_filter_story_user_types_to_hide">Gizlenecek kullanıcı türleri</string>
+    <string name="piko_user_type_unverified">Doğrulanmamış kullanıcılar</string>
+    <string name="piko_user_type_verified">Doğrulanmış kullanıcılar</string>
+    <string name="piko_filter_story_minimum_item_count">Minimum hikaye öğesi sayısı</string>
+    <string name="piko_filter_story_minimum_item_count_desc">X öğeden az hikayeler gizlenecek (varsayılan 1)</string>
+    <string name="piko_filter_story_maximum_item_count">Maksimum hikaye öğesi sayısı</string>
+    <string name="piko_filter_story_maximum_item_count_desc">x\'ten fazla öğe içeren hikayeler gizlenecektir (varsayılan 9999).</string>
 </resources>

@@ -16,6 +16,9 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patches.all.misc.resources.ResourceType
+import app.morphe.patches.all.misc.resources.resourceLiteral
+import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import java.util.logging.Logger
@@ -30,6 +33,13 @@ private object RedirectingToXLiteFlagCheckFingerprint : Fingerprint(
         ),
 )
 
+private object XLiteSettingItemsAdderFingerprint : Fingerprint(
+    filters =
+        listOf(
+            resourceLiteral(ResourceType.STRING, "settings_back_to_x_item_title"),
+        ),
+)
+
 @Suppress("unused")
 val blockRedirectingToXLitePatch =
     bytecodePatch(
@@ -38,7 +48,7 @@ val blockRedirectingToXLitePatch =
         default = true,
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, versionCheckPatch)
+        dependsOn(settingsPatch, versionCheckPatch, resourceMappingPatch)
 
         execute {
 
@@ -57,6 +67,16 @@ val blockRedirectingToXLitePatch =
                         const v$boolRegister, 0x0
                         """.trimIndent(),
                     )
+                }
+
+                XLiteSettingItemsAdderFingerprint.apply {
+                    val strIndex = instructionMatches.first().index
+                    method.apply {
+                        val originalXItemCheckInstruction =
+                            instructions.last { it.opcode == Opcode.IF_EQZ && it.location.index < strIndex }
+                        val register = originalXItemCheckInstruction.registersUsed[0]
+                        addInstruction(originalXItemCheckInstruction.location.index, "const v$register, 0x1")
+                    }
                 }
 
                 enableSettings("blockRedirectingToXLite")

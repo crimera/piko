@@ -11,6 +11,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
@@ -47,21 +48,29 @@ public class UI {
     public static final String DRAWABLE_CODE_ICON = "fb_ic_code_outline_24";
     public static final String DRAWABLE_FRAME_CROSSED_ICON = "fb_ic_frames_cross_outline_16";
     public static final String DRAWABLE_LINK_ICON = "fb_ic_link_outline_24";
+    public static final String DRAWABLE_COLLECTIONS_ICON = "instagram_collections_pano_outline_24";
+    public static final String DRAWABLE_EYE_STROKE_ICON = "design_ic_visibility_off";
+    public static final String DRAWABLE_EYE_ICON = "design_ic_visibility";
+    public static final String DRAWABLE_SHARE_TO_DIRECT = "gallery_share_to_direct_button";
+    public static final String DRAWABLE_SHARE_TO_REEL = "gallery_share_to_reels_button";
 
-
-    public static int getThemedColour() {
+    public static int getThemedColour(String attrName) {
         Context context = Utils.getContext();
         TypedValue typedValue = new TypedValue();
-        int attrId = ResourceUtils.getIdentifier(ResourceType.ATTR, "igds_color_primary_icon");
+        int attrId = ResourceUtils.getAttrIdentifier(attrName);
         boolean resolved = context.getTheme().resolveAttribute(attrId, typedValue, true);
         return context.getColor(typedValue.resourceId);
+    }
+
+    public static boolean isDarkMode() {
+        return Color.luminance(getThemedColour("igds_color_primary_background")) < 0.5;
     }
 
     public static void setThemedIcon(ImageView imageView, String drawableAttr) {
         try {
             Drawable drawable = ResourceUtils.getDrawable(drawableAttr);
             imageView.setImageDrawable(drawable);
-            imageView.setColorFilter(new PorterDuffColorFilter(getThemedColour(), PorterDuff.Mode.SRC_ATOP));
+            imageView.setColorFilter(new PorterDuffColorFilter(getThemedColour("igds_color_primary_icon"), PorterDuff.Mode.SRC_ATOP));
 
         } catch (Exception ex) {
             Logger.printException(() -> "Failed setThemedIcon: ", ex);
@@ -179,15 +188,13 @@ public class UI {
             @Override
             public void onClick(DialogInterface d, int which) {
                 try {
-                    // If settings is placed on action bar, no need to redirect to profile.
-                    if(!Pref.pikoSettingsOnActionBar()) {
-                        // Doing like this because options are dynamic.
-                        String selectedOption = options.get(which);
+                    // Doing like this because options are dynamic.
+                    String selectedOption = options.get(which);
 
-                        if (selectedOption.equals(str("piko_goto_piko_settings"))) {
-                            PikoUtils.openUrl("instagram://profile");
-                        }
+                    if (selectedOption.equals(str("piko_goto_piko_settings"))) {
+                        PikoUtils.openUrl("instagram://profile",true);
                     }
+
                 } catch (Exception e) {
                     Logger.printException(() -> "Error at welcomeDialogBox", e);
                     Utils.showToastShort(e.getMessage());

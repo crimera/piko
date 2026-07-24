@@ -54,6 +54,8 @@
 
 
 Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", pero se detendrá por sí sola al cabo de unos segundos."</string>
+    <string name="piko_disable_swipe_to_create">Deshabilitar la función de deslizar para crear</string>
+    <string name="piko_disable_swipe_to_create_desc">Impide abrir la pantalla de creación deslizando el dedo hacia la derecha en la pestaña de inicio.</string>
     <string name="piko_hide_stories_tray">Ocultar barra de historias</string>
     <string name="piko_hide_stories_tray_desc">Ocultar la barra de historias del feed principal</string>
     <string name="piko_hide_notes_tray">Ocultar barra de notas</string>
@@ -73,8 +75,11 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_disable_discover_people_desc">Desactiva la sección de descubrir personas en el perfil de usuario</string>
     <string name="piko_follow_back_indicator">Habilitar el indicador de estado de amistad</string>
     <string name="piko_follow_back_indicator_desc">Agrega una etiqueta de estado \"Te sigue de vuelta\" en la página de perfil y muestra un desglose detallado del estado de amistad al hacer clic</string>
+    <string name="piko_fbi_color_indicator">Habilite el indicador de estado de amistad de colores</string>
+    <string name="piko_fbi_color_indicator_desc">Es necesario habilitar el indicador de estado de amistad</string>
     <string name="piko_fbi_follows_you">Te sigue</string>
     <string name="piko_fbi_doesnt_follows_you">No te sigue</string>
+    <string name="piko_fbi_following_each_other">Siguiéndose unos a otros</string>
     <string name="piko_friendship_status">Estado de amistad</string>
     <string name="piko_view_story_mentions">Ver menciones de historia</string>
     <string name="piko_vsm_title">Menciones de historia</string>
@@ -85,8 +90,6 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_stories_audio_autoplay">Reproducción automática de audio en historias</string>
     <string name="piko_customise_story_timestamp">Personalizar horario de la historia</string>
     <string name="piko_customise_story_timestamp_desc">Personalizar el horario mostrado de cuando se publicó la historia</string>
-    <string name="piko_unlimited_replays">Hacer medios permanentes</string>
-    <string name="piko_unlimited_replays_desc">Transforma medios de visualización única o doble en visualización permanente</string>
     <string name="piko_improve_image_viewing">Mejorar calidad de imágenes</string>
     <string name="piko_improve_image_viewing_desc">Obtiene imágenes en la resolución máxima del servidor</string>
     <string name="piko_hide_reshare_button">Ocultar botón de republicar</string>
@@ -103,13 +106,17 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_download_profile_picture">Descargar foto de perfil</string>
     <string name="piko_copied">Copiado</string>
     <string name="piko_more_profile_options">Más opciones de perfil</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Opciones de perfil en la barra superior</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Mueve el botón de opciones de perfil a la barra superior</string>
     <string name="piko_remove_empty_bottom_space">Eliminar espacio inferior vacío</string>
     <string name="piko_unlock_plus_benefits">Desbloquear beneficios Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Desbloquea beneficios de la suscripción \"Plus\" verificados localmente. ÚSALO BAJO TU PROPIO RIESGO</string>
     <string name="piko_customise_story_ring_size">Personalizar tamaño del anillo de historia</string>
     <string name="piko_customise_story_ring_size_desc">Cambia el tamaño del anillo de historia por un porcentaje (Predeterminado: 100)</string>
+    <!-- DM Section -->
+    <string name="piko_category_dm">Mensaje Directo</string>
+    <string name="piko_unlimited_replays">Convertir los medios efímeros en permanentes</string>
+    <string name="piko_unlimited_replays_desc">Transforma medios de visualización única o doble en visualización permanente</string>
+    <string name="piko_enable_mark_chat_as_read">Habilitar la opción de marcar el chat como leído</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Al mantener pulsado el chat, aparecerá una opción para marcarlo como leído</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Descargar medios</string>
     <string name="piko_enable_download">Activar descarga</string>
@@ -130,11 +137,13 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_downloaded_media">Descargado: </string>
     <string name="piko_media_exists">El medio ya existe</string>
     <string name="piko_download_failed_media">Error al descargar: </string>
-    <string name="piko_download_set_path">Establecer ruta de descarga personalizada</string>
+    <string name="piko_download_set_path">Seleccione la carpeta de descarga</string>
     <string name="piko_download_set_path_success">¡Directorio de descarga actualizado!</string>
-    <string name="piko_download_set_path_failed">Error al resolver la ruta de la carpeta</string>
-    <string name="piko_download_grant_permission">Concede acceso al almacenamiento para continuar las descargas</string>
-    <string name="piko_download_grant_permission_failed">No se pudieron abrir los ajustes. Concede acceso total a los archivos manualmente</string>
+    <string name="piko_download_set_path_failed">No se pudo guardar la carpeta de descargas</string>
+    <string name="piko_download_choose_folder">Seleccione una carpeta de descarga para continuar</string>
+    <string name="piko_download_choose_folder_failed">No se pudo abrir el selector de carpetas</string>
+    <string name="piko_download_grant_permission">Seleccione una carpeta de descarga para continuar</string>
+    <string name="piko_download_grant_permission_failed">No se pudo abrir el selector de carpetas</string>
     <string name="piko_download_with_external_downloader">Descargar con gestor externo</string>
     <string name="piko_external_downloader_package_name">Nombre del paquete del gestor externo</string>
     <string name="piko_external_downloader_package_name_not_found">Nombre del paquete del gestor externo no encontrado</string>
@@ -157,8 +166,11 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_hide_navigation_create">Ocultar botón Crear</string>
     <!-- Information Section -->
     <string name="piko_category_about">Acerca de</string>
-    <string name="piko_export_pref">Exportar preferencias de piko</string>
-    <string name="piko_import_pref">Importar preferencias de piko</string>
+    <string name="piko_export_pref">Exportar preferencias de Piko</string>
+    <string name="piko_import_pref">Importar preferencias de Piko</string>
+    <string name="piko_reset_pref">Restablecer preferencias de Piko</string>
+    <string name="piko_reset_pref_success">Se eliminaron las preferencias de Piko</string>
+    <string name="piko_reset_pref_failed">No se pudieron eliminar las preferencias de Piko</string>
     <string name="piko_app_version">Versión de la aplicación: %s</string>
     <string name="piko_patch_version">Versión del parche: %s</string>
     <string name="piko_patch_info_title">Información del parche</string>
@@ -200,6 +212,74 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_no_internet">Conéctate a Internet</string>
     <string name="piko_tap_here">¡¡Toca aquí!!</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Personalización de la barra de acciones</string>
+    <string name="piko_action_bar_main_feed">Iconos de la barra de acciones del feed principal</string>
+    <string name="piko_action_bar_user_profile">Iconos de la barra de acciones del perfil de usuario</string>
+    <string name="piko_action_bar_chat">Iconos de la barra de acciones de chat</string>
+    <string name="piko_action_bar_chat_desc">Iconos de la barra de acciones dentro de un DM</string>
+    <string name="piko_action_bar_inbox">Iconos de la barra de acciones de la bandeja de entrada</string>
+    <string name="piko_action_bar_button_settings_icon">Icono de configuración</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Icono de modo fantasma</string>
+    <string name="piko_action_bar_button_profile_info_icon">Icono de información de perfil</string>
     <string name="piko_settings_on_action_bar">Ajustes de Piko en el feed principal</string>
     <string name="piko_settings_on_action_bar_desc">Mueve el acceso a los ajustes de Piko a la barra superior en el feed principal</string>
+    <!-- Story filters -->
+    <string name="piko_category_filter_content">Filtrar contenido</string>
+    <string name="piko_filter_story">Historia de filtro</string>
+    <string name="piko_filter_story_types_to_hide">Tipos de historias para ocultar</string>
+    <string name="piko_reel_type_ads_reel">Anuncios de Reel</string>
+    <string name="piko_reel_type_ar_effect_preview">Vista previa del efecto Ar</string>
+    <string name="piko_reel_type_archive_day_media_reel">Archivo de video del reel del día</string>
+    <string name="piko_reel_type_archive_day_reel">Archivo del reel del día</string>
+    <string name="piko_reel_type_archive_friend_reel">Archivo de reel amigo</string>
+    <string name="piko_reel_type_archive_map_reel">Mapa del reel de archivo</string>
+    <string name="piko_reel_type_archive_scheduled_for_deletion_reel">Archivo reel programado para ser eliminado</string>
+    <string name="piko_reel_type_archive_shop_reel">Tienda del reel de archivo</string>
+    <string name="piko_reel_type_axe_reel">Axe reel</string>
+    <string name="piko_reel_type_birthday_highlights">Momentos destacados del cumpleaños</string>
+    <string name="piko_reel_type_bloks">Bloque</string>
+    <string name="piko_reel_type_broadcast_reel">Transmisión de reel</string>
+    <string name="piko_reel_type_daily_snapshot_reel">Resumen diario de imágenes</string>
+    <string name="piko_reel_type_election_reel">Elección de reel</string>
+    <string name="piko_reel_type_empty_story_state_reel">Estado de reel de historia vacío</string>
+    <string name="piko_reel_type_end_of_year">Fin de año</string>
+    <string name="piko_reel_type_expiring_story_reel">Historias de reel que expiran</string>
+    <string name="piko_reel_type_fan_club_story">Historia del club de fans</string>
+    <string name="piko_reel_type_follow_versaries">Sigue los aniversarios</string>
+    <string name="piko_reel_type_friend_map_reel">Mapa del reel de amigos</string>
+    <string name="piko_reel_type_group_mention">Mención del grupo</string>
+    <string name="piko_reel_type_group_reel">Reel grupal</string>
+    <string name="piko_reel_type_hallpass_reel">Pase de sala del reel</string>
+    <string name="piko_reel_type_highlight_reel">Reel destacado</string>
+    <string name="piko_reel_type_highlight_rewind_reel">Rebobinación de lo más destacado de reel</string>
+    <string name="piko_reel_type_inactive_hallpass_reel">Pase de sala de reel inactivo</string>
+    <string name="piko_reel_type_mas_reel">Más de reel</string>
+    <string name="piko_reel_type_media_reshare">Compartir en los medios</string>
+    <string name="piko_reel_type_memory_reel">Memoria del reel</string>
+    <string name="piko_reel_type_my_week_reel">Mi reel de la semana</string>
+    <string name="piko_reel_type_netego_reel">Red del ego reel</string>
+    <string name="piko_reel_type_nux_reel">Nux reel</string>
+    <string name="piko_reel_type_private_story">Historia privada</string>
+    <string name="piko_reel_type_prompt_sticker_reel">Prompt para sticker de reel</string>
+    <string name="piko_reel_type_reconsideration_injected_story">Reconsideración inyectada de historia</string>
+    <string name="piko_reel_type_shopping_auto_highlight_reel">Compras inteligentes en el reel</string>
+    <string name="piko_reel_type_shopping_pdp_reel">Compras pdp reel</string>
+    <string name="piko_reel_type_shopping_smart_reel">Compras inteligentes en el reel</string>
+    <string name="piko_reel_type_stars_welcome_reel">Las estrellas dan la bienvenida al reel</string>
+    <string name="piko_reel_type_story_stationary_timeline_reel">Historia línea de tiempo estática del reel</string>
+    <string name="piko_reel_type_subscription_shoutout_mention">Mención especial por suscripción</string>
+    <string name="piko_reel_type_suggested_creator_reel">Reel del creador sugerido</string>
+    <string name="piko_reel_type_suggested_user">Usuario sugerido</string>
+    <string name="piko_reel_type_suggested_user_reel">Reel de usuario sugerido</string>
+    <string name="piko_reel_type_superlative_reel">Reel superlativo</string>
+    <string name="piko_reel_type_third_party_app_story">Historia de una aplicación de terceros</string>
+    <string name="piko_reel_type_typed_container">Contenedor tipificado</string>
+    <string name="piko_reel_type_user_reel">Reel de usuario</string>
+    <string name="piko_filter_story_user_types_to_hide">Tipos de usuario para ocultar</string>
+    <string name="piko_user_type_unverified">Usuarios no verificados</string>
+    <string name="piko_user_type_verified">Usuarios verificados</string>
+    <string name="piko_filter_story_minimum_item_count">Elementos mínimos de la historia</string>
+    <string name="piko_filter_story_minimum_item_count_desc">Las historias con menos de x elementos se ocultarán (Por defecto 1)</string>
+    <string name="piko_filter_story_maximum_item_count">Elementos de historia máximos</string>
+    <string name="piko_filter_story_maximum_item_count_desc">Las historias que tengan más de x elementos se ocultarán (Por defecto 9999)</string>
 </resources>

@@ -22,7 +22,7 @@
     <string name="piko_import_id_mapping">マッピングファイルをインポート</string>
     <string name="piko_download_id_mapping">マッピングファイルをダウンロード</string>
     <string name="piko_missing_mapping_file">マッピングファイルがありません</string>
-    <string name="piko_missing_mapping_file_desc">マッピングファイルがないと、開発者向けオプションの名前が正しく表示されません。ダウンロードしますか？</string>
+    <string name="piko_missing_mapping_file_desc">マッピングファイルがないと、開発者向けオプションの名前が正しく表示されません。マッピングファイルをダウンロードしますか？</string>
     <!-- Links Section -->
     <string name="piko_category_links">リンク</string>
     <string name="piko_open_links_externally">リンクを外部ブラウザで開く</string>
@@ -52,6 +52,8 @@
     <string name="piko_disable_reels_scrolling_desc">"リールでのスクロールを無効化し、次のリールをスワイプして視聴できないようにします。
 
 初めてリールを視聴する際、「上にスワイプしてさらに表示」と表示される場合がありますが、数秒後に自動で停止します。"</string>
+    <string name="piko_disable_swipe_to_create">作成画面へのスワイプを無効化</string>
+    <string name="piko_disable_swipe_to_create_desc">ホームタブで右にスワイプしても、作成画面が開かないようにします。</string>
     <string name="piko_hide_stories_tray">ストーリーズ欄を非表示</string>
     <string name="piko_hide_stories_tray_desc">メインフィードからストーリーズ欄を非表示にします</string>
     <string name="piko_hide_notes_tray">ノート欄を非表示</string>
@@ -61,7 +63,7 @@
     <string name="piko_disable_double_tap_like_reel">リールをダブルタップして「いいね！」を無効化</string>
     <string name="piko_disable_double_tap_like_comment">コメントをダブルタップして「いいね！」を無効化</string>
     <string name="piko_disable_double_tap_like_message">メッセージをダブルタップして「いいね！」を無効化</string>
-    <string name="piko_disable_double_tap_to_like">ダブルタップして「いいね！」を無効化</string>
+    <string name="piko_disable_double_tap_to_like">ダブルタップでの「いいね！」を無効化</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">その他</string>
     <string name="piko_disable_analytics">分析データの送信を無効化</string>
@@ -69,11 +71,14 @@
     <string name="piko_disable_analytics_desc">InstagramとFacebookのサーバーへ送信される分析データをブロックします</string>
     <string name="piko_disable_discover_people">おすすめのユーザーを無効化</string>
     <string name="piko_disable_discover_people_desc">プロフィール内の「おすすめのユーザー」欄を非表示にします</string>
-    <string name="piko_follow_back_indicator">フレンドの状態表示を有効化</string>
-    <string name="piko_follow_back_indicator_desc">プロフィールページに「フォローされています」ステータスを追加し、クリックすると詳細なフォロー関係を表示します</string>
+    <string name="piko_follow_back_indicator">フレンド状態の表示を有効化</string>
+    <string name="piko_follow_back_indicator_desc">プロフィールページに「フォローされています」ステータスを追加し、タップすると詳細なフォロー関係を表示します</string>
+    <string name="piko_fbi_color_indicator">色付きの [フレンド状態の表示] を有効化</string>
+    <string name="piko_fbi_color_indicator_desc">[フレンド状態の表示] を有効にする必要があります</string>
     <string name="piko_fbi_follows_you">フォローされています</string>
     <string name="piko_fbi_doesnt_follows_you">フォローされていません</string>
-    <string name="piko_friendship_status">フレンドの状態</string>
+    <string name="piko_fbi_following_each_other">相互フォロー</string>
+    <string name="piko_friendship_status">フレンド状態</string>
     <string name="piko_view_story_mentions">ストーリーのメンションを表示</string>
     <string name="piko_vsm_title">メンションされたアカウント</string>
     <string name="piko_vsm_no_mentions">このストーリーでメンションされたアカウントはありません</string>
@@ -83,8 +88,6 @@
     <string name="piko_stories_audio_autoplay">ストーリーズの音声を自動で再生</string>
     <string name="piko_customise_story_timestamp">ストーリーの時刻表示をカスタマイズ</string>
     <string name="piko_customise_story_timestamp_desc">ストーリーに表示される投稿時刻をカスタマイズします</string>
-    <string name="piko_unlimited_replays">一時メディアを永続化</string>
-    <string name="piko_unlimited_replays_desc">「1回表示」や「2回表示」のメディアを通常の表示に変更します</string>
     <string name="piko_improve_image_viewing">画像表示を改善</string>
     <string name="piko_improve_image_viewing_desc">サーバーから最大解像度の画像を取得します</string>
     <string name="piko_hide_reshare_button">リシェアボタンを非表示</string>
@@ -101,13 +104,17 @@
     <string name="piko_download_profile_picture">プロフィール画像をダウンロード</string>
     <string name="piko_copied">コピーしました</string>
     <string name="piko_more_profile_options">プロフィールのオプション</string>
-    <string name="piko_more_profile_options_action_bar_toggle">プロフィールオプションをアクションバーに表示</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">プロフィールオプションボタンをプロフィール画面上部のアクションバーに移動します</string>
     <string name="piko_remove_empty_bottom_space">ナビゲーションバー下の空白を削除</string>
     <string name="piko_unlock_plus_benefits">Plus特典を有効化</string>
     <string name="piko_unlock_plus_benefits_desc">ローカルで判定される「Plus」サブスクリプション特典を有効化します。自己責任で使用してください</string>
     <string name="piko_customise_story_ring_size">ストーリー欄のアイコンのサイズをカスタマイズ</string>
     <string name="piko_customise_story_ring_size_desc">ストーリー欄のアイコンのサイズをパーセントで変更します。（デフォルト値：100）</string>
+    <!-- DM Section -->
+    <string name="piko_category_dm">DM</string>
+    <string name="piko_unlimited_replays">一時的なメディアを永続的にする</string>
+    <string name="piko_unlimited_replays_desc">「1回表示」や「2回表示」のメディアを通常の表示に変更します</string>
+    <string name="piko_enable_mark_chat_as_read">チャットを既読にするオプションを有効化</string>
+    <string name="piko_enable_mark_chat_as_read_desc">チャットを長押ししたときに、既読にできるオプションを追加します</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">メディアのダウンロード</string>
     <string name="piko_enable_download">ダウンロードを有効化</string>
@@ -128,11 +135,13 @@
     <string name="piko_downloaded_media">ダウンロード完了： </string>
     <string name="piko_media_exists">メディアは既に存在します</string>
     <string name="piko_download_failed_media">ダウンロード失敗： </string>
-    <string name="piko_download_set_path">ダウンロード先フォルダを設定</string>
+    <string name="piko_download_set_path">ダウンロード先のフォルダを選択</string>
     <string name="piko_download_set_path_success">ダウンロード先フォルダを更新しました！</string>
-    <string name="piko_download_set_path_failed">フォルダのパスを取得できませんでした</string>
-    <string name="piko_download_grant_permission">ダウンロードを続けるにはストレージへのアクセスを許可してください</string>
-    <string name="piko_download_grant_permission_failed">設定を開けませんでした。手動で「すべてのファイルへのアクセス」を許可してください</string>
+    <string name="piko_download_set_path_failed">ダウンロード先のフォルダの保存に失敗しました</string>
+    <string name="piko_download_choose_folder">続行するにはダウンロード先のフォルダを選択してください</string>
+    <string name="piko_download_choose_folder_failed">フォルダ選択画面を開けませんでした</string>
+    <string name="piko_download_grant_permission">続行するにはダウンロード先のフォルダを選択してください</string>
+    <string name="piko_download_grant_permission_failed">フォルダ選択画面を開けませんでした</string>
     <string name="piko_download_with_external_downloader">外部ダウンローダーでダウンロード</string>
     <string name="piko_external_downloader_package_name">外部ダウンローダーのパッケージ名</string>
     <string name="piko_external_downloader_package_name_not_found">外部ダウンローダーのパッケージ名が見つかりません</string>
@@ -157,6 +166,9 @@
     <string name="piko_category_about">概要</string>
     <string name="piko_export_pref">Piko設定をエクスポート</string>
     <string name="piko_import_pref">Piko設定をインポート</string>
+    <string name="piko_reset_pref">Piko設定をリセット</string>
+    <string name="piko_reset_pref_success">Piko設定をリセットしました</string>
+    <string name="piko_reset_pref_failed">Piko設定のリセットに失敗しました</string>
     <string name="piko_app_version">アプリバージョン：v%s</string>
     <string name="piko_patch_version">パッチバージョン：v%s</string>
     <string name="piko_patch_info_title">パッチ情報</string>
@@ -169,12 +181,12 @@
     <string name="piko_fail_no_file">ファイルが見つかりません</string>
     <string name="piko_import_success">インポートしました</string>
     <string name="piko_import_fail">インポートに失敗しました</string>
-    <string name="piko_restart_app">変更を反映するにはアプリの再起動が必要です</string>
+    <string name="piko_restart_app">変更を適用するにはアプリの再起動が必要です</string>
     <string name="piko_ok">OK</string>
     <string name="piko_cancel">キャンセル</string>
     <string name="piko_deleted">削除しました</string>
     <string name="piko_debug">Pikoデバッグ</string>
-    <string name="piko_debug_desc">一部コンポーネントにテスト用のデバッグオプションを追加します</string>
+    <string name="piko_debug_desc">一部のコンポーネントにテスト用のデバッグオプションを追加します</string>
     <string name="piko_export_experiment_list">実験リストをエクスポート</string>
     <string name="piko_export_experiment_mappings">実験マッピングをエクスポート</string>
     <!-- Open With Section -->
@@ -193,11 +205,79 @@
     <string name="piko_array_time_left">残り時間(時/分/秒)</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Pikoへようこそ</string>
-    <string name="piko_welcome_message">Pikoをより快適に利用するため、Piko設定でお好みに合わせて設定してください</string>
+    <string name="piko_welcome_message">Pikoをより快適に利用するために、Piko設定でお好みに合わせて設定してください</string>
     <string name="piko_goto_piko_settings">Piko設定へ移動</string>
     <string name="piko_no_internet">インターネットに接続してください</string>
     <string name="piko_tap_here">ここをタップ！！</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">アクションバーをカスタマイズ</string>
+    <string name="piko_action_bar_main_feed">[ホーム] タブに表示するアクション</string>
+    <string name="piko_action_bar_user_profile">[プロフィール] タブに表示するアクション</string>
+    <string name="piko_action_bar_chat">チャットに表示するアクション</string>
+    <string name="piko_action_bar_chat_desc">DMに表示するアクションを設定します</string>
+    <string name="piko_action_bar_inbox">メッセージタブに表示するアクション</string>
+    <string name="piko_action_bar_button_settings_icon">設定</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">匿名モード</string>
+    <string name="piko_action_bar_button_profile_info_icon">プロフィール情報</string>
     <string name="piko_settings_on_action_bar">Piko設定をアクションバーに表示</string>
     <string name="piko_settings_on_action_bar_desc">Piko設定をメインフィード上部のアクションバーに移動します</string>
+    <!-- Story filters -->
+    <string name="piko_category_filter_content">コンテンツをフィルタリング</string>
+    <string name="piko_filter_story">ストーリーをフィルタリング</string>
+    <string name="piko_filter_story_types_to_hide">非表示にするストーリーの種類</string>
+    <string name="piko_reel_type_ads_reel">広告リール</string>
+    <string name="piko_reel_type_ar_effect_preview">ARエフェクトプレビュー</string>
+    <string name="piko_reel_type_archive_day_media_reel">アーカイブの日別メディアストーリー</string>
+    <string name="piko_reel_type_archive_day_reel">日別のアーカイブストーリー</string>
+    <string name="piko_reel_type_archive_friend_reel">友達別のアーカイブストーリー</string>
+    <string name="piko_reel_type_archive_map_reel">マップアーカイブストーリー</string>
+    <string name="piko_reel_type_archive_scheduled_for_deletion_reel">削除予定のアーカイブストーリー</string>
+    <string name="piko_reel_type_archive_shop_reel">ショップアーカイブストーリー</string>
+    <string name="piko_reel_type_axe_reel">Axeストーリー</string>
+    <string name="piko_reel_type_birthday_highlights">誕生日ハイライト</string>
+    <string name="piko_reel_type_bloks">Bloksコンテンツ</string>
+    <string name="piko_reel_type_broadcast_reel">ライブ配信のストーリー</string>
+    <string name="piko_reel_type_daily_snapshot_reel">デイリースナップショット</string>
+    <string name="piko_reel_type_election_reel">選挙関連のストーリー</string>
+    <string name="piko_reel_type_empty_story_state_reel">空のストーリー状態</string>
+    <string name="piko_reel_type_end_of_year">年末のまとめ</string>
+    <string name="piko_reel_type_expiring_story_reel">期限切れ間近のストーリー</string>
+    <string name="piko_reel_type_fan_club_story">ファンクラブストーリー</string>
+    <string name="piko_reel_type_follow_versaries">フォロー記念日</string>
+    <string name="piko_reel_type_friend_map_reel">友達マップストーリー</string>
+    <string name="piko_reel_type_group_mention">グループメンション</string>
+    <string name="piko_reel_type_group_reel">グループストーリー</string>
+    <string name="piko_reel_type_hallpass_reel">Hall Passストーリー</string>
+    <string name="piko_reel_type_highlight_reel">ハイライト</string>
+    <string name="piko_reel_type_highlight_rewind_reel">過去のハイライト</string>
+    <string name="piko_reel_type_inactive_hallpass_reel">無効なHall Passストーリー</string>
+    <string name="piko_reel_type_mas_reel">複数ユーザーのまとめストーリー</string>
+    <string name="piko_reel_type_media_reshare">メディアのリシェア</string>
+    <string name="piko_reel_type_memory_reel">思い出のストーリー</string>
+    <string name="piko_reel_type_my_week_reel">今週のまとめ</string>
+    <string name="piko_reel_type_netego_reel">おすすめのストーリー</string>
+    <string name="piko_reel_type_nux_reel">初回の案内ストーリー</string>
+    <string name="piko_reel_type_private_story">非公開のストーリー</string>
+    <string name="piko_reel_type_prompt_sticker_reel">お題スタンプのストーリー</string>
+    <string name="piko_reel_type_reconsideration_injected_story">再検討用に挿入されたストーリー</string>
+    <string name="piko_reel_type_shopping_auto_highlight_reel">ショッピングの自動ハイライトストーリー</string>
+    <string name="piko_reel_type_shopping_pdp_reel">商品詳細ページのストーリー</string>
+    <string name="piko_reel_type_shopping_smart_reel">ショッピングスマートストーリー</string>
+    <string name="piko_reel_type_stars_welcome_reel">Stars案内ストーリー</string>
+    <string name="piko_reel_type_story_stationary_timeline_reel">固定タイムラインストーリー</string>
+    <string name="piko_reel_type_subscription_shoutout_mention">サブスクリプションのシャウトアウトメンション</string>
+    <string name="piko_reel_type_suggested_creator_reel">おすすめクリエイターのストーリー</string>
+    <string name="piko_reel_type_suggested_user">おすすめのユーザー</string>
+    <string name="piko_reel_type_suggested_user_reel">おすすめユーザーのストーリー</string>
+    <string name="piko_reel_type_superlative_reel">卒業記念ストーリー</string>
+    <string name="piko_reel_type_third_party_app_story">サードパーティーアプリのストーリー</string>
+    <string name="piko_reel_type_typed_container">タイプ付きコンテナ</string>
+    <string name="piko_reel_type_user_reel">ユーザーストーリー</string>
+    <string name="piko_filter_story_user_types_to_hide">非表示にするユーザーの種類</string>
+    <string name="piko_user_type_unverified">未認証のユーザー</string>
+    <string name="piko_user_type_verified">認証済みのユーザー</string>
+    <string name="piko_filter_story_minimum_item_count">ストーリー内の最小件数</string>
+    <string name="piko_filter_story_minimum_item_count_desc">指定した項目数未満のストーリーを非表示にします（デフォルト：1）</string>
+    <string name="piko_filter_story_maximum_item_count">ストーリー内の最大件数</string>
+    <string name="piko_filter_story_maximum_item_count_desc">指定した項目数を超えるストーリーを非表示にします（デフォルト：9999）</string>
 </resources>

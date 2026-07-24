@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Settings Search -->
+    <string name="piko_settings_search_hint">Поиск в настройках Piko</string>
+    <string name="piko_settings_search_clear">Очистить поле</string>
+    <string name="piko_settings_search_no_results">Ничего не найдено для \"%1$s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Премиум</string>
     <string name="piko_pref_undo_posts">Включить отмену постов</string>
@@ -22,19 +26,41 @@
     <string name="piko_pref_download_media_link_handle_always_ask">Всегда спрашивать</string>
     <string name="piko_pref_download_media_link_handle_copy_media_link">Копировать ссылку на медиа</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Поделиться ссылкой на медиа</string>
+    <string name="piko_pref_external_downloader_toggle">Включить внешний загрузчик</string>
+    <string name="piko_pref_external_downloader_text">Скачать внешним загрузчиком</string>
+    <string name="piko_pref_external_downloader_package_name">Имя пакета внешнего загрузчика</string>
+    <string name="piko_pref_external_downloader_package_not_set">Пакет для внешней загрузки не задан</string>
+    <string name="piko_pref_external_downloader_package_not_found">Пакет внешнего загрузчика не найден</string>
     <!-- Native -->
     <string name="piko_title_native">Нативные функции</string>
+    <string name="piko_pref_native_page_desc">Эти встроенные функции Piko доступны в меню поста.</string>
     <string name="piko_title_native_downloader">Нативное скачивание</string>
     <string name="piko_title_native_downloader_toggle">Включить нативный загрузчик</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res">Автоматически скачивать видео в максимальном разрешении</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">Пропускать диалог выбора и сразу скачивать одиночные видео в наилучшем доступном разрешении</string>
+    <string name="piko_pref_native_downloader_show_download_icon">Показывать значок скачивания</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">Показывать значок копирования</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">Показывать значок вариантов</string>
     <string name="piko_pref_native_downloader_inline_button">Показывать кнопку загрузки в строке</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Добавляет кнопку загрузки непосредственно в панель действий поста</string>
     <string name="piko_pref_native_downloader_alert_title">Скачать медиа</string>
     <string name="piko_pref_native_downloader_download_all">Скачать все</string>
     <string name="piko_pref_native_downloader_no_media">Медиа не найдено</string>
     <string name="piko_pref_native_downloader_filename_title">Сохранить шаблон имени файла</string>
+    <string name="piko_browse_object_title">Просмотр объекта твита</string>
+    <string name="piko_browse_object_toggle">Включить просмотр объекта твита</string>
     <string name="piko_share_image_title">Делиться твитом как изображением</string>
     <string name="piko_share_image_toggle">Включить Делиться твитами как изображением</string>
+    <string name="piko_share_image_autocleanup">Автоочистка снимков</string>
+    <string name="piko_share_image_autocleanup_desc">Удалять снимки старше 24 часов</string>
+    <string name="piko_share_image_invalid_context">Неверный контекст</string>
+    <string name="piko_share_image_capturing">Захват твита...</string>
+    <string name="piko_share_image_view_not_found">Представление твита не найдено</string>
+    <string name="piko_share_image_capture_failed">Не удалось захватить изображение</string>
     <string name="piko_share_image_error">Ошибка: %s</string>
+    <string name="piko_share_image_app_error">%s не найдено</string>
+    <string name="piko_share_image_instagram_stories">Поделиться в Instagram Stories</string>
+    <string name="piko_share_image_whatsapp_status">Поделиться в статусе WhatsApp</string>
     <string name="piko_title_native_translator">Нативный перевод постов</string>
     <string name="piko_native_translator_toggle">Включить нативный перевод постов</string>
     <string name="piko_native_translator_provider">Сервис перевода</string>
@@ -57,6 +83,8 @@
     <string name="piko_native_reader_mode_cache_delete">Удалить кэш режима чтения</string>
     <string name="piko_native_reader_mode_cache_delete_success">Кэш успешно удалён</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Не удалось удалить кэш</string>
+    <string name="piko_title_native_share_menu">Системное меню «Поделиться»</string>
+    <string name="piko_native_share_menu_toggle">Включить системное меню «Поделиться»</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Реклама</string>
     <string name="piko_pref_hide_promoted_posts">Скрыть продвигаемые посты</string>
@@ -65,23 +93,33 @@
     <string name="piko_pref_ctj_section">Спрятать \"Обзор сообществ\"</string>
     <string name="piko_pref_ryb_section">Спрятать \"Обзор закладок\"</string>
     <string name="piko_pref_pinned_posts_section">Спрятать \"Закреплено пользователями\"</string>
-    <string name="piko_pref_hide_related_posts">Спрятать \"Похожие твиты\" (в ответах)</string>
+    <string name="piko_pref_hide_unrelated_replies">Скрывать нерелевантные ответы</string>
+    <string name="piko_pref_hide_premium_prompt">Скрывать подсказки в сообщениях</string>
     <string name="piko_pref_hide_todays_news">Спрятать новости за сегодня</string>
     <string name="piko_pref_del_from_db">Удалить записи из базы данных</string>
+    <string name="piko_pref_db_promoted_posts">Рекламные публикации</string>
     <string name="piko_pref_db_wtf_section">Панель \"Кого читать\"</string>
     <string name="piko_pref_db_cts_section">Панель \"Авторы для вас\"</string>
     <string name="piko_pref_db_ctj_section">Панель \"Обзор сообществ\"</string>
     <string name="piko_pref_db_ryb_section">Панель \"Обзор закладок\"</string>
     <string name="piko_pref_db_pinned_posts_section">Панель \"Закреплено пользователями\"</string>
-    <string name="piko_pref_db_related_posts">Панель \"Похожие твиты\" (в ответах)</string>
+    <string name="piko_pref_db_unrelated_replies">Нерелевантные ответы</string>
+    <string name="piko_pref_db_premium_prompt">Подсказки в сообщениях</string>
     <string name="piko_pref_db_todays_news">Новости за сегодня</string>
     <string name="piko_pref_db_not_found">База данных не найдена</string>
     <string name="piko_pref_db_not_open">База данных не открыта</string>
     <string name="piko_pref_db_del_items">Удаленные записи</string>
     <string name="piko_pref_hide_premium_upsell">Спрятать навязывание премиума</string>
     <string name="piko_pref_hide_premium_upsell_desc">Убирает предложения купить премиум из ленты</string>
+    <string name="piko_pref_top_people_search">Скрывать «Топ-людей» в поиске</string>
+    <string name="piko_pref_top_people_search_desc">Скрывать раздел «Люди» после поиска</string>
     <!-- Misc Settings -->
     <string name="piko_title_misc">Прочее</string>
+    <string name="piko_pref_chirp_font">Отключить шрифт Chirp</string>
+    <string name="piko_pref_hide_fab">Скрывать плавающую кнопку действия</string>
+    <string name="piko_pref_hide_fab_menu">Скрывать кнопки плавающего меню</string>
+    <string name="piko_pref_rec_users">Скрывать рекомендуемых пользователей</string>
+    <string name="piko_pref_hide_view_count">Скрывать количество просмотров</string>
     <string name="piko_pref_custom_share_domain">Кастомный домен ссылки</string>
     <string name="piko_pref_custom_share_domain_desc">Изменить домен ссылки на пост</string>
     <string name="piko_pref_show_sensitive_media">Показывать деликатный контент</string>
@@ -90,6 +128,7 @@
     <string name="piko_pref_unshorten_link">Отключить сокращение ссылок</string>
     <string name="piko_pref_unshorten_link_desc">Не использовать t.co в ссылках</string>
     <string name="piko_pref_round_off_numbers">Округление чисел</string>
+    <string name="piko_pref_round_off_numbers_desc">Округлять числа до K и M</string>
     <string name="piko_pref_quick_settings">Включить быстрый доступ</string>
     <string name="piko_pref_quick_settings_summary">Переход в настройки Piko через боковое меню</string>
     <!-- Feature flags Settings -->
@@ -98,10 +137,15 @@
     <string name="piko_pref_edit_flag_title">Изменить флаг</string>
     <string name="piko_pref_add_flag_title">Добавить флаг</string>
     <string name="piko_pref_search_flags">Поиск флагов</string>
+    <string name="piko_pref_import_flags">Импорт флагов</string>
+    <string name="piko_pref_export_flags">Экспорт флаги</string>
+    <string name="piko_pref_reset_flags">Сброс флагов</string>
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">Лента</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Отключить автопрокрутку ленты</string>
+    <string name="piko_pref_hide_live_threads">Скрыть активные треды</string>
     <string name="piko_pref_hide_live_threads_desc">Баннер прямых эфиров поверх ленты</string>
+    <string name="piko_pref_hide_banner">Скрыть баннер</string>
     <string name="piko_pref_force_translate">Принудительный перевод</string>
     <string name="piko_pref_force_translate_desc">Кнопка перевода текста во всех постах</string>
     <string name="piko_pref_hide_quick_promote_desc">Кнопка продвижения под своими постами</string>
@@ -147,8 +191,6 @@
     <string name="piko_pref_included">Применен</string>
     <string name="piko_pref_excluded">Не применен</string>
     <string name="piko_pref_app_restart_rec">Рекомендуется перезапуск приложения</string>
-    <string name="piko_single_page_settings">Настройки одной страницей</string>
-    <string name="piko_single_page_settings_desc">Показывать все настройки на одной странице</string>
     <!-- For arrays-->
     <string name="piko_array_grok">Grok</string>
     <string name="piko_array_xchat">X Чат</string>

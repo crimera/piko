@@ -37,4 +37,8 @@ public class UserFriendshipStatus extends Entity {
     public Boolean getFollowBackStatus() throws Exception {
         return getValue("followed_by");
     }
+
+    public Boolean getFollowingStatus() throws Exception {
+        return getValue("following");
+    }
 }

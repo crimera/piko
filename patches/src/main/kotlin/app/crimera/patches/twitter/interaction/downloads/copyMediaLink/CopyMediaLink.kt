@@ -11,10 +11,9 @@ import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.removeInstruction
-import app.morphe.patcher.opcode
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -22,10 +21,6 @@ internal object DownloadCallFingerprint : Fingerprint(
     definingClass = "Lcom/twitter/downloader/",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
     returnType = "V",
-    filters =
-        listOf(
-            opcode(Opcode.GOTO),
-        ),
     strings =
         listOf(
             "getString(...)",
@@ -44,20 +39,19 @@ val copyMediaLink =
         dependsOn(settingsPatch)
 
         execute {
-            val method = DownloadCallFingerprint.method
+            DownloadCallFingerprint.method.apply {
+                val firstIfEqzIndex = indexOfFirstInstruction(Opcode.IF_EQZ)
 
-            val gotoLoc = DownloadCallFingerprint.instructionMatches.first().index
+                addInstructions(
+                    firstIfEqzIndex + 1,
+                    """
+                    invoke-static{p0,p1}, $PATCHES_DESCRIPTOR/DownloadPatch;->mediaHandle(Ljava/lang/Object;Ljava/lang/Object;)V
+                    return-void
+                    """.trimIndent(),
+                )
 
-            val METHOD =
-                """
-                invoke-static{p0,p1}, $PATCHES_DESCRIPTOR/DownloadPatch;->mediaHandle(Ljava/lang/Object;Ljava/lang/Object;)V
-                """.trimIndent()
-
-            method.removeInstruction(gotoLoc - 1)
-            method.addInstruction(gotoLoc - 1, METHOD)
-
-            enableSettings("mediaLinkHandle")
-
+                enableSettings("mediaLinkHandle")
+            }
             // end func
         }
     }

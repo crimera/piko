@@ -56,6 +56,8 @@
     <string name="piko_disable_reels_scrolling_desc">"Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel.
 
 Note: On a clean install, the \'Tip\' animation may appear but will stop on its own after a few seconds."</string>
+    <string name="piko_disable_swipe_to_create">Disable swipe to create</string>
+    <string name="piko_disable_swipe_to_create_desc">Prevents opening the creation screen by swiping right on the home tab.</string>
     <string name="piko_hide_stories_tray">Hide stories tray</string>
     <string name="piko_hide_stories_tray_desc">Hide stories tray from main feed</string>
     <string name="piko_hide_notes_tray">Hide notes tray</string>
@@ -76,8 +78,11 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_disable_discover_people_desc">Disables discover people section on user profile</string>
     <string name="piko_follow_back_indicator">Enable friendship status indicator</string>
     <string name="piko_follow_back_indicator_desc">Adds a follows you back status label on the profile page and shows a detailed friendship status breakdown on click</string>
+    <string name="piko_fbi_color_indicator">Enable colored friendship status indicator</string>
+    <string name="piko_fbi_color_indicator_desc">Friendship status indicator needs to be enabled</string>
     <string name="piko_fbi_follows_you">Follows you</string>
     <string name="piko_fbi_doesnt_follows_you">Does not follow you</string>
+    <string name="piko_fbi_following_each_other">Following each other</string>
     <string name="piko_friendship_status">Friendship status</string>
     <string name="piko_view_story_mentions">View story mentions</string>
     <string name="piko_vsm_title">Story mentions</string>
@@ -88,8 +93,6 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_stories_audio_autoplay">Stories audio autoplay</string>
     <string name="piko_customise_story_timestamp">Customise story timestamp</string>
     <string name="piko_customise_story_timestamp_desc">Customise the timestamp that shows when the story was posted</string>
-    <string name="piko_unlimited_replays">Make ephemeral media permament</string>
-    <string name="piko_unlimited_replays_desc">Changes unexpired view once, view twice media to permanent view</string>
     <string name="piko_improve_image_viewing">Improve image viewing</string>
     <string name="piko_improve_image_viewing_desc">Fetches max resolution images from server</string>
     <string name="piko_hide_reshare_button">Hide reshare button</string>
@@ -106,13 +109,18 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_download_profile_picture">Download profile picture</string>
     <string name="piko_copied">Copied</string>
     <string name="piko_more_profile_options">More profile options</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Profile options on action bar</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Move profile options button to profile action bar</string>
     <string name="piko_remove_empty_bottom_space">Remove empty bottom space</string>
     <string name="piko_unlock_plus_benefits">Unlock Plus benefits</string>
     <string name="piko_unlock_plus_benefits_desc">Unlock \'Plus\' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK</string>
     <string name="piko_customise_story_ring_size">Customise story ring size</string>
     <string name="piko_customise_story_ring_size_desc">Change the size of story ring by a percentage (Default: 100)</string>
+
+    <!-- DM Section -->
+    <string name="piko_category_dm">DM</string>
+    <string name="piko_unlimited_replays">Make ephemeral media permanent</string>
+    <string name="piko_unlimited_replays_desc">Changes unexpired view once, view twice media to permanent view</string>
+    <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read</string>
 
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download media</string>
@@ -134,11 +142,13 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_downloaded_media">Downloaded: </string>
     <string name="piko_media_exists">Media exists</string>
     <string name="piko_download_failed_media">Download failed : </string>
-    <string name="piko_download_set_path">Set custom download path</string>
+    <string name="piko_download_set_path">Choose download folder</string>
     <string name="piko_download_set_path_success">Download directory updated!</string>
-    <string name="piko_download_set_path_failed">Failed to resolve folder path</string>
-    <string name="piko_download_grant_permission">Please grant storage access to continue downloads</string>
-    <string name="piko_download_grant_permission_failed">Could not open settings. Please grant All Files Access manually</string>
+    <string name="piko_download_set_path_failed">Failed to save download folder</string>
+    <string name="piko_download_choose_folder">Choose a download folder to continue</string>
+    <string name="piko_download_choose_folder_failed">Could not open folder picker</string>
+    <string name="piko_download_grant_permission">Choose a download folder to continue</string>
+    <string name="piko_download_grant_permission_failed">Could not open folder picker</string>
     <string name="piko_download_with_external_downloader">Download with external downloader</string>
     <string name="piko_external_downloader_package_name">External downloader package name</string>
     <string name="piko_external_downloader_package_name_not_found">External downloader package name not found</string>
@@ -164,8 +174,11 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
 
     <!-- Information Section -->
     <string name="piko_category_about">About</string>
-    <string name="piko_export_pref">Export piko preferences</string>
-    <string name="piko_import_pref">Import piko preferences</string>
+    <string name="piko_export_pref">Export Piko preferences</string>
+    <string name="piko_import_pref">Import Piko preferences</string>
+    <string name="piko_reset_pref">Reset Piko preferences</string>
+    <string name="piko_reset_pref_success">Piko preferences deleted</string>
+    <string name="piko_reset_pref_failed">Failed to delete Piko preferences</string>
     <string name="piko_app_version">App version: %s</string>
     <string name="piko_patch_version">Patch version: %s</string>
     <string name="piko_patch_info_title">Patch information</string>
@@ -213,6 +226,81 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_tap_here">Tap here !!</string>
 
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Action bar customisation</string>
+    <string name="piko_action_bar_main_feed">Main feed action bar icons</string>
+    <string name="piko_action_bar_user_profile">User profile action bar icons</string>
+    <string name="piko_action_bar_chat">Chat action bar icons</string>
+    <string name="piko_action_bar_chat_desc">Action bar icons inside a DM</string>
+    <string name="piko_action_bar_inbox">Inbox action bar icons</string>
+
+    <string name="piko_action_bar_button_settings_icon">Settings icon</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Ghost mode icon</string>
+    <string name="piko_action_bar_button_profile_info_icon">Profile info icon</string>
+
     <string name="piko_settings_on_action_bar">Piko settings on action bar</string>
     <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
+
+    <!-- Story filters -->
+    <string name="piko_category_filter_content">Filter content</string>
+
+    <string name="piko_filter_story">Filter Story</string>
+
+    <string name="piko_filter_story_types_to_hide">Story types to hide</string>
+    <string name="piko_reel_type_ads_reel">Ads reel</string>
+    <string name="piko_reel_type_ar_effect_preview">Ar effect preview</string>
+    <string name="piko_reel_type_archive_day_media_reel">Archive day media reel</string>
+    <string name="piko_reel_type_archive_day_reel">Archive day reel</string>
+    <string name="piko_reel_type_archive_friend_reel">Archive friend reel</string>
+    <string name="piko_reel_type_archive_map_reel">Archive map reel</string>
+    <string name="piko_reel_type_archive_scheduled_for_deletion_reel">Archive scheduled for deletion reel</string>
+    <string name="piko_reel_type_archive_shop_reel">Archive shop reel</string>
+    <string name="piko_reel_type_axe_reel">Axe reel</string>
+    <string name="piko_reel_type_birthday_highlights">Birthday highlights</string>
+    <string name="piko_reel_type_bloks">Blox</string>
+    <string name="piko_reel_type_broadcast_reel">Broadcast reel</string>
+    <string name="piko_reel_type_daily_snapshot_reel">Daily snapshot reel</string>
+    <string name="piko_reel_type_election_reel">Election reel</string>
+    <string name="piko_reel_type_empty_story_state_reel">Empty story state reel</string>
+    <string name="piko_reel_type_end_of_year">End of year</string>
+    <string name="piko_reel_type_expiring_story_reel">Expiring story reel</string>
+    <string name="piko_reel_type_fan_club_story">Fan club story</string>
+    <string name="piko_reel_type_follow_versaries">Follow versaries</string>
+    <string name="piko_reel_type_friend_map_reel">Friend map reel</string>
+    <string name="piko_reel_type_group_mention">Group mention</string>
+    <string name="piko_reel_type_group_reel">Group reel</string>
+    <string name="piko_reel_type_hallpass_reel">Hall pass reel</string>
+    <string name="piko_reel_type_highlight_reel">Highlight reel</string>
+    <string name="piko_reel_type_highlight_rewind_reel">Highlight rewind reel</string>
+    <string name="piko_reel_type_inactive_hallpass_reel">Inactive hallpass reel</string>
+    <string name="piko_reel_type_mas_reel">Mas reel</string>
+    <string name="piko_reel_type_media_reshare">Media reshare</string>
+    <string name="piko_reel_type_memory_reel">Memory reel</string>
+    <string name="piko_reel_type_my_week_reel">My week reel</string>
+    <string name="piko_reel_type_netego_reel">Net ego reel</string>
+    <string name="piko_reel_type_nux_reel">Nux reel</string>
+    <string name="piko_reel_type_private_story">Private story</string>
+    <string name="piko_reel_type_prompt_sticker_reel">Prompt sticker reel</string>
+    <string name="piko_reel_type_reconsideration_injected_story">reconsideration injected story</string>
+    <string name="piko_reel_type_shopping_auto_highlight_reel">Shopping smart reel</string>
+    <string name="piko_reel_type_shopping_pdp_reel">Shopping pdp reel</string>
+    <string name="piko_reel_type_shopping_smart_reel">Shopping smart reel</string>
+    <string name="piko_reel_type_stars_welcome_reel">Stars welcome reel</string>
+    <string name="piko_reel_type_story_stationary_timeline_reel">Story stationary timeline reel</string>
+    <string name="piko_reel_type_subscription_shoutout_mention">Subscription shoutout mention</string>
+    <string name="piko_reel_type_suggested_creator_reel">Suggested creator reel</string>
+    <string name="piko_reel_type_suggested_user">Suggested user</string>
+    <string name="piko_reel_type_suggested_user_reel">Suggested user reel</string>
+    <string name="piko_reel_type_superlative_reel">Superlative reel</string>
+    <string name="piko_reel_type_third_party_app_story">Third party app story</string>
+    <string name="piko_reel_type_typed_container">Typed container</string>
+    <string name="piko_reel_type_user_reel">User reel</string>
+
+    <string name="piko_filter_story_user_types_to_hide">User types to hide</string>
+    <string name="piko_user_type_unverified">Unverified users</string>
+    <string name="piko_user_type_verified">Verified users</string>
+
+    <string name="piko_filter_story_minimum_item_count">Minimum story items</string>
+    <string name="piko_filter_story_minimum_item_count_desc">Stories having less than x items will be hidden (default 1)</string>
+    <string name="piko_filter_story_maximum_item_count">Maximum story items</string>
+    <string name="piko_filter_story_maximum_item_count_desc">Stories having more than x items will be hidden (default 9999)</string>
 </resources>

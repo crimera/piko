@@ -24,6 +24,10 @@ public class Constants {
     // https://www.instagram.com/reel/<short code>/
     // https://www.instagram.com/stories/<user name>/<post id>
 
+    public static final String AB_SETTINGS_ICON = "SETTINGS_ICON";
+    public static final String AB_GHOST_MODE_ICON = "GHOST_MODE_ICON";
+    public static final String AB_PROFILE_INFO_ICON = "PROFILE_INFO_ICON";
+
     public static final String PIKO_FRAGMENT_TITLE = "piko_frag_title";
     public static final String PIKO_FRAGMENT_NAME = "piko_frag_name";
 
@@ -37,6 +41,9 @@ public class Constants {
     public static final String PIKO_FRAGMENT_NAV_BTNS = "piko_frag_nav_btns";
     public static final String PIKO_FRAGMENT_DEV_OPTIONS = "piko_frag_dev_options";
     public static final String PIKO_FRAGMENT_ABOUT = "piko_frag_about";
+    public static final String PIKO_FRAGMENT_ACTION_BAR = "piko_frag_action_bar";
+    public static final String PIKO_FRAGMENT_DM = "piko_frag_dm";
+    public static final String PIKO_FRAGMENT_FILTER_CONTENT = "piko_frag_filter_content";
 
     public static void load() {
         ExtensionStrings.setDefaultPikoFolder(Constants.DEFAULT_PIKO_FOLDER);
@@ -46,7 +53,7 @@ public class Constants {
         ExtensionStrings.setDownloadMediaExists(str("piko_media_exists"));
         ExtensionStrings.setDownloadSetPathFailed(str("piko_download_set_path_failed"));
         ExtensionStrings.setDownloadSetPathSuccess(str("piko_download_set_path_success"));
-        ExtensionStrings.setDownloadGrantPermission(str("piko_download_grant_permission"));
-        ExtensionStrings.setDownloadGrantPermissionFailed(str("piko_download_grant_permission_failed"));
+        ExtensionStrings.setDownloadGrantPermission(str("piko_download_choose_folder"));
+        ExtensionStrings.setDownloadGrantPermissionFailed(str("piko_download_choose_folder_failed"));
     }
 }

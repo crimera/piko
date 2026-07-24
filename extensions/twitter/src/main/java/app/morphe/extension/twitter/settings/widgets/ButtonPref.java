@@ -18,9 +18,12 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.util.AttributeSet;
 
+import static app.morphe.extension.shared.StringRef.str;
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
-import app.morphe.extension.twitter.Utils;
+import app.morphe.extension.crimera.PikoUtils;
+
+import app.morphe.extension.twitter.patches.Changelogs;
 import app.morphe.extension.twitter.patches.DatabasePatch;
 import app.morphe.extension.twitter.patches.customise.appIcon.IconSelectorFragment;
 import app.morphe.extension.twitter.patches.customise.font.FontPickerFragment;
@@ -32,6 +35,7 @@ import app.morphe.extension.twitter.settings.ActivityHook;
 import app.morphe.extension.twitter.settings.Settings;
 import app.morphe.extension.twitter.settings.fragments.BackupPrefFragment;
 import app.morphe.extension.twitter.settings.fragments.RestorePrefFragment;
+import app.morphe.extension.twitter.Utils;
 
 public class ButtonPref extends Preference {
     private final Context context;
@@ -92,6 +96,7 @@ public class ButtonPref extends Preference {
                     String key = getKey();
                     Bundle bundle = new Bundle();
                     Fragment fragment = null;
+
                     if (key.equals(Settings.EXPORT_PREF)) {
                         bundle.putBoolean("featureFlag", false);
                         fragment = new BackupPrefFragment();
@@ -117,7 +122,7 @@ public class ButtonPref extends Preference {
                     } else if (key.equals(Settings.PREMIUM_UNDO_POSTS.key)) {
                         Utils.startUndoPostActivity();
                     }  else if (key.equals(Settings.PREMIUM_NAVBAR.key)) {
-                        app.morphe.extension.crimera.PikoUtils.openUrl("https://www.x.com/settings/custom_navigation");
+                        PikoUtils.openUrl("https://www.x.com/settings/custom_navigation",true);
                     } else if (key.equals(Settings.RESET_PREF)) {
                         Utils.deleteSharedPrefAB(context, false);
                     } else if (key.equals(Settings.RESET_FLAGS)) {
@@ -132,6 +137,14 @@ public class ButtonPref extends Preference {
                         new ImportLoginTokenDialogFragment().show(((Activity) context).getFragmentManager(), null);
                     } else if (key.equals(Settings.EXPORT_LOGIN_TOKEN)) {
                         fragment = new ExportLoginTokenFragment();
+                    } else if ( (key.equals(Settings.APP_VERSION)) || (key.equals(Settings.PIKO_PATCHES)) ) {
+                        String summary = preference.getSummary().toString();
+                        app.morphe.extension.shared.Utils.setClipboard(summary);
+                        PikoUtils.toast(str("copied_to_clipboard")+": "+ summary);
+                    } else if (key.equals(Settings.SUPPORTED_LINKS)){
+                        PikoUtils.openDefaultLinks();
+                    } else if (key.equals(Settings.CHANGELOGS_TITLE)){
+                        Changelogs.showChangelogDialog(context);
                     } else {
                         ActivityHook.startActivity(key);
                     }
@@ -141,8 +154,8 @@ public class ButtonPref extends Preference {
                         ActivityHook.startFragment((Activity) context, key,fragment, true);
                     }
                 } catch (Exception e) {
-                    app.morphe.extension.crimera.PikoUtils.logger(e);
-                    app.morphe.extension.crimera.PikoUtils.toast(e.toString());
+                    PikoUtils.logger(e);
+                    PikoUtils.toast(e.toString());
                 }
 
                 return true;

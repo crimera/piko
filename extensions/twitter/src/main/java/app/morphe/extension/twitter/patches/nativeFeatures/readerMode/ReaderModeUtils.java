@@ -97,10 +97,14 @@ public class ReaderModeUtils {
                 "}";
     }
 
-    public static void launchReaderMode(Context activity, Object tweet) throws Exception {
-        String tweetId = "" + new Tweet(tweet).getTweetId();
-        ActivityHook.startReaderMode(tweetId);
-        return;
+    public static void launchReaderMode(Context activity, Object tweet){
+        try {
+            String tweetId = "" + new Tweet(tweet).getTweetId();
+            ActivityHook.startReaderMode(tweetId);
+            return;
+        } catch (Exception ex) {
+            PikoUtils.logger(ex);
+        }
     }
 
     private static JSONObject getThreadInfo(String tweetId) throws Exception {

@@ -72,4 +72,159 @@
         <item>RINGS_LIKE_TYSHAWN</item>
         <item>RINGS_LIKE_ZARNA</item>
     </string-array>
+
+    <string-array name="piko_array_action_bar_main_feed">
+        <item>@string/piko_action_bar_button_settings_icon</item>
+        <item>@string/piko_action_bar_button_ghost_mode_icon</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_main_feed_val">
+        <item>SETTINGS_ICON</item>
+        <item>GHOST_MODE_ICON</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_user_profile">
+        <item>@string/piko_action_bar_button_settings_icon</item>
+        <item>@string/piko_action_bar_button_profile_info_icon</item>
+        <item>@string/piko_action_bar_button_ghost_mode_icon</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_user_profile_val">
+        <item>SETTINGS_ICON</item>
+        <item>PROFILE_INFO_ICON</item>
+        <item>GHOST_MODE_ICON</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_chat">
+        <item>@string/piko_action_bar_button_settings_icon</item>
+        <item>@string/piko_action_bar_button_ghost_mode_icon</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_chat_val">
+        <item>SETTINGS_ICON</item>
+        <item>GHOST_MODE_ICON</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_inbox">
+        <item>@string/piko_action_bar_button_settings_icon</item>
+        <item>@string/piko_action_bar_button_ghost_mode_icon</item>
+    </string-array>
+
+    <string-array name="piko_array_action_bar_inbox_val">
+        <item>SETTINGS_ICON</item>
+        <item>GHOST_MODE_ICON</item>
+    </string-array>
+
+    <string-array name="piko_array_reel_type">
+        <item>@string/piko_reel_type_ads_reel</item>
+        <item>@string/piko_reel_type_ar_effect_preview</item>
+        <item>@string/piko_reel_type_archive_day_media_reel</item>
+        <item>@string/piko_reel_type_archive_day_reel</item>
+        <item>@string/piko_reel_type_archive_friend_reel</item>
+        <item>@string/piko_reel_type_archive_map_reel</item>
+        <item>@string/piko_reel_type_archive_scheduled_for_deletion_reel</item>
+        <item>@string/piko_reel_type_archive_shop_reel</item>
+        <item>@string/piko_reel_type_axe_reel</item>
+        <item>@string/piko_reel_type_birthday_highlights</item>
+        <item>@string/piko_reel_type_bloks</item>
+        <item>@string/piko_reel_type_broadcast_reel</item>
+        <item>@string/piko_reel_type_daily_snapshot_reel</item>
+        <item>@string/piko_reel_type_election_reel</item>
+        <item>@string/piko_reel_type_empty_story_state_reel</item>
+        <item>@string/piko_reel_type_end_of_year</item>
+        <item>@string/piko_reel_type_expiring_story_reel</item>
+        <item>@string/piko_reel_type_fan_club_story</item>
+        <item>@string/piko_reel_type_follow_versaries</item>
+        <item>@string/piko_reel_type_friend_map_reel</item>
+        <item>@string/piko_reel_type_group_mention</item>
+        <item>@string/piko_reel_type_group_reel</item>
+        <item>@string/piko_reel_type_hallpass_reel</item>
+        <item>@string/piko_reel_type_highlight_reel</item>
+        <item>@string/piko_reel_type_highlight_rewind_reel</item>
+        <item>@string/piko_reel_type_inactive_hallpass_reel</item>
+        <item>@string/piko_reel_type_mas_reel</item>
+        <item>@string/piko_reel_type_media_reshare</item>
+        <item>@string/piko_reel_type_memory_reel</item>
+        <item>@string/piko_reel_type_my_week_reel</item>
+        <item>@string/piko_reel_type_netego_reel</item>
+        <item>@string/piko_reel_type_nux_reel</item>
+        <item>@string/piko_reel_type_private_story</item>
+        <item>@string/piko_reel_type_prompt_sticker_reel</item>
+        <item>@string/piko_reel_type_reconsideration_injected_story</item>
+        <item>@string/piko_reel_type_shopping_auto_highlight_reel</item>
+        <item>@string/piko_reel_type_shopping_pdp_reel</item>
+        <item>@string/piko_reel_type_shopping_smart_reel</item>
+        <item>@string/piko_reel_type_stars_welcome_reel</item>
+        <item>@string/piko_reel_type_story_stationary_timeline_reel</item>
+        <item>@string/piko_reel_type_subscription_shoutout_mention</item>
+        <item>@string/piko_reel_type_suggested_creator_reel</item>
+        <item>@string/piko_reel_type_suggested_user</item>
+        <item>@string/piko_reel_type_suggested_user_reel</item>
+        <item>@string/piko_reel_type_superlative_reel</item>
+        <item>@string/piko_reel_type_third_party_app_story</item>
+        <item>@string/piko_reel_type_typed_container</item>
+        <item>@string/piko_reel_type_user_reel</item>
+    </string-array>
+
+    <string-array name="piko_array_reel_type_val">
+        <item>ads_reel</item>
+        <item>ar_effect_preview</item>
+        <item>archive_day_media_reel</item>
+        <item>archive_day_reel</item>
+        <item>archive_friend_reel</item>
+        <item>archive_map_reel</item>
+        <item>archive_scheduled_for_deletion_reel</item>
+        <item>archive_shop_reel</item>
+        <item>axe_reel</item>
+        <item>birthday_highlights</item>
+        <item>bloks</item>
+        <item>broadcast_reel</item>
+        <item>daily_snapshot_reel</item>
+        <item>election_reel</item>
+        <item>empty_story_state_reel</item>
+        <item>end_of_year</item>
+        <item>expiring_story_reel</item>
+        <item>fan_club_story</item>
+        <item>follow_versaries</item>
+        <item>friend_map_reel</item>
+        <item>group_mention</item>
+        <item>group_reel</item>
+        <item>hallpass_reel</item>
+        <item>highlight_reel</item>
+        <item>highlight_rewind_reel</item>
+        <item>inactive_hallpass_reel</item>
+        <item>mas_reel</item>
+        <item>media_reshare</item>
+        <item>memory_reel</item>
+        <item>my_week_reel</item>
+        <item>netego_reel</item>
+        <item>nux_reel</item>
+        <item>private_story</item>
+        <item>prompt_sticker_reel</item>
+        <item>reconsideration_injected_story</item>
+        <item>shopping_auto_highlight_reel</item>
+        <item>shopping_pdp_reel</item>
+        <item>shopping_smart_reel</item>
+        <item>stars_welcome_reel</item>
+        <item>story_stationary_timeline_reel</item>
+        <item>subscription_shoutout_mention</item>
+        <item>suggested_creator_reel</item>
+        <item>suggested_user</item>
+        <item>suggested_user_reel</item>
+        <item>superlative_reel</item>
+        <item>third_party_app_story</item>
+        <item>typed_container</item>
+        <item>user_reel</item>
+    </string-array>
+
+    <string-array name="piko_array_user_type">
+        <item>@string/piko_user_type_unverified</item>
+        <item>@string/piko_user_type_verified</item>
+    </string-array>
+
+    <string-array name="piko_array_user_type_val">
+        <item>unverified</item>
+        <item>verified</item>
+    </string-array>
+
 </resources>

@@ -8,7 +8,9 @@ package app.crimera.patches.twitter.misc.shareMenu.nativeShareImage
 
 import app.crimera.patches.twitter.entity.entityGenerator
 import app.crimera.patches.twitter.misc.settings.settingsPatch
+import app.crimera.patches.twitter.misc.shareMenu.browseObject.browseObjectPatch
 import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonInjection
+import app.crimera.patches.twitter.misc.shareMenu.hooks.shareMenuButtonOnClickHook
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.patch.bytecodePatch
@@ -20,14 +22,13 @@ val nativeShareImagePatch =
         description = "Share tweets as rendered image. Requires X 11.0.0-release.0 or higher.",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, entityGenerator, versionCheckPatch)
+        dependsOn(settingsPatch, entityGenerator, versionCheckPatch, shareMenuButtonOnClickHook, browseObjectPatch)
 
         execute {
             val actionName = "ShareImage"
             val prefFunctionName = "enableShareImage"
             val stringId = "piko_share_image_title"
             val iconId = "ic_vector_share"
-            val functionReference = "/shareImage/ShareImageHandler;->shareAsImage"
             val statusFunctionName = "shareImage"
 
             shareMenuButtonInjection(
@@ -35,7 +36,6 @@ val nativeShareImagePatch =
                 prefFunctionName,
                 stringId,
                 iconId,
-                functionReference,
                 statusFunctionName,
             )
         }

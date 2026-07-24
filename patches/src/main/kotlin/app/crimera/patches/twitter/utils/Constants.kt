@@ -14,22 +14,7 @@ object Constants {
             targets =
                 listOf(
                     AppTarget(
-                        version = "11.81.0-release.0",
-                        description = "Last stable version without PairIP protection",
-                    ),
-                    // PairIP-ripped version
-                    AppTarget(
-                        version = "11.99.0-release-ripped.1",
-                        description = "Make sure the APK is PairIP bypassed (Check the support group)",
-                    ),
-                    // Shim versions
-                    AppTarget(
-                        version = "12.0.0-release.0",
-                        description = "Requires Piko-Shim to be included",
-                    ),
-                    AppTarget(
-                        version = "12.2.0-release.0",
-                        description = "Requires Piko-Shim to be included",
+                        version = "12.7.1-release.0",
                     ),
                 ),
         )
@@ -56,4 +41,6 @@ object Constants {
 
     const val SSTS_DESCRIPTOR = "invoke-static {}, $ACTIVITY_SETTINGS_CLASS/SettingsStatus;"
     const val FSTS_DESCRIPTOR = "invoke-static {}, $INTEGRATIONS_PACKAGE/patches/FeatureSwitchPatch;"
+
+    const val ENTITY_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/entity/"
 }

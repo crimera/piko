@@ -18,17 +18,29 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Shader;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.util.Xml;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,27 +60,20 @@ public class ShareImageHandler {
     private static final String[] CROP_ANCHORS = new String[]{ID_INLINE_ACTIONS, ID_STATS_CONTAINER};
     private static final Map<String, Integer> RESOURCE_IDS = new HashMap<>();
 
-    public static void shareAsImage(Context context, Object tweetObj) {
-        if (!(context instanceof Activity)) {
-            PikoUtils.toast(str("piko_share_image_invalid_context"));
-            return;
-        }
+    // Corner radius (in dp) applied to the exported screenshot
+    private static final float IMAGE_CORNER_RADIUS_DP = 16f;
 
-        Activity activity = (Activity) context;
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            activity.runOnUiThread(() -> shareAsImage(activity, tweetObj));
-            return;
-        }
-
+    private static Uri generateImage(Activity activity, Tweet tweet) {
         try {
-            Tweet tweet = new Tweet(tweetObj);
             PikoUtils.toast(str("piko_share_image_capturing"));
-            
+
+            Long tweetId = tweet.getTweetId();
+
             View rootView = activity.getWindow().getDecorView().getRootView();
-            View tweetView = searchViewTree(rootView, tweet.getTweetId(), 0);
+            View tweetView = searchViewTree(rootView, tweetId, 0);
             if (tweetView == null) {
                 PikoUtils.toast(str("piko_share_image_view_not_found"));
-                return;
+                return null;
             }
             CaptureTarget target = resolveCaptureTarget(activity, rootView, tweetView);
 
@@ -76,17 +81,22 @@ public class ShareImageHandler {
 
             if (ViewUtils.DEBUG) {
                 PikoUtils.logger(String.format("Capture: Tweet %d | Density %.1f",
-                    tweet.getTweetId(), activity.getResources().getDisplayMetrics().density));
+                        tweetId, activity.getResources().getDisplayMetrics().density));
                 PikoUtils.logger("Target: " + target.view.getClass().getSimpleName() + " " + target.view.getWidth() + "x" + target.view.getHeight());
-                
+
                 if (target.clipRect != null) {
                     PikoUtils.logger("Clip: " + target.clipRect.toShortString());
                 }
             }
-            
+
             if (ViewUtils.DEBUG) {
                 dumpViewTree(activity, target.view, 0);
             }
+
+            // Uncomment it only for debugging purpose
+            // Dump the captured layout to XML so individual elements can be
+            // inspected/removed (by id) before re-rendering, if desired.
+            // saveLayoutXml(activity, target.view, "tweet_" + tweetId);
 
             Bitmap bitmap = null;
             try {
@@ -95,24 +105,22 @@ public class ShareImageHandler {
             } finally {
                 ViewUtils.setScrollbarsVisible(target.view, true);
             }
-            
+
             if (bitmap == null) {
                 PikoUtils.toast(str("piko_share_image_capture_failed"));
-                return;
+                return null;
             }
 
-            shareImage(activity, bitmap, "tweet_" + tweet.getTweetId());
-        } catch (Exception e) {
-            PikoUtils.logger(e);
-            PikoUtils.toast(str("piko_share_image_error", e.getMessage()));
-        }
-    }
+            // Round the corners of the exported screenshot
+            float radiusPx = dpF(activity, IMAGE_CORNER_RADIUS_DP);
+            Bitmap rounded = roundCorners(bitmap, radiusPx);
+            bitmap.recycle();
+            bitmap = rounded;
 
-    private static void shareImage(Activity activity, Bitmap bitmap, String filename) {
-        try {
+
             cleanupOldFiles(activity);
             ContentResolver resolver = activity.getContentResolver();
-            String displayName = filename + ".png";
+            String displayName = "tweet_"+tweetId+ ".png";
 
             // Overwrite existing
             try {
@@ -130,7 +138,7 @@ public class ShareImageHandler {
             }
 
             Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-            if (uri == null) return;
+            if (uri == null) return null;
 
             try (OutputStream os = resolver.openOutputStream(uri)) {
                 ViewUtils.saveBitmap(bitmap, os);
@@ -144,6 +152,51 @@ public class ShareImageHandler {
                 resolver.update(uri, values, null, null);
             }
 
+            return uri;
+
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+            PikoUtils.toast(str("piko_share_image_error", e.getMessage()));
+            return  null;
+        }
+
+    }
+
+    // shareTo => 0 -> default; 1 -> Instagram stories;
+    public static void shareAsImage(Context context, Object tweetObj, int shareTo) {
+        try{
+            Tweet tweet = new Tweet(tweetObj);
+
+            if (!(context instanceof Activity)) {
+                PikoUtils.toast(str("piko_share_image_invalid_context"));
+                return;
+            }
+
+            Activity activity = (Activity) context;
+            if (Looper.myLooper() != Looper.getMainLooper()) {
+                activity.runOnUiThread(() -> shareAsImage(activity, tweetObj, shareTo));
+                return;
+            }
+
+            Uri uri = generateImage(activity, tweet);
+            if(uri!=null){
+                if(shareTo == 1){
+                    shareImageToInstaStory(activity,uri);
+
+                } else{
+                    shareImage(activity,uri);
+                }
+
+            }
+
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+            PikoUtils.toast(str("piko_share_image_error", e.getMessage()));
+        }
+    }
+
+    private static void shareImage(Activity activity, Uri uri) {
+        try {
             Intent intent = new Intent(Intent.ACTION_SEND)
                     .setType("image/png")
                     .putExtra(Intent.EXTRA_STREAM, uri)
@@ -153,8 +206,8 @@ public class ShareImageHandler {
                 intent.setClipData(ClipData.newRawUri("image", uri));
             }
 
-            Intent chooser = Intent.createChooser(intent, "Share Tweet Image");
-            
+            Intent chooser = Intent.createChooser(intent, str("piko_share_image_title"));
+
             // Grant URI permission to all resolved activities
             PackageManager pm = activity.getPackageManager();
             List<ResolveInfo> resInfoList = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
@@ -168,13 +221,35 @@ public class ShareImageHandler {
         }
     }
 
+    private static void shareImageToInstaStory(Activity activity, Uri imageUri) {
+        String packageName = "com.instagram.android";
+
+        if(PikoUtils.isAppInstalledAndEnabled(packageName)) {
+            Intent intent = new Intent("com.instagram.share.ADD_TO_STORY");
+            intent.setPackage(packageName);
+
+            intent.setDataAndType(imageUri, "image/jpeg");
+
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            activity.grantUriPermission(packageName, imageUri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            // Optional: Pass background gradient colors or a custom sticker asset
+            // intent.putExtra("top_background_color", "#333333");
+            // intent.putExtra("bottom_background_color", "#A1A1A1");
+
+            activity.startActivity(intent);
+        } else{
+            str("piko_share_image_app_error", "Instagram");
+        }
+    }
+
     private static void cleanupOldFiles(Context context) {
         if (!Pref.shareImageAutoCleanup()) return;
         try {
             long cutoff = (System.currentTimeMillis() - (24 * 60 * 60 * 1000)) / 1000;
             String selection = MediaStore.MediaColumns.DATE_ADDED + " < ?";
             String[] args = new String[]{String.valueOf(cutoff)};
-            
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 selection += " AND " + MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ?";
                 args = new String[]{String.valueOf(cutoff), "Pictures/Piko/%"};
@@ -194,7 +269,7 @@ public class ShareImageHandler {
         if (tag instanceof String && tag.equals(targetId.toString())) return view;
 
         if (!(view instanceof ViewGroup)) return null;
-        
+
         ViewGroup group = (ViewGroup) view;
         for (int i = 0; i < group.getChildCount(); i++) {
             View result = searchViewTree(group.getChildAt(i), targetId, depth + 1);
@@ -217,7 +292,7 @@ public class ShareImageHandler {
 
         View expanded = expandToTweetContainer(activity, rootView, tweetRow);
         View target = (expanded != null) ? expanded : tweetRow;
-        
+
         int adjustedBottom = getBottomWithoutDivider(activity, target);
         if (adjustedBottom >= target.getHeight()) {
             return new CaptureTarget(target, null);
@@ -233,7 +308,7 @@ public class ShareImageHandler {
         for (String name : CROP_ANCHORS) {
             View anchor = findViewById(target, name);
             if (anchor == null || anchor.getVisibility() != View.VISIBLE) continue;
-            
+
             int crop = getRelativeBottom(anchor, target) - dp(activity, 1);
             if (crop > 0 && crop < h) {
                 if (ViewUtils.DEBUG) {
@@ -245,7 +320,7 @@ public class ShareImageHandler {
 
         // 2. Linear slop removal (Iterative)
         if (!(target instanceof ViewGroup)) return h;
-        
+
         ViewGroup g = (ViewGroup) target;
         int bot = h;
         for (int i = g.getChildCount() - 1; i >= 0; i--) {
@@ -395,7 +470,7 @@ public class ShareImageHandler {
         if (v == null) return false;
         if (isTweetView(v)) return true;
         if (!(v instanceof ViewGroup)) return false;
-        
+
         ViewGroup g = (ViewGroup) v;
         for (int i = 0; i < g.getChildCount(); i++) {
             if (isTweetItem(g.getChildAt(i))) return true;
@@ -435,23 +510,145 @@ public class ShareImageHandler {
         return Math.round(dp * a.getResources().getDisplayMetrics().density);
     }
 
-    private static void dumpViewTree(Activity activity, View v, int depth) {
-        if (v == null || v.getVisibility() != View.VISIBLE || depth > 20) return;
-        
+    private static float dpF(Activity a, float dp) {
+        return dp * a.getResources().getDisplayMetrics().density;
+    }
+
+    /**
+     * Returns a copy of {@code bitmap} with its corners clipped to a rounded rectangle.
+     * The source bitmap is left untouched (caller is responsible for recycling it).
+     */
+    private static Bitmap roundCorners(Bitmap bitmap, float radiusPx) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setShader(new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+
+        RectF rect = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        canvas.drawRoundRect(rect, radiusPx, radiusPx, paint);
+
+        return output;
+    }
+
+    /**
+     * Serializes the captured view hierarchy (class, resource id, bounds, visibility)
+     * to an XML file saved next to the screenshot. This lets a later step identify
+     * a view by id/bounds, toggle its visibility (e.g. GONE) and re-capture, effectively
+     * letting elements be removed from the screenshot.
+     */
+    private static void saveLayoutXml(Activity activity, View target, String baseName) {
+        try {
+            StringWriter writer = new StringWriter();
+            XmlSerializer serializer = Xml.newSerializer();
+            serializer.setOutput(writer);
+            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+            serializer.startDocument("UTF-8", true);
+
+            serializeView(activity, target, serializer, 0);
+
+            serializer.endDocument();
+            saveXmlFile(activity, baseName + ".xml", writer.toString());
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+        }
+    }
+
+    private static void serializeView(Activity activity, View v, XmlSerializer serializer, int depth) throws Exception {
+        if (v == null || depth > 50) return;
+
+        serializer.startTag(null, "view");
+        serializer.attribute(null, "class", v.getClass().getName());
+
         String idName = "";
         try {
             int id = v.getId();
             if (id != View.NO_ID && id != 0) idName = activity.getResources().getResourceEntryName(id);
         } catch (Resources.NotFoundException ignored) {}
-        
+        if (!idName.isEmpty()) serializer.attribute(null, "id", idName);
+
+        serializer.attribute(null, "left", String.valueOf(v.getLeft()));
+        serializer.attribute(null, "top", String.valueOf(v.getTop()));
+        serializer.attribute(null, "right", String.valueOf(v.getRight()));
+        serializer.attribute(null, "bottom", String.valueOf(v.getBottom()));
+        serializer.attribute(null, "width", String.valueOf(v.getWidth()));
+        serializer.attribute(null, "height", String.valueOf(v.getHeight()));
+        serializer.attribute(null, "visibility", visibilityName(v.getVisibility()));
+
+        if (v instanceof ViewGroup group) {
+            for (int i = 0; i < group.getChildCount(); i++) {
+                serializeView(activity, group.getChildAt(i), serializer, depth + 1);
+            }
+        }
+
+        serializer.endTag(null, "view");
+    }
+
+    private static String visibilityName(int visibility) {
+        switch (visibility) {
+            case View.VISIBLE: return "visible";
+            case View.INVISIBLE: return "invisible";
+            case View.GONE: return "gone";
+            default: return String.valueOf(visibility);
+        }
+    }
+
+    /**
+     * Writes {@code content} to Documents/Piko/{displayName}, mirroring the
+     * MediaStore approach used for saving the screenshot itself.
+     */
+    private static void saveXmlFile(Context context, String displayName, String content) {
+        try {
+            byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ContentResolver resolver = context.getContentResolver();
+
+                String selection = MediaStore.MediaColumns.DISPLAY_NAME + " = ? AND " + MediaStore.MediaColumns.RELATIVE_PATH + " LIKE ?";
+                resolver.delete(MediaStore.Files.getContentUri("external"), selection, new String[]{displayName, "Documents/Piko/%"});
+
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
+                values.put(MediaStore.MediaColumns.MIME_TYPE, "text/xml");
+                values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/Piko");
+
+                Uri uri = resolver.insert(MediaStore.Files.getContentUri("external"), values);
+                if (uri == null) return;
+
+                try (OutputStream os = resolver.openOutputStream(uri)) {
+                    if (os != null) os.write(bytes);
+                }
+            } else {
+                File dir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "Piko");
+                if (!dir.exists() && !dir.mkdirs()) return;
+
+                File file = new File(dir, displayName);
+                try (FileOutputStream fos = new FileOutputStream(file)) {
+                    fos.write(bytes);
+                }
+            }
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+        }
+    }
+
+    private static void dumpViewTree(Activity activity, View v, int depth) {
+        if (v == null || v.getVisibility() != View.VISIBLE || depth > 20) return;
+
+        String idName = "";
+        try {
+            int id = v.getId();
+            if (id != View.NO_ID && id != 0) idName = activity.getResources().getResourceEntryName(id);
+        } catch (Resources.NotFoundException ignored) {}
+
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < depth; i++) sb.append("| ");
-        sb.append(String.format("%s [%dx%d] @%d,%d%s", 
-            v.getClass().getSimpleName(), v.getWidth(), v.getHeight(), v.getLeft(), v.getTop(), 
-            idName.isEmpty() ? "" : " #" + idName));
+        sb.append(String.format("%s [%dx%d] @%d,%d%s",
+                v.getClass().getSimpleName(), v.getWidth(), v.getHeight(), v.getLeft(), v.getTop(),
+                idName.isEmpty() ? "" : " #" + idName));
 
         PikoUtils.logger(sb.toString());
-        
+
         if (v instanceof ViewGroup group) {
             for (int i = 0; i < group.getChildCount(); i++) {
                 dumpViewTree(activity, group.getChildAt(i), depth + 1);

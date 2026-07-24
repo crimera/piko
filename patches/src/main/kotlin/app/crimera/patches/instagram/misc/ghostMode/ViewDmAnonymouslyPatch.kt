@@ -6,7 +6,8 @@
 
 package app.crimera.patches.instagram.misc.ghostMode
 
-import app.crimera.patches.instagram.misc.actionBar.dmActionBarButton.dmActionBarButtonPatch
+import app.crimera.patches.instagram.misc.actionBar.chatActionBarButton.chatActionBarButtonPatch
+import app.crimera.patches.instagram.misc.actionBar.inboxActionBarButton.inboxActionBarButtonPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PREF_DESCRIPTOR
@@ -22,7 +23,7 @@ val viewDmAnonymouslyPatch =
     bytecodePatch(
         name = "View DMs anonymously",
     ) {
-        dependsOn(settingsPatch, dmActionBarButtonPatch)
+        dependsOn(settingsPatch, chatActionBarButtonPatch, inboxActionBarButtonPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {

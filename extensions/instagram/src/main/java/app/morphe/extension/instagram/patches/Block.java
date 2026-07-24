@@ -14,9 +14,10 @@ import java.util.Arrays;
 import java.io.File;
 
 import app.morphe.extension.instagram.utils.Pref;
-import app.morphe.extension.instagram.utils.Utils;
+import app.morphe.extension.instagram.utils.InstaUtils;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.shared.Utils;
 
 public class Block {
     private static boolean DISABLE_SUGGESTED_CONTENT;
@@ -38,8 +39,8 @@ public class Block {
     }
 
     public static void deleteAnalyticsCacheFolder() {
-        File analyticDirectory = new File(app.morphe.extension.shared.Utils.getContext().getDataDir(), "app_analytics");
-        Boolean done = Utils.deleteRecursive(analyticDirectory);
+        File analyticDirectory = new File(Utils.getContext().getDataDir(), "app_analytics");
+        Boolean done = InstaUtils.deleteRecursive(analyticDirectory);
         if (done) {
             app.morphe.extension.crimera.PikoUtils.toast(str("piko_deleted"));
         }

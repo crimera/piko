@@ -20,6 +20,7 @@ import app.morphe.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.builder.BuilderOffsetInstruction
 import java.util.logging.Logger
 
 internal object NewShareSheetLinkFingerprint : Fingerprint(
@@ -101,8 +102,10 @@ val handleModernShareSheetLinks =
                     val shareSheetWInstruction = instructions[indexOfFirstInstruction(firstGoto, Opcode.IGET_OBJECT)]
                     val shareSheetWRegister = shareSheetWInstruction.registersUsed[1]
 
-                    val dummyRegister = getInstruction(firstGoto - 2).registersUsed[0]
-                    val linkRegister = getInstruction(firstGoto - 1).registersUsed[0]
+                    val linkMergeIndex = getInstruction<BuilderOffsetInstruction>(firstGoto).target.location.index
+                    val linkMergeInstruction = getInstruction(linkMergeIndex)
+                    val linkRegister = linkMergeInstruction.registersUsed[0]
+                    val dummyRegister = findFreeRegister(linkMergeIndex + 1, listOf(linkRegister, shareSheetWRegister))
 
                     val injectCode =
                         callStatement
@@ -110,7 +113,7 @@ val handleModernShareSheetLinks =
                             .replace(dummy2, linkRegister.toString())
 
                     addInstructions(
-                        firstGoto,
+                        linkMergeIndex + 1,
                         """
                         iget-object v$dummyRegister, v$shareSheetWRegister, $contextualPostField
                         $injectCode

@@ -26,8 +26,10 @@
         androidSdk = android-nixpkgs.sdk.${system} (sdkPkgs: with sdkPkgs; [
           cmdline-tools-latest
           build-tools-34-0-0
+          build-tools-36-0-0
           platform-tools
           platforms-android-34
+          platforms-android-36
         ]);
       });
     in
@@ -37,6 +39,7 @@
           default = pkgs.mkShell {
             packages = with pkgs; [
               jdk17
+              gh
               androidSdk
             ];
 

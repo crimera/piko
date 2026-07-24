@@ -7,17 +7,32 @@
 package app.morphe.extension.instagram.patches.userprofile;
 
 import android.view.ViewGroup;
+import java.util.Set;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.patches.userprofile.ProfileMoreOption;
 
 public class UserProfileButton {
-    private static boolean PIKO_SETTINGS_ON_ACTION_BAR;
+    private static boolean isSettingsInActionBar;
+    private static Set userProfileABPref;
+
     static {
-        PIKO_SETTINGS_ON_ACTION_BAR = Pref.pikoSettingsOnActionBar();
+        userProfileABPref = Pref.userProfileActionBarButtons();
+        if(userProfileABPref.contains(Constants.AB_SETTINGS_ICON)){
+            isSettingsInActionBar = true;
+        } else if(Pref.mainFeedActionBarButtons().contains(Constants.AB_SETTINGS_ICON)){
+            isSettingsInActionBar = true;
+        } else if(Pref.chatActionBarButtons().contains(Constants.AB_SETTINGS_ICON)){
+            isSettingsInActionBar = true;
+        } else if(Pref.inboxActionBarButtons().contains(Constants.AB_SETTINGS_ICON)){
+            isSettingsInActionBar = true;
+        } else{
+            isSettingsInActionBar = false;
+        }
     }
 
     public static void addButtons(ViewGroup viewGroup, Object object) {
@@ -25,12 +40,11 @@ public class UserProfileButton {
             ProfileInfo profileInfo = new ProfileInfo(object);
             Boolean isSelfProfile = profileInfo.isSelfProfile();
 
-            if(!Pref.enableMoreOptionsOnProfileQuickToggle() && Pref.isMoreOptionsOnProfilePatched()){
-                ProfileMoreOption.addProfileMoreOptionsButton(viewGroup, profileInfo);
-            }
-
-            if (isSelfProfile && !PIKO_SETTINGS_ON_ACTION_BAR) {
+            if (!isSettingsInActionBar && isSelfProfile){
                 UI.pikoSettingsButton(viewGroup);
+            }
+            if(!userProfileABPref.contains(Constants.AB_PROFILE_INFO_ICON) && Pref.isMoreOptionsOnProfilePatched()){
+                ProfileMoreOption.addProfileMoreOptionsButton(viewGroup, profileInfo);
             }
         } catch (Exception e) {
             Logger.printException(() -> "Failed to add piko button: ", e);

@@ -7,16 +7,28 @@
 
 package app.morphe.extension.instagram.utils;
 
+import java.util.Set;
+
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.instagram.constants.Constants;
+
 import app.morphe.extension.crimera.SharedPref;
 
 @SuppressWarnings("unused")
 public class Pref {
-    public static boolean pikoSettingsOnActionBar() {
-        return SharedPref.getBooleanPref(Settings.PIKO_SETTINGS_ON_ACTION_BAR);
+    public static boolean SHOULD_MARK_CHAT_AS_READ;
+    static {
+        SHOULD_MARK_CHAT_AS_READ = false;
+    }
+    public static void setMarkChatAsReadIndicator(boolean bool) {
+        SHOULD_MARK_CHAT_AS_READ = bool;
     }
 
+    public static boolean clearAllPreferences() {
+        return SharedPref.clearAll();
+    }
+    
     public static boolean pikoDebug() {
         return SharedPref.getBooleanPref(Settings.PIKO_DEBUG);
     }
@@ -56,14 +68,6 @@ public class Pref {
         return SharedPref.setBooleanPref(Settings.TURN_ON_ALL_GHOST_MODES.key,bool);
     }
 
-    public static boolean enableGhostModeQuickToggle() {
-        return SharedPref.getBooleanPref(Settings.GHOST_MODES_QUICK_TOGGLE);
-    }
-
-    public static boolean enableMoreOptionsOnProfileQuickToggle() {
-        return SharedPref.getBooleanPref(Settings.MORE_PROFILE_OPTIONS_ACTION_BAR_TOGGLE) && Pref.isMoreOptionsOnProfilePatched();
-    }
-
     public static boolean isMoreOptionsOnProfilePatched(){
         return SettingsStatus.moreOptionsOnProfile;
     }
@@ -84,7 +88,16 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_TYPING_STATUS) || Pref.getTurnOnAllGhostModes();
     }
 
+    public static boolean enableMarkChatAsReadOption() {
+        return SharedPref.getBooleanPref(Settings.ENABLE_MARK_CHAT_AS_READ) && SettingsStatus.markChatAsRead;
+    }
+
+    // Return false = call the message seen api.
+    // Return true = blocks the message seen api.
     public static boolean viewDmAnonymously() {
+        if(enableMarkChatAsReadOption() && SHOULD_MARK_CHAT_AS_READ){
+            return false;
+        }
         return SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY) || Pref.getTurnOnAllGhostModes();
     }
 
@@ -129,6 +142,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_REELS_SCROLLING) && SettingsStatus.disableReelsScrolling;
     }
 
+    public static boolean disableSwipeToCreate() {
+        return SharedPref.getBooleanPref(Settings.DISABLE_SWIPE_TO_CREATE) && SettingsStatus.disableSwipeToCreate;
+    }
+
     public static boolean makeEphemeralMediaPermanent() {
         return SharedPref.getBooleanPref(Settings.UNLIMITED_REPLAYS) && SettingsStatus.unlimitedReplaysOnEphemeralMedia;
     }
@@ -169,6 +186,9 @@ public class Pref {
     public static boolean followBackIndicator() {
         return SharedPref.getBooleanPref(Settings.FOLLOW_BACK_INDICATOR);
     }
+    public static boolean followBackColorIndicator() {
+        return SharedPref.getBooleanPref(Settings.FOLLOW_BACK_COLOR_INDICATOR);
+    }
 
     public static boolean disableStoryFlipping() {
         return SharedPref.getBooleanPref(Settings.DISABLE_STORY_FLIPPING);
@@ -200,10 +220,6 @@ public class Pref {
 
     public static boolean downloadUsernameFolder() {
         return SharedPref.getBooleanPref(Settings.DOWNLOAD_USERNAME_FOLDER);
-    }
-
-    public static String getCustomDownloadPath() {
-        return SharedPref.getStringPref(Settings.CUSTOM_DOWNLOAD_PATH);
     }
 
     public static boolean hideNavigationFeed() {
@@ -271,6 +287,38 @@ public class Pref {
 
     public static String externalDownloaderPackageName() {
         return SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
+    }
+
+    public static Set<String> mainFeedActionBarButtons() {
+        return SharedPref.getSetPref(Settings.ACTION_BAR_MAIN_FEED);
+    }
+
+    public static Set<String> userProfileActionBarButtons() {
+        return SharedPref.getSetPref(Settings.ACTION_BAR_USER_PROFILE);
+    }
+
+    public static Set<String> chatActionBarButtons() {
+        return SharedPref.getSetPref(Settings.ACTION_BAR_CHAT);
+    }
+
+    public static Set<String> inboxActionBarButtons() {
+        return SharedPref.getSetPref(Settings.ACTION_BAR_INBOX);
+    }
+
+    public static Set<String> filterStoryByType() {
+        return SharedPref.getSetPref(Settings.FILTER_STORY_BY_TYPE);
+    }
+
+    public static Set<String> filterStoryByUserType() {
+        return SharedPref.getSetPref(Settings.FILTER_STORY_BY_USER_TYPE);
+    }
+
+    public static Integer filterStoryByMinStoryItems() {
+        return Integer.valueOf(SharedPref.getStringPref(Settings.FILTER_STORY_MIN_STORY_ITEMS));
+    }
+
+    public static Integer filterStoryByMaxStoryItems() {
+        return Integer.valueOf(SharedPref.getStringPref(Settings.FILTER_STORY_MAX_STORY_ITEMS));
     }
 
     //end

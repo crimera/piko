@@ -52,6 +52,8 @@
     <string name="piko_disable_reels_scrolling_desc">"Menonaktifkan perilaku pengguliran tak terbatas di Instagram Reels, mencegah usapan ke Reels berikutnya.
 
 Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan berhenti dengan sendirinya setelah beberapa detik."</string>
+    <string name="piko_disable_swipe_to_create">Nonaktifkan fitur usap untuk membuat</string>
+    <string name="piko_disable_swipe_to_create_desc">Mencegah layar pembuatan terbuka saat mengusap ke kanan pada tab beranda.</string>
     <string name="piko_hide_stories_tray">Sembunyikan deretan cerita</string>
     <string name="piko_hide_stories_tray_desc">Menyembunyikan deretan cerita dari feed beranda utama</string>
     <string name="piko_hide_notes_tray">Sembunyikan deretan catatan</string>
@@ -71,8 +73,11 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_disable_discover_people_desc">Menonaktifkan bagian temukan orang di profil pengguna</string>
     <string name="piko_follow_back_indicator">Aktifkan indikator status pertemanan</string>
     <string name="piko_follow_back_indicator_desc">Menambahkan label status mengikuti balik di halaman profil dan menampilkan rincian status pertemanan secara terperinci saat diklik</string>
+    <string name="piko_fbi_color_indicator">Aktifkan indikator status pertemanan berwarna</string>
+    <string name="piko_fbi_color_indicator_desc">Indikator status pertemanan perlu diaktifkan</string>
     <string name="piko_fbi_follows_you">Mengikuti Anda</string>
     <string name="piko_fbi_doesnt_follows_you">Tidak mengikuti Anda</string>
+    <string name="piko_fbi_following_each_other">Mengikuti satu sama lain</string>
     <string name="piko_friendship_status">Status pertemanan</string>
     <string name="piko_view_story_mentions">Lihat sebutan cerita</string>
     <string name="piko_vsm_title">Sebutan cerita</string>
@@ -83,8 +88,6 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_stories_audio_autoplay">Putar otomatis audio cerita</string>
     <string name="piko_customise_story_timestamp">Sesuaikan stempel waktu cerita</string>
     <string name="piko_customise_story_timestamp_desc">Sesuaikan stempel waktu yang menunjukkan kapan cerita diposting</string>
-    <string name="piko_unlimited_replays">Jadikan media sementara menjadi permanen</string>
-    <string name="piko_unlimited_replays_desc">Mengubah media sekali lihat atau dua kali lihat yang belum kedaluwarsa menjadi tampilan permanen</string>
     <string name="piko_improve_image_viewing">Tingkatkan tampilan gambar</string>
     <string name="piko_improve_image_viewing_desc">Mengambil gambar resolusi maksimum dari server</string>
     <string name="piko_hide_reshare_button">Sembunyikan tombol bagikan ulang</string>
@@ -101,13 +104,17 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_download_profile_picture">Unduh foto profil</string>
     <string name="piko_copied">Disalin</string>
     <string name="piko_more_profile_options">Pilihan profil lainnya</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Pilihan profil di bilah tindakan</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Pindahkan tombol pilihan profil ke bilah tindakan profil</string>
     <string name="piko_remove_empty_bottom_space">Hapus ruang kosong di bagian bawah</string>
     <string name="piko_unlock_plus_benefits">Buka keuntungan Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Buka keuntungan langganan \'Plus\' yang diperiksa secara lokal. GUNAKAN DENGAN RISIKO ANDA SENDIRI</string>
     <string name="piko_customise_story_ring_size">Sesuaikan ukuran lingkaran cerita</string>
     <string name="piko_customise_story_ring_size_desc">Ubah ukuran lingkaran cerita berdasarkan persentase (Bawaan: 100)</string>
+    <!-- DM Section -->
+    <string name="piko_category_dm">DM</string>
+    <string name="piko_unlimited_replays">Jadikan media sementara menjadi permanen</string>
+    <string name="piko_unlimited_replays_desc">Mengubah media sekali lihat atau dua kali lihat yang belum kedaluwarsa menjadi tampilan permanen</string>
+    <string name="piko_enable_mark_chat_as_read">Aktifkan pilihan tandai obrolan sebagai sudah dibaca</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Dapatkan pilihan, dengan menekan lama obrolan, untuk menandainya sebagai sudah dibaca</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Unduh media</string>
     <string name="piko_enable_download">Aktifkan unduhan</string>
@@ -128,11 +135,13 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_downloaded_media">Diunduh: </string>
     <string name="piko_media_exists">Media sudah ada</string>
     <string name="piko_download_failed_media">Unduhan gagal : </string>
-    <string name="piko_download_set_path">Atur jalur unduhan khusus</string>
+    <string name="piko_download_set_path">Pilih folder unduhan</string>
     <string name="piko_download_set_path_success">Direktori unduhan telah diperbarui!</string>
-    <string name="piko_download_set_path_failed">Gagal menemukan jalur folder</string>
-    <string name="piko_download_grant_permission">Silakan berikan izin penyimpanan untuk melanjutkan pengunduhan</string>
-    <string name="piko_download_grant_permission_failed">Tidak dapat membuka pengaturan. Silakan berikan izin Akses Semua Berkas secara manual</string>
+    <string name="piko_download_set_path_failed">Gagal menyimpan ke folder unduhan</string>
+    <string name="piko_download_choose_folder">Pilih folder unduhan untuk melanjutkan</string>
+    <string name="piko_download_choose_folder_failed">Tidak dapat membuka pemilih folder</string>
+    <string name="piko_download_grant_permission">Pilih folder unduhan untuk melanjutkan</string>
+    <string name="piko_download_grant_permission_failed">Tidak dapat membuka pemilih folder</string>
     <string name="piko_download_with_external_downloader">Unduh menggunakan pengunduh eksternal</string>
     <string name="piko_external_downloader_package_name">Nama paket pengunduh eksternal</string>
     <string name="piko_external_downloader_package_name_not_found">Nama paket pengunduh eksternal tidak ditemukan</string>
@@ -155,8 +164,11 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_hide_navigation_create">Sembunyikan tombol Buat</string>
     <!-- Information Section -->
     <string name="piko_category_about">Tentang</string>
-    <string name="piko_export_pref">Ekspor preferensi piko</string>
-    <string name="piko_import_pref">Impor preferensi piko</string>
+    <string name="piko_export_pref">Ekspor preferensi Piko</string>
+    <string name="piko_import_pref">Impor preferensi Piko</string>
+    <string name="piko_reset_pref">Atur ulang preferensi Piko</string>
+    <string name="piko_reset_pref_success">Preferensi Piko telah dihapus</string>
+    <string name="piko_reset_pref_failed">Gagal menghapus preferensi Piko</string>
     <string name="piko_app_version">Versi aplikasi: %s</string>
     <string name="piko_patch_version">Versi tambalan: %s</string>
     <string name="piko_patch_info_title">Informasi tambalan</string>
@@ -198,6 +210,74 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_no_internet">Silakan sambungkan ke internet</string>
     <string name="piko_tap_here">Ketuk di sini !!</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Kustomisasi bilah tindakan</string>
+    <string name="piko_action_bar_main_feed">Ikon bilah tindakan di feed utama</string>
+    <string name="piko_action_bar_user_profile">Ikon bilah tindakan profil pengguna</string>
+    <string name="piko_action_bar_chat">Ikon bilah tindakan obrolan</string>
+    <string name="piko_action_bar_chat_desc">Ikon bilah tindakan di dalam DM</string>
+    <string name="piko_action_bar_inbox">Ikon bilah tindakan kotak masuk</string>
+    <string name="piko_action_bar_button_settings_icon">Ikon pengaturan</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Ikon mode hantu</string>
+    <string name="piko_action_bar_button_profile_info_icon">Ikon info profil</string>
     <string name="piko_settings_on_action_bar">Pengaturan Piko di bilah tindakan</string>
     <string name="piko_settings_on_action_bar_desc">Pindahkan titik masuk pengaturan Piko ke bilah tindakan feed utama</string>
+    <!-- Story filters -->
+    <string name="piko_category_filter_content">Saring konten</string>
+    <string name="piko_filter_story">Saring Cerita</string>
+    <string name="piko_filter_story_types_to_hide">Jenis cerita yang disembunyikan</string>
+    <string name="piko_reel_type_ads_reel">Iklan reel</string>
+    <string name="piko_reel_type_ar_effect_preview">Pratinjau efek AR</string>
+    <string name="piko_reel_type_archive_day_media_reel">Arsip reel media harian</string>
+    <string name="piko_reel_type_archive_day_reel">Arsip reel harian</string>
+    <string name="piko_reel_type_archive_friend_reel">Arsip reel teman</string>
+    <string name="piko_reel_type_archive_map_reel">Arsip reel peta</string>
+    <string name="piko_reel_type_archive_scheduled_for_deletion_reel">Arsip reel yang dijadwalkan untuk dihapus</string>
+    <string name="piko_reel_type_archive_shop_reel">Arsip reel toko</string>
+    <string name="piko_reel_type_axe_reel">Reel kapak</string>
+    <string name="piko_reel_type_birthday_highlights">Sorotan ulang tahun</string>
+    <string name="piko_reel_type_bloks">Blox</string>
+    <string name="piko_reel_type_broadcast_reel">Reel siaran</string>
+    <string name="piko_reel_type_daily_snapshot_reel">Reel cuplikan harian</string>
+    <string name="piko_reel_type_election_reel">Reel pemilu</string>
+    <string name="piko_reel_type_empty_story_state_reel">Reel situasi cerita kosong</string>
+    <string name="piko_reel_type_end_of_year">Akhir tahun</string>
+    <string name="piko_reel_type_expiring_story_reel">Reel cerita yang hampir kedaluwarsa</string>
+    <string name="piko_reel_type_fan_club_story">Cerita klub penggemar</string>
+    <string name="piko_reel_type_follow_versaries">Ikuti hari peringatan</string>
+    <string name="piko_reel_type_friend_map_reel">Reel peta teman</string>
+    <string name="piko_reel_type_group_mention">Sebutan grup</string>
+    <string name="piko_reel_type_group_reel">Reel grup</string>
+    <string name="piko_reel_type_hallpass_reel">Reel ruang bebas</string>
+    <string name="piko_reel_type_highlight_reel">Reel sorotan</string>
+    <string name="piko_reel_type_highlight_rewind_reel">Reel sorotan kilas balik</string>
+    <string name="piko_reel_type_inactive_hallpass_reel">Reel ruang kosong yang tidak aktif</string>
+    <string name="piko_reel_type_mas_reel">Reel yang banyak</string>
+    <string name="piko_reel_type_media_reshare">Pembagian ulang media</string>
+    <string name="piko_reel_type_memory_reel">Reel memori</string>
+    <string name="piko_reel_type_my_week_reel">Reel mingguanku</string>
+    <string name="piko_reel_type_netego_reel">Reel net ego</string>
+    <string name="piko_reel_type_nux_reel">Reel nux</string>
+    <string name="piko_reel_type_private_story">Cerita privat</string>
+    <string name="piko_reel_type_prompt_sticker_reel">Reel prompt stiker</string>
+    <string name="piko_reel_type_reconsideration_injected_story">cerita yang disisipkan untuk ditinjau kembali</string>
+    <string name="piko_reel_type_shopping_auto_highlight_reel">Reel berbelanja cerdas</string>
+    <string name="piko_reel_type_shopping_pdp_reel">Reel berbelanja produk</string>
+    <string name="piko_reel_type_shopping_smart_reel">Reel berbelanja cerdas</string>
+    <string name="piko_reel_type_stars_welcome_reel">Reel sambutan bintang</string>
+    <string name="piko_reel_type_story_stationary_timeline_reel">Reel lini masa ceria tetap</string>
+    <string name="piko_reel_type_subscription_shoutout_mention">Sebutan hangat untuk langganan</string>
+    <string name="piko_reel_type_suggested_creator_reel">Reel kreator yang disarankan</string>
+    <string name="piko_reel_type_suggested_user">Pengguna yang disarankan</string>
+    <string name="piko_reel_type_suggested_user_reel">Reel pengguna yang disarankan</string>
+    <string name="piko_reel_type_superlative_reel">Reel yang sangat bagus</string>
+    <string name="piko_reel_type_third_party_app_story">Cerita aplikasi pihak ketiga</string>
+    <string name="piko_reel_type_typed_container">Wadah terstruktur</string>
+    <string name="piko_reel_type_user_reel">Reel pengguna</string>
+    <string name="piko_filter_story_user_types_to_hide">Jenis pengguna yang disembunyikan</string>
+    <string name="piko_user_type_unverified">Pengguna tidak terverifikasi</string>
+    <string name="piko_user_type_verified">Pengguna terverifikasi</string>
+    <string name="piko_filter_story_minimum_item_count">Item cerita minimum</string>
+    <string name="piko_filter_story_minimum_item_count_desc">Cerita yang berisi kurang dari x item akan disembunyikan (nilai bawaan 1)</string>
+    <string name="piko_filter_story_maximum_item_count">Item cerita maksimum</string>
+    <string name="piko_filter_story_maximum_item_count_desc">Cerita yang memiliki lebih dari x item akan disembunyikan (nilai bawaan 9999)</string>
 </resources>

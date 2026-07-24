@@ -17,24 +17,36 @@ import app.morphe.extension.instagram.constants.Constants;
 public class FragmentHook {
 
     public static void startFragment(String key){
+        String actionBarTitleKey = null;
+
         if(key.equals(Constants.PIKO_FRAGMENT_ADS)){
-            startAds();
+            actionBarTitleKey = "piko_category_ads";
         }else if(key.equals(Constants.PIKO_FRAGMENT_GHOST)){
-            startGhost();
+            actionBarTitleKey = "piko_category_ghost";
         }else if(key.equals(Constants.PIKO_FRAGMENT_LINKS)){
-            startLinks();
+            actionBarTitleKey = "piko_category_links";
         }else if(key.equals(Constants.PIKO_FRAGMENT_DISTRACTION_FREE)){
-            startDistractionFree();
+            actionBarTitleKey = "piko_category_distraction_free";
         }else if(key.equals(Constants.PIKO_FRAGMENT_MISC)){
-            startMisc();
+            actionBarTitleKey = "piko_category_misc";
         }else if(key.equals(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA)){
-            startDownloadMedia();
+            actionBarTitleKey = "piko_category_download_media";
         }else if(key.equals(Constants.PIKO_FRAGMENT_NAV_BTNS)){
-            startHideNavBtn();
+            actionBarTitleKey = "piko_category_hide_navigation_buttons";
         }else if(key.equals(Constants.PIKO_FRAGMENT_DEV_OPTIONS)){
-            startDevOptions();
+            actionBarTitleKey = "piko_category_dev_options";
         }else if(key.equals(Constants.PIKO_FRAGMENT_ABOUT)){
-            startAbout();
+            actionBarTitleKey = "piko_category_about";
+        }else if(key.equals(Constants.PIKO_FRAGMENT_ACTION_BAR)){
+            actionBarTitleKey = "piko_category_action_bar";
+        }else if(key.equals(Constants.PIKO_FRAGMENT_DM)){
+            actionBarTitleKey = "piko_category_dm";
+        }else if(key.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)){
+            actionBarTitleKey = "piko_category_filter_content";
+        }
+
+        if(actionBarTitleKey!=null){
+            ActivityHook.startPikoActivity(key,actionBarTitleKey);
         }
     }
 
@@ -42,38 +54,4 @@ public class FragmentHook {
         ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_SETTINGS,"piko_title_settings");
     }
 
-    private static void startAds(){
-        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_ADS,"piko_category_ads");
-    }
-
-    private static void startGhost(){
-        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_GHOST,"piko_category_ghost");
-    }
-
-    private static void startLinks(){
-        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_LINKS,"piko_category_links");
-    }
-
-    private static void startDistractionFree(){
-        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_DISTRACTION_FREE,"piko_category_distraction_free");
-    }
-
-    private static void startMisc(){
-        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_MISC,"piko_category_misc");
-    }
-    private static void startDownloadMedia(){
-        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_DOWNLOAD_MEDIA,"piko_category_download_media");
-    }
-
-    private static void startHideNavBtn(){
-        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_NAV_BTNS,"piko_category_hide_navigation_buttons");
-    }
-
-    private static void startDevOptions(){
-        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_DEV_OPTIONS,"piko_category_dev_options");
-    }
-
-    private static void startAbout(){
-        ActivityHook.startPikoActivity(Constants.PIKO_FRAGMENT_ABOUT,"piko_category_about");
-    }
 }

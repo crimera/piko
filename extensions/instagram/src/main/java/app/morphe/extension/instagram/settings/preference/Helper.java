@@ -9,14 +9,17 @@ package app.morphe.extension.instagram.settings.preference;
 
 import android.content.Context;
 import android.preference.Preference;
+import java.util.Set;
 
-import app.morphe.extension.crimera.SharedPref;
 import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
+import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
+
+import app.morphe.extension.crimera.SharedPref;
 import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.crimera.settings.StringSetting;
 
@@ -76,7 +79,17 @@ public class Helper {
         preference.setSingleLineTitle(false);
         return preference;
     }
-
+    public Preference multiSelectListPref(String title, String summary, StringSetting setting) {
+        MultiSelectListPref preference = new MultiSelectListPref(context);
+        String key = setting.key;
+        preference.setTitle(title);
+        preference.setDialogTitle(title);
+        preference.setSummary(summary);
+        preference.setKey(key);
+        preference.setInitialValue(key);
+        preference.setSingleLineTitle(false);
+        return preference;
+    }
 
     public void setValue(Preference preference, Object newValue) {
         String key = preference.getKey();
@@ -88,6 +101,8 @@ public class Helper {
                     SharedPref.setBooleanPref(key, (Boolean) newValue);
                 } else if (newValClass.equals("String")) {
                     SharedPref.setStringPref(key, (String) newValue);
+                } else if (newValClass.equals("HashSet")) {
+                    SharedPref.setSetPref(key, (Set) newValue);
                 }
             }
 

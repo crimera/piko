@@ -69,8 +69,12 @@ Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma s
     <string name="piko_disable_analytics_desc">Blocca gli analytics che vengono inviati ai server Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Disabilita scopri le persone</string>
     <string name="piko_disable_discover_people_desc">Disabilita la sezione scopri le persone sul profilo utente</string>
+    <string name="piko_follow_back_indicator">Abilita indicatore di stato amicizia</string>
+    <string name="piko_fbi_color_indicator">Abilita indicatore di stato dell\'amicizia colorato</string>
+    <string name="piko_fbi_color_indicator_desc">L\'indicatore dello stato di amicizia deve essere abilitato</string>
     <string name="piko_fbi_follows_you">Ti segue</string>
     <string name="piko_fbi_doesnt_follows_you">Non ti segue</string>
+    <string name="piko_fbi_following_each_other">Si seguono a vicenda</string>
     <string name="piko_friendship_status">Stato di amicizia</string>
     <string name="piko_view_story_mentions">Visualizza le menzioni nella storia</string>
     <string name="piko_vsm_title">Menzioni nelle storie</string>
@@ -81,8 +85,6 @@ Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma s
     <string name="piko_stories_audio_autoplay">Riproduzione automatica audio nelle storie</string>
     <string name="piko_customise_story_timestamp">Personalizza timestamp della storia</string>
     <string name="piko_customise_story_timestamp_desc">Personalizza il timestamp che mostra quando la storia è stata pubblicata</string>
-    <string name="piko_unlimited_replays">Rendi permanenti i contenuti temporanei</string>
-    <string name="piko_unlimited_replays_desc">Cambia la visualizzazione non scaduta una volta, visualizza due volte i media per la visualizzazione permanente</string>
     <string name="piko_improve_image_viewing">Migliora la visualizzazione delle immagini</string>
     <string name="piko_improve_image_viewing_desc">Recupera immagini alla massima risoluzione dal server</string>
     <string name="piko_hide_reshare_button">Nascondi pulsante di ricondivisione</string>
@@ -99,13 +101,13 @@ Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma s
     <string name="piko_download_profile_picture">Scarica immagine del profilo</string>
     <string name="piko_copied">Copiato</string>
     <string name="piko_more_profile_options">Altre opzioni del profilo</string>
-    <string name="piko_more_profile_options_action_bar_toggle">Opzioni del profilo sulla barra delle azioni</string>
-    <string name="piko_more_profile_options_action_bar_toggle_desc">Sposta il pulsante delle opzioni del profilo nella barra delle azioni del profilo</string>
     <string name="piko_remove_empty_bottom_space">Rimuovi spazio vuoto in basso</string>
     <string name="piko_unlock_plus_benefits">Sblocca i vantaggi Plus</string>
     <string name="piko_unlock_plus_benefits_desc">Sblocca i vantaggi dell\'abbonamento \'Plus\' che vengono controllati in locale. USA A TUO RISCHIO</string>
     <string name="piko_customise_story_ring_size">Personalizza dimensione cerchio delle storie</string>
     <string name="piko_customise_story_ring_size_desc">Cambia la dimensione del cerchio delle storie in percentuale (Predefinito: 100)</string>
+    <!-- DM Section -->
+    <string name="piko_unlimited_replays_desc">Cambia la visualizzazione non scaduta una volta, visualizza due volte i media per la visualizzazione permanente</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Scarica file multimediali</string>
     <string name="piko_enable_download">Abilita download</string>
@@ -126,11 +128,7 @@ Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma s
     <string name="piko_downloaded_media">Scaricato: </string>
     <string name="piko_media_exists">Il file multimediale esiste</string>
     <string name="piko_download_failed_media">Download fallito: </string>
-    <string name="piko_download_set_path">Imposta percorso di download personalizzato</string>
     <string name="piko_download_set_path_success">Cartella di download aggiornata!</string>
-    <string name="piko_download_set_path_failed">Impossibile risolvere il percorso della cartella</string>
-    <string name="piko_download_grant_permission">Si prega di concedere l\'accesso all\'archivio per continuare con il download</string>
-    <string name="piko_download_grant_permission_failed">Impossibile aprire le impostazioni. Si prega di concedere l\'accesso a tutti i file manualmente</string>
     <string name="piko_download_with_external_downloader">Scarica con downloader esterno</string>
     <string name="piko_external_downloader_package_name">Nome del pacchetto del downloader esterno</string>
     <string name="piko_external_downloader_package_name_not_found">Nome del pacchetto del downloader esterno non trovato</string>
@@ -155,6 +153,8 @@ Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma s
     <string name="piko_category_about">Informazioni</string>
     <string name="piko_export_pref">Esporta preferenze Piko</string>
     <string name="piko_import_pref">Importa preferenze Piko</string>
+    <string name="piko_reset_pref">Reimposta preferenze Piko</string>
+    <string name="piko_reset_pref_success">Preferenze di Piko eliminate</string>
     <string name="piko_app_version">Versione dell\'app: %s</string>
     <string name="piko_patch_version">Versione patch: %s</string>
     <string name="piko_patch_info_title">Informazioni patch</string>
@@ -196,6 +196,10 @@ Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma s
     <string name="piko_no_internet">Connettiti a internet</string>
     <string name="piko_tap_here">Clicca qui!!</string>
     <!-- Action Bar Section -->
+    <string name="piko_category_action_bar">Personalizzazione barra di azione</string>
+    <string name="piko_action_bar_button_settings_icon">Icona Impostazioni</string>
+    <string name="piko_action_bar_button_ghost_mode_icon">Icona modalità fantasma</string>
     <string name="piko_settings_on_action_bar">Impostazioni Piko sulla barra delle azioni</string>
     <string name="piko_settings_on_action_bar_desc">Sposta l\'apertura delle impostazioni Piko nella barra delle azioni principale del feed</string>
+    <!-- Story filters -->
 </resources>

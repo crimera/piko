@@ -31,6 +31,12 @@ public class Tweet extends Debug {
         return (String) super.getMethod("userNameMethod");
     }
 
+    public String getTweetLink() throws Exception {
+        Long tweetId = getTweetId();
+        String username = getTweetUsername();
+        return "https://x.com/"+username+"/status/"+tweetId;
+    }
+
     public String getTweetProfileName() throws Exception {
         return (String) super.getMethod("profileNameMethod");
     }
@@ -40,8 +46,8 @@ public class Tweet extends Debug {
         return (Long) super.getMethod("userIdMethod");
     }
 
-    public ArrayList<Media> getMedias() throws Exception {
-        ArrayList<Media> mediaData = new ArrayList();
+    private ArrayList<ExtMediaEntities> getExtendedMediaEntities() throws Exception {
+        ArrayList<ExtMediaEntities> extMediaEntitiesArrayList = new ArrayList();
 
         // c()Lcom/twitter/model/core/entity/c0;
         Object mediaRootObject = super.getMethod("mediaMethod");
@@ -55,15 +61,22 @@ public class Tweet extends Debug {
         List<?> list = (List<?>) super.getField(superClass, superClassInstance, "extMediaList");
 
         assert list != null;
-        if (list.isEmpty()) {
-            return mediaData;
-        }
 
-        for (Object item : list) {
-            ExtMediaEntities mediaObj = new ExtMediaEntities(item);
-            Media media = mediaObj.getMedia();
-            mediaData.add(media);
-        }
+        list.forEach(item ->{
+            extMediaEntitiesArrayList.add(new ExtMediaEntities(item));
+        });
+
+        return extMediaEntitiesArrayList;
+    }
+
+    public ArrayList<ArrayList<Media>> getMediaList() throws Exception {
+        ArrayList<ArrayList<Media>> mediaData = new ArrayList();
+
+        ArrayList<ExtMediaEntities> extMediaEntitiesArrayList = this.getExtendedMediaEntities();
+
+        extMediaEntitiesArrayList.forEach(item ->{
+                mediaData.add(item.getMediaList());
+        });
         return mediaData;
     }
 
@@ -117,7 +130,7 @@ public class Tweet extends Debug {
         try {
             return "Tweet [getTweetId()=" + this.getTweetId() + ", getTweetUsername()=" + this.getTweetUsername()
                     + ", getTweetProfileName()=" + this.getTweetProfileName() + ", getTweetUserId()=" + this.getTweetUserId()
-                    + ", getMedias()=" + this.getMedias() + ", getTweetInfo()=" + this.getTweetInfo() + ", getTweetLang()="
+                    + ", getMediaList()=" + this.getMediaList() + ", getTweetInfo()=" + this.getTweetInfo() + ", getTweetLang()="
                     + this.getTweetLang() + ", getLongText()=" + this.getLongText() + ", getShortText()=" + this.getShortText() + "]";
 
         } catch (Exception e) {

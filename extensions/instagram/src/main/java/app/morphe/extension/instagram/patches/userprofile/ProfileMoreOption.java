@@ -64,7 +64,7 @@ public class ProfileMoreOption {
                             toCopy = true;
 
                         } else if (selectedOption.equals(str("piko_copy_full_name"))) {
-                            text = userData.getFullname();
+                            text = userData.getFullName();
                             toCopy = true;
 
                         } else if (selectedOption.equals(str("piko_copy_user_id"))) {

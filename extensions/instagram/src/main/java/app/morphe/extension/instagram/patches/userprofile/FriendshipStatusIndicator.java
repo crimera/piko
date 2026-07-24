@@ -18,9 +18,11 @@ import android.view.View;
 import android.content.Context;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.util.TypedValue;
 
 import app.morphe.extension.instagram.utils.Pref;
-import app.morphe.extension.instagram.utils.Utils;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.entity.UserFriendshipStatus;
 import app.morphe.extension.instagram.entity.UserData;
@@ -77,12 +79,33 @@ public class FriendshipStatusIndicator {
                 UserData viewingUserData = profileInfo.getUserData();
                 UserFriendshipStatus userFriendshipStatus = viewingUserData.getUserFriendshipStatus();
                 Boolean followed_by = userFriendshipStatus.getFollowBackStatus();
+                Boolean following = userFriendshipStatus.getFollowingStatus();
+
                 String indicatorText = followed_by ? str("piko_fbi_follows_you") : str("piko_fbi_doesnt_follows_you");
+                indicatorText = followed_by && following ? str("piko_fbi_following_each_other") : indicatorText;
+
 
                 Entity entity = new Entity(badgeObject);
                 TextView badgeView = (TextView) entity.getMethod("getView");
                 badgeView.setVisibility(View.VISIBLE);
                 badgeView.setText(indicatorText);
+                badgeView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+                badgeView.setTypeface(null, Typeface.BOLD); // Bold.
+
+                if(Pref.followBackColorIndicator()){
+                    String colorHex = "#EB4941"; // Red Shade.
+
+                    if(followed_by){
+                        if(following){
+                            colorHex = "#3389DF";
+                        } else{
+                            colorHex = "#3CC176";
+
+                        }
+                    }
+
+                    badgeView.setBackgroundColor(Color.parseColor(colorHex));
+                }
 
                 badgeView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -90,6 +113,8 @@ public class FriendshipStatusIndicator {
                         friendshipStatusDialogBox(v.getContext(), userFriendshipStatus);
                     }
                 });
+
+
 
             } catch (Exception ex) {
                 Logger.printException(() -> "Failed follow back indicator", ex);

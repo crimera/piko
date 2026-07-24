@@ -37,8 +37,8 @@ public class CategoryPref extends PreferenceCategory {
     @Override
     protected View onCreateView(ViewGroup parent) {
         TextView title = new TextView(getContext());
-        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        title.setTypeface(Typeface.DEFAULT, Typeface.NORMAL);
+        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         applyCategoryStyle(title);
         title.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -51,7 +51,7 @@ public class CategoryPref extends PreferenceCategory {
     protected void onBindView(View view) {
         TextView title = (TextView) view;
         title.setText(getTitle());
-        title.setTextColor(InstagramPreferenceStyle.primaryTextColor(getContext()));
+        title.setTextColor(InstagramPreferenceStyle.primaryTextColor());
         applyCategoryStyle(title);
         title.setEnabled(isEnabled());
     }
@@ -64,6 +64,6 @@ public class CategoryPref extends PreferenceCategory {
                 InstagramPreferenceStyle.dp(getContext(), 24),
                 InstagramPreferenceStyle.dp(getContext(), 10)
         );
-        title.setBackgroundColor(InstagramPreferenceStyle.backgroundColor(getContext()));
+        title.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
     }
 }

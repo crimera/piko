@@ -8,9 +8,7 @@ package app.morphe.extension.twitter.patches.nativeFeatures.downloader;
 
 import static app.morphe.extension.shared.StringRef.str;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.widget.LinearLayout;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.twitter.Pref;
 import java.lang.reflect.InvocationTargetException;
@@ -20,26 +18,15 @@ import java.time.format.DateTimeFormatter;
 
 import app.morphe.extension.twitter.entity.Media;
 import app.morphe.extension.twitter.entity.Tweet;
+import java.util.List;
 
 public class NativeDownloader {
     public static String downloadString() {
         return str("piko_pref_native_downloader_alert_title");
     }
-    private static String getExtension(String typ) {
-        if (typ.equals("video/mp4")) {
-            return "mp4";
-        }
-        if (typ.equals("video/webm")) {
-            return "webm";
-        }
-        if (typ.equals("application/x-mpegURL")) {
-            return "m3u8";
-        }
-        return "jpg";
-    }
 
     private static String generateFileName(Tweet tweet) throws Exception {
-        String tweetId = ""+tweet.getTweetId();
+        String tweetId = String.valueOf(tweet.getTweetId());
         int fileNameType = Pref.nativeDownloaderFileNameType();
         switch (fileNameType) {
             case 1:
@@ -55,69 +42,109 @@ public class NativeDownloader {
         }
     }
 
-    private static void alertBox(Context ctx, String filename, ArrayList<Media> mediaData) throws NoSuchFieldException, IllegalAccessException {
-        String photo = str("drafts_empty_photo");
-        String video = str("drafts_empty_video");
+    public static ArrayList<DownloadItem> buildDownloadItems(
+            Context context, String filename, ArrayList<ArrayList<Media>> mediaData
+    ) {
+        String photoLabel = str("drafts_empty_photo");
+        String videoLabel = str("drafts_empty_video");
 
-        LinearLayout ln = new LinearLayout(ctx);
-        ln.setOrientation(LinearLayout.VERTICAL);
-        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-        builder.setTitle(str("piko_pref_native_downloader_alert_title"));
+        ArrayList<DownloadItem> items = new ArrayList<>();
+        boolean multipleMedia = mediaData.size() > 1;
 
-        int n = mediaData.size();
-        String[] choices = new String[n];
-        for (int i = 0; i < n; i++) {
-            Media media = mediaData.get(i);
-            String typ = media.type == 0?photo:video;
-            choices[i] = "• " + typ + " " + (i + 1);
-        }
+        for (int i = 0; i < mediaData.size(); i++) {
+            ArrayList<DownloadItem> variantList = new ArrayList<>();
+            ArrayList<Media> mediaList = mediaData.get(i);
+            boolean multipleVariants = mediaList.size() > 1;
 
-        builder.setItems(choices, (dialogInterface, which) -> {
-            Media media = mediaData.get(which);
+            for (int j = 0; j < mediaList.size(); j++) {
+                Media media = mediaList.get(j);
+                String resolution = media.resolution;
+                // Title for variants dialog
+                String variantLabel = resolution;
 
-            PikoUtils.toast(str("download_started"));
-            app.morphe.extension.twitter.Utils.downloadFile(media.url, filename + (which + 1), media.ext);
-        });
+                StringBuilder sb = new StringBuilder(filename);
+                if (multipleMedia) {
+                    sb.append("_").append(i + 1);
+                }
+                if (multipleVariants) {
+                    sb.append("_").append(resolution);
+                }
+                String itemFileName = sb.toString();
 
-        builder.setNegativeButton(str("piko_pref_native_downloader_download_all"), (dialogInterface, index) -> {
-            PikoUtils.toast(str("download_started"));
-
-            int i = 1;
-            for (Media media : mediaData) {
-                app.morphe.extension.twitter.Utils.downloadFile(media.url, filename + i, media.ext);
-                i++;
+                variantList.add(new DownloadItem(variantLabel, null, itemFileName, media));
             }
-            dialogInterface.dismiss();
-        });
 
-        builder.show();
+            DownloadItem highestResMedia = variantList.get(0);
+            Media mainMedia = highestResMedia.media;
+
+            // Title and subtitle for the main dialog list
+            String mainLabel = (mainMedia.type == 0 ? photoLabel : videoLabel) + " " + (i + 1);
+            String mainSubtitle = mainMedia.resolution;
+
+            items.add(new DownloadItem(mainLabel, mainSubtitle, highestResMedia.fileName, mainMedia, variantList));
+        }
+        return items;
     }
 
-    public static void downloader(Context activity, Object tweetObj) throws NoSuchMethodException,
-            InvocationTargetException, IllegalAccessException, NoSuchFieldException, ClassNotFoundException {
+    private static void alertBox(Context context, String filename, ArrayList<ArrayList<Media>> mediaData) {
+        ArrayList<DownloadItem> items = buildDownloadItems(context, filename, mediaData);
+
+        if (items.size() == 1 && items.get(0).hasVariants()) {
+            DownloadDialog.buildDialog(context, str("piko_video_variants"), items.get(0).variants);
+        } else {
+            DownloadDialog.buildDialog(context, str("piko_pref_native_downloader_alert_title"), items);
+        }
+    }
+
+    public static void downloader(Context activity, Object tweetObj) {
         try {
             Tweet tweet = new Tweet(tweetObj);
-            ArrayList<Media> media = tweet.getMedias();
+            ArrayList<ArrayList<Media>> media = tweet.getMediaList();
 
-            assert media != null;
-            if (media.isEmpty()) {
+            if (media == null || media.isEmpty()) {
                 PikoUtils.toast(str("piko_pref_native_downloader_no_media"));
                 return;
             }
 
             String fileName = generateFileName(tweet);
 
-            if (media.size() == 1) {
-                Media item = media.get(0);
+            // Skip dialog if there is only one media and one variant
+            if (media.size() == 1 && media.get(0).size() == 1) {
+                Media singleMedia = media.get(0).get(0);
                 PikoUtils.toast(str("download_started"));
-                app.morphe.extension.twitter.Utils.downloadFile(item.url, fileName, item.ext);
+                app.morphe.extension.twitter.Utils.downloadFile(singleMedia.url, fileName, singleMedia.ext);
                 return;
             }
 
-            alertBox(activity, fileName + "-", media);
+            // Skip resolution dialog if autodownload highest res is enabled and only one video is present
+            if (Pref.nativeDownloaderAutodownloadHighestVideoRes() && media.size() == 1 && media.get(0).size() > 1) {
+                Media highestResMedia = media.get(0).get(0);
+                PikoUtils.toast(str("download_started"));
+                app.morphe.extension.twitter.Utils.downloadFile(highestResMedia.url, fileName + "_" + highestResMedia.resolution, highestResMedia.ext);
+                return;
+            }
+
+            alertBox(activity, fileName, media);
         } catch (Exception ex) {
             PikoUtils.logger(ex);
         }
     }
 
+    public static void downloadAllFromTweet(Context activity, Object tweetObj) {
+        try {
+            Tweet tweet = new Tweet(tweetObj);
+            ArrayList<ArrayList<Media>> mediaList = tweet.getMediaList();
+
+            if (mediaList == null || mediaList.isEmpty()) {
+                PikoUtils.toast(str("piko_pref_native_downloader_no_media"));
+                return;
+            }
+
+            String fileName = generateFileName(tweet);
+            List<DownloadItem> items = buildDownloadItems(activity, fileName, mediaList);
+            DownloadDialog.downloadAll(items);
+        } catch (Exception ex) {
+            PikoUtils.logger(ex);
+        }
+    }
 }

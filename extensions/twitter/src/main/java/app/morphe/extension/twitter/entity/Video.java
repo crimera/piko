@@ -8,6 +8,8 @@ package app.morphe.extension.twitter.entity;
 
 import app.morphe.extension.twitter.entity.Debug;
 import app.morphe.extension.crimera.PikoUtils;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // Lcom/twitter/media/av/model/b0;
 public class Video extends Debug {
@@ -16,6 +18,21 @@ public class Video extends Debug {
     public Video(Object obj) {
         super(obj);
         this.obj = obj;
+    }
+
+    public String getResolution(){
+        try {
+            Pattern pattern = Pattern.compile("/(\\d+x\\d+)/");
+            Matcher matcher = pattern.matcher(this.getMediaUrl());
+
+            if (matcher.find()) {
+                return matcher.group(1);
+            }
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+        }
+
+        return null;
     }
 
     public Integer getBitrate()
@@ -53,12 +70,14 @@ public class Video extends Debug {
         return "unknown";
     }
 
+
+
     @Override
     public String toString() {
         try {
             return "Video [getBitrate()=" + this.getBitrate() + ", getMediaUrl()=" + this.getMediaUrl() + ", getCodec()="
                     + this.getCodec()
-                    + ", getThumbnail()=" + this.getThumbnail() + ", getExtension()=" + this.getExtension() + "]";
+                    + ", getThumbnail()=" + this.getThumbnail() + ", getExtension()=" + this.getExtension() +", getResolution()=" +this.getResolution()+"]";
 
         } catch (Exception e) {
             PikoUtils.logger(e);

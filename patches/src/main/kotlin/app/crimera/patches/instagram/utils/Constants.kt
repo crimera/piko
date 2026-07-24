@@ -56,7 +56,7 @@ object Constants {
 
     const val LINKS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Links;"
     const val DOWNLOAD_DESCRIPTOR = "$PATCHES_DESCRIPTOR/download"
-    const val ACTIONBAR_DESCRIPTOR = "$PATCHES_DESCRIPTOR/actionbar"
+    const val ACTIONBAR_DESCRIPTOR = "$PATCHES_DESCRIPTOR/actionbar/ActionBarPatch;"
 
     const val OVERFLOW_MENU_BUTTON_CLASS = "$PATCHES_DESCRIPTOR/overflowMenuButton"
     const val ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS = "$OVERFLOW_MENU_BUTTON_CLASS/reels/AddReelButton;"

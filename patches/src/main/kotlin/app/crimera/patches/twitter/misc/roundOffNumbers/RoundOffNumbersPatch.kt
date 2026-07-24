@@ -17,6 +17,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.resourceLiteral
+import app.morphe.patches.all.misc.resources.resourceMappingPatch
 import com.android.tools.smali.dexlib2.Opcode
 
 private object RoundOffNumbersFingerprint : Fingerprint(
@@ -39,7 +40,7 @@ val roundOffNumbersPatch =
         description = "Enable or disable rounding off numbers",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch)
+        dependsOn(settingsPatch, resourceMappingPatch)
 
         execute {
             RoundOffNumbersFingerprint.method.apply {
@@ -51,7 +52,7 @@ val roundOffNumbersPatch =
                     move_res_obj + 1,
                     """
                     sget-boolean v1, $PREF_DESCRIPTOR;->ROUND_OFF_NUMBERS:Z
-                    if-nez v1, :cond
+                    if-eqz v1, :cond
                     goto :here
                     """.trimIndent(),
                     ExternalLabel("here", sget_obj),

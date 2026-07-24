@@ -14,17 +14,23 @@ import android.graphics.Color;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.*;
+import android.view.View;
+import android.widget.ListView;
+import java.util.TreeMap;
+import java.util.Map;
 
 import app.morphe.extension.shared.Utils;
 import com.twitter.ui.widget.LegacyTwitterPreferenceCategory;
-import java.util.*;
 import app.morphe.extension.twitter.settings.ActivityHook;
 import app.morphe.extension.twitter.settings.SettingsStatus;
-import app.morphe.extension.twitter.patches.Changelogs;
+import app.morphe.extension.twitter.settings.Settings;
+import app.morphe.extension.twitter.settings.SettingsSearchNavigator;
+import app.morphe.extension.twitter.settings.widgets.Helper;
 
 @SuppressWarnings("deprecation")
-public class SettingsAboutFragment extends PreferenceFragment implements Preference.OnPreferenceClickListener {
+public class SettingsAboutFragment extends PreferenceFragment {
     private Context context;
+    private Preference searchTargetPreference;
 
     @Override
     public void onResume() {
@@ -36,40 +42,60 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
     public void onCreate(@org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getContext();
+        Helper helper = new Helper(context);
 
         PreferenceManager preferenceManager = getPreferenceManager();
         PreferenceScreen screen = preferenceManager.createPreferenceScreen(context);
         LegacyTwitterPreferenceCategory verPref = preferenceCategory(str("piko_pref_version_info"), screen);
+
+        String text = Settings.APP_VERSION;
         verPref.addPreference(
-                buttonPreference(
-                        str("piko_pref_app_version"),
+                helper.buttonPreference(
+                        str(text),
                         Utils.getAppVersionName(),
-                        str("piko_pref_app_version")
+                        text
                 )
         );
+
+        text = Settings.PIKO_PATCHES;
         verPref.addPreference(
-                buttonPreference(
-                        str("piko_title_piko_patches"),
+                helper.buttonPreference(
+                        str(text),
                         Utils.getPatchesReleaseVersion(),
-                        str("piko_title_piko_patches")
+                        text
                 )
         );
+
+        text = Settings.CHANGELOGS_TITLE;
         verPref.addPreference(
-                buttonPreference(
-                        str("piko_changelogs_title"),
+                helper.buttonPreference(
+                        str(text),
                         "",
-                        str("piko_changelogs_title")
+                        text
                 )
         );
+
+        text = Settings.SUPPORTED_LINKS;
         verPref.addPreference(
-                buttonPreference(
-                        str("piko_settings_supported_links"),
+                helper.buttonPreference(
+                        str(text),
                         "",
-                        str("piko_settings_supported_links")
+                        text
+                )
+        );
+
+        verPref.addPreference(
+                helper.switchPreference(
+                        str("piko_debug"),
+                        "",
+                        Settings.PIKO_DEBUG
                 )
         );
 
         TreeMap<String,Boolean> flags = new TreeMap();
+        flags.put(str("piko_pref_customisation_more_info_on_profile"),SettingsStatus.moreInfoOnProfile);
+        flags.put(str("piko_pref_external_downloader_toggle"),SettingsStatus.externalDownloader);
+        flags.put(str("piko_title_native_share_menu"),SettingsStatus.enableNativeShareMenu);
         flags.put(str("piko_pref_video_download"),SettingsStatus.enableVidDownload);
         flags.put(str("piko_pref_undo_posts"),SettingsStatus.enableUndoPosts);
         flags.put(str("tab_customization_screen_title"),SettingsStatus.navBarCustomisation);
@@ -81,7 +107,7 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         flags.put(str("piko_pref_ctj_section"),SettingsStatus.hideCTJ);
         flags.put(str("piko_pref_ryb_section"),SettingsStatus.hideRBMK);
         flags.put(str("piko_pref_pinned_posts_section"),SettingsStatus.hideRPinnedPosts);
-        flags.put(str("piko_pref_hide_related_posts"),SettingsStatus.hideDetailedPosts);
+        flags.put(str("piko_pref_hide_unrelated_replies"),SettingsStatus.hideDetailedPosts);
         flags.put(str("piko_pref_chirp_font"),SettingsStatus.enableFontMod);
         flags.put(str("piko_pref_hide_fab"),SettingsStatus.hideFAB);
         flags.put(str("piko_pref_hide_fab_menu"),SettingsStatus.hideFABBtns);
@@ -151,7 +177,7 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
             boolean sts = (boolean) entry.getValue();
 
             patPref.addPreference(
-                    buttonPreference2(
+                    buttonPreference(
                             resName,
                             sts,
                             str("piko_pref_patches")
@@ -160,6 +186,30 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         }
 
         setPreferenceScreen(screen);
+        searchTargetPreference = SettingsSearchNavigator.findTargetPreference(screen, getArguments());
+
+    }
+
+    @Override
+    public void onActivityCreated(@org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        scrollToSearchTarget();
+    }
+
+    private void scrollToSearchTarget() {
+        if (searchTargetPreference == null) {
+            return;
+        }
+
+        View view = getView();
+        if (view == null) {
+            return;
+        }
+
+        ListView listView = view.findViewById(android.R.id.list);
+        if (listView != null) {
+            SettingsSearchNavigator.scrollToPreferenceAndHighlight(listView, searchTargetPreference);
+        }
 
     }
 
@@ -170,16 +220,7 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         return preferenceCategory;
     }
 
-    private Preference buttonPreference(String title, String summary, String key) {
-        Preference preference = new Preference(context);
-        preference.setKey(key);
-        preference.setTitle(title);
-        preference.setSummary(summary);
-        preference.setOnPreferenceClickListener(this);
-        return preference;
-    }
-
-    private Preference buttonPreference2(String title, Boolean inc, String key) {
+    private Preference buttonPreference(String title, Boolean inc, String key) {
         String summary = inc ? str("piko_pref_included"):str("piko_pref_excluded");
         String colorHex = inc ? "#008FC4":"#DE0025";
         Preference preference = new Preference(context);
@@ -188,24 +229,6 @@ public class SettingsAboutFragment extends PreferenceFragment implements Prefere
         Spannable summarySpan = new SpannableString(summary);
         summarySpan.setSpan(new ForegroundColorSpan(Color.parseColor(colorHex)), 0, summary.length(), 0);
         preference.setSummary(summarySpan);
-        preference.setOnPreferenceClickListener(this);
         return preference;
     }
-
-    @Override
-    public boolean onPreferenceClick(Preference preference) {
-        String key = preference.getKey();
-        if ( (key.equals(str("piko_pref_app_version"))) || (key.equals(str("piko_title_piko_patches"))) ) {
-            String summary = preference.getSummary().toString();
-            Utils.setClipboard(summary);
-            Utils.showToastShort(str("copied_to_clipboard")+": "+ summary);
-        }else if (key.equals(str("piko_settings_supported_links"))){
-            app.morphe.extension.crimera.PikoUtils.openDefaultLinks();
-        }else if (key.equals(str("piko_changelogs_title"))){
-            Changelogs.showChangelogDialog(context);
-        }
-
-        return true;
-    }
-
 }

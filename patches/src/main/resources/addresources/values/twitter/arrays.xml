@@ -92,7 +92,7 @@
         <item>@string/piko_pref_db_ctj_section</item>
         <item>@string/piko_pref_db_ryb_section</item>
         <item>@string/piko_pref_db_pinned_posts_section</item>
-        <item>@string/piko_pref_db_related_posts</item>
+        <item>@string/piko_pref_db_unrelated_replies</item>
         <item>@string/piko_pref_db_premium_prompt</item>
         <item>@string/piko_pref_db_todays_news</item>
     </string-array>

@@ -11,6 +11,8 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import java.util.List;
 import android.content.Context;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
@@ -50,6 +52,8 @@ public class HandleCommentButton {
         }
     }
 
+    // return true = Piko button clicked no need to check Instagram's buttons.
+    // return false = Piko button not clicked, check Instagram's buttons.
     public static boolean checkOnCommentButtonClick(Object button, List list) {
         try {
             if (list.isEmpty()) return false;
@@ -65,38 +69,43 @@ public class HandleCommentButton {
                     PikoUtils.toast(str("piko_comment_copied_failed"));
                 }
                 return true;
+
             } else if (button.equals(DebugButton.A00)) {
                 CommentData commentData = new CommentData(commentObject);
 
                 Context context = (Context) Utils.getActivity();
                 ObjectBrowser.browseObject(context,commentData);
                 return true;
+
             } else if (button.equals(SaveMediaButton.A00)) {
-                CommentData commentData = new CommentData(commentObject);
+                    CommentData commentData = new CommentData(commentObject);
 
-                Context context = (Context) Utils.getActivity();
-                if(commentData.hasGifMedia()) {
-                    String gifUrl = commentData.getGifUrl();
-                    String fileName = commentData.getGifDownloadName();
-                    DownloadUtils.downloadMediaUrl(context, gifUrl, Constants.DEFAULT_GIF_FOLDER, fileName);
-                    return true;
-                } else if (commentData.hasImageMedia()) {
-                    MediaData imageData = commentData.getImageMedia();
-                    UserData userData = commentData.getCommentUserData();
+                    Context context = (Context) Utils.getActivity();
+                    if (commentData.hasGifMedia()) {
+                        String gifUrl = commentData.getGifUrl();
+                        String fileName = commentData.getGifDownloadName();
+                        DownloadUtils.downloadMediaUrl(context, gifUrl, Constants.DEFAULT_GIF_FOLDER, fileName);
+                    } else if (commentData.hasImageMedia()) {
+                        MediaData imageData = commentData.getImageMedia();
+                        UserData userData = commentData.getCommentUserData();
 
-                    String userName = userData.getUsername();
-                    String mediaLink = imageData.getMediaLink();
-                    String fileName = userName+"_"+imageData.getDownloadFilename(MediaType.IMAGE);
+                        String userName = (userData != null) ? userData.getUsername() : "comment_"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+                        String mediaLink = imageData.getMediaLink();
+                        String fileName = userName + "_" + imageData.getDownloadFilename(MediaType.ANY);
 
-                    String subFolder = DownloadUtils.getSubfolderName(userName);
+                        String subFolder = DownloadUtils.getSubfolderName(userName);
 
-                    DownloadUtils.downloadMediaUrl(context, mediaLink, subFolder, fileName);
-                    return true;
-                }
+                        DownloadUtils.downloadMediaUrl(context, mediaLink, subFolder, fileName);
+                    }
+                
+                return true;
             }
 
         } catch (Exception e) {
             PikoUtils.logger(e);
+            PikoUtils.toast(e.getMessage());
+            // If exception happens, we need not check Instagram's button.
+            return true;
         }
         return false;
     }
