@@ -42,25 +42,18 @@ public class CommentData extends Entity implements GifMediaInterface {
     }
 
     public MediaData getImageMedia() throws Exception {
-        try {
-            Entity imageDataEntity = super.getFieldAsEntity("fieldName");
-            if (imageDataEntity != null) {
-                Object mediaObj = imageDataEntity.getField("fieldName2");
-                if (mediaObj != null) {
-                    return new MediaData(mediaObj);
-                }
+        Entity imageDataEntity = super.getFieldAsEntity("fieldName");
+        if (imageDataEntity != null) {
+            Object mediaObj = imageDataEntity.getField("fieldName2");
+            if (mediaObj != null) {
+                return new MediaData(mediaObj);
             }
-        } catch (Exception ignored) {
         }
         return null;
     }
 
     private Object getGifMedia() throws Exception {
-        try {
-            return super.getField("fieldName");
-        } catch (Exception ignored) {
-            return null;
-        }
+        return super.getField("fieldName");
     }
 
     public boolean hasGifMedia() throws Exception {
