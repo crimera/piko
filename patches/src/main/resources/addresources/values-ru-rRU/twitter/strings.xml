@@ -36,6 +36,11 @@
     <string name="piko_pref_native_page_desc">Эти встроенные функции Piko доступны в меню поста.</string>
     <string name="piko_title_native_downloader">Нативное скачивание</string>
     <string name="piko_title_native_downloader_toggle">Включить нативный загрузчик</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res">Автоматически скачивать видео в максимальном разрешении</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">Пропускать диалог выбора и сразу скачивать одиночные видео в наилучшем доступном разрешении</string>
+    <string name="piko_pref_native_downloader_show_download_icon">Показывать значок скачивания</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">Показывать значок копирования</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">Показывать значок вариантов</string>
     <string name="piko_pref_native_downloader_inline_button">Показывать кнопку загрузки в строке</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Добавляет кнопку загрузки непосредственно в панель действий поста</string>
     <string name="piko_pref_native_downloader_alert_title">Скачать медиа</string>

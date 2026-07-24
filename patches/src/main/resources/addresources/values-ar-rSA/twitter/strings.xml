@@ -36,6 +36,11 @@
     <string name="piko_pref_native_page_desc">تتوفر ميزات Piko المحلية هذه في قائمة المنشور.</string>
     <string name="piko_title_native_downloader">أداة التنزيل المحلية</string>
     <string name="piko_title_native_downloader_toggle">تمكين التنزيل المحلي</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res">تنزيل أعلى دقة للفيديو تلقائيًا</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">تخطي نافذة اختيار الجودة وتنزيل مباشرة أفضل دقة متاحة للفيديوهات الفردية.</string>
+    <string name="piko_pref_native_downloader_show_download_icon">عرض أيقونة التنزيل</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">عرض أيقونة النسخ</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">عرض أيقونة الخيارات</string>
     <string name="piko_pref_native_downloader_inline_button">عرض زر التنزيل المضمن</string>
     <string name="piko_pref_native_downloader_inline_button_desc">يضيف زر تنزيل مباشرةً إلى شريط إجراءات المنشور</string>
     <string name="piko_pref_native_downloader_alert_title">تنزيل الوسائط</string>

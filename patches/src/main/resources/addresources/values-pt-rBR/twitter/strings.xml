@@ -36,9 +36,15 @@
     <string name="piko_pref_native_page_desc">Esses recursos nativos do Piko estão disponíveis no menu de publicação..</string>
     <string name="piko_title_native_downloader">Baixador nativo</string>
     <string name="piko_title_native_downloader_toggle">Ativar baixador nativo</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res">Baixar automaticamente vídeos na resolução mais alta</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">Ignore a caixa de diálogo de seleção e baixe imediatamente a melhor resolução disponível para vídeos individuais.</string>
+    <string name="piko_pref_native_downloader_show_download_icon">Mostrar ícone de download</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">Mostrar ícone de cópia</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">Mostrar variantes do ícone</string>
     <string name="piko_pref_native_downloader_inline_button">Exibir botão de download embutido</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Adicionar um botão de download diretamente à barra de ação do post.</string>
     <string name="piko_pref_native_downloader_alert_title">Baixar mídia</string>
+    <string name="piko_video_variants">Variantes de vídeo</string>
     <string name="piko_pref_native_downloader_download_all">Baixar tudo</string>
     <string name="piko_pref_native_downloader_no_media">Nenhuma mídia encontrada</string>
     <string name="piko_pref_native_downloader_filename_title">Nome de arquivo padrão ao salvar</string>
@@ -383,4 +389,6 @@ Recomenda-se a leitura deste documento antes de usar esta funcionalidade. Ele co
     <string name="piko_login_token_import_success_reopen_required">Reabra o aplicativo</string>
     <string name="piko_login_token_import_failed_missing_info">Erro: \"nome de usuário\" ou \"token\" ou \"segredo\" está faltando</string>
     <string name="piko_login_token_import_failed_already_exist">Falha ao adicionar a conta (pode já existir)</string>
+    <string name="piko_ok">Ok</string>
+    <string name="piko_cancel">Cancelar</string>
 </resources>

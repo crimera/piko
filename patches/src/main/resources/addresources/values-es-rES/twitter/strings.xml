@@ -36,9 +36,15 @@
     <string name="piko_pref_native_page_desc">Estas funciones nativas de Piko están disponibles en el menú de publicaciones.</string>
     <string name="piko_title_native_downloader">Descargador nativo</string>
     <string name="piko_title_native_downloader_toggle">Habilitar gestor de descarga nativo</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res">Descarga automáticamente la resolución de vídeo más alta</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">Omita el cuadro de diálogo de selección y descargue inmediatamente la mejor resolución disponible para cada vídeo.</string>
+    <string name="piko_pref_native_downloader_show_download_icon">Mostrar icono de descarga</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">Mostrar icono de copia</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">Mostrar variantes de ícono</string>
     <string name="piko_pref_native_downloader_inline_button">Mostrar botón de descarga en línea</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Agrega un botón de descarga a la barra superior en publicaciones</string>
     <string name="piko_pref_native_downloader_alert_title">Descargar medios</string>
+    <string name="piko_video_variants">Variantes de vídeo</string>
     <string name="piko_pref_native_downloader_download_all">Descargar todo</string>
     <string name="piko_pref_native_downloader_no_media">No se encontraron medios</string>
     <string name="piko_pref_native_downloader_filename_title">Patrón de nombre de archivo para guardar</string>
@@ -383,4 +389,6 @@ Se recomienda leerla antes de usar esta función. Incluye información important
     <string name="piko_login_token_import_success_reopen_required">Vuelve a abrir la aplicación</string>
     <string name="piko_login_token_import_failed_missing_info">Error: falta \"username\", \"token\" o \"secret\"</string>
     <string name="piko_login_token_import_failed_already_exist">No se pudo agregar la cuenta (es posible que ya exista)</string>
+    <string name="piko_ok">Ok</string>
+    <string name="piko_cancel">Cancelar</string>
 </resources>

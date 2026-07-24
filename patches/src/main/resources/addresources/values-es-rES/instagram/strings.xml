@@ -54,6 +54,8 @@
 
 
 Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", pero se detendrá por sí sola al cabo de unos segundos."</string>
+    <string name="piko_disable_swipe_to_create">Deshabilitar la función de deslizar para crear</string>
+    <string name="piko_disable_swipe_to_create_desc">Impide abrir la pantalla de creación deslizando el dedo hacia la derecha en la pestaña de inicio.</string>
     <string name="piko_hide_stories_tray">Ocultar barra de historias</string>
     <string name="piko_hide_stories_tray_desc">Ocultar la barra de historias del feed principal</string>
     <string name="piko_hide_notes_tray">Ocultar barra de notas</string>

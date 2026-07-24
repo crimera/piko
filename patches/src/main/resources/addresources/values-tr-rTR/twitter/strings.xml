@@ -36,6 +36,11 @@
     <string name="piko_pref_native_page_desc">Bu yerleşik piko özellikleri gönderi menüsünde mevcut.</string>
     <string name="piko_title_native_downloader">Yerel indirici</string>
     <string name="piko_title_native_downloader_toggle">Yerel indirmeyi etkinleştir</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res">En yüksek video çözünürlüğünü otomatik indir</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">Seçim penceresini atla ve tekil videolar için mevcut en yüksek çözünürlüğü hemen indir</string>
+    <string name="piko_pref_native_downloader_show_download_icon">İndirme simgesini göster</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">Kopyalama simgesini göster</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">Varyantlar simgesini göster</string>
     <string name="piko_pref_native_downloader_inline_button">İndirme butonunu satır içinde göster</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Gönderi işlem çubuğuna doğrudan bir indirme düğmesi ekler</string>
     <string name="piko_pref_native_downloader_alert_title">Medyayı indir</string>
