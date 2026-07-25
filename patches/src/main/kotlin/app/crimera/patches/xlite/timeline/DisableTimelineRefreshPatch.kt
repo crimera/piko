@@ -20,6 +20,7 @@ import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.findFreeRegister
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -73,7 +74,7 @@ private val disableTimelineRefreshSettingsPatch =
 val disableTimelineRefreshPatch =
     bytecodePatch(
         name = "X-Lite: Disable automatic timeline refresh",
-        description = "Prevents automatic X-Lite timeline refreshes on launch and foregrounding.",
+        description = "Prevents automatic timeline jumps on startup and foregrounding.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
         dependsOn(disableTimelineRefreshSettingsPatch)
@@ -108,7 +109,14 @@ val disableTimelineRefreshPatch =
                         lifecycleMatches.joinToString { it.originalMethod.toString() },
                 )
             }
-            lifecycleMatches.single().method.apply {
+            val lifecycleMatch = lifecycleMatches.single()
+            val requestTypeDescriptor =
+                lifecycleMatch.instructionMatches.first()
+                    .instruction
+                    .getReference<FieldReference>()
+                    ?.definingClass
+                    ?: throw PatchException("X-Lite request type descriptor was not found")
+            lifecycleMatch.method.apply {
                 val forYouInstruction =
                     instructions.singleOrNull { instruction ->
                         instruction.opcode == Opcode.SGET_OBJECT &&
@@ -119,7 +127,7 @@ val disableTimelineRefreshPatch =
                             } == true
                     } ?: throw PatchException("X-Lite auto-refresh FOR_YOU check was not found")
                 val forYouIndex = forYouInstruction.location.index
-                val timelineResultInstruction =
+                val timelineResult =
                     instructions
                         .take(forYouIndex)
                         .lastOrNull { instruction ->
@@ -128,47 +136,85 @@ val disableTimelineRefreshPatch =
                             getInstruction(resultIndex - 1)
                                 .getReference<MethodReference>()
                                 ?.returnType == TIMELINE_TYPE_DESCRIPTOR
-                        } as? OneRegisterInstruction
-                        ?: throw PatchException(
+                        } ?: throw PatchException(
                             "X-Lite auto-refresh timeline type result was not found",
                         )
-                val unitLoadInstruction =
-                    instructions.lastOrNull { instruction ->
+                val timelineGetterCall = getInstruction(timelineResult.location.index - 1)
+                val timelineGetterReference =
+                    timelineGetterCall.getReference<MethodReference>()
+                        ?: throw PatchException("X-Lite timeline type getter was not found")
+                val timelineGetterInstruction =
+                    timelineGetterCall as? FiveRegisterInstruction
+                        ?: throw PatchException("X-Lite timeline type getter does not use explicit registers")
+                if (timelineGetterInstruction.registerCount != 1) {
+                    throw PatchException("Unexpected X-Lite timeline type getter register layout")
+                }
+                val autoRefreshLoads =
+                    instructions.filter { instruction ->
                         instruction.opcode == Opcode.SGET_OBJECT &&
-                            instruction.getReference<FieldReference>()?.definingClass == "Lkotlin/Unit;"
-                    } ?: throw PatchException("X-Lite auto-refresh Unit return was not found")
-                val originalComparisonInstruction = instructions[forYouIndex + 1]
-                val timelineRegister = timelineResultInstruction.registerA
-                val forYouRegister =
-                    (forYouInstruction as OneRegisterInstruction).registerA
-                val settingRegister =
-                    findFreeRegister(
-                        forYouIndex + 1,
-                        listOf(timelineRegister, forYouRegister),
+                            instruction.getReference<FieldReference>()?.name == "AUTO_REFRESH"
+                    }
+                if (autoRefreshLoads.size != 3) {
+                    throw PatchException(
+                        "Expected three X-Lite AUTO_REFRESH request loads, found " +
+                            autoRefreshLoads.size,
                     )
-                val readInstructionCount =
-                    disableTimelineRefresh.injectBooleanRead(
-                        this,
-                        forYouIndex + 1,
-                        settingRegister,
+                }
+                autoRefreshLoads.asReversed().forEachIndexed { reverseIndex, autoRefreshLoad ->
+                    val autoRefreshIndex = autoRefreshLoad.location.index
+                    val originalNextInstruction = instructions[autoRefreshIndex + 1]
+                    val requestTypeRegister =
+                        (autoRefreshLoad as OneRegisterInstruction).registerA
+                    val requestCall =
+                        instructions
+                            .drop(autoRefreshIndex + 1)
+                            .firstOrNull { instruction ->
+                                instruction.opcode == Opcode.INVOKE_INTERFACE &&
+                                    (instruction as? FiveRegisterInstruction)?.registerCount == 3
+                            } as? FiveRegisterInstruction
+                            ?: throw PatchException(
+                                "X-Lite auto-refresh repository call was not found",
+                            )
+                    val repositoryRegister = requestCall.registerC
+                    val settingRegister =
+                        findFreeRegister(
+                            autoRefreshIndex + 1,
+                            listOf(repositoryRegister, requestTypeRegister),
+                        )
+                    val timelineRegister =
+                        findFreeRegister(
+                            autoRefreshIndex + 1,
+                            listOf(repositoryRegister, requestTypeRegister, settingRegister),
+                        )
+                    val insertIndex = autoRefreshIndex + 1
+                    val readInstructionCount =
+                        disableTimelineRefresh.injectBooleanRead(
+                            this,
+                            insertIndex,
+                            settingRegister,
+                        )
+                    val labelSuffix = autoRefreshLoads.size - reverseIndex
+                    addInstructionsWithLabels(
+                        insertIndex + readInstructionCount,
+                        """
+                            if-eqz v$settingRegister, :piko_xlite_refresh_lifecycle_continue_$labelSuffix
+                            invoke-interface {v$repositoryRegister}, $timelineGetterReference
+                            move-result-object v$timelineRegister
+                            sget-object v$settingRegister, $TIMELINE_TYPE_DESCRIPTOR->FOR_YOU:$TIMELINE_TYPE_DESCRIPTOR
+                            if-ne v$timelineRegister, v$settingRegister, :piko_xlite_refresh_lifecycle_check_following_$labelSuffix
+                            sget-object v$requestTypeRegister, $requestTypeDescriptor->VIEWPORT_AWARE_AUTO_REFRESH:$requestTypeDescriptor
+                            goto :piko_xlite_refresh_lifecycle_continue_$labelSuffix
+                            :piko_xlite_refresh_lifecycle_check_following_$labelSuffix
+                            sget-object v$settingRegister, $TIMELINE_TYPE_DESCRIPTOR->FOLLOWING:$TIMELINE_TYPE_DESCRIPTOR
+                            if-ne v$timelineRegister, v$settingRegister, :piko_xlite_refresh_lifecycle_continue_$labelSuffix
+                            sget-object v$requestTypeRegister, $requestTypeDescriptor->VIEWPORT_AWARE_AUTO_REFRESH:$requestTypeDescriptor
+                        """.trimIndent(),
+                        ExternalLabel(
+                            "piko_xlite_refresh_lifecycle_continue_$labelSuffix",
+                            originalNextInstruction,
+                        ),
                     )
-                addInstructionsWithLabels(
-                    forYouIndex + 1 + readInstructionCount,
-                    """
-                        if-eqz v$settingRegister, :piko_xlite_refresh_lifecycle_continue
-                        if-eq v$timelineRegister, v$forYouRegister, :piko_xlite_refresh_lifecycle_skip
-                        sget-object v$settingRegister, $TIMELINE_TYPE_DESCRIPTOR->FOLLOWING:$TIMELINE_TYPE_DESCRIPTOR
-                        if-eq v$timelineRegister, v$settingRegister, :piko_xlite_refresh_lifecycle_skip
-                    """.trimIndent(),
-                    ExternalLabel(
-                        "piko_xlite_refresh_lifecycle_continue",
-                        originalComparisonInstruction,
-                    ),
-                    ExternalLabel(
-                        "piko_xlite_refresh_lifecycle_skip",
-                        unitLoadInstruction,
-                    ),
-                )
+                }
             }
         }
     }
