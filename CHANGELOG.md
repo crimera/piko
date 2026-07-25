@@ -1,3 +1,9 @@
+## [3.8.2-dev.2](https://github.com/Flaxmbot/piko/compare/v3.8.2-dev.1...v3.8.2-dev.2) (2026-07-25)
+
+### 🐛 Bug Fixes
+
+* **instagram:** fix reel bottom sheet crash caused by register clobbering ([43e42ef](https://github.com/Flaxmbot/piko/commit/43e42efe65da1127c15daaffe13dcb0e7479fe8b))
+
 ## [3.8.2-dev.1](https://github.com/Flaxmbot/piko/compare/v3.8.1...v3.8.2-dev.1) (2026-07-25)
 
 ### 🐛 Bug Fixes
