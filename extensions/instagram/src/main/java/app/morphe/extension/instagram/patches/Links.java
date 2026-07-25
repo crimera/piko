@@ -96,6 +96,17 @@ public class Links {
                         || host.contains("graph.facebook.com")
                         || path.contains("/logging_client_events")) {
                     shouldBlockUri = DISABLE_ANALYTICS;
+                } else if (DISABLE_ANALYTICS && (
+                        path.contains("/api/v1/consent/existing_user_flow/")
+                        || path.contains("/api/v1/consent/new_user_flow/")
+                        || path.contains("/consent/existing_user_flow/")
+                        || path.contains("/consent/new_user_flow/"))) {
+                    // When analytics is disabled, also block consent re-check endpoints.
+                    // These are called on every launch to determine if setup dialogs
+                    // (location, contacts, notifications) need to be shown again.
+                    // Blocking them prevents the "Set up on new device" location popup
+                    // from appearing on every app open when Disable Analytics is enabled.
+                    shouldBlockUri = true;
                 } else if (path.contains("/api/v2/media/seen/")) {
                     shouldBlockUri = Pref.viewStoriesAnonymously();
                 } else if (path.contains("/heartbeat_and_get_viewer_count/")) {
