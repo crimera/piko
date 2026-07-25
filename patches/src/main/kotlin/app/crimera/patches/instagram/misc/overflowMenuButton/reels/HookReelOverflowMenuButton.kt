@@ -32,10 +32,6 @@ val hookReelOverflowMenuButton =
 
                 val appActivityField = classFields.first { it.type == FRAGMENT_ACTIVITY }
 
-                // Find the first int field on the controller class — this holds the current
-                // carousel/slideshow index that Instagram tracks for the viewed item.
-                val currentMediaIndexField = classFields.firstOrNull { it.type == "I" }
-
                 val selfClassRegister = instructions[indexOfFirstInstruction(Opcode.MOVE_OBJECT_FROM16)].registersUsed[0]
                 val buttonAdderInstanceRegister = instructions[indexOfFirstInstruction(Opcode.NEW_INSTANCE)].registersUsed[0]
 
@@ -45,26 +41,13 @@ val hookReelOverflowMenuButton =
 
                 val freeRegisterOne = instructions[indexOfFirstInstruction(mediaObjectFromParameterIndex, Opcode.CONST_4)].registersUsed[0]
 
-                if (currentMediaIndexField != null) {
-                    addInstructions(
-                        mediaObjectFromParameterIndex + 1,
-                        """
-                        iget-object v$freeRegisterOne, v$selfClassRegister, $appActivityField
-                        iget v$selfClassRegister, v$selfClassRegister, $currentMediaIndexField
-                        invoke-static {v$freeRegisterOne,v$buttonAdderInstanceRegister,v$mediaObjectRegister,v$selfClassRegister},$ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS->includeCustomReelOverflowButtons(Landroid/content/Context;Ljava/lang/Object;Ljava/lang/Object;I)V
-                        """.trimIndent(),
-                    )
-                } else {
-                    // Fallback: no int field found, pass 0 as the index.
-                    addInstructions(
-                        mediaObjectFromParameterIndex + 1,
-                        """
-                        iget-object v$freeRegisterOne, v$selfClassRegister, $appActivityField
-                        const/4 v$selfClassRegister, 0x0
-                        invoke-static {v$freeRegisterOne,v$buttonAdderInstanceRegister,v$mediaObjectRegister,v$selfClassRegister},$ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS->includeCustomReelOverflowButtons(Landroid/content/Context;Ljava/lang/Object;Ljava/lang/Object;I)V
-                        """.trimIndent(),
-                    )
-                }
+                addInstructions(
+                    mediaObjectFromParameterIndex + 1,
+                    """
+                    iget-object v$freeRegisterOne, v$selfClassRegister, $appActivityField
+                    invoke-static {v$freeRegisterOne,v$buttonAdderInstanceRegister,v$mediaObjectRegister},$ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS->includeCustomReelOverflowButtons(Landroid/content/Context;Ljava/lang/Object;Ljava/lang/Object;)V
+                    """.trimIndent(),
+                )
             }
         }
     }

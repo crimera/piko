@@ -53,9 +53,9 @@ public class AddReelButton {
         }
     }
 
-    private static void addDownloadButton(Context context, Object helperObject, Object mediaObject, int currentMediaIndex){
+    private static void addDownloadButton(Context context, Object helperObject, Object mediaObject){
         String icon = UI.DRAWABLE_DOWNLOAD_ICON;
-        ReelButton reelButton = new DownloadButton(context, mediaObject, currentMediaIndex);
+        ReelButton reelButton = new DownloadButton(context, mediaObject);
         String DOWNLOAD_BUTTON_TEXT = str("piko_download_options");
         if(Pref.enableDirectDownload()){
             DOWNLOAD_BUTTON_TEXT = str("piko_category_download_media");
@@ -66,9 +66,9 @@ public class AddReelButton {
         AddReelButton.addReelButton(context,reelOverflowButton,helperObject);
     }
 
-    private static void addInfoButton(Context context, Object helperObject, Object mediaObject, int currentMediaIndex){
+    private static void addInfoButton(Context context, Object helperObject, Object mediaObject){
         String icon = UI.DRAWABLE_BLUB_ICON;
-        ReelButton reelButton = new InfoButton(context, mediaObject, currentMediaIndex);
+        ReelButton reelButton = new InfoButton(context, mediaObject);
         String buttonText = str("piko_more_options");
 
         ReelOverflowButton reelOverflowButton = new ReelOverflowButton(icon,reelButton,buttonText);
@@ -76,9 +76,9 @@ public class AddReelButton {
         AddReelButton.addReelButton(context,reelOverflowButton,helperObject);
     }
 
-    private static void addDebugButton(Context context, Object helperObject, Object mediaObject, int currentMediaIndex) {
+    private static void addDebugButton(Context context, Object helperObject, Object mediaObject) {
         String icon = UI.DRAWABLE_DEBUG_ICON;
-        ReelButton reelButton = new DebugButton(context, mediaObject, currentMediaIndex);
+        ReelButton reelButton = new DebugButton(context, mediaObject);
         String buttonText = str("piko_debug");
 
         ReelOverflowButton reelOverflowButton = new ReelOverflowButton(icon, reelButton, buttonText);
@@ -87,9 +87,9 @@ public class AddReelButton {
 
     }
 
-    private static void addExternalDownloadButton(Context context, Object helperObject, Object mediaObject, int currentMediaIndex){
+    private static void addExternalDownloadButton(Context context, Object helperObject, Object mediaObject){
         String icon = UI.DRAWABLE_DOWNLOAD_ICON;
-        ReelButton reelButton = new ExternalDownloadButton(context, mediaObject, currentMediaIndex);
+        ReelButton reelButton = new ExternalDownloadButton(context, mediaObject);
         String buttonText = str("piko_download_with_external_downloader");
 
         ReelOverflowButton reelOverflowButton = new ReelOverflowButton(icon,reelButton,buttonText);
@@ -97,18 +97,18 @@ public class AddReelButton {
         AddReelButton.addReelButton(context,reelOverflowButton,helperObject);
     }
 
-    public static void includeCustomReelOverflowButtons(Context context, Object helperObject, Object mediaObject, int currentMediaIndex){
+    public static void includeCustomReelOverflowButtons(Context context, Object helperObject, Object mediaObject){
         if(Pref.pikoDebug()){
-            AddReelButton.addDebugButton(context, helperObject, mediaObject, currentMediaIndex);
+            AddReelButton.addDebugButton(context, helperObject, mediaObject);
         }
         if(Pref.enableDownload()){
-            AddReelButton.addDownloadButton(context, helperObject, mediaObject, currentMediaIndex);
+            AddReelButton.addDownloadButton(context, helperObject, mediaObject);
         }
         if(Pref.downloadWithExternalDownloader()){
-            AddReelButton.addExternalDownloadButton(context, helperObject, mediaObject, currentMediaIndex);
+            AddReelButton.addExternalDownloadButton(context, helperObject, mediaObject);
         }
         if(Pref.moreOptionsOnPost()){
-            AddReelButton.addInfoButton(context, helperObject, mediaObject, currentMediaIndex);
+            AddReelButton.addInfoButton(context, helperObject, mediaObject);
         }
     }
 
