@@ -935,6 +935,17 @@ public class ScreenBuilder {
         LegacyTwitterPreferenceCategory category = null;
         if(buildCategory)
             category = preferenceCategory(str("piko_title_timeline"));
+        if (SettingsStatus.postFilter) {
+            addPreference(category,
+                    helper.buttonPreference(
+                            str("piko_pref_post_filter"),
+                            str("piko_pref_post_filter_desc"),
+                            Settings.POST_FILTER_SCREEN,
+                            "ic_vector_exiting",
+                            null
+                    )
+            );
+        }
         if (SettingsStatus.disableAutoTimelineScroll) {
             addPreference(category,
                     helper.switchPreference(

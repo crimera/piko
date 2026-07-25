@@ -10,6 +10,8 @@ import com.x.models.ClientEventInfo;
 
 public interface UrtTimelineItem {
 
+    long getSortIndex();
+
     String getEntryId();
 
     ClientEventInfo getClientEventInfo();

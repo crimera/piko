@@ -1,12 +1,6 @@
 package com.x.models;
 
-import com.x.models.UserResult;
-import com.x.models.CanonicalPost;
-
-public class ContextualPost {
-
-    public CanonicalPost getCanonicalPost(){return null;}
-    public UserResult getAuthor(){
-        return null;
-    }
+public abstract class ContextualPost implements PostResult {
+    public abstract CanonicalPost getCanonicalPost();
+    public abstract PostResult getDisplayQuotedPost();
 }

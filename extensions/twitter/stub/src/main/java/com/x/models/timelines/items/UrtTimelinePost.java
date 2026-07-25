@@ -6,22 +6,21 @@
 
 package com.x.models.timelines.items;
 
-import com.x.models.ClientEventInfo;
+import com.x.models.PostIdentifier;
+import com.x.models.PostResult;
 import com.x.models.TimelinePromotedMetadata;
+import com.x.models.UserResult;
+import com.x.models.articles.Article;
+import com.x.models.cards.LegacyCard;
+import com.x.models.notes.NotePost;
 
-public class UrtTimelinePost implements UrtTimelineItem {
-
-    @Override
-    public String getEntryId() {
-        return null;
-    }
-
-    @Override
-    public ClientEventInfo getClientEventInfo() {
-        return null;
-    }
-
-    public TimelinePromotedMetadata getPromotedMetadata() {
-        return null;
-    }
+public abstract class UrtTimelinePost implements UrtTimelineItem {
+    public abstract TimelinePromotedMetadata getPromotedMetadata();
+    public abstract PostResult getPostResult();
+    public abstract String getText();
+    public abstract UserResult getAuthor();
+    public abstract PostIdentifier getId();
+    public abstract NotePost getNotePost();
+    public abstract Article getArticle();
+    public abstract LegacyCard getLegacyCard();
 }

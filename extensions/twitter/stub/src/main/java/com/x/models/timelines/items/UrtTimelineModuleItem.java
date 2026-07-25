@@ -6,9 +6,8 @@
 
 package com.x.models.timelines.items;
 
-public class UrtTimelineModuleItem {
-
-    public UrtTimelineItem getItem() {
-        return null;
-    }
+public abstract class UrtTimelineModuleItem {
+    public abstract UrtTimelineItem getItem();
+    public abstract boolean isDispensable();
+    public abstract UrtTimelineModuleItem copy(UrtTimelineItem item, boolean isDispensable);
 }

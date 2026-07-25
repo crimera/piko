@@ -93,6 +93,8 @@ public class Settings {
     public static final BooleanSetting TIMELINE_HIDE_NAVBAR_BADGE = new BooleanSetting("timeline_hide_navbar_badge", false);
     public static final BooleanSetting TIMELINE_HIDE_POST_INLINE_METRICS = new BooleanSetting("timeline_hide_post_inline_metrics", false);
     public static final BooleanSetting TIMELINE_HIDE_POST_DETAILED_METRICS = new BooleanSetting("timeline_hide_post_detailed_metrics", false);
+    public static final BooleanSetting POST_FILTER_ENABLED = new BooleanSetting("post_filter_enabled", true);
+    public static final StringSetting POST_FILTER_KEYWORDS = new StringSetting("post_filter_keywords", "");
 
     public static final BooleanSetting PREMIUM_UNDO_POSTS = new BooleanSetting("premium_undo_posts", false);
     public static final BooleanSetting PREMIUM_NAVBAR = new BooleanSetting("premium_custom_navbar", true);
@@ -126,6 +128,7 @@ public class Settings {
     public static final String RESET_PREF = "reset_pref";
     public static final String RESET_FLAGS = "reset_flags";
     public static final String FEATURE_FLAGS = "feature_flags";
+    public static final String POST_FILTER_SCREEN = "post_filter";
     public static final String ADD_FONT = "add_font";
     public static final String DELETE_FONT = "delete_font";
     public static final String ADD_EMOJI_FONT = "add_emoji_font";

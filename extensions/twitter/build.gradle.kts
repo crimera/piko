@@ -10,4 +10,7 @@ dependencies {
     compileOnly(libs.morphe.extensions.library)
     compileOnly(libs.annotation)
     compileOnly(libs.appcompat)
+
+    testImplementation(project(":extensions:twitter:stub"))
+    testImplementation("junit:junit:4.13.2")
 }

@@ -102,6 +102,7 @@ public class SettingsAboutFragment extends PreferenceFragment {
         flags.put(str("piko_pref_download"),SettingsStatus.changeDownloadEnabled);
         flags.put(str("piko_pref_download_media_link_handle"),SettingsStatus.mediaLinkHandle);
         flags.put(str("piko_pref_hide_promoted_posts"),SettingsStatus.hideAds);
+        flags.put(str("piko_pref_post_filter"),SettingsStatus.postFilter);
         flags.put(str("piko_pref_wtf_section"),SettingsStatus.hideWTF);
         flags.put(str("piko_pref_cts_section"),SettingsStatus.hideCTS);
         flags.put(str("piko_pref_ctj_section"),SettingsStatus.hideCTJ);

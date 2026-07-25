@@ -26,6 +26,7 @@ import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.twitter.settings.featureflags.FeatureFlagsFragment;
+import app.morphe.extension.twitter.settings.postfilter.PostFilterFragment;
 import app.morphe.extension.twitter.settings.fragments.*;
 import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeFragment;
 import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderModeUtils;
@@ -87,6 +88,8 @@ public class ActivityHook {
             fragment = new FeatureFlagsFragment();
         } else if (Settings.PATCH_INFO.equals(activity_name)) {
             fragment = new SettingsAboutFragment();
+        } else if (Settings.POST_FILTER_SCREEN.equals(activity_name)) {
+            fragment = new PostFilterFragment();
         } else if (Settings.READER_MODE_KEY.equals(activity_name)) {
             fragment = new ReaderModeFragment();
         } else {
@@ -134,6 +137,7 @@ public class ActivityHook {
         }
         String toolbarText = switch (activity_name) {
             case Settings.READER_MODE_KEY -> "piko_title_native_reader_mode";
+            case Settings.POST_FILTER_SCREEN -> "piko_title_post_filter";
             case Settings.CHANGE_APP_ICON -> "piko_pref_customisation_change_app_icon";
             case Settings.EXPORT_LOGIN_TOKEN -> "piko_pref_export_login_token";
             default -> "piko_title_settings";

@@ -4,7 +4,7 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
-package app.crimera.patches.twitter.ads.xlite
+package app.crimera.patches.twitter.timeline.xlite
 
 import app.morphe.patcher.Fingerprint
 
@@ -19,5 +19,6 @@ private object XLiteTimelineSuccessClassFingerprint : Fingerprint(
 internal object XLiteTimelineSuccessFingerprint : Fingerprint(
     classFingerprint = XLiteTimelineSuccessClassFingerprint,
     name = "<init>",
+    parameters = listOf("L", "L", "L", "Z", "Z"),
     returnType = "V",
 )

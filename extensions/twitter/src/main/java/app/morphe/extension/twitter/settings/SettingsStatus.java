@@ -82,6 +82,7 @@ public class SettingsStatus {
     public static boolean hideCommBadge = false;
     public static boolean serverResponseLogging = false;
     public static boolean serverResponseLoggingOverwriteFile = false;
+    public static boolean postFilter = false;
 
     public static boolean customFont = false;
     public static boolean customEmojiFont = false;
@@ -90,6 +91,10 @@ public class SettingsStatus {
     public static boolean moreInfoOnProfile = false;
     public static void moreInfoOnProfile() {
         moreInfoOnProfile = true;
+    }
+
+    public static void postFilter() {
+        postFilter = true;
     }
 
     public static void inlineDownloadButton() {
@@ -407,7 +412,7 @@ public class SettingsStatus {
 
 
     public static boolean enableTimelineSection() {
-        return ( hidePostMetrics || hideNavbarBadge || showSourceLabel || hideCommBadge || showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD);
+        return (postFilter || hidePostMetrics || hideNavbarBadge || showSourceLabel || hideCommBadge || showSensitiveMedia || hideNudgeButton || disableAutoTimelineScroll || forceTranslate || hidePromoteButton || hideCommunityNote || hideLiveThreads || hideBanner || hideInlineBmk || showPollResultsEnabled || hideImmersivePlayer || enableVidAutoAdvance || enableForceHD);
     }
 
     public static boolean enableMiscSection() {

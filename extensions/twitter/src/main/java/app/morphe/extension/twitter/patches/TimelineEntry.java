@@ -152,110 +152,12 @@ public class TimelineEntry {
         return videoEnities;
     }
 
-    private static Class<?>[] getAllInterfaces(Object obj) {
-        java.util.Set<Class<?>> set = new java.util.HashSet<>();
-        Class<?> current = obj.getClass();
-        while (current != null) {
-            for (Class<?> iface : current.getInterfaces()) {
-                set.add(iface);
-            }
-            current = current.getSuperclass();
-        }
-        return set.toArray(new Class<?>[0]);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Object wrapAsImmutableList(final List<Object> filteredList, final Object originalList) {
-        Class<?>[] interfaces = getAllInterfaces(originalList);
-        if (interfaces.length == 0) {
-            return java.util.Collections.unmodifiableList(filteredList);
-        }
-
-        return java.lang.reflect.Proxy.newProxyInstance(
-            originalList.getClass().getClassLoader(),
-            interfaces,
-            new java.lang.reflect.InvocationHandler() {
-                @Override
-                public Object invoke(Object proxy, java.lang.reflect.Method method, Object[] args) throws Throwable {
-                    String name = method.getName();
-                    if ("equals".equals(name) && args != null && args.length == 1) {
-                        return proxy == args[0] || filteredList.equals(args[0]);
-                    }
-                    if ("hashCode".equals(name) && (args == null || args.length == 0)) {
-                        return filteredList.hashCode();
-                    }
-                    if ("toString".equals(name) && (args == null || args.length == 0)) {
-                        return filteredList.toString();
-                    }
-                    Object res = method.invoke(filteredList, args);
-                    if ("subList".equals(name) && res instanceof List) {
-                        return wrapAsImmutableList((List<Object>) res, originalList);
-                    }
-                    return res;
-                }
-            }
-        );
+    public static boolean shouldHideUrtEntryId(String entryId) {
+        return entryId != null && isEntryIdRemove(entryId);
     }
 
     public static Object filterUrtTimelineItems(Object itemsList) {
-        if (!hideAds || itemsList == null) return itemsList;
-
-        try {
-            List<Object> filteredList = new ArrayList<>();
-            Iterable<?> iterable = (Iterable<?>) itemsList;
-            int totalCount = 0;
-
-            for (Object itemObj : iterable) {
-                totalCount++;
-                if (itemObj == null) continue;
-
-                boolean isAd = false;
-                UrtTimelineItem item = null;
-                if (itemObj instanceof UrtTimelineItem) {
-                    item = (UrtTimelineItem) itemObj;
-                } else if (itemObj instanceof UrtTimelineModuleItem) {
-                    item = ((UrtTimelineModuleItem) itemObj).getItem();
-                }
-
-                if (item != null) {
-                    // 1. Check entryId using existing filter helper
-                    String entryId = item.getEntryId();
-                    if (entryId != null && isEntryIdRemove(entryId)) {
-                        isAd = true;
-                    }
-
-                    // 2. Check promotedMetadata on UrtTimelinePost
-                    if (!isAd && item instanceof UrtTimelinePost) {
-                        UrtTimelinePost post = (UrtTimelinePost) item;
-                        if (post.getPromotedMetadata() != null) {
-                            isAd = true;
-                        }
-                    }
-
-                    // 3. Check clientEventInfo for promoted content
-                    if (!isAd) {
-                        Object clientEventInfo = item.getClientEventInfo();
-                        if (clientEventInfo != null && clientEventInfo.toString().toLowerCase(java.util.Locale.ROOT).contains("promoted")) {
-                            isAd = true;
-                        }
-                    }
-                }
-
-                if (!isAd) {
-                    filteredList.add(itemObj);
-                }
-            }
-
-            if (filteredList.size() == totalCount) {
-                return itemsList;
-            }
-
-            return wrapAsImmutableList(filteredList, itemsList);
-
-        } catch (Exception e) {
-            PikoUtils.logger(e);
-            return itemsList;
-        }
+        return app.morphe.extension.twitter.patches.xlite.XLiteTimelineFilter.filter(itemsList);
     }
 
 //end
