@@ -8,6 +8,7 @@ import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
@@ -16,7 +17,14 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.findFreeRegister
+import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+
+private const val TIMELINE_TYPE_DESCRIPTOR = "Lcom/x/models/timelines/TimelineType;"
 
 private object XLiteHomeReselectFingerprint : Fingerprint(
     parameters = listOf("Z", "Z"),
@@ -101,15 +109,65 @@ val disableTimelineRefreshPatch =
                 )
             }
             lifecycleMatches.single().method.apply {
-                val originalFirstInstruction = instructions.first()
-                val readInstructionCount = disableTimelineRefresh.injectBooleanRead(this, 0, 0)
+                val forYouInstruction =
+                    instructions.singleOrNull { instruction ->
+                        instruction.opcode == Opcode.SGET_OBJECT &&
+                            instruction.getReference<FieldReference>()?.let { reference ->
+                                reference.definingClass == TIMELINE_TYPE_DESCRIPTOR &&
+                                    reference.name == "FOR_YOU" &&
+                                    reference.type == TIMELINE_TYPE_DESCRIPTOR
+                            } == true
+                    } ?: throw PatchException("X-Lite auto-refresh FOR_YOU check was not found")
+                val forYouIndex = forYouInstruction.location.index
+                val timelineResultInstruction =
+                    instructions
+                        .take(forYouIndex)
+                        .lastOrNull { instruction ->
+                            if (instruction.opcode != Opcode.MOVE_RESULT_OBJECT) return@lastOrNull false
+                            val resultIndex = instruction.location.index
+                            getInstruction(resultIndex - 1)
+                                .getReference<MethodReference>()
+                                ?.returnType == TIMELINE_TYPE_DESCRIPTOR
+                        } as? OneRegisterInstruction
+                        ?: throw PatchException(
+                            "X-Lite auto-refresh timeline type result was not found",
+                        )
+                val unitLoadInstruction =
+                    instructions.lastOrNull { instruction ->
+                        instruction.opcode == Opcode.SGET_OBJECT &&
+                            instruction.getReference<FieldReference>()?.definingClass == "Lkotlin/Unit;"
+                    } ?: throw PatchException("X-Lite auto-refresh Unit return was not found")
+                val originalComparisonInstruction = instructions[forYouIndex + 1]
+                val timelineRegister = timelineResultInstruction.registerA
+                val forYouRegister =
+                    (forYouInstruction as OneRegisterInstruction).registerA
+                val settingRegister =
+                    findFreeRegister(
+                        forYouIndex + 1,
+                        listOf(timelineRegister, forYouRegister),
+                    )
+                val readInstructionCount =
+                    disableTimelineRefresh.injectBooleanRead(
+                        this,
+                        forYouIndex + 1,
+                        settingRegister,
+                    )
                 addInstructionsWithLabels(
-                    readInstructionCount,
+                    forYouIndex + 1 + readInstructionCount,
                     """
-                        if-eqz v0, :piko_xlite_refresh_lifecycle_continue
-                        return-object p1
+                        if-eqz v$settingRegister, :piko_xlite_refresh_lifecycle_continue
+                        if-eq v$timelineRegister, v$forYouRegister, :piko_xlite_refresh_lifecycle_skip
+                        sget-object v$settingRegister, $TIMELINE_TYPE_DESCRIPTOR->FOLLOWING:$TIMELINE_TYPE_DESCRIPTOR
+                        if-eq v$timelineRegister, v$settingRegister, :piko_xlite_refresh_lifecycle_skip
                     """.trimIndent(),
-                    ExternalLabel("piko_xlite_refresh_lifecycle_continue", originalFirstInstruction),
+                    ExternalLabel(
+                        "piko_xlite_refresh_lifecycle_continue",
+                        originalComparisonInstruction,
+                    ),
+                    ExternalLabel(
+                        "piko_xlite_refresh_lifecycle_skip",
+                        unitLoadInstruction,
+                    ),
                 )
             }
         }
