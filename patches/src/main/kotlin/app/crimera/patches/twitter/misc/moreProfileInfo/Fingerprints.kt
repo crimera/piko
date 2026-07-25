@@ -19,9 +19,9 @@ internal object ProfileStatViewFormerFingerprint : Fingerprint(
 )
 
 internal object ProfileStatViewLoaderFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/app/profiles/header",
     filters =
         listOf(
-            resourceLiteral(ResourceType.ID, "icon"),
             resourceLiteral(ResourceType.PLURALS, "profile_follower_count"),
         ),
 )
