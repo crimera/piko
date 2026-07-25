@@ -57,7 +57,7 @@ public final class SettingsRenderer {
     }
 
     private static PreferenceCategory category(Context context, SettingsNode.Group group) {
-        PreferenceCategory preference = new PreferenceCategory(context);
+        PreferenceCategory preference = new XLitePreferenceStyle.Category(context);
         applyMetadata(preference, group);
         return preference;
     }
@@ -91,7 +91,7 @@ public final class SettingsRenderer {
             Context context,
             SettingsNode.Toggle item
     ) {
-        SwitchPreference preference = new SwitchPreference(context);
+        SwitchPreference preference = new XLitePreferenceStyle.Toggle(context);
         preference.setPersistent(false);
         preference.setChecked(item.setting.get());
         preference.setOnPreferenceChangeListener((ignored, newValue) -> {
@@ -109,7 +109,7 @@ public final class SettingsRenderer {
             Context context,
             SettingsNode.TextInput item
     ) {
-        EditTextPreference preference = new EditTextPreference(context);
+        EditTextPreference preference = new XLitePreferenceStyle.TextInput(context);
         preference.setPersistent(false);
         preference.setText(item.setting.get());
         if (item.inputKind == SettingsNode.InputKind.MULTILINE) {
@@ -134,7 +134,7 @@ public final class SettingsRenderer {
             Context context,
             SettingsNode.MultiChoice item
     ) {
-        MultiSelectListPreference preference = new MultiSelectListPreference(context);
+        MultiSelectListPreference preference = new XLitePreferenceStyle.MultiChoice(context);
         preference.setPersistent(false);
         CharSequence[] entries = new CharSequence[item.options.size()];
         CharSequence[] values = new CharSequence[item.options.size()];
@@ -167,7 +167,7 @@ public final class SettingsRenderer {
             Context context,
             SettingsNode.Action item
     ) {
-        Preference preference = new Preference(context);
+        Preference preference = new XLitePreferenceStyle.Action(context);
         preference.setPersistent(false);
         preference.setOnPreferenceClickListener(ignored -> {
             try {
