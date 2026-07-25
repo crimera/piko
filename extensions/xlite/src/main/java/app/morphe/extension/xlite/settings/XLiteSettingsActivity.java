@@ -2,9 +2,14 @@ package app.morphe.extension.xlite.settings;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.ContextThemeWrapper;
+import android.view.View;
+import android.view.Window;
+
+import androidx.appcompat.widget.Toolbar;
 
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
@@ -15,42 +20,86 @@ import app.morphe.extension.shared.Utils;
 public final class XLiteSettingsActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        applyHostTheme();
+        applySystemTheme();
         super.onCreate(savedInstanceState);
         Utils.setActivity(this);
-        setTitle(StringRef.str("piko_xlite_settings_title"));
+        configureSystemBars();
+        setContentView(ResourceUtils.getIdentifierOrThrow(
+                this,
+                ResourceType.LAYOUT,
+                "preference_fragment_activity"
+        ));
+        configureToolbar();
         if (savedInstanceState != null) return;
+
+        int containerId = ResourceUtils.getIdentifierOrThrow(
+                this,
+                ResourceType.ID,
+                "fragment_container"
+        );
         getFragmentManager()
                 .beginTransaction()
-                .replace(android.R.id.content, new XLiteSettingsFragment())
+                .replace(containerId, new XLiteSettingsFragment())
                 .commit();
     }
 
-    private void applyHostTheme() {
+    private void applySystemTheme() {
         getTheme().applyStyle(style("Twitter"), true);
-        getTheme().applyStyle(style(selectedPalette(this)), true);
+        getTheme().applyStyle(
+                style(isSystemDark(this) ? "Twitter.LightsOut" : "Twitter.Standard"),
+                true
+        );
     }
 
     static Context createPreferenceContext(Context context) {
-        int theme = "Twitter.Standard".equals(selectedPalette(context))
-                ? android.R.style.Theme_Material_Light_NoActionBar
-                : android.R.style.Theme_Material_NoActionBar;
+        int theme = isSystemDark(context)
+                ? android.R.style.Theme_Material_NoActionBar
+                : android.R.style.Theme_Material_Light_NoActionBar;
         return new ContextThemeWrapper(context, theme);
     }
 
-    private static String selectedPalette(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences(
-                context.getPackageName() + "_preferences",
-                Context.MODE_PRIVATE
+    private static boolean isSystemDark(Context context) {
+        int nightMode = context.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK;
+        return nightMode == Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    private void configureToolbar() {
+        Toolbar toolbar = findViewById(ResourceUtils.getIdentifierOrThrow(
+                this,
+                ResourceType.ID,
+                "toolbar"
+        ));
+        toolbar.setNavigationIcon(ResourceUtils.getIdentifierOrThrow(
+                this,
+                ResourceType.DRAWABLE,
+                "ic_vector_arrow_left"
+        ));
+        toolbar.setTitle(StringRef.str("piko_xlite_settings_title"));
+        toolbar.setNavigationOnClickListener(ignored -> onBackPressed());
+    }
+
+    private void configureSystemBars() {
+        Window window = getWindow();
+        View decorView = window.getDecorView();
+        int visibility = decorView.getSystemUiVisibility();
+        int lightBarFlags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        decorView.setSystemUiVisibility(
+                isSystemDark(this) ? visibility & ~lightBarFlags : visibility | lightBarFlags
         );
-        if ("0".equals(preferences.getString("three_state_night_mode", "light"))) {
-            return "Twitter.Standard";
-        }
-        return switch (preferences.getString("dark_mode_appearance", "lights_out")) {
-            case "dim" -> "Twitter.Dim";
-            case "lights_out" -> "Twitter.LightsOut";
-            default -> "Twitter.Standard";
-        };
+        if (Build.VERSION.SDK_INT < 35) return;
+
+        decorView.setOnApplyWindowInsetsListener((view, insets) -> {
+            view.setPadding(
+                    insets.getSystemWindowInsetLeft(),
+                    insets.getSystemWindowInsetTop(),
+                    insets.getSystemWindowInsetRight(),
+                    insets.getSystemWindowInsetBottom()
+            );
+            return insets.consumeSystemWindowInsets();
+        });
+        decorView.requestApplyInsets();
     }
 
     private int style(String resourceName) {
