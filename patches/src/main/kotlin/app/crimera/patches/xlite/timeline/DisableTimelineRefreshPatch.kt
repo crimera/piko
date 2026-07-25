@@ -72,7 +72,7 @@ private val disableTimelineRefreshSettingsPatch =
 @Suppress("unused")
 val disableTimelineRefreshPatch =
     bytecodePatch(
-        name = "Disable automatic X-Lite timeline refresh",
+        name = "X-Lite: Disable automatic timeline refresh",
         description = "Prevents automatic X-Lite timeline refreshes on launch and foregrounding.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)

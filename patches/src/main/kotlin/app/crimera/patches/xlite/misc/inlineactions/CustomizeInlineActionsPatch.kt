@@ -85,7 +85,7 @@ private val hiddenInlineActionsSettingsPatch =
 @Suppress("unused")
 val customizeXLiteInlineActionsPatch =
     bytecodePatch(
-        name = "Customize X-Lite inline actions",
+        name = "X-Lite: Customize inline actions",
         description = "Lets you hide selected actions from X-Lite post action bars.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)

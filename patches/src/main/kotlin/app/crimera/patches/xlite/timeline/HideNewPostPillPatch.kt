@@ -44,7 +44,7 @@ private val hideNewPostPillSettingsPatch =
 @Suppress("unused")
 val hideNewPostPillPatch =
     bytecodePatch(
-        name = "Hide X-Lite new-post pill",
+        name = "X-Lite: Hide new-post pill",
         description = "Hides the new-post notification pill in X-Lite timelines.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
