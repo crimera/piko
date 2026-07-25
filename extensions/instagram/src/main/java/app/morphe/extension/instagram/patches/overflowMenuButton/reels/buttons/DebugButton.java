@@ -13,8 +13,8 @@ import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.instagram.entity.MediaData;
 
 public class DebugButton extends ReelButton {
-    public DebugButton(Context context, Object mediaObject) {
-        super(context, mediaObject);
+    public DebugButton(Context context, Object mediaObject, int currentMediaIndex) {
+        super(context, mediaObject, currentMediaIndex);
     }
 
     @Override
