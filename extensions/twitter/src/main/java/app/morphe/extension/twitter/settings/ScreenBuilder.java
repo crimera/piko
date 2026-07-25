@@ -21,6 +21,8 @@ import app.morphe.extension.twitter.settings.SettingsSearchMatcher.SearchMatch;
 import app.morphe.extension.twitter.settings.SettingsSearchMatcher.SearchResult;
 import app.morphe.extension.twitter.settings.widgets.*;
 import androidx.annotation.Nullable;
+
+import app.morphe.extension.twitter.DynamicColor;
 import app.morphe.extension.twitter.Pref;
 
 
@@ -842,6 +844,21 @@ public class ScreenBuilder {
                     )
             );
         }
+
+        if (SettingsStatus.dynamicColor) {
+            Preference dynamicColorPreference = helper.switchPreference(
+                    str("piko_pref_dynamic_color"),
+                    "",
+                    Settings.DYNAMIC_COLOR
+            );
+            dynamicColorPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+                helper.setValue(preference, newValue);
+                DynamicColor.updateLauncherIcon((Boolean) newValue);
+                return true;
+            });
+            addPreference(category, dynamicColorPreference);
+        }
+
         if (SettingsStatus.moreInfoOnProfile) {
             addPreference(category,
                     helper.switchPreference(

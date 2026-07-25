@@ -9,14 +9,13 @@ package app.morphe.extension.twitter.settings;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.text.BidiFormatter;
 import android.text.Editable;
@@ -135,7 +134,7 @@ public final class SettingsSearchUIController {
 
         LinearLayout wrapper = new LinearLayout(act);
         wrapper.setOrientation(LinearLayout.VERTICAL);
-        wrapper.setBackgroundColor(SettingsSearchColors.current().settingsBackgroundColor);
+        wrapper.setBackgroundColor(SettingsSearchColors.current(act).settingsBackgroundColor);
 
         settingsSearchEntryBar = createSettingsSearchEntryBar(act);
         wrapper.addView(settingsSearchEntryBar, new LinearLayout.LayoutParams(
@@ -144,7 +143,7 @@ public final class SettingsSearchUIController {
         ));
 
         FrameLayout contentFrame = new FrameLayout(act);
-        contentFrame.setBackgroundColor(SettingsSearchColors.current().settingsBackgroundColor);
+        contentFrame.setBackgroundColor(SettingsSearchColors.current(act).settingsBackgroundColor);
         settingsSearchContentView = fragmentContainer;
         contentFrame.addView(fragmentContainer, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -233,7 +232,7 @@ public final class SettingsSearchUIController {
         parentGroup.removeView(toolbar);
 
         FrameLayout toolbarFrame = new FrameLayout(activity);
-        toolbarFrame.setBackgroundColor(SettingsSearchColors.current().settingsBackgroundColor);
+        toolbarFrame.setBackgroundColor(SettingsSearchColors.current(activity).settingsBackgroundColor);
         toolbarFrame.addView(toolbar, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT
@@ -261,7 +260,7 @@ public final class SettingsSearchUIController {
         LinearLayout outer = new LinearLayout(context);
         outer.setOrientation(LinearLayout.VERTICAL);
         outer.setPadding(dp(context, 16), dp(context, 8), dp(context, 16), dp(context, 8));
-        outer.setBackgroundColor(SettingsSearchColors.current().settingsBackgroundColor);
+        outer.setBackgroundColor(SettingsSearchColors.current(context).settingsBackgroundColor);
 
         LinearLayout searchField = new LinearLayout(context);
         searchField.setOrientation(LinearLayout.HORIZONTAL);
@@ -270,7 +269,7 @@ public final class SettingsSearchUIController {
 
         searchField.setBackground(createSearchFieldBackground(context));
 
-        int iconColor = SettingsSearchColors.current().searchHintColor;
+        int iconColor = SettingsSearchColors.current(context).searchHintColor;
         SearchIconView searchIcon = new SearchIconView(context, iconColor);
         LinearLayout.LayoutParams searchIconParams = new LinearLayout.LayoutParams(dp(context, 26), dp(context, 26));
         searchIconParams.setMarginEnd(dp(context, 8));
@@ -279,7 +278,7 @@ public final class SettingsSearchUIController {
         TextView label = new TextView(context);
         label.setSingleLine(true);
         label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-        label.setTextColor(SettingsSearchColors.current().searchHintColor);
+        label.setTextColor(SettingsSearchColors.current(context).searchHintColor);
         label.setText(str("piko_settings_search_hint"));
         label.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
@@ -300,12 +299,12 @@ public final class SettingsSearchUIController {
     private static LinearLayout createSettingsSearchEmptyState(Context context) {
         LinearLayout empty = new LinearLayout(context);
         empty.setOrientation(LinearLayout.VERTICAL);
-        empty.setBackgroundColor(SettingsSearchColors.current().settingsBackgroundColor);
+        empty.setBackgroundColor(SettingsSearchColors.current(context).settingsBackgroundColor);
         empty.setGravity(Gravity.START);
         empty.setPadding(dp(context, 24), dp(context, 32), dp(context, 24), 0);
 
         settingsSearchEmptyTitle = new TextView(context);
-        settingsSearchEmptyTitle.setTextColor(SettingsSearchColors.current().searchTextColor);
+        settingsSearchEmptyTitle.setTextColor(SettingsSearchColors.current(context).searchTextColor);
         settingsSearchEmptyTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26);
         settingsSearchEmptyTitle.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         settingsSearchEmptyTitle.setLineSpacing(0, 1.04f);
@@ -502,8 +501,8 @@ public final class SettingsSearchUIController {
         toolbarSearchInput = new EditText(activity);
         toolbarSearchInput.setSingleLine(true);
         toolbarSearchInput.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-        toolbarSearchInput.setTextColor(SettingsSearchColors.current().searchTextColor);
-        toolbarSearchInput.setHintTextColor(SettingsSearchColors.current().searchHintColor);
+        toolbarSearchInput.setTextColor(SettingsSearchColors.current(activity).searchTextColor);
+        toolbarSearchInput.setHintTextColor(SettingsSearchColors.current(activity).searchHintColor);
         toolbarSearchInput.setHint(str("piko_settings_search_hint"));
         toolbarSearchInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         toolbarSearchInput.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
@@ -568,22 +567,35 @@ public final class SettingsSearchUIController {
     }
 
     private static Drawable createSearchFieldBackground(Context context) {
-        SettingsSearchColors palette = SettingsSearchColors.current();
-        GradientDrawable content = createRoundedSearchFieldDrawable(
-                context,
-                palette.searchFieldBackgroundColor
+        SettingsSearchColors palette = SettingsSearchColors.current(context);
+        StateListDrawable background = new StateListDrawable();
+        background.addState(
+                new int[]{android.R.attr.state_pressed},
+                createRoundedSearchFieldDrawable(
+                        context,
+                        palette.searchFieldPressedColor,
+                        palette.searchFieldBorderColor
+                )
         );
-        GradientDrawable mask = createRoundedSearchFieldDrawable(context, palette.searchTextColor);
-        return new RippleDrawable(
-                ColorStateList.valueOf(palette.searchFieldTapHighlightColor),
-                content,
-                mask
+        background.addState(
+                new int[]{},
+                createRoundedSearchFieldDrawable(
+                        context,
+                        palette.searchFieldBackgroundColor,
+                        palette.searchFieldBorderColor
+                )
         );
+        return background;
     }
 
-    private static GradientDrawable createRoundedSearchFieldDrawable(Context context, int color) {
+    private static GradientDrawable createRoundedSearchFieldDrawable(
+            Context context,
+            int color,
+            int borderColor
+    ) {
         GradientDrawable drawable = new GradientDrawable();
         drawable.setColor(color);
+        drawable.setStroke(dp(context, 1), borderColor);
         drawable.setCornerRadius(dp(context, 20));
         return drawable;
     }

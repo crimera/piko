@@ -12,15 +12,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import app.morphe.extension.twitter.settings.Settings;
+import android.os.Build;
+
 import java.util.List;
+
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.twitter.settings.Settings;
 
 public class AppIconManager {
 
     private static final String PREF_NAME = Settings.SHARED_PREF_NAME;
     private static final String KEY_SELECTED_ICON = "selected_app_icon";
     private static final String defComponentName = "com.twitter.android.StartActivity";
+    private static final String DYNAMIC_COLOR_COMPONENT_NAME =
+            "app.morphe.extension.twitter.dynamiccoloricon";
 
     private final Context context;
     private final PackageManager pm;
@@ -69,19 +74,7 @@ public class AppIconManager {
         }
     }
 
-    // ---------------------------------------------------------------------------------------------
-    // Enable ONE icon, disable all others
-    // ---------------------------------------------------------------------------------------------
-    public void applyIcon(String componentName) {
-        String prevComponentName = getSavedIcon();
-        saveSelectedIcon(componentName);
-        // If the icon is "default" remove all icons. This is a measure taken in case multiple icons are created.
-        if (componentName.equals(defComponentName)) {
-            disableAllIcons();
-        }
-        else{
-            disableIcon(prevComponentName);
-        }
+    private void enableIcon(String componentName) {
         pm.setComponentEnabledSetting(
                 new ComponentName(context, componentName),
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
@@ -89,6 +82,58 @@ public class AppIconManager {
         );
         logger("Set: "+componentName);
     }
+
+    private String getSavedIconOrDefault() {
+        String componentName = getSavedIcon();
+        return componentName.isEmpty() ? defComponentName : componentName;
+    }
+
+    private boolean switchLauncherIcon(String componentName, String previousComponentName) {
+        try {
+            enableIcon(componentName);
+            if (!componentName.equals(previousComponentName)) {
+                disableIcon(previousComponentName);
+            }
+            return true;
+        } catch (RuntimeException exception) {
+            logger(exception.toString());
+            return false;
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+    // Enable ONE icon, disable all others
+    // ---------------------------------------------------------------------------------------------
+    public void applyIcon(String componentName) {
+        String prevComponentName = getSavedIcon();
+        saveSelectedIcon(componentName);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                && app.morphe.extension.twitter.Utils.getBooleanPref(Settings.DYNAMIC_COLOR)
+                && applyDynamicColorIcon(true)) {
+            return;
+        }
+
+        // If the icon is "default" remove all icons. This is a measure taken in case multiple icons are created.
+        if (componentName.equals(defComponentName)) {
+            disableAllIcons();
+        }
+        else{
+            disableIcon(prevComponentName);
+        }
+        enableIcon(componentName);
+    }
+
+    public boolean applyDynamicColorIcon(boolean enabled) {
+        String componentName = enabled
+                ? DYNAMIC_COLOR_COMPONENT_NAME
+                : getSavedIconOrDefault();
+        String previousComponentName = enabled
+                ? getSavedIconOrDefault()
+                : DYNAMIC_COLOR_COMPONENT_NAME;
+        return switchLauncherIcon(componentName, previousComponentName);
+    }
+
     private void logger(String msg){
         app.morphe.extension.crimera.PikoUtils.logger(msg);
     }
