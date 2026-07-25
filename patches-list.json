@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.9.0-dev.2",
+"version": "3.9.0-dev.2",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -89,6 +89,34 @@
               "version": "439.0.0.37.89",
               "versionCodes": {
                 "ARM64_V8A": 384510827
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Amoled theme",
+      "description": "Replaces Instagram's dark-mode background greys with pure black for AMOLED displays.",
+      "default": true,
+      "dependencies": [],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "435.0.0.37.76",
+              "versionCodes": {
+                "ARM64_V8A": 384109456
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3113,6 +3141,14 @@
       "options": []
     },
     {
+      "name": "Remove X-Lite Ads",
+      "description": "Hooks UrtTimelineState$Success to filter promoted posts and modules from X-Lite timeline.",
+      "default": true,
+      "dependencies": [],
+      "compatiblePackages": null,
+      "options": []
+    },
+    {
       "name": "Remove build expired popup",
       "description": "Removes the popup that appears after a while, when the app version ages.",
       "default": true,
@@ -3587,7 +3623,7 @@
       "options": []
     },
     {
-      "name": "Theme",
+"name": "Theme",
       "description": "Applies either amoled or material you theme for Instagram at patch time. [default = material you]",
       "default": false,
       "dependencies": [],

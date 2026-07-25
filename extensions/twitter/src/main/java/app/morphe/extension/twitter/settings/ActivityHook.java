@@ -34,8 +34,7 @@ import app.morphe.extension.twitter.patches.nativeFeatures.readerMode.ReaderMode
 public class ActivityHook {
     @SuppressLint("StaticFieldLeak")
     public static Toolbar toolbar;
-    private static final String PIKO_SETTINGS_ACTIVITY_CLASS =
-            "app.morphe.extension.twitter.settings.PikoSettingsActivity";
+    private static final String AUTHORIZE_ACTIVITY_CLASS = "com.twitter.android.AuthorizeAppActivity";
     private static final String EXTRA_PIKO = "piko";
     private static final String EXTRA_PIKO_SETTINGS = EXTRA_PIKO + "_settings";
     public static final String EXTRA_SETTINGS_SEARCH_TARGET_KEY = EXTRA_PIKO + "_settings_search_target_key";
@@ -147,7 +146,7 @@ public class ActivityHook {
         bundle.putString(Settings.ACT_NAME, activity_name);
         bundle.putBoolean(EXTRA_PIKO, true);
         Intent intent = new Intent();
-        intent.setClassName(packageName, PIKO_SETTINGS_ACTIVITY_CLASS);
+        intent.setClassName(packageName, AUTHORIZE_ACTIVITY_CLASS);
         intent.setPackage(packageName);
         intent.putExtras(bundle);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

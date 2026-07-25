@@ -172,8 +172,11 @@ public class Customise {
 
             while (itr.hasNext()) {
                 Object obj = itr.next();
-                if (obj != null && shouldHideInlineBarItem(choices, obj)) {
-                    list2.remove(obj);
+                if (obj != null) {
+                    String itemStr = obj.toString();
+                    if(choices.contains(itemStr)){
+                        list2.remove(obj);
+                    }
                 }
             }
             return list2;
@@ -181,28 +184,6 @@ public class Customise {
             logger(e);
         }
         return inp;
-    }
-
-    private static boolean shouldHideInlineBarItem(ArrayList choices, Object item) {
-        if (choices.contains(item.toString())) return true;
-        if (!"com.x.models.InlineActionEntry".equals(item.getClass().getName())) return false;
-
-        try {
-            Object actionType = item.getClass().getMethod("getActionType").invoke(item);
-            if (actionType == null) return false;
-
-            String actionName = actionType.toString();
-            if (choices.contains(actionName)) return true;
-            if ("Unfavorite".equals(actionName)) return choices.contains("Favorite");
-            if ("UndoRetweet".equals(actionName)) return choices.contains("Retweet");
-            if ("Share".equals(actionName)) return choices.contains("TwitterShare");
-            if ("AddToBookmarks".equals(actionName) || "RemoveFromBookmarks".equals(actionName)) {
-                return choices.contains("AddRemoveBookmarks");
-            }
-        } catch (Exception e) {
-            logger(e);
-        }
-        return false;
     }
 
     public static List sideBar(List inp){

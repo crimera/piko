@@ -1,0 +1,219 @@
+package app.morphe.extension.xlite.settings;
+
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Context;
+import android.preference.EditTextPreference;
+import android.preference.MultiSelectListPreference;
+import android.preference.Preference;
+import android.preference.PreferenceCategory;
+import android.preference.PreferenceGroup;
+import android.preference.PreferenceScreen;
+import android.preference.SwitchPreference;
+import android.text.InputType;
+
+import java.lang.reflect.Constructor;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.StringRef;
+import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.settings.Setting;
+import app.morphe.extension.shared.ui.CustomDialog;
+
+@SuppressWarnings("deprecation")
+public final class SettingsRenderer {
+    private SettingsRenderer() {
+    }
+
+    public static void render(Activity activity, PreferenceScreen screen) {
+        Context preferenceContext = screen.getContext();
+        List<SettingsNode.Category> categories = SettingsRegistry.catalog();
+        for (SettingsNode.Category category : categories) {
+            PreferenceCategory heading = category(preferenceContext, category);
+            screen.addPreference(heading);
+            renderChildren(activity, preferenceContext, heading, category.children);
+        }
+        Utils.setPreferenceTitlesToMultiLineIfNeeded(screen);
+    }
+
+    private static void renderChildren(
+            Activity activity,
+            Context preferenceContext,
+            PreferenceGroup parent,
+            List<SettingsNode> children
+    ) {
+        for (SettingsNode child : children) {
+            if (child instanceof SettingsNode.Group group) {
+                PreferenceCategory heading = category(preferenceContext, group);
+                parent.addPreference(heading);
+                renderChildren(activity, preferenceContext, heading, group.children);
+                continue;
+            }
+            parent.addPreference(item(activity, preferenceContext, (SettingsNode.Item) child));
+        }
+    }
+
+    private static PreferenceCategory category(Context context, SettingsNode.Group group) {
+        PreferenceCategory preference = new PreferenceCategory(context);
+        applyMetadata(preference, group);
+        return preference;
+    }
+
+    private static Preference item(
+            Activity activity,
+            Context preferenceContext,
+            SettingsNode.Item item
+    ) {
+        Preference preference;
+        if (item instanceof SettingsNode.Toggle toggle) {
+            preference = toggle(activity, preferenceContext, toggle);
+        } else if (item instanceof SettingsNode.TextInput textInput) {
+            preference = textInput(activity, preferenceContext, textInput);
+        } else if (item instanceof SettingsNode.MultiChoice multiChoice) {
+            preference = multiChoice(activity, preferenceContext, multiChoice);
+        } else if (item instanceof SettingsNode.Action action) {
+            preference = action(activity, preferenceContext, action);
+        } else {
+            throw new IllegalStateException("Unknown X-Lite settings node: " + item.getClass());
+        }
+        applyMetadata(preference, item);
+        if (item instanceof SettingsNode.ValueItem<?> valueItem) {
+            preference.setEnabled(valueItem.setting.isAvailable());
+        }
+        return preference;
+    }
+
+    private static SwitchPreference toggle(
+            Activity activity,
+            Context context,
+            SettingsNode.Toggle item
+    ) {
+        SwitchPreference preference = new SwitchPreference(context);
+        preference.setPersistent(false);
+        preference.setChecked(item.setting.get());
+        preference.setOnPreferenceChangeListener((ignored, newValue) -> {
+            boolean value = (Boolean) newValue;
+            if (item.setting.get() == value) return true;
+            item.setting.save(value);
+            promptForRestart(activity, item.setting);
+            return true;
+        });
+        return preference;
+    }
+
+    private static EditTextPreference textInput(
+            Activity activity,
+            Context context,
+            SettingsNode.TextInput item
+    ) {
+        EditTextPreference preference = new EditTextPreference(context);
+        preference.setPersistent(false);
+        preference.setText(item.setting.get());
+        if (item.inputKind == SettingsNode.InputKind.MULTILINE) {
+            preference.getEditText().setInputType(
+                    InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            );
+        } else {
+            preference.getEditText().setInputType(InputType.TYPE_CLASS_TEXT);
+        }
+        preference.setOnPreferenceChangeListener((ignored, newValue) -> {
+            String value = String.valueOf(newValue);
+            if (item.setting.get().equals(value)) return true;
+            item.setting.save(value);
+            promptForRestart(activity, item.setting);
+            return true;
+        });
+        return preference;
+    }
+
+    private static MultiSelectListPreference multiChoice(
+            Activity activity,
+            Context context,
+            SettingsNode.MultiChoice item
+    ) {
+        MultiSelectListPreference preference = new MultiSelectListPreference(context);
+        preference.setPersistent(false);
+        CharSequence[] entries = new CharSequence[item.options.size()];
+        CharSequence[] values = new CharSequence[item.options.size()];
+        for (int index = 0; index < item.options.size(); index++) {
+            SettingsNode.ChoiceOption option = item.options.get(index);
+            entries[index] = option.title.toString();
+            values[index] = option.id;
+        }
+        preference.setEntries(entries);
+        preference.setEntryValues(values);
+        preference.setValues(new LinkedHashSet<>(item.setting.get()));
+        preference.setOnPreferenceChangeListener((ignored, newValue) -> {
+            if (!(newValue instanceof Set<?> rawValues)) return false;
+            Set<String> valuesToSave = new LinkedHashSet<>();
+            for (Object rawValue : rawValues) {
+                if (!(rawValue instanceof String value)) return false;
+                valuesToSave.add(value);
+            }
+            Set<String> immutableValues = StringSetSetting.immutableCopy(valuesToSave);
+            if (item.setting.get().equals(immutableValues)) return true;
+            item.setting.save(immutableValues);
+            promptForRestart(activity, item.setting);
+            return true;
+        });
+        return preference;
+    }
+
+    private static Preference action(
+            Activity activity,
+            Context context,
+            SettingsNode.Action item
+    ) {
+        Preference preference = new Preference(context);
+        preference.setPersistent(false);
+        preference.setOnPreferenceClickListener(ignored -> {
+            try {
+                instantiateAction(activity, item.handlerClassDescriptor).run(activity);
+            } catch (Exception exception) {
+                Logger.printException(() -> "X-Lite settings action failed: " + item.id, exception);
+                Utils.showToastShort(StringRef.str("piko_xlite_action_failed"));
+            }
+            return true;
+        });
+        return preference;
+    }
+
+    private static SettingsActionHandler instantiateAction(Activity activity, String descriptor)
+            throws ReflectiveOperationException {
+        String className = descriptor.substring(1, descriptor.length() - 1).replace('/', '.');
+        Class<?> handlerClass = Class.forName(className, true, activity.getClassLoader());
+        if (!SettingsActionHandler.class.isAssignableFrom(handlerClass)) {
+            throw new IllegalArgumentException("Not an X-Lite settings action: " + className);
+        }
+        Constructor<?> constructor = handlerClass.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        return (SettingsActionHandler) constructor.newInstance();
+    }
+
+    private static void promptForRestart(Activity activity, Setting<?> setting) {
+        if (!setting.rebootApp) return;
+        Dialog dialog = CustomDialog.create(
+                activity,
+                StringRef.str("piko_xlite_restart_title"),
+                StringRef.str("piko_xlite_restart_summary"),
+                null,
+                StringRef.str("piko_xlite_restart_now"),
+                () -> Utils.restartApp(activity),
+                () -> { },
+                null,
+                null,
+                true
+        ).first;
+        dialog.show();
+    }
+
+    private static void applyMetadata(Preference preference, SettingsNode node) {
+        preference.setKey(node.id);
+        preference.setOrder(node.order);
+        preference.setTitle(node.title.toString());
+        if (node.summary != null) preference.setSummary(node.summary.toString());
+    }
+}
