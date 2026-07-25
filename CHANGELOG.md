@@ -1,3 +1,9 @@
+## [3.8.1](https://github.com/Flaxmbot/piko/compare/v3.8.0...v3.8.1) (2026-07-25)
+
+### 🐛 Bug Fixes
+
+* **instagram:** pass current carousel index to reel overflow buttons ([f6d876f](https://github.com/Flaxmbot/piko/commit/f6d876f74cfbd35a1baa76d6a98f3015b74ba389))
+
 ## 1.0.0 (2026-07-25)
 
 ### ⚠ BREAKING CHANGES
