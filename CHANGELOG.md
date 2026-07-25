@@ -1,3 +1,9 @@
+## [3.8.2-dev.1](https://github.com/Flaxmbot/piko/compare/v3.8.1...v3.8.2-dev.1) (2026-07-25)
+
+### 🐛 Bug Fixes
+
+* **instagram:** block consent re-check endpoints when analytics is disabled ([d7832e4](https://github.com/Flaxmbot/piko/commit/d7832e477c965b4bb9b37f6603fba8c2b91ea7e1))
+
 ## [3.8.1](https://github.com/Flaxmbot/piko/compare/v3.8.0...v3.8.1) (2026-07-25)
 
 ### 🐛 Bug Fixes

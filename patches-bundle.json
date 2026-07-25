@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-07-25T13:21:28",
-  "description": "## [3.8.1](https://github.com/Flaxmbot/piko/compare/v3.8.0...v3.8.1) (2026-07-25)\n\n### 🐛 Bug Fixes\n\n* **instagram:** pass current carousel index to reel overflow buttons ([f6d876f](https://github.com/Flaxmbot/piko/commit/f6d876f74cfbd35a1baa76d6a98f3015b74ba389))",
-  "download_url": "https://github.com/Flaxmbot/piko/releases/download/v3.8.1/patches-3.8.1.mpp",
-  "signature_download_url": "https://github.com/Flaxmbot/piko/releases/download/v3.8.1/patches-3.8.1.mpp.asc",
-  "version": "3.8.1"
+  "created_at": "2026-07-25T13:52:30",
+  "description": "## [3.8.2-dev.1](https://github.com/Flaxmbot/piko/compare/v3.8.1...v3.8.2-dev.1) (2026-07-25)\n\n### 🐛 Bug Fixes\n\n* **instagram:** block consent re-check endpoints when analytics is disabled ([d7832e4](https://github.com/Flaxmbot/piko/commit/d7832e477c965b4bb9b37f6603fba8c2b91ea7e1))",
+  "download_url": "https://github.com/Flaxmbot/piko/releases/download/v3.8.2-dev.1/patches-3.8.2-dev.1.mpp",
+  "signature_download_url": "https://github.com/Flaxmbot/piko/releases/download/v3.8.2-dev.1/patches-3.8.2-dev.1.mpp.asc",
+  "version": "3.8.2-dev.1"
 }
