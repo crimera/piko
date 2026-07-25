@@ -12,12 +12,16 @@ import android.content.Context;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 
 public class DownloadButton extends ReelButton {
+    public DownloadButton(Context context, Object mediaObject, int currentMediaIndex) {
+        super(context, mediaObject, currentMediaIndex);
+    }
+
     public DownloadButton(Context context, Object mediaObject) {
-        super(context, mediaObject);
+        super(context, mediaObject, 0);
     }
 
     @Override
     public void onClick(View view) {
-        DownloadUtils.downloadPost(this.context, null, this.mediaObject, 0);
+        DownloadUtils.downloadPost(this.context, null, this.mediaObject, this.currentMediaIndex);
     }
 }

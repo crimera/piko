@@ -13,10 +13,16 @@ import android.content.Context;
 public abstract class ReelButton implements View.OnClickListener {
     public final Context context;
     public final Object mediaObject;
+    public final int currentMediaIndex;
 
-    public ReelButton(Context context, Object mediaObject) {
+    public ReelButton(Context context, Object mediaObject, int currentMediaIndex) {
         this.context = context;
         this.mediaObject = mediaObject;
+        this.currentMediaIndex = currentMediaIndex;
+    }
+
+    public ReelButton(Context context, Object mediaObject) {
+        this(context, mediaObject, 0);
     }
 
     // Every subclass will be forced to implement its own specific click logic
