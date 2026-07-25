@@ -10,6 +10,7 @@ import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
+import app.crimera.patches.twitter.utils.flagSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -28,21 +29,20 @@ private object RemovePremiumUpsellPatchFingerprint : Fingerprint(
 val disablePremiumUpsellPatch =
     bytecodePatch(
         name = "Remove premium upsell",
-        description = "Removes premium upsell in home timeline",
+        description = "Removes premium upsells",
     ) {
         compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
 
         execute {
-            val PREF = "invoke-static {}, $PREF_DESCRIPTOR;->removePremiumUpsell()Z"
 
-            val methods = RemovePremiumUpsellPatchFingerprint.method
-            val instructions = methods.instructions
+            RemovePremiumUpsellPatchFingerprint.method.apply {
+                val cond_loc = instructions.first { it.opcode == Opcode.INVOKE_VIRTUAL }.location.index
 
-            val cond_loc = instructions.first { it.opcode == Opcode.INVOKE_VIRTUAL }.location.index
+                addInstruction(cond_loc + 1, "invoke-static {}, $PREF_DESCRIPTOR;->removePremiumUpsell()Z")
 
-            methods.addInstruction(cond_loc + 1, PREF)
-
-            enableSettings("removePremiumUpsell")
+                enableSettings("removePremiumUpsell")
+                flagSettings("removePremiumUpsell")
+            }
         }
     }

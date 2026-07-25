@@ -66,6 +66,33 @@ public class FeatureSwitchPatch {
         Utils.setStringPref(Settings.MISC_FEATURE_FLAGS_SEARCH.key, FLAGS_SEARCH);
     }
 
+    private static void removePremiumUpsell() {
+        boolean flag = !Pref.removePremiumUpsell();
+        addFlag("subscriptions_enabled", flag);
+        addFlag("subscriptions_upsells_get_verified_profile", flag);
+        addFlag("subscriptions_upsells_get_verified_drawer_discount_enabled", flag);
+        addFlag("subscriptions_upsells_get_verified_profile_fatigue_enabled", flag);
+        addFlag("subscriptions_upsells_api_enabled", flag);
+        addFlag("subscriptions_upsells_user_profile_name_migration_enabled", flag);
+        addFlag("subscriptions_upsells_profile_card_enable", flag);
+        addFlag("subscriptions_upsells_get_verified_drawer_card_enabled", flag);
+        addFlag("subscriptions_upsells_get_verified_profile_discount_visitor_enabled", flag);
+        addFlag("subscriptions_upsells_analytics_profile_enabled", flag);
+        addFlag("subscriptions_upsells_articles_post_composer_promo_variant_enabled", flag);
+        addFlag("subscriptions_upsells_bookmark_folders_enabled", flag);
+        addFlag("subscriptions_upsells_verified_profile_visitor_upsell_enabled", flag);
+        addFlag("subscriptions_upsells_verified_profile_visitor_upsell_redesign_enabled", flag);
+        addFlag("subscriptions_upsells_get_verified_profile_card", flag);
+        addFlag("subscriptions_upsells_get_verified_profile_discount_own_enabled", flag);
+        addFlag("subscriptions_upsells_get_verified_profile_rotation_enabled", flag);
+        addFlag("subscriptions_upsells_home_nav_migration_enabled", flag);
+        addFlag("subscriptions_upsells_profile_card_enabled", flag);
+        addFlag("subscriptions_upsells_quick_display_settings", flag);
+        addFlag("subscriptions_upsells_track_interactions_enabled", flag);
+        addFlag("subscriptions_upsells_user_profile_header_migration_enabled", flag);
+
+    }
+
     public static Object flagInfo(String flag, Object def) {
         try {
             if (def instanceof Boolean) {
