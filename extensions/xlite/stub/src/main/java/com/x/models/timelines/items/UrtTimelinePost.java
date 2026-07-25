@@ -7,9 +7,10 @@
 package com.x.models.timelines.items;
 
 import com.x.models.ClientEventInfo;
+import com.x.models.PostIdentifier;
 import com.x.models.TimelinePromotedMetadata;
 
-public class UrtTimelinePost implements UrtTimelineItem {
+public abstract class UrtTimelinePost implements UrtTimelineItem {
 
     @Override
     public String getEntryId() {
@@ -21,7 +22,7 @@ public class UrtTimelinePost implements UrtTimelineItem {
         return null;
     }
 
-    public TimelinePromotedMetadata getPromotedMetadata() {
-        return null;
-    }
+    public abstract TimelinePromotedMetadata getPromotedMetadata();
+
+    public abstract PostIdentifier getId();
 }
