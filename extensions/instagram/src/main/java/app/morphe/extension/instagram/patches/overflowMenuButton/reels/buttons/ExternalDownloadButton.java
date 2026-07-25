@@ -16,6 +16,10 @@ public class ExternalDownloadButton extends ReelButton {
         super(context, mediaObject, currentMediaIndex);
     }
 
+    public ExternalDownloadButton(Context context, Object mediaObject) {
+        super(context, mediaObject, 0);
+    }
+
     @Override
     public void onClick(View view) {
         DownloadUtils.externalDownloader(this.mediaObject, this.currentMediaIndex);

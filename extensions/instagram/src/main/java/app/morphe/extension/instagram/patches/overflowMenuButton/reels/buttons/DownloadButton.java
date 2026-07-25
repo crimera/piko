@@ -16,6 +16,10 @@ public class DownloadButton extends ReelButton {
         super(context, mediaObject, currentMediaIndex);
     }
 
+    public DownloadButton(Context context, Object mediaObject) {
+        super(context, mediaObject, 0);
+    }
+
     @Override
     public void onClick(View view) {
         DownloadUtils.downloadPost(this.context, null, this.mediaObject, this.currentMediaIndex);

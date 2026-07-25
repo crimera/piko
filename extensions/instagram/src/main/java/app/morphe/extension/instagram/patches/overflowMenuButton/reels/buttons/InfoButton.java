@@ -16,6 +16,10 @@ public class InfoButton extends ReelButton {
         super(context, mediaObject, currentMediaIndex);
     }
 
+    public InfoButton(Context context, Object mediaObject) {
+        super(context, mediaObject, 0);
+    }
+
     @Override
     public void onClick(View view) {
         MoreOptionsOnPostPatch.postMoreOptions(this.context, null, this.mediaObject, this.currentMediaIndex);

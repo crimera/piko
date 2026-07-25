@@ -21,6 +21,10 @@ public abstract class ReelButton implements View.OnClickListener {
         this.currentMediaIndex = currentMediaIndex;
     }
 
+    public ReelButton(Context context, Object mediaObject) {
+        this(context, mediaObject, 0);
+    }
+
     // Every subclass will be forced to implement its own specific click logic
     @Override
     public abstract void onClick(View view);

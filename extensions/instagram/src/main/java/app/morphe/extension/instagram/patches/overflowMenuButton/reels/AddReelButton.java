@@ -84,7 +84,6 @@ public class AddReelButton {
         ReelOverflowButton reelOverflowButton = new ReelOverflowButton(icon, reelButton, buttonText);
 
         AddReelButton.addReelButton(context, reelOverflowButton, helperObject);
-
     }
 
     private static void addExternalDownloadButton(Context context, Object helperObject, Object mediaObject, int currentMediaIndex){
@@ -97,6 +96,8 @@ public class AddReelButton {
         AddReelButton.addReelButton(context,reelOverflowButton,helperObject);
     }
 
+    // Called from hook when MEDIA_ADD_INFO_CLASS_NAME field is found on the reel controller —
+    // passes the real current carousel index.
     public static void includeCustomReelOverflowButtons(Context context, Object helperObject, Object mediaObject, int currentMediaIndex){
         if(Pref.pikoDebug()){
             AddReelButton.addDebugButton(context, helperObject, mediaObject, currentMediaIndex);
@@ -110,6 +111,11 @@ public class AddReelButton {
         if(Pref.moreOptionsOnPost()){
             AddReelButton.addInfoButton(context, helperObject, mediaObject, currentMediaIndex);
         }
+    }
+
+    // Fallback: called when MEDIA_ADD_INFO_CLASS_NAME field is not found — index defaults to 0.
+    public static void includeCustomReelOverflowButtons(Context context, Object helperObject, Object mediaObject){
+        includeCustomReelOverflowButtons(context, helperObject, mediaObject, 0);
     }
 
 

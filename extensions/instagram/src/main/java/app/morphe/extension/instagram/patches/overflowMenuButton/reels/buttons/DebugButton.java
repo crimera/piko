@@ -17,6 +17,10 @@ public class DebugButton extends ReelButton {
         super(context, mediaObject, currentMediaIndex);
     }
 
+    public DebugButton(Context context, Object mediaObject) {
+        super(context, mediaObject, 0);
+    }
+
     @Override
     public void onClick(View view) {
         ObjectBrowser.browseObject(this.context, new MediaData(this.mediaObject));
