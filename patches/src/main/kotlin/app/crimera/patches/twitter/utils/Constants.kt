@@ -18,14 +18,6 @@ object Constants {
                     ),
                 ),
         )
-    val COMPATIBILITY_X_11_69 =
-        COMPATIBILITY_X
-            .including(
-                AppTarget(
-                    version = "11.69.0-release.0",
-                    description = "Last stable version which had old share sheet and DMs (Disunify XChat Subsystem patch)",
-                ),
-            ).excluding(null)
 
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/twitter"
     const val STRING_REF_DESCRIPTOR = "Lapp/morphe/extension/shared/StringRef"

@@ -447,10 +447,6 @@ public class Pref {
         return Utils.getBooleanPref(Settings.TIMELINE_HIDE_POST_DETAILED_METRICS);
     }
 
-    public static boolean disUnifyXChatSystem(){
-        return !Utils.getBooleanPref(Settings.MISC_DISUNIFY_XCHAT_SYSTEM);
-    }
-
     public static boolean enableNativeShareMenu(){
         return Utils.getBooleanPref(Settings.NATIVE_SHARE_MENU) && SettingsStatus.enableNativeShareMenu;
     }
