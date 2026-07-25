@@ -12,11 +12,9 @@ import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
 
 private object HideBannerFingerprint : Fingerprint(
@@ -28,24 +26,11 @@ private object HideBannerFingerprint : Fingerprint(
         ),
 )
 
-private object XLiteNewPostsPillFingerprint : Fingerprint(
-    parameters =
-        listOf(
-            "Lcom/x/models/timelines/URTTimelineInstruction\$ShowInstructions\$TimelineShowAlert;",
-            "L",
-            "Landroidx/compose/ui/Modifier;",
-            "Lkotlin/jvm/functions/Function0;",
-            "Landroidx/compose/runtime/Composer;",
-            "I",
-        ),
-    returnType = "V",
-)
-
 @Suppress("unused")
 val hideBannerPatch =
     bytecodePatch(
         name = "Hide Banner",
-        description = "Hide new post banner and X-Lite new posts pill",
+        description = "Hide new post banner",
     ) {
         compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch)
@@ -66,20 +51,6 @@ val hideBannerPatch =
                 move-result v0
                 """.trimIndent(),
             )
-
-            XLiteNewPostsPillFingerprint.matchOrNull()?.let { match ->
-                val firstInstruction = match.method.instructions.first()
-                match.method.addInstructionsWithLabels(
-                    0,
-                    """
-                    invoke-static {}, $PREF_DESCRIPTOR;->hideBanner()Z
-                    move-result v0
-                    if-nez v0, :piko_hide_banner_continue
-                    return-void
-                    """.trimIndent(),
-                    ExternalLabel("piko_hide_banner_continue", firstInstruction),
-                )
-            }
 
             enableSettings("hideBanner")
         }

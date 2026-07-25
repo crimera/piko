@@ -6,7 +6,6 @@
 
 package app.crimera.patches.twitter.ads.timelineEntryHook
 
-import app.crimera.patches.twitter.ads.xlite.xLiteHideAdsPatch
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
@@ -34,7 +33,7 @@ val hideAds =
         description = "Removed promoted posts, trends and google ads",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(timelineEntryHookPatch, xLiteHideAdsPatch, settingsPatch)
+        dependsOn(timelineEntryHookPatch, settingsPatch)
         execute {
             // Normal Ads.
             enableSettings("hideAds")

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="piko_xlite_settings_title">Piko X-Lite settings</string>
+    <string name="piko_xlite_settings_open_failed">Could not open Piko X-Lite settings</string>
+    <string name="piko_xlite_category_timeline_title">Timeline</string>
+    <string name="piko_xlite_category_content_title">Content</string>
+
+    <string name="piko_xlite_disable_timeline_refresh_title">Disable automatic timeline refresh</string>
+    <string name="piko_xlite_disable_timeline_refresh_summary">Prevents timeline refreshes when X-Lite starts or returns to the foreground</string>
+    <string name="piko_xlite_hide_new_post_pill_title">Hide the new-post pill</string>
+    <string name="piko_xlite_hide_new_post_pill_summary">Hides the pill that appears when newer posts are available</string>
+    <string name="piko_xlite_filter_promoted_posts_title">Filter promoted posts</string>
+    <string name="piko_xlite_filter_promoted_posts_summary">Removes promoted posts and promoted timeline modules</string>
+
+    <string name="piko_xlite_inline_actions_title">Inline actions to hide</string>
+    <string name="piko_xlite_inline_actions_summary">Choose which actions are hidden below X-Lite posts</string>
+    <string name="piko_xlite_inline_action_reply">Reply</string>
+    <string name="piko_xlite_inline_action_repost">Repost</string>
+    <string name="piko_xlite_inline_action_like">Like</string>
+    <string name="piko_xlite_inline_action_view_count">View count</string>
+    <string name="piko_xlite_inline_action_bookmark">Bookmark</string>
+    <string name="piko_xlite_inline_action_share">Share</string>
+
+    <string name="piko_xlite_restart_title">Restart X?</string>
+    <string name="piko_xlite_restart_summary">Restart the app now to apply this change.</string>
+    <string name="piko_xlite_restart_now">Restart now</string>
+    <string name="piko_xlite_action_failed">The X-Lite settings action failed</string>
+</resources>

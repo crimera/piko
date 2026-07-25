@@ -27,25 +27,6 @@ internal val settingsResourcePatch =
                 }
             }
 
-            document("AndroidManifest.xml").use { document ->
-                val application = document.getElementsByTagName("application").item(0) as Element
-                val activity = document.createElement("activity").apply {
-                    setAttribute(
-                        "android:name",
-                        "app.morphe.extension.twitter.settings.PikoSettingsActivity",
-                    )
-                    setAttribute("android:excludeFromRecents", "true")
-                    setAttribute("android:exported", "false")
-                    appendChild(
-                        document.createElement("meta-data").apply {
-                            setAttribute("android:name", "appFamilies")
-                            setAttribute("android:value", "x-lite,twitter")
-                        },
-                    )
-                }
-                application.appendChild(activity)
-            }
-
             document("res/xml/settings_root.xml").use { editor ->
                 val parent = editor.getElementsByTagName("PreferenceScreen").item(0) as Element
 

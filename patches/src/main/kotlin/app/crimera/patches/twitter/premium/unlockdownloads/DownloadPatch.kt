@@ -60,7 +60,7 @@ val downloadPatch =
         description = "Unlocks the ability to download videos and gifs from Twitter/X",
     ) {
         compatibleWith(COMPATIBILITY_X)
-        dependsOn(settingsPatch, xLiteDownloadPatch)
+        dependsOn(settingsPatch)
 
         execute {
 

@@ -100,6 +100,34 @@
       "options": []
     },
     {
+      "name": "Amoled theme",
+      "description": "Replaces Instagram's dark-mode background greys with pure black for AMOLED displays.",
+      "default": true,
+      "dependencies": [],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "435.0.0.37.76",
+              "versionCodes": {
+                "ARM64_V8A": 384109456
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "Block redirecting to X Lite",
       "description": "Blocks redirecting to the new X Android UI on launch",
       "default": true,
@@ -3113,6 +3141,14 @@
           ]
         }
       ],
+      "options": []
+    },
+    {
+      "name": "Remove X-Lite Ads",
+      "description": "Hooks UrtTimelineState$Success to filter promoted posts and modules from X-Lite timeline.",
+      "default": true,
+      "dependencies": [],
+      "compatiblePackages": null,
       "options": []
     },
     {

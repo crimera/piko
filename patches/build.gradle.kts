@@ -19,6 +19,8 @@ dependencies {
     implementation(libs.gson)
 
     implementation(libs.morphe.patches.library)
+
+    testImplementation(kotlin("test"))
 }
 
 tasks {
