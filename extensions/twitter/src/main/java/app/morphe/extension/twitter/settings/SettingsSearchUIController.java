@@ -42,6 +42,7 @@ import java.util.Locale;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.ResourceUtils;
+import static app.morphe.extension.shared.StringRef.str;
 
 @SuppressLint("StaticFieldLeak")
 public final class SettingsSearchUIController {
@@ -61,7 +62,7 @@ public final class SettingsSearchUIController {
     private static Object settingsSearchBackCallback;
     private static boolean settingsSearchBackCallbackRegistered;
     private static SettingsSearchSession.State pendingConfigurationState;
-    private static final int TWITTER_BLUE = Color.rgb(29, 155, 240);
+    private static final int TWITTER_BLUE = ResourceUtils.getColor("twitter_blue_fill_pressed");
 
     private SettingsSearchUIController() {
     }
@@ -96,7 +97,7 @@ public final class SettingsSearchUIController {
                 || settingsSearchToolbar == null) {
             return;
         }
-        settingsSearchToolbar.setTitle(ResourceUtils.getString("piko_title_settings"));
+        settingsSearchToolbar.setTitle(str("piko_title_settings"));
         settingsSearchToolbar.setNavigationOnClickListener(view -> {
             Activity owner = settingsSearchStateOwner.current();
             if (owner != null) {
@@ -279,7 +280,7 @@ public final class SettingsSearchUIController {
         label.setSingleLine(true);
         label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         label.setTextColor(SettingsSearchColors.current().searchHintColor);
-        label.setText(searchString("piko_settings_search_hint", "Search Piko settings"));
+        label.setText(str("piko_settings_search_hint"));
         label.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -329,10 +330,7 @@ public final class SettingsSearchUIController {
         }
 
         if (settingsSearchEmptyTitle != null && showNoResults) {
-            settingsSearchEmptyTitle.setText(formatSearchNoResults(
-                    settingsSearchEmptyTitle.getContext(),
-                    query
-            ));
+            settingsSearchEmptyTitle.setText(str("piko_settings_search_no_results",query));
         }
     }
 
@@ -396,7 +394,7 @@ public final class SettingsSearchUIController {
             settingsSearchEntryBar.setVisibility(View.VISIBLE);
         }
         if (searchToolbar != null) {
-            searchToolbar.setTitle(ResourceUtils.getString("piko_title_settings"));
+            searchToolbar.setTitle(str("piko_title_settings"));
             searchToolbar.setNavigationOnClickListener(view -> activity.onBackPressed());
         }
         setContentState("", true, false);
@@ -506,7 +504,7 @@ public final class SettingsSearchUIController {
         toolbarSearchInput.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         toolbarSearchInput.setTextColor(SettingsSearchColors.current().searchTextColor);
         toolbarSearchInput.setHintTextColor(SettingsSearchColors.current().searchHintColor);
-        toolbarSearchInput.setHint(searchString("piko_settings_search_hint", "Search Piko settings"));
+        toolbarSearchInput.setHint(str("piko_settings_search_hint"));
         toolbarSearchInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         toolbarSearchInput.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         toolbarSearchInput.setBackgroundColor(Color.TRANSPARENT);
@@ -529,7 +527,7 @@ public final class SettingsSearchUIController {
         ));
 
         toolbarSearchClear = new ClearIconView(activity, TWITTER_BLUE);
-        toolbarSearchClear.setContentDescription(searchString("piko_settings_search_clear", "Clear input"));
+        toolbarSearchClear.setContentDescription(str("piko_settings_search_clear"));
         toolbarSearchClear.setVisibility(View.GONE);
         toolbarSearchClear.setOnClickListener(view -> toolbarSearchInput.setText(""));
         search.addView(toolbarSearchClear, new LinearLayout.LayoutParams(dp(activity, 48), dp(activity, 48)));
@@ -564,35 +562,9 @@ public final class SettingsSearchUIController {
         }
     }
 
-    private static String formatSearchNoResults(Context context, String query) {
-        String template = searchString(
-                "piko_settings_search_no_results",
-                "No results for \"%1$s\""
-        );
-        String displayQuery = query == null ? "" : query;
-        displayQuery = BidiFormatter.getInstance(isLayoutRtl(context)).unicodeWrap(displayQuery);
-        try {
-            return String.format(Locale.getDefault(), template, displayQuery);
-        } catch (Throwable ignored) {
-            return "No results for \"" + displayQuery + "\"";
-        }
-    }
-
     static boolean isLayoutRtl(Context context) {
         return context != null
                 && context.getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-    }
-
-    private static String searchString(String resourceName, String fallback) {
-        try {
-            String value = ResourceUtils.getString(resourceName);
-            if (value != null && value.length() > 0 && !resourceName.equals(value)) {
-                return value;
-            }
-        } catch (Throwable ignored) {
-        }
-
-        return fallback;
     }
 
     private static Drawable createSearchFieldBackground(Context context) {
@@ -601,7 +573,7 @@ public final class SettingsSearchUIController {
                 context,
                 palette.searchFieldBackgroundColor
         );
-        GradientDrawable mask = createRoundedSearchFieldDrawable(context, Color.WHITE);
+        GradientDrawable mask = createRoundedSearchFieldDrawable(context, palette.searchTextColor);
         return new RippleDrawable(
                 ColorStateList.valueOf(palette.searchFieldTapHighlightColor),
                 content,

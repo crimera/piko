@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Search Piko settings</string>
     <string name="piko_settings_search_clear">Clear input</string>
-    <string name="piko_settings_search_no_results">No results for \"%1$s\"</string>
+    <string name="piko_settings_search_no_results">No results for \"%s\"</string>
 
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>

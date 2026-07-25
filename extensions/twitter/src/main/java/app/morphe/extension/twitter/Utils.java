@@ -345,6 +345,10 @@ public class Utils {
         return tv.data;
     }
 
+    public static int resolveColor(String attrName) {
+        return resolveColor(ctx, attrName);
+    }
+
     private static void toast(String msg){
         app.morphe.extension.crimera.PikoUtils.toast(msg);
     }
