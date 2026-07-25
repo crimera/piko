@@ -31,7 +31,7 @@ private val filterPromotedPostsSettingsPatch =
 @Suppress("unused")
 val xLiteHideAdsPatch =
     bytecodePatch(
-        name = "Remove X-Lite ads",
+        name = "X-Lite: Remove ads",
         description = "Filters promoted posts and modules from X-Lite timelines.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)

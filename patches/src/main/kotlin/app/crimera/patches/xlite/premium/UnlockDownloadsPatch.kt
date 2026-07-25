@@ -51,7 +51,7 @@ private fun requireMatches(
 @Suppress("unused")
 val xLiteDownloadPatch =
     bytecodePatch(
-        name = "Unlock X-Lite downloads",
+        name = "X-Lite: Unlock downloads",
         description = "Unlocks media downloads and offline video saving in X-Lite.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
