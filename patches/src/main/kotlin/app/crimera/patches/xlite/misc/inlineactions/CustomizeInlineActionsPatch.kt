@@ -1,13 +1,13 @@
 package app.crimera.patches.xlite.misc.inlineactions
 
-import app.crimera.patches.xlite.settings.ChoiceOption
-import app.crimera.patches.xlite.settings.MultiChoiceSettingDefinition
-import app.crimera.patches.xlite.settings.injectStringSetRead
-import app.crimera.patches.xlite.settings.xLiteSettingsContributionPatch
+import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.SettingReadRegisterConstraint
+import app.crimera.patches.xlite.settings.injectRead
+import app.crimera.patches.xlite.settings.choice
+import app.crimera.patches.xlite.settings.settingStrings
+import app.crimera.patches.xlite.settings.xLiteMultiChoice
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.INLINE_ACTION_FILTER_DESCRIPTOR
-import app.morphe.extension.xlite.api.XLiteSettings.Categories
-import app.morphe.extension.xlite.api.XLiteSettings.Keys
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -58,31 +58,6 @@ private object CustomizeXLiteInlineActionsFingerprint : Fingerprint(
         ),
 )
 
-private val hiddenInlineActions =
-    MultiChoiceSettingDefinition(
-        key = Keys.HIDDEN_INLINE_ACTIONS,
-        titleResourceName = "piko_xlite_inline_actions_title",
-        summaryResourceName = "piko_xlite_inline_actions_summary",
-        order = 200,
-        defaultValue = emptySet(),
-        options =
-            listOf(
-                ChoiceOption("Reply", "piko_xlite_inline_action_reply"),
-                ChoiceOption("Retweet", "piko_xlite_inline_action_repost"),
-                ChoiceOption("Favorite", "piko_xlite_inline_action_like"),
-                ChoiceOption("ViewCount", "piko_xlite_inline_action_view_count"),
-                ChoiceOption("AddRemoveBookmarks", "piko_xlite_inline_action_bookmark"),
-                ChoiceOption("TwitterShare", "piko_xlite_inline_action_share"),
-            ),
-    )
-
-private val hiddenInlineActionsSettingsPatch =
-    xLiteSettingsContributionPatch {
-        category(Categories.CONTENT) {
-            add(hiddenInlineActions)
-        }
-    }
-
 @Suppress("unused")
 val customizeXLiteInlineActionsPatch =
     bytecodePatch(
@@ -90,7 +65,24 @@ val customizeXLiteInlineActionsPatch =
         description = "Lets you hide selected actions from X-Lite post action bars.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
-        dependsOn(hiddenInlineActionsSettingsPatch)
+
+        val hiddenInlineActions =
+            xLiteMultiChoice(
+                id = "xlite.content.hidden_inline_actions",
+                category = Categories.CONTENT,
+                strings = settingStrings("piko_xlite_inline_actions"),
+                order = 200,
+                defaultValue = emptySet(),
+                options =
+                    listOf(
+                        choice("Reply", "piko_xlite_inline_action_reply"),
+                        choice("Retweet", "piko_xlite_inline_action_repost"),
+                        choice("Favorite", "piko_xlite_inline_action_like"),
+                        choice("ViewCount", "piko_xlite_inline_action_view_count"),
+                        choice("AddRemoveBookmarks", "piko_xlite_inline_action_bookmark"),
+                        choice("TwitterShare", "piko_xlite_inline_action_share"),
+                    ),
+            )
 
         execute {
             val matches = CustomizeXLiteInlineActionsFingerprint.matchAll()
@@ -122,24 +114,25 @@ val customizeXLiteInlineActionsPatch =
                     throw PatchException("X-Lite inline action list conversion result not found")
                 }
                 val resultRegister = resultInstruction.registerA
-                val registerProvider =
-                    method.getFreeRegisterProvider(resultIndex + 1, 2, resultRegister)
-                val listRegister = registerProvider.getFreeRegister4Bit()
-                val settingsRegister = registerProvider.getFreeRegister4Bit()
-                val readInstructionCount =
-                    hiddenInlineActions.injectStringSetRead(
-                        method,
-                        resultIndex + 1,
-                        settingsRegister,
+                val listRegister =
+                    method
+                        .getFreeRegisterProvider(resultIndex + 1, 1, resultRegister)
+                        .getFreeRegister4Bit()
+                val read =
+                    hiddenInlineActions.injectRead(
+                        method = method,
+                        index = resultIndex + 1,
+                        excludedRegisters = listOf(resultRegister, listRegister),
+                        registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                     )
 
                 // Loop exits target the immutable conversion. Hook its result, then restore the
                 // exact immutable representation before the consumer sees it.
                 method.addInstructions(
-                    resultIndex + 1 + readInstructionCount,
+                    read.nextIndex,
                     """
                         move-object/from16 v$listRegister, v$resultRegister
-                        invoke-static {v$listRegister, v$settingsRegister}, $INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;Ljava/util/Set;)Ljava/util/List;
+                        invoke-static {v$listRegister, v${read.register}}, $INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;Ljava/util/Set;)Ljava/util/List;
                         move-result-object v$resultRegister
                         invoke-static/range {v$resultRegister .. v$resultRegister}, $conversionReference
                         move-result-object v$resultRegister

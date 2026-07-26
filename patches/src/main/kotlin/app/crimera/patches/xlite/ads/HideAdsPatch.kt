@@ -1,33 +1,16 @@
 package app.crimera.patches.xlite.ads
 
-import app.crimera.patches.xlite.settings.injectBooleanRead
-import app.crimera.patches.xlite.settings.toggleSetting
-import app.crimera.patches.xlite.settings.xLiteSettingsContributionPatch
+import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.SettingReadRegisterConstraint
+import app.crimera.patches.xlite.settings.injectRead
+import app.crimera.patches.xlite.settings.settingStrings
+import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.timeline.XLiteTimelineSuccessFingerprint
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
-import app.morphe.extension.xlite.api.XLiteSettings.Categories
-import app.morphe.extension.xlite.api.XLiteSettings.Keys
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.findFreeRegister
-
-private val filterPromotedPosts =
-    toggleSetting(
-        key = Keys.FILTER_PROMOTED_POSTS,
-        titleResourceName = "piko_xlite_filter_promoted_posts_title",
-        summaryResourceName = "piko_xlite_filter_promoted_posts_summary",
-        order = 100,
-        defaultValue = true,
-    )
-
-private val filterPromotedPostsSettingsPatch =
-    xLiteSettingsContributionPatch {
-        category(Categories.CONTENT) {
-            add(filterPromotedPosts)
-        }
-    }
 
 @Suppress("unused")
 val xLiteHideAdsPatch =
@@ -36,7 +19,15 @@ val xLiteHideAdsPatch =
         description = "Filters promoted posts and modules from X-Lite timelines.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
-        dependsOn(filterPromotedPostsSettingsPatch)
+
+        val filterPromotedPosts =
+            xLiteToggle(
+                id = "xlite.content.filter_promoted_posts",
+                category = Categories.CONTENT,
+                strings = settingStrings("piko_xlite_filter_promoted_posts"),
+                order = 100,
+                defaultValue = true,
+            )
 
         execute {
             val matches = XLiteTimelineSuccessFingerprint.matchAll()
@@ -48,13 +39,16 @@ val xLiteHideAdsPatch =
             }
 
             matches.single().method.apply {
-                val settingRegister = findFreeRegister(0)
-                val readInstructionCount =
-                    filterPromotedPosts.injectBooleanRead(this, 0, settingRegister)
+                val read =
+                    filterPromotedPosts.injectRead(
+                        method = this,
+                        index = 0,
+                        registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+                    )
                 addInstructions(
-                    readInstructionCount,
+                    read.nextIndex,
                     """
-                        invoke-static {p2, v$settingRegister}, $TIMELINE_FILTER_DESCRIPTOR->filterPromotedItems(Ljava/lang/Object;Z)Ljava/lang/Object;
+                        invoke-static {p2, v${read.register}}, $TIMELINE_FILTER_DESCRIPTOR->filterPromotedItems(Ljava/lang/Object;Z)Ljava/lang/Object;
                         move-result-object p2
                     """.trimIndent(),
                 )

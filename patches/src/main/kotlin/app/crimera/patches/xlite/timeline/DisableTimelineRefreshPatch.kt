@@ -1,11 +1,11 @@
 package app.crimera.patches.xlite.timeline
 
-import app.crimera.patches.xlite.settings.injectBooleanRead
-import app.crimera.patches.xlite.settings.toggleSetting
-import app.crimera.patches.xlite.settings.xLiteSettingsContributionPatch
+import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.SettingReadRegisterConstraint
+import app.crimera.patches.xlite.settings.injectRead
+import app.crimera.patches.xlite.settings.settingStrings
+import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
-import app.morphe.extension.xlite.api.XLiteSettings.Categories
-import app.morphe.extension.xlite.api.XLiteSettings.Keys
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -18,7 +18,7 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.findFreeRegister
+import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
@@ -55,22 +55,6 @@ private object XLiteLifecycleAutoRefreshFingerprint : Fingerprint(
         ),
 )
 
-private val disableTimelineRefresh =
-    toggleSetting(
-        key = Keys.DISABLE_TIMELINE_REFRESH,
-        titleResourceName = "piko_xlite_disable_timeline_refresh_title",
-        summaryResourceName = "piko_xlite_disable_timeline_refresh_summary",
-        order = 100,
-        defaultValue = true,
-    )
-
-private val disableTimelineRefreshSettingsPatch =
-    xLiteSettingsContributionPatch {
-        category(Categories.TIMELINE) {
-            add(disableTimelineRefresh)
-        }
-    }
-
 @Suppress("unused")
 val disableTimelineRefreshPatch =
     bytecodePatch(
@@ -78,7 +62,15 @@ val disableTimelineRefreshPatch =
         description = "Prevents automatic timeline jumps on startup and foregrounding.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
-        dependsOn(disableTimelineRefreshSettingsPatch)
+
+        val disableTimelineRefresh =
+            xLiteToggle(
+                id = "xlite.timeline.disable_refresh",
+                category = Categories.TIMELINE,
+                strings = settingStrings("piko_xlite_disable_timeline_refresh"),
+                order = 100,
+                defaultValue = true,
+            )
 
         execute {
             val homeMatches = XLiteHomeReselectFingerprint.matchAll()
@@ -90,13 +82,18 @@ val disableTimelineRefreshPatch =
             }
             homeMatches.single().method.apply {
                 val originalFirstInstruction = instructions.first()
-                val readInstructionCount = disableTimelineRefresh.injectBooleanRead(this, 0, 0)
+                val read =
+                    disableTimelineRefresh.injectRead(
+                        method = this,
+                        index = 0,
+                        registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+                    )
                 addInstructionsWithLabels(
-                    readInstructionCount,
+                    read.nextIndex,
                     """
-                        if-eqz v0, :piko_xlite_refresh_home_continue
-                        const/4 v0, 0x0
-                        return v0
+                        if-eqz v${read.register}, :piko_xlite_refresh_home_continue
+                        const/4 v${read.register}, 0x0
+                        return v${read.register}
                     """.trimIndent(),
                     ExternalLabel("piko_xlite_refresh_home_continue", originalFirstInstruction),
                 )
@@ -138,8 +135,8 @@ val disableTimelineRefreshPatch =
                                 .getReference<MethodReference>()
                                 ?.returnType == TIMELINE_TYPE_DESCRIPTOR
                         } ?: throw PatchException(
-                            "X-Lite auto-refresh timeline type result was not found",
-                        )
+                        "X-Lite auto-refresh timeline type result was not found",
+                    )
                 val timelineGetterCall = getInstruction(timelineResult.location.index - 1)
                 val timelineGetterReference =
                     timelineGetterCall.getReference<MethodReference>()
@@ -177,26 +174,25 @@ val disableTimelineRefreshPatch =
                                 "X-Lite auto-refresh repository call was not found",
                             )
                     val repositoryRegister = requestCall.registerC
-                    val settingRegister =
-                        findFreeRegister(
-                            autoRefreshIndex + 1,
-                            listOf(repositoryRegister, requestTypeRegister),
+                    val read =
+                        disableTimelineRefresh.injectRead(
+                            method = this,
+                            index = autoRefreshIndex + 1,
+                            excludedRegisters = listOf(repositoryRegister, requestTypeRegister),
+                            registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                         )
+                    val settingRegister = read.register
                     val timelineRegister =
-                        findFreeRegister(
+                        getFreeRegisterProvider(
                             autoRefreshIndex + 1,
-                            listOf(repositoryRegister, requestTypeRegister, settingRegister),
-                        )
-                    val insertIndex = autoRefreshIndex + 1
-                    val readInstructionCount =
-                        disableTimelineRefresh.injectBooleanRead(
-                            this,
-                            insertIndex,
+                            1,
+                            repositoryRegister,
+                            requestTypeRegister,
                             settingRegister,
-                        )
+                        ).getFreeRegister4Bit()
                     val labelSuffix = autoRefreshLoads.size - reverseIndex
                     addInstructionsWithLabels(
-                        insertIndex + readInstructionCount,
+                        read.nextIndex,
                         """
                             if-eqz v$settingRegister, :piko_xlite_refresh_lifecycle_continue_$labelSuffix
                             invoke-interface {v$repositoryRegister}, $timelineGetterReference
