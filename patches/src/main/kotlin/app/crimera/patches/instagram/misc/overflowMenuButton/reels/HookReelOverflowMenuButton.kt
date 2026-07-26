@@ -13,12 +13,18 @@ import app.crimera.patches.instagram.misc.download.AddReelButtonFingerprint
 import app.crimera.patches.instagram.utils.Constants.ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.FRAGMENT_ACTIVITY
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+
+internal object ClipsItemStateToStringFingerprint : Fingerprint(
+    name = "toString",
+    strings = listOf("ClipsItemState(lastUserPausedPositionMs="),
+)
 
 @Suppress("unused")
 val hookReelOverflowMenuButton =
@@ -36,7 +42,7 @@ val hookReelOverflowMenuButton =
 
                 // Find the field that holds the MEDIA_ADD_INFO object on the reel controller.
                 // This is the same class used by the feed hook to get CURRENT_MEDIA_FIELD.
-                val mediaExtraDataField = classFields.firstOrNull { it.type == MEDIA_ADD_INFO_CLASS_NAME }
+                val mediaExtraDataField = ClipsItemStateToStringFingerprint.classDef.fields.first { it.type == MEDIA_ADD_INFO_CLASS_NAME }
 
                 val selfClassRegister = getInstruction(indexOfFirstInstruction(Opcode.MOVE_OBJECT_FROM16)).registersUsed[0]
                 val buttonAdderInstanceRegister = getInstruction(indexOfFirstInstruction(Opcode.NEW_INSTANCE)).registersUsed[0]
@@ -52,32 +58,16 @@ val hookReelOverflowMenuButton =
                         indexOfFirstInstruction(mediaObjectFromParameterIndex, Opcode.CONST_4),
                     ).registersUsed[0]
 
-                if (mediaExtraDataField != null) {
-                    // Safe two-register pattern: identical to how the feed onClick hook reads
-                    // CURRENT_MEDIA_FIELD.
-                    // Safe order:
-                    //   iget-object freeRegisterOne, selfClassRegister, mediaExtraDataField  <- read extra-data obj (selfClassRegister still intact)
-                    //   iget        freeRegisterOne, freeRegisterOne,   CURRENT_MEDIA_FIELD  <- overwrite with int (extra-data obj no longer needed)
-                    //   iget-object selfClassRegister, selfClassRegister, appActivityField   <- now clobber selfClassRegister with context
-                    //   invoke-static {selfClassRegister, buttonAdderInstanceRegister, mediaObjectRegister, freeRegisterOne}
-                    addInstructions(
-                        mediaObjectFromParameterIndex + 1,
-                        """
-                        iget-object v$freeRegisterOne, v$selfClassRegister, $mediaExtraDataField
-                        iget v$freeRegisterOne, v$freeRegisterOne, $CURRENT_MEDIA_FIELD
-                        iget-object v$selfClassRegister, v$selfClassRegister, $appActivityField
-                        invoke-static {v$selfClassRegister,v$buttonAdderInstanceRegister,v$mediaObjectRegister,v$freeRegisterOne},$ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS->includeCustomReelOverflowButtons(Landroid/content/Context;Ljava/lang/Object;Ljava/lang/Object;I)V
-                        """.trimIndent(),
-                    )
-                } else {
-                    addInstructions(
-                        mediaObjectFromParameterIndex + 1,
-                        """
-                        iget-object v$freeRegisterOne, v$selfClassRegister, $appActivityField
-                        invoke-static {v$freeRegisterOne,v$buttonAdderInstanceRegister,v$mediaObjectRegister},$ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS->includeCustomReelOverflowButtons(Landroid/content/Context;Ljava/lang/Object;Ljava/lang/Object;)V
-                        """.trimIndent(),
-                    )
-                }
+                addInstructions(
+                    mediaObjectFromParameterIndex + 1,
+                    """
+                    move-object/from16 v$freeRegisterOne,p2
+                    iget-object v$freeRegisterOne, v$freeRegisterOne, $mediaExtraDataField
+                    iget v$freeRegisterOne, v$freeRegisterOne, $CURRENT_MEDIA_FIELD
+                    iget-object v$selfClassRegister, v$selfClassRegister, $appActivityField
+                    invoke-static {v$selfClassRegister,v$buttonAdderInstanceRegister,v$mediaObjectRegister,v$freeRegisterOne},$ADD_REEL_BTN_OVERFLOW_MENU_BUTTON_CLASS->includeCustomReelOverflowButtons(Landroid/content/Context;Ljava/lang/Object;Ljava/lang/Object;I)V
+                    """.trimIndent(),
+                )
             }
         }
     }
