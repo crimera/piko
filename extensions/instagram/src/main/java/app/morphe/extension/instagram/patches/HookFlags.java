@@ -20,8 +20,9 @@ public class HookFlags {
     private static Map<String, Boolean> BOOL_FLAGS = new HashMap<>();
     private static DeveloperOptions developerOptions = new DeveloperOptions();
 
-    private static void contactPermissionConsentFlags() {
+    private static void onboardingPermissionPromptFlags() {
         BOOL_FLAGS.put("56295", false); //ig_device_permission_consent
+        BOOL_FLAGS.put("77866", false); //ig4a_d0_retention
     }
 
     private static void simpleOverflowMenuFlags() {
