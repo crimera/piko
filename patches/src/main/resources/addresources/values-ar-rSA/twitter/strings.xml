@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">البحث في إعدادات Piko</string>
     <string name="piko_settings_search_clear">مسح الإدخال</string>
-    <string name="piko_settings_search_no_results">لا توجد نتائج ل \"%1$s\"</string>
+    <string name="piko_settings_search_no_results">لا توجد نتائج لـ \"%s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">تمكين التراجع عن المنشورات</string>
@@ -37,7 +37,7 @@
     <string name="piko_title_native_downloader">أداة التنزيل المحلية</string>
     <string name="piko_title_native_downloader_toggle">تمكين التنزيل المحلي</string>
     <string name="piko_pref_native_downloader_autodownload_highest_video_res">تنزيل أعلى دقة للفيديو تلقائيًا</string>
-    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">تخطي نافذة اختيار الجودة وتنزيل مباشرة أفضل دقة متاحة للفيديوهات الفردية.</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">تخطي نافذة اختيار الجودة وتنزيل مباشرة أفضل دقة متاحة للفيديوهات الفردية</string>
     <string name="piko_pref_native_downloader_show_download_icon">عرض أيقونة التنزيل</string>
     <string name="piko_pref_native_downloader_show_copy_icon">عرض أيقونة النسخ</string>
     <string name="piko_pref_native_downloader_show_variants_icon">عرض أيقونة الخيارات</string>
@@ -137,8 +137,6 @@
     <string name="piko_pref_pause_search_suggestion_desc">لن يتم حفظ اقتراحات البحث محليًا</string>
     <string name="piko_pref_search_suggestion">إخفاء اقتراحات البحث</string>
     <string name="piko_pref_search_suggestion_desc">يخفي اقتراحات البحث في قسم استكشف</string>
-    <string name="piko_disunify_xchat_system">Disunify xchat system</string>
-    <string name="piko_disunify_xchat_system_desc">استعادة الميزات القديمة مثل الرسائل و نافذة المشاركة</string>
     <string name="piko_legacy_share_link">روابط المشاركة الكلاسيكية</string>
     <string name="piko_block_redirecting_to_x_lite">منع التحويل التلقائي إلى X Lite</string>
     <!-- Feature flags Settings -->

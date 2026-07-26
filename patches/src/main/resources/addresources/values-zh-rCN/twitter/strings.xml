@@ -109,8 +109,6 @@
     <string name="piko_pref_pause_search_suggestion_desc">将不会在本地保存搜索建议</string>
     <string name="piko_pref_search_suggestion">隐藏搜索建议</string>
     <string name="piko_pref_search_suggestion_desc">隐藏探索页面中的搜索建议</string>
-    <string name="piko_disunify_xchat_system">分离 XChat 系统</string>
-    <string name="piko_disunify_xchat_system_desc">恢复旧版功能，如消息和分享面板</string>
     <string name="piko_legacy_share_link">旧版分享链接</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">功能标志</string>

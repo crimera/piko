@@ -128,8 +128,6 @@
     <string name="piko_pref_pause_search_suggestion_desc">I suggerimenti di ricerca non verranno salvati localmente</string>
     <string name="piko_pref_search_suggestion">Nascondi i suggerimenti di ricerca</string>
     <string name="piko_pref_search_suggestion_desc">Nascondi il suggerimento di ricerca nella sezione Esplora</string>
-    <string name="piko_disunify_xchat_system">Disunifica il sistema chat di X</string>
-    <string name="piko_disunify_xchat_system_desc">Riporta indietro le caratteristiche legacy come i messaggi e il menu condivisione</string>
     <string name="piko_legacy_share_link">Condivisione dei link legacy</string>
     <string name="piko_block_redirecting_to_x_lite">Blocca reindirizzamento a X Lite</string>
     <!-- Feature flags Settings -->

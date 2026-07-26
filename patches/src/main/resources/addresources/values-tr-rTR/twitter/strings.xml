@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Piko ayarlarında ara</string>
     <string name="piko_settings_search_clear">Girişi temizle</string>
-    <string name="piko_settings_search_no_results">\"%1$s\" için sonuç bulunamadı</string>
+    <string name="piko_settings_search_no_results">\"%s\" için sonuç bulunamadı</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Gönderileri geri alma özelliğini etkinleştirin</string>
@@ -137,8 +137,6 @@
     <string name="piko_pref_pause_search_suggestion_desc">Arama önerileri yerel olarak kaydedilmez</string>
     <string name="piko_pref_search_suggestion">Arama önerilerini gizle</string>
     <string name="piko_pref_search_suggestion_desc">Keşfet bölümünde arama önerilerini gizler</string>
-    <string name="piko_disunify_xchat_system">Xchat sistemini ayırma</string>
-    <string name="piko_disunify_xchat_system_desc">Mesajlar ve paylaşım sayfası gibi eski özellikleri geri getirir</string>
     <string name="piko_legacy_share_link">Türkçe</string>
     <string name="piko_block_redirecting_to_x_lite">X Lite sürümüne yönlendirmeyi engelle</string>
     <!-- Feature flags Settings -->

@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Cari pengaturan Piko</string>
     <string name="piko_settings_search_clear">Hapus masukan</string>
-    <string name="piko_settings_search_no_results">Tidak ada hasil untuk \"%1$s\"</string>
+    <string name="piko_settings_search_no_results">Tidak ada hasil untuk \"%s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Aktifkan batalkan postingan</string>
@@ -137,8 +137,6 @@
     <string name="piko_pref_pause_search_suggestion_desc">Saran pencarian tidak akan disimpan secara lokal</string>
     <string name="piko_pref_search_suggestion">Sembunyikan saran pencarian</string>
     <string name="piko_pref_search_suggestion_desc">Menyembunyikan saran pencarian di bagian jelajahi</string>
-    <string name="piko_disunify_xchat_system">Memisahkan sistem xchat</string>
-    <string name="piko_disunify_xchat_system_desc">Kembalikan fitur-fitur usang seperti pesan dan lembar bagikan</string>
     <string name="piko_legacy_share_link">Tautan berbagi versi lama</string>
     <string name="piko_block_redirecting_to_x_lite">Blokir pengalihan ke X Lite</string>
     <!-- Feature flags Settings -->
