@@ -1,10 +1,9 @@
 package app.crimera.patches.xlite.timeline
 
-import app.crimera.patches.xlite.settings.toggleSetting
-import app.crimera.patches.xlite.settings.xLiteSettingsContributionPatch
+import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.settingStrings
+import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
-import app.morphe.extension.xlite.api.XLiteSettings.Categories
-import app.morphe.extension.xlite.api.XLiteSettings.Keys
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -63,23 +62,6 @@ private object XLiteSaveScrollPositionFingerprint : Fingerprint(
         ),
 )
 
-private val restoreTimelinePosition =
-    toggleSetting(
-        key = Keys.RESTORE_TIMELINE_POSITION,
-        titleResourceName = "piko_xlite_restore_timeline_position_title",
-        summaryResourceName = "piko_xlite_restore_timeline_position_summary",
-        order = 150,
-        defaultValue = true,
-        rebootApp = true,
-    )
-
-private val restoreTimelinePositionSettingsPatch =
-    xLiteSettingsContributionPatch {
-        category(Categories.TIMELINE) {
-            add(restoreTimelinePosition)
-        }
-    }
-
 @Suppress("unused")
 val restoreTimelinePositionPatch =
     bytecodePatch(
@@ -87,7 +69,15 @@ val restoreTimelinePositionPatch =
         description = "Persists the timeline index and offset, then restores them after the app process restarts.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
-        dependsOn(restoreTimelinePositionSettingsPatch)
+
+        xLiteToggle(
+            id = "xlite.timeline.restore_position",
+            category = Categories.TIMELINE,
+            strings = settingStrings("piko_xlite_restore_timeline_position"),
+            order = 150,
+            defaultValue = true,
+            rebootApp = true,
+        )
 
         execute {
             val storeMatches = XLiteScrollPositionStoreClassFingerprint.matchAll()

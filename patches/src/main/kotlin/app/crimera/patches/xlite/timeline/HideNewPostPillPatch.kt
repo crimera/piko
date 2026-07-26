@@ -1,17 +1,13 @@
 package app.crimera.patches.xlite.timeline
 
-import app.crimera.patches.xlite.settings.injectBooleanRead
-import app.crimera.patches.xlite.settings.toggleSetting
-import app.crimera.patches.xlite.settings.xLiteSettingsContributionPatch
+import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.returnVoidIfEnabled
+import app.crimera.patches.xlite.settings.settingStrings
+import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
-import app.morphe.extension.xlite.api.XLiteSettings.Categories
-import app.morphe.extension.xlite.api.XLiteSettings.Keys
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
 
 private object XLiteNewPostsPillFingerprint : Fingerprint(
     parameters =
@@ -26,22 +22,6 @@ private object XLiteNewPostsPillFingerprint : Fingerprint(
     returnType = "V",
 )
 
-private val hideNewPostPill =
-    toggleSetting(
-        key = Keys.HIDE_NEW_POST_PILL,
-        titleResourceName = "piko_xlite_hide_new_post_pill_title",
-        summaryResourceName = "piko_xlite_hide_new_post_pill_summary",
-        order = 200,
-        defaultValue = true,
-    )
-
-private val hideNewPostPillSettingsPatch =
-    xLiteSettingsContributionPatch {
-        category(Categories.TIMELINE) {
-            add(hideNewPostPill)
-        }
-    }
-
 @Suppress("unused")
 val hideNewPostPillPatch =
     bytecodePatch(
@@ -49,7 +29,15 @@ val hideNewPostPillPatch =
         description = "Hides the new-post notification pill in X-Lite timelines.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
-        dependsOn(hideNewPostPillSettingsPatch)
+
+        val hideNewPostPill =
+            xLiteToggle(
+                id = "xlite.timeline.hide_new_post_pill",
+                category = Categories.TIMELINE,
+                strings = settingStrings("piko_xlite_hide_new_post_pill"),
+                order = 200,
+                defaultValue = true,
+            )
 
         execute {
             val matches = XLiteNewPostsPillFingerprint.matchAll()
@@ -59,17 +47,6 @@ val hideNewPostPillPatch =
                         matches.joinToString { it.originalMethod.toString() },
                 )
             }
-            matches.single().method.apply {
-                val originalFirstInstruction = instructions.first()
-                val readInstructionCount = hideNewPostPill.injectBooleanRead(this, 0, 0)
-                addInstructionsWithLabels(
-                    readInstructionCount,
-                    """
-                        if-eqz v0, :piko_xlite_new_post_pill_continue
-                        return-void
-                    """.trimIndent(),
-                    ExternalLabel("piko_xlite_new_post_pill_continue", originalFirstInstruction),
-                )
-            }
+            hideNewPostPill.returnVoidIfEnabled(matches.single().method, 0)
         }
     }

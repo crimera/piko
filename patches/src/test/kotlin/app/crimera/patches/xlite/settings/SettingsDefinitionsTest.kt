@@ -1,24 +1,24 @@
 package app.crimera.patches.xlite.settings
 
-import app.morphe.extension.xlite.api.XLiteSettings.Categories
-import app.morphe.extension.xlite.api.SettingKey
+import app.morphe.patcher.patch.bytecodePatch
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 
 class SettingsDefinitionsTest {
-    private val keySecond = SettingKey<Boolean>("xlite.content.second")
-    private val keyFirst = SettingKey<Boolean>("xlite.content.first")
-    private val keyTimelineItem = SettingKey<Boolean>("xlite.timeline.item")
-    private val keySharedDuplicate = SettingKey<Boolean>("xlite.shared.duplicate")
-    private val keyRepeatedItem0 = SettingKey<Boolean>("xlite.content.repeated.item0")
-    private val keyRepeatedItem1 = SettingKey<Boolean>("xlite.content.repeated.item1")
-    private val keyMultiChoice = SettingKey<Set<String>>("xlite.content.actions")
-    private val keyAction = SettingKey<String>("xlite.content.action")
-    private val keyFilterWords = SettingKey<String>("xlite.content.filters.words")
-    private val keyFilterClear = SettingKey<String>("xlite.content.filters.clear")
-    private val keyInvalidToggle = SettingKey<Boolean>("content.missing_namespace")
+    private val secondId = "xlite.content.second"
+    private val firstId = "xlite.content.first"
+    private val timelineItemId = "xlite.timeline.item"
+    private val sharedDuplicateId = "xlite.shared.duplicate"
+    private val repeatedItem0Id = "xlite.content.repeated.item0"
+    private val repeatedItem1Id = "xlite.content.repeated.item1"
+    private val multiChoiceId = "xlite.content.actions"
+    private val actionId = "xlite.content.action"
+    private val filterWordsId = "xlite.content.filters.words"
+    private val filterClearId = "xlite.content.filters.clear"
+    private val invalidToggleId = "content.missing_namespace"
 
     @Test
     fun `catalog and children are sorted by order then id`() {
@@ -27,13 +27,13 @@ class SettingsDefinitionsTest {
                 .apply {
                     category(Categories.CONTENT) {
                         toggle(
-                            key = keySecond,
+                            id = secondId,
                             titleResourceName = "piko_xlite_second_title",
                             order = 20,
                             defaultValue = false,
                         )
                         toggle(
-                            key = keyFirst,
+                            id = firstId,
                             titleResourceName = "piko_xlite_first_title",
                             order = 10,
                             defaultValue = true,
@@ -41,7 +41,7 @@ class SettingsDefinitionsTest {
                     }
                     category(Categories.TIMELINE) {
                         toggle(
-                            key = keyTimelineItem,
+                            id = timelineItemId,
                             titleResourceName = "piko_xlite_timeline_item_title",
                             defaultValue = true,
                         )
@@ -53,9 +53,102 @@ class SettingsDefinitionsTest {
             catalog.categories.map(SettingsGroupDefinition::id),
         )
         assertEquals(
-            listOf("xlite.content.first", "xlite.content.second"),
+            listOf(firstId, secondId),
             catalog.categories[1].children.map(SettingsNodeDefinition::id),
         )
+    }
+
+    @Test
+    fun `builder methods return typed definitions`() {
+        val result =
+            SettingsContributionBuilder().category(Categories.CONTENT) {
+                val toggle =
+                    toggle(
+                        id = firstId,
+                        titleResourceName = "piko_xlite_first_title",
+                        defaultValue = true,
+                    )
+                val input =
+                    input(
+                        id = filterWordsId,
+                        titleResourceName = "piko_xlite_filter_words_title",
+                        defaultValue = "",
+                    )
+                val multiChoice =
+                    multiChoice(
+                        id = multiChoiceId,
+                        titleResourceName = "piko_xlite_actions_title",
+                        defaultValue = emptySet(),
+                        options = listOf(ChoiceOption("reply", "piko_xlite_reply_title")),
+                    )
+                val action =
+                    action(
+                        id = actionId,
+                        titleResourceName = "piko_xlite_action_title",
+                        handlerClassDescriptor =
+                            "Lapp/morphe/extension/xlite/settings/ClearFiltersAction;",
+                    )
+                listOf(toggle, input, multiChoice, action)
+            }
+
+        assertIs<ToggleSettingDefinition>(result[0])
+        assertIs<TextInputSettingDefinition>(result[1])
+        assertIs<MultiChoiceSettingDefinition>(result[2])
+        assertIs<ActionSettingDefinition>(result[3])
+    }
+
+    @Test
+    fun `generic category and group return block results`() {
+        val result =
+            SettingsContributionBuilder().category(Categories.CONTENT) {
+                group(
+                    id = "xlite.content.filters",
+                    titleResourceName = "piko_xlite_filters_title",
+                ) {
+                    toggle(
+                        id = firstId,
+                        titleResourceName = "piko_xlite_first_title",
+                        defaultValue = true,
+                    )
+                }
+            }
+
+        assertIs<ToggleSettingDefinition>(result)
+    }
+
+    @Test
+    fun `setting strings derive conventional resources`() {
+        assertEquals(
+            SettingStrings(
+                "piko_xlite_archive_title",
+                "piko_xlite_archive_summary",
+            ),
+            settingStrings("piko_xlite_archive"),
+        )
+        assertEquals(
+            SettingStrings("piko_xlite_archive_title", null),
+            settingStrings("piko_xlite_archive", summary = false),
+        )
+        assertEquals(
+            SettingStrings("piko_xlite_custom_title", "piko_xlite_custom_summary"),
+            settingStrings("piko_xlite_custom_title", "piko_xlite_custom_summary"),
+        )
+    }
+
+    @Test
+    fun `toggle attaches exactly one hidden contribution dependency`() {
+        val patch =
+            bytecodePatch(name = "X-Lite settings test", default = false) {
+                xLiteToggle(
+                    id = "xlite.content.test",
+                    category = Categories.CONTENT,
+                    strings = settingStrings("piko_xlite_test"),
+                    defaultValue = true,
+                )
+            }
+
+        assertEquals(1, patch.dependencies.size)
+        assertNull(patch.dependencies.single().name)
     }
 
     @Test
@@ -69,14 +162,14 @@ class SettingsDefinitionsTest {
                             titleResourceName = "piko_xlite_filters_title",
                         ) {
                             input(
-                                key = keyFilterWords,
+                                id = filterWordsId,
                                 titleResourceName = "piko_xlite_filter_words_title",
                                 order = 10,
                                 defaultValue = "",
                                 inputKind = InputKind.MULTILINE,
                             )
                             action(
-                                key = keyFilterClear,
+                                id = filterClearId,
                                 titleResourceName = "piko_xlite_filter_clear_title",
                                 order = 20,
                                 handlerClassDescriptor =
@@ -100,14 +193,14 @@ class SettingsDefinitionsTest {
                     .apply {
                         category(Categories.TIMELINE) {
                             toggle(
-                                key = keySharedDuplicate,
+                                id = sharedDuplicateId,
                                 titleResourceName = "piko_xlite_first_title",
                                 defaultValue = true,
                             )
                         }
                         category(Categories.CONTENT) {
                             toggle(
-                                key = keySharedDuplicate,
+                                id = sharedDuplicateId,
                                 titleResourceName = "piko_xlite_second_title",
                                 defaultValue = false,
                             )
@@ -116,7 +209,7 @@ class SettingsDefinitionsTest {
             }
 
         assertEquals(
-            "Duplicate X-Lite setting ID: xlite.shared.duplicate",
+            "Duplicate X-Lite setting ID: $sharedDuplicateId",
             exception.message,
         )
     }
@@ -133,7 +226,7 @@ class SettingsDefinitionsTest {
                                 titleResourceName = "piko_xlite_repeated_title",
                             ) {
                                 toggle(
-                                    key = if (it == 0) keyRepeatedItem0 else keyRepeatedItem1,
+                                    id = if (it == 0) repeatedItem0Id else repeatedItem1Id,
                                     titleResourceName = "piko_xlite_item_title",
                                     defaultValue = true,
                                 )
@@ -152,7 +245,7 @@ class SettingsDefinitionsTest {
                     .apply {
                         category(Categories.CONTENT) {
                             multiChoice(
-                                key = keyMultiChoice,
+                                id = multiChoiceId,
                                 titleResourceName = "piko_xlite_actions_title",
                                 defaultValue = setOf("missing"),
                                 options =
@@ -165,7 +258,7 @@ class SettingsDefinitionsTest {
             }
 
         assertEquals(
-            "Unknown default choice for xlite.content.actions: [missing]",
+            "Unknown default choice for $multiChoiceId: [missing]",
             exception.message,
         )
     }
@@ -180,7 +273,7 @@ class SettingsDefinitionsTest {
                 .apply {
                     category(Categories.CONTENT) {
                         action(
-                            key = keyAction,
+                            id = actionId,
                             titleResourceName = "piko_xlite_action_title",
                             handlerClassDescriptor = "not-a-descriptor",
                         )
@@ -192,7 +285,7 @@ class SettingsDefinitionsTest {
                 .apply {
                     category(Categories.CONTENT) {
                         toggle(
-                            key = keyInvalidToggle,
+                            id = invalidToggleId,
                             titleResourceName = "piko_xlite_action_title",
                             defaultValue = true,
                         )

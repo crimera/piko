@@ -1,8 +1,5 @@
 package app.crimera.patches.xlite.settings
 
-import app.morphe.extension.xlite.api.SettingsCategory
-import app.morphe.extension.xlite.api.SettingKey
-
 private val STABLE_ID_PATTERN = Regex("xlite\\.[a-z0-9._-]+")
 private val OPTION_ID_PATTERN = Regex("[a-zA-Z0-9._-]+")
 private val RESOURCE_NAME_PATTERN = Regex("piko_xlite_[a-z0-9_]+")
@@ -25,20 +22,15 @@ internal data class SettingsGroupDefinition(
     val children: List<SettingsNodeDefinition>,
 ) : SettingsNodeDefinition
 
-internal sealed interface SettingItemDefinition : SettingsNodeDefinition {
-    val key: SettingKey<*>
-    override val id: String
-        get() = key.id
-}
+internal sealed interface SettingItemDefinition : SettingsNodeDefinition
 
 internal sealed interface ValueSettingDefinition<T> : SettingItemDefinition {
-    override val key: SettingKey<T>
     val defaultValue: T
     val rebootApp: Boolean
 }
 
 internal data class ToggleSettingDefinition(
-    override val key: SettingKey<Boolean>,
+    override val id: String,
     override val titleResourceName: String,
     override val summaryResourceName: String?,
     override val order: Int,
@@ -52,7 +44,7 @@ internal enum class InputKind {
 }
 
 internal data class TextInputSettingDefinition(
-    override val key: SettingKey<String>,
+    override val id: String,
     override val titleResourceName: String,
     override val summaryResourceName: String?,
     override val order: Int,
@@ -67,7 +59,7 @@ internal data class ChoiceOption(
 )
 
 internal data class MultiChoiceSettingDefinition(
-    override val key: SettingKey<Set<String>>,
+    override val id: String,
     override val titleResourceName: String,
     override val summaryResourceName: String?,
     override val order: Int,
@@ -77,7 +69,7 @@ internal data class MultiChoiceSettingDefinition(
 ) : ValueSettingDefinition<Set<String>>
 
 internal data class ActionSettingDefinition(
-    override val key: SettingKey<*>,
+    override val id: String,
     override val titleResourceName: String,
     override val summaryResourceName: String?,
     override val order: Int,
@@ -93,19 +85,20 @@ internal data class SettingsContributionCatalog(
 internal class SettingsContributionBuilder {
     private val categoryBuilders = linkedMapOf<SettingsCategory, SettingsGroupBuilder>()
 
-    fun category(
+    fun <T> category(
         category: SettingsCategory,
-        block: SettingsGroupBuilder.() -> Unit,
-    ) {
-        categoryBuilders
-            .getOrPut(category) {
+        block: SettingsGroupBuilder.() -> T,
+    ): T {
+        val builder =
+            categoryBuilders.getOrPut(category) {
                 SettingsGroupBuilder(
                     id = category.id,
                     titleResourceName = category.titleResourceName,
                     summaryResourceName = category.summaryResourceName,
                     order = category.order,
                 )
-            }.apply(block)
+            }
+        return builder.block()
     }
 
     fun build(): SettingsContributionCatalog {
@@ -130,87 +123,101 @@ internal class SettingsGroupBuilder(
 ) {
     private val children = mutableListOf<SettingsNodeDefinition>()
 
-    fun add(definition: SettingItemDefinition) {
+    fun <T : SettingItemDefinition> add(definition: T): T {
         children += definition
+        return definition
     }
 
-    fun group(
+    fun <T> group(
         id: String,
         titleResourceName: String,
         summaryResourceName: String? = null,
         order: Int = 0,
-        block: SettingsGroupBuilder.() -> Unit,
-    ) {
-        children +=
-            SettingsGroupBuilder(id, titleResourceName, summaryResourceName, order)
-                .apply(block)
-                .build()
+        block: SettingsGroupBuilder.() -> T,
+    ): T {
+        val builder = SettingsGroupBuilder(id, titleResourceName, summaryResourceName, order)
+        val result = builder.block()
+        children += builder.build()
+        return result
     }
 
     fun toggle(
-        key: SettingKey<Boolean>,
+        id: String,
         titleResourceName: String,
         summaryResourceName: String? = null,
         order: Int = 0,
         defaultValue: Boolean,
         rebootApp: Boolean = false,
-    ) = add(ToggleSettingDefinition(key, titleResourceName, summaryResourceName, order, defaultValue, rebootApp))
+    ): ToggleSettingDefinition =
+        add(
+            ToggleSettingDefinition(
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                defaultValue,
+                rebootApp,
+            ),
+        )
 
     fun input(
-        key: SettingKey<String>,
+        id: String,
         titleResourceName: String,
         summaryResourceName: String? = null,
         order: Int = 0,
         defaultValue: String,
         rebootApp: Boolean = false,
         inputKind: InputKind = InputKind.TEXT,
-    ) = add(
-        TextInputSettingDefinition(
-            key,
-            titleResourceName,
-            summaryResourceName,
-            order,
-            defaultValue,
-            rebootApp,
-            inputKind,
-        ),
-    )
+    ): TextInputSettingDefinition =
+        add(
+            TextInputSettingDefinition(
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                defaultValue,
+                rebootApp,
+                inputKind,
+            ),
+        )
 
     fun multiChoice(
-        key: SettingKey<Set<String>>,
+        id: String,
         titleResourceName: String,
         summaryResourceName: String? = null,
         order: Int = 0,
         defaultValue: Set<String>,
         rebootApp: Boolean = false,
         options: List<ChoiceOption>,
-    ) = add(
-        MultiChoiceSettingDefinition(
-            key,
-            titleResourceName,
-            summaryResourceName,
-            order,
-            defaultValue,
-            rebootApp,
-            options,
-        ),
-    )
+    ): MultiChoiceSettingDefinition =
+        add(
+            MultiChoiceSettingDefinition(
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                defaultValue,
+                rebootApp,
+                options,
+            ),
+        )
 
     fun action(
-        key: SettingKey<*>,
+        id: String,
         titleResourceName: String,
         summaryResourceName: String? = null,
         order: Int = 0,
         handlerClassDescriptor: String,
-    ) = add(
-        ActionSettingDefinition(
-            key,
-            titleResourceName,
-            summaryResourceName,
-            order,
-            handlerClassDescriptor,
-        ),
-    )
+    ): ActionSettingDefinition =
+        add(
+            ActionSettingDefinition(
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                handlerClassDescriptor,
+            ),
+        )
 
     internal fun build() =
         SettingsGroupDefinition(
@@ -221,17 +228,6 @@ internal class SettingsGroupBuilder(
             children = children.sortedWith(nodeComparator),
         )
 }
-
-// ── Top-level factory functions ──────────────────────────────────────────
-
-internal fun toggleSetting(
-    key: SettingKey<Boolean>,
-    titleResourceName: String,
-    summaryResourceName: String? = null,
-    order: Int = 0,
-    defaultValue: Boolean,
-    rebootApp: Boolean = false,
-) = ToggleSettingDefinition(key, titleResourceName, summaryResourceName, order, defaultValue, rebootApp)
 
 private val nodeComparator =
     compareBy<SettingsNodeDefinition>(SettingsNodeDefinition::order, SettingsNodeDefinition::id)

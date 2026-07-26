@@ -48,48 +48,24 @@ internal fun main(args: Array<String>) {
 
     val exceptions = mutableListOf<Exception>()
 
-    arrayOf(
-        "instagram",
-        "shared",
-        "twitter",
-        "twitter-bring-back",
-        // Add more apps as created.
-    ).forEach { appId ->
+    val localizedAppIds =
+        listOf(
+            "instagram",
+            "shared",
+            "twitter",
+            "twitter-bring-back",
+        )
+    val defaultOnlyAppIds = listOf("xlite")
+
+    localizedAppIds.forEach { appId ->
         locales.forEach { locale ->
             val srcFolderName = locale.getSrcLocaleFolderName()
-            val srcSubPath = "$srcFolderName/$appId/strings.xml"
-
-            inputStreamFromBundledResource(
-                "addresources", srcSubPath
-            ).use { stream ->
-                if (stream == null) throw IllegalArgumentException("Could not find resource $srcSubPath")
-                val document = DocumentBuilderFactory.newInstance()
-                    .newDocumentBuilder()
-                    .parse(stream)
-
-                val nodeList = document.getElementsByTagName("string")
-                for (i in 0 until nodeList.length) {
-                    val node = nodeList.item(i)
-                    if (node.nodeType == Node.ELEMENT_NODE) {
-                        val element = node as Element
-                        val name = element.getAttribute("name")
-                        val value = element.textContent
-                        try {
-                            sanitizeAndroidResourceString(
-                                key = name,
-                                value = value,
-                                filePath = srcSubPath,
-                                throwException = true
-                            )
-                        } catch (e: Exception) {
-                            exceptions += e
-                        }
-
-                        stringsChecked++
-                    }
-                }
-            }
+            stringsChecked += checkStrings("$srcFolderName/$appId/strings.xml", exceptions)
         }
+    }
+    defaultOnlyAppIds.forEach { appId ->
+        val defaultFolderName = locales.first().getSrcLocaleFolderName()
+        stringsChecked += checkStrings("$defaultFolderName/$appId/strings.xml", exceptions)
     }
 
     if (exceptions.isNotEmpty()) {
@@ -101,4 +77,35 @@ internal fun main(args: Array<String>) {
     }
 
     println("Verified $stringsChecked strings, no issues found")
+}
+
+private fun checkStrings(
+    srcSubPath: String,
+    exceptions: MutableList<Exception>,
+): Int {
+    val stream =
+        inputStreamFromBundledResource("addresources", srcSubPath)
+            ?: throw IllegalArgumentException("Could not find resource $srcSubPath")
+
+    stream.use {
+        val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(it)
+        val nodeList = document.getElementsByTagName("string")
+        for (index in 0 until nodeList.length) {
+            val node = nodeList.item(index)
+            if (node.nodeType != Node.ELEMENT_NODE) continue
+
+            val element = node as Element
+            try {
+                sanitizeAndroidResourceString(
+                    key = element.getAttribute("name"),
+                    value = element.textContent,
+                    filePath = srcSubPath,
+                    throwException = true,
+                )
+            } catch (exception: Exception) {
+                exceptions += exception
+            }
+        }
+        return nodeList.length
+    }
 }

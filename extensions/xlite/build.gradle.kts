@@ -8,7 +8,6 @@ android {
 
 dependencies {
     compileOnly(project(":extensions:shared:library"))
-    implementation(project(":extensions:xlite:api"))
     compileOnly(project(":extensions:xlite:stub"))
     compileOnly(libs.morphe.extensions.library)
     compileOnly(libs.annotation)
