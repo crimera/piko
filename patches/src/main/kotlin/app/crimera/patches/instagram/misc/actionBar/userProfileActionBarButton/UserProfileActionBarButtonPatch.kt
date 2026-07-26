@@ -34,13 +34,15 @@ internal object ProfileActionBarRelatedFingerprint : Fingerprint(
 )
 
 internal object ProfileHeaderRelatedFingerprint : Fingerprint(
-    strings = listOf("user_profile_header", "profile_search_igid_extra", "profile_search_display_name_extra"),
+    strings = listOf("profile_user_id", "click_point", "user_profile_header"),
     returnType = "V",
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 3
+    },
 )
 
 internal object ProfileActionBarFingerprint : Fingerprint(
     definingClass = "Lcom/instagram/profile/actionbar/ProfileActionBar;",
-    strings = listOf("IG_PROFILE"),
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
 )
 
@@ -71,52 +73,42 @@ val userProfileActionBarButtonPatch =
 
             val userDataFieldInUserDetailClass = userDetailsClassFields.first { it.type == USER_MODEL_CLASS_NAME }
 
-            val userSessionFieldInUserDetailClass = userDetailsClassFields.first { it.type == USER_SESSION_CLASS }
-
-            ProfileActionBarFingerprint
-                .method
-                .apply {
-
-                    instructions.filter { it.opcode == Opcode.INVOKE_VIRTUAL }.first {
-                        val methodExt = it.methodExtractor()
-                        if (methodExt.name == "removeAllViews") {
-                            val index = it.location.index + 1
-                            val viewGroupRegister = getInstruction(index).registersUsed[0]
-                            val nextInstruction = getInstruction(index + 1)
-                            val freeRegister = findFreeRegister(index, viewGroupRegister)
-
-                            val gotoIndexAfterTarget = indexOfFirstInstruction(index, Opcode.GOTO)
-                            val invokeStaticAfterGoto = indexOfFirstInstruction(gotoIndexAfterTarget, Opcode.INVOKE_STATIC)
-
-                            val actionBarRelatedObjectParameterRegister = getInstruction(invokeStaticAfterGoto).registersUsed[2]
-                            val userSessionRegister = getInstruction(invokeStaticAfterGoto).registersUsed[1]
-
-                            val CODE =
-                                """
-                                if-eqz v$actionBarRelatedObjectParameterRegister, :piko
-                                iget-object v$freeRegister, v$actionBarRelatedObjectParameterRegister, $profileHeaderFieldInActionBarRelatedClass
-                                
-                                if-eqz v$freeRegister, :piko
-                                iget-object v$freeRegister,v$freeRegister, $userDetailViewModelFieldInProfileHeaderRelatedClass
-                                
-                                if-eqz v$freeRegister, :piko
-                                iget-object v$freeRegister,v$freeRegister, $userDataFieldInUserDetailClass
-                                
-                                invoke-static {v$viewGroupRegister, v$userSessionRegister, v$freeRegister}, $ACTIONBAR_DESCRIPTOR->userProfileActionBarButton(Landroid/view/ViewGroup;${USER_SESSION_CLASS}Ljava/lang/Object;)V
-                                """.trimIndent()
-
-                            addInstructionsWithLabels(
-                                index + 1,
-                                CODE,
-                                ExternalLabel("piko", nextInstruction),
-                            )
-
-                            addFlags("profileActionBarFlags")
-                            true
-                        } else {
-                            false
-                        }
+            ProfileActionBarFingerprint.method.apply {
+                val actionBarRelatedObjectParameterRegister =
+                    parameters.indexOfFirst {
+                        it.type ==
+                            ProfileActionBarRelatedFingerprint.classDef.type
                     }
-                }
+                val userSessionParameterRegister = parameters.indexOfFirst { it.type == USER_SESSION_CLASS }
+
+                val profileActionBarIconInjectMethodIndex = instructions.last { it.opcode == Opcode.INVOKE_STATIC_RANGE }.location.index
+                val layoutRegister = getInstruction(profileActionBarIconInjectMethodIndex - 1).registersUsed[0]
+                val nextReturnVoidIndex = indexOfFirstInstruction(profileActionBarIconInjectMethodIndex, Opcode.RETURN_VOID)
+                val freeRegister = 3
+                val freeRegister2 = 4
+                val CODE =
+                    """
+                    move-object/from16 v$freeRegister, p$actionBarRelatedObjectParameterRegister
+                            if-eqz v$actionBarRelatedObjectParameterRegister, :piko
+                            iget-object v$freeRegister, v$actionBarRelatedObjectParameterRegister, $profileHeaderFieldInActionBarRelatedClass
+                            
+                            if-eqz v$freeRegister, :piko
+                            iget-object v$freeRegister,v$freeRegister, $userDetailViewModelFieldInProfileHeaderRelatedClass
+                            
+                            if-eqz v$freeRegister, :piko
+                            iget-object v$freeRegister,v$freeRegister, $userDataFieldInUserDetailClass
+                            move-object/from16 v$freeRegister2, p$userSessionParameterRegister
+                            invoke-static {v$layoutRegister, v$freeRegister2, v$freeRegister}, $ACTIONBAR_DESCRIPTOR->userProfileActionBarButton(Landroid/view/ViewGroup;${USER_SESSION_CLASS}Ljava/lang/Object;)V
+                            return-void
+                    """.trimIndent()
+
+                addInstructionsWithLabels(
+                    profileActionBarIconInjectMethodIndex + 1,
+                    CODE,
+                    ExternalLabel("piko", getInstruction(nextReturnVoidIndex)),
+                )
+
+                addFlags("profileActionBarFlags")
+            }
         }
     }
