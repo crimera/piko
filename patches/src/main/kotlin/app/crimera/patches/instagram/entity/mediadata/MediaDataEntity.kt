@@ -129,7 +129,6 @@ val mediaDataEntity =
                 method.apply {
                     val getCommentTextFieldName = instructions.last { it.opcode == Opcode.IGET_OBJECT }.fieldExtractor().name
                     GetDescriptionTextExtensionFingerprint.changeStringAt(1, getCommentTextFieldName)
-                    println(getCommentTextFieldName)
                 }
             }
 
@@ -141,7 +140,6 @@ val mediaDataEntity =
                             commentObjectClassName
                     }.name
             GetDescriptionTextExtensionFingerprint.changeFirstString(getCommentDataFromMediaMethodName)
-            println(getCommentDataFromMediaMethodName)
 
             // Extraction of trackInfo
             MusicAudioTypeEnumStringFingerprint.method.apply {

@@ -124,4 +124,8 @@ internal object IsVerifiedUserTreeDictFingerprint : Fingerprint(
     definingClass = LIVE_TREE_USER_DICT_CLASS,
     strings = listOf("is_verified"),
     returnType = "Ljava/lang/Boolean;",
+    filters =
+        listOf(
+            literal(1565553213),
+        ),
 )
