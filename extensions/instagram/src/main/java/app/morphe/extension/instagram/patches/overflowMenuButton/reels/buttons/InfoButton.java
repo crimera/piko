@@ -12,12 +12,12 @@ import android.content.Context;
 import app.morphe.extension.instagram.patches.feed.MoreOptionsOnPostPatch;
 
 public class InfoButton extends ReelButton {
-    public InfoButton(Context context, Object mediaObject) {
-        super(context, mediaObject);
+    public InfoButton(Context context, Object mediaObject, int currentMediaIndex) {
+        super(context, mediaObject, currentMediaIndex);
     }
 
     @Override
     public void onClick(View view) {
-        MoreOptionsOnPostPatch.postMoreOptions(this.context, null, this.mediaObject, 0);
+        MoreOptionsOnPostPatch.postMoreOptions(this.context, null, this.mediaObject, this.currentMediaIndex);
     }
 }
