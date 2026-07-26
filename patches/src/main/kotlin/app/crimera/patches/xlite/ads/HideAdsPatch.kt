@@ -1,12 +1,13 @@
 package app.crimera.patches.xlite.ads
 
-import app.crimera.patches.xlite.settings.XLiteSettingsCategory
 import app.crimera.patches.xlite.settings.injectBooleanRead
 import app.crimera.patches.xlite.settings.toggleSetting
 import app.crimera.patches.xlite.settings.xLiteSettingsContributionPatch
 import app.crimera.patches.xlite.timeline.XLiteTimelineSuccessFingerprint
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
+import app.morphe.extension.xlite.api.XLiteSettings.Categories
+import app.morphe.extension.xlite.api.XLiteSettings.Keys
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -14,7 +15,7 @@ import app.morphe.util.findFreeRegister
 
 private val filterPromotedPosts =
     toggleSetting(
-        id = "xlite.content.filter_promoted_posts",
+        key = Keys.FILTER_PROMOTED_POSTS,
         titleResourceName = "piko_xlite_filter_promoted_posts_title",
         summaryResourceName = "piko_xlite_filter_promoted_posts_summary",
         order = 100,
@@ -23,7 +24,7 @@ private val filterPromotedPosts =
 
 private val filterPromotedPostsSettingsPatch =
     xLiteSettingsContributionPatch {
-        category(XLiteSettingsCategory.CONTENT) {
+        category(Categories.CONTENT) {
             add(filterPromotedPosts)
         }
     }

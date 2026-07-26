@@ -18,6 +18,10 @@ dependencies {
 
     implementation(libs.morphe.patches.library)
 
+    // Shared X-Lite types (categories + keys) from the API module.
+    // Must be implementation — the compiled patches reference these at load time.
+    implementation(project(":extensions:xlite:api"))
+
     testImplementation(kotlin("test"))
 }
 

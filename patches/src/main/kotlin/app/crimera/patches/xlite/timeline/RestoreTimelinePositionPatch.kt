@@ -1,9 +1,10 @@
 package app.crimera.patches.xlite.timeline
 
-import app.crimera.patches.xlite.settings.XLiteSettingsCategory
 import app.crimera.patches.xlite.settings.toggleSetting
 import app.crimera.patches.xlite.settings.xLiteSettingsContributionPatch
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.morphe.extension.xlite.api.XLiteSettings.Categories
+import app.morphe.extension.xlite.api.XLiteSettings.Keys
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -64,7 +65,7 @@ private object XLiteSaveScrollPositionFingerprint : Fingerprint(
 
 private val restoreTimelinePosition =
     toggleSetting(
-        id = "xlite.timeline.restore_position",
+        key = Keys.RESTORE_TIMELINE_POSITION,
         titleResourceName = "piko_xlite_restore_timeline_position_title",
         summaryResourceName = "piko_xlite_restore_timeline_position_summary",
         order = 150,
@@ -74,7 +75,7 @@ private val restoreTimelinePosition =
 
 private val restoreTimelinePositionSettingsPatch =
     xLiteSettingsContributionPatch {
-        category(XLiteSettingsCategory.TIMELINE) {
+        category(Categories.TIMELINE) {
             add(restoreTimelinePosition)
         }
     }

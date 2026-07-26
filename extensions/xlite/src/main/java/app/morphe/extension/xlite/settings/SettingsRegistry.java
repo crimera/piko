@@ -19,6 +19,7 @@ import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.settings.BooleanSetting;
 import app.morphe.extension.shared.settings.Setting;
 import app.morphe.extension.shared.settings.StringSetting;
+import app.morphe.extension.xlite.api.SettingKey;
 
 public final class SettingsRegistry {
     private enum ItemType {
@@ -201,6 +202,20 @@ public final class SettingsRegistry {
             throw failure("X-Lite setting is not a string set: " + key);
         }
         return stringSetSetting.get();
+    }
+
+    // ── Typed key overloads ──────────────────────────────────────────────
+
+    public static boolean getBoolean(SettingKey<Boolean> key) {
+        return getBoolean(key.getId());
+    }
+
+    public static String getString(SettingKey<String> key) {
+        return getString(key.getId());
+    }
+
+    public static Set<String> getStringSet(SettingKey<Set<String>> key) {
+        return getStringSet(key.getId());
     }
 
     private static void registerGroupInternal(
