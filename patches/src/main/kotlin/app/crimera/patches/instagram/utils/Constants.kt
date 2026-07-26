@@ -39,6 +39,7 @@ object Constants {
     const val MEDIA_OPTIONS_CLASS = "Lcom/instagram/feed/media/mediaoption/MediaOption\$Option;"
     const val USER_SESSION_CLASS = "Lcom/instagram/common/session/UserSession;"
     const val USER_DETAIL_VIEW_MODEL_CLASS = "Lcom/instagram/profile/fragment/UserDetailViewModel;"
+    const val ORIGINAL_SOUND_DATA_INTF = "Lcom/instagram/api/schemas/OriginalSoundDataIntf;"
 
     // Extension classes.
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/instagram"

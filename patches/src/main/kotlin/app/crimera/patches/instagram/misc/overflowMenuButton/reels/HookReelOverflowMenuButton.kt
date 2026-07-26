@@ -14,7 +14,7 @@ import app.crimera.patches.instagram.utils.Constants.ADD_REEL_BTN_OVERFLOW_MENU_
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.FRAGMENT_ACTIVITY
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
@@ -38,16 +38,19 @@ val hookReelOverflowMenuButton =
                 // This is the same class used by the feed hook to get CURRENT_MEDIA_FIELD.
                 val mediaExtraDataField = classFields.firstOrNull { it.type == MEDIA_ADD_INFO_CLASS_NAME }
 
-                val selfClassRegister = instructions[indexOfFirstInstruction(Opcode.MOVE_OBJECT_FROM16)].registersUsed[0]
-                val buttonAdderInstanceRegister = instructions[indexOfFirstInstruction(Opcode.NEW_INSTANCE)].registersUsed[0]
+                val selfClassRegister = getInstruction(indexOfFirstInstruction(Opcode.MOVE_OBJECT_FROM16)).registersUsed[0]
+                val buttonAdderInstanceRegister = getInstruction(indexOfFirstInstruction(Opcode.NEW_INSTANCE)).registersUsed[0]
 
                 val sPutIndex = indexOfFirstInstruction(Opcode.SPUT)
                 val mediaObjectFromParameterIndex = indexOfFirstInstruction(sPutIndex, Opcode.MOVE_OBJECT_FROM16)
-                val mediaObjectRegister = instructions[mediaObjectFromParameterIndex].registersUsed[0]
+                val mediaObjectRegister = getInstruction(mediaObjectFromParameterIndex).registersUsed[0]
 
                 // freeRegisterOne is used for scratch — it's set by CONST_4 after our injection
                 // point so it's safe to clobber before that instruction runs.
-                val freeRegisterOne = instructions[indexOfFirstInstruction(mediaObjectFromParameterIndex, Opcode.CONST_4)].registersUsed[0]
+                val freeRegisterOne =
+                    getInstruction(
+                        indexOfFirstInstruction(mediaObjectFromParameterIndex, Opcode.CONST_4),
+                    ).registersUsed[0]
 
                 if (mediaExtraDataField != null) {
                     // Safe two-register pattern: identical to how the feed onClick hook reads

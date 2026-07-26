@@ -11,12 +11,10 @@ import app.crimera.patches.instagram.entity.decoder.ReelsInlineQualitySurveyRela
 import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.utils.Constants
 import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CLASS
+import app.crimera.patches.instagram.utils.Constants.ORIGINAL_SOUND_DATA_INTF
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.InstructionLocation.MatchAfterWithin
-import app.morphe.patcher.opcode
 import com.android.tools.smali.dexlib2.AccessFlags
-import com.android.tools.smali.dexlib2.Opcode
 
 internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
@@ -154,17 +152,16 @@ internal object DirectShareTargetRelatedFingerprint : Fingerprint(
     },
 )
 
+internal object GetDisplayArtistFromMusicInfoAndOriginalSoundDataFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    parameters = listOf("Lcom/instagram/api/schemas/MusicInfo;", ORIGINAL_SOUND_DATA_INTF),
+)
+
 internal object MusicAudioTypeEnumStringFingerprint : Fingerprint(
+    classFingerprint = GetDisplayArtistFromMusicInfoAndOriginalSoundDataFingerprint,
     returnType = "Ljava/lang/String;",
     parameters = listOf("Landroid/content/Context;", USER_SESSION_CLASS, MEDIA_CLASS_NAME),
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
-    filters =
-        listOf(
-            opcode(
-                opcode = Opcode.IF_EQZ,
-                location = MatchAfterWithin(4),
-            ),
-        ),
 )
 
 internal object AudioIntfMapperFingerprint : Fingerprint(
@@ -226,7 +223,7 @@ internal object AyuMidcardMediaHelperImageObjectMethodFingerprint : Fingerprint(
 
 internal object GetOriginalSoundDataIntfFromMediaFingerprint : Fingerprint(
     classFingerprint = ReelsInlineQualitySurveyRelatedFingerprint,
-    returnType = "OriginalSoundDataIntf;",
+    returnType = ORIGINAL_SOUND_DATA_INTF,
 )
 
 internal object GetUserDataFromMediaFingerprint : Fingerprint(
