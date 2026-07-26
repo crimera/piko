@@ -26,8 +26,6 @@ val mediaDataEntity =
     ) {
         dependsOn(decoderEntity)
         execute {
-            var mediaHelperClass: String
-
             GetHelperClassExtensionFingerprint.changeFirstString(classNameToExtension(MEDIAEXT_CLASS_NAME))
 
             // Extracting get original sound info data using media and user session.
@@ -125,21 +123,25 @@ val mediaDataEntity =
             GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(LiveTreeMediaDictGetUserFingerprint.method.name)
 
             // Extraction of description
-            EditMediaInfoGetCurrentMediaIdFingerprint.method.apply {
-
-                val getCommentDataFromMediaMethodName =
-                    getInstruction(
-                        instructions.indexOfLast { it.opcode == Opcode.INVOKE_STATIC },
-                    ).methodExtractor().name
-
-                val getCommentTextFieldName =
-                    getInstruction(
-                        instructions.indexOfLast { it.opcode == Opcode.IGET_OBJECT },
-                    ).fieldExtractor().name
-
-                GetDescriptionTextExtensionFingerprint.changeFirstString(getCommentDataFromMediaMethodName)
-                GetDescriptionTextExtensionFingerprint.changeStringAt(1, getCommentTextFieldName)
+            val commentObjectClassName: String
+            CommentToStringFingerprint.apply {
+                commentObjectClassName = classDef.type
+                method.apply {
+                    val getCommentTextFieldName = instructions.last { it.opcode == Opcode.IGET_OBJECT }.fieldExtractor().name
+                    GetDescriptionTextExtensionFingerprint.changeStringAt(1, getCommentTextFieldName)
+                    println(getCommentTextFieldName)
+                }
             }
+
+            val getCommentDataFromMediaMethodName =
+                mutableClassDefBy { it.type == MEDIAEXT_CLASS_NAME }
+                    .methods
+                    .first {
+                        it.returnType ==
+                            commentObjectClassName
+                    }.name
+            GetDescriptionTextExtensionFingerprint.changeFirstString(getCommentDataFromMediaMethodName)
+            println(getCommentDataFromMediaMethodName)
 
             // Extraction of trackInfo
             MusicAudioTypeEnumStringFingerprint.method.apply {

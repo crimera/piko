@@ -225,3 +225,8 @@ internal object GetUserDataFromMediaFingerprint : Fingerprint(
     parameters = listOf(USER_SESSION_CLASS, MEDIA_CLASS_NAME),
     returnType = USER_MODEL_CLASS_NAME,
 )
+
+internal object CommentToStringFingerprint : Fingerprint(
+    name = "toString",
+    strings = listOf("Comment{mCreatedAtSeconds=%d, mUser=@%s, mText=\'%s\'}"),
+)
