@@ -260,8 +260,19 @@ public class MediaData extends Entity {
     
     public String getImageLink() throws Exception {
         List<ImageData> imageDataList = this.getImageVariants();
-        if(imageDataList!=null){
-            return imageDataList.get(0).getUrl();
+        if(imageDataList != null && !imageDataList.isEmpty()){
+            ImageData highestResolutionImage = imageDataList.get(0);
+            long highestPixelCount = (long) highestResolutionImage.getWidth() * highestResolutionImage.getHeight();
+
+            for (ImageData imageData : imageDataList) {
+                long pixelCount = (long) imageData.getWidth() * imageData.getHeight();
+                if (pixelCount > highestPixelCount) {
+                    highestResolutionImage = imageData;
+                    highestPixelCount = pixelCount;
+                }
+            }
+
+            return highestResolutionImage.getUrl();
         }
         return null;
     }
