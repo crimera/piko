@@ -252,8 +252,19 @@ public class MediaData extends Entity {
 
     public String getVideoLink() throws Exception {
         List<VideoData> videoDataList = this.getVideoVariants();
-        if(videoDataList!=null){
-            return videoDataList.get(0).getUrl();
+        if(videoDataList != null && !videoDataList.isEmpty()){
+            VideoData highestResolutionVideo = videoDataList.get(0);
+            long highestPixelCount = (long) highestResolutionVideo.getWidth() * highestResolutionVideo.getHeight();
+
+            for (VideoData videoData : videoDataList) {
+                long pixelCount = (long) videoData.getWidth() * videoData.getHeight();
+                if (pixelCount > highestPixelCount) {
+                    highestResolutionVideo = videoData;
+                    highestPixelCount = pixelCount;
+                }
+            }
+
+            return highestResolutionVideo.getUrl();
         }
         return null;
     }
