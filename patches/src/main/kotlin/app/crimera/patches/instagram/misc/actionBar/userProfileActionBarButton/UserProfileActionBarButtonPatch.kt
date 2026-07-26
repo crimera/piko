@@ -78,7 +78,7 @@ val userProfileActionBarButtonPatch =
                     parameters.indexOfFirst {
                         it.type ==
                             ProfileActionBarRelatedFingerprint.classDef.type
-                    }
+                    } + 1
                 val userSessionParameterRegister = parameters.indexOfFirst { it.type == USER_SESSION_CLASS }
 
                 val profileActionBarIconInjectMethodIndex = instructions.last { it.opcode == Opcode.INVOKE_STATIC_RANGE }.location.index
@@ -99,7 +99,7 @@ val userProfileActionBarButtonPatch =
                             if-eqz v$freeRegister, :piko
                             iget-object v$freeRegister,v$freeRegister, $userDataFieldInUserDetailClass
                             move-object/from16 v$freeRegister2, p$userSessionParameterRegister
-                            move-object/from16 v$freeRegister3, p$layoutRegister
+                            move-object/from16 v$freeRegister3, v$layoutRegister
                             invoke-static {v$freeRegister3, v$freeRegister2, v$freeRegister}, $ACTIONBAR_DESCRIPTOR->userProfileActionBarButton(Landroid/view/ViewGroup;${USER_SESSION_CLASS}Ljava/lang/Object;)V
                             return-void
                     """.trimIndent()
