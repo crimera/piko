@@ -108,7 +108,7 @@ internal object LowResProfilePictureUserTreeDictFingerprint : Fingerprint(
     returnType = "ImageUrl;",
     filters =
         listOf(
-            opcode(Opcode.CONST_STRING_JUMBO, InstructionLocation.MatchFirst()),
+            literal(1782139044),
         ),
 )
 
