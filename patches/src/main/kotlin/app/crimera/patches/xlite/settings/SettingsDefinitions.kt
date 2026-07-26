@@ -1,29 +1,14 @@
 package app.crimera.patches.xlite.settings
 
+import app.morphe.extension.xlite.api.SettingsCategory
+import app.morphe.extension.xlite.api.SettingKey
+
 private val STABLE_ID_PATTERN = Regex("xlite\\.[a-z0-9._-]+")
 private val OPTION_ID_PATTERN = Regex("[a-zA-Z0-9._-]+")
 private val RESOURCE_NAME_PATTERN = Regex("piko_xlite_[a-z0-9_]+")
 private val HANDLER_DESCRIPTOR_PATTERN = Regex("L[a-zA-Z0-9_$/]+;")
 
-internal enum class XLiteSettingsCategory(
-    val id: String,
-    val titleResourceName: String,
-    val summaryResourceName: String?,
-    val order: Int,
-) {
-    TIMELINE(
-        id = "xlite.timeline",
-        titleResourceName = "piko_xlite_category_timeline_title",
-        summaryResourceName = null,
-        order = 100,
-    ),
-    CONTENT(
-        id = "xlite.content",
-        titleResourceName = "piko_xlite_category_content_title",
-        summaryResourceName = null,
-        order = 200,
-    ),
-}
+// ── Settings model definitions ───────────────────────────────────────────
 
 internal sealed interface SettingsNodeDefinition {
     val id: String
@@ -40,15 +25,20 @@ internal data class SettingsGroupDefinition(
     val children: List<SettingsNodeDefinition>,
 ) : SettingsNodeDefinition
 
-internal sealed interface SettingItemDefinition : SettingsNodeDefinition
+internal sealed interface SettingItemDefinition : SettingsNodeDefinition {
+    val key: SettingKey<*>
+    override val id: String
+        get() = key.id
+}
 
 internal sealed interface ValueSettingDefinition<T> : SettingItemDefinition {
+    override val key: SettingKey<T>
     val defaultValue: T
     val rebootApp: Boolean
 }
 
 internal data class ToggleSettingDefinition(
-    override val id: String,
+    override val key: SettingKey<Boolean>,
     override val titleResourceName: String,
     override val summaryResourceName: String?,
     override val order: Int,
@@ -62,7 +52,7 @@ internal enum class InputKind {
 }
 
 internal data class TextInputSettingDefinition(
-    override val id: String,
+    override val key: SettingKey<String>,
     override val titleResourceName: String,
     override val summaryResourceName: String?,
     override val order: Int,
@@ -77,7 +67,7 @@ internal data class ChoiceOption(
 )
 
 internal data class MultiChoiceSettingDefinition(
-    override val id: String,
+    override val key: SettingKey<Set<String>>,
     override val titleResourceName: String,
     override val summaryResourceName: String?,
     override val order: Int,
@@ -87,7 +77,7 @@ internal data class MultiChoiceSettingDefinition(
 ) : ValueSettingDefinition<Set<String>>
 
 internal data class ActionSettingDefinition(
-    override val id: String,
+    override val key: SettingKey<*>,
     override val titleResourceName: String,
     override val summaryResourceName: String?,
     override val order: Int,
@@ -98,11 +88,13 @@ internal data class SettingsContributionCatalog(
     val categories: List<SettingsGroupDefinition>,
 )
 
+// ── Builder ──────────────────────────────────────────────────────────────
+
 internal class SettingsContributionBuilder {
-    private val categoryBuilders = linkedMapOf<XLiteSettingsCategory, SettingsGroupBuilder>()
+    private val categoryBuilders = linkedMapOf<SettingsCategory, SettingsGroupBuilder>()
 
     fun category(
-        category: XLiteSettingsCategory,
+        category: SettingsCategory,
         block: SettingsGroupBuilder.() -> Unit,
     ) {
         categoryBuilders
@@ -156,25 +148,16 @@ internal class SettingsGroupBuilder(
     }
 
     fun toggle(
-        id: String,
+        key: SettingKey<Boolean>,
         titleResourceName: String,
         summaryResourceName: String? = null,
         order: Int = 0,
         defaultValue: Boolean,
         rebootApp: Boolean = false,
-    ) = add(
-        toggleSetting(
-            id,
-            titleResourceName,
-            summaryResourceName,
-            order,
-            defaultValue,
-            rebootApp,
-        ),
-    )
+    ) = add(ToggleSettingDefinition(key, titleResourceName, summaryResourceName, order, defaultValue, rebootApp))
 
     fun input(
-        id: String,
+        key: SettingKey<String>,
         titleResourceName: String,
         summaryResourceName: String? = null,
         order: Int = 0,
@@ -183,7 +166,7 @@ internal class SettingsGroupBuilder(
         inputKind: InputKind = InputKind.TEXT,
     ) = add(
         TextInputSettingDefinition(
-            id,
+            key,
             titleResourceName,
             summaryResourceName,
             order,
@@ -194,7 +177,7 @@ internal class SettingsGroupBuilder(
     )
 
     fun multiChoice(
-        id: String,
+        key: SettingKey<Set<String>>,
         titleResourceName: String,
         summaryResourceName: String? = null,
         order: Int = 0,
@@ -203,7 +186,7 @@ internal class SettingsGroupBuilder(
         options: List<ChoiceOption>,
     ) = add(
         MultiChoiceSettingDefinition(
-            id,
+            key,
             titleResourceName,
             summaryResourceName,
             order,
@@ -214,14 +197,14 @@ internal class SettingsGroupBuilder(
     )
 
     fun action(
-        id: String,
+        key: SettingKey<*>,
         titleResourceName: String,
         summaryResourceName: String? = null,
         order: Int = 0,
         handlerClassDescriptor: String,
     ) = add(
         ActionSettingDefinition(
-            id,
+            key,
             titleResourceName,
             summaryResourceName,
             order,
@@ -239,24 +222,21 @@ internal class SettingsGroupBuilder(
         )
 }
 
+// ── Top-level factory functions ──────────────────────────────────────────
+
 internal fun toggleSetting(
-    id: String,
+    key: SettingKey<Boolean>,
     titleResourceName: String,
     summaryResourceName: String? = null,
     order: Int = 0,
     defaultValue: Boolean,
     rebootApp: Boolean = false,
-) = ToggleSettingDefinition(
-    id,
-    titleResourceName,
-    summaryResourceName,
-    order,
-    defaultValue,
-    rebootApp,
-)
+) = ToggleSettingDefinition(key, titleResourceName, summaryResourceName, order, defaultValue, rebootApp)
 
 private val nodeComparator =
     compareBy<SettingsNodeDefinition>(SettingsNodeDefinition::order, SettingsNodeDefinition::id)
+
+// ── Validation ───────────────────────────────────────────────────────────
 
 internal fun validateSettingsContribution(catalog: SettingsContributionCatalog) {
     require(catalog.categories.isNotEmpty()) { "An X-Lite settings contribution cannot be empty" }

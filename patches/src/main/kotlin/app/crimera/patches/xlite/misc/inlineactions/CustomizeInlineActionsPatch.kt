@@ -2,11 +2,12 @@ package app.crimera.patches.xlite.misc.inlineactions
 
 import app.crimera.patches.xlite.settings.ChoiceOption
 import app.crimera.patches.xlite.settings.MultiChoiceSettingDefinition
-import app.crimera.patches.xlite.settings.XLiteSettingsCategory
 import app.crimera.patches.xlite.settings.injectStringSetRead
 import app.crimera.patches.xlite.settings.xLiteSettingsContributionPatch
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.INLINE_ACTION_FILTER_DESCRIPTOR
+import app.morphe.extension.xlite.api.XLiteSettings.Categories
+import app.morphe.extension.xlite.api.XLiteSettings.Keys
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -59,7 +60,7 @@ private object CustomizeXLiteInlineActionsFingerprint : Fingerprint(
 
 private val hiddenInlineActions =
     MultiChoiceSettingDefinition(
-        id = "xlite.content.hidden_inline_actions",
+        key = Keys.HIDDEN_INLINE_ACTIONS,
         titleResourceName = "piko_xlite_inline_actions_title",
         summaryResourceName = "piko_xlite_inline_actions_summary",
         order = 200,
@@ -77,7 +78,7 @@ private val hiddenInlineActions =
 
 private val hiddenInlineActionsSettingsPatch =
     xLiteSettingsContributionPatch {
-        category(XLiteSettingsCategory.CONTENT) {
+        category(Categories.CONTENT) {
             add(hiddenInlineActions)
         }
     }

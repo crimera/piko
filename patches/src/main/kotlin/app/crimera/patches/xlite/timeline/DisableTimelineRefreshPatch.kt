@@ -1,10 +1,11 @@
 package app.crimera.patches.xlite.timeline
 
-import app.crimera.patches.xlite.settings.XLiteSettingsCategory
 import app.crimera.patches.xlite.settings.injectBooleanRead
 import app.crimera.patches.xlite.settings.toggleSetting
 import app.crimera.patches.xlite.settings.xLiteSettingsContributionPatch
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.morphe.extension.xlite.api.XLiteSettings.Categories
+import app.morphe.extension.xlite.api.XLiteSettings.Keys
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -56,7 +57,7 @@ private object XLiteLifecycleAutoRefreshFingerprint : Fingerprint(
 
 private val disableTimelineRefresh =
     toggleSetting(
-        id = "xlite.timeline.disable_refresh",
+        key = Keys.DISABLE_TIMELINE_REFRESH,
         titleResourceName = "piko_xlite_disable_timeline_refresh_title",
         summaryResourceName = "piko_xlite_disable_timeline_refresh_summary",
         order = 100,
@@ -65,7 +66,7 @@ private val disableTimelineRefresh =
 
 private val disableTimelineRefreshSettingsPatch =
     xLiteSettingsContributionPatch {
-        category(XLiteSettingsCategory.TIMELINE) {
+        category(Categories.TIMELINE) {
             add(disableTimelineRefresh)
         }
     }

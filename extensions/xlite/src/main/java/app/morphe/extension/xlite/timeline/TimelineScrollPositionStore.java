@@ -15,10 +15,10 @@ import java.util.regex.Pattern;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.xlite.api.XLiteSettings.Keys;
 import app.morphe.extension.xlite.settings.SettingsRegistry;
 
 public final class TimelineScrollPositionStore {
-    private static final String ENABLED_SETTING = "xlite.timeline.restore_position";
     private static final String PREFERENCES_NAME = "piko_xlite_timeline_positions";
     private static final String INDEX_SUFFIX = ".index";
     private static final String OFFSET_SUFFIX = ".offset";
@@ -30,7 +30,7 @@ public final class TimelineScrollPositionStore {
     }
 
     public static void restore(Object store) {
-        if (!SettingsRegistry.getBoolean(ENABLED_SETTING)) return;
+        if (!SettingsRegistry.getBoolean(Keys.RESTORE_TIMELINE_POSITION)) return;
 
         try {
             SharedPreferences preferences = preferences();
@@ -64,7 +64,7 @@ public final class TimelineScrollPositionStore {
     }
 
     public static void save(Enum<?> timeline, Object holder) {
-        if (!SettingsRegistry.getBoolean(ENABLED_SETTING)) return;
+        if (!SettingsRegistry.getBoolean(Keys.RESTORE_TIMELINE_POSITION)) return;
 
         try {
             SharedPreferences preferences = preferences();

@@ -1,10 +1,11 @@
 package app.crimera.patches.xlite.timeline
 
-import app.crimera.patches.xlite.settings.XLiteSettingsCategory
 import app.crimera.patches.xlite.settings.injectBooleanRead
 import app.crimera.patches.xlite.settings.toggleSetting
 import app.crimera.patches.xlite.settings.xLiteSettingsContributionPatch
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.morphe.extension.xlite.api.XLiteSettings.Categories
+import app.morphe.extension.xlite.api.XLiteSettings.Keys
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -27,7 +28,7 @@ private object XLiteNewPostsPillFingerprint : Fingerprint(
 
 private val hideNewPostPill =
     toggleSetting(
-        id = "xlite.timeline.hide_new_post_pill",
+        key = Keys.HIDE_NEW_POST_PILL,
         titleResourceName = "piko_xlite_hide_new_post_pill_title",
         summaryResourceName = "piko_xlite_hide_new_post_pill_summary",
         order = 200,
@@ -36,7 +37,7 @@ private val hideNewPostPill =
 
 private val hideNewPostPillSettingsPatch =
     xLiteSettingsContributionPatch {
-        category(XLiteSettingsCategory.TIMELINE) {
+        category(Categories.TIMELINE) {
             add(hideNewPostPill)
         }
     }
