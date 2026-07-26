@@ -34,6 +34,7 @@ public class Links {
     private static final boolean DISABLE_DISCOVER_PEOPLE;
     private static final boolean DISABLE_ADS;
     private static final boolean DISABLE_HIGHLIGHTS;
+    private static final boolean DISABLE_ONBOARDING_PERMISSION_PROMPTS;
     private static final List<String> META_PACKAGES;
 
     static {
@@ -44,6 +45,7 @@ public class Links {
         DISABLE_COMMENTS = Pref.disableComments() && SettingsStatus.disableComments;
         DISABLE_DISCOVER_PEOPLE = Pref.disableDiscoverPeople() && SettingsStatus.disableDiscoverPeople;
         DISABLE_ADS = Pref.disableAds() && SettingsStatus.disableAds;
+        DISABLE_ONBOARDING_PERMISSION_PROMPTS = SettingsStatus.disableOnboardingPermissionPrompts;
 
         META_PACKAGES = Arrays.asList(
                 "com.instagram.android",      // Instagram
@@ -96,6 +98,9 @@ public class Links {
                         || host.contains("graph.facebook.com")
                         || path.contains("/logging_client_events")) {
                     shouldBlockUri = DISABLE_ANALYTICS;
+                } else if (path.contains("/consent/existing_user_flow/")
+                        || path.contains("/consent/new_user_flow/")) {
+                    shouldBlockUri = DISABLE_ONBOARDING_PERMISSION_PROMPTS;
                 } else if (path.contains("/api/v2/media/seen/")) {
                     shouldBlockUri = Pref.viewStoriesAnonymously();
                 } else if (path.contains("/heartbeat_and_get_viewer_count/")) {

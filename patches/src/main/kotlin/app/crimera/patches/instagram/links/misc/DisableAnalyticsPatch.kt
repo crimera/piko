@@ -9,7 +9,6 @@ package app.crimera.patches.instagram.links.misc
 import app.crimera.patches.instagram.links.interceptUriPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.addFlags
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
 
@@ -23,9 +22,6 @@ val disableAnalyticsPatch =
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
-
-            addFlags("contactPermissionConsentFlags")
-
             enableSettings("disableAnalytics")
         }
     }

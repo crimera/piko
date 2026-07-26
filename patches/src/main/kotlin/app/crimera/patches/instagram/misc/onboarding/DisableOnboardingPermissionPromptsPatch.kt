@@ -6,9 +6,11 @@
 
 package app.crimera.patches.instagram.misc.onboarding
 
+import app.crimera.patches.instagram.links.interceptUriPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.addFlags
+import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.patch.bytecodePatch
 
 @Suppress("unused")
@@ -18,10 +20,11 @@ val disableOnboardingPermissionPromptsPatch =
         description = "Prevents contacts and location permission onboarding prompts from appearing on launch.",
         default = true,
     ) {
-        dependsOn(settingsPatch)
+        dependsOn(settingsPatch, interceptUriPatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
             addFlags("onboardingPermissionPromptFlags")
+            enableSettings("disableOnboardingPermissionPrompts")
         }
     }
