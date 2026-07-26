@@ -81,9 +81,7 @@ internal object UserNameLiveTreeUserDictFingerprint : Fingerprint(
     definingClass = LIVE_TREE_USER_DICT_CLASS,
     filters =
         listOf(
-            literal(31),
-            literal(8),
-            literal(0),
+            literal(-265713450),
         ),
 )
 
