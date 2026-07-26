@@ -18,7 +18,6 @@ import com.android.tools.smali.dexlib2.AccessFlags
 
 internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
-internal const val VIDEO_INFO_MAPPER_KEY = "video_to_carousel_cut_info"
 
 internal object GetHelperClassExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
@@ -107,11 +106,6 @@ internal object GetPostTypeExtensionFingerprint : Fingerprint(
 
 // -----------------------------------
 
-internal object ReelsMentionDoubleTapFingerprint : Fingerprint(
-    returnType = "V",
-    strings = listOf("userSession", "direct_add_mention_tap"),
-)
-
 internal object InstagramMainActivityNotificationRelatedFingerprint : Fingerprint(
     definingClass = "/InstagramMainActivity;",
     strings = listOf("nme_ig_post_post_creation_notif", "nme_ig_post_story_creation_notif"),
@@ -181,14 +175,14 @@ internal object ExtMediaDictVideoInfoMapperFingerprint : Fingerprint(
     strings =
         listOf(
             "video_subtitles_uri",
-            VIDEO_INFO_MAPPER_KEY,
+            "video_to_carousel_cut_info",
         ),
     returnType = "Ljava/util/Map;",
 )
 
-internal object LiveTreeMediaDictClinitFingerprint : Fingerprint(
-    name = "<clinit>",
-    strings = listOf(VIDEO_INFO_MAPPER_KEY),
+internal object LiveTreeMediaDictReelsMentionFingerprint : Fingerprint(
+    returnType = "Ljava/util/List;",
+    strings = listOf("reel_mentions"),
 )
 
 internal object ExtMediaDictImageInfoMapperFingerprint : Fingerprint(
