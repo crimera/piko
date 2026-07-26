@@ -86,6 +86,7 @@ val userProfileActionBarButtonPatch =
                 val nextReturnVoidIndex = indexOfFirstInstruction(profileActionBarIconInjectMethodIndex, Opcode.RETURN_VOID)
                 val freeRegister = 3
                 val freeRegister2 = 4
+                val freeRegister3 = 5
                 val CODE =
                     """
                     move-object/from16 v$freeRegister, p$actionBarRelatedObjectParameterRegister
@@ -98,7 +99,8 @@ val userProfileActionBarButtonPatch =
                             if-eqz v$freeRegister, :piko
                             iget-object v$freeRegister,v$freeRegister, $userDataFieldInUserDetailClass
                             move-object/from16 v$freeRegister2, p$userSessionParameterRegister
-                            invoke-static {v$layoutRegister, v$freeRegister2, v$freeRegister}, $ACTIONBAR_DESCRIPTOR->userProfileActionBarButton(Landroid/view/ViewGroup;${USER_SESSION_CLASS}Ljava/lang/Object;)V
+                            move-object/from16 v$freeRegister3, p$layoutRegister
+                            invoke-static {v$freeRegister3, v$freeRegister2, v$freeRegister}, $ACTIONBAR_DESCRIPTOR->userProfileActionBarButton(Landroid/view/ViewGroup;${USER_SESSION_CLASS}Ljava/lang/Object;)V
                             return-void
                     """.trimIndent()
 
