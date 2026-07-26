@@ -52,8 +52,8 @@ val sanitizeShareLinksPatch =
 
             val responseImplFingerprint =
                 listOf(
-                    StoryUrlResponseImplFingerprint,
-                    LiveUrlResponseImplFingerprint,
+                    StoryItemThirdPartySharingUrlResponseImplFingerprint,
+                    LiveThirdPartySharingUrlResponseImplFingerprint,
                 )
 
             responseImplFingerprint.forEach { fingerprint ->
