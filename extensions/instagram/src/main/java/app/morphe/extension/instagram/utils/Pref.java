@@ -208,9 +208,7 @@ public class Pref {
     }
 
     public static Integer improveImageViewing(Integer defaultSize) {
-        return enableDownload() || SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING)
-                ? MAX_IMAGE_SIZE
-                : defaultSize;
+        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
     }
 
     public static boolean enableDownload() {
