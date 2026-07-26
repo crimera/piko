@@ -24,6 +24,11 @@ public class HookFlags {
         BOOL_FLAGS.put("56295", false); //ig_device_permission_consent
     }
 
+    private static void onboardingPermissionPromptFlags() {
+        BOOL_FLAGS.put("56295", false); //ig_device_permission_consent
+        BOOL_FLAGS.put("77866", false); //ig4a_d0_retention
+    }
+
     private static void simpleOverflowMenuFlags() {
         BOOL_FLAGS.put("104772", false); //ig_ini
         BOOL_FLAGS.put("117613::0", true); //ig_overflow_menu_icon::use_more_lines_icon
