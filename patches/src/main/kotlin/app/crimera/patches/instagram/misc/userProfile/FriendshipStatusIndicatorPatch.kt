@@ -78,8 +78,9 @@ val friendshipStatusIndicatorPatch =
                     val internalBadgeReturnType = extensionToClassName(internalBadgeInstructionExtraction.returnType)
 
                     // Instruction to which the call needs to transfer after our hook.
-                    val moveFrom16Index =
-                        indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.MOVE_OBJECT_FROM16)
+//                    val moveFrom16Index =
+//                        indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.MOVE_OBJECT_FROM16)
+                    val invokeStaticRangeIndex = indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.INVOKE_STATIC_RANGE)
 
                     // Added instructions:
                     // Bypass the internal badge visibility checks.
@@ -88,7 +89,7 @@ val friendshipStatusIndicatorPatch =
                         """
                         goto :piko
                         """.trimIndent(),
-                        ExternalLabel("piko", getInstruction(moveFrom16Index)),
+                        ExternalLabel("piko", getInstruction(invokeStaticRangeIndex)),
                     )
 
                     // Added instructions:
