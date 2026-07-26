@@ -17,6 +17,7 @@ import app.morphe.extension.crimera.SharedPref;
 
 @SuppressWarnings("unused")
 public class Pref {
+    private static final int MAX_IMAGE_SIZE = 4096;
     public static boolean SHOULD_MARK_CHAT_AS_READ;
     static {
         SHOULD_MARK_CHAT_AS_READ = false;
@@ -203,11 +204,11 @@ public class Pref {
     }
 
     public static int improveImageViewing(int defaultSize) {
-        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? 2048 : defaultSize;
+        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
     }
 
     public static Integer improveImageViewing(Integer defaultSize) {
-        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? 2048 : defaultSize;
+        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
     }
 
     public static boolean enableDownload() {
