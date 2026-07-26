@@ -18,6 +18,7 @@ import com.android.tools.smali.dexlib2.AccessFlags
 
 internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
+internal const val LIVE_TREE_MEDIA_DICT_CLASS = "/LiveTreeMediaDict;"
 
 internal object GetHelperClassExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
@@ -138,14 +139,6 @@ internal object FanClubContentPreviewInteractorImplFingerprint : Fingerprint(
     strings = listOf("subscription_exclusive_content_public_preview_select", "creator_igid"),
 )
 
-internal object DirectShareTargetRelatedFingerprint : Fingerprint(
-    returnType = "V",
-    strings = listOf("", "https://www.instagram.com/p/"),
-    custom = { methodDef, _ ->
-        methodDef.parameters.size == 3 && methodDef.parameters.last().type == "Lcom/instagram/model/direct/DirectShareTarget;"
-    },
-)
-
 internal object GetDisplayArtistFromMusicInfoAndOriginalSoundDataFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     parameters = listOf("Lcom/instagram/api/schemas/MusicInfo;", ORIGINAL_SOUND_DATA_INTF),
@@ -183,6 +176,13 @@ internal object ExtMediaDictVideoInfoMapperFingerprint : Fingerprint(
 internal object LiveTreeMediaDictReelsMentionFingerprint : Fingerprint(
     returnType = "Ljava/util/List;",
     strings = listOf("reel_mentions"),
+    definingClass = LIVE_TREE_MEDIA_DICT_CLASS,
+)
+
+internal object LiveTreeMediaDictGetUserFingerprint : Fingerprint(
+    returnType = USER_MODEL_CLASS_NAME,
+    strings = listOf("user"),
+    definingClass = LIVE_TREE_MEDIA_DICT_CLASS,
 )
 
 internal object ExtMediaDictImageInfoMapperFingerprint : Fingerprint(

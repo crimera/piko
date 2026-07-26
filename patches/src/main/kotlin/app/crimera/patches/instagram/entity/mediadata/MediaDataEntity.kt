@@ -122,11 +122,7 @@ val mediaDataEntity =
             }
 
             // Extraction of user data used in extended media class.
-            DirectShareTargetRelatedFingerprint.method.apply {
-                val firstIfEqz = indexOfFirstInstruction(Opcode.IF_EQZ)
-                val userDataMethodName = getInstruction(indexOfFirstInstruction(firstIfEqz, Opcode.INVOKE_INTERFACE)).methodExtractor().name
-                GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(userDataMethodName)
-            }
+            GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(LiveTreeMediaDictGetUserFingerprint.method.name)
 
             // Extraction of description
             EditMediaInfoGetCurrentMediaIdFingerprint.method.apply {
