@@ -90,6 +90,7 @@ public class ActionBarPatch {
         }
     }
 
+    //TO-DO: Fix user profile action bar.
     public static void userProfileActionBarButton(ViewGroup viewGroup, UserSession userSession, Object userObject){
         try {
             if (viewGroup == null) {
