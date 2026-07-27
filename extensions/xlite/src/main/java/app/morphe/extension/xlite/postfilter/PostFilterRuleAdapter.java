@@ -24,6 +24,7 @@ final class PostFilterRuleAdapter extends BaseAdapter {
     private final Context context;
     private final Listener listener;
     private List<PostFilterRule> rules = Collections.emptyList();
+    private boolean interactionsEnabled = true;
 
     PostFilterRuleAdapter(Context context, Listener listener) {
         this.context = context;
@@ -32,6 +33,12 @@ final class PostFilterRuleAdapter extends BaseAdapter {
 
     void submit(List<PostFilterRule> updatedRules) {
         rules = updatedRules;
+        notifyDataSetChanged();
+    }
+
+    void setInteractionsEnabled(boolean enabled) {
+        if (interactionsEnabled == enabled) return;
+        interactionsEnabled = enabled;
         notifyDataSetChanged();
     }
 
@@ -66,8 +73,12 @@ final class PostFilterRuleAdapter extends BaseAdapter {
         row.scope.setText(scopeSummary(rule));
         row.enabled.setOnCheckedChangeListener(null);
         row.enabled.setChecked(rule.isEnabled(), false);
-        row.enabled.setOnCheckedChangeListener(checked -> listener.setEnabled(rule, checked));
-        reusableView.setOnClickListener(ignored -> listener.edit(rule));
+        row.enabled.setEnabled(interactionsEnabled);
+        row.enabled.setOnCheckedChangeListener(checked -> {
+            if (interactionsEnabled) listener.setEnabled(rule, checked);
+        });
+        reusableView.setEnabled(interactionsEnabled);
+        reusableView.setOnClickListener(interactionsEnabled ? ignored -> listener.edit(rule) : null);
         return reusableView;
     }
 
