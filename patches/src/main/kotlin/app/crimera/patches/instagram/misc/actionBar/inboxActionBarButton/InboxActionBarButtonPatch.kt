@@ -40,7 +40,7 @@ val inboxActionBarButtonPatch =
                     if (typeRef == "Lcom/instagram/igds/components/actionbar/IgdsActionBar;") {
                         val viewGroupRegister = it.registersUsed[0]
                         addInstructions(
-                            it.location.index,
+                            it.location.index + 1,
                             """
                             invoke-static {v$viewGroupRegister}, $ACTIONBAR_DESCRIPTOR->inboxActionBarButton(Landroid/view/ViewGroup;)V
                             """.trimIndent(),

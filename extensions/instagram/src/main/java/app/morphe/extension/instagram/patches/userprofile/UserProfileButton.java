@@ -40,9 +40,7 @@ public class UserProfileButton {
             ProfileInfo profileInfo = new ProfileInfo(object);
             Boolean isSelfProfile = profileInfo.isSelfProfile();
 
-//            if (!isSettingsInActionBar && isSelfProfile){
-            //TO-DO: Fix user profile action bar.
-            if (isSelfProfile){
+            if (!isSettingsInActionBar && isSelfProfile){
                 UI.pikoSettingsButton(viewGroup);
             }
             if(!userProfileABPref.contains(Constants.AB_PROFILE_INFO_ICON) && Pref.isMoreOptionsOnProfilePatched()){
