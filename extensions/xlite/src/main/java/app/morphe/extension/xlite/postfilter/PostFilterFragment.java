@@ -30,6 +30,8 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
     private final PostFilterRuleStore store = PostFilterRuleStore.shared();
     private PostFilterRuleAdapter adapter;
     private TextView emptyState;
+    private FrameLayout rulesContainer;
+    private View addButton;
     private XLiteSettingsUi.SwitchRow masterSwitch;
 
     @Override
@@ -52,11 +54,12 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
                 null,
                 store.isEnabled()
         );
-        masterSwitch.setOnCheckedChangeListener(store::setEnabled);
+        masterSwitch.setOnCheckedChangeListener(this::setFilteringEnabled);
         content.addView(masterSwitch, new LinearLayout.LayoutParams(-1, -2));
+        content.addView(XLiteSettingsUi.divider(context));
 
-        FrameLayout listContainer = new FrameLayout(context);
-        content.addView(listContainer, new LinearLayout.LayoutParams(-1, 0, 1f));
+        rulesContainer = new FrameLayout(context);
+        content.addView(rulesContainer, new LinearLayout.LayoutParams(-1, 0, 1f));
 
         ListView list = new ListView(context);
         list.setDivider(null);
@@ -70,7 +73,7 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         );
         adapter = new PostFilterRuleAdapter(context, this);
         list.setAdapter(adapter);
-        listContainer.addView(list, matchParent());
+        rulesContainer.addView(list, matchParent());
 
         emptyState = new TextView(context);
         emptyState.setText(StringRef.str("piko_xlite_post_filtering_empty"));
@@ -79,9 +82,9 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         emptyState.setGravity(Gravity.CENTER);
         int emptyPadding = XLiteSettingsUi.dp(context, 32);
         emptyState.setPadding(emptyPadding, emptyPadding, emptyPadding, emptyPadding);
-        listContainer.addView(emptyState, matchParent());
+        rulesContainer.addView(emptyState, matchParent());
 
-        View addButton = XLiteSettingsUi.floatingActionButton(
+        addButton = XLiteSettingsUi.floatingActionButton(
                 context,
                 StringRef.str("piko_xlite_post_filtering_add"),
                 ignored -> showRuleDialog(null)
@@ -248,8 +251,23 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         if (masterSwitch != null && masterSwitch.isChecked() != store.isEnabled()) {
             masterSwitch.setOnCheckedChangeListener(null);
             masterSwitch.setChecked(store.isEnabled(), false);
-            masterSwitch.setOnCheckedChangeListener(store::setEnabled);
+            masterSwitch.setOnCheckedChangeListener(this::setFilteringEnabled);
         }
+        applyFilteringEnabled(store.isEnabled());
+    }
+
+    private void setFilteringEnabled(boolean enabled) {
+        store.setEnabled(enabled);
+        applyFilteringEnabled(enabled);
+    }
+
+    private void applyFilteringEnabled(boolean enabled) {
+        if (rulesContainer == null || addButton == null || adapter == null) return;
+        adapter.setInteractionsEnabled(enabled);
+        rulesContainer.setEnabled(enabled);
+        rulesContainer.setAlpha(enabled ? 1f : 0.45f);
+        addButton.setEnabled(enabled);
+        addButton.setAlpha(enabled ? 1f : 0.45f);
     }
 
     private Context requireContext() {

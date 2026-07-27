@@ -26,7 +26,7 @@
     <string name="piko_xlite_post_filtering_title">Post filtering</string>
     <string name="piko_xlite_post_filtering_summary">Hide posts containing user-defined words and phrases</string>
     <string name="piko_xlite_post_filtering_enabled_title">Enable post filtering</string>
-    <string name="piko_xlite_post_filtering_empty">No filter rules yet. Add a word or phrase to hide matching posts.</string>
+    <string name="piko_xlite_post_filtering_empty">No filter rules yet.\n\nRules match literal words or phrases without case sensitivity. Content rules check posts, quotes, notes, articles, and link cards. Username rules check post and quoted authors. Matches are hidden from newly loaded timelines, including reply and profile timelines.</string>
     <string name="piko_xlite_post_filtering_add">Add filter rule</string>
     <string name="piko_xlite_post_filtering_add_title">Add filter rule</string>
     <string name="piko_xlite_post_filtering_edit_title">Edit filter rule</string>

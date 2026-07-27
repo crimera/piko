@@ -91,6 +91,22 @@ public final class XLiteSettingsUi {
         return new SwitchRow(context, title, summary, checked);
     }
 
+    public static View divider(Context context) {
+        View divider = new View(context);
+        int color = secondaryTextColor(context);
+        divider.setBackgroundColor(Color.argb(
+                48,
+                Color.red(color),
+                Color.green(color),
+                Color.blue(color)
+        ));
+        divider.setLayoutParams(new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                dp(context, 1)
+        ));
+        return divider;
+    }
+
     public static View floatingActionButton(
             Context context,
             CharSequence contentDescription,
