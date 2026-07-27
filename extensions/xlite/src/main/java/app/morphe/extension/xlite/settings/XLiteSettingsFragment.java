@@ -10,16 +10,67 @@ import android.widget.ListView;
 
 @SuppressWarnings("deprecation")
 public final class XLiteSettingsFragment extends PreferenceFragment {
+    private static final String GROUP_ID_ARGUMENT = "group_id";
+    private SettingsNode.Group group;
+
+    static XLiteSettingsFragment forGroup(SettingsNode.Group group) {
+        XLiteSettingsFragment fragment = new XLiteSettingsFragment();
+        Bundle arguments = new Bundle();
+        arguments.putString(GROUP_ID_ARGUMENT, group.id);
+        fragment.setArguments(arguments);
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Activity activity = getActivity();
-        if (activity == null) throw new IllegalStateException("X-Lite settings activity is missing");
+        Activity activity = requireActivity();
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            String groupId = arguments.getString(GROUP_ID_ARGUMENT);
+            if (groupId != null) group = SettingsRegistry.getGroup(groupId);
+        }
 
         Context preferenceContext = XLiteSettingsActivity.createPreferenceContext(activity);
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(preferenceContext);
         setPreferenceScreen(screen);
-        SettingsRenderer.render(activity, screen);
+        if (group == null) {
+            SettingsRenderer.render(activity, screen, this::openGroup);
+            return;
+        }
+        SettingsRenderer.renderGroup(activity, screen, group, this::openGroup);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Activity activity = requireActivity();
+        if (!(activity instanceof XLiteSettingsActivity settingsActivity)) return;
+        settingsActivity.setPageTitle(
+                group == null
+                        ? app.morphe.extension.shared.StringRef.str("piko_xlite_settings_title")
+                        : group.title.toString()
+        );
+    }
+
+    private void openGroup(SettingsNode.Group group) {
+        Activity activity = requireActivity();
+        int containerId = app.morphe.extension.shared.ResourceUtils.getIdentifierOrThrow(
+                activity,
+                app.morphe.extension.shared.ResourceType.ID,
+                "fragment_container"
+        );
+        getFragmentManager()
+                .beginTransaction()
+                .replace(containerId, forGroup(group))
+                .addToBackStack(group.id)
+                .commit();
+    }
+
+    private Activity requireActivity() {
+        Activity activity = getActivity();
+        if (activity == null) throw new IllegalStateException("X-Lite settings activity is missing");
+        return activity;
     }
 
     @Override

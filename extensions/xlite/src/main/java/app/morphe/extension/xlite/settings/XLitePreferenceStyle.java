@@ -20,6 +20,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 final class XLitePreferenceStyle {
+    private enum TrailingAccessory {
+        NONE,
+        SWITCH,
+        CHEVRON,
+    }
+
     private static final String TAG_TITLE = "piko_xlite_pref_title";
     private static final String TAG_SUMMARY = "piko_xlite_pref_summary";
     private static final String TAG_SWITCH = "piko_xlite_pref_switch";
@@ -62,7 +68,7 @@ final class XLitePreferenceStyle {
         ));
     }
 
-    private static View createRow(Context context, boolean showSwitch) {
+    private static View createRow(Context context, TrailingAccessory trailingAccessory) {
         LinearLayout row = new LinearLayout(context);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
@@ -97,14 +103,15 @@ final class XLitePreferenceStyle {
                 LinearLayout.LayoutParams.WRAP_CONTENT
         ));
 
-        if (showSwitch) {
+        if (trailingAccessory == TrailingAccessory.SWITCH) {
             SwitchView switchView = new SwitchView(context);
             switchView.setTag(TAG_SWITCH);
             row.addView(switchView, new LinearLayout.LayoutParams(
                     dp(context, 52),
                     dp(context, 32)
             ));
-        } else {
+        }
+        if (trailingAccessory == TrailingAccessory.CHEVRON) {
             ChevronView chevron = new ChevronView(context);
             chevron.setTag(TAG_TRAILING);
             row.addView(chevron, new LinearLayout.LayoutParams(
@@ -212,7 +219,7 @@ final class XLitePreferenceStyle {
 
         @Override
         protected View onCreateView(ViewGroup parent) {
-            return createRow(getContext(), true);
+            return createRow(getContext(), TrailingAccessory.SWITCH);
         }
 
         @Override
@@ -248,7 +255,7 @@ final class XLitePreferenceStyle {
 
         @Override
         protected View onCreateView(ViewGroup parent) {
-            return createRow(getContext(), false);
+            return createRow(getContext(), TrailingAccessory.NONE);
         }
 
         @Override
@@ -264,7 +271,7 @@ final class XLitePreferenceStyle {
 
         @Override
         protected View onCreateView(ViewGroup parent) {
-            return createRow(getContext(), false);
+            return createRow(getContext(), TrailingAccessory.NONE);
         }
 
         @Override
@@ -280,7 +287,23 @@ final class XLitePreferenceStyle {
 
         @Override
         protected View onCreateView(ViewGroup parent) {
-            return createRow(getContext(), false);
+            return createRow(getContext(), TrailingAccessory.NONE);
+        }
+
+        @Override
+        protected void onBindView(View view) {
+            bind(this, view);
+        }
+    }
+
+    static final class Navigation extends Preference {
+        Navigation(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected View onCreateView(ViewGroup parent) {
+            return createRow(getContext(), TrailingAccessory.CHEVRON);
         }
 
         @Override

@@ -179,6 +179,15 @@ public final class SettingsRegistry {
         return catalog;
     }
 
+    public static synchronized SettingsNode.Group getGroup(String id) {
+        requireFrozen();
+        for (SettingsNode.Category category : catalog) {
+            SettingsNode.Group match = findGroup(category, id);
+            if (match != null) return match;
+        }
+        throw failure("Unknown X-Lite settings group: " + id);
+    }
+
     public static synchronized boolean getBoolean(String key) {
         Setting<?> setting = requireSetting(key);
         if (!(setting instanceof BooleanSetting booleanSetting)) {
@@ -423,6 +432,17 @@ public final class SettingsRegistry {
     @Nullable
     private static StringRef stringRefOrNull(@Nullable String resourceName) {
         return resourceName == null ? null : stringRef(resourceName);
+    }
+
+    @Nullable
+    private static SettingsNode.Group findGroup(SettingsNode.Group group, String id) {
+        if (group.id.equals(id)) return group;
+        for (SettingsNode child : group.children) {
+            if (!(child instanceof SettingsNode.Group childGroup)) continue;
+            SettingsNode.Group match = findGroup(childGroup, id);
+            if (match != null) return match;
+        }
+        return null;
     }
 
     private static GroupBuilder requireGroup(String id) {

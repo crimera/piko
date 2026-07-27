@@ -21,20 +21,56 @@ import java.util.Locale;
 import java.util.Set;
 
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.xlite.postfilter.PostFilterMatcher;
+import app.morphe.extension.xlite.settings.SettingsRegistry;
 
 public final class XLiteTimelineFilter {
+    private static final String BLOCKED_WORDS_SETTING_ID =
+            "xlite.content.post_filtering.blocked_words";
+
     private XLiteTimelineFilter() {
     }
 
     public static Object filterPromotedItems(Object timelineItems, boolean enabled) {
-        if (!enabled || timelineItems == null) return timelineItems;
+        return filterTimelineItems(timelineItems, enabled, Collections.emptyList());
+    }
+
+    public static Object filterPostsByKeyword(Object timelineItems, boolean enabled) {
+        if (!enabled) return timelineItems;
+        return filterPostsByKeyword(
+                timelineItems,
+                true,
+                SettingsRegistry.getString(BLOCKED_WORDS_SETTING_ID)
+        );
+    }
+
+    public static Object filterPostsByKeyword(
+            Object timelineItems,
+            boolean enabled,
+            String blockedWords
+    ) {
+        if (!enabled) return timelineItems;
+        return filterTimelineItems(
+                timelineItems,
+                false,
+                PostFilterMatcher.normalizedKeywords(blockedWords)
+        );
+    }
+
+    private static Object filterTimelineItems(
+            Object timelineItems,
+            boolean filterPromotedItems,
+            List<String> normalizedKeywords
+    ) {
+        if (timelineItems == null) return null;
+        if (!filterPromotedItems && normalizedKeywords.isEmpty()) return timelineItems;
         if (!(timelineItems instanceof Iterable<?> iterable)) return timelineItems;
 
         try {
             List<Object> filtered = new ArrayList<>();
             boolean changed = false;
             for (Object original : iterable) {
-                FilterResult result = filterObject(original);
+                FilterResult result = filterObject(original, filterPromotedItems, normalizedKeywords);
                 if (result.remove) {
                     changed = true;
                     continue;
@@ -45,28 +81,38 @@ public final class XLiteTimelineFilter {
             if (!changed) return timelineItems;
             return immutableListView(filtered, timelineItems);
         } catch (RuntimeException exception) {
-            logFailure("top-level promoted item filtering", exception);
+            logFailure("top-level timeline filtering", exception);
             return timelineItems;
         }
     }
 
-    private static FilterResult filterObject(Object original) {
+    private static FilterResult filterObject(
+            Object original,
+            boolean filterPromotedItems,
+            List<String> normalizedKeywords
+    ) {
         if (original == null) return FilterResult.keep(null);
         try {
             if (original instanceof UrtTimelineModuleItem wrapper) {
-                return filterModuleItem(wrapper);
+                return filterModuleItem(wrapper, filterPromotedItems, normalizedKeywords);
             }
-            if (original instanceof UrtTimelineItem item) return filterItem(item);
+            if (original instanceof UrtTimelineItem item) {
+                return filterItem(item, filterPromotedItems, normalizedKeywords);
+            }
             return FilterResult.keep(original);
         } catch (RuntimeException exception) {
-            logFailure("promoted item " + original.getClass().getSimpleName(), exception);
+            logFailure("timeline item " + original.getClass().getSimpleName(), exception);
             return FilterResult.keep(original);
         }
     }
 
-    private static FilterResult filterModuleItem(UrtTimelineModuleItem wrapper) {
+    private static FilterResult filterModuleItem(
+            UrtTimelineModuleItem wrapper,
+            boolean filterPromotedItems,
+            List<String> normalizedKeywords
+    ) {
         UrtTimelineItem originalItem = wrapper.getItem();
-        FilterResult result = filterItem(originalItem);
+        FilterResult result = filterItem(originalItem, filterPromotedItems, normalizedKeywords);
         if (result.remove) return result;
         if (result.item == originalItem) return FilterResult.keep(wrapper);
         return FilterResult.replace(wrapper.copy(
@@ -75,14 +121,28 @@ public final class XLiteTimelineFilter {
         ));
     }
 
-    private static FilterResult filterItem(UrtTimelineItem item) {
+    private static FilterResult filterItem(
+            UrtTimelineItem item,
+            boolean filterPromotedItems,
+            List<String> normalizedKeywords
+    ) {
         if (item == null) return FilterResult.keep(null);
-        if (isPromoted(item)) return FilterResult.remove();
-        if (item instanceof UrtTimelineModule module) return filterModule(module);
+        if (filterPromotedItems && isPromoted(item)) return FilterResult.remove();
+        if (item instanceof UrtTimelinePost post
+                && PostFilterMatcher.findMatchReason(post, normalizedKeywords) != null) {
+            return FilterResult.remove();
+        }
+        if (item instanceof UrtTimelineModule module) {
+            return filterModule(module, filterPromotedItems, normalizedKeywords);
+        }
         return FilterResult.keep(item);
     }
 
-    private static FilterResult filterModule(UrtTimelineModule module) {
+    private static FilterResult filterModule(
+            UrtTimelineModule module,
+            boolean filterPromotedItems,
+            List<String> normalizedKeywords
+    ) {
         List<UrtTimelineModuleItem> originalChildren = module.getInnerContent();
         if (originalChildren == null || originalChildren.isEmpty()) {
             return FilterResult.keep(module);
@@ -100,9 +160,9 @@ public final class XLiteTimelineFilter {
             UrtTimelineItem originalItem = originalChild.getItem();
             FilterResult result;
             try {
-                result = filterItem(originalItem);
+                result = filterItem(originalItem, filterPromotedItems, normalizedKeywords);
             } catch (RuntimeException exception) {
-                logFailure("promoted module child", exception);
+                logFailure("timeline module child", exception);
                 filteredChildren.add(originalChild);
                 continue;
             }
@@ -127,7 +187,7 @@ public final class XLiteTimelineFilter {
                 ));
                 changed = true;
             } catch (RuntimeException exception) {
-                logFailure("promoted module child reconstruction", exception);
+                logFailure("timeline module child reconstruction", exception);
                 filteredChildren.add(originalChild);
             }
         }
@@ -150,7 +210,7 @@ public final class XLiteTimelineFilter {
                     module.getClientEventInfo()
             ));
         } catch (RuntimeException exception) {
-            logFailure("promoted module reconstruction", exception);
+            logFailure("timeline module reconstruction", exception);
             return FilterResult.keep(module);
         }
     }

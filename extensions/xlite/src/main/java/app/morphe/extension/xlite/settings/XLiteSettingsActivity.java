@@ -18,6 +18,7 @@ import app.morphe.extension.shared.Utils;
 
 @SuppressWarnings("deprecation")
 public final class XLiteSettingsActivity extends Activity {
+    private Toolbar toolbar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         applySystemTheme();
@@ -65,7 +66,7 @@ public final class XLiteSettingsActivity extends Activity {
     }
 
     private void configureToolbar() {
-        Toolbar toolbar = findViewById(ResourceUtils.getIdentifierOrThrow(
+        toolbar = findViewById(ResourceUtils.getIdentifierOrThrow(
                 this,
                 ResourceType.ID,
                 "toolbar"
@@ -77,6 +78,10 @@ public final class XLiteSettingsActivity extends Activity {
         ));
         toolbar.setTitle(StringRef.str("piko_xlite_settings_title"));
         toolbar.setNavigationOnClickListener(ignored -> onBackPressed());
+    }
+
+    void setPageTitle(CharSequence title) {
+        if (toolbar != null) toolbar.setTitle(title);
     }
 
     private void configureSystemBars() {
