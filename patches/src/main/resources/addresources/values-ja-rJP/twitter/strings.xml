@@ -37,7 +37,7 @@
     <string name="piko_title_native_downloader">ネイティブダウンローダー</string>
     <string name="piko_title_native_downloader_toggle">ネイティブダウンローダーを有効化</string>
     <string name="piko_pref_native_downloader_autodownload_highest_video_res">常に最高画質の動画を自動でダウンロード</string>
-    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">単一の動画ではダイアログを表示せず、利用可能な最高画質ですぐにダウンロードします</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">単一の動画ではダイアログを表示せず、利用可能な最高画質ですぐにダウンロードします。</string>
     <string name="piko_pref_native_downloader_show_download_icon">ダウンロードアイコンを表示</string>
     <string name="piko_pref_native_downloader_show_copy_icon">コピーアイコンを表示</string>
     <string name="piko_pref_native_downloader_show_variants_icon">解像度アイコンを表示</string>
