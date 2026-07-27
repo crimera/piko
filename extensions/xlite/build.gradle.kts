@@ -12,4 +12,7 @@ dependencies {
     compileOnly(libs.morphe.extensions.library)
     compileOnly(libs.annotation)
     compileOnly(libs.appcompat)
+
+    testImplementation(project(":extensions:xlite:stub"))
+    testImplementation("junit:junit:4.13.2")
 }

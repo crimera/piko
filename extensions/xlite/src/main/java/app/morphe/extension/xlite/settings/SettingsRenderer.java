@@ -25,17 +25,35 @@ import app.morphe.extension.shared.ui.CustomDialog;
 
 @SuppressWarnings("deprecation")
 public final class SettingsRenderer {
+    interface GroupNavigator {
+        void open(SettingsNode.Group group);
+    }
+
     private SettingsRenderer() {
     }
 
-    public static void render(Activity activity, PreferenceScreen screen) {
+    public static void render(
+            Activity activity,
+            PreferenceScreen screen,
+            GroupNavigator navigator
+    ) {
         Context preferenceContext = screen.getContext();
         List<SettingsNode.Category> categories = SettingsRegistry.catalog();
         for (SettingsNode.Category category : categories) {
             PreferenceCategory heading = category(preferenceContext, category);
             screen.addPreference(heading);
-            renderChildren(activity, preferenceContext, heading, category.children);
+            renderChildren(activity, preferenceContext, heading, category.children, navigator);
         }
+        Utils.setPreferenceTitlesToMultiLineIfNeeded(screen);
+    }
+
+    public static void renderGroup(
+            Activity activity,
+            PreferenceScreen screen,
+            SettingsNode.Group group,
+            GroupNavigator navigator
+    ) {
+        renderChildren(activity, screen.getContext(), screen, group.children, navigator);
         Utils.setPreferenceTitlesToMultiLineIfNeeded(screen);
     }
 
@@ -43,17 +61,30 @@ public final class SettingsRenderer {
             Activity activity,
             Context preferenceContext,
             PreferenceGroup parent,
-            List<SettingsNode> children
+            List<SettingsNode> children,
+            GroupNavigator navigator
     ) {
         for (SettingsNode child : children) {
             if (child instanceof SettingsNode.Group group) {
-                PreferenceCategory heading = category(preferenceContext, group);
-                parent.addPreference(heading);
-                renderChildren(activity, preferenceContext, heading, group.children);
+                parent.addPreference(group(preferenceContext, group, navigator));
                 continue;
             }
             parent.addPreference(item(activity, preferenceContext, (SettingsNode.Item) child));
         }
+    }
+
+    private static Preference group(
+            Context context,
+            SettingsNode.Group group,
+            GroupNavigator navigator
+    ) {
+        Preference preference = new XLitePreferenceStyle.Navigation(context);
+        applyMetadata(preference, group);
+        preference.setOnPreferenceClickListener(ignored -> {
+            navigator.open(group);
+            return true;
+        });
+        return preference;
     }
 
     private static PreferenceCategory category(Context context, SettingsNode.Group group) {
