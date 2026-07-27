@@ -26,9 +26,23 @@
     <string name="piko_xlite_post_filtering_title">Post filtering</string>
     <string name="piko_xlite_post_filtering_summary">Hide posts containing user-defined words and phrases</string>
     <string name="piko_xlite_post_filtering_enabled_title">Enable post filtering</string>
-    <string name="piko_xlite_post_filtering_enabled_summary">Apply keyword filters to newly loaded X-Lite timelines</string>
-    <string name="piko_xlite_post_filtering_blocked_words_title">Filtered words and phrases</string>
-    <string name="piko_xlite_post_filtering_blocked_words_summary">Enter one literal, case-insensitive filter per line. Matches post text, usernames, quotes, notes, articles, and link cards.</string>
+    <string name="piko_xlite_post_filtering_empty">No filter rules yet. Add a word or phrase to hide matching posts.</string>
+    <string name="piko_xlite_post_filtering_add">Add filter rule</string>
+    <string name="piko_xlite_post_filtering_add_title">Add filter rule</string>
+    <string name="piko_xlite_post_filtering_edit_title">Edit filter rule</string>
+    <string name="piko_xlite_post_filtering_phrase_hint">Word or phrase</string>
+    <string name="piko_xlite_post_filtering_match_content">Match post content</string>
+    <string name="piko_xlite_post_filtering_match_usernames">Match usernames</string>
+    <string name="piko_xlite_post_filtering_scope_content">Post content</string>
+    <string name="piko_xlite_post_filtering_scope_usernames">Usernames</string>
+    <string name="piko_xlite_post_filtering_scope_both">Post content and usernames</string>
+    <string name="piko_xlite_post_filtering_rule_enabled">Filter rule enabled</string>
+    <string name="piko_xlite_post_filtering_save">Save</string>
+    <string name="piko_xlite_post_filtering_cancel">Cancel</string>
+    <string name="piko_xlite_post_filtering_remove">Remove</string>
+    <string name="piko_xlite_post_filtering_error_blank">Enter a word or phrase.</string>
+    <string name="piko_xlite_post_filtering_error_scope">Select at least one matching scope.</string>
+    <string name="piko_xlite_post_filtering_error_duplicate">This word or phrase already has a rule.</string>
 
     <string name="piko_xlite_restart_title">Restart X?</string>
     <string name="piko_xlite_restart_summary">Restart the app now to apply this change.</string>

@@ -76,6 +76,14 @@ internal data class ActionSettingDefinition(
     val handlerClassDescriptor: String,
 ) : SettingItemDefinition
 
+internal data class CustomScreenSettingDefinition(
+    override val id: String,
+    override val titleResourceName: String,
+    override val summaryResourceName: String?,
+    override val order: Int,
+    val fragmentClassDescriptor: String,
+) : SettingItemDefinition
+
 internal data class SettingsContributionCatalog(
     val categories: List<SettingsGroupDefinition>,
 )
@@ -219,6 +227,23 @@ internal class SettingsGroupBuilder(
             ),
         )
 
+    fun customScreen(
+        id: String,
+        titleResourceName: String,
+        summaryResourceName: String? = null,
+        order: Int = 0,
+        fragmentClassDescriptor: String,
+    ): CustomScreenSettingDefinition =
+        add(
+            CustomScreenSettingDefinition(
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                fragmentClassDescriptor,
+            ),
+        )
+
     internal fun build() =
         SettingsGroupDefinition(
             id = id,
@@ -296,6 +321,11 @@ private fun validateSetting(setting: SettingItemDefinition) {
         is ActionSettingDefinition ->
             require(HANDLER_DESCRIPTOR_PATTERN.matches(setting.handlerClassDescriptor)) {
                 "Invalid action handler descriptor for ${setting.id}: ${setting.handlerClassDescriptor}"
+            }
+
+        is CustomScreenSettingDefinition ->
+            require(HANDLER_DESCRIPTOR_PATTERN.matches(setting.fragmentClassDescriptor)) {
+                "Invalid custom screen fragment descriptor for ${setting.id}: ${setting.fragmentClassDescriptor}"
             }
 
         is TextInputSettingDefinition,

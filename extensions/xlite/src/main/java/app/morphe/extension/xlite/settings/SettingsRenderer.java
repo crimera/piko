@@ -29,20 +29,32 @@ public final class SettingsRenderer {
         void open(SettingsNode.Group group);
     }
 
+    interface ScreenNavigator {
+        void open(SettingsNode.CustomScreen screen);
+    }
+
     private SettingsRenderer() {
     }
 
     public static void render(
             Activity activity,
             PreferenceScreen screen,
-            GroupNavigator navigator
+            GroupNavigator groupNavigator,
+            ScreenNavigator screenNavigator
     ) {
         Context preferenceContext = screen.getContext();
         List<SettingsNode.Category> categories = SettingsRegistry.catalog();
         for (SettingsNode.Category category : categories) {
             PreferenceCategory heading = category(preferenceContext, category);
             screen.addPreference(heading);
-            renderChildren(activity, preferenceContext, heading, category.children, navigator);
+            renderChildren(
+                    activity,
+                    preferenceContext,
+                    heading,
+                    category.children,
+                    groupNavigator,
+                    screenNavigator
+            );
         }
         Utils.setPreferenceTitlesToMultiLineIfNeeded(screen);
     }
@@ -51,9 +63,17 @@ public final class SettingsRenderer {
             Activity activity,
             PreferenceScreen screen,
             SettingsNode.Group group,
-            GroupNavigator navigator
+            GroupNavigator groupNavigator,
+            ScreenNavigator screenNavigator
     ) {
-        renderChildren(activity, screen.getContext(), screen, group.children, navigator);
+        renderChildren(
+                activity,
+                screen.getContext(),
+                screen,
+                group.children,
+                groupNavigator,
+                screenNavigator
+        );
         Utils.setPreferenceTitlesToMultiLineIfNeeded(screen);
     }
 
@@ -62,11 +82,16 @@ public final class SettingsRenderer {
             Context preferenceContext,
             PreferenceGroup parent,
             List<SettingsNode> children,
-            GroupNavigator navigator
+            GroupNavigator groupNavigator,
+            ScreenNavigator screenNavigator
     ) {
         for (SettingsNode child : children) {
             if (child instanceof SettingsNode.Group group) {
-                parent.addPreference(group(preferenceContext, group, navigator));
+                parent.addPreference(group(preferenceContext, group, groupNavigator));
+                continue;
+            }
+            if (child instanceof SettingsNode.CustomScreen screen) {
+                parent.addPreference(customScreen(preferenceContext, screen, screenNavigator));
                 continue;
             }
             parent.addPreference(item(activity, preferenceContext, (SettingsNode.Item) child));
@@ -82,6 +107,20 @@ public final class SettingsRenderer {
         applyMetadata(preference, group);
         preference.setOnPreferenceClickListener(ignored -> {
             navigator.open(group);
+            return true;
+        });
+        return preference;
+    }
+
+    private static Preference customScreen(
+            Context context,
+            SettingsNode.CustomScreen screen,
+            ScreenNavigator navigator
+    ) {
+        Preference preference = new XLitePreferenceStyle.Navigation(context);
+        applyMetadata(preference, screen);
+        preference.setOnPreferenceClickListener(ignored -> {
+            navigator.open(screen);
             return true;
         });
         return preference;

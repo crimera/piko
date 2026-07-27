@@ -1,6 +1,7 @@
 package app.morphe.extension.xlite.settings;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
@@ -35,10 +36,16 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(preferenceContext);
         setPreferenceScreen(screen);
         if (group == null) {
-            SettingsRenderer.render(activity, screen, this::openGroup);
+            SettingsRenderer.render(activity, screen, this::openGroup, this::openScreen);
             return;
         }
-        SettingsRenderer.renderGroup(activity, screen, group, this::openGroup);
+        SettingsRenderer.renderGroup(
+                activity,
+                screen,
+                group,
+                this::openGroup,
+                this::openScreen
+        );
     }
 
     @Override
@@ -65,6 +72,35 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
                 .replace(containerId, forGroup(group))
                 .addToBackStack(group.id)
                 .commit();
+    }
+
+    private void openScreen(SettingsNode.CustomScreen screen) {
+        Activity activity = requireActivity();
+        try {
+            Fragment fragment = instantiateFragment(activity, screen.fragmentClassDescriptor);
+            int containerId = app.morphe.extension.shared.ResourceUtils.getIdentifierOrThrow(
+                    activity,
+                    app.morphe.extension.shared.ResourceType.ID,
+                    "fragment_container"
+            );
+            getFragmentManager()
+                    .beginTransaction()
+                    .replace(containerId, fragment)
+                    .addToBackStack(screen.id)
+                    .commit();
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("Could not open X-Lite custom screen: " + screen.id, exception);
+        }
+    }
+
+    private static Fragment instantiateFragment(Activity activity, String descriptor)
+            throws ReflectiveOperationException {
+        String className = descriptor.substring(1, descriptor.length() - 1).replace('/', '.');
+        Class<?> fragmentClass = Class.forName(className, true, activity.getClassLoader());
+        if (!Fragment.class.isAssignableFrom(fragmentClass)) {
+            throw new IllegalArgumentException("Not an Android fragment: " + className);
+        }
+        return (Fragment) fragmentClass.getDeclaredConstructor().newInstance();
     }
 
     private Activity requireActivity() {

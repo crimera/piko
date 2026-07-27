@@ -16,6 +16,7 @@ class SettingsDefinitionsTest {
     private val repeatedItem1Id = "xlite.content.repeated.item1"
     private val multiChoiceId = "xlite.content.actions"
     private val actionId = "xlite.content.action"
+    private val customScreenId = "xlite.content.custom_screen"
     private val filterWordsId = "xlite.content.filters.words"
     private val filterClearId = "xlite.content.filters.clear"
     private val invalidToggleId = "content.missing_namespace"
@@ -88,13 +89,21 @@ class SettingsDefinitionsTest {
                         handlerClassDescriptor =
                             "Lapp/morphe/extension/xlite/settings/ClearFiltersAction;",
                     )
-                listOf(toggle, input, multiChoice, action)
+                val customScreen =
+                    customScreen(
+                        id = customScreenId,
+                        titleResourceName = "piko_xlite_custom_screen_title",
+                        fragmentClassDescriptor =
+                            "Lapp/morphe/extension/xlite/settings/CustomFragment;",
+                    )
+                listOf(toggle, input, multiChoice, action, customScreen)
             }
 
         assertIs<ToggleSettingDefinition>(result[0])
         assertIs<TextInputSettingDefinition>(result[1])
         assertIs<MultiChoiceSettingDefinition>(result[2])
         assertIs<ActionSettingDefinition>(result[3])
+        assertIs<CustomScreenSettingDefinition>(result[4])
     }
 
     @Test

@@ -26,6 +26,7 @@ public final class SettingsRegistry {
         TEXT_INPUT,
         MULTI_CHOICE,
         ACTION,
+        CUSTOM_SCREEN,
     }
 
     private static final Comparator<NodeBuilder> NODE_COMPARATOR =
@@ -150,10 +151,26 @@ public final class SettingsRegistry {
     public static synchronized void configureAction(String id, String handlerClassDescriptor) {
         ItemBuilder item = requireItem(id, ItemType.ACTION);
         requireUnconfigured(item);
-        if (!handlerClassDescriptor.startsWith("L") || !handlerClassDescriptor.endsWith(";")) {
-            throw failure("Invalid action handler descriptor for " + id + ": " + handlerClassDescriptor);
-        }
+        validateClassDescriptor(id, handlerClassDescriptor);
         item.handlerClassDescriptor = handlerClassDescriptor;
+        item.configured = true;
+    }
+
+    public static synchronized void registerCustomScreen(
+            String parentId,
+            String id,
+            String titleResourceName,
+            @Nullable String summaryResourceName,
+            int order
+    ) {
+        registerItem(parentId, id, titleResourceName, summaryResourceName, order, ItemType.CUSTOM_SCREEN);
+    }
+
+    public static synchronized void configureCustomScreen(String id, String fragmentClassDescriptor) {
+        ItemBuilder item = requireItem(id, ItemType.CUSTOM_SCREEN);
+        requireUnconfigured(item);
+        validateClassDescriptor(id, fragmentClassDescriptor);
+        item.fragmentClassDescriptor = fragmentClassDescriptor;
         item.configured = true;
     }
 
@@ -417,6 +434,13 @@ public final class SettingsRegistry {
                     item.order,
                     item.handlerClassDescriptor
             );
+            case CUSTOM_SCREEN -> new SettingsNode.CustomScreen(
+                    item.id,
+                    title,
+                    summary,
+                    item.order,
+                    item.fragmentClassDescriptor
+            );
         };
     }
 
@@ -469,6 +493,11 @@ public final class SettingsRegistry {
 
     private static void requireUnconfigured(ItemBuilder item) {
         if (item.configured) throw failure("X-Lite setting configured twice: " + item.id);
+    }
+
+    private static void validateClassDescriptor(String id, String descriptor) {
+        if (descriptor.startsWith("L") && descriptor.endsWith(";")) return;
+        throw failure("Invalid class descriptor for " + id + ": " + descriptor);
     }
 
     private static void requireMutable() {
@@ -555,6 +584,7 @@ public final class SettingsRegistry {
         @Nullable Object defaultValue;
         @Nullable SettingsNode.InputKind inputKind;
         @Nullable String handlerClassDescriptor;
+        @Nullable String fragmentClassDescriptor;
 
         ItemBuilder(
                 String parentId,

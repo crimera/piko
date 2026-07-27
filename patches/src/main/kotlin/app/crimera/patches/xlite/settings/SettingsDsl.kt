@@ -106,6 +106,20 @@ internal fun SettingsGroupBuilder.action(
         handlerClassDescriptor = handlerClassDescriptor,
     )
 
+internal fun SettingsGroupBuilder.customScreen(
+    id: String,
+    strings: SettingStrings,
+    order: Int = 0,
+    fragmentClassDescriptor: String,
+): CustomScreenSettingDefinition =
+    customScreen(
+        id = id,
+        titleResourceName = strings.titleResourceName,
+        summaryResourceName = strings.summaryResourceName,
+        order = order,
+        fragmentClassDescriptor = fragmentClassDescriptor,
+    )
+
 internal fun <T> BytecodePatchBuilder.xLiteSettings(
     block: SettingsContributionBuilder.() -> T,
 ): T {
@@ -180,6 +194,25 @@ internal fun BytecodePatchBuilder.xLiteMultiChoice(
                 defaultValue = defaultValue,
                 rebootApp = rebootApp,
                 options = options,
+            )
+        }
+    }
+
+internal fun BytecodePatchBuilder.xLiteCustomScreen(
+    id: String,
+    category: SettingsCategory,
+    strings: SettingStrings,
+    order: Int = 0,
+    fragmentClassDescriptor: String,
+): CustomScreenSettingDefinition =
+    xLiteSettings {
+        category(category) {
+            customScreen(
+                id = id,
+                titleResourceName = strings.titleResourceName,
+                summaryResourceName = strings.summaryResourceName,
+                order = order,
+                fragmentClassDescriptor = fragmentClassDescriptor,
             )
         }
     }

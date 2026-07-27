@@ -80,7 +80,7 @@ public final class XLiteSettingsActivity extends Activity {
         toolbar.setNavigationOnClickListener(ignored -> onBackPressed());
     }
 
-    void setPageTitle(CharSequence title) {
+    public void setPageTitle(CharSequence title) {
         if (toolbar != null) toolbar.setTitle(title);
     }
 
