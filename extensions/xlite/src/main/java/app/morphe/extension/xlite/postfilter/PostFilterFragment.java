@@ -5,11 +5,7 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.TypedValue;
@@ -21,20 +17,20 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.xlite.settings.XLiteSettingsActivity;
+import app.morphe.extension.xlite.settings.XLiteSettingsUi;
 
 @SuppressWarnings("deprecation")
 public final class PostFilterFragment extends Fragment implements PostFilterRuleAdapter.Listener {
     private final PostFilterRuleStore store = PostFilterRuleStore.shared();
     private PostFilterRuleAdapter adapter;
     private TextView emptyState;
-    private Switch masterSwitch;
+    private XLiteSettingsUi.SwitchRow masterSwitch;
 
     @Override
     public View onCreateView(
@@ -44,21 +40,19 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
     ) {
         Context context = requireContext();
         FrameLayout root = new FrameLayout(context);
-        root.setBackgroundColor(backgroundColor(context));
+        root.setBackgroundColor(XLiteSettingsUi.backgroundColor(context));
 
         LinearLayout content = new LinearLayout(context);
         content.setOrientation(LinearLayout.VERTICAL);
         root.addView(content, matchParent());
 
-        masterSwitch = new Switch(context);
-        masterSwitch.setText(StringRef.str("piko_xlite_post_filtering_enabled_title"));
-        masterSwitch.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
-        masterSwitch.setTextColor(primaryTextColor(context));
-        masterSwitch.setGravity(Gravity.CENTER_VERTICAL);
-        masterSwitch.setPadding(dp(context, 20), dp(context, 12), dp(context, 16), dp(context, 12));
-        masterSwitch.setMinHeight(dp(context, 64));
-        masterSwitch.setChecked(store.isEnabled());
-        masterSwitch.setOnCheckedChangeListener((ignored, enabled) -> store.setEnabled(enabled));
+        masterSwitch = XLiteSettingsUi.switchRow(
+                context,
+                StringRef.str("piko_xlite_post_filtering_enabled_title"),
+                null,
+                store.isEnabled()
+        );
+        masterSwitch.setOnCheckedChangeListener(store::setEnabled);
         content.addView(masterSwitch, new LinearLayout.LayoutParams(-1, -2));
 
         FrameLayout listContainer = new FrameLayout(context);
@@ -68,7 +62,12 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         list.setDivider(null);
         list.setDividerHeight(0);
         list.setClipToPadding(false);
-        list.setPadding(0, dp(context, 4), 0, dp(context, 96));
+        list.setPadding(
+                0,
+                XLiteSettingsUi.dp(context, 4),
+                0,
+                XLiteSettingsUi.dp(context, 96)
+        );
         adapter = new PostFilterRuleAdapter(context, this);
         list.setAdapter(adapter);
         listContainer.addView(list, matchParent());
@@ -76,17 +75,28 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         emptyState = new TextView(context);
         emptyState.setText(StringRef.str("piko_xlite_post_filtering_empty"));
         emptyState.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        emptyState.setTextColor(secondaryTextColor(context));
+        emptyState.setTextColor(XLiteSettingsUi.secondaryTextColor(context));
         emptyState.setGravity(Gravity.CENTER);
-        emptyState.setPadding(dp(context, 32), dp(context, 32), dp(context, 32), dp(context, 32));
+        int emptyPadding = XLiteSettingsUi.dp(context, 32);
+        emptyState.setPadding(emptyPadding, emptyPadding, emptyPadding, emptyPadding);
         listContainer.addView(emptyState, matchParent());
 
-        AddButton addButton = new AddButton(context);
-        addButton.setContentDescription(StringRef.str("piko_xlite_post_filtering_add"));
-        addButton.setOnClickListener(ignored -> showRuleDialog(null));
-        FrameLayout.LayoutParams addParams = new FrameLayout.LayoutParams(dp(context, 56), dp(context, 56));
+        View addButton = XLiteSettingsUi.floatingActionButton(
+                context,
+                StringRef.str("piko_xlite_post_filtering_add"),
+                ignored -> showRuleDialog(null)
+        );
+        FrameLayout.LayoutParams addParams = new FrameLayout.LayoutParams(
+                XLiteSettingsUi.dp(context, 56),
+                XLiteSettingsUi.dp(context, 56)
+        );
         addParams.gravity = Gravity.BOTTOM | Gravity.END;
-        addParams.setMargins(0, 0, dp(context, 20), dp(context, 20));
+        addParams.setMargins(
+                0,
+                0,
+                XLiteSettingsUi.dp(context, 20),
+                XLiteSettingsUi.dp(context, 20)
+        );
         root.addView(addButton, addParams);
 
         refreshRules();
@@ -118,7 +128,12 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         Context context = requireContext();
         LinearLayout form = new LinearLayout(context);
         form.setOrientation(LinearLayout.VERTICAL);
-        form.setPadding(dp(context, 24), dp(context, 8), dp(context, 24), 0);
+        form.setPadding(
+                XLiteSettingsUi.dp(context, 24),
+                XLiteSettingsUi.dp(context, 8),
+                XLiteSettingsUi.dp(context, 24),
+                0
+        );
 
         EditText phrase = new EditText(context);
         phrase.setHint(StringRef.str("piko_xlite_post_filtering_phrase_hint"));
@@ -126,14 +141,14 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         if (editingRule != null) phrase.setText(editingRule.getPhrase());
         form.addView(phrase, new LinearLayout.LayoutParams(-1, -2));
 
-        Switch matchContent = scopeSwitch(
+        XLiteSettingsUi.SwitchRow matchContent = scopeSwitch(
                 context,
                 "piko_xlite_post_filtering_match_content",
                 editingRule == null || editingRule.matchesContent()
         );
         form.addView(matchContent, new LinearLayout.LayoutParams(-1, -2));
 
-        Switch matchUsernames = scopeSwitch(
+        XLiteSettingsUi.SwitchRow matchUsernames = scopeSwitch(
                 context,
                 "piko_xlite_post_filtering_match_usernames",
                 editingRule != null && editingRule.matchesUsernames()
@@ -143,7 +158,7 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         TextView validation = new TextView(context);
         validation.setTextColor(Color.rgb(244, 33, 46));
         validation.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        validation.setPadding(0, dp(context, 8), 0, 0);
+        validation.setPadding(0, XLiteSettingsUi.dp(context, 8), 0, 0);
         validation.setVisibility(View.GONE);
         form.addView(validation, new LinearLayout.LayoutParams(-1, -2));
 
@@ -174,8 +189,8 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
             AlertDialog dialog,
             @Nullable PostFilterRule editingRule,
             EditText phrase,
-            Switch matchContent,
-            Switch matchUsernames,
+            XLiteSettingsUi.SwitchRow matchContent,
+            XLiteSettingsUi.SwitchRow matchUsernames,
             TextView validation
     ) {
         dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(ignored -> {
@@ -217,15 +232,12 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         };
     }
 
-    private Switch scopeSwitch(Context context, String textResource, boolean checked) {
-        Switch scope = new Switch(context);
-        scope.setText(StringRef.str(textResource));
-        scope.setTextColor(primaryTextColor(context));
-        scope.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        scope.setGravity(Gravity.CENTER_VERTICAL);
-        scope.setMinHeight(dp(context, 52));
-        scope.setChecked(checked);
-        return scope;
+    private XLiteSettingsUi.SwitchRow scopeSwitch(
+            Context context,
+            String textResource,
+            boolean checked
+    ) {
+        return XLiteSettingsUi.switchRow(context, StringRef.str(textResource), null, checked);
     }
 
     private void refreshRules() {
@@ -235,8 +247,8 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         emptyState.setVisibility(rules.isEmpty() ? View.VISIBLE : View.GONE);
         if (masterSwitch != null && masterSwitch.isChecked() != store.isEnabled()) {
             masterSwitch.setOnCheckedChangeListener(null);
-            masterSwitch.setChecked(store.isEnabled());
-            masterSwitch.setOnCheckedChangeListener((ignored, enabled) -> store.setEnabled(enabled));
+            masterSwitch.setChecked(store.isEnabled(), false);
+            masterSwitch.setOnCheckedChangeListener(store::setEnabled);
         }
     }
 
@@ -250,57 +262,4 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         return new FrameLayout.LayoutParams(-1, -1);
     }
 
-    private static int backgroundColor(Context context) {
-        return isDark(context) ? Color.BLACK : Color.WHITE;
-    }
-
-    private static int primaryTextColor(Context context) {
-        return isDark(context) ? Color.WHITE : Color.BLACK;
-    }
-
-    private static int secondaryTextColor(Context context) {
-        return isDark(context) ? Color.LTGRAY : Color.DKGRAY;
-    }
-
-    private static boolean isDark(Context context) {
-        int mode = context.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK;
-        return mode == Configuration.UI_MODE_NIGHT_YES;
-    }
-
-    private static int dp(Context context, float value) {
-        return Math.round(TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                value,
-                context.getResources().getDisplayMetrics()
-        ));
-    }
-
-    private static final class AddButton extends View {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-        AddButton(Context context) {
-            super(context);
-            GradientDrawable background = new GradientDrawable();
-            background.setShape(GradientDrawable.OVAL);
-            background.setColor(Color.rgb(29, 155, 240));
-            setBackground(background);
-            setElevation(dp(context, 6));
-            setClickable(true);
-            setFocusable(true);
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-            float centerX = getWidth() / 2f;
-            float centerY = getHeight() / 2f;
-            float radius = dp(getContext(), 9);
-            paint.setColor(Color.WHITE);
-            paint.setStrokeWidth(dp(getContext(), 2.5f));
-            paint.setStrokeCap(Paint.Cap.ROUND);
-            canvas.drawLine(centerX - radius, centerY, centerX + radius, centerY, paint);
-            canvas.drawLine(centerX, centerY - radius, centerX, centerY + radius, paint);
-        }
-    }
 }

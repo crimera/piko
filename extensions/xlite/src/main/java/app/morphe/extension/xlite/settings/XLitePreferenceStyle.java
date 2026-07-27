@@ -1,10 +1,7 @@
 package app.morphe.extension.xlite.settings;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.preference.EditTextPreference;
 import android.preference.MultiSelectListPreference;
@@ -35,37 +32,23 @@ final class XLitePreferenceStyle {
     }
 
     static int backgroundColor(Context context) {
-        return isDark(context) ? Color.BLACK : Color.WHITE;
+        return XLiteSettingsUi.backgroundColor(context);
     }
 
     private static int primaryTextColor(Context context) {
-        return isDark(context) ? Color.WHITE : Color.BLACK;
+        return XLiteSettingsUi.primaryTextColor(context);
     }
 
     private static int secondaryTextColor(Context context) {
-        return blend(backgroundColor(context), primaryTextColor(context), 0.68f);
-    }
-
-    private static int accentColor(Context context) {
-        return Color.rgb(29, 155, 240);
-    }
-
-    private static boolean isDark(Context context) {
-        int nightMode = context.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK;
-        return nightMode == Configuration.UI_MODE_NIGHT_YES;
+        return XLiteSettingsUi.secondaryTextColor(context);
     }
 
     private static int disabledColor(Context context) {
-        return blend(backgroundColor(context), secondaryTextColor(context), 0.45f);
+        return XLiteSettingsUi.disabledColor(context);
     }
 
     private static int dp(Context context, float value) {
-        return Math.round(TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                value,
-                context.getResources().getDisplayMetrics()
-        ));
+        return XLiteSettingsUi.dp(context, value);
     }
 
     private static View createRow(Context context, TrailingAccessory trailingAccessory) {
@@ -104,7 +87,8 @@ final class XLitePreferenceStyle {
         ));
 
         if (trailingAccessory == TrailingAccessory.SWITCH) {
-            SwitchView switchView = new SwitchView(context);
+            XLiteSettingsUi.SwitchControl switchView =
+                    new XLiteSettingsUi.SwitchControl(context);
             switchView.setTag(TAG_SWITCH);
             row.addView(switchView, new LinearLayout.LayoutParams(
                     dp(context, 52),
@@ -123,16 +107,7 @@ final class XLitePreferenceStyle {
     }
 
     private static void applyRippleBackground(View view) {
-        TypedValue value = new TypedValue();
-        if (!view.getContext().getTheme().resolveAttribute(
-                android.R.attr.selectableItemBackground,
-                value,
-                true
-        ) || value.resourceId == 0) {
-            view.setBackgroundColor(backgroundColor(view.getContext()));
-            return;
-        }
-        view.setBackgroundResource(value.resourceId);
+        XLiteSettingsUi.applyRippleBackground(view);
     }
 
     private static void addTitle(Context context, LinearLayout parent, float weight) {
@@ -209,7 +184,7 @@ final class XLitePreferenceStyle {
     }
 
     static final class Toggle extends SwitchPreference {
-        private SwitchView switchView;
+        private XLiteSettingsUi.SwitchControl switchView;
         private boolean animateChange;
         private boolean previousChecked;
 
@@ -337,102 +312,4 @@ final class XLitePreferenceStyle {
         }
     }
 
-    private static final class SwitchView extends View {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private float progress;
-        private ValueAnimator animator;
-
-        SwitchView(Context context) {
-            super(context);
-            setClickable(false);
-            setFocusable(false);
-        }
-
-        boolean isAnimating() {
-            return animator != null && animator.isRunning();
-        }
-
-        void setChecked(boolean checked, boolean animate) {
-            float target = checked ? 1f : 0f;
-            if (animator != null) animator.cancel();
-            if (!animate) {
-                progress = target;
-                invalidate();
-                return;
-            }
-            animator = ValueAnimator.ofFloat(progress, target);
-            animator.setDuration(250L);
-            animator.addUpdateListener(animation -> {
-                progress = (Float) animation.getAnimatedValue();
-                invalidate();
-            });
-            animator.start();
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            int background = backgroundColor(getContext());
-            int accent = accentColor(getContext());
-            int secondary = secondaryTextColor(getContext());
-            int disabled = disabledColor(getContext());
-            int offTrack = blend(background, secondary, 0.32f);
-            int onTrack = isEnabled() ? accent : disabled;
-            int track = blend(offTrack, onTrack, progress);
-            int offThumb = blend(background, secondary, 0.72f);
-            int thumb = blend(offThumb, background, progress);
-
-            float radius = getHeight() / 2f;
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(track);
-            canvas.drawRoundRect(0, 0, getWidth(), getHeight(), radius, radius, paint);
-
-            float thumbRadius = dp(getContext(), 10) + dp(getContext(), 3) * progress;
-            float startX = radius;
-            float endX = getWidth() - radius;
-            float centerX = startX + (endX - startX) * progress;
-            float centerY = getHeight() / 2f;
-            paint.setColor(thumb);
-            canvas.drawCircle(centerX, centerY, thumbRadius, paint);
-
-            if (progress <= 0f || !isEnabled()) return;
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(dp(getContext(), 2));
-            paint.setStrokeCap(Paint.Cap.ROUND);
-            paint.setStrokeJoin(Paint.Join.ROUND);
-            paint.setColor(withAlpha(accent, progress));
-            float size = thumbRadius * 0.8f;
-            canvas.drawLine(
-                    centerX - size * 0.35f,
-                    centerY,
-                    centerX - size * 0.08f,
-                    centerY + size * 0.25f,
-                    paint
-            );
-            canvas.drawLine(
-                    centerX - size * 0.08f,
-                    centerY + size * 0.25f,
-                    centerX + size * 0.4f,
-                    centerY - size * 0.28f,
-                    paint
-            );
-        }
-    }
-
-    private static int withAlpha(int color, float amount) {
-        return Color.argb(
-                Math.round(Color.alpha(color) * amount),
-                Color.red(color),
-                Color.green(color),
-                Color.blue(color)
-        );
-    }
-
-    private static int blend(int from, int to, float amount) {
-        return Color.argb(
-                Math.round(Color.alpha(from) + (Color.alpha(to) - Color.alpha(from)) * amount),
-                Math.round(Color.red(from) + (Color.red(to) - Color.red(from)) * amount),
-                Math.round(Color.green(from) + (Color.green(to) - Color.green(from)) * amount),
-                Math.round(Color.blue(from) + (Color.blue(to) - Color.blue(from)) * amount)
-        );
-    }
 }

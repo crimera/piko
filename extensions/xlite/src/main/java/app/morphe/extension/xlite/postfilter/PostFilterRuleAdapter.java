@@ -1,22 +1,18 @@
 package app.morphe.extension.xlite.postfilter;
 
 import android.content.Context;
-import android.content.res.Configuration;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.Collections;
 import java.util.List;
 
 import app.morphe.extension.shared.StringRef;
+import app.morphe.extension.xlite.settings.XLiteSettingsUi;
 
 @SuppressWarnings("deprecation")
 final class PostFilterRuleAdapter extends BaseAdapter {
@@ -69,9 +65,8 @@ final class PostFilterRuleAdapter extends BaseAdapter {
         row.phrase.setText(rule.getPhrase());
         row.scope.setText(scopeSummary(rule));
         row.enabled.setOnCheckedChangeListener(null);
-        row.enabled.setChecked(rule.isEnabled());
-        row.enabled.setOnCheckedChangeListener((ignored, checked) ->
-                listener.setEnabled(rule, checked));
+        row.enabled.setChecked(rule.isEnabled(), false);
+        row.enabled.setOnCheckedChangeListener(checked -> listener.setEnabled(rule, checked));
         reusableView.setOnClickListener(ignored -> listener.edit(rule));
         return reusableView;
     }
@@ -80,24 +75,33 @@ final class PostFilterRuleAdapter extends BaseAdapter {
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.HORIZONTAL);
         root.setGravity(Gravity.CENTER_VERTICAL);
-        root.setMinimumHeight(dp(72));
-        root.setPadding(dp(20), dp(10), dp(16), dp(10));
-        root.setBackground(selectableBackground());
+        root.setMinimumHeight(XLiteSettingsUi.dp(context, 72));
+        root.setPadding(
+                XLiteSettingsUi.dp(context, 20),
+                XLiteSettingsUi.dp(context, 10),
+                XLiteSettingsUi.dp(context, 16),
+                XLiteSettingsUi.dp(context, 10)
+        );
+        XLiteSettingsUi.applyRippleBackground(root);
 
         LinearLayout labels = new LinearLayout(context);
         labels.setOrientation(LinearLayout.VERTICAL);
-        TextView phrase = text(17, primaryTextColor());
-        TextView scope = text(14, secondaryTextColor());
-        scope.setPadding(0, dp(5), 0, 0);
+        TextView phrase = XLiteSettingsUi.titleText(context);
+        TextView scope = XLiteSettingsUi.summaryText(context);
+        scope.setPadding(0, XLiteSettingsUi.dp(context, 5), 0, 0);
         labels.addView(phrase);
         labels.addView(scope);
         LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(0, -2, 1f);
-        labelParams.setMarginEnd(dp(12));
+        labelParams.setMarginEnd(XLiteSettingsUi.dp(context, 12));
         root.addView(labels, labelParams);
 
-        Switch enabled = new Switch(context);
+        XLiteSettingsUi.SwitchControl enabled = new XLiteSettingsUi.SwitchControl(context);
+        enabled.setInteractive(true);
         enabled.setContentDescription(StringRef.str("piko_xlite_post_filtering_rule_enabled"));
-        root.addView(enabled, new LinearLayout.LayoutParams(-2, -2));
+        root.addView(enabled, new LinearLayout.LayoutParams(
+                XLiteSettingsUi.dp(context, 52),
+                XLiteSettingsUi.dp(context, 32)
+        ));
         return new Row(root, phrase, scope, enabled);
     }
 
@@ -109,54 +113,18 @@ final class PostFilterRuleAdapter extends BaseAdapter {
         return StringRef.str("piko_xlite_post_filtering_scope_usernames");
     }
 
-    private TextView text(float size, int color) {
-        TextView text = new TextView(context);
-        text.setTextSize(TypedValue.COMPLEX_UNIT_SP, size);
-        text.setTextColor(color);
-        return text;
-    }
-
-    private android.graphics.drawable.Drawable selectableBackground() {
-        TypedValue value = new TypedValue();
-        if (context.getTheme().resolveAttribute(android.R.attr.selectableItemBackground, value, true)
-                && value.resourceId != 0) {
-            return context.getDrawable(value.resourceId);
-        }
-        return new ColorDrawable(backgroundColor());
-    }
-
-    private int primaryTextColor() {
-        return isDark() ? Color.WHITE : Color.BLACK;
-    }
-
-    private int secondaryTextColor() {
-        return isDark() ? Color.LTGRAY : Color.DKGRAY;
-    }
-
-    private int backgroundColor() {
-        return isDark() ? Color.BLACK : Color.WHITE;
-    }
-
-    private boolean isDark() {
-        int mode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        return mode == Configuration.UI_MODE_NIGHT_YES;
-    }
-
-    private int dp(float value) {
-        return Math.round(TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                value,
-                context.getResources().getDisplayMetrics()
-        ));
-    }
-
     private static final class Row {
         final LinearLayout root;
         final TextView phrase;
         final TextView scope;
-        final Switch enabled;
+        final XLiteSettingsUi.SwitchControl enabled;
 
-        Row(LinearLayout root, TextView phrase, TextView scope, Switch enabled) {
+        Row(
+                LinearLayout root,
+                TextView phrase,
+                TextView scope,
+                XLiteSettingsUi.SwitchControl enabled
+        ) {
             this.root = root;
             this.phrase = phrase;
             this.scope = scope;
