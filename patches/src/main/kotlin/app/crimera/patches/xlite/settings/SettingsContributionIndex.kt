@@ -42,6 +42,7 @@ private fun SettingsNodeDefinition.immutableSnapshot(): SettingsNodeDefinition =
                 options = immutableList(options),
             )
         is ActionSettingDefinition,
+        is CustomScreenSettingDefinition,
         is TextInputSettingDefinition,
         is ToggleSettingDefinition,
         -> this

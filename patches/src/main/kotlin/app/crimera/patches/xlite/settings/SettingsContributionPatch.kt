@@ -244,6 +244,15 @@ private fun StringBuilder.appendNodeRegistration(
                 method = "configureAction(Ljava/lang/String;Ljava/lang/String;)V",
             )
         }
+
+        is CustomScreenSettingDefinition -> {
+            appendItemRegistration("registerCustomScreen", parentId, node)
+            appendConfiguration(
+                id = node.id,
+                values = listOf(stringValue(node.fragmentClassDescriptor)),
+                method = "configureCustomScreen(Ljava/lang/String;Ljava/lang/String;)V",
+            )
+        }
     }
 }
 

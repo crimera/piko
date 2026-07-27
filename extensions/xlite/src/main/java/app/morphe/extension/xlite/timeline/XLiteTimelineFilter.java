@@ -22,55 +22,53 @@ import java.util.Set;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.xlite.postfilter.PostFilterMatcher;
-import app.morphe.extension.xlite.settings.SettingsRegistry;
+import app.morphe.extension.xlite.postfilter.PostFilterRuleStore;
 
 public final class XLiteTimelineFilter {
-    private static final String BLOCKED_WORDS_SETTING_ID =
-            "xlite.content.post_filtering.blocked_words";
 
     private XLiteTimelineFilter() {
     }
 
     public static Object filterPromotedItems(Object timelineItems, boolean enabled) {
-        return filterTimelineItems(timelineItems, enabled, Collections.emptyList());
+        return filterTimelineItems(timelineItems, enabled, null);
     }
 
-    public static Object filterPostsByKeyword(Object timelineItems, boolean enabled) {
-        if (!enabled) return timelineItems;
-        return filterPostsByKeyword(
-                timelineItems,
-                true,
-                SettingsRegistry.getString(BLOCKED_WORDS_SETTING_ID)
-        );
+    public static Object filterPostsByKeyword(Object timelineItems) {
+        try {
+            PostFilterRuleStore store = PostFilterRuleStore.shared();
+            if (!store.isEnabled()) return timelineItems;
+            return filterTimelineItems(timelineItems, false, store.snapshot());
+        } catch (RuntimeException exception) {
+            logFailure("post-filter rule loading", exception);
+            return timelineItems;
+        }
     }
 
     public static Object filterPostsByKeyword(
             Object timelineItems,
             boolean enabled,
-            String blockedWords
+            PostFilterRuleStore.Snapshot snapshot
     ) {
         if (!enabled) return timelineItems;
-        return filterTimelineItems(
-                timelineItems,
-                false,
-                PostFilterMatcher.normalizedKeywords(blockedWords)
-        );
+        return filterTimelineItems(timelineItems, false, snapshot);
     }
 
     private static Object filterTimelineItems(
             Object timelineItems,
             boolean filterPromotedItems,
-            List<String> normalizedKeywords
+            PostFilterRuleStore.Snapshot ruleSnapshot
     ) {
         if (timelineItems == null) return null;
-        if (!filterPromotedItems && normalizedKeywords.isEmpty()) return timelineItems;
+        if (!filterPromotedItems && (ruleSnapshot == null || !ruleSnapshot.hasEnabledRules())) {
+            return timelineItems;
+        }
         if (!(timelineItems instanceof Iterable<?> iterable)) return timelineItems;
 
         try {
             List<Object> filtered = new ArrayList<>();
             boolean changed = false;
             for (Object original : iterable) {
-                FilterResult result = filterObject(original, filterPromotedItems, normalizedKeywords);
+                FilterResult result = filterObject(original, filterPromotedItems, ruleSnapshot);
                 if (result.remove) {
                     changed = true;
                     continue;
@@ -89,15 +87,15 @@ public final class XLiteTimelineFilter {
     private static FilterResult filterObject(
             Object original,
             boolean filterPromotedItems,
-            List<String> normalizedKeywords
+            PostFilterRuleStore.Snapshot ruleSnapshot
     ) {
         if (original == null) return FilterResult.keep(null);
         try {
             if (original instanceof UrtTimelineModuleItem wrapper) {
-                return filterModuleItem(wrapper, filterPromotedItems, normalizedKeywords);
+                return filterModuleItem(wrapper, filterPromotedItems, ruleSnapshot);
             }
             if (original instanceof UrtTimelineItem item) {
-                return filterItem(item, filterPromotedItems, normalizedKeywords);
+                return filterItem(item, filterPromotedItems, ruleSnapshot);
             }
             return FilterResult.keep(original);
         } catch (RuntimeException exception) {
@@ -109,10 +107,10 @@ public final class XLiteTimelineFilter {
     private static FilterResult filterModuleItem(
             UrtTimelineModuleItem wrapper,
             boolean filterPromotedItems,
-            List<String> normalizedKeywords
+            PostFilterRuleStore.Snapshot ruleSnapshot
     ) {
         UrtTimelineItem originalItem = wrapper.getItem();
-        FilterResult result = filterItem(originalItem, filterPromotedItems, normalizedKeywords);
+        FilterResult result = filterItem(originalItem, filterPromotedItems, ruleSnapshot);
         if (result.remove) return result;
         if (result.item == originalItem) return FilterResult.keep(wrapper);
         return FilterResult.replace(wrapper.copy(
@@ -124,16 +122,16 @@ public final class XLiteTimelineFilter {
     private static FilterResult filterItem(
             UrtTimelineItem item,
             boolean filterPromotedItems,
-            List<String> normalizedKeywords
+            PostFilterRuleStore.Snapshot ruleSnapshot
     ) {
         if (item == null) return FilterResult.keep(null);
         if (filterPromotedItems && isPromoted(item)) return FilterResult.remove();
         if (item instanceof UrtTimelinePost post
-                && PostFilterMatcher.findMatchReason(post, normalizedKeywords) != null) {
+                && PostFilterMatcher.findMatchReason(post, ruleSnapshot) != null) {
             return FilterResult.remove();
         }
         if (item instanceof UrtTimelineModule module) {
-            return filterModule(module, filterPromotedItems, normalizedKeywords);
+            return filterModule(module, filterPromotedItems, ruleSnapshot);
         }
         return FilterResult.keep(item);
     }
@@ -141,7 +139,7 @@ public final class XLiteTimelineFilter {
     private static FilterResult filterModule(
             UrtTimelineModule module,
             boolean filterPromotedItems,
-            List<String> normalizedKeywords
+            PostFilterRuleStore.Snapshot ruleSnapshot
     ) {
         List<UrtTimelineModuleItem> originalChildren = module.getInnerContent();
         if (originalChildren == null || originalChildren.isEmpty()) {
@@ -160,7 +158,7 @@ public final class XLiteTimelineFilter {
             UrtTimelineItem originalItem = originalChild.getItem();
             FilterResult result;
             try {
-                result = filterItem(originalItem, filterPromotedItems, normalizedKeywords);
+                result = filterItem(originalItem, filterPromotedItems, ruleSnapshot);
             } catch (RuntimeException exception) {
                 logFailure("timeline module child", exception);
                 filteredChildren.add(originalChild);

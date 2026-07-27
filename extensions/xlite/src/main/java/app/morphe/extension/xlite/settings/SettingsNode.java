@@ -145,4 +145,19 @@ public abstract class SettingsNode {
             this.handlerClassDescriptor = Objects.requireNonNull(handlerClassDescriptor);
         }
     }
+
+    public static final class CustomScreen extends Item {
+        public final String fragmentClassDescriptor;
+
+        CustomScreen(
+                String id,
+                StringRef title,
+                @Nullable StringRef summary,
+                int order,
+                String fragmentClassDescriptor
+        ) {
+            super(id, title, summary, order);
+            this.fragmentClassDescriptor = Objects.requireNonNull(fragmentClassDescriptor);
+        }
+    }
 }

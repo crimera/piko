@@ -13,6 +13,7 @@ enum class AggregateSettingType {
     STRING,
     STRING_SET,
     ACTION,
+    CUSTOM_SCREEN,
 }
 
 data class AggregateSetting(
@@ -197,6 +198,7 @@ internal object XLiteContributionDiscovery {
                 "TextInputSettingDefinition" -> AggregateSettingType.STRING
                 "MultiChoiceSettingDefinition" -> AggregateSettingType.STRING_SET
                 "ActionSettingDefinition" -> AggregateSettingType.ACTION
+                "CustomScreenSettingDefinition" -> AggregateSettingType.CUSTOM_SCREEN
                 else -> error("Unknown X-Lite settings node ${value.javaClass.name}")
             }
         val choices =

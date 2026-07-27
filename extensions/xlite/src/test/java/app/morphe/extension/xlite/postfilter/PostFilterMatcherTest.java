@@ -20,7 +20,6 @@ import com.x.models.timelines.items.UrtTimelinePost;
 
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -43,79 +42,117 @@ public class PostFilterMatcherTest {
     }
 
     @Test
-    public void parsesOneKeywordPerLineAndRemovesNormalizedDuplicates() {
+    public void contentRuleDoesNotMatchUsername() {
+        assertNull(reason(post("safe", user("blocked_user")), contentRule("blocked")));
         assertEquals(
-                List.of("first", "second"),
-                PostFilterMatcher.normalizedKeywords(" First \nsecond\nＦＩＲＳＴ\n\n")
+                "KEYWORD_MAIN_TEXT",
+                reason(post("contains blocked phrase", user("safe")), contentRule("blocked"))
         );
     }
 
     @Test
-    public void matchesLiteralTextAndUsernameForms() {
-        assertEquals("KEYWORD_MAIN_TEXT", reason(post("value [.*?] here", null), "[.*?]"));
-        assertEquals("KEYWORD_MAIN_TEXT", reason(post("これは日本語です", null), "日本語"));
-        assertEquals("KEYWORD_USERNAME", reason(post("safe", user("ExampleUser")), "@exampleuser"));
-    }
+    public void usernameRuleMatchesMainAndQuotedAuthorsOnly() {
+        assertEquals(
+                "KEYWORD_USERNAME",
+                reason(post("safe", user("ExampleUser")), usernameRule("@exampleuser"))
+        );
+        assertNull(reason(post("text says exampleuser", user("safe")), usernameRule("exampleuser")));
 
-    @Test
-    public void matchesQuotedPostContent() {
-        FakePost post = post("safe", user("safe_author"));
-        post.postResult = contextual(
+        FakePost quoted = post("safe", user("safe_author"));
+        quoted.postResult = contextual(
                 postResult("safe", user("safe_author")),
-                postResult("quoted phrase", user("quoted_author"))
+                postResult("safe", user("quoted_author"))
         );
-
-        assertEquals("KEYWORD_QUOTED_TEXT", reason(post, "quoted phrase"));
-        assertEquals("KEYWORD_QUOTED_USERNAME", reason(post, "@quoted_author"));
+        assertEquals(
+                "KEYWORD_QUOTED_USERNAME",
+                reason(quoted, usernameRule("quoted_author"))
+        );
     }
 
     @Test
-    public void matchesLongNoteArticleAndCard() {
+    public void contentRuleMatchesQuotedNoteArticleAndCardContent() {
+        FakePost quoted = post("safe", null);
+        quoted.postResult = contextual(postResult("safe", null), postResult("quoted phrase", null));
+        assertEquals("KEYWORD_QUOTED_TEXT", reason(quoted, contentRule("quoted phrase")));
+
         FakePost notePost = post("safe", null);
         notePost.notePost = note("long note phrase");
-        assertEquals("KEYWORD_NOTE", reason(notePost, "note phrase"));
+        assertEquals("KEYWORD_NOTE", reason(notePost, contentRule("note phrase")));
 
         FakePost articlePost = post("safe", null);
         articlePost.article = article("article title", "preview body");
-        assertEquals("KEYWORD_ARTICLE", reason(articlePost, "preview body"));
+        assertEquals("KEYWORD_ARTICLE", reason(articlePost, contentRule("preview body")));
 
         FakePost cardPost = post("safe", null);
         cardPost.card = card("card title", "card description");
-        assertEquals("KEYWORD_CARD", reason(cardPost, "description"));
+        assertEquals("KEYWORD_CARD", reason(cardPost, contentRule("description")));
+    }
+
+    @Test
+    public void disabledRuleDoesNotMatch() {
+        PostFilterRule disabled = new PostFilterRule("1", "blocked", true, true, false);
+        assertNull(reason(post("blocked", user("blocked")), disabled));
     }
 
     @Test
     public void ignoresUnrelatedMetadata() {
         FakePost safe = post("safe", user("safe_author"));
         safe.entryId = "metadata-secret";
-        assertNull(reason(safe, "secret"));
+        assertNull(reason(safe, contentRule("secret")));
     }
 
     @Test
     public void timelineFilterReturnsOriginalListWhenDisabledOrUnchanged() {
         List<UrtTimelinePost> posts = List.of(post("safe", null));
+        PostFilterRuleStore.Snapshot snapshot = snapshot(contentRule("safe"));
 
-        assertSame(posts, XLiteTimelineFilter.filterPostsByKeyword(posts, false, "safe"));
-        assertSame(posts, XLiteTimelineFilter.filterPostsByKeyword(posts, true, "blocked"));
+        assertSame(posts, XLiteTimelineFilter.filterPostsByKeyword(posts, false, snapshot));
+        assertSame(
+                posts,
+                XLiteTimelineFilter.filterPostsByKeyword(
+                        posts,
+                        true,
+                        snapshot(contentRule("blocked"))
+                )
+        );
     }
 
     @Test
-    public void timelineFilterRemovesMatchingPosts() {
+    public void timelineFilterRemovesOnlyScopedMatches() {
         List<UrtTimelinePost> posts = List.of(
-                post("safe", null),
-                post("contains blocked phrase", null)
+                post("safe", user("blocked")),
+                post("contains blocked phrase", user("safe"))
         );
 
-        Object result = XLiteTimelineFilter.filterPostsByKeyword(posts, true, "blocked phrase");
+        Object contentResult = XLiteTimelineFilter.filterPostsByKeyword(
+                posts,
+                true,
+                snapshot(contentRule("blocked"))
+        );
+        assertEquals(List.of(posts.get(0)), contentResult);
 
-        assertEquals(List.of(posts.get(0)), result);
+        Object usernameResult = XLiteTimelineFilter.filterPostsByKeyword(
+                posts,
+                true,
+                snapshot(usernameRule("blocked"))
+        );
+        assertEquals(List.of(posts.get(1)), usernameResult);
     }
 
-    private static String reason(UrtTimelinePost post, String keyword) {
-        return PostFilterMatcher.findMatchReason(
-                post,
-                Collections.singletonList(PostFilterMatcher.normalize(keyword))
-        );
+    private static String reason(UrtTimelinePost post, PostFilterRule rule) {
+        return PostFilterMatcher.findMatchReason(post, snapshot(rule));
+    }
+
+    private static PostFilterRuleStore.Snapshot snapshot(PostFilterRule rule) {
+        return PostFilterRuleStore.snapshotOf(List.of(rule));
+    }
+
+    private static PostFilterRule contentRule(String phrase) {
+        return new PostFilterRule("content-" + phrase, phrase, true, false, true);
+    }
+
+    private static PostFilterRule usernameRule(String phrase) {
+        return new PostFilterRule("username-" + phrase, phrase, false, true, true);
     }
 
     private static FakePost post(String text, UserResult author) {
