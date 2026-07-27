@@ -1,3 +1,14 @@
+## [3.9.0-dev.2](https://github.com/crimera/piko/compare/v3.9.0-dev.1...v3.9.0-dev.2) (2026-07-27)
+
+### 🐛 Bug Fixes
+
+* **instagram:** prevent inbox action bar verifier crash ([b65cdb2](https://github.com/crimera/piko/commit/b65cdb26c195891a12e2b7ad64c90cb21e56b042))
+* **instagram:** restore profile action bar hooks ([5cf2a42](https://github.com/crimera/piko/commit/5cf2a427c2f8b3831276fe8cbc6a12178aa3dbe4))
+
+### ✨ New Features
+
+* **Instagram:** Added mappings for `439.0.0.37.89` ([b335af3](https://github.com/crimera/piko/commit/b335af3f20cefe15d6f5342fd5cc41d692eb9fac))
+
 ## [3.9.0-dev.1](https://github.com/crimera/piko/compare/v3.8.0...v3.9.0-dev.1) (2026-07-26)
 
 ### 🐛 Bug Fixes

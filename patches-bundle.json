@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-07-26T18:06:11",
-  "description": "## [3.9.0-dev.1](https://github.com/crimera/piko/compare/v3.8.0...v3.9.0-dev.1) (2026-07-26)\n\n### 🐛 Bug Fixes\n\n* **Instagram:** Fix reels current media logic ([40836e8](https://github.com/crimera/piko/commit/40836e83e10b1f023e7ec4c1dca4f1407ba6d638))\n* **Instagram:** Fix register issue while hooking reel overflow menu ([83786a8](https://github.com/crimera/piko/commit/83786a8d379b7ae05bfaa73ab07c94172ba9d9d3))\n* **instagram:** pass current carousel index to reel overflow buttons ([#1586](https://github.com/crimera/piko/issues/1586)) ([a80bf4a](https://github.com/crimera/piko/commit/a80bf4af5bdc1ff402793dbe0209a642c015b3fa))\n* **Twitter:** Fix `More information on profile` fingerprint on 12.11 ([3b5c945](https://github.com/crimera/piko/commit/3b5c94596dc45af901c0c6efbd72af0e03a12e9e))\n\n### ✨ New Features\n\n* **Instagram:** New patch to block onboarding permission prompts ([9b6e569](https://github.com/crimera/piko/commit/9b6e56956ecb6df916afc1743a6cbb3b8e463b33))\n\n### 🚀 Updated App Support\n\n* **Instagram:** Add support for `439.0.0.37.89` ([3e38d22](https://github.com/crimera/piko/commit/3e38d22c56b37ded2861be7d24f0afea0f0c7034))\n* **Twitter:** Add support for `12.11.0-release.0` ([cdca6a8](https://github.com/crimera/piko/commit/cdca6a84f94366aa91c1c2fcb533056413a95d61))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.1/patches-3.9.0-dev.1.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.1/patches-3.9.0-dev.1.mpp.asc",
-  "version": "3.9.0-dev.1"
+  "created_at": "2026-07-27T18:26:54",
+  "description": "## [3.9.0-dev.2](https://github.com/crimera/piko/compare/v3.9.0-dev.1...v3.9.0-dev.2) (2026-07-27)\n\n### 🐛 Bug Fixes\n\n* **instagram:** prevent inbox action bar verifier crash ([b65cdb2](https://github.com/crimera/piko/commit/b65cdb26c195891a12e2b7ad64c90cb21e56b042))\n* **instagram:** restore profile action bar hooks ([5cf2a42](https://github.com/crimera/piko/commit/5cf2a427c2f8b3831276fe8cbc6a12178aa3dbe4))\n\n### ✨ New Features\n\n* **Instagram:** Added mappings for `439.0.0.37.89` ([b335af3](https://github.com/crimera/piko/commit/b335af3f20cefe15d6f5342fd5cc41d692eb9fac))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.2/patches-3.9.0-dev.2.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.2/patches-3.9.0-dev.2.mpp.asc",
+  "version": "3.9.0-dev.2"
 }
