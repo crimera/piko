@@ -23,6 +23,16 @@
     <string name="piko_xlite_inline_action_bookmark">Bookmark</string>
     <string name="piko_xlite_inline_action_share">Share</string>
 
+    <string name="piko_xlite_nav_bar_title">Navigation bar items to hide</string>
+    <string name="piko_xlite_nav_bar_summary">Choose which items are hidden from the X-Lite bottom navigation bar</string>
+    <string name="piko_xlite_nav_bar_home">Home</string>
+    <string name="piko_xlite_nav_bar_explore">Explore</string>
+    <string name="piko_xlite_nav_bar_grok">Grok</string>
+    <string name="piko_xlite_nav_bar_notifications">Notifications</string>
+    <string name="piko_xlite_nav_bar_dm">Messages</string>
+    <string name="piko_xlite_nav_bar_communities">Communities</string>
+    <string name="piko_xlite_nav_bar_spaces">Spaces</string>
+
     <string name="piko_xlite_post_filtering_title">Post filtering</string>
     <string name="piko_xlite_post_filtering_summary">Hide posts containing user-defined words and phrases</string>
     <string name="piko_xlite_post_filtering_enabled_title">Enable post filtering</string>
