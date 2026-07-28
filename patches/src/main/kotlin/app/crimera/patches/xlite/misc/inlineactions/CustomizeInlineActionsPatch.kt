@@ -23,7 +23,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
-private object XLiteInlineActionBarClassFingerprint : Fingerprint(
+internal object XLiteInlineActionBarClassFingerprint : Fingerprint(
     name = "<init>",
     returnType = "V",
     filters =

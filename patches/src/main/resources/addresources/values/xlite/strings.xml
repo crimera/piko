@@ -21,6 +21,8 @@
     <string name="piko_xlite_share_image_title">Share post as image</string>
     <string name="piko_xlite_share_image_summary">Adds a rendered-image share action to post menus</string>
 
+    <string name="piko_xlite_inline_download_button_title">Show inline download button</string>
+    <string name="piko_xlite_inline_download_button_summary">Adds a download button directly below X-Lite posts</string>
     <string name="piko_xlite_inline_actions_title">Inline actions to hide</string>
     <string name="piko_xlite_inline_actions_summary">Choose which actions are hidden below X-Lite posts</string>
     <string name="piko_xlite_inline_action_reply">Reply</string>

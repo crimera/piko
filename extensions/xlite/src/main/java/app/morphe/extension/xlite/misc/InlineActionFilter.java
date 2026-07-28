@@ -14,7 +14,14 @@ public final class InlineActionFilter {
     }
 
     public static List<?> filter(List<?> actions, Set<String> hiddenActionIds) {
-        if (actions == null || hiddenActionIds == null || hiddenActionIds.isEmpty()) return actions;
+        if (actions == null) return null;
+
+        List<?> filtered = filterHiddenActions(actions, hiddenActionIds);
+        return InlineDownloadButton.addAction(filtered);
+    }
+
+    private static List<?> filterHiddenActions(List<?> actions, Set<String> hiddenActionIds) {
+        if (hiddenActionIds == null || hiddenActionIds.isEmpty()) return actions;
 
         try {
             List<Object> filtered = new ArrayList<>(actions.size());
