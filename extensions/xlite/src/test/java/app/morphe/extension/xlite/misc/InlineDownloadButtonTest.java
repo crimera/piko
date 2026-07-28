@@ -1,8 +1,13 @@
 package app.morphe.extension.xlite.misc;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
+
+import java.util.Collections;
+import java.util.List;
 
 public final class InlineDownloadButtonTest {
     @Test
@@ -43,5 +48,25 @@ public final class InlineDownloadButtonTest {
                 "download_tmp",
                 InlineDownloadButton.temporaryDownloadFileName("download")
         );
+    }
+
+    @Test
+    public void detectsWhetherPostHasMedia() {
+        assertFalse(InlineDownloadButton.hasMedia(null));
+        assertFalse(InlineDownloadButton.hasMedia(new MediaPost(null)));
+        assertFalse(InlineDownloadButton.hasMedia(new MediaPost(Collections.emptyList())));
+        assertTrue(InlineDownloadButton.hasMedia(new MediaPost(Collections.singletonList(new Object()))));
+    }
+
+    public static final class MediaPost {
+        private final List<?> media;
+
+        MediaPost(List<?> media) {
+            this.media = media;
+        }
+
+        public List<?> getMedia() {
+            return media;
+        }
     }
 }
