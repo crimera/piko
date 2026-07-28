@@ -40,6 +40,29 @@
     <string name="piko_xlite_nav_bar_communities">Communities</string>
     <string name="piko_xlite_nav_bar_spaces">Spaces</string>
 
+    <string name="piko_xlite_drawer_title">Drawer items to hide</string>
+    <string name="piko_xlite_drawer_summary">Choose which items are hidden from the X-Lite navigation drawer</string>
+    <string name="piko_xlite_drawer_profile">Profile</string>
+    <string name="piko_xlite_drawer_premium">Premium</string>
+    <string name="piko_xlite_drawer_money">Money</string>
+    <string name="piko_xlite_drawer_communities">Communities</string>
+    <string name="piko_xlite_drawer_bookmarks">Bookmarks</string>
+    <string name="piko_xlite_drawer_community_notes">Community Notes</string>
+    <string name="piko_xlite_drawer_offline_videos">Offline videos</string>
+    <string name="piko_xlite_drawer_lists">Lists</string>
+    <string name="piko_xlite_drawer_boost">Boost</string>
+    <string name="piko_xlite_drawer_spaces">Spaces</string>
+    <string name="piko_xlite_drawer_follow_requests">Follow requests</string>
+    <string name="piko_xlite_drawer_monetization">Monetization</string>
+    <string name="piko_xlite_drawer_creator_studio">Creator Studio</string>
+    <string name="piko_xlite_drawer_analytics">Analytics</string>
+    <string name="piko_xlite_drawer_switch_to_x">Switch back to X</string>
+    <string name="piko_xlite_drawer_settings">Settings and privacy</string>
+    <string name="piko_xlite_drawer_help_center">Help Center</string>
+    <string name="piko_xlite_drawer_feedback">Feedback and issues</string>
+    <string name="piko_xlite_drawer_media_transparency">Media transparency</string>
+    <string name="piko_xlite_drawer_imprint">Imprint</string>
+
     <string name="piko_xlite_post_filtering_title">Post filtering</string>
     <string name="piko_xlite_post_filtering_summary">Hide posts containing user-defined words and phrases</string>
     <string name="piko_xlite_post_filtering_enabled_title">Enable post filtering</string>
