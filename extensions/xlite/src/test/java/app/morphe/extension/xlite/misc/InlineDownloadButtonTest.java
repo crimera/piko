@@ -32,4 +32,16 @@ public final class InlineDownloadButtonTest {
                 InlineDownloadButton.downloadFileName("@jack/user", "post:id", "jpg", 0, 1)
         );
     }
+
+    @Test
+    public void temporarySuffixPrecedesExtension() {
+        assertEquals(
+                "jack_123456789_tmp.jpg",
+                InlineDownloadButton.temporaryDownloadFileName("jack_123456789.jpg")
+        );
+        assertEquals(
+                "download_tmp",
+                InlineDownloadButton.temporaryDownloadFileName("download")
+        );
+    }
 }
