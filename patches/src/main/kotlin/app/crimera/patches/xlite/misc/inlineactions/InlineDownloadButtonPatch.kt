@@ -1,14 +1,14 @@
 package app.crimera.patches.xlite.misc.inlineactions
 
-import app.crimera.patches.xlite.premium.xLiteDownloadPatch
+import app.crimera.patches.xlite.misc.extension.xLiteInitHook
 import app.crimera.patches.xlite.settings.Categories
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
-import app.crimera.utils.changeFirstString
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.Match
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -32,16 +32,9 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 private const val INLINE_ACTION_ENTRY = "Lcom/x/models/InlineActionEntry;"
 private const val POST_ACTION_TYPE = "Lcom/x/models/PostActionType;"
-private const val POST_IDENTIFIER = "Lcom/x/models/PostIdentifier;"
-private const val MEDIA_CONTENT = "Lcom/x/models/MediaContent;"
 private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
-private const val FUNCTION1 = "Lkotlin/jvm/functions/Function1;"
-private const val POINTER_INPUT_HANDLER =
-    "Landroidx/compose/ui/input/pointer/PointerInputEventHandler;"
 private const val EXTENSION = "Lapp/morphe/extension/xlite/misc/InlineDownloadButton;"
-private const val DOWNLOAD_EVENT_PLACEHOLDER =
-    "com.x.urt.items.post.DownloadMediaRequested"
 
 private object InlineActionEntryRendererFingerprint : Fingerprint(
     parameters =
@@ -68,26 +61,6 @@ private object InlineActionEntryRendererFingerprint : Fingerprint(
                 smali = "$INLINE_ACTION_ENTRY->isEnabled()Z",
             ),
         ),
-)
-
-private object TimelinePostStateFingerprint : Fingerprint(
-    returnType = "Ljava/lang/String;",
-    filters =
-        listOf(
-            app.morphe.patcher.string("AvailablePost(entryId="),
-            app.morphe.patcher.string(", postId="),
-            app.morphe.patcher.string(", eventSink="),
-        ),
-)
-
-private object DownloadMediaEventFingerprint : Fingerprint(
-    returnType = "Ljava/lang/String;",
-    filters = listOf(app.morphe.patcher.string("DownloadMediaRequested(media=")),
-)
-
-private object DownloadEventClassNameFingerprint : Fingerprint(
-    definingClass = EXTENSION,
-    strings = listOf(DOWNLOAD_EVENT_PLACEHOLDER),
 )
 
 private fun requireSingle(
@@ -122,10 +95,10 @@ private fun MutableMethod.freeRegisters4Bit(
 val xLiteInlineDownloadButtonPatch =
     bytecodePatch(
         name = "X-Lite: Inline download button",
-        description = "Adds a Download button below X-Lite posts and routes it through X-Lite's downloader.",
+        description = "Adds a Download button below X-Lite posts and saves media to Pictures/Twitter.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
-        dependsOn(customizeXLiteInlineActionsPatch, xLiteDownloadPatch)
+        dependsOn(customizeXLiteInlineActionsPatch)
 
         xLiteToggle(
             id = "xlite.content.inline_download_button",
@@ -136,6 +109,11 @@ val xLiteInlineDownloadButtonPatch =
         )
 
         execute {
+            xLiteInitHook.fingerprint.method.addInstruction(
+                0,
+                "invoke-static/range {p0 .. p0}, $EXTENSION->initialize(Landroid/content/Context;)V",
+            )
+
             val inlineRenderer =
                 requireSingle(
                     "X-Lite inline-action entry renderer",
@@ -283,79 +261,6 @@ val xLiteInlineDownloadButtonPatch =
                 )
             }
 
-            val timelineState =
-                requireSingle(
-                    "X-Lite available-post state",
-                    TimelinePostStateFingerprint.matchAll(),
-                )
-            val timelineStateType = timelineState.originalClassDef.type
-            val postIdentifierField =
-                timelineState.originalClassDef.fields.singleOrNull { it.type == POST_IDENTIFIER }
-                    ?: throw PatchException("X-Lite available-post state has no unique PostIdentifier field")
-            val eventSinkField =
-                timelineState.originalClassDef.fields.singleOrNull { it.type == FUNCTION1 }
-                    ?: throw PatchException("X-Lite available-post state has no unique event sink field")
-            val timelineRenderer =
-                requireSingle(
-                    "X-Lite individual post renderer",
-                    Fingerprint(
-                        returnType = "V",
-                        parameters =
-                            listOf(
-                                timelineStateType,
-                                "L",
-                                "L",
-                                "L",
-                                COMPOSER,
-                                "I",
-                            ),
-                        filters =
-                            listOf(
-                                methodCall(
-                                    parameters = listOf(MODIFIER, "Ljava/lang/Object;", POINTER_INPUT_HANDLER),
-                                    returnType = MODIFIER,
-                                ),
-                                opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
-                                methodCall(
-                                    parameters = listOf(COMPOSER, MODIFIER),
-                                    returnType = MODIFIER,
-                                ),
-                            ),
-                    ).matchAll(),
-                )
-            timelineRenderer.method.apply {
-                requireStatic("X-Lite individual post renderer")
-                val (postIdentifierRegister, eventSinkRegister) =
-                    freeRegisters4Bit(index = 0, count = 2)
-                addInstructions(
-                    0,
-                    """
-                        move-object/from16 v$postIdentifierRegister, p0
-                        iget-object v$postIdentifierRegister, v$postIdentifierRegister, $postIdentifierField
-                        move-object/from16 v$eventSinkRegister, p0
-                        iget-object v$eventSinkRegister, v$eventSinkRegister, $eventSinkField
-                        invoke-static {v$postIdentifierRegister, v$eventSinkRegister}, $EXTENSION->registerEventSink(Ljava/lang/Object;Ljava/lang/Object;)V
-                    """.trimIndent(),
-                )
-            }
-
-            val downloadEvent =
-                requireSingle(
-                    "X-Lite DownloadMediaRequested event",
-                    DownloadMediaEventFingerprint.matchAll(),
-                )
-            if (downloadEvent.originalClassDef.methods.none { method ->
-                    method.name == "<init>" &&
-                        method.parameterTypes.map { it.toString() } == listOf(MEDIA_CONTENT)
-                }
-            ) {
-                throw PatchException(
-                    "X-Lite DownloadMediaRequested constructor changed: ${downloadEvent.originalClassDef.type}",
-                )
-            }
-            DownloadEventClassNameFingerprint.changeFirstString(
-                downloadEvent.originalClassDef.type.toJavaClassName(),
-            )
         }
     }
 
@@ -383,6 +288,3 @@ private fun resolveIconField(resourceName: String): FieldReference {
             fields.joinToString(),
     )
 }
-
-private fun String.toJavaClassName() =
-    removePrefix("L").removeSuffix(";").replace('/', '.')
