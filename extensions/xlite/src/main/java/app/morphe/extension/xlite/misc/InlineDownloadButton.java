@@ -1,28 +1,47 @@
 package app.morphe.extension.xlite.misc;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.widget.Toast;
 
 import com.x.models.InlineActionEntry;
 import com.x.models.PostActionType;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.xlite.settings.SettingsRegistry;
@@ -33,10 +52,13 @@ public final class InlineDownloadButton {
     private static final String CARRIER_ACTION_NAME = "TwitterShare";
     private static final String CONTEXTUAL_POST_CLASS = "com.x.models.ContextualPost";
     private static final String DOWNLOAD_DIRECTORY = "Twitter";
+    private static final String PENDING_DOWNLOADS_PREFS = "piko_xlite_inline_downloads";
     private static final int MAX_TRACKED_OBJECTS = 128;
+    private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final List<WeakReference<InlineActionEntry>> DOWNLOAD_ACTIONS = new ArrayList<>();
     private static WeakReference<Activity> resumedActivity = new WeakReference<>(null);
     private static boolean lifecycleCallbacksRegistered;
+    private static boolean downloadReceiverRegistered;
 
     private InlineDownloadButton() {
     }
@@ -80,6 +102,8 @@ public final class InlineDownloadButton {
             }
         });
         lifecycleCallbacksRegistered = true;
+        registerDownloadReceiver(application);
+        resumePendingDownloads(application);
     }
 
     public static List<?> addAction(List<?> actions) {
@@ -433,6 +457,7 @@ public final class InlineDownloadButton {
             int mediaCount
     ) {
         String fileName = downloadFileName(username, postId, download.extension, index, mediaCount);
+        String temporaryFileName = temporaryDownloadFileName(fileName);
         try {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(download.url))
                     .setTitle(fileName)
@@ -445,19 +470,252 @@ public final class InlineDownloadButton {
                     )
                     .setDestinationInExternalPublicDir(
                             Environment.DIRECTORY_PICTURES,
-                            DOWNLOAD_DIRECTORY + "/" + fileName
+                            DOWNLOAD_DIRECTORY + "/" + temporaryFileName
                     );
-            request.allowScanningByMediaScanner();
 
             DownloadManager manager =
                     (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
             if (manager == null) throw new IllegalStateException("DownloadManager is unavailable");
-            manager.enqueue(request);
+
+            long downloadId = manager.enqueue(request);
+            savePendingDownload(
+                    context,
+                    downloadId,
+                    temporaryFileName,
+                    fileName,
+                    download.mimeType
+            );
+            finishPendingDownloadAsync(context, manager, downloadId);
             return true;
         } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to enqueue X-Lite media download", exception);
             return false;
         }
+    }
+
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+    private static void registerDownloadReceiver(Context context) {
+        if (downloadReceiverRegistered) return;
+
+        BroadcastReceiver receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context receiverContext, Intent intent) {
+                long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                if (downloadId < 0) return;
+
+                DownloadManager manager =
+                        (DownloadManager) receiverContext.getSystemService(Context.DOWNLOAD_SERVICE);
+                if (manager == null) return;
+                finishPendingDownloadAsync(receiverContext, manager, downloadId);
+            }
+        };
+        IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED);
+        } else {
+            context.registerReceiver(receiver, filter);
+        }
+        downloadReceiverRegistered = true;
+    }
+
+    private static void resumePendingDownloads(Context context) {
+        DownloadManager manager =
+                (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+        if (manager == null) return;
+
+        Map<String, ?> pending = pendingDownloads(context).getAll();
+        for (String key : pending.keySet()) {
+            try {
+                finishPendingDownloadAsync(context, manager, Long.parseLong(key));
+            } catch (NumberFormatException exception) {
+                pendingDownloads(context).edit().remove(key).apply();
+            }
+        }
+    }
+
+    private static void savePendingDownload(
+            Context context,
+            long downloadId,
+            String temporaryFileName,
+            String fileName,
+            String mimeType
+    ) {
+        String value = temporaryFileName + "\n" + fileName + "\n" + mimeType;
+        boolean saved = pendingDownloads(context)
+                .edit()
+                .putString(String.valueOf(downloadId), value)
+                .commit();
+        if (!saved) throw new IllegalStateException("Could not persist pending download");
+    }
+
+    private static PendingDownload pendingDownload(Context context, long downloadId) {
+        String value = pendingDownloads(context).getString(String.valueOf(downloadId), null);
+        if (value == null) return null;
+
+        String[] fields = value.split("\n", -1);
+        if (fields.length != 3) {
+            clearPendingDownload(context, downloadId);
+            return null;
+        }
+        return new PendingDownload(fields[0], fields[1], fields[2]);
+    }
+
+    private static SharedPreferences pendingDownloads(Context context) {
+        return context.getSharedPreferences(PENDING_DOWNLOADS_PREFS, Context.MODE_PRIVATE);
+    }
+
+    private static void clearPendingDownload(Context context, long downloadId) {
+        pendingDownloads(context).edit().remove(String.valueOf(downloadId)).apply();
+    }
+
+    private static void finishPendingDownloadAsync(
+            Context context,
+            DownloadManager manager,
+            long downloadId
+    ) {
+        Context applicationContext = context.getApplicationContext();
+        Context safeContext = applicationContext != null ? applicationContext : context;
+        DOWNLOAD_EXECUTOR.execute(() -> finishPendingDownload(safeContext, manager, downloadId));
+    }
+
+    private static void finishPendingDownload(
+            Context context,
+            DownloadManager manager,
+            long downloadId
+    ) {
+        PendingDownload pending = pendingDownload(context, downloadId);
+        if (pending == null) return;
+
+        int status = downloadStatus(manager, downloadId);
+        if (status == DownloadManager.STATUS_PENDING ||
+                status == DownloadManager.STATUS_RUNNING ||
+                status == DownloadManager.STATUS_PAUSED) {
+            return;
+        }
+        if (status != DownloadManager.STATUS_SUCCESSFUL) {
+            clearPendingDownload(context, downloadId);
+            manager.remove(downloadId);
+            showToast(context, "Download failed: " + pending.fileName);
+            return;
+        }
+
+        try {
+            boolean moved = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+                    ? publishDownload(context, manager, downloadId, pending.fileName, pending.mimeType)
+                    : moveLegacyDownload(context, pending.temporaryFileName, pending.fileName);
+            if (!moved) {
+                showToast(context, "Could not finalize download: " + pending.fileName);
+                return;
+            }
+
+            clearPendingDownload(context, downloadId);
+            manager.remove(downloadId);
+            showToast(context, "Downloaded: " + pending.fileName);
+        } catch (IOException | RuntimeException exception) {
+            Logger.printException(() -> "Failed to finalize X-Lite media download", exception);
+            showToast(context, "Could not finalize download: " + pending.fileName);
+        }
+    }
+
+    private static int downloadStatus(DownloadManager manager, long downloadId) {
+        DownloadManager.Query query = new DownloadManager.Query().setFilterById(downloadId);
+        try (Cursor cursor = manager.query(query)) {
+            if (cursor == null || !cursor.moveToFirst()) return -1;
+            int statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+            return statusIndex < 0 ? -1 : cursor.getInt(statusIndex);
+        }
+    }
+
+    private static boolean publishDownload(
+            Context context,
+            DownloadManager manager,
+            long downloadId,
+            String fileName,
+            String mimeType
+    ) throws IOException {
+        Uri source = manager.getUriForDownloadedFile(downloadId);
+        if (source == null) return false;
+
+        ContentResolver resolver = context.getContentResolver();
+        Uri collection = mimeType.startsWith("video/")
+                ? MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                : MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+        String relativePath = Environment.DIRECTORY_PICTURES + "/" + DOWNLOAD_DIRECTORY + "/";
+        deleteExistingMedia(resolver, collection, fileName, relativePath);
+
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
+        values.put(MediaStore.MediaColumns.MIME_TYPE, mimeType);
+        values.put(MediaStore.MediaColumns.RELATIVE_PATH, relativePath);
+        values.put(MediaStore.MediaColumns.IS_PENDING, 1);
+
+        Uri destination = resolver.insert(collection, values);
+        if (destination == null) return false;
+
+        try (InputStream input = resolver.openInputStream(source);
+             OutputStream output = resolver.openOutputStream(destination, "w")) {
+            if (input == null || output == null) throw new IOException("Could not open media streams");
+            copy(input, output);
+        } catch (IOException | RuntimeException exception) {
+            resolver.delete(destination, null, null);
+            throw exception;
+        }
+
+        ContentValues completed = new ContentValues();
+        completed.put(MediaStore.MediaColumns.IS_PENDING, 0);
+        resolver.update(destination, completed, null, null);
+        return true;
+    }
+
+    private static void deleteExistingMedia(
+            ContentResolver resolver,
+            Uri collection,
+            String fileName,
+            String relativePath
+    ) {
+        try {
+            String selection = MediaStore.MediaColumns.DISPLAY_NAME + "=? AND " +
+                    MediaStore.MediaColumns.RELATIVE_PATH + "=?";
+            resolver.delete(collection, selection, new String[]{fileName, relativePath});
+        } catch (RuntimeException exception) {
+            Logger.printException(() -> "Failed to replace existing X-Lite media", exception);
+        }
+    }
+
+    private static boolean moveLegacyDownload(
+            Context context,
+            String temporaryFileName,
+            String fileName
+    ) throws IOException {
+        File pictures = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File directory = new File(pictures, DOWNLOAD_DIRECTORY);
+        File temporaryFile = new File(directory, temporaryFileName);
+        if (!temporaryFile.isFile()) return false;
+
+        File finalFile = new File(directory, fileName);
+        Files.move(
+                temporaryFile.toPath(),
+                finalFile.toPath(),
+                StandardCopyOption.REPLACE_EXISTING
+        );
+        context.sendBroadcast(
+                new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(finalFile))
+        );
+        return true;
+    }
+
+    private static void copy(InputStream input, OutputStream output) throws IOException {
+        byte[] buffer = new byte[64 * 1024];
+        int read;
+        while ((read = input.read(buffer)) != -1) {
+            output.write(buffer, 0, read);
+        }
+    }
+
+    static String temporaryDownloadFileName(String fileName) {
+        int extensionIndex = fileName.lastIndexOf('.');
+        if (extensionIndex <= 0) return fileName + "_tmp";
+        return fileName.substring(0, extensionIndex) + "_tmp" + fileName.substring(extensionIndex);
     }
 
     static String downloadFileName(
@@ -562,6 +820,18 @@ public final class InlineDownloadButton {
             this.extension = extension;
             this.mimeType = mimeType;
             this.label = label;
+        }
+    }
+
+    private static final class PendingDownload {
+        final String temporaryFileName;
+        final String fileName;
+        final String mimeType;
+
+        PendingDownload(String temporaryFileName, String fileName, String mimeType) {
+            this.temporaryFileName = temporaryFileName;
+            this.fileName = fileName;
+            this.mimeType = mimeType;
         }
     }
 
