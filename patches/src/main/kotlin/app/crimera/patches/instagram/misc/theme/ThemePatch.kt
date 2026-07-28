@@ -31,10 +31,7 @@ val themePatch =
             title = "Pure-black AMOLED theme",
             description = "By default this patch applies a Material You dynamic theme that " +
                 "follows your device's light/dark setting. Turn this on to override it " +
-                "with a pure-black AMOLED theme instead. " +
-                "Note: a few server-driven pages (notifications, DM inbox, " +
-                "About-this-account) and full-screen media/Reels keep Instagram's own " +
-                "colours in both modes.",
+                "with a pure-black AMOLED theme instead.",
         )
 
         
@@ -55,11 +52,35 @@ val themePatch =
 // attributes themselves straight to white, leaving the shared surface leaf intact.
 // On-media chrome sits over media (arbitrary/dark), so white is correct in every
 // theme. Guarded so a missing/undecoded styles.xml can never fail the build.
+// muteIconPrimaryColor: same on-media conflict as the igds_* attrs above,
+// just under IG's own naming (not bds_/igds_). Two style blocks define it
+// with fixed mid-greys (grey_14/grey_15) that had adequate contrast against
+// the original audio-bar pill background — but igds_prism_gray_08 (that pill's
+// background) is remapped to piko_dynamic_prism_black below, so the icon
+// needs to be forced white too, like the rest of on-media chrome.
 private val onMediaChromeAttrs =
     setOf(
         "igds_color_primary_text_on_media",
         "igds_color_icon_on_media",
         "igds_color_primary_button_on_media",
+        "muteIconPrimaryColor",
+    )
+
+// SmartCapture (the Stories/Reels camera UI) has its own on-media attribute
+// namespace (sc_*) that ALSO conflicts through abc_decor_view_status_guard_light
+// in some style blocks (e.g. IgSmartCaptureTheme, SmartCapture) - same underlying
+// bug as onMediaChromeAttrs above. Unlike those igds_* attrs (always bds_white
+// wherever they appear), these sc_* names are reused with genuinely different,
+// intentional values elsewhere (e.g. SmartCapture.Selfie.Ig.Dark deliberately
+// uses a darker sc_fds_gray_90 for that one selfie sub-mode), so this can't be a
+// blanket by-name replace like onMediaChromeAttrs - it has to match by the
+// CURRENT value instead, only touching the specific instances that still point
+// at the conflicted background resource.
+private val onMediaAttrsPointingAtGuardLight =
+    setOf(
+        "sc_primary_icon_on_media",
+        "sc_primary_text_on_media",
+        "sc_always_white",
     )
 
 private fun ResourcePatchContext.forceWhiteOnMediaChrome() {
@@ -73,7 +94,14 @@ private fun ResourcePatchContext.forceWhiteOnMediaChrome() {
                 val items = document.getElementsByTagName("item")
                 for (index in 0 until items.length) {
                     val item = items.item(index) as? Element ?: continue
-                    if (onMediaChromeAttrs.contains(item.getAttribute("name"))) {
+                    val name = item.getAttribute("name")
+
+                    if (onMediaChromeAttrs.contains(name)) {
+                        item.textContent = "@color/bds_white"
+                    } else if (
+                        onMediaAttrsPointingAtGuardLight.contains(name) &&
+                        item.textContent == "@color/abc_decor_view_status_guard_light"
+                    ) {
                         item.textContent = "@color/bds_white"
                     }
                 }
@@ -450,7 +478,13 @@ private val materialYouSurfaceBaselineMappings =
         "igds_prism_gray_09_alpha_95" to "@color/piko_dynamic_prism_black",
         "igds_prism_gray_10_alpha_95" to "@color/piko_dynamic_prism_black",
         "bds_grey_9_95_transparent" to "@color/piko_dynamic_prism_black",
-        "bds_grey_10_80_transparent" to "@color/piko_dynamic_prism_black",
+        // bds_grey_10_80_transparent is intentionally EXCLUDED from this flatten:
+        // it's shared with igds_secondary_button_on_media (the reel "watch again"
+        // pill and similar on-media buttons), which needs to stay translucent over
+        // arbitrary media. Flattening it turned that pill into a solid opaque black
+        // block instead of a translucent overlay. igds_creation_menu_background,
+        // the other consumer of this literal, already gets its own direct override
+        // above, so it's unaffected by leaving this literal alone.
         "bds_grey_10_90_transparent" to "@color/piko_dynamic_prism_black",
         // LIGHT-mode counterparts of the dark surface leaves above (all confirmed
         // present in the 435.x resource table). In light mode Instagram resolves the
