@@ -18,7 +18,7 @@ import app.morphe.extension.crimera.PikoUtils;
 
 public class TimelineEntry {
     public static final boolean hideAds;
-    private static final boolean hideWTF,hideCTS,hideCTJ,hideDetailedPosts,hideRBMK,hidePinnedPosts,hidePremiumPrompt,showSensitiveMedia,hideTopPeopleSearch,hideTodaysNews;
+    private static final boolean hideWTF,hideCTS,hideCTJ,hideDetailedPosts,hideRBMK,hidePinnedPosts,hidePremiumPrompt,hideTopPeopleSearch,hideTodaysNews;
     static {
         hideAds = (Pref.hideAds() && SettingsStatus.hideAds);
         hideWTF = (Pref.hideWTF() && SettingsStatus.hideWTF);
@@ -28,7 +28,6 @@ public class TimelineEntry {
         hideRBMK = (Pref.hideRBMK() && SettingsStatus.hideRBMK);
         hidePinnedPosts = (Pref.hideRPinnedPosts() && SettingsStatus.hideRPinnedPosts);
         hidePremiumPrompt = (Pref.hidePremiumPrompt() && SettingsStatus.hidePremiumPrompt);
-        showSensitiveMedia = Pref.showSensitiveMedia();
         hideTopPeopleSearch = (Pref.hideTopPeopleSearch() && SettingsStatus.hideTopPeopleSearch);
         hideTodaysNews = (Pref.hideTodaysNews() && SettingsStatus.hideTodaysNews);
     }
@@ -100,18 +99,6 @@ public class TimelineEntry {
 
         }
         return jsonTimelineModuleItem;
-    }
-    public static JsonSensitiveMediaWarning sensitiveMedia(JsonSensitiveMediaWarning jsonSensitiveMediaWarning) {
-        try {
-            if(showSensitiveMedia){
-                jsonSensitiveMediaWarning.a = false;
-                jsonSensitiveMediaWarning.b = false;
-                jsonSensitiveMediaWarning.c = false;
-            }
-        } catch (Exception unused) {
-
-        }
-        return jsonSensitiveMediaWarning;
     }
     public static boolean hidePromotedTrend(Object data) {
         if (data != null && hideAds) {
