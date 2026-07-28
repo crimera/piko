@@ -26,4 +26,5 @@ internal object Constants {
     const val TIMELINE_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/timeline/XLiteTimelineFilter;"
     const val INLINE_ACTION_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/InlineActionFilter;"
     const val NAV_BAR_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/NavBarFilter;"
+    const val DRAWER_ITEM_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/DrawerItemFilter;"
 }
