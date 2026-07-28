@@ -8,20 +8,22 @@ package app.crimera.patches.twitter.timeline.sensitivemediasettings
 
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
-import app.crimera.patches.twitter.utils.Constants.PATCHES_DESCRIPTOR
+import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 
-// Credits to @Cradlesofashes
 
 private object sensitiveMediaSettingsPatchFingerprint : Fingerprint(
-    definingClass = "Lcom/twitter/model/json/core/JsonSensitiveMediaWarning\$\$JsonObjectMapper;",
-    name = "parse",
-    returnType = "Ljava/lang/Object",
+    definingClass = "Lcom/twitter/model/json/core/JsonTweetWithVisibilityResults\$\$JsonObjectMapper;",
+    name = "parseField",
+    returnType = "V",
+    parameters = listOf("Lcom/twitter/model/json/core/JsonTweetWithVisibilityResults;", "Ljava/lang/String;", "Lcom/fasterxml/jackson/core/h;")
 )
 
 @Suppress("unused")
@@ -33,19 +35,28 @@ val sensitiveMediaPatch =
         dependsOn(settingsPatch)
 
         execute {
-            val TIMELINE_ENTRY_DESCRIPTOR = "$PATCHES_DESCRIPTOR/TimelineEntry"
+            val method = sensitiveMediaSettingsPatchFingerprint.method
+            val instructions = method.instructions
 
-            val methods = sensitiveMediaSettingsPatchFingerprint.method
-            val instructions = methods.instructions
+            val ndx = instructions.first {
+                it.opcode == Opcode.CONST_STRING &&
+                (it as? ReferenceInstruction)?.reference?.toString() == "media_visibility_results"
+            }.location.index
 
-            val returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
+            val istrSoftInterPiv = instructions.first {
+                it.location.index > ndx &&
+                it.opcode == Opcode.CONST_STRING &&
+                (it as? ReferenceInstruction)?.reference?.toString() == "soft_intervention_pivot"
+            }
 
-            methods.addInstructions(
-                returnObj,
+            method.addInstructionsWithLabels(
+                ndx + 4,
                 """
-                invoke-static {p1}, $TIMELINE_ENTRY_DESCRIPTOR;->sensitiveMedia(Lcom/twitter/model/json/core/JsonSensitiveMediaWarning;)Lcom/twitter/model/json/core/JsonSensitiveMediaWarning;
-                move-result-object p1
+                invoke-static {}, $PREF_DESCRIPTOR;->showSensitiveMedia()Z
+                move-result v0
+                if-nez v0, :nextstr
                 """.trimIndent(),
+                ExternalLabel("nextstr", istrSoftInterPiv),
             )
             enableSettings("showSensitiveMedia")
         }
