@@ -14,6 +14,9 @@
     <string name="piko_xlite_filter_promoted_posts_title">Filter promoted posts</string>
     <string name="piko_xlite_filter_promoted_posts_summary">Removes promoted posts and promoted timeline modules</string>
 
+    <string name="piko_xlite_share_image_title">Share post as image</string>
+    <string name="piko_xlite_share_image_summary">Adds a rendered-image share action to post menus</string>
+
     <string name="piko_xlite_inline_actions_title">Inline actions to hide</string>
     <string name="piko_xlite_inline_actions_summary">Choose which actions are hidden below X-Lite posts</string>
     <string name="piko_xlite_inline_action_reply">Reply</string>
