@@ -13,6 +13,8 @@
     <string name="piko_xlite_hide_new_post_pill_summary">Hides the pill that appears when newer posts are available</string>
     <string name="piko_xlite_filter_promoted_posts_title">Filter promoted posts</string>
     <string name="piko_xlite_filter_promoted_posts_summary">Removes promoted posts and promoted timeline modules</string>
+    <string name="piko_xlite_hide_premium_upsell_title">Hide premium upsell</string>
+    <string name="piko_xlite_hide_premium_upsell_summary">Hides the premium upgrade chip from the home top bar</string>
 
     <string name="piko_xlite_share_image_title">Share post as image</string>
     <string name="piko_xlite_share_image_summary">Adds a rendered-image share action to post menus</string>
