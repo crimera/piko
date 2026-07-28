@@ -9,6 +9,8 @@
     <string name="piko_xlite_disable_timeline_refresh_summary">Prevents timeline jumps when X-Lite starts or returns to the foreground</string>
     <string name="piko_xlite_restore_timeline_position_title">Restore timeline position</string>
     <string name="piko_xlite_restore_timeline_position_summary">Returns to your saved timeline position after the app restarts</string>
+    <string name="piko_xlite_hide_spaces_bar_title">Hide Spaces bar</string>
+    <string name="piko_xlite_hide_spaces_bar_summary">Hides the Spaces bar above X-Lite timelines</string>
     <string name="piko_xlite_hide_new_post_pill_title">Hide the new-post pill</string>
     <string name="piko_xlite_hide_new_post_pill_summary">Hides the pill that appears when newer posts are available</string>
     <string name="piko_xlite_hide_new_post_button_title">Hide the new-post button</string>
