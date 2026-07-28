@@ -19,9 +19,12 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+
+private const val CONTEXTUAL_POST = "Lcom/x/models/ContextualPost;"
 
 internal object XLiteInlineActionBarClassFingerprint : Fingerprint(
     name = "<init>",
@@ -31,7 +34,7 @@ internal object XLiteInlineActionBarClassFingerprint : Fingerprint(
             fieldAccess(
                 opcode = Opcode.IPUT_OBJECT,
                 definingClass = "this",
-                type = "Lcom/x/models/ContextualPost;",
+                type = CONTEXTUAL_POST,
             ),
             fieldAccess(
                 opcode = Opcode.IPUT_OBJECT,
@@ -48,11 +51,11 @@ private object CustomizeXLiteInlineActionsFingerprint : Fingerprint(
         listOf(
             methodCall(
                 smali =
-                    "Lcom/x/models/ContextualPost;->getCanonicalPost()Lcom/x/models/CanonicalPost;",
+                    "$CONTEXTUAL_POST->getCanonicalPost()Lcom/x/models/CanonicalPost;",
             ),
             methodCall(
                 smali =
-                    "Lcom/x/models/ContextualPost;->getInlineActionEntry()Lkotlinx/collections/immutable/c;",
+                    "$CONTEXTUAL_POST->getInlineActionEntry()Lkotlinx/collections/immutable/c;",
             ),
             methodCall(smali = "Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z"),
         ),
@@ -95,6 +98,9 @@ val customizeXLiteInlineActionsPatch =
 
             matches.single().let { match ->
                 val method = match.method
+                if (AccessFlags.STATIC.isSet(method.accessFlags)) {
+                    throw PatchException("X-Lite inline action state builder is unexpectedly static: $method")
+                }
                 val addIndex = match.instructionMatches.last().index
                 val builderListRegister = method.getInstruction(addIndex).registersUsed.first()
                 val conversionInstruction =
@@ -114,15 +120,15 @@ val customizeXLiteInlineActionsPatch =
                     throw PatchException("X-Lite inline action list conversion result not found")
                 }
                 val resultRegister = resultInstruction.registerA
-                val listRegister =
-                    method
-                        .getFreeRegisterProvider(resultIndex + 1, 1, resultRegister)
-                        .getFreeRegister4Bit()
+                val freeRegisters =
+                    method.getFreeRegisterProvider(resultIndex + 1, 2, resultRegister)
+                val listRegister = freeRegisters.getFreeRegister4Bit()
+                val presenterRegister = freeRegisters.getFreeRegister4Bit()
                 val read =
                     hiddenInlineActions.injectRead(
                         method = method,
                         index = resultIndex + 1,
-                        excludedRegisters = listOf(resultRegister, listRegister),
+                        excludedRegisters = listOf(resultRegister, listRegister, presenterRegister),
                         registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                     )
 
@@ -132,7 +138,8 @@ val customizeXLiteInlineActionsPatch =
                     read.nextIndex,
                     """
                         move-object/from16 v$listRegister, v$resultRegister
-                        invoke-static {v$listRegister, v${read.register}}, $INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;Ljava/util/Set;)Ljava/util/List;
+                        move-object/from16 v$presenterRegister, p0
+                        invoke-static {v$listRegister, v${read.register}, v$presenterRegister}, $INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;Ljava/util/Set;Ljava/lang/Object;)Ljava/util/List;
                         move-result-object v$resultRegister
                         invoke-static/range {v$resultRegister .. v$resultRegister}, $conversionReference
                         move-result-object v$resultRegister

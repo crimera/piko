@@ -106,8 +106,8 @@ public final class InlineDownloadButton {
         resumePendingDownloads(application);
     }
 
-    public static List<?> addAction(List<?> actions) {
-        if (!isEnabled() || actions == null) return actions;
+    public static List<?> addAction(List<?> actions, Object presenter) {
+        if (!isEnabled() || actions == null || !hasMedia(postFor(presenter))) return actions;
         if (containsDownloadAction(actions)) return actions;
 
         try {
@@ -186,6 +186,17 @@ public final class InlineDownloadButton {
         }
     }
 
+    static boolean hasMedia(Object post) {
+        if (post == null) return false;
+
+        try {
+            return !mediaFor(post).isEmpty();
+        } catch (ReflectiveOperationException | RuntimeException exception) {
+            Logger.printException(() -> "Failed to check X-Lite post media", exception);
+            return false;
+        }
+    }
+
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static InlineActionEntry createDownloadAction() throws ReflectiveOperationException {
         Class actionClass = PostActionType.class;
@@ -252,6 +263,15 @@ public final class InlineDownloadButton {
             Logger.printException(() -> "Failed to read the X-Lite inline action event", exception);
         }
         return null;
+    }
+
+    private static Object postFor(Object presenter) {
+        try {
+            return findPresenterData(presenter).post;
+        } catch (IllegalAccessException | RuntimeException exception) {
+            Logger.printException(() -> "Failed to find the X-Lite inline action post", exception);
+            return null;
+        }
     }
 
     private static PresenterData findPresenterData(Object presenter) throws IllegalAccessException {

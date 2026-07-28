@@ -13,11 +13,15 @@ public final class InlineActionFilter {
     private InlineActionFilter() {
     }
 
-    public static List<?> filter(List<?> actions, Set<String> hiddenActionIds) {
+    public static List<?> filter(
+            List<?> actions,
+            Set<String> hiddenActionIds,
+            Object presenter
+    ) {
         if (actions == null) return null;
 
         List<?> filtered = filterHiddenActions(actions, hiddenActionIds);
-        return InlineDownloadButton.addAction(filtered);
+        return InlineDownloadButton.addAction(filtered, presenter);
     }
 
     private static List<?> filterHiddenActions(List<?> actions, Set<String> hiddenActionIds) {
