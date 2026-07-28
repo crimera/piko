@@ -47,7 +47,6 @@ internal object ComposePrismBlackFingerprint : Fingerprint(
 
 internal val composePrismBlackPatch =
     bytecodePatch(
-        name = "Fix Compose prism black",
         description = "Rewrites the GRAY_1600 constant in BasePrismColorsV2 so newer " +
             "Compose-based screens render true black instead of Instagram's stock dark " +
             "gray prism tone. Required for the AMOLED theme option in the Theme patch " +
