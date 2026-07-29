@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import java.util.List;
 
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.xlite.settings.SettingsRegistry;
 import app.morphe.extension.xlite.ui.ButtonView;
 import app.morphe.extension.xlite.ui.DialogView;
 import app.morphe.extension.xlite.ui.IconView;
@@ -21,6 +22,7 @@ import app.morphe.extension.xlite.utils.XLiteUtils;
  * Media Picker Dialog for X-Lite inline download action.
  */
 public final class MediaPickerDialog {
+    private static final String COPY_LINK_SETTING_ID = "xlite.content.media_picker_copy_link";
 
     public interface OnMediaSelectedListener {
         void onDownloadItem(int index);
@@ -55,6 +57,7 @@ public final class MediaPickerDialog {
         listContainer.setOrientation(LinearLayout.VERTICAL);
 
         boolean hasMultiple = downloads.size() > 1;
+        boolean showCopyLinkButton = showCopyLinkButton();
 
         // Add individual media rows
         for (int i = 0; i < downloads.size(); i++) {
@@ -70,16 +73,18 @@ public final class MediaPickerDialog {
             int primaryAccent = Theme.primaryAccent(current);
             itemRow.setLeadingIcon(iconType, primaryAccent, Theme.surfaceVariant(current));
 
-            View copyLinkButton = itemRow.createTrailingIconButton(
-                    IconView.IconType.COPY_LINK,
-                    Theme.secondaryText(current),
-                    v -> {
-                        dialog.dismiss();
-                        Utils.setClipboard(item.url);
-                        Utils.showToastShort("Link copied");
-                    }
-            );
-            itemRow.setTrailingView(copyLinkButton);
+            if (showCopyLinkButton) {
+                View copyLinkButton = itemRow.createTrailingIconButton(
+                        IconView.IconType.COPY_LINK,
+                        Theme.secondaryText(current),
+                        v -> {
+                            dialog.dismiss();
+                            Utils.setClipboard(item.url);
+                            Utils.showToastShort("Link copied");
+                        }
+                );
+                itemRow.setTrailingView(copyLinkButton);
+            }
 
             itemRow.setOnClickListener(v -> {
                 dialog.dismiss();
@@ -111,6 +116,14 @@ public final class MediaPickerDialog {
         }
 
         dialog.show();
+    }
+
+    private static boolean showCopyLinkButton() {
+        try {
+            return SettingsRegistry.getBoolean(COPY_LINK_SETTING_ID);
+        } catch (RuntimeException exception) {
+            return true;
+        }
     }
 
     private static IconView.IconType resolveIconType(InlineDownloadButton.DownloadItem item) {

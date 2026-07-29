@@ -1,11 +1,14 @@
 package app.crimera.patches.xlite.misc.inlineactions
 
 import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.Groups
 import app.crimera.patches.xlite.settings.SettingReadRegisterConstraint
-import app.crimera.patches.xlite.settings.injectRead
 import app.crimera.patches.xlite.settings.choice
+import app.crimera.patches.xlite.settings.group
+import app.crimera.patches.xlite.settings.injectRead
+import app.crimera.patches.xlite.settings.multiChoice
 import app.crimera.patches.xlite.settings.settingStrings
-import app.crimera.patches.xlite.settings.xLiteMultiChoice
+import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.INLINE_ACTION_FILTER_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
@@ -70,22 +73,27 @@ val customizeXLiteInlineActionsPatch =
         compatibleWith(COMPATIBILITY_X_LITE)
 
         val hiddenInlineActions =
-            xLiteMultiChoice(
-                id = "xlite.content.hidden_inline_actions",
-                category = Categories.CONTENT,
-                strings = settingStrings("piko_xlite_inline_actions"),
-                order = 200,
-                defaultValue = emptySet(),
-                options =
-                    listOf(
-                        choice("Reply", "piko_xlite_inline_action_reply"),
-                        choice("Retweet", "piko_xlite_inline_action_repost"),
-                        choice("Favorite", "piko_xlite_inline_action_like"),
-                        choice("ViewCount", "piko_xlite_inline_action_view_count"),
-                        choice("AddRemoveBookmarks", "piko_xlite_inline_action_bookmark"),
-                        choice("TwitterShare", "piko_xlite_inline_action_share"),
-                    ),
-            )
+            xLiteSettings {
+                category(Categories.POST_ACTIONS_MEDIA) {
+                    group(Groups.INLINE_ACTIONS) {
+                        multiChoice(
+                            id = "xlite.content.hidden_inline_actions",
+                            strings = settingStrings("piko_xlite_inline_actions"),
+                            order = 100,
+                            defaultValue = emptySet(),
+                            options =
+                                listOf(
+                                    choice("Reply", "piko_xlite_inline_action_reply"),
+                                    choice("Retweet", "piko_xlite_inline_action_repost"),
+                                    choice("Favorite", "piko_xlite_inline_action_like"),
+                                    choice("ViewCount", "piko_xlite_inline_action_view_count"),
+                                    choice("AddRemoveBookmarks", "piko_xlite_inline_action_bookmark"),
+                                    choice("TwitterShare", "piko_xlite_inline_action_share"),
+                                ),
+                        )
+                    }
+                }
+            }
 
         execute {
             val matches = CustomizeXLiteInlineActionsFingerprint.matchAll()

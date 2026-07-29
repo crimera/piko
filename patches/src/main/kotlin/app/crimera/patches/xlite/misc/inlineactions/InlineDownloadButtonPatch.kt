@@ -2,8 +2,11 @@ package app.crimera.patches.xlite.misc.inlineactions
 
 import app.crimera.patches.xlite.misc.extension.xLiteInitHook
 import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.Groups
+import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.settingStrings
-import app.crimera.patches.xlite.settings.xLiteToggle
+import app.crimera.patches.xlite.settings.toggle
+import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -100,13 +103,24 @@ val xLiteInlineDownloadButtonPatch =
         compatibleWith(COMPATIBILITY_X_LITE)
         dependsOn(customizeXLiteInlineActionsPatch)
 
-        xLiteToggle(
-            id = "xlite.content.inline_download_button",
-            category = Categories.CONTENT,
-            strings = settingStrings("piko_xlite_inline_download_button"),
-            order = 225,
-            defaultValue = true,
-        )
+        xLiteSettings {
+            category(Categories.POST_ACTIONS_MEDIA) {
+                group(Groups.INLINE_ACTIONS) {
+                    toggle(
+                        id = "xlite.content.inline_download_button",
+                        strings = settingStrings("piko_xlite_inline_download_button"),
+                        order = 200,
+                        defaultValue = true,
+                    )
+                    toggle(
+                        id = "xlite.content.media_picker_copy_link",
+                        strings = settingStrings("piko_xlite_media_picker_copy_link"),
+                        order = 300,
+                        defaultValue = true,
+                    )
+                }
+            }
+        }
 
         execute {
             xLiteInitHook.fingerprint.method.addInstruction(

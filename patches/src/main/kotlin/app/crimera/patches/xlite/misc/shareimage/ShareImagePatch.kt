@@ -118,7 +118,7 @@ val xLiteShareImagePatch =
 
         xLiteToggle(
             id = "xlite.content.share_post_as_image",
-            category = Categories.CONTENT,
+            category = Categories.POST_ACTIONS_MEDIA,
             strings = settingStrings("piko_xlite_share_image"),
             order = 250,
             defaultValue = true,
