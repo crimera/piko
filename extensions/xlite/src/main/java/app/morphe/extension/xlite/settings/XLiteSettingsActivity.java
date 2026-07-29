@@ -2,6 +2,7 @@ package app.morphe.extension.xlite.settings;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -42,6 +43,12 @@ public final class XLiteSettingsActivity extends Activity {
                 .beginTransaction()
                 .replace(containerId, new XLiteSettingsFragment())
                 .commit();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        SettingsBackupRestore.handleActivityResult(this, requestCode, resultCode, data);
     }
 
     private void applySystemTheme() {

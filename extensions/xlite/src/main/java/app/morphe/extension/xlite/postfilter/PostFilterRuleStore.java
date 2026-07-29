@@ -1,7 +1,5 @@
 package app.morphe.extension.xlite.postfilter;
 
-import android.content.SharedPreferences;
-
 import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
@@ -16,7 +14,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.shared.settings.Setting;
+import app.morphe.extension.shared.settings.BooleanSetting;
+import app.morphe.extension.shared.settings.StringSetting;
 
 public final class PostFilterRuleStore {
     static final String ENABLED_KEY = "xlite.content.post_filtering.enabled";
@@ -310,34 +309,29 @@ public final class PostFilterRuleStore {
     }
 
     private static final class SharedPreferencesPersistence implements Persistence {
-        private SharedPreferences preferences() {
-            return Setting.preferences.preferences;
-        }
+        private static final BooleanSetting ENABLED_SETTING = new BooleanSetting(ENABLED_KEY, true);
+        private static final StringSetting STRUCTURED_RULES_SETTING =
+                new StringSetting(STRUCTURED_RULES_KEY, "");
 
         @Override
         public String readStructuredRules() {
-            return preferences().getString(STRUCTURED_RULES_KEY, null);
+            String serializedRules = STRUCTURED_RULES_SETTING.get();
+            return serializedRules.isEmpty() ? null : serializedRules;
         }
 
         @Override
         public boolean readEnabled() {
-            return preferences().getBoolean(ENABLED_KEY, true);
+            return ENABLED_SETTING.get();
         }
 
         @Override
         public void writeStructuredRules(String value) {
-            preferences().edit().putString(STRUCTURED_RULES_KEY, value).apply();
+            STRUCTURED_RULES_SETTING.save(value);
         }
 
         @Override
         public void writeEnabled(boolean enabled) {
-            SharedPreferences.Editor editor = preferences().edit();
-            if (enabled) {
-                editor.remove(ENABLED_KEY);
-            } else {
-                editor.putBoolean(ENABLED_KEY, false);
-            }
-            editor.apply();
+            ENABLED_SETTING.save(enabled);
         }
     }
 }

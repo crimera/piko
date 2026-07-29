@@ -44,9 +44,18 @@ public final class SettingsRegistry {
             String id,
             String titleResourceName,
             @Nullable String summaryResourceName,
+            @Nullable String iconResourceName,
             int order
     ) {
-        registerGroupInternal(null, id, titleResourceName, summaryResourceName, order, true);
+        registerGroupInternal(
+                null,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                iconResourceName,
+                order,
+                true
+        );
     }
 
     public static synchronized void registerGroup(
@@ -54,20 +63,18 @@ public final class SettingsRegistry {
             String id,
             String titleResourceName,
             @Nullable String summaryResourceName,
+            @Nullable String iconResourceName,
             int order
     ) {
-        registerGroupInternal(parentId, id, titleResourceName, summaryResourceName, order, false);
-    }
-
-    public static synchronized void registerGroupIcon(String id, String iconResourceName) {
-        requireMutable();
-        GroupBuilder group = requireGroup(id);
-        if (group.iconResourceName == null) {
-            group.iconResourceName = Objects.requireNonNull(iconResourceName);
-            return;
-        }
-        if (group.iconResourceName.equals(iconResourceName)) return;
-        throw failure("Conflicting X-Lite settings group icon: " + id);
+        registerGroupInternal(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                iconResourceName,
+                order,
+                false
+        );
     }
 
     public static synchronized void registerToggle(
@@ -192,9 +199,11 @@ public final class SettingsRegistry {
         Object register2 = null;
         Object register3 = null;
         Object register4 = null;
-        reserveInjectionRegisters(register0, register1, register2, register3, register4);
+        Object register5 = null;
+        reserveInjectionRegisters(register0, register1, register2, register3, register4, register5);
 
         try {
+            BuiltInSettings.register();
             freeze();
         } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to initialize X-Lite settings", exception);
@@ -245,6 +254,7 @@ public final class SettingsRegistry {
             String id,
             String titleResourceName,
             @Nullable String summaryResourceName,
+            @Nullable String iconResourceName,
             int order,
             boolean category
     ) {
@@ -252,7 +262,14 @@ public final class SettingsRegistry {
         NodeBuilder existing = NODES.get(id);
         if (existing != null) {
             if (!(existing instanceof GroupBuilder group)
-                    || !group.matches(parentId, titleResourceName, summaryResourceName, order, category)) {
+                    || !group.matches(
+                            parentId,
+                            titleResourceName,
+                            summaryResourceName,
+                            iconResourceName,
+                            order,
+                            category
+                    )) {
                 throw failure("Conflicting X-Lite settings group: " + id);
             }
             return;
@@ -270,6 +287,7 @@ public final class SettingsRegistry {
                 id,
                 titleResourceName,
                 summaryResourceName,
+                iconResourceName,
                 order,
                 category
         );
@@ -538,7 +556,8 @@ public final class SettingsRegistry {
             Object register1,
             Object register2,
             Object register3,
-            Object register4
+            Object register4,
+            Object register5
     ) {
     }
 
@@ -567,17 +586,19 @@ public final class SettingsRegistry {
     private static final class GroupBuilder extends NodeBuilder {
         final boolean category;
         final List<NodeBuilder> children = new ArrayList<>();
-        @Nullable String iconResourceName;
+        @Nullable final String iconResourceName;
 
         GroupBuilder(
                 @Nullable String parentId,
                 String id,
                 String titleResourceName,
                 @Nullable String summaryResourceName,
+                @Nullable String iconResourceName,
                 int order,
                 boolean category
         ) {
             super(parentId, id, titleResourceName, summaryResourceName, order);
+            this.iconResourceName = iconResourceName;
             this.category = category;
         }
 
@@ -585,12 +606,14 @@ public final class SettingsRegistry {
                 @Nullable String candidateParentId,
                 String candidateTitle,
                 @Nullable String candidateSummary,
+                @Nullable String candidateIcon,
                 int candidateOrder,
                 boolean candidateCategory
         ) {
             return Objects.equals(parentId, candidateParentId)
                     && titleResourceName.equals(candidateTitle)
                     && Objects.equals(summaryResourceName, candidateSummary)
+                    && Objects.equals(iconResourceName, candidateIcon)
                     && order == candidateOrder
                     && category == candidateCategory;
         }
