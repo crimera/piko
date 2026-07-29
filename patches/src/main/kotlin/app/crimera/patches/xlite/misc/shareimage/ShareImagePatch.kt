@@ -4,6 +4,7 @@ import app.crimera.patches.xlite.misc.extension.xLiteInitHook
 import app.crimera.patches.xlite.settings.Categories
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteToggle
+import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -15,9 +16,6 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.AppTarget
-import app.morphe.patcher.patch.ApkFileType
-import app.morphe.patcher.patch.Compatibility
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -37,26 +35,12 @@ private const val POST_OPTIONS_STATE_PREFIX = "PostOptionsState(showOptionsDialo
 private const val POST_OPTIONS_LIST_PREFIX = ", options="
 private const val URT_POST = "Lcom/x/models/timelines/items/UrtTimelinePost;"
 private const val CONTEXT = "Landroid/content/Context;"
-private const val COROUTINE_SCOPE = "Lkotlinx/coroutines/k0;"
 private const val POST_IDENTIFIER = "Lcom/x/models/PostIdentifier;"
 private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
 private const val FUNCTION1 = "Lkotlin/jvm/functions/Function1;"
 private const val POINTER_INPUT_HANDLER = "Landroidx/compose/ui/input/pointer/PointerInputEventHandler;"
 private const val SHARE_IMAGE_HANDLER = "Lapp/morphe/extension/xlite/misc/XLiteShareImageHandler;"
-
-private val compatibility =
-    Compatibility(
-        name = "X-Lite",
-        packageName = "com.twitter.android",
-        apkFileType = ApkFileType.APKM,
-        appIconColor = 0x000000,
-        targets =
-            listOf(
-                AppTarget(version = "12.10.1-release.0"),
-                AppTarget(version = "12.11.0-release.0"),
-            ),
-    )
 
 private object PostOptionsStateFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
@@ -114,7 +98,7 @@ val xLiteShareImagePatch =
         name = "X-Lite: Share post as image",
         description = "Adds a rendered-image share action to X-Lite post menus.",
     ) {
-        compatibleWith(compatibility)
+        compatibleWith(COMPATIBILITY_X_LITE)
 
         xLiteToggle(
             id = "xlite.content.share_post_as_image",
@@ -333,11 +317,11 @@ val xLiteShareImagePatch =
                         parameters =
                             listOf(
                                 presenterMatch.originalClassDef.type,
-                                COROUTINE_SCOPE,
-                                "Landroidx/compose/runtime/v2;",
-                                "Landroidx/compose/runtime/v2;",
-                                "Landroidx/compose/runtime/v2;",
-                                "Landroidx/compose/runtime/v2;",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
+                                "L",
                             ),
                     ).matchAll(),
                 ).single()

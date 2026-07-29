@@ -62,6 +62,33 @@ private object XLiteHomeNavUpsellTypeFingerprint : Fingerprint(
     },
 )
 
+private object XLiteHomeNavUpsellEnabledFingerprint : Fingerprint(
+    returnType = "Z",
+    parameters = listOf("L"),
+    filters =
+        listOf(
+            string("subscriptions_enabled"),
+            methodCall(
+                opcode = Opcode.INVOKE_INTERFACE,
+                definingClass = FEATURE_SWITCHES_DESCRIPTOR,
+                name = "getBoolean",
+                parameters = listOf("Ljava/lang/String;", "Z"),
+                returnType = "Z",
+            ),
+            opcode(Opcode.MOVE_RESULT, MatchAfterImmediately()),
+            string("subscriptions_upsells_premium_home_nav_enabled"),
+            methodCall(
+                opcode = Opcode.INVOKE_INTERFACE,
+                definingClass = FEATURE_SWITCHES_DESCRIPTOR,
+                name = "getBoolean",
+                parameters = listOf("Ljava/lang/String;", "Z"),
+                returnType = "Z",
+            ),
+            opcode(Opcode.MOVE_RESULT, MatchAfterImmediately()),
+        ),
+    custom = { _, classDef -> SUBSCRIPTIONS_FEATURES_DESCRIPTOR in classDef.interfaces },
+)
+
 private fun MutableMethod.disabledUpsellField(startIndex: Int): FieldReference {
     val directSingletonReturn =
         instructions
@@ -98,7 +125,9 @@ val hidePremiumUpsellPatch =
             )
 
         execute {
-            val matches = XLiteHomeNavUpsellTypeFingerprint.matchAll()
+            val typeMatches = XLiteHomeNavUpsellTypeFingerprint.matchAllOrNull().orEmpty()
+            val enabledMatches = XLiteHomeNavUpsellEnabledFingerprint.matchAllOrNull().orEmpty()
+            val matches = typeMatches + enabledMatches
             if (matches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite home-nav upsell checker, found ${matches.size}: " +
@@ -109,22 +138,37 @@ val hidePremiumUpsellPatch =
             val match = matches.single()
             match.method.apply {
                 val originalFirstInstruction = instructions.first()
-                val disabledField = disabledUpsellField(match.instructionMatches.first().index)
                 val disabledFieldDescriptor =
-                    "${disabledField.definingClass}->${disabledField.name}:${disabledField.type}"
+                    if (match in typeMatches) {
+                        disabledUpsellField(match.instructionMatches.first().index).let { field ->
+                            "${field.definingClass}->${field.name}:${field.type}"
+                        }
+                    } else {
+                        null
+                    }
                 val read =
                     hidePremiumUpsell.injectRead(
                         method = this,
                         index = 0,
                         registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                     )
+                val overrideInstructions =
+                    if (disabledFieldDescriptor != null) {
+                        """
+                            if-eqz v${read.register}, :piko_xlite_premium_upsell_continue
+                            sget-object v${read.register}, $disabledFieldDescriptor
+                            return-object v${read.register}
+                        """.trimIndent()
+                    } else {
+                        """
+                            if-eqz v${read.register}, :piko_xlite_premium_upsell_continue
+                            const/4 v${read.register}, 0x0
+                            return v${read.register}
+                        """.trimIndent()
+                    }
                 addInstructionsWithLabels(
                     read.nextIndex,
-                    """
-                        if-eqz v${read.register}, :piko_xlite_premium_upsell_continue
-                        sget-object v${read.register}, $disabledFieldDescriptor
-                        return-object v${read.register}
-                    """.trimIndent(),
+                    overrideInstructions,
                     ExternalLabel(
                         "piko_xlite_premium_upsell_continue",
                         originalFirstInstruction,
