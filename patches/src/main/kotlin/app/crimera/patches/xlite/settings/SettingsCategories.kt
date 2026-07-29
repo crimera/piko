@@ -52,6 +52,15 @@ internal object Categories {
             iconResourceName = "ic_vector_menu",
             order = 400,
         )
+
+    val ADVANCED =
+        SettingsCategory(
+            id = "xlite.advanced",
+            titleResourceName = "piko_xlite_category_advanced_title",
+            summaryResourceName = "piko_xlite_category_advanced_summary",
+            iconResourceName = "ic_vector_toolbox_stroke",
+            order = 500,
+        )
 }
 
 internal object Groups {

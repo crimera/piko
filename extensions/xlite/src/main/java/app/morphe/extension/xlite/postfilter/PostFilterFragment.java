@@ -141,11 +141,11 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
                 0
         );
 
-        EditText phrase = new EditText(context);
-        phrase.setHint(StringRef.str("piko_xlite_post_filtering_phrase_hint"));
-        phrase.setTextColor(Theme.primaryText(context));
-        phrase.setHintTextColor(Theme.secondaryText(context));
-        phrase.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        EditText phrase = XLiteSettingsUi.textInput(
+                context,
+                StringRef.str("piko_xlite_post_filtering_phrase_hint"),
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+        );
         if (editingRule != null) phrase.setText(editingRule.getPhrase());
         form.addView(phrase, new LinearLayout.LayoutParams(-1, -2));
 
