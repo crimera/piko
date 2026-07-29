@@ -116,7 +116,7 @@ val customizeXLiteNavBarPatch =
         val hiddenTabs =
             xLiteMultiChoice(
                 id = "xlite.content.hidden_nav_bar_items",
-                category = Categories.CONTENT,
+                category = Categories.NAVIGATION,
                 strings = settingStrings("piko_xlite_nav_bar"),
                 order = 300,
                 defaultValue = emptySet(),

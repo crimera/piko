@@ -103,7 +103,7 @@ val customizeXLiteDrawerPatch =
         val hiddenItems =
             xLiteMultiChoice(
                 id = "xlite.content.hidden_drawer_items",
-                category = Categories.CONTENT,
+                category = Categories.NAVIGATION,
                 strings = settingStrings("piko_xlite_drawer"),
                 order = 400,
                 defaultValue = emptySet(),

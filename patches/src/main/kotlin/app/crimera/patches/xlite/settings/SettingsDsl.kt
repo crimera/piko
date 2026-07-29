@@ -42,6 +42,19 @@ internal fun <T> SettingsGroupBuilder.group(
         block = block,
     )
 
+internal fun <T> SettingsGroupBuilder.group(
+    group: SettingsGroupMetadata,
+    block: SettingsGroupBuilder.() -> T,
+): T =
+    group(
+        id = group.id,
+        titleResourceName = group.titleResourceName,
+        summaryResourceName = group.summaryResourceName,
+        iconResourceName = group.iconResourceName,
+        order = group.order,
+        block = block,
+    )
+
 internal fun SettingsGroupBuilder.toggle(
     id: String,
     strings: SettingStrings,
