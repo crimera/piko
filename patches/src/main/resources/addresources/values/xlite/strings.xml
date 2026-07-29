@@ -31,6 +31,14 @@
     <string name="piko_xlite_show_sensitive_media_summary">Shows sensitive media without requiring confirmation</string>
     <string name="piko_xlite_hide_premium_upsell_title">Hide premium upsell</string>
     <string name="piko_xlite_hide_premium_upsell_summary">Hides the premium upgrade chip from the home top bar</string>
+    <string name="piko_xlite_group_dynamic_colors_title">Dynamic colors</string>
+    <string name="piko_xlite_group_dynamic_colors_summary">Customize Material You colors and themed accent behavior</string>
+    <string name="piko_xlite_dynamic_color_title">Use dynamic colors</string>
+    <string name="piko_xlite_dynamic_color_summary">Uses your system Material You colors throughout X-Lite and Piko settings.</string>
+    <string name="piko_xlite_dynamic_color_amoled_title">AMOLED black</string>
+    <string name="piko_xlite_dynamic_color_amoled_summary">Uses pure black backgrounds in lights-out mode.</string>
+    <string name="piko_xlite_dynamic_color_like_title">Theme liked-post icon</string>
+    <string name="piko_xlite_dynamic_color_like_summary">Uses the dynamic accent for liked posts. Warning: This disables the heart Lottie animation.</string>
 
     <string name="piko_xlite_share_image_title">Share post as image</string>
     <string name="piko_xlite_share_image_summary">Adds a rendered-image share action to post menus</string>

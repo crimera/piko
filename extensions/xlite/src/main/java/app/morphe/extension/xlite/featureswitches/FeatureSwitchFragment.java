@@ -189,9 +189,9 @@ public final class FeatureSwitchFragment extends Fragment implements FeatureSwit
                 .setNegativeButton(StringRef.str("piko_xlite_feature_switch_cancel"), null)
                 .create();
         dialog.setOnShowListener(ignored -> {
+            styleDialogButtons(dialog);
             Button next = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
             if (next == null) return;
-            next.setTextColor(Theme.primaryAccent(context));
             next.setOnClickListener(button -> {
                 String featureKey = key.getText().toString().trim();
                 if (featureKey.isEmpty()) {
@@ -305,9 +305,9 @@ public final class FeatureSwitchFragment extends Fragment implements FeatureSwit
             TextView validation
     ) {
         Context context = dialog.getContext();
+        styleDialogButtons(dialog);
         Button save = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
         if (save != null) {
-            save.setTextColor(Theme.primaryAccent(context));
             save.setOnClickListener(ignored -> {
                 try {
                     Object value = parseValue(featureType, booleanValue, textValue);
@@ -321,8 +321,6 @@ public final class FeatureSwitchFragment extends Fragment implements FeatureSwit
             });
         }
 
-        Button cancel = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-        if (cancel != null) cancel.setTextColor(Theme.secondaryText(context));
         if (!overridden) return;
 
         Button remove = dialog.getButton(DialogInterface.BUTTON_NEUTRAL);
@@ -333,6 +331,14 @@ public final class FeatureSwitchFragment extends Fragment implements FeatureSwit
             refresh();
             dialog.dismiss();
         });
+    }
+
+    private void styleDialogButtons(AlertDialog dialog) {
+        int actionColor = Theme.primaryAccent(dialog.getContext());
+        Button positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        if (positive != null) positive.setTextColor(actionColor);
+        Button negative = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        if (negative != null) negative.setTextColor(actionColor);
     }
 
     private Object parseValue(

@@ -4,10 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.ContextThemeWrapper;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 
 import androidx.appcompat.widget.Toolbar;
@@ -16,6 +19,7 @@ import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.xlite.ui.Theme;
 
 @SuppressWarnings("deprecation")
 public final class XLiteSettingsActivity extends Activity {
@@ -25,12 +29,12 @@ public final class XLiteSettingsActivity extends Activity {
         applySystemTheme();
         super.onCreate(savedInstanceState);
         Utils.setActivity(this);
-        configureSystemBars();
         setContentView(ResourceUtils.getIdentifierOrThrow(
                 this,
                 ResourceType.LAYOUT,
                 "preference_fragment_activity"
         ));
+        configureSystemBars();
         configureToolbar();
         if (savedInstanceState != null) return;
 
@@ -78,13 +82,30 @@ public final class XLiteSettingsActivity extends Activity {
                 ResourceType.ID,
                 "toolbar"
         ));
-        toolbar.setNavigationIcon(ResourceUtils.getIdentifierOrThrow(
+        int contentColor = Theme.primaryText(this);
+        Drawable navigationIcon = getDrawable(ResourceUtils.getIdentifierOrThrow(
                 this,
                 ResourceType.DRAWABLE,
                 "ic_vector_arrow_left"
-        ));
+        )).mutate();
+        navigationIcon.setTint(contentColor);
+        toolbar.setNavigationIcon(navigationIcon);
+        toolbar.setBackgroundColor(Theme.surfaceContainer(this));
+        toolbar.setTitleTextColor(contentColor);
         toolbar.setTitle(StringRef.str("piko_xlite_settings_title"));
         toolbar.setNavigationOnClickListener(ignored -> onBackPressed());
+
+        ViewGroup toolbarParent = (ViewGroup) toolbar.getParent();
+        View divider = new View(this);
+        divider.setBackgroundColor(Theme.dividerColor(this));
+        toolbarParent.addView(
+                divider,
+                toolbarParent.indexOfChild(toolbar) + 1,
+                new ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        Math.max(1, Theme.dpToPx(this, 1f))
+                )
+        );
     }
 
     public void setPageTitle(CharSequence title) {
@@ -93,7 +114,17 @@ public final class XLiteSettingsActivity extends Activity {
 
     private void configureSystemBars() {
         Window window = getWindow();
+        int systemBarColor = Theme.surfaceContainer(this);
         View decorView = window.getDecorView();
+        decorView.setBackgroundColor(systemBarColor);
+        findViewById(android.R.id.content).setBackgroundColor(systemBarColor);
+        if (Build.VERSION.SDK_INT >= 35) {
+            window.setStatusBarColor(Color.TRANSPARENT);
+            window.setNavigationBarColor(Color.TRANSPARENT);
+        } else {
+            window.setStatusBarColor(systemBarColor);
+            window.setNavigationBarColor(systemBarColor);
+        }
         int visibility = decorView.getSystemUiVisibility();
         int lightBarFlags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
