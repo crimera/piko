@@ -13,6 +13,7 @@ import java.util.List;
 
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.xlite.settings.XLiteSettingsUi;
+import app.morphe.extension.xlite.ui.Theme;
 
 @SuppressWarnings("deprecation")
 final class PostFilterRuleAdapter extends BaseAdapter {
@@ -86,12 +87,12 @@ final class PostFilterRuleAdapter extends BaseAdapter {
         LinearLayout root = new LinearLayout(context);
         root.setOrientation(LinearLayout.HORIZONTAL);
         root.setGravity(Gravity.CENTER_VERTICAL);
-        root.setMinimumHeight(XLiteSettingsUi.dp(context, 72));
+        root.setMinimumHeight(Theme.dpToPx(context, 72f));
         root.setPadding(
-                XLiteSettingsUi.dp(context, 20),
-                XLiteSettingsUi.dp(context, 10),
-                XLiteSettingsUi.dp(context, 16),
-                XLiteSettingsUi.dp(context, 10)
+                Theme.dpToPx(context, 20f),
+                Theme.dpToPx(context, 10f),
+                Theme.dpToPx(context, 16f),
+                Theme.dpToPx(context, 10f)
         );
         XLiteSettingsUi.applyRippleBackground(root);
 
@@ -99,19 +100,19 @@ final class PostFilterRuleAdapter extends BaseAdapter {
         labels.setOrientation(LinearLayout.VERTICAL);
         TextView phrase = XLiteSettingsUi.titleText(context);
         TextView scope = XLiteSettingsUi.summaryText(context);
-        scope.setPadding(0, XLiteSettingsUi.dp(context, 5), 0, 0);
+        scope.setPadding(0, Theme.dpToPx(context, 5f), 0, 0);
         labels.addView(phrase);
         labels.addView(scope);
         LinearLayout.LayoutParams labelParams = new LinearLayout.LayoutParams(0, -2, 1f);
-        labelParams.setMarginEnd(XLiteSettingsUi.dp(context, 12));
+        labelParams.setMarginEnd(Theme.dpToPx(context, 12f));
         root.addView(labels, labelParams);
 
         XLiteSettingsUi.SwitchControl enabled = new XLiteSettingsUi.SwitchControl(context);
         enabled.setInteractive(true);
         enabled.setContentDescription(StringRef.str("piko_xlite_post_filtering_rule_enabled"));
         root.addView(enabled, new LinearLayout.LayoutParams(
-                XLiteSettingsUi.dp(context, 52),
-                XLiteSettingsUi.dp(context, 32)
+                Theme.dpToPx(context, 52f),
+                Theme.dpToPx(context, 32f)
         ));
         return new Row(root, phrase, scope, enabled);
     }

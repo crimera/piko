@@ -1,6 +1,8 @@
 package app.morphe.extension.xlite.misc;
 
 import android.app.Activity;
+import app.morphe.extension.shared.Utils;
+import app.morphe.extension.xlite.utils.XLiteUtils;
 import android.app.Application;
 import android.content.ClipData;
 import android.content.ContentResolver;
@@ -139,13 +141,13 @@ public final class XLiteShareImageHandler {
                 if (URT_POST_CLASS.equals(field.getType().getName())) post = field.get(presenter);
             }
             if (context == null || post == null) {
-                showToast(context, "Could not find the selected post");
+                Utils.showToastShort("Could not find the selected post");
                 return true;
             }
             shareAsImage(context, post);
             return true;
         } catch (IllegalAccessException exception) {
-            showToast(null, "Could not find the selected post");
+            Utils.showToastShort("Could not find the selected post");
             return true;
         }
     }
@@ -158,11 +160,11 @@ public final class XLiteShareImageHandler {
             return;
         }
 
-        Activity contextActivity = findActivity(context);
+        Activity contextActivity = XLiteUtils.findActivity(context);
         Activity activity = contextActivity != null ? contextActivity : currentActivity();
         if (activity == null) {
             Log.e(DEBUG_TAG, "No activity for context " + context.getClass().getName());
-            showToast(context, "Could not capture the rendered post");
+            Utils.showToastShort("Could not capture the rendered post");
             return;
         }
 
@@ -170,11 +172,11 @@ public final class XLiteShareImageHandler {
         try {
             id = postId(post);
         } catch (ReflectiveOperationException exception) {
-            showToast(context, "Could not identify the selected post");
+            Utils.showToastShort("Could not identify the selected post");
             return;
         }
         if (id == null) {
-            showToast(context, "Could not identify the selected post");
+            Utils.showToastShort("Could not identify the selected post");
             return;
         }
 
@@ -194,25 +196,25 @@ public final class XLiteShareImageHandler {
     private static void captureRenderedPost(Activity activity, String postId) {
         View decorView = activity.getWindow().getDecorView();
         if (!decorView.isAttachedToWindow()) {
-            showToast(activity, "Post is no longer rendered");
+            Utils.showToastShort("Post is no longer rendered");
             return;
         }
 
         Rect bounds = renderedBounds(postId);
         if (bounds == null) {
             Log.e(DEBUG_TAG, "No resolved bounds for post " + postId);
-            showToast(activity, "Post is no longer rendered");
+            Utils.showToastShort("Post is no longer rendered");
             return;
         }
         Log.d(DEBUG_TAG, "Requesting post " + postId + " bounds=" + bounds + " window=" + decorView.getWidth() + "x" + decorView.getHeight());
         if (bounds.left < 0 || bounds.top < 0 || bounds.right > decorView.getWidth() || bounds.bottom > decorView.getHeight()) {
-            showToast(activity, "Make the entire post visible before sharing");
+            Utils.showToastShort("Make the entire post visible before sharing");
             return;
         }
 
         long pixelCount = (long) bounds.width() * bounds.height();
         if (pixelCount <= 0 || pixelCount > MAX_CAPTURE_PIXELS) {
-            showToast(activity, "Rendered post is too large to capture");
+            Utils.showToastShort("Rendered post is too large to capture");
             return;
         }
 
@@ -220,7 +222,7 @@ public final class XLiteShareImageHandler {
         try {
             bitmap = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
         } catch (RuntimeException | OutOfMemoryError error) {
-            showToast(activity, "Could not allocate the post image");
+            Utils.showToastShort("Could not allocate the post image");
             return;
         }
 
@@ -235,7 +237,7 @@ public final class XLiteShareImageHandler {
         } catch (RuntimeException exception) {
             Log.e(DEBUG_TAG, "PixelCopy request failed", exception);
             bitmap.recycle();
-            showToast(activity, "Could not capture the rendered post");
+            Utils.showToastShort("Could not capture the rendered post");
         }
     }
 
@@ -243,7 +245,7 @@ public final class XLiteShareImageHandler {
         if (result != PixelCopy.SUCCESS) {
             Log.e(DEBUG_TAG, "PixelCopy result=" + result + " for post " + postId);
             bitmap.recycle();
-            showToast(context, "Could not capture the rendered post");
+            Utils.showToastShort("Could not capture the rendered post");
             return;
         }
 
@@ -254,7 +256,7 @@ public final class XLiteShareImageHandler {
             bitmap.recycle();
         }
         if (uri == null) {
-            showToast(context, "Could not save the post image");
+            Utils.showToastShort("Could not save the post image");
             return;
         }
         shareImage(context, uri);
@@ -402,12 +404,12 @@ public final class XLiteShareImageHandler {
     private static Bitmap renderPost(Object post) throws ReflectiveOperationException {
         final int width = 1080;
         final int padding = 72;
-        Object author = invoke(post, "getAuthor");
-        Object postResult = invoke(post, "getPostResult");
-        Object canonicalPost = postResult == null ? null : invoke(postResult, "getCanonicalPost");
-        String name = stringValue(invoke(author, "getName"), "X user");
-        String screenName = stringValue(invoke(author, "getScreenName"), "");
-        String text = stringValue(canonicalPost == null ? null : invoke(canonicalPost, "getText"), "");
+        Object author = XLiteUtils.invoke(post, "getAuthor");
+        Object postResult = XLiteUtils.invoke(post, "getPostResult");
+        Object canonicalPost = postResult == null ? null : XLiteUtils.invoke(postResult, "getCanonicalPost");
+        String name = stringValue(XLiteUtils.invoke(author, "getName"), "X user");
+        String screenName = stringValue(XLiteUtils.invoke(author, "getScreenName"), "");
+        String text = stringValue(canonicalPost == null ? null : XLiteUtils.invoke(canonicalPost, "getText"), "");
 
         TextPaint bodyPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
         bodyPaint.setColor(Color.rgb(15, 20, 25));
@@ -447,7 +449,7 @@ public final class XLiteShareImageHandler {
 
     private static Uri saveImage(Context context, Bitmap bitmap, String postId) {
         ContentResolver resolver = context.getContentResolver();
-        String fileName = "tweet_" + safeFileName(postId) + ".png";
+        String fileName = "tweet_" + XLiteUtils.sanitizeFileName(postId) + ".png";
         ContentValues values = new ContentValues();
         values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
         values.put(MediaStore.MediaColumns.MIME_TYPE, "image/png");
@@ -514,29 +516,18 @@ public final class XLiteShareImageHandler {
         context.startActivity(chooser);
     }
 
-    private static Activity findActivity(Context context) {
-        Context current = context;
-        while (current instanceof ContextWrapper) {
-            if (current instanceof Activity) return (Activity) current;
-            Context baseContext = ((ContextWrapper) current).getBaseContext();
-            if (baseContext == current) return null;
-            current = baseContext;
-        }
-        return current instanceof Activity ? (Activity) current : null;
-    }
-
     private static String postId(Object post) throws ReflectiveOperationException {
-        return identifierValue(invoke(post, "getId"));
+        return identifierValue(XLiteUtils.invoke(post, "getId"));
     }
 
     private static String identifierValue(Object identifier) {
         if (identifier == null || !POST_IDENTIFIER_CLASS.equals(identifier.getClass().getName())) return null;
         try {
-            Object value = invoke(identifier, "getValue");
+            Object value = XLiteUtils.invoke(identifier, "getValue");
             String string = value == null ? null : String.valueOf(value).trim();
             if (string != null && !string.isEmpty()) return string;
 
-            value = invoke(identifier, "getStr");
+            value = XLiteUtils.invoke(identifier, "getStr");
             string = value == null ? null : String.valueOf(value).trim();
             return string == null || string.isEmpty() ? null : string;
         } catch (ReflectiveOperationException exception) {
@@ -544,25 +535,10 @@ public final class XLiteShareImageHandler {
         }
     }
 
-    private static Object invoke(Object target, String name) throws ReflectiveOperationException {
-        if (target == null) return null;
-        Method method = target.getClass().getMethod(name);
-        return method.invoke(target);
-    }
-
     private static String stringValue(Object value, String fallback) {
         if (value == null) return fallback;
         String string = String.valueOf(value).trim();
         return string.isEmpty() ? fallback : string;
-    }
-
-    private static String safeFileName(String value) {
-        return value.replaceAll("[^A-Za-z0-9._-]", "_");
-    }
-
-    private static void showToast(Context context, String message) {
-        if (context == null) return;
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }
 
     private static final class PositionCallback implements Function1<Object, Object> {

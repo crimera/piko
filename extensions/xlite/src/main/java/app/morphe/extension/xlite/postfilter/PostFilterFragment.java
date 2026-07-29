@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.TypedValue;
@@ -13,6 +14,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -24,6 +26,7 @@ import androidx.annotation.Nullable;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.xlite.settings.XLiteSettingsActivity;
 import app.morphe.extension.xlite.settings.XLiteSettingsUi;
+import app.morphe.extension.xlite.ui.Theme;
 
 @SuppressWarnings("deprecation")
 public final class PostFilterFragment extends Fragment implements PostFilterRuleAdapter.Listener {
@@ -67,9 +70,9 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         list.setClipToPadding(false);
         list.setPadding(
                 0,
-                XLiteSettingsUi.dp(context, 4),
+                Theme.dpToPx(context, 4f),
                 0,
-                XLiteSettingsUi.dp(context, 96)
+                Theme.dpToPx(context, 96f)
         );
         adapter = new PostFilterRuleAdapter(context, this);
         list.setAdapter(adapter);
@@ -78,9 +81,9 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         emptyState = new TextView(context);
         emptyState.setText(StringRef.str("piko_xlite_post_filtering_empty"));
         emptyState.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        emptyState.setTextColor(XLiteSettingsUi.secondaryTextColor(context));
+        emptyState.setTextColor(Theme.secondaryText(context));
         emptyState.setGravity(Gravity.CENTER);
-        int emptyPadding = XLiteSettingsUi.dp(context, 32);
+        int emptyPadding = Theme.dpToPx(context, 32f);
         emptyState.setPadding(emptyPadding, emptyPadding, emptyPadding, emptyPadding);
         rulesContainer.addView(emptyState, matchParent());
 
@@ -90,15 +93,15 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
                 ignored -> showRuleDialog(null)
         );
         FrameLayout.LayoutParams addParams = new FrameLayout.LayoutParams(
-                XLiteSettingsUi.dp(context, 56),
-                XLiteSettingsUi.dp(context, 56)
+                Theme.dpToPx(context, 56f),
+                Theme.dpToPx(context, 56f)
         );
         addParams.gravity = Gravity.BOTTOM | Gravity.END;
         addParams.setMargins(
                 0,
                 0,
-                XLiteSettingsUi.dp(context, 20),
-                XLiteSettingsUi.dp(context, 20)
+                Theme.dpToPx(context, 20f),
+                Theme.dpToPx(context, 20f)
         );
         root.addView(addButton, addParams);
 
@@ -132,14 +135,16 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         LinearLayout form = new LinearLayout(context);
         form.setOrientation(LinearLayout.VERTICAL);
         form.setPadding(
-                XLiteSettingsUi.dp(context, 24),
-                XLiteSettingsUi.dp(context, 8),
-                XLiteSettingsUi.dp(context, 24),
+                Theme.dpToPx(context, 24f),
+                Theme.dpToPx(context, 8f),
+                Theme.dpToPx(context, 24f),
                 0
         );
 
         EditText phrase = new EditText(context);
         phrase.setHint(StringRef.str("piko_xlite_post_filtering_phrase_hint"));
+        phrase.setTextColor(Theme.primaryText(context));
+        phrase.setHintTextColor(Theme.secondaryText(context));
         phrase.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         if (editingRule != null) phrase.setText(editingRule.getPhrase());
         form.addView(phrase, new LinearLayout.LayoutParams(-1, -2));
@@ -161,7 +166,7 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         TextView validation = new TextView(context);
         validation.setTextColor(Color.rgb(244, 33, 46));
         validation.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        validation.setPadding(0, XLiteSettingsUi.dp(context, 8), 0, 0);
+        validation.setPadding(0, Theme.dpToPx(context, 8f), 0, 0);
         validation.setVisibility(View.GONE);
         form.addView(validation, new LinearLayout.LayoutParams(-1, -2));
 
@@ -177,6 +182,13 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         }
 
         AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            GradientDrawable dialogBg = new GradientDrawable();
+            dialogBg.setColor(Theme.surfaceContainerHigh(context));
+            dialogBg.setCornerRadius(Theme.dpToPx(context, 28f));
+            dialog.getWindow().setBackgroundDrawable(dialogBg);
+        }
+
         dialog.setOnShowListener(ignored -> configureDialogButtons(
                 dialog,
                 editingRule,
@@ -196,35 +208,51 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
             XLiteSettingsUi.SwitchRow matchUsernames,
             TextView validation
     ) {
-        dialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(ignored -> {
-            try {
-                if (editingRule == null) {
-                    store.add(
-                            phrase.getText().toString(),
-                            matchContent.isChecked(),
-                            matchUsernames.isChecked()
-                    );
-                } else {
-                    store.update(
-                            editingRule.getId(),
-                            phrase.getText().toString(),
-                            matchContent.isChecked(),
-                            matchUsernames.isChecked()
-                    );
+        Context context = dialog.getContext();
+        Button posBtn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
+        if (posBtn != null) {
+            posBtn.setTextColor(Theme.primaryAccent(context));
+            posBtn.setOnClickListener(ignored -> {
+                try {
+                    if (editingRule == null) {
+                        store.add(
+                                phrase.getText().toString(),
+                                matchContent.isChecked(),
+                                matchUsernames.isChecked()
+                        );
+                    } else {
+                        store.update(
+                                editingRule.getId(),
+                                phrase.getText().toString(),
+                                matchContent.isChecked(),
+                                matchUsernames.isChecked()
+                        );
+                    }
+                    refreshRules();
+                    dialog.dismiss();
+                } catch (PostFilterRuleStore.ValidationException exception) {
+                    validation.setText(validationMessage(exception.getError()));
+                    validation.setVisibility(View.VISIBLE);
                 }
-                refreshRules();
-                dialog.dismiss();
-            } catch (PostFilterRuleStore.ValidationException exception) {
-                validation.setText(validationMessage(exception.getError()));
-                validation.setVisibility(View.VISIBLE);
+            });
+        }
+
+        Button negBtn = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+        if (negBtn != null) {
+            negBtn.setTextColor(Theme.secondaryText(context));
+        }
+
+        if (editingRule != null) {
+            Button neuBtn = dialog.getButton(DialogInterface.BUTTON_NEUTRAL);
+            if (neuBtn != null) {
+                neuBtn.setTextColor(Color.rgb(244, 33, 46));
+                neuBtn.setOnClickListener(ignored -> {
+                    store.remove(editingRule.getId());
+                    refreshRules();
+                    dialog.dismiss();
+                });
             }
-        });
-        if (editingRule == null) return;
-        dialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(ignored -> {
-            store.remove(editingRule.getId());
-            refreshRules();
-            dialog.dismiss();
-        });
+        }
     }
 
     private CharSequence validationMessage(PostFilterRuleStore.ValidationError error) {

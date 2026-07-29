@@ -2,6 +2,9 @@ package app.morphe.extension.xlite.misc;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import app.morphe.extension.shared.Utils;
+import app.morphe.extension.xlite.ui.Theme;
+import app.morphe.extension.xlite.utils.XLiteUtils;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.app.DownloadManager;
@@ -150,30 +153,27 @@ public final class InlineDownloadButton {
             PresenterData presenterData = findPresenterData(presenter);
             context = presenterData.context;
             if (context == null || presenterData.post == null) {
-                showToast(context, "Could not find the selected post");
+                Utils.showToastShort("Could not find the selected post");
                 return true;
             }
 
             List<DownloadItem> downloads = downloadItems(mediaFor(presenterData.post));
             if (downloads.isEmpty()) {
-                showToast(context, "No downloadable media found");
+                Utils.showToastShort("No downloadable media found");
                 return true;
             }
 
             String username = username(presenterData.post);
             String postId = postId(presenterData.post);
-            boolean downloadAll = event != null &&
-                    event.toString().startsWith("DidLongClickInlineActionEntry");
-            if (downloadAll || downloads.size() == 1) {
-                enqueueDownloads(context, downloads, username, postId, downloadAll);
-                return true;
+            if (downloads.size() == 1) {
+                enqueueSingleDownload(context, downloads.get(0), username, postId, 0, 1);
+            } else {
+                showMediaPicker(context, downloads, username, postId);
             }
-
-            showMediaPicker(context, downloads, username, postId);
             return true;
         } catch (ReflectiveOperationException | RuntimeException exception) {
-            Logger.printException(() -> "Failed to handle the X-Lite inline download action", exception);
-            showToast(context, "Could not download post media");
+            Logger.printException(() -> "Failed to process inline download action", exception);
+            Utils.showToastShort("Could not download post media");
             return true;
         }
     }
@@ -288,18 +288,18 @@ public final class InlineDownloadButton {
     }
 
     private static List<?> mediaFor(Object post) throws ReflectiveOperationException {
-        Object media = invoke(post, "getMedia");
+        Object media = XLiteUtils.invoke(post, "getMedia");
         return media instanceof List<?> list ? list : java.util.Collections.emptyList();
     }
 
     private static String postId(Object post) throws ReflectiveOperationException {
-        String value = identifierValue(invoke(post, "getId"));
+        String value = identifierValue(XLiteUtils.invoke(post, "getId"));
         return safeFileSegment(value, "post");
     }
 
     private static String username(Object post) throws ReflectiveOperationException {
-        Object author = invoke(post, "getAuthor");
-        Object value = author == null ? null : invoke(author, "getScreenName");
+        Object author = XLiteUtils.invoke(post, "getAuthor");
+        Object value = author == null ? null : XLiteUtils.invoke(author, "getScreenName");
         return safeFileSegment(value == null ? null : String.valueOf(value), "twitter");
     }
 
@@ -307,14 +307,14 @@ public final class InlineDownloadButton {
         if (identifier == null) return null;
 
         try {
-            Object value = invoke(identifier, "getValue");
+            Object value = XLiteUtils.invoke(identifier, "getValue");
             String id = value == null ? null : String.valueOf(value).trim();
             if (id != null && !id.isEmpty()) return id;
         } catch (ReflectiveOperationException ignored) {
         }
 
         try {
-            Object value = invoke(identifier, "getStr");
+            Object value = XLiteUtils.invoke(identifier, "getStr");
             String id = value == null ? null : String.valueOf(value).trim();
             return id == null || id.isEmpty() ? null : id;
         } catch (ReflectiveOperationException ignored) {
@@ -338,12 +338,13 @@ public final class InlineDownloadButton {
     }
 
     private static DownloadItem downloadItem(Object media) throws ReflectiveOperationException {
-        Object imageUrl = invokeIfPresent(media, "getImageUrl");
-        if (imageUrl instanceof String url && isHttpUrl(url)) {
-            return new DownloadItem(originalImageUrl(url), "jpg", "image/jpeg", "Image");
+        Object imageUrl = XLiteUtils.invokeIfPresent(media, "getImageUrl");
+        if (imageUrl instanceof String url && XLiteUtils.isHttpUrl(url)) {
+            String originalUrl = originalImageUrl(url);
+            return new DownloadItem(originalUrl, "jpg", "image/jpeg", "Image");
         }
 
-        Object variantsValue = invokeIfPresent(media, "getVariants");
+        Object variantsValue = XLiteUtils.invokeIfPresent(media, "getVariants");
         if (!(variantsValue instanceof List<?> variants)) return null;
 
         Variant bestVariant = bestMp4Variant(variants);
@@ -359,16 +360,16 @@ public final class InlineDownloadButton {
         for (Object candidate : variants) {
             if (candidate == null) continue;
 
-            Object urlValue = invoke(candidate, "getUrl");
-            Object contentTypeValue = invoke(candidate, "getContentType");
-            if (!(urlValue instanceof String url) || !isHttpUrl(url)) continue;
+            Object urlValue = XLiteUtils.invoke(candidate, "getUrl");
+            Object contentTypeValue = XLiteUtils.invoke(candidate, "getContentType");
+            if (!(urlValue instanceof String url) || !XLiteUtils.isHttpUrl(url)) continue;
 
             String contentType = contentTypeValue == null ? "" : String.valueOf(contentTypeValue);
             if (!contentType.equalsIgnoreCase("video/mp4") && !url.toLowerCase().contains(".mp4")) {
                 continue;
             }
 
-            Object bitRateValue = invoke(candidate, "getBitRate");
+            Object bitRateValue = XLiteUtils.invoke(candidate, "getBitRate");
             int bitRate = bitRateValue instanceof Number number ? number.intValue() : 0;
             if (best == null || bitRate > best.bitRate) best = new Variant(url, bitRate);
         }
@@ -388,59 +389,39 @@ public final class InlineDownloadButton {
                 .toString();
     }
 
-    private static boolean isHttpUrl(String value) {
-        Uri uri = Uri.parse(value);
-        String scheme = uri.getScheme();
-        return "http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme);
-    }
-
     private static void showMediaPicker(
             Context context,
             List<DownloadItem> downloads,
             String username,
             String postId
     ) {
-        Activity contextActivity = findActivity(context);
-        Activity activity = contextActivity != null ? contextActivity : currentActivity();
-        if (activity == null) {
-            showToast(context, "Could not open the media picker");
-            return;
-        }
-
-        String[] labels = new String[downloads.size() + 1];
-        for (int index = 0; index < downloads.size(); index++) {
-            labels[index] = downloads.get(index).label + " " + (index + 1);
-        }
-        labels[downloads.size()] = "Download all";
-
-        mainHandler().post(() -> {
-            if (activity.isFinishing() || activity.isDestroyed()) return;
-            new AlertDialog.Builder(activity)
-                    .setTitle("Download media")
-                    .setItems(labels, (dialog, selectedIndex) -> {
-                        if (selectedIndex == downloads.size()) {
-                            enqueueDownloads(context, downloads, username, postId, true);
-                            return;
+        MediaPickerDialog.show(
+                context,
+                downloads,
+                username,
+                postId,
+                new MediaPickerDialog.OnMediaSelectedListener() {
+                    @Override
+                    public void onDownloadItem(int index) {
+                        if (index >= 0 && index < downloads.size()) {
+                            enqueueSingleDownload(context, downloads.get(index), username, postId, index, downloads.size());
                         }
-                        enqueueDownloadAt(context, downloads, username, postId, selectedIndex);
-                    })
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .show();
-        });
+                    }
+
+                    @Override
+                    public void onDownloadAll() {
+                        enqueueAllDownloads(context, downloads, username, postId);
+                    }
+                }
+        );
     }
 
-    private static void enqueueDownloads(
+    private static void enqueueAllDownloads(
             Context context,
             List<DownloadItem> downloads,
             String username,
-            String postId,
-            boolean downloadAll
+            String postId
     ) {
-        if (!downloadAll) {
-            enqueueDownloadAt(context, downloads, username, postId, 0);
-            return;
-        }
-
         int queued = 0;
         for (int index = 0; index < downloads.size(); index++) {
             if (enqueueDownload(context, downloads.get(index), username, postId, index, downloads.size())) {
@@ -450,20 +431,21 @@ public final class InlineDownloadButton {
         showQueueResult(context, queued, downloads.size());
     }
 
-    private static void enqueueDownloadAt(
+    private static void enqueueSingleDownload(
             Context context,
-            List<DownloadItem> downloads,
+            DownloadItem download,
             String username,
             String postId,
-            int index
+            int index,
+            int mediaCount
     ) {
         boolean queued = enqueueDownload(
                 context,
-                downloads.get(index),
+                download,
                 username,
                 postId,
                 index,
-                downloads.size()
+                mediaCount
         );
         showQueueResult(context, queued ? 1 : 0, 1);
     }
@@ -503,13 +485,46 @@ public final class InlineDownloadButton {
                     downloadId,
                     temporaryFileName,
                     fileName,
-                    download.mimeType
+                    download.mimeType,
+                    download.url
             );
             finishPendingDownloadAsync(context, manager, downloadId);
             return true;
         } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to enqueue X-Lite media download", exception);
             return false;
+        }
+    }
+
+    private static void enqueueFallbackDownload(
+            Context context,
+            DownloadManager manager,
+            String fallbackUrl,
+            String fileName,
+            String mimeType
+    ) {
+        String temporaryFileName = temporaryDownloadFileName(fileName);
+        try {
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(fallbackUrl))
+                    .setTitle(fileName)
+                    .setDescription("Downloading media")
+                    .setMimeType(mimeType)
+                    .setAllowedOverMetered(true)
+                    .setAllowedOverRoaming(true)
+                    .setNotificationVisibility(
+                            DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
+                    )
+                    .setDestinationInExternalPublicDir(
+                            Environment.DIRECTORY_PICTURES,
+                            DOWNLOAD_DIRECTORY + "/" + temporaryFileName
+                    );
+
+            long downloadId = manager.enqueue(request);
+            savePendingDownload(context, downloadId, temporaryFileName, fileName, mimeType, fallbackUrl);
+            finishPendingDownloadAsync(context, manager, downloadId);
+        } catch (RuntimeException exception) {
+            Logger.printException(() -> "Failed to enqueue fallback media download", exception);
+            Utils.showToastShort("Download failed: " + fileName);
         }
     }
 
@@ -558,9 +573,10 @@ public final class InlineDownloadButton {
             long downloadId,
             String temporaryFileName,
             String fileName,
-            String mimeType
+            String mimeType,
+            String url
     ) {
-        String value = temporaryFileName + "\n" + fileName + "\n" + mimeType;
+        String value = temporaryFileName + "\n" + fileName + "\n" + mimeType + "\n" + (url != null ? url : "");
         boolean saved = pendingDownloads(context)
                 .edit()
                 .putString(String.valueOf(downloadId), value)
@@ -573,11 +589,12 @@ public final class InlineDownloadButton {
         if (value == null) return null;
 
         String[] fields = value.split("\n", -1);
-        if (fields.length != 3) {
+        if (fields.length < 3) {
             clearPendingDownload(context, downloadId);
             return null;
         }
-        return new PendingDownload(fields[0], fields[1], fields[2]);
+        String url = fields.length >= 4 ? fields[3] : "";
+        return new PendingDownload(fields[0], fields[1], fields[2], url);
     }
 
     private static SharedPreferences pendingDownloads(Context context) {
@@ -615,7 +632,12 @@ public final class InlineDownloadButton {
         if (status != DownloadManager.STATUS_SUCCESSFUL) {
             clearPendingDownload(context, downloadId);
             manager.remove(downloadId);
-            showToast(context, "Download failed: " + pending.fileName);
+            if (pending.url != null && pending.url.contains("name=orig")) {
+                String fallbackUrl = pending.url.replace("name=orig", "name=4096x4096");
+                enqueueFallbackDownload(context, manager, fallbackUrl, pending.fileName, pending.mimeType);
+                return;
+            }
+            Utils.showToastShort("Download failed: " + pending.fileName);
             return;
         }
 
@@ -624,16 +646,16 @@ public final class InlineDownloadButton {
                     ? publishDownload(context, manager, downloadId, pending.fileName, pending.mimeType)
                     : moveLegacyDownload(context, pending.temporaryFileName, pending.fileName);
             if (!moved) {
-                showToast(context, "Could not finalize download: " + pending.fileName);
+                Utils.showToastShort("Could not finalize download: " + pending.fileName);
                 return;
             }
 
             clearPendingDownload(context, downloadId);
             manager.remove(downloadId);
-            showToast(context, "Downloaded: " + pending.fileName);
+            Utils.showToastShort("Downloaded: " + pending.fileName);
         } catch (IOException | RuntimeException exception) {
             Logger.printException(() -> "Failed to finalize X-Lite media download", exception);
-            showToast(context, "Could not finalize download: " + pending.fileName);
+            Utils.showToastShort("Could not finalize download: " + pending.fileName);
         }
     }
 
@@ -764,28 +786,17 @@ public final class InlineDownloadButton {
     private static void showQueueResult(Context context, int queued, int requested) {
         if (queued == requested) {
             String message = queued == 1 ? "Download started" : queued + " downloads started";
-            showToast(context, message);
+            Utils.showToastShort(message);
             return;
         }
         if (queued == 0) {
-            showToast(context, "Could not start download");
+            Utils.showToastShort("Could not start download");
             return;
         }
-        showToast(context, queued + " of " + requested + " downloads started");
+        Utils.showToastShort(queued + " of " + requested + " downloads started");
     }
 
-    private static Activity findActivity(Context context) {
-        Context current = context;
-        while (current instanceof ContextWrapper) {
-            if (current instanceof Activity) return (Activity) current;
-            Context baseContext = ((ContextWrapper) current).getBaseContext();
-            if (baseContext == current) return null;
-            current = baseContext;
-        }
-        return current instanceof Activity ? (Activity) current : null;
-    }
-
-    private static Activity currentActivity() {
+    static Activity currentActivity() {
         Activity activity = resumedActivity.get();
         if (activity == null || activity.isFinishing() || activity.isDestroyed()) return null;
         return activity;
@@ -793,30 +804,6 @@ public final class InlineDownloadButton {
 
     private static void clearActivity(Activity activity) {
         if (resumedActivity.get() == activity) resumedActivity.clear();
-    }
-
-    private static Object invokeIfPresent(Object target, String methodName)
-            throws ReflectiveOperationException {
-        try {
-            return invoke(target, methodName);
-        } catch (NoSuchMethodException ignored) {
-            return null;
-        }
-    }
-
-    private static Object invoke(Object target, String methodName) throws ReflectiveOperationException {
-        if (target == null) return null;
-        Method method = target.getClass().getMethod(methodName);
-        return method.invoke(target);
-    }
-
-    private static Handler mainHandler() {
-        return new Handler(Looper.getMainLooper());
-    }
-
-    private static void showToast(Context context, String message) {
-        if (context == null) return;
-        mainHandler().post(() -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show());
     }
 
     private static final class PresenterData {
@@ -829,7 +816,7 @@ public final class InlineDownloadButton {
         }
     }
 
-    private static final class DownloadItem {
+    static final class DownloadItem {
         final String url;
         final String extension;
         final String mimeType;
@@ -847,11 +834,13 @@ public final class InlineDownloadButton {
         final String temporaryFileName;
         final String fileName;
         final String mimeType;
+        final String url;
 
-        PendingDownload(String temporaryFileName, String fileName, String mimeType) {
+        PendingDownload(String temporaryFileName, String fileName, String mimeType, String url) {
             this.temporaryFileName = temporaryFileName;
             this.fileName = fileName;
             this.mimeType = mimeType;
+            this.url = url;
         }
     }
 
