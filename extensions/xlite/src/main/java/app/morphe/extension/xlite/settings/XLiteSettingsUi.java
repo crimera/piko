@@ -11,6 +11,7 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -49,6 +50,26 @@ public final class XLiteSettingsUi {
         summary.setTextColor(Theme.secondaryText(context));
         summary.setLineSpacing(Theme.dpToPx(context, 1f), 1f);
         return summary;
+    }
+
+    public static EditText textInput(
+            Context context,
+            CharSequence hint,
+            int inputType
+    ) {
+        EditText input = new EditText(context);
+        input.setHint(hint);
+        input.setTextColor(Theme.primaryText(context));
+        input.setHintTextColor(Theme.secondaryText(context));
+        input.setPadding(
+                Theme.dpToPx(context, 16f),
+                Theme.dpToPx(context, 12f),
+                Theme.dpToPx(context, 16f),
+                Theme.dpToPx(context, 12f)
+        );
+        input.setMinHeight(Theme.dpToPx(context, 56f));
+        input.setInputType(inputType);
+        return input;
     }
 
     public static void applyRippleBackground(View view) {
