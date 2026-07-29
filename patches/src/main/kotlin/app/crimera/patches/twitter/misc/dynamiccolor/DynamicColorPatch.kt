@@ -14,20 +14,16 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.patcher.string
 import app.morphe.util.ResourceGroup
 import app.morphe.util.copyResources
-import app.morphe.util.findElementByAttributeValue
-import app.morphe.util.findElementByAttributeValueOrThrow
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
 private const val DYNAMIC_COLOR_DESCRIPTOR = "$INTEGRATIONS_PACKAGE/DynamicColor;"
-private const val DYNAMIC_COLOR_ICON_ALIAS = "app.morphe.extension.twitter.dynamiccoloricon"
 private const val APP_DETAILS_ACTIVITY = "android.app.AppDetailsActivity"
 
 private object ThemeApplierClassFingerprint : Fingerprint(
@@ -64,6 +60,11 @@ private object ThemeApplierFingerprint : Fingerprint(
                 returnType = "V",
             ),
         ),
+    custom = { methodDef, _ ->
+        AccessFlags.STATIC.isSet(methodDef.accessFlags) &&
+            methodDef.parameters.size == 3 &&
+            methodDef.parameters.first().type == "Landroid/content/Context;"
+    },
 )
 
 private object ComponentFactoryActivityFingerprint : Fingerprint(
@@ -75,6 +76,10 @@ private object ComponentFactoryActivityFingerprint : Fingerprint(
             "Landroid/content/Intent;",
         ),
     returnType = "Landroid/app/Activity;",
+    custom = { methodDef, _ ->
+        !AccessFlags.STATIC.isSet(methodDef.accessFlags) &&
+            methodDef.implementation?.registerCount?.let { it >= 5 } == true
+    },
 )
 
 private val dynamicColorResourcePatch =
@@ -83,59 +88,7 @@ private val dynamicColorResourcePatch =
             copyResources(
                 "twitter/dynamiccolor",
                 ResourceGroup("values-v31", "styles.xml"),
-                ResourceGroup("mipmap-anydpi-v26", "ic_launcher_dynamic_color.xml"),
-                ResourceGroup("mipmap-anydpi-v31", "ic_launcher_dynamic_color.xml"),
             )
-
-            document("AndroidManifest.xml").use { document ->
-                val applicationNode = document.getElementsByTagName("application").item(0)
-                val existingAlias =
-                    applicationNode.childNodes.findElementByAttributeValue(
-                        "android:name",
-                        DYNAMIC_COLOR_ICON_ALIAS,
-                    )
-                if (existingAlias != null) return@use
-
-                val startActivity =
-                    applicationNode.childNodes.findElementByAttributeValueOrThrow(
-                        "android:name",
-                        "com.twitter.android.StartActivity",
-                    )
-                val activityAlias =
-                    document.createElement("activity-alias").apply {
-                        setAttribute("android:enabled", "false")
-                        setAttribute("android:exported", "true")
-                        setAttribute("android:icon", "@mipmap/ic_launcher_dynamic_color")
-                        setAttribute("android:name", DYNAMIC_COLOR_ICON_ALIAS)
-                        setAttribute("android:roundIcon", "@mipmap/ic_launcher_dynamic_color")
-                        setAttribute("android:targetActivity", "com.twitter.android.StartActivity")
-                    }
-                val intentFilter = document.createElement("intent-filter")
-                intentFilter.appendChild(
-                    document.createElement("action").apply {
-                        setAttribute("android:name", "android.intent.action.MAIN")
-                    },
-                )
-                intentFilter.appendChild(
-                    document.createElement("category").apply {
-                        setAttribute("android:name", "android.intent.category.LAUNCHER")
-                    },
-                )
-                activityAlias.appendChild(intentFilter)
-                activityAlias.appendChild(
-                    document.createElement("meta-data").apply {
-                        setAttribute("android:name", "appFamilies")
-                        setAttribute("android:value", "twitter")
-                    },
-                )
-                activityAlias.appendChild(
-                    document.createElement("meta-data").apply {
-                        setAttribute("android:name", "mainActivityAliasForAppFamily")
-                        setAttribute("android:value", "true")
-                    },
-                )
-                applicationNode.insertBefore(activityAlias, startActivity.nextSibling)
-            }
         }
     }
 
@@ -144,26 +97,16 @@ val dynamicColorPatch =
     bytecodePatch(
         name = "Dynamic color",
         description = "Adds an option to replace Twitter Blue with the user's Material You palette.",
-        default = false,
+        default = true,
     ) {
         compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch, dynamicColorResourcePatch)
 
         execute {
             ThemeApplierFingerprint.apply {
-                if (!AccessFlags.STATIC.isSet(method.accessFlags) ||
-                    method.parameters.size != 3 ||
-                    method.parameters.first().type != "Landroid/content/Context;"
-                ) {
-                    throw PatchException("Unexpected Twitter theme applier signature")
-                }
-
                 val intValueIndex = instructionMatches[1].index
                 val applyStyleIndex = instructionMatches[2].index
-                val styleRegister =
-                    method
-                        .getInstruction<OneRegisterInstruction>(intValueIndex + 1)
-                        .registerA
+                val styleRegister = method.getInstruction(intValueIndex + 1).registersUsed[0]
 
                 method.addInstructions(
                     applyStyleIndex + 1,
@@ -174,16 +117,6 @@ val dynamicColorPatch =
             }
 
             ComponentFactoryActivityFingerprint.apply {
-                if (AccessFlags.STATIC.isSet(method.accessFlags)) {
-                    throw PatchException("Unexpected static Twitter component factory method")
-                }
-                val registerCount =
-                    method.implementation?.registerCount
-                        ?: throw PatchException("Twitter component factory has no implementation")
-                if (registerCount < 5) {
-                    throw PatchException("Twitter component factory has no local register")
-                }
-
                 method.addInstructions(
                     0,
                     """

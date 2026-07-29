@@ -12,9 +12,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Build;
 
-import app.morphe.extension.twitter.patches.customise.appIcon.AppIconManager;
-import app.morphe.extension.twitter.settings.Settings;
-
 @SuppressWarnings("unused")
 public final class DynamicColor {
     private static final String LIGHT_STYLE = "PikoDynamicPaletteLight";
@@ -22,16 +19,6 @@ public final class DynamicColor {
     private static final String LIGHTS_OUT_STYLE = "PikoDynamicPaletteLightsOut";
 
     private DynamicColor() {
-    }
-
-    public static void updateLauncherIcon(boolean enabled) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            return;
-        }
-
-        new AppIconManager(
-                app.morphe.extension.shared.Utils.getContext()
-        ).applyDynamicColorIcon(enabled);
     }
 
     public static Activity instantiateFrameworkActivity(
@@ -43,10 +30,7 @@ public final class DynamicColor {
     }
 
     public static void applyThemeStyle(Resources.Theme theme, int originalStyleId) {
-        boolean enabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                && Utils.getBooleanPref(Settings.DYNAMIC_COLOR);
-
-        if (!enabled) {
+        if (!Pref.dynamicColor()) {
             return;
         }
 
