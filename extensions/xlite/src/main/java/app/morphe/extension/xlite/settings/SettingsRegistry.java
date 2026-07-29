@@ -59,6 +59,17 @@ public final class SettingsRegistry {
         registerGroupInternal(parentId, id, titleResourceName, summaryResourceName, order, false);
     }
 
+    public static synchronized void registerGroupIcon(String id, String iconResourceName) {
+        requireMutable();
+        GroupBuilder group = requireGroup(id);
+        if (group.iconResourceName == null) {
+            group.iconResourceName = Objects.requireNonNull(iconResourceName);
+            return;
+        }
+        if (group.iconResourceName.equals(iconResourceName)) return;
+        throw failure("Conflicting X-Lite settings group icon: " + id);
+    }
+
     public static synchronized void registerToggle(
             String parentId,
             String id,
@@ -317,8 +328,9 @@ public final class SettingsRegistry {
     }
 
     private static void validateGroup(GroupBuilder group) {
-        validateResource(group.titleResourceName);
-        validateResource(group.summaryResourceName);
+        validateStringResource(group.titleResourceName);
+        validateStringResource(group.summaryResourceName);
+        validateDrawableResource(group.iconResourceName);
         if (group.children.isEmpty()) {
             throw failure("Empty X-Lite settings group: " + group.id);
         }
@@ -336,13 +348,13 @@ public final class SettingsRegistry {
         if (!item.configured) {
             throw failure("Incomplete X-Lite setting definition: " + item.id);
         }
-        validateResource(item.titleResourceName);
-        validateResource(item.summaryResourceName);
+        validateStringResource(item.titleResourceName);
+        validateStringResource(item.summaryResourceName);
         if (item.type != ItemType.MULTI_CHOICE) return;
         if (item.options.isEmpty()) {
             throw failure("Multi-choice setting has no options: " + item.id);
         }
-        item.options.values().forEach(option -> validateResource(option.titleResourceName));
+        item.options.values().forEach(option -> validateStringResource(option.titleResourceName));
     }
 
     private static SettingsNode.Category buildCategory(GroupBuilder group) {
@@ -350,6 +362,7 @@ public final class SettingsRegistry {
                 group.id,
                 stringRef(group.titleResourceName),
                 stringRefOrNull(group.summaryResourceName),
+                group.iconResourceName,
                 group.order,
                 buildChildren(group)
         );
@@ -360,6 +373,7 @@ public final class SettingsRegistry {
                 group.id,
                 stringRef(group.titleResourceName),
                 stringRefOrNull(group.summaryResourceName),
+                group.iconResourceName,
                 group.order,
                 buildChildren(group)
         );
@@ -444,9 +458,14 @@ public final class SettingsRegistry {
         };
     }
 
-    private static void validateResource(@Nullable String resourceName) {
+    private static void validateStringResource(@Nullable String resourceName) {
         if (resourceName == null) return;
         ResourceUtils.getIdentifierOrThrow(ResourceType.STRING, resourceName);
+    }
+
+    private static void validateDrawableResource(@Nullable String resourceName) {
+        if (resourceName == null) return;
+        ResourceUtils.getIdentifierOrThrow(ResourceType.DRAWABLE, resourceName);
     }
 
     private static StringRef stringRef(String resourceName) {
@@ -548,6 +567,7 @@ public final class SettingsRegistry {
     private static final class GroupBuilder extends NodeBuilder {
         final boolean category;
         final List<NodeBuilder> children = new ArrayList<>();
+        @Nullable String iconResourceName;
 
         GroupBuilder(
                 @Nullable String parentId,

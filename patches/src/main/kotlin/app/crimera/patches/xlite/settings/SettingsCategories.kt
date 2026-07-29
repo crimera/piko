@@ -4,6 +4,7 @@ internal data class SettingsCategory(
     val id: String,
     val titleResourceName: String,
     val summaryResourceName: String?,
+    val iconResourceName: String?,
     val order: Int,
 )
 
@@ -12,7 +13,8 @@ internal object Categories {
         SettingsCategory(
             id = "xlite.timeline",
             titleResourceName = "piko_xlite_category_timeline_title",
-            summaryResourceName = null,
+            summaryResourceName = "piko_xlite_category_timeline_summary",
+            iconResourceName = "ic_vector_home_stroke",
             order = 100,
         )
 
@@ -20,7 +22,8 @@ internal object Categories {
         SettingsCategory(
             id = "xlite.content",
             titleResourceName = "piko_xlite_category_content_title",
-            summaryResourceName = null,
+            summaryResourceName = "piko_xlite_category_content_summary",
+            iconResourceName = "ic_vector_bulleted_list",
             order = 200,
         )
 }

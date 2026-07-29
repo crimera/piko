@@ -50,10 +50,10 @@ class SettingsAggregateValidationTest {
                             catalog(
                                 "xlite.content",
                                 setting("xlite.content.second"),
-                                titleResourceName = "piko_xlite_other_title",
+                                iconResourceName = "ic_vector_other",
                             ),
                         ),
-                    resourceNames = resourceNames + "piko_xlite_other_title",
+                    resourceNames = resourceNames,
                     registryReads = emptyList(),
                 )
             }
@@ -112,6 +112,7 @@ class SettingsAggregateValidationTest {
         id: String,
         setting: AggregateSetting,
         titleResourceName: String = "piko_xlite_group_title",
+        iconResourceName: String? = "ic_vector_group",
     ) =
         AggregateCatalog(
             listOf(
@@ -119,6 +120,7 @@ class SettingsAggregateValidationTest {
                     id = id,
                     titleResourceName = titleResourceName,
                     summaryResourceName = null,
+                    iconResourceName = iconResourceName,
                     order = 100,
                     children = listOf(AggregateSettingNode(setting)),
                 ),

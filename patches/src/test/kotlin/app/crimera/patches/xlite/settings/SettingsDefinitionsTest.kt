@@ -169,6 +169,8 @@ class SettingsDefinitionsTest {
                         group(
                             id = "xlite.content.filters",
                             titleResourceName = "piko_xlite_filters_title",
+                            summaryResourceName = "piko_xlite_filters_summary",
+                            iconResourceName = "ic_vector_filter",
                         ) {
                             input(
                                 id = filterWordsId,
@@ -190,6 +192,8 @@ class SettingsDefinitionsTest {
 
         val group = assertIs<SettingsGroupDefinition>(catalog.categories.single().children.single())
         assertEquals("xlite.content.filters", group.id)
+        assertEquals("piko_xlite_filters_summary", group.summaryResourceName)
+        assertEquals("ic_vector_filter", group.iconResourceName)
         assertIs<TextInputSettingDefinition>(group.children[0])
         assertIs<ActionSettingDefinition>(group.children[1])
     }

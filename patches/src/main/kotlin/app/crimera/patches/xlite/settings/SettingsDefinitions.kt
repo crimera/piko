@@ -3,6 +3,7 @@ package app.crimera.patches.xlite.settings
 private val STABLE_ID_PATTERN = Regex("xlite\\.[a-z0-9._-]+")
 private val OPTION_ID_PATTERN = Regex("[a-zA-Z0-9._-]+")
 private val RESOURCE_NAME_PATTERN = Regex("piko_xlite_[a-z0-9_]+")
+private val DRAWABLE_RESOURCE_NAME_PATTERN = Regex("[a-z][a-z0-9_]+")
 private val HANDLER_DESCRIPTOR_PATTERN = Regex("L[a-zA-Z0-9_$/]+;")
 
 // ── Settings model definitions ───────────────────────────────────────────
@@ -18,6 +19,7 @@ internal data class SettingsGroupDefinition(
     override val id: String,
     override val titleResourceName: String,
     override val summaryResourceName: String?,
+    val iconResourceName: String?,
     override val order: Int,
     val children: List<SettingsNodeDefinition>,
 ) : SettingsNodeDefinition
@@ -103,6 +105,7 @@ internal class SettingsContributionBuilder {
                     id = category.id,
                     titleResourceName = category.titleResourceName,
                     summaryResourceName = category.summaryResourceName,
+                    iconResourceName = category.iconResourceName,
                     order = category.order,
                 )
             }
@@ -127,6 +130,7 @@ internal class SettingsGroupBuilder(
     private val id: String,
     private val titleResourceName: String,
     private val summaryResourceName: String?,
+    private val iconResourceName: String?,
     private val order: Int,
 ) {
     private val children = mutableListOf<SettingsNodeDefinition>()
@@ -140,10 +144,18 @@ internal class SettingsGroupBuilder(
         id: String,
         titleResourceName: String,
         summaryResourceName: String? = null,
+        iconResourceName: String? = null,
         order: Int = 0,
         block: SettingsGroupBuilder.() -> T,
     ): T {
-        val builder = SettingsGroupBuilder(id, titleResourceName, summaryResourceName, order)
+        val builder =
+            SettingsGroupBuilder(
+                id,
+                titleResourceName,
+                summaryResourceName,
+                iconResourceName,
+                order,
+            )
         val result = builder.block()
         children += builder.build()
         return result
@@ -249,6 +261,7 @@ internal class SettingsGroupBuilder(
             id = id,
             titleResourceName = titleResourceName,
             summaryResourceName = summaryResourceName,
+            iconResourceName = iconResourceName,
             order = order,
             children = children.sortedWith(nodeComparator),
         )
@@ -270,6 +283,11 @@ internal fun validateSettingsContribution(catalog: SettingsContributionCatalog) 
         when (node) {
             is SettingsGroupDefinition -> {
                 require(groupIds.add(node.id)) { "Duplicate X-Lite settings group ID: ${node.id}" }
+                node.iconResourceName?.let { iconResourceName ->
+                    require(DRAWABLE_RESOURCE_NAME_PATTERN.matches(iconResourceName)) {
+                        "Invalid X-Lite group icon resource: $iconResourceName"
+                    }
+                }
                 require(node.children.isNotEmpty()) { "X-Lite settings group is empty: ${node.id}" }
                 node.children.forEach(::validateNode)
             }

@@ -28,6 +28,7 @@ data class AggregateGroup(
     val id: String,
     val titleResourceName: String,
     val summaryResourceName: String?,
+    val iconResourceName: String?,
     val order: Int,
     val children: List<AggregateNode>,
 )
@@ -112,7 +113,7 @@ internal object SettingsAggregateValidator {
     }
 
     private fun AggregateGroup.metadata() =
-        listOf(titleResourceName, summaryResourceName, order)
+        listOf(titleResourceName, summaryResourceName, iconResourceName, order)
 }
 
 internal object XLiteContributionDiscovery {
@@ -181,6 +182,7 @@ internal object XLiteContributionDiscovery {
             id = value.property("Id"),
             titleResourceName = value.property("TitleResourceName"),
             summaryResourceName = value.property("SummaryResourceName"),
+            iconResourceName = value.property("IconResourceName"),
             order = value.property("Order"),
             children = value.property<List<*>>("Children").map(::nodeSnapshot),
         )

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.preference.EditTextPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceCategory;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
@@ -18,6 +17,8 @@ import java.util.List;
 import java.util.Set;
 
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.ResourceType;
+import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.Setting;
@@ -37,24 +38,13 @@ public final class SettingsRenderer {
     }
 
     public static void render(
-            Activity activity,
             PreferenceScreen screen,
-            GroupNavigator groupNavigator,
-            ScreenNavigator screenNavigator
+            GroupNavigator groupNavigator
     ) {
         Context preferenceContext = screen.getContext();
         List<SettingsNode.Category> categories = SettingsRegistry.catalog();
         for (SettingsNode.Category category : categories) {
-            PreferenceCategory heading = category(preferenceContext, category);
-            screen.addPreference(heading);
-            renderChildren(
-                    activity,
-                    preferenceContext,
-                    heading,
-                    category.children,
-                    groupNavigator,
-                    screenNavigator
-            );
+            screen.addPreference(group(preferenceContext, category, groupNavigator));
         }
         Utils.setPreferenceTitlesToMultiLineIfNeeded(screen);
     }
@@ -105,6 +95,13 @@ public final class SettingsRenderer {
     ) {
         Preference preference = new XLitePreferenceStyle.Navigation(context);
         applyMetadata(preference, group);
+        if (group.iconResourceName != null) {
+            preference.setIcon(ResourceUtils.getIdentifierOrThrow(
+                    context,
+                    ResourceType.DRAWABLE,
+                    group.iconResourceName
+            ));
+        }
         preference.setOnPreferenceClickListener(ignored -> {
             navigator.open(group);
             return true;
@@ -123,12 +120,6 @@ public final class SettingsRenderer {
             navigator.open(screen);
             return true;
         });
-        return preference;
-    }
-
-    private static PreferenceCategory category(Context context, SettingsNode.Group group) {
-        PreferenceCategory preference = new XLitePreferenceStyle.Category(context);
-        applyMetadata(preference, group);
         return preference;
     }
 

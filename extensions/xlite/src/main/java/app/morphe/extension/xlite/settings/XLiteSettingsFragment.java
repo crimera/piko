@@ -36,7 +36,7 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(preferenceContext);
         setPreferenceScreen(screen);
         if (group == null) {
-            SettingsRenderer.render(activity, screen, this::openGroup, this::openScreen);
+            SettingsRenderer.render(screen, this::openGroup);
             return;
         }
         SettingsRenderer.renderGroup(

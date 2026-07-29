@@ -29,6 +29,7 @@ internal fun choice(
 internal fun <T> SettingsGroupBuilder.group(
     id: String,
     strings: SettingStrings,
+    iconResourceName: String? = null,
     order: Int = 0,
     block: SettingsGroupBuilder.() -> T,
 ): T =
@@ -36,6 +37,7 @@ internal fun <T> SettingsGroupBuilder.group(
         id = id,
         titleResourceName = strings.titleResourceName,
         summaryResourceName = strings.summaryResourceName,
+        iconResourceName = iconResourceName,
         order = order,
         block = block,
     )

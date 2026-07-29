@@ -3,7 +3,9 @@
     <string name="piko_xlite_settings_title">Piko X-Lite settings</string>
     <string name="piko_xlite_settings_open_failed">Could not open Piko X-Lite settings</string>
     <string name="piko_xlite_category_timeline_title">Timeline</string>
+    <string name="piko_xlite_category_timeline_summary">Manage timeline behavior and appearance</string>
     <string name="piko_xlite_category_content_title">Content</string>
+    <string name="piko_xlite_category_content_summary">Manage posts, actions, navigation, and other X-Lite content</string>
 
     <string name="piko_xlite_disable_timeline_refresh_title">Disable automatic timeline refresh</string>
     <string name="piko_xlite_disable_timeline_refresh_summary">Prevents timeline jumps when X-Lite starts or returns to the foreground</string>
