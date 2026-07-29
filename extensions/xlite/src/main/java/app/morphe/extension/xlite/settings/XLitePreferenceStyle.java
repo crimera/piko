@@ -1,19 +1,19 @@
 package app.morphe.extension.xlite.settings;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.preference.EditTextPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceCategory;
 import android.preference.SwitchPreference;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -23,13 +23,14 @@ final class XLitePreferenceStyle {
     private enum TrailingAccessory {
         NONE,
         SWITCH,
-        CHEVRON,
     }
 
+    private static final String TAG_LEADING = "piko_xlite_pref_leading";
     private static final String TAG_TITLE = "piko_xlite_pref_title";
     private static final String TAG_SUMMARY = "piko_xlite_pref_summary";
     private static final String TAG_SWITCH = "piko_xlite_pref_switch";
-    private static final String TAG_TRAILING = "piko_xlite_pref_trailing";
+    private static final int[] TITLE_TEXT_SIZES = {13, 14, 15, 16, 17, 18};
+    private static final int[] SUMMARY_TEXT_SIZES = {12, 13, 14, 15, 16, 17};
 
     private XLitePreferenceStyle() {
     }
@@ -54,7 +55,11 @@ final class XLitePreferenceStyle {
         return Theme.dpToPx(context, value);
     }
 
-    private static View createRow(Context context, TrailingAccessory trailingAccessory) {
+    private static View createRow(
+            Context context,
+            TrailingAccessory trailingAccessory,
+            boolean navigation
+    ) {
         LinearLayout row = new LinearLayout(context);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
@@ -65,6 +70,19 @@ final class XLitePreferenceStyle {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         ));
+
+        if (navigation) {
+            ImageView leading = new ImageView(context);
+            leading.setTag(TAG_LEADING);
+            leading.setScaleType(ImageView.ScaleType.FIT_CENTER);
+            leading.setVisibility(View.GONE);
+            LinearLayout.LayoutParams leadingParams = new LinearLayout.LayoutParams(
+                    dp(context, 20),
+                    dp(context, 20)
+            );
+            leadingParams.setMarginEnd(dp(context, 32));
+            row.addView(leading, leadingParams);
+        }
 
         LinearLayout textContainer = new LinearLayout(context);
         textContainer.setOrientation(LinearLayout.VERTICAL);
@@ -80,10 +98,14 @@ final class XLitePreferenceStyle {
 
         TextView summary = new TextView(context);
         summary.setTag(TAG_SUMMARY);
-        summary.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        summary.setTextSize(
+                TypedValue.COMPLEX_UNIT_SP,
+                SUMMARY_TEXT_SIZES[typographyScale(context)]
+        );
+        summary.setTypeface(font(context, "chirp_regular_400", Typeface.DEFAULT));
         summary.setTextColor(secondaryTextColor(context));
         summary.setLineSpacing(dp(context, 1), 1f);
-        summary.setPadding(0, dp(context, 6), 0, 0);
+        summary.setPadding(0, dp(context, 2), 0, 0);
         textContainer.addView(summary, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
@@ -98,14 +120,6 @@ final class XLitePreferenceStyle {
                     dp(context, 32)
             ));
         }
-        if (trailingAccessory == TrailingAccessory.CHEVRON) {
-            ChevronView chevron = new ChevronView(context);
-            chevron.setTag(TAG_TRAILING);
-            row.addView(chevron, new LinearLayout.LayoutParams(
-                    dp(context, 20),
-                    dp(context, 32)
-            ));
-        }
         return row;
     }
 
@@ -113,10 +127,22 @@ final class XLitePreferenceStyle {
         XLiteSettingsUi.applyRippleBackground(view);
     }
 
-    private static void addTitle(Context context, LinearLayout parent, float weight) {
+    private static void addTitle(
+            Context context,
+            LinearLayout parent,
+            float weight
+    ) {
         TextView title = new TextView(context);
         title.setTag(TAG_TITLE);
-        title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
+        title.setTextSize(
+                TypedValue.COMPLEX_UNIT_SP,
+                TITLE_TEXT_SIZES[typographyScale(context)]
+        );
+        title.setTypeface(font(
+                context,
+                "chirp_medium_500",
+                Typeface.create("sans-serif-medium", Typeface.NORMAL)
+        ));
         title.setTextColor(primaryTextColor(context));
         title.setSingleLine(false);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -128,13 +154,46 @@ final class XLitePreferenceStyle {
         parent.addView(title, params);
     }
 
+    private static int typographyScale(Context context) {
+        int width = context.getResources().getConfiguration().smallestScreenWidthDp;
+        if (width >= 720) return 5;
+        if (width >= 600) return 4;
+        if (width >= 480) return 3;
+        if (width >= 400) return 2;
+        if (width >= 320) return 1;
+        return 0;
+    }
+
+    private static Typeface font(Context context, String resourceName, Typeface fallback) {
+        int resourceId = context.getResources().getIdentifier(
+                resourceName,
+                "font",
+                context.getPackageName()
+        );
+        if (resourceId == 0) return fallback;
+        try {
+            return context.getResources().getFont(resourceId);
+        } catch (RuntimeException ignored) {
+            return fallback;
+        }
+    }
+
     private static void bind(Preference preference, View view) {
         boolean enabled = preference.isEnabled();
+        ImageView leading = view.findViewWithTag(TAG_LEADING);
         TextView title = view.findViewWithTag(TAG_TITLE);
         TextView summary = view.findViewWithTag(TAG_SUMMARY);
-        View trailing = view.findViewWithTag(TAG_TRAILING);
         int disabled = disabledColor(view.getContext());
 
+        if (leading != null) {
+            Drawable icon = preference.getIcon();
+            leading.setImageDrawable(icon);
+            leading.setVisibility(icon == null ? View.GONE : View.VISIBLE);
+            leading.setColorFilter(
+                    enabled ? secondaryTextColor(view.getContext()) : disabled,
+                    PorterDuff.Mode.SRC_IN
+            );
+        }
         if (title != null) {
             title.setText(preference.getTitle());
             title.setTextColor(enabled ? primaryTextColor(view.getContext()) : disabled);
@@ -146,44 +205,7 @@ final class XLitePreferenceStyle {
             summary.setVisibility(visible ? View.VISIBLE : View.GONE);
             summary.setTextColor(enabled ? secondaryTextColor(view.getContext()) : disabled);
         }
-        if (trailing != null) {
-            trailing.setEnabled(enabled);
-            trailing.invalidate();
-        }
         view.setEnabled(enabled);
-    }
-
-    static final class Category extends PreferenceCategory {
-        Category(Context context) {
-            super(context);
-        }
-
-        @Override
-        protected View onCreateView(ViewGroup parent) {
-            TextView title = new TextView(getContext());
-            title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-            title.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-            title.setTextColor(primaryTextColor(getContext()));
-            title.setPadding(
-                    dp(getContext(), 20),
-                    dp(getContext(), 22),
-                    dp(getContext(), 16),
-                    dp(getContext(), 8)
-            );
-            title.setBackgroundColor(backgroundColor(getContext()));
-            title.setLayoutParams(new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-            ));
-            return title;
-        }
-
-        @Override
-        protected void onBindView(View view) {
-            TextView title = (TextView) view;
-            title.setText(getTitle());
-            title.setEnabled(isEnabled());
-        }
     }
 
     static final class Toggle extends SwitchPreference {
@@ -197,7 +219,7 @@ final class XLitePreferenceStyle {
 
         @Override
         protected View onCreateView(ViewGroup parent) {
-            return createRow(getContext(), TrailingAccessory.SWITCH);
+            return createRow(getContext(), TrailingAccessory.SWITCH, false);
         }
 
         @Override
@@ -233,7 +255,7 @@ final class XLitePreferenceStyle {
 
         @Override
         protected View onCreateView(ViewGroup parent) {
-            return createRow(getContext(), TrailingAccessory.NONE);
+            return createRow(getContext(), TrailingAccessory.NONE, false);
         }
 
         @Override
@@ -249,7 +271,7 @@ final class XLitePreferenceStyle {
 
         @Override
         protected View onCreateView(ViewGroup parent) {
-            return createRow(getContext(), TrailingAccessory.NONE);
+            return createRow(getContext(), TrailingAccessory.NONE, false);
         }
 
         @Override
@@ -265,7 +287,7 @@ final class XLitePreferenceStyle {
 
         @Override
         protected View onCreateView(ViewGroup parent) {
-            return createRow(getContext(), TrailingAccessory.NONE);
+            return createRow(getContext(), TrailingAccessory.NONE, false);
         }
 
         @Override
@@ -281,37 +303,12 @@ final class XLitePreferenceStyle {
 
         @Override
         protected View onCreateView(ViewGroup parent) {
-            return createRow(getContext(), TrailingAccessory.CHEVRON);
+            return createRow(getContext(), TrailingAccessory.NONE, true);
         }
 
         @Override
         protected void onBindView(View view) {
             bind(this, view);
-        }
-    }
-
-    private static final class ChevronView extends View {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-        ChevronView(Context context) {
-            super(context);
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            float centerY = getHeight() / 2f;
-            float tipX = getWidth() - dp(getContext(), 2);
-            float armX = tipX - dp(getContext(), 6);
-            float offset = dp(getContext(), 6);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(dp(getContext(), 1.8f));
-            paint.setStrokeCap(Paint.Cap.ROUND);
-            paint.setStrokeJoin(Paint.Join.ROUND);
-            paint.setColor(isEnabled()
-                    ? secondaryTextColor(getContext())
-                    : disabledColor(getContext()));
-            canvas.drawLine(armX, centerY - offset, tipX, centerY, paint);
-            canvas.drawLine(tipX, centerY, armX, centerY + offset, paint);
         }
     }
 

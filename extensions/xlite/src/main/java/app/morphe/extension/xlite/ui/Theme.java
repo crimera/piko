@@ -54,11 +54,11 @@ public final class Theme {
     }
 
     public static int primaryText(Context context) {
-        return isDark(context) ? Color.rgb(230, 225, 229) : Color.rgb(29, 27, 32);
+        return isDark(context) ? Color.rgb(217, 217, 217) : Color.rgb(15, 20, 25);
     }
 
     public static int secondaryText(Context context) {
-        return isDark(context) ? Color.rgb(202, 196, 208) : Color.rgb(73, 69, 79);
+        return isDark(context) ? Color.rgb(124, 131, 138) : Color.rgb(83, 100, 113);
     }
 
     public static int primaryAccent(Context context) {

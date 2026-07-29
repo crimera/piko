@@ -279,6 +279,12 @@ private fun StringBuilder.appendGroupRegistration(
             )
         }
     appendInvoke(values, "$method(${values.descriptor()})V")
+    group.iconResourceName?.let { iconResourceName ->
+        appendInvoke(
+            listOf(stringValue(group.id), stringValue(iconResourceName)),
+            "registerGroupIcon(Ljava/lang/String;Ljava/lang/String;)V",
+        )
+    }
 }
 
 private fun StringBuilder.appendItemRegistration(

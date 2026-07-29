@@ -25,16 +25,19 @@ public abstract class SettingsNode {
     }
 
     public static class Group extends SettingsNode {
+        @Nullable public final String iconResourceName;
         public final List<SettingsNode> children;
 
         Group(
                 String id,
                 StringRef title,
                 @Nullable StringRef summary,
+                @Nullable String iconResourceName,
                 int order,
                 List<SettingsNode> children
         ) {
             super(id, title, summary, order);
+            this.iconResourceName = iconResourceName;
             this.children = Collections.unmodifiableList(List.copyOf(children));
         }
     }
@@ -44,10 +47,11 @@ public abstract class SettingsNode {
                 String id,
                 StringRef title,
                 @Nullable StringRef summary,
+                @Nullable String iconResourceName,
                 int order,
                 List<SettingsNode> children
         ) {
-            super(id, title, summary, order, children);
+            super(id, title, summary, iconResourceName, order, children);
         }
     }
 
