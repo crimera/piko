@@ -2,6 +2,7 @@ package app.morphe.extension.xlite.settings;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.preference.EditTextPreference;
 import android.preference.MultiSelectListPreference;
@@ -15,6 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import app.morphe.extension.xlite.ui.Theme;
 
 final class XLitePreferenceStyle {
     private enum TrailingAccessory {
@@ -32,23 +35,23 @@ final class XLitePreferenceStyle {
     }
 
     static int backgroundColor(Context context) {
-        return XLiteSettingsUi.backgroundColor(context);
+        return Theme.surfaceContainer(context);
     }
 
     private static int primaryTextColor(Context context) {
-        return XLiteSettingsUi.primaryTextColor(context);
+        return Theme.primaryText(context);
     }
 
     private static int secondaryTextColor(Context context) {
-        return XLiteSettingsUi.secondaryTextColor(context);
+        return Theme.secondaryText(context);
     }
 
     private static int disabledColor(Context context) {
-        return XLiteSettingsUi.disabledColor(context);
+        return Theme.blend(backgroundColor(context), secondaryTextColor(context), 0.45f);
     }
 
     private static int dp(Context context, float value) {
-        return XLiteSettingsUi.dp(context, value);
+        return Theme.dpToPx(context, value);
     }
 
     private static View createRow(Context context, TrailingAccessory trailingAccessory) {

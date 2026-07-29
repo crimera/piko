@@ -16,6 +16,8 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import app.morphe.extension.xlite.ui.Theme;
+
 /** Reusable themed views for extension-owned X-Lite settings screens. */
 public final class XLiteSettingsUi {
     public interface CheckedChangeListener {
@@ -25,38 +27,18 @@ public final class XLiteSettingsUi {
     private XLiteSettingsUi() {
     }
 
+    public static boolean isDark(Context context) {
+        return Theme.isDark(context);
+    }
+
     public static int backgroundColor(Context context) {
-        return isDark(context) ? Color.BLACK : Color.WHITE;
-    }
-
-    public static int primaryTextColor(Context context) {
-        return isDark(context) ? Color.WHITE : Color.BLACK;
-    }
-
-    public static int secondaryTextColor(Context context) {
-        return blend(backgroundColor(context), primaryTextColor(context), 0.68f);
-    }
-
-    public static int accentColor() {
-        return Color.rgb(29, 155, 240);
-    }
-
-    public static int disabledColor(Context context) {
-        return blend(backgroundColor(context), secondaryTextColor(context), 0.45f);
-    }
-
-    public static int dp(Context context, float value) {
-        return Math.round(TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                value,
-                context.getResources().getDisplayMetrics()
-        ));
+        return Theme.surfaceContainer(context);
     }
 
     public static TextView titleText(Context context) {
         TextView title = new TextView(context);
         title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
-        title.setTextColor(primaryTextColor(context));
+        title.setTextColor(Theme.primaryText(context));
         title.setSingleLine(false);
         return title;
     }
@@ -64,8 +46,8 @@ public final class XLiteSettingsUi {
     public static TextView summaryText(Context context) {
         TextView summary = new TextView(context);
         summary.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        summary.setTextColor(secondaryTextColor(context));
-        summary.setLineSpacing(dp(context, 1), 1f);
+        summary.setTextColor(Theme.secondaryText(context));
+        summary.setLineSpacing(Theme.dpToPx(context, 1f), 1f);
         return summary;
     }
 
@@ -93,16 +75,10 @@ public final class XLiteSettingsUi {
 
     public static View divider(Context context) {
         View divider = new View(context);
-        int color = secondaryTextColor(context);
-        divider.setBackgroundColor(Color.argb(
-                48,
-                Color.red(color),
-                Color.green(color),
-                Color.blue(color)
-        ));
+        divider.setBackgroundColor(Theme.dividerColor(context));
         divider.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                dp(context, 1)
+                Theme.dpToPx(context, 1f)
         ));
         return divider;
     }
@@ -118,27 +94,12 @@ public final class XLiteSettingsUi {
         return button;
     }
 
-    private static boolean isDark(Context context) {
-        int nightMode = context.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK;
-        return nightMode == Configuration.UI_MODE_NIGHT_YES;
-    }
-
     private static int withAlpha(int color, float amount) {
         return Color.argb(
                 Math.round(Color.alpha(color) * amount),
                 Color.red(color),
                 Color.green(color),
                 Color.blue(color)
-        );
-    }
-
-    private static int blend(int from, int to, float amount) {
-        return Color.argb(
-                Math.round(Color.alpha(from) + (Color.alpha(to) - Color.alpha(from)) * amount),
-                Math.round(Color.red(from) + (Color.red(to) - Color.red(from)) * amount),
-                Math.round(Color.green(from) + (Color.green(to) - Color.green(from)) * amount),
-                Math.round(Color.blue(from) + (Color.blue(to) - Color.blue(from)) * amount)
         );
     }
 
@@ -154,8 +115,13 @@ public final class XLiteSettingsUi {
             super(context);
             setOrientation(HORIZONTAL);
             setGravity(Gravity.CENTER_VERTICAL);
-            setMinimumHeight(dp(context, 68));
-            setPadding(dp(context, 20), dp(context, 10), dp(context, 16), dp(context, 10));
+            setMinimumHeight(Theme.dpToPx(context, 68f));
+            setPadding(
+                    Theme.dpToPx(context, 20f),
+                    Theme.dpToPx(context, 10f),
+                    Theme.dpToPx(context, 16f),
+                    Theme.dpToPx(context, 10f)
+            );
             applyRippleBackground(this);
 
             LinearLayout labels = new LinearLayout(context);
@@ -170,19 +136,22 @@ public final class XLiteSettingsUi {
             if (summary != null && summary.length() > 0) {
                 TextView summaryView = summaryText(context);
                 summaryView.setText(summary);
-                summaryView.setPadding(0, dp(context, 6), 0, 0);
+                summaryView.setPadding(0, Theme.dpToPx(context, 6f), 0, 0);
                 labels.addView(summaryView, new LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                 ));
             }
             LayoutParams labelParams = new LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-            labelParams.setMarginEnd(dp(context, 14));
+            labelParams.setMarginEnd(Theme.dpToPx(context, 14f));
             addView(labels, labelParams);
 
             control = new SwitchControl(context);
             control.setChecked(checked, false);
-            addView(control, new LayoutParams(dp(context, 52), dp(context, 32)));
+            addView(control, new LayoutParams(
+                    Theme.dpToPx(context, 52f),
+                    Theme.dpToPx(context, 32f)
+            ));
             setOnClickListener(ignored -> control.toggle(true));
         }
 
@@ -253,22 +222,23 @@ public final class XLiteSettingsUi {
 
         @Override
         protected void onDraw(Canvas canvas) {
-            int background = backgroundColor(getContext());
-            int accent = accentColor();
-            int secondary = secondaryTextColor(getContext());
-            int disabled = disabledColor(getContext());
-            int offTrack = blend(background, secondary, 0.32f);
+            Context context = getContext();
+            int background = backgroundColor(context);
+            int accent = Theme.primaryAccent(context);
+            int secondary = Theme.secondaryText(context);
+            int disabled = Theme.blend(background, secondary, 0.45f);
+            int offTrack = Theme.blend(background, secondary, 0.32f);
             int onTrack = isEnabled() ? accent : disabled;
-            int track = blend(offTrack, onTrack, progress);
-            int offThumb = blend(background, secondary, 0.72f);
-            int thumb = blend(offThumb, background, progress);
+            int track = Theme.blend(offTrack, onTrack, progress);
+            int offThumb = Theme.blend(background, secondary, 0.72f);
+            int thumb = Theme.blend(offThumb, background, progress);
 
             float radius = getHeight() / 2f;
             paint.setStyle(Paint.Style.FILL);
             paint.setColor(track);
             canvas.drawRoundRect(0, 0, getWidth(), getHeight(), radius, radius, paint);
 
-            float thumbRadius = dp(getContext(), 10) + dp(getContext(), 3) * progress;
+            float thumbRadius = Theme.dpToPx(context, 10f) + Theme.dpToPx(context, 3f) * progress;
             float startX = radius;
             float endX = getWidth() - radius;
             float centerX = startX + (endX - startX) * progress;
@@ -278,7 +248,7 @@ public final class XLiteSettingsUi {
 
             if (progress <= 0f || !isEnabled()) return;
             paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(dp(getContext(), 2));
+            paint.setStrokeWidth(Theme.dpToPx(context, 2f));
             paint.setStrokeCap(Paint.Cap.ROUND);
             paint.setStrokeJoin(Paint.Join.ROUND);
             paint.setColor(withAlpha(accent, progress));
@@ -307,9 +277,9 @@ public final class XLiteSettingsUi {
             super(context);
             GradientDrawable background = new GradientDrawable();
             background.setShape(GradientDrawable.OVAL);
-            background.setColor(accentColor());
+            background.setColor(Theme.primaryAccent(context));
             setBackground(background);
-            setElevation(dp(context, 6));
+            setElevation(Theme.dpToPx(context, 6f));
             setClickable(true);
             setFocusable(true);
         }
@@ -317,11 +287,12 @@ public final class XLiteSettingsUi {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
+            Context context = getContext();
             float centerX = getWidth() / 2f;
             float centerY = getHeight() / 2f;
-            float radius = dp(getContext(), 9);
+            float radius = Theme.dpToPx(context, 9f);
             paint.setColor(Color.WHITE);
-            paint.setStrokeWidth(dp(getContext(), 2.5f));
+            paint.setStrokeWidth(Theme.dpToPx(context, 2.5f));
             paint.setStrokeCap(Paint.Cap.ROUND);
             canvas.drawLine(centerX - radius, centerY, centerX + radius, centerY, paint);
             canvas.drawLine(centerX, centerY - radius, centerX, centerY + radius, paint);
