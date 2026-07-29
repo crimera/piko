@@ -23,7 +23,6 @@ internal object ComposeSettingsBasicItemFingerprint : Fingerprint(
     filters =
         listOf(
             string("title"),
-            string("onClick"),
             methodCall(
                 opcode = Opcode.INVOKE_INTERFACE,
                 definingClass = "Landroidx/compose/runtime/Composer;",
