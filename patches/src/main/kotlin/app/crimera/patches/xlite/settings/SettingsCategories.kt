@@ -64,6 +64,15 @@ internal object Categories {
 }
 
 internal object Groups {
+    val DYNAMIC_COLORS =
+        SettingsGroupMetadata(
+            id = "xlite.content.dynamic_colors",
+            titleResourceName = "piko_xlite_group_dynamic_colors_title",
+            summaryResourceName = "piko_xlite_group_dynamic_colors_summary",
+            iconResourceName = "ic_vector_paintbrush_box",
+            order = 100,
+        )
+
     val INLINE_ACTIONS =
         SettingsGroupMetadata(
             id = "xlite.post_actions_media.inline_actions",

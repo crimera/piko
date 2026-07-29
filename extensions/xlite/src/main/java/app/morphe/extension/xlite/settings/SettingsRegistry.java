@@ -233,6 +233,15 @@ public final class SettingsRegistry {
         return booleanSetting.get();
     }
 
+    public static synchronized boolean getBooleanOrDefault(String key, boolean defaultValue) {
+        Setting<?> setting = SETTINGS.get(key);
+        if (setting == null) return defaultValue;
+        if (!(setting instanceof BooleanSetting booleanSetting)) {
+            throw failure("X-Lite setting is not boolean: " + key);
+        }
+        return booleanSetting.get();
+    }
+
     public static synchronized String getString(String key) {
         Setting<?> setting = requireSetting(key);
         if (!(setting instanceof StringSetting stringSetting)) {
