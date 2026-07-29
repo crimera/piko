@@ -4,6 +4,7 @@ import app.crimera.patches.xlite.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
@@ -17,25 +18,30 @@ internal fun xLiteSettingsContributionPatch(
     dependsOn(xLiteSettingsPatch)
 
     execute {
-        val registryClass = mutableClassDefBy(SETTINGS_REGISTRY_DESCRIPTOR)
-        var loadMethod =
-            registryClass.methods.singleOrNull { method ->
-                method.name == "load" &&
-                    method.parameterTypes.isEmpty() &&
-                    method.returnType == "V"
-            } ?: error("X-Lite SettingsRegistry.load() was not found")
-        val registerCount = loadMethod.implementation?.registerCount ?: 0
-        if (registerCount < REGISTRATION_REGISTER_COUNT) {
-            val expandedMethod =
-                loadMethod.cloneMutable(
-                    additionalRegisters = REGISTRATION_REGISTER_COUNT - registerCount,
-                )
-            registryClass.methods.remove(loadMethod)
-            registryClass.methods.add(expandedMethod)
-            loadMethod = expandedMethod
-        }
-        loadMethod.addInstructions(0, contribution.registrationInstructions())
+        injectSettingsContribution(contribution)
     }
+}
+
+context(context: BytecodePatchContext)
+internal fun injectSettingsContribution(contribution: SettingsContributionCatalog) {
+    val registryClass = context.mutableClassDefBy(SETTINGS_REGISTRY_DESCRIPTOR)
+    var loadMethod =
+        registryClass.methods.singleOrNull { method ->
+            method.name == "load" &&
+                method.parameterTypes.isEmpty() &&
+                method.returnType == "V"
+        } ?: error("X-Lite SettingsRegistry.load() was not found")
+    val registerCount = loadMethod.implementation?.registerCount ?: 0
+    if (registerCount < REGISTRATION_REGISTER_COUNT) {
+        val expandedMethod =
+            loadMethod.cloneMutable(
+                additionalRegisters = REGISTRATION_REGISTER_COUNT - registerCount,
+            )
+        registryClass.methods.remove(loadMethod)
+        registryClass.methods.add(expandedMethod)
+        loadMethod = expandedMethod
+    }
+    loadMethod.addInstructions(0, contribution.registrationInstructions())
 }
 
 internal data class InjectedSettingRead(
@@ -267,6 +273,7 @@ private fun StringBuilder.appendGroupRegistration(
                 stringValue(group.id),
                 stringValue(group.titleResourceName),
                 nullableStringValue(group.summaryResourceName),
+                nullableStringValue(group.iconResourceName),
                 intValue(group.order),
             )
         } else {
@@ -275,16 +282,11 @@ private fun StringBuilder.appendGroupRegistration(
                 stringValue(group.id),
                 stringValue(group.titleResourceName),
                 nullableStringValue(group.summaryResourceName),
+                nullableStringValue(group.iconResourceName),
                 intValue(group.order),
             )
         }
     appendInvoke(values, "$method(${values.descriptor()})V")
-    group.iconResourceName?.let { iconResourceName ->
-        appendInvoke(
-            listOf(stringValue(group.id), stringValue(iconResourceName)),
-            "registerGroupIcon(Ljava/lang/String;Ljava/lang/String;)V",
-        )
-    }
 }
 
 private fun StringBuilder.appendItemRegistration(
@@ -315,10 +317,18 @@ private fun StringBuilder.appendInvoke(
     values: List<SmaliValue>,
     method: String,
 ) {
-    require(values.size <= 5) { "X-Lite registry call uses too many registers: $method" }
+    require(values.size <= REGISTRATION_REGISTER_COUNT) {
+        "X-Lite registry call uses too many registers: $method"
+    }
     values.forEachIndexed { index, value -> appendLine(value.instruction(index)) }
-    val registers = values.indices.joinToString(", ") { "v$it" }
-    appendLine("invoke-static {$registers}, $SETTINGS_REGISTRY_DESCRIPTOR->$method")
+    if (values.size <= 5) {
+        val registers = values.indices.joinToString(", ") { "v$it" }
+        appendLine("invoke-static {$registers}, $SETTINGS_REGISTRY_DESCRIPTOR->$method")
+        return
+    }
+    appendLine(
+        "invoke-static/range {v0 .. v${values.lastIndex}}, $SETTINGS_REGISTRY_DESCRIPTOR->$method",
+    )
 }
 
 private data class SmaliValue(
@@ -351,7 +361,7 @@ private fun smaliString(value: String) =
         .replace("\n", "\\n")
         .replace("\r", "\\r")
 
-private const val REGISTRATION_REGISTER_COUNT = 5
+private const val REGISTRATION_REGISTER_COUNT = 6
 private const val READ_INSTRUCTION_COUNT = 3
 
 private fun ToggleSettingDefinition.guard(
