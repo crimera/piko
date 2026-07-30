@@ -20,13 +20,12 @@ public class AppIconManager {
 
     private static final String PREF_NAME = Settings.SHARED_PREF_NAME;
     private static final String KEY_SELECTED_ICON = "selected_app_icon";
-    private static final String defComponentName = "com.twitter.android.StartActivity";
 
     private final Context context;
     private final PackageManager pm;
     private final SharedPreferences prefs;
 
-    public AppIconManager(Context context) {
+    public AppIconManager() {
         this.context = Utils.getContext();
         this.pm = this.context.getPackageManager();
         this.prefs = this.context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -73,15 +72,9 @@ public class AppIconManager {
     // Enable ONE icon, disable all others
     // ---------------------------------------------------------------------------------------------
     public void applyIcon(String componentName) {
-        String prevComponentName = getSavedIcon();
         saveSelectedIcon(componentName);
-        // If the icon is "default" remove all icons. This is a measure taken in case multiple icons are created.
-        if (componentName.equals(defComponentName)) {
-            disableAllIcons();
-        }
-        else{
-            disableIcon(prevComponentName);
-        }
+        // Always disable all icons. This is a measure taken in case multiple icons are enabled.
+        disableAllIcons();
         pm.setComponentEnabledSetting(
                 new ComponentName(context, componentName),
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
