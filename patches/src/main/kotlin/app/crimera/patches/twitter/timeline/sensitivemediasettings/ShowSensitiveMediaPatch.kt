@@ -19,7 +19,7 @@ import com.android.tools.smali.dexlib2.Opcode
 // Credits to @Cradlesofashes
 
 private object sensitiveMediaSettingsPatchFingerprint : Fingerprint(
-    definingClass = "Lcom/twitter/model/json/core/JsonSensitiveMediaWarning\$\$JsonObjectMapper;",
+    definingClass = "Lcom/twitter/model/json/core/JsonTweetWithVisibilityResults\$\$JsonObjectMapper;",
     name = "parse",
     returnType = "Ljava/lang/Object",
 )
@@ -43,7 +43,7 @@ val sensitiveMediaPatch =
             methods.addInstructions(
                 returnObj,
                 """
-                invoke-static {p1}, $TIMELINE_ENTRY_DESCRIPTOR;->sensitiveMedia(Lcom/twitter/model/json/core/JsonSensitiveMediaWarning;)Lcom/twitter/model/json/core/JsonSensitiveMediaWarning;
+                invoke-static {p1}, $TIMELINE_ENTRY_DESCRIPTOR;->sensitiveMedia(Lcom/twitter/model/json/core/JsonTweetWithVisibilityResults;)Lcom/twitter/model/json/core/JsonTweetWithVisibilityResults;
                 move-result-object p1
                 """.trimIndent(),
             )
