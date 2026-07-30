@@ -20,7 +20,7 @@ import app.morphe.extension.crimera.PikoUtils;
 public class TimelineEntry {
     public static final boolean hideAds;
     private static final boolean hideWTF,hideCTS,hideCTJ,hideDetailedPosts,hideRBMK,hidePinnedPosts,hidePremiumPrompt,showSensitiveMedia,hideTopPeopleSearch,hideTodaysNews;
-    private static final Field mediaVisibility;
+    private static Field mediaVisibility;
 
     static {
         hideAds = (Pref.hideAds() && SettingsStatus.hideAds);
@@ -34,7 +34,6 @@ public class TimelineEntry {
         showSensitiveMedia = Pref.showSensitiveMedia();
         hideTopPeopleSearch = (Pref.hideTopPeopleSearch() && SettingsStatus.hideTopPeopleSearch);
         hideTodaysNews = (Pref.hideTodaysNews() && SettingsStatus.hideTodaysNews);
-        mediaVisibility = getFieldMediaVisibility();
     }
 
     private static boolean isEntryIdRemove(String entryId) {
@@ -105,9 +104,13 @@ public class TimelineEntry {
         }
         return jsonTimelineModuleItem;
     }
-    public static JsonTweetWithVisibilityResults sensitiveMedia(JsonTweetWithVisibilityResults jsonTweetWithVisibilityResults) {
+    public static JsonTweetWithVisibilityResults sensitiveMedia(JsonTweetWithVisibilityResults jsonTweetWithVisibilityResults, String fieldName) {
         try {
-            if (showSensitiveMedia && mediaVisibility != null) {
+            if (showSensitiveMedia) {
+                if (mediaVisibility == null) {
+                    mediaVisibility = jsonTweetWithVisibilityResults.getClass().getDeclaredField(fieldName);
+                    mediaVisibility.setAccessible(true);
+                }
                 mediaVisibility.set(jsonTweetWithVisibilityResults, null);
             }
         } catch (Exception unused) {
@@ -149,16 +152,6 @@ public class TimelineEntry {
         }
 
         return videoEnities;
-    }
-    private static final Field getFieldMediaVisibility() {
-        Field[] fields = JsonTweetWithVisibilityResults.class.getDeclaredFields();
-
-        for (Field field : fields) {
-            if (field.getType().getName().indexOf("model.mediavisibility") != -1) {
-                return field;
-            }
-        }
-        return null;
     }
 //end
 }
