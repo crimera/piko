@@ -2,6 +2,7 @@ package app.morphe.extension.xlite.featureswitches;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -110,6 +111,33 @@ public final class FeatureSwitchStoreTest {
                 List.class
         );
         assertEquals(List.of("first"), resolved);
+    }
+
+    @Test
+    public void exportedOverridesCanReplaceAnotherStoresOverrides() throws Exception {
+        FeatureSwitchStore source = new FeatureSwitchStore(new MemoryPersistence());
+        source.setOverride("enabled", FeatureSwitchStore.ValueType.BOOLEAN, true);
+        source.setOverride("limit", FeatureSwitchStore.ValueType.INT, 8);
+
+        FeatureSwitchStore target = new FeatureSwitchStore(new MemoryPersistence());
+        target.setOverride("stale", FeatureSwitchStore.ValueType.STRING, "remove me");
+        target.importOverrides(source.exportOverrides());
+
+        assertFalse(target.hasEntry("stale"));
+        assertTrue(target.resolve(
+                "enabled", FeatureSwitchStore.ValueType.BOOLEAN, false, Boolean.class));
+        assertEquals(Integer.valueOf(8), target.resolve(
+                "limit", FeatureSwitchStore.ValueType.INT, 0, Integer.class));
+    }
+
+    @Test
+    public void invalidImportDoesNotReplaceCurrentOverrides() {
+        FeatureSwitchStore store = new FeatureSwitchStore(new MemoryPersistence());
+        store.setOverride("enabled", FeatureSwitchStore.ValueType.BOOLEAN, true);
+
+        assertThrows(org.json.JSONException.class, () -> store.importOverrides("not json"));
+        assertTrue(store.resolve(
+                "enabled", FeatureSwitchStore.ValueType.BOOLEAN, false, Boolean.class));
     }
 
     private static final class MemoryPersistence implements FeatureSwitchStore.Persistence {

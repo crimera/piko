@@ -113,7 +113,18 @@
     <string name="piko_xlite_post_filtering_error_duplicate">This word or phrase already has a rule.</string>
 
     <string name="piko_xlite_feature_switches_title">Feature switches</string>
-    <string name="piko_xlite_feature_switches_summary">Search observed switches and override boolean, numeric, string, or list values</string>
+    <string name="piko_xlite_feature_switches_summary">Manage, import, or export feature switch overrides</string>
+    <string name="piko_xlite_feature_switch_manage_title">Manage feature switches</string>
+    <string name="piko_xlite_feature_switch_manage_summary">Search observed switches and override boolean, numeric, string, or list values</string>
+    <string name="piko_xlite_feature_switch_import_title">Import feature switches</string>
+    <string name="piko_xlite_feature_switch_import_summary">Replace current feature switch overrides from a JSON file</string>
+    <string name="piko_xlite_feature_switch_export_title">Export feature switches</string>
+    <string name="piko_xlite_feature_switch_export_summary">Save current feature switch overrides to a JSON file</string>
+    <string name="piko_xlite_feature_switch_import_success">Feature switches imported</string>
+    <string name="piko_xlite_feature_switch_import_failed">Could not import feature switches</string>
+    <string name="piko_xlite_feature_switch_export_success">Feature switches exported</string>
+    <string name="piko_xlite_feature_switch_export_failed">Could not export feature switches</string>
+    <string name="piko_xlite_feature_switch_file_not_selected">No feature switch file was selected</string>
     <string name="piko_xlite_feature_switch_search_hint">Search feature switches</string>
     <string name="piko_xlite_feature_switch_add">Add feature switch</string>
     <string name="piko_xlite_feature_switch_add_title">Add feature switch</string>

@@ -1,7 +1,10 @@
 package app.crimera.patches.xlite.misc.featureflags
 
 import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.Groups
+import app.crimera.patches.xlite.settings.action
 import app.crimera.patches.xlite.settings.customScreen
+import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
@@ -22,6 +25,8 @@ private const val STRING_TYPE = "Ljava/lang/String;"
 private const val LIST_TYPE = "Ljava/util/List;"
 private const val FEATURE_SWITCH_STORE_DESCRIPTOR =
     "$EXTENSION_PACKAGE/featureswitches/FeatureSwitchStore;"
+private const val FEATURE_SWITCH_IMPORT_EXPORT_DESCRIPTOR =
+    "$EXTENSION_PACKAGE/featureswitches/FeatureSwitchImportExport"
 
 private object XLiteFeatureSwitchRepositoryFingerprint : Fingerprint(
     parameters = emptyList(),
@@ -54,13 +59,29 @@ val featureFlagPatch =
 
         xLiteSettings {
             category(Categories.ADVANCED) {
-                customScreen(
-                    id = "xlite.advanced.feature_switches",
-                    strings = settingStrings("piko_xlite_feature_switches"),
-                    order = 100,
-                    fragmentClassDescriptor =
-                        "Lapp/morphe/extension/xlite/featureswitches/FeatureSwitchFragment;",
-                )
+                group(Groups.FEATURE_SWITCHES) {
+                    customScreen(
+                        id = "xlite.advanced.feature_switches.manage",
+                        strings = settingStrings("piko_xlite_feature_switch_manage"),
+                        order = 100,
+                        fragmentClassDescriptor =
+                            "Lapp/morphe/extension/xlite/featureswitches/FeatureSwitchFragment;",
+                    )
+                    action(
+                        id = "xlite.advanced.feature_switches.import",
+                        strings = settingStrings("piko_xlite_feature_switch_import"),
+                        order = 200,
+                        handlerClassDescriptor =
+                            "$FEATURE_SWITCH_IMPORT_EXPORT_DESCRIPTOR\$ImportAction;",
+                    )
+                    action(
+                        id = "xlite.advanced.feature_switches.export",
+                        strings = settingStrings("piko_xlite_feature_switch_export"),
+                        order = 300,
+                        handlerClassDescriptor =
+                            "$FEATURE_SWITCH_IMPORT_EXPORT_DESCRIPTOR\$ExportAction;",
+                    )
+                }
             }
         }
 
