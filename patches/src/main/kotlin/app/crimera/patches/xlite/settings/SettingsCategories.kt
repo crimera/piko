@@ -69,7 +69,7 @@ internal object Groups {
             id = "xlite.advanced.feature_switches",
             titleResourceName = "piko_xlite_feature_switches_title",
             summaryResourceName = "piko_xlite_feature_switches_summary",
-            iconResourceName = "ic_vector_toolbox_stroke",
+            iconResourceName = "ic_vector_flask_stroke",
             order = 100,
         )
 
