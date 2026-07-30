@@ -19,6 +19,7 @@ import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.xlite.featureswitches.FeatureSwitchImportExport;
 import app.morphe.extension.xlite.ui.Theme;
 
 @SuppressWarnings("deprecation")
@@ -52,6 +53,9 @@ public final class XLiteSettingsActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (FeatureSwitchImportExport.handleActivityResult(this, requestCode, resultCode, data)) {
+            return;
+        }
         SettingsBackupRestore.handleActivityResult(this, requestCode, resultCode, data);
     }
 

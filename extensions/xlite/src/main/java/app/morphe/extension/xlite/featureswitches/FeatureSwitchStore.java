@@ -202,6 +202,21 @@ public final class FeatureSwitchStore {
         persist();
     }
 
+    public String exportOverrides() {
+        ensureLoaded();
+        return serialize(overrides);
+    }
+
+    public void importOverrides(String serialized) throws JSONException {
+        Map<String, OverrideValue> importedOverrides = deserialize(serialized);
+        ensureLoaded();
+        synchronized (persistenceLock) {
+            overrides.clear();
+            overrides.putAll(importedOverrides);
+            persistence.write(serialize(overrides));
+        }
+    }
+
     <T> T resolve(
             String key,
             ValueType type,

@@ -64,6 +64,15 @@ internal object Categories {
 }
 
 internal object Groups {
+    val FEATURE_SWITCHES =
+        SettingsGroupMetadata(
+            id = "xlite.advanced.feature_switches",
+            titleResourceName = "piko_xlite_feature_switches_title",
+            summaryResourceName = "piko_xlite_feature_switches_summary",
+            iconResourceName = "ic_vector_toolbox_stroke",
+            order = 100,
+        )
+
     val DYNAMIC_COLORS =
         SettingsGroupMetadata(
             id = "xlite.content.dynamic_colors",
