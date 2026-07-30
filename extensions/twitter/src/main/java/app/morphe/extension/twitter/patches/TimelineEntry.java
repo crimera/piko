@@ -6,12 +6,13 @@
 
 package app.morphe.extension.twitter.patches;
 
+import com.twitter.model.json.core.JsonTweetWithVisibilityResults;
 import com.twitter.model.json.timeline.urt.JsonTimelineEntry;
-import com.twitter.model.json.core.JsonSensitiveMediaWarning;
 import com.twitter.model.json.timeline.urt.JsonTimelineModuleItem;
 import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.twitter.settings.SettingsStatus;
 import app.morphe.extension.twitter.entity.Video;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.ArrayList;
 import app.morphe.extension.crimera.PikoUtils;
@@ -19,6 +20,8 @@ import app.morphe.extension.crimera.PikoUtils;
 public class TimelineEntry {
     public static final boolean hideAds;
     private static final boolean hideWTF,hideCTS,hideCTJ,hideDetailedPosts,hideRBMK,hidePinnedPosts,hidePremiumPrompt,showSensitiveMedia,hideTopPeopleSearch,hideTodaysNews;
+    private static Field mediaVisibility;
+
     static {
         hideAds = (Pref.hideAds() && SettingsStatus.hideAds);
         hideWTF = (Pref.hideWTF() && SettingsStatus.hideWTF);
@@ -101,17 +104,19 @@ public class TimelineEntry {
         }
         return jsonTimelineModuleItem;
     }
-    public static JsonSensitiveMediaWarning sensitiveMedia(JsonSensitiveMediaWarning jsonSensitiveMediaWarning) {
+    public static JsonTweetWithVisibilityResults sensitiveMedia(JsonTweetWithVisibilityResults jsonTweetWithVisibilityResults, String fieldName) {
         try {
-            if(showSensitiveMedia){
-                jsonSensitiveMediaWarning.a = false;
-                jsonSensitiveMediaWarning.b = false;
-                jsonSensitiveMediaWarning.c = false;
+            if (showSensitiveMedia) {
+                if (mediaVisibility == null) {
+                    mediaVisibility = jsonTweetWithVisibilityResults.getClass().getDeclaredField(fieldName);
+                    mediaVisibility.setAccessible(true);
+                }
+                mediaVisibility.set(jsonTweetWithVisibilityResults, null);
             }
         } catch (Exception unused) {
 
         }
-        return jsonSensitiveMediaWarning;
+        return jsonTweetWithVisibilityResults;
     }
     public static boolean hidePromotedTrend(Object data) {
         if (data != null && hideAds) {
@@ -136,7 +141,7 @@ public class TimelineEntry {
                     maxVideoObject = vidObj;
                 }
                 if (maxVideoObject != null) {
-                    ArrayList result = new ArrayList();
+                    ArrayList<Object> result = new ArrayList<>();
                     result.add(maxVideoObject);
                     return result;
                 }
@@ -148,6 +153,5 @@ public class TimelineEntry {
 
         return videoEnities;
     }
-
 //end
 }

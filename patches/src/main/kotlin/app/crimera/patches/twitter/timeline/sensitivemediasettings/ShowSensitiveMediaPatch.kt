@@ -15,11 +15,13 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.value.ArrayEncodedValue
+import com.android.tools.smali.dexlib2.iface.value.StringEncodedValue
 
 // Credits to @Cradlesofashes
 
 private object sensitiveMediaSettingsPatchFingerprint : Fingerprint(
-    definingClass = "Lcom/twitter/model/json/core/JsonSensitiveMediaWarning\$\$JsonObjectMapper;",
+    definingClass = "Lcom/twitter/model/json/core/JsonTweetWithVisibilityResults\$\$JsonObjectMapper;",
     name = "parse",
     returnType = "Ljava/lang/Object",
 )
@@ -40,10 +42,29 @@ val sensitiveMediaPatch =
 
             val returnObj = instructions.last { it.opcode == Opcode.RETURN_OBJECT }.location.index
 
+            val jsonClass = classDefBy {
+                it.type == "Lcom/tweet/model/json/core/JsonTestWithVisibilityResults;"
+            }!!
+
+            val mediaVisibilityField = jsonClass.fields.first { field ->
+                field.annotations.any { annotation ->
+                    annotation.type.endsWith("JsonField;") &&
+                    annotation.elements.any { element ->
+                        element.name == "name" &&
+                        (element.value as? ArrayEncodedValue)?.value?.any {
+                            (it as? StringEncodedValue)?.value == "media_visibility_results"
+                        } == true
+                    }
+                }
+            }
+
+            val fieldName = mediaVisibilityField.name
+
             methods.addInstructions(
                 returnObj,
                 """
-                invoke-static {p1}, $TIMELINE_ENTRY_DESCRIPTOR;->sensitiveMedia(Lcom/twitter/model/json/core/JsonSensitiveMediaWarning;)Lcom/twitter/model/json/core/JsonSensitiveMediaWarning;
+                const-string v0, "$fieldName"
+                invoke-static {p1, v0}, $TIMELINE_ENTRY_DESCRIPTOR;->sensitiveMedia(Lcom/twitter/model/json/core/JsonTestWithVisibilityResults;Ljava/lang/String;)Lcom/twitter/model/json/core/JsonTestWithVisibilityResults;
                 move-result-object p1
                 """.trimIndent(),
             )
