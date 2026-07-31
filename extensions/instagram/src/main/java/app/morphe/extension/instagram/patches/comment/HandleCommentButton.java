@@ -78,6 +78,7 @@ public class HandleCommentButton {
                 return true;
 
             } else if (button.equals(SaveMediaButton.A00)) {
+                try {
                     CommentData commentData = new CommentData(commentObject);
 
                     Context context = (Context) Utils.getActivity();
@@ -89,15 +90,20 @@ public class HandleCommentButton {
                         MediaData imageData = commentData.getImageMedia();
                         UserData userData = commentData.getCommentUserData();
 
-                        String userName = (userData != null) ? userData.getUsername() : "comment_"+LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+                        String userName = (userData != null && userData.getUsername() != null) ? userData.getUsername() : "comment_" + System.currentTimeMillis();
                         String mediaLink = imageData.getMediaLink();
                         String fileName = userName + "_" + imageData.getDownloadFilename(MediaType.ANY);
 
                         String subFolder = DownloadUtils.getSubfolderName(userName);
 
                         DownloadUtils.downloadMediaUrl(context, mediaLink, subFolder, fileName);
+                    } else {
+                        PikoUtils.toast(str("piko_comment_copied_failed"));
                     }
-                
+                } catch (Exception ex) {
+                    PikoUtils.logger(ex);
+                    PikoUtils.toast(str("piko_comment_copied_failed"));
+                }
                 return true;
             }
 
