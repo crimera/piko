@@ -10,6 +10,10 @@ import app.morphe.extension.crimera.settings.StringSetting;
 
 public class Settings {
     public static final BooleanSetting PIKO_DEBUG = new BooleanSetting("piko_debug", false);
+    public static final BooleanSetting MATERIAL_YOU_THEME = new BooleanSetting("material_you_theme", false);
+    public static final BooleanSetting AMOLED_THEME = new BooleanSetting("amoled_theme", false);
+    public static final StringSetting INSTAGRAM_THEME_MODE =
+            new StringSetting("instagram_theme_mode", "-1");
     // It should be true always. It will be handled upon opening the piko settings for the first time.
     public static final BooleanSetting FIRST_TIME_PIKO = new BooleanSetting("first_time_piko", true);
 
