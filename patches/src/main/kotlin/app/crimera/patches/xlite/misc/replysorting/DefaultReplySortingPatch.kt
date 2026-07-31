@@ -20,6 +20,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -30,6 +31,7 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 /**
  * Targets the X-Lite Compose post detail timeline repository initialization, where
@@ -67,22 +69,24 @@ private object XLiteComposeReplySortingSelectionFingerprint : Fingerprint(
  * configured default so the UI matches the repository's ranking mode.
  */
 private object XLiteComposeReplySortingUiStateFingerprint : Fingerprint(
+    filters =
+        listOf(
+            fieldAccess(
+                opcode = Opcode.SGET_OBJECT,
+                name = "Relevance",
+            ),
+        ),
     custom = { method, classDef ->
         val instructions = method.implementation?.instructions
         classDef.interfaces.contains("Lkotlin/jvm/functions/Function0;") &&
-            instructions?.any { ins ->
-                ins.opcode == Opcode.SGET_OBJECT &&
-                    (ins as? ReferenceInstruction)?.reference
-                        ?.toString()?.contains("->Relevance:L") == true
-            } == true &&
             // mutableStateOf: androidx.compose.runtime static factory taking Object and
             // returning a runtime state type. Matched on the stable descriptor/package
             // parts because the short class names (p5, k3) are R8-obfuscated and can
             // shift between Compose runtime versions.
             instructions?.any { ins ->
                 ins.opcode == Opcode.INVOKE_STATIC &&
-                    (ins as? ReferenceInstruction)?.reference?.toString()
-                        ?.contains("(Ljava/lang/Object;)Landroidx/compose/runtime/") == true
+                    ((ins as? ReferenceInstruction)?.reference as? MethodReference)
+                        ?.definingClass?.startsWith("Landroidx/compose/runtime/") == true
             } == true
     },
 )
@@ -190,8 +194,7 @@ val xLiteDefaultReplySortingPatch =
             val uiStateMethod = uiStateMatches.single().method
             val uiStateIndex = uiStateMethod.instructions.indexOfFirst { ins ->
                 ins.opcode == Opcode.SGET_OBJECT &&
-                    (ins as? ReferenceInstruction)?.reference
-                        ?.toString()?.contains("->Relevance:L") == true
+                    ((ins as? ReferenceInstruction)?.reference as? FieldReference)?.name == "Relevance"
             }
             if (uiStateIndex == -1) {
                 throw PatchException("Missing relevance sget-object in X-Lite reply sorting UI state initializer")
@@ -214,3 +217,4 @@ val xLiteDefaultReplySortingPatch =
             )
         }
     }
+
