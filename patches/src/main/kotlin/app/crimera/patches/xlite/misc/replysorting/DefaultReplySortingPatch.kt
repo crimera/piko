@@ -75,10 +75,14 @@ private object XLiteComposeReplySortingUiStateFingerprint : Fingerprint(
                     (ins as? ReferenceInstruction)?.reference
                         ?.toString()?.contains("->Relevance:L") == true
             } == true &&
+            // mutableStateOf: androidx.compose.runtime static factory taking Object and
+            // returning a runtime state type. Matched on the stable descriptor/package
+            // parts because the short class names (p5, k3) are R8-obfuscated and can
+            // shift between Compose runtime versions.
             instructions?.any { ins ->
                 ins.opcode == Opcode.INVOKE_STATIC &&
-                    (ins as? ReferenceInstruction)?.reference?.toString() ==
-                    "Landroidx/compose/runtime/p5;->f(Ljava/lang/Object;)Landroidx/compose/runtime/k3;"
+                    (ins as? ReferenceInstruction)?.reference?.toString()
+                        ?.contains("(Ljava/lang/Object;)Landroidx/compose/runtime/") == true
             } == true
     },
 )
