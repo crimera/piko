@@ -72,8 +72,7 @@ public final class ReplySortingFilter {
             }
             if (name == null || name.isEmpty()) return;
 
-            PikoSharedPrefCategory preferences = preferences();
-            if (preferences == null) return;
+            PikoSharedPrefCategory preferences = new PikoSharedPrefCategory(PREFERENCES_NAME);
             preferences.saveString(LAST_KEY, name);
         } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to save X-Lite last reply sorting", exception);
@@ -82,14 +81,9 @@ public final class ReplySortingFilter {
 
     @Nullable
     private static String readLast() {
-        PikoSharedPrefCategory preferences = preferences();
-        if (preferences == null) return null;
-        return preferences.getString(LAST_KEY, null);
+        // getString requires a non-null default; an empty value means unset.
+        String last = new PikoSharedPrefCategory(PREFERENCES_NAME).getString(LAST_KEY, "");
+        return last.isEmpty() ? null : last;
     }
 
-    @Nullable
-    private static PikoSharedPrefCategory preferences() {
-        if (Utils.getContext() == null) return null;
-        return new PikoSharedPrefCategory(PREFERENCES_NAME);
-    }
 }
