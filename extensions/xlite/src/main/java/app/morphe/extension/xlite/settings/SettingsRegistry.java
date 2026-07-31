@@ -24,6 +24,7 @@ public final class SettingsRegistry {
     private enum ItemType {
         TOGGLE,
         TEXT_INPUT,
+        SINGLE_CHOICE,
         MULTI_CHOICE,
         ACTION,
         CUSTOM_SCREEN,
@@ -123,6 +124,28 @@ public final class SettingsRegistry {
         item.configured = true;
     }
 
+    public static synchronized void registerSingleChoice(
+            String parentId,
+            String id,
+            String titleResourceName,
+            @Nullable String summaryResourceName,
+            int order
+    ) {
+        registerItem(parentId, id, titleResourceName, summaryResourceName, order, ItemType.SINGLE_CHOICE);
+    }
+
+    public static synchronized void configureSingleChoice(
+            String id,
+            String defaultValue,
+            boolean rebootApp
+    ) {
+        ItemBuilder item = requireItem(id, ItemType.SINGLE_CHOICE);
+        requireUnconfigured(item);
+        item.defaultValue = Objects.requireNonNull(defaultValue);
+        item.rebootApp = rebootApp;
+        item.configured = true;
+    }
+
     public static synchronized void registerMultiChoice(
             String parentId,
             String id,
@@ -146,7 +169,11 @@ public final class SettingsRegistry {
             String titleResourceName,
             boolean selectedByDefault
     ) {
-        ItemBuilder item = requireItem(settingId, ItemType.MULTI_CHOICE);
+        requireMutable();
+        NodeBuilder node = NODES.get(settingId);
+        if (!(node instanceof ItemBuilder item) || (item.type != ItemType.SINGLE_CHOICE && item.type != ItemType.MULTI_CHOICE)) {
+            throw failure("Unknown X-Lite choice setting: " + settingId);
+        }
         if (item.options.containsKey(optionId)) {
             throw failure("Duplicate choice option for " + settingId + ": " + optionId);
         }
@@ -377,9 +404,9 @@ public final class SettingsRegistry {
         }
         validateStringResource(item.titleResourceName);
         validateStringResource(item.summaryResourceName);
-        if (item.type != ItemType.MULTI_CHOICE) return;
+        if (item.type != ItemType.SINGLE_CHOICE && item.type != ItemType.MULTI_CHOICE) return;
         if (item.options.isEmpty()) {
-            throw failure("Multi-choice setting has no options: " + item.id);
+            throw failure("Choice setting has no options: " + item.id);
         }
         item.options.values().forEach(option -> validateStringResource(option.titleResourceName));
     }
@@ -445,6 +472,29 @@ public final class SettingsRegistry {
                         item.order,
                         setting,
                         item.inputKind
+                );
+            }
+            case SINGLE_CHOICE -> {
+                List<SettingsNode.ChoiceOption> options = new ArrayList<>();
+                item.options.values().forEach(option -> {
+                    options.add(new SettingsNode.ChoiceOption(
+                            option.id,
+                            stringRef(option.titleResourceName)
+                    ));
+                });
+                StringSetting setting = new StringSetting(
+                        item.id,
+                        (String) item.defaultValue,
+                        item.rebootApp
+                );
+                SETTINGS.put(item.id, setting);
+                yield new SettingsNode.SingleChoice(
+                        item.id,
+                        title,
+                        summary,
+                        item.order,
+                        setting,
+                        options
                 );
             }
             case MULTI_CHOICE -> {

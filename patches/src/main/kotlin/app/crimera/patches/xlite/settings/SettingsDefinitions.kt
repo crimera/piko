@@ -60,6 +60,16 @@ internal data class ChoiceOption(
     val titleResourceName: String,
 )
 
+internal data class SingleChoiceSettingDefinition(
+    override val id: String,
+    override val titleResourceName: String,
+    override val summaryResourceName: String?,
+    override val order: Int,
+    override val defaultValue: String,
+    override val rebootApp: Boolean = false,
+    val options: List<ChoiceOption>,
+) : ValueSettingDefinition<String>
+
 internal data class MultiChoiceSettingDefinition(
     override val id: String,
     override val titleResourceName: String,
@@ -201,6 +211,27 @@ internal class SettingsGroupBuilder(
             ),
         )
 
+    fun singleChoice(
+        id: String,
+        titleResourceName: String,
+        summaryResourceName: String? = null,
+        order: Int = 0,
+        defaultValue: String,
+        rebootApp: Boolean = false,
+        options: List<ChoiceOption>,
+    ): SingleChoiceSettingDefinition =
+        add(
+            SingleChoiceSettingDefinition(
+                id,
+                titleResourceName,
+                summaryResourceName,
+                order,
+                defaultValue,
+                rebootApp,
+                options,
+            ),
+        )
+
     fun multiChoice(
         id: String,
         titleResourceName: String,
@@ -317,6 +348,25 @@ private fun validateCommonMetadata(node: SettingsNodeDefinition) {
 
 private fun validateSetting(setting: SettingItemDefinition) {
     when (setting) {
+        is SingleChoiceSettingDefinition -> {
+            require(setting.options.isNotEmpty()) { "Single-choice setting has no options: ${setting.id}" }
+            val optionIds = mutableSetOf<String>()
+            setting.options.forEach { option ->
+                require(OPTION_ID_PATTERN.matches(option.id)) {
+                    "Invalid choice option ID for ${setting.id}: ${option.id}"
+                }
+                require(optionIds.add(option.id)) {
+                    "Duplicate choice option ID for ${setting.id}: ${option.id}"
+                }
+                require(RESOURCE_NAME_PATTERN.matches(option.titleResourceName)) {
+                    "Invalid choice title resource for ${setting.id}: ${option.titleResourceName}"
+                }
+            }
+            require(setting.defaultValue in optionIds) {
+                "Unknown default choice for ${setting.id}: ${setting.defaultValue}"
+            }
+        }
+
         is MultiChoiceSettingDefinition -> {
             require(setting.options.isNotEmpty()) { "Multi-choice setting has no options: ${setting.id}" }
             val optionIds = mutableSetOf<String>()

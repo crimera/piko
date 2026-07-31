@@ -84,6 +84,21 @@ internal fun TextInputSettingDefinition.injectRead(
         returnType = "Ljava/lang/String;",
     )
 
+internal fun SingleChoiceSettingDefinition.injectRead(
+    method: MutableMethod,
+    index: Int,
+    excludedRegisters: List<Int> = emptyList(),
+    registerConstraint: SettingReadRegisterConstraint = SettingReadRegisterConstraint.BYTE,
+): InjectedSettingRead =
+    injectSettingRead(
+        method = method,
+        index = index,
+        excludedRegisters = excludedRegisters,
+        registerConstraint = registerConstraint,
+        methodName = "getString",
+        returnType = "Ljava/lang/String;",
+    )
+
 internal fun MultiChoiceSettingDefinition.injectRead(
     method: MutableMethod,
     index: Int,
@@ -217,6 +232,33 @@ private fun StringBuilder.appendNodeRegistration(
                     ),
                 method = "configureTextInput(Ljava/lang/String;Ljava/lang/String;IZ)V",
             )
+        }
+
+        is SingleChoiceSettingDefinition -> {
+            appendItemRegistration("registerSingleChoice", parentId, node)
+            appendConfiguration(
+                id = node.id,
+                values =
+                    listOf(
+                        stringValue(node.defaultValue),
+                        booleanValue(node.rebootApp),
+                    ),
+                method = "configureSingleChoice(Ljava/lang/String;Ljava/lang/String;Z)V",
+            )
+            node.options.forEach { option ->
+                appendConfiguration(
+                    id = node.id,
+                    values =
+                        listOf(
+                            stringValue(option.id),
+                            stringValue(option.titleResourceName),
+                            booleanValue(option.id == node.defaultValue),
+                        ),
+                    method =
+                        "registerChoiceOption(Ljava/lang/String;Ljava/lang/String;" +
+                            "Ljava/lang/String;Z)V",
+                )
+            }
         }
 
         is MultiChoiceSettingDefinition -> {

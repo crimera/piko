@@ -89,6 +89,24 @@ internal fun SettingsGroupBuilder.input(
         inputKind = inputKind,
     )
 
+internal fun SettingsGroupBuilder.singleChoice(
+    id: String,
+    strings: SettingStrings,
+    order: Int = 0,
+    defaultValue: String,
+    rebootApp: Boolean = false,
+    options: List<ChoiceOption>,
+): SingleChoiceSettingDefinition =
+    singleChoice(
+        id = id,
+        titleResourceName = strings.titleResourceName,
+        summaryResourceName = strings.summaryResourceName,
+        order = order,
+        defaultValue = defaultValue,
+        rebootApp = rebootApp,
+        options = options,
+    )
+
 internal fun SettingsGroupBuilder.multiChoice(
     id: String,
     strings: SettingStrings,
@@ -186,6 +204,29 @@ internal fun BytecodePatchBuilder.xLiteTextInput(
                 defaultValue = defaultValue,
                 rebootApp = rebootApp,
                 inputKind = inputKind,
+            )
+        }
+    }
+
+internal fun BytecodePatchBuilder.xLiteSingleChoice(
+    id: String,
+    category: SettingsCategory,
+    strings: SettingStrings,
+    order: Int = 0,
+    defaultValue: String,
+    rebootApp: Boolean = false,
+    options: List<ChoiceOption>,
+): SingleChoiceSettingDefinition =
+    xLiteSettings {
+        category(category) {
+            singleChoice(
+                id = id,
+                titleResourceName = strings.titleResourceName,
+                summaryResourceName = strings.summaryResourceName,
+                order = order,
+                defaultValue = defaultValue,
+                rebootApp = rebootApp,
+                options = options,
             )
         }
     }

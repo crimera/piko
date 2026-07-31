@@ -5,6 +5,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.SwitchPreference;
@@ -250,6 +251,22 @@ final class XLitePreferenceStyle {
 
     static final class TextInput extends EditTextPreference {
         TextInput(Context context) {
+            super(context);
+        }
+
+        @Override
+        protected View onCreateView(ViewGroup parent) {
+            return createRow(getContext(), TrailingAccessory.NONE, false);
+        }
+
+        @Override
+        protected void onBindView(View view) {
+            bind(this, view);
+        }
+    }
+
+    static final class SingleChoice extends ListPreference {
+        SingleChoice(Context context) {
             super(context);
         }
 

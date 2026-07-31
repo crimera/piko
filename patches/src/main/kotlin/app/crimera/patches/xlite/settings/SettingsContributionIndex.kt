@@ -36,6 +36,10 @@ private fun SettingsGroupDefinition.immutableSnapshot(): SettingsGroupDefinition
 private fun SettingsNodeDefinition.immutableSnapshot(): SettingsNodeDefinition =
     when (this) {
         is SettingsGroupDefinition -> immutableSnapshot()
+        is SingleChoiceSettingDefinition ->
+            copy(
+                options = immutableList(options),
+            )
         is MultiChoiceSettingDefinition ->
             copy(
                 defaultValue = immutableSet(defaultValue),
