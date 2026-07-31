@@ -67,8 +67,10 @@ val defaultReplySortingPatch =
             val inst = method2.instructions
 
             inst
-                .filter { it.opcode == Opcode.CONST_STRING }
-                .first { it.getReference<StringReference>()?.string == "reply_sorting" }
+                .first {
+                    (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
+                        it.getReference<StringReference>()?.string == "reply_sorting"
+                }
                 .apply {
                     var loc = location.index
                     var r = method2.getInstruction<OneRegisterInstruction>(loc - 1).registerA
