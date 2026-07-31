@@ -119,6 +119,22 @@ public abstract class SettingsNode {
         }
     }
 
+    public static final class SingleChoice extends ValueItem<String> {
+        public final List<ChoiceOption> options;
+
+        SingleChoice(
+                String id,
+                StringRef title,
+                @Nullable StringRef summary,
+                int order,
+                StringSetting setting,
+                List<ChoiceOption> options
+        ) {
+            super(id, title, summary, order, setting);
+            this.options = Collections.unmodifiableList(List.copyOf(options));
+        }
+    }
+
     public static final class MultiChoice extends ValueItem<java.util.Set<String>> {
         public final List<ChoiceOption> options;
 

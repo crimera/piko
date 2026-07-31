@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceGroup;
@@ -133,6 +134,8 @@ public final class SettingsRenderer {
             preference = toggle(activity, preferenceContext, toggle);
         } else if (item instanceof SettingsNode.TextInput textInput) {
             preference = textInput(activity, preferenceContext, textInput);
+        } else if (item instanceof SettingsNode.SingleChoice singleChoice) {
+            preference = singleChoice(activity, preferenceContext, singleChoice);
         } else if (item instanceof SettingsNode.MultiChoice multiChoice) {
             preference = multiChoice(activity, preferenceContext, multiChoice);
         } else if (item instanceof SettingsNode.Action action) {
@@ -180,6 +183,33 @@ public final class SettingsRenderer {
         } else {
             preference.getEditText().setInputType(InputType.TYPE_CLASS_TEXT);
         }
+        preference.setOnPreferenceChangeListener((ignored, newValue) -> {
+            String value = String.valueOf(newValue);
+            if (item.setting.get().equals(value)) return true;
+            item.setting.save(value);
+            promptForRestart(activity, item.setting);
+            return true;
+        });
+        return preference;
+    }
+
+    private static ListPreference singleChoice(
+            Activity activity,
+            Context context,
+            SettingsNode.SingleChoice item
+    ) {
+        ListPreference preference = new XLitePreferenceStyle.SingleChoice(context);
+        preference.setPersistent(false);
+        CharSequence[] entries = new CharSequence[item.options.size()];
+        CharSequence[] values = new CharSequence[item.options.size()];
+        for (int index = 0; index < item.options.size(); index++) {
+            SettingsNode.ChoiceOption option = item.options.get(index);
+            entries[index] = option.title.toString();
+            values[index] = option.id;
+        }
+        preference.setEntries(entries);
+        preference.setEntryValues(values);
+        preference.setValue(item.setting.get());
         preference.setOnPreferenceChangeListener((ignored, newValue) -> {
             String value = String.valueOf(newValue);
             if (item.setting.get().equals(value)) return true;

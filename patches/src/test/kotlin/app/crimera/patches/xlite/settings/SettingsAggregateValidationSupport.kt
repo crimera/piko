@@ -197,14 +197,16 @@ internal object XLiteContributionDiscovery {
         val type =
             when (value.javaClass.simpleName) {
                 "ToggleSettingDefinition" -> AggregateSettingType.BOOLEAN
-                "TextInputSettingDefinition" -> AggregateSettingType.STRING
+                "TextInputSettingDefinition",
+                "SingleChoiceSettingDefinition",
+                -> AggregateSettingType.STRING
                 "MultiChoiceSettingDefinition" -> AggregateSettingType.STRING_SET
                 "ActionSettingDefinition" -> AggregateSettingType.ACTION
                 "CustomScreenSettingDefinition" -> AggregateSettingType.CUSTOM_SCREEN
                 else -> error("Unknown X-Lite settings node ${value.javaClass.name}")
             }
         val choices =
-            if (type == AggregateSettingType.STRING_SET) {
+            if (type == AggregateSettingType.STRING_SET || value.javaClass.simpleName == "SingleChoiceSettingDefinition") {
                 value.property<List<*>>("Options").map { option ->
                     requireNotNull(option).property<String>("TitleResourceName")
                 }
