@@ -19,6 +19,9 @@ public final class ReplySortingFilter {
     private static final String DEFAULT_SETTING = "xlite.timeline.default_reply_sorting";
     private static final String REMEMBER_SETTING = "xlite.timeline.remember_reply_sorting";
 
+    /** Lazily created on first use; the extension hook always runs before any call site. */
+    private static PikoSharedPrefCategory preferences;
+
     private ReplySortingFilter() {
     }
 
@@ -72,8 +75,7 @@ public final class ReplySortingFilter {
             }
             if (name == null || name.isEmpty()) return;
 
-            PikoSharedPrefCategory preferences = new PikoSharedPrefCategory(PREFERENCES_NAME);
-            preferences.saveString(LAST_KEY, name);
+            preferences().saveString(LAST_KEY, name);
         } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to save X-Lite last reply sorting", exception);
         }
@@ -82,8 +84,15 @@ public final class ReplySortingFilter {
     @Nullable
     private static String readLast() {
         // getString requires a non-null default; an empty value means unset.
-        String last = new PikoSharedPrefCategory(PREFERENCES_NAME).getString(LAST_KEY, "");
+        String last = preferences().getString(LAST_KEY, "");
         return last.isEmpty() ? null : last;
+    }
+
+    private static PikoSharedPrefCategory preferences() {
+        if (preferences == null) {
+            preferences = new PikoSharedPrefCategory(PREFERENCES_NAME);
+        }
+        return preferences;
     }
 
 }
