@@ -29,6 +29,15 @@
     <string name="piko_xlite_filter_promoted_posts_summary">Removes promoted posts and promoted timeline modules</string>
     <string name="piko_xlite_show_sensitive_media_title">Show sensitive media</string>
     <string name="piko_xlite_show_sensitive_media_summary">Shows sensitive media without requiring confirmation</string>
+    <string name="piko_xlite_default_reply_sorting_title">Default reply sorting</string>
+    <string name="piko_xlite_default_reply_sorting_summary">Default reply-sort order for tweet detail (Relevance, Recency, or Likes)</string>
+    <string name="piko_xlite_group_reply_sorting_title">Reply sorting</string>
+    <string name="piko_xlite_group_reply_sorting_summary">Customize how replies are sorted in post detail</string>
+    <string name="piko_xlite_reply_sort_relevance">Relevant replies</string>
+    <string name="piko_xlite_reply_sort_recency">Recent replies</string>
+    <string name="piko_xlite_reply_sort_likes">Most liked replies</string>
+    <string name="piko_xlite_remember_reply_sorting_title">Remember last reply sorting</string>
+    <string name="piko_xlite_remember_reply_sorting_summary">Uses your last selected reply-sort order instead of the default</string>
     <string name="piko_xlite_hide_premium_upsell_title">Hide premium upsell</string>
     <string name="piko_xlite_hide_premium_upsell_summary">Hides the premium upgrade chip from the home top bar</string>
     <string name="piko_xlite_group_dynamic_colors_title">Dynamic colors</string>

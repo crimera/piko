@@ -90,4 +90,13 @@ internal object Groups {
             iconResourceName = "ic_vector_reply_stroke",
             order = 200,
         )
+
+    val REPLY_SORTING =
+        SettingsGroupMetadata(
+            id = "xlite.timeline.reply_sorting",
+            titleResourceName = "piko_xlite_group_reply_sorting_title",
+            summaryResourceName = "piko_xlite_group_reply_sorting_summary",
+            iconResourceName = "ic_vector_reply_stroke",
+            order = 300,
+        )
 }
