@@ -15,7 +15,7 @@ import app.crimera.patches.xlite.settings.singleChoice
 import app.crimera.patches.xlite.settings.toggle
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
-import app.crimera.patches.xlite.utils.Constants.REPLY_SORT_FILTER_DESCRIPTOR
+import app.crimera.patches.xlite.utils.Constants.REPLY_SORTING_RESOLVER_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -150,7 +150,7 @@ val xLiteDefaultReplySortingPatch =
                 targetSgetIndex + 1,
                 """
                     const-class v$sortRegister, $enumClass
-                    invoke-static {v$sortRegister}, $REPLY_SORT_FILTER_DESCRIPTOR->getEnumDefault(Ljava/lang/Class;)Ljava/lang/Object;
+                    invoke-static {v$sortRegister}, $REPLY_SORTING_RESOLVER_DESCRIPTOR->getEnumDefault(Ljava/lang/Class;)Ljava/lang/Object;
                     move-result-object v$sortRegister
                     check-cast v$sortRegister, $enumClass
                 """.trimIndent(),
@@ -170,7 +170,7 @@ val xLiteDefaultReplySortingPatch =
             selectionMethod.addInstructions(
                 checkCastIndex + 1,
                 """
-                    invoke-static {p1}, $REPLY_SORT_FILTER_DESCRIPTOR->remember(Ljava/lang/Object;)V
+                    invoke-static {p1}, $REPLY_SORTING_RESOLVER_DESCRIPTOR->remember(Ljava/lang/Object;)V
                 """.trimIndent(),
             )
 
@@ -203,7 +203,7 @@ val xLiteDefaultReplySortingPatch =
                 uiStateIndex + 1,
                 """
                     const-class v$uiStateRegister, $uiStateEnumClass
-                    invoke-static {v$uiStateRegister}, $REPLY_SORT_FILTER_DESCRIPTOR->getEnumDefault(Ljava/lang/Class;)Ljava/lang/Object;
+                    invoke-static {v$uiStateRegister}, $REPLY_SORTING_RESOLVER_DESCRIPTOR->getEnumDefault(Ljava/lang/Class;)Ljava/lang/Object;
                     move-result-object v$uiStateRegister
                     check-cast v$uiStateRegister, $uiStateEnumClass
                 """.trimIndent(),

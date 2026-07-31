@@ -11,7 +11,7 @@ import app.morphe.extension.xlite.settings.SettingsRegistry;
  * Resolves the default reply-sorting mode for X-Lite tweet detail requests and remembers the
  * last user-selected mode.
  */
-public final class ReplySortingFilter {
+public final class ReplySortingResolver {
     private static final String PREFERENCES_NAME = "piko_xlite_reply_sorting";
     private static final String LAST_KEY = "last_filter";
     private static final String DEFAULT_FALLBACK = "Relevance";
@@ -22,7 +22,7 @@ public final class ReplySortingFilter {
     /** Lazily created on first use; the extension hook always runs before any call site. */
     private static PikoSharedPrefCategory preferences;
 
-    private ReplySortingFilter() {
+    private ReplySortingResolver() {
     }
 
     public static Object getEnumDefault(Class<?> enumClass) {
