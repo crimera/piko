@@ -71,6 +71,8 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
 
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Misc</string>
+    <string name="piko_material_you_title">Material You</string>
+    <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Disable analytics</string>
     <string name="piko_delete_analytics_cache">Delete analytic cache</string>
     <string name="piko_disable_analytics_desc">Block analytics that are sent to Instagram/Facebook servers</string>

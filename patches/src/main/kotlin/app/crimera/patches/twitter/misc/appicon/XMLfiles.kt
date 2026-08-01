@@ -102,6 +102,7 @@ internal val iconNames =
         "ic_app_icon_sun",
         "ic_app_icon_upsidedown",
         "ic_app_icon_games_chamber",
+        "ic_app_icon_material_you",
     )
 
 internal val iconBackgroundFiles =

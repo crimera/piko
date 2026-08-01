@@ -651,21 +651,23 @@ public class ScreenBuilder {
                 )
         );
 
-        addPreference(
-                helper.switchPreference(
-                        str("piko_download_with_external_downloader"),
-                        "",
-                        Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER
-                )
-        );
+        if(SettingsStatus.downloadWithExternalDownloader) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_download_with_external_downloader"),
+                            "",
+                            Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER
+                    )
+            );
 
-        addPreference(
-                helper.editTextPreference(
-                        str("piko_external_downloader_package_name"),
-                        Pref.externalDownloaderPackageName(),
-                        Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
-                )
-        );
+            addPreference(
+                    helper.editTextPreference(
+                            str("piko_external_downloader_package_name"),
+                            Pref.externalDownloaderPackageName(),
+                            Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
+                    )
+            );
+        }
     }
 
     public void buildActionBarSection() {

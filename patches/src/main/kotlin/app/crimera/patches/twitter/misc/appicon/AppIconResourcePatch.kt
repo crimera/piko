@@ -37,6 +37,10 @@ val appIconResourcePatch =
                 "$imagesDir/foreground",
                 ResourceGroup("mipmap-xxhdpi", *iconForegroundFiles),
             )
+            copyResources(
+                sourceDir,
+                ResourceGroup("mipmap-anydpi-v31", "ic_app_icon_material_you.xml"),
+            )
 
             var iconStartCount = 0
             document("AndroidManifest.xml").use { document ->
@@ -97,6 +101,12 @@ val appIconResourcePatch =
                         activityAlias.appendChild(intentFilter)
 
                         // Add meta-data elements
+                        activityAlias.appendChild(
+                            document.createElement("meta-data").apply {
+                                setAttribute("android:name", "exclude_from_shutdown")
+                                setAttribute("android:value", "true")
+                            },
+                        )
                         activityAlias.appendChild(
                             document.createElement("meta-data").apply {
                                 setAttribute("android:name", "appFamilies")

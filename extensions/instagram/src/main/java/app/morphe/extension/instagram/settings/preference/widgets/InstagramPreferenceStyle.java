@@ -27,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.theme.MaterialYouTheme;
 import app.morphe.extension.shared.ResourceUtils;
 
 public final class InstagramPreferenceStyle {
@@ -49,16 +50,7 @@ public final class InstagramPreferenceStyle {
         );
     }
 
-    /**
-     * Native list / multi-select / edit-text preference dialogs build from
-     * getContext()'s platform alertDialogTheme. The settings activity is registered
-     * with a fixed dark DeviceDefault theme, so without this the dialogs are always
-     * dark. Wrapping the preference's context in a matching DeviceDefault theme makes
-     * them follow Instagram's resolved in-app theme, via {@link UI#isDarkMode()} (the
-     * luminance of the themed background), rather than the device's night setting — so
-     * the dialog matches IG even when the device and IG themes disagree. This only
-     * selects a platform DIALOG theme; it sets no app colour.
-     */
+    /** Matches platform preference dialogs to Instagram's resolved theme. */
     public static Context dialogContext(Context context) {
         int themeRes = UI.isDarkMode()
                 ? android.R.style.Theme_DeviceDefault
@@ -512,8 +504,15 @@ public final class InstagramPreferenceStyle {
 
             boolean enabled = isEnabled();
 
-            int onTrack = UI.getThemedColour("igds_color_primary_button");
-            int onThumb = backgroundColor();
+            boolean materialYouEnabled = MaterialYouTheme.isMaterialYouEnabled();
+            int instagramOnTrack = UI.getThemedColour("igds_color_primary_button");
+            int instagramOnThumb = backgroundColor();
+            int onTrack = materialYouEnabled
+                    ? ResourceUtils.getColor("material_selected_track", instagramOnTrack)
+                    : instagramOnTrack;
+            int onThumb = materialYouEnabled
+                    ? ResourceUtils.getColor("checkbox_image_tint", instagramOnThumb)
+                    : instagramOnThumb;
 
             int offTrack = ResourceUtils.getColor("material_unselected_track", pressedBackgroundColor());
             int offThumb = ResourceUtils.getColor("checkbox_unchecked_enabled", secondaryTextColor());
@@ -612,10 +611,8 @@ public final class InstagramPreferenceStyle {
             paint.setColor(thumbColor);
             canvas.drawCircle(cx, cy, thumbRadius, paint);
 
-            // Checkmark on the thumb when enabled, drawn in the accent colour so it
-            // reads against the surface-coloured thumb. Fades in with colorProgress.
             if (enabled && colorProgress > 0f) {
-                int checkColor = UI.getThemedColour("igds_color_primary_button");
+                int checkColor = onTrack;
                 paint.setStyle(Paint.Style.STROKE);
                 paint.setStrokeWidth(dp(getContext(), 2));
                 paint.setStrokeCap(Paint.Cap.ROUND);

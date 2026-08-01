@@ -19,7 +19,7 @@ import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectLis
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
-import app.morphe.extension.crimera.SharedPref;
+import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.crimera.settings.StringSetting;
 
