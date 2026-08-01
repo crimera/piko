@@ -15,6 +15,10 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import java.util.TreeMap;
 import java.util.Map;
+import java.util.List;
+
+import  app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
+import  app.morphe.extension.instagram.patches.devFlags.Flag;
 
 import app.morphe.extension.crimera.downloader.StorageUtils;
 import app.morphe.extension.instagram.settings.SettingsStatus;
@@ -795,6 +799,20 @@ public class ScreenBuilder {
         );
     }
 
+    public void buildRecommendedFlagsSection() {
+        List<Flag> recFlags = RecommendedFlags.getFlags();
+
+        for(Flag flag : recFlags) {
+            addPreference(
+                    helper.switchPreference(
+                            flag.getName(),
+                            flag.getDesc(),
+                            flag.getCode()
+                    )
+            );
+        }
+    }
+
     public void aboutSection(TreeMap<String, Boolean> flags) {
 
         String appVersionText = String.format(str("piko_app_version"), Utils.getAppVersionName());
@@ -977,6 +995,13 @@ public class ScreenBuilder {
             );
         }
 
+        addPreference(
+                helper.buttonPreference(
+                        str("piko_category_rec_flags"),
+                        str("piko_category_rec_flags_desc"),
+                        Constants.PIKO_FRAGMENT_REC_FLAGS
+                )
+        );
 
         addPreference(
                 helper.buttonPreference(

@@ -289,6 +289,8 @@ public class SettingsActivity extends Activity {
                 screenBuilder.dmSection();
             } else if (fragment_name.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)) {
                 screenBuilder.filterContentSection();
+            } else if (fragment_name.equals(Constants.PIKO_FRAGMENT_REC_FLAGS)) {
+                screenBuilder.buildRecommendedFlagsSection();
             }
 
             setPreferenceScreen(screen);

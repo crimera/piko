@@ -23,6 +23,7 @@ import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.crimera.settings.StringSetting;
 
+import  app.morphe.extension.instagram.patches.devFlags.FlagsSharedPref;
 
 public class Helper {
     private final Context context;
@@ -98,7 +99,12 @@ public class Helper {
                 String newValClass = newValue.getClass().getSimpleName();
 
                 if (newValClass.equals("Boolean")) {
-                    SharedPref.setBooleanPref(key, (Boolean) newValue);
+                    Boolean val = (Boolean) newValue;
+                    if(key.contains("_")) {
+                        SharedPref.setBooleanPref(key, val);
+                    }else{
+                        FlagsSharedPref.setBooleanPref(key, val);
+                    }
                 } else if (newValClass.equals("String")) {
                     SharedPref.setStringPref(key, (String) newValue);
                 } else if (newValClass.equals("HashSet")) {
