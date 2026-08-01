@@ -27,6 +27,8 @@
     <string name="piko_xlite_hide_new_post_button_summary">Removes the new-post button from X-Lite timelines</string>
     <string name="piko_xlite_filter_promoted_posts_title">Filter promoted posts</string>
     <string name="piko_xlite_filter_promoted_posts_summary">Removes promoted posts and promoted timeline modules</string>
+    <string name="piko_xlite_hide_who_to_follow_title">Hide who to follow</string>
+    <string name="piko_xlite_hide_who_to_follow_summary">Removes recommended-user sections from timelines and profile pages</string>
     <string name="piko_xlite_show_sensitive_media_title">Show sensitive media</string>
     <string name="piko_xlite_show_sensitive_media_summary">Shows sensitive media without requiring confirmation</string>
     <string name="piko_xlite_default_reply_sorting_title">Default reply sorting</string>
