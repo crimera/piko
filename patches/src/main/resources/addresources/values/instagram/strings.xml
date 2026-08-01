@@ -106,6 +106,11 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_copy_full_name">Copy full name</string>
     <string name="piko_copy_user_id">Copy user id</string>
     <string name="piko_copy_bio">Copy bio</string>
+    <string name="piko_view_profile_picture">View profile picture</string>
+    <string name="piko_copy_profile_link">Copy profile link</string>
+    <string name="piko_share_this_profile">Share this profile</string>
+    <string name="piko_copy_links_from_bio">Copy links from bio</string>
+    <string name="piko_no_links_in_bio">No links in this bio</string>
     <string name="piko_download_profile_picture">Download profile picture</string>
     <string name="piko_copied">Copied</string>
     <string name="piko_more_profile_options">More profile options</string>
