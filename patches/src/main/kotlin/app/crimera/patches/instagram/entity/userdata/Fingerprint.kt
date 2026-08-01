@@ -13,10 +13,12 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation
 import app.morphe.patcher.literal
 import app.morphe.patcher.opcode
+import app.morphe.util.getReference
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.resourceLiteral
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/UserData;"
 internal const val LIVE_TREE_USER_DICT_CLASS = "Lcom/instagram/user/model/LiveTreeUserDict;"
@@ -95,13 +97,16 @@ internal object FriendshipStatusLiveTreeUserDictFingerprint : Fingerprint(
 internal object BiographyLiveTreeUserDictFingerprint : Fingerprint(
     strings = listOf("biography"),
     definingClass = LIVE_TREE_USER_DICT_CLASS,
+    returnType = "Ljava/lang/String;",
+    // "biography" also occurs inside "translated_biography" and
+    // "has_biography_translation", and a string match is a substring match: without
+    // this the accessor that resolves is the translated one, which is null for any
+    // account whose bio was never translated — i.e. almost all of them.
     custom = { methodDef, _ ->
-        methodDef.returnType != "V"
+        methodDef.implementation
+            ?.instructions
+            ?.any { it.getReference<StringReference>()?.string == "biography" } == true
     },
-    filters =
-        listOf(
-            opcode(Opcode.CONST_STRING_JUMBO, InstructionLocation.MatchFirst()),
-        ),
 )
 
 internal object LowResProfilePictureUserTreeDictFingerprint : Fingerprint(
