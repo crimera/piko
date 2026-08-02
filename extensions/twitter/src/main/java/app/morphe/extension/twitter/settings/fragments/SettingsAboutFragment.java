@@ -165,7 +165,6 @@ public class SettingsAboutFragment extends PreferenceFragment {
         flags.put(str("piko_pref_customisation_change_app_icon"),SettingsStatus.appIconCustomisation);
         flags.put(str("piko_pref_hide_badge_nav_bar"),SettingsStatus.hideNavbarBadge);
         flags.put(str("piko_pref_hide_post_inline_metrics"),SettingsStatus.hidePostMetrics);
-        flags.put(str("piko_disunify_xchat_system"),SettingsStatus.disUnifyXChatSystem);
         flags.put(str("piko_legacy_share_link"),SettingsStatus.legacyShareLink);
         flags.put(str("piko_pref_export_login_token"),SettingsStatus.exportLoginToken);
         flags.put(str("piko_block_redirecting_to_x_lite"),SettingsStatus.blockRedirectingToXLite);

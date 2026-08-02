@@ -101,10 +101,6 @@ public class ActionBarPatch {
             UserData userData = new UserData(userObject);
             Boolean isSelfProfile = userData.getUserId().equals(userSession.getUserId());
 
-            if(pref.contains(Constants.AB_SETTINGS_ICON) && isSelfProfile) {
-                UI.pikoSettingsGear(viewGroup);
-            }
-
             if(pref.contains(Constants.AB_GHOST_MODE_ICON) && isSelfProfile) {
                 ghostModeToggle(viewGroup);
             }
@@ -112,6 +108,10 @@ public class ActionBarPatch {
             if(pref.contains(Constants.AB_PROFILE_INFO_ICON)) {
                 Context context = viewGroup.getContext();
                 UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_INFO_ICON, () -> ProfileMoreOption.moreOptionsDailogueBox(context, userData));
+            }
+
+            if(pref.contains(Constants.AB_SETTINGS_ICON) && isSelfProfile) {
+                UI.pikoSettingsGear(viewGroup);
             }
 
 

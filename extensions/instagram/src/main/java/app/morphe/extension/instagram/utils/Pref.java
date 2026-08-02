@@ -13,10 +13,11 @@ import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
 
-import app.morphe.extension.crimera.SharedPref;
+import app.morphe.extension.crimera.sharedPreference.SharedPref;
 
 @SuppressWarnings("unused")
 public class Pref {
+    private static final int MAX_IMAGE_SIZE = 4096;
     public static boolean SHOULD_MARK_CHAT_AS_READ;
     static {
         SHOULD_MARK_CHAT_AS_READ = false;
@@ -203,11 +204,11 @@ public class Pref {
     }
 
     public static int improveImageViewing(int defaultSize) {
-        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? 2048 : defaultSize;
+        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
     }
 
     public static Integer improveImageViewing(Integer defaultSize) {
-        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? 2048 : defaultSize;
+        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
     }
 
     public static boolean enableDownload() {
@@ -319,6 +320,15 @@ public class Pref {
 
     public static Integer filterStoryByMaxStoryItems() {
         return Integer.valueOf(SharedPref.getStringPref(Settings.FILTER_STORY_MAX_STORY_ITEMS));
+    }
+
+    public static Long getLastRecommendedFlagDownloadTimestamp() {
+        return Long.valueOf(SharedPref.getStringPref(Settings.LAST_RECOMMENDED_FLAG_DOWNLOAD_TIMESTAMP));
+    }
+
+    public static void setLastRecommendedFlagDownloadTimestamp(Long timestamp) {
+        String ts = String.valueOf(timestamp);
+        SharedPref.setStringPref(Settings.LAST_RECOMMENDED_FLAG_DOWNLOAD_TIMESTAMP.key,ts);
     }
 
     //end

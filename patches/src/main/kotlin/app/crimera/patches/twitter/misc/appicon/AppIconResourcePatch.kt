@@ -99,6 +99,12 @@ val appIconResourcePatch =
                         // Add meta-data elements
                         activityAlias.appendChild(
                             document.createElement("meta-data").apply {
+                                setAttribute("android:name", "exclude_from_shutdown")
+                                setAttribute("android:value", "true")
+                            },
+                        )
+                        activityAlias.appendChild(
+                            document.createElement("meta-data").apply {
                                 setAttribute("android:name", "appFamilies")
                                 setAttribute("android:value", "twitter")
                             },

@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Piko設定を検索</string>
     <string name="piko_settings_search_clear">入力を削除</string>
-    <string name="piko_settings_search_no_results">「%1$s」の検索結果はありません</string>
+    <string name="piko_settings_search_no_results">「%s」の検索結果はありません</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">プレミアム</string>
     <string name="piko_pref_undo_posts">ポストの取り消しを有効化</string>
@@ -37,7 +37,7 @@
     <string name="piko_title_native_downloader">ネイティブダウンローダー</string>
     <string name="piko_title_native_downloader_toggle">ネイティブダウンローダーを有効化</string>
     <string name="piko_pref_native_downloader_autodownload_highest_video_res">常に最高画質の動画を自動でダウンロード</string>
-    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">単一の動画ではダイアログを表示せず、利用可能な最高画質ですぐにダウンロードします</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">単一の動画ではダイアログを表示せず、利用可能な最高画質ですぐにダウンロードします。</string>
     <string name="piko_pref_native_downloader_show_download_icon">ダウンロードアイコンを表示</string>
     <string name="piko_pref_native_downloader_show_copy_icon">コピーアイコンを表示</string>
     <string name="piko_pref_native_downloader_show_variants_icon">解像度アイコンを表示</string>
@@ -137,8 +137,6 @@
     <string name="piko_pref_pause_search_suggestion_desc">検索候補はローカルに保存されなくなります</string>
     <string name="piko_pref_search_suggestion">検索候補を削除</string>
     <string name="piko_pref_search_suggestion_desc">[話題を検索] タブの検索候補を非表示または削除します</string>
-    <string name="piko_disunify_xchat_system">xchatシステムを無効化</string>
-    <string name="piko_disunify_xchat_system_desc">メッセージや共有シートなどの従来の機能を復活させます</string>
     <string name="piko_legacy_share_link">旧式の共有リンク</string>
     <string name="piko_block_redirecting_to_x_lite">X Liteへのリダイレクトを無効化</string>
     <!-- Feature flags Settings -->

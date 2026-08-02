@@ -72,14 +72,14 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.8.0](https://github.com/crimera/piko/releases/tag/v3.8.0)**&nbsp;&nbsp;•&nbsp;&nbsp;`main`&nbsp;&nbsp;•&nbsp;&nbsp;128 patches total
+> **[v3.9.0-dev.2](https://github.com/crimera/piko/releases/tag/v3.9.0-dev.2)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;128 patches total
 <details>
-<summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;74 patches</summary>
+<summary>📦 X&nbsp;&nbsp;•&nbsp;&nbsp;73 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 12.7.1-release.0 |
+| 12.11.0-release.0 |
 | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
@@ -110,7 +110,6 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Delete from database](#delete-from-database) | Delete entries from database(cache) |  |
 | [Disable auto timeline scroll on launch](#disable-auto-timeline-scroll-on-launch) |  |  |
 | [Disable chirp font](#disable-chirp-font) |  |  |
-| [Disunify xchat system](#disunify-xchat-system) | Bring back legacy features like messages and share sheet. |  |
 | [Download patch](#download-patch) | Unlocks the ability to download videos and gifs from Twitter/X |  |
 | [Dynamic color](#dynamic-color) | Replaces the default Twitter Blue with the user's Material You palette. |  |
 | [Enable PiP mode automatically](#enable-pip-mode-automatically) | Enables PiP mode when you close the app |  |
@@ -147,7 +146,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [No shortened URL](#no-shortened-url) | Get rid of t.co short urls. |  |
 | [Pause search suggestions](#pause-search-suggestions) | Search suggestions will not be saved locally |  |
 | [Remove Ads](#remove-ads) | Removed promoted posts, trends and google ads |  |
-| [Remove premium upsell](#remove-premium-upsell) | Removes premium upsell in home timeline |  |
+| [Remove premium upsell](#remove-premium-upsell) | Removes premium upsells |  |
 | [Remove search suggestions](#remove-search-suggestions) | Hide/Remove search suggestion in explore section |  |
 | [Remove view count](#remove-view-count) | Removes the view count from the bottom of tweets |  |
 | [Round off numbers](#round-off-numbers) | Enable or disable rounding off numbers |  |
@@ -162,12 +161,12 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;54 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;55 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 435.0.0.37.76 |
+| 439.0.0.37.89 |
 | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
@@ -188,6 +187,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Disable double tap like](#disable-double-tap-like) | Disable double tap like on post, reel, comment and message |  |
 | [Disable explore](#disable-explore) |  |  |
 | [Disable highlights](#disable-highlights) |  |  |
+| [Disable onboarding permission prompts](#disable-onboarding-permission-prompts) | Prevents contacts and location permission onboarding prompts from appearing on launch. |  |
 | [Disable screenshot detection](#disable-screenshot-detection) | Disables screenshots detection in DM |  |
 | [Disable stories](#disable-stories) |  |  |
 | [Disable story flipping](#disable-story-flipping) | Disable automatic flipping/moving to next story |  |

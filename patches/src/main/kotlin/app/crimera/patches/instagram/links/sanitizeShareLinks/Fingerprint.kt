@@ -7,7 +7,6 @@
 package app.crimera.patches.instagram.links.sanitizeShareLinks
 
 import app.morphe.patcher.Fingerprint
-import com.android.tools.smali.dexlib2.Opcode
 
 internal val TARGET_STRING_ARRAY =
     arrayOf(
@@ -18,11 +17,7 @@ internal val TARGET_STRING_ARRAY =
 internal object PermalinkResponseJsonParserFingerprint : Fingerprint(
     strings = listOf(TARGET_STRING_ARRAY[0]),
     custom = { methodDef, _ ->
-        methodDef.name.lowercase().contains("parsefromjson") &&
-            methodDef.implementation
-                ?.instructions
-                ?.filter { it.opcode == Opcode.CONST_STRING }!!
-                .size < 3
+        methodDef.name.lowercase().contains("parsefromjson")
     },
 )
 
@@ -33,12 +28,12 @@ internal object ProfileUrlResponseJsonParserFingerprint : Fingerprint(
     },
 )
 
-internal object StoryUrlResponseImplFingerprint : Fingerprint(
+internal object StoryItemThirdPartySharingUrlResponseImplFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
-    definingClass = "Lcom/instagram/request/StoryItemUrlResponseImpl;",
+    definingClass = "StoryItemThirdPartySharingUrlResponseImpl;",
 )
 
-internal object LiveUrlResponseImplFingerprint : Fingerprint(
+internal object LiveThirdPartySharingUrlResponseImplFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
-    definingClass = "Lcom/instagram/request/LiveItemLinkUrlResponseImpl;",
+    definingClass = "Lcom/instagram/api/schemas/LiveThirdPartySharingUrlResponseImpl;",
 )

@@ -667,17 +667,6 @@ public class ScreenBuilder {
             );
         }
 
-
-        if (SettingsStatus.disUnifyXChatSystem) {
-            addPreference(category,
-                    helper.switchPreference(
-                            str("piko_disunify_xchat_system"),
-                            str("piko_disunify_xchat_system_desc"),
-                            Settings.MISC_DISUNIFY_XCHAT_SYSTEM
-                    )
-            );
-        }
-
     }
 
     public void buildFeatureFlagsSection(boolean buildCategory){
@@ -853,23 +842,24 @@ public class ScreenBuilder {
                     )
             );
         }
+        addPreference(category,
+                helper.switchPreference(
+                        str("piko_pref_quick_settings"),
+                        str("piko_pref_quick_settings_summary"),
+                        Settings.MISC_QUICK_SETTINGS_BUTTON
+                )
+        );
+
         if (SettingsStatus.moreInfoOnProfile) {
             addPreference(category,
                     helper.switchPreference(
-                            str("piko_pref_quick_settings"),
-                            str("piko_pref_quick_settings_summary"),
-                            Settings.MISC_QUICK_SETTINGS_BUTTON
+                            str("piko_pref_customisation_more_info_on_profile"),
+                            str("piko_pref_customisation_more_info_on_profile_desc"),
+                            Settings.MORE_INFO_ON_PROFILE
                     )
             );
         }
 
-        addPreference(category,
-                helper.switchPreference(
-                        str("piko_pref_customisation_more_info_on_profile"),
-                        str("piko_pref_customisation_more_info_on_profile_desc"),
-                        Settings.MORE_INFO_ON_PROFILE
-                )
-        );
     }
 
     public void buildFontSection(boolean buildCategory){

@@ -16,11 +16,13 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -52,10 +54,11 @@ val friendshipStatusIndicatorPatch =
                 // This is needed in order to find the profile info parameter.
                 val isStaticMethod = AccessFlags.STATIC.isSet(method.accessFlags)
 
+                val internalBadgeStringIndex = stringMatches[0].index
+
                 method.apply {
                     val viewType = "Landroid/view/View;"
 
-                    val internalBadgeStringIndex = BindInternalBadgeFingerprint.stringMatches[0].index
                     val profileInfoClassType = ProfileUserInfoViewBinderFingerprint.method.parameters[1].type
 
                     // Identify the profile info in the method parameter, which is later passed to our custom hook.
@@ -77,19 +80,13 @@ val friendshipStatusIndicatorPatch =
                     val internalBadgeFieldName = internalBadgeInstructionExtraction.name
                     val internalBadgeReturnType = extensionToClassName(internalBadgeInstructionExtraction.returnType)
 
-                    // Instruction to which the call needs to transfer after our hook.
-                    val moveFrom16Index =
-                        indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.MOVE_OBJECT_FROM16)
+                    // Make the internal badge label visible always.
+                    val isInternalUserCheckIndex = indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.IF_EQZ)
+                    val internalUserRegister = getInstruction(isInternalUserCheckIndex).registersUsed[0]
 
                     // Added instructions:
-                    // Bypass the internal badge visibility checks.
-                    addInstructionsWithLabels(
-                        internalBadgeInstructionIndex + 1,
-                        """
-                        goto :piko
-                        """.trimIndent(),
-                        ExternalLabel("piko", getInstruction(moveFrom16Index)),
-                    )
+                    // isInternalUser set to true, making the label visible.
+                    addInstruction(isInternalUserCheckIndex, "const v$internalUserRegister, 0x1")
 
                     // Added instructions:
                     // Get the view  and check if its not null

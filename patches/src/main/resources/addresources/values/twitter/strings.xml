@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Search Piko settings</string>
     <string name="piko_settings_search_clear">Clear input</string>
-    <string name="piko_settings_search_no_results">No results for \"%1$s\"</string>
+    <string name="piko_settings_search_no_results">No results for \"%s\"</string>
 
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
@@ -147,8 +147,6 @@
     <string name="piko_pref_pause_search_suggestion_desc">Search suggestions will not be saved locally</string>
     <string name="piko_pref_search_suggestion">Hide search suggestions</string>
     <string name="piko_pref_search_suggestion_desc">Hides search suggestion in explore section</string>
-    <string name="piko_disunify_xchat_system">Disunify xchat system</string>
-    <string name="piko_disunify_xchat_system_desc">Bring back legacy features like messages and share sheet</string>
     <string name="piko_legacy_share_link">Legacy share links</string>
     <string name="piko_block_redirecting_to_x_lite">Block redirecting to X Lite</string>
 

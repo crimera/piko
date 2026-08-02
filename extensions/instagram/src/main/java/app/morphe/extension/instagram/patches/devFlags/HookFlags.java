@@ -5,7 +5,7 @@
  */
 
 
-package app.morphe.extension.instagram.patches;
+package app.morphe.extension.instagram.patches.devFlags;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -20,8 +20,9 @@ public class HookFlags {
     private static Map<String, Boolean> BOOL_FLAGS = new HashMap<>();
     private static DeveloperOptions developerOptions = new DeveloperOptions();
 
-    private static void contactPermissionConsentFlags() {
+    private static void onboardingPermissionPromptFlags() {
         BOOL_FLAGS.put("56295", false); //ig_device_permission_consent
+        BOOL_FLAGS.put("77866", false); //ig4a_d0_retention
     }
 
     private static void simpleOverflowMenuFlags() {
@@ -48,8 +49,8 @@ public class HookFlags {
     private static void suggestedContentFlags() {
         BOOL_FLAGS.put("111509::3", false); //ig_search_ta_nullstate_suggestions::is_android_enabled
         BOOL_FLAGS.put("82771::0", false); //igx_foundation_litho_stories_tray::is_litho_stories_tray_enabled
-        BOOL_FLAGS.put("109730", false); //ig_android_ai_discovery_menu
-        BOOL_FLAGS.put("80654", false); //ig_meta_ai_cdd_reels_viewer
+//        BOOL_FLAGS.put("109730", false); //ig_android_ai_discovery_menu
+//        BOOL_FLAGS.put("80654", false); //ig_meta_ai_cdd_reels_viewer
     }
 
     private static void profileActionBarFlags() {
@@ -76,7 +77,13 @@ public class HookFlags {
         }
     }
 
+    private static void addRecommendedFlags(){
+        Map<String, Boolean> recFlags = FlagsSharedPref.getAll();
+        BOOL_FLAGS.putAll(recFlags);
+    }
+
     public static void load() {
+        addRecommendedFlags();
     }
 
     public static Boolean handleBoolFlags(long mobileConfigSpecifier) {

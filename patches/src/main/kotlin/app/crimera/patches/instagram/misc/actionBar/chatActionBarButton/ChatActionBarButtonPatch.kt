@@ -22,7 +22,10 @@ import com.android.tools.smali.dexlib2.Opcode
 object ChatActionBarBuilderFingerprint : Fingerprint(
     returnType = "V",
     filters =
-        listOf(resourceLiteral(ResourceType.LAYOUT, "layout_direct_thread_header")),
+        listOf(
+            resourceLiteral(ResourceType.ID, "direct_thread_header"),
+            resourceLiteral(ResourceType.LAYOUT, "layout_direct_thread_header"),
+        ),
 )
 
 val chatActionBarButtonPatch =
@@ -35,7 +38,7 @@ val chatActionBarButtonPatch =
         execute {
 
             ChatActionBarBuilderFingerprint.apply {
-                val layoutIndex = instructionMatches.first().index
+                val layoutIndex = instructionMatches.last().index
                 method
                     .apply {
                         val viewGroupInstruction = getInstruction(indexOfFirstInstruction(Opcode.CHECK_CAST))

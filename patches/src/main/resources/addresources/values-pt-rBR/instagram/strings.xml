@@ -110,7 +110,7 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_customise_story_ring_size">Personalizar tamanho do anel do stories</string>
     <string name="piko_customise_story_ring_size_desc">Altera o tamanho do anel do stories por uma porcentagem (Padrão: 100)</string>
     <!-- DM Section -->
-    <string name="piko_category_dm">Mensagem direta</string>
+    <string name="piko_category_dm">Direct</string>
     <string name="piko_unlimited_replays">Tornar permanentes as mídias efêmeras</string>
     <string name="piko_unlimited_replays_desc">Transforma mídias de visualização única ou dupla em visualização permanente.</string>
     <string name="piko_enable_mark_chat_as_read">Ativar a opção marcar chat como lido</string>
@@ -214,7 +214,7 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_action_bar_main_feed">Ícones da barra de ação do feed principal</string>
     <string name="piko_action_bar_user_profile">Ícones da barra de ações do perfil do usuário</string>
     <string name="piko_action_bar_chat">Ícones da barra de ações do chat</string>
-    <string name="piko_action_bar_chat_desc">Ícones da barra de ações dentro de uma mensagem direta</string>
+    <string name="piko_action_bar_chat_desc">Ícones da barra de ações dentro de uma conversa</string>
     <string name="piko_action_bar_inbox">Ícones da barra de ação da caixa de entrada</string>
     <string name="piko_action_bar_button_settings_icon">Ícone de configurações</string>
     <string name="piko_action_bar_button_ghost_mode_icon">Ícone do modo fantasma</string>

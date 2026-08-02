@@ -265,19 +265,19 @@
     <string name="piko_reel_type_shopping_smart_reel">ショッピングスマートストーリー</string>
     <string name="piko_reel_type_stars_welcome_reel">Stars案内ストーリー</string>
     <string name="piko_reel_type_story_stationary_timeline_reel">固定タイムラインストーリー</string>
-    <string name="piko_reel_type_subscription_shoutout_mention">サブスクリプションのシャウトアウトメンション</string>
+    <string name="piko_reel_type_subscription_shoutout_mention">サブスクリプションの紹介</string>
     <string name="piko_reel_type_suggested_creator_reel">おすすめクリエイターのストーリー</string>
     <string name="piko_reel_type_suggested_user">おすすめのユーザー</string>
     <string name="piko_reel_type_suggested_user_reel">おすすめユーザーのストーリー</string>
     <string name="piko_reel_type_superlative_reel">卒業記念ストーリー</string>
     <string name="piko_reel_type_third_party_app_story">サードパーティーアプリのストーリー</string>
     <string name="piko_reel_type_typed_container">タイプ付きコンテナ</string>
-    <string name="piko_reel_type_user_reel">ユーザーストーリー</string>
+    <string name="piko_reel_type_user_reel">ユーザーリール</string>
     <string name="piko_filter_story_user_types_to_hide">非表示にするユーザーの種類</string>
     <string name="piko_user_type_unverified">未認証のユーザー</string>
     <string name="piko_user_type_verified">認証済みのユーザー</string>
     <string name="piko_filter_story_minimum_item_count">ストーリー内の最小件数</string>
-    <string name="piko_filter_story_minimum_item_count_desc">指定した項目数未満のストーリーを非表示にします（デフォルト：1）</string>
+    <string name="piko_filter_story_minimum_item_count_desc">指定した項目数未満のストーリーを非表示にします(デフォルト: 1)</string>
     <string name="piko_filter_story_maximum_item_count">ストーリー内の最大件数</string>
-    <string name="piko_filter_story_maximum_item_count_desc">指定した項目数を超えるストーリーを非表示にします（デフォルト：9999）</string>
+    <string name="piko_filter_story_maximum_item_count_desc">指定した項目数を超えるストーリーを非表示にします(デフォルト: 9999)</string>
 </resources>

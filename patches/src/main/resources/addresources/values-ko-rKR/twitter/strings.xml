@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Piko 설정 검색</string>
     <string name="piko_settings_search_clear">입력 지우기</string>
-    <string name="piko_settings_search_no_results">\'%1$s\'에 대한 검색 결과가 없습니다</string>
+    <string name="piko_settings_search_no_results">\'%s\'에 대한 검색 결과가 없습니다</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">게시물 취소 활성화하기</string>
@@ -137,8 +137,6 @@
     <string name="piko_pref_pause_search_suggestion_desc">검색어 추천은 로컬에 저장되지 않습니다</string>
     <string name="piko_pref_search_suggestion">검색어 추천 숨기기</string>
     <string name="piko_pref_search_suggestion_desc">탐색 영역에서 검색어 추천을 숨길 수 있습니다</string>
-    <string name="piko_disunify_xchat_system">Disunify xchat 시스템</string>
-    <string name="piko_disunify_xchat_system_desc">메시지 및 공유 시트와 같은 기존 기능을 복원할 수 있습니다</string>
     <string name="piko_legacy_share_link">이전 공유 링크</string>
     <string name="piko_block_redirecting_to_x_lite">X Lite로 리디렉션 차단하기</string>
     <!-- Feature flags Settings -->

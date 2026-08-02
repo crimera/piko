@@ -26,8 +26,6 @@ val mediaDataEntity =
     ) {
         dependsOn(decoderEntity)
         execute {
-            var mediaHelperClass: String
-
             GetHelperClassExtensionFingerprint.changeFirstString(classNameToExtension(MEDIAEXT_CLASS_NAME))
 
             // Extracting get original sound info data using media and user session.
@@ -44,10 +42,8 @@ val mediaDataEntity =
             }
 
             // Extracting the get mention set method used media helper class.
-            ReelsMentionDoubleTapFingerprint.method.apply {
-                val userInteractionListMethodInvoke = instructions.first { it.opcode == Opcode.INVOKE_INTERFACE }.methodExtractor()
-                GetMentionSetExtensionFingerprint.changeFirstString(userInteractionListMethodInvoke.name)
-            }
+            GetMentionSetExtensionFingerprint.changeFirstString(LiveTreeMediaDictReelsMentionFingerprint.method.name)
+
             InstagramMainActivityNotificationRelatedFingerprint.apply {
                 val strIndex = stringMatches.last().index
                 method.apply {
@@ -124,28 +120,26 @@ val mediaDataEntity =
             }
 
             // Extraction of user data used in extended media class.
-            DirectShareTargetRelatedFingerprint.method.apply {
-                val firstIfEqz = indexOfFirstInstruction(Opcode.IF_EQZ)
-                val userDataMethodName = getInstruction(indexOfFirstInstruction(firstIfEqz, Opcode.INVOKE_INTERFACE)).methodExtractor().name
-                GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(userDataMethodName)
-            }
+            GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(LiveTreeMediaDictGetUserFingerprint.method.name)
 
             // Extraction of description
-            EditMediaInfoGetCurrentMediaIdFingerprint.method.apply {
-
-                val getCommentDataFromMediaMethodName =
-                    getInstruction(
-                        instructions.indexOfLast { it.opcode == Opcode.INVOKE_STATIC },
-                    ).methodExtractor().name
-
-                val getCommentTextFieldName =
-                    getInstruction(
-                        instructions.indexOfLast { it.opcode == Opcode.IGET_OBJECT },
-                    ).fieldExtractor().name
-
-                GetDescriptionTextExtensionFingerprint.changeFirstString(getCommentDataFromMediaMethodName)
-                GetDescriptionTextExtensionFingerprint.changeStringAt(1, getCommentTextFieldName)
+            val commentObjectClassName: String
+            CommentToStringFingerprint.apply {
+                commentObjectClassName = classDef.type
+                method.apply {
+                    val getCommentTextFieldName = instructions.last { it.opcode == Opcode.IGET_OBJECT }.fieldExtractor().name
+                    GetDescriptionTextExtensionFingerprint.changeStringAt(1, getCommentTextFieldName)
+                }
             }
+
+            val getCommentDataFromMediaMethodName =
+                mutableClassDefBy { it.type == MEDIAEXT_CLASS_NAME }
+                    .methods
+                    .first {
+                        it.returnType ==
+                            commentObjectClassName
+                    }.name
+            GetDescriptionTextExtensionFingerprint.changeFirstString(getCommentDataFromMediaMethodName)
 
             // Extraction of trackInfo
             MusicAudioTypeEnumStringFingerprint.method.apply {
@@ -185,7 +179,7 @@ val mediaDataEntity =
             // More extended data.
             ExtMediaDictVideoInfoMapperFingerprint.apply {
                 val moreExtendedMediaDataFieldName =
-                    LiveTreeMediaDictClinitFingerprint.classDef.fields
+                    LiveTreeMediaDictReelsMentionFingerprint.classDef.fields
                         .first { it.type == classDef.type }
                         .name
                 GetMoreExtendedDataExtensionFingerprint.changeFirstString(moreExtendedMediaDataFieldName)

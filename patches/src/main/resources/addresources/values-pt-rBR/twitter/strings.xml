@@ -3,7 +3,6 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Pesquisar configurações do Piko</string>
     <string name="piko_settings_search_clear">Limpar entrada</string>
-    <string name="piko_settings_search_no_results">Nenhum resultado encontrado para \"%1$s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Ativar desfazer postagens</string>
@@ -137,8 +136,6 @@
     <string name="piko_pref_pause_search_suggestion_desc">As sugestões de pesquisa não serão salvas localmente.</string>
     <string name="piko_pref_search_suggestion">Ocultar sugestões de pesquisa</string>
     <string name="piko_pref_search_suggestion_desc">Oculta a sugestão de pesquisa na seção explorar.</string>
-    <string name="piko_disunify_xchat_system">Desunificar sistema do xchat</string>
-    <string name="piko_disunify_xchat_system_desc">Traz de volta recursos antigos como mensagens e menu de compartilhamento.</string>
     <string name="piko_legacy_share_link">Links de compartilhamento antigos</string>
     <string name="piko_block_redirecting_to_x_lite">Bloquear o redirecionamento para o X Lite</string>
     <!-- Feature flags Settings -->
