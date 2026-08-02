@@ -13,12 +13,10 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation
 import app.morphe.patcher.literal
 import app.morphe.patcher.opcode
-import app.morphe.util.getReference
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.resourceLiteral
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/UserData;"
 internal const val LIVE_TREE_USER_DICT_CLASS = "Lcom/instagram/user/model/LiveTreeUserDict;"
