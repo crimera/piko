@@ -17,7 +17,7 @@ import android.os.Looper;
 import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 
-import app.morphe.extension.crimera.SharedPref;
+import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.utils.IgStr;
 import app.morphe.extension.shared.Logger;
