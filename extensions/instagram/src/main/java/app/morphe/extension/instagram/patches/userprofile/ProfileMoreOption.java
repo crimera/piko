@@ -84,11 +84,11 @@ public class ProfileMoreOption {
                             toCopy = true;
 
                         } else if (selectedOption.equals(str("piko_copy_profile_link"))) {
-                            text = profileLink(userData.getUsername());
+                            text = userData.getProfileLink();
                             toCopy = true;
 
                         } else if (selectedOption.equals(str("piko_share_this_profile"))) {
-                            PikoUtils.shareText(profileLink(userData.getUsername()));
+                            PikoUtils.shareText(userData.getProfileLink());
 
                         } else if (selectedOption.equals(str("piko_copy_links_from_bio"))) {
                             // Links live in the bio as plain text; the profile object
@@ -137,11 +137,6 @@ public class ProfileMoreOption {
             Logger.printException(() -> "Error at moreOptionsDailogueBox", e);
             Utils.showToastShort(e.getMessage());
         }
-    }
-
-    /** The public permalink of a profile: what "share" and "copy link" both hand out. */
-    private static String profileLink(String username) {
-        return "https://www.instagram.com/" + username + "/";
     }
 
     /**
