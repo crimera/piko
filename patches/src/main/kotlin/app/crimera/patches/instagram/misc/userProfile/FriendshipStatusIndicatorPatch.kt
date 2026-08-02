@@ -80,14 +80,6 @@ val friendshipStatusIndicatorPatch =
                     val internalBadgeFieldName = internalBadgeInstructionExtraction.name
                     val internalBadgeReturnType = extensionToClassName(internalBadgeInstructionExtraction.returnType)
 
-                    // Make the internal badge label visible always.
-                    val isInternalUserCheckIndex = indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.IF_EQZ)
-                    val internalUserRegister = getInstruction(isInternalUserCheckIndex).registersUsed[0]
-
-                    // Added instructions:
-                    // isInternalUser set to true, making the label visible.
-                    addInstruction(isInternalUserCheckIndex, "const v$internalUserRegister, 0x1")
-
                     // Added instructions:
                     // Get the view  and check if its not null
                     // and then cast it to the profile model class*.
@@ -101,7 +93,7 @@ val friendshipStatusIndicatorPatch =
                         check-cast v1, $internalBadgeDefiningClassName
                         iget-object v2, v1, $internalBadgeDefiningClassName->$internalBadgeFieldName:$internalBadgeReturnType
                         move-object/from16 v0, p$profileInfoParameter
-                        invoke-static {v0, v2}, ${PATCHES_DESCRIPTOR}/userprofile/FriendshipStatusIndicator;->indicators(Ljava/lang/Object;Ljava/lang/Object;)V
+                        invoke-static {v0, v2}, ${PATCHES_DESCRIPTOR}/userprofile/FriendshipStatusIndicator;->addFriendshipIndicator(Ljava/lang/Object;Ljava/lang/Object;)V
                         """.trimIndent(),
                         ExternalLabel("cond_piko", getInstruction(0)),
                     )
