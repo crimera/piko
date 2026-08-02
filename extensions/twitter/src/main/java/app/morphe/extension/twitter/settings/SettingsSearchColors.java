@@ -5,22 +5,16 @@
  */
 
 package app.morphe.extension.twitter.settings;
+
+import android.content.Context;
+
 import app.morphe.extension.twitter.Utils;
-import app.morphe.extension.shared.ResourceUtils;
 
 final class SettingsSearchColors {
-       private static final SettingsSearchColors CLR = new SettingsSearchColors(
-            Utils.resolveColor("coreColorAppBackground"),
-            ResourceUtils.getColor("black_opacity_15"),
-            Utils.resolveColor("coreColorSelectionHighlightBackground"),
-            Utils.resolveColor("coreColorSelectionHighlightText"),
-            Utils.resolveColor("coreColorSelectionHighlightText"),
-            Utils.resolveColor("coreColorSelectionHighlightBackground")
-    );
-
     final int settingsBackgroundColor;
     final int searchFieldBackgroundColor;
-    final int searchFieldTapHighlightColor;
+    final int searchFieldPressedColor;
+    final int searchFieldBorderColor;
     final int searchTextColor;
     final int searchHintColor;
     final int searchTargetRowHighlightColor;
@@ -28,20 +22,33 @@ final class SettingsSearchColors {
     private SettingsSearchColors(
             int settingsBackgroundColor,
             int searchFieldBackgroundColor,
-            int searchFieldTapHighlightColor,
+            int searchFieldPressedColor,
+            int searchFieldBorderColor,
             int searchTextColor,
             int searchHintColor,
             int searchTargetRowHighlightColor
     ) {
         this.settingsBackgroundColor = settingsBackgroundColor;
         this.searchFieldBackgroundColor = searchFieldBackgroundColor;
-        this.searchFieldTapHighlightColor = searchFieldTapHighlightColor;
+        this.searchFieldPressedColor = searchFieldPressedColor;
+        this.searchFieldBorderColor = searchFieldBorderColor;
         this.searchTextColor = searchTextColor;
         this.searchHintColor = searchHintColor;
         this.searchTargetRowHighlightColor = searchTargetRowHighlightColor;
     }
 
-    static SettingsSearchColors current() {
-        return CLR;
+    static SettingsSearchColors current(Context context) {
+        int settingsBackgroundColor = Utils.resolveColor(context, "coreColorAppBackground");
+        int searchTextColor = Utils.resolveColor(context, "coreColorPrimaryText");
+
+        return new SettingsSearchColors(
+                settingsBackgroundColor,
+                Utils.resolveColor(context, "abstractColorFadedGray"),
+                Utils.resolveColor(context, "coreColorPressed"),
+                Utils.resolveColor(context, "coreColorBorder"),
+                searchTextColor,
+                Utils.resolveColor(context, "coreColorSecondaryText"),
+                Utils.resolveColor(context, "abstractColorHighlightBackground")
+        );
     }
 }

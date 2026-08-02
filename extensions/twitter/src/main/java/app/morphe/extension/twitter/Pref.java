@@ -6,6 +6,7 @@
 
 package app.morphe.extension.twitter;
 
+import android.os.Build;
 import android.util.Log;
 
 import app.morphe.extension.shared.ResourceUtils;
@@ -30,6 +31,12 @@ public class Pref {
 
     public static boolean pikoDebug() {
         return Utils.getBooleanPref(Settings.PIKO_DEBUG);
+    }
+
+    public static boolean dynamicColor() {
+        return SettingsStatus.dynamicColor
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                && Utils.getBooleanPref(Settings.DYNAMIC_COLOR);
     }
 
     public static String getLatestChangelogVersion(){

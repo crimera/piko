@@ -275,7 +275,7 @@ public final class SettingsSearchNavigator {
 
             originalBackground = row.getBackground();
             highlightBackground = new ColorDrawable(
-                    SettingsSearchColors.current().searchTargetRowHighlightColor
+                    SettingsSearchColors.current(row.getContext()).searchTargetRowHighlightColor
             );
             row.setBackground(highlightBackground);
             row.invalidate();

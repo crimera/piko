@@ -21,6 +21,7 @@ import app.morphe.extension.twitter.settings.SettingsSearchMatcher.SearchMatch;
 import app.morphe.extension.twitter.settings.SettingsSearchMatcher.SearchResult;
 import app.morphe.extension.twitter.settings.widgets.*;
 import androidx.annotation.Nullable;
+
 import app.morphe.extension.twitter.Pref;
 
 
@@ -842,6 +843,17 @@ public class ScreenBuilder {
                     )
             );
         }
+
+        if (SettingsStatus.dynamicColor) {
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_dynamic_color"),
+                            str("piko_pref_dynamic_color_desc"),
+                            Settings.DYNAMIC_COLOR
+                    )
+            );
+        }
+      
         addPreference(category,
                 helper.switchPreference(
                         str("piko_pref_quick_settings"),

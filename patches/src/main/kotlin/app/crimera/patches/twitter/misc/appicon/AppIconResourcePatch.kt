@@ -37,6 +37,10 @@ val appIconResourcePatch =
                 "$imagesDir/foreground",
                 ResourceGroup("mipmap-xxhdpi", *iconForegroundFiles),
             )
+            copyResources(
+                sourceDir,
+                ResourceGroup("mipmap-anydpi-v31", "ic_app_icon_material_you.xml"),
+            )
 
             var iconStartCount = 0
             document("AndroidManifest.xml").use { document ->

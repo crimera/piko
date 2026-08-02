@@ -87,7 +87,13 @@ public class SettingsStatus {
     public static boolean customEmojiFont = false;
     public static boolean inlineDownloadButton = false;
 
+    public static boolean dynamicColor = false;
     public static boolean moreInfoOnProfile = false;
+
+    public static void dynamicColor() {
+        dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
+    }
+
     public static void moreInfoOnProfile() {
         moreInfoOnProfile = true;
     }
@@ -428,7 +434,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableCustomisationSection() {
-        return (moreInfoOnProfile || appIconCustomisation || notificationTabCustomisation || searchTabCustomisation || typeaheadCustomisation || exploreTabCustomisation || customPostFontSize || inlineBarCustomisation || navBarCustomisation || sideBarCustomisation || profileTabCustomisation || timelineTabCustomisation || defaultReplySortFilter);
+        return (dynamicColor || moreInfoOnProfile || appIconCustomisation || notificationTabCustomisation || searchTabCustomisation || typeaheadCustomisation || exploreTabCustomisation || customPostFontSize || inlineBarCustomisation || navBarCustomisation || sideBarCustomisation || profileTabCustomisation || timelineTabCustomisation || defaultReplySortFilter);
     }
     public static boolean loggingSection() {
         return (serverResponseLogging || serverResponseLoggingOverwriteFile);
