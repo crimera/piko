@@ -17,7 +17,7 @@ import android.os.Looper;
 import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 
-import app.morphe.extension.crimera.sharedPreference.SharedPref;
+import app.morphe.extension.crimera.SharedPref;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.utils.IgStr;
 import app.morphe.extension.shared.Logger;
@@ -219,7 +219,24 @@ public final class MaterialYouTheme {
             Function1<Integer, Unit> callback
     ) {
         Function1<Integer, Unit> nativeCallback = unwrapNativeThemeCallback(callback);
-        return () -> {
+        // Implemented as an explicit class (not a bare lambda) so D8/R8 cannot
+        // fold this Function0 into another synthetic $$ExternalSyntheticLambda
+        // class of matching erased shape (e.g. the Logger.printException
+        // message supplier below). That collision is what produced the
+        // AbstractMethodError on Function0.invoke() when tapping the AMOLED
+        // radio item.
+        return new AmoledRadioCallback(nativeCallback);
+    }
+
+    private static final class AmoledRadioCallback implements Function0<Unit> {
+        private final Function1<Integer, Unit> nativeCallback;
+
+        private AmoledRadioCallback(Function1<Integer, Unit> nativeCallback) {
+            this.nativeCallback = nativeCallback;
+        }
+
+        @Override
+        public Unit invoke() {
             ThemeMode targetMode = MaterialYouState.modeForAmoledToggle(
                     true,
                     currentModeForRequest()
@@ -231,7 +248,7 @@ public final class MaterialYouTheme {
                     () -> nativeCallback.invoke(NATIVE_THEME_DARK)
             );
             return Unit.INSTANCE;
-        };
+        }
     }
 
     public static RadioGroup.OnCheckedChangeListener wrapLegacyNativeThemeListener(
@@ -290,6 +307,10 @@ public final class MaterialYouTheme {
 
     public static String getAmoledTitle() {
         return "AMOLED";
+    }
+
+    public static String getMaterialYouTitle() {
+        return "Material You";
     }
 
     public static String resolveLegacyRadioTitle(
