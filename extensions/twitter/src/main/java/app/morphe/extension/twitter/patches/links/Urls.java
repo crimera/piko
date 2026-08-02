@@ -39,7 +39,8 @@ public class Urls {
             if(customDomainName.length()<1) return urlString;
 
             // Check for domain extension
-            if(!(customDomainName.matches("^[A-Za-z0-9-]{1,63}\\.[A-Za-z]{2,6}$"))) {
+            String regex  = "(?:https?://)?(?:[\\w-]+\\.)+[a-z]{2,}(?:/[^\\s]*)?";
+            if(!(customDomainName.matches(regex))) {
                 //have .com as default extension just for safety reasons
                 customDomainName += ".com";
             }
