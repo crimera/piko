@@ -197,8 +197,7 @@ private fun createLegacyMaterialYouHelper(
     """
     invoke-static {}, Lapp/morphe/extension/instagram/theme/MaterialYouTheme;->getLegacyToggleListener()Landroid/widget/CompoundButton${'$'}OnCheckedChangeListener;
     move-result-object v1
-    const-string v2, "piko_material_you_title"
-    invoke-static {v2}, Lapp/morphe/extension/instagram/utils/IgStr;->str(Ljava/lang/String;)Ljava/lang/String;
+    invoke-static {}, Lapp/morphe/extension/instagram/theme/MaterialYouTheme;->getMaterialYouTitle()Ljava/lang/String;
     move-result-object v2
     invoke-static {}, Lapp/morphe/extension/instagram/theme/MaterialYouTheme;->isEnabled()Z
     move-result v0
