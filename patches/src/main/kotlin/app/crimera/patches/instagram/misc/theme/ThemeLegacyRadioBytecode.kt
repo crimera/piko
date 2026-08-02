@@ -36,6 +36,7 @@ private data class LegacyRadioItemBinding(
     val darkId: Int,
     val systemId: Int,
     val amoledId: Int,
+    val nativeTitleId: Int,
 )
 
 private data class LegacyTitleBinding(
@@ -62,7 +63,7 @@ private data class LegacyItemRecord(
 )
 
 context(patchContext: BytecodePatchContext)
-internal fun installLegacyAmoledRadio(titleId: Int) {
+internal fun installLegacyAmoledRadio() {
     val fragmentConstructor =
         LegacyDarkModeFragmentConstructorFingerprint
             .matchAll(1..1)
@@ -106,7 +107,7 @@ internal fun installLegacyAmoledRadio(titleId: Int) {
     installLegacyOnCreateAmoledItem(
         binding = onCreateBinding,
         itemBinding = itemBinding,
-        titleId = titleId,
+        titleId = itemBinding.nativeTitleId,
     )
 }
 
@@ -410,6 +411,7 @@ private fun deriveLegacyRadioItemBinding(itemType: String): LegacyRadioItemBindi
         darkId = darkId,
         systemId = systemId,
         amoledId = amoledId,
+        nativeTitleId = intValues.getValue(titleField).first(),
     )
 }
 
