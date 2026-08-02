@@ -22,7 +22,7 @@ val bringBackTwitterPatch =
     resourcePatch(
         name = "Bring back twitter",
         description = "Bring back old twitter logo and name",
-        default = false,
+        default = true,
     ) {
         compatibleWith(COMPATIBILITY_X)
 
