@@ -71,11 +71,11 @@ internal object SelectHighlightsCoverFragmentOnCreateFingerprint : Fingerprint(
 )
 
 internal object FullNameLiveTreeUserDictFingerprint : Fingerprint(
-    strings = listOf("full_name"),
     definingClass = LIVE_TREE_USER_DICT_CLASS,
-    custom = { methodDef, _ ->
-        methodDef.returnType != "V"
-    },
+     filters =
+        listOf(
+            string("full_name"),
+        ),
 )
 
 internal object UserNameLiveTreeUserDictFingerprint : Fingerprint(
@@ -95,36 +95,29 @@ internal object FriendshipStatusLiveTreeUserDictFingerprint : Fingerprint(
 )
 
 internal object BiographyLiveTreeUserDictFingerprint : Fingerprint(
-    strings = listOf("biography"),
     definingClass = LIVE_TREE_USER_DICT_CLASS,
     returnType = "Ljava/lang/String;",
-    // "biography" also occurs inside "translated_biography" and
-    // "has_biography_translation", and a string match is a substring match: without
-    // this the accessor that resolves is the translated one, which is null for any
-    // account whose bio was never translated — i.e. almost all of them.
-    custom = { methodDef, _ ->
-        methodDef.implementation
-            ?.instructions
-            ?.any { it.getReference<StringReference>()?.string == "biography" } == true
-    },
+    filters =
+        listOf(
+            string("biography"),
+        ),
 )
 
 internal object LowResProfilePictureUserTreeDictFingerprint : Fingerprint(
-    strings = listOf("profile_pic_url"),
     definingClass = LIVE_TREE_USER_DICT_CLASS,
     returnType = "ImageUrl;",
     filters =
         listOf(
-            opcode(Opcode.CONST_STRING_JUMBO, InstructionLocation.MatchFirst()),
+            string("profile_pic_url"),
         ),
 )
 
 internal object HDProfileInfoUserTreeDictFingerprint : Fingerprint(
-    strings = listOf("hd_profile_pic_url_info"),
     definingClass = LIVE_TREE_USER_DICT_CLASS,
-    custom = { methodDef, _ ->
-        methodDef.returnType != "V"
-    },
+     filters =
+        listOf(
+            string("hd_profile_pic_url_info"),
+        ),
 )
 
 internal object IsVerifiedUserTreeDictFingerprint : Fingerprint(
