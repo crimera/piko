@@ -13,6 +13,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation
 import app.morphe.patcher.literal
 import app.morphe.patcher.opcode
+import app.morphe.patcher.string
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.resourceLiteral
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -69,11 +70,11 @@ internal object SelectHighlightsCoverFragmentOnCreateFingerprint : Fingerprint(
 )
 
 internal object FullNameLiveTreeUserDictFingerprint : Fingerprint(
-    strings = listOf("full_name"),
     definingClass = LIVE_TREE_USER_DICT_CLASS,
-    custom = { methodDef, _ ->
-        methodDef.returnType != "V"
-    },
+     filters =
+        listOf(
+            string("full_name"),
+        ),
 )
 
 internal object UserNameLiveTreeUserDictFingerprint : Fingerprint(
@@ -91,33 +92,29 @@ internal object FriendshipStatusLiveTreeUserDictFingerprint : Fingerprint(
 )
 
 internal object BiographyLiveTreeUserDictFingerprint : Fingerprint(
-    strings = listOf("biography"),
     definingClass = LIVE_TREE_USER_DICT_CLASS,
-    custom = { methodDef, _ ->
-        methodDef.returnType != "V"
-    },
+    returnType = "Ljava/lang/String;",
     filters =
         listOf(
-            opcode(Opcode.CONST_STRING_JUMBO, InstructionLocation.MatchFirst()),
+            string("biography"),
         ),
 )
 
 internal object LowResProfilePictureUserTreeDictFingerprint : Fingerprint(
-    strings = listOf("profile_pic_url"),
     definingClass = LIVE_TREE_USER_DICT_CLASS,
     returnType = "ImageUrl;",
     filters =
         listOf(
-            literal(1782139044),
+            string("profile_pic_url"),
         ),
 )
 
 internal object HDProfileInfoUserTreeDictFingerprint : Fingerprint(
-    strings = listOf("hd_profile_pic_url_info"),
     definingClass = LIVE_TREE_USER_DICT_CLASS,
-    custom = { methodDef, _ ->
-        methodDef.returnType != "V"
-    },
+     filters =
+        listOf(
+            string("hd_profile_pic_url_info"),
+        ),
 )
 
 internal object IsVerifiedUserTreeDictFingerprint : Fingerprint(
