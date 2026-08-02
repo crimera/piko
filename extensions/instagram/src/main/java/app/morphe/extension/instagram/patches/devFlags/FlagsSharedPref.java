@@ -7,6 +7,11 @@
 
 package app.morphe.extension.instagram.patches.devFlags;
 
+import org.json.JSONObject;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.HashMap;
+
 import app.morphe.extension.crimera.sharedPreference.BaseSharedPref;
 import app.morphe.extension.crimera.settings.BooleanSetting;
 
@@ -29,4 +34,19 @@ public class FlagsSharedPref extends BaseSharedPref {
         return INSTANCE.setBoolean(key, val);
     }
 
+    public static Map<String, Boolean> getAll(){
+        Map<String, Boolean> outFlags = new HashMap();
+        try {
+            JSONObject flags = INSTANCE.all();
+            Iterator<String> keys = flags.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                Boolean value = (Boolean) flags.get(key);
+                outFlags.put(key, value);
+            }
+        } catch (Exception e) {
+
+        }
+        return outFlags;
+    }
 }

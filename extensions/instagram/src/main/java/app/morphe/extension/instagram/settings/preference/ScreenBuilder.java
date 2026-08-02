@@ -16,6 +16,10 @@ import android.preference.PreferenceCategory;
 import java.util.TreeMap;
 import java.util.Map;
 import java.util.List;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import  app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import  app.morphe.extension.instagram.patches.devFlags.Flag;
@@ -88,6 +92,15 @@ public class ScreenBuilder {
         if (!(SettingsStatus.developerOptionsSection())) return;
 
         // PreferenceCategory category= addCategory(str("piko_category_dev_options"));
+
+        addPreference(
+                helper.buttonPreference(
+                        str("piko_category_rec_flags"),
+                        str("piko_category_rec_flags_desc"),
+                        Constants.PIKO_FRAGMENT_REC_FLAGS
+                )
+        );
+
 
         if (SettingsStatus.removeBuildExpirePopup) {
             addPreference(
@@ -800,8 +813,24 @@ public class ScreenBuilder {
     }
 
     public void buildRecommendedFlagsSection() {
-        List<Flag> recFlags = RecommendedFlags.getFlags();
 
+        long lastModified = Pref.getLastRecommendedFlagDownloadTimestamp();
+        LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastModified), ZoneId.systemDefault());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd, yyyy hh:mm:ss a");
+        String formattedDate = dateTime.format(formatter);
+        String lastModifiedAtString = String.format(str("piko_rec_flags_last_modified_at"), formattedDate);
+        addPreference(
+            helper.buttonPreference(
+                    str("piko_rec_flags_refresh_file"),
+                    lastModifiedAtString,
+                    "piko_rec_flags_refresh_file"
+            )
+        );
+        List<Flag> recFlags = RecommendedFlags.getFlags();
+        // The flag names will be English only,
+        // as I want to keep it as a live service
+        // rather than triggering new build
+        // for every a new flag.
         for(Flag flag : recFlags) {
             addPreference(
                     helper.switchPreference(
@@ -994,14 +1023,6 @@ public class ScreenBuilder {
                     )
             );
         }
-
-        addPreference(
-                helper.buttonPreference(
-                        str("piko_category_rec_flags"),
-                        str("piko_category_rec_flags_desc"),
-                        Constants.PIKO_FRAGMENT_REC_FLAGS
-                )
-        );
 
         addPreference(
                 helper.buttonPreference(

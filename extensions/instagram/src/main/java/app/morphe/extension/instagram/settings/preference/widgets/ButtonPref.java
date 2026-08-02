@@ -20,6 +20,7 @@ import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.settings.preference.fragments.FragmentHook;
 import app.morphe.extension.instagram.patches.Block;
 import app.morphe.extension.instagram.patches.download.DownloadMapping;
+import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.utils.InstaUtils;
@@ -81,6 +82,8 @@ public class ButtonPref extends Preference {
                     } else if (key.startsWith("piko_frag_")) {
                         FragmentHook.startFragment(key);
 
+                    } else if (key.equals("piko_rec_flags_refresh_file")) {
+                        RecommendedFlags.downloadRecommendedFlagsFile();
                     }
                 } catch (Exception e) {
                     Utils.showToastShort(e.getMessage());
@@ -114,7 +117,8 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_delete_analytics_cache")
                 || key.equals("piko_export_experiment_list")
                 || key.equals("piko_export_experiment_mappings")
-                || key.equals("piko_download_id_mapping"));
+                || key.equals("piko_download_id_mapping")
+                || key.equals("piko_rec_flags_refresh_file"));
     }
 
     private String getIconResourceName(String key) {
@@ -153,9 +157,6 @@ public class ButtonPref extends Preference {
         }
         if(key.equals(Constants.PIKO_FRAGMENT_FILTER_CONTENT)){
             return UI.DRAWABLE_SHARE_TO_REEL;
-        }
-        if(key.equals(Constants.PIKO_FRAGMENT_REC_FLAGS)){
-            return UI.DRAWABLE_DEBUG_ICON;
         }
         return null;
     }

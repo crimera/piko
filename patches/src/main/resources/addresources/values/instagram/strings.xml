@@ -245,8 +245,11 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <!-- Developer Options Section -->
     <string name="piko_category_rec_flags">Recommended flags</string>
     <string name="piko_category_rec_flags_desc">Developer flags suggested by the community</string>
-    <string name="rec_flags_read_error">Failed to read cached flags file</string>
-    <string name="rec_flags_no_file">Recommended flags file not found</string>
+    <string name="piko_rec_flags_read_error">Failed to read cached flags file</string>
+    <string name="piko_rec_flags_no_file">Recommended flags file not found</string>
+    <string name="piko_rec_flags_refresh_file">Refresh flags</string>
+    <string name="piko_rec_flags_last_modified_at">Last modified: %s</string>
+
 
     <!-- Story filters -->
     <string name="piko_category_filter_content">Filter content</string>
