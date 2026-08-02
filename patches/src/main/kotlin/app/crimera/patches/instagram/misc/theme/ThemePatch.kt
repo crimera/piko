@@ -60,15 +60,6 @@ val themePatch =
                 restoreApi31Base(
                     snapshot = originalApi31Base,
                 )
-                val materialYouStringIds =
-                    reservePublicStringIds(
-                        publicXml = get("res/values/public.xml"),
-                        names =
-                            listOf(
-                                "piko_material_you_title",
-                                "piko_amoled_title",
-                            ),
-                    )
                 writeMaterialYouOverlay(night = false)
                 writeMaterialYouOverlay(night = true)
                 writeAmoledOverlay(originalApi31Base)
@@ -78,10 +69,7 @@ val themePatch =
                     installComposePrismBlackRuntime(legacyAmoled = amoled == true)
                     installSystemDefaultUiModeHook()
                     installThemeLifecycleHooks()
-                    installMaterialYouToggle(
-                        titleId = materialYouStringIds.getValue("piko_material_you_title"),
-                        amoledTitleId = materialYouStringIds.getValue("piko_amoled_title"),
-                    )
+                    installMaterialYouToggle()
                 }
             } finally {
                 bytecodePatchContext = null
