@@ -166,19 +166,10 @@ internal fun installSystemDefaultUiModeHook() {
 
 context(patchContext: BytecodePatchContext)
 
-internal fun installMaterialYouToggle(
-    titleId: Int,
-    amoledTitleId: Int,
-) {
-    if (titleId == 0 || amoledTitleId == 0) {
-        throw PatchException("Theme string resource ids must be non-zero")
-    }
-
-    installLegacyAmoledRadio(amoledTitleId)
+internal fun installMaterialYouToggle() {
+    installLegacyAmoledRadio()
     installLegacyMaterialYouToggle()
-    installComposeMaterialYouToggle(
-        titleId = titleId,
-    )
+    installComposeMaterialYouToggle()
 }
 
 internal fun MutableMethod.invokeCalls(): List<InvokeCall> =
