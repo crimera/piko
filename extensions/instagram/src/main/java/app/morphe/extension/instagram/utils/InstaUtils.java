@@ -9,17 +9,25 @@ package app.morphe.extension.instagram.utils;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 
 import java.io.File;
+import java.net.HttpURLConnection;
 
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
-
 import app.morphe.extension.crimera.PikoUtils;
+
 import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.requests.Requester;
+import app.morphe.extension.shared.requests.Route;
+import app.morphe.extension.shared.Logger;
+import static app.morphe.extension.shared.requests.Route.Method.GET;
 
 public class InstaUtils {
 
@@ -73,5 +81,33 @@ public class InstaUtils {
         }else{
             PikoUtils.toast(str("piko_reset_pref_failed"));
         }
+    }
+
+    public static void downloadFile(String host, String endpoint, File outputFile, boolean restartAfterDownload) {
+        Context context = Utils.getContext();
+
+        if (!Utils.isNetworkConnected()) {
+            PikoUtils.toast(str("piko_no_internet"));
+            return;
+        }
+        Utils.runOnBackgroundThread(() -> {
+            try {
+                Route route = new Route(GET, endpoint);
+                HttpURLConnection connection = Requester.getConnectionFromRoute(host, route);
+                String response = Requester.parseString(connection);
+
+                PikoUtils.writeFile(outputFile, response.getBytes(), false);
+
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    PikoUtils.toast(str("piko_downloaded_media") + outputFile.getName());
+                    if (restartAfterDownload) Utils.restartApp(context);
+                });
+
+            } catch (Exception e) {
+                PikoUtils.logger(e);
+                PikoUtils.toast(str("piko_download_failed_media") + outputFile.getName());
+            }
+        });
+
     }
 }
