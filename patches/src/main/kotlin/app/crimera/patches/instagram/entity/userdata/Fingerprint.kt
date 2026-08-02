@@ -13,6 +13,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation
 import app.morphe.patcher.literal
 import app.morphe.patcher.opcode
+import app.morphe.patcher.string
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.resourceLiteral
 import com.android.tools.smali.dexlib2.AccessFlags
