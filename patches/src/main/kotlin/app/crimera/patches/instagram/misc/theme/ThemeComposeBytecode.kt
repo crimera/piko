@@ -60,9 +60,7 @@ private data class ComposeRadioBinding(
 )
 
 context(patchContext: BytecodePatchContext)
-internal fun installComposeMaterialYouToggle(
-    titleId: Int,
-) {
+internal fun installComposeMaterialYouToggle() {
     val darkModeMatch = DarkModeSectionFingerprint.matchAll(1..1).single()
     val reduceMotionMatch = ReduceMotionToggleFingerprint.matchAll(1..1).single()
     val darkModeSection = darkModeMatch.method
@@ -139,7 +137,11 @@ internal fun installComposeMaterialYouToggle(
 
     copy.replaceInstruction(
         stringCalls[0].literalIndex,
-        "const v${stringCalls[0].resourceRegister}, $titleId",
+        "nop",
+    )
+    copy.replaceInstruction(
+        stringCalls[0].literalIndex + 1,
+        "invoke-static {}, Lapp/morphe/extension/instagram/theme/MaterialYouTheme;->getMaterialYouTitle()Ljava/lang/String;",
     )
     replaceStringResourceResultWithNull(
         method = copy,
@@ -485,7 +487,7 @@ internal fun replaceStringResourceResultWithNull(
 
     method.replaceInstruction(
         resultIndex,
-        "const/4 v$resultRegister, 0x0",
+        "const-string v$resultRegister, \"\"",
     )
 }
 
