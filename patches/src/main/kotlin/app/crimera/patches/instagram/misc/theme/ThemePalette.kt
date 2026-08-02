@@ -13,6 +13,13 @@ internal const val MATERIAL_YOU_LIGHT_SWITCH_OFF_TRACK_DYNAMIC =
 internal const val MATERIAL_YOU_DARK_SWITCH_OFF_TRACK_DYNAMIC =
     "@android:color/system_neutral1_800"
 
+internal val amoledSwitchMappings =
+    mapOf(
+        "material_unselected_track" to "#ff5e646d",
+        "material_track_border" to "#ffa2aab4",
+        "checkbox_unchecked_enabled" to "#ffa2aab4",
+    )
+
 // Static fallbacks used when Android dynamic colors are unavailable.
 internal val materialYouLightFallbackAliases =
     mapOf(

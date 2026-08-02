@@ -194,7 +194,12 @@ internal fun ResourcePatchContext.writeAmoledMaterialYouOverlay(): File =
     )
 
 internal fun amoledOverlayValues(snapshot: Api31BaseSnapshot): OverlayValues =
-    (snapshot.nightColors + amoledSurfaceBaselineMappings + amoledNightOverrides).let { values ->
+    (
+        snapshot.nightColors +
+            amoledSurfaceBaselineMappings +
+            amoledNightOverrides +
+            amoledSwitchMappings
+    ).let { values ->
         OverlayValues(day = values, night = values)
     }
 

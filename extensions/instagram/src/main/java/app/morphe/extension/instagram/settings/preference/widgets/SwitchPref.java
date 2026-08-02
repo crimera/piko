@@ -13,13 +13,14 @@ import android.preference.Preference;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import app.morphe.extension.instagram.settings.preference.Helper;
 
 public class SwitchPref extends SwitchPreference {
     private static Helper helper;
     private View rowView;
-    private InstagramPreferenceStyle.SwitchView switchView;
-    private boolean hasPendingAnimation;
+    private CompoundButton switchView;
+    private boolean clickInProgress;
     private boolean pendingFromChecked;
     private boolean pendingToChecked;
 
@@ -64,22 +65,21 @@ public class SwitchPref extends SwitchPreference {
     @Override
     protected void onBindView(View view) {
         rowView = view;
-        Object previousKey = view.getTag();
-        boolean samePreference = getKey() != null && getKey().equals(previousKey);
-        view.setTag(getKey());
         InstagramPreferenceStyle.bindText(this, view);
         InstagramPreferenceStyle.bindSwitchAccessibility(view, isChecked());
-        InstagramPreferenceStyle.SwitchView currentSwitch = InstagramPreferenceStyle.findSwitch(view);
+        CompoundButton currentSwitch = InstagramPreferenceStyle.findSwitch(view);
         if (currentSwitch != null) {
             currentSwitch.setEnabled(isEnabled());
-            if (hasPendingAnimation && isChecked() == pendingToChecked) {
-                currentSwitch.setChecked(pendingFromChecked, false);
-                currentSwitch.setChecked(pendingToChecked, true);
-                hasPendingAnimation = false;
-            } else if (!currentSwitch.isAnimating() || !samePreference) {
-                currentSwitch.setChecked(isChecked(), false);
-            } else {
-                currentSwitch.setEnabled(isEnabled());
+            boolean deferBinding = clickInProgress
+                    && currentSwitch == switchView
+                    && currentSwitch.isChecked() == pendingFromChecked
+                    && isChecked() == pendingToChecked;
+            if (!deferBinding && currentSwitch.isChecked() != isChecked()) {
+                InstagramPreferenceStyle.setNativeSwitchChecked(
+                        currentSwitch,
+                        isChecked(),
+                        false
+                );
             }
             switchView = currentSwitch;
         }
@@ -88,18 +88,20 @@ public class SwitchPref extends SwitchPreference {
     @Override
     protected void onClick() {
         if (!InstagramPreferenceStyle.consumeSwitchClickAllowed(rowView)) {
-            hasPendingAnimation = false;
             return;
         }
 
         boolean wasChecked = isChecked();
-        hasPendingAnimation = true;
         pendingFromChecked = wasChecked;
         pendingToChecked = !wasChecked;
-        super.onClick();
+        clickInProgress = true;
+        try {
+            super.onClick();
+        } finally {
+            clickInProgress = false;
+        }
 
         if (wasChecked == isChecked()) {
-            hasPendingAnimation = false;
             return;
         }
 
@@ -107,10 +109,13 @@ public class SwitchPref extends SwitchPreference {
             InstagramPreferenceStyle.bindSwitchAccessibility(rowView, isChecked());
         }
 
-        if (hasPendingAnimation && switchView != null) {
-            switchView.setChecked(wasChecked, false);
-            switchView.setChecked(isChecked(), true);
-            hasPendingAnimation = false;
+        if (switchView != null) {
+            InstagramPreferenceStyle.setNativeSwitchChecked(
+                    switchView,
+                    isChecked(),
+                    switchView.isChecked() == wasChecked
+            );
         }
     }
+
 }

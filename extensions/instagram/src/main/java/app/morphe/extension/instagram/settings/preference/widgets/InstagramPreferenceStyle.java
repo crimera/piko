@@ -6,8 +6,8 @@
 
 package app.morphe.extension.instagram.settings.preference.widgets;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -15,6 +15,7 @@ import android.graphics.Rect;
 import android.preference.Preference;
 import android.text.TextUtils;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,12 +23,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.animation.LinearInterpolator;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import app.morphe.extension.instagram.constants.UI;
-import app.morphe.extension.instagram.theme.MaterialYouTheme;
 import app.morphe.extension.shared.ResourceUtils;
 
 public final class InstagramPreferenceStyle {
@@ -35,6 +35,8 @@ public final class InstagramPreferenceStyle {
     private static final String TAG_SUMMARY = "piko_instagram_pref_summary";
     private static final String TAG_SWITCH = "piko_instagram_pref_switch";
     private static final String TAG_TRAILING = "piko_instagram_pref_trailing";
+    private static final String IGDS_SWITCH_CLASS_NAME =
+            "com.instagram.igds.components.switchbutton.IgdsSwitch";
 
     public static final int TRAILING_SWITCH = 1;
     public static final int TRAILING_CHEVRON = 2;
@@ -132,7 +134,10 @@ public final class InstagramPreferenceStyle {
             titleParams.rightMargin = dp(context, 14);
             titleRow.addView(title, titleParams);
 
-            SwitchView switchView = new SwitchView(context);
+            CompoundButton switchView = createNativeSwitch(nativeSwitchContext(context));
+            switchView.setClickable(false);
+            switchView.setFocusable(false);
+            switchView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
             switchView.setTag(TAG_SWITCH);
             titleRow.addView(switchView, new LinearLayout.LayoutParams(dp(context, 52), dp(context, 32)));
 
@@ -238,8 +243,52 @@ public final class InstagramPreferenceStyle {
         }
     }
 
-    public static SwitchView findSwitch(View view) {
+    public static CompoundButton findSwitch(View view) {
         return view.findViewWithTag(TAG_SWITCH);
+    }
+
+    public static void setNativeSwitchChecked(
+            CompoundButton switchView,
+            boolean checked,
+            boolean animate
+    ) {
+        if (!animate || switchView.isChecked() == checked) {
+            switchView.setChecked(checked);
+            return;
+        }
+
+        try {
+            switchView.getClass()
+                    .getMethod("setCheckedAnimated", boolean.class)
+                    .invoke(switchView, checked);
+        } catch (ReflectiveOperationException ignored) {
+            switchView.setChecked(checked);
+        }
+    }
+
+    private static Context nativeSwitchContext(Context context) {
+        Configuration overrideConfiguration = new Configuration();
+        overrideConfiguration.uiMode = UI.isDarkMode()
+                ? Configuration.UI_MODE_NIGHT_YES
+                : Configuration.UI_MODE_NIGHT_NO;
+
+        ContextThemeWrapper switchContext = new ContextThemeWrapper(context, 0);
+        switchContext.applyOverrideConfiguration(overrideConfiguration);
+        switchContext.getTheme().setTo(context.getTheme());
+        return switchContext;
+    }
+
+    private static CompoundButton createNativeSwitch(Context context) {
+        try {
+            CompoundButton switchView = Class
+                    .forName(IGDS_SWITCH_CLASS_NAME, true, context.getClassLoader())
+                    .asSubclass(CompoundButton.class)
+                    .getConstructor(Context.class)
+                    .newInstance(context);
+            return switchView;
+        } catch (ReflectiveOperationException | ClassCastException exception) {
+            throw new IllegalStateException("Unable to create Instagram's IgdsSwitch", exception);
+        }
     }
 
     public static void bindSwitchAccessibility(View view, boolean checked) {
@@ -446,227 +495,4 @@ public final class InstagramPreferenceStyle {
         }
     }
 
-    public static class SwitchView extends View {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private float progress;
-        private float animationProgress;
-        private boolean checked;
-        private boolean animatingToChecked;
-        private ValueAnimator animator;
-
-        public SwitchView(Context context) {
-            super(context);
-            setClickable(false);
-            setFocusable(false);
-        }
-
-        public boolean isAnimating() {
-            return animator != null && animator.isRunning();
-        }
-
-        public void setChecked(boolean checked, boolean animate) {
-            float target = checked ? 1f : 0f;
-            if (this.checked == checked && progress == target) {
-                return;
-            }
-
-            this.checked = checked;
-            if (animator != null) {
-                animator.cancel();
-            }
-
-            if (!animate) {
-                progress = target;
-                animationProgress = 1f;
-                invalidate();
-                return;
-            }
-
-            animatingToChecked = checked;
-            animationProgress = 0f;
-            animator = ValueAnimator.ofFloat(0f, 1f);
-            animator.setDuration(700L);
-            animator.setInterpolator(new LinearInterpolator());
-            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    animationProgress = (Float) animation.getAnimatedValue();
-                    progress = animatingToChecked ? animationProgress : 1f - animationProgress;
-                    invalidate();
-                }
-            });
-            animator.start();
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-
-            boolean enabled = isEnabled();
-
-            boolean materialYouEnabled = MaterialYouTheme.isMaterialYouEnabled();
-            int instagramOnTrack = UI.getThemedColour("igds_color_primary_button");
-            int instagramOnThumb = backgroundColor();
-            int onTrack = materialYouEnabled
-                    ? ResourceUtils.getColor("material_selected_track", instagramOnTrack)
-                    : instagramOnTrack;
-            int onThumb = materialYouEnabled
-                    ? ResourceUtils.getColor("checkbox_image_tint", instagramOnThumb)
-                    : instagramOnThumb;
-
-            int offTrack = ResourceUtils.getColor("material_unselected_track", pressedBackgroundColor());
-            int offThumb = ResourceUtils.getColor("checkbox_unchecked_enabled", secondaryTextColor());
-
-            if (!enabled) {
-                onTrack = UI.getThemedColour("igds_color_divider");
-                onThumb = UI.getThemedColour("igds_color_creation_tools_grey_04");
-
-                offTrack = onTrack;
-                offThumb = onThumb;
-            }
-
-            boolean animating = isAnimating();
-            float elapsedProgress = animating
-                    ? animationProgress
-                    : progress;
-
-            float pressEndProgress = 0.10f;
-            float edgeContactProgress = animatingToChecked ? 0.10f : 0.20f;
-            float movementStartProgress = 0.30f;
-            float movementDuration = animatingToChecked ? 0.30f : 0.40f;
-            float movementEndProgress = movementStartProgress + movementDuration;
-            float colorStartProgress = animatingToChecked ? 0.20f : 0.15f;
-            float colorDuration = animatingToChecked ? 0.35f : 0.40f;
-            float movementProgress = easeOutCubic(clamp01((elapsedProgress - movementStartProgress) / movementDuration));
-            float colorStep = smoothStep(clamp01((elapsedProgress - colorStartProgress) / colorDuration));
-            float positionProgress = animating
-                    ? (animatingToChecked ? movementProgress : 1f - movementProgress)
-                    : progress;
-            float colorProgress = animating
-                    ? (animatingToChecked ? colorStep : 1f - colorStep)
-                    : progress;
-
-            int trackColor = blend(offTrack, onTrack, colorProgress);
-            int thumbColor = blend(offThumb, onThumb, colorProgress);
-            int stroke = blend(offThumb, onTrack, colorProgress);
-
-            float strokeWidth = dp(getContext(), 2);
-            float radius = getHeight() / 2f;
-
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(trackColor);
-            canvas.drawRoundRect(0, 0, getWidth(), getHeight(), radius, radius, paint);
-
-            float strokeProgress;
-            if (animating) {
-                strokeProgress = smoothStep(clamp01((0.62f - colorProgress) / 0.42f));
-            } else {
-                strokeProgress = 1f - progress;
-            }
-            float strokeOpacity =  strokeProgress;
-            int strokeAlpha = Math.round(Color.alpha(stroke) * strokeOpacity);
-            if (strokeAlpha > 0) {
-                paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(strokeWidth);
-                paint.setColor(Color.argb(strokeAlpha, Color.red(stroke), Color.green(stroke), Color.blue(stroke)));
-                canvas.drawRoundRect(strokeWidth / 2f, strokeWidth / 2f, getWidth() - strokeWidth / 2f, getHeight() - strokeWidth / 2f, radius, radius, paint);
-            }
-
-            float offThumbRadius = (getHeight() - dp(getContext(), 16)) / 2f;
-            float onThumbRadius = (getHeight() - dp(getContext(), 8)) / 2f;
-            float contactRadius = (getHeight() / 2f) - (strokeWidth / 2f);
-            float startThumbRadius = animatingToChecked ? offThumbRadius : onThumbRadius;
-            float endThumbRadius = animatingToChecked ? onThumbRadius : offThumbRadius;
-            float pressedThumbRadius = Math.max(dp(getContext(), 8.5f), Math.min(offThumbRadius, onThumbRadius) - dp(getContext(), 3.5f));
-            float preMoveThumbRadius = contactRadius - dp(getContext(), 1.0f);
-            float thumbRadius;
-            if (!animating) {
-                thumbRadius = offThumbRadius + ((onThumbRadius - offThumbRadius) * progress);
-            } else if (animatingToChecked) {
-                if (elapsedProgress < edgeContactProgress) {
-                    thumbRadius = lerp(startThumbRadius, preMoveThumbRadius, smoothStep(clamp01(elapsedProgress / edgeContactProgress)));
-                } else if (elapsedProgress < movementEndProgress) {
-                    thumbRadius = preMoveThumbRadius;
-                } else {
-                    float settleDuration = 0.15f;
-                    thumbRadius = lerp(preMoveThumbRadius, endThumbRadius, smoothStep(clamp01((elapsedProgress - movementEndProgress) / settleDuration)));
-                }
-            } else if (elapsedProgress < pressEndProgress) {
-                thumbRadius = lerp(startThumbRadius, pressedThumbRadius, smoothStep(clamp01(elapsedProgress / pressEndProgress)));
-            } else if (elapsedProgress < edgeContactProgress) {
-                thumbRadius = lerp(pressedThumbRadius, preMoveThumbRadius, smoothStep(clamp01((elapsedProgress - pressEndProgress) / (edgeContactProgress - pressEndProgress))));
-            } else if (elapsedProgress < 0.55f) {
-                thumbRadius = preMoveThumbRadius;
-            } else {
-                float settleStart = 0.55f;
-                float settleDuration = 0.20f;
-                thumbRadius = lerp(preMoveThumbRadius, endThumbRadius, smoothStep(clamp01((elapsedProgress - settleStart) / settleDuration)));
-            }
-            float left = getHeight() / 2f;
-            float right = getWidth() - (getHeight() / 2f);
-            float cx = left + ((right - left) * positionProgress);
-            float cy = getHeight() / 2f;
-
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(thumbColor);
-            canvas.drawCircle(cx, cy, thumbRadius, paint);
-
-            if (enabled && colorProgress > 0f) {
-                int checkColor = onTrack;
-                paint.setStyle(Paint.Style.STROKE);
-                paint.setStrokeWidth(dp(getContext(), 2));
-                paint.setStrokeCap(Paint.Cap.ROUND);
-                paint.setStrokeJoin(Paint.Join.ROUND);
-                paint.setColor(Color.argb(
-                        Math.round(Color.alpha(checkColor) * colorProgress),
-                        Color.red(checkColor),
-                        Color.green(checkColor),
-                        Color.blue(checkColor)
-                ));
-
-                float checkSize = thumbRadius * 0.82f;
-                float startX = cx - (checkSize * 0.34f);
-                float startY = cy - (checkSize * 0.03f);
-                float midX = cx - (checkSize * 0.09f);
-                float midY = cy + (checkSize * 0.23f);
-                float endX = cx + (checkSize * 0.38f);
-                float endY = cy - (checkSize * 0.27f);
-                canvas.drawLine(startX, startY, midX, midY, paint);
-                canvas.drawLine(midX, midY, endX, endY, paint);
-                paint.setStrokeCap(Paint.Cap.BUTT);
-                paint.setStrokeJoin(Paint.Join.MITER);
-            }
-        }
-
-        private float lerp(float from, float to, float amount) {
-            return from + ((to - from) * amount);
-        }
-
-        private float easeOutCubic(float value) {
-            float inverse = 1f - value;
-            return 1f - (inverse * inverse * inverse);
-        }
-
-        private int blend(int from, int to, float amount) {
-            int a = (int) (Color.alpha(from) + (Color.alpha(to) - Color.alpha(from)) * amount);
-            int r = (int) (Color.red(from) + (Color.red(to) - Color.red(from)) * amount);
-            int g = (int) (Color.green(from) + (Color.green(to) - Color.green(from)) * amount);
-            int b = (int) (Color.blue(from) + (Color.blue(to) - Color.blue(from)) * amount);
-            return Color.argb(a, r, g, b);
-        }
-
-        private float clamp01(float value) {
-            if (value < 0f) {
-                return 0f;
-            }
-            if (value > 1f) {
-                return 1f;
-            }
-            return value;
-        }
-
-        private float smoothStep(float value) {
-            return value * value * (3f - (2f * value));
-        }
-    }
 }
