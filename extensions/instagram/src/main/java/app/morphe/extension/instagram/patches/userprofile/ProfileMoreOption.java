@@ -113,7 +113,8 @@ public class ProfileMoreOption {
                             toCopy = false;
 
                         } else if (selectedOption.equals(str("piko_debug"))) {
-                            ObjectBrowser.browseObject(context, userData.getObject());
+                            // Using userData as it will be easier to debug known functions.
+                            ObjectBrowser.browseObject(context, userData);
 
                         }
 

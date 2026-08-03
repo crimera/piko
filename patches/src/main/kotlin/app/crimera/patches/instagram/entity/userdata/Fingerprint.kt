@@ -71,10 +71,11 @@ internal object SelectHighlightsCoverFragmentOnCreateFingerprint : Fingerprint(
 
 internal object FullNameLiveTreeUserDictFingerprint : Fingerprint(
     definingClass = LIVE_TREE_USER_DICT_CLASS,
-     filters =
+    filters =
         listOf(
             string("full_name"),
         ),
+    returnType = "Ljava/lang/String;",
 )
 
 internal object UserNameLiveTreeUserDictFingerprint : Fingerprint(
@@ -111,10 +112,11 @@ internal object LowResProfilePictureUserTreeDictFingerprint : Fingerprint(
 
 internal object HDProfileInfoUserTreeDictFingerprint : Fingerprint(
     definingClass = LIVE_TREE_USER_DICT_CLASS,
-     filters =
+    filters =
         listOf(
             string("hd_profile_pic_url_info"),
         ),
+    returnType = "ProfilePicUrlInfo",
 )
 
 internal object IsVerifiedUserTreeDictFingerprint : Fingerprint(
