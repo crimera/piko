@@ -4,5 +4,11 @@
     "desc" : "",
     "code" : "109730",
     "defaultValue" : true
+  },
+  {
+    "name" : "Add Meta AI reels description pills",
+    "desc" : "",
+    "code" : "80654",
+    "defaultValue" : true
   }
 ]
