@@ -1,3 +1,20 @@
+## [3.9.0-dev.3](https://github.com/crimera/piko/compare/v3.9.0-dev.2...v3.9.0-dev.3) (2026-08-03)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Check and add external downloader options in settings ([c6651df](https://github.com/crimera/piko/commit/c6651df52aab328755ea4138f87ab079cad25cf1))
+* **instagram:** patch GRAY_1600 to fix Compose surfaces staying gray in AMOLED mode ([#1596](https://github.com/crimera/piko/issues/1596)) ([07d08d4](https://github.com/crimera/piko/commit/07d08d4ba4a291bb3f454ec3e92ca9cb6f07975d))
+* **Twitter:** "Change app icon" is broken on recent X versions ([#1624](https://github.com/crimera/piko/issues/1624)) ([350779d](https://github.com/crimera/piko/commit/350779d06bdf8c86992332387062bb42a6e236bc))
+* **Twitter:** Fix check and add `more info on profile` preference ([97f9dca](https://github.com/crimera/piko/commit/97f9dcaad76e6bd61f5a3347ced7e778155f47b1))
+* **twitter:** replace ic_vector_x logo in Bring back twitter patch ([7b6c7e9](https://github.com/crimera/piko/commit/7b6c7e9949422a470563a50cb1efd36d0416fa50))
+
+### ✨ New Features
+
+* **instagram:** add material you and amoled theme controls ([#1631](https://github.com/crimera/piko/issues/1631)) ([840492a](https://github.com/crimera/piko/commit/840492a46c603fb99e55ec03fb1ec47c735c169a))
+* **Instagram:** Added `Recommended flags` section ([ff31eda](https://github.com/crimera/piko/commit/ff31eda2ea878c77820c455088b4d23c561e049a))
+* **Instagram:** Added more options in profile options menu ([#1638](https://github.com/crimera/piko/issues/1638)) ([ad61869](https://github.com/crimera/piko/commit/ad61869cc0711670f83fea67c2bd959b95a0ad62))
+* **Twitter:** Add Dynamic color switch toggle ([#1582](https://github.com/crimera/piko/issues/1582)) ([c3de8d8](https://github.com/crimera/piko/commit/c3de8d8df101203139ff3171bf8f600ef3eef028))
+
 ## [3.9.0-dev.2](https://github.com/crimera/piko/compare/v3.9.0-dev.1...v3.9.0-dev.2) (2026-07-27)
 
 ### 🐛 Bug Fixes
