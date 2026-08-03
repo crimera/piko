@@ -1,3 +1,14 @@
+## [3.9.0-dev.4](https://github.com/crimera/piko/compare/v3.9.0-dev.3...v3.9.0-dev.4) (2026-08-03)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix user data entity fingerprints ([5d83613](https://github.com/crimera/piko/commit/5d8361334805470b2cc94fcfd0f2e4623a4d6be0))
+* **Twitter:** Fix inverted upsell flag boolean ([8a8b9e1](https://github.com/crimera/piko/commit/8a8b9e1a92da7d80419679ab0c900647bffed44a))
+
+### ✨ New Features
+
+* **Instagram:** Added some recommended flags ([40ddc7e](https://github.com/crimera/piko/commit/40ddc7ee525e351ae57e71055a81d995207e9917))
+
 ## [3.9.0-dev.3](https://github.com/crimera/piko/compare/v3.9.0-dev.2...v3.9.0-dev.3) (2026-08-03)
 
 ### 🐛 Bug Fixes
