@@ -103,6 +103,11 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_copy_full_name">Copiar nome completo</string>
     <string name="piko_copy_user_id">Copiar ID do usuário</string>
     <string name="piko_copy_bio">Copiar a bio</string>
+    <string name="piko_view_profile_picture">Ver foto do perfil</string>
+    <string name="piko_copy_profile_link">Copiar link do perfil</string>
+    <string name="piko_share_this_profile">Compartilhar este perfil</string>
+    <string name="piko_copy_links_from_bio">Copiar links da biografia</string>
+    <string name="piko_no_links_in_bio">Não há links nesta biografia</string>
     <string name="piko_download_profile_picture">Baixar foto de perfil</string>
     <string name="piko_copied">Copiado</string>
     <string name="piko_more_profile_options">Mais opções de perfil</string>
@@ -224,6 +229,12 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_settings_on_action_bar">Configurações do Piko no feed principal</string>
     <string name="piko_settings_on_action_bar_desc">Mova o acesso às configurações do Piko para a barra superior no feed principal.</string>
     <!-- Developer Options Section -->
+    <string name="piko_category_rec_flags">Sinalizadores recomendados</string>
+    <string name="piko_category_rec_flags_desc">Sinalizadores de desenvolvedor sugeridos pela comunidade</string>
+    <string name="piko_rec_flags_read_error">Falha ao ler o arquivo de sinalizadores em cache</string>
+    <string name="piko_rec_flags_no_file">Arquivo de sinalizadores recomendado não encontrado</string>
+    <string name="piko_rec_flags_refresh_file">Atualizar sinalizadores</string>
+    <string name="piko_rec_flags_last_modified_at">Última modificação: %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">Filtrar conteúdo</string>
     <string name="piko_filter_story">Filtrar Stories</string>
