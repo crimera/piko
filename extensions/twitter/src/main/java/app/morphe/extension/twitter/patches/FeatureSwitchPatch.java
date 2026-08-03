@@ -67,7 +67,7 @@ public class FeatureSwitchPatch {
     }
 
     private static void removePremiumUpsell() {
-        boolean flag = !Pref.removePremiumUpsell();
+        boolean flag = Pref.removePremiumUpsell();
         addFlag("subscriptions_enabled", flag);
         addFlag("subscriptions_upsells_get_verified_profile", flag);
         addFlag("subscriptions_upsells_get_verified_drawer_discount_enabled", flag);
