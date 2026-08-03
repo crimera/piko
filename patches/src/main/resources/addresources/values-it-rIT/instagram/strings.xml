@@ -74,7 +74,7 @@ Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma s
     <string name="piko_fbi_color_indicator_desc">L\'indicatore dello stato di amicizia deve essere abilitato</string>
     <string name="piko_fbi_follows_you">Ti segue</string>
     <string name="piko_fbi_doesnt_follows_you">Non ti segue</string>
-    <string name="piko_fbi_following_each_other">Si seguono a vicenda</string>
+    <string name="piko_fbi_following_each_other">Vi seguite a vicenda</string>
     <string name="piko_friendship_status">Stato di amicizia</string>
     <string name="piko_view_story_mentions">Visualizza le menzioni nella storia</string>
     <string name="piko_vsm_title">Menzioni nelle storie</string>
@@ -121,14 +121,17 @@ Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma s
     <string name="piko_image_variants">Varianti immagine</string>
     <string name="piko_download_audio">Scarica audio</string>
     <string name="piko_download_options">Opzioni di download</string>
-    <string name="piko_copy_media_link">Copia il link del media</string>
+    <string name="piko_copy_media_link">Copia il link multimediale</string>
     <string name="piko_copied_media_link">Link multimediale copiato</string>
     <string name="piko_download_all">Scarica tutto</string>
     <string name="piko_downloading_media">Scaricando: </string>
     <string name="piko_downloaded_media">Scaricato: </string>
     <string name="piko_media_exists">Il file multimediale esiste</string>
     <string name="piko_download_failed_media">Download fallito: </string>
+    <string name="piko_download_set_path">Scegli cartella download</string>
     <string name="piko_download_set_path_success">Cartella di download aggiornata!</string>
+    <string name="piko_download_set_path_failed">Impossibile salvare la cartella di download</string>
+    <string name="piko_download_choose_folder">Scegli una cartella di download per continuare</string>
     <string name="piko_download_with_external_downloader">Scarica con downloader esterno</string>
     <string name="piko_external_downloader_package_name">Nome del pacchetto del downloader esterno</string>
     <string name="piko_external_downloader_package_name_not_found">Nome del pacchetto del downloader esterno non trovato</string>
@@ -201,5 +204,13 @@ Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma s
     <string name="piko_action_bar_button_ghost_mode_icon">Icona modalità fantasma</string>
     <string name="piko_settings_on_action_bar">Impostazioni Piko sulla barra delle azioni</string>
     <string name="piko_settings_on_action_bar_desc">Sposta l\'apertura delle impostazioni Piko nella barra delle azioni principale del feed</string>
+    <!-- Developer Options Section -->
     <!-- Story filters -->
+    <string name="piko_reel_type_private_story">Storia privata</string>
+    <string name="piko_user_type_unverified">Utenti non verificati</string>
+    <string name="piko_user_type_verified">Utenti verificati</string>
+    <string name="piko_filter_story_minimum_item_count">Oggetti minimi della storia</string>
+    <string name="piko_filter_story_minimum_item_count_desc">Le storie che hanno meno di x elementi saranno nascoste (predefinito 1)</string>
+    <string name="piko_filter_story_maximum_item_count">Oggetti minimi della storia</string>
+    <string name="piko_filter_story_maximum_item_count_desc">Le storie che hanno più di x elementi saranno nascoste (predefinito 9999)</string>
 </resources>

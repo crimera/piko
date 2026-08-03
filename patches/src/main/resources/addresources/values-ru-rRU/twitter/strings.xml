@@ -84,8 +84,8 @@
     <string name="piko_native_reader_mode_cache_delete">Удалить кэш режима чтения</string>
     <string name="piko_native_reader_mode_cache_delete_success">Кэш успешно удалён</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Не удалось удалить кэш</string>
-    <string name="piko_title_native_share_menu">Системное меню «Поделиться»</string>
-    <string name="piko_native_share_menu_toggle">Включить системное меню «Поделиться»</string>
+    <string name="piko_title_native_share_menu">Нативное меню «Поделиться»</string>
+    <string name="piko_native_share_menu_toggle">Включить нативное меню «Поделиться»</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Реклама</string>
     <string name="piko_pref_hide_promoted_posts">Скрыть продвигаемые посты</string>
@@ -121,7 +121,7 @@
     <string name="piko_pref_hide_fab_menu">Скрывать кнопки плавающего меню</string>
     <string name="piko_pref_rec_users">Скрывать рекомендуемых пользователей</string>
     <string name="piko_pref_hide_view_count">Скрывать количество просмотров</string>
-    <string name="piko_pref_custom_share_domain">Кастомный домен ссылки</string>
+    <string name="piko_pref_custom_share_domain">Пользовательский домен для обмена</string>
     <string name="piko_pref_custom_share_domain_desc">Изменить домен ссылки на пост</string>
     <string name="piko_pref_show_sensitive_media">Показывать деликатный контент</string>
     <string name="piko_pref_selectable_text">Включить копирование текста</string>
@@ -255,17 +255,117 @@
     <string name="piko_settings_supported_links">Открывать поддерживаемые ссылки</string>
     <!-- For arrays-->
     <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_money">Деньги</string>
     <string name="piko_array_xchat">X Чат</string>
+    <string name="piko_array_x_lite">Новый X Android</string>
+    <string name="piko_array_conference">Конференция</string>
+    <string name="piko_array_creator_studio">Творческая студия</string>
+    <string name="piko_array_jobs">Вакансии</string>
+    <string name="piko_array_media">Мультимедиа</string>
     <string name="piko_array_light_mode">Светлая тема</string>
     <!-- App icon strings -->
+    <string name="piko_app_icon_thanks">Спасибо @NeoFreeBird за иконки приложений из iOS</string>
     <string name="piko_app_icon_piko_exclusive">(Эксклюзивно для Piko)</string>
     <!-- Category -->
+    <string name="piko_app_icon_category_legacy">Архивные</string>
+    <string name="piko_app_icon_category_seasonal_event">Сезонные события</string>
+    <string name="piko_app_icon_category_sports">Спорт</string>
+    <string name="piko_app_icon_category_cultural_and_celebrations">Культурные события и празднования</string>
+    <string name="piko_app_icon_category_pride">Pride</string>
+    <string name="piko_app_icon_category_misc">Разное</string>
+    <string name="piko_app_icon_category_space">Космос</string>
+    <string name="piko_app_icon_category_movies_n_series">Фильмы и сериалы</string>
     <!-- Icon names -->
     <string name="piko_app_icon_name_default">По умолчанию</string>
     <string name="piko_app_icon_name_legacy_icon_1">Старая иконка 1</string>
     <string name="piko_app_icon_name_legacy_icon_2">Старая иконка 2</string>
     <string name="piko_app_icon_name_legacy_icon_3">Старая иконка 3</string>
     <string name="piko_app_icon_name_legacy_icon_4">Старая иконка 4</string>
+    <string name="piko_app_icon_name_legacy_blue">Архивный синий</string>
+    <string name="piko_app_icon_name_twitter_blue">Twitter Blue</string>
+    <string name="piko_app_icon_name_earth">Земля</string>
+    <string name="piko_app_icon_name_moon">Луна</string>
+    <string name="piko_app_icon_name_mars">Марс</string>
+    <string name="piko_app_icon_name_sun">Солнце</string>
+    <string name="piko_app_icon_name_stars">Звёзды</string>
+    <string name="piko_app_icon_name_milky_way">Млечный Путь</string>
+    <string name="piko_app_icon_name_autumn_2021">Осень 2021</string>
+    <string name="piko_app_icon_name_autumn_2022">Осень 2022</string>
+    <string name="piko_app_icon_name_south_spring_2021">Южная весна 2021</string>
+    <string name="piko_app_icon_name_south_spring_2022">Южная весна 2022</string>
+    <string name="piko_app_icon_name_winter_1">Зимняя 1</string>
+    <string name="piko_app_icon_name_winter_2">Зимняя 2</string>
+    <string name="piko_app_icon_name_summer_1">Летняя 1</string>
+    <string name="piko_app_icon_name_summer_2">Летняя 2</string>
+    <string name="piko_app_icon_name_autumn_southern">Осенняя Юга</string>
+    <string name="piko_app_icon_name_summer">Летняя</string>
+    <string name="piko_app_icon_name_winter">Зимняя</string>
+    <string name="piko_app_icon_name_beijing_olympics_1">Олимпийские игры в Пекине 1</string>
+    <string name="piko_app_icon_name_beijing_olympics_2">Олимпийские игры в Пекине 2</string>
+    <string name="piko_app_icon_name_daytona">Daytona</string>
+    <string name="piko_app_icon_name_formulaone">Формула 1</string>
+    <string name="piko_app_icon_name_kentucky_derby">Кентукский Дерби</string>
+    <string name="piko_app_icon_name_mlb">Главная лига бейсбола (MLB)</string>
+    <string name="piko_app_icon_name_nba">Национальная баскетбольная ассоциация (NBA)</string>
+    <string name="piko_app_icon_name_nba_2">NBA 2</string>
+    <string name="piko_app_icon_name_ncaa">Национальная ассоциация студенческого спорта (NCAA)</string>
+    <string name="piko_app_icon_name_masters">Мастер спорта</string>
+    <string name="piko_app_icon_name_nba_finals">Финал НБА</string>
+    <string name="piko_app_icon_name_stanley_cup">Кубок Стэнли</string>
+    <string name="piko_app_icon_name_commonwealth">Содружество</string>
+    <string name="piko_app_icon_name_mothers_day">День матери</string>
+    <string name="piko_app_icon_name_womansday">Женский день</string>
+    <string name="piko_app_icon_name_halloween_2021">Хэллоуин 2021</string>
+    <string name="piko_app_icon_name_halloween_2022">Хэллоуин 2022</string>
+    <string name="piko_app_icon_name_halloween_2024_1">Хэллоуин 2024 1</string>
+    <string name="piko_app_icon_name_halloween_2024_2">Хэллоуин 2024 2</string>
+    <string name="piko_app_icon_name_halloween_2024_3">Хэллоуин 2024 3</string>
+    <string name="piko_app_icon_name_holi">Праздник Холи</string>
+    <string name="piko_app_icon_name_stpatricks_day">День святого Патрика</string>
+    <string name="piko_app_icon_name_easter">Пасха</string>
+    <string name="piko_app_icon_name_anzac">Anzac</string>
+    <string name="piko_app_icon_name_ramadan">Рамадан</string>
+    <string name="piko_app_icon_name_black_history">История чернокожих</string>
+    <string name="piko_app_icon_name_eurovisionfinal">Финал \"Евровидение\"</string>
+    <string name="piko_app_icon_name_lunar_new_year_1">Китайский Новый год 1</string>
+    <string name="piko_app_icon_name_lunar_new_year_2">Китайский Новый год 2</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_1">Японский Новый год 1</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_2">Японский Новый год 2</string>
+    <string name="piko_app_icon_name_may_the_fourth">День «Звёздных войн»</string>
+    <string name="piko_app_icon_name_barbie">Барби</string>
+    <string name="piko_app_icon_name_thanksgiving_1">День Благодарения 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2">День Благодарения 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_1">День Благодарения 2024 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_2">День Благодарения 2024 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_3">День Благодарения 2024 3</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_4">День Благодарения 2024 4</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_5">День Благодарения 2024 5</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_6">День Благодарения 2024 6</string>
+    <string name="piko_app_icon_name_canada_day">День Канады</string>
+    <string name="piko_app_icon_name_canada_indigenous">Коренные народы Канады</string>
+    <string name="piko_app_icon_name_earth_hour">Час Земли</string>
+    <string name="piko_app_icon_name_euro">Евро</string>
+    <string name="piko_app_icon_name_independence_day">День независимости</string>
+    <string name="piko_app_icon_name_juneteenth">День эмансипации</string>
+    <string name="piko_app_icon_name_naidoc">Naidoc</string>
+    <string name="piko_app_icon_name_christmas_2024_1">Рождество 2024 1</string>
+    <string name="piko_app_icon_name_christmas_2024_2">Рождество 2024 2</string>
+    <string name="piko_app_icon_name_christmas_2024_3">Рождество 2024 3</string>
+    <string name="piko_app_icon_name_christmas_2024_4">Рождество 2024 4</string>
+    <string name="piko_app_icon_name_upsidedown">Вверх ногами</string>
+    <string name="piko_app_icon_name_games_chamber">Games Chamber</string>
+    <string name="piko_app_icon_name_pridesouthern">Гордость Юга</string>
+    <string name="piko_app_icon_name_newzealand_pride_1">Гордость Новой Зеландии 1</string>
+    <string name="piko_app_icon_name_newzealand_pride_2">Гордость Новой Зеландии 2</string>
+    <string name="piko_app_icon_name_pride_month">Месяц гордости</string>
+    <string name="piko_app_icon_name_fancy">Шик</string>
+    <string name="piko_app_icon_name_broken">Сломанная</string>
+    <string name="piko_app_icon_name_cyber">Кибер</string>
+    <string name="piko_app_icon_name_soft_pastel_pink">Нежно-розовый</string>
+    <string name="piko_app_icon_name_electric_indigo">Электрический индиго</string>
+    <string name="piko_app_icon_name_neon_pink">Неоновый Розовый</string>
+    <string name="piko_app_icon_name_tropical_teal">Тропический бирюзовый</string>
+    <string name="piko_app_icon_name_vivid_orange">Ярко-оранжевый</string>
     <!-- Import / export login tokens -->
     <string name="piko_login_token_export_screen_description">"Эта функция экспортирует токены сессии для текущего вошедшего аккаунта.
 
@@ -275,7 +375,7 @@
 
 Для получения подробных сведений, пожалуйста, ознакомьтесь с этой страницей:
 https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
-Рекомендуется прочитать ее перед использованием этой функции. Она содержит важную информацию, например, о том, как импортировать токены"</string>
+Рекомендуется прочитать ее перед использованием этой функции. Она содержит важную информацию, например, о том, как импортировать токены."</string>
     <string name="piko_login_token_select_account">Выберите аккаунт:</string>
     <string name="piko_login_token_export_copy_to_clipboard">Копировать в буфер обмена</string>
     <string name="piko_login_token_export_save_to_file">Сохранить в файл</string>

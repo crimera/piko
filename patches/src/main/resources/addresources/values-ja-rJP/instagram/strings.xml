@@ -66,6 +66,8 @@
     <string name="piko_disable_double_tap_to_like">ダブルタップでの「いいね！」を無効化</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">その他</string>
+    <string name="piko_material_you_title">Material You</string>
+    <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">分析データの送信を無効化</string>
     <string name="piko_delete_analytics_cache">分析キャッシュを削除</string>
     <string name="piko_disable_analytics_desc">InstagramとFacebookのサーバーへ送信される分析データをブロックします</string>
@@ -101,6 +103,11 @@
     <string name="piko_copy_full_name">名前をコピー</string>
     <string name="piko_copy_user_id">ユーザーIDをコピー</string>
     <string name="piko_copy_bio">自己紹介をコピー</string>
+    <string name="piko_view_profile_picture">プロフィール画像を表示</string>
+    <string name="piko_copy_profile_link">プロフィールリンクをコピー</string>
+    <string name="piko_share_this_profile">プロフィールを共有</string>
+    <string name="piko_copy_links_from_bio">プロフィールからリンクをコピー</string>
+    <string name="piko_no_links_in_bio">このプロフィールにリンクはありません</string>
     <string name="piko_download_profile_picture">プロフィール画像をダウンロード</string>
     <string name="piko_copied">コピーしました</string>
     <string name="piko_more_profile_options">プロフィールのオプション</string>
@@ -221,6 +228,13 @@
     <string name="piko_action_bar_button_profile_info_icon">プロフィール情報</string>
     <string name="piko_settings_on_action_bar">Piko設定をアクションバーに表示</string>
     <string name="piko_settings_on_action_bar_desc">Piko設定をメインフィード上部のアクションバーに移動します</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_rec_flags">おすすめの機能フラグ</string>
+    <string name="piko_category_rec_flags_desc">コミュニティが提案した開発者フラグです</string>
+    <string name="piko_rec_flags_read_error">キャッシュされたフラグファイルの読み込みに失敗しました</string>
+    <string name="piko_rec_flags_no_file">おすすめのフラグファイルが見つかりません</string>
+    <string name="piko_rec_flags_refresh_file">フラグを更新</string>
+    <string name="piko_rec_flags_last_modified_at">最終更新: %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">コンテンツをフィルタリング</string>
     <string name="piko_filter_story">ストーリーをフィルタリング</string>

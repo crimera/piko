@@ -221,6 +221,7 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_action_bar_button_profile_info_icon">Ikon info profil</string>
     <string name="piko_settings_on_action_bar">Pengaturan Piko di bilah tindakan</string>
     <string name="piko_settings_on_action_bar_desc">Pindahkan titik masuk pengaturan Piko ke bilah tindakan feed utama</string>
+    <!-- Developer Options Section -->
     <!-- Story filters -->
     <string name="piko_category_filter_content">Saring konten</string>
     <string name="piko_filter_story">Saring Cerita</string>

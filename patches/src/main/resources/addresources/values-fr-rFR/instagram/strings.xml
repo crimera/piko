@@ -66,6 +66,8 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_disable_double_tap_to_like">Désactiver le double appui pour aimer</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Divers</string>
+    <string name="piko_material_you_title">Material You</string>
+    <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Désactiver les analyses</string>
     <string name="piko_delete_analytics_cache">Supprimer le cache des analyses</string>
     <string name="piko_disable_analytics_desc">Bloquer les analyses envoyées aux serveurs Instagram/Facebook</string>
@@ -101,6 +103,11 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_copy_full_name">Copier le nom complet</string>
     <string name="piko_copy_user_id">Copier l\'identifiant utilisateur</string>
     <string name="piko_copy_bio">Copier la bio</string>
+    <string name="piko_view_profile_picture">Voir la photo de profil</string>
+    <string name="piko_copy_profile_link">Copier le lien du profil</string>
+    <string name="piko_share_this_profile">Partager ce profil</string>
+    <string name="piko_copy_links_from_bio">Copier les liens de la bio</string>
+    <string name="piko_no_links_in_bio">Aucun lien dans cette bio</string>
     <string name="piko_download_profile_picture">Télécharger la photo de profil</string>
     <string name="piko_copied">Copié</string>
     <string name="piko_more_profile_options">Plus d’options de profil</string>
@@ -221,6 +228,13 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_action_bar_button_profile_info_icon">Icône des informations du profil</string>
     <string name="piko_settings_on_action_bar">Paramètres de Piko sur la barre d’actions</string>
     <string name="piko_settings_on_action_bar_desc">Déplacer le point d’entrée des paramètres de Piko vers la barre d’actions du fil principal</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_rec_flags">Flags recommandés</string>
+    <string name="piko_category_rec_flags_desc">Flags de développeur suggérés par la communauté</string>
+    <string name="piko_rec_flags_read_error">Échec de la lecture du fichier de flags en cache</string>
+    <string name="piko_rec_flags_no_file">Fichier de flags recommandés introuvable</string>
+    <string name="piko_rec_flags_refresh_file">Actualiser les flags</string>
+    <string name="piko_rec_flags_last_modified_at">Dernière modification : %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">Filtrer le contenu</string>
     <string name="piko_filter_story">Filtrer la story</string>

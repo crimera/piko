@@ -203,5 +203,6 @@
     <string name="piko_action_bar_button_profile_info_icon">個人檔案圖標</string>
     <string name="piko_settings_on_action_bar">操作列上顯示 Piko 設定</string>
     <string name="piko_settings_on_action_bar_desc">將 Piko 設定入口移至動態首頁的操作列上</string>
+    <!-- Developer Options Section -->
     <!-- Story filters -->
 </resources>

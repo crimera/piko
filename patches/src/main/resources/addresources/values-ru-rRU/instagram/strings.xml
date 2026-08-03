@@ -221,6 +221,7 @@
     <string name="piko_action_bar_button_profile_info_icon">Иконка информации профиля</string>
     <string name="piko_settings_on_action_bar">Кнопка настроек Piko на панели действий</string>
     <string name="piko_settings_on_action_bar_desc">Переместить кнопку настроек Piko на панель действий главной ленты</string>
+    <!-- Developer Options Section -->
     <!-- Story filters -->
     <string name="piko_category_filter_content">Фильтрация контента</string>
     <string name="piko_filter_story">Фильтрация историй</string>

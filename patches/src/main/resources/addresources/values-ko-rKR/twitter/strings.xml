@@ -201,6 +201,8 @@
     <string name="piko_pref_customisation_post_font_size">게시물 폰트 사이즈</string>
     <string name="piko_pref_customisation_search_type_ahead">숨겨질 검색어 추천</string>
     <string name="piko_pref_customisation_change_app_icon">앱 아이콘 변경하기</string>
+    <string name="piko_pref_dynamic_color">동적 색상</string>
+    <string name="piko_pref_dynamic_color_desc">사용자의 Material You 팔레트를 앱 전체 테마에 적용합니다. 앱 아이콘에도 동적 색상을 적용하려면 \'Piko 설정 &gt; 사용자 정의 &gt; 앱 아이콘 변경하기\'로 이동하세요</string>
     <string name="piko_notifications_tab_priority">우선순위</string>
     <string name="piko_pref_customisation_more_info_on_profile">프로필 정보 더보기</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">프로필 페이지에 더 자세한 정보를 추가합니다</string>
@@ -283,6 +285,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">이전 아이콘 4</string>
     <string name="piko_app_icon_name_legacy_blue">이전 블루</string>
     <string name="piko_app_icon_name_twitter_blue">트위터 블루</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">지구</string>
     <string name="piko_app_icon_name_moon">달</string>
     <string name="piko_app_icon_name_mars">화성</string>

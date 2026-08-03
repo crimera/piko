@@ -201,6 +201,8 @@
     <string name="piko_pref_customisation_post_font_size">ポストのフォントサイズ</string>
     <string name="piko_pref_customisation_search_type_ahead">検索候補から非表示にする項目</string>
     <string name="piko_pref_customisation_change_app_icon">アプリアイコンを変更</string>
+    <string name="piko_pref_dynamic_color">Dynamic color</string>
+    <string name="piko_pref_dynamic_color_desc">ユーザーのMaterial Youパレットをアプリ全体のテーマに適用します。アプリのアイコンにMaterial Youを適用するには、Piko設定 &gt; カスタマイズ &gt; アプリアイコンを変更から変更できます</string>
     <string name="piko_notifications_tab_priority">優先度</string>
     <string name="piko_pref_customisation_more_info_on_profile">プロフィールの詳細</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">プロフィールページに詳細情報を追加します</string>
@@ -283,6 +285,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">Legacy Icon 4</string>
     <string name="piko_app_icon_name_legacy_blue">Legacy Blue</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Blue</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">Earth</string>
     <string name="piko_app_icon_name_moon">Moon</string>
     <string name="piko_app_icon_name_mars">Mars</string>

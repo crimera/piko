@@ -66,6 +66,8 @@
     <string name="piko_disable_double_tap_to_like">두 번 탭하여 좋아요 비활성화</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">기타</string>
+    <string name="piko_material_you_title">Material You</string>
+    <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">분석 비활성화</string>
     <string name="piko_delete_analytics_cache">분석 캐시 삭제</string>
     <string name="piko_disable_analytics_desc">Instagram/Facebook 서버로 전송되는 분석 데이터를 차단합니다</string>
@@ -101,6 +103,11 @@
     <string name="piko_copy_full_name">이름 복사</string>
     <string name="piko_copy_user_id">사용자 ID 복사</string>
     <string name="piko_copy_bio">소개 복사</string>
+    <string name="piko_view_profile_picture">프로필 사진 보기</string>
+    <string name="piko_copy_profile_link">프로필 링크 복사</string>
+    <string name="piko_share_this_profile">이 프로필 공유</string>
+    <string name="piko_copy_links_from_bio">소개에 있는 링크 복사</string>
+    <string name="piko_no_links_in_bio">이 소개에는 링크가 없습니다</string>
     <string name="piko_download_profile_picture">프로필 사진 다운로드</string>
     <string name="piko_copied">복사하였습니다</string>
     <string name="piko_more_profile_options">프로필 옵션 더보기</string>
@@ -221,6 +228,13 @@
     <string name="piko_action_bar_button_profile_info_icon">프로필 정보 아이콘</string>
     <string name="piko_settings_on_action_bar">Piko 설정을 액션바로 이동</string>
     <string name="piko_settings_on_action_bar_desc">Piko 설정 버튼을 메인 피드 액션바로 이동합니다</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_rec_flags">권장 플래그</string>
+    <string name="piko_category_rec_flags_desc">커뮤니티에서 제안한 개발자 플래그</string>
+    <string name="piko_rec_flags_read_error">캐시된 플래그 파일을 읽을 수 없습니다</string>
+    <string name="piko_rec_flags_no_file">권장 플래그 파일을 찾을 수 없습니다</string>
+    <string name="piko_rec_flags_refresh_file">플래그 새로고침</string>
+    <string name="piko_rec_flags_last_modified_at">마지막 수정일: %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">콘텐츠 필터</string>
     <string name="piko_filter_story">스토리 필터</string>

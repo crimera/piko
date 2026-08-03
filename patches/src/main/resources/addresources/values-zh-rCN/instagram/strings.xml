@@ -193,5 +193,6 @@
     <string name="piko_action_bar_button_profile_info_icon">个人资料图标</string>
     <string name="piko_settings_on_action_bar">操作栏上的 Piko 设置</string>
     <string name="piko_settings_on_action_bar_desc">移动Piko 设置到主页操作栏</string>
+    <!-- Developer Options Section -->
     <!-- Story filters -->
 </resources>

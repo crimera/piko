@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Settings Search -->
+    <string name="piko_settings_search_hint">Cerca impostazioni Piko</string>
+    <string name="piko_settings_search_clear">Cancella ricerca</string>
+    <string name="piko_settings_search_no_results">Nessun risultato per \"%s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Abilita annulla i post</string>
@@ -33,9 +36,15 @@
     <string name="piko_pref_native_page_desc">Queste caratteristiche native di Piko sono disponibili nel menu dei post.</string>
     <string name="piko_title_native_downloader">Scaricatore nativo</string>
     <string name="piko_title_native_downloader_toggle">Abilita lo scaricatore nativo</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res">Scarica automaticamente alla risoluzione video più alta</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">Salta la finestra di selezione e scarica immediatamente alla migliore risoluzione disponibile per i singoli video.</string>
+    <string name="piko_pref_native_downloader_show_download_icon">Mostra icona download</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">Mostra l\'icona copia</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">Mostra icona varianti</string>
     <string name="piko_pref_native_downloader_inline_button">Aggiungi pulsante download per i post</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Aggiunge un pulsante di download direttamente alla barra delle azioni del post</string>
     <string name="piko_pref_native_downloader_alert_title">Scarica media</string>
+    <string name="piko_video_variants">Varianti video</string>
     <string name="piko_pref_native_downloader_download_all">Scarica tutto</string>
     <string name="piko_pref_native_downloader_no_media">Nessun media trovato</string>
     <string name="piko_pref_native_downloader_filename_title">Salva modello del nome del file</string>
@@ -233,6 +242,7 @@
     <string name="piko_pref_patch_info">Informazioni sulle Patch</string>
     <string name="piko_pref_version_info">Informazioni sulla Versione</string>
     <string name="piko_changelogs_title">Registro delle modifiche</string>
+    <string name="piko_debug">Debug Piko</string>
     <string name="piko_pref_patches">Le patch</string>
     <string name="piko_pref_included">Incluso</string>
     <string name="piko_pref_excluded">Escluso</string>
@@ -377,4 +387,6 @@ Si consiglia di leggerlo prima di usare questa funzione. Include alcune note imp
     <string name="piko_login_token_import_success_reopen_required">Riapri l\'app</string>
     <string name="piko_login_token_import_failed_missing_info">Errore: mancano \"username\" o \"token\" o \"secret\"</string>
     <string name="piko_login_token_import_failed_already_exist">Impossibile aggiungere l\'account (potrebbe già essere stato aggiunto)</string>
+    <string name="piko_ok">OK</string>
+    <string name="piko_cancel">Annulla</string>
 </resources>

@@ -221,6 +221,7 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_action_bar_button_profile_info_icon">Profil bilgisi simgesi</string>
     <string name="piko_settings_on_action_bar">Piko ayarları eylem çubuğunda</string>
     <string name="piko_settings_on_action_bar_desc">Piko ayarları butonunu ana akış eylem çubuğuna taşı</string>
+    <!-- Developer Options Section -->
     <!-- Story filters -->
     <string name="piko_category_filter_content">İçeriği filtrele</string>
     <string name="piko_filter_story">Hikaye filtrele</string>

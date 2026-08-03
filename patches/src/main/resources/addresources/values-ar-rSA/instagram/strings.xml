@@ -65,5 +65,6 @@
     <string name="piko_tap_here">إضغط هنا !!</string>
     <!-- Action Bar Section -->
     <string name="piko_action_bar_button_settings_icon">أيقونة الإعدادات</string>
+    <!-- Developer Options Section -->
     <!-- Story filters -->
 </resources>

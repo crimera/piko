@@ -223,6 +223,7 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_action_bar_button_profile_info_icon">Icono de información de perfil</string>
     <string name="piko_settings_on_action_bar">Ajustes de Piko en el feed principal</string>
     <string name="piko_settings_on_action_bar_desc">Mueve el acceso a los ajustes de Piko a la barra superior en el feed principal</string>
+    <!-- Developer Options Section -->
     <!-- Story filters -->
     <string name="piko_category_filter_content">Filtrar contenido</string>
     <string name="piko_filter_story">Historia de filtro</string>

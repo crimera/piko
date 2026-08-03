@@ -24,7 +24,7 @@
     <string name="piko_pref_download_media_link_handle_download">Bezpośrednie pobieranie</string>
     <string name="piko_pref_download_media_link_handle_copy_link">Bezpośrednie kopiowanie linku</string>
     <string name="piko_pref_download_media_link_handle_always_ask">Zawsze pytaj</string>
-    <string name="piko_pref_download_media_link_handle_copy_media_link">Skopiuj link</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">Kopiuj link</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Udostępnij link</string>
     <string name="piko_pref_external_downloader_toggle">Włącz zewnętrzne pobieranie</string>
     <string name="piko_pref_external_downloader_text">Pobierz przez zewnętrzną aplikację</string>
@@ -80,7 +80,7 @@
     <string name="piko_native_reader_mode_pref_text_only_mode">Tryb samego tekstu</string>
     <string name="piko_native_reader_mode_pref_hide_quoted_posts">Ukryj cytowane wpisy</string>
     <string name="piko_native_reader_mode_pref_no_grok">Bez analiz Groka</string>
-    <string name="piko_native_reader_mode_copy_post">Skopiuj link do wpisu</string>
+    <string name="piko_native_reader_mode_copy_post">Kopiuj link do wpisu</string>
     <string name="piko_native_reader_mode_cache_delete">Wyczyść pamięć podręczną</string>
     <string name="piko_native_reader_mode_cache_delete_success">Pamięć podręczna została wyczyszczona</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Nie udało się wyczyścić pamięci podręcznej</string>
@@ -201,6 +201,8 @@
     <string name="piko_pref_customisation_post_font_size">Rozmiar czcionki wpisów</string>
     <string name="piko_pref_customisation_search_type_ahead">Sugestie wyszukiwania do ukrycia</string>
     <string name="piko_pref_customisation_change_app_icon">Zmień ikonę aplikacji</string>
+    <string name="piko_pref_dynamic_color">Dynamiczny kolor</string>
+    <string name="piko_pref_dynamic_color_desc">Stosuje paletę Material You użytkownika do motywu całej aplikacji. Aby zastosować dynamiczne kolory do ikony aplikacji, przejdź do ustawień Piko &gt; Personalizacja &gt; Zmień ikonę aplikacji</string>
     <string name="piko_notifications_tab_priority">Priorytet</string>
     <string name="piko_pref_customisation_more_info_on_profile">Więcej informacji w profilu</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Dodaje więcej szczegółów na stronie profilu</string>
@@ -283,6 +285,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">Klasyczna 4</string>
     <string name="piko_app_icon_name_legacy_blue">Klasyczny błękit</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Blue</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">Ziemia</string>
     <string name="piko_app_icon_name_moon">Księżyc</string>
     <string name="piko_app_icon_name_mars">Mars</string>
@@ -377,7 +380,7 @@ Szczegóły znajdziesz na tej stronie:
 https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
 Zalecamy zapoznanie się z tym dokumentem przed użyciem funkcji. Zawiera on ważne informacje, między innymi o tym, jak importować tokeny."</string>
     <string name="piko_login_token_select_account">Wybierz konto:</string>
-    <string name="piko_login_token_export_copy_to_clipboard">Skopiuj do schowka</string>
+    <string name="piko_login_token_export_copy_to_clipboard">Kopiuj do schowka</string>
     <string name="piko_login_token_export_save_to_file">Zapisz do pliku</string>
     <string name="piko_login_token_export_no_accounts_message">Uwaga: Nie jesteś zalogowany na żadnym koncie. Aby wyeksportować tokeny, najpierw się zaloguj.</string>
     <string name="piko_login_token_import_token_button_text">Zaloguj przez token JSON</string>

@@ -201,6 +201,8 @@
     <string name="piko_pref_customisation_post_font_size">حجم خط المنشور</string>
     <string name="piko_pref_customisation_search_type_ahead">اقتراحات البحث المراد إخفاؤها</string>
     <string name="piko_pref_customisation_change_app_icon">تغيير أيقونة التطبيق</string>
+    <string name="piko_pref_dynamic_color">الألوان الديناميكية</string>
+    <string name="piko_pref_dynamic_color_desc">يطبّق لوحة ألوان Material You الخاصة بالمستخدم على مظهر التطبيق بالكامل. لتطبيق الألوان الديناميكية على أيقونة التطبيق، انتقل إلى إعدادات Piko &gt; التخصيص &gt; تغيير أيقونة التطبيق</string>
     <string name="piko_notifications_tab_priority">الأولوية</string>
     <string name="piko_pref_customisation_more_info_on_profile">المزيد من المعلومات في الملف الشخصي</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">يضيف المزيد من التفاصيل على صفحة الملف الشخصي</string>
@@ -283,6 +285,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">أيقونة قديمة 4</string>
     <string name="piko_app_icon_name_legacy_blue">الزرقاء القديمة</string>
     <string name="piko_app_icon_name_twitter_blue">تويتر الأزرق</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">الأرض</string>
     <string name="piko_app_icon_name_moon">القمر</string>
     <string name="piko_app_icon_name_mars">المريخ</string>

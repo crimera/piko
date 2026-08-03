@@ -201,6 +201,8 @@
     <string name="piko_pref_customisation_post_font_size">Taille de police des publications</string>
     <string name="piko_pref_customisation_search_type_ahead">Suggestions de recherche à masquer</string>
     <string name="piko_pref_customisation_change_app_icon">Changer l\'icône de l\'application</string>
+    <string name="piko_pref_dynamic_color">Couleurs dynamiques</string>
+    <string name="piko_pref_dynamic_color_desc">Applique la palette Material You de l’utilisateur au thème de l’application entière. Pour appliquer des couleurs dynamiques à l’icône de l’application, allez dans les paramètres de Piko &gt; Personnalisation &gt; Changer l\'icône de l\'application</string>
     <string name="piko_notifications_tab_priority">Priorité</string>
     <string name="piko_pref_customisation_more_info_on_profile">Plus d\'informations sur le profil</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Ajoute plus de détails sur la page de profil</string>
@@ -283,6 +285,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">Icône classique 4</string>
     <string name="piko_app_icon_name_legacy_blue">Classique bleu</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Bleu</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">Terre</string>
     <string name="piko_app_icon_name_moon">Lune</string>
     <string name="piko_app_icon_name_mars">Mars</string>

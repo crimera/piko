@@ -66,6 +66,8 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_disable_double_tap_to_like">Wyłącz polubienie podwójnym dotknięciem</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Różne</string>
+    <string name="piko_material_you_title">Material You</string>
+    <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Wyłącz analitykę</string>
     <string name="piko_delete_analytics_cache">Usuń pamięć podręczną analityki</string>
     <string name="piko_disable_analytics_desc">Blokuje wysyłanie danych telemetrycznych na serwery Instagrama/Facebooka</string>
@@ -91,16 +93,21 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_improve_image_viewing">Popraw jakość obrazów</string>
     <string name="piko_improve_image_viewing_desc">Wymusza pobieranie obrazów w maksymalnej rozdzielczości z serwera</string>
     <string name="piko_hide_reshare_button">Ukryj przycisk Udostępnij</string>
-    <string name="piko_copy_comment">Skopiuj komentarz</string>
+    <string name="piko_copy_comment">Kopiuj komentarz</string>
     <string name="piko_copy_comment_desc">Dodaje przycisk pozwalający skopiować treść komentarza pod postami i rolkami</string>
     <string name="piko_comment_copied_success">Skopiowano komentarz</string>
     <string name="piko_comment_copied_failed">Nie znaleziono tekstu do skopiowania</string>
     <string name="piko_save_media_comment">Zapisz multimedia z komentarzy</string>
     <string name="piko_save_media_comment_desc">Dodaje przycisk do zapisywania multimediów z komentarzy pod postami i rolkami</string>
-    <string name="piko_copy_username">Skopiuj nazwę użytkownika</string>
-    <string name="piko_copy_full_name">Skopiuj wyświetlaną nazwę</string>
-    <string name="piko_copy_user_id">Skopiuj ID użytkownika</string>
-    <string name="piko_copy_bio">Skopiuj biogram</string>
+    <string name="piko_copy_username">Kopiuj nazwę użytkownika</string>
+    <string name="piko_copy_full_name">Kopiuj wyświetlaną nazwę</string>
+    <string name="piko_copy_user_id">Kopiuj ID użytkownika</string>
+    <string name="piko_copy_bio">Kopiuj biogram</string>
+    <string name="piko_view_profile_picture">Wyświetl zdjęcie profilowe</string>
+    <string name="piko_copy_profile_link">Kopiuj link do profilu</string>
+    <string name="piko_share_this_profile">Udostępnij ten profil</string>
+    <string name="piko_copy_links_from_bio">Kopiuj linki z biogramu</string>
+    <string name="piko_no_links_in_bio">Brak linków w tym biogramie</string>
     <string name="piko_download_profile_picture">Pobierz zdjęcie profilowe</string>
     <string name="piko_copied">Skopiowano</string>
     <string name="piko_more_profile_options">Więcej opcji profilu</string>
@@ -128,7 +135,7 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_image_variants">Warianty obrazu</string>
     <string name="piko_download_audio">Pobierz sam dźwięk</string>
     <string name="piko_download_options">Opcje pobierania</string>
-    <string name="piko_copy_media_link">Skopiuj link do pliku</string>
+    <string name="piko_copy_media_link">Kopiuj link do pliku</string>
     <string name="piko_copied_media_link">Skopiowano link do pliku</string>
     <string name="piko_download_all">Pobierz wszystko</string>
     <string name="piko_downloading_media">Pobieranie: </string>
@@ -149,9 +156,9 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_download_voice_media">Pobierz wiadomość głosową</string>
     <!-- Posts Section -->
     <string name="piko_post_options">Opcje posta</string>
-    <string name="piko_copy_post_description">Skopiuj opis posta</string>
-    <string name="piko_copy_post_owner_username">Skopiuj nazwę twórcy</string>
-    <string name="piko_copy_post_owner_fullname">Skopiuj wyświetlaną nazwę twórcy</string>
+    <string name="piko_copy_post_description">Kopiuj opis posta</string>
+    <string name="piko_copy_post_owner_username">Kopiuj nazwę twórcy</string>
+    <string name="piko_copy_post_owner_fullname">Kopiuj wyświetlaną nazwę twórcy</string>
     <string name="piko_enable_more_options_on_post">Włącz więcej opcji dla postów</string>
     <string name="piko_enable_more_options_on_post_desc">Dodaje przycisk menu z dodatkowymi opcjami pod postami i rolkami (np. kopiowanie opisu, nazwy użytkownika itp.)</string>
     <string name="piko_more_options">Więcej opcji</string>
@@ -221,6 +228,13 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_action_bar_button_profile_info_icon">Ikona informacji o profilu</string>
     <string name="piko_settings_on_action_bar">Ustawienia Piko na pasku akcji</string>
     <string name="piko_settings_on_action_bar_desc">Przenosi skrót do ustawień Piko na pasek akcji strony głównej</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_rec_flags">Polecane flagi</string>
+    <string name="piko_category_rec_flags_desc">Flagi programisty sugerowane przez społeczność</string>
+    <string name="piko_rec_flags_read_error">Nie udało się odczytać pliku flag z pamięci podręcznej</string>
+    <string name="piko_rec_flags_no_file">Nie znaleziono pliku polecanych flag</string>
+    <string name="piko_rec_flags_refresh_file">Odśwież flagi</string>
+    <string name="piko_rec_flags_last_modified_at">Ostatnio zmodyfikowane: %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">Filtrowanie treści</string>
     <string name="piko_filter_story">Filtruj relacje</string>

@@ -66,6 +66,8 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_disable_double_tap_to_like">Desativar curtida por toque duplo</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Diversos</string>
+    <string name="piko_material_you_title">Material You</string>
+    <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Desativar análises</string>
     <string name="piko_delete_analytics_cache">Apagar cache de análises</string>
     <string name="piko_disable_analytics_desc">Bloqueia análises enviados para os servidores do Instagram/Facebook.</string>
@@ -164,7 +166,7 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_hide_navigation_create">Ocultar botão Criar (+)</string>
     <!-- Information Section -->
     <string name="piko_category_about">Sobre</string>
-    <string name="piko_export_pref">Preferências de exportação Piko</string>
+    <string name="piko_export_pref">Exportar preferências do Piko</string>
     <string name="piko_import_pref">Importar preferências do Piko</string>
     <string name="piko_reset_pref">Redefinir preferências do Piko</string>
     <string name="piko_reset_pref_success">Preferências do Piko excluídas</string>
@@ -221,6 +223,7 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_action_bar_button_profile_info_icon">Ícone de informações do perfil</string>
     <string name="piko_settings_on_action_bar">Configurações do Piko no feed principal</string>
     <string name="piko_settings_on_action_bar_desc">Mova o acesso às configurações do Piko para a barra superior no feed principal.</string>
+    <!-- Developer Options Section -->
     <!-- Story filters -->
     <string name="piko_category_filter_content">Filtrar conteúdo</string>
     <string name="piko_filter_story">Filtrar Stories</string>
