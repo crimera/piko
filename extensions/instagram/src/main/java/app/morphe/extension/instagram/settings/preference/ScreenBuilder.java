@@ -814,6 +814,14 @@ public class ScreenBuilder {
 
     public void buildRecommendedFlagsSection() {
 
+        addPreference(
+                helper.switchPreference(
+                        str("piko_enable_rec_flags"),
+                        str("piko_enable_rec_flags_desc"),
+                        Settings.ENABLE_RECOMMENDED_FLAGS
+                )
+        );
+
         long lastModified = Pref.getLastRecommendedFlagDownloadTimestamp();
         LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(lastModified), ZoneId.systemDefault());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd, yyyy hh:mm:ss a");
