@@ -248,6 +248,8 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_settings_on_action_bar_desc">Move Piko settings entry point to main feed action bar</string>
 
     <!-- Developer Options Section -->
+    <string name="piko_enable_rec_flags">Enable recommended flags</string>
+    <string name="piko_enable_rec_flags_desc">Applies the community-recommended flags. Turn off to ignore them entirely, even if individually enabled in a restored backup</string>
     <string name="piko_category_rec_flags">Recommended flags</string>
     <string name="piko_category_rec_flags_desc">Developer flags suggested by the community</string>
     <string name="piko_rec_flags_read_error">Failed to read cached flags file</string>
