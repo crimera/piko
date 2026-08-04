@@ -78,6 +78,7 @@ public class HookFlags {
     }
 
     private static void addRecommendedFlags(){
+        if (!Pref.enableRecommendedFlags()) return;
         Map<String, Boolean> recFlags = FlagsSharedPref.getAll();
         BOOL_FLAGS.putAll(recFlags);
     }
