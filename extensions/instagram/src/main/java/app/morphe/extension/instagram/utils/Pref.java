@@ -322,6 +322,10 @@ public class Pref {
         return Integer.valueOf(SharedPref.getStringPref(Settings.FILTER_STORY_MAX_STORY_ITEMS));
     }
 
+    public static boolean enableRecommendedFlags() {
+        return SharedPref.getBooleanPref(Settings.ENABLE_RECOMMENDED_FLAGS);
+    }
+
     public static Long getLastRecommendedFlagDownloadTimestamp() {
         return Long.valueOf(SharedPref.getStringPref(Settings.LAST_RECOMMENDED_FLAG_DOWNLOAD_TIMESTAMP));
     }
