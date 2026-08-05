@@ -38,6 +38,7 @@ public class MultiSelectListPref extends MultiSelectListPreference {
     }
 
     private void init() {
+        setSingleLineTitle(false);
         setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
