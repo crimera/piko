@@ -56,6 +56,8 @@ public final class InlineDownloadButton {
     private static final String CONTEXTUAL_POST_CLASS = "com.x.models.ContextualPost";
     private static final String DOWNLOAD_DIRECTORY = "Twitter";
     private static final String PENDING_DOWNLOADS_PREFS = "piko_xlite_inline_downloads";
+    private static final String CONFLICT_SETTING = "xlite.content.inline_download_conflict";
+    private static final ConflictBehavior DEFAULT_CONFLICT_BEHAVIOR = ConflictBehavior.SKIP;
     private static final int MAX_TRACKED_OBJECTS = 128;
     private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final List<WeakReference<InlineActionEntry>> DOWNLOAD_ACTIONS = new ArrayList<>();
@@ -423,12 +425,16 @@ public final class InlineDownloadButton {
             String postId
     ) {
         int queued = 0;
+        int exists = 0;
+        int failed = 0;
         for (int index = 0; index < downloads.size(); index++) {
-            if (enqueueDownload(context, downloads.get(index), username, postId, index, downloads.size())) {
-                queued++;
+            switch (enqueueDownload(context, downloads.get(index), username, postId, index, downloads.size())) {
+                case QUEUED -> queued++;
+                case EXISTS -> exists++;
+                case FAILED -> failed++;
             }
         }
-        showQueueResult(context, queued, downloads.size());
+        showQueueResult(context, queued, exists, failed);
     }
 
     private static void enqueueSingleDownload(
@@ -439,18 +445,16 @@ public final class InlineDownloadButton {
             int index,
             int mediaCount
     ) {
-        boolean queued = enqueueDownload(
-                context,
-                download,
-                username,
-                postId,
-                index,
-                mediaCount
-        );
-        showQueueResult(context, queued ? 1 : 0, 1);
+        EnqueueState state =
+                enqueueDownload(context, download, username, postId, index, mediaCount);
+        switch (state) {
+            case QUEUED -> Utils.showToastShort("Download started");
+            case EXISTS -> Utils.showToastShort("Already downloaded");
+            case FAILED -> Utils.showToastShort("Could not start download");
+        }
     }
 
-    private static boolean enqueueDownload(
+    private static EnqueueState enqueueDownload(
             Context context,
             DownloadItem download,
             String username,
@@ -458,7 +462,16 @@ public final class InlineDownloadButton {
             int index,
             int mediaCount
     ) {
-        String fileName = downloadFileName(username, postId, download.extension, index, mediaCount);
+        String baseFileName = downloadFileName(username, postId, download.extension, index, mediaCount);
+        String fileName;
+        try {
+            fileName = resolveTargetFileName(context, baseFileName, conflictBehavior());
+        } catch (IOException | RuntimeException exception) {
+            Logger.printException(() -> "Failed to resolve X-Lite download target", exception);
+            return EnqueueState.FAILED;
+        }
+        if (fileName == null) return EnqueueState.EXISTS;
+
         String temporaryFileName = temporaryDownloadFileName(fileName);
         try {
             DownloadManager.Request request = new DownloadManager.Request(Uri.parse(download.url))
@@ -489,10 +502,10 @@ public final class InlineDownloadButton {
                     download.url
             );
             finishPendingDownloadAsync(context, manager, downloadId);
-            return true;
+            return EnqueueState.QUEUED;
         } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to enqueue X-Lite media download", exception);
-            return false;
+            return EnqueueState.FAILED;
         }
     }
 
@@ -683,7 +696,6 @@ public final class InlineDownloadButton {
                 ? MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
                 : MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
         String relativePath = Environment.DIRECTORY_PICTURES + "/" + DOWNLOAD_DIRECTORY + "/";
-        deleteExistingMedia(resolver, collection, fileName, relativePath);
 
         ContentValues values = new ContentValues();
         values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
@@ -706,6 +718,10 @@ public final class InlineDownloadButton {
         ContentValues completed = new ContentValues();
         completed.put(MediaStore.MediaColumns.IS_PENDING, 0);
         resolver.update(destination, completed, null, null);
+
+        // Replace any pre-existing copy only after the new file is fully written, so a
+        // failed download never destroys the previously saved media.
+        deleteExistingMedia(resolver, collection, fileName, relativePath);
         return true;
     }
 
@@ -783,17 +799,102 @@ public final class InlineDownloadButton {
         return sanitized.isEmpty() ? fallback : sanitized;
     }
 
-    private static void showQueueResult(Context context, int queued, int requested) {
-        if (queued == requested) {
+    private static void showQueueResult(Context context, int queued, int exists, int failed) {
+        if (failed == 0 && exists == 0) {
             String message = queued == 1 ? "Download started" : queued + " downloads started";
             Utils.showToastShort(message);
             return;
         }
         if (queued == 0) {
+            if (failed == 0 && exists > 0) {
+                Utils.showToastShort(exists == 1 ? "Already downloaded" : exists + " media already downloaded");
+                return;
+            }
             Utils.showToastShort("Could not start download");
             return;
         }
-        Utils.showToastShort(queued + " of " + requested + " downloads started");
+        List<String> parts = new ArrayList<>();
+        parts.add(queued == 1 ? "1 download started" : queued + " downloads started");
+        if (exists > 0) parts.add(exists == 1 ? "1 already downloaded" : exists + " already downloaded");
+        if (failed > 0) parts.add(failed == 1 ? "1 failed" : failed + " failed");
+        Utils.showToastShort(String.join(", ", parts));
+    }
+
+    private static ConflictBehavior conflictBehavior() {
+        try {
+            String value = SettingsRegistry.getString(CONFLICT_SETTING);
+            if (value != null) {
+                for (ConflictBehavior behavior : ConflictBehavior.values()) {
+                    if (behavior.name().equalsIgnoreCase(value)) return behavior;
+                }
+            }
+        } catch (RuntimeException exception) {
+            Logger.printException(() -> "Failed to read X-Lite download conflict behavior", exception);
+        }
+        return DEFAULT_CONFLICT_BEHAVIOR;
+    }
+
+    @androidx.annotation.Nullable
+    private static String resolveTargetFileName(
+            Context context,
+            String baseFileName,
+            ConflictBehavior behavior
+    ) throws IOException {
+        switch (behavior) {
+            case OVERWRITE:
+                return baseFileName;
+            case SKIP:
+                return mediaExists(context, baseFileName) ? null : baseFileName;
+            case RENAME:
+                if (!mediaExists(context, baseFileName)) return baseFileName;
+                return uniqueFileName(context, baseFileName);
+            default:
+                return baseFileName;
+        }
+    }
+
+    private static String uniqueFileName(Context context, String baseFileName) throws IOException {
+        int dot = baseFileName.lastIndexOf('.');
+        String stem = dot > 0 ? baseFileName.substring(0, dot) : baseFileName;
+        String extension = dot > 0 ? baseFileName.substring(dot) : "";
+        int counter = 1;
+        while (true) {
+            String candidate = stem + "_" + counter + extension;
+            if (!mediaExists(context, candidate)) return candidate;
+            counter++;
+        }
+    }
+
+    private static boolean mediaExists(Context context, String fileName) throws IOException {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContentResolver resolver = context.getContentResolver();
+            String relativePath = Environment.DIRECTORY_PICTURES + "/" + DOWNLOAD_DIRECTORY + "/";
+            String selection = MediaStore.MediaColumns.DISPLAY_NAME + "=? AND " +
+                    MediaStore.MediaColumns.RELATIVE_PATH + "=?";
+            String[] selectionArgs = new String[]{fileName, relativePath};
+            Uri[] collections = {
+                    MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+                    MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
+            };
+            for (Uri collection : collections) {
+                try (Cursor cursor = resolver.query(
+                        collection,
+                        new String[]{MediaStore.MediaColumns._ID},
+                        selection,
+                        selectionArgs,
+                        null
+                )) {
+                    if (cursor != null && cursor.moveToFirst()) return true;
+                } catch (RuntimeException exception) {
+                    Logger.printException(() -> "Failed to query X-Lite media existence", exception);
+                }
+            }
+            return false;
+        }
+
+        File pictures = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File directory = new File(pictures, DOWNLOAD_DIRECTORY);
+        return new File(directory, fileName).isFile();
     }
 
     static Activity currentActivity() {
@@ -814,6 +915,18 @@ public final class InlineDownloadButton {
             this.context = context;
             this.post = post;
         }
+    }
+
+    private enum EnqueueState {
+        QUEUED,
+        EXISTS,
+        FAILED,
+    }
+
+    private enum ConflictBehavior {
+        OVERWRITE,
+        RENAME,
+        SKIP,
     }
 
     static final class DownloadItem {

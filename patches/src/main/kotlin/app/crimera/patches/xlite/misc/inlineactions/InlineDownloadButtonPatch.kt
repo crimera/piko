@@ -3,8 +3,10 @@ package app.crimera.patches.xlite.misc.inlineactions
 import app.crimera.patches.xlite.misc.extension.xLiteInitHook
 import app.crimera.patches.xlite.settings.Categories
 import app.crimera.patches.xlite.settings.Groups
+import app.crimera.patches.xlite.settings.choice
 import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.settingStrings
+import app.crimera.patches.xlite.settings.singleChoice
 import app.crimera.patches.xlite.settings.toggle
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
@@ -145,6 +147,18 @@ val xLiteInlineDownloadButtonPatch =
                         strings = settingStrings("piko_xlite_media_picker_copy_link"),
                         order = 300,
                         defaultValue = true,
+                    )
+                    singleChoice(
+                        id = "xlite.content.inline_download_conflict",
+                        strings = settingStrings("piko_xlite_inline_download_conflict"),
+                        order = 400,
+                        defaultValue = "skip",
+                        options =
+                            listOf(
+                                choice("overwrite", "piko_xlite_inline_download_conflict_overwrite"),
+                                choice("rename", "piko_xlite_inline_download_conflict_rename"),
+                                choice("skip", "piko_xlite_inline_download_conflict_skip"),
+                            ),
                     )
                 }
             }

@@ -60,6 +60,11 @@
     <string name="piko_xlite_inline_download_button_summary">Adds a download button directly below X-Lite posts</string>
     <string name="piko_xlite_media_picker_copy_link_title">Show copy-link button</string>
     <string name="piko_xlite_media_picker_copy_link_summary">Shows a button for copying media URLs in the download media picker</string>
+    <string name="piko_xlite_inline_download_conflict_title">When media already exists</string>
+    <string name="piko_xlite_inline_download_conflict_summary">How re-downloading a post that already has saved media is handled</string>
+    <string name="piko_xlite_inline_download_conflict_overwrite">Overwrite the existing file</string>
+    <string name="piko_xlite_inline_download_conflict_rename">Save with a new name</string>
+    <string name="piko_xlite_inline_download_conflict_skip">Skip already-downloaded media</string>
     <string name="piko_xlite_inline_actions_title">Inline actions to hide</string>
     <string name="piko_xlite_inline_actions_summary">Choose which actions are hidden below X-Lite posts</string>
     <string name="piko_xlite_inline_action_reply">Reply</string>
