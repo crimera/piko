@@ -1,6 +1,7 @@
 package app.crimera.patches.xlite.misc.shareimage
 
-import app.crimera.patches.xlite.misc.extension.xLiteInitHook
+import app.crimera.patches.xlite.misc.postoptions.SHARE_IMAGE_ACTION
+import app.crimera.patches.xlite.misc.postoptions.xLitePostOption
 import app.crimera.patches.xlite.settings.Categories
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteToggle
@@ -8,48 +9,24 @@ import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
-import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
-import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
-import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.patches.all.misc.resources.ResourceType
-import app.morphe.patches.all.misc.resources.getResourceId
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
-private const val POST_ACTION_TYPE = "Lcom/x/models/PostActionType;"
-private const val POST_OPTIONS_STATE_PREFIX = "PostOptionsState(showOptionsDialog="
-private const val POST_OPTIONS_LIST_PREFIX = ", options="
-private const val URT_POST = "Lcom/x/models/timelines/items/UrtTimelinePost;"
-private const val CONTEXT = "Landroid/content/Context;"
 private const val POST_IDENTIFIER = "Lcom/x/models/PostIdentifier;"
 private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
 private const val FUNCTION1 = "Lkotlin/jvm/functions/Function1;"
 private const val POINTER_INPUT_HANDLER = "Landroidx/compose/ui/input/pointer/PointerInputEventHandler;"
 private const val SHARE_IMAGE_HANDLER = "Lapp/morphe/extension/xlite/misc/XLiteShareImageHandler;"
-
-private object PostOptionsStateFingerprint : Fingerprint(
-    returnType = "Ljava/lang/String;",
-    filters =
-        listOf(
-            app.morphe.patcher.string(POST_OPTIONS_STATE_PREFIX),
-            app.morphe.patcher.string(POST_OPTIONS_LIST_PREFIX),
-        ),
-)
 
 private object TimelinePostStateFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
@@ -58,29 +35,6 @@ private object TimelinePostStateFingerprint : Fingerprint(
             app.morphe.patcher.string("AvailablePost(entryId="),
             app.morphe.patcher.string(", postId="),
             app.morphe.patcher.string(", timelinePostMediaState="),
-        ),
-)
-
-private object PostOptionsPresenterFingerprint : Fingerprint(
-    name = "<init>",
-    returnType = "V",
-    filters =
-        listOf(
-            fieldAccess(
-                opcode = Opcode.IPUT_OBJECT,
-                definingClass = "this",
-                type = URT_POST,
-            ),
-            fieldAccess(
-                opcode = Opcode.IPUT_OBJECT,
-                definingClass = "this",
-                type = CONTEXT,
-            ),
-            fieldAccess(
-                opcode = Opcode.IPUT_OBJECT,
-                definingClass = "this",
-                type = "Lkotlinx/coroutines/channels/e;",
-            ),
         ),
 )
 
@@ -108,12 +62,14 @@ val xLiteShareImagePatch =
             defaultValue = true,
         )
 
-        execute {
-            xLiteInitHook.fingerprint.method.addInstruction(
-                0,
-                "invoke-static/range {p0 .. p0}, $SHARE_IMAGE_HANDLER->initialize(Landroid/content/Context;)V",
-            )
+        xLitePostOption(
+            handlerDescriptor = SHARE_IMAGE_HANDLER,
+            actionName = SHARE_IMAGE_ACTION,
+            iconResourceName = "ic_vector_share",
+            order = 250,
+        )
 
+        execute {
             val timelinePostStateMatch =
                 requireMatches(
                     "X-Lite timeline-post state",
@@ -194,234 +150,5 @@ val xLiteShareImagePatch =
                     move-result-object v${modifierResult.registerA}
                 """.trimIndent(),
             )
-
-            val stateMatch = requireMatches("X-Lite post-options state", PostOptionsStateFingerprint.matchAll()).single()
-            val stateType = stateMatch.originalClassDef.type
-            val stateConstructor =
-                requireMatches(
-                    "X-Lite post-options state constructor",
-                    Fingerprint(
-                        classFingerprint = PostOptionsStateFingerprint,
-                        name = "<init>",
-                        returnType = "V",
-                        parameters =
-                            listOf(
-                                "Z",
-                                "Lcom/x/models/UserResult;",
-                                "Ljava/util/List;",
-                                "Ljava/util/Map;",
-                                "Lkotlinx/coroutines/flow/g;",
-                                "Lkotlin/jvm/functions/Function1;",
-                                "L",
-                                "L",
-                            ),
-                    ).matchAll(),
-                ).single()
-
-            stateConstructor.method.addInstructions(
-                0,
-                """
-                    invoke-static {p3}, $SHARE_IMAGE_HANDLER->addOption(Ljava/util/List;)Ljava/util/List;
-                    move-result-object p3
-                """.trimIndent(),
-            )
-
-            val labelRenderer =
-                requireMatches(
-                    "X-Lite post-options label renderer",
-                    Fingerprint(
-                        filters =
-                            listOf(
-                                fieldAccess(
-                                    opcode = Opcode.IGET_OBJECT,
-                                    definingClass = stateType,
-                                    type = "Ljava/util/Map;",
-                                ),
-                                methodCall(
-                                    opcode = Opcode.INVOKE_INTERFACE,
-                                    definingClass = "Ljava/util/Map;",
-                                    name = "get",
-                                    parameters = listOf("Ljava/lang/Object;"),
-                                    returnType = "Ljava/lang/Object;",
-                                    location = MatchAfterImmediately(),
-                                ),
-                                opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
-                            ),
-                    ).matchAll(),
-                ).single()
-            val mapGet = labelRenderer.instructionMatches[1].instruction
-            val labelResult = labelRenderer.instructionMatches[2].instruction as? OneRegisterInstruction
-                ?: throw PatchException("X-Lite post-options Map.get does not return an object register")
-            val actionRegister = mapGet.registersUsed.getOrNull(1)
-                ?: throw PatchException("X-Lite post-options Map.get has no action register")
-            if (actionRegister !in 0..15 || labelResult.registerA !in 0..15) {
-                throw PatchException("X-Lite post-options label registers exceed 4-bit encoding")
-            }
-            labelRenderer.method.addInstructions(
-                labelRenderer.instructionMatches[2].index + 1,
-                """
-                    invoke-static {v$actionRegister, v${labelResult.registerA}}, $SHARE_IMAGE_HANDLER->labelFor(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;
-                    move-result-object v${labelResult.registerA}
-                """.trimIndent(),
-            )
-
-            val iconAssignmentInstruction =
-                labelRenderer.method.instructions.withIndex().lastOrNull { (index, instruction) ->
-                    instruction.opcode == Opcode.MOVE_OBJECT_FROM16 &&
-                        index < labelRenderer.instructionMatches[1].index &&
-                        labelRenderer.method.instructions.getOrNull(index + 1)?.opcode in
-                        setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32)
-                }?.value ?: throw PatchException("X-Lite post-options icon assignment was not found")
-            val iconAssignment = iconAssignmentInstruction as? TwoRegisterInstruction
-                ?: throw PatchException("X-Lite post-options icon assignment has no registers")
-            val iconAssignmentIndex =
-                labelRenderer.method.instructions.indexOf(iconAssignmentInstruction)
-            val iconSourceRegister = iconAssignment.registerB
-            val iconResultRegister = iconAssignment.registerA
-            val iconType =
-                labelRenderer.method.instructions
-                    .take(iconAssignmentIndex)
-                    .asReversed()
-                    .firstNotNullOfOrNull { instruction ->
-                        if (instruction.opcode != Opcode.SGET_OBJECT) return@firstNotNullOfOrNull null
-                        val register = (instruction as? OneRegisterInstruction)?.registerA
-                        instruction.getReference<FieldReference>()?.takeIf {
-                            register == iconSourceRegister
-                        }?.type
-                    } ?: throw PatchException("X-Lite post-options icon type was not found")
-            val shareIconField = resolveShareIconField(iconType)
-            val nativeIconContinuation =
-                labelRenderer.method.instructions[iconAssignmentIndex + 1]
-            labelRenderer.method.addInstructionsWithLabels(
-                iconAssignmentIndex + 1,
-                """
-                    invoke-static {v$actionRegister}, $SHARE_IMAGE_HANDLER->usesShareIcon(Ljava/lang/Object;)Z
-                    move-result v$iconSourceRegister
-                    if-eqz v$iconSourceRegister, :piko_xlite_share_image_native_icon
-                    sget-object v$iconResultRegister, $shareIconField
-                """.trimIndent(),
-                ExternalLabel("piko_xlite_share_image_native_icon", nativeIconContinuation),
-            )
-
-            val presenterMatch =
-                requireMatches(
-                    "X-Lite post-options presenter",
-                    PostOptionsPresenterFingerprint.matchAll(),
-                ).single()
-            val eventHandlerClass =
-                requireMatches(
-                    "X-Lite post-options event handler class",
-                    Fingerprint(
-                        name = "<init>",
-                        returnType = "V",
-                        parameters =
-                            listOf(
-                                presenterMatch.originalClassDef.type,
-                                "L",
-                                "L",
-                                "L",
-                                "L",
-                                "L",
-                            ),
-                    ).matchAll(),
-                ).single()
-            val eventHandler =
-                requireMatches(
-                    "X-Lite post-options event handler",
-                    Fingerprint(
-                        classFingerprint = Fingerprint(
-                            definingClass = eventHandlerClass.originalClassDef.type,
-                        ),
-                        parameters = listOf("Ljava/lang/Object;"),
-                        returnType = "Ljava/lang/Object;",
-                    ).matchAll(),
-                ).single()
-            val presenterField =
-                eventHandler.originalClassDef.fields.singleOrNull {
-                    it.type == presenterMatch.originalClassDef.type
-                } ?: throw PatchException("X-Lite post-options event handler has no presenter field")
-
-            val actionFieldInstruction =
-                eventHandler.method.instructions.withIndex().singleOrNull { (index, instruction) ->
-                    val field = instruction.getReference<FieldReference>()
-                    if (instruction.opcode != Opcode.IGET_OBJECT || field?.type != POST_ACTION_TYPE) return@singleOrNull false
-
-                    val nextReference =
-                        eventHandler.method.instructions
-                            .getOrNull(index + 1)
-                            ?.getReference<MethodReference>()
-                    if (nextReference?.definingClass != "Ljava/lang/Enum;" || nextReference.name != "ordinal") {
-                        return@singleOrNull false
-                    }
-
-                    eventHandler.method.instructions
-                        .subList(maxOf(0, index - 12), index)
-                        .any { previous ->
-                            previous.getReference<MethodReference>()?.let { reference ->
-                                reference.name == "setValue" &&
-                                    reference.parameterTypes.map { it.toString() } == listOf("Ljava/lang/Object;") &&
-                                    reference.returnType == "V"
-                            } == true
-                        }
-                } ?: throw PatchException("X-Lite confirmed post-option action extraction was not found uniquely")
-            val clickActionRegister =
-                (actionFieldInstruction.value as? OneRegisterInstruction)?.registerA
-                    ?: throw PatchException("X-Lite confirmed post-option action has no register")
-            val scratchRegister =
-                eventHandler.method.instructions
-                    .getOrNull(actionFieldInstruction.index + 2)
-                    ?.let { it as? OneRegisterInstruction }
-                    ?.registerA
-                    ?: throw PatchException("X-Lite post-option ordinal result has no register")
-            if (clickActionRegister !in 0..15 || scratchRegister !in 0..15) {
-                throw PatchException("X-Lite post-option hook registers exceed 4-bit encoding")
-            }
-
-            val nativeActionDispatch =
-                eventHandler.method.instructions[actionFieldInstruction.index + 1]
-            eventHandler.method.addInstructionsWithLabels(
-                actionFieldInstruction.index + 1,
-                """
-                    move-object/from16 v$scratchRegister, p0
-                    iget-object v$scratchRegister, v$scratchRegister, $presenterField
-                    invoke-static {v$scratchRegister, v$clickActionRegister}, $SHARE_IMAGE_HANDLER->handleOptionAction(Ljava/lang/Object;Ljava/lang/Object;)Z
-                    move-result v$scratchRegister
-                    if-eqz v$scratchRegister, :piko_xlite_share_image_continue
-                    sget-object v$scratchRegister, Lkotlin/Unit;->a:Lkotlin/Unit;
-                    return-object v$scratchRegister
-                """.trimIndent(),
-                ExternalLabel("piko_xlite_share_image_continue", nativeActionDispatch),
-            )
         }
     }
-
-context(_: BytecodePatchContext)
-private fun resolveShareIconField(iconType: String): FieldReference {
-    val drawableId = getResourceId(ResourceType.DRAWABLE, "ic_vector_share")
-    val matches =
-        Fingerprint(
-            name = "<clinit>",
-            returnType = "V",
-            parameters = emptyList(),
-            filters = listOf(literal(drawableId)),
-        ).matchAll()
-    val fields =
-        matches.mapNotNull { match ->
-            val literalIndex = match.instructionMatches.single().index
-            match.method.instructions
-                .drop(literalIndex + 1)
-                .take(4)
-                .firstOrNull { instruction ->
-                    instruction.opcode == Opcode.SPUT_OBJECT &&
-                        instruction.getReference<FieldReference>()?.type == iconType
-                }?.getReference<FieldReference>()
-        }.distinctBy(FieldReference::toString)
-
-    if (fields.size != 1) {
-        throw PatchException(
-            "Expected one X-Lite share icon field, found ${fields.size}: " +
-                fields.joinToString(),
-        )
-    }
-    return fields.single()
-}

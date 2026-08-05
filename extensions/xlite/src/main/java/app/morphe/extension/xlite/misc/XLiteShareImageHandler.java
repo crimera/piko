@@ -3,12 +3,10 @@ package app.morphe.extension.xlite.misc;
 import android.app.Activity;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.xlite.utils.XLiteUtils;
-import android.app.Application;
 import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -18,7 +16,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -44,7 +41,7 @@ import kotlin.jvm.functions.Function1;
 /** Bridges X-Lite's rendered Compose post row to an Android image share intent. */
 public final class XLiteShareImageHandler {
     private static final String DEBUG_TAG = "DEBUG-share-image";
-    private static final String OPTION_NAME = "ViewDebugDialog";
+    private static final String OPTION_NAME = XLitePostOptionActions.SHARE_IMAGE_ACTION;
     private static final String SETTING_ID = "xlite.content.share_post_as_image";
     private static final String POST_IDENTIFIER_CLASS = "com.x.models.PostIdentifier";
     private static final String URT_POST_CLASS = "com.x.models.timelines.items.UrtTimelinePost";
@@ -55,69 +52,12 @@ public final class XLiteShareImageHandler {
     private static final Map<String, WeakReference<PositionCallback>> RENDERED_POSTS = new HashMap<>();
     private static final Map<String, Rect> RENDERED_BOUNDS = new HashMap<>();
     private static final Function1<Object, Object> NO_POSITION_CALLBACK = coordinates -> null;
-    private static WeakReference<Activity> resumedActivity = new WeakReference<>(null);
-    private static boolean lifecycleCallbacksRegistered;
 
     private XLiteShareImageHandler() {
     }
 
-    public static synchronized void initialize(Context context) {
-        if (lifecycleCallbacksRegistered || context == null) return;
-
-        Context applicationContext = context.getApplicationContext();
-        if (!(applicationContext instanceof Application application)) return;
-
-        application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityCreated(Activity activity, Bundle state) {
-            }
-
-            @Override
-            public void onActivityStarted(Activity activity) {
-            }
-
-            @Override
-            public void onActivityResumed(Activity activity) {
-                resumedActivity = new WeakReference<>(activity);
-            }
-
-            @Override
-            public void onActivityPaused(Activity activity) {
-                clearActivity(activity);
-            }
-
-            @Override
-            public void onActivityStopped(Activity activity) {
-            }
-
-            @Override
-            public void onActivitySaveInstanceState(Activity activity, Bundle state) {
-            }
-
-            @Override
-            public void onActivityDestroyed(Activity activity) {
-                clearActivity(activity);
-            }
-        });
-        lifecycleCallbacksRegistered = true;
-    }
-
     public static java.util.List<?> addOption(java.util.List<?> groups) {
-        if (!isEnabled() || groups == null || groups.isEmpty()) return groups;
-
-        try {
-            Object action = findAction(groups);
-            if (action == null || containsAction(groups, action)) return groups;
-
-            Object group = createOptionGroup(groups, action);
-            if (group == null) return groups;
-
-            java.util.ArrayList<Object> copy = new java.util.ArrayList<>(groups);
-            copy.add(group);
-            return copy;
-        } catch (ReflectiveOperationException exception) {
-            return groups;
-        }
+        return XLitePostOptions.addOption(groups, OPTION_NAME, isEnabled());
     }
 
     public static Function1<Object, Object> positionCallback(Object postIdentifier) {
@@ -133,13 +73,9 @@ public final class XLiteShareImageHandler {
         if (!isShareImageAction(action)) return false;
 
         try {
-            Context context = null;
-            Object post = null;
-            for (Field field : presenter.getClass().getDeclaredFields()) {
-                field.setAccessible(true);
-                if (Context.class.isAssignableFrom(field.getType())) context = (Context) field.get(presenter);
-                if (URT_POST_CLASS.equals(field.getType().getName())) post = field.get(presenter);
-            }
+            XLiteUtils.PresenterData presenterData = XLiteUtils.findPresenterData(presenter, URT_POST_CLASS);
+            Context context = presenterData.getContext();
+            Object post = presenterData.getValue();
             if (context == null || post == null) {
                 Utils.showToastShort("Could not find the selected post");
                 return true;
@@ -160,8 +96,7 @@ public final class XLiteShareImageHandler {
             return;
         }
 
-        Activity contextActivity = XLiteUtils.findActivity(context);
-        Activity activity = contextActivity != null ? contextActivity : currentActivity();
+        Activity activity = XLiteUtils.findUsableActivity(context);
         if (activity == null) {
             Log.e(DEBUG_TAG, "No activity for context " + context.getClass().getName());
             Utils.showToastShort("Could not capture the rendered post");
@@ -189,7 +124,7 @@ public final class XLiteShareImageHandler {
         return originalLabel instanceof String ? (String) originalLabel : null;
     }
 
-    public static boolean usesShareIcon(Object action) {
+    public static boolean usesIcon(Object action) {
         return isShareImageAction(action);
     }
 
@@ -260,16 +195,6 @@ public final class XLiteShareImageHandler {
             return;
         }
         shareImage(context, uri);
-    }
-
-    private static Activity currentActivity() {
-        Activity activity = resumedActivity.get();
-        if (activity == null || activity.isFinishing() || activity.isDestroyed()) return null;
-        return activity;
-    }
-
-    private static void clearActivity(Activity activity) {
-        if (resumedActivity.get() == activity) resumedActivity.clear();
     }
 
     private static Rect renderedBounds(String postId) {
@@ -352,51 +277,8 @@ public final class XLiteShareImageHandler {
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private static Object findAction(java.util.List<?> groups) throws ReflectiveOperationException {
-        for (Object group : groups) {
-            for (Object action : actions(group)) {
-                if (!(action instanceof Enum<?>)) continue;
-                return Enum.valueOf((Class<? extends Enum>) action.getClass(), OPTION_NAME);
-            }
-        }
-        return null;
-    }
-
-    private static boolean containsAction(java.util.List<?> groups, Object action) throws ReflectiveOperationException {
-        for (Object group : groups) {
-            if (actions(group).contains(action)) return true;
-        }
-        return false;
-    }
-
-    private static Object createOptionGroup(java.util.List<?> groups, Object action) throws ReflectiveOperationException {
-        Object exemplar = groups.get(0);
-        java.lang.reflect.Constructor<?> constructor = null;
-        for (java.lang.reflect.Constructor<?> candidate : exemplar.getClass().getDeclaredConstructors()) {
-            if (candidate.getParameterCount() != 1 || !java.util.List.class.isAssignableFrom(candidate.getParameterTypes()[0])) continue;
-            constructor = candidate;
-            break;
-        }
-        if (constructor == null) return null;
-
-        constructor.setAccessible(true);
-        return constructor.newInstance(java.util.Collections.singletonList(action));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static java.util.List<Object> actions(Object group) throws ReflectiveOperationException {
-        for (Field field : group.getClass().getDeclaredFields()) {
-            if (!java.util.List.class.isAssignableFrom(field.getType())) continue;
-            field.setAccessible(true);
-            Object value = field.get(group);
-            if (value instanceof java.util.List<?>) return (java.util.List<Object>) value;
-        }
-        return java.util.Collections.emptyList();
-    }
-
     private static boolean isShareImageAction(Object action) {
-        return action instanceof Enum<?> && OPTION_NAME.equals(((Enum<?>) action).name());
+        return XLitePostOptions.isAction(action, OPTION_NAME);
     }
 
     // Retained until rendered-UI capture passes device verification.

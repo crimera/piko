@@ -19,7 +19,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -61,54 +60,22 @@ public final class InlineDownloadButton {
     private static final int MAX_TRACKED_OBJECTS = 128;
     private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final List<WeakReference<InlineActionEntry>> DOWNLOAD_ACTIONS = new ArrayList<>();
-    private static WeakReference<Activity> resumedActivity = new WeakReference<>(null);
-    private static boolean lifecycleCallbacksRegistered;
+    private static boolean initialized;
     private static boolean downloadReceiverRegistered;
 
     private InlineDownloadButton() {
     }
 
     public static synchronized void initialize(Context context) {
-        if (lifecycleCallbacksRegistered || context == null) return;
+        if (initialized || context == null) return;
 
         Context applicationContext = context.getApplicationContext();
         if (!(applicationContext instanceof Application application)) return;
 
-        application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityCreated(Activity activity, Bundle state) {
-            }
-
-            @Override
-            public void onActivityStarted(Activity activity) {
-            }
-
-            @Override
-            public void onActivityResumed(Activity activity) {
-                resumedActivity = new WeakReference<>(activity);
-            }
-
-            @Override
-            public void onActivityPaused(Activity activity) {
-                clearActivity(activity);
-            }
-
-            @Override
-            public void onActivityStopped(Activity activity) {
-            }
-
-            @Override
-            public void onActivitySaveInstanceState(Activity activity, Bundle state) {
-            }
-
-            @Override
-            public void onActivityDestroyed(Activity activity) {
-                clearActivity(activity);
-            }
-        });
-        lifecycleCallbacksRegistered = true;
+        XLiteUtils.initialize(application);
         registerDownloadReceiver(application);
         resumePendingDownloads(application);
+        initialized = true;
     }
 
     public static List<?> addAction(List<?> actions, Object presenter) {
@@ -152,21 +119,23 @@ public final class InlineDownloadButton {
 
         Context context = null;
         try {
-            PresenterData presenterData = findPresenterData(presenter);
-            context = presenterData.context;
-            if (context == null || presenterData.post == null) {
+            XLiteUtils.PresenterData presenterData =
+                    XLiteUtils.findPresenterData(presenter, CONTEXTUAL_POST_CLASS);
+            context = presenterData.getContext();
+            Object post = presenterData.getValue();
+            if (context == null || post == null) {
                 Utils.showToastShort("Could not find the selected post");
                 return true;
             }
 
-            List<DownloadItem> downloads = downloadItems(mediaFor(presenterData.post));
+            List<DownloadItem> downloads = downloadItems(mediaFor(post));
             if (downloads.isEmpty()) {
                 Utils.showToastShort("No downloadable media found");
                 return true;
             }
 
-            String username = username(presenterData.post);
-            String postId = postId(presenterData.post);
+            String username = username(post);
+            String postId = postId(post);
             if (downloads.size() == 1) {
                 enqueueSingleDownload(context, downloads.get(0), username, postId, 0, 1);
             } else {
@@ -269,24 +238,11 @@ public final class InlineDownloadButton {
 
     private static Object postFor(Object presenter) {
         try {
-            return findPresenterData(presenter).post;
+            return XLiteUtils.findPresenterData(presenter, CONTEXTUAL_POST_CLASS).getValue();
         } catch (IllegalAccessException | RuntimeException exception) {
             Logger.printException(() -> "Failed to find the X-Lite inline action post", exception);
             return null;
         }
-    }
-
-    private static PresenterData findPresenterData(Object presenter) throws IllegalAccessException {
-        if (presenter == null) return new PresenterData(null, null);
-
-        Context context = null;
-        Object post = null;
-        for (Field field : presenter.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
-            if (Context.class.isAssignableFrom(field.getType())) context = (Context) field.get(presenter);
-            if (CONTEXTUAL_POST_CLASS.equals(field.getType().getName())) post = field.get(presenter);
-        }
-        return new PresenterData(context, post);
     }
 
     private static List<?> mediaFor(Object post) throws ReflectiveOperationException {
@@ -918,24 +874,9 @@ public final class InlineDownloadButton {
     }
 
     static Activity currentActivity() {
-        Activity activity = resumedActivity.get();
-        if (activity == null || activity.isFinishing() || activity.isDestroyed()) return null;
-        return activity;
+        return XLiteUtils.findUsableActivity(null);
     }
 
-    private static void clearActivity(Activity activity) {
-        if (resumedActivity.get() == activity) resumedActivity.clear();
-    }
-
-    private static final class PresenterData {
-        final Context context;
-        final Object post;
-
-        PresenterData(Context context, Object post) {
-            this.context = context;
-            this.post = post;
-        }
-    }
 
     private enum EnqueueState {
         QUEUED,

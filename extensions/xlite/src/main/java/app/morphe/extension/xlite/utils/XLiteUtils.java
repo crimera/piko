@@ -1,14 +1,17 @@
 package app.morphe.extension.xlite.utils;
 
 import android.app.Activity;
-import android.content.ClipData;
-import android.content.ClipboardManager;
+import android.app.Application;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
+import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import app.morphe.extension.shared.Utils;
 
@@ -16,8 +19,51 @@ import app.morphe.extension.shared.Utils;
  * Shared context, reflection, string, and UI utilities for X-Lite features.
  */
 public final class XLiteUtils {
+    private static WeakReference<Activity> resumedActivity = new WeakReference<>(null);
+    private static boolean lifecycleCallbacksRegistered;
 
     private XLiteUtils() {
+    }
+
+    public static synchronized void initialize(Context context) {
+        if (lifecycleCallbacksRegistered || context == null) return;
+
+        Context applicationContext = context.getApplicationContext();
+        if (!(applicationContext instanceof Application application)) return;
+
+        application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityCreated(Activity activity, Bundle state) {
+            }
+
+            @Override
+            public void onActivityStarted(Activity activity) {
+            }
+
+            @Override
+            public void onActivityResumed(Activity activity) {
+                resumedActivity = new WeakReference<>(activity);
+            }
+
+            @Override
+            public void onActivityPaused(Activity activity) {
+                clearActivity(activity);
+            }
+
+            @Override
+            public void onActivityStopped(Activity activity) {
+            }
+
+            @Override
+            public void onActivitySaveInstanceState(Activity activity, Bundle state) {
+            }
+
+            @Override
+            public void onActivityDestroyed(Activity activity) {
+                clearActivity(activity);
+            }
+        });
+        lifecycleCallbacksRegistered = true;
     }
 
     public static Activity findActivity(Context context) {
@@ -31,6 +77,47 @@ public final class XLiteUtils {
         return current instanceof Activity activity ? activity : null;
     }
 
+    public static Activity findUsableActivity(Context context) {
+        Activity activity = findActivity(context);
+        if (isUsable(activity)) return activity;
+
+        activity = resumedActivity.get();
+        return isUsable(activity) ? activity : null;
+    }
+
+    public static PresenterData findPresenterData(Object presenter, String valueTypeName)
+            throws IllegalAccessException {
+        if (presenter == null) return new PresenterData(null, null);
+
+        Context context = null;
+        Object value = null;
+        for (Class<?> type = presenter.getClass(); type != null; type = type.getSuperclass()) {
+            for (Field field : type.getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers())) continue;
+
+                boolean isContext = Context.class.isAssignableFrom(field.getType());
+                boolean isValue = valueTypeName != null && valueTypeName.equals(field.getType().getName());
+                if (!isContext && !isValue) continue;
+
+                field.setAccessible(true);
+                Object fieldValue = field.get(presenter);
+                if (context == null && isContext && fieldValue instanceof Context) {
+                    context = (Context) fieldValue;
+                }
+                if (value == null && isValue) value = fieldValue;
+            }
+        }
+        return new PresenterData(context, value);
+    }
+
+    private static void clearActivity(Activity activity) {
+        if (resumedActivity.get() == activity) resumedActivity.clear();
+    }
+
+    private static boolean isUsable(Activity activity) {
+        return activity != null && !activity.isFinishing() && !activity.isDestroyed();
+    }
+
     public static boolean isHttpUrl(String url) {
         return url != null && (url.startsWith("http://") || url.startsWith("https://"));
     }
@@ -39,6 +126,24 @@ public final class XLiteUtils {
         if (target == null || methodName == null) return null;
         Method method = target.getClass().getMethod(methodName);
         return method.invoke(target);
+    }
+
+    public static final class PresenterData {
+        private final Context context;
+        private final Object value;
+
+        private PresenterData(Context context, Object value) {
+            this.context = context;
+            this.value = value;
+        }
+
+        public Context getContext() {
+            return context;
+        }
+
+        public Object getValue() {
+            return value;
+        }
     }
 
     public static Object invokeIfPresent(Object target, String methodName) {

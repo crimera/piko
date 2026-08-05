@@ -53,6 +53,8 @@
 
     <string name="piko_xlite_share_image_title">Share post as image</string>
     <string name="piko_xlite_share_image_summary">Adds a rendered-image share action to post menus</string>
+    <string name="piko_xlite_browse_tweet_object_title">Browse tweet object</string>
+    <string name="piko_xlite_browse_tweet_object_summary">Adds a debug option to inspect the tweet object in post menus</string>
 
     <string name="piko_xlite_group_inline_actions_title">Inline actions</string>
     <string name="piko_xlite_group_inline_actions_summary">Customize post actions and media download controls</string>
