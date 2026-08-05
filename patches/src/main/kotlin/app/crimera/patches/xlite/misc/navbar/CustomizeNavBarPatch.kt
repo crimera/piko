@@ -58,7 +58,7 @@ private object XLiteTabDataFingerprint : Fingerprint(
 private const val FINGERPRINT_ANCHOR_COUNT = 4
 private const val TAB_DATA_ARG_INDEX = 9
 private const val STATE_TAB_DATA_PARAMETER_INDEX = 8
-private const val F_INIT_PARAM_COUNT = 16
+private val STATE_CONSTRUCTOR_PARAMETER_COUNTS = setOf(16, 18)
 private const val PROFILE_USER_DESCRIPTOR = "Lcom/x/models/ProfileUser;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val MAP_DESCRIPTOR = "Ljava/util/Map;"
@@ -71,13 +71,12 @@ private fun MutableMethod.findStateInitIndex(anchorIndex: Int): Int {
                 if (instruction.opcode != Opcode.INVOKE_DIRECT_RANGE) return@mapNotNull null
 
                 val range = instruction as? Instruction3rc ?: return@mapNotNull null
-                if (range.registerCount != F_INIT_PARAM_COUNT + 1) return@mapNotNull null
-
                 val reference = instruction.getReference<MethodReference>() ?: return@mapNotNull null
                 val parameters = reference.parameterTypes.map { it.toString() }
                 if (reference.name != "<init>" ||
                     reference.returnType != "V" ||
-                    parameters.size != F_INIT_PARAM_COUNT ||
+                    parameters.size !in STATE_CONSTRUCTOR_PARAMETER_COUNTS ||
+                    range.registerCount != parameters.size + 1 ||
                     parameters.getOrNull(0) != PROFILE_USER_DESCRIPTOR ||
                     parameters.getOrNull(6) != LIST_DESCRIPTOR ||
                     parameters.getOrNull(7) != MAP_DESCRIPTOR ||

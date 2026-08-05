@@ -365,7 +365,9 @@ private fun MutableMethod.staticColorFields(): List<FieldReference> =
 
 context(context: BytecodePatchContext)
 private fun patchInlineActionTints() {
-    val entryMatches = XLiteInlineActionEntryRendererFingerprint.matchAll()
+    val entryMatches =
+        XLiteInlineActionEntryRendererFingerprint.matchAllOrNull().orEmpty() +
+            XLiteInlineActionEntryRendererWithModeFingerprint.matchAllOrNull().orEmpty()
     requireExactlyOne("X-Lite inline action entry renderer", entryMatches)
     val entryMethod = entryMatches.single().method
     val tintReference =

@@ -82,3 +82,25 @@ internal object XLiteInlineActionEntryRendererFingerprint : Fingerprint(
         methodCall(smali = "$INLINE_ACTION_ENTRY_DESCRIPTOR->isEnabled()Z"),
     ),
 )
+
+/** X 12.14 changed the inline-action presentation mode from a boolean to an object. */
+internal object XLiteInlineActionEntryRendererWithModeFingerprint : Fingerprint(
+    parameters = listOf(
+        INLINE_ACTION_ENTRY_DESCRIPTOR,
+        "L",
+        "J",
+        "F",
+        "L",
+        "J",
+        "L",
+        "L",
+        MODIFIER_DESCRIPTOR,
+        COMPOSER_DESCRIPTOR,
+        "I",
+    ),
+    returnType = "V",
+    filters = listOf(
+        methodCall(smali = "$INLINE_ACTION_ENTRY_DESCRIPTOR->getActionType()$POST_ACTION_TYPE_DESCRIPTOR"),
+        methodCall(smali = "$INLINE_ACTION_ENTRY_DESCRIPTOR->isEnabled()Z"),
+    ),
+)

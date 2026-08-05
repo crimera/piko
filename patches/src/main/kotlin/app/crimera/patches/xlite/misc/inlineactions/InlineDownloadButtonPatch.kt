@@ -66,6 +66,34 @@ private object InlineActionEntryRendererFingerprint : Fingerprint(
         ),
 )
 
+/** X 12.14 changed the inline-action presentation mode from a boolean to an object. */
+private object InlineActionEntryRendererWithModeFingerprint : Fingerprint(
+    parameters =
+        listOf(
+            INLINE_ACTION_ENTRY,
+            "L",
+            "J",
+            "F",
+            "L",
+            "J",
+            "L",
+            "L",
+            MODIFIER,
+            COMPOSER,
+            "I",
+        ),
+    returnType = "V",
+    filters =
+        listOf(
+            methodCall(
+                smali = "$INLINE_ACTION_ENTRY->getActionType()$POST_ACTION_TYPE",
+            ),
+            methodCall(
+                smali = "$INLINE_ACTION_ENTRY->isEnabled()Z",
+            ),
+        ),
+)
+
 private fun requireSingle(
     label: String,
     matches: Collection<Match>,
@@ -131,7 +159,8 @@ val xLiteInlineDownloadButtonPatch =
             val inlineRenderer =
                 requireSingle(
                     "X-Lite inline-action entry renderer",
-                    InlineActionEntryRendererFingerprint.matchAll(),
+                    InlineActionEntryRendererFingerprint.matchAllOrNull().orEmpty() +
+                        InlineActionEntryRendererWithModeFingerprint.matchAllOrNull().orEmpty(),
                 )
             inlineRenderer.method.apply {
                 requireStatic("X-Lite inline-action entry renderer")
