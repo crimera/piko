@@ -721,7 +721,7 @@ public final class InlineDownloadButton {
 
         // Replace any pre-existing copy only after the new file is fully written, so a
         // failed download never destroys the previously saved media.
-        deleteExistingMedia(resolver, collection, fileName, relativePath);
+        deleteExistingMedia(resolver, collection, fileName, relativePath, destination);
         return true;
     }
 
@@ -729,15 +729,35 @@ public final class InlineDownloadButton {
             ContentResolver resolver,
             Uri collection,
             String fileName,
-            String relativePath
+            String relativePath,
+            Uri destination
     ) {
+        String destinationId = destination.getLastPathSegment();
+        if (destinationId == null) return;
+
         try {
-            String selection = MediaStore.MediaColumns.DISPLAY_NAME + "=? AND " +
-                    MediaStore.MediaColumns.RELATIVE_PATH + "=?";
-            resolver.delete(collection, selection, new String[]{fileName, relativePath});
+            resolver.delete(
+                    collection,
+                    existingMediaSelection(),
+                    existingMediaSelectionArgs(fileName, relativePath, destinationId)
+            );
         } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to replace existing X-Lite media", exception);
         }
+    }
+
+    static String existingMediaSelection() {
+        return MediaStore.MediaColumns.DISPLAY_NAME + "=? AND " +
+                MediaStore.MediaColumns.RELATIVE_PATH + "=? AND " +
+                MediaStore.MediaColumns._ID + "!=?";
+    }
+
+    static String[] existingMediaSelectionArgs(
+            String fileName,
+            String relativePath,
+            String destinationId
+    ) {
+        return new String[]{fileName, relativePath, destinationId};
     }
 
     private static boolean moveLegacyDownload(
