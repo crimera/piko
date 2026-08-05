@@ -62,6 +62,7 @@ private object XLiteHomeNavUpsellTypeFingerprint : Fingerprint(
     },
 )
 
+/** The feature-switch interface's obfuscated short name changes between releases. */
 private object XLiteHomeNavUpsellEnabledFingerprint : Fingerprint(
     returnType = "Z",
     parameters = listOf("L"),
@@ -70,7 +71,6 @@ private object XLiteHomeNavUpsellEnabledFingerprint : Fingerprint(
             string("subscriptions_enabled"),
             methodCall(
                 opcode = Opcode.INVOKE_INTERFACE,
-                definingClass = FEATURE_SWITCHES_DESCRIPTOR,
                 name = "getBoolean",
                 parameters = listOf("Ljava/lang/String;", "Z"),
                 returnType = "Z",
@@ -79,7 +79,6 @@ private object XLiteHomeNavUpsellEnabledFingerprint : Fingerprint(
             string("subscriptions_upsells_premium_home_nav_enabled"),
             methodCall(
                 opcode = Opcode.INVOKE_INTERFACE,
-                definingClass = FEATURE_SWITCHES_DESCRIPTOR,
                 name = "getBoolean",
                 parameters = listOf("Ljava/lang/String;", "Z"),
                 returnType = "Z",
