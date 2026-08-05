@@ -27,6 +27,9 @@ import app.morphe.extension.xlite.postfilter.PostFilterRuleStore;
 
 public final class XLiteTimelineFilter {
 
+    private static final String AI_SOURCE_USER_MARKED = "UserMarked";
+    private static final String AI_SOURCE_AUTO_DETECTED = "AutoDetected";
+
     private XLiteTimelineFilter() {
     }
 
@@ -59,16 +62,53 @@ public final class XLiteTimelineFilter {
         return filterTimelineItems(timelineItems, false, false, snapshot);
     }
 
+    /** Removes posts disclosed as AI-generated whose detection source is in {@code sourcesToHide}. */
+    public static Object filterAiGeneratedPosts(Object timelineItems, Set<String> sourcesToHide) {
+        Set<String> sources = parseAiSources(sourcesToHide);
+        if (sources.isEmpty()) return timelineItems;
+        return filterTimelineItems(timelineItems, false, false, null, sources);
+    }
+
+    private static Set<String> parseAiSources(Set<String> sourcesToHide) {
+        if (sourcesToHide == null || sourcesToHide.isEmpty()) return Collections.emptySet();
+        Set<String> sources = new HashSet<>();
+        for (String source : sourcesToHide) {
+            if (source != null && isSupportedAiSource(source)) sources.add(source);
+        }
+        return sources;
+    }
+
+    private static boolean isSupportedAiSource(String source) {
+        return AI_SOURCE_USER_MARKED.equals(source) || AI_SOURCE_AUTO_DETECTED.equals(source);
+    }
+
     private static Object filterTimelineItems(
             Object timelineItems,
             boolean filterPromotedItems,
             boolean hideWhoToFollow,
             PostFilterRuleStore.Snapshot ruleSnapshot
     ) {
+        return filterTimelineItems(
+                timelineItems,
+                filterPromotedItems,
+                hideWhoToFollow,
+                ruleSnapshot,
+                Collections.emptySet()
+        );
+    }
+
+    private static Object filterTimelineItems(
+            Object timelineItems,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide
+    ) {
         if (timelineItems == null) return null;
         if (!filterPromotedItems
                 && !hideWhoToFollow
-                && (ruleSnapshot == null || !ruleSnapshot.hasEnabledRules())) {
+                && (ruleSnapshot == null || !ruleSnapshot.hasEnabledRules())
+                && (aiSourcesToHide == null || aiSourcesToHide.isEmpty())) {
             return timelineItems;
         }
         if (!(timelineItems instanceof Iterable<?> iterable)) return timelineItems;
@@ -81,7 +121,8 @@ public final class XLiteTimelineFilter {
                         original,
                         filterPromotedItems,
                         hideWhoToFollow,
-                        ruleSnapshot
+                        ruleSnapshot,
+                        aiSourcesToHide
                 );
                 if (result.remove) {
                     changed = true;
@@ -102,15 +143,22 @@ public final class XLiteTimelineFilter {
             Object original,
             boolean filterPromotedItems,
             boolean hideWhoToFollow,
-            PostFilterRuleStore.Snapshot ruleSnapshot
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide
     ) {
         if (original == null) return FilterResult.keep(null);
         try {
             if (original instanceof UrtTimelineModuleItem wrapper) {
-                return filterModuleItem(wrapper, filterPromotedItems, hideWhoToFollow, ruleSnapshot);
+                return filterModuleItem(
+                        wrapper,
+                        filterPromotedItems,
+                        hideWhoToFollow,
+                        ruleSnapshot,
+                        aiSourcesToHide
+                );
             }
             if (original instanceof UrtTimelineItem item) {
-                return filterItem(item, filterPromotedItems, hideWhoToFollow, ruleSnapshot);
+                return filterItem(item, filterPromotedItems, hideWhoToFollow, ruleSnapshot, aiSourcesToHide);
             }
             return FilterResult.keep(original);
         } catch (RuntimeException exception) {
@@ -123,11 +171,18 @@ public final class XLiteTimelineFilter {
             UrtTimelineModuleItem wrapper,
             boolean filterPromotedItems,
             boolean hideWhoToFollow,
-            PostFilterRuleStore.Snapshot ruleSnapshot
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide
     ) {
         UrtTimelineItem originalItem = wrapper.getItem();
         FilterResult result =
-                filterItem(originalItem, filterPromotedItems, hideWhoToFollow, ruleSnapshot);
+                filterItem(
+                        originalItem,
+                        filterPromotedItems,
+                        hideWhoToFollow,
+                        ruleSnapshot,
+                        aiSourcesToHide
+                );
         if (result.remove) return result;
         if (result.item == originalItem) return FilterResult.keep(wrapper);
         return FilterResult.replace(wrapper.copy(
@@ -140,25 +195,53 @@ public final class XLiteTimelineFilter {
             UrtTimelineItem item,
             boolean filterPromotedItems,
             boolean hideWhoToFollow,
-            PostFilterRuleStore.Snapshot ruleSnapshot
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide
     ) {
         if (item == null) return FilterResult.keep(null);
         if (filterPromotedItems && isPromoted(item)) return FilterResult.remove();
-        if (item instanceof UrtTimelinePost post
-                && PostFilterMatcher.findMatchReason(post, ruleSnapshot) != null) {
-            return FilterResult.remove();
+        if (item instanceof UrtTimelinePost post) {
+            if (PostFilterMatcher.findMatchReason(post, ruleSnapshot) != null) {
+                return FilterResult.remove();
+            }
+            if (isAiGenerated(post, aiSourcesToHide)) return FilterResult.remove();
         }
         if (item instanceof UrtTimelineModule module) {
-            return filterModule(module, filterPromotedItems, hideWhoToFollow, ruleSnapshot);
+            return filterModule(module, filterPromotedItems, hideWhoToFollow, ruleSnapshot, aiSourcesToHide);
         }
         return FilterResult.keep(item);
+    }
+
+    private static boolean isAiGenerated(
+            UrtTimelinePost post,
+            Set<String> aiSourcesToHide
+    ) {
+        if (aiSourcesToHide == null || aiSourcesToHide.isEmpty()) return false;
+        Object disclosure = getContentDisclosure(post);
+        if (disclosure == null || !hasAiGeneratedDisclosure(disclosure)) return false;
+        Object source = getAiDetectionSource(disclosure);
+        if (!(source instanceof Enum<?> enumSource)) return false;
+        return aiSourcesToHide.contains(enumSource.name());
+    }
+
+    private static Object getContentDisclosure(UrtTimelinePost post) {
+        return null;
+    }
+
+    private static boolean hasAiGeneratedDisclosure(Object disclosure) {
+        return false;
+    }
+
+    private static Object getAiDetectionSource(Object disclosure) {
+        return null;
     }
 
     private static FilterResult filterModule(
             UrtTimelineModule module,
             boolean filterPromotedItems,
             boolean hideWhoToFollow,
-            PostFilterRuleStore.Snapshot ruleSnapshot
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide
     ) {
         if (hideWhoToFollow && isWhoToFollowModule(module)) {
             return FilterResult.remove();
@@ -181,7 +264,13 @@ public final class XLiteTimelineFilter {
             UrtTimelineItem originalItem = originalChild.getItem();
             FilterResult result;
             try {
-                result = filterItem(originalItem, filterPromotedItems, hideWhoToFollow, ruleSnapshot);
+                result = filterItem(
+                        originalItem,
+                        filterPromotedItems,
+                        hideWhoToFollow,
+                        ruleSnapshot,
+                        aiSourcesToHide
+                );
             } catch (RuntimeException exception) {
                 logFailure("timeline module child", exception);
                 filteredChildren.add(originalChild);
@@ -348,7 +437,7 @@ public final class XLiteTimelineFilter {
         return arguments == null || arguments.length == 0;
     }
 
-    private static void logFailure(String operation, RuntimeException exception) {
+    private static void logFailure(String operation, Throwable exception) {
         Logger.printException(() -> "Failed X-Lite " + operation, exception);
     }
 
