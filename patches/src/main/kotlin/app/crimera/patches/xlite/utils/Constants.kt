@@ -32,4 +32,5 @@ internal object Constants {
     const val NAV_BAR_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/NavBarFilter;"
     const val DRAWER_ITEM_FILTER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/DrawerItemFilter;"
     const val REPLY_SORTING_RESOLVER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/ReplySortingResolver;"
+    const val MEDIA_TAB_RESOLVER_DESCRIPTOR = "$EXTENSION_PACKAGE/misc/MediaTabResolver;"
 }
