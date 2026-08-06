@@ -73,7 +73,7 @@ val dynamicColorPatch =
                                 id = "xlite.theme.amoled_black",
                                 strings = settingStrings("piko_xlite_dynamic_color_amoled"),
                                 order = 200,
-                                defaultValue = false,
+                                defaultValue = true,
                                 rebootApp = true,
                             )
                         toggle(
