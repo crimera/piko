@@ -42,6 +42,17 @@ public class Helper {
         return preference;
     }
 
+    public Preference switchPreference(
+            String title,
+            String summary,
+            BooleanSetting setting,
+            Preference.OnPreferenceChangeListener listener
+    ) {
+        Preference preference = switchPreference(title, summary, setting);
+        preference.setOnPreferenceChangeListener(listener);
+        return preference;
+    }
+
     public Preference listPreference(String title, String summary, StringSetting setting) {
         ListPref preference = new ListPref(context);
         String key = setting.key;

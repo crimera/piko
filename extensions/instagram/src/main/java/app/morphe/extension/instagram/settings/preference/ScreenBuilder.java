@@ -31,6 +31,7 @@ import app.morphe.extension.instagram.settings.preference.widgets.*;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.theme.MaterialYouTheme;
 
 public class ScreenBuilder {
     private final Context context;
@@ -459,6 +460,34 @@ public class ScreenBuilder {
         if (!(SettingsStatus.miscSection())) return;
 
         // PreferenceCategory category= addCategory(str("piko_category_misc"));
+        if (MaterialYouTheme.isAmoledAvailable()) {
+            SwitchPref amoledPreference = (SwitchPref) helper.switchPreference(
+                    str("piko_amoled_title"),
+                    "",
+                    Settings.AMOLED_THEME,
+                    (preference, value) -> MaterialYouTheme.requestAmoledChange(
+                            context,
+                            Boolean.TRUE.equals(value)
+                    )
+            );
+            amoledPreference.setSwitchInteractionEnabled(
+                    MaterialYouTheme.canEnableAmoled(context)
+            );
+            addPreference(amoledPreference);
+        }
+        if (MaterialYouTheme.isMaterialYouAvailable()) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_material_you_title"),
+                            "",
+                            Settings.MATERIAL_YOU_THEME,
+                            (preference, value) -> MaterialYouTheme.requestMaterialYouChange(
+                                    context,
+                                    Boolean.TRUE.equals(value)
+                            )
+                    )
+            );
+        }
         if (SettingsStatus.unlockPlusBenefits) {
             addPreference(
                     helper.switchPreference(

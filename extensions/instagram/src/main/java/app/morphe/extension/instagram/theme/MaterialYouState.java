@@ -49,6 +49,13 @@ final class MaterialYouState {
         return hasMaterialYou(mode) ? materialYouBackgroundArgb : 0;
     }
 
+    static int composeSearchRowOverrideArgb(
+            ThemeMode mode,
+            int materialYouSearchRowArgb
+    ) {
+        return hasMaterialYou(mode) ? materialYouSearchRowArgb : 0;
+    }
+
     static long composeSearchRowBackground(
             long nativePackedColor,
             int overrideArgb
@@ -57,13 +64,6 @@ final class MaterialYouState {
             return nativePackedColor;
         }
         return ((long) overrideArgb) << 32;
-    }
-
-    static boolean shouldRequestToggleChange(
-            boolean requestedEnabled,
-            boolean currentEnabled
-    ) {
-        return requestedEnabled != currentEnabled;
     }
 
     static ThemeMode availableModeOrBase(
@@ -121,10 +121,61 @@ final class MaterialYouState {
                 == Configuration.UI_MODE_NIGHT_YES;
     }
 
+    static boolean isActivityUiModeDark(int activityUiMode) {
+        return (activityUiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    static Boolean updateObservedInstagramDark(
+            Boolean observedInstagramDark,
+            boolean pikoSettingsActivity,
+            boolean activityDark
+    ) {
+        return pikoSettingsActivity
+                ? observedInstagramDark
+                : activityDark;
+    }
+
+    static Boolean updateObservedInstagramDarkForNativeMode(
+            Boolean observedInstagramDark,
+            Integer nativeMode,
+            boolean requestedInstagramDark
+    ) {
+        return nativeMode == null
+                ? observedInstagramDark
+                : requestedInstagramDark;
+    }
+
+    static boolean resolveInstagramDark(
+            Boolean observedInstagramDark,
+            int nativeMode,
+            boolean nativeModeSynchronized,
+            int systemNightMask
+    ) {
+        int sanitizedNativeMode = sanitizeNativeThemeMode(nativeMode);
+        if (sanitizedNativeMode == 1 || sanitizedNativeMode == 2) {
+            return isEffectiveDark(sanitizedNativeMode, systemNightMask);
+        }
+        if (nativeModeSynchronized) {
+            return isEffectiveDark(sanitizedNativeMode, systemNightMask);
+        }
+        return observedInstagramDark != null
+                ? observedInstagramDark
+                : isEffectiveDark(sanitizedNativeMode, systemNightMask);
+    }
+
     static int sanitizeNativeThemeMode(int nativeMode) {
         return nativeMode == -1 || nativeMode == 1 || nativeMode == 2
                 ? nativeMode
                 : -1;
+    }
+
+    static boolean shouldPersistObservedNativeMode(
+            int currentNativeMode,
+            int observedNativeMode,
+            boolean nativeModeSynchronized
+    ) {
+        return currentNativeMode != observedNativeMode || !nativeModeSynchronized;
     }
 
     static boolean shouldPersistNativeThemeBeforeAction(
@@ -218,15 +269,15 @@ final class MaterialYouState {
 
         return nativeModeForLegacySelection(
                 parsedId,
+                unpackLegacyRadioId(packedIds, 0),
                 unpackLegacyRadioId(packedIds, 1),
-                unpackLegacyRadioId(packedIds, 2),
-                unpackLegacyRadioId(packedIds, 3)
+                unpackLegacyRadioId(packedIds, 2)
         );
     }
 
     static int unpackLegacyRadioId(int packedIds, int byteIndex) {
-        if (byteIndex < 0 || byteIndex > 3) {
-            throw new IllegalArgumentException("Legacy theme radio byte index must be 0..3");
+        if (byteIndex < 0 || byteIndex > 2) {
+            throw new IllegalArgumentException("Legacy theme radio byte index must be 0..2");
         }
         return (packedIds >>> (byteIndex * 8)) & 0xff;
     }
@@ -235,14 +286,14 @@ final class MaterialYouState {
         return resolveMode(hasMaterialYou(currentMode), enabled);
     }
 
+    static ThemeMode modeForEffectiveTheme(ThemeMode currentMode, boolean effectiveDark) {
+        return effectiveDark
+                ? currentMode
+                : modeForAmoledToggle(false, currentMode);
+    }
+
     static ThemeMode modeForNativeThemeSelection(ThemeMode currentMode) {
         return resolveMode(hasMaterialYou(currentMode), false);
     }
 
-    static boolean shouldSelectNativeDark(
-            boolean nativeDarkSelected,
-            boolean amoledEnabled
-    ) {
-        return nativeDarkSelected && !amoledEnabled;
-    }
 }

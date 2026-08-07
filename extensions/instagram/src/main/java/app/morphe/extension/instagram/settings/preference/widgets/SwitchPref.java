@@ -23,6 +23,7 @@ public class SwitchPref extends SwitchPreference {
     private boolean clickInProgress;
     private boolean pendingFromChecked;
     private boolean pendingToChecked;
+    private boolean switchInteractionEnabled = true;
 
     public SwitchPref(Context context) {
         super(context);
@@ -54,6 +55,28 @@ public class SwitchPref extends SwitchPreference {
         });
     }
 
+    public void setSwitchInteractionEnabled(boolean enabled) {
+        if (switchInteractionEnabled == enabled) {
+            return;
+        }
+        switchInteractionEnabled = enabled;
+        applySwitchInteractionState(rowView, switchView);
+        notifyChanged();
+    }
+
+    private void applySwitchInteractionState(
+            View currentRow,
+            CompoundButton currentSwitch
+    ) {
+        if (currentRow != null) {
+            currentRow.setEnabled(isEnabled() && switchInteractionEnabled);
+            currentRow.setAlpha(switchInteractionEnabled ? 1.0f : 0.5f);
+        }
+        if (currentSwitch != null) {
+            currentSwitch.setEnabled(isEnabled());
+        }
+    }
+
     @Override
     protected View onCreateView(ViewGroup parent) {
         View view = InstagramPreferenceStyle.createPreferenceView(getContext(), InstagramPreferenceStyle.TRAILING_SWITCH);
@@ -69,7 +92,7 @@ public class SwitchPref extends SwitchPreference {
         InstagramPreferenceStyle.bindSwitchAccessibility(view, isChecked());
         CompoundButton currentSwitch = InstagramPreferenceStyle.findSwitch(view);
         if (currentSwitch != null) {
-            currentSwitch.setEnabled(isEnabled());
+            applySwitchInteractionState(view, currentSwitch);
             boolean deferBinding = clickInProgress
                     && currentSwitch == switchView
                     && currentSwitch.isChecked() == pendingFromChecked
@@ -87,7 +110,8 @@ public class SwitchPref extends SwitchPreference {
 
     @Override
     protected void onClick() {
-        if (!InstagramPreferenceStyle.consumeSwitchClickAllowed(rowView)) {
+        if (!InstagramPreferenceStyle.consumeSwitchClickAllowed(rowView)
+                || !switchInteractionEnabled) {
             return;
         }
 
