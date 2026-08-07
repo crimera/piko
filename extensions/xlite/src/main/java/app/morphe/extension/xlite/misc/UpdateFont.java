@@ -110,10 +110,6 @@ public class UpdateFont {
                 : fallback;
     }
 
-    public static int emojiProcessingMode(int originalMode) {
-        return isCustomFontEnabled && textTypeface != null ? 1 : originalMode;
-    }
-
     private static Typeface processTypeface(Typeface original) {
         if (isCustomFontEnabled && textTypeface != null) {
             return styledTypeface(textTypeface, original);
