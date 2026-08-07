@@ -12,6 +12,7 @@ import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
 
@@ -37,6 +38,7 @@ public final class XLiteSettingsActivity extends Activity {
         ));
         configureSystemBars();
         configureToolbar();
+        applyCustomFontToToolbar();
         if (savedInstanceState != null) return;
 
         int containerId = ResourceUtils.getIdentifierOrThrow(
@@ -113,7 +115,20 @@ public final class XLiteSettingsActivity extends Activity {
     }
 
     public void setPageTitle(CharSequence title) {
-        if (toolbar != null) toolbar.setTitle(title);
+        if (toolbar == null) return;
+        toolbar.setTitle(title);
+        applyCustomFontToToolbar();
+    }
+
+    private void applyCustomFontToToolbar() {
+        for (int i = 0; i < toolbar.getChildCount(); i++) {
+            View child = toolbar.getChildAt(i);
+            if (child instanceof TextView) {
+                ((TextView) child).setTypeface(app.morphe.extension.xlite.misc.UpdateFont.customTypefaceOr(
+                        ((TextView) child).getTypeface()
+                ));
+            }
+        }
     }
 
     private void configureSystemBars() {

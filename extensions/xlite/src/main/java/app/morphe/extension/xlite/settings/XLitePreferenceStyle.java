@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import app.morphe.extension.xlite.misc.UpdateFont;
 import app.morphe.extension.xlite.ui.Theme;
 
 final class XLitePreferenceStyle {
@@ -103,7 +104,9 @@ final class XLitePreferenceStyle {
                 TypedValue.COMPLEX_UNIT_SP,
                 SUMMARY_TEXT_SIZES[typographyScale(context)]
         );
-        summary.setTypeface(font(context, "chirp_regular_400", Typeface.DEFAULT));
+        summary.setTypeface(UpdateFont.customTypefaceOr(
+                font(context, "chirp_regular_400", Typeface.DEFAULT)
+        ));
         summary.setTextColor(secondaryTextColor(context));
         summary.setLineSpacing(dp(context, 1), 1f);
         summary.setPadding(0, dp(context, 2), 0, 0);
@@ -139,10 +142,12 @@ final class XLitePreferenceStyle {
                 TypedValue.COMPLEX_UNIT_SP,
                 TITLE_TEXT_SIZES[typographyScale(context)]
         );
-        title.setTypeface(font(
-                context,
-                "chirp_medium_500",
-                Typeface.create("sans-serif-medium", Typeface.NORMAL)
+        title.setTypeface(UpdateFont.customTypefaceOr(
+                font(
+                        context,
+                        "chirp_medium_500",
+                        Typeface.create("sans-serif-medium", Typeface.NORMAL)
+                )
         ));
         title.setTextColor(primaryTextColor(context));
         title.setSingleLine(false);

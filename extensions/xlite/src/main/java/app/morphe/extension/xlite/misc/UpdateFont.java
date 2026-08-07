@@ -79,6 +79,15 @@ public class UpdateFont {
         paint.setTypeface(processTypeface(typeface));
     }
 
+    /**
+     * Returns the loaded custom text font when both the setting and the font file are in
+     * place, otherwise the given fallback. Used by View-based surfaces we own directly
+     * (X-Lite settings), which do not pass through the Compose paragraph typeface hook.
+     */
+    public static Typeface customTypefaceOr(Typeface fallback) {
+        return isCustomFontEnabled && textTypeface != null ? textTypeface : fallback;
+    }
+
     private static Typeface processTypeface(Typeface original) {
         if (isCustomFontEnabled && textTypeface != null) return textTypeface;
         if (isCustomEmojiFontEnabled && emojiTypeface != null) return emojiTypeface;

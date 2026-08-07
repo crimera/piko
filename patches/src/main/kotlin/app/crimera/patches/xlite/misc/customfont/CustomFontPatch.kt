@@ -44,6 +44,20 @@ private val composeParagraphTypefaceFingerprint by lazy {
     )
 }
 
+/**
+ * Matches Compose's MetricAffectingSpan typeface updates. These run after paragraph
+ * initialization and otherwise overwrite the custom typeface for styled text ranges.
+ */
+private object ComposeSpanTypefaceFingerprint : Fingerprint(
+    definingClass = "androidx/compose/ui/text/android/style",
+    filters =
+        listOf(
+            methodCall(
+                smali = "Landroid/graphics/Paint;->setTypeface(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;",
+            ),
+        ),
+)
+
 @Suppress("unused")
 val customFontPatch =
     bytecodePatch(
@@ -121,5 +135,29 @@ val customFontPatch =
                 invoke-static {v${register.registerC}, v${register.registerD}}, $FONT_UPDATE_DESCRIPTOR->applyTypeface(Landroid/graphics/Paint;Landroid/graphics/Typeface;)V
                 """.trimIndent(),
             )
+
+            val spanMatches = ComposeSpanTypefaceFingerprint.matchAllOrNull().orEmpty()
+            val spanMethodNames = spanMatches.map { it.method.name }.toSet()
+            if (spanMatches.size != 2 || spanMethodNames != setOf("updateDrawState", "updateMeasureState")) {
+                throw PatchException(
+                    "Expected Compose typeface span draw/measure anchors, found " +
+                        spanMatches.joinToString { it.method.toString() },
+                )
+            }
+            spanMatches.forEach { match ->
+                val spanMethod = match.method
+                val spanTypefaceIndex = match.instructionMatches.single().index
+                val spanTypeface = spanMethod.instructions.getOrNull(spanTypefaceIndex)
+                if (spanTypeface?.opcode != Opcode.INVOKE_VIRTUAL) {
+                    throw PatchException("Compose typeface span anchor is not invoke-virtual")
+                }
+                val spanRegister = spanTypeface as Instruction35c
+                spanMethod.replaceInstruction(
+                    spanTypefaceIndex,
+                    """
+                    invoke-static {v${spanRegister.registerC}, v${spanRegister.registerD}}, $FONT_UPDATE_DESCRIPTOR->applyTypeface(Landroid/graphics/Paint;Landroid/graphics/Typeface;)V
+                    """.trimIndent(),
+                )
+            }
         }
     }
