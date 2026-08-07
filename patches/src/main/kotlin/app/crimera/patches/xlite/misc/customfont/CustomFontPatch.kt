@@ -1,0 +1,125 @@
+/*
+ * Copyright (C) 2026 piko <https://github.com/crimera/piko>
+ *
+ * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
+ */
+
+package app.crimera.patches.xlite.misc.customfont
+
+import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.action
+import app.crimera.patches.xlite.settings.group
+import app.crimera.patches.xlite.settings.settingStrings
+import app.crimera.patches.xlite.settings.toggle
+import app.crimera.patches.xlite.settings.xLiteSettings
+import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.crimera.patches.xlite.utils.Constants.FONT_CLASS
+import app.crimera.patches.xlite.utils.Constants.FONT_UPDATE_DESCRIPTOR
+import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.patch.PatchException
+import app.morphe.patcher.patch.bytecodePatch
+import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
+
+/**
+ * Matches the Compose paragraph intrinsics constructor (AndroidParagraphIntrinsics, obfuscated
+ * to `androidx/compose/ui/text/platform/d` in 12.14.0). The constructor resolves the
+ * paragraph's [android.graphics.Typeface] from the text style and applies it to the
+ * paragraph TextPaint. X-Lite renders Compose-first, so this single constructor carries every
+ * text surface (timeline, buttons, settings). Legacy View text has its own dedicated patch
+ * set; it is intentionally not hooked here.
+ */
+private val composeParagraphTypefaceFingerprint by lazy {
+    Fingerprint(
+        definingClass = "androidx/compose/ui/text/platform",
+        filters =
+            listOf(
+                methodCall(
+                    smali = "Landroid/graphics/Paint;->setTypeface(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;",
+                ),
+            ),
+    )
+}
+
+@Suppress("unused")
+val customFontPatch =
+    bytecodePatch(
+        name = "X-Lite: Custom font",
+        description = "Customise font style",
+    ) {
+        compatibleWith(COMPATIBILITY_X_LITE)
+
+        xLiteSettings {
+            category(Categories.CONTENT) {
+                group(
+                    id = "xlite.content.custom_font",
+                    strings = settingStrings("piko_xlite_font"),
+                    order = 200,
+                ) {
+                    toggle(
+                        id = "xlite.content.custom_font.enabled",
+                        strings = settingStrings("piko_xlite_custom_font"),
+                        order = 100,
+                        defaultValue = false,
+                        rebootApp = true,
+                    )
+                    action(
+                        id = "xlite.content.custom_font.add",
+                        strings = settingStrings("piko_xlite_add_font"),
+                        order = 110,
+                        handlerClassDescriptor = "$FONT_CLASS\$AddFontAction;",
+                    )
+                    action(
+                        id = "xlite.content.custom_font.delete",
+                        strings = settingStrings("piko_xlite_delete_font", summary = false),
+                        order = 120,
+                        handlerClassDescriptor = "$FONT_CLASS\$DeleteFontAction;",
+                    )
+                    toggle(
+                        id = "xlite.content.custom_emoji_font.enabled",
+                        strings = settingStrings("piko_xlite_custom_emoji_font"),
+                        order = 200,
+                        defaultValue = false,
+                        rebootApp = true,
+                    )
+                    action(
+                        id = "xlite.content.custom_emoji_font.add",
+                        strings = settingStrings("piko_xlite_add_emoji_font"),
+                        order = 210,
+                        handlerClassDescriptor = "$FONT_CLASS\$AddEmojiFontAction;",
+                    )
+                    action(
+                        id = "xlite.content.custom_emoji_font.delete",
+                        strings = settingStrings("piko_xlite_delete_emoji_font", summary = false),
+                        order = 220,
+                        handlerClassDescriptor = "$FONT_CLASS\$DeleteEmojiFontAction;",
+                    )
+                }
+            }
+        }
+
+        execute {
+            val paragraphMethod = composeParagraphTypefaceFingerprint.method
+            if (paragraphMethod.name != "<init>" || paragraphMethod.parameterTypes.size != 6) {
+                throw PatchException(
+                    "X-Lite compose paragraph typeface anchor is not the expected intrinsics " +
+                        "constructor: ${paragraphMethod}",
+                )
+            }
+            val setTypefaceIndex = composeParagraphTypefaceFingerprint.instructionMatches.last().index
+            val setTypeface = paragraphMethod.instructions.getOrNull(setTypefaceIndex)
+            if (setTypeface?.opcode != Opcode.INVOKE_VIRTUAL) {
+                throw PatchException("X-Lite compose paragraph typeface anchor is not invoke-virtual")
+            }
+            val register = setTypeface as Instruction35c
+            paragraphMethod.replaceInstruction(
+                setTypefaceIndex,
+                """
+                invoke-static {v${register.registerC}, v${register.registerD}}, $FONT_UPDATE_DESCRIPTOR->applyTypeface(Landroid/graphics/Paint;Landroid/graphics/Typeface;)V
+                """.trimIndent(),
+            )
+        }
+    }

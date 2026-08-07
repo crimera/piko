@@ -191,6 +191,25 @@
     <string name="morphe_settings_import_success">Restored %1$d X-Lite settings</string>
     <string name="morphe_settings_import_failure_parse">Could not restore X-Lite settings: %1$s</string>
 
+    <string name="piko_xlite_font_title">Font style</string>
+    <string name="piko_xlite_font_summary">Customise the app and emoji font style</string>
+    <string name="piko_xlite_custom_font_title">Custom font</string>
+    <string name="piko_xlite_custom_font_summary">Apply a custom TTF or OTF font to the app</string>
+    <string name="piko_xlite_add_font_title">Add font</string>
+    <string name="piko_xlite_add_font_summary">Make sure the font is of type .ttf or .otf</string>
+    <string name="piko_xlite_delete_font_title">Delete font</string>
+    <string name="piko_xlite_custom_emoji_font_title">Custom emoji font</string>
+    <string name="piko_xlite_custom_emoji_font_summary">Apply a custom font to emojis</string>
+    <string name="piko_xlite_add_emoji_font_title">Add emoji font</string>
+    <string name="piko_xlite_add_emoji_font_summary">Make sure the font is of type .ttf or .otf</string>
+    <string name="piko_xlite_delete_emoji_font_title">Delete emoji font</string>
+    <string name="piko_xlite_font_added">Font added successfully</string>
+    <string name="piko_xlite_font_add_failed">Font addition failed</string>
+    <string name="piko_xlite_font_invalid">Make sure the font is of type .ttf or .otf</string>
+    <string name="piko_xlite_font_deleted">Font deleted successfully</string>
+    <string name="piko_xlite_font_delete_failed">Font deletion failed</string>
+    <string name="piko_xlite_font_not_found">No custom font found to be deleted</string>
+
     <string name="piko_xlite_restart_title">Restart X?</string>
     <string name="piko_xlite_restart_summary">Restart the app now to apply this change.</string>
     <string name="piko_xlite_restart_now">Restart now</string>
