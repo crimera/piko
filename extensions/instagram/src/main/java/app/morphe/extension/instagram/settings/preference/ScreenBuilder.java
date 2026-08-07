@@ -461,31 +461,11 @@ public class ScreenBuilder {
 
         // PreferenceCategory category= addCategory(str("piko_category_misc"));
         if (MaterialYouTheme.isAmoledAvailable()) {
-            SwitchPref amoledPreference = (SwitchPref) helper.switchPreference(
-                    str("piko_amoled_title"),
-                    "",
-                    Settings.AMOLED_THEME,
-                    (preference, value) -> MaterialYouTheme.requestAmoledChange(
-                            context,
-                            Boolean.TRUE.equals(value)
-                    )
-            );
-            amoledPreference.setSwitchInteractionEnabled(
-                    MaterialYouTheme.canEnableAmoled(context)
-            );
-            addPreference(amoledPreference);
+            addPreference(helper.amoledThemePreference(str("piko_amoled_title")));
         }
         if (MaterialYouTheme.isMaterialYouAvailable()) {
             addPreference(
-                    helper.switchPreference(
-                            str("piko_material_you_title"),
-                            "",
-                            Settings.MATERIAL_YOU_THEME,
-                            (preference, value) -> MaterialYouTheme.requestMaterialYouChange(
-                                    context,
-                                    Boolean.TRUE.equals(value)
-                            )
-                    )
+                    helper.materialYouThemePreference(str("piko_material_you_title"))
             );
         }
         if (SettingsStatus.unlockPlusBenefits) {

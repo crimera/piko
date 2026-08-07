@@ -16,6 +16,8 @@ import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
 import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
+import app.morphe.extension.instagram.settings.Settings;
+import app.morphe.extension.instagram.theme.MaterialYouTheme;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
@@ -42,14 +44,34 @@ public class Helper {
         return preference;
     }
 
-    public Preference switchPreference(
-            String title,
-            String summary,
-            BooleanSetting setting,
-            Preference.OnPreferenceChangeListener listener
-    ) {
-        Preference preference = switchPreference(title, summary, setting);
-        preference.setOnPreferenceChangeListener(listener);
+    public Preference amoledThemePreference(String title) {
+        SwitchPref preference = (SwitchPref) switchPreference(
+                title,
+                "",
+                Settings.AMOLED_THEME
+        );
+        preference.setOnPreferenceChangeListener(
+                (changedPreference, value) -> MaterialYouTheme.requestAmoledChange(
+                        context,
+                        Boolean.TRUE.equals(value)
+                )
+        );
+        preference.setSwitchInteractionEnabled(MaterialYouTheme.canEnableAmoled(context));
+        return preference;
+    }
+
+    public Preference materialYouThemePreference(String title) {
+        Preference preference = switchPreference(
+                title,
+                "",
+                Settings.MATERIAL_YOU_THEME
+        );
+        preference.setOnPreferenceChangeListener(
+                (changedPreference, value) -> MaterialYouTheme.requestMaterialYouChange(
+                        context,
+                        Boolean.TRUE.equals(value)
+                )
+        );
         return preference;
     }
 
