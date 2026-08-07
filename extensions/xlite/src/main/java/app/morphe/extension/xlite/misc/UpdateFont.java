@@ -13,9 +13,13 @@ import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.fonts.Font;
+import android.graphics.fonts.FontFamily;
+import android.os.Build;
 import android.os.Bundle;
 
 import java.io.File;
+import java.io.IOException;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.ResourceType;
@@ -51,7 +55,7 @@ public class UpdateFont {
         if (!fontFile.exists()) {
             PikoUtils.logger("Font not found: " + fontFile.getAbsolutePath());
         } else {
-            Typeface typeface = Typeface.createFromFile(fontFile);
+            Typeface typeface = createTypeface(fontFile, isEmojiFont);
             if (isEmojiFont) {
                 emojiTypeface = typeface;
             } else {
@@ -79,19 +83,50 @@ public class UpdateFont {
         paint.setTypeface(processTypeface(typeface));
     }
 
+    private static Typeface createTypeface(File fontFile, boolean isEmojiFont) {
+        if (isEmojiFont || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            return Typeface.createFromFile(fontFile);
+        }
+        try {
+            Font font = new Font.Builder(fontFile).build();
+            FontFamily family = new FontFamily.Builder(font).build();
+            return new Typeface.CustomFallbackBuilder(family)
+                    .setSystemFallback("sans-serif")
+                    .build();
+        } catch (IOException | RuntimeException exception) {
+            PikoUtils.logger(exception);
+            return Typeface.createFromFile(fontFile);
+        }
+    }
+
     /**
      * Returns the loaded custom text font when both the setting and the font file are in
      * place, otherwise the given fallback. Used by View-based surfaces we own directly
      * (X-Lite settings), which do not pass through the Compose paragraph typeface hook.
      */
     public static Typeface customTypefaceOr(Typeface fallback) {
-        return isCustomFontEnabled && textTypeface != null ? textTypeface : fallback;
+        return isCustomFontEnabled && textTypeface != null
+                ? styledTypeface(textTypeface, fallback)
+                : fallback;
+    }
+
+    public static int emojiProcessingMode(int originalMode) {
+        return isCustomFontEnabled && textTypeface != null ? 1 : originalMode;
     }
 
     private static Typeface processTypeface(Typeface original) {
-        if (isCustomFontEnabled && textTypeface != null) return textTypeface;
-        if (isCustomEmojiFontEnabled && emojiTypeface != null) return emojiTypeface;
+        if (isCustomFontEnabled && textTypeface != null) {
+            return styledTypeface(textTypeface, original);
+        }
+        if (isCustomEmojiFontEnabled && emojiTypeface != null) {
+            return styledTypeface(emojiTypeface, original);
+        }
         return original;
+    }
+
+    private static Typeface styledTypeface(Typeface custom, Typeface original) {
+        int style = original == null ? Typeface.NORMAL : original.getStyle();
+        return Typeface.create(custom, style);
     }
 
     public static final class AddFontAction implements SettingsActionHandler {

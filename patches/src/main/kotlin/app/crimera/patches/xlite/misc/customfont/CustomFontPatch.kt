@@ -16,6 +16,7 @@ import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.FONT_CLASS
 import app.crimera.patches.xlite.utils.Constants.FONT_UPDATE_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
@@ -54,6 +55,16 @@ private object ComposeSpanTypefaceFingerprint : Fingerprint(
         listOf(
             methodCall(
                 smali = "Landroid/graphics/Paint;->setTypeface(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;",
+            ),
+        ),
+)
+
+private object ComposeEmojiProcessingFingerprint : Fingerprint(
+    definingClass = "androidx/compose/ui/text/platform",
+    filters =
+        listOf(
+            methodCall(
+                smali = "Landroidx/emoji2/text/f;->i(IIILjava/lang/CharSequence;)Ljava/lang/CharSequence;",
             ),
         ),
 )
@@ -159,5 +170,26 @@ val customFontPatch =
                     """.trimIndent(),
                 )
             }
+
+            val emojiMethod = ComposeEmojiProcessingFingerprint.method
+            if (emojiMethod.name != "<init>" || emojiMethod.parameterTypes.size != 6) {
+                throw PatchException(
+                    "X-Lite Compose emoji processing anchor is not the expected intrinsics " +
+                        "constructor: ${emojiMethod}",
+                )
+            }
+            val emojiIndex = ComposeEmojiProcessingFingerprint.instructionMatches.single().index
+            val emojiCall = emojiMethod.instructions.getOrNull(emojiIndex)
+            if (emojiCall?.opcode != Opcode.INVOKE_VIRTUAL) {
+                throw PatchException("Compose emoji processing anchor is not invoke-virtual")
+            }
+            val emojiRegisters = emojiCall as Instruction35c
+            emojiMethod.addInstructions(
+                emojiIndex,
+                """
+                invoke-static {v${emojiRegisters.registerF}}, $FONT_UPDATE_DESCRIPTOR->emojiProcessingMode(I)I
+                move-result v${emojiRegisters.registerF}
+                """.trimIndent(),
+            )
         }
     }
