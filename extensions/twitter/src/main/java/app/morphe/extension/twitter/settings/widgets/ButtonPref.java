@@ -73,6 +73,7 @@ public class ButtonPref extends Preference {
 
 
     private void init() {
+        setSingleLineTitle(false);
         if (iconName != null) {
             int resId = ResourceUtils.getIdentifier(ResourceType.DRAWABLE, iconName);
             Drawable icon = context.getResources().getDrawable(resId);
