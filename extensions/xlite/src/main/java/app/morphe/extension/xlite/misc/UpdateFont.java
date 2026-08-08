@@ -11,12 +11,18 @@ import static app.morphe.extension.shared.StringRef.str;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.fonts.Font;
 import android.graphics.fonts.FontFamily;
+import android.icu.lang.UCharacter;
+import android.icu.lang.UProperty;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ReplacementSpan;
 
 import java.io.File;
 import java.io.IOException;
@@ -89,6 +95,98 @@ public class UpdateFont {
         );
     }
 
+    public static CharSequence processComposeEmoji(CharSequence value) {
+        if (value == null || !isCustomEmojiFontEnabled || emojiTypeface == null || value.length() == 0) {
+            return value;
+        }
+
+        SpannableStringBuilder result = new SpannableStringBuilder(value);
+        int index = 0;
+        while (index < result.length()) {
+            int end = findEmojiEnd(result, index);
+            if (end == index) {
+                int codePoint = Character.codePointAt(result, index);
+                index += Character.charCount(codePoint);
+                continue;
+            }
+
+            ReplacementSpan[] existingSpans =
+                    result.getSpans(index, end, ReplacementSpan.class);
+            for (ReplacementSpan existingSpan : existingSpans) {
+                if (existingSpan.getClass().getName().startsWith("androidx.emoji2.text.")) {
+                    result.removeSpan(existingSpan);
+                }
+            }
+            result.setSpan(
+                    new ComposeEmojiSpan(),
+                    index,
+                    end,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+            index = end;
+        }
+        return result;
+    }
+
+    private static int findEmojiEnd(CharSequence text, int start) {
+        int codePoint = Character.codePointAt(text, start);
+        int end = start + Character.charCount(codePoint);
+        if (!isEmojiStart(text, codePoint, end)) return start;
+
+        if (isRegionalIndicator(codePoint) && end < text.length()) {
+            int next = Character.codePointAt(text, end);
+            if (isRegionalIndicator(next)) return end + Character.charCount(next);
+        }
+
+        end = consumeEmojiSuffix(text, end);
+        while (end < text.length() && Character.codePointAt(text, end) == 0x200D) {
+            int joinedStart = end + 1;
+            if (joinedStart >= text.length()) break;
+            int joinedCodePoint = Character.codePointAt(text, joinedStart);
+            if (!UCharacter.hasBinaryProperty(joinedCodePoint, UProperty.EMOJI)) break;
+            end = joinedStart + Character.charCount(joinedCodePoint);
+            end = consumeEmojiSuffix(text, end);
+        }
+        return end;
+    }
+
+    private static boolean isEmojiStart(CharSequence text, int codePoint, int nextIndex) {
+        if (UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI_PRESENTATION)) return true;
+        if (!UCharacter.hasBinaryProperty(codePoint, UProperty.EMOJI)) return false;
+        if (nextIndex >= text.length()) return false;
+        int next = Character.codePointAt(text, nextIndex);
+        return next == 0xFE0F || next == 0x20E3;
+    }
+
+    private static int consumeEmojiSuffix(CharSequence text, int start) {
+        int end = start;
+        if (end < text.length()) {
+            int codePoint = Character.codePointAt(text, end);
+            if (codePoint == 0xFE0E || codePoint == 0xFE0F) {
+                end += Character.charCount(codePoint);
+            }
+        }
+        if (end < text.length()) {
+            int codePoint = Character.codePointAt(text, end);
+            if (codePoint >= 0x1F3FB && codePoint <= 0x1F3FF) {
+                end += Character.charCount(codePoint);
+            }
+        }
+        if (end < text.length() && Character.codePointAt(text, end) == 0x20E3) {
+            end += Character.charCount(0x20E3);
+        }
+        while (end < text.length()) {
+            int codePoint = Character.codePointAt(text, end);
+            if (codePoint < 0xE0020 || codePoint > 0xE007F) break;
+            end += Character.charCount(codePoint);
+        }
+        return end;
+    }
+
+    private static boolean isRegionalIndicator(int codePoint) {
+        return codePoint >= 0x1F1E6 && codePoint <= 0x1F1FF;
+    }
+
     private static Typeface createTypeface(File fontFile, boolean isEmojiFont) {
         if (isEmojiFont || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             return Typeface.createFromFile(fontFile);
@@ -117,18 +215,57 @@ public class UpdateFont {
     }
 
     private static Typeface processTypeface(Typeface original) {
-        if (isCustomFontEnabled && textTypeface != null) {
-            return styledTypeface(textTypeface, original);
-        }
-        if (isCustomEmojiFontEnabled && emojiTypeface != null) {
-            return styledTypeface(emojiTypeface, original);
-        }
-        return original;
+        return isCustomFontEnabled && textTypeface != null
+                ? styledTypeface(textTypeface, original)
+                : original;
     }
 
     private static Typeface styledTypeface(Typeface custom, Typeface original) {
         int style = original == null ? Typeface.NORMAL : original.getStyle();
         return Typeface.create(custom, style);
+    }
+
+    private static final class ComposeEmojiSpan extends ReplacementSpan {
+        @Override
+        public int getSize(
+                Paint paint,
+                CharSequence text,
+                int start,
+                int end,
+                Paint.FontMetricsInt fontMetrics
+        ) {
+            Typeface original = paint.getTypeface();
+            applyEmojiTypeface(paint, original);
+            if (fontMetrics != null) {
+                Paint.FontMetricsInt customMetrics = paint.getFontMetricsInt();
+                fontMetrics.top = customMetrics.top;
+                fontMetrics.ascent = customMetrics.ascent;
+                fontMetrics.descent = customMetrics.descent;
+                fontMetrics.bottom = customMetrics.bottom;
+                fontMetrics.leading = customMetrics.leading;
+            }
+            int width = Math.round(paint.measureText(text, start, end));
+            paint.setTypeface(original);
+            return width;
+        }
+
+        @Override
+        public void draw(
+                Canvas canvas,
+                CharSequence text,
+                int start,
+                int end,
+                float x,
+                int top,
+                int y,
+                int bottom,
+                Paint paint
+        ) {
+            Typeface original = paint.getTypeface();
+            applyEmojiTypeface(paint, original);
+            canvas.drawText(text, start, end, x, y, paint);
+            paint.setTypeface(original);
+        }
     }
 
     public static final class AddFontAction implements SettingsActionHandler {

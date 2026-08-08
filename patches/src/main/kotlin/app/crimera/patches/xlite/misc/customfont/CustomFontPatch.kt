@@ -16,13 +16,19 @@ import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.FONT_CLASS
 import app.crimera.patches.xlite.utils.Constants.FONT_UPDATE_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction35c
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 /**
  * Matches the Compose paragraph intrinsics constructor (AndroidParagraphIntrinsics, obfuscated
@@ -58,40 +64,26 @@ private object ComposeSpanTypefaceFingerprint : Fingerprint(
         ),
 )
 
-/**
- * Matches EmojiCompat's public ReplacementSpan draw contract. EmojiSpan replaces the paragraph
- * typeface immediately before drawing, so the custom emoji font must be applied at this final
- * renderer boundary instead of at Compose paragraph initialization.
- */
-private object EmojiSpanDrawFingerprint : Fingerprint(
-    definingClass = "androidx/emoji2/text",
-    name = "draw",
-    returnType = "V",
-    parameters =
-        listOf(
-            "Landroid/graphics/Canvas;",
-            "Ljava/lang/CharSequence;",
-            "I",
-            "I",
-            "F",
-            "I",
-            "I",
-            "I",
-            "Landroid/graphics/Paint;",
-        ),
-    filters =
-        listOf(
-            methodCall(
-                smali = "Landroid/graphics/Paint;->setTypeface(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;",
-            ),
-            methodCall(
-                smali = "Landroid/graphics/Canvas;->drawText([CIIFFLandroid/graphics/Paint;)V",
-            ),
-            methodCall(
-                smali = "Landroid/graphics/Paint;->setTypeface(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;",
-            ),
-        ),
-)
+private const val CHAR_SEQUENCE_DESCRIPTOR = "Ljava/lang/CharSequence;"
+
+private fun isComposeEmojiProcessingCall(instruction: Instruction): Boolean {
+    if (instruction.opcode != Opcode.INVOKE_VIRTUAL) return false
+    val reference =
+        (instruction as? ReferenceInstruction)?.reference as? MethodReference ?: return false
+    return reference.definingClass.startsWith("Landroidx/emoji2/text/") &&
+        reference.parameterTypes == listOf("I", "I", "I", CHAR_SEQUENCE_DESCRIPTOR) &&
+        reference.returnType == CHAR_SEQUENCE_DESCRIPTOR
+}
+
+private fun isListEmptyCall(instruction: Instruction): Boolean {
+    if (instruction.opcode != Opcode.INVOKE_INTERFACE) return false
+    val reference =
+        (instruction as? ReferenceInstruction)?.reference as? MethodReference ?: return false
+    return reference.definingClass == "Ljava/util/List;" &&
+        reference.name == "isEmpty" &&
+        reference.parameterTypes.isEmpty() &&
+        reference.returnType == "Z"
+}
 
 @Suppress("unused")
 val customFontPatch =
@@ -195,31 +187,54 @@ val customFontPatch =
                 )
             }
 
-            val emojiSpanMatches = EmojiSpanDrawFingerprint.matchAllOrNull().orEmpty()
-            if (emojiSpanMatches.size != 1) {
+            val emojiCalls =
+                paragraphMethod.instructions.withIndex().filter { (_, instruction) ->
+                    isComposeEmojiProcessingCall(instruction)
+                }
+            if (emojiCalls.size != 1) {
                 throw PatchException(
-                    "Expected one EmojiSpan draw renderer, found " +
-                        emojiSpanMatches.joinToString { it.method.toString() },
+                    "Expected one Compose EmojiCompat processing call, found " +
+                        emojiCalls.joinToString { "${it.index}:${it.value}" },
                 )
             }
-            val emojiSpanMatch = emojiSpanMatches.single()
-            if (emojiSpanMatch.instructionMatches.size != 3) {
+            val (emojiIndex, emojiInstruction) = emojiCalls.single()
+            val emojiResultInstruction = paragraphMethod.instructions.getOrNull(emojiIndex + 1)
+            if (emojiResultInstruction?.opcode != Opcode.MOVE_RESULT_OBJECT) {
+                throw PatchException("Compose EmojiCompat call is not followed by move-result-object")
+            }
+            val emojiResultRegister =
+                (emojiResultInstruction as? OneRegisterInstruction)?.registerA
+                    ?: throw PatchException("Compose emoji result register is unavailable")
+            val mergeCandidates =
+                paragraphMethod.instructions.withIndex().filter { (index, instruction) ->
+                    index in (emojiIndex + 1)..(emojiIndex + 20) && isListEmptyCall(instruction)
+                }
+            if (mergeCandidates.size != 2) {
                 throw PatchException(
-                    "Expected three EmojiSpan typeface/draw anchors, found " +
-                        emojiSpanMatch.instructionMatches.size,
+                    "Expected two list checks after the Compose emoji merge, found " +
+                        mergeCandidates.joinToString { "${it.index}:${it.value}" },
                 )
             }
-            val emojiTypefaceIndex = emojiSpanMatch.instructionMatches.first().index
-            val emojiTypeface = emojiSpanMatch.method.instructions.getOrNull(emojiTypefaceIndex)
-            if (emojiTypeface?.opcode != Opcode.INVOKE_VIRTUAL) {
-                throw PatchException("EmojiSpan typeface anchor is not invoke-virtual")
+            val mergeIndex = mergeCandidates.first().index
+            val bypassCandidates =
+                paragraphMethod.instructions.withIndex().filter { (index, instruction) ->
+                    if (index !in (emojiIndex + 2) until mergeIndex) return@filter false
+                    if (instruction.opcode != Opcode.MOVE_OBJECT) return@filter false
+                    (instruction as? TwoRegisterInstruction)?.registerA == emojiResultRegister
+                }
+            if (bypassCandidates.size != 1) {
+                throw PatchException(
+                    "Expected one raw-text Compose emoji bypass, found " +
+                        bypassCandidates.joinToString { "${it.index}:${it.value}" },
+                )
             }
-            val emojiRegister = emojiTypeface as Instruction35c
-            emojiSpanMatch.method.replaceInstruction(
-                emojiTypefaceIndex,
+            val bypassIndex = bypassCandidates.single().index
+            val processEmojiInstructions =
                 """
-                invoke-static {v${emojiRegister.registerC}, v${emojiRegister.registerD}}, $FONT_UPDATE_DESCRIPTOR->applyEmojiTypeface(Landroid/graphics/Paint;Landroid/graphics/Typeface;)V
-                """.trimIndent(),
-            )
+                invoke-static {v$emojiResultRegister}, $FONT_UPDATE_DESCRIPTOR->processComposeEmoji(Ljava/lang/CharSequence;)Ljava/lang/CharSequence;
+                move-result-object v$emojiResultRegister
+                """.trimIndent()
+            paragraphMethod.addInstructions(bypassIndex + 1, processEmojiInstructions)
+            paragraphMethod.addInstructions(emojiIndex + 2, processEmojiInstructions)
         }
     }
