@@ -25,8 +25,8 @@ private object XLiteNewPostsPillFingerprint : Fingerprint(
 @Suppress("unused")
 val hideNewPostPillPatch =
     bytecodePatch(
-        name = "X-Lite: Hide new-post pill",
-        description = "Hides the new-post notification pill in X-Lite timelines.",
+        name = "X-Lite: Hide new posts pill",
+        description = "Hides the new posts pill in X-Lite timelines.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
 

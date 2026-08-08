@@ -44,8 +44,8 @@ private object XLiteNewPostButtonFingerprint : Fingerprint(
 @Suppress("unused")
 val hideNewPostButtonPatch =
     bytecodePatch(
-        name = "X-Lite: Hide new-post button",
-        description = "Removes the new-post button from X-Lite timelines.",
+        name = "X-Lite: Hide compose button",
+        description = "Removes the compose button from X-Lite timelines.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
 
