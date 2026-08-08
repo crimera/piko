@@ -177,10 +177,10 @@
     <string name="piko_pref_show_poll_result">Show poll results</string>
     <string name="piko_pref_show_poll_result_desc">View poll results without voting</string>
     <string name="piko_pref_hide_community_notes">Hide community notes</string>
-    <string name="piko_pref_hide_immersive_player">Hide immersive player</string>
-    <string name="piko_pref_hide_immersive_player_desc">Removes swipe up for more videos in video player</string>
+    <string name="piko_pref_hide_immersive_player">Disable immersive player</string>
+    <string name="piko_pref_hide_immersive_player_desc">Disable the new video player that allows you to watch more videos by swiping up</string>
     <string name="piko_pref_enable_vid_auto_advance">Enable video auto scroll</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Enables video auto scroll in immersive view</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Enables video auto scroll in immersive player</string>
     <string name="piko_pref_hide_hidden_replies">Hide hidden replies</string>
     <string name="piko_pref_force_hd">Force HD videos</string>
     <string name="piko_pref_force_hd_desc">Videos will be played in the highest quality always</string>

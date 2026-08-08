@@ -43,6 +43,7 @@ public class EditTextPref extends EditTextPreference {
     }
 
     private void init() {
+        setSingleLineTitle(false);
         setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {

@@ -36,14 +36,12 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(setting.key);
         preference.setDefaultValue(setting.defaultValue);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
     public Preference editTextNumPreference(String title, String summary, StringSetting setting) {
         EditTextPref preference = (EditTextPref)editTextPreference(title,summary,setting);
         preference.setNumericOnly(true);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
@@ -53,7 +51,6 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(setting.key);
         preference.setDefaultValue(setting.defaultValue);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
@@ -62,7 +59,6 @@ public class Helper {
         preference.setTitle(title);
         preference.setSummary(summary);
         preference.setKey(setting);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
@@ -78,7 +74,6 @@ public class Helper {
         }
         preference.setSummary(summary);
         preference.setKey(setting);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
@@ -90,7 +85,6 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(key);
         preference.setDefaultValue(setting.defaultValue);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
@@ -102,7 +96,6 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(key);
         preference.setInitialValue(key);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
