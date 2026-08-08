@@ -3,12 +3,15 @@ package app.morphe.extension.xlite.misc;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public final class InlineDownloadButtonTest {
     @Test
@@ -49,6 +52,49 @@ public final class InlineDownloadButtonTest {
                 "download_tmp",
                 InlineDownloadButton.temporaryDownloadFileName("download")
         );
+    }
+
+    @Test
+    public void occupiedTargetIsSkipped() {
+        String target = "jack_123456789.jpg";
+
+        assertNull(InlineDownloadButton.resolveTargetFileName(
+                target,
+                InlineDownloadButton.ConflictBehavior.SKIP,
+                Set.of(target)::contains
+        ));
+    }
+
+    @Test
+    public void renameSkipsOccupiedTargets() {
+        String target = "jack_123456789.jpg";
+
+        assertEquals(
+                target,
+                InlineDownloadButton.resolveTargetFileName(
+                        target,
+                        InlineDownloadButton.ConflictBehavior.RENAME,
+                        Set.of()::contains
+                )
+        );
+        assertEquals(
+                "jack_123456789_2.jpg",
+                InlineDownloadButton.resolveTargetFileName(
+                        target,
+                        InlineDownloadButton.ConflictBehavior.RENAME,
+                        Set.of(target, "jack_123456789_1.jpg")::contains
+                )
+        );
+    }
+
+    @Test
+    public void uniqueTemporaryDownloadNamesDoNotCollide() {
+        String first = InlineDownloadButton.uniqueTemporaryDownloadFileName("jack_123456789.jpg");
+        String second = InlineDownloadButton.uniqueTemporaryDownloadFileName("jack_123456789.jpg");
+
+        assertNotEquals(first, second);
+        assertTrue(first.startsWith("jack_123456789_tmp_"));
+        assertTrue(first.endsWith(".jpg"));
     }
 
     @Test

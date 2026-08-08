@@ -42,8 +42,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Predicate;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.xlite.settings.SettingsRegistry;
@@ -381,16 +383,16 @@ public final class InlineDownloadButton {
             String postId
     ) {
         int queued = 0;
-        int exists = 0;
+        int skipped = 0;
         int failed = 0;
         for (int index = 0; index < downloads.size(); index++) {
             switch (enqueueDownload(context, downloads.get(index), username, postId, index, downloads.size())) {
                 case QUEUED -> queued++;
-                case EXISTS -> exists++;
+                case SKIPPED -> skipped++;
                 case FAILED -> failed++;
             }
         }
-        showQueueResult(context, queued, exists, failed);
+        showQueueResult(context, queued, skipped, failed);
     }
 
     private static void enqueueSingleDownload(
@@ -405,12 +407,12 @@ public final class InlineDownloadButton {
                 enqueueDownload(context, download, username, postId, index, mediaCount);
         switch (state) {
             case QUEUED -> Utils.showToastShort("Download started");
-            case EXISTS -> Utils.showToastShort("Already downloaded");
+            case SKIPPED -> Utils.showToastShort("Already downloaded or queued");
             case FAILED -> Utils.showToastShort("Could not start download");
         }
     }
 
-    private static EnqueueState enqueueDownload(
+    private static synchronized EnqueueState enqueueDownload(
             Context context,
             DownloadItem download,
             String username,
@@ -418,65 +420,57 @@ public final class InlineDownloadButton {
             int index,
             int mediaCount
     ) {
+        if (!XLiteUtils.isHttpUrl(download.url)) return EnqueueState.FAILED;
+
+        DownloadManager manager = downloadManager(context);
+        if (manager == null) return EnqueueState.FAILED;
+
         String baseFileName = downloadFileName(username, postId, download.extension, index, mediaCount);
         String fileName;
         try {
             fileName = resolveTargetFileName(context, baseFileName, conflictBehavior());
-        } catch (IOException | RuntimeException exception) {
+        } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to resolve X-Lite download target", exception);
             return EnqueueState.FAILED;
         }
-        if (fileName == null) return EnqueueState.EXISTS;
+        if (fileName == null) return EnqueueState.SKIPPED;
 
-        String temporaryFileName = temporaryDownloadFileName(fileName);
-        try {
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(download.url))
-                    .setTitle(fileName)
-                    .setDescription("Downloading media from @" + username)
-                    .setMimeType(download.mimeType)
-                    .setAllowedOverMetered(true)
-                    .setAllowedOverRoaming(true)
-                    .setNotificationVisibility(
-                            DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
-                    )
-                    .setDestinationInExternalPublicDir(
-                            Environment.DIRECTORY_PICTURES,
-                            DOWNLOAD_DIRECTORY + "/" + temporaryFileName
-                    );
-
-            DownloadManager manager =
-                    (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-            if (manager == null) throw new IllegalStateException("DownloadManager is unavailable");
-
-            long downloadId = manager.enqueue(request);
-            savePendingDownload(
-                    context,
-                    downloadId,
-                    temporaryFileName,
-                    fileName,
-                    download.mimeType,
-                    download.url
-            );
-            finishPendingDownloadAsync(context, manager, downloadId);
-            return EnqueueState.QUEUED;
-        } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to enqueue X-Lite media download", exception);
-            return EnqueueState.FAILED;
-        }
+        return queueDownload(
+                context,
+                manager,
+                download.url,
+                fileName,
+                download.mimeType,
+                "Downloading media from @" + username
+        );
     }
 
-    private static void enqueueFallbackDownload(
+    private static synchronized void enqueueFallbackDownload(
             Context context,
             DownloadManager manager,
             String fallbackUrl,
             String fileName,
             String mimeType
     ) {
-        String temporaryFileName = temporaryDownloadFileName(fileName);
+        if (queueDownload(context, manager, fallbackUrl, fileName, mimeType, "Downloading media") ==
+                EnqueueState.FAILED) {
+            Utils.showToastShort("Download failed: " + fileName);
+        }
+    }
+
+    private static EnqueueState queueDownload(
+            Context context,
+            DownloadManager manager,
+            String url,
+            String fileName,
+            String mimeType,
+            String description
+    ) {
+        String temporaryFileName = uniqueTemporaryDownloadFileName(fileName);
         try {
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(fallbackUrl))
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
                     .setTitle(fileName)
-                    .setDescription("Downloading media")
+                    .setDescription(description)
                     .setMimeType(mimeType)
                     .setAllowedOverMetered(true)
                     .setAllowedOverRoaming(true)
@@ -489,12 +483,23 @@ public final class InlineDownloadButton {
                     );
 
             long downloadId = manager.enqueue(request);
-            savePendingDownload(context, downloadId, temporaryFileName, fileName, mimeType, fallbackUrl);
+            try {
+                savePendingDownload(context, downloadId, temporaryFileName, fileName, mimeType, url);
+            } catch (RuntimeException exception) {
+                manager.remove(downloadId);
+                throw exception;
+            }
             finishPendingDownloadAsync(context, manager, downloadId);
+            return EnqueueState.QUEUED;
         } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to enqueue fallback media download", exception);
-            Utils.showToastShort("Download failed: " + fileName);
+            Logger.printException(() -> "Failed to enqueue X-Lite media download", exception);
+            return EnqueueState.FAILED;
         }
+    }
+
+    private static DownloadManager downloadManager(Context context) {
+        Object service = context.getSystemService(Context.DOWNLOAD_SERVICE);
+        return service instanceof DownloadManager manager ? manager : null;
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
@@ -507,8 +512,7 @@ public final class InlineDownloadButton {
                 long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 if (downloadId < 0) return;
 
-                DownloadManager manager =
-                        (DownloadManager) receiverContext.getSystemService(Context.DOWNLOAD_SERVICE);
+                DownloadManager manager = downloadManager(receiverContext);
                 if (manager == null) return;
                 finishPendingDownloadAsync(receiverContext, manager, downloadId);
             }
@@ -523,8 +527,7 @@ public final class InlineDownloadButton {
     }
 
     private static void resumePendingDownloads(Context context) {
-        DownloadManager manager =
-                (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+        DownloadManager manager = downloadManager(context);
         if (manager == null) return;
 
         Map<String, ?> pending = pendingDownloads(context).getAll();
@@ -599,14 +602,7 @@ public final class InlineDownloadButton {
             return;
         }
         if (status != DownloadManager.STATUS_SUCCESSFUL) {
-            clearPendingDownload(context, downloadId);
-            manager.remove(downloadId);
-            if (pending.url != null && pending.url.contains("name=orig")) {
-                String fallbackUrl = pending.url.replace("name=orig", "name=4096x4096");
-                enqueueFallbackDownload(context, manager, fallbackUrl, pending.fileName, pending.mimeType);
-                return;
-            }
-            Utils.showToastShort("Download failed: " + pending.fileName);
+            handleFailedDownload(context, manager, downloadId, pending);
             return;
         }
 
@@ -619,13 +615,36 @@ public final class InlineDownloadButton {
                 return;
             }
 
-            clearPendingDownload(context, downloadId);
-            manager.remove(downloadId);
+            removePendingDownload(context, manager, downloadId);
             Utils.showToastShort("Downloaded: " + pending.fileName);
         } catch (IOException | RuntimeException exception) {
             Logger.printException(() -> "Failed to finalize X-Lite media download", exception);
             Utils.showToastShort("Could not finalize download: " + pending.fileName);
         }
+    }
+
+    private static synchronized void handleFailedDownload(
+            Context context,
+            DownloadManager manager,
+            long downloadId,
+            PendingDownload pending
+    ) {
+        removePendingDownload(context, manager, downloadId);
+        if (pending.url != null && pending.url.contains("name=orig")) {
+            String fallbackUrl = pending.url.replace("name=orig", "name=4096x4096");
+            enqueueFallbackDownload(context, manager, fallbackUrl, pending.fileName, pending.mimeType);
+            return;
+        }
+        Utils.showToastShort("Download failed: " + pending.fileName);
+    }
+
+    private static synchronized void removePendingDownload(
+            Context context,
+            DownloadManager manager,
+            long downloadId
+    ) {
+        clearPendingDownload(context, downloadId);
+        manager.remove(downloadId);
     }
 
     private static int downloadStatus(DownloadManager manager, long downloadId) {
@@ -747,9 +766,20 @@ public final class InlineDownloadButton {
     }
 
     static String temporaryDownloadFileName(String fileName) {
+        return temporaryDownloadFileName(fileName, "_tmp");
+    }
+
+    static String uniqueTemporaryDownloadFileName(String fileName) {
+        return temporaryDownloadFileName(
+                fileName,
+                "_tmp_" + UUID.randomUUID().toString().replace("-", "")
+        );
+    }
+
+    private static String temporaryDownloadFileName(String fileName, String suffix) {
         int extensionIndex = fileName.lastIndexOf('.');
-        if (extensionIndex <= 0) return fileName + "_tmp";
-        return fileName.substring(0, extensionIndex) + "_tmp" + fileName.substring(extensionIndex);
+        if (extensionIndex <= 0) return fileName + suffix;
+        return fileName.substring(0, extensionIndex) + suffix + fileName.substring(extensionIndex);
     }
 
     static String downloadFileName(
@@ -775,15 +805,17 @@ public final class InlineDownloadButton {
         return sanitized.isEmpty() ? fallback : sanitized;
     }
 
-    private static void showQueueResult(Context context, int queued, int exists, int failed) {
-        if (failed == 0 && exists == 0) {
+    private static void showQueueResult(Context context, int queued, int skipped, int failed) {
+        if (failed == 0 && skipped == 0) {
             String message = queued == 1 ? "Download started" : queued + " downloads started";
             Utils.showToastShort(message);
             return;
         }
         if (queued == 0) {
-            if (failed == 0 && exists > 0) {
-                Utils.showToastShort(exists == 1 ? "Already downloaded" : exists + " media already downloaded");
+            if (failed == 0 && skipped > 0) {
+                Utils.showToastShort(skipped == 1
+                        ? "Already downloaded or queued"
+                        : skipped + " media already downloaded or queued");
                 return;
             }
             Utils.showToastShort("Could not start download");
@@ -791,7 +823,9 @@ public final class InlineDownloadButton {
         }
         List<String> parts = new ArrayList<>();
         parts.add(queued == 1 ? "1 download started" : queued + " downloads started");
-        if (exists > 0) parts.add(exists == 1 ? "1 already downloaded" : exists + " already downloaded");
+        if (skipped > 0) parts.add(skipped == 1
+                ? "1 already downloaded or queued"
+                : skipped + " already downloaded or queued");
         if (failed > 0) parts.add(failed == 1 ? "1 failed" : failed + " failed");
         Utils.showToastShort(String.join(", ", parts));
     }
@@ -815,33 +849,55 @@ public final class InlineDownloadButton {
             Context context,
             String baseFileName,
             ConflictBehavior behavior
-    ) throws IOException {
-        switch (behavior) {
-            case OVERWRITE:
-                return baseFileName;
-            case SKIP:
-                return mediaExists(context, baseFileName) ? null : baseFileName;
-            case RENAME:
-                if (!mediaExists(context, baseFileName)) return baseFileName;
-                return uniqueFileName(context, baseFileName);
-            default:
-                return baseFileName;
-        }
+    ) {
+        return resolveTargetFileName(
+                baseFileName,
+                behavior,
+                fileName -> mediaExists(context, fileName) || pendingFileExists(context, fileName)
+        );
     }
 
-    private static String uniqueFileName(Context context, String baseFileName) throws IOException {
+    static String resolveTargetFileName(
+            String baseFileName,
+            ConflictBehavior behavior,
+            Predicate<String> isOccupied
+    ) {
+        if (behavior == null || isOccupied == null) {
+            throw new IllegalArgumentException("Download target resolver is incomplete");
+        }
+
+        return switch (behavior) {
+            case OVERWRITE -> baseFileName;
+            case SKIP -> isOccupied.test(baseFileName) ? null : baseFileName;
+            case RENAME -> isOccupied.test(baseFileName)
+                    ? uniqueFileName(baseFileName, isOccupied)
+                    : baseFileName;
+        };
+    }
+
+    private static String uniqueFileName(String baseFileName, Predicate<String> isOccupied) {
         int dot = baseFileName.lastIndexOf('.');
         String stem = dot > 0 ? baseFileName.substring(0, dot) : baseFileName;
         String extension = dot > 0 ? baseFileName.substring(dot) : "";
         int counter = 1;
         while (true) {
             String candidate = stem + "_" + counter + extension;
-            if (!mediaExists(context, candidate)) return candidate;
+            if (!isOccupied.test(candidate)) return candidate;
             counter++;
         }
     }
 
-    private static boolean mediaExists(Context context, String fileName) throws IOException {
+    private static boolean pendingFileExists(Context context, String fileName) {
+        for (Object value : pendingDownloads(context).getAll().values()) {
+            if (!(value instanceof String serialized)) continue;
+
+            String[] fields = serialized.split("\n", -1);
+            if (fields.length >= 3 && fileName.equals(fields[1])) return true;
+        }
+        return false;
+    }
+
+    private static boolean mediaExists(Context context, String fileName) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ContentResolver resolver = context.getContentResolver();
             String relativePath = Environment.DIRECTORY_PICTURES + "/" + DOWNLOAD_DIRECTORY + "/";
@@ -880,11 +936,11 @@ public final class InlineDownloadButton {
 
     private enum EnqueueState {
         QUEUED,
-        EXISTS,
+        SKIPPED,
         FAILED,
     }
 
-    private enum ConflictBehavior {
+    enum ConflictBehavior {
         OVERWRITE,
         RENAME,
         SKIP,
