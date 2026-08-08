@@ -41,37 +41,11 @@ public class Helper {
         preference.setKey(setting.key);
         preference.setDefaultValue(setting.defaultValue);
         preference.setSingleLineTitle(false);
-        return preference;
-    }
-
-    public Preference amoledThemePreference(String title) {
-        SwitchPref preference = (SwitchPref) switchPreference(
-                title,
-                "",
-                Settings.AMOLED_THEME
-        );
-        preference.setOnPreferenceChangeListener(
-                (changedPreference, value) -> MaterialYouTheme.requestAmoledChange(
-                        context,
-                        Boolean.TRUE.equals(value)
-                )
-        );
-        preference.setSwitchInteractionEnabled(MaterialYouTheme.canEnableAmoled(context));
-        return preference;
-    }
-
-    public Preference materialYouThemePreference(String title) {
-        Preference preference = switchPreference(
-                title,
-                "",
-                Settings.MATERIAL_YOU_THEME
-        );
-        preference.setOnPreferenceChangeListener(
-                (changedPreference, value) -> MaterialYouTheme.requestMaterialYouChange(
-                        context,
-                        Boolean.TRUE.equals(value)
-                )
-        );
+        if (Settings.AMOLED_THEME.key.equals(setting.key)) {
+            preference.setSwitchInteractionEnabled(
+                    MaterialYouTheme.canEnableAmoled(context)
+            );
+        }
         return preference;
     }
 
@@ -125,7 +99,7 @@ public class Helper {
         return preference;
     }
 
-    public void setValue(Preference preference, Object newValue) {
+    public boolean setValue(Preference preference, Object newValue) {
         String key = preference.getKey();
         try {
             if (newValue != null) {
@@ -133,6 +107,12 @@ public class Helper {
 
                 if (newValClass.equals("Boolean")) {
                     Boolean val = (Boolean) newValue;
+                    if (Settings.AMOLED_THEME.key.equals(key)) {
+                        return MaterialYouTheme.requestAmoledChange(context, val);
+                    }
+                    if (Settings.MATERIAL_YOU_THEME.key.equals(key)) {
+                        return MaterialYouTheme.requestMaterialYouChange(context, val);
+                    }
                     if(key.contains("_")) {
                         SharedPref.setBooleanPref(key, val);
                     }else{
@@ -144,10 +124,11 @@ public class Helper {
                     SharedPref.setSetPref(key, (Set) newValue);
                 }
             }
-
+            return true;
         } catch (Exception ex) {
             Utils.showToastShort(ex.toString());
             Logger.printException(() -> "Failed setting pref: ", ex);
+            return false;
         }
     }
 }

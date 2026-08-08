@@ -49,8 +49,7 @@ public class SwitchPref extends SwitchPreference {
         setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                helper.setValue(preference,newValue);
-                return true;
+                return helper.setValue(preference,newValue);
             }
         });
     }
