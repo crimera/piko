@@ -58,6 +58,41 @@ private object ComposeSpanTypefaceFingerprint : Fingerprint(
         ),
 )
 
+/**
+ * Matches EmojiCompat's public ReplacementSpan draw contract. EmojiSpan replaces the paragraph
+ * typeface immediately before drawing, so the custom emoji font must be applied at this final
+ * renderer boundary instead of at Compose paragraph initialization.
+ */
+private object EmojiSpanDrawFingerprint : Fingerprint(
+    definingClass = "androidx/emoji2/text",
+    name = "draw",
+    returnType = "V",
+    parameters =
+        listOf(
+            "Landroid/graphics/Canvas;",
+            "Ljava/lang/CharSequence;",
+            "I",
+            "I",
+            "F",
+            "I",
+            "I",
+            "I",
+            "Landroid/graphics/Paint;",
+        ),
+    filters =
+        listOf(
+            methodCall(
+                smali = "Landroid/graphics/Paint;->setTypeface(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;",
+            ),
+            methodCall(
+                smali = "Landroid/graphics/Canvas;->drawText([CIIFFLandroid/graphics/Paint;)V",
+            ),
+            methodCall(
+                smali = "Landroid/graphics/Paint;->setTypeface(Landroid/graphics/Typeface;)Landroid/graphics/Typeface;",
+            ),
+        ),
+)
+
 @Suppress("unused")
 val customFontPatch =
     bytecodePatch(
@@ -160,5 +195,31 @@ val customFontPatch =
                 )
             }
 
+            val emojiSpanMatches = EmojiSpanDrawFingerprint.matchAllOrNull().orEmpty()
+            if (emojiSpanMatches.size != 1) {
+                throw PatchException(
+                    "Expected one EmojiSpan draw renderer, found " +
+                        emojiSpanMatches.joinToString { it.method.toString() },
+                )
+            }
+            val emojiSpanMatch = emojiSpanMatches.single()
+            if (emojiSpanMatch.instructionMatches.size != 3) {
+                throw PatchException(
+                    "Expected three EmojiSpan typeface/draw anchors, found " +
+                        emojiSpanMatch.instructionMatches.size,
+                )
+            }
+            val emojiTypefaceIndex = emojiSpanMatch.instructionMatches.first().index
+            val emojiTypeface = emojiSpanMatch.method.instructions.getOrNull(emojiTypefaceIndex)
+            if (emojiTypeface?.opcode != Opcode.INVOKE_VIRTUAL) {
+                throw PatchException("EmojiSpan typeface anchor is not invoke-virtual")
+            }
+            val emojiRegister = emojiTypeface as Instruction35c
+            emojiSpanMatch.method.replaceInstruction(
+                emojiTypefaceIndex,
+                """
+                invoke-static {v${emojiRegister.registerC}, v${emojiRegister.registerD}}, $FONT_UPDATE_DESCRIPTOR->applyEmojiTypeface(Landroid/graphics/Paint;Landroid/graphics/Typeface;)V
+                """.trimIndent(),
+            )
         }
     }

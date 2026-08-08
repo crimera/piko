@@ -83,6 +83,12 @@ public class UpdateFont {
         paint.setTypeface(processTypeface(typeface));
     }
 
+    public static void applyEmojiTypeface(Paint paint, Typeface typeface) {
+        paint.setTypeface(
+                isCustomEmojiFontEnabled && emojiTypeface != null ? emojiTypeface : typeface
+        );
+    }
+
     private static Typeface createTypeface(File fontFile, boolean isEmojiFont) {
         if (isEmojiFont || Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             return Typeface.createFromFile(fontFile);
