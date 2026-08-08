@@ -118,7 +118,7 @@ val hidePremiumUpsellPatch =
                 id = "xlite.content.hide_premium_upsell",
                 category = Categories.CONTENT,
                 strings = settingStrings("piko_xlite_hide_premium_upsell"),
-                order = 50,
+                order = 200,
                 defaultValue = true,
                 rebootApp = true,
             )

@@ -54,7 +54,7 @@ val xLiteHideSpacesBarPatch =
                 id = "xlite.timeline.hide_spaces_bar",
                 category = Categories.TIMELINE,
                 strings = settingStrings("piko_xlite_hide_spaces_bar"),
-                order = 150,
+                order = 250,
                 defaultValue = false,
             )
 

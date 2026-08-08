@@ -100,7 +100,7 @@ val xLiteDefaultReplySortingPatch =
         compatibleWith(COMPATIBILITY_X_LITE)
 
         xLiteSettings {
-            category(Categories.TIMELINE) {
+            category(Categories.POST_ACTIONS_MEDIA) {
                 group(Groups.REPLY_SORTING) {
                     singleChoice(
                         id = "xlite.timeline.default_reply_sorting",

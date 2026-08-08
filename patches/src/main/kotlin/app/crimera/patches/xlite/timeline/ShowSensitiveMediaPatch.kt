@@ -39,7 +39,7 @@ val xLiteShowSensitiveMediaPatch =
                 id = "xlite.content.show_sensitive_media",
                 category = Categories.CONTENT,
                 strings = settingStrings("piko_xlite_show_sensitive_media"),
-                order = 100,
+                order = 300,
                 defaultValue = true,
             )
 

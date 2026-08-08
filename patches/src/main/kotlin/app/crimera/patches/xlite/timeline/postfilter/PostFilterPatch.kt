@@ -1,7 +1,9 @@
 package app.crimera.patches.xlite.timeline.postfilter
 
 import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.Groups
 import app.crimera.patches.xlite.settings.customScreen
+import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.timeline.XLiteTimelineSuccessFingerprint
@@ -22,13 +24,15 @@ val postFilterPatch =
 
         xLiteSettings {
             category(Categories.CONTENT) {
-                customScreen(
-                    id = "xlite.content.post_filtering",
-                    strings = settingStrings("piko_xlite_post_filtering"),
-                    order = 300,
-                    fragmentClassDescriptor =
-                        "Lapp/morphe/extension/xlite/postfilter/PostFilterFragment;",
-                )
+                group(Groups.CONTENT_FILTERING) {
+                    customScreen(
+                        id = "xlite.content.post_filtering",
+                        strings = settingStrings("piko_xlite_post_filtering"),
+                        order = 400,
+                        fragmentClassDescriptor =
+                            "Lapp/morphe/extension/xlite/postfilter/PostFilterFragment;",
+                    )
+                }
             }
         }
 

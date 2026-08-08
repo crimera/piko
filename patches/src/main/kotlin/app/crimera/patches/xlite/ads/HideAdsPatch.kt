@@ -1,10 +1,13 @@
 package app.crimera.patches.xlite.ads
 
 import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.Groups
 import app.crimera.patches.xlite.settings.SettingReadRegisterConstraint
+import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.injectRead
 import app.crimera.patches.xlite.settings.settingStrings
-import app.crimera.patches.xlite.settings.xLiteToggle
+import app.crimera.patches.xlite.settings.toggle
+import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.timeline.XLiteTimelineSuccessFingerprint
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
@@ -21,13 +24,18 @@ val xLiteHideAdsPatch =
         compatibleWith(COMPATIBILITY_X_LITE)
 
         val filterPromotedPosts =
-            xLiteToggle(
-                id = "xlite.content.filter_promoted_posts",
-                category = Categories.CONTENT,
-                strings = settingStrings("piko_xlite_filter_promoted_posts"),
-                order = 100,
-                defaultValue = true,
-            )
+            xLiteSettings {
+                category(Categories.CONTENT) {
+                    group(Groups.CONTENT_FILTERING) {
+                        toggle(
+                            id = "xlite.content.filter_promoted_posts",
+                            strings = settingStrings("piko_xlite_filter_promoted_posts"),
+                            order = 100,
+                            defaultValue = true,
+                        )
+                    }
+                }
+            }
 
         execute {
             val matches = XLiteTimelineSuccessFingerprint.matchAll()

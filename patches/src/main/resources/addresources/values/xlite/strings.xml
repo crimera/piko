@@ -5,13 +5,15 @@
     <string name="piko_xlite_category_timeline_title">Timeline</string>
     <string name="piko_xlite_category_timeline_summary">Manage timeline behavior and appearance</string>
     <string name="piko_xlite_category_content_title">Content</string>
-    <string name="piko_xlite_category_content_summary">Manage ads, premium prompts, and post filtering</string>
-    <string name="piko_xlite_category_post_actions_media_title">Post actions and media</string>
-    <string name="piko_xlite_category_post_actions_media_summary">Manage post actions, downloads, and sharing</string>
+    <string name="piko_xlite_category_content_summary">Control promotions, recommendations, sensitive media, and filters</string>
+    <string name="piko_xlite_category_appearance_title">Appearance</string>
+    <string name="piko_xlite_category_appearance_summary">Customize colors and fonts</string>
+    <string name="piko_xlite_category_post_actions_media_title">Posts and media</string>
+    <string name="piko_xlite_category_post_actions_media_summary">Customize post actions, replies, media tabs, downloads, and sharing</string>
     <string name="piko_xlite_category_navigation_title">Navigation</string>
     <string name="piko_xlite_category_navigation_summary">Customize navigation bar and drawer items</string>
     <string name="piko_xlite_category_advanced_title">Advanced</string>
-    <string name="piko_xlite_category_advanced_summary">Inspect and override internal X-Lite behavior</string>
+    <string name="piko_xlite_category_advanced_summary">Power-user tools, debugging, and settings maintenance</string>
     <string name="piko_xlite_backup_restore_title">Backup and restore</string>
     <string name="piko_xlite_backup_restore_summary">Save or restore your Piko X-Lite settings</string>
 
@@ -37,8 +39,12 @@
     <string name="piko_xlite_show_sensitive_media_summary">Shows sensitive media without requiring confirmation</string>
     <string name="piko_xlite_default_reply_sorting_title">Default reply sorting</string>
     <string name="piko_xlite_default_reply_sorting_summary">Default reply-sort order for tweet detail (Relevance, Recency, or Likes)</string>
+    <string name="piko_xlite_group_content_filtering_title">Content filtering</string>
+    <string name="piko_xlite_group_content_filtering_summary">Control promotions, recommendations, AI-generated posts, and keyword filters</string>
     <string name="piko_xlite_group_reply_sorting_title">Reply sorting</string>
     <string name="piko_xlite_group_reply_sorting_summary">Customize how replies are sorted in post detail</string>
+    <string name="piko_xlite_group_debug_tools_title">Developer tools</string>
+    <string name="piko_xlite_group_debug_tools_summary">Inspect internal X-Lite data from post menus</string>
     <string name="piko_xlite_reply_sort_relevance">Relevant replies</string>
     <string name="piko_xlite_reply_sort_recency">Recent replies</string>
     <string name="piko_xlite_reply_sort_likes">Most liked replies</string>

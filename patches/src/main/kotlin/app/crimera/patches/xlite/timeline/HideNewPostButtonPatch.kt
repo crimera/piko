@@ -54,7 +54,7 @@ val hideNewPostButtonPatch =
                 id = "xlite.timeline.hide_new_post_button",
                 category = Categories.TIMELINE,
                 strings = settingStrings("piko_xlite_hide_new_post_button"),
-                order = 250,
+                order = 300,
                 defaultValue = false,
             )
 

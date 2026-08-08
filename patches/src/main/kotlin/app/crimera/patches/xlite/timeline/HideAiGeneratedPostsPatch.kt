@@ -1,11 +1,14 @@
 package app.crimera.patches.xlite.timeline
 
 import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.Groups
 import app.crimera.patches.xlite.settings.SettingReadRegisterConstraint
 import app.crimera.patches.xlite.settings.choice
+import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.injectRead
+import app.crimera.patches.xlite.settings.multiChoice
 import app.crimera.patches.xlite.settings.settingStrings
-import app.crimera.patches.xlite.settings.xLiteMultiChoice
+import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -24,18 +27,23 @@ val xLiteHideAiGeneratedPostsPatch =
         compatibleWith(COMPATIBILITY_X_LITE)
 
         val aiSourcesToHide =
-            xLiteMultiChoice(
-                id = "xlite.content.hide_ai_generated_posts",
-                category = Categories.CONTENT,
-                strings = settingStrings("piko_xlite_hide_ai_generated_posts"),
-                order = 120,
-                defaultValue = emptySet(),
-                options =
-                    listOf(
-                        choice("UserMarked", "piko_xlite_hide_ai_generated_posts_user_marked"),
-                        choice("AutoDetected", "piko_xlite_hide_ai_generated_posts_auto_detected"),
-                    ),
-            )
+            xLiteSettings {
+                category(Categories.CONTENT) {
+                    group(Groups.CONTENT_FILTERING) {
+                        multiChoice(
+                            id = "xlite.content.hide_ai_generated_posts",
+                            strings = settingStrings("piko_xlite_hide_ai_generated_posts"),
+                            order = 300,
+                            defaultValue = emptySet(),
+                            options =
+                                listOf(
+                                    choice("UserMarked", "piko_xlite_hide_ai_generated_posts_user_marked"),
+                                    choice("AutoDetected", "piko_xlite_hide_ai_generated_posts_auto_detected"),
+                                ),
+                        )
+                    }
+                }
+            }
 
         execute {
             val accessors = resolveAiDisclosureAccessors()

@@ -13,7 +13,7 @@ final class BuiltInSettings {
                 "piko_xlite_category_advanced_title",
                 "piko_xlite_category_advanced_summary",
                 "ic_vector_toolbox_stroke",
-                500
+                600
         );
         SettingsRegistry.registerGroup(
                 ADVANCED_CATEGORY_ID,

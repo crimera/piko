@@ -3,8 +3,11 @@ package app.crimera.patches.xlite.misc.browseobject
 import app.crimera.patches.xlite.misc.postoptions.BROWSE_OBJECT_ACTION
 import app.crimera.patches.xlite.misc.postoptions.xLitePostOption
 import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.Groups
+import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.settingStrings
-import app.crimera.patches.xlite.settings.xLiteToggle
+import app.crimera.patches.xlite.settings.toggle
+import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.morphe.patcher.patch.bytecodePatch
 
@@ -18,13 +21,18 @@ val xLiteBrowseObjectPatch =
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
 
-        xLiteToggle(
-            id = "xlite.content.browse_tweet_object",
-            category = Categories.POST_ACTIONS_MEDIA,
-            strings = settingStrings("piko_xlite_browse_tweet_object"),
-            order = 260,
-            defaultValue = true,
-        )
+        xLiteSettings {
+            category(Categories.ADVANCED) {
+                group(Groups.DEBUG_TOOLS) {
+                    toggle(
+                        id = "xlite.content.browse_tweet_object",
+                        strings = settingStrings("piko_xlite_browse_tweet_object"),
+                        order = 100,
+                        defaultValue = true,
+                    )
+                }
+            }
+        }
         xLitePostOption(
             handlerDescriptor = OBJECT_BROWSER_HANDLER,
             actionName = BROWSE_OBJECT_ACTION,

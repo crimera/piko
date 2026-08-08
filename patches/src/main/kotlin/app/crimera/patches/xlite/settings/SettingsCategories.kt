@@ -35,13 +35,22 @@ internal object Categories {
             order = 200,
         )
 
+    val APPEARANCE =
+        SettingsCategory(
+            id = "xlite.appearance",
+            titleResourceName = "piko_xlite_category_appearance_title",
+            summaryResourceName = "piko_xlite_category_appearance_summary",
+            iconResourceName = "ic_vector_paintbrush_box",
+            order = 300,
+        )
+
     val POST_ACTIONS_MEDIA =
         SettingsCategory(
             id = "xlite.post_actions_media",
             titleResourceName = "piko_xlite_category_post_actions_media_title",
             summaryResourceName = "piko_xlite_category_post_actions_media_summary",
             iconResourceName = "ic_vector_post_with_media",
-            order = 300,
+            order = 400,
         )
 
     val NAVIGATION =
@@ -50,7 +59,7 @@ internal object Categories {
             titleResourceName = "piko_xlite_category_navigation_title",
             summaryResourceName = "piko_xlite_category_navigation_summary",
             iconResourceName = "ic_vector_menu",
-            order = 400,
+            order = 500,
         )
 
     val ADVANCED =
@@ -59,7 +68,7 @@ internal object Categories {
             titleResourceName = "piko_xlite_category_advanced_title",
             summaryResourceName = "piko_xlite_category_advanced_summary",
             iconResourceName = "ic_vector_toolbox_stroke",
-            order = 500,
+            order = 600,
         )
 }
 
@@ -73,9 +82,18 @@ internal object Groups {
             order = 100,
         )
 
+    val CONTENT_FILTERING =
+        SettingsGroupMetadata(
+            id = "xlite.content.filtering",
+            titleResourceName = "piko_xlite_group_content_filtering_title",
+            summaryResourceName = "piko_xlite_group_content_filtering_summary",
+            iconResourceName = "ic_vector_filter",
+            order = 100,
+        )
+
     val DYNAMIC_COLORS =
         SettingsGroupMetadata(
-            id = "xlite.content.dynamic_colors",
+            id = "xlite.appearance.dynamic_colors",
             titleResourceName = "piko_xlite_group_dynamic_colors_title",
             summaryResourceName = "piko_xlite_group_dynamic_colors_summary",
             iconResourceName = "ic_vector_paintbrush_box",
@@ -93,10 +111,19 @@ internal object Groups {
 
     val REPLY_SORTING =
         SettingsGroupMetadata(
-            id = "xlite.timeline.reply_sorting",
+            id = "xlite.post_actions_media.reply_sorting",
             titleResourceName = "piko_xlite_group_reply_sorting_title",
             summaryResourceName = "piko_xlite_group_reply_sorting_summary",
             iconResourceName = "ic_vector_reply_stroke",
+            order = 300,
+        )
+
+    val DEBUG_TOOLS =
+        SettingsGroupMetadata(
+            id = "xlite.advanced.debug_tools",
+            titleResourceName = "piko_xlite_group_debug_tools_title",
+            summaryResourceName = "piko_xlite_group_debug_tools_summary",
+            iconResourceName = "ic_vector_bug_stroke",
             order = 300,
         )
 }

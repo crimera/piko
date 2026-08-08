@@ -94,9 +94,9 @@ val customFontPatch =
         compatibleWith(COMPATIBILITY_X_LITE)
 
         xLiteSettings {
-            category(Categories.CONTENT) {
+            category(Categories.APPEARANCE) {
                 group(
-                    id = "xlite.content.custom_font",
+                    id = "xlite.appearance.fonts",
                     strings = settingStrings("piko_xlite_font"),
                     iconResourceName = "ic_vector_text_size",
                     order = 200,

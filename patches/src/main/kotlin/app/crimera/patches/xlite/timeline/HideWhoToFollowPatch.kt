@@ -1,10 +1,13 @@
 package app.crimera.patches.xlite.timeline
 
 import app.crimera.patches.xlite.settings.Categories
+import app.crimera.patches.xlite.settings.Groups
 import app.crimera.patches.xlite.settings.SettingReadRegisterConstraint
+import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.injectRead
 import app.crimera.patches.xlite.settings.settingStrings
-import app.crimera.patches.xlite.settings.xLiteToggle
+import app.crimera.patches.xlite.settings.toggle
+import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -20,13 +23,18 @@ val xLiteHideWhoToFollowPatch =
         compatibleWith(COMPATIBILITY_X_LITE)
 
         val hideWhoToFollow =
-            xLiteToggle(
-                id = "xlite.content.hide_who_to_follow",
-                category = Categories.CONTENT,
-                strings = settingStrings("piko_xlite_hide_who_to_follow"),
-                order = 110,
-                defaultValue = false,
-            )
+            xLiteSettings {
+                category(Categories.CONTENT) {
+                    group(Groups.CONTENT_FILTERING) {
+                        toggle(
+                            id = "xlite.content.hide_who_to_follow",
+                            strings = settingStrings("piko_xlite_hide_who_to_follow"),
+                            order = 200,
+                            defaultValue = false,
+                        )
+                    }
+                }
+            }
 
         execute {
             val matches = XLiteTimelineSuccessFingerprint.matchAll()

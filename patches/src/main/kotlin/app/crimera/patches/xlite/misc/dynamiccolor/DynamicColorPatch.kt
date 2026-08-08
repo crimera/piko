@@ -59,7 +59,7 @@ val dynamicColorPatch =
 
         val useAmoledBlack =
             xLiteSettings {
-                category(Categories.CONTENT) {
+                category(Categories.APPEARANCE) {
                     group(Groups.DYNAMIC_COLORS) {
                         toggle(
                             id = "xlite.theme.dynamic_color",
