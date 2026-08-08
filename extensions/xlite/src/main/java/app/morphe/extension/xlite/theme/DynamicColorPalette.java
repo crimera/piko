@@ -192,8 +192,14 @@ public final class DynamicColorPalette {
         return switch (token) {
             case PRIMARY, LINK -> dynamicColor(dark, LIGHT_PRIMARY, DARK_PRIMARY);
             case PRIMARY_TEXT -> dynamicColor(dark, LIGHT_ON_SURFACE, DARK_ON_SURFACE);
-            case SECONDARY_TEXT, TERTIARY, TOMBSTONE ->
+            case SECONDARY_TEXT, TERTIARY ->
                     dynamicColor(dark, LIGHT_ON_SURFACE_VARIANT, DARK_ON_SURFACE_VARIANT);
+            // Tombstone is a container background in the Compose post interstitial, not text.
+            case TOMBSTONE -> dynamicColor(
+                    dark,
+                    LIGHT_SURFACE_CONTAINER_HIGH,
+                    DARK_SURFACE_CONTAINER_HIGH
+            );
             case ON_PRIMARY -> dynamicColor(dark, LIGHT_ON_PRIMARY, DARK_ON_PRIMARY);
             case DIVIDER, BORDER -> dynamicColor(dark, LIGHT_OUTLINE_VARIANT, DARK_OUTLINE_VARIANT);
             case CELL_BACKGROUND, APP_BACKGROUND ->
