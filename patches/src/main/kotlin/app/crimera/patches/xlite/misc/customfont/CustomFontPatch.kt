@@ -98,6 +98,7 @@ val customFontPatch =
                 group(
                     id = "xlite.content.custom_font",
                     strings = settingStrings("piko_xlite_font"),
+                    iconResourceName = "ic_vector_text_size",
                     order = 200,
                 ) {
                     toggle(
