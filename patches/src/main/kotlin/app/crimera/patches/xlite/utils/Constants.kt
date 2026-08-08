@@ -13,7 +13,6 @@ internal object Constants {
             appIconColor = 0x000000,
             targets =
                 listOf(
-                    AppTarget(version = "12.7.1-release.0"),
                     AppTarget(version = "12.10.1-release.0"),
                     AppTarget(version = "12.11.0-release.0"),
                     AppTarget(version = "12.12.0-release.0"),
