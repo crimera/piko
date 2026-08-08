@@ -63,9 +63,9 @@ public class RecommendedFlags {
         String filename = Constants.REC_FLAGS+".json";
         String host = Constants.PIKO_MAPPINGS_PATH;
         File recFlagFile = new File(context.getFilesDir(), filename);
-        InstaUtils.downloadFile(host, filename, recFlagFile, false);
-
-        long lastModified = recFlagFile.lastModified();
-        Pref.setLastRecommendedFlagDownloadTimestamp(lastModified);
+        InstaUtils.downloadFile(host, filename, recFlagFile, ()->{
+            long lastModified = recFlagFile.lastModified();
+            Pref.setLastRecommendedFlagDownloadTimestamp(lastModified);
+        });
     }
 }
