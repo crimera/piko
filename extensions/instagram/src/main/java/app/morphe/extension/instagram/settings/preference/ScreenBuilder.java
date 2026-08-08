@@ -833,7 +833,7 @@ public class ScreenBuilder {
         // for every a new flag.
         for(Flag flag : recFlags) {
             addPreference(
-                    helper.switchPreference(
+                    helper.listPreference(
                             flag.getName(),
                             flag.getDesc(),
                             flag.getCode()
