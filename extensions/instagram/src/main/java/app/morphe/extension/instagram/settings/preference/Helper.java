@@ -16,6 +16,7 @@ import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
 import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
+import app.morphe.extension.instagram.settings.SettingsRestart;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.theme.MaterialYouTheme;
 import app.morphe.extension.shared.Utils;
@@ -97,7 +98,9 @@ public class Helper {
         String key = preference.getKey();
         try {
             if (newValue != null) {
+                Object previousValue = getValue(preference);
                 String newValClass = newValue.getClass().getSimpleName();
+                boolean saved = false;
 
                 if (newValClass.equals("Boolean")) {
                     Boolean val = (Boolean) newValue;
@@ -107,16 +110,20 @@ public class Helper {
                     if (Settings.MATERIAL_YOU_THEME.key.equals(key)) {
                         return MaterialYouTheme.requestMaterialYouChange(context, val);
                     }
-                    SharedPref.setBooleanPref(key, val);
+                    saved = SharedPref.setBooleanPref(key, val);
                 } else if (newValClass.equals("String")) {
                     String val = (String) newValue;
                     if(key.contains("_")) {
-                        SharedPref.setStringPref(key, val);
+                        saved = SharedPref.setStringPref(key, val);
                     }else{
-                        FlagsSharedPref.setStringPref(key, val);
+                        saved = FlagsSharedPref.setStringPref(key, val);
                     }
                 } else if (newValClass.equals("HashSet")) {
-                    SharedPref.setSetPref(key, (Set) newValue);
+                    saved = SharedPref.setSetPref(key, (Set) newValue);
+                }
+
+                if (saved) {
+                    SettingsRestart.markChanged(previousValue, newValue);
                 }
             }
             return true;
@@ -125,5 +132,21 @@ public class Helper {
             Logger.printException(() -> "Failed setting pref: ", ex);
             return false;
         }
+    }
+
+    private Object getValue(Preference preference) {
+        if (preference instanceof SwitchPref) {
+            return ((SwitchPref) preference).isChecked();
+        }
+        if (preference instanceof ListPref) {
+            return ((ListPref) preference).getValue();
+        }
+        if (preference instanceof EditTextPref) {
+            return ((EditTextPref) preference).getText();
+        }
+        if (preference instanceof MultiSelectListPref) {
+            return ((MultiSelectListPref) preference).getValues();
+        }
+        return null;
     }
 }

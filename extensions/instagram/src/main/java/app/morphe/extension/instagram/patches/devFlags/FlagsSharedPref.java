@@ -35,6 +35,10 @@ public class FlagsSharedPref extends BaseSharedPref {
         return INSTANCE.setString(key, val);
     }
 
+    public static boolean flush() {
+        return INSTANCE.flushPreferences();
+    }
+
     public static Map<String, Boolean> getAll(){
         Map<String, Boolean> outFlags = new HashMap();
         try {

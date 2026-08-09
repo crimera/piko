@@ -109,6 +109,17 @@ public abstract class BaseSharedPref {
         return false;
     }
 
+    protected boolean flushPreferences() {
+        try {
+            if (sp != null) {
+                return sp.preferences.edit().commit();
+            }
+        } catch (Exception ex) {
+            Utils.showToastShort(ex.toString());
+        }
+        return false;
+    }
+
     public JSONObject all() {
         try {
             if (sp != null) {
