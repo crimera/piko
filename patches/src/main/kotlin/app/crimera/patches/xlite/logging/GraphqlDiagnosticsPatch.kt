@@ -158,37 +158,39 @@ val xLiteGraphqlDiagnosticsPatch =
 
         xLiteSettings {
             category(Categories.ADVANCED) {
-                group(Groups.NETWORK_LOGGING) {
-                    toggle(
-                        id = "xlite.advanced.debug_tools.log_network_diagnostics",
-                        strings = settingStrings("piko_xlite_log_network_diagnostics"),
-                        order = 400,
-                        defaultValue = false,
-                    )
-                    input(
-                        id = "xlite.advanced.debug_tools.log_network_diagnostics.operation_allowlist",
-                        strings = settingStrings("piko_xlite_log_network_diagnostics_allowlist"),
-                        order = 410,
-                        defaultValue = "",
-                    )
-                    toggle(
-                        id = "xlite.advanced.debug_tools.log_network_diagnostics.include_queue_lifecycle",
-                        strings = settingStrings("piko_xlite_log_network_diagnostics_queue"),
-                        order = 420,
-                        defaultValue = true,
-                    )
-                    toggle(
-                        id = "xlite.advanced.debug_tools.log_network_diagnostics.include_request_metadata",
-                        strings = settingStrings("piko_xlite_log_network_diagnostics_metadata"),
-                        order = 430,
-                        defaultValue = false,
-                    )
-                    action(
-                        id = "xlite.advanced.debug_tools.log_network_diagnostics.clear_file",
-                        strings = settingStrings("piko_xlite_log_network_diagnostics_clear"),
-                        order = 440,
-                        handlerClassDescriptor = "$GRAPHQL_DIAGNOSTICS_CLASS\$ClearFileAction;",
-                    )
+                group(Groups.DEBUG_TOOLS) {
+                    group(Groups.NETWORK_LOGGING) {
+                        toggle(
+                            id = "xlite.advanced.debug_tools.log_network_diagnostics",
+                            strings = settingStrings("piko_xlite_log_network_diagnostics"),
+                            order = 400,
+                            defaultValue = false,
+                        )
+                        input(
+                            id = "xlite.advanced.debug_tools.log_network_diagnostics.operation_allowlist",
+                            strings = settingStrings("piko_xlite_log_network_diagnostics_allowlist"),
+                            order = 410,
+                            defaultValue = "",
+                        )
+                        toggle(
+                            id = "xlite.advanced.debug_tools.log_network_diagnostics.include_queue_lifecycle",
+                            strings = settingStrings("piko_xlite_log_network_diagnostics_queue"),
+                            order = 420,
+                            defaultValue = true,
+                        )
+                        toggle(
+                            id = "xlite.advanced.debug_tools.log_network_diagnostics.include_request_metadata",
+                            strings = settingStrings("piko_xlite_log_network_diagnostics_metadata"),
+                            order = 430,
+                            defaultValue = false,
+                        )
+                        action(
+                            id = "xlite.advanced.debug_tools.log_network_diagnostics.clear_file",
+                            strings = settingStrings("piko_xlite_log_network_diagnostics_clear"),
+                            order = 440,
+                            handlerClassDescriptor = "$GRAPHQL_DIAGNOSTICS_CLASS\$ClearFileAction;",
+                        )
+                    }
                 }
             }
         }
