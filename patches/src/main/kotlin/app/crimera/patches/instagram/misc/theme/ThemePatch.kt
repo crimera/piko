@@ -20,7 +20,7 @@ val themePatch =
     resourcePatch(
         name = "Theme",
         description =
-            "Adds Material You and AMOLED options to Instagram's Dark mode settings " +
+            "Adds Material You and AMOLED controls to Piko settings " +
                 "on Android 12 and later. On Android 8–11, it applies a fixed " +
                 "Material You-style theme or an optional AMOLED theme.",
         default = true,
@@ -33,8 +33,8 @@ val themePatch =
             title = "Pure-black AMOLED theme for Android 8–11",
             description =
                 "Use a fixed pure-black AMOLED theme instead of the fixed Material " +
-                    "You-style theme on Android 8–11. On Android 12 and later, select " +
-                    "AMOLED in Instagram's Dark mode settings.",
+                    "You-style theme on Android 8–11. On Android 12 and later, use " +
+                    "the AMOLED control in Piko settings.",
         )
 
         var bytecodePatchContext: BytecodePatchContext? = null
@@ -60,15 +60,6 @@ val themePatch =
                 restoreApi31Base(
                     snapshot = originalApi31Base,
                 )
-                val materialYouStringIds =
-                    reservePublicStringIds(
-                        publicXml = get("res/values/public.xml"),
-                        names =
-                            listOf(
-                                "piko_material_you_title",
-                                "piko_amoled_title",
-                            ),
-                    )
                 writeMaterialYouOverlay(night = false)
                 writeMaterialYouOverlay(night = true)
                 writeAmoledOverlay(originalApi31Base)
@@ -78,10 +69,7 @@ val themePatch =
                     installComposePrismBlackRuntime(legacyAmoled = amoled == true)
                     installSystemDefaultUiModeHook()
                     installThemeLifecycleHooks()
-                    installMaterialYouToggle(
-                        titleId = materialYouStringIds.getValue("piko_material_you_title"),
-                        amoledTitleId = materialYouStringIds.getValue("piko_amoled_title"),
-                    )
+                    installNativeThemeModeSync()
                 }
             } finally {
                 bytecodePatchContext = null

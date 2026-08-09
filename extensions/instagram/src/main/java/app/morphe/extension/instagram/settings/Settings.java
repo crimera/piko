@@ -14,6 +14,8 @@ public class Settings {
     public static final BooleanSetting AMOLED_THEME = new BooleanSetting("amoled_theme", false);
     public static final StringSetting INSTAGRAM_THEME_MODE =
             new StringSetting("instagram_theme_mode", "-1");
+    public static final BooleanSetting INSTAGRAM_THEME_MODE_SYNCHRONIZED =
+            new BooleanSetting("instagram_theme_mode_synchronized", false);
     // It should be true always. It will be handled upon opening the piko settings for the first time.
     public static final BooleanSetting FIRST_TIME_PIKO = new BooleanSetting("first_time_piko", true);
     public static final StringSetting LAST_RECOMMENDED_FLAG_DOWNLOAD_TIMESTAMP = new StringSetting("last_recommended_flag_download_timestamp", "0");
