@@ -72,7 +72,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.9.0-dev.4](https://github.com/crimera/piko/releases/tag/v3.9.0-dev.4)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;128 patches total
+> **[v3.9.0-dev.5](https://github.com/crimera/piko/releases/tag/v3.9.0-dev.5)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;129 patches total
 <details>
 <summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;73 patches</summary>
 <br>
@@ -111,7 +111,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Disable auto timeline scroll on launch](#disable-auto-timeline-scroll-on-launch) |  |  |
 | [Disable chirp font](#disable-chirp-font) |  |  |
 | [Download patch](#download-patch) | Unlocks the ability to download videos and gifs from Twitter/X |  |
-| [Dynamic color](#dynamic-color) | Adds an option to replace Twitter Blue with the user's Material You palette. |  |
+| [Dynamic color](#dynamic-color) | Replaces the default Twitter Blue with the user's Material You palette. |  |
 | [Enable PiP mode automatically](#enable-pip-mode-automatically) | Enables PiP mode when you close the app |  |
 | [Enable Undo Posts](#enable-undo-posts) | Enables ability to undo posts before posting |  |
 | [Enable debug menu for posts](#enable-debug-menu-for-posts) |  |  |
@@ -161,7 +161,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;55 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;56 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -212,12 +212,13 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [More options on post](#more-options-on-post) | Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc |  |
 | [More options on profile](#more-options-on-profile) | Adds a new button to handle user related data like copy handle, download profile picture etc |  |
 | [Open links externally](#open-links-externally) | Changes links to always open in your external browser, instead of the in-app browser. |  |
+| [Recommended flags](#recommended-flags) | Developer flags suggested by the community |  |
 | [Remove build expired popup](#remove-build-expired-popup) | Removes the popup that appears after a while, when the app version ages. |  |
 | [Remove empty bottom space](#remove-empty-bottom-space) | Removes empty space below bottom navigation bar |  |
 | [Sanitize share links](#sanitize-share-links) |  |  |
 | [Save media comment](#save-media-comment) | Adds a button to save media comments on posts and reels. |  |
 | [Stories audio autoplay](#stories-audio-autoplay) |  |  |
-| [Theme](#theme) | Adds Material You and AMOLED options to Instagram's Dark mode settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme. | • Pure-black AMOLED theme for Android 8–11 |
+| [Theme](#theme) | Adds Material You and AMOLED controls to Piko settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme. | • Pure-black AMOLED theme for Android 8–11 |
 | [Unlock Plus benefits](#unlock-plus-benefits) | Unlocks 'Plus' subscription benefits that are checked locally. USE IT AT YOUR OWN RISK |  |
 | [Unlock developer options](#unlock-developer-options) | Unlocks developer option by long pressing home icon |  |
 | [Unlock employee options](#unlock-employee-options) | Unlocks all options using by employee for debugging |  |

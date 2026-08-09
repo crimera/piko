@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-03T16:32:36",
-  "description": "## [3.9.0-dev.4](https://github.com/crimera/piko/compare/v3.9.0-dev.3...v3.9.0-dev.4) (2026-08-03)\n\n### 🐛 Bug Fixes\n\n* **Instagram:** Fix user data entity fingerprints ([5d83613](https://github.com/crimera/piko/commit/5d8361334805470b2cc94fcfd0f2e4623a4d6be0))\n* **Twitter:** Fix inverted upsell flag boolean ([8a8b9e1](https://github.com/crimera/piko/commit/8a8b9e1a92da7d80419679ab0c900647bffed44a))\n\n### ✨ New Features\n\n* **Instagram:** Added some recommended flags ([40ddc7e](https://github.com/crimera/piko/commit/40ddc7ee525e351ae57e71055a81d995207e9917))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.4/patches-3.9.0-dev.4.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.4/patches-3.9.0-dev.4.mpp.asc",
-  "version": "3.9.0-dev.4"
+  "created_at": "2026-08-09T13:35:19",
+  "description": "## [3.9.0-dev.5](https://github.com/crimera/piko/compare/v3.9.0-dev.4...v3.9.0-dev.5) (2026-08-09)\n\n### ✨ New Features\n\n* **Instagram:** Added some recommended flags ([#1651](https://github.com/crimera/piko/issues/1651)) ([1cb0687](https://github.com/crimera/piko/commit/1cb068703fc101903272bea21fc93fe12ddde662))\n* **Instagram:** Made `Recommended flags` into patch ([f81fc79](https://github.com/crimera/piko/commit/f81fc7992792a72ecfc7d006590db9a506c86caa))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.5/patches-3.9.0-dev.5.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.5/patches-3.9.0-dev.5.mpp.asc",
+  "version": "3.9.0-dev.5"
 }

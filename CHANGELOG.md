@@ -1,3 +1,10 @@
+## [3.9.0-dev.5](https://github.com/crimera/piko/compare/v3.9.0-dev.4...v3.9.0-dev.5) (2026-08-09)
+
+### ✨ New Features
+
+* **Instagram:** Added some recommended flags ([#1651](https://github.com/crimera/piko/issues/1651)) ([1cb0687](https://github.com/crimera/piko/commit/1cb068703fc101903272bea21fc93fe12ddde662))
+* **Instagram:** Made `Recommended flags` into patch ([f81fc79](https://github.com/crimera/piko/commit/f81fc7992792a72ecfc7d006590db9a506c86caa))
+
 ## [3.9.0-dev.4](https://github.com/crimera/piko/compare/v3.9.0-dev.3...v3.9.0-dev.4) (2026-08-03)
 
 ### 🐛 Bug Fixes
