@@ -11,6 +11,9 @@ import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.text.InputType;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.view.View;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashSet;
@@ -24,6 +27,7 @@ import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.Setting;
 import app.morphe.extension.shared.ui.CustomDialog;
+import app.morphe.extension.xlite.ui.Theme;
 
 @SuppressWarnings("deprecation")
 public final class SettingsRenderer {
@@ -66,6 +70,80 @@ public final class SettingsRenderer {
                 screenNavigator
         );
         Utils.setPreferenceTitlesToMultiLineIfNeeded(screen);
+    }
+
+    public static int renderSearchResults(
+            Activity activity,
+            PreferenceScreen screen,
+            String query,
+            List<SettingsSearchMatcher.Match> matches,
+            ScreenNavigator screenNavigator
+    ) {
+        Context preferenceContext = screen.getContext();
+        boolean isRtl = preferenceContext.getResources()
+                .getConfiguration()
+                .getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+        int addedResults = 0;
+        for (SettingsSearchMatcher.Match match : matches) {
+            SettingsNode.Item item = match.result.item;
+            Preference preference;
+            if (item instanceof SettingsNode.CustomScreen customScreen) {
+                preference = customScreen(preferenceContext, customScreen, screenNavigator);
+            } else {
+                preference = item(activity, preferenceContext, item);
+            }
+            preference.setOrder(addedResults);
+            preference.setTitle(highlight(
+                    preferenceContext,
+                    match.result.title,
+                    query
+            ));
+            preference.setSummary(highlight(
+                    preferenceContext,
+                    searchSummary(match.result, isRtl),
+                    query
+            ));
+            screen.addPreference(preference);
+            addedResults++;
+        }
+        Utils.setPreferenceTitlesToMultiLineIfNeeded(screen);
+        return addedResults;
+    }
+
+    private static String searchSummary(
+            SettingsSearchIndex.Result result,
+            boolean isRtl
+    ) {
+        String path = result.path;
+        if (isRtl) path = path.replace(" \u2192 ", " \u2190 ");
+        if (path.isEmpty()) return result.summary;
+        if (result.summary.isEmpty()) return path;
+        return path + " - " + result.summary;
+    }
+
+    private static CharSequence highlight(
+            Context context,
+            String text,
+            String query
+    ) {
+        if (text == null || text.isEmpty()) return "";
+        List<SettingsSearchMatcher.MatchRange> ranges =
+                SettingsSearchMatcher.findHighlightRanges(text, query);
+        if (ranges.isEmpty()) return text;
+        SpannableString highlighted = new SpannableString(text);
+        int color = Theme.primaryAccent(context);
+        for (SettingsSearchMatcher.MatchRange range : ranges) {
+            if (range.start < 0 || range.end > text.length() || range.end <= range.start) {
+                continue;
+            }
+            highlighted.setSpan(
+                    new ForegroundColorSpan(color),
+                    range.start,
+                    range.end,
+                    SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+        }
+        return highlighted;
     }
 
     private static void renderChildren(

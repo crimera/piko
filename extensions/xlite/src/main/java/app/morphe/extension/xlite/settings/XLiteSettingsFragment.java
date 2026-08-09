@@ -9,10 +9,16 @@ import android.preference.PreferenceScreen;
 import android.view.View;
 import android.widget.ListView;
 
+import java.util.List;
+
+import app.morphe.extension.shared.StringRef;
+
 @SuppressWarnings("deprecation")
 public final class XLiteSettingsFragment extends PreferenceFragment {
     private static final String GROUP_ID_ARGUMENT = "group_id";
     private SettingsNode.Group group;
+    private PreferenceScreen screen;
+    private SettingsSearchField searchField;
 
     static XLiteSettingsFragment forGroup(SettingsNode.Group group) {
         XLiteSettingsFragment fragment = new XLiteSettingsFragment();
@@ -33,10 +39,10 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
         }
 
         Context preferenceContext = XLiteSettingsActivity.createPreferenceContext(activity);
-        PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(preferenceContext);
+        screen = getPreferenceManager().createPreferenceScreen(preferenceContext);
         setPreferenceScreen(screen);
         if (group == null) {
-            SettingsRenderer.render(screen, this::openGroup);
+            renderRoot();
             return;
         }
         SettingsRenderer.renderGroup(
@@ -46,6 +52,59 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
                 this::openGroup,
                 this::openScreen
         );
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (group != null) return;
+
+        View list = view.findViewById(android.R.id.list);
+        if (!(list instanceof ListView listView)) return;
+
+        Context context = requireActivity();
+        searchField = new SettingsSearchField(context);
+        listView.addHeaderView(searchField, null, false);
+
+        searchField.setOnQueryChangedListener(query -> {
+            SettingsSearchSession.update(query);
+            renderRoot();
+        });
+        searchField.setQuery(SettingsSearchSession.query());
+        renderRoot();
+    }
+
+    private void renderRoot() {
+        if (group != null || screen == null) return;
+
+        String query = SettingsSearchSession.query();
+        screen.removeAll();
+        if (query.trim().isEmpty()) {
+            setSearchEmptyState(false, query);
+            SettingsRenderer.render(screen, this::openGroup);
+            return;
+        }
+
+        List<SettingsSearchMatcher.Match> matches =
+                SettingsSearchMatcher.match(SettingsSearchIndex.results(), query);
+        int resultCount = SettingsRenderer.renderSearchResults(
+                requireActivity(),
+                screen,
+                query,
+                matches,
+                this::openScreen
+        );
+        setSearchEmptyState(resultCount == 0, query);
+    }
+
+
+    private void setSearchEmptyState(boolean visible, String query) {
+        if (searchField == null) return;
+        CharSequence message = StringRef.str(
+                "piko_xlite_settings_search_no_results",
+                query == null ? "" : query.trim()
+        );
+        searchField.setNoResults(visible, message);
     }
 
     @Override
@@ -107,6 +166,15 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
         Activity activity = getActivity();
         if (activity == null) throw new IllegalStateException("X-Lite settings activity is missing");
         return activity;
+    }
+
+    @Override
+    public void onDestroy() {
+        Activity activity = getActivity();
+        if (group == null && activity != null && activity.isFinishing()) {
+            SettingsSearchSession.reset();
+        }
+        super.onDestroy();
     }
 
     @Override
