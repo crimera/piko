@@ -210,6 +210,8 @@
     <string name="piko_array_detailed_timestamp">상세 타임스탬프 (요일/월/일/시/분/초)</string>
     <string name="piko_array_post_time">게시 시간 (시/분/초)</string>
     <string name="piko_array_time_left">남은 시간 (시/분/초 left)</string>
+    <string name="piko_array_recmd_flag_state_enable">활성화</string>
+    <string name="piko_array_recmd_flag_state_disable">비활성화</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Piko에 오신 것을 환영합니다</string>
     <string name="piko_welcome_message">Piko 사용 경험을 개선하려면 Piko 설정으로 이동하여 원하는 대로 설정해 주세요</string>

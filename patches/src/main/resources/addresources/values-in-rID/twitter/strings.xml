@@ -165,10 +165,10 @@
     <string name="piko_pref_show_poll_result">Tampilkan hasil polling</string>
     <string name="piko_pref_show_poll_result_desc">Lihat hasil polling tanpa memberikan suara</string>
     <string name="piko_pref_hide_community_notes">Sembunyikan catatan komunitas</string>
-    <string name="piko_pref_hide_immersive_player">Sembunyikan pemutar imersif</string>
-    <string name="piko_pref_hide_immersive_player_desc">Menghapus geser ke atas untuk video lainnya di pemutar video</string>
+    <string name="piko_pref_hide_immersive_player">Nonaktifkan pemutar imersif</string>
+    <string name="piko_pref_hide_immersive_player_desc">Nonaktifkan pemutar video baru yang memungkinkan Anda menonton lebih banyak video dengan menggeser ke atas</string>
     <string name="piko_pref_enable_vid_auto_advance">Aktifkan pengguliran video otomatis</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Mengaktifkan gulir otomatis video di tampilan imersif</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Mengaktifkan pengguliran otomatis video di pemutar imersif</string>
     <string name="piko_pref_hide_hidden_replies">Sembunyikan balasan yang disembunyikan</string>
     <string name="piko_pref_force_hd">Paksa video HD</string>
     <string name="piko_pref_force_hd_desc">Video akan selalu diputar dalam kualitas tertinggi</string>
@@ -283,6 +283,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">Ikon usang 4</string>
     <string name="piko_app_icon_name_legacy_blue">Biru Usang</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Biru</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">Bumi</string>
     <string name="piko_app_icon_name_moon">Bulan</string>
     <string name="piko_app_icon_name_mars">Mars</string>

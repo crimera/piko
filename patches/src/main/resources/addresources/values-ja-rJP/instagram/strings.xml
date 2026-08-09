@@ -210,6 +210,8 @@
     <string name="piko_array_detailed_timestamp">詳細な時刻表示</string>
     <string name="piko_array_post_time">投稿時刻(時/分/秒)</string>
     <string name="piko_array_time_left">残り時間(時/分/秒)</string>
+    <string name="piko_array_recmd_flag_state_enable">有効</string>
+    <string name="piko_array_recmd_flag_state_disable">無効</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Pikoへようこそ</string>
     <string name="piko_welcome_message">Pikoをより快適に利用するために、Piko設定でお好みに合わせて設定してください</string>

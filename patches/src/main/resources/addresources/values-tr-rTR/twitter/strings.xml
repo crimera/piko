@@ -165,10 +165,10 @@
     <string name="piko_pref_show_poll_result">Anket sonuçlarını göster</string>
     <string name="piko_pref_show_poll_result_desc">Oy vermeden anket sonuçlarını görüntüle</string>
     <string name="piko_pref_hide_community_notes">Topluluk notlarını gizle</string>
-    <string name="piko_pref_hide_immersive_player">Tam ekran oynatıcıyı gizle</string>
-    <string name="piko_pref_hide_immersive_player_desc">Video oynatıcıda yukarı kaydırarak daha fazla video açma özelliğini kaldırır</string>
+    <string name="piko_pref_hide_immersive_player">Sürükleyici oynatıcıyı devre dışı bırak</string>
+    <string name="piko_pref_hide_immersive_player_desc">Yukarı kaydırarak daha fazla video izlemenizi sağlayan yeni video oynatıcıyı devre dışı bırakır</string>
     <string name="piko_pref_enable_vid_auto_advance">Otomatik kaydırmayı etkinleştir</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Immersive görünümde video otomatik kaydırmayı etkinleştirir</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Sürükleyici oynatıcıda otomatik video kaydırmayı etkinleştirir</string>
     <string name="piko_pref_hide_hidden_replies">Gizli yanıtları gizle</string>
     <string name="piko_pref_force_hd">HD videoları zorla</string>
     <string name="piko_pref_force_hd_desc">Videolar her zaman en yüksek kalitede oynatılır</string>
@@ -283,6 +283,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">Eski İkon 4</string>
     <string name="piko_app_icon_name_legacy_blue">Eski Mavi</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Mavi</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">Dünya</string>
     <string name="piko_app_icon_name_moon">Ay</string>
     <string name="piko_app_icon_name_mars">Mars</string>

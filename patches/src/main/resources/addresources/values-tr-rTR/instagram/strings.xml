@@ -66,6 +66,8 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_disable_double_tap_to_like">Çift dokunarak beğenmeyi devre dışı bırak</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Çeşitli</string>
+    <string name="piko_material_you_title">Material You</string>
+    <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Analizleri devre dışı bırak</string>
     <string name="piko_delete_analytics_cache">Analiz önbelleğini sil</string>
     <string name="piko_disable_analytics_desc">Instagram/Facebook sunucularına gönderilen analizleri engelle</string>
@@ -101,6 +103,11 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_copy_full_name">Tam adı kopyala</string>
     <string name="piko_copy_user_id">Kullanıcı kimliğini kopyala</string>
     <string name="piko_copy_bio">Biyografiyi kopyala</string>
+    <string name="piko_view_profile_picture">Profil resmini görüntüle</string>
+    <string name="piko_copy_profile_link">Profil bağlantısını kopyala</string>
+    <string name="piko_share_this_profile">Bu profili paylaş</string>
+    <string name="piko_copy_links_from_bio">Biyografideki bağlantıları kopyala</string>
+    <string name="piko_no_links_in_bio">Bu biyografide bağlantı yok</string>
     <string name="piko_download_profile_picture">Profil resmini indir</string>
     <string name="piko_copied">Kopyalandı</string>
     <string name="piko_more_profile_options">Daha fazla profil seçeneği</string>
@@ -222,6 +229,12 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_settings_on_action_bar">Piko ayarları eylem çubuğunda</string>
     <string name="piko_settings_on_action_bar_desc">Piko ayarları butonunu ana akış eylem çubuğuna taşı</string>
     <!-- Developer Options Section -->
+    <string name="piko_category_rec_flags">Önerilen bayraklar</string>
+    <string name="piko_category_rec_flags_desc">Topluluk tarafından önerilen geliştirici işaretleri</string>
+    <string name="piko_rec_flags_read_error">Önbelleğe alınmış bayraklar dosyasını okuma başarısız oldu</string>
+    <string name="piko_rec_flags_no_file">Önerilen bayraklar dosyası bulunamadı</string>
+    <string name="piko_rec_flags_refresh_file">Bayrakları yenile</string>
+    <string name="piko_rec_flags_last_modified_at">Son değiştirilme tarihi: %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">İçeriği filtrele</string>
     <string name="piko_filter_story">Hikaye filtrele</string>

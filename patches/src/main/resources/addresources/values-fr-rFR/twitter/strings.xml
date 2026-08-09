@@ -165,10 +165,10 @@
     <string name="piko_pref_show_poll_result">Afficher les résultats du sondage</string>
     <string name="piko_pref_show_poll_result_desc">Voir les résultats du sondage sans voter</string>
     <string name="piko_pref_hide_community_notes">Masquer les notes de la communauté</string>
-    <string name="piko_pref_hide_immersive_player">Masquer le joueur immersif</string>
-    <string name="piko_pref_hide_immersive_player_desc">Supprime le balayage vers le haut pour plus de vidéos dans le lecteur vidéo</string>
+    <string name="piko_pref_hide_immersive_player">Désactiver le lecteur immersif</string>
+    <string name="piko_pref_hide_immersive_player_desc">Désactiver le nouveau lecteur vidéo qui permet de regarder davantage de vidéos en faisant glisser vers le haut</string>
     <string name="piko_pref_enable_vid_auto_advance">Activer le défilement automatique de la vidéo</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Active le défilement automatique des vidéos en vue immersive</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Active le défilement automatique des vidéos dans le lecteur immersif</string>
     <string name="piko_pref_hide_hidden_replies">Masquer les réponses cachées</string>
     <string name="piko_pref_force_hd">Forcer les vidéos HD</string>
     <string name="piko_pref_force_hd_desc">Les vidéos seront toujours lues dans la plus haute qualité</string>
@@ -201,8 +201,6 @@
     <string name="piko_pref_customisation_post_font_size">Taille de police des publications</string>
     <string name="piko_pref_customisation_search_type_ahead">Suggestions de recherche à masquer</string>
     <string name="piko_pref_customisation_change_app_icon">Changer l\'icône de l\'application</string>
-    <string name="piko_pref_dynamic_color">Couleurs dynamiques</string>
-    <string name="piko_pref_dynamic_color_desc">Applique la palette Material You de l’utilisateur au thème de l’application entière. Pour appliquer des couleurs dynamiques à l’icône de l’application, allez dans les paramètres de Piko &gt; Personnalisation &gt; Changer l\'icône de l\'application</string>
     <string name="piko_notifications_tab_priority">Priorité</string>
     <string name="piko_pref_customisation_more_info_on_profile">Plus d\'informations sur le profil</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Ajoute plus de détails sur la page de profil</string>

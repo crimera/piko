@@ -165,10 +165,7 @@
     <string name="piko_pref_show_poll_result">Mostra risultati del sondaggio</string>
     <string name="piko_pref_show_poll_result_desc">Mostra i risultati del sondaggio senza votare</string>
     <string name="piko_pref_hide_community_notes">Nascondi le note della comunità</string>
-    <string name="piko_pref_hide_immersive_player">Nascondi lettore immersivo</string>
-    <string name="piko_pref_hide_immersive_player_desc">Rimuove lo scorrimento verso l\'alto per visualizzare altri video nel lettore video</string>
     <string name="piko_pref_enable_vid_auto_advance">Abilita scorrimento automatico video</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Abilita lo scorrimento automatico dei video nella visione immersiva</string>
     <string name="piko_pref_hide_hidden_replies">Nascondi le risposte nascoste</string>
     <string name="piko_pref_force_hd">Forza video in HD</string>
     <string name="piko_pref_force_hd_desc">I video verranno riprodotti sempre a una qualità alta</string>

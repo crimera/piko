@@ -229,11 +229,11 @@ Nota: Em uma instalação limpa, a animação de dica pode aparecer, mas irá su
     <string name="piko_settings_on_action_bar">Configurações do Piko no feed principal</string>
     <string name="piko_settings_on_action_bar_desc">Mova o acesso às configurações do Piko para a barra superior no feed principal.</string>
     <!-- Developer Options Section -->
-    <string name="piko_category_rec_flags">Sinalizadores recomendados</string>
-    <string name="piko_category_rec_flags_desc">Sinalizadores de desenvolvedor sugeridos pela comunidade</string>
-    <string name="piko_rec_flags_read_error">Falha ao ler o arquivo de sinalizadores em cache</string>
-    <string name="piko_rec_flags_no_file">Arquivo de sinalizadores recomendado não encontrado</string>
-    <string name="piko_rec_flags_refresh_file">Atualizar sinalizadores</string>
+    <string name="piko_category_rec_flags">Flags recomendados</string>
+    <string name="piko_category_rec_flags_desc">Flags de desenvolvedor sugeridos pela comunidade</string>
+    <string name="piko_rec_flags_read_error">Falha ao ler o arquivo de flags em cache</string>
+    <string name="piko_rec_flags_no_file">Arquivo de flags recomendados não encontrado</string>
+    <string name="piko_rec_flags_refresh_file">Atualizar flags</string>
     <string name="piko_rec_flags_last_modified_at">Última modificação: %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">Filtrar conteúdo</string>

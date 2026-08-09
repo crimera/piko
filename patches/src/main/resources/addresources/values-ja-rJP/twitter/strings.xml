@@ -165,8 +165,8 @@
     <string name="piko_pref_show_poll_result">投票結果を表示</string>
     <string name="piko_pref_show_poll_result_desc">投票せずに投票結果を表示できるようにします</string>
     <string name="piko_pref_hide_community_notes">コミュニティノートを削除</string>
-    <string name="piko_pref_hide_immersive_player">没入型プレーヤーを削除</string>
-    <string name="piko_pref_hide_immersive_player_desc">動画再生時にスワイプして他の動画を表示する機能を無効化します</string>
+    <string name="piko_pref_hide_immersive_player">没入型プレーヤーを無効化</string>
+    <string name="piko_pref_hide_immersive_player_desc">上にスワイプしてより多くの動画を視聴できる新しいビデオプレーヤーを無効にします</string>
     <string name="piko_pref_enable_vid_auto_advance">動画の自動スクロールを有効化</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">没入型プレーヤーで自動スクロールを有効化します</string>
     <string name="piko_pref_hide_hidden_replies">「非表示の返信」を削除</string>
@@ -201,8 +201,6 @@
     <string name="piko_pref_customisation_post_font_size">ポストのフォントサイズ</string>
     <string name="piko_pref_customisation_search_type_ahead">検索候補から非表示にする項目</string>
     <string name="piko_pref_customisation_change_app_icon">アプリアイコンを変更</string>
-    <string name="piko_pref_dynamic_color">Dynamic color</string>
-    <string name="piko_pref_dynamic_color_desc">ユーザーのMaterial Youパレットをアプリ全体のテーマに適用します。アプリのアイコンにMaterial Youを適用するには、Piko設定 &gt; カスタマイズ &gt; アプリアイコンを変更から変更できます</string>
     <string name="piko_notifications_tab_priority">優先度</string>
     <string name="piko_pref_customisation_more_info_on_profile">プロフィールの詳細</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">プロフィールページに詳細情報を追加します</string>

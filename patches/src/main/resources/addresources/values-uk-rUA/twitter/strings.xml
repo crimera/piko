@@ -67,8 +67,6 @@
     <string name="piko_pref_hide_quick_promote_desc">Кнопка просування під своїми дописами</string>
     <string name="piko_pref_show_poll_result">Показати результати опитування</string>
     <string name="piko_pref_show_poll_result_desc">Відображає результати опитування без голосування</string>
-    <string name="piko_pref_hide_immersive_player_desc">Видаляє свайп вгору для додаткових відео у відеопрогравачі</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Автоматичне гортання відео в імерсивному програвачі</string>
     <string name="piko_pref_force_hd_desc">Програвання відео лише в HD-якості</string>
     <string name="piko_pref_hide_nudge_button">Сховати кнопку взаємодії</string>
     <string name="piko_pref_hide_nudge_button_desc">Сховати кнопки Читати/Підписка/Теж читати на дописах</string>

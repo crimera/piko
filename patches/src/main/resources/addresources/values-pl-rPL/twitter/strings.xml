@@ -165,10 +165,10 @@
     <string name="piko_pref_show_poll_result">Pokaż wyniki ankiet</string>
     <string name="piko_pref_show_poll_result_desc">Pozwala zobaczyć wyniki ankiety bez oddawania głosu</string>
     <string name="piko_pref_hide_community_notes">Ukryj uwagi społeczności</string>
-    <string name="piko_pref_hide_immersive_player">Ukryj pełnoekranowy odtwarzacz</string>
-    <string name="piko_pref_hide_immersive_player_desc">Wyłącza gest przesuwania w górę dla kolejnych filmów</string>
+    <string name="piko_pref_hide_immersive_player">Wyłącz odtwarzacz immersyjny</string>
+    <string name="piko_pref_hide_immersive_player_desc">Wyłącza nowy odtwarzacz filmów, który pozwala oglądać kolejne filmy po przesunięciu w górę</string>
     <string name="piko_pref_enable_vid_auto_advance">Włącz auto-przewijanie filmów</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Włącza automatyczne przechodzenie do kolejnego filmu w widoku pełnoekranowym</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Włącza automatyczne przewijanie filmów w trybie immersyjnym</string>
     <string name="piko_pref_hide_hidden_replies">Ukryj ukryte odpowiedzi</string>
     <string name="piko_pref_force_hd">Wymuś jakość filmów w HD</string>
     <string name="piko_pref_force_hd_desc">Filmy będą zawsze odtwarzane w najwyższej dostępnej jakości</string>
@@ -201,8 +201,6 @@
     <string name="piko_pref_customisation_post_font_size">Rozmiar czcionki wpisów</string>
     <string name="piko_pref_customisation_search_type_ahead">Sugestie wyszukiwania do ukrycia</string>
     <string name="piko_pref_customisation_change_app_icon">Zmień ikonę aplikacji</string>
-    <string name="piko_pref_dynamic_color">Dynamiczny kolor</string>
-    <string name="piko_pref_dynamic_color_desc">Stosuje paletę Material You użytkownika do motywu całej aplikacji. Aby zastosować dynamiczne kolory do ikony aplikacji, przejdź do ustawień Piko &gt; Personalizacja &gt; Zmień ikonę aplikacji</string>
     <string name="piko_notifications_tab_priority">Priorytet</string>
     <string name="piko_pref_customisation_more_info_on_profile">Więcej informacji w profilu</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Dodaje więcej szczegółów na stronie profilu</string>

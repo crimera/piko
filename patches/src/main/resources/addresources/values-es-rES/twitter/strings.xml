@@ -165,10 +165,7 @@
     <string name="piko_pref_show_poll_result">Mostrar resultados de encuestas</string>
     <string name="piko_pref_show_poll_result_desc">Ver resultados de encuestas sin votar</string>
     <string name="piko_pref_hide_community_notes">Ocultar notas de la comunidad</string>
-    <string name="piko_pref_hide_immersive_player">Ocultar reproductor inmersivo</string>
-    <string name="piko_pref_hide_immersive_player_desc">Elimina el deslizamiento hacia arriba para más videos en el reproductor de video</string>
     <string name="piko_pref_enable_vid_auto_advance">Habilitar el desplazamiento automático del vídeo</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Habilita el desplazamiento automático de video en modo inmersivo</string>
     <string name="piko_pref_hide_hidden_replies">Ocultar respuestas ocultas</string>
     <string name="piko_pref_force_hd">Forzar videos HD</string>
     <string name="piko_pref_force_hd_desc">Los videos se reproducirán siempre en la calidad más alta</string>
@@ -201,8 +198,6 @@
     <string name="piko_pref_customisation_post_font_size">Tamaño de fuente de las publicaciones</string>
     <string name="piko_pref_customisation_search_type_ahead">Sugerencias de búsqueda a ocultar</string>
     <string name="piko_pref_customisation_change_app_icon">Cambiar ícono de la app</string>
-    <string name="piko_pref_dynamic_color">Color dinámico</string>
-    <string name="piko_pref_dynamic_color_desc">Aplica la paleta Material You del usuario al tema de toda la aplicación. Para aplicar colores dinámicos al ícono de la aplicación, vaya a Configuración de Piko &gt; Personalizar &gt; Cambiar ícono de la aplicación</string>
     <string name="piko_notifications_tab_priority">Prioridad</string>
     <string name="piko_pref_customisation_more_info_on_profile">Más información en el perfil</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Agrega más detalles en la página de perfil</string>

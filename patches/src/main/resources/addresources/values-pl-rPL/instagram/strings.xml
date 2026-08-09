@@ -210,6 +210,8 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_array_detailed_timestamp">Szczegółowy czas (dzień tygodnia/miesiąc/dzień/godzina/minuta/sekunda)</string>
     <string name="piko_array_post_time">Czas publikacji (godzina/minuta/sekunda)</string>
     <string name="piko_array_time_left">Pozostały czas (godziny/minuty/sekundy)</string>
+    <string name="piko_array_recmd_flag_state_enable">Włącz</string>
+    <string name="piko_array_recmd_flag_state_disable">Wyłącz</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Witaj w Piko</string>
     <string name="piko_welcome_message">Aby wyciągnąć z Piko jak najwięcej, zajrzyj do ustawień i dostosuj je pod siebie</string>

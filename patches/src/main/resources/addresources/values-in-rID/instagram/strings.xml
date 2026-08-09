@@ -66,6 +66,8 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_disable_double_tap_to_like">Nonaktifkan ketuk dua kali untuk menyukai</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Lain-lain</string>
+    <string name="piko_material_you_title">Material You</string>
+    <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Nonaktifkan analitik</string>
     <string name="piko_delete_analytics_cache">Hapus cache analitik</string>
     <string name="piko_disable_analytics_desc">Blokir analitik yang dikirim ke server Instagram/Facebook</string>
@@ -101,6 +103,11 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_copy_full_name">Salin nama lengkap</string>
     <string name="piko_copy_user_id">Salin id pengguna</string>
     <string name="piko_copy_bio">Salin bio</string>
+    <string name="piko_view_profile_picture">Lihat foto profil</string>
+    <string name="piko_copy_profile_link">Salin tautan profil</string>
+    <string name="piko_share_this_profile">Bagikan profil ini</string>
+    <string name="piko_copy_links_from_bio">Salin tautan dari bio</string>
+    <string name="piko_no_links_in_bio">Tidak ada tautan di bio ini</string>
     <string name="piko_download_profile_picture">Unduh foto profil</string>
     <string name="piko_copied">Disalin</string>
     <string name="piko_more_profile_options">Pilihan profil lainnya</string>
@@ -203,6 +210,8 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_array_detailed_timestamp">Stempel waktu terperinci (Hari Kerja/Bulan/Tanggal/Jam/Menit/Detik)</string>
     <string name="piko_array_post_time">Waktu posting (Jam/Menit/Detik)</string>
     <string name="piko_array_time_left">Waktu tersisa (Jam/Menit/Detik tersisa)</string>
+    <string name="piko_array_recmd_flag_state_enable">Aktifkan</string>
+    <string name="piko_array_recmd_flag_state_disable">Nonaktifkan</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Selamat datang di Piko</string>
     <string name="piko_welcome_message">Untuk meningkatkan pengalaman Anda menggunakan Piko, silakan buka pengaturan Piko dan sesuaikan preferensi Anda</string>
@@ -222,6 +231,12 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_settings_on_action_bar">Pengaturan Piko di bilah tindakan</string>
     <string name="piko_settings_on_action_bar_desc">Pindahkan titik masuk pengaturan Piko ke bilah tindakan feed utama</string>
     <!-- Developer Options Section -->
+    <string name="piko_category_rec_flags">Tanda yang direkomendasikan</string>
+    <string name="piko_category_rec_flags_desc">Tanda pengembang yang disarankan oleh komunitas</string>
+    <string name="piko_rec_flags_read_error">Gagal membaca berkas tanda yang di-cache</string>
+    <string name="piko_rec_flags_no_file">Berkas tanda yang direkomendasikan tidak ditemukan</string>
+    <string name="piko_rec_flags_refresh_file">Segarkan tanda</string>
+    <string name="piko_rec_flags_last_modified_at">Terakhir diubah: %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">Saring konten</string>
     <string name="piko_filter_story">Saring Cerita</string>

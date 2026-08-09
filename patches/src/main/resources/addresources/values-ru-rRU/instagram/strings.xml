@@ -66,6 +66,8 @@
     <string name="piko_disable_double_tap_to_like">Отключить двойное нажатие для отметки «Нравится»</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Разное</string>
+    <string name="piko_material_you_title">Material You</string>
+    <string name="piko_amoled_title">Amoled</string>
     <string name="piko_disable_analytics">Отключить аналитику</string>
     <string name="piko_delete_analytics_cache">Очистить кэш аналитики</string>
     <string name="piko_disable_analytics_desc">Блокировать отправку данных анализа в серверы Instagram/Facebook</string>
@@ -101,6 +103,11 @@
     <string name="piko_copy_full_name">Скопировать полное имя</string>
     <string name="piko_copy_user_id">Скопировать id пользователя</string>
     <string name="piko_copy_bio">Скопировать описание профиля</string>
+    <string name="piko_view_profile_picture">Посмотреть фото профиля</string>
+    <string name="piko_copy_profile_link">Скопировать ссылку на профиль</string>
+    <string name="piko_share_this_profile">Поделиться этим профилем</string>
+    <string name="piko_copy_links_from_bio">Скопировать ссылки из описания профиля</string>
+    <string name="piko_no_links_in_bio">В описании профиля нет ссылок</string>
     <string name="piko_download_profile_picture">Скачать фото профиля</string>
     <string name="piko_copied">Скопировано</string>
     <string name="piko_more_profile_options">Дополнительные действия с профилем</string>
@@ -222,6 +229,12 @@
     <string name="piko_settings_on_action_bar">Кнопка настроек Piko на панели действий</string>
     <string name="piko_settings_on_action_bar_desc">Переместить кнопку настроек Piko на панель действий главной ленты</string>
     <!-- Developer Options Section -->
+    <string name="piko_category_rec_flags">Рекомендуемые флаги</string>
+    <string name="piko_category_rec_flags_desc">Флаги разработчика, предложенные сообществом</string>
+    <string name="piko_rec_flags_read_error">Не удалось прочитать кэшированный файл флагов</string>
+    <string name="piko_rec_flags_no_file">Файл рекомендуемых флагов не найден</string>
+    <string name="piko_rec_flags_refresh_file">Обновить флаги</string>
+    <string name="piko_rec_flags_last_modified_at">Последнее изменение: %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">Фильтрация контента</string>
     <string name="piko_filter_story">Фильтрация историй</string>
