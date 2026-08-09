@@ -8,22 +8,21 @@
 package app.morphe.extension.instagram.patches.devFlags;
 
 import org.json.JSONObject;
-import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
 
 
 public class Flag {
 
     private String name;
     private String desc;
-    private BooleanSetting code;
+    private StringSetting code;
 
     public Flag(JSONObject jsonObject) {
         try {
             this.name = jsonObject.optString("name");
             this.desc = jsonObject.optString("desc");
             String codeKey = jsonObject.optString("code");
-            boolean defValue = jsonObject.optBoolean("defaultValue");
-            this.code = new BooleanSetting(codeKey,defValue);
+            this.code = new StringSetting(codeKey,FlagState.DISABLE.toString());
         } catch (Exception e) {
         }
     }
@@ -36,7 +35,7 @@ public class Flag {
         return desc;
     }
 
-    public BooleanSetting getCode() {
+    public StringSetting getCode() {
         return code;
     }
 }

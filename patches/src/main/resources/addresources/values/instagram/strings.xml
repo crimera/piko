@@ -225,6 +225,9 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_array_post_time">Post time (Hour/Minute/Second)</string>
     <string name="piko_array_time_left">Time left (Hour/Minute/Second left)</string>
 
+    <string name="piko_array_recmd_flag_state_enable">Enable</string>
+    <string name="piko_array_recmd_flag_state_disable">Disable</string>
+
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Welcome to Piko</string>
     <string name="piko_welcome_message">To improve your experience with Piko, please vist Piko settings and adjust your preference</string>

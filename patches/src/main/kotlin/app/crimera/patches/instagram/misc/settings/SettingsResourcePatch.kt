@@ -28,7 +28,7 @@ val addSettingsActivityPatch =
                 val service = document.createElement("service")
                 service.setAttribute(
                     "android:name",
-                    "app.morphe.extension.instagram.utils.InstaUtils\$SettingsTaskService",
+                    "app.morphe.extension.instagram.settings.SettingsTaskService",
                 )
                 service.setAttribute("android:exported", "false")
                 service.setAttribute("android:stopWithTask", "false")

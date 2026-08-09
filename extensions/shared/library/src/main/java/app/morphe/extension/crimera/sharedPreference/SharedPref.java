@@ -53,4 +53,8 @@ public class SharedPref extends BaseSharedPref {
     public static boolean clearAll() {
         return INSTANCE.clear();
     }
+
+    public static boolean flush() {
+        return INSTANCE.flushPreferences();
+    }
 }

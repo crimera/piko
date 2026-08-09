@@ -16,7 +16,7 @@ import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
 import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
-import app.morphe.extension.instagram.utils.InstaUtils;
+import app.morphe.extension.instagram.settings.SettingsRestart;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
@@ -96,20 +96,20 @@ public class Helper {
                 boolean saved = false;
 
                 if (newValClass.equals("Boolean")) {
-                    Boolean val = (Boolean) newValue;
-                    if(key.contains("_")) {
-                        saved = SharedPref.setBooleanPref(key, val);
-                    }else{
-                        saved = FlagsSharedPref.setBooleanPref(key, val);
-                    }
+                    saved = SharedPref.setBooleanPref(key, (Boolean) newValue);
                 } else if (newValClass.equals("String")) {
-                    saved = SharedPref.setStringPref(key, (String) newValue);
+                    String val = (String) newValue;
+                    if(key.contains("_")) {
+                        saved = SharedPref.setStringPref(key, val);
+                    }else{
+                        saved = FlagsSharedPref.setStringPref(key, val);
+                    }
                 } else if (newValClass.equals("HashSet")) {
                     saved = SharedPref.setSetPref(key, (Set) newValue);
                 }
 
                 if (saved) {
-                    InstaUtils.markSettingsChanged(previousValue, newValue);
+                    SettingsRestart.markChanged(previousValue, newValue);
                 }
             }
 

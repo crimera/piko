@@ -85,7 +85,7 @@ public class DownloadMapping {
         String appVersionName = Utils.getAppVersionName();
         String mappings_filename = appVersionName + ".json";
         File destinationFile = new File(DownloadMapping.mappingsPath);
-        InstaUtils.downloadFile(host, mappings_filename, destinationFile, true);
+        InstaUtils.downloadFile(host, mappings_filename, destinationFile, ()->Utils.restartApp(context));
     }
 
 }
