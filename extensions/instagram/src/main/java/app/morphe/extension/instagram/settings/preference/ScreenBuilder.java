@@ -93,15 +93,15 @@ public class ScreenBuilder {
         if (!(SettingsStatus.developerOptionsSection())) return;
 
         // PreferenceCategory category= addCategory(str("piko_category_dev_options"));
-
-        addPreference(
-                helper.buttonPreference(
-                        str("piko_category_rec_flags"),
-                        str("piko_category_rec_flags_desc"),
-                        Constants.PIKO_FRAGMENT_REC_FLAGS
-                )
-        );
-
+        if (SettingsStatus.recommendedFlags) {
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_category_rec_flags"),
+                            str("piko_category_rec_flags_desc"),
+                            Constants.PIKO_FRAGMENT_REC_FLAGS
+                    )
+            );
+        }
 
         if (SettingsStatus.removeBuildExpirePopup) {
             addPreference(
@@ -852,7 +852,7 @@ public class ScreenBuilder {
         // for every a new flag.
         for(Flag flag : recFlags) {
             addPreference(
-                    helper.switchPreference(
+                    helper.listPreference(
                             flag.getName(),
                             flag.getDesc(),
                             flag.getCode()

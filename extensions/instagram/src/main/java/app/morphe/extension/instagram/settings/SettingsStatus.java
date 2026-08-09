@@ -29,8 +29,10 @@ public class SettingsStatus {
     public static void allowUserNetworkCertificate() {
         allowUserNetworkCertificate = true;
     }
+    public static boolean recommendedFlags = false;
+    public static void recommendedFlags() {recommendedFlags = true;}
     public static boolean developerOptionsSection() {
-        return (allowUserNetworkCertificate || unlockEmployeeOptions || enableDeveloperOptions || removeBuildExpirePopup);
+        return (allowUserNetworkCertificate || unlockEmployeeOptions || enableDeveloperOptions || removeBuildExpirePopup || recommendedFlags);
     }
 
     //Ads section.

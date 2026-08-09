@@ -12,8 +12,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 
+import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.crimera.sharedPreference.BaseSharedPref;
-import app.morphe.extension.crimera.settings.BooleanSetting;
+import app.morphe.extension.crimera.settings.StringSetting;
 
 import app.morphe.extension.instagram.constants.Constants;
 
@@ -26,12 +27,12 @@ public class FlagsSharedPref extends BaseSharedPref {
     }
 
     // Static Wrapper Delegates
-    public static Boolean getBooleanPref(BooleanSetting setting) {
-        return INSTANCE.getBoolean(setting);
+    public static String getStringPref(StringSetting setting) {
+        return INSTANCE.getString(setting);
     }
 
-    public static Boolean setBooleanPref(String key, Boolean val) {
-        return INSTANCE.setBoolean(key, val);
+    public static Boolean setStringPref(String key, String val) {
+        return INSTANCE.setString(key, val);
     }
 
     public static Map<String, Boolean> getAll(){
@@ -41,7 +42,10 @@ public class FlagsSharedPref extends BaseSharedPref {
             Iterator<String> keys = flags.keys();
             while (keys.hasNext()) {
                 String key = keys.next();
-                Boolean value = (Boolean) flags.get(key);
+                String flagState = (String) flags.get(key);
+                if (flagState.equals(FlagState.DISABLE.toString())) continue;
+                Boolean value = flagState.equals(FlagState.ENABLE.toString()) ? true:false;
+                PikoUtils.logger(key+" : "+Boolean.valueOf(value));
                 outFlags.put(key, value);
             }
         } catch (Exception e) {

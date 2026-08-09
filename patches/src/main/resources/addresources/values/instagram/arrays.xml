@@ -227,4 +227,16 @@
         <item>verified</item>
     </string-array>
 
+    <string-array name="piko_array_recmd_flag_states">
+        <item>@string/piko_array_default</item>
+        <item>@string/piko_array_recmd_flag_state_enable</item>
+        <item>@string/piko_array_recmd_flag_state_disable</item>
+    </string-array>
+
+    <string-array name="piko_array_recmd_flag_states_val">
+        <item>default</item>
+        <item>enable</item>
+        <item>disable</item>
+    </string-array>
+
 </resources>

@@ -107,13 +107,14 @@ public class Helper {
                     if (Settings.MATERIAL_YOU_THEME.key.equals(key)) {
                         return MaterialYouTheme.requestMaterialYouChange(context, val);
                     }
-                    if(key.contains("_")) {
-                        SharedPref.setBooleanPref(key, val);
-                    }else{
-                        FlagsSharedPref.setBooleanPref(key, val);
-                    }
+                    SharedPref.setBooleanPref(key, val);
                 } else if (newValClass.equals("String")) {
-                    SharedPref.setStringPref(key, (String) newValue);
+                    String val = (String) newValue;
+                    if(key.contains("_")) {
+                        SharedPref.setStringPref(key, val);
+                    }else{
+                        FlagsSharedPref.setStringPref(key, val);
+                    }
                 } else if (newValClass.equals("HashSet")) {
                     SharedPref.setSetPref(key, (Set) newValue);
                 }
