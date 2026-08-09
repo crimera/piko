@@ -170,7 +170,10 @@ public class Pref {
         return 3;
     }
     public static String customSharingDomain() {
-        return Utils.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
+        if (SettingsStatus.customSharingDomainEnabled) {
+            return Utils.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
+        }
+        return "";
     }
 
     public static ArrayList hideRecommendedUsers(ArrayList users) {
