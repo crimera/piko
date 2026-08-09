@@ -47,7 +47,7 @@ public class FlagsSharedPref extends BaseSharedPref {
             while (keys.hasNext()) {
                 String key = keys.next();
                 String flagState = (String) flags.get(key);
-                if (flagState.equals(FlagState.DISABLE.toString())) continue;
+                if (flagState.equals(FlagState.DEFAULT.toString())) continue;
                 Boolean value = flagState.equals(FlagState.ENABLE.toString()) ? true:false;
                 PikoUtils.logger(key+" : "+Boolean.valueOf(value));
                 outFlags.put(key, value);
