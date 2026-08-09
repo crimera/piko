@@ -93,14 +93,14 @@ public class Helper {
                 String newValClass = newValue.getClass().getSimpleName();
 
                 if (newValClass.equals("Boolean")) {
-                    Boolean val = (Boolean) newValue;
-                    if(key.contains("_")) {
-                        SharedPref.setBooleanPref(key, val);
-                    }else{
-                        FlagsSharedPref.setBooleanPref(key, val);
-                    }
+                    SharedPref.setBooleanPref(key, (Boolean) newValue);
                 } else if (newValClass.equals("String")) {
-                    SharedPref.setStringPref(key, (String) newValue);
+                    String val = (String) newValue;
+                    if(key.contains("_")) {
+                        SharedPref.setStringPref(key, val);
+                    }else{
+                        FlagsSharedPref.setStringPref(key, val);
+                    }
                 } else if (newValClass.equals("HashSet")) {
                     SharedPref.setSetPref(key, (Set) newValue);
                 }

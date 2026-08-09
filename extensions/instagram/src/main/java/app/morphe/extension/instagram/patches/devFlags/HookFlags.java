@@ -15,6 +15,7 @@ import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
 import app.morphe.extension.instagram.entity.DeveloperOptionsItem;
 import app.morphe.extension.instagram.utils.Pref;
+import app.morphe.extension.instagram.settings.SettingsStatus;
 
 public class HookFlags {
     private static Map<String, Boolean> BOOL_FLAGS = new HashMap<>();
@@ -78,8 +79,10 @@ public class HookFlags {
     }
 
     private static void addRecommendedFlags(){
-        Map<String, Boolean> recFlags = FlagsSharedPref.getAll();
-        BOOL_FLAGS.putAll(recFlags);
+        if(SettingsStatus.recommendedFlags) {
+            Map<String, Boolean> recFlags = FlagsSharedPref.getAll();
+            BOOL_FLAGS.putAll(recFlags);
+        }
     }
 
     public static void load() {

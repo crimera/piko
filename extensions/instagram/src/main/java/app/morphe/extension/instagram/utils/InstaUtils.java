@@ -83,7 +83,7 @@ public class InstaUtils {
         }
     }
 
-    public static void downloadFile(String host, String endpoint, File outputFile, boolean restartAfterDownload) {
+    public static void downloadFile(String host, String endpoint, File outputFile, Runnable onComplete) {
         Context context = Utils.getContext();
 
         if (!Utils.isNetworkConnected()) {
@@ -100,7 +100,10 @@ public class InstaUtils {
 
                 new Handler(Looper.getMainLooper()).post(() -> {
                     PikoUtils.toast(str("piko_downloaded_media") + outputFile.getName());
-                    if (restartAfterDownload) Utils.restartApp(context);
+
+                    if (onComplete != null) {
+                        onComplete.run();
+                    }
                 });
 
             } catch (Exception e) {
@@ -108,6 +111,5 @@ public class InstaUtils {
                 PikoUtils.toast(str("piko_download_failed_media") + outputFile.getName());
             }
         });
-
     }
 }
