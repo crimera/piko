@@ -1,3 +1,9 @@
+## [3.9.0-dev.6](https://github.com/crimera/piko/compare/v3.9.0-dev.5...v3.9.0-dev.6) (2026-08-09)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** Fix default flag state while extracting recommended flags map ([82785a8](https://github.com/crimera/piko/commit/82785a858bae02ee11bd8ff07f06fa260bcceea2))
+
 ## [3.9.0-dev.5](https://github.com/crimera/piko/compare/v3.9.0-dev.4...v3.9.0-dev.5) (2026-08-09)
 
 ### ✨ New Features
