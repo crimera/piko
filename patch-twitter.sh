@@ -82,6 +82,7 @@ java -jar morphe-desktop-1.11.0-all.jar patch \
   -e "X-Lite: Custom font" \
   -e "X-Lite: Open canonical URLs" \
   -e "X-Lite: Collect AI-filter training posts" \
+  -e "X-Lite: Log network diagnostics" \
   --striplibs=arm64-v8a \
   --force \
   -o ~/Downloads/piko-twitter-patched.apk \

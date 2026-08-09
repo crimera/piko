@@ -45,6 +45,8 @@
     <string name="piko_xlite_group_reply_sorting_summary">Customize how replies are sorted in post detail</string>
     <string name="piko_xlite_group_debug_tools_title">Developer tools</string>
     <string name="piko_xlite_group_debug_tools_summary">Inspect internal X-Lite data from post menus</string>
+    <string name="piko_xlite_group_network_logging_title">Network logging</string>
+    <string name="piko_xlite_group_network_logging_summary">Bounded, sanitized GraphQL and queue lifecycle diagnostics records</string>
     <string name="piko_xlite_reply_sort_relevance">Relevant replies</string>
     <string name="piko_xlite_reply_sort_recency">Recent replies</string>
     <string name="piko_xlite_reply_sort_likes">Most liked replies</string>
@@ -69,6 +71,16 @@
     <string name="piko_xlite_share_image_summary">Adds a rendered-image share action to post menus</string>
     <string name="piko_xlite_browse_tweet_object_title">Browse tweet object</string>
     <string name="piko_xlite_browse_tweet_object_summary">Adds a debug option to inspect the tweet object in post menus</string>
+    <string name="piko_xlite_log_network_diagnostics_title">Log network diagnostics</string>
+    <string name="piko_xlite_log_network_diagnostics_summary">Logs GraphQL requests, responses, and errors plus durable queue events to Download/Piko/X-Lite-GraphQL-Diagnostics.txt. The allowlist filters request-start and transport-error records; empty (default) logs every operation. Bounded and sanitized, off by default</string>
+    <string name="piko_xlite_log_network_diagnostics_allowlist_title">Operation allowlist</string>
+    <string name="piko_xlite_log_network_diagnostics_allowlist_summary">Comma-separated GraphQL operation names to log. Empty (default) logs every operation</string>
+    <string name="piko_xlite_log_network_diagnostics_queue_title">Include queue lifecycle</string>
+    <string name="piko_xlite_log_network_diagnostics_queue_summary">Log durable request enqueue, retry, completion, and permanent-failure events</string>
+    <string name="piko_xlite_log_network_diagnostics_metadata_title">Include request metadata</string>
+    <string name="piko_xlite_log_network_diagnostics_metadata_summary">Adds sanitized operation and response details to records</string>
+    <string name="piko_xlite_log_network_diagnostics_clear_title">Clear diagnostics file</string>
+    <string name="piko_xlite_log_network_diagnostics_clear_summary">Deletes the diagnostics file from Download/Piko</string>
 
     <string name="piko_xlite_group_inline_actions_title">Inline actions</string>
     <string name="piko_xlite_group_inline_actions_summary">Customize post actions and media download controls</string>
