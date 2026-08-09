@@ -155,7 +155,7 @@ private val materialYouThemeMappings =
         "igds_primary_background" to "@color/piko_dynamic_background",
         "igds_secondary_background" to "@color/piko_dynamic_background",
         "igds_elevated_background" to "@color/piko_dynamic_background",
-        "igds_elevated_highlight_background" to "@color/piko_dynamic_pressed_background",
+        "igds_elevated_highlight_background" to "@color/piko_dynamic_background",
         "igds_elevated_separator" to "@color/piko_dynamic_outline_variant",
         "igds_separator" to "@color/piko_dynamic_outline_variant",
         "igds_stroke" to "@color/piko_dynamic_outline",
@@ -186,7 +186,6 @@ private val materialYouSurfaceBaselineMappings =
         "material_grey_850" to "@color/piko_dynamic_background",
         "material_grey_900" to "@color/piko_dynamic_background",
         "igds_prism_gray_07" to "@color/piko_dynamic_prism_black",
-        // Keep search and pressed rows distinct from the primary background.
         "igds_prism_gray_09" to "@color/piko_dynamic_pressed_background",
         "igds_prism_gray_13" to "@color/piko_dynamic_prism_black",
         "igds_prism_gray_14" to "@color/piko_dynamic_prism_black",
@@ -230,10 +229,17 @@ private val amoledMaterialYouAliases =
         )
 
 internal fun amoledMaterialYouOverlayMappings(): Map<String, String> =
-    materialYouNamedMappings.mapValues { (_, value) ->
-        val alias = value.removePrefix("@color/")
-        amoledMaterialYouAliases[alias] ?: value
+    materialYouNamedMappings.mapValues { (name, value) ->
+        if (name == "igds_elevated_highlight_background") {
+            amoledMaterialYouAliases.getValue("piko_dynamic_pressed_background")
+        } else {
+            val alias = value.removePrefix("@color/")
+            amoledMaterialYouAliases[alias] ?: value
+        }
     }
+
+internal val amoledSplashMappings =
+    mapOf("ig_splash_screen_background" to "@color/bds_black")
 
 internal fun dynamicOverlayMappings(night: Boolean): Map<String, String> {
     val aliases =

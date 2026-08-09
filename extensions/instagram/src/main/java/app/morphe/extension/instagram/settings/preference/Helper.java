@@ -17,6 +17,8 @@ import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
 import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
 import app.morphe.extension.instagram.settings.SettingsRestart;
+import app.morphe.extension.instagram.settings.Settings;
+import app.morphe.extension.instagram.theme.MaterialYouTheme;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
@@ -39,6 +41,11 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(setting.key);
         preference.setDefaultValue(setting.defaultValue);
+        if (Settings.AMOLED_THEME.key.equals(setting.key)) {
+            preference.setSwitchInteractionEnabled(
+                    MaterialYouTheme.canEnableAmoled(context)
+            );
+        }
         return preference;
     }
 
@@ -87,7 +94,7 @@ public class Helper {
         return preference;
     }
 
-    public void setValue(Preference preference, Object newValue) {
+    public boolean setValue(Preference preference, Object newValue) {
         String key = preference.getKey();
         try {
             if (newValue != null) {
@@ -96,7 +103,14 @@ public class Helper {
                 boolean saved = false;
 
                 if (newValClass.equals("Boolean")) {
-                    saved = SharedPref.setBooleanPref(key, (Boolean) newValue);
+                    Boolean val = (Boolean) newValue;
+                    if (Settings.AMOLED_THEME.key.equals(key)) {
+                        return MaterialYouTheme.requestAmoledChange(context, val);
+                    }
+                    if (Settings.MATERIAL_YOU_THEME.key.equals(key)) {
+                        return MaterialYouTheme.requestMaterialYouChange(context, val);
+                    }
+                    saved = SharedPref.setBooleanPref(key, val);
                 } else if (newValClass.equals("String")) {
                     String val = (String) newValue;
                     if(key.contains("_")) {
@@ -112,10 +126,11 @@ public class Helper {
                     SettingsRestart.markChanged(previousValue, newValue);
                 }
             }
-
+            return true;
         } catch (Exception ex) {
             Utils.showToastShort(ex.toString());
             Logger.printException(() -> "Failed setting pref: ", ex);
+            return false;
         }
     }
 

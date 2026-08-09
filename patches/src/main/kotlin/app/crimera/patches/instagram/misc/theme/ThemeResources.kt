@@ -43,7 +43,6 @@ private val amoledNightOverrides =
     mapOf(
         "igds_secondary_background" to "@color/bds_black",
         "igds_elevated_background" to "@color/bds_black",
-        "igds_elevated_highlight_background" to "@color/bds_black",
         "igds_prism_black" to "#ff000000",
     )
 
@@ -153,7 +152,7 @@ internal fun ResourcePatchContext.writeAmoledOverlay(
     )
 
 internal fun amoledMaterialYouOverlayValues(): OverlayValues {
-    val values = amoledMaterialYouOverlayMappings()
+    val values = amoledMaterialYouOverlayMappings() + amoledSplashMappings
     val api34Values = values + materialYouSwitchApi34Mappings(night = true)
     return OverlayValues(
         day = values,
@@ -198,6 +197,7 @@ internal fun amoledOverlayValues(snapshot: Api31BaseSnapshot): OverlayValues =
         snapshot.nightColors +
             amoledSurfaceBaselineMappings +
             amoledNightOverrides +
+            amoledSplashMappings +
             amoledSwitchMappings
     ).let { values ->
         OverlayValues(day = values, night = values)

@@ -36,7 +36,9 @@ import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.settings.preference.Helper;
 import app.morphe.extension.instagram.settings.preference.ScreenBuilder;
 import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
+import app.morphe.extension.instagram.settings.preference.widgets.SwitchPref;
 import app.morphe.extension.instagram.settings.SettingsStatus;
+import app.morphe.extension.instagram.theme.MaterialYouTheme;
 
 public class SettingsActivity extends Activity {
 
@@ -245,6 +247,14 @@ public class SettingsActivity extends Activity {
                     "piko_download_set_path",
                     StorageUtils::getCustomPathForDisplay
             );
+            Preference preference = findPreference(Settings.AMOLED_THEME.key);
+            if (preference instanceof SwitchPref) {
+                SwitchPref amoledPreference = (SwitchPref) preference;
+                amoledPreference.setChecked(MaterialYouTheme.isAmoledEnabled());
+                amoledPreference.setSwitchInteractionEnabled(
+                        MaterialYouTheme.canEnableAmoled(getActivity())
+                );
+            }
         }
 
         @Override

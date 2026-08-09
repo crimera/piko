@@ -844,16 +844,6 @@ public class ScreenBuilder {
             );
         }
 
-        if (SettingsStatus.dynamicColor) {
-            addPreference(category,
-                    helper.switchPreference(
-                            str("piko_pref_dynamic_color"),
-                            str("piko_pref_dynamic_color_desc"),
-                            Settings.DYNAMIC_COLOR
-                    )
-            );
-        }
-      
         addPreference(category,
                 helper.switchPreference(
                         str("piko_pref_quick_settings"),
