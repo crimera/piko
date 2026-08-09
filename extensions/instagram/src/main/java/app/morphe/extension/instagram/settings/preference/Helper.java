@@ -16,6 +16,7 @@ import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
 import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
+import app.morphe.extension.instagram.utils.InstaUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
@@ -90,19 +91,25 @@ public class Helper {
         String key = preference.getKey();
         try {
             if (newValue != null) {
+                Object previousValue = getValue(preference);
                 String newValClass = newValue.getClass().getSimpleName();
+                boolean saved = false;
 
                 if (newValClass.equals("Boolean")) {
                     Boolean val = (Boolean) newValue;
                     if(key.contains("_")) {
-                        SharedPref.setBooleanPref(key, val);
+                        saved = SharedPref.setBooleanPref(key, val);
                     }else{
-                        FlagsSharedPref.setBooleanPref(key, val);
+                        saved = FlagsSharedPref.setBooleanPref(key, val);
                     }
                 } else if (newValClass.equals("String")) {
-                    SharedPref.setStringPref(key, (String) newValue);
+                    saved = SharedPref.setStringPref(key, (String) newValue);
                 } else if (newValClass.equals("HashSet")) {
-                    SharedPref.setSetPref(key, (Set) newValue);
+                    saved = SharedPref.setSetPref(key, (Set) newValue);
+                }
+
+                if (saved) {
+                    InstaUtils.markSettingsChanged(previousValue, newValue);
                 }
             }
 
@@ -110,5 +117,21 @@ public class Helper {
             Utils.showToastShort(ex.toString());
             Logger.printException(() -> "Failed setting pref: ", ex);
         }
+    }
+
+    private Object getValue(Preference preference) {
+        if (preference instanceof SwitchPref) {
+            return ((SwitchPref) preference).isChecked();
+        }
+        if (preference instanceof ListPref) {
+            return ((ListPref) preference).getValue();
+        }
+        if (preference instanceof EditTextPref) {
+            return ((EditTextPref) preference).getText();
+        }
+        if (preference instanceof MultiSelectListPref) {
+            return ((MultiSelectListPref) preference).getValues();
+        }
+        return null;
     }
 }
