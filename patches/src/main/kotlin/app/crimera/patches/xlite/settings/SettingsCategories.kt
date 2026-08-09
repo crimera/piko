@@ -105,7 +105,7 @@ internal object Groups {
             id = "xlite.post_actions_media.inline_actions",
             titleResourceName = "piko_xlite_group_inline_actions_title",
             summaryResourceName = "piko_xlite_group_inline_actions_summary",
-            iconResourceName = "ic_vector_reply_stroke",
+            iconResourceName = "ic_vector_more",
             order = 200,
         )
 
@@ -114,7 +114,7 @@ internal object Groups {
             id = "xlite.post_actions_media.reply_sorting",
             titleResourceName = "piko_xlite_group_reply_sorting_title",
             summaryResourceName = "piko_xlite_group_reply_sorting_summary",
-            iconResourceName = "ic_vector_reply_stroke",
+            iconResourceName = "ic_vector_sort_arrows",
             order = 300,
         )
 
