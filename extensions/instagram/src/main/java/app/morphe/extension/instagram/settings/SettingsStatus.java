@@ -290,7 +290,9 @@ public class SettingsStatus {
         FLAGS.put(str("piko_allow_user_network_certificate"),SettingsStatus.allowUserNetworkCertificate);
 
         FLAGS.put(str("piko_enable_mark_chat_as_read"),SettingsStatus.markChatAsRead);
-            FLAGS.put(str("piko_category_filter_content"),SettingsStatus.storyFilters);
+        FLAGS.put(str("piko_category_filter_content"),SettingsStatus.storyFilters);
+        FLAGS.put(str("piko_category_rec_flags"),SettingsStatus.recommendedFlags);
+
     }
 
     public static void load() {
