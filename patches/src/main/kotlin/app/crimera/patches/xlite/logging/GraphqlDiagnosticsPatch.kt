@@ -14,7 +14,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.string
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
@@ -24,56 +23,47 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 private const val GRAPHQL_DIAGNOSTICS_CLASS = "Lapp/morphe/extension/xlite/logging/GraphqlDiagnostics"
 private const val GRAPHQL_DIAGNOSTICS_DESCRIPTOR = "$GRAPHQL_DIAGNOSTICS_CLASS;"
 
-/** Shared GraphQL repository owner: stable semantic strings from the response mapper and failure logger. */
-private object GraphqlApiImplClassFingerprint : Fingerprint(
-    filters =
-        listOf(
-            string("GraphqlApiImpl"),
-            string("CAUGHT AN APOLLO EXCEPTION for "),
-        ),
-)
-
-/** Shared thrown-exception helper: `s(String, Throwable) -> b$a`. */
+/** Shared thrown-exception helper: `(String, Throwable) -> object result`. */
 internal object GraphqlFailureFingerprint : Fingerprint(
-    classFingerprint = GraphqlApiImplClassFingerprint,
-    parameters = listOf("Ljava/lang/String;", "Ljava/lang/Throwable;"),
-    returnType = "Lcom/x/result/b\$a;",
+    strings = listOf("CAUGHT AN APOLLO EXCEPTION for "),
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 2 &&
+            methodDef.parameters[0].type == "Ljava/lang/String;" &&
+            methodDef.parameters[1].type == "Ljava/lang/Throwable;" &&
+            methodDef.returnType.startsWith("L")
+    },
 )
 
-/** Mutation entry: `i(q0, Map, x, Continuation) -> Object`. */
+/** Mutation entry: `(Apollo operation, Map, GraphQL repository, Continuation) -> Object`. */
 internal object GraphqlMutationRequestStartFingerprint : Fingerprint(
-    classFingerprint = GraphqlApiImplClassFingerprint,
+    strings = listOf("mutation"),
     returnType = "Ljava/lang/Object;",
     custom = { methodDef, _ ->
         methodDef.parameters.size == 4 &&
-            methodDef.parameters[0].type in
-                setOf(
-                    "Lcom/apollographql/apollo/api/q0;",
-                    "Lcom/apollographql/apollo/api/r0;",
-                ) &&
+            methodDef.parameters[0].type.startsWith("Lcom/apollographql/apollo/api/") &&
             methodDef.parameters[1].type == "Ljava/util/Map;" &&
             methodDef.parameters[2].type.startsWith("Lcom/x/repositories/graphql/") &&
             methodDef.parameters[3].type == "Lkotlin/coroutines/Continuation;"
     },
 )
 
-/** Shared query execution entry: `h(y0, Map, x, http/h, List, k0, Continuation) -> Object`. */
+/** Shared query execution entry: `(Apollo operation, Map, GraphQL repository, HTTP context, List, Apollo value, Continuation) -> Object`. */
 internal object GraphqlSharedRequestStartFingerprint : Fingerprint(
-    classFingerprint = GraphqlApiImplClassFingerprint,
+    strings = listOf("call to 'resume' before 'invoke' with coroutine"),
     returnType = "Ljava/lang/Object;",
     custom = { methodDef, _ ->
         methodDef.parameters.size == 7 &&
-            methodDef.parameters[0].type == "Lcom/apollographql/apollo/api/y0;" &&
+            methodDef.parameters[0].type.startsWith("Lcom/apollographql/apollo/api/") &&
             methodDef.parameters[1].type == "Ljava/util/Map;" &&
             methodDef.parameters[2].type.startsWith("Lcom/x/repositories/graphql/") &&
-            methodDef.parameters[3].type == "Lcom/apollographql/apollo/api/http/h;" &&
+            methodDef.parameters[3].type.startsWith("Lcom/apollographql/apollo/api/http/") &&
             methodDef.parameters[4].type == "Ljava/util/List;" &&
-            methodDef.parameters[5].type == "Lcom/apollographql/apollo/api/k0;" &&
+            methodDef.parameters[5].type.startsWith("Lcom/apollographql/apollo/api/") &&
             methodDef.parameters[6].type == "Lkotlin/coroutines/Continuation;"
     },
 )
 
-/** Shared Apollo-to-app response mapper: static `a(f, Function2) -> com/x/result/b`. */
+/** Shared Apollo-to-app response mapper: static `(Apollo response, Function2) -> result object`. */
 internal object GraphqlResponseMapperFingerprint : Fingerprint(
     strings =
         listOf(
@@ -81,54 +71,55 @@ internal object GraphqlResponseMapperFingerprint : Fingerprint(
             "bounce_deeplink",
             "sub_error_code",
         ),
-    parameters =
-        listOf(
-            "Lcom/apollographql/apollo/api/f;",
-            "Lkotlin/jvm/functions/Function2;",
-        ),
-    returnType = "Lcom/x/result/b;",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 2 &&
+            methodDef.parameters[0].type.startsWith("Lcom/apollographql/apollo/api/") &&
+            methodDef.parameters[1].type == "Lkotlin/jvm/functions/Function2;" &&
+            methodDef.returnType.startsWith("Lcom/x/result/")
+    },
 )
 
-/** Durable enqueue boundary: static-extension `L(s, ContextualPost, PostActionType, String, MapBuilder, PostIdentifier, I) -> V`. */
+/** Durable enqueue boundary: static extension with stable model/library package shapes. */
 internal object PostActionsEnqueueFingerprint : Fingerprint(
-    parameters =
-        listOf(
-            "Lcom/x/repositories/post/actions/s;",
-            "Lcom/x/models/ContextualPost;",
-            "Lcom/x/models/PostActionType;",
-            "Ljava/lang/String;",
-            "Lkotlin/collections/builders/MapBuilder;",
-            "Lcom/x/models/PostIdentifier;",
-            "I",
-        ),
     returnType = "V",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 7 &&
+            methodDef.parameters[0].type.startsWith("Lcom/x/repositories/post/actions/") &&
+            methodDef.parameters[1].type.startsWith("Lcom/x/models/") &&
+            methodDef.parameters[2].type.startsWith("Lcom/x/models/") &&
+            methodDef.parameters[3].type == "Ljava/lang/String;" &&
+            methodDef.parameters[4].type == "Lkotlin/collections/builders/MapBuilder;" &&
+            methodDef.parameters[5].type.startsWith("Lcom/x/models/") &&
+            methodDef.parameters[6].type == "I"
+    },
 )
 
-/** Durable completion boundary: static-extension `I(s, String, post/actions/n, String) -> V`. */
+/** Durable completion boundary: static extension with stable package shapes. */
 internal object PostActionsCompleteFingerprint : Fingerprint(
-    parameters =
-        listOf(
-            "Lcom/x/repositories/post/actions/s;",
-            "Ljava/lang/String;",
-            "Lcom/x/repositories/post/actions/n;",
-            "Ljava/lang/String;",
-        ),
     returnType = "V",
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 4 &&
+            methodDef.parameters[0].type.startsWith("Lcom/x/repositories/post/actions/") &&
+            methodDef.parameters[1].type == "Ljava/lang/String;" &&
+            methodDef.parameters[2].type.startsWith("Lcom/x/repositories/post/actions/") &&
+            methodDef.parameters[3].type == "Ljava/lang/String;"
+    },
 )
 
-/** Terminal drop boundary: static `b(f, g, String) -> V` (permanent/no-executor/ttl/retry-exhausted). */
+/** Terminal drop boundary on the named durable worker; parameter classes are release-obfuscated. */
 internal object DurableWorkerDropFingerprint : Fingerprint(
+    definingClass = "Lcom/x/durableactions/DurableActionWorker;",
     strings = listOf("DurableActionWorker"),
-    parameters =
-        listOf(
-            "Lcom/x/durableactions/f;",
-            "Lcom/x/durableactions/g;",
-            "Ljava/lang/String;",
-        ),
     returnType = "V",
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 3 &&
+            methodDef.parameters[0].type.startsWith("Lcom/x/durableactions/") &&
+            methodDef.parameters[1].type.startsWith("Lcom/x/durableactions/") &&
+            methodDef.parameters[2].type == "Ljava/lang/String;"
+    },
 )
 
 /** WorkManager entry kept by name: `doWork(Continuation) -> Object` with retry/worker literals. */
@@ -200,7 +191,6 @@ val xLiteGraphqlDiagnosticsPatch =
             check(failureMatches.size == 1) {
                 "Expected one transport-error helper, found ${failureMatches.size}: $failureMatches"
             }
-            println("[DEBUG-patch] transport_error helper: ${failureMatches.single().originalMethod}")
             failureMatches.single().method.addInstructions(
                 0,
                 """
@@ -212,7 +202,6 @@ val xLiteGraphqlDiagnosticsPatch =
             check(mutationMatches.size == 1) {
                 "Expected one mutation entry, found ${mutationMatches.size}: $mutationMatches"
             }
-            println("[DEBUG-patch] mutation entry: ${mutationMatches.single().originalMethod}")
             mutationMatches.single().method.addInstructions(
                 0,
                 """
@@ -224,7 +213,6 @@ val xLiteGraphqlDiagnosticsPatch =
             check(sharedMatches.size == 1) {
                 "Expected one shared request entry, found ${sharedMatches.size}: $sharedMatches"
             }
-            println("[DEBUG-patch] shared request entry: ${sharedMatches.single().originalMethod}")
             sharedMatches.single().method.addInstructions(
                 0,
                 """
@@ -237,7 +225,6 @@ val xLiteGraphqlDiagnosticsPatch =
                 "Expected one Apollo response mapper, found ${mapperMatches.size}: $mapperMatches"
             }
             val mapperMethod = mapperMatches.single().method
-            println("[DEBUG-patch] response mapper: ${mapperMatches.single().originalMethod}")
             val implementation = mapperMethod.implementation
                 ?: throw PatchException("Response mapper has no implementation")
             val p0Register = implementation.registerCount - mapperMethod.parameterTypes.size
@@ -274,7 +261,6 @@ val xLiteGraphqlDiagnosticsPatch =
             check(enqueueMatches.size == 1) {
                 "Expected one durable enqueue method, found ${enqueueMatches.size}: $enqueueMatches"
             }
-            println("[DEBUG-patch] durable enqueue: ${enqueueMatches.single().originalMethod}")
             enqueueMatches.single().method.addInstructions(
                 0,
                 """
@@ -286,7 +272,6 @@ val xLiteGraphqlDiagnosticsPatch =
             check(completeMatches.size == 1) {
                 "Expected one durable completion method, found ${completeMatches.size}: $completeMatches"
             }
-            println("[DEBUG-patch] durable completion: ${completeMatches.single().originalMethod}")
             completeMatches.single().method.addInstructions(
                 0,
                 """
@@ -298,7 +283,6 @@ val xLiteGraphqlDiagnosticsPatch =
             check(dropMatches.size == 1) {
                 "Expected one durable drop helper, found ${dropMatches.size}: $dropMatches"
             }
-            println("[DEBUG-patch] durable drop: ${dropMatches.single().originalMethod}")
             dropMatches.single().method.addInstructions(
                 0,
                 """
@@ -316,10 +300,11 @@ val xLiteGraphqlDiagnosticsPatch =
                     .filter { (_, instruction) ->
                         instruction.opcode == Opcode.INVOKE_INTERFACE &&
                             instruction.getReference<MethodReference>()?.let { reference ->
-                                reference.definingClass == "Lcom/x/durableactions/l0;" &&
-                                    reference.name == "f" &&
+                                reference.definingClass.startsWith("Lcom/x/durableactions/") &&
                                     reference.parameterTypes.size == 2 &&
-                                    reference.parameterTypes[0] == "Lcom/x/durableactions/g;"
+                                    reference.parameterTypes[0].startsWith("Lcom/x/durableactions/") &&
+                                    reference.parameterTypes[1].startsWith("Lkotlin/coroutines/jvm/internal/") &&
+                                    reference.returnType == "Ljava/lang/Object;"
                             } == true
                     }
                     .map { it.index }
