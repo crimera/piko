@@ -23,7 +23,7 @@ public class Constants {
     // https://www.instagram.com/p/<short code>/
     // https://www.instagram.com/reel/<short code>/
     // https://www.instagram.com/stories/<user name>/<post id>
-    public static final String REC_FLAGS = PIKO + "_recommended_flags_v2";
+    public static final String REC_FLAGS = PIKO + "_recommended_flags_v3";
     public static final String PIKO_MAPPINGS_PATH = "https://github.com/crimera/piko/raw/refs/heads/dev/docs/mappings/";
 
     public static final String AB_SETTINGS_ICON = "SETTINGS_ICON";
