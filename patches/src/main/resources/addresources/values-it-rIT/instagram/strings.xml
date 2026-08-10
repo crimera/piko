@@ -49,9 +49,6 @@
     <string name="piko_limit_following_feed">Limita il feed ai profili seguiti</string>
     <string name="piko_limit_following_feed_desc">Filtra la home per visualizzare solo il contenuto dai profili che segui.</string>
     <string name="piko_disable_reels_scrolling">Disabilita Scorrimento Reels</string>
-    <string name="piko_disable_reels_scrolling_desc">"Disabilita il comportamento di scroll infinito nei Reel di Instagram, impedendo lo scorrimento verso il Reel successivo.
-
-Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma si fermerà da sola dopo pochi secondi."</string>
     <string name="piko_hide_stories_tray">Nascondi il riquadro delle storie</string>
     <string name="piko_hide_stories_tray_desc">Nascondi il riquadro delle storie dal feed principale</string>
     <string name="piko_hide_notes_tray">Nascondi il riquadro delle note</string>
@@ -66,7 +63,6 @@ Nota: su un'installazione pulita, l'animazione 'Suggerimento' può apparire ma s
     <string name="piko_category_misc">Varie</string>
     <string name="piko_disable_analytics">Disabilita analytics</string>
     <string name="piko_delete_analytics_cache">Elimina la cache analytics</string>
-    <string name="piko_disable_analytics_desc">Blocca gli analytics che vengono inviati ai server Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Disabilita scopri le persone</string>
     <string name="piko_disable_discover_people_desc">Disabilita la sezione scopri le persone sul profilo utente</string>
     <string name="piko_follow_back_indicator">Abilita indicatore di stato amicizia</string>

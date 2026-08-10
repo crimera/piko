@@ -49,11 +49,6 @@
     <string name="piko_limit_following_feed">Limitar feed a perfiles seguidos</string>
     <string name="piko_limit_following_feed_desc">Filtra el feed de inicio para mostrar solo contenido de los perfiles que sigues.</string>
     <string name="piko_disable_reels_scrolling">Desactiva desplazamiento de Reels</string>
-    <string name="piko_disable_reels_scrolling_desc">"Desactiva el desplazamiento infinito en Instagram Reels, lo que impide pasar al siguiente Reel deslizando el dedo.
-
-
-
-Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", pero se detendrá por sí sola al cabo de unos segundos."</string>
     <string name="piko_disable_swipe_to_create">Deshabilitar la función de deslizar para crear</string>
     <string name="piko_disable_swipe_to_create_desc">Impide abrir la pantalla de creación deslizando el dedo hacia la derecha en la pestaña de inicio.</string>
     <string name="piko_hide_stories_tray">Ocultar barra de historias</string>
@@ -72,7 +67,6 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Desactivar analíticas</string>
     <string name="piko_delete_analytics_cache">Eliminar caché de analíticas</string>
-    <string name="piko_disable_analytics_desc">Bloquear las analíticas enviadas a los servidores de Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Desactivar descubrir personas</string>
     <string name="piko_disable_discover_people_desc">Desactiva la sección de descubrir personas en el perfil de usuario</string>
     <string name="piko_follow_back_indicator">Habilitar el indicador de estado de amistad</string>
@@ -212,6 +206,8 @@ Nota: En una instalación nueva, es posible que aparezca la animación \"Tip\", 
     <string name="piko_array_detailed_timestamp">Horario detallado (Día de la Semana/Mes/Fecha/Hora/Minutos/Segundo)</string>
     <string name="piko_array_post_time">Horario de publicación (Hora/Minuto/Segundo)</string>
     <string name="piko_array_time_left">Tiempo restante (Falta: Hora/Minuto/Segundo)</string>
+    <string name="piko_array_recmd_flag_state_enable">Activar</string>
+    <string name="piko_array_recmd_flag_state_disable">Desactivar</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Bienvenido a Piko</string>
     <string name="piko_welcome_message">Para mejorar tu experiencia con Piko, visita los ajustes de Piko y ajusta tus configuracio</string>

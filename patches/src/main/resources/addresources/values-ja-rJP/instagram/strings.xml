@@ -49,9 +49,6 @@
     <string name="piko_limit_following_feed">フィードにフォロー中のアカウントのみ表示</string>
     <string name="piko_limit_following_feed_desc">ホームフィードにフォローしているアカウントの投稿のみ表示します。</string>
     <string name="piko_disable_reels_scrolling">リールのスクロールを無効化</string>
-    <string name="piko_disable_reels_scrolling_desc">"リールでのスクロールを無効化し、次のリールをスワイプして視聴できないようにします。
-
-初めてリールを視聴する際、「上にスワイプしてさらに表示」と表示される場合がありますが、数秒後に自動で停止します。"</string>
     <string name="piko_disable_swipe_to_create">作成画面へのスワイプを無効化</string>
     <string name="piko_disable_swipe_to_create_desc">ホームタブで右にスワイプしても、作成画面が開かないようにします。</string>
     <string name="piko_hide_stories_tray">ストーリーズ欄を非表示</string>
@@ -70,7 +67,6 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">分析データの送信を無効化</string>
     <string name="piko_delete_analytics_cache">分析キャッシュを削除</string>
-    <string name="piko_disable_analytics_desc">InstagramとFacebookのサーバーへ送信される分析データをブロックします</string>
     <string name="piko_disable_discover_people">おすすめのユーザーを無効化</string>
     <string name="piko_disable_discover_people_desc">プロフィール内の「おすすめのユーザー」欄を非表示にします</string>
     <string name="piko_follow_back_indicator">フレンド状態の表示を有効化</string>

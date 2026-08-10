@@ -49,9 +49,6 @@
     <string name="piko_limit_following_feed">Ограничить ленту подписками</string>
     <string name="piko_limit_following_feed_desc">Показывать в главной ленте только содержимое от профилей, на которые вы подписаны.</string>
     <string name="piko_disable_reels_scrolling">Отключить пролистывание Reels</string>
-    <string name="piko_disable_reels_scrolling_desc">"Отключает бесконечное пролистывание в Reels, не позволяя переходить к следующему видео.
-
-Примечание: при чистой установке анимация «Подсказка» может появиться, но через несколько секунд остановится сама."</string>
     <string name="piko_disable_swipe_to_create">Отключить создание свайпом</string>
     <string name="piko_disable_swipe_to_create_desc">Блокирует открытие экрана создания при свайпе вправо на главной вкладке</string>
     <string name="piko_hide_stories_tray">Скрыть панель историй</string>
@@ -70,7 +67,6 @@
     <string name="piko_amoled_title">Amoled</string>
     <string name="piko_disable_analytics">Отключить аналитику</string>
     <string name="piko_delete_analytics_cache">Очистить кэш аналитики</string>
-    <string name="piko_disable_analytics_desc">Блокировать отправку данных анализа в серверы Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Отключить раздел «Возможные знакомые»</string>
     <string name="piko_disable_discover_people_desc">Отключает раздел «Возможные знакомые» в профиле пользователя</string>
     <string name="piko_follow_back_indicator">Включить индикатор статуса дружбы</string>

@@ -49,9 +49,6 @@
     <string name="piko_limit_following_feed">Batasi feed hanya untuk profil yang diikuti</string>
     <string name="piko_limit_following_feed_desc">Menyaring feed beranda untuk hanya menampilkan konten dari profil yang Anda ikuti.</string>
     <string name="piko_disable_reels_scrolling">Nonaktifkan pengguliran Reels</string>
-    <string name="piko_disable_reels_scrolling_desc">"Menonaktifkan perilaku pengguliran tak terbatas di Instagram Reels, mencegah usapan ke Reels berikutnya.
-
-Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan berhenti dengan sendirinya setelah beberapa detik."</string>
     <string name="piko_disable_swipe_to_create">Nonaktifkan fitur usap untuk membuat</string>
     <string name="piko_disable_swipe_to_create_desc">Mencegah layar pembuatan terbuka saat mengusap ke kanan pada tab beranda.</string>
     <string name="piko_hide_stories_tray">Sembunyikan deretan cerita</string>
@@ -70,7 +67,6 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Nonaktifkan analitik</string>
     <string name="piko_delete_analytics_cache">Hapus cache analitik</string>
-    <string name="piko_disable_analytics_desc">Blokir analitik yang dikirim ke server Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Nonaktifkan temukan orang</string>
     <string name="piko_disable_discover_people_desc">Menonaktifkan bagian temukan orang di profil pengguna</string>
     <string name="piko_follow_back_indicator">Aktifkan indikator status pertemanan</string>

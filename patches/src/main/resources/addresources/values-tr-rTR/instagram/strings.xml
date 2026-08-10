@@ -49,9 +49,6 @@
     <string name="piko_limit_following_feed">Akışı takip edilen profillerle sınırla</string>
     <string name="piko_limit_following_feed_desc">Ana sayfa akışını yalnızca takip ettiğiniz profillerin içerikleriyle sınırlar</string>
     <string name="piko_disable_reels_scrolling">Reels kaydırmayı devre dışı bırak</string>
-    <string name="piko_disable_reels_scrolling_desc">"Instagram Reels'deki sonsuz kaydırma özelliğini devre dışı bırakır, sonraki Reel'e kaydırmayı engeller.
-
-Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye sonra kendiliğinden duracaktır."</string>
     <string name="piko_disable_swipe_to_create">Kaydırarak içerik oluşturmayı kapat</string>
     <string name="piko_disable_swipe_to_create_desc">Ana sekmede sağa kaydırarak oluşturma ekranının açılmasını engeller.</string>
     <string name="piko_hide_stories_tray">Hikayeler tepsisini gizle</string>
@@ -70,7 +67,6 @@ Not: Temiz bir kurulumda, 'İpucu' animasyonu gözükebilir ancak birkaç saniye
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Analizleri devre dışı bırak</string>
     <string name="piko_delete_analytics_cache">Analiz önbelleğini sil</string>
-    <string name="piko_disable_analytics_desc">Instagram/Facebook sunucularına gönderilen analizleri engelle</string>
     <string name="piko_disable_discover_people">Kişileri keşfetmeyi kapat</string>
     <string name="piko_disable_discover_people_desc">Kullanıcı profilindeki Kişileri keşfet bölümünü devre dışı bırak</string>
     <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>

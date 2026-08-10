@@ -49,9 +49,7 @@
     <string name="piko_limit_following_feed">Limiter le fil aux comptes suivis</string>
     <string name="piko_limit_following_feed_desc">Filtre le fil d’accueil pour n’afficher que le contenu des comptes que vous suivez.</string>
     <string name="piko_disable_reels_scrolling">Désactiver le défilement des Reels</string>
-    <string name="piko_disable_reels_scrolling_desc">"Désactive le défilement infini dans les Reels Instagram, empêchant de passer au Reel suivant par balayage.
-
-Remarque : Lors d’une installation propre, l’animation 'Astuce' peut apparaître, mais elle s’arrêtera d’elle-même après quelques secondes."</string>
+    <string name="piko_disable_reels_scrolling_desc">Désactive le défilement infini dans les Reels Instagram, empêchant de passer au Reel suivant par balayage. Remarque : Lors d’une installation propre, l’animation \'Astuce\' peut apparaître, mais elle s’arrêtera d’elle-même après quelques secondes.</string>
     <string name="piko_disable_swipe_to_create">Désactiver le balayage pour créer</string>
     <string name="piko_disable_swipe_to_create_desc">Empêche l\'ouverture de l\'écran de création en balayant vers la droite depuis l\'onglet accueil</string>
     <string name="piko_hide_stories_tray">Masquer le bandeau des stories</string>
@@ -70,7 +68,6 @@ Remarque : Lors d’une installation propre, l’animation 'Astuce' peut appara�
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Désactiver les analyses</string>
     <string name="piko_delete_analytics_cache">Supprimer le cache des analyses</string>
-    <string name="piko_disable_analytics_desc">Bloquer les analyses envoyées aux serveurs Instagram/Facebook</string>
     <string name="piko_disable_discover_people">Désactiver “Découvrir des personnes”</string>
     <string name="piko_disable_discover_people_desc">Désactive la section “Découvrir des personnes” sur le profil utilisateur</string>
     <string name="piko_follow_back_indicator">Activer l\'indicateur de statut d\'amitié</string>

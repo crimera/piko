@@ -49,9 +49,6 @@
     <string name="piko_limit_following_feed">僅顯示已追蹤的帳號的動態</string>
     <string name="piko_limit_following_feed_desc">篩選動態首頁，僅顯示您已追蹤的帳號所發布的內容。</string>
     <string name="piko_disable_reels_scrolling">停用 Reels 捲動</string>
-    <string name="piko_disable_reels_scrolling_desc">"停用 Instagram Reels 中的無限捲動功能，防止自動滑動至下一則 Reel。
-
-注意：在全新安裝的情況下，可能會出現「提示」動畫，但幾秒鐘後會自動停止。"</string>
     <string name="piko_disable_swipe_to_create">停用滑動建立</string>
     <string name="piko_disable_swipe_to_create_desc">防止在首頁分頁向右滑動開啟創作畫面。</string>
     <string name="piko_hide_stories_tray">隱藏限時動態欄</string>
@@ -68,7 +65,6 @@
     <string name="piko_category_misc">其他</string>
     <string name="piko_disable_analytics">停用資料分析</string>
     <string name="piko_delete_analytics_cache">刪除資料分析快取</string>
-    <string name="piko_disable_analytics_desc">封鎖傳送至 Instagram / Facebook 伺服器的分析資料</string>
     <string name="piko_disable_discover_people">停用「為你推薦」功能</string>
     <string name="piko_disable_discover_people_desc">在其他人主頁中停用「為你推薦」功能</string>
     <string name="piko_follow_back_indicator">啟用好友關係狀態指示器</string>

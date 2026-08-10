@@ -165,7 +165,10 @@
     <string name="piko_pref_show_poll_result">Exibir resultados da enquete</string>
     <string name="piko_pref_show_poll_result_desc">Ver resultados da enquete sem votar.</string>
     <string name="piko_pref_hide_community_notes">Ocultar notas da comunidade</string>
+    <string name="piko_pref_hide_immersive_player">Desativar jogador imersivo</string>
+    <string name="piko_pref_hide_immersive_player_desc">Desative o novo player de vídeo que permite assistir mais vídeos deslizando para cima</string>
     <string name="piko_pref_enable_vid_auto_advance">Ativar rolagem automática de vídeo</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Ativa a rolagem automática de vídeo no player imersivo</string>
     <string name="piko_pref_hide_hidden_replies">Ocultar respostas ocultas</string>
     <string name="piko_pref_force_hd">Forçar vídeos em HD</string>
     <string name="piko_pref_force_hd_desc">Os vídeos sempre serão reproduzidos na mais alta qualidade.</string>

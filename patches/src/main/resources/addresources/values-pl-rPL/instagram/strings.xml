@@ -49,9 +49,6 @@
     <string name="piko_limit_following_feed">Ogranicz oś czasu do obserwowanych</string>
     <string name="piko_limit_following_feed_desc">Filtruje oś czasu, wyświetlając tylko treści od profili, które obserwujesz</string>
     <string name="piko_disable_reels_scrolling">Wyłącz przewijanie rolek</string>
-    <string name="piko_disable_reels_scrolling_desc">"Wyłącza nieskończone przewijanie rolek na Instagramie, blokując przejście do następnej
-
-Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po kilku sekundach sama zniknie"</string>
     <string name="piko_disable_swipe_to_create">Wyłącz gest tworzenia</string>
     <string name="piko_disable_swipe_to_create_desc">Blokuje otwieranie ekranu tworzenia po przesunięciu w prawo na stronie głównej</string>
     <string name="piko_hide_stories_tray">Ukryj pasek relacji</string>
@@ -70,7 +67,6 @@ Uwaga: Po czystej instalacji może pojawić się animacja podpowiedzi, ale po ki
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Wyłącz analitykę</string>
     <string name="piko_delete_analytics_cache">Usuń pamięć podręczną analityki</string>
-    <string name="piko_disable_analytics_desc">Blokuje wysyłanie danych telemetrycznych na serwery Instagrama/Facebooka</string>
     <string name="piko_disable_discover_people">Wyłącz odkrywanie osób</string>
     <string name="piko_disable_discover_people_desc">Wyłącza sekcję sugerowanych osób na profilach użytkowników</string>
     <string name="piko_follow_back_indicator">Włącz wskaźnik statusu relacji</string>

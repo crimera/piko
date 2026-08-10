@@ -49,9 +49,7 @@
     <string name="piko_limit_following_feed">팔로우한 프로필만 피드에 표시</string>
     <string name="piko_limit_following_feed_desc">홈 피드에 내가 팔로우하는 프로필의 콘텐츠만 표시합니다</string>
     <string name="piko_disable_reels_scrolling">릴스 스크롤 비활성화</string>
-    <string name="piko_disable_reels_scrolling_desc">"인스타그램 릴스에서 무한 스크롤 동작을 비활성화하여 다음 릴스로 넘길 수 없도록 합니다
-
-알림: 앱을 새로 설치한 경우에 'Tip' 애니메이션이 표시될 수 있지만, 몇 초 후에 자동으로 사라집니다"</string>
+    <string name="piko_disable_reels_scrolling_desc">인스타그램 릴스에서 계속 스크롤되는 동작을 비활성화하여 다음 릴스로 스와이프할 수 없도록 합니다\n\n알림: 새로 설치한 경우에 ‘Tip’ 애니메이션이 표시될 수 있지만, 몇 초 후 자동으로 멈춥니다</string>
     <string name="piko_disable_swipe_to_create">스와이프하여 만들기 비활성화</string>
     <string name="piko_disable_swipe_to_create_desc">홈 탭에서 오른쪽으로 스와이프하여 만들기 화면이 실행되는 것을 방지합니다</string>
     <string name="piko_hide_stories_tray">스토리 선반 숨기기</string>
@@ -70,7 +68,6 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">분석 비활성화</string>
     <string name="piko_delete_analytics_cache">분석 캐시 삭제</string>
-    <string name="piko_disable_analytics_desc">Instagram/Facebook 서버로 전송되는 분석 데이터를 차단합니다</string>
     <string name="piko_disable_discover_people">사람 찾아보기 비활성화</string>
     <string name="piko_disable_discover_people_desc">프로필에서 사람 찾아보기 섹션을 비활성화합니다</string>
     <string name="piko_follow_back_indicator">관계 상태 표시기 활성화</string>
@@ -224,7 +221,7 @@
     <string name="piko_action_bar_user_profile">사용자 프로필 액션바 아이콘</string>
     <string name="piko_action_bar_chat">채팅 액션바 아이콘</string>
     <string name="piko_action_bar_chat_desc">메시지 내부 액션바 아이콘</string>
-    <string name="piko_action_bar_inbox">받은 편지함 액션바 아이콘</string>
+    <string name="piko_action_bar_inbox">받은 메시지함 액션바 아이콘</string>
     <string name="piko_action_bar_button_settings_icon">설정 아이콘</string>
     <string name="piko_action_bar_button_ghost_mode_icon">고스트 모드 아이콘</string>
     <string name="piko_action_bar_button_profile_info_icon">프로필 정보 아이콘</string>

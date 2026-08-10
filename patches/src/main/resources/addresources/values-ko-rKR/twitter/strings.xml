@@ -37,7 +37,7 @@
     <string name="piko_title_native_downloader">기본 다운로더</string>
     <string name="piko_title_native_downloader_toggle">기본 다운로더 활성화하기</string>
     <string name="piko_pref_native_downloader_autodownload_highest_video_res">최고 화질 동영상 자동 다운로드</string>
-    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">단일 동영상은 화질 선택 다이얼로그를 건너뛰고, 사용 가능한 가장 높은 화질으로 즉시 다운로드합니다</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">단일 동영상은 화질 선택 대화 상자를 건너뛰고, 사용 가능한 가장 높은 화질으로 즉시 다운로드합니다</string>
     <string name="piko_pref_native_downloader_show_download_icon">다운로드 아이콘 표시</string>
     <string name="piko_pref_native_downloader_show_copy_icon">복사 아이콘 표시</string>
     <string name="piko_pref_native_downloader_show_variants_icon">변형 아이콘 표시</string>
