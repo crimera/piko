@@ -1,7 +1,7 @@
 {
-  "created_at": "2026-08-09T15:17:51",
-  "description": "## [3.9.0-dev.6](https://github.com/crimera/piko/compare/v3.9.0-dev.5...v3.9.0-dev.6) (2026-08-09)\n\n### 🐛 Bug Fixes\n\n* **Instagram:** Fix default flag state while extracting recommended flags map ([82785a8](https://github.com/crimera/piko/commit/82785a858bae02ee11bd8ff07f06fa260bcceea2))",
-  "download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.6/patches-3.9.0-dev.6.mpp",
-  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.6/patches-3.9.0-dev.6.mpp.asc",
-  "version": "3.9.0-dev.6"
+  "created_at": "2026-08-10T18:23:13",
+  "description": "## [3.9.0-dev.7](https://github.com/crimera/piko/compare/v3.9.0-dev.6...v3.9.0-dev.7) (2026-08-10)\n\n### 🔧 Improvements\n\n* **Instagram:** Turn off `Disable analytics` by default ([#1674](https://github.com/crimera/piko/issues/1674)) ([753a70b](https://github.com/crimera/piko/commit/753a70be81449c27f0a8e056f7f0e938a11e964e))",
+  "download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.7/patches-3.9.0-dev.7.mpp",
+  "signature_download_url": "https://github.com/crimera/piko/releases/download/v3.9.0-dev.7/patches-3.9.0-dev.7.mpp.asc",
+  "version": "3.9.0-dev.7"
 }
