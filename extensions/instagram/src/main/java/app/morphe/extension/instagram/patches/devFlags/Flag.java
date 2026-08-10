@@ -22,7 +22,7 @@ public class Flag {
             this.name = jsonObject.optString("name");
             this.desc = jsonObject.optString("desc");
             String codeKey = jsonObject.optString("code");
-            this.code = new StringSetting(codeKey,FlagState.DISABLE.toString());
+            this.code = new StringSetting(codeKey,FlagState.DEFAULT.toString());
         } catch (Exception e) {
         }
     }
