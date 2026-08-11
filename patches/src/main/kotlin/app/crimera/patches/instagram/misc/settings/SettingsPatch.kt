@@ -13,6 +13,7 @@ import app.crimera.patches.instagram.misc.actionBar.mainFeedActionBarButton.main
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.misc.hookFlags.hookFlagsPatch
+import app.crimera.patches.instagram.misc.notification.fixNotificationRegistrationCrashPatch
 import app.crimera.patches.instagram.misc.userProfile.userProfileButtonPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.CONSTANTS_DESCRIPTOR
@@ -45,6 +46,7 @@ val settingsPatch =
             mainFeedActionBarButtonPatch,
             userProfileButtonPatch,
             hookFlagsPatch,
+            fixNotificationRegistrationCrashPatch,
             profileInfoEntity,
             instagramButtonEntity,
             developerOptionsEntity,
