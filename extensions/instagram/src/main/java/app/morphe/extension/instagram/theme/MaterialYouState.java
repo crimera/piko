@@ -66,37 +66,19 @@ final class MaterialYouState {
         return ((long) overrideArgb) << 32;
     }
 
-    static ThemeMode availableModeOrBase(
-            ThemeMode mode,
-            boolean materialYouAvailable,
-            boolean amoledAvailable
-    ) {
-        if (hasMaterialYou(mode) && !materialYouAvailable
-                || hasAmoled(mode) && !amoledAvailable) {
-            return ThemeMode.BASE;
-        }
-        return mode;
-    }
-
-    static ThemeMode availableModeOrFallback(
-            ThemeMode mode,
+    static ThemeMode availableRequestedModeOrFallback(
+            ThemeMode requestedMode,
+            boolean effectiveDark,
             boolean materialYouAvailable,
             boolean amoledAvailable,
             boolean combinedAvailable
     ) {
-        if (mode == ThemeMode.AMOLED_MATERIAL_YOU) {
-            if (materialYouAvailable && amoledAvailable && combinedAvailable) {
-                return mode;
-            }
-            if (amoledAvailable) {
-                return ThemeMode.AMOLED;
-            }
-            if (materialYouAvailable) {
-                return ThemeMode.MATERIAL_YOU;
-            }
-            return ThemeMode.BASE;
+        boolean materialYou = hasMaterialYou(requestedMode) && materialYouAvailable;
+        boolean amoled = hasAmoled(requestedMode) && amoledAvailable;
+        if (effectiveDark && materialYou && amoled && !combinedAvailable) {
+            materialYou = false;
         }
-        return availableModeOrBase(mode, materialYouAvailable, amoledAvailable);
+        return resolveMode(materialYou, amoled);
     }
 
     static ThemeMode modeForMaterialYouToggle(boolean enabled, ThemeMode currentMode) {
@@ -293,7 +275,7 @@ final class MaterialYouState {
     }
 
     static ThemeMode modeForNativeThemeSelection(ThemeMode currentMode) {
-        return resolveMode(hasMaterialYou(currentMode), false);
+        return currentMode;
     }
 
 }
