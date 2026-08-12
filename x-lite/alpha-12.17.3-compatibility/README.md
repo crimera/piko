@@ -16,6 +16,43 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Filter posts by keyword](patches/post-filter.md) | Extension DEX referenced `UrtTimelinePost` and related models | Main-text generic bridge implemented; broader matching temporarily reduced; runtime verification pending |
 | [Hide AI-generated posts](patches/hide-ai-generated.md) | Timeline and content-disclosure models/getters are obfuscated | In progress; alpha patching still fails while resolving the post-to-disclosure accessor |
 
+## Unported queue
+
+These patches have not yet been independently run and verified on the alpha. Their documents are placeholders for the exact failure, fix, and evidence discovered during each port.
+
+### Priority 1 — Timeline and user-facing controls
+
+- [Hide compose button](patches/hide-compose-button.md)
+- [Hide new posts pill](patches/hide-new-posts-pill.md)
+- [Hide Spaces bar](patches/hide-spaces-bar.md)
+- [Restore timeline position](patches/restore-timeline-position.md)
+- [Show sensitive media](patches/show-sensitive-media.md)
+- [Customize inline actions](patches/customize-inline-actions.md)
+- [Inline download button](patches/inline-download-button.md)
+
+### Priority 2 — Premium and navigation
+
+- [Hide premium upsell](patches/hide-premium-upsell.md)
+- [Unlock downloads](patches/unlock-downloads.md)
+- [Customize drawer items](patches/customize-drawer.md)
+- [Customize navigation bar items](patches/customize-navigation-bar.md)
+- [Customize default media tab](patches/default-media-tab.md)
+- [Customize default reply sorting](patches/default-reply-sorting.md)
+
+### Priority 3 — Miscellaneous features
+
+- [Open canonical URLs](patches/open-canonical-urls.md)
+- [Custom font](patches/custom-font.md)
+- [Dynamic color](patches/dynamic-color.md)
+- [Feature switch overrides](patches/feature-switch-overrides.md)
+- [Share post as image](patches/share-post-as-image.md)
+
+### Priority 4 — Diagnostics and development tools
+
+- [Log network diagnostics](patches/log-network-diagnostics.md)
+- [Collect AI-filter training posts](patches/collect-ai-training-posts.md)
+- [Browse tweet object](patches/browse-tweet-object.md)
+
 ## Alpha mappings observed
 
 | Semantic model | Alpha descriptor |
@@ -44,7 +81,9 @@ These names are analysis evidence only. Production extension signatures must not
 ## Remaining matrix
 
 1. Finish the AI disclosure bridge.
-2. Build the MPP and patch 12.17.3-alpha.01 with each timeline patch independently.
-3. Inspect final DEX for direct alpha model operations and absence of unobfuscated timeline descriptors.
-4. Install and exercise timeline filtering without `NoClassDefFoundError`.
-5. Repatch and test 12.15.1 and 12.14.0.
+2. Work through the unported queue, one patch at a time.
+3. Build the MPP and patch 12.17.3-alpha.01 with each patch independently.
+4. Inspect final DEX for reachable mutations and unresolved model references.
+5. Install and exercise each feature on alpha.
+6. Repatch and regression-test 12.15.1 and 12.14.0.
+7. Add alpha to the centralized compatibility list only after the production patch set is proven.
