@@ -16,7 +16,9 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.cloneMutable
+import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
+import app.morphe.util.numberOfParameterRegisters
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
@@ -29,6 +31,7 @@ private const val ENUM_DESCRIPTOR = "Ljava/lang/Enum;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val TIMELINE_POSITION_STORE_DESCRIPTOR =
     "Lapp/morphe/extension/xlite/timeline/TimelineScrollPositionStore;"
+private const val RESTORE_TEMPORARY_REGISTER_COUNT = 2
 
 private object XLiteScrollPositionHolderFingerprint : Fingerprint(
     name = "toString",
@@ -138,15 +141,17 @@ val restoreTimelinePositionPatch =
             }
             val getterMatch = getterMatches.single()
             var getterMethod = getterMatch.method
-            val registerCount = getterMethod.implementation?.registerCount
-                ?: throw PatchException("X-Lite scroll-position getter has no implementation")
-            if (registerCount < 12) {
-                val expandedMethod =
-                    getterMethod.cloneMutable(additionalRegisters = 12 - registerCount)
-                getterMatch.classDef.methods.remove(getterMethod)
-                getterMatch.classDef.methods.add(expandedMethod)
-                getterMethod = expandedMethod
+            if (getterMethod.implementation == null) {
+                throw PatchException("X-Lite scroll-position getter has no implementation")
             }
+            val expandedMethod =
+                getterMethod.cloneMutable(
+                    additionalRegisters =
+                        RESTORE_TEMPORARY_REGISTER_COUNT + getterMethod.numberOfParameterRegisters,
+                )
+            getterMatch.classDef.methods.remove(getterMethod)
+            getterMatch.classDef.methods.add(expandedMethod)
+            getterMethod = expandedMethod
 
             val mapGetCandidates =
                 getterMethod.instructions.withIndex().filter { indexedInstruction ->
@@ -242,21 +247,46 @@ val restoreTimelinePositionPatch =
             val originalContinuation =
                 getterMethod.instructions.getOrNull(timelineResultIndex + 1)
                     ?: throw PatchException("X-Lite scroll-position getter continuation was not found")
-            val expandedRegisterCount =
-                getterMethod.implementation?.registerCount
-                    ?: throw PatchException("X-Lite scroll-position getter has no implementation after expansion")
-            if (expandedRegisterCount < 12) {
+            val timelineGetterInstruction =
+                getterMethod.instructions.getOrNull(timelineResultIndex - 1)
+                    ?: throw PatchException("X-Lite timeline-type getter call was not found")
+            val timelineGetterReference =
+                timelineGetterInstruction.getReference<MethodReference>()
+                    ?: throw PatchException("X-Lite timeline-type getter call has no method reference")
+            val timelineGetterInvoke =
+                timelineGetterInstruction as? FiveRegisterInstruction
+                    ?: throw PatchException("X-Lite timeline-type getter call has an unsupported register layout")
+            if (timelineGetterInvoke.registerCount != 1) {
                 throw PatchException(
-                    "X-Lite scroll-position getter expansion provided only " +
-                        "$expandedRegisterCount registers",
+                    "Unexpected X-Lite timeline-type getter call register count: " +
+                        timelineGetterInvoke.registerCount,
                 )
             }
-            val freeRegisters = listOf(7, 8, 9, 10)
-            val mapOwnerRegister = freeRegisters[0]
-            val mapRegister = freeRegisters[1]
-            val positionsRegister = freeRegisters[0]
-            val indexRegister = freeRegisters[2]
-            val offsetRegister = freeRegisters[3]
+            val timelineGetterReceiverRegister = timelineGetterInvoke.registerC
+            val restoreRegisters =
+                try {
+                    getterMethod
+                        .getFreeRegisterProvider(
+                            timelineResultIndex + 1,
+                            RESTORE_TEMPORARY_REGISTER_COUNT,
+                            timelineRegister,
+                            timelineGetterReceiverRegister,
+                        ).let { provider ->
+                            List(RESTORE_TEMPORARY_REGISTER_COUNT) {
+                                provider.getFreeRegister4Bit()
+                            }
+                        }
+                } catch (exception: RuntimeException) {
+                    throw PatchException(
+                        "Could not allocate X-Lite timeline-position restore registers",
+                        exception,
+                    )
+                }
+            val mapOwnerRegister = restoreRegisters[0]
+            val positionsRegister = mapOwnerRegister
+            val mapRegister = restoreRegisters[1]
+            val indexRegister = mapRegister
+            val offsetRegister = timelineRegister
             getterMethod.addInstructionsWithLabels(
                 timelineResultIndex + 1,
                 """
@@ -274,8 +304,12 @@ val restoreTimelinePositionPatch =
                     aget v$offsetRegister, v$positionsRegister, v$offsetRegister
                     new-instance v$positionsRegister, $holderDescriptor
                     invoke-direct {v$positionsRegister, v$indexRegister, v$offsetRegister}, $holderConstructorReference
+                    invoke-interface {v$timelineGetterReceiverRegister}, $timelineGetterReference
+                    move-result-object v$timelineRegister
+                    iget-object v$mapRegister, p0, $componentField
+                    iget-object v$mapRegister, v$mapRegister, $mapField
                     invoke-virtual {v$mapRegister, v$timelineRegister, v$positionsRegister}, $CONCURRENT_HASH_MAP_DESCRIPTOR->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
-                    move-result-object v$indexRegister
+                    move-result-object v$mapRegister
                 """.trimIndent(),
                 ExternalLabel("piko_xlite_restore_position_continue", originalContinuation),
             )
