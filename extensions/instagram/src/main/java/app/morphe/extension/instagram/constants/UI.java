@@ -53,6 +53,10 @@ public class UI {
     public static final String DRAWABLE_EYE_ICON = "design_ic_visibility";
     public static final String DRAWABLE_SHARE_TO_DIRECT = "gallery_share_to_direct_button";
     public static final String DRAWABLE_SHARE_TO_REEL = "gallery_share_to_reels_button";
+    public static final String DRAWABLE_CHEVRON_RIGHT =
+            "instagram_chevron_right_outline_16";
+    public static final String DRAWABLE_CHEVRON_RIGHT_RTL =
+            "instagram_chevron_right_outline_rtl_16";
 
     public static int getThemedColour(String attrName) {
         Context context = Utils.getContext();
@@ -67,10 +71,21 @@ public class UI {
     }
 
     public static void setThemedIcon(ImageView imageView, String drawableAttr) {
+        setThemedIcon(imageView, drawableAttr, "igds_color_primary_icon");
+    }
+
+    public static void setThemedIcon(
+            ImageView imageView,
+            String drawableAttr,
+            String colorAttr
+    ) {
         try {
             Drawable drawable = ResourceUtils.getDrawable(drawableAttr);
             imageView.setImageDrawable(drawable);
-            imageView.setColorFilter(new PorterDuffColorFilter(getThemedColour("igds_color_primary_icon"), PorterDuff.Mode.SRC_ATOP));
+            imageView.setColorFilter(new PorterDuffColorFilter(
+                    getThemedColour(colorAttr),
+                    PorterDuff.Mode.SRC_ATOP
+            ));
 
         } catch (Exception ex) {
             Logger.printException(() -> "Failed setThemedIcon: ", ex);
