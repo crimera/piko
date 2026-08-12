@@ -45,8 +45,8 @@ public class UpdateFont {
 
     static {
         context = app.morphe.extension.shared.Utils.getContext();
-        isCustomFontEnabled = SettingsRegistry.getBoolean("xlite.content.custom_font.enabled");
-        isCustomEmojiFontEnabled = SettingsRegistry.getBoolean("xlite.content.custom_emoji_font.enabled");
+        isCustomFontEnabled = SettingsRegistry.getBooleanOrDefault("xlite.content.custom_font.enabled", false);
+        isCustomEmojiFontEnabled = SettingsRegistry.getBooleanOrDefault("xlite.content.custom_emoji_font.enabled", false);
 
         if (isCustomFontEnabled) {
             loadFont(FONT_FILE_NAME, false);
