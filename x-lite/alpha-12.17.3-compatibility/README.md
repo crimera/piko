@@ -11,6 +11,7 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Settings](patches/settings.md) | Compose invocation changed; legacy styles/layout and AppCompat toolbar assumptions disappeared | Runtime-tested: settings opens on alpha |
 | [Timeline model adapter](patches/timeline-model-adapter.md) | Timeline item descriptors are obfuscated | Runtime-tested on alpha through timeline filters; no `NoClassDefFoundError` |
 | [Disable automatic timeline refresh](patches/disable-timeline-refresh.md) | `TimelineType` descriptor became obfuscated | Runtime-tested on alpha: working |
+| [Restore timeline position](patches/restore-timeline-position.md) | Timeline position state moved into an obfuscated URT component and holder/map contracts | Runtime-tested on alpha: working |
 | [Remove ads](patches/remove-ads.md) | Extension DEX referenced unobfuscated timeline models | Runtime-tested on alpha: working |
 | [Hide who to follow](patches/hide-who-to-follow.md) | Extension DEX referenced unobfuscated timeline models | Runtime-tested on alpha: working |
 | [Filter posts by keyword](patches/post-filter.md) | Extension DEX referenced `UrtTimelinePost` and related models | Main-text generic bridge runtime-tested on alpha: working |
@@ -27,7 +28,6 @@ These patches have not yet been independently run and verified on the alpha. The
 ### Priority 1 — Timeline and user-facing controls
 
 - [Hide Spaces bar](patches/hide-spaces-bar.md)
-- [Restore timeline position](patches/restore-timeline-position.md)
 - [Show sensitive media](patches/show-sensitive-media.md)
 
 ### Priority 2 — Premium and navigation
@@ -79,6 +79,7 @@ These names are analysis evidence only. Production extension signatures must not
 - User runtime-verified the timeline model adapter, automatic-refresh control, ad filtering, who-to-follow filtering, and keyword filtering on the alpha. The original timeline-model `NoClassDefFoundError` is gone.
 - User runtime-verified AI-generated post filtering on the alpha after resolving the full timeline post → contextual post → canonical post → content disclosure field chain.
 - User and agent runtime-verified the alpha inline-download action: normal-size download icon appears on media posts, native actions remain usable, and tapping it saves media successfully.
+- Agent runtime-verified Restore timeline position on the alpha: a scrolled For You timeline restored the same item/position after force-stop and relaunch, with no current-process runtime exceptions.
 
 ## Remaining matrix
 
