@@ -12,13 +12,15 @@ import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 @Suppress("unused")
 val xLiteHideAiGeneratedPostsPatch =
@@ -51,12 +53,7 @@ val xLiteHideAiGeneratedPostsPatch =
 
         execute {
             val accessors = resolveAiDisclosureAccessors()
-            patchAiDisclosureAccessors(
-                contentDisclosureDescriptor = accessors.contentDisclosureDescriptor,
-                contentDisclosureGetter = accessors.contentDisclosureGetter,
-                hasAiDisclosureField = accessors.hasAiDisclosureField,
-                sourceField = accessors.sourceField,
-            )
+            patchAiDisclosureAccessors(accessors)
 
             val matches = XLiteTimelineSuccessFingerprint.matchAll()
             if (matches.size != 1) {
@@ -85,10 +82,23 @@ val xLiteHideAiGeneratedPostsPatch =
     }
 
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
-private const val POST_DISCLOSURE_GETTER_NAME = "getContentDisclosure"
 private const val CONTENT_DISCLOSURE_HELPER = "getContentDisclosure"
 private const val HAS_AI_DISCLOSURE_HELPER = "hasAiGeneratedDisclosure"
 private const val SOURCE_HELPER = "getAiDetectionSource"
+
+private object ContextualPostModelFingerprint : Fingerprint(
+    name = "toString",
+    returnType = "Ljava/lang/String;",
+    parameters = emptyList(),
+    strings = listOf("ContextualPost(canonicalPost=", ", quotedPost="),
+)
+
+private object CanonicalPostModelFingerprint : Fingerprint(
+    name = "toString",
+    returnType = "Ljava/lang/String;",
+    parameters = emptyList(),
+    strings = listOf("CanonicalPost(id=", ", contentDisclosure="),
+)
 
 private object ContentDisclosureModelFingerprint : Fingerprint(
     name = "toString",
@@ -103,8 +113,12 @@ private object ContentDisclosureModelFingerprint : Fingerprint(
 )
 
 private data class AiDisclosureAccessors(
+    val timelinePostDescriptor: String,
+    val timelinePostResultField: String,
+    val contextualPostDescriptor: String,
+    val contextualCanonicalPostField: String,
+    val canonicalContentDisclosureField: String,
     val contentDisclosureDescriptor: String,
-    val contentDisclosureGetter: String,
     val hasAiDisclosureField: String,
     val sourceField: String,
 )
@@ -121,26 +135,54 @@ private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
     val contentDisclosureMatch = contentDisclosureMatches.single()
     val contentDisclosureClass = contentDisclosureMatch.classDef
     val contentDisclosureDescriptor = contentDisclosureClass.type
-    val hasAiDisclosureField =
-        contentDisclosureMatch.fieldForToStringLabel(", hasAIGeneratedDisclosure=")
+    val disclosureBooleanFields =
+        contentDisclosureMatch.instanceFieldsRead("Z")
+    if (disclosureBooleanFields.size != 3) {
+        throw PatchException(
+            "Expected three ordered X-Lite content-disclosure booleans, found " +
+                "${disclosureBooleanFields.size}: ${disclosureBooleanFields.joinToString()}",
+        )
+    }
+    val hasAiDisclosureField = disclosureBooleanFields[1]
     val sourceField =
-        contentDisclosureMatch.fieldForToStringLabel(", aiGeneratedDetectionSource=")
+        requireExactlyOne(
+            "X-Lite content-disclosure source field",
+            contentDisclosureClass.fields.filter { field ->
+                !AccessFlags.STATIC.isSet(field.accessFlags) &&
+                    field.type.startsWith("L") &&
+                    field.type.endsWith(";")
+            },
+        )
     contentDisclosureClass.makePublic(hasAiDisclosureField)
     contentDisclosureClass.makePublic(sourceField)
 
-    val timelinePostClass = resolveTimelinePostModelClass()
-    val postGetterCandidates =
-        timelinePostClass.methods.filter { method ->
-            AccessFlags.PUBLIC.isSet(method.accessFlags) &&
-                method.parameterTypes.isEmpty() &&
-                method.returnType == contentDisclosureDescriptor
-        }
-    val contentDisclosureGetter =
-        postGetterCandidates.singleOrNull { it.name == POST_DISCLOSURE_GETTER_NAME }
-            ?: requireExactlyOne(
-                "X-Lite timeline post content disclosure accessor",
-                postGetterCandidates,
-            )
+    val timelinePostMatch = resolveTimelinePostModelMatch()
+    val timelinePostClass = timelinePostMatch.classDef
+    val timelinePostResultField =
+        timelinePostMatch.fieldForToStringLabel("UrtTimelinePost(postResult=")
+
+    val contextualPostMatch = ContextualPostModelFingerprint.requireSingle("contextual post model")
+    val contextualPostClass = contextualPostMatch.classDef
+    val canonicalPostMatch = CanonicalPostModelFingerprint.requireSingle("canonical post model")
+    val canonicalPostClass = canonicalPostMatch.classDef
+    val contextualCanonicalPostField =
+        requireExactlyOne(
+            "X-Lite contextual canonical-post field",
+            contextualPostClass.fields.filter { field ->
+                field.type == canonicalPostClass.type && !AccessFlags.STATIC.isSet(field.accessFlags)
+            },
+        )
+    val canonicalContentDisclosureField =
+        requireExactlyOne(
+            "X-Lite canonical-post content-disclosure field",
+            canonicalPostClass.fields.filter { field ->
+                field.type == contentDisclosureDescriptor && !AccessFlags.STATIC.isSet(field.accessFlags)
+            },
+        )
+
+    timelinePostClass.makePublic(timelinePostResultField)
+    contextualPostClass.makePublic(contextualCanonicalPostField)
+    canonicalPostClass.makePublic(canonicalContentDisclosureField)
     if (!sourceField.type.startsWith("L") || !sourceField.type.endsWith(";")) {
         throw PatchException("X-Lite content disclosure source is not an object: $sourceField")
     }
@@ -148,20 +190,19 @@ private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
         throw PatchException("X-Lite AI disclosure field is not a boolean: $hasAiDisclosureField")
     }
     return AiDisclosureAccessors(
+        timelinePostDescriptor = timelinePostClass.type,
+        timelinePostResultField = timelinePostResultField.toString(),
+        contextualPostDescriptor = contextualPostClass.type,
+        contextualCanonicalPostField = contextualCanonicalPostField.toString(),
+        canonicalContentDisclosureField = canonicalContentDisclosureField.toString(),
         contentDisclosureDescriptor = contentDisclosureDescriptor,
-        contentDisclosureGetter = contentDisclosureGetter.smaliReference(),
         hasAiDisclosureField = hasAiDisclosureField.toString(),
         sourceField = sourceField.toString(),
     )
 }
 
 context(context: BytecodePatchContext)
-private fun patchAiDisclosureAccessors(
-    contentDisclosureDescriptor: String,
-    contentDisclosureGetter: String,
-    hasAiDisclosureField: String,
-    sourceField: String,
-) {
+private fun patchAiDisclosureAccessors(accessors: AiDisclosureAccessors) {
     val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
 
     fun patchHelper(
@@ -191,8 +232,11 @@ private fun patchAiDisclosureAccessors(
         returnType = OBJECT_DESCRIPTOR,
         instructions =
             """
-                invoke-virtual {p0}, $contentDisclosureGetter
-                move-result-object p0
+                check-cast p0, ${accessors.timelinePostDescriptor}
+                iget-object p0, p0, ${accessors.timelinePostResultField}
+                check-cast p0, ${accessors.contextualPostDescriptor}
+                iget-object p0, p0, ${accessors.contextualCanonicalPostField}
+                iget-object p0, p0, ${accessors.canonicalContentDisclosureField}
                 return-object p0
             """.trimIndent(),
     )
@@ -202,8 +246,8 @@ private fun patchAiDisclosureAccessors(
         returnType = "Z",
         instructions =
             """
-                check-cast p0, $contentDisclosureDescriptor
-                iget-boolean p0, p0, $hasAiDisclosureField
+                check-cast p0, ${accessors.contentDisclosureDescriptor}
+                iget-boolean p0, p0, ${accessors.hasAiDisclosureField}
                 return p0
             """.trimIndent(),
     )
@@ -213,12 +257,19 @@ private fun patchAiDisclosureAccessors(
         returnType = OBJECT_DESCRIPTOR,
         instructions =
             """
-                check-cast p0, $contentDisclosureDescriptor
-                iget-object p0, p0, $sourceField
+                check-cast p0, ${accessors.contentDisclosureDescriptor}
+                iget-object p0, p0, ${accessors.sourceField}
                 return-object p0
             """.trimIndent(),
     )
 }
+
+private fun Match.instanceFieldsRead(type: String): List<FieldReference> =
+    method.instructions.mapNotNull { instruction ->
+        instruction.getReference<FieldReference>()?.takeIf { field ->
+            field.definingClass == originalMethod.definingClass && field.type == type
+        }
+    }.distinctBy(FieldReference::toString)
 
 private fun app.morphe.patcher.util.proxy.mutableTypes.MutableClass.makePublic(field: FieldReference) {
     val definition = fields.singleOrNull { candidate -> candidate.toString() == field.toString() }
@@ -228,8 +279,15 @@ private fun app.morphe.patcher.util.proxy.mutableTypes.MutableClass.makePublic(f
         (definition.accessFlags and nonPublicFlags.inv()) or AccessFlags.PUBLIC.value
 }
 
-private fun MethodReference.smaliReference(): String =
-    "$definingClass->$name(${parameterTypes.joinToString("")})$returnType"
+context(_: BytecodePatchContext)
+private fun Fingerprint.requireSingle(target: String): Match {
+    val matches = matchAll()
+    if (matches.size == 1) return matches.single()
+    throw PatchException(
+        "Expected one X-Lite $target, found ${matches.size}: " +
+            matches.joinToString { it.originalMethod.toString() },
+    )
+}
 
 private fun <T> requireExactlyOne(target: String, matches: List<T>): T {
     if (matches.size == 1) return matches.single()

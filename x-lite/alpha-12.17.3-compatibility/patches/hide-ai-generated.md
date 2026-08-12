@@ -2,23 +2,39 @@
 
 ## Why it broke
 
-The patch assumed stable descriptors and getter names for `UrtTimelinePost`, `ContentDisclosure`, and its source enum. In the alpha, timeline post and content disclosure are obfuscated, and readable getters are absent.
+The original patch assumed stable descriptors and getter names for `UrtTimelinePost`, `ContentDisclosure`, and its source enum. The alpha obfuscates the complete model path:
 
-## Work completed
+```text
+timeline post → post result/contextual post → canonical post → content disclosure
+```
 
-- Changed extension bridge input to `Object`.
-- Added the timeline model adapter dependency.
-- Fingerprint `ContentDisclosure` through stable data-class `toString()` labels.
-- Resolve its AI boolean and source fields from those labels.
-- Keep the source behind `Object` and compare `Enum.name()` to `UserMarked` / `AutoDetected`.
-- Prepare direct field-read bridge injection without embedding model descriptors in Java.
+The alpha timeline post does not expose a direct public method returning the disclosure model. The disclosure boolean/source getters are also absent or renamed.
 
-## Current blocker
+## Fix
 
-The alpha timeline post (`w0`) delegates semantic post properties through its obfuscated post-result field/interface. No direct public method returning the resolved disclosure descriptor was found on the timeline post. The patch run currently fails fast while resolving that post-to-disclosure accessor.
+- Keep every extension helper signature typed as `Object`.
+- Resolve the timeline post through its stable `UrtTimelinePost(postResult=...)` data-class text.
+- Resolve contextual post, canonical post, and content disclosure through stable `toString()` labels.
+- Resolve the field chain structurally:
+  - timeline post's post-result field;
+  - contextual post's unique canonical-post field;
+  - canonical post's unique content-disclosure field.
+- Resolve the disclosure source as its unique non-static object field.
+- Resolve `hasAIGeneratedDisclosure` as the second ordered boolean read in the disclosure `toString()` contract (`paid promotion`, `AI generated`, `can edit`).
+- Make only the resolved fields public so the extension bridge can use direct `iget` instructions.
+- Inject direct casts/field reads into `Object`-typed helpers. No alpha descriptor is embedded in extension Java.
+- Keep the source behind `Object`; runtime compares `Enum.name()` with `UserMarked` and `AutoDetected`.
 
-The next step is to resolve the post-result field from the timeline post, then identify/inject the disclosure accessor on that resolved owner or interface.
+## Verifier correction
+
+The first bridge used `instance-of v0, p0` in a one-register static helper. In that method, `v0` and `p0` alias, so `instance-of` replaced the object with a boolean and the following `check-cast` failed verification.
+
+The final bridge uses the already-proven timeline/contextual model chain directly and needs no temporary register. Unexpected model shapes are contained by the existing per-item runtime exception guard.
 
 ## Verification
 
-Not complete. Do not mark this patch alpha-compatible until the alpha patch run, final DEX inspection, and runtime filtering test pass.
+- Patch bundle builds.
+- Exclusive alpha patch run reports `Applied: X-Lite: Hide AI-generated posts` and saves the APK.
+- Initial runtime test exposed the aliased-register `VerifyError`; corrected bridge removes it.
+- User runtime-verified filtering on 12.17.3-alpha.01: working.
+- Regression patching/runtime tests on 12.15.1 and 12.14.0 remain pending.

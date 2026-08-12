@@ -14,7 +14,7 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Remove ads](patches/remove-ads.md) | Extension DEX referenced unobfuscated timeline models | Runtime-tested on alpha: working |
 | [Hide who to follow](patches/hide-who-to-follow.md) | Extension DEX referenced unobfuscated timeline models | Runtime-tested on alpha: working |
 | [Filter posts by keyword](patches/post-filter.md) | Extension DEX referenced `UrtTimelinePost` and related models | Main-text generic bridge runtime-tested on alpha: working |
-| [Hide AI-generated posts](patches/hide-ai-generated.md) | Timeline and content-disclosure models/getters are obfuscated | In progress; alpha patching still fails while resolving the post-to-disclosure accessor |
+| [Hide AI-generated posts](patches/hide-ai-generated.md) | Timeline, contextual-post, canonical-post, and disclosure models are obfuscated | Runtime-tested on alpha: working |
 
 ## Unported queue
 
@@ -77,14 +77,13 @@ These names are analysis evidence only. Production extension signatures must not
   4. Fragment restore failure fixed by reusing the host `fragment_container` ID.
   5. User confirmed the settings screen opens.
 - User runtime-verified the timeline model adapter, automatic-refresh control, ad filtering, who-to-follow filtering, and keyword filtering on the alpha. The original timeline-model `NoClassDefFoundError` is gone.
-- **Hide AI-generated posts** remains blocked because no direct post accessor returning the resolved disclosure model has yet been identified.
+- User runtime-verified AI-generated post filtering on the alpha after resolving the full timeline post → contextual post → canonical post → content disclosure field chain.
 
 ## Remaining matrix
 
-1. Finish the AI disclosure bridge.
-2. Work through the unported queue, one patch at a time.
-3. Build the MPP and patch 12.17.3-alpha.01 with each patch independently.
-4. Inspect final DEX for reachable mutations and unresolved model references.
-5. Install and exercise each feature on alpha.
-6. Repatch and regression-test 12.15.1 and 12.14.0.
-7. Add alpha to the centralized compatibility list only after the production patch set is proven.
+1. Work through the unported queue, one patch at a time.
+2. Build the MPP and patch 12.17.3-alpha.01 with each patch independently.
+3. Inspect final DEX for reachable mutations and unresolved model references.
+4. Install and exercise each feature on alpha.
+5. Repatch and regression-test 12.15.1 and 12.14.0.
+6. Add alpha to the centralized compatibility list only after the production patch set is proven.

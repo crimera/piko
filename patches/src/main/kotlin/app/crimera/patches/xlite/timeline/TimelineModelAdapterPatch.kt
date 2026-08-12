@@ -170,8 +170,8 @@ private fun resolveTimelineModels(): TimelineModels {
 }
 
 context(_: BytecodePatchContext)
-internal fun resolveTimelinePostModelClass(): MutableClass =
-    TimelinePostModelFingerprint.requireSingle("timeline post model").classDef
+internal fun resolveTimelinePostModelMatch(): Match =
+    TimelinePostModelFingerprint.requireSingle("timeline post model")
 
 context(context: BytecodePatchContext)
 private fun patchTimelineFilterBridges(models: TimelineModels) {
