@@ -27,6 +27,10 @@ import app.morphe.extension.instagram.settings.ActivityHook;
 
 @SuppressWarnings("unused")
 public class Links {
+    private static final String NDX_CONTACT_IMPORT_SCREEN =
+            "com.bloks.www.bloks.ig.ndx.ci.entry.screen";
+    private static final String NDX_LOCATION_SERVICES_SCREEN =
+            "com.bloks.www.bloks.ig.ndx.ls.entry.screen";
     private static final boolean DISABLE_ANALYTICS;
     private static final boolean DISABLE_STORIES;
     private static final boolean DISABLE_EXPLORE;
@@ -67,6 +71,15 @@ public class Links {
 
     public static boolean setStorySeen(boolean seenStatus){
         return Pref.viewStoriesAnonymously() ? true:seenStatus;
+    }
+
+    public static boolean shouldBlockOnboardingScreen(String appId) {
+        if (!DISABLE_ONBOARDING_PERMISSION_PROMPTS || appId == null) {
+            return false;
+        }
+
+        return NDX_CONTACT_IMPORT_SCREEN.equals(appId)
+                || NDX_LOCATION_SERVICES_SCREEN.equals(appId);
     }
 
     public static boolean openExternally(String url) {
