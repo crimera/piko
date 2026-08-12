@@ -15,4 +15,6 @@ Header-text fallback matching was removed with the unstable typed header boundar
 
 ## Verification
 
-Build passes. Isolated alpha patching and runtime tests on timelines/profile pages remain pending.
+- Build passes.
+- User runtime-verified who-to-follow filtering on 12.17.3-alpha.01: working.
+- Final-DEX inspection and regression tests on 12.15.1 and 12.14.0 remain pending.

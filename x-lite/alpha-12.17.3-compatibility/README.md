@@ -9,11 +9,11 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | Patch / component | Breakage | Current status |
 |---|---|---|
 | [Settings](patches/settings.md) | Compose invocation changed; legacy styles/layout and AppCompat toolbar assumptions disappeared | Runtime-tested: settings opens on alpha |
-| [Timeline model adapter](patches/timeline-model-adapter.md) | Timeline item descriptors are obfuscated | Implemented; full runtime matrix pending |
-| [Disable automatic timeline refresh](patches/disable-timeline-refresh.md) | `TimelineType` descriptor became obfuscated | Implemented; alpha patch/runtime verification pending |
-| [Remove ads](patches/remove-ads.md) | Extension DEX referenced unobfuscated timeline models | Generic boundary implemented; runtime verification pending |
-| [Hide who to follow](patches/hide-who-to-follow.md) | Extension DEX referenced unobfuscated timeline models | Generic boundary implemented; runtime verification pending |
-| [Filter posts by keyword](patches/post-filter.md) | Extension DEX referenced `UrtTimelinePost` and related models | Main-text generic bridge implemented; broader matching temporarily reduced; runtime verification pending |
+| [Timeline model adapter](patches/timeline-model-adapter.md) | Timeline item descriptors are obfuscated | Runtime-tested on alpha through timeline filters; no `NoClassDefFoundError` |
+| [Disable automatic timeline refresh](patches/disable-timeline-refresh.md) | `TimelineType` descriptor became obfuscated | Runtime-tested on alpha: working |
+| [Remove ads](patches/remove-ads.md) | Extension DEX referenced unobfuscated timeline models | Runtime-tested on alpha: working |
+| [Hide who to follow](patches/hide-who-to-follow.md) | Extension DEX referenced unobfuscated timeline models | Runtime-tested on alpha: working |
+| [Filter posts by keyword](patches/post-filter.md) | Extension DEX referenced `UrtTimelinePost` and related models | Main-text generic bridge runtime-tested on alpha: working |
 | [Hide AI-generated posts](patches/hide-ai-generated.md) | Timeline and content-disclosure models/getters are obfuscated | In progress; alpha patching still fails while resolving the post-to-disclosure accessor |
 
 ## Unported queue
@@ -76,7 +76,8 @@ These names are analysis evidence only. Production extension signatures must not
   3. Stripped AppCompat `Toolbar` crash fixed by framework `LinearLayout`, `ImageButton`, and `TextView` controls.
   4. Fragment restore failure fixed by reusing the host `fragment_container` ID.
   5. User confirmed the settings screen opens.
-- Four-patch alpha test currently stops in **Hide AI-generated posts** because no direct post accessor returning the resolved disclosure model has yet been identified.
+- User runtime-verified the timeline model adapter, automatic-refresh control, ad filtering, who-to-follow filtering, and keyword filtering on the alpha. The original timeline-model `NoClassDefFoundError` is gone.
+- **Hide AI-generated posts** remains blocked because no direct post accessor returning the resolved disclosure model has yet been identified.
 
 ## Remaining matrix
 

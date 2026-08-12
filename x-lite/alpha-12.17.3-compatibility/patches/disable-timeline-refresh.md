@@ -15,4 +15,6 @@ No alpha-specific descriptor is stored in source.
 
 ## Verification
 
-Patch code builds. Alpha patch execution, final-DEX inspection, and runtime behavior are pending.
+- Patch code builds.
+- User runtime-verified the patch on 12.17.3-alpha.01: working.
+- Final-DEX inspection and regression tests on 12.15.1 and 12.14.0 remain pending.

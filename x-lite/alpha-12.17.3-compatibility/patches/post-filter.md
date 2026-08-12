@@ -17,4 +17,6 @@ Only main post text matching is currently retained. Username, quoted-post, note,
 
 ## Verification
 
-The alpha patcher logged this patch as applied before the combined run stopped in the AI patch. Final-DEX and runtime filtering tests remain pending.
+- The alpha patcher logged this patch as applied.
+- User runtime-verified main-text keyword filtering on 12.17.3-alpha.01: working.
+- Final-DEX inspection and regression tests on 12.15.1 and 12.14.0 remain pending.

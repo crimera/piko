@@ -21,4 +21,7 @@ Release descriptors exist only in injected bytecode. They are not extension meth
 
 ## Verification
 
-Initial patch bundle build passed. Full final-DEX and runtime checks on alpha, 12.15.1, and 12.14.0 remain pending.
+- Initial patch bundle build passed.
+- User runtime-verified the dependent timeline filters on 12.17.3-alpha.01.
+- The original timeline-model `NoClassDefFoundError` no longer occurs.
+- Final-DEX inspection and regression tests on 12.15.1 and 12.14.0 remain pending.
