@@ -21,6 +21,7 @@ val xLiteHideWhoToFollowPatch =
         description = "Hides recommended-user sections (\"Who to follow\") from X-Lite timelines and profile pages.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
+        dependsOn(xLiteTimelineModelAdapterPatch)
 
         val hideWhoToFollow =
             xLiteSettings {

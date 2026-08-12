@@ -8,13 +8,16 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import androidx.appcompat.widget.Toolbar;
 
 import app.morphe.extension.shared.ResourceType;
 import app.morphe.extension.shared.ResourceUtils;
@@ -25,27 +28,21 @@ import app.morphe.extension.xlite.ui.Theme;
 
 @SuppressWarnings("deprecation")
 public final class XLiteSettingsActivity extends Activity {
-    private Toolbar toolbar;
+    private static final int SETTINGS_CONTAINER_ID = 0x00f00001;
+
+    private LinearLayout toolbar;
+    private TextView toolbarTitle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         applySystemTheme();
         super.onCreate(savedInstanceState);
         Utils.setActivity(this);
-        setContentView(ResourceUtils.getIdentifierOrThrow(
-                this,
-                ResourceType.LAYOUT,
-                "preference_fragment_activity"
-        ));
+        int containerId = createContentView();
         configureSystemBars();
         configureToolbar();
         applyCustomFontToToolbar();
         if (savedInstanceState != null) return;
 
-        int containerId = ResourceUtils.getIdentifierOrThrow(
-                this,
-                ResourceType.ID,
-                "fragment_container"
-        );
         getFragmentManager()
                 .beginTransaction()
                 .replace(containerId, new XLiteSettingsFragment())
@@ -62,11 +59,12 @@ public final class XLiteSettingsActivity extends Activity {
     }
 
     private void applySystemTheme() {
-        getTheme().applyStyle(style("Twitter"), true);
-        getTheme().applyStyle(
-                style(isSystemDark(this) ? "Twitter.LightsOut" : "Twitter.Standard"),
-                true
-        );
+        int baseStyle = style("Twitter");
+        if (baseStyle == 0) baseStyle = style("Theme.AppCompat.DayNight.NoActionBar");
+        if (baseStyle != 0) getTheme().applyStyle(baseStyle, true);
+
+        int paletteStyle = style(isSystemDark(this) ? "Twitter.LightsOut" : "Twitter.Standard");
+        if (paletteStyle != 0) getTheme().applyStyle(paletteStyle, true);
     }
 
     static Context createPreferenceContext(Context context) {
@@ -82,12 +80,40 @@ public final class XLiteSettingsActivity extends Activity {
         return nightMode == Configuration.UI_MODE_NIGHT_YES;
     }
 
+    private int createContentView() {
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+
+        toolbar = new LinearLayout(this);
+        toolbar.setGravity(Gravity.CENTER_VERTICAL);
+        root.addView(
+                toolbar,
+                new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        Theme.dpToPx(this, 56f)
+                )
+        );
+
+        FrameLayout container = new FrameLayout(this);
+        int containerId = getResources().getIdentifier(
+                "fragment_container",
+                "id",
+                getPackageName()
+        );
+        container.setId(containerId != 0 ? containerId : SETTINGS_CONTAINER_ID);
+        root.addView(
+                container,
+                new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        0,
+                        1f
+                )
+        );
+        setContentView(root);
+        return container.getId();
+    }
+
     private void configureToolbar() {
-        toolbar = findViewById(ResourceUtils.getIdentifierOrThrow(
-                this,
-                ResourceType.ID,
-                "toolbar"
-        ));
         int contentColor = Theme.primaryText(this);
         Drawable navigationIcon = getDrawable(ResourceUtils.getIdentifierOrThrow(
                 this,
@@ -95,11 +121,35 @@ public final class XLiteSettingsActivity extends Activity {
                 "ic_vector_arrow_left"
         )).mutate();
         navigationIcon.setTint(contentColor);
-        toolbar.setNavigationIcon(navigationIcon);
+
+        ImageButton navigationButton = new ImageButton(this);
+        navigationButton.setImageDrawable(navigationIcon);
+        navigationButton.setBackgroundColor(Color.TRANSPARENT);
+        navigationButton.setContentDescription("Back");
+        navigationButton.setOnClickListener(ignored -> onBackPressed());
+        toolbar.addView(
+                navigationButton,
+                new LinearLayout.LayoutParams(
+                        Theme.dpToPx(this, 56f),
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                )
+        );
+
+        toolbarTitle = new TextView(this);
+        toolbarTitle.setText(StringRef.str("piko_xlite_settings_title"));
+        toolbarTitle.setTextColor(contentColor);
+        toolbarTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f);
+        toolbarTitle.setGravity(Gravity.CENTER_VERTICAL);
+        toolbarTitle.setSingleLine(true);
+        toolbar.addView(
+                toolbarTitle,
+                new LinearLayout.LayoutParams(
+                        0,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        1f
+                )
+        );
         toolbar.setBackgroundColor(Theme.surfaceContainer(this));
-        toolbar.setTitleTextColor(contentColor);
-        toolbar.setTitle(StringRef.str("piko_xlite_settings_title"));
-        toolbar.setNavigationOnClickListener(ignored -> onBackPressed());
 
         ViewGroup toolbarParent = (ViewGroup) toolbar.getParent();
         View divider = new View(this);
@@ -115,20 +165,16 @@ public final class XLiteSettingsActivity extends Activity {
     }
 
     public void setPageTitle(CharSequence title) {
-        if (toolbar == null) return;
-        toolbar.setTitle(title);
+        if (toolbarTitle == null) return;
+        toolbarTitle.setText(title);
         applyCustomFontToToolbar();
     }
 
     private void applyCustomFontToToolbar() {
-        for (int i = 0; i < toolbar.getChildCount(); i++) {
-            View child = toolbar.getChildAt(i);
-            if (child instanceof TextView) {
-                ((TextView) child).setTypeface(app.morphe.extension.xlite.misc.UpdateFont.customTypefaceOr(
-                        ((TextView) child).getTypeface()
-                ));
-            }
-        }
+        if (toolbarTitle == null) return;
+        toolbarTitle.setTypeface(app.morphe.extension.xlite.misc.UpdateFont.customTypefaceOr(
+                toolbarTitle.getTypeface()
+        ));
     }
 
     private void configureSystemBars() {
@@ -165,6 +211,6 @@ public final class XLiteSettingsActivity extends Activity {
     }
 
     private int style(String resourceName) {
-        return ResourceUtils.getIdentifierOrThrow(this, ResourceType.STYLE, resourceName);
+        return getResources().getIdentifier(resourceName, "style", getPackageName());
     }
 }

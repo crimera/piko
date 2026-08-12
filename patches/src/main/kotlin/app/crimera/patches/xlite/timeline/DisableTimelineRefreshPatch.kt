@@ -26,8 +26,6 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
-private const val TIMELINE_TYPE_DESCRIPTOR = "Lcom/x/models/timelines/TimelineType;"
-
 private object XLiteHomeReselectFingerprint : Fingerprint(
     parameters = listOf("Z", "Z"),
     returnType = "Z",
@@ -115,16 +113,19 @@ val disableTimelineRefreshPatch =
                     ?.definingClass
                     ?: throw PatchException("X-Lite request type descriptor was not found")
             lifecycleMatch.method.apply {
-                val forYouInstruction =
-                    instructions.singleOrNull { instruction ->
-                        instruction.opcode == Opcode.SGET_OBJECT &&
-                            instruction.getReference<FieldReference>()?.let { reference ->
-                                reference.definingClass == TIMELINE_TYPE_DESCRIPTOR &&
-                                    reference.name == "FOR_YOU" &&
-                                    reference.type == TIMELINE_TYPE_DESCRIPTOR
-                            } == true
+                val forYouReference =
+                    instructions.mapNotNull { instruction ->
+                        if (instruction.opcode != Opcode.SGET_OBJECT) return@mapNotNull null
+                        instruction.getReference<FieldReference>()
+                    }.singleOrNull { reference ->
+                        reference.name == "FOR_YOU" &&
+                            reference.type == reference.definingClass
                     } ?: throw PatchException("X-Lite auto-refresh FOR_YOU check was not found")
-                val forYouIndex = forYouInstruction.location.index
+                val timelineTypeDescriptor = forYouReference.definingClass
+                val forYouIndex =
+                    instructions.single { instruction ->
+                        instruction.getReference<FieldReference>() == forYouReference
+                    }.location.index
                 val timelineResult =
                     instructions
                         .take(forYouIndex)
@@ -133,7 +134,7 @@ val disableTimelineRefreshPatch =
                             val resultIndex = instruction.location.index
                             getInstruction(resultIndex - 1)
                                 .getReference<MethodReference>()
-                                ?.returnType == TIMELINE_TYPE_DESCRIPTOR
+                                ?.returnType == timelineTypeDescriptor
                         } ?: throw PatchException(
                         "X-Lite auto-refresh timeline type result was not found",
                     )
@@ -197,12 +198,12 @@ val disableTimelineRefreshPatch =
                             if-eqz v$settingRegister, :piko_xlite_refresh_lifecycle_continue_$labelSuffix
                             invoke-interface {v$repositoryRegister}, $timelineGetterReference
                             move-result-object v$timelineRegister
-                            sget-object v$settingRegister, $TIMELINE_TYPE_DESCRIPTOR->FOR_YOU:$TIMELINE_TYPE_DESCRIPTOR
+                            sget-object v$settingRegister, $timelineTypeDescriptor->FOR_YOU:$timelineTypeDescriptor
                             if-ne v$timelineRegister, v$settingRegister, :piko_xlite_refresh_lifecycle_check_following_$labelSuffix
                             sget-object v$requestTypeRegister, $requestTypeDescriptor->VIEWPORT_AWARE_AUTO_REFRESH:$requestTypeDescriptor
                             goto :piko_xlite_refresh_lifecycle_continue_$labelSuffix
                             :piko_xlite_refresh_lifecycle_check_following_$labelSuffix
-                            sget-object v$settingRegister, $TIMELINE_TYPE_DESCRIPTOR->FOLLOWING:$TIMELINE_TYPE_DESCRIPTOR
+                            sget-object v$settingRegister, $timelineTypeDescriptor->FOLLOWING:$timelineTypeDescriptor
                             if-ne v$timelineRegister, v$settingRegister, :piko_xlite_refresh_lifecycle_continue_$labelSuffix
                             sget-object v$requestTypeRegister, $requestTypeDescriptor->VIEWPORT_AWARE_AUTO_REFRESH:$requestTypeDescriptor
                         """.trimIndent(),
