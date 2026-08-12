@@ -69,6 +69,33 @@ internal fun ToggleSettingDefinition.injectRead(
         returnType = "Z",
     )
 
+// The caller reserves this pair when normal liveness-based allocation cannot find safe locals.
+internal fun ToggleSettingDefinition.injectReadWithDefault(
+    method: MutableMethod,
+    index: Int,
+    defaultValue: Boolean,
+    registerRange: IntRange,
+): InjectedSettingRead {
+    require(
+        registerRange.first >= 0 &&
+            registerRange.last == registerRange.first + 1 &&
+            registerRange.last <= 255,
+    ) {
+        "X-Lite default setting read requires two consecutive registers in v0..v255: $registerRange"
+    }
+    method.addInstructions(
+        index,
+        valueReadWithDefaultInstructions(
+            defaultValue = defaultValue,
+            registerRange = registerRange,
+        ),
+    )
+    return InjectedSettingRead(
+        register = registerRange.first,
+        nextIndex = index + READ_WITH_DEFAULT_INSTRUCTION_COUNT,
+    )
+}
+
 internal fun TextInputSettingDefinition.injectRead(
     method: MutableMethod,
     index: Int,
@@ -190,6 +217,20 @@ private fun SettingItemDefinition.valueReadInstructions(
         const-string v$destinationRegister, "${smaliString(id)}"
         ${invoke}$SETTINGS_REGISTRY_DESCRIPTOR->$methodName(Ljava/lang/String;)$returnType
         $moveResult v$destinationRegister
+    """.trimIndent()
+}
+
+private fun SettingItemDefinition.valueReadWithDefaultInstructions(
+    defaultValue: Boolean,
+    registerRange: IntRange,
+): String {
+    val settingRegister = registerRange.first
+    val defaultRegister = registerRange.last
+    return """
+        const-string v$settingRegister, "${smaliString(id)}"
+        const/4 v$defaultRegister, ${if (defaultValue) "0x1" else "0x0"}
+        invoke-static/range {v$settingRegister .. v$defaultRegister}, $SETTINGS_REGISTRY_DESCRIPTOR->getBooleanOrDefault(Ljava/lang/String;Z)Z
+        move-result v$settingRegister
     """.trimIndent()
 }
 
@@ -405,6 +446,7 @@ private fun smaliString(value: String) =
 
 private const val REGISTRATION_REGISTER_COUNT = 6
 private const val READ_INSTRUCTION_COUNT = 3
+private const val READ_WITH_DEFAULT_INSTRUCTION_COUNT = 4
 
 private fun ToggleSettingDefinition.guard(
     method: MutableMethod,

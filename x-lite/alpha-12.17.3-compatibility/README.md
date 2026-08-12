@@ -20,6 +20,7 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Inline download button](patches/inline-download-button.md) | Inline models/getters and icon renderer changed; old extension types failed verification | Runtime-tested on alpha: action, icon, and download working |
 | [Hide new posts pill](patches/hide-new-posts-pill.md) | Previous renderer signature referenced the unobfuscated `TimelineShowAlert` model | Runtime-tested on alpha: working |
 | [Hide compose button](patches/hide-compose-button.md) | Renderer owner and method changed from obfuscated `g0->a` to `n->c` | Runtime-tested on alpha: working |
+| [Show sensitive media](patches/show-sensitive-media.md) | Stable media-visibility getter disappeared; alpha retains semantic model labels but uses obfuscated fields | Patch-applied and final-Dex verified; runtime pending device |
 
 ## Unported queue
 
@@ -28,7 +29,6 @@ These patches have not yet been independently run and verified on the alpha. The
 ### Priority 1 — Timeline and user-facing controls
 
 - [Hide Spaces bar](patches/hide-spaces-bar.md)
-- [Show sensitive media](patches/show-sensitive-media.md)
 
 ### Priority 2 — Premium and navigation
 
