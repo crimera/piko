@@ -96,9 +96,13 @@ public class InstaUtils {
                 HttpURLConnection connection = Requester.getConnectionFromRoute(host, route);
                 String response = Requester.parseString(connection);
 
-                PikoUtils.writeFile(outputFile, response.getBytes(), false);
+                boolean fileWritten = PikoUtils.writeFile(outputFile, response.getBytes(), false);
 
                 new Handler(Looper.getMainLooper()).post(() -> {
+                    if (!fileWritten) {
+                        PikoUtils.toast(str("piko_download_failed_media") + outputFile.getName());
+                        return;
+                    }
                     PikoUtils.toast(str("piko_downloaded_media") + outputFile.getName());
 
                     if (onComplete != null) {

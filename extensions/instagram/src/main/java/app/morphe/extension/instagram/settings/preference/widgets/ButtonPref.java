@@ -13,6 +13,8 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.lang.ref.WeakReference;
+
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.instagram.settings.ActivityHook;
@@ -83,7 +85,9 @@ public class ButtonPref extends Preference {
                         FragmentHook.startFragment(key);
 
                     } else if (key.equals("piko_rec_flags_refresh_file")) {
-                        RecommendedFlags.downloadRecommendedFlagsFile();
+                        RecommendedFlags.downloadRecommendedFlagsFile(
+                                recreateActivityOnComplete(context)
+                        );
                     }
                 } catch (Exception e) {
                     Utils.showToastShort(e.getMessage());
@@ -92,6 +96,19 @@ public class ButtonPref extends Preference {
                 return true;
             }
         });
+    }
+
+    private static Runnable recreateActivityOnComplete(Context context) {
+        if (!(context instanceof Activity)) {
+            return null;
+        }
+        WeakReference<Activity> activityReference = new WeakReference<>((Activity) context);
+        return () -> {
+            Activity activity = activityReference.get();
+            if (activity != null && !activity.isFinishing() && !activity.isDestroyed()) {
+                activity.recreate();
+            }
+        };
     }
 
     @Override

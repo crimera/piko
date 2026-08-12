@@ -19,16 +19,24 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
 import app.morphe.extension.instagram.entity.DeveloperOptionsItem;
-import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.utils.InstaUtils;
 
 public class RecommendedFlags {
 
+    private static File getRecommendedFlagsFile() {
+        Context context = PikoUtils.getContext();
+        return new File(context.getFilesDir(), Constants.REC_FLAGS + ".json");
+    }
+
+    public static long getLastModified() {
+        File file = getRecommendedFlagsFile();
+        return file.exists() ? file.lastModified() : 0L;
+    }
+
     private static JSONArray readFlagsFromFileDir(){
         try{
-            Context context = PikoUtils.getContext();
-            File recFlagsFile = new File(context.getFilesDir(), Constants.REC_FLAGS+".json");
+            File recFlagsFile = getRecommendedFlagsFile();
             if (!recFlagsFile.exists()) {
                 PikoUtils.toast(str("piko_rec_flags_no_file"));
             } else {
@@ -57,15 +65,9 @@ public class RecommendedFlags {
         return flags;
     }
 
-    public static void downloadRecommendedFlagsFile() {
-        Context context = PikoUtils.getContext();
-
+    public static void downloadRecommendedFlagsFile(Runnable onComplete) {
         String filename = Constants.REC_FLAGS+".json";
         String host = Constants.PIKO_MAPPINGS_PATH;
-        File recFlagFile = new File(context.getFilesDir(), filename);
-        InstaUtils.downloadFile(host, filename, recFlagFile, ()->{
-            long lastModified = recFlagFile.lastModified();
-            Pref.setLastRecommendedFlagDownloadTimestamp(lastModified);
-        });
+        InstaUtils.downloadFile(host, filename, getRecommendedFlagsFile(), onComplete);
     }
 }
