@@ -101,6 +101,7 @@ public class SettingsActivity extends Activity {
         ImageView back = new ImageView(this);
         UI.setThemedIcon(back, UI.DRAWABLE_ARROW_BACK);
         back.setScaleType(ImageView.ScaleType.CENTER);
+        back.setPaddingRelative(0, 0, InstagramPreferenceStyle.dp(this, 16), 0);
         LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(iconSize, iconSize);
         backParams.gravity = android.view.Gravity.CENTER_VERTICAL;
         back.setLayoutParams(backParams);
