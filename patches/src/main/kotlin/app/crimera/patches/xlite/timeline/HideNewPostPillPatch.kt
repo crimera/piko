@@ -6,13 +6,14 @@ import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.string
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 
 private object XLiteNewPostsPillFingerprint : Fingerprint(
     parameters =
         listOf(
-            "Lcom/x/models/timelines/URTTimelineInstruction\$ShowInstructions\$TimelineShowAlert;",
+            "L",
             "L",
             "Landroidx/compose/ui/Modifier;",
             "Lkotlin/jvm/functions/Function0;",
@@ -20,6 +21,7 @@ private object XLiteNewPostsPillFingerprint : Fingerprint(
             "I",
         ),
     returnType = "V",
+    filters = listOf(string("ntp")),
 )
 
 @Suppress("unused")
