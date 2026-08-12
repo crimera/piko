@@ -69,7 +69,7 @@ public class MoreProfileInfo {
                 setTweetStatView(context, rootView, "media_stat", text, count);
 
                 count = twitterUserEntity.getLikesCount();
-                text = str("profile_tab_title_favorites");
+                text = str("profile_tab_title_likes");
                 setTweetStatView(context, rootView, "likes_stat", text, count);
             }
         } catch (Exception e) {
