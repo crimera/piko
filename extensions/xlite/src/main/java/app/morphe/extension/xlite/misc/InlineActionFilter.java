@@ -1,8 +1,5 @@
 package app.morphe.extension.xlite.misc;
 
-import com.x.models.InlineActionEntry;
-import com.x.models.PostActionType;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -10,7 +7,26 @@ import java.util.Set;
 import app.morphe.extension.shared.Logger;
 
 public final class InlineActionFilter {
+    private static final ThreadLocal<Set<String>> HIDDEN_ACTION_IDS = new ThreadLocal<>();
+    private static final ThreadLocal<Object> PRESENTER = new ThreadLocal<>();
+
     private InlineActionFilter() {
+    }
+
+    public static void prepareHiddenActions(Set<String> hiddenActionIds) {
+        HIDDEN_ACTION_IDS.set(hiddenActionIds);
+    }
+
+    public static void preparePresenter(Object presenter) {
+        PRESENTER.set(presenter);
+    }
+
+    public static List<?> filter(List<?> actions) {
+        Set<String> hiddenActionIds = HIDDEN_ACTION_IDS.get();
+        Object presenter = PRESENTER.get();
+        HIDDEN_ACTION_IDS.remove();
+        PRESENTER.remove();
+        return filter(actions, hiddenActionIds, presenter);
     }
 
     public static List<?> filter(
@@ -41,13 +57,9 @@ public final class InlineActionFilter {
 
     private static boolean shouldHide(Object action, Set<String> hiddenActionIds) {
         if (action == null) return false;
-        if (!(action instanceof InlineActionEntry entry)) {
-            return hiddenActionIds.contains(action.toString());
-        }
 
-        PostActionType actionType = entry.getActionType();
-        if (actionType == null) return false;
-        String actionName = actionType.toString();
+        String actionName = inlineActionName(action);
+        if (actionName == null) return false;
         if (hiddenActionIds.contains(actionName)) return true;
         return switch (actionName) {
             case "Unfavorite" -> hiddenActionIds.contains("Favorite");
@@ -57,5 +69,16 @@ public final class InlineActionFilter {
                     hiddenActionIds.contains("AddRemoveBookmarks");
             default -> false;
         };
+    }
+
+    private static String inlineActionName(Object action) {
+        String value = action.toString();
+        String prefix = "InlineActionEntry(actionType=";
+        if (!value.startsWith(prefix)) return value;
+
+        int end = value.indexOf(',', prefix.length());
+        if (end < 0) end = value.indexOf(')', prefix.length());
+        if (end < 0) return null;
+        return value.substring(prefix.length(), end);
     }
 }

@@ -2,7 +2,7 @@
 
 This directory tracks the X-Lite patch port from Twitter/X 12.14.0 and 12.15.1 to `com.twitter.android` `12.17.3-alpha.01`.
 
-The alpha removes or obfuscates several contracts previously treated as stable. Fixes must preserve compatibility with 12.14.0 and 12.15.1 and avoid embedding alpha-specific descriptors in extension code.
+The alpha removes or obfuscates several contracts previously treated as stable. X-Lite compatibility now targets `12.17.3-alpha.01` only; older targets were retired rather than carrying parallel legacy fingerprints. Release-specific descriptors must not be embedded in extension code.
 
 ## Status
 
@@ -15,6 +15,8 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Hide who to follow](patches/hide-who-to-follow.md) | Extension DEX referenced unobfuscated timeline models | Runtime-tested on alpha: working |
 | [Filter posts by keyword](patches/post-filter.md) | Extension DEX referenced `UrtTimelinePost` and related models | Main-text generic bridge runtime-tested on alpha: working |
 | [Hide AI-generated posts](patches/hide-ai-generated.md) | Timeline, contextual-post, canonical-post, and disclosure models are obfuscated | Runtime-tested on alpha: working |
+| [Customize inline actions](patches/customize-inline-actions.md) | Presenter/model descriptors changed and the final Compose list conversion had severe register pressure | Ported and exercised through inline-download dependency; hide-option matrix pending |
+| [Inline download button](patches/inline-download-button.md) | Inline models/getters and icon renderer changed; old extension types failed verification | Runtime-tested on alpha: action, icon, and download working |
 
 ## Unported queue
 
@@ -27,8 +29,6 @@ These patches have not yet been independently run and verified on the alpha. The
 - [Hide Spaces bar](patches/hide-spaces-bar.md)
 - [Restore timeline position](patches/restore-timeline-position.md)
 - [Show sensitive media](patches/show-sensitive-media.md)
-- [Customize inline actions](patches/customize-inline-actions.md)
-- [Inline download button](patches/inline-download-button.md)
 
 ### Priority 2 — Premium and navigation
 
@@ -78,6 +78,7 @@ These names are analysis evidence only. Production extension signatures must not
   5. User confirmed the settings screen opens.
 - User runtime-verified the timeline model adapter, automatic-refresh control, ad filtering, who-to-follow filtering, and keyword filtering on the alpha. The original timeline-model `NoClassDefFoundError` is gone.
 - User runtime-verified AI-generated post filtering on the alpha after resolving the full timeline post → contextual post → canonical post → content disclosure field chain.
+- User and agent runtime-verified the alpha inline-download action: normal-size download icon appears on media posts, native actions remain usable, and tapping it saves media successfully.
 
 ## Remaining matrix
 
@@ -85,5 +86,5 @@ These names are analysis evidence only. Production extension signatures must not
 2. Build the MPP and patch 12.17.3-alpha.01 with each patch independently.
 3. Inspect final DEX for reachable mutations and unresolved model references.
 4. Install and exercise each feature on alpha.
-5. Repatch and regression-test 12.15.1 and 12.14.0.
-6. Add alpha to the centralized compatibility list only after the production patch set is proven.
+5. Exercise the production patch set on 12.17.3-alpha.01.
+6. Keep the centralized compatibility list aligned with the current alpha-only target.

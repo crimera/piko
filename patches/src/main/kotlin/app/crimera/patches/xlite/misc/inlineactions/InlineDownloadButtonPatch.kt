@@ -11,7 +11,6 @@ import app.crimera.patches.xlite.settings.toggle
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -20,7 +19,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
-import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -28,6 +26,7 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.util.cloneMutable
 import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -35,66 +34,13 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
-private const val INLINE_ACTION_ENTRY = "Lcom/x/models/InlineActionEntry;"
-private const val POST_ACTION_TYPE = "Lcom/x/models/PostActionType;"
 private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
 private const val EXTENSION = "Lapp/morphe/extension/xlite/misc/InlineDownloadButton;"
-
-private object InlineActionEntryRendererFingerprint : Fingerprint(
-    parameters =
-        listOf(
-            INLINE_ACTION_ENTRY,
-            "L",
-            "J",
-            "F",
-            "L",
-            "J",
-            "L",
-            "Z",
-            MODIFIER,
-            COMPOSER,
-            "I",
-        ),
-    returnType = "V",
-    filters =
-        listOf(
-            methodCall(
-                smali = "$INLINE_ACTION_ENTRY->getActionType()$POST_ACTION_TYPE",
-            ),
-            methodCall(
-                smali = "$INLINE_ACTION_ENTRY->isEnabled()Z",
-            ),
-        ),
-)
-
-/** X 12.14 changed the inline-action presentation mode from a boolean to an object. */
-private object InlineActionEntryRendererWithModeFingerprint : Fingerprint(
-    parameters =
-        listOf(
-            INLINE_ACTION_ENTRY,
-            "L",
-            "J",
-            "F",
-            "L",
-            "J",
-            "L",
-            "L",
-            MODIFIER,
-            COMPOSER,
-            "I",
-        ),
-    returnType = "V",
-    filters =
-        listOf(
-            methodCall(
-                smali = "$INLINE_ACTION_ENTRY->getActionType()$POST_ACTION_TYPE",
-            ),
-            methodCall(
-                smali = "$INLINE_ACTION_ENTRY->isEnabled()Z",
-            ),
-        ),
-)
+private const val POST_CLASS_NAME_HELPER = "getPresenterPostClassName"
+private const val CANONICAL_POST_HELPER = "getCanonicalPost"
+private const val POST_MEDIA_HELPER = "getPostMedia"
+private const val CREATE_ACTION_HELPER = "createDownloadAction"
 
 private fun requireSingle(
     label: String,
@@ -165,6 +111,7 @@ val xLiteInlineDownloadButtonPatch =
         }
 
         execute {
+            patchPostModelBridges()
             xLiteInitHook.fingerprint.method.addInstruction(
                 0,
                 "invoke-static/range {p0 .. p0}, $EXTENSION->initialize(Landroid/content/Context;)V",
@@ -173,8 +120,37 @@ val xLiteInlineDownloadButtonPatch =
             val inlineRenderer =
                 requireSingle(
                     "X-Lite inline-action entry renderer",
-                    InlineActionEntryRendererFingerprint.matchAllOrNull().orEmpty() +
-                        InlineActionEntryRendererWithModeFingerprint.matchAllOrNull().orEmpty(),
+                    Fingerprint(
+                        custom = { _, classDef -> classDef.type.startsWith("Lcom/x/inlineactionbar/") },
+                        parameters =
+                            listOf(
+                                xLiteInlineActionEntryType,
+                                "L",
+                                "J",
+                                "F",
+                                "L",
+                                "J",
+                                "L",
+                                "L",
+                                MODIFIER,
+                                COMPOSER,
+                                "I",
+                            ),
+                        returnType = "V",
+                        filters =
+                            listOf(
+                                fieldAccess(
+                                    opcode = Opcode.IGET_OBJECT,
+                                    definingClass = xLiteInlineActionEntryType,
+                                    type = xLitePostActionType,
+                                ),
+                                fieldAccess(
+                                    opcode = Opcode.IGET_BOOLEAN,
+                                    definingClass = xLiteInlineActionEntryType,
+                                    type = "Z",
+                                ),
+                            ),
+                    ).matchAll(),
                 )
             inlineRenderer.method.apply {
                 requireStatic("X-Lite inline-action entry renderer")
@@ -184,7 +160,7 @@ val xLiteInlineDownloadButtonPatch =
                     """
                         move-object/from16 v$entryRegister, p0
                         move/from16 v$sizeRegister, p4
-                        invoke-static {v$entryRegister, v$sizeRegister}, $EXTENSION->markIconSize(${INLINE_ACTION_ENTRY}F)F
+                        invoke-static {v$entryRegister, v$sizeRegister}, $EXTENSION->markIconSize(Ljava/lang/Object;F)F
                         move-result v$sizeRegister
                         move/from16 p4, v$sizeRegister
                     """.trimIndent(),
@@ -194,36 +170,16 @@ val xLiteInlineDownloadButtonPatch =
             val shareIconField = resolveIconField("ic_vector_share")
             val incomingIconField = resolveIconField("ic_vector_incoming_stroke")
             if (shareIconField.type != incomingIconField.type) {
-                throw PatchException(
-                    "X-Lite inline icon types differ: ${shareIconField.type} and ${incomingIconField.type}",
-                )
+                throw PatchException("X-Lite inline icon types differ")
             }
-
             val iconRenderer =
                 requireSingle(
-                    "X-Lite TwitterShare icon renderer",
+                    "X-Lite TwitterShare icon lambda",
                     Fingerprint(
-                        parameters = listOf("Ljava/lang/Object;", "Ljava/lang/Object;"),
-                        returnType = "Ljava/lang/Object;",
                         filters =
                             listOf(
-                                fieldAccess(
-                                    opcode = Opcode.SGET_OBJECT,
-                                    reference = shareIconField,
-                                ),
-                                methodCall(
-                                    parameters = listOf(COMPOSER, "I"),
-                                    returnType = "Ljava/lang/String;",
-                                ),
-                                opcode(
-                                    Opcode.MOVE_RESULT_OBJECT,
-                                    MatchAfterImmediately(),
-                                ),
-                                fieldAccess(
-                                    opcode = Opcode.IGET,
-                                    definingClass = "this",
-                                    type = "F",
-                                ),
+                                fieldAccess(opcode = Opcode.SGET_OBJECT, reference = shareIconField),
+                                fieldAccess(opcode = Opcode.IGET, definingClass = "this", type = "F"),
                             ),
                     ).matchAll(),
                 )
@@ -232,31 +188,18 @@ val xLiteInlineDownloadButtonPatch =
                 val iconRegister =
                     (iconAccess.instruction as? OneRegisterInstruction)?.registerA
                         ?: throw PatchException("X-Lite share icon access has no register")
-                val descriptionResult = iconRenderer.instructionMatches[2]
-                val descriptionRegister =
-                    (descriptionResult.instruction as? OneRegisterInstruction)?.registerA
-                        ?: throw PatchException("X-Lite share description has no result register")
-                val sizeAccess = iconRenderer.instructionMatches[3]
+                val sizeAccess = iconRenderer.instructionMatches[1]
                 val sizeRegister =
                     (sizeAccess.instruction as? OneRegisterInstruction)?.registerA
                         ?: throw PatchException("X-Lite share icon size has no register")
                 val sizeField =
                     sizeAccess.instruction.getReference<FieldReference>()
                         ?: throw PatchException("X-Lite share icon size field was not found")
-
                 addInstructions(
                     sizeAccess.index + 1,
                     """
                         invoke-static {v$sizeRegister}, $EXTENSION->normalizeIconSize(F)F
                         move-result v$sizeRegister
-                    """.trimIndent(),
-                )
-                addInstructions(
-                    descriptionResult.index + 1,
-                    """
-                        iget p1, p0, $sizeField
-                        invoke-static {v$descriptionRegister, p1}, $EXTENSION->contentDescription(Ljava/lang/String;F)Ljava/lang/String;
-                        move-result-object v$descriptionRegister
                     """.trimIndent(),
                 )
                 addInstructions(
@@ -271,8 +214,7 @@ val xLiteInlineDownloadButtonPatch =
                 )
             }
 
-            val inlinePresenterType =
-                XLiteInlineActionBarClassFingerprint.originalClassDef.type
+            val inlinePresenterType = xLiteInlineActionBarClassType
             val inlineEventHandler =
                 requireSingle(
                     "X-Lite inline-action event handler",
@@ -281,8 +223,10 @@ val xLiteInlineDownloadButtonPatch =
                         returnType = "V",
                         filters =
                             listOf(
-                                methodCall(
-                                    smali = "$INLINE_ACTION_ENTRY->getActionType()$POST_ACTION_TYPE",
+                                fieldAccess(
+                                    opcode = Opcode.IGET_OBJECT,
+                                    definingClass = xLiteInlineActionEntryType,
+                                    type = xLitePostActionType,
                                 ),
                                 methodCall(
                                     definingClass = "Ljava/lang/Enum;",
@@ -320,6 +264,83 @@ val xLiteInlineDownloadButtonPatch =
 
         }
     }
+
+context(context: BytecodePatchContext)
+private fun patchPostModelBridges() {
+    val presenterClass = context.mutableClassDefBy(xLiteInlineActionBarClassType)
+    val constructor = presenterClass.methods.singleOrNull { method -> method.name == "<init>" }
+        ?: throw PatchException("Expected one X-Lite inline presenter constructor")
+    val postType = constructor.parameterTypes.firstOrNull { type -> type.toString().startsWith("Lcom/x/models/") }
+        ?: throw PatchException("X-Lite inline presenter post parameter was not found")
+    val extensionClass = context.mutableClassDefBy(EXTENSION)
+    val classNameHelper = extensionClass.requireHelper(POST_CLASS_NAME_HELPER, emptyList())
+    classNameHelper.addInstructions(
+        0,
+        """
+            const-string v0, "${postType.toString().removePrefix("L").removeSuffix(";").replace('/', '.')}"
+            return-object v0
+        """.trimIndent(),
+    )
+    extensionClass.requireHelper(CANONICAL_POST_HELPER, listOf("Ljava/lang/Object;")).addInstructions(
+        0,
+        """
+            check-cast p0, $xLiteContextualPostType
+            iget-object p0, p0, $xLiteContextualCanonicalPostField
+            return-object p0
+        """.trimIndent(),
+    )
+    extensionClass.requireHelper(POST_MEDIA_HELPER, listOf("Ljava/lang/Object;")).addInstructions(
+        0,
+        """
+            check-cast p0, $xLiteCanonicalPostType
+            iget-object p0, p0, $xLiteCanonicalPostMediaField
+            return-object p0
+        """.trimIndent(),
+    )
+    val entryClass = context.mutableClassDefBy(xLiteInlineActionEntryType)
+    val actionConstructor = entryClass.methods.singleOrNull { method ->
+        method.name == "<init>" && method.parameterTypes.map { it.toString() } ==
+            listOf(xLitePostActionType, "Ljava/lang/Long;", "Z")
+    } ?: throw PatchException("Expected one X-Lite inline-action constructor")
+    val actionTypeClass = context.mutableClassDefBy(xLitePostActionType)
+    val carrierField = actionTypeClass.fields.singleOrNull { field ->
+        AccessFlags.STATIC.isSet(field.accessFlags) && field.type == xLitePostActionType &&
+            field.name == "TwitterShare"
+    } ?: throw PatchException("Expected X-Lite TwitterShare action constant")
+    val createActionPlaceholder = extensionClass.requireHelper(CREATE_ACTION_HELPER, emptyList())
+    val registerCount = createActionPlaceholder.implementation?.registerCount ?: 0
+    val createActionHelper =
+        if (registerCount >= 4) {
+            createActionPlaceholder
+        } else {
+            createActionPlaceholder.cloneMutable(additionalRegisters = 4 - registerCount).also { expanded ->
+                extensionClass.methods.remove(createActionPlaceholder)
+                extensionClass.methods.add(expanded)
+            }
+        }
+    createActionHelper.addInstructions(
+        0,
+        """
+            new-instance v0, $xLiteInlineActionEntryType
+            sget-object v1, $carrierField
+            const/4 v2, 0x0
+            const/4 v3, 0x1
+            invoke-direct {v0, v1, v2, v3}, $actionConstructor
+            return-object v0
+        """.trimIndent(),
+    )
+}
+
+private fun app.morphe.patcher.util.proxy.mutableTypes.MutableClass.requireHelper(
+    name: String,
+    parameters: List<String>,
+): MutableMethod =
+    methods.singleOrNull { method ->
+        method.name == name && method.parameterTypes.map { it.toString() } == parameters &&
+            method.returnType == "Ljava/lang/Object;" ||
+            method.name == name && parameters.isEmpty() && method.parameterTypes.isEmpty() &&
+                method.returnType == "Ljava/lang/String;"
+    } ?: throw PatchException("X-Lite inline helper $name was not found")
 
 context(_: BytecodePatchContext)
 private fun resolveIconField(resourceName: String): FieldReference {

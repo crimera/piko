@@ -25,17 +25,12 @@ import android.os.Looper;
 import android.provider.MediaStore;
 import android.widget.Toast;
 
-import com.x.models.InlineActionEntry;
-import com.x.models.PostActionType;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -53,17 +48,16 @@ import app.morphe.extension.xlite.settings.SettingsRegistry;
 @SuppressWarnings("unused")
 public final class InlineDownloadButton {
     private static final String SETTING_ID = "xlite.content.inline_download_button";
-    private static final String CARRIER_ACTION_NAME = "TwitterShare";
-    private static final String CONTEXTUAL_POST_CLASS = "com.x.models.ContextualPost";
     private static final String DOWNLOAD_DIRECTORY = "Twitter";
     private static final String PENDING_DOWNLOADS_PREFS = "piko_xlite_inline_downloads";
     private static final String CONFLICT_SETTING = "xlite.content.inline_download_conflict";
     private static final ConflictBehavior DEFAULT_CONFLICT_BEHAVIOR = ConflictBehavior.SKIP;
     private static final int MAX_TRACKED_OBJECTS = 128;
     private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newSingleThreadExecutor();
-    private static final List<WeakReference<InlineActionEntry>> DOWNLOAD_ACTIONS = new ArrayList<>();
+    private static final List<WeakReference<Object>> DOWNLOAD_ACTIONS = new ArrayList<>();
     private static boolean initialized;
     private static boolean downloadReceiverRegistered;
+    private static final ThreadLocal<Boolean> RENDERING_DOWNLOAD_ACTION = new ThreadLocal<>();
 
     private InlineDownloadButton() {
     }
@@ -85,30 +79,28 @@ public final class InlineDownloadButton {
         if (containsDownloadAction(actions)) return actions;
 
         try {
-            InlineActionEntry downloadAction = createDownloadAction();
+            Object downloadAction = createDownloadAction();
             registerDownloadAction(downloadAction);
 
             List<Object> result = new ArrayList<>(actions.size() + 1);
             result.addAll(actions);
             result.add(downloadAction);
             return result;
-        } catch (ReflectiveOperationException | RuntimeException exception) {
+        } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to add the X-Lite inline download action", exception);
             return actions;
         }
     }
 
-    public static float markIconSize(InlineActionEntry action, float iconSize) {
-        if (!isDownloadAction(action)) return iconSize;
-        return -Math.abs(iconSize);
+    public static float markIconSize(Object action, float iconSize) {
+        RENDERING_DOWNLOAD_ACTION.set(isDownloadAction(action));
+        return iconSize;
     }
 
     public static Object selectIcon(Object nativeIcon, float markedIconSize, Object downloadIcon) {
-        return isMarkedIconSize(markedIconSize) ? downloadIcon : nativeIcon;
-    }
-
-    public static String contentDescription(String nativeDescription, float markedIconSize) {
-        return isMarkedIconSize(markedIconSize) ? "Download" : nativeDescription;
+        boolean useDownloadIcon = Boolean.TRUE.equals(RENDERING_DOWNLOAD_ACTION.get());
+        RENDERING_DOWNLOAD_ACTION.remove();
+        return useDownloadIcon ? downloadIcon : nativeIcon;
     }
 
     public static float normalizeIconSize(float markedIconSize) {
@@ -116,13 +108,13 @@ public final class InlineDownloadButton {
     }
 
     public static boolean handleEvent(Object presenter, Object event) {
-        InlineActionEntry action = findActionEntry(event);
+        Object action = findActionEntry(event);
         if (!isDownloadAction(action)) return false;
 
         Context context = null;
         try {
             XLiteUtils.PresenterData presenterData =
-                    XLiteUtils.findPresenterData(presenter, CONTEXTUAL_POST_CLASS);
+                    XLiteUtils.findPresenterData(presenter, presenterPostClassName());
             context = presenterData.getContext();
             Object post = presenterData.getValue();
             if (context == null || post == null) {
@@ -164,33 +156,24 @@ public final class InlineDownloadButton {
 
         try {
             return !mediaFor(post).isEmpty();
-        } catch (ReflectiveOperationException | RuntimeException exception) {
+        } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to check X-Lite post media", exception);
             return false;
         }
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    private static InlineActionEntry createDownloadAction() throws ReflectiveOperationException {
-        Class actionClass = PostActionType.class;
-        Object carrierAction = Enum.valueOf(actionClass, CARRIER_ACTION_NAME);
-        Constructor<InlineActionEntry> constructor = InlineActionEntry.class.getDeclaredConstructor(
-                PostActionType.class,
-                Long.class,
-                boolean.class
-        );
-        constructor.setAccessible(true);
-        return constructor.newInstance(carrierAction, null, true);
+    private static Object createDownloadAction() {
+        return null;
     }
 
     private static boolean containsDownloadAction(List<?> actions) {
         for (Object action : actions) {
-            if (action instanceof InlineActionEntry entry && isDownloadAction(entry)) return true;
+            if (isDownloadAction(action)) return true;
         }
         return false;
     }
 
-    private static void registerDownloadAction(InlineActionEntry action) {
+    private static void registerDownloadAction(Object action) {
         synchronized (DOWNLOAD_ACTIONS) {
             removeClearedDownloadActions();
             if (DOWNLOAD_ACTIONS.size() >= MAX_TRACKED_OBJECTS) DOWNLOAD_ACTIONS.clear();
@@ -198,13 +181,13 @@ public final class InlineDownloadButton {
         }
     }
 
-    private static boolean isDownloadAction(InlineActionEntry candidate) {
+    private static boolean isDownloadAction(Object candidate) {
         if (candidate == null) return false;
 
         synchronized (DOWNLOAD_ACTIONS) {
-            Iterator<WeakReference<InlineActionEntry>> iterator = DOWNLOAD_ACTIONS.iterator();
+            Iterator<WeakReference<Object>> iterator = DOWNLOAD_ACTIONS.iterator();
             while (iterator.hasNext()) {
-                InlineActionEntry action = iterator.next().get();
+                Object action = iterator.next().get();
                 if (action == null) {
                     iterator.remove();
                     continue;
@@ -219,18 +202,14 @@ public final class InlineDownloadButton {
         DOWNLOAD_ACTIONS.removeIf(reference -> reference.get() == null);
     }
 
-    private static boolean isMarkedIconSize(float iconSize) {
-        return Float.floatToRawIntBits(iconSize) < 0;
-    }
-
-    private static InlineActionEntry findActionEntry(Object event) {
+    private static Object findActionEntry(Object event) {
         if (event == null) return null;
 
         try {
             for (Field field : event.getClass().getDeclaredFields()) {
-                if (field.getType() != InlineActionEntry.class) continue;
                 field.setAccessible(true);
-                return (InlineActionEntry) field.get(event);
+                Object value = field.get(event);
+                if (isDownloadAction(value)) return value;
             }
         } catch (IllegalAccessException exception) {
             Logger.printException(() -> "Failed to read the X-Lite inline action event", exception);
@@ -238,48 +217,65 @@ public final class InlineDownloadButton {
         return null;
     }
 
+    private static String presenterPostClassName() {
+        return getPresenterPostClassName();
+    }
+
+    private static String getPresenterPostClassName() {
+        return "";
+    }
+
+    private static Object canonicalPost(Object post) {
+        return getCanonicalPost(post);
+    }
+
+    private static Object getCanonicalPost(Object post) {
+        return null;
+    }
+
+    private static Object getPostMedia(Object canonicalPost) {
+        return null;
+    }
+
     private static Object postFor(Object presenter) {
         try {
-            return XLiteUtils.findPresenterData(presenter, CONTEXTUAL_POST_CLASS).getValue();
+            return XLiteUtils.findPresenterData(presenter, presenterPostClassName()).getValue();
         } catch (IllegalAccessException | RuntimeException exception) {
             Logger.printException(() -> "Failed to find the X-Lite inline action post", exception);
             return null;
         }
     }
 
-    private static List<?> mediaFor(Object post) throws ReflectiveOperationException {
-        Object media = XLiteUtils.invoke(post, "getMedia");
+    private static List<?> mediaFor(Object post) {
+        Object canonicalPost = canonicalPost(post);
+        if (canonicalPost == null) return java.util.Collections.emptyList();
+        Object media = getPostMedia(canonicalPost);
         return media instanceof List<?> list ? list : java.util.Collections.emptyList();
     }
 
-    private static String postId(Object post) throws ReflectiveOperationException {
-        String value = identifierValue(XLiteUtils.invoke(post, "getId"));
-        return safeFileSegment(value, "post");
+    private static String postId(Object post) {
+        Object canonicalPost = canonicalPost(post);
+        String text = canonicalPost == null ? null : canonicalPost.toString();
+        return safeFileSegment(toStringValue(text, "CanonicalPost(id=", ", text="), "post");
     }
 
-    private static String username(Object post) throws ReflectiveOperationException {
-        Object author = XLiteUtils.invoke(post, "getAuthor");
-        Object value = author == null ? null : XLiteUtils.invoke(author, "getScreenName");
-        return safeFileSegment(value == null ? null : String.valueOf(value), "twitter");
+    private static String username(Object post) {
+        Object canonicalPost = canonicalPost(post);
+        String text = canonicalPost == null ? null : canonicalPost.toString();
+        String author = toStringValue(text, ", author=", ", legacyCard=");
+        String screenName = toStringValue(author, "screenName=", ",");
+        return safeFileSegment(screenName, "twitter");
     }
 
-    private static String identifierValue(Object identifier) {
-        if (identifier == null) return null;
-
-        try {
-            Object value = XLiteUtils.invoke(identifier, "getValue");
-            String id = value == null ? null : String.valueOf(value).trim();
-            if (id != null && !id.isEmpty()) return id;
-        } catch (ReflectiveOperationException ignored) {
-        }
-
-        try {
-            Object value = XLiteUtils.invoke(identifier, "getStr");
-            String id = value == null ? null : String.valueOf(value).trim();
-            return id == null || id.isEmpty() ? null : id;
-        } catch (ReflectiveOperationException ignored) {
-            return null;
-        }
+    private static String toStringValue(String value, String prefix, String suffix) {
+        if (value == null) return null;
+        int start = value.indexOf(prefix);
+        if (start < 0) return null;
+        start += prefix.length();
+        int end = value.indexOf(suffix, start);
+        if (end < 0) return null;
+        String result = value.substring(start, end).trim();
+        return result.equals("null") || result.isEmpty() ? null : result;
     }
 
     private static List<DownloadItem> downloadItems(List<?> media) {
@@ -290,50 +286,58 @@ public final class InlineDownloadButton {
             try {
                 DownloadItem download = downloadItem(item);
                 if (download != null) downloads.add(download);
-            } catch (ReflectiveOperationException | RuntimeException exception) {
+            } catch (RuntimeException exception) {
                 Logger.printException(() -> "Failed to read X-Lite media", exception);
             }
         }
         return downloads;
     }
 
-    private static DownloadItem downloadItem(Object media) throws ReflectiveOperationException {
-        Object imageUrl = XLiteUtils.invokeIfPresent(media, "getImageUrl");
-        if (imageUrl instanceof String url && XLiteUtils.isHttpUrl(url)) {
-            String originalUrl = originalImageUrl(url);
-            return new DownloadItem(originalUrl, "jpg", "image/jpeg", "Image");
+    private static DownloadItem downloadItem(Object media) {
+        String value = media.toString();
+        if (value.startsWith("MediaContentImage(")) {
+            String url = toStringValue(value, ", imageUrl=", ", originalImgHeight=");
+            if (!XLiteUtils.isHttpUrl(url)) return null;
+            return new DownloadItem(originalImageUrl(url), "jpg", "image/jpeg", "Image");
         }
 
-        Object variantsValue = XLiteUtils.invokeIfPresent(media, "getVariants");
-        if (!(variantsValue instanceof List<?> variants)) return null;
-
-        Variant bestVariant = bestMp4Variant(variants);
+        Variant bestVariant = bestMp4Variant(value);
         if (bestVariant == null) return null;
 
-        String simpleName = media.getClass().getSimpleName();
-        String label = simpleName.endsWith("Gif") ? "GIF" : "Video";
+        String label = value.startsWith("MediaContentGif(") ? "GIF" : "Video";
         return new DownloadItem(bestVariant.url, "mp4", "video/mp4", label);
     }
 
-    private static Variant bestMp4Variant(List<?> variants) throws ReflectiveOperationException {
+    private static Variant bestMp4Variant(String value) {
         Variant best = null;
-        for (Object candidate : variants) {
-            if (candidate == null) continue;
+        String prefix = "MediaVariant(url=";
+        int offset = 0;
+        while (true) {
+            int start = value.indexOf(prefix, offset);
+            if (start < 0) return best;
+            start += prefix.length();
+            int bitRateStart = value.indexOf(", bitRate=", start);
+            int contentTypeStart = value.indexOf(", contentType=", bitRateStart);
+            int end = value.indexOf(')', contentTypeStart);
+            if (bitRateStart < 0 || contentTypeStart < 0 || end < 0) return best;
 
-            Object urlValue = XLiteUtils.invoke(candidate, "getUrl");
-            Object contentTypeValue = XLiteUtils.invoke(candidate, "getContentType");
-            if (!(urlValue instanceof String url) || !XLiteUtils.isHttpUrl(url)) continue;
-
-            String contentType = contentTypeValue == null ? "" : String.valueOf(contentTypeValue);
-            if (!contentType.equalsIgnoreCase("video/mp4") && !url.toLowerCase().contains(".mp4")) {
-                continue;
+            String url = value.substring(start, bitRateStart);
+            String contentType = value.substring(contentTypeStart + 14, end);
+            if (XLiteUtils.isHttpUrl(url) &&
+                    (contentType.equalsIgnoreCase("video/mp4") || url.toLowerCase().contains(".mp4"))) {
+                int bitRate = parseBitRate(value.substring(bitRateStart + 10, contentTypeStart));
+                if (best == null || bitRate > best.bitRate) best = new Variant(url, bitRate);
             }
-
-            Object bitRateValue = XLiteUtils.invoke(candidate, "getBitRate");
-            int bitRate = bitRateValue instanceof Number number ? number.intValue() : 0;
-            if (best == null || bitRate > best.bitRate) best = new Variant(url, bitRate);
+            offset = end + 1;
         }
-        return best;
+    }
+
+    private static int parseBitRate(String value) {
+        try {
+            return value.equals("null") ? 0 : Integer.parseInt(value);
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
     }
 
     private static String originalImageUrl(String url) {
