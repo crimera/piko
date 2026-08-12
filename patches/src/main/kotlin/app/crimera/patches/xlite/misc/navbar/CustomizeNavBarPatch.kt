@@ -22,6 +22,7 @@ import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.formats.Instruction3rc
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 /** Filters X-Lite navigation state before the landing component consumes it. */
@@ -31,19 +32,18 @@ private object XLiteTabDataFingerprint : Fingerprint(
     filters =
         listOf(
             methodCall(
-                smali = "Lcom/x/navigation/MainLandingArgs\$TabType;->getEntries()Lkotlin/enums/EnumEntries;",
+                opcode = Opcode.INVOKE_STATIC,
+                name = "getEntries",
+                parameters = emptyList(),
+                returnType = "Lkotlin/enums/EnumEntries;",
             ),
             fieldAccess(
                 opcode = Opcode.SGET_OBJECT,
-                definingClass = "Lcom/x/navigation/MainLandingArgs\$TabType;",
                 name = "COMMUNITIES",
-                type = "Lcom/x/navigation/MainLandingArgs\$TabType;",
             ),
             fieldAccess(
                 opcode = Opcode.SGET_OBJECT,
-                definingClass = "Lcom/x/navigation/MainLandingArgs\$TabType;",
                 name = "SPACES",
-                type = "Lcom/x/navigation/MainLandingArgs\$TabType;",
             ),
             methodCall(
                 opcode = Opcode.INVOKE_INTERFACE,
@@ -59,7 +59,6 @@ private const val FINGERPRINT_ANCHOR_COUNT = 4
 private const val TAB_DATA_ARG_INDEX = 9
 private const val STATE_TAB_DATA_PARAMETER_INDEX = 8
 private val STATE_CONSTRUCTOR_PARAMETER_COUNTS = setOf(16, 18)
-private const val PROFILE_USER_DESCRIPTOR = "Lcom/x/models/ProfileUser;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val MAP_DESCRIPTOR = "Ljava/util/Map;"
 
@@ -77,7 +76,7 @@ private fun MutableMethod.findStateInitIndex(anchorIndex: Int): Int {
                     reference.returnType != "V" ||
                     parameters.size !in STATE_CONSTRUCTOR_PARAMETER_COUNTS ||
                     range.registerCount != parameters.size + 1 ||
-                    parameters.getOrNull(0) != PROFILE_USER_DESCRIPTOR ||
+                    parameters.getOrNull(0)?.startsWith("L") != true ||
                     parameters.getOrNull(6) != LIST_DESCRIPTOR ||
                     parameters.getOrNull(7) != MAP_DESCRIPTOR ||
                     parameters.getOrNull(STATE_TAB_DATA_PARAMETER_INDEX) != MAP_DESCRIPTOR
@@ -101,6 +100,29 @@ private fun validateFingerprintMatch(match: Match) {
             "X-Lite tabData fingerprint returned ${match.instructionMatches.size} anchors; " +
                 "expected $FINGERPRINT_ANCHOR_COUNT",
         )
+    }
+
+    val entriesReference =
+        match.instructionMatches[0].instruction.getReference<MethodReference>()
+            ?: throw PatchException("X-Lite tabData getEntries anchor has no method reference")
+    val communityReference =
+        match.instructionMatches[1].instruction.getReference<FieldReference>()
+            ?: throw PatchException("X-Lite tabData COMMUNITIES anchor has no field reference")
+    val spacesReference =
+        match.instructionMatches[2].instruction.getReference<FieldReference>()
+            ?: throw PatchException("X-Lite tabData SPACES anchor has no field reference")
+    val tabTypeDescriptor = entriesReference.definingClass.toString()
+    if (entriesReference.name != "getEntries" ||
+        entriesReference.parameterTypes.isNotEmpty() ||
+        entriesReference.returnType.toString() != "Lkotlin/enums/EnumEntries;" ||
+        communityReference.definingClass.toString() != tabTypeDescriptor ||
+        communityReference.type.toString() != tabTypeDescriptor ||
+        spacesReference.definingClass.toString() != tabTypeDescriptor ||
+        spacesReference.type.toString() != tabTypeDescriptor ||
+        communityReference.name != "COMMUNITIES" ||
+        spacesReference.name != "SPACES"
+    ) {
+        throw PatchException("X-Lite tabData navigation enum anchors are inconsistent")
     }
 }
 
