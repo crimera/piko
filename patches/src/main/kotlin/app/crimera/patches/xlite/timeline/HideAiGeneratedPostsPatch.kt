@@ -26,8 +26,7 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 val xLiteHideAiGeneratedPostsPatch =
     bytecodePatch(
         name = "X-Lite: Hide AI-generated posts",
-        description = "Hides posts disclosed as AI-generated from X-Lite timelines. You can choose " +
-            "whether to filter user-marked posts, automatically-detected posts, or both.",
+        description = "Hides selected AI-generated posts from X-Lite timelines.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
         dependsOn(xLiteTimelineModelAdapterPatch)
@@ -45,6 +44,7 @@ val xLiteHideAiGeneratedPostsPatch =
                                 listOf(
                                     choice("UserMarked", "piko_xlite_hide_ai_generated_posts_user_marked"),
                                     choice("AutoDetected", "piko_xlite_hide_ai_generated_posts_auto_detected"),
+                                    choice("SourceNotIdentified", "piko_xlite_hide_ai_generated_posts_source_not_identified"),
                                 ),
                         )
                     }

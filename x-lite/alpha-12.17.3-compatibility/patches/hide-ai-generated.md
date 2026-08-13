@@ -24,6 +24,7 @@ The alpha timeline post does not expose a direct public method returning the dis
 - Make only the resolved fields public so the extension bridge can use direct `iget` instructions.
 - Inject direct casts/field reads into `Object`-typed helpers. No alpha descriptor is embedded in extension Java.
 - Keep the source behind `Object`; runtime compares `Enum.name()` with `UserMarked` and `AutoDetected`.
+- Expose a third `SourceNotIdentified` setting value for disclosures whose AI source is null; the extension maps that sentinel to `source == null` without naming the alpha enum.
 
 ## Verifier correction
 
@@ -36,5 +37,6 @@ The final bridge uses the already-proven timeline/contextual model chain directl
 - Patch bundle builds.
 - Exclusive alpha patch run reports `Applied: X-Lite: Hide AI-generated posts` and saves the APK.
 - Initial runtime test exposed the aliased-register `VerifyError`; corrected bridge removes it.
-- User runtime-verified filtering on 12.17.3-alpha.01: working.
+- Diagnostic runtime logs on 12.17.3-alpha.01 confirmed the bridge reaches `com.x.models.a1`, reads `hasAi=true`, and sees both `UserMarked` and null source values.
+- The `AI source not identified` option is implemented for null-source disclosures; final runtime verification on 12.17.3-alpha.01 is pending.
 - Regression patching/runtime tests on 12.15.1 and 12.14.0 remain pending.

@@ -32,9 +32,10 @@
     <string name="piko_xlite_hide_who_to_follow_title">Hide who to follow</string>
     <string name="piko_xlite_hide_who_to_follow_summary">Removes recommended-user sections from timelines and profile pages</string>
     <string name="piko_xlite_hide_ai_generated_posts_title">Hide AI-generated posts</string>
-    <string name="piko_xlite_hide_ai_generated_posts_summary">Hides posts disclosed as AI-generated. Choose whether to filter user-marked posts, automatically-detected posts, or both</string>
-    <string name="piko_xlite_hide_ai_generated_posts_user_marked">User-marked posts</string>
-    <string name="piko_xlite_hide_ai_generated_posts_auto_detected">Automatically-detected posts</string>
+    <string name="piko_xlite_hide_ai_generated_posts_summary">Hides selected AI-generated posts from X-Lite timelines</string>
+    <string name="piko_xlite_hide_ai_generated_posts_user_marked">User-marked</string>
+    <string name="piko_xlite_hide_ai_generated_posts_auto_detected">Automatically detected</string>
+    <string name="piko_xlite_hide_ai_generated_posts_source_not_identified">AI source not identified</string>
     <string name="piko_xlite_show_sensitive_media_title">Show sensitive media</string>
     <string name="piko_xlite_show_sensitive_media_summary">Shows sensitive media without requiring confirmation</string>
     <string name="piko_xlite_default_reply_sorting_title">Default reply sorting</string>

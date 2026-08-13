@@ -19,6 +19,7 @@ public final class XLiteTimelineFilter {
 
     private static final String AI_SOURCE_USER_MARKED = "UserMarked";
     private static final String AI_SOURCE_AUTO_DETECTED = "AutoDetected";
+    private static final String AI_SOURCE_NOT_IDENTIFIED = "SourceNotIdentified";
 
     private XLiteTimelineFilter() {
     }
@@ -68,7 +69,9 @@ public final class XLiteTimelineFilter {
     }
 
     private static boolean isSupportedAiSource(String source) {
-        return AI_SOURCE_USER_MARKED.equals(source) || AI_SOURCE_AUTO_DETECTED.equals(source);
+        return AI_SOURCE_USER_MARKED.equals(source)
+                || AI_SOURCE_AUTO_DETECTED.equals(source)
+                || AI_SOURCE_NOT_IDENTIFIED.equals(source);
     }
 
     private static Object filterTimelineItems(
@@ -202,7 +205,9 @@ public final class XLiteTimelineFilter {
         if (aiSourcesToHide == null || aiSourcesToHide.isEmpty()) return false;
         Object disclosure = getContentDisclosure(post);
         if (disclosure == null || !hasAiGeneratedDisclosure(disclosure)) return false;
+
         Object source = getAiDetectionSource(disclosure);
+        if (source == null) return aiSourcesToHide.contains(AI_SOURCE_NOT_IDENTIFIED);
         if (!(source instanceof Enum<?> enumSource)) return false;
         return aiSourcesToHide.contains(enumSource.name());
     }
