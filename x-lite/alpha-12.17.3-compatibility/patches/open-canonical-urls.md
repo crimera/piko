@@ -2,24 +2,42 @@
 
 ## Status
 
-**Unported / not yet verified on 12.17.3-alpha.01.**
+**Patch-applied and final-Dex verified on 12.17.3-alpha.01. Runtime verification is pending because no ADB device is connected.**
 
 Source: `patches/src/main/kotlin/app/crimera/patches/xlite/misc/canonicalurls/CanonicalUrlsPatch.kt`
 
-## Breakage
+## Target evidence
 
-Unknown until this patch is run independently against the exact alpha APK. Do not assume a successful build means its fingerprints or runtime boundary remain valid.
+- Package/version: `com.twitter.android` `12.17.3-alpha.01`
+- Input APK SHA-256: `b7dd95a6b7ea222ecf946766dc8e971f3e892a2de6b6fdd8bf4bd660c491867e`
+- MPP: `patches/build/libs/patches-3.9.0-dev.4.mpp`
+- MPP SHA-256: `a9664ce88d8e428c7266dd6ba1767c57b2e3fddefb21d296c34699d881976ee0`
+- Reviewed output: `/tmp/twitter-12.17.3-alpha.01-canonical-reviewed.apk`
+- Output SHA-256: `7a20a864e84965cbbc2facac036dcca275a017995ec133c134a900293a3da405`
 
-## Port checklist
+## Resolution and mutation
 
-1. Run this patch alone against 12.17.3-alpha.01 and record the exact match/failure.
-2. Compare the matched alpha bytecode with 12.15.1 and 12.14.0.
-3. Remove hardcoded obfuscated descriptors, method names, generated literals, or removed host resources.
-4. Assert expected fingerprint cardinality.
-5. Build the MPP and inspect the final DEX for a reachable mutation.
-6. Install and test the feature on alpha.
-7. Repatch and regression-test 12.15.1 and 12.14.0.
+The alpha no longer exposes the old model descriptors/getters used by the previous patch. The port resolves:
 
-## Findings and fix
+- URL entity from `UrlEntity(displayUrl=..., expandedUrl=..., url=...)` data-class text;
+- mention entity from `MentionEntity(userId=..., startIdx=...)` text;
+- contextual post from `ContextualPost(canonicalPost=..., quotedPost=...)` text;
+- URL entity string fields from the target model's verified `toString()` field references.
 
-Not started. Add exact root cause, stable anchors, mutation, and verification evidence here during the port.
+The patch then builds release-specific fingerprints using the resolved fields and stable `android.net.Uri` calls. Cardinality is asserted for the text-entity navigation method, URL picker, and post-link click handler.
+
+Final-Dex comparison against the unpatched alpha confirmed:
+
+- `Lcom/x/navigation/ma;->f(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;` returns its expanded second argument when non-null, otherwise retains the original fallback path.
+- The text-entity navigation fallback URL read in `Lcom/x/navigation/ma;` changed from the short URL field to the expanded URL field.
+- The post-link click URL read in `Lcom/x/urt/items/post/x4;` changed from the short URL field to the expanded URL field.
+
+The field resolution follows the URL entity constructor's semantic `displayUrl`, `expandedUrl`, and `url` parameter labels to their owner-defined `iput-object` writes. This avoids hardcoded obfuscated field names and does not depend on the alpha compiler's helper-based `toString()` implementation.
+
+## Validation
+
+- `:patches:build`: passed.
+- Exclusive patch application: passed.
+- Final APK decoded successfully with apktool.
+- Original-vs-final smali comparison confirmed the three expected behavioral mutations and no model mutation.
+- Runtime install/UI verification: pending; no ADB device is connected.

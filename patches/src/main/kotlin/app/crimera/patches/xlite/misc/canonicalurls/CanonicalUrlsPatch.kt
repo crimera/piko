@@ -2,11 +2,11 @@ package app.crimera.patches.xlite.misc.canonicalurls
 
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
+import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.instanceOf
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
@@ -14,179 +14,62 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
+import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
-private const val URL_ENTITY = "Lcom/x/models/text/UrlEntity;"
-private const val CONTEXTUAL_POST = "Lcom/x/models/ContextualPost;"
-private const val POST_IDENTIFIER = "Lcom/x/models/PostIdentifier;"
+private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val URI = "Landroid/net/Uri;"
+private const val POST_URL_FIELD_FILTER_INDEX = 3
+private const val TEXT_ENTITY_URL_FIELD_FILTER_INDEX = 5
 
-private const val POST_URL_READ_FILTER_INDEX = 4
-private const val TEXT_ENTITY_URL_READ_FILTER_INDEX = 5
+private object UrlEntityModelFingerprint : Fingerprint(
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    strings = listOf("UrlEntity(displayUrl=", ", expandedUrl=", ", url="),
+)
 
-/**
- * The Compose timeline post event handler.
- *
- * The target is identified by the stable URL-entity → URI → post-ID chain used by the
- * actual external-link open. Event, coroutine, presenter, and navigation descriptors are
- * obfuscated and deliberately represented by `L` wildcards or omitted.
- */
-private object TimelinePostLinkClickFingerprint : Fingerprint(
-    returnType = "V",
-    parameters =
-        listOf(
-            "L",
-            CONTEXTUAL_POST,
-            "L",
-            "L",
-            "L",
-            "L",
-            "L",
-        ),
-    filters =
-        listOf(
-            // Promoted URL-click scribing reads the short URL before the open path.
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = URL_ENTITY,
-                name = "getUrl",
-                parameters = emptyList(),
-                returnType = "Ljava/lang/String;",
-            ),
-            // External-link handling starts from the expanded URL.
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = URL_ENTITY,
-                name = "getExpandedUrl",
-                parameters = emptyList(),
-                returnType = "Ljava/lang/String;",
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_STATIC,
-                definingClass = URI,
-                name = "parse",
-                parameters = listOf("Ljava/lang/String;"),
-                returnType = URI,
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = URI,
-                name = "getAuthority",
-                parameters = emptyList(),
-                returnType = "Ljava/lang/String;",
-            ),
-            // This is the URL consumed by the external-link open, not the earlier scribe read.
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = URL_ENTITY,
-                name = "getUrl",
-                parameters = emptyList(),
-                returnType = "Ljava/lang/String;",
-            ),
-            opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = CONTEXTUAL_POST,
-                name = "getId",
-                parameters = emptyList(),
-                returnType = POST_IDENTIFIER,
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = POST_IDENTIFIER,
-                name = "getValue",
-                parameters = emptyList(),
-                returnType = "J",
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = URL_ENTITY,
-                name = "getExpandedUrl",
-                parameters = emptyList(),
-                returnType = "Ljava/lang/String;",
-            ),
-        ),
+private object MentionEntityModelFingerprint : Fingerprint(
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    strings = listOf("MentionEntity(userId=", ", startIdx="),
+)
+
+private object ContextualPostModelFingerprint : Fingerprint(
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    strings = listOf("ContextualPost(canonicalPost=", ", quotedPost="),
+)
+
+private data class UrlEntityFields(
+    val type: String,
+    val expandedUrl: FieldReference,
+    val url: FieldReference,
+)
+
+private data class CanonicalUrlMatches(
+    val postLinkClick: Match,
+    val textEntityNavigation: Match,
+    val urlPicker: Match,
+    val expandedUrlField: FieldReference,
 )
 
 /**
- * The Compose navigation helper that opens a clicked text entity.
+ * Opens expanded URL values in the Compose/URT navigation paths instead of shortened URLs.
  *
- * The stable rich-text type sequence identifies the method without depending on the
- * obfuscated navigation interface, entity base class, or method name.
- */
-private object TextEntityNavigationFingerprint : Fingerprint(
-    parameters = listOf("L", "L"),
-    returnType = "V",
-    filters =
-        listOf(
-            instanceOf("Lcom/x/models/text/MentionEntity;"),
-            instanceOf(URL_ENTITY),
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = URL_ENTITY,
-                name = "getExpandedUrl",
-                parameters = emptyList(),
-                returnType = "Ljava/lang/String;",
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_STATIC,
-                definingClass = URI,
-                name = "parse",
-                parameters = listOf("Ljava/lang/String;"),
-                returnType = URI,
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = URI,
-                name = "getAuthority",
-                parameters = emptyList(),
-                returnType = "Ljava/lang/String;",
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = URL_ENTITY,
-                name = "getUrl",
-                parameters = emptyList(),
-                returnType = "Ljava/lang/String;",
-            ),
-            opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
-        ),
-)
-
-/**
- * The URL picker in the same navigation helper class as TextEntityNavigationFingerprint.
- * The class fingerprint removes the release-specific obfuscated owner descriptor.
- */
-private object TimelineUrlPickerFingerprint : Fingerprint(
-    classFingerprint = TextEntityNavigationFingerprint,
-    parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;"),
-    returnType = "Ljava/lang/String;",
-    filters =
-        listOf(
-            methodCall(
-                opcode = Opcode.INVOKE_STATIC,
-                definingClass = URI,
-                name = "parse",
-                parameters = listOf("Ljava/lang/String;"),
-                returnType = URI,
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = URI,
-                name = "getAuthority",
-                parameters = emptyList(),
-                returnType = "Ljava/lang/String;",
-            ),
-        ),
-)
-
-/**
- * Opens the canonical (expanded) URL directly when a link is clicked anywhere in the
- * Compose UI, instead of letting Twitter resolve the shortened `t.co` link first.
- *
- * Only the Compose / URT navigation path is touched; the legacy view-based UI
- * (tweetview, `com.twitter.navigation.timeline.TimelineUrlLauncher`) is left intact.
+ * The alpha obfuscates model descriptors and removes the model getters. Model classes and
+ * fields are therefore resolved from their stable data-class labels, then used only to build
+ * release-specific fingerprints at patch time.
  */
 @Suppress("unused")
 val xLiteCanonicalUrlsPatch =
@@ -198,39 +81,216 @@ val xLiteCanonicalUrlsPatch =
         compatibleWith(COMPATIBILITY_X_LITE)
 
         execute {
-            openExpandedUrlInPostPresenter()
-
-            // Resolve the navigation class once. The URL-picker fingerprint reuses this
-            // cached class match before the text-entity method is mutated.
-            val textEntityNavigationMatch = TextEntityNavigationFingerprint.requireSingleMatch()
-            val urlPickerMatch = TimelineUrlPickerFingerprint.requireSingleMatch()
-            preferExpandedUrlInUrlPicker(urlPickerMatch)
-            replaceUrlEntityRead(textEntityNavigationMatch, TEXT_ENTITY_URL_READ_FILTER_INDEX)
+            val matches = resolveCanonicalUrlMatches()
+            replaceUrlEntityFieldRead(
+                matches.postLinkClick,
+                POST_URL_FIELD_FILTER_INDEX,
+                matches.expandedUrlField,
+            )
+            replaceUrlEntityFieldRead(
+                matches.textEntityNavigation,
+                TEXT_ENTITY_URL_FIELD_FILTER_INDEX,
+                matches.expandedUrlField,
+            )
+            preferExpandedUrlInUrlPicker(matches.urlPicker)
         }
     }
 
-private fun BytecodePatchContext.openExpandedUrlInPostPresenter() {
-    val match = TimelinePostLinkClickFingerprint.requireSingleMatch()
-    replaceUrlEntityRead(match, POST_URL_READ_FILTER_INDEX)
-}
+context(_: BytecodePatchContext)
+private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
+    val urlEntityMatch = UrlEntityModelFingerprint.requireSingleMatch("URL entity model")
+    val urlEntityFields = resolveUrlEntityFields(urlEntityMatch)
+    val mentionType = MentionEntityModelFingerprint.requireSingleMatch("mention entity model")
+        .originalClassDef.type
+    val contextualPostType =
+        ContextualPostModelFingerprint.requireSingleMatch("contextual post model")
+            .originalClassDef.type
 
-private fun replaceUrlEntityRead(match: Match, filterIndex: Int) {
-    val method = match.method
-    val urlReadIndex = match.instructionMatches[filterIndex].index
-    val urlRead = method.instructions[urlReadIndex] as? FiveRegisterInstruction
-        ?: throw PatchException("Expected an encoded UrlEntity getter at instruction $urlReadIndex")
+    val textEntityNavigationFingerprint =
+        Fingerprint(
+            parameters = listOf("L", "L"),
+            returnType = "V",
+            filters =
+                listOf(
+                    instanceOf(mentionType),
+                    instanceOf(urlEntityFields.type),
+                    fieldAccess(
+                        opcode = Opcode.IGET_OBJECT,
+                        reference = urlEntityFields.expandedUrl,
+                    ),
+                    uriParseCall(),
+                    uriAuthorityCall(),
+                    fieldAccess(
+                        opcode = Opcode.IGET_OBJECT,
+                        reference = urlEntityFields.url,
+                    ),
+                ),
+        )
+    val textEntityNavigationMatch =
+        textEntityNavigationFingerprint.requireSingleMatch("text-entity navigation")
 
-    method.replaceInstruction(
-        urlReadIndex,
-        "invoke-virtual {v${urlRead.registerC}}, $URL_ENTITY->getExpandedUrl()Ljava/lang/String;",
+    val urlPickerMatch =
+        Fingerprint(
+            classFingerprint = textEntityNavigationFingerprint,
+            parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
+            returnType = STRING_DESCRIPTOR,
+            filters = listOf(uriParseCall(), uriAuthorityCall()),
+        ).requireSingleMatch("URL picker")
+
+    val postLinkClickMatch =
+        Fingerprint(
+            returnType = "V",
+            parameters = listOf("L", contextualPostType, "L", "L", "L", "L", "L"),
+            filters =
+                listOf(
+                    fieldAccess(
+                        opcode = Opcode.IGET_OBJECT,
+                        reference = urlEntityFields.expandedUrl,
+                    ),
+                    uriParseCall(),
+                    uriAuthorityCall(),
+                    fieldAccess(
+                        opcode = Opcode.IGET_OBJECT,
+                        reference = urlEntityFields.url,
+                    ),
+                    methodCall(
+                        opcode = Opcode.INVOKE_INTERFACE,
+                        name = "getId",
+                        parameters = emptyList(),
+                        returnType = "L",
+                    ),
+                    fieldAccess(opcode = Opcode.IGET_WIDE, type = "J"),
+                ),
+        ).requireSingleMatch("post link click handler")
+
+    return CanonicalUrlMatches(
+        postLinkClick = postLinkClickMatch,
+        textEntityNavigation = textEntityNavigationMatch,
+        urlPicker = urlPickerMatch,
+        expandedUrlField = urlEntityFields.expandedUrl,
     )
 }
 
-private fun BytecodePatchContext.preferExpandedUrlInUrlPicker(match: Match) {
+private fun resolveUrlEntityFields(match: Match): UrlEntityFields {
+    val owner = match.originalClassDef.type
+    val constructor =
+        match.originalClassDef.methods.singleOrNull { method ->
+            method.name == "<init>" &&
+                listOf("displayUrl", "expandedUrl", "url").all { label ->
+                    method.hasNamedParameter(label)
+                }
+        } ?: throw PatchException("Could not resolve the semantic URL entity constructor")
+
+    val fields = listOf("displayUrl", "expandedUrl", "url").map { label ->
+        constructor.fieldWrittenFromNamedParameter(label, owner)
+    }
+    if (fields.distinctBy(FieldReference::toString).size != fields.size) {
+        throw PatchException("URL entity constructor reuses a String field: ${fields.joinToString()}")
+    }
+
+    return UrlEntityFields(
+        type = owner,
+        expandedUrl = fields[1],
+        url = fields[2],
+    )
+}
+
+private fun Method.hasNamedParameter(label: String): Boolean =
+    findNamedParameterRegister(label) != null
+
+private fun Method.fieldWrittenFromNamedParameter(
+    label: String,
+    owner: String,
+): FieldReference {
+    val parameterRegister =
+        findNamedParameterRegister(label)
+            ?: throw PatchException("URL entity constructor has no $label parameter")
+    val fields =
+        implementation?.instructions?.toList().orEmpty().mapNotNull { instruction ->
+            if (instruction.opcode != Opcode.IPUT_OBJECT) return@mapNotNull null
+            val registers = instruction as? TwoRegisterInstruction ?: return@mapNotNull null
+            if (registers.registerA != parameterRegister) return@mapNotNull null
+            instruction.getReference<FieldReference>()?.takeIf { field ->
+                field.definingClass == owner && field.type == STRING_DESCRIPTOR
+            }
+        }.distinctBy(FieldReference::toString)
+    return fields.singleOrNull()
+        ?: throw PatchException("Expected one $label URL entity field write, found ${fields.joinToString()}")
+}
+
+private fun Method.findNamedParameterRegister(label: String): Int? {
+    val instructions = implementation?.instructions?.toList().orEmpty()
+    instructions.forEachIndexed { index, instruction ->
+        val stringInstruction = instruction as? OneRegisterInstruction ?: return@forEachIndexed
+        val reference = instruction.getReference<StringReference>() ?: return@forEachIndexed
+        if (reference.string != label) return@forEachIndexed
+        val invoke = instructions.getOrNull(index + 1) ?: return@forEachIndexed
+        val methodReference = invoke.getReference<MethodReference>() ?: return@forEachIndexed
+        if (
+            methodReference.parameterTypes.map(CharSequence::toString) !=
+                listOf("Ljava/lang/Object;", STRING_DESCRIPTOR) ||
+            methodReference.returnType != "V"
+        ) return@forEachIndexed
+        val arguments = invoke.argumentRegistersOrNull() ?: return@forEachIndexed
+        if (arguments.getOrNull(1) != stringInstruction.registerA) return@forEachIndexed
+        return arguments.firstOrNull()
+    }
+    return null
+}
+
+private fun com.android.tools.smali.dexlib2.iface.instruction.Instruction.argumentRegistersOrNull(): List<Int>? =
+    when (this) {
+        is FiveRegisterInstruction -> listOf(registerC, registerD)
+        is RegisterRangeInstruction -> listOf(startRegister, startRegister + 1)
+        else -> null
+    }
+
+private fun uriParseCall() =
+    methodCall(
+        opcode = Opcode.INVOKE_STATIC,
+        definingClass = URI,
+        name = "parse",
+        parameters = listOf(STRING_DESCRIPTOR),
+        returnType = URI,
+    )
+
+private fun uriAuthorityCall() =
+    methodCall(
+        opcode = Opcode.INVOKE_VIRTUAL,
+        definingClass = URI,
+        name = "getAuthority",
+        parameters = emptyList(),
+        returnType = STRING_DESCRIPTOR,
+    )
+
+private fun replaceUrlEntityFieldRead(
+    match: Match,
+    filterIndex: Int,
+    replacement: FieldReference,
+) {
+    val method = match.method
+    val fieldReadIndex = match.instructionMatches[filterIndex].index
+    val fieldRead =
+        method.instructions[fieldReadIndex] as? TwoRegisterInstruction
+            ?: throw PatchException(
+                "Expected an encoded URL-entity field read at instruction $fieldReadIndex",
+            )
+    if (fieldRead.opcode != Opcode.IGET_OBJECT) {
+        throw PatchException(
+            "Expected an iget-object URL-entity field read at instruction $fieldReadIndex",
+        )
+    }
+
+    method.replaceInstruction(
+        fieldReadIndex,
+        "iget-object v${fieldRead.registerA}, v${fieldRead.registerB}, $replacement",
+    )
+}
+
+private fun preferExpandedUrlInUrlPicker(match: Match) {
     val method = match.method
 
-    // `e(url, expanded)`: return the expanded URL as soon as it is present,
-    // falling back to the original (short) URL otherwise.
+    // `f(url, expanded)`: use the expanded URL whenever it is available.
     val firstInstruction = method.instructions.first()
     method.addInstructionsWithLabels(
         0,
@@ -243,11 +303,11 @@ private fun BytecodePatchContext.preferExpandedUrlInUrlPicker(match: Match) {
 }
 
 context(_: BytecodePatchContext)
-private fun Fingerprint.requireSingleMatch(): Match {
+private fun Fingerprint.requireSingleMatch(label: String): Match {
     val matches = matchAll()
     return matches.singleOrNull()
         ?: throw PatchException(
-            "Expected exactly one match, found ${matches.size}: " +
+            "Expected exactly one $label match, found ${matches.size}: " +
                 matches.joinToString { it.originalMethod.toString() },
         )
 }
