@@ -55,7 +55,6 @@ private object NotificationTokenRegistrationFingerprint : Fingerprint(
 @Suppress("unused")
 val fixNotificationRegistrationCrashPatch =
     bytecodePatch(
-        name = "Fix notification crash",
         description =
             "Prevents Instagram from crashing on launch while setting up push notifications on Android 12 and later.",
     ) {
