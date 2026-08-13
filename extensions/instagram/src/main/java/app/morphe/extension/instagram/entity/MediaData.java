@@ -98,12 +98,19 @@ public class MediaData extends Entity {
     private List<MediaData> getCarouselMediaData() throws Exception {
         List<MediaData> carouselMediaData = new ArrayList<>();
         List<Object> mediaList = this.getMediaList();
-        if (mediaList.isEmpty()){
+        // Some 442 media objects do not expose the carousel list for a normal
+        // single-media post. Treat a null/empty result as the media object itself.
+        if (mediaList == null || mediaList.isEmpty()){
             carouselMediaData.add(new MediaData(this.obj, this.userSession));
         } else {
             mediaList.forEach(item->{
-                carouselMediaData.add(new MediaData(item, this.userSession));
+                if (item != null) {
+                    carouselMediaData.add(new MediaData(item, this.userSession));
+                }
             });
+            if (carouselMediaData.isEmpty()) {
+                carouselMediaData.add(new MediaData(this.obj, this.userSession));
+            }
         }
         return carouselMediaData;
     }
@@ -194,11 +201,15 @@ public class MediaData extends Entity {
     }
 
     public int getCarouselSize() throws Exception {
-        return this.getMediaList().size();
+        List<Object> mediaList = this.getMediaList();
+        return mediaList == null || mediaList.isEmpty() ? 1 : mediaList.size();
     }
 
     public MediaData getMediaAt(int position) throws Exception {
         List<MediaData> mediaList = this.getCarouselMediaData();
+        if (mediaList == null || mediaList.isEmpty()) {
+            return new MediaData(this.obj, this.userSession);
+        }
 
         int safePosition = Math.max(0, Math.min(position, mediaList.size() - 1));
         return mediaList.get(safePosition);
@@ -226,9 +237,16 @@ public class MediaData extends Entity {
         // getMoreExtendedData() points to a different nested object and causes the
         // field lookup to fail for this target.
         List variantList = (List) super.getField(this.getExtendedData(), "fieldName");
+        if (variantList == null) {
+            return null;
+        }
 
         List<VideoData> videoList = new ArrayList<>();
-        variantList.forEach(item -> videoList.add(new VideoData(item)));
+        variantList.forEach(item -> {
+            if (item != null) {
+                videoList.add(new VideoData(item));
+            }
+        });
         return videoList;
     }
 
@@ -242,10 +260,20 @@ public class MediaData extends Entity {
 
     public List getImageVariants() throws Exception {
         Object imageInfoObject = (Object) super.getField(this.getMoreExtendedData(), "fieldName");
+        if (imageInfoObject == null) {
+            return new ArrayList<>();
+        }
         List variantList = (List) super.getMethod(imageInfoObject, "methodName");
+        if (variantList == null) {
+            return new ArrayList<>();
+        }
 
         List<ImageData> imageList = new ArrayList<>();
-        variantList.forEach(item -> imageList.add(new ImageData(item)));
+        variantList.forEach(item -> {
+            if (item != null) {
+                imageList.add(new ImageData(item));
+            }
+        });
         return imageList;
     }
 
@@ -259,7 +287,7 @@ public class MediaData extends Entity {
     
     public String getImageLink() throws Exception {
         List<ImageData> imageDataList = this.getImageVariants();
-        if(imageDataList!=null){
+        if(imageDataList!=null && !imageDataList.isEmpty()){
             return imageDataList.get(0).getUrl();
         }
         return null;
