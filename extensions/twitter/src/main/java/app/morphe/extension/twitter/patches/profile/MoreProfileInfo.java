@@ -38,6 +38,9 @@ public class MoreProfileInfo {
         int targetId = ResourceUtils.getIdentifier(ResourceType.ID, resourceName);
         TweetStatView tweetStatView = (TweetStatView)  rootView.findViewById(targetId);
 
+        tweetStatView.setOnTouchListener((v, event) -> true);
+        tweetStatView.setOnClickListener(v -> {});
+
         setTweetStatViewValue(context, tweetStatView, text, count);
         if(count>0)
             tweetStatView.setVisibility(View.VISIBLE);
