@@ -99,7 +99,7 @@ val mediaDataEntity =
                 GetDescriptionTextExtensionFingerprint.changeStringAt(1, getCommentTextFieldName)
             }
 
-            MusicAudioTypeEnumStringFingerprint.method.apply {
+            MusicAudioTypeEnumStringFingerprint.matchOrNull()?.method?.apply {
                 instructions.filter { it.opcode == Opcode.INVOKE_STATIC }.firstOrNull {
                     val methodExt = it.methodExtractor()
                     if (methodExt.returnType != "V") {
