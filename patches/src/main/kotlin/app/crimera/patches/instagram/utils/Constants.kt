@@ -12,7 +12,7 @@ import app.morphe.patcher.patch.Compatibility
 import app.morphe.patcher.patch.SupportedAbi.ARM64_V8A
 
 object Constants {
-    const val INSTAGRAM_442_VERSION_NAME = "442.0.0.46.79"
+    const val INSTAGRAM_VERSION_NAME = "442.0.0.46.79"
 
     val COMPATIBILITY_INSTAGRAM =
         Compatibility(
@@ -24,7 +24,7 @@ object Constants {
                 listOf(
                     // Stable
                     AppTarget(
-                        version = INSTAGRAM_442_VERSION_NAME,
+                        version = INSTAGRAM_VERSION_NAME,
                         versionCodes =
                             mapOf(
                                 ARM64_V8A to 384810148,
