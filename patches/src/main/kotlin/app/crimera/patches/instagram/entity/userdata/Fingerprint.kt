@@ -6,13 +6,13 @@
 
 package app.crimera.patches.instagram.entity.userdata
 
+import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.utils.Constants
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.literal
 import app.morphe.patcher.string
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/UserData;"
-internal const val USER_CLASS = "Lcom/instagram/user/model/User;"
 
 internal object GetAdditionalUserInfoExtensionFingerprint : Fingerprint(
     name = "getAdditionalUserInfo",
@@ -57,42 +57,42 @@ internal object IsVerifiedExtensionFingerprint : Fingerprint(
 // -----------------------------------
 
 internal object FullNameLiveTreeUserDictFingerprint : Fingerprint(
-    definingClass = USER_CLASS,
+    definingClass = USER_MODEL_CLASS_NAME,
     filters = listOf(string("full_name")),
     returnType = "Ljava/lang/String;",
 )
 
 internal object UserNameLiveTreeUserDictFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
-    definingClass = USER_CLASS,
+    definingClass = USER_MODEL_CLASS_NAME,
     filters = listOf(literal(-265713450)),
 )
 
 internal object FriendshipStatusLiveTreeUserDictFingerprint : Fingerprint(
-    definingClass = USER_CLASS,
+    definingClass = USER_MODEL_CLASS_NAME,
     returnType = "FriendshipStatus;",
 )
 
 internal object BiographyLiveTreeUserDictFingerprint : Fingerprint(
-    definingClass = USER_CLASS,
+    definingClass = USER_MODEL_CLASS_NAME,
     returnType = "Ljava/lang/String;",
     filters = listOf(string("biography")),
 )
 
 internal object LowResProfilePictureUserTreeDictFingerprint : Fingerprint(
-    definingClass = USER_CLASS,
+    definingClass = USER_MODEL_CLASS_NAME,
     returnType = "ImageUrl;",
     filters = listOf(string("profile_pic_url")),
 )
 
 internal object HDProfileInfoUserTreeDictFingerprint : Fingerprint(
-    definingClass = USER_CLASS,
+    definingClass = USER_MODEL_CLASS_NAME,
     filters = listOf(string("hd_profile_pic_url_info")),
     returnType = "ProfilePicUrlInfo",
 )
 
 internal object IsVerifiedUserTreeDictFingerprint : Fingerprint(
-    definingClass = USER_CLASS,
+    definingClass = USER_MODEL_CLASS_NAME,
     strings = listOf("is_verified"),
     returnType = "Ljava/lang/Boolean;",
     filters = listOf(literal(1565553213)),
