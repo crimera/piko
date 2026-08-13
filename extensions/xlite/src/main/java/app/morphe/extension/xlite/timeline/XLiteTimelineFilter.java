@@ -462,9 +462,7 @@ public final class XLiteTimelineFilter {
     private static boolean isPromotedEntryId(String entryId) {
         if (entryId == null) return false;
         if (entryId.contains("promoted")) return true;
-        if (entryId.startsWith("ad-") || entryId.contains("-ad-")) return true;
-        String[] components = entryId.split("-");
-        return components.length == 3 && "conversationthread".equals(components[0]);
+        return entryId.startsWith("ad-") || entryId.contains("-ad-");
     }
 
     private static boolean isTimelineModuleItem(Object value) {

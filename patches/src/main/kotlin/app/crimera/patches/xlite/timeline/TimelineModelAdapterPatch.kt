@@ -13,6 +13,8 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -335,35 +337,58 @@ private fun Fingerprint.requireSingle(target: String): Match {
 
 internal fun Match.fieldForToStringLabel(value: String): FieldReference {
     val instructions = method.instructions
-    val labelIndex =
-        instructions.indexOfFirst { instruction ->
-            instruction.getReference<StringReference>()?.string == value
-        }
+    val labelIndex = instructions.indexOfFirst { instruction ->
+        instruction.getReference<StringReference>()?.string == value
+    }
     if (labelIndex < 0) throw PatchException("X-Lite model label was not found: $value in $originalMethod")
 
-    val appendCandidates =
-        instructions.withIndex().drop(labelIndex + 1).filter { (_, instruction) ->
-            instruction.getReference<MethodReference>()?.let { reference ->
-                reference.definingClass == "Ljava/lang/StringBuilder;" &&
-                    reference.name == "append" &&
-                    reference.parameterTypes.size == 1
-            } == true
-        }
-    val appendIndex = if (value.startsWith("UrtTimeline")) 0 else 1
-    val append = appendCandidates.getOrNull(appendIndex)
-        ?: throw PatchException("X-Lite model value append after '$value' was not found in $originalMethod")
-    val appendInstruction = append.value as? FiveRegisterInstruction
-        ?: throw PatchException("X-Lite model append after '$value' has an unsupported register layout")
-    val valueRegister = appendInstruction.registerD
+    val labelInstruction = instructions[labelIndex] as? OneRegisterInstruction
+        ?: throw PatchException("X-Lite model label '$value' has an unsupported register layout")
+    val labelRegister = labelInstruction.registerA
+    val labelConsumerIndex =
+        instructions.withIndex().drop(labelIndex + 1).firstOrNull { (_, instruction) ->
+            val reference = instruction.getReference<MethodReference>() ?: return@firstOrNull false
+            reference.isStringBuilderLabelConsumer() &&
+                instruction.singleArgumentRegister() == labelRegister
+        }?.index ?: throw PatchException(
+            "X-Lite model label consumer for '$value' was not found in $originalMethod",
+        )
 
-    return instructions.take(append.index).asReversed().firstNotNullOfOrNull { instruction ->
-        val registerInstruction = instruction as? TwoRegisterInstruction ?: return@firstNotNullOfOrNull null
-        if (registerInstruction.registerA != valueRegister) return@firstNotNullOfOrNull null
-        instruction.getReference<FieldReference>()?.takeIf { field ->
-            field.definingClass == originalMethod.definingClass
-        }
-    } ?: throw PatchException("X-Lite model field for '$value' was not found in $originalMethod")
+    val valueAppend =
+        instructions.withIndex().drop(labelConsumerIndex + 1).firstOrNull { (_, instruction) ->
+            instruction.getReference<MethodReference>()?.isStringBuilderValueAppend() == true
+        } ?: throw PatchException(
+            "X-Lite model value append after '$value' was not found in $originalMethod",
+        )
+    val valueRegister = valueAppend.value.singleArgumentRegister()
+        ?: throw PatchException("X-Lite model value after '$value' has an unsupported register layout")
+
+    return instructions.subList(labelConsumerIndex + 1, valueAppend.index)
+        .asReversed()
+        .firstNotNullOfOrNull { instruction ->
+            val registerInstruction = instruction as? TwoRegisterInstruction
+                ?: return@firstNotNullOfOrNull null
+            if (registerInstruction.registerA != valueRegister) return@firstNotNullOfOrNull null
+            instruction.getReference<FieldReference>()?.takeIf { field ->
+                field.definingClass == originalMethod.definingClass
+            }
+        } ?: throw PatchException("X-Lite model field for '$value' was not found in $originalMethod")
 }
+
+private fun MethodReference.isStringBuilderLabelConsumer(): Boolean =
+    definingClass == "Ljava/lang/StringBuilder;" &&
+        parameterTypes.map(CharSequence::toString) == listOf(STRING_DESCRIPTOR) &&
+        (name == "<init>" || name == "append")
+
+private fun MethodReference.isStringBuilderValueAppend(): Boolean =
+    definingClass == "Ljava/lang/StringBuilder;" && name == "append" && parameterTypes.size == 1
+
+private fun com.android.tools.smali.dexlib2.iface.instruction.Instruction.singleArgumentRegister(): Int? =
+    when (this) {
+        is FiveRegisterInstruction -> registerD
+        is RegisterRangeInstruction -> startRegister + 1
+        else -> null
+    }
 
 private fun MutableClass.requireSingleField(type: String): FieldReference {
     val matches = fields.filter { field ->

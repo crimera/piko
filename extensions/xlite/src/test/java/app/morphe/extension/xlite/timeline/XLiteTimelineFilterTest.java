@@ -53,6 +53,29 @@ public class XLiteTimelineFilterTest {
     }
 
     @Test
+    public void keepsOrdinaryThreePartConversationEntryId() {
+        FakeModule conversation = module("conversationthread-123-456", item(post("kept")));
+        List<Object> input = items(conversation);
+
+        assertSame(input, XLiteTimelineFilter.filterPromotedItems(input, true, MODELS));
+    }
+
+    @Test
+    public void removesPromotedEntryIdPatterns() {
+        FakePost promoted = post("buy now");
+        promoted.entryId = "promoted-tweet-123";
+        FakePost ad = post("sponsored");
+        ad.entryId = "timeline-ad-456";
+
+        Object filtered = XLiteTimelineFilter.filterPromotedItems(
+                items(promoted, ad, post("kept")),
+                true,
+                MODELS
+        );
+        assertEquals(1, ((List<?>) filtered).size());
+    }
+
+    @Test
     public void removesPromotedPostAndRtbAd() {
         FakePost promoted = post("buy now");
         promoted.promotedMetadata = new Object();
@@ -82,6 +105,19 @@ public class XLiteTimelineFilterTest {
         FakeVerticalConversation displayType = (FakeVerticalConversation) filteredModule.displayType;
 
         assertEquals(List.of("post-2"), displayType.postIds);
+    }
+
+    @Test
+    public void removesPromotedClientEventInfo() {
+        FakePost promoted = post("buy now");
+        promoted.clientEventInfo = "ClientEventInfo(component=promoted_content)";
+
+        Object filtered = XLiteTimelineFilter.filterPromotedItems(
+                items(promoted, post("kept")),
+                true,
+                MODELS
+        );
+        assertEquals(1, ((List<?>) filtered).size());
     }
 
     @Test
@@ -153,6 +189,7 @@ public class XLiteTimelineFilterTest {
         private String id = "post-id";
         private String entryId = "post-1";
         private Object promotedMetadata;
+        private Object clientEventInfo;
         private FakeDisclosure disclosure;
 
         private FakePost(String text) {
@@ -237,6 +274,9 @@ public class XLiteTimelineFilterTest {
         @Override String getPostEntryId(Object post) { return ((FakePost) post).entryId; }
         @Override Object getPostPromotedMetadata(Object post) {
             return ((FakePost) post).promotedMetadata;
+        }
+        @Override Object getPostClientEventInfo(Object post) {
+            return ((FakePost) post).clientEventInfo;
         }
         @Override String getPostText(Object post) { return ((FakePost) post).text; }
         @Override Object getContentDisclosure(Object post) { return ((FakePost) post).disclosure; }
