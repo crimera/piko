@@ -24,6 +24,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.util.TypedValue;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
@@ -125,9 +126,22 @@ public class FriendshipStatusIndicator {
                     null,
                     null
             );
-            friendshipStatusTextView.setPadding(0, Dim.dp4, 0, Dim.dp4);
+            GradientDrawable background = new GradientDrawable();
+            int backgroundColor = UI.getThemedColour("igds_color_primary_text");
+            background.setColor(Color.argb(
+                    13,
+                    Color.red(backgroundColor),
+                    Color.green(backgroundColor),
+                    Color.blue(backgroundColor)
+            ));
+            background.setCornerRadius(Dim.dp20);
+            friendshipStatusTextView.setBackground(background);
+            friendshipStatusTextView.setPadding(Dim.dp8, Dim.dp4, Dim.dp8, 0);
             friendshipStatusTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-            friendshipStatusTextView.setTypeface(null, Typeface.NORMAL);
+            friendshipStatusTextView.setTypeface(Typeface.create(
+                    "sans-serif-medium",
+                    Typeface.NORMAL
+            ));
 
             friendshipStatusTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -137,7 +151,12 @@ public class FriendshipStatusIndicator {
             });
 
             int targetIndex = viewGroup.indexOfChild(internalBadgeTextView);
-            viewGroup.addView(friendshipStatusTextView, targetIndex + 1);
+            ViewGroup.MarginLayoutParams layoutParams = new ViewGroup.MarginLayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            );
+            layoutParams.topMargin = Dim.dp4;
+            viewGroup.addView(friendshipStatusTextView, targetIndex + 1, layoutParams);
         }
     }
 
