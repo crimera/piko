@@ -154,7 +154,7 @@ private val materialYouThemeMappings =
         "igds_primary_background" to "@color/piko_dynamic_background",
         "igds_secondary_background" to "@color/piko_dynamic_background",
         "igds_elevated_background" to "@color/piko_dynamic_background",
-        "igds_elevated_highlight_background" to "@color/piko_dynamic_background",
+        "igds_elevated_highlight_background" to "@color/piko_dynamic_pressed_background",
         "igds_elevated_separator" to "@color/piko_dynamic_outline_variant",
         "igds_separator" to "@color/piko_dynamic_outline_variant",
         "igds_stroke" to "@color/piko_dynamic_outline",

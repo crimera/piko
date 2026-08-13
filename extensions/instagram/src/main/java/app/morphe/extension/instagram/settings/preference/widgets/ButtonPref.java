@@ -79,7 +79,7 @@ public class ButtonPref extends Preference {
                     } else if (key.equals("piko_download_id_mapping")) {
                         DownloadMapping.downloadMapping();
 
-                    } else if (key.startsWith("piko_frag_")) {
+                    } else if (isFragmentNavigation(key)) {
                         FragmentHook.startFragment(key);
 
                     } else if (key.equals("piko_rec_flags_refresh_file")) {
@@ -101,12 +101,22 @@ public class ButtonPref extends Preference {
 
     @Override
     protected void onBindView(View view) {
+        String key = getKey();
         InstagramPreferenceStyle.bindText(this, view);
-        InstagramPreferenceStyle.setTrailingVisible(view, hasVisibleTrail(getKey()));
+        InstagramPreferenceStyle.setTrailingVisible(view, hasVisibleTrail(key));
+        InstagramPreferenceStyle.setPressedHighlightEnabled(
+                view,
+                hasPressedHighlight(key)
+        );
     }
 
-    private boolean hasVisibleTrail(String key) {
-        return key != null
+    private static boolean isFragmentNavigation(String key) {
+        return key != null && key.startsWith("piko_frag_");
+    }
+
+    private static boolean hasVisibleTrail(String key) {
+        return isFragmentNavigation(key)
+                || (key != null
                 && (key.equals("piko_export_dev_overrides")
                 || key.equals("piko_import_dev_overrides")
                 || key.equals("piko_import_id_mapping")
@@ -118,7 +128,12 @@ public class ButtonPref extends Preference {
                 || key.equals("piko_export_experiment_list")
                 || key.equals("piko_export_experiment_mappings")
                 || key.equals("piko_download_id_mapping")
-                || key.equals("piko_rec_flags_refresh_file"));
+                || key.equals("piko_rec_flags_refresh_file")));
+    }
+
+    private static boolean hasPressedHighlight(String key) {
+        return isFragmentNavigation(key)
+                && !Constants.PIKO_FRAGMENT_REC_FLAGS.equals(key);
     }
 
     private String getIconResourceName(String key) {

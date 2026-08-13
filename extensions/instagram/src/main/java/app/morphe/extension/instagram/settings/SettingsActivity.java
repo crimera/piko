@@ -11,9 +11,7 @@ import static app.morphe.extension.instagram.utils.IgStr.str;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -24,6 +22,7 @@ import android.preference.PreferenceScreen;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.WindowInsets;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -99,7 +98,10 @@ public class SettingsActivity extends Activity {
 
         int iconSize = InstagramPreferenceStyle.dp(this, 44);
 
-        BackArrowView back = new BackArrowView(this);
+        ImageView back = new ImageView(this);
+        UI.setThemedIcon(back, UI.DRAWABLE_ARROW_BACK);
+        back.setScaleType(ImageView.ScaleType.CENTER);
+        back.setPaddingRelative(0, 0, InstagramPreferenceStyle.dp(this, 16), 0);
         LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(iconSize, iconSize);
         backParams.gravity = android.view.Gravity.CENTER_VERTICAL;
         back.setLayoutParams(backParams);
@@ -178,36 +180,6 @@ public class SettingsActivity extends Activity {
 
     public LinearLayout getCustomContainer() {
         return customContainer;
-    }
-
-    // (Keep original BackArrowView & applySystemBarStyle methods unchanged)
-    private static class BackArrowView extends View {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-        BackArrowView(Context context) {
-            super(context);
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-
-            float centerY = getHeight() / 2f;
-            float tipX = InstagramPreferenceStyle.dp(getContext(), 2);
-            float endX = InstagramPreferenceStyle.dp(getContext(), 21);
-            float headEndX = InstagramPreferenceStyle.dp(getContext(), 10);
-            float headOffset = InstagramPreferenceStyle.dp(getContext(), 7);
-
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(InstagramPreferenceStyle.dp(getContext(), 1.9f));
-            paint.setStrokeCap(Paint.Cap.ROUND);
-            paint.setStrokeJoin(Paint.Join.ROUND);
-            paint.setColor(InstagramPreferenceStyle.primaryTextColor());
-
-            canvas.drawLine(tipX, centerY, endX, centerY, paint);
-            canvas.drawLine(tipX, centerY, headEndX, centerY - headOffset, paint);
-            canvas.drawLine(tipX, centerY, headEndX, centerY + headOffset, paint);
-        }
     }
 
     private void applySystemBarStyle() {

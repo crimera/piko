@@ -9,8 +9,9 @@ package app.morphe.extension.instagram.settings.preference.widgets;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.preference.Preference;
 import android.text.TextUtils;
@@ -44,6 +45,20 @@ public final class InstagramPreferenceStyle {
     private InstagramPreferenceStyle() {
     }
 
+    private static String chevronDrawableName(int layoutDirection) {
+        return layoutDirection == View.LAYOUT_DIRECTION_RTL
+                ? UI.DRAWABLE_CHEVRON_RIGHT_RTL
+                : UI.DRAWABLE_CHEVRON_RIGHT;
+    }
+
+    private static int topPaddingDp(int trailingType, boolean hasSummary) {
+        return hasSummary || trailingType == TRAILING_SWITCH ? 10 : 15;
+    }
+
+    private static int bottomPaddingDp(int trailingType, boolean hasSummary) {
+        return hasSummary || trailingType == TRAILING_SWITCH ? 20 : 15;
+    }
+
     public static int dp(Context context, float value) {
         return (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP,
@@ -69,13 +84,8 @@ public final class InstagramPreferenceStyle {
     }
 
     public static int pressedBackgroundColor() {
-        int secondaryBackground = UI.getThemedColour("igds_color_secondary_background");
-
-        if (!UI.isDarkMode() || backgroundColor() == Color.BLACK) {
-            return secondaryBackground;
-        }
-
-        return ResourceUtils.getColor("igds_prism_gray_09", secondaryBackground);
+        int fallback = UI.getThemedColour("igds_color_secondary_background");
+        return ResourceUtils.getColor("igds_elevated_highlight_background", fallback);
     }
 
     public static int primaryTextColor() {
@@ -190,8 +200,16 @@ public final class InstagramPreferenceStyle {
         ));
 
         if (trailingType == TRAILING_CHEVRON) {
-            ChevronView trailing = new ChevronView(context);
+            ImageView trailing = new ImageView(context);
             trailing.setTag(TAG_TRAILING);
+            UI.setThemedIcon(
+                    trailing,
+                    chevronDrawableName(
+                            context.getResources().getConfiguration().getLayoutDirection()
+                    ),
+                    "igds_color_secondary_icon"
+            );
+            trailing.setScaleType(ImageView.ScaleType.CENTER);
             row.addView(trailing, new LinearLayout.LayoutParams(dp(context, 22), dp(context, 34)));
         }
 
@@ -229,6 +247,15 @@ public final class InstagramPreferenceStyle {
 
         if (trailing != null) {
             trailing.setEnabled(enabled);
+            if (trailing instanceof ImageView) {
+                int trailingColor = enabled
+                        ? UI.getThemedColour("igds_color_secondary_icon")
+                        : disabledTextColor();
+                ((ImageView) trailing).setColorFilter(new PorterDuffColorFilter(
+                        trailingColor,
+                        PorterDuff.Mode.SRC_ATOP
+                ));
+            }
             trailing.invalidate();
         }
 
@@ -240,6 +267,12 @@ public final class InstagramPreferenceStyle {
         if (trailing != null) {
             trailing.setVisibility(visible ? View.VISIBLE : View.GONE);
             trailing.invalidate();
+        }
+    }
+
+    public static void setPressedHighlightEnabled(View view, boolean enabled) {
+        if (view instanceof PreferenceRow) {
+            ((PreferenceRow) view).setPressedHighlightEnabled(enabled);
         }
     }
 
@@ -309,6 +342,7 @@ public final class InstagramPreferenceStyle {
         private final Rect switchHitRect = new Rect();
         private final int trailingType;
         private View highlightView;
+        private boolean pressedHighlightEnabled;
         private boolean pressedHighlightAllowed;
         private boolean switchClickAllowed = true;
         private boolean drawPressedHighlight;
@@ -351,6 +385,15 @@ public final class InstagramPreferenceStyle {
 
         void setHighlightView(View highlightView) {
             this.highlightView = highlightView;
+            pressedHighlightEnabled = true;
+        }
+
+        void setPressedHighlightEnabled(boolean enabled) {
+            pressedHighlightEnabled = enabled;
+            if (!enabled) {
+                pressedHighlightAllowed = false;
+                setDrawPressedHighlight(false);
+            }
         }
 
         void setSwitchAccessibilityChecked(boolean checked) {
@@ -358,8 +401,8 @@ public final class InstagramPreferenceStyle {
         }
 
         void setHasSummary(boolean hasSummary) {
-            int topPadding = dp(getContext(), 10);
-            int bottomPadding = dp(getContext(), 20);
+            int topPadding = dp(getContext(), topPaddingDp(trailingType, hasSummary));
+            int bottomPadding = dp(getContext(), bottomPaddingDp(trailingType, hasSummary));
             setMinimumHeight(dp(getContext(), hasSummary ? 80 : 62));
             setPadding(getPaddingLeft(), topPadding, getPaddingRight(), bottomPadding);
         }
@@ -385,9 +428,13 @@ public final class InstagramPreferenceStyle {
 
         @Override
         public boolean dispatchTouchEvent(MotionEvent event) {
-            if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
                 pressedHighlightAllowed = shouldDrawPressedHighlight(event.getX(), event.getY());
                 switchClickAllowed = shouldHandleSwitchClick(event.getY());
+            } else if (action == MotionEvent.ACTION_CANCEL) {
+                pressedHighlightAllowed = false;
+                setDrawPressedHighlight(false);
             }
             return super.dispatchTouchEvent(event);
         }
@@ -403,22 +450,24 @@ public final class InstagramPreferenceStyle {
 
         @Override
         protected void dispatchDraw(Canvas canvas) {
-            if (drawPressedHighlight && highlightView != null) {
+            if (drawPressedHighlight) {
                 pressedPaint.setStyle(Paint.Style.FILL);
                 pressedPaint.setColor(pressedBackgroundColor());
-                int top = highlightTop();
-                int bottom = highlightBottom();
-                canvas.drawRect(0, top, getWidth(), bottom, pressedPaint);
+                canvas.drawRect(0, highlightTop(), getWidth(), highlightBottom(), pressedPaint);
             }
             super.dispatchDraw(canvas);
         }
 
         private boolean shouldDrawPressedHighlight(float x, float y) {
-            if (trailingType != TRAILING_SWITCH || !isEnabled() || highlightView == null) {
+            if (!pressedHighlightEnabled || !isEnabled()) {
                 return false;
             }
 
-            if (y < highlightTop() || y > highlightBottom()) {
+            if (trailingType != TRAILING_SWITCH) {
+                return true;
+            }
+
+            if (highlightView == null || y < highlightTop() || y > highlightBottom()) {
                 return false;
             }
 
@@ -454,7 +503,7 @@ public final class InstagramPreferenceStyle {
 
         private int highlightBottom() {
             if (highlightView == null) {
-                return 0;
+                return getHeight();
             }
             return Math.min(getHeight(), highlightView.getBottom() + dp(getContext(), 10));
         }
@@ -465,33 +514,6 @@ public final class InstagramPreferenceStyle {
             }
             this.drawPressedHighlight = drawPressedHighlight;
             invalidate();
-        }
-    }
-
-    private static class ChevronView extends View {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-
-        ChevronView(Context context) {
-            super(context);
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-
-            float centerY = getHeight() / 2f;
-            float tipX = getWidth() - dp(getContext(), 1.25f);
-            float armX = getWidth() - dp(getContext(), 6.75f);
-            float armOffset = dp(getContext(), 6.25f);
-
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(dp(getContext(), 1.9f));
-            paint.setStrokeCap(Paint.Cap.ROUND);
-            paint.setStrokeJoin(Paint.Join.ROUND);
-            paint.setColor(isEnabled() ? secondaryTextColor() : disabledTextColor());
-
-            canvas.drawLine(armX, centerY - armOffset, tipX, centerY, paint);
-            canvas.drawLine(tipX, centerY, armX, centerY + armOffset, paint);
         }
     }
 
