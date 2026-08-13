@@ -67,7 +67,6 @@ val mediaDataEntity =
                 IsVideoExtensionFingerprint.changeFirstString(isVideoCallingMethodName)
             }
 
-            var foundMediaListMethod = false
             EditMediaInfoFragmentMediaSizeFingerprint.method.apply {
                 val firstReturnIndex = indexOfFirstInstruction(Opcode.RETURN)
                 val extendedDataFieldIndex = indexOfFirstInstruction(firstReturnIndex, Opcode.IGET_OBJECT)
@@ -76,19 +75,6 @@ val mediaDataEntity =
                     val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
                     GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
                     GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
-                    foundMediaListMethod = true
-                }
-            }
-
-            if (!foundMediaListMethod) {
-                GetAndroidLinkFromMediaObject.method.apply {
-                    val firstIfNeIndex = indexOfFirstInstruction(Opcode.IF_NE)
-                    val extendedDataFieldIndex = indexOfFirstInstruction(firstIfNeIndex, Opcode.IGET_OBJECT)
-                    val extendedDataFieldName = getInstruction(extendedDataFieldIndex).fieldExtractor().name
-                    val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
-                    GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
-                    GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
-                    foundMediaListMethod = true
                 }
             }
 
