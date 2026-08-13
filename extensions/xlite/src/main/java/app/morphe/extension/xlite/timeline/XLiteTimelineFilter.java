@@ -1,12 +1,8 @@
 package app.morphe.extension.xlite.timeline;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -20,24 +16,94 @@ public final class XLiteTimelineFilter {
     private static final String AI_SOURCE_USER_MARKED = "UserMarked";
     private static final String AI_SOURCE_AUTO_DETECTED = "AutoDetected";
     private static final String AI_SOURCE_NOT_IDENTIFIED = "SourceNotIdentified";
+    private static final TimelineModelAccess PRODUCTION_MODEL_ACCESS = new TimelineModelAccess() {
+        @Override boolean isModuleItem(Object value) { return isTimelineModuleItem(value); }
+        @Override boolean isPost(Object value) { return isTimelinePost(value); }
+        @Override boolean isModule(Object value) { return isTimelineModule(value); }
+        @Override boolean isRtbImageAd(Object value) { return isTimelineRtbImageAd(value); }
+        @Override Object getModuleItem(Object wrapper) { return XLiteTimelineFilter.getModuleItem(wrapper); }
+        @Override boolean isModuleItemDispensable(Object wrapper) {
+            return XLiteTimelineFilter.isModuleItemDispensable(wrapper);
+        }
+        @Override Object copyModuleItem(Object wrapper, Object item, boolean dispensable) {
+            return XLiteTimelineFilter.copyModuleItem(wrapper, item, dispensable);
+        }
+        @Override List<?> getModuleChildren(Object module) { return getModuleInnerContent(module); }
+        @Override Object getModuleDisplayType(Object module) { return XLiteTimelineFilter.getModuleDisplayType(module); }
+        @Override Object copyModule(Object module, List<?> children, Object displayType) {
+            return XLiteTimelineFilter.copyModule(
+                    module,
+                    children,
+                    getModuleHeader(module),
+                    getModuleFooter(module),
+                    displayType,
+                    getModuleSortIndex(module),
+                    getModuleEntryId(module),
+                    getModuleClientEventInfo(module)
+            );
+        }
+        @Override Object getPostId(Object post) { return XLiteTimelineFilter.getPostId(post); }
+        @Override boolean isVerticalConversation(Object displayType) {
+            return XLiteTimelineFilter.isVerticalConversation(displayType);
+        }
+        @Override List<?> getVerticalConversationPostIds(Object displayType) {
+            return XLiteTimelineFilter.getVerticalConversationPostIds(displayType);
+        }
+        @Override Object copyVerticalConversation(Object displayType, List<?> postIds) {
+            return XLiteTimelineFilter.copyVerticalConversation(displayType, postIds);
+        }
+        @Override String getModuleEntryId(Object module) { return XLiteTimelineFilter.getModuleEntryId(module); }
+        @Override Object getModuleClientEventInfo(Object module) {
+            return XLiteTimelineFilter.getModuleClientEventInfo(module);
+        }
+        @Override String getPostEntryId(Object post) { return XLiteTimelineFilter.getPostEntryId(post); }
+        @Override Object getPostClientEventInfo(Object post) {
+            return XLiteTimelineFilter.getPostClientEventInfo(post);
+        }
+        @Override Object getPostPromotedMetadata(Object post) {
+            return XLiteTimelineFilter.getPostPromotedMetadata(post);
+        }
+        @Override String getPostText(Object post) { return XLiteTimelineFilter.getPostText(post); }
+        @Override Object getContentDisclosure(Object post) { return XLiteTimelineFilter.getContentDisclosure(post); }
+        @Override boolean hasAiGeneratedDisclosure(Object disclosure) {
+            return XLiteTimelineFilter.hasAiGeneratedDisclosure(disclosure);
+        }
+        @Override Object getAiDetectionSource(Object disclosure) {
+            return XLiteTimelineFilter.getAiDetectionSource(disclosure);
+        }
+    };
 
     private XLiteTimelineFilter() {
     }
 
     public static Object filterPromotedItems(Object timelineItems, boolean enabled) {
-        return filterTimelineItems(timelineItems, enabled, false, null);
+        return filterPromotedItems(timelineItems, enabled, PRODUCTION_MODEL_ACCESS);
+    }
+
+    static Object filterPromotedItems(Object timelineItems, boolean enabled, TimelineModelAccess modelAccess) {
+        return filterTimelineItems(timelineItems, enabled, false, null, modelAccess);
     }
 
     public static Object filterWhoToFollow(Object timelineItems, boolean enabled) {
+        return filterWhoToFollow(timelineItems, enabled, PRODUCTION_MODEL_ACCESS);
+    }
+
+    static Object filterWhoToFollow(Object timelineItems, boolean enabled, TimelineModelAccess modelAccess) {
         if (!enabled) return timelineItems;
-        return filterTimelineItems(timelineItems, false, true, null);
+        return filterTimelineItems(timelineItems, false, true, null, modelAccess);
     }
 
     public static Object filterPostsByKeyword(Object timelineItems) {
         try {
             PostFilterRuleStore store = PostFilterRuleStore.shared();
             if (!store.isEnabled()) return timelineItems;
-            return filterTimelineItems(timelineItems, false, false, store.snapshot());
+            return filterTimelineItems(
+                    timelineItems,
+                    false,
+                    false,
+                    store.snapshot(),
+                    PRODUCTION_MODEL_ACCESS
+            );
         } catch (RuntimeException exception) {
             logFailure("post-filter rule loading", exception);
             return timelineItems;
@@ -49,14 +115,31 @@ public final class XLiteTimelineFilter {
             boolean enabled,
             PostFilterRuleStore.Snapshot snapshot
     ) {
+        return filterPostsByKeyword(timelineItems, enabled, snapshot, PRODUCTION_MODEL_ACCESS);
+    }
+
+    static Object filterPostsByKeyword(
+            Object timelineItems,
+            boolean enabled,
+            PostFilterRuleStore.Snapshot snapshot,
+            TimelineModelAccess modelAccess
+    ) {
         if (!enabled) return timelineItems;
-        return filterTimelineItems(timelineItems, false, false, snapshot);
+        return filterTimelineItems(timelineItems, false, false, snapshot, modelAccess);
     }
 
     public static Object filterAiGeneratedPosts(Object timelineItems, Set<String> sourcesToHide) {
+        return filterAiGeneratedPosts(timelineItems, sourcesToHide, PRODUCTION_MODEL_ACCESS);
+    }
+
+    static Object filterAiGeneratedPosts(
+            Object timelineItems,
+            Set<String> sourcesToHide,
+            TimelineModelAccess modelAccess
+    ) {
         Set<String> sources = parseAiSources(sourcesToHide);
         if (sources.isEmpty()) return timelineItems;
-        return filterTimelineItems(timelineItems, false, false, null, sources);
+        return filterTimelineItems(timelineItems, false, false, null, sources, modelAccess);
     }
 
     private static Set<String> parseAiSources(Set<String> sourcesToHide) {
@@ -78,14 +161,16 @@ public final class XLiteTimelineFilter {
             Object timelineItems,
             boolean filterPromotedItems,
             boolean hideWhoToFollow,
-            PostFilterRuleStore.Snapshot ruleSnapshot
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            TimelineModelAccess modelAccess
     ) {
         return filterTimelineItems(
                 timelineItems,
                 filterPromotedItems,
                 hideWhoToFollow,
                 ruleSnapshot,
-                Collections.emptySet()
+                Collections.emptySet(),
+                modelAccess
         );
     }
 
@@ -94,7 +179,8 @@ public final class XLiteTimelineFilter {
             boolean filterPromotedItems,
             boolean hideWhoToFollow,
             PostFilterRuleStore.Snapshot ruleSnapshot,
-            Set<String> aiSourcesToHide
+            Set<String> aiSourcesToHide,
+            TimelineModelAccess modelAccess
     ) {
         if (timelineItems == null) return null;
         if (!filterPromotedItems
@@ -114,7 +200,8 @@ public final class XLiteTimelineFilter {
                         filterPromotedItems,
                         hideWhoToFollow,
                         ruleSnapshot,
-                        aiSourcesToHide
+                        aiSourcesToHide,
+                        modelAccess
                 );
                 if (result.remove) {
                     changed = true;
@@ -124,7 +211,7 @@ public final class XLiteTimelineFilter {
                 changed |= result.item != original;
             }
             if (!changed) return timelineItems;
-            return immutableListView(filtered, timelineItems);
+            return immutableList(filtered);
         } catch (RuntimeException exception) {
             logFailure("top-level timeline filtering", exception);
             return timelineItems;
@@ -136,20 +223,29 @@ public final class XLiteTimelineFilter {
             boolean filterPromotedItems,
             boolean hideWhoToFollow,
             PostFilterRuleStore.Snapshot ruleSnapshot,
-            Set<String> aiSourcesToHide
+            Set<String> aiSourcesToHide,
+            TimelineModelAccess modelAccess
     ) {
         if (original == null) return FilterResult.keep(null);
         try {
-            if (isTimelineModuleItem(original)) {
+            if (modelAccess.isModuleItem(original)) {
                 return filterModuleItem(
                         original,
                         filterPromotedItems,
                         hideWhoToFollow,
                         ruleSnapshot,
-                        aiSourcesToHide
+                        aiSourcesToHide,
+                        modelAccess
                 );
             }
-            return filterItem(original, filterPromotedItems, hideWhoToFollow, ruleSnapshot, aiSourcesToHide);
+            return filterItem(
+                    original,
+                    filterPromotedItems,
+                    hideWhoToFollow,
+                    ruleSnapshot,
+                    aiSourcesToHide,
+                    modelAccess
+            );
         } catch (RuntimeException exception) {
             logFailure("timeline item " + original.getClass().getSimpleName(), exception);
             return FilterResult.keep(original);
@@ -161,22 +257,24 @@ public final class XLiteTimelineFilter {
             boolean filterPromotedItems,
             boolean hideWhoToFollow,
             PostFilterRuleStore.Snapshot ruleSnapshot,
-            Set<String> aiSourcesToHide
+            Set<String> aiSourcesToHide,
+            TimelineModelAccess modelAccess
     ) {
-        Object originalItem = getModuleItem(wrapper);
+        Object originalItem = modelAccess.getModuleItem(wrapper);
         FilterResult result = filterItem(
                 originalItem,
                 filterPromotedItems,
                 hideWhoToFollow,
                 ruleSnapshot,
-                aiSourcesToHide
+                aiSourcesToHide,
+                modelAccess
         );
         if (result.remove) return result;
         if (result.item == originalItem) return FilterResult.keep(wrapper);
-        return FilterResult.replace(copyModuleItem(
+        return FilterResult.replace(modelAccess.copyModuleItem(
                 wrapper,
                 result.item,
-                isModuleItemDispensable(wrapper)
+                modelAccess.isModuleItemDispensable(wrapper)
         ));
     }
 
@@ -185,28 +283,40 @@ public final class XLiteTimelineFilter {
             boolean filterPromotedItems,
             boolean hideWhoToFollow,
             PostFilterRuleStore.Snapshot ruleSnapshot,
-            Set<String> aiSourcesToHide
+            Set<String> aiSourcesToHide,
+            TimelineModelAccess modelAccess
     ) {
         if (item == null) return FilterResult.keep(null);
-        if (filterPromotedItems && isPromoted(item)) return FilterResult.remove();
-        if (isTimelinePost(item)) {
-            if (PostFilterMatcher.findMatchReason(item, ruleSnapshot) != null) {
+        if (filterPromotedItems && isPromoted(item, modelAccess)) return FilterResult.remove();
+        if (modelAccess.isPost(item)) {
+            if (PostFilterMatcher.findMatchReason(modelAccess.getPostText(item), ruleSnapshot) != null) {
                 return FilterResult.remove();
             }
-            if (isAiGenerated(item, aiSourcesToHide)) return FilterResult.remove();
+            if (isAiGenerated(item, aiSourcesToHide, modelAccess)) return FilterResult.remove();
         }
-        if (isTimelineModule(item)) {
-            return filterModule(item, filterPromotedItems, hideWhoToFollow, ruleSnapshot, aiSourcesToHide);
+        if (modelAccess.isModule(item)) {
+            return filterModule(
+                    item,
+                    filterPromotedItems,
+                    hideWhoToFollow,
+                    ruleSnapshot,
+                    aiSourcesToHide,
+                    modelAccess
+            );
         }
         return FilterResult.keep(item);
     }
 
-    private static boolean isAiGenerated(Object post, Set<String> aiSourcesToHide) {
+    private static boolean isAiGenerated(
+            Object post,
+            Set<String> aiSourcesToHide,
+            TimelineModelAccess modelAccess
+    ) {
         if (aiSourcesToHide == null || aiSourcesToHide.isEmpty()) return false;
-        Object disclosure = getContentDisclosure(post);
-        if (disclosure == null || !hasAiGeneratedDisclosure(disclosure)) return false;
+        Object disclosure = modelAccess.getContentDisclosure(post);
+        if (disclosure == null || !modelAccess.hasAiGeneratedDisclosure(disclosure)) return false;
 
-        Object source = getAiDetectionSource(disclosure);
+        Object source = modelAccess.getAiDetectionSource(disclosure);
         if (source == null) return aiSourcesToHide.contains(AI_SOURCE_NOT_IDENTIFIED);
         if (!(source instanceof Enum<?> enumSource)) return false;
         return aiSourcesToHide.contains(enumSource.name());
@@ -229,18 +339,20 @@ public final class XLiteTimelineFilter {
             boolean filterPromotedItems,
             boolean hideWhoToFollow,
             PostFilterRuleStore.Snapshot ruleSnapshot,
-            Set<String> aiSourcesToHide
+            Set<String> aiSourcesToHide,
+            TimelineModelAccess modelAccess
     ) {
-        if (hideWhoToFollow && isWhoToFollowEntryId(getModuleEntryId(module))) {
+        if (hideWhoToFollow && isWhoToFollowEntryId(modelAccess.getModuleEntryId(module))) {
             return FilterResult.remove();
         }
 
-        List<?> originalChildren = getModuleInnerContent(module);
+        List<?> originalChildren = modelAccess.getModuleChildren(module);
         if (originalChildren == null || originalChildren.isEmpty()) {
             return FilterResult.keep(module);
         }
 
         List<Object> filteredChildren = new ArrayList<>(originalChildren.size());
+        Set<Object> removedPostIds = new HashSet<>();
         boolean changed = false;
         for (Object originalChild : originalChildren) {
             if (originalChild == null) {
@@ -248,7 +360,7 @@ public final class XLiteTimelineFilter {
                 continue;
             }
 
-            Object originalItem = getModuleItem(originalChild);
+            Object originalItem = modelAccess.getModuleItem(originalChild);
             FilterResult result;
             try {
                 result = filterItem(
@@ -256,7 +368,8 @@ public final class XLiteTimelineFilter {
                         filterPromotedItems,
                         hideWhoToFollow,
                         ruleSnapshot,
-                        aiSourcesToHide
+                        aiSourcesToHide,
+                        modelAccess
                 );
             } catch (RuntimeException exception) {
                 logFailure("timeline module child", exception);
@@ -266,6 +379,10 @@ public final class XLiteTimelineFilter {
 
             if (result.remove) {
                 changed = true;
+                if (modelAccess.isPost(originalItem)) {
+                    Object postId = modelAccess.getPostId(originalItem);
+                    if (postId != null) removedPostIds.add(postId);
+                }
                 continue;
             }
             if (result.item == originalItem) {
@@ -274,10 +391,10 @@ public final class XLiteTimelineFilter {
             }
 
             try {
-                filteredChildren.add(copyModuleItem(
+                filteredChildren.add(modelAccess.copyModuleItem(
                         originalChild,
                         result.item,
-                        isModuleItemDispensable(originalChild)
+                        modelAccess.isModuleItemDispensable(originalChild)
                 ));
                 changed = true;
             } catch (RuntimeException exception) {
@@ -290,37 +407,51 @@ public final class XLiteTimelineFilter {
         if (filteredChildren.isEmpty()) return FilterResult.remove();
 
         try {
-            return FilterResult.replace(copyModule(
-                    module,
-                    filteredChildren,
-                    getModuleHeader(module),
-                    getModuleFooter(module),
-                    getModuleDisplayType(module),
-                    getModuleSortIndex(module),
-                    getModuleEntryId(module),
-                    getModuleClientEventInfo(module)
-            ));
+            Object displayType = repairDisplayType(
+                    modelAccess.getModuleDisplayType(module),
+                    removedPostIds,
+                    modelAccess
+            );
+            return FilterResult.replace(modelAccess.copyModule(module, filteredChildren, displayType));
         } catch (RuntimeException exception) {
             logFailure("timeline module reconstruction", exception);
             return FilterResult.keep(module);
         }
     }
 
+    private static Object repairDisplayType(
+            Object displayType,
+            Set<Object> removedPostIds,
+            TimelineModelAccess modelAccess
+    ) {
+        if (removedPostIds.isEmpty() || !modelAccess.isVerticalConversation(displayType)) return displayType;
+
+        List<?> originalIds = modelAccess.getVerticalConversationPostIds(displayType);
+        if (originalIds == null || originalIds.isEmpty()) return displayType;
+
+        List<Object> filteredIds = new ArrayList<>(originalIds.size());
+        for (Object id : originalIds) {
+            if (!removedPostIds.contains(id)) filteredIds.add(id);
+        }
+        if (filteredIds.size() == originalIds.size()) return displayType;
+        return modelAccess.copyVerticalConversation(displayType, filteredIds);
+    }
+
     private static boolean isWhoToFollowEntryId(String entryId) {
         return entryId != null && entryId.startsWith("who-to-follow");
     }
 
-    private static boolean isPromoted(Object item) {
-        if (isTimelineRtbImageAd(item)) return true;
+    private static boolean isPromoted(Object item, TimelineModelAccess modelAccess) {
+        if (modelAccess.isRtbImageAd(item)) return true;
         String entryId = null;
         Object eventInfo = null;
-        if (isTimelinePost(item)) {
-            entryId = getPostEntryId(item);
-            eventInfo = getPostClientEventInfo(item);
-            if (getPostPromotedMetadata(item) != null) return true;
-        } else if (isTimelineModule(item)) {
-            entryId = getModuleEntryId(item);
-            eventInfo = getModuleClientEventInfo(item);
+        if (modelAccess.isPost(item)) {
+            entryId = modelAccess.getPostEntryId(item);
+            eventInfo = modelAccess.getPostClientEventInfo(item);
+            if (modelAccess.getPostPromotedMetadata(item) != null) return true;
+        } else if (modelAccess.isModule(item)) {
+            entryId = modelAccess.getModuleEntryId(item);
+            eventInfo = modelAccess.getModuleClientEventInfo(item);
         }
         if (isPromotedEntryId(entryId)) return true;
 
@@ -404,6 +535,26 @@ public final class XLiteTimelineFilter {
         return null;
     }
 
+    private static Object getPostId(Object post) {
+        return null;
+    }
+
+    private static boolean isVerticalConversation(Object displayType) {
+        return false;
+    }
+
+    private static List<?> getVerticalConversationPostIds(Object displayType) {
+        return null;
+    }
+
+    private static Object copyVerticalConversation(Object ignoredDisplayType, List<?> postIds) {
+        return ignoredDisplayType;
+    }
+
+    private static String getPostText(Object post) {
+        return null;
+    }
+
     private static Object copyModule(
             Object ignoredModule,
             List<?> children,
@@ -417,61 +568,8 @@ public final class XLiteTimelineFilter {
         return null;
     }
 
-    private static Object immutableListView(List<Object> filtered, Object originalList) {
-        Set<Class<?>> interfaces = new LinkedHashSet<>();
-        Class<?> current = originalList.getClass();
-        while (current != null) {
-            for (Class<?> type : current.getInterfaces()) collectInterfaces(type, interfaces);
-            current = current.getSuperclass();
-        }
-        if (interfaces.isEmpty()) return Collections.unmodifiableList(filtered);
-
-        List<Object> readOnly = Collections.unmodifiableList(new ArrayList<>(filtered));
-        InvocationHandler handler = (proxy, method, arguments) -> invokeListMethod(
-                proxy,
-                method,
-                arguments,
-                readOnly,
-                originalList
-        );
-        return Proxy.newProxyInstance(
-                originalList.getClass().getClassLoader(),
-                interfaces.toArray(new Class<?>[0]),
-                handler
-        );
-    }
-
-    private static void collectInterfaces(Class<?> type, Set<Class<?>> output) {
-        if (!output.add(type)) return;
-        for (Class<?> parent : type.getInterfaces()) collectInterfaces(parent, output);
-    }
-
-    private static Object invokeListMethod(
-            Object proxy,
-            Method method,
-            Object[] arguments,
-            List<Object> readOnly,
-            Object originalList
-    ) throws Throwable {
-        String name = method.getName();
-        if ("equals".equals(name) && arguments != null && arguments.length == 1) {
-            return proxy == arguments[0] || readOnly.equals(arguments[0]);
-        }
-        if ("hashCode".equals(name) && noArguments(arguments)) return readOnly.hashCode();
-        if ("toString".equals(name) && noArguments(arguments)) return readOnly.toString();
-
-        Method listMethod = List.class.getMethod(name, method.getParameterTypes());
-        Object result = listMethod.invoke(readOnly, arguments);
-        if ("subList".equals(name) && result instanceof List<?> subList) {
-            @SuppressWarnings("unchecked")
-            List<Object> typedSubList = (List<Object>) subList;
-            return immutableListView(typedSubList, originalList);
-        }
-        return result;
-    }
-
-    private static boolean noArguments(Object[] arguments) {
-        return arguments == null || arguments.length == 0;
+    private static Object immutableList(List<Object> filtered) {
+        return Collections.unmodifiableList(new ArrayList<>(filtered));
     }
 
     private static void logFailure(String operation, Throwable exception) {

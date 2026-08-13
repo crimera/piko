@@ -21,8 +21,6 @@ import com.android.tools.smali.dexlib2.iface.reference.StringReference
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
-private const val POST_FILTER_MATCHER_DESCRIPTOR =
-    "Lapp/morphe/extension/xlite/postfilter/PostFilterMatcher;"
 
 private object TimelinePostModelFingerprint : Fingerprint(
     name = "toString",
@@ -45,22 +43,21 @@ private object TimelineModuleItemModelFingerprint : Fingerprint(
     strings = listOf("UrtTimelineModuleItem(item=", ", isDispensable="),
 )
 
-private object TimelineRtbImageAdModelFingerprint : Fingerprint(
+private object VerticalConversationModelFingerprint : Fingerprint(
     name = "toString",
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
-    strings = listOf("UrtTimelineRtbImageAd(advertiserAvatarImageUrl="),
+    strings = listOf("VerticalConversation(allTweetIds="),
 )
 
 private data class TimelineModels(
     val postDescriptor: String,
     val moduleDescriptor: String,
     val moduleItemDescriptor: String,
-    val adDescriptor: String,
-    val postTextGetter: MethodReference,
-    val postEntryIdField: FieldReference,
-    val postPromotedMetadataField: FieldReference,
-    val postClientEventInfoField: FieldReference,
+    val verticalConversationDescriptor: String,
+    val postIdGetter: MethodReference,
+    val verticalConversationPostIdsField: FieldReference,
+    val verticalConversationConstructor: MethodReference,
     val moduleInnerContentField: FieldReference,
     val moduleHeaderField: FieldReference,
     val moduleFooterField: FieldReference,
@@ -81,7 +78,6 @@ internal val xLiteTimelineModelAdapterPatch =
         execute {
             val models = resolveTimelineModels()
             patchTimelineFilterBridges(models)
-            patchPostFilterBridges(models)
         }
     }
 
@@ -90,21 +86,31 @@ private fun resolveTimelineModels(): TimelineModels {
     val postMatch = TimelinePostModelFingerprint.requireSingle("timeline post model")
     val moduleMatch = TimelineModuleModelFingerprint.requireSingle("timeline module model")
     val moduleItemMatch = TimelineModuleItemModelFingerprint.requireSingle("timeline module-item model")
-    val adMatch = TimelineRtbImageAdModelFingerprint.requireSingle("timeline RTB image-ad model")
-
+    val verticalConversationMatch =
+        VerticalConversationModelFingerprint.requireSingle("vertical-conversation display model")
     val postClass = postMatch.classDef
     val moduleClass = moduleMatch.classDef
     val moduleItemClass = moduleItemMatch.classDef
+    val verticalConversationClass = verticalConversationMatch.classDef
 
-    val postEntryIdField = postMatch.fieldForToStringLabel(", entryId=")
-    val postPromotedMetadataField = postMatch.fieldForToStringLabel(", promotedMetadata=")
-    val postClientEventInfoField = postMatch.fieldForToStringLabel(", clientEventInfo=")
-    val postTextGetter =
-        postClass.methods.singleOrNull { method ->
-            method.name == "getText" &&
-                method.parameterTypes.isEmpty() &&
-                method.returnType == STRING_DESCRIPTOR
-        } ?: throw PatchException("Expected one X-Lite timeline post getText(): $postClass")
+    val postIdGetters = postClass.methods.filter { method ->
+        method.name == "getId" && method.parameterTypes.isEmpty() && method.returnType.startsWith("L")
+    }
+    if (postIdGetters.size != 1) {
+        throw PatchException(
+            "Expected one X-Lite timeline post getId(), found ${postIdGetters.size}: " +
+                postIdGetters.joinToString(),
+        )
+    }
+    val verticalConversationPostIdsField = verticalConversationClass.requireSingleField(LIST_DESCRIPTOR)
+    val verticalConversationConstructor =
+        verticalConversationClass.methods.singleOrNull { method ->
+            method.name == "<init>" &&
+                method.parameterTypes.map(CharSequence::toString) == listOf(LIST_DESCRIPTOR) &&
+                method.returnType == "V"
+        } ?: throw PatchException(
+            "Expected one X-Lite vertical-conversation constructor: $verticalConversationClass",
+        )
 
     val moduleInnerContentField = moduleClass.requireSingleField(LIST_DESCRIPTOR)
     val moduleHeaderField = moduleMatch.fieldForToStringLabel(", moduleHeader=")
@@ -146,15 +152,28 @@ private fun resolveTimelineModels(): TimelineModels {
                 "$moduleItemConstructorParameters: $moduleItemClass",
         )
 
+    verticalConversationClass.makeFieldsPublic(listOf(verticalConversationPostIdsField))
+    moduleClass.makeFieldsPublic(
+        listOf(
+            moduleInnerContentField,
+            moduleHeaderField,
+            moduleFooterField,
+            moduleDisplayTypeField,
+            moduleSortIndexField,
+            moduleEntryIdField,
+            moduleClientEventInfoField,
+        ),
+    )
+    moduleItemClass.makeFieldsPublic(listOf(moduleItemField, moduleItemDispensableField))
+
     return TimelineModels(
         postDescriptor = postClass.type,
         moduleDescriptor = moduleClass.type,
         moduleItemDescriptor = moduleItemClass.type,
-        adDescriptor = adMatch.classDef.type,
-        postTextGetter = postTextGetter,
-        postEntryIdField = postEntryIdField,
-        postPromotedMetadataField = postPromotedMetadataField,
-        postClientEventInfoField = postClientEventInfoField,
+        verticalConversationDescriptor = verticalConversationClass.type,
+        postIdGetter = postIdGetters.single(),
+        verticalConversationPostIdsField = verticalConversationPostIdsField,
+        verticalConversationConstructor = verticalConversationConstructor,
         moduleInnerContentField = moduleInnerContentField,
         moduleHeaderField = moduleHeaderField,
         moduleFooterField = moduleFooterField,
@@ -196,24 +215,47 @@ private fun patchTimelineFilterBridges(models: TimelineModels) {
         "instance-of p0, p0, ${models.moduleDescriptor}\nreturn p0",
     )
     filterClass.patchBridge(
-        "isTimelineRtbImageAd",
+        "getPostId",
+        OBJECT_DESCRIPTOR,
+        OBJECT_DESCRIPTOR,
+        """
+            check-cast p0, ${models.postDescriptor}
+            invoke-virtual {p0}, ${models.postIdGetter.smaliReference()}
+            move-result-object p0
+            return-object p0
+        """.trimIndent(),
+    )
+    filterClass.patchBridge(
+        "isVerticalConversation",
         OBJECT_DESCRIPTOR,
         "Z",
-        "instance-of p0, p0, ${models.adDescriptor}\nreturn p0",
+        "instance-of p0, p0, ${models.verticalConversationDescriptor}\nreturn p0",
     )
     filterClass.patchObjectFieldGetter(
-        context,
+        "getVerticalConversationPostIds",
+        models.verticalConversationDescriptor,
+        models.verticalConversationPostIdsField,
+        LIST_DESCRIPTOR,
+    )
+    filterClass.patchBridge(
+        "copyVerticalConversation",
+        "$OBJECT_DESCRIPTOR$LIST_DESCRIPTOR",
+        OBJECT_DESCRIPTOR,
+        """
+            new-instance p0, ${models.verticalConversationDescriptor}
+            invoke-direct {p0, p1}, ${models.verticalConversationConstructor.smaliReference()}
+            return-object p0
+        """.trimIndent(),
+    )
+    filterClass.patchObjectFieldGetter(
         "getModuleItem",
         models.moduleItemDescriptor,
         models.moduleItemField,
-        "getItem",
     )
     filterClass.patchBooleanFieldGetter(
-        context,
         "isModuleItemDispensable",
         models.moduleItemDescriptor,
         models.moduleItemDispensableField,
-        "isDispensable",
     )
     filterClass.patchBridge(
         "copyModuleItem",
@@ -227,77 +269,41 @@ private fun patchTimelineFilterBridges(models: TimelineModels) {
         """.trimIndent(),
     )
     filterClass.patchObjectFieldGetter(
-        context,
         "getModuleInnerContent",
         models.moduleDescriptor,
         models.moduleInnerContentField,
-        "getInnerContent",
         LIST_DESCRIPTOR,
     )
     filterClass.patchObjectFieldGetter(
-        context,
         "getModuleHeader",
         models.moduleDescriptor,
         models.moduleHeaderField,
-        "getModuleHeader",
     )
     filterClass.patchObjectFieldGetter(
-        context,
         "getModuleFooter",
         models.moduleDescriptor,
         models.moduleFooterField,
-        "getModuleFooter",
     )
     filterClass.patchObjectFieldGetter(
-        context,
         "getModuleDisplayType",
         models.moduleDescriptor,
         models.moduleDisplayTypeField,
-        "getDisplayType",
     )
     filterClass.patchWideFieldGetter(
-        context,
         "getModuleSortIndex",
         models.moduleDescriptor,
         models.moduleSortIndexField,
-        "getSortIndex",
     )
     filterClass.patchObjectFieldGetter(
-        context,
         "getModuleEntryId",
         models.moduleDescriptor,
         models.moduleEntryIdField,
-        "getEntryId",
         STRING_DESCRIPTOR,
     )
     filterClass.patchObjectFieldGetter(
-        context,
         "getModuleClientEventInfo",
         models.moduleDescriptor,
         models.moduleClientEventInfoField,
-        "getClientEventInfo",
-    )
-    filterClass.patchObjectFieldGetter(
-        context,
-        "getPostEntryId",
-        models.postDescriptor,
-        models.postEntryIdField,
-        "getEntryId",
-        STRING_DESCRIPTOR,
-    )
-    filterClass.patchObjectFieldGetter(
-        context,
-        "getPostClientEventInfo",
-        models.postDescriptor,
-        models.postClientEventInfoField,
-        "getClientEventInfo",
-    )
-    filterClass.patchObjectFieldGetter(
-        context,
-        "getPostPromotedMetadata",
-        models.postDescriptor,
-        models.postPromotedMetadataField,
-        "getPromotedMetadata",
     )
     filterClass.patchBridge(
         "copyModule",
@@ -312,21 +318,6 @@ private fun patchTimelineFilterBridges(models: TimelineModels) {
             check-cast p8, ${models.moduleClientEventInfoField.type}
             new-instance p0, ${models.moduleDescriptor}
             invoke-direct/range {p0 .. p8}, ${models.moduleConstructor.smaliReference()}
-            return-object p0
-        """.trimIndent(),
-    )
-}
-
-context(context: BytecodePatchContext)
-private fun patchPostFilterBridges(models: TimelineModels) {
-    context.mutableClassDefBy(POST_FILTER_MATCHER_DESCRIPTOR).patchBridge(
-        "getPostText",
-        OBJECT_DESCRIPTOR,
-        STRING_DESCRIPTOR,
-        """
-            check-cast p0, ${models.postDescriptor}
-            invoke-virtual {p0}, ${models.postTextGetter.smaliReference()}
-            move-result-object p0
             return-object p0
         """.trimIndent(),
     )
@@ -385,98 +376,51 @@ private fun MutableClass.requireSingleField(type: String): FieldReference {
     )
 }
 
-private fun MutableClass.patchObjectFieldGetter(
-    context: BytecodePatchContext,
+internal fun MutableClass.makeFieldsPublic(fields: List<FieldReference>) {
+    for (field in fields) {
+        val definition = this.fields.singleOrNull { candidate -> candidate.toString() == field.toString() }
+            ?: throw PatchException("X-Lite model field definition was not found: $field")
+        val nonPublicFlags = AccessFlags.PRIVATE.value or AccessFlags.PROTECTED.value
+        definition.accessFlags =
+            (definition.accessFlags and nonPublicFlags.inv()) or AccessFlags.PUBLIC.value
+    }
+}
+
+internal fun MutableClass.patchObjectFieldGetter(
     name: String,
     ownerDescriptor: String,
     field: FieldReference,
-    preferredGetterName: String,
     returnType: String = OBJECT_DESCRIPTOR,
 ) = patchBridge(
     name,
     OBJECT_DESCRIPTOR,
     returnType,
-    context.fieldReadInstructions(
-        ownerDescriptor,
-        field,
-        preferredGetterName,
-        directRead = "iget-object p0, p0, $field\nreturn-object p0",
-        getterRead = { getter ->
-            "invoke-virtual {p0}, ${getter.smaliReference()}\nmove-result-object p0\nreturn-object p0"
-        },
-    ),
+    "check-cast p0, $ownerDescriptor\niget-object p0, p0, $field\nreturn-object p0",
 )
 
 private fun MutableClass.patchBooleanFieldGetter(
-    context: BytecodePatchContext,
     name: String,
     ownerDescriptor: String,
     field: FieldReference,
-    preferredGetterName: String,
 ) = patchBridge(
     name,
     OBJECT_DESCRIPTOR,
     "Z",
-    context.fieldReadInstructions(
-        ownerDescriptor,
-        field,
-        preferredGetterName,
-        directRead = "iget-boolean p0, p0, $field\nreturn p0",
-        getterRead = { getter ->
-            "invoke-virtual {p0}, ${getter.smaliReference()}\nmove-result p0\nreturn p0"
-        },
-    ),
+    "check-cast p0, $ownerDescriptor\niget-boolean p0, p0, $field\nreturn p0",
 )
 
 private fun MutableClass.patchWideFieldGetter(
-    context: BytecodePatchContext,
     name: String,
     ownerDescriptor: String,
     field: FieldReference,
-    preferredGetterName: String,
 ) = patchBridge(
     name,
     OBJECT_DESCRIPTOR,
     "J",
-    context.fieldReadInstructions(
-        ownerDescriptor,
-        field,
-        preferredGetterName,
-        directRead = "iget-wide v0, p0, $field\nreturn-wide v0",
-        getterRead = { getter ->
-            "invoke-virtual {p0}, ${getter.smaliReference()}\nmove-result-wide v0\nreturn-wide v0"
-        },
-    ),
+    "check-cast p0, $ownerDescriptor\niget-wide v0, p0, $field\nreturn-wide v0",
 )
 
-private fun BytecodePatchContext.fieldReadInstructions(
-    ownerDescriptor: String,
-    field: FieldReference,
-    preferredGetterName: String,
-    directRead: String,
-    getterRead: (MethodReference) -> String,
-): String {
-    val owner = mutableClassDefBy(ownerDescriptor)
-    val fieldDefinition = owner.fields.singleOrNull { candidate -> candidate.toString() == field.toString() }
-        ?: throw PatchException("X-Lite model field definition was not found: $field")
-    val read =
-        if (AccessFlags.PUBLIC.isSet(fieldDefinition.accessFlags)) {
-            directRead
-        } else {
-            val getter = owner.methods.singleOrNull { method ->
-                method.name == preferredGetterName &&
-                    method.parameterTypes.isEmpty() &&
-                    method.returnType == field.type &&
-                    AccessFlags.PUBLIC.isSet(method.accessFlags)
-            } ?: throw PatchException(
-                "Expected one public X-Lite model getter $preferredGetterName for $field in $owner",
-            )
-            getterRead(getter)
-        }
-    return "check-cast p0, $ownerDescriptor\n$read"
-}
-
-private fun MutableClass.patchBridge(
+internal fun MutableClass.patchBridge(
     name: String,
     parameters: String,
     returnType: String,
@@ -496,5 +440,5 @@ private fun MutableClass.patchBridge(
     matches.single().addInstructions(0, instructions)
 }
 
-private fun MethodReference.smaliReference(): String =
+internal fun MethodReference.smaliReference(): String =
     "$definingClass->$name(${parameterTypes.joinToString("")})$returnType"

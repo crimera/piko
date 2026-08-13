@@ -98,7 +98,7 @@ public final class PostFilterRuleStore {
         return Holder.INSTANCE;
     }
 
-    static Snapshot snapshotOf(List<PostFilterRule> rules) {
+    public static Snapshot snapshotOf(List<PostFilterRule> rules) {
         return rules.isEmpty() ? Snapshot.EMPTY : new Snapshot(rules);
     }
 

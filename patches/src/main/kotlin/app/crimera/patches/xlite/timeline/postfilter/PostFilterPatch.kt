@@ -7,7 +7,6 @@ import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.timeline.XLiteTimelineSuccessFingerprint
-import app.crimera.patches.xlite.timeline.xLiteTimelineModelAdapterPatch
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -22,7 +21,7 @@ val postFilterPatch =
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
-        dependsOn(xLiteTimelineModelAdapterPatch)
+        dependsOn(xLiteTimelineTextModelAdapterPatch)
 
         xLiteSettings {
             category(Categories.CONTENT) {
