@@ -50,7 +50,6 @@ These patches have not yet been independently run and verified on the alpha. The
 ### Priority 4 — Diagnostics and development tools
 
 - [Log network diagnostics](patches/log-network-diagnostics.md)
-- [Collect AI-filter training posts](patches/collect-ai-training-posts.md)
 - [Browse tweet object](patches/browse-tweet-object.md)
 
 ## Alpha mappings observed

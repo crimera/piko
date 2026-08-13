@@ -9,15 +9,15 @@ import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.EXTENSION_PACKAGE
-import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.addInstructionsAtControlFlowLabel
 import app.morphe.util.cloneParameters
+import app.morphe.util.p0Register
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 
@@ -28,25 +28,59 @@ private const val FEATURE_SWITCH_STORE_DESCRIPTOR =
 private const val FEATURE_SWITCH_IMPORT_EXPORT_DESCRIPTOR =
     "$EXTENSION_PACKAGE/featureswitches/FeatureSwitchImportExport"
 
-private object XLiteFeatureSwitchRepositoryFingerprint : Fingerprint(
-    parameters = emptyList(),
-    returnType = "J",
-    filters = listOf(string("android_system_dns_timeout_ms")),
-    custom = { _, classDef ->
-        classDef.type.startsWith("Lcom/x/featureswitches/") &&
-            classDef.methods.any {
-            it.name == "getBoolean" &&
-                it.parameterTypes.map(CharSequence::toString) == listOf(STRING_TYPE, "Z") &&
-                it.returnType == "Z"
-        } &&
-            classDef.methods.any {
-                it.name == "getString" &&
-                    it.parameterTypes.map(CharSequence::toString) ==
-                    listOf(STRING_TYPE, STRING_TYPE) &&
-                    it.returnType == STRING_TYPE
-            }
-    },
+// This owner is preserved in 12.17.3-alpha.01. Resolve it through the patcher's descriptor index;
+// a global string fingerprint is both slower and less reliable because the old DNS string anchor
+// is no longer in this class.
+private const val FEATURE_SWITCH_REPOSITORY_DESCRIPTOR =
+    "Lcom/x/featureswitches/FeatureSwitchesRepositoryImpl;"
+
+private data class FeatureSwitchAccessor(
+    val typeName: String,
+    val parameterTypes: List<String>,
+    val returnType: String,
+    val extensionMethod: String,
+) {
+    val methodNames = listOf("get$typeName", "peek$typeName")
+    val returnOpcode =
+        when {
+            returnType == "J" || returnType == "D" -> Opcode.RETURN_WIDE
+            returnType.startsWith("L") -> Opcode.RETURN_OBJECT
+            else -> Opcode.RETURN
+        }
+    val moveResultOpcode =
+        when {
+            returnOpcode == Opcode.RETURN_WIDE -> "move-result-wide"
+            returnOpcode == Opcode.RETURN_OBJECT -> "move-result-object"
+            else -> "move-result"
+        }
+}
+
+private fun scalarAccessor(
+    typeName: String,
+    valueType: String,
+    extensionMethod: String,
+) = FeatureSwitchAccessor(
+    typeName = typeName,
+    parameterTypes = listOf(STRING_TYPE, valueType),
+    returnType = valueType,
+    extensionMethod = extensionMethod,
 )
+
+private val FEATURE_SWITCH_ACCESSORS =
+    listOf(
+        scalarAccessor("Boolean", "Z", "resolveBoolean"),
+        scalarAccessor("Float", "F", "resolveFloat"),
+        scalarAccessor("Int", "I", "resolveInt"),
+        scalarAccessor("Long", "J", "resolveLong"),
+        scalarAccessor("Double", "D", "resolveDouble"),
+        FeatureSwitchAccessor(
+            "String",
+            listOf(STRING_TYPE, STRING_TYPE),
+            STRING_TYPE,
+            "resolveString",
+        ),
+        FeatureSwitchAccessor("List", listOf(STRING_TYPE), LIST_TYPE, "resolveList"),
+    )
 
 @Suppress("unused")
 val featureFlagPatch =
@@ -86,110 +120,60 @@ val featureFlagPatch =
         }
 
         execute {
-            val repositoryMatches = XLiteFeatureSwitchRepositoryFingerprint.matchAll()
-            if (repositoryMatches.size != 1) {
-                throw PatchException(
-                    "Expected one X-Lite feature switch repository, found " +
-                        "${repositoryMatches.size}: " +
-                        repositoryMatches.joinToString { it.originalMethod.toString() },
-                )
+            val repository = mutableClassDefBy(FEATURE_SWITCH_REPOSITORY_DESCRIPTOR)
+            FEATURE_SWITCH_ACCESSORS.forEach { accessor ->
+                val matches = repository.methods.matching(accessor)
+                requireAccessorMatches(accessor, matches)
+                matches.forEach { it.cloneParameters(repository).hookReturns(accessor) }
             }
-
-            val repository =
-                mutableClassDefBy(repositoryMatches.single().originalMethod.definingClass)
-            val methods = repository.methods
-
-            val booleanMethods = methods.withSignature(listOf(STRING_TYPE, "Z"), "Z")
-            val floatMethods = methods.withSignature(listOf(STRING_TYPE, "F"), "F")
-            val intMethods = methods.withSignature(listOf(STRING_TYPE, "I"), "I")
-            val longMethods = methods.withSignature(listOf(STRING_TYPE, "J"), "J")
-            val doubleMethods = methods.withSignature(listOf(STRING_TYPE, "D"), "D")
-            val stringMethods = methods.withSignature(listOf(STRING_TYPE, STRING_TYPE), STRING_TYPE)
-            val listMethods = methods.withSignature(listOf(STRING_TYPE), LIST_TYPE)
-
-            requireMethodCount("boolean", booleanMethods, 2)
-            requireMethodCount("float", floatMethods, 1)
-            requireMethodCount("int", intMethods, 1)
-            requireMethodCount("long", longMethods, 1)
-            requireMethodCount("double", doubleMethods, 1)
-            requireMethodCount("string", stringMethods, 1)
-            requireMethodCount("list", listMethods, 1)
-
-            val hookedBooleanMethods = booleanMethods.map { it.cloneParameters(repository) }
-            val hookedFloatMethod = floatMethods.single().cloneParameters(repository)
-            val hookedIntMethod = intMethods.single().cloneParameters(repository)
-            val hookedLongMethod = longMethods.single().cloneParameters(repository)
-            val hookedDoubleMethod = doubleMethods.single().cloneParameters(repository)
-            val hookedStringMethod = stringMethods.single().cloneParameters(repository)
-            val hookedListMethod = listMethods.single().cloneParameters(repository)
-
-            hookedBooleanMethods.forEach {
-                it.hookReturns(Opcode.RETURN, "resolveBoolean", "Z", "move-result")
-            }
-            hookedFloatMethod.hookReturns(Opcode.RETURN, "resolveFloat", "F", "move-result")
-            hookedIntMethod.hookReturns(Opcode.RETURN, "resolveInt", "I", "move-result")
-            hookedLongMethod.hookReturns(
-                Opcode.RETURN_WIDE,
-                "resolveLong",
-                "J",
-                "move-result-wide",
-            )
-            hookedDoubleMethod.hookReturns(
-                Opcode.RETURN_WIDE,
-                "resolveDouble",
-                "D",
-                "move-result-wide",
-            )
-            hookedStringMethod.hookReturns(
-                Opcode.RETURN_OBJECT,
-                "resolveString",
-                STRING_TYPE,
-                "move-result-object",
-            )
-            hookedListMethod.hookReturns(
-                Opcode.RETURN_OBJECT,
-                "resolveList",
-                LIST_TYPE,
-                "move-result-object",
-            )
         }
     }
 
-private fun Collection<MutableMethod>.withSignature(
-    parameters: List<String>,
-    returnType: String,
-) = filter {
-    it.parameterTypes.map(CharSequence::toString) == parameters && it.returnType == returnType
+private fun Collection<MutableMethod>.matching(
+    accessor: FeatureSwitchAccessor,
+) = filter { method ->
+    AccessFlags.PUBLIC.isSet(method.accessFlags) &&
+        !AccessFlags.STATIC.isSet(method.accessFlags) &&
+        method.name in accessor.methodNames &&
+        method.parameterTypes.map(CharSequence::toString) == accessor.parameterTypes &&
+        method.returnType == accessor.returnType
 }
 
-private fun requireMethodCount(
-    type: String,
+private fun requireAccessorMatches(
+    accessor: FeatureSwitchAccessor,
     methods: List<MutableMethod>,
-    expectedCount: Int,
 ) {
-    if (methods.size == expectedCount) return
+    val actualNames = methods.map(MutableMethod::getName).toSet()
+    if (methods.size == accessor.methodNames.size && actualNames == accessor.methodNames.toSet()) return
+
     throw PatchException(
-        "Expected $expectedCount X-Lite $type feature switch getter(s), found ${methods.size}: " +
-            methods.joinToString(),
+        "Expected X-Lite ${accessor.typeName.lowercase()} accessors " +
+            "${accessor.methodNames.joinToString()} exactly once, found ${methods.joinToString()}",
     )
 }
 
-private fun MutableMethod.hookReturns(
-    returnOpcode: Opcode,
-    extensionMethod: String,
-    valueType: String,
-    moveResultOpcode: String,
-) {
+private fun MutableMethod.hookReturns(accessor: FeatureSwitchAccessor) {
     val returnIndices =
-        instructions.indices.filter { instructions[it].opcode == returnOpcode }.asReversed()
+        instructions.indices.filter { instructions[it].opcode == accessor.returnOpcode }.asReversed()
     if (returnIndices.isEmpty()) {
-        throw PatchException("No $returnOpcode found in X-Lite feature switch getter: $this")
+        throw PatchException(
+            "No ${accessor.returnOpcode} found in X-Lite ${accessor.typeName.lowercase()} accessor: $this",
+        )
     }
 
+    val keyRegister = p0Register + 1
     returnIndices.forEach { returnIndex ->
         val valueRegister = getInstruction<OneRegisterInstruction>(returnIndex).registerA
+        val lastValueRegister =
+            valueRegister + if (accessor.returnOpcode == Opcode.RETURN_WIDE) 1 else 0
+        if (keyRegister > 15 || lastValueRegister > 15) {
+            throw PatchException(
+                "X-Lite ${accessor.typeName.lowercase()} accessor uses registers outside " +
+                    "the invoke-static 35c range: key=v$keyRegister, value=v$valueRegister",
+            )
+        }
         val valueArgument =
-            if (returnOpcode == Opcode.RETURN_WIDE) {
+            if (accessor.returnOpcode == Opcode.RETURN_WIDE) {
                 "v$valueRegister, v${valueRegister + 1}"
             } else {
                 "v$valueRegister"
@@ -197,8 +181,8 @@ private fun MutableMethod.hookReturns(
         addInstructionsAtControlFlowLabel(
             returnIndex,
             """
-                invoke-static {p1, $valueArgument}, $FEATURE_SWITCH_STORE_DESCRIPTOR->$extensionMethod(Ljava/lang/String;$valueType)$valueType
-                $moveResultOpcode v$valueRegister
+                invoke-static {p1, $valueArgument}, $FEATURE_SWITCH_STORE_DESCRIPTOR->${accessor.extensionMethod}(Ljava/lang/String;${accessor.returnType})${accessor.returnType}
+                ${accessor.moveResultOpcode} v$valueRegister
             """.trimIndent(),
         )
     }

@@ -2,24 +2,35 @@
 
 ## Status
 
-**Unported / not yet verified on 12.17.3-alpha.01.**
+**Patch-applied and final-Dex verified on 12.17.3-alpha.01. Runtime verification is pending because no ADB device is connected.**
 
 Source: `patches/src/main/kotlin/app/crimera/patches/xlite/misc/featureflags/FeatureFlagPatch.kt`
 
-## Breakage
+## Target evidence
 
-Unknown until this patch is run independently against the exact alpha APK. Do not assume a successful build means its fingerprints or runtime boundary remain valid.
+- Package/version: `com.twitter.android` `12.17.3-alpha.01`
+- Input APK SHA-256: `b7dd95a6b7ea222ecf946766dc8e971f3e892a2de6b6fdd8bf4bd660c491867e`
+- MPP: `patches/build/libs/patches-3.9.0-dev.4.mpp`
+- MPP SHA-256: `40ad73f7d79731f7ff2c422f8a37f6406f2f675f58eca2e144a431716b917480`
+- Reviewed output: `/tmp/twitter-12.17.3-alpha.01-feature-switch-reviewed.apk`
+- Output SHA-256: `5ab6cdf2f3b45ffc64caa0c629f5038492fbd9e48caa02ff7b2b676638bc1772`
 
-## Port checklist
+## Resolution and mutation
 
-1. Run this patch alone against 12.17.3-alpha.01 and record the exact match/failure.
-2. Compare the matched alpha bytecode with 12.15.1 and 12.14.0.
-3. Remove hardcoded obfuscated descriptors, method names, generated literals, or removed host resources.
-4. Assert expected fingerprint cardinality.
-5. Build the MPP and inspect the final DEX for a reachable mutation.
-6. Install and test the feature on alpha.
-7. Repatch and regression-test 12.15.1 and 12.14.0.
+The alpha contains the preserved owner:
 
-## Findings and fix
+```text
+Lcom/x/featureswitches/FeatureSwitchesRepositoryImpl;
+```
 
-Not started. Add exact root cause, stable anchors, mutation, and verification evidence here during the port.
+The patch now uses `mutableClassDefBy` for indexed owner lookup instead of a global fingerprint. It then matches the exact public `get*` and `peek*` names, complete parameter descriptors, and return descriptors. Cardinality is asserted as one `get` and one `peek` accessor for each of Boolean, Float, Int, Long, Double, String, and List.
+
+Each matched method is cloned with preserved parameter registers. Every reachable return is wrapped with the corresponding typed `FeatureSwitchStore.resolve*` call. The final owner smali contains 28 resolver calls: two return paths for each of 14 accessors. The APK was decoded successfully after patching, proving the injected register and return shapes assemble.
+
+The old `android_system_dns_timeout_ms` string anchor is not used: it is outside this repository implementation in the alpha. The 12.14.0 artifact uses a different, obfuscated repository owner and is not covered by the current alpha-only compatibility declaration.
+
+## Validation
+
+- `:patches:build`: passed.
+- Final owner smali contains 28 resolver calls with 28 paired `move-result*` instructions.
+- Runtime install/UI verification: pending; no ADB device is connected.
