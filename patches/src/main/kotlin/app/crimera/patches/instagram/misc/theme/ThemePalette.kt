@@ -137,7 +137,6 @@ private val materialYouBaseMappings =
         "bds_blue_0" to "@color/piko_dynamic_primary",
         "bds_blue_1" to "@color/piko_dynamic_primary_pressed",
         "bds_blue_2" to "@color/piko_dynamic_primary_container",
-        "bottom_sheet_undo_redo_color" to "@color/piko_dynamic_background",
         "badge_color" to "@color/piko_dynamic_primary",
         "igds_prism_indigo_1000" to "@color/piko_dynamic_primary_container",
     )
