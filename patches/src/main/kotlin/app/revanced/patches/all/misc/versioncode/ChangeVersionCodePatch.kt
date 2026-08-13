@@ -1,13 +1,12 @@
 package app.revanced.patches.all.misc.versioncode
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.Constants.INSTAGRAM_442_VERSION_NAME
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.intOption
 import app.morphe.patcher.patch.resourcePatch
 import app.morphe.util.getNode
 import org.w3c.dom.Element
-
-private const val INSTAGRAM_442_VERSION_NAME = "442.0.0.46.79"
 
 @Suppress("unused")
 val changeVersionCodePatch =
