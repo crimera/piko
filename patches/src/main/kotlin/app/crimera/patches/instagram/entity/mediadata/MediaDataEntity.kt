@@ -62,9 +62,15 @@ val mediaDataEntity =
             }
 
             // Extracting get video variants.
+            // The first interface call in this fingerprint is List.isEmpty() on Instagram 442.
+            // Select the actual list-returning method instead.
             VideoMediaInIGTVFeedHasVideoVariantsFingerprint.method.apply {
-                val firstInvokeInterfaceInstruction = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_INTERFACE))
-                val getVideoVariantsMethodName = firstInvokeInterfaceInstruction.methodExtractor().name
+                val getVideoVariantsMethodName = instructions
+                    .filter { it.opcode == Opcode.INVOKE_INTERFACE }
+                    .map { getInstruction(it.location.index).methodExtractor() }
+                    .firstOrNull { it.returnType == "Ljava/util/List;" }
+                    ?.name
+                    ?: error("Could not find the video variants list method")
                 GetVideoVariantsV1ExtensionFingerprint.changeFirstString(getVideoVariantsMethodName)
             }
 
@@ -146,7 +152,7 @@ val mediaDataEntity =
                     val strIndex = stringMatches.first().index
                     method.apply {
                         val imageInfoListFieldName = getInstruction(strIndex + 2).fieldExtractor().name
-                        GetImageVariantsExtensionFingerprint.changeFirstString(imageInfoListFieldName)
+                        GetImageVariantsExtensionFingerprint.changeStringAt(1, imageInfoListFieldName)
                     }
                 }
             }
