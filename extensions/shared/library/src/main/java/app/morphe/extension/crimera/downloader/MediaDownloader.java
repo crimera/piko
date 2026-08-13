@@ -31,6 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import app.morphe.extension.crimera.constants.ExtensionStrings;
 import app.morphe.extension.crimera.PikoUtils;
+import app.morphe.extension.shared.Utils;
 
 public class MediaDownloader {
     private static final String CHANNEL_ID = "media_download_channel";
@@ -42,8 +43,17 @@ public class MediaDownloader {
     private boolean isDownloading = false;
 
     public MediaDownloader(Context context) {
-        this.context = context;
-        this.notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Context resolvedContext = context != null ? context : Utils.getContext();
+        if (resolvedContext == null) {
+            throw new IllegalStateException("Download context is unavailable");
+        }
+
+        Context applicationContext = resolvedContext.getApplicationContext();
+        this.context = applicationContext != null ? applicationContext : resolvedContext;
+        this.notificationManager = this.context.getSystemService(NotificationManager.class);
+        if (notificationManager == null) {
+            throw new IllegalStateException("Notification service is unavailable");
+        }
         createNotificationChannel();
     }
 
