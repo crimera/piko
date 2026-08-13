@@ -222,7 +222,10 @@ public class MediaData extends Entity {
     }
 
     private List getVideoVariantsV2() throws Exception {
-        List variantList = (List) super.getField(this.getMoreExtendedData(), "fieldName");
+        // Instagram 442 stores video_versions on the extended Media object itself.
+        // getMoreExtendedData() points to a different nested object and causes the
+        // field lookup to fail for this target.
+        List variantList = (List) super.getField(this.getExtendedData(), "fieldName");
 
         List<VideoData> videoList = new ArrayList<>();
         variantList.forEach(item -> videoList.add(new VideoData(item)));
@@ -248,7 +251,7 @@ public class MediaData extends Entity {
 
     public String getVideoLink() throws Exception {
         List<VideoData> videoDataList = this.getVideoVariants();
-        if(videoDataList!=null){
+        if(videoDataList != null && !videoDataList.isEmpty()){
             return videoDataList.get(0).getUrl();
         }
         return null;
