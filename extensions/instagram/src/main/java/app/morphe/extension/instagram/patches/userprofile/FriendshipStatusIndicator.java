@@ -19,9 +19,11 @@ import android.content.Context;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.util.TypedValue;
-import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
@@ -32,8 +34,11 @@ import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
+import app.morphe.extension.instagram.constants.UI;
 
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.ResourceUtils;
+import app.morphe.extension.shared.ui.Dim;
 
 import com.instagram.common.session.UserSession;
 
@@ -42,7 +47,7 @@ public class FriendshipStatusIndicator {
     private static void friendshipStatusDialogBox(Context context, UserFriendshipStatus userFriendshipStatus) {
         InstagramDialogBox dialog = new InstagramDialogBox(context);
 
-        dialog.setNegativeButton(str("piko_cancel"),null);
+        dialog.setPositiveButton(str("piko_ok"), null);
         dialog.setTitle(str("piko_friendship_status"));
         dialog.setCancelable(false);
         dialog.setCanceledOnTouchOutside(false);
@@ -70,17 +75,22 @@ public class FriendshipStatusIndicator {
         dlg.show();
     }
 
-    private static void addFriendshipTextView(View internalBadgeTextView, UserFriendshipStatus userFriendshipStatus, String text, String colorHex) throws Exception {
+    private static void addFriendshipTextView(
+            View internalBadgeTextView,
+            UserFriendshipStatus userFriendshipStatus,
+            String text,
+            String indicatorColorHex,
+            String indicatorIconDrawable
+    ) throws Exception {
         if (internalBadgeTextView == null) return;
 
         ViewParent parent = internalBadgeTextView.getParent();
         if (parent instanceof ViewGroup) {
             ViewGroup viewGroup = (ViewGroup) parent;
 
-            // 1. Prevent adding duplicate views using a unique tag
             String tag = "piko_friendship_status_textview";
             if (viewGroup.findViewWithTag(tag) != null) {
-                return; // Already added
+                return;
             }
 
             Context context = internalBadgeTextView.getContext();
@@ -88,24 +98,36 @@ public class FriendshipStatusIndicator {
             friendshipStatusTextView.setTag(tag);
             friendshipStatusTextView.setText(text);
 
-            // 2. Set text color to Black
-            friendshipStatusTextView.setTextColor(Color.BLACK);
+            int secondaryTextColor = UI.getThemedColour("igds_color_secondary_text");
+            friendshipStatusTextView.setTextColor(secondaryTextColor);
 
-            // Fetch display density for DP to PX conversion
-            float density = context.getResources().getDisplayMetrics().density;
+            int indicatorColor = indicatorColorHex == null
+                    ? secondaryTextColor
+                    : Color.parseColor(indicatorColorHex);
+            Drawable statusIcon = ResourceUtils
+                    .getDrawable(indicatorIconDrawable)
+                    .mutate();
+            statusIcon.setColorFilter(
+                    new PorterDuffColorFilter(indicatorColor, PorterDuff.Mode.SRC_ATOP)
+            );
+            // Keep the text baseline native while optically centering the bottom-heavy friend icon.
+            statusIcon.setBounds(
+                    0,
+                    -Dim.dp2,
+                    statusIcon.getIntrinsicWidth(),
+                    statusIcon.getIntrinsicHeight() - Dim.dp2
+            );
 
-            // 3. Create rounded background with Grey color
-            GradientDrawable background = new GradientDrawable();
-            background.setCornerRadius(8.0f * density); // 8dp rounded corners
-            friendshipStatusTextView.setBackgroundColor(Color.parseColor(colorHex));
-
-            // 4. Set left and right padding (16dp gap)
-            int paddingPx = (int) (16.0f * density);
-            friendshipStatusTextView.setPadding(paddingPx, 0, paddingPx, 0);
-
-            // 5. Set font size to 12sp and typeface to bold.
+            friendshipStatusTextView.setCompoundDrawablePadding(Dim.dp6);
+            friendshipStatusTextView.setCompoundDrawablesRelative(
+                    statusIcon,
+                    null,
+                    null,
+                    null
+            );
+            friendshipStatusTextView.setPadding(0, Dim.dp4, 0, Dim.dp4);
             friendshipStatusTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
-            friendshipStatusTextView.setTypeface(null, Typeface.BOLD); // Bold.
+            friendshipStatusTextView.setTypeface(null, Typeface.NORMAL);
 
             friendshipStatusTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -114,7 +136,6 @@ public class FriendshipStatusIndicator {
                 }
             });
 
-            // 6. Place it directly underneath the target view
             int targetIndex = viewGroup.indexOfChild(internalBadgeTextView);
             viewGroup.addView(friendshipStatusTextView, targetIndex + 1);
         }
@@ -134,27 +155,34 @@ public class FriendshipStatusIndicator {
                 Boolean followed_by = userFriendshipStatus.getFollowBackStatus();
                 Boolean following = userFriendshipStatus.getFollowingStatus();
 
-                String indicatorText = followed_by ? str("piko_fbi_follows_you") : str("piko_fbi_doesnt_follows_you");
-                indicatorText = followed_by && following ? str("piko_fbi_following_each_other") : indicatorText;
-
                 Entity entity = new Entity(badgeObject);
                 TextView badgeView = (TextView) entity.getMethod("getView");
 
-                String colorHex = "#CCCCCC";
-                if(Pref.followBackColorIndicator()){
-                    colorHex = "#EB4941"; // Red Shade.
-
-                    if(followed_by){
-                        if(following){
-                            colorHex = "#3389DF";
-                        } else{
-                            colorHex = "#3CC176";
-
-                        }
-                    }
+                String indicatorText;
+                String indicatorIconDrawable;
+                String indicatorColorHex;
+                boolean useStatusColor = Pref.followBackColorIndicator();
+                if (followed_by && following) {
+                    indicatorText = str("piko_fbi_following_each_other");
+                    indicatorIconDrawable = "fb_ic_friend_confirm_outline_20";
+                    indicatorColorHex = useStatusColor ? "#3389DF" : null;
+                } else if (followed_by) {
+                    indicatorText = str("piko_fbi_follows_you");
+                    indicatorIconDrawable = "fb_ic_friend_add_outline_20";
+                    indicatorColorHex = useStatusColor ? "#3CC176" : null;
+                } else {
+                    indicatorText = str("piko_fbi_doesnt_follows_you");
+                    indicatorIconDrawable = "fb_ic_friend_remove_outline_20";
+                    indicatorColorHex = useStatusColor ? "#EB4941" : null;
                 }
 
-                addFriendshipTextView(badgeView, userFriendshipStatus, indicatorText, colorHex);
+                addFriendshipTextView(
+                        badgeView,
+                        userFriendshipStatus,
+                        indicatorText,
+                        indicatorColorHex,
+                        indicatorIconDrawable
+                );
 
             } catch (Exception ex) {
                 Logger.printException(() -> "Failed follow back indicator", ex);
