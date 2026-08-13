@@ -7,6 +7,8 @@ import app.morphe.patcher.patch.resourcePatch
 import app.morphe.util.getNode
 import org.w3c.dom.Element
 
+private const val INSTAGRAM_442_VERSION_NAME = "442.0.0.46.79"
+
 @Suppress("unused")
 val changeVersionCodePatch =
     resourcePatch(
@@ -36,6 +38,13 @@ val changeVersionCodePatch =
             document("AndroidManifest.xml").use { document ->
                 val manifestElement = document.getNode("manifest") as Element
                 manifestElement.setAttribute("android:versionCode", "$versionCode")
+
+                // Keep Morphe's installed-app metadata aligned with the Instagram build that
+                // this compatibility branch targets, including cloned package names.
+                val packageName = manifestElement.getAttribute("package")
+                if (packageName.startsWith("com.instagram.android")) {
+                    manifestElement.setAttribute("android:versionName", INSTAGRAM_442_VERSION_NAME)
+                }
             }
         }
     }

@@ -49,7 +49,6 @@ public class MediaData extends Entity {
 
         String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
-        // Handle the edge case where the ID is 0
         if (instaId == 0) {
             return String.valueOf(alphabet.charAt(0));
         }
@@ -77,8 +76,6 @@ public class MediaData extends Entity {
     public PostType getPostType() {
         try{
             String postType = this.getPostTypeKey().toLowerCase();
-            //TODO: for some reason clips are not recogonised.
-            // Need to fix it later.
             if(postType.equals("clips")){
                 return PostType.REEL;
             }
@@ -139,7 +136,6 @@ public class MediaData extends Entity {
         if (mediaType.equals(MediaType.VIDEO)) return videoExtension;
         if (mediaType.equals(MediaType.AUDIO)) return audioExtension;
 
-        // Default fallback just in case.
         return imageExtension;
     }
 
@@ -157,7 +153,7 @@ public class MediaData extends Entity {
     }
 
     public UserData getUserDataWithoutUserSession() throws Exception {
-        Object userData = super.getMethod(this.getExtendedData(), "methodName");
+        Object userData = super.getMethod(this.obj, "methodName");
         return new UserData(userData);
     }
 
@@ -190,7 +186,7 @@ public class MediaData extends Entity {
     }
 
     public List<Object> getMediaList() throws Exception {
-        List mediaList = (List) super.getMethod(this.getExtendedData(), "methodName");
+        List mediaList = (List) super.getMethod(this.obj, "methodName");
         if (mediaList != null) {
             return mediaList;
         }

@@ -6,7 +6,6 @@
 
 package app.crimera.patches.instagram.entity.mediadata
 
-import app.crimera.patches.instagram.entity.decoder.EditMediaInfoGetCurrentMediaIdFingerprint
 import app.crimera.patches.instagram.entity.decoder.MEDIAEXT_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.utils.changeFirstString
@@ -28,6 +27,11 @@ val mediaDataEntity =
         execute {
             GetHelperClassExtensionFingerprint.changeFirstString(classNameToExtension(MEDIAEXT_CLASS_NAME))
 
+            // Instagram 442 / VC148 Media layout.
+            GetExtendedDataExtensionFingerprint.changeFirstString("A04")
+            GetMediaListExtensionFingerprint.changeFirstString("A8c")
+            GetTrackDataIntfExtensionFingerprint.changeFirstString("A0H")
+
             // Extracting get original sound info data using media and user session.
             GetOriginalSoundDataIntfExtensionFingerprint.changeFirstString(GetOriginalSoundDataIntfFromMediaFingerprint.method.name)
 
@@ -41,7 +45,7 @@ val mediaDataEntity =
                 GetImageVariantsExtensionFingerprint.changeStringAt(1, imageVariantsMethodName)
             }
 
-            // Extracting the get mention set method used media helper class.
+            // Compatibility-only reel mention mapping for Instagram 442.
             GetMentionSetExtensionFingerprint.changeFirstString(LiveTreeMediaDictReelsMentionFingerprint.method.name)
 
             InstagramMainActivityNotificationRelatedFingerprint.apply {
@@ -72,45 +76,6 @@ val mediaDataEntity =
                 IsVideoExtensionFingerprint.changeFirstString(isVideoCallingMethodName)
             }
 
-            // Extraction of extended media data field.
-            // Extraction of media list from extended media data.
-            var foundMediaListMethod = false
-            EditMediaInfoFragmentMediaSizeFingerprint.method.apply {
-                val firstReturnIndex = indexOfFirstInstruction(Opcode.RETURN)
-
-                val extendedDataFieldIndex = indexOfFirstInstruction(firstReturnIndex, Opcode.IGET_OBJECT)
-                // If iget-object is found after return instruction.
-                if (extendedDataFieldIndex > 0) {
-                    val extendedDataFieldName =
-                        getInstruction(
-                            extendedDataFieldIndex,
-                        ).fieldExtractor().name
-                    val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
-
-                    GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
-                    GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
-                    foundMediaListMethod = true
-                }
-            }
-
-            // Backup for media list extraction if the first fingerprint fails.
-            if (!foundMediaListMethod) {
-                GetAndroidLinkFromMediaObject.method.apply {
-                    val firstIfNeIndex = indexOfFirstInstruction(Opcode.IF_NE)
-
-                    val extendedDataFieldIndex = indexOfFirstInstruction(firstIfNeIndex, Opcode.IGET_OBJECT)
-                    val extendedDataFieldName =
-                        getInstruction(
-                            extendedDataFieldIndex,
-                        ).fieldExtractor().name
-                    val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
-
-                    GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
-                    GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
-                    foundMediaListMethod = true
-                }
-            }
-
             // Extraction of media pkid from media class.
             FanClubContentPreviewInteractorImplFingerprint.method.apply {
                 val strIndex = FanClubContentPreviewInteractorImplFingerprint.stringMatches[1].index
@@ -119,10 +84,10 @@ val mediaDataEntity =
                 GetMediaPkIdExtensionFingerprint.changeFirstString(mediaPkIdMethodName)
             }
 
-            // Extraction of user data used in extended media class.
+            // Instagram 442 exposes the user getter directly on Media.
             GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(LiveTreeMediaDictGetUserFingerprint.method.name)
 
-            // Extraction of description
+            // Extraction of description.
             val commentObjectClassName: String
             CommentToStringFingerprint.apply {
                 commentObjectClassName = classDef.type
@@ -135,24 +100,9 @@ val mediaDataEntity =
             val getCommentDataFromMediaMethodName =
                 mutableClassDefBy { it.type == MEDIAEXT_CLASS_NAME }
                     .methods
-                    .first {
-                        it.returnType ==
-                            commentObjectClassName
-                    }.name
+                    .first { it.returnType == commentObjectClassName }
+                    .name
             GetDescriptionTextExtensionFingerprint.changeFirstString(getCommentDataFromMediaMethodName)
-
-            // Extraction of trackInfo
-            MusicAudioTypeEnumStringFingerprint.method.apply {
-                instructions.filter { it.opcode == Opcode.INVOKE_STATIC }.firstOrNull {
-                    val methodExt = it.methodExtractor()
-                    if (methodExt.returnType != "V") {
-                        GetTrackDataIntfExtensionFingerprint.changeFirstString(methodExt.name)
-                        true
-                    } else {
-                        false
-                    }
-                }
-            }
 
             // Message audio.
             IgPlayerControllerRelatedFingerprint.method.apply {
@@ -184,10 +134,11 @@ val mediaDataEntity =
                         .name
                 GetMoreExtendedDataExtensionFingerprint.changeFirstString(moreExtendedMediaDataFieldName)
 
-                val strIndex = stringMatches.last().index
+                // In 442 the variants field follows the explicit video_versions key.
+                val videoVersionsIndex = stringMatches.first { it.string == "video_versions" }.index
                 method.apply {
-                    val videoVariantsListFieldName = getInstruction(strIndex + 2).fieldExtractor().name
-
+                    val fieldIndex = indexOfFirstInstruction(videoVersionsIndex, Opcode.IGET_OBJECT)
+                    val videoVariantsListFieldName = getInstruction(fieldIndex).fieldExtractor().name
                     GetVideoVariantsV2ExtensionFingerprint.changeFirstString(videoVariantsListFieldName)
                 }
 
@@ -208,7 +159,5 @@ val mediaDataEntity =
                     GetPostTypeExtensionFingerprint.changeFirstString(productTypeFieldName)
                 }
             }
-
-            // End.
         }
     }

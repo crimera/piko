@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.HashMap;
 import app.morphe.extension.crimera.PikoUtils;
 
-import com.instagram.model.mediasize.VideoVersion;
-import com.instagram.model.mediasize.ImmutablePandoVideoVersion;
-import com.instagram.model.mediasize.VideoVersionIntf;
+import com.instagram.api.schemas.VideoVersion;
+import com.instagram.api.schemas.ImmutablePandoVideoVersion;
+import com.instagram.api.schemas.VideoVersionIntf;
 
 import app.morphe.extension.crimera.downloader.MediaType;
 

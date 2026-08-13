@@ -19,6 +19,7 @@ import com.android.tools.smali.dexlib2.AccessFlags
 internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
 internal const val LIVE_TREE_MEDIA_DICT_CLASS = "/LiveTreeMediaDict;"
+internal const val MEDIA_CLASS_DESCRIPTOR = "Lcom/instagram/feed/media/Media;"
 
 internal object GetHelperClassExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
@@ -128,7 +129,7 @@ internal object EditMediaInfoFragmentMediaSizeFingerprint : Fingerprint(
     definingClass = EDIT_MEDIA_INFO_FRAGMENT_CLASS,
 )
 
-// Backup fingerprint to find a media list method.
+// Backup fingerprint retained for older targets.
 internal object GetAndroidLinkFromMediaObject : Fingerprint(
     returnType = "Lcom/instagram/model/androidlink/AndroidLink;",
     definingClass = "Lcom/instagram/profile/fragment/UserDetailFragment;",
@@ -169,20 +170,23 @@ internal object ExtMediaDictVideoInfoMapperFingerprint : Fingerprint(
         listOf(
             "video_subtitles_uri",
             "video_to_carousel_cut_info",
+            "video_versions",
         ),
     returnType = "Ljava/util/Map;",
 )
 
+// Instagram 442 no longer exposes reel_mentions through LiveTreeMediaDict with a List return.
+// This compatibility fingerprint keeps the shared MediaData setup patchable; story-mention
+// behavior should be treated as best-effort for this target.
 internal object LiveTreeMediaDictReelsMentionFingerprint : Fingerprint(
-    returnType = "Ljava/util/List;",
+    returnType = "V",
     strings = listOf("reel_mentions"),
-    definingClass = LIVE_TREE_MEDIA_DICT_CLASS,
 )
 
 internal object LiveTreeMediaDictGetUserFingerprint : Fingerprint(
     returnType = USER_MODEL_CLASS_NAME,
     strings = listOf("user"),
-    definingClass = LIVE_TREE_MEDIA_DICT_CLASS,
+    definingClass = MEDIA_CLASS_DESCRIPTOR,
 )
 
 internal object ExtMediaDictImageInfoMapperFingerprint : Fingerprint(

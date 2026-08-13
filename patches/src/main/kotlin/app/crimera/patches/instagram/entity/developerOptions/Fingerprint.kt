@@ -37,5 +37,5 @@ internal object ExperimentsValueBuilderFingerprint : Fingerprint(
 )
 
 internal object ExperimentsGetMobileConfigSpecifier : Fingerprint(
-    strings = listOf("ExperimentParameter", "Failed to get config key with specifier:%d"),
+    strings = listOf("ExperimentParameter"),
 )

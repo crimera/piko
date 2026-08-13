@@ -315,11 +315,14 @@ private fun installLegacyOnResumeThemeSync(
                     null
                 }
             }
-    if (selectedIdReads.size != 1) {
+    if (selectedIdReads.size !in 1..2) {
         throw PatchException(
-            "Expected one selected RadioItem id read, found ${selectedIdReads.size}",
+            "Expected one or two selected RadioItem id reads, found ${selectedIdReads.size}",
         )
     }
+    // Instagram 442 reads the same id field once while preparing the row and again for
+    // the selected value. The latter is the value that feeds the RadioGroup constructor.
+    val selectedIdIndex = selectedIdReads.last()
 
     val packedIdsRegister =
         method.findFreeRegister(
@@ -330,7 +333,7 @@ private fun installLegacyOnResumeThemeSync(
         )
     val selectionTempRegister =
         method.findFreeRegister(
-            selectedIdReads.single() + 1,
+            selectedIdIndex + 1,
             selectedIdRegister,
         )
     val firstParameter = firstParameterRegister(method)
@@ -362,7 +365,6 @@ private fun installLegacyOnResumeThemeSync(
         move-result-object v$listenerRegister
         """.trimIndent(),
     )
-    val selectedIdIndex = selectedIdReads.single()
     method.addInstructions(
         selectedIdIndex + 1,
         """

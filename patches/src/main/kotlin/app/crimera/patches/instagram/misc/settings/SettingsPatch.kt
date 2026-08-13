@@ -23,6 +23,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
@@ -30,6 +31,8 @@ import app.morphe.util.findFreeRegister
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 @Suppress("unused")
 val settingsPatch =
@@ -87,14 +90,34 @@ val settingsPatch =
                 )
             }
 
-            // For welcome message.
+            // For welcome message. Instagram 442 has a Bundle.getString() result before
+            // requireContext(), so resolve the actual Context-producing call instead of using
+            // the first MOVE_RESULT_OBJECT after the marker.
             MainFeedFragmentOnCreateFingerprint.apply {
                 val strIndex = stringMatches[0].index
 
                 method.apply {
-                    val contextIndex = indexOfFirstInstruction(strIndex, Opcode.MOVE_RESULT_OBJECT)
-                    val contextInstruction = getInstruction(contextIndex)
-                    val contextRegister = contextInstruction.registersUsed[0]
+                    val contextInvokeIndex =
+                        instructions.withIndex().firstOrNull { (index, instruction) ->
+                            if (index <= strIndex || instruction.opcode !in setOf(
+                                    Opcode.INVOKE_VIRTUAL,
+                                    Opcode.INVOKE_INTERFACE,
+                                )
+                            ) {
+                                false
+                            } else {
+                                val reference =
+                                    (instruction as? ReferenceInstruction)?.reference as? MethodReference
+                                reference?.returnType == "Landroid/content/Context;"
+                            }
+                        }?.index
+                            ?: throw PatchException("Could not find MainFeedFragment Context getter")
+
+                    val contextIndex = indexOfFirstInstruction(contextInvokeIndex + 1, Opcode.MOVE_RESULT_OBJECT)
+                    if (contextIndex < 0) {
+                        throw PatchException("MainFeedFragment Context getter has no move-result-object")
+                    }
+                    val contextRegister = getInstruction(contextIndex).registersUsed[0]
 
                     addInstruction(
                         contextIndex + 1,
