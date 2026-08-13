@@ -120,12 +120,8 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
     }
 
     private void openGroup(SettingsNode.Group group) {
-        Activity activity = requireActivity();
-        int containerId = app.morphe.extension.shared.ResourceUtils.getIdentifierOrThrow(
-                activity,
-                app.morphe.extension.shared.ResourceType.ID,
-                "fragment_container"
-        );
+        requireActivity();
+        int containerId = XLiteSettingsActivity.SETTINGS_CONTAINER_ID;
         getFragmentManager()
                 .beginTransaction()
                 .replace(containerId, forGroup(group))
@@ -137,11 +133,7 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
         Activity activity = requireActivity();
         try {
             Fragment fragment = instantiateFragment(activity, screen.fragmentClassDescriptor);
-            int containerId = app.morphe.extension.shared.ResourceUtils.getIdentifierOrThrow(
-                    activity,
-                    app.morphe.extension.shared.ResourceType.ID,
-                    "fragment_container"
-            );
+            int containerId = XLiteSettingsActivity.SETTINGS_CONTAINER_ID;
             getFragmentManager()
                     .beginTransaction()
                     .replace(containerId, fragment)

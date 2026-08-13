@@ -28,10 +28,13 @@ import app.morphe.extension.xlite.ui.Theme;
 
 @SuppressWarnings("deprecation")
 public final class XLiteSettingsActivity extends Activity {
-    private static final int SETTINGS_CONTAINER_ID = 0x00f00001;
+    static final int SETTINGS_CONTAINER_ID = 0x00f00001;
 
     private LinearLayout toolbar;
     private TextView toolbarTitle;
+    private Object backCallback;
+    private boolean backCallbackRegistered;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         applySystemTheme();
@@ -41,12 +44,79 @@ public final class XLiteSettingsActivity extends Activity {
         configureSystemBars();
         configureToolbar();
         applyCustomFontToToolbar();
+        getFragmentManager().addOnBackStackChangedListener(this::onBackStackChanged);
+        updateBackCallback();
         if (savedInstanceState != null) return;
 
         getFragmentManager()
                 .beginTransaction()
                 .replace(containerId, new XLiteSettingsFragment())
                 .commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!isFinishing() && !isDestroyed()) {
+            try {
+                if (getFragmentManager().popBackStackImmediate()) {
+                    return;
+                }
+            } catch (IllegalStateException ignored) {
+                // Ignore if called after state saved
+            }
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && backCallbackRegistered) {
+            Api33BackHelper.unregister(this, backCallback);
+            backCallback = null;
+            backCallbackRegistered = false;
+        }
+        super.onDestroy();
+    }
+
+    private void onBackStackChanged() {
+        updateBackCallback();
+        if (getFragmentManager().getBackStackEntryCount() == 0) {
+            setPageTitle(StringRef.str("piko_xlite_settings_title"));
+        }
+    }
+
+    private void updateBackCallback() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return;
+        boolean shouldRegister = getFragmentManager().getBackStackEntryCount() > 0;
+        if (shouldRegister && !backCallbackRegistered) {
+            backCallback = Api33BackHelper.register(this, this::onBackPressed);
+            backCallbackRegistered = true;
+        } else if (!shouldRegister && backCallbackRegistered) {
+            Api33BackHelper.unregister(this, backCallback);
+            backCallback = null;
+            backCallbackRegistered = false;
+        }
+    }
+
+    @androidx.annotation.RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private static final class Api33BackHelper {
+        @androidx.annotation.DoNotInline
+        static Object register(Activity activity, Runnable onBack) {
+            android.window.OnBackInvokedDispatcher dispatcher = activity.getOnBackInvokedDispatcher();
+            android.window.OnBackInvokedCallback callback = onBack::run;
+            dispatcher.registerOnBackInvokedCallback(
+                    android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,
+                    callback
+            );
+            return callback;
+        }
+
+        @androidx.annotation.DoNotInline
+        static void unregister(Activity activity, Object callback) {
+            if (callback instanceof android.window.OnBackInvokedCallback backCallback) {
+                activity.getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(backCallback);
+            }
+        }
     }
 
     @Override
@@ -95,12 +165,7 @@ public final class XLiteSettingsActivity extends Activity {
         );
 
         FrameLayout container = new FrameLayout(this);
-        int containerId = getResources().getIdentifier(
-                "fragment_container",
-                "id",
-                getPackageName()
-        );
-        container.setId(containerId != 0 ? containerId : SETTINGS_CONTAINER_ID);
+        container.setId(SETTINGS_CONTAINER_ID);
         root.addView(
                 container,
                 new LinearLayout.LayoutParams(
@@ -110,7 +175,7 @@ public final class XLiteSettingsActivity extends Activity {
                 )
         );
         setContentView(root);
-        return container.getId();
+        return SETTINGS_CONTAINER_ID;
     }
 
     private void configureToolbar() {
