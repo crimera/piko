@@ -1,7 +1,6 @@
 package app.revanced.patches.all.misc.versioncode
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.Constants.INSTAGRAM_VERSION_NAME
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.intOption
 import app.morphe.patcher.patch.resourcePatch
@@ -27,7 +26,7 @@ val changeVersionCodePatch =
             title = "Version code",
             description =
                 "The version code to use. Using the highest value turns off app store " +
-                    "updates and allows downgrading an existing app install to an older app version.",
+                    "updates and allows downgrading an existing app version to an older app version.",
             required = true,
         ) { versionCode -> versionCode!! >= 1 }
 
@@ -37,13 +36,6 @@ val changeVersionCodePatch =
             document("AndroidManifest.xml").use { document ->
                 val manifestElement = document.getNode("manifest") as Element
                 manifestElement.setAttribute("android:versionCode", "$versionCode")
-
-                // Keep Morphe's installed-app metadata aligned with the Instagram build that
-                // this compatibility branch targets, including cloned package names.
-                val packageName = manifestElement.getAttribute("package")
-                if (packageName.startsWith("com.instagram.android")) {
-                    manifestElement.setAttribute("android:versionName", INSTAGRAM_VERSION_NAME)
-                }
             }
         }
     }
