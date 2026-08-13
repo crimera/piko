@@ -1,7 +1,7 @@
 package app.revanced.patches.all.misc.versioncode
 
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.Constants.INSTAGRAM_442_VERSION_NAME
+import app.crimera.patches.instagram.utils.Constants.INSTAGRAM_VERSION_NAME
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.morphe.patcher.patch.intOption
 import app.morphe.patcher.patch.resourcePatch
@@ -42,7 +42,7 @@ val changeVersionCodePatch =
                 // this compatibility branch targets, including cloned package names.
                 val packageName = manifestElement.getAttribute("package")
                 if (packageName.startsWith("com.instagram.android")) {
-                    manifestElement.setAttribute("android:versionName", INSTAGRAM_442_VERSION_NAME)
+                    manifestElement.setAttribute("android:versionName", INSTAGRAM_VERSION_NAME)
                 }
             }
         }
