@@ -19,7 +19,6 @@ import com.android.tools.smali.dexlib2.AccessFlags
 internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
 internal const val LIVE_TREE_MEDIA_DICT_CLASS = "/LiveTreeMediaDict;"
-internal const val MEDIA_CLASS_DESCRIPTOR = "Lcom/instagram/feed/media/Media;"
 
 internal object GetHelperClassExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
@@ -154,7 +153,7 @@ internal object MusicAudioTypeEnumStringFingerprint : Fingerprint(
 
 internal object AudioIntfMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
-    strings = listOf(AUDIO_SRC_KEY, "audio_src_expiration_timestamp_us", "codec", "duration", "fallback", "file_format"),
+    strings = listOf("audio_src", "audio_src_expiration_timestamp_us", "codec", "duration", "fallback", "file_format"),
 )
 
 internal object IgPlayerControllerRelatedFingerprint : Fingerprint(
@@ -186,7 +185,7 @@ internal object LiveTreeMediaDictReelsMentionFingerprint : Fingerprint(
 internal object LiveTreeMediaDictGetUserFingerprint : Fingerprint(
     returnType = USER_MODEL_CLASS_NAME,
     strings = listOf("user"),
-    definingClass = MEDIA_CLASS_DESCRIPTOR,
+    definingClass = MEDIA_CLASS_NAME,
 )
 
 internal object ExtMediaDictImageInfoMapperFingerprint : Fingerprint(
