@@ -14,7 +14,10 @@ import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CL
 import app.crimera.patches.instagram.utils.Constants.ORIGINAL_SOUND_DATA_INTF
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.opcode
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 
 internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
@@ -58,8 +61,18 @@ internal object DirectShareTargetRelatedFingerprint : Fingerprint(
     },
 )
 
-internal object GetDisplayArtistFromMusicInfoAndOriginalSoundDataFingerprint : Fingerprint(returnType = "Ljava/lang/String;", parameters = listOf("Lcom/instagram/api/schemas/MusicInfo;", ORIGINAL_SOUND_DATA_INTF))
-internal object MusicAudioTypeEnumStringFingerprint : Fingerprint(classFingerprint = GetDisplayArtistFromMusicInfoAndOriginalSoundDataFingerprint, returnType = "Ljava/lang/String;", parameters = listOf("Landroid/content/Context;", USER_SESSION_CLASS, MEDIA_CLASS_NAME), accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL))
+internal object MusicAudioTypeEnumStringFingerprint : Fingerprint(
+    returnType = "Ljava/lang/String;",
+    parameters = listOf("Landroid/content/Context;", USER_SESSION_CLASS, MEDIA_CLASS_NAME),
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
+    filters = listOf(
+        opcode(
+            opcode = Opcode.IF_EQZ,
+            location = MatchAfterWithin(4),
+        ),
+    ),
+)
+
 internal object AudioIntfMapperFingerprint : Fingerprint(returnType = "Ljava/util/Map;", strings = listOf("audio_src", "audio_src_expiration_timestamp_us", "codec", "duration", "fallback", "file_format"))
 internal object IgPlayerControllerRelatedFingerprint : Fingerprint(strings = listOf("igPlayerController must be initialized", "audioMetadata must be set before preparing"))
 internal object ExtMediaDictVideoInfoMapperFingerprint : Fingerprint(strings = listOf("video_subtitles_uri", "video_to_carousel_cut_info", "video_versions"), returnType = "Ljava/util/Map;")
