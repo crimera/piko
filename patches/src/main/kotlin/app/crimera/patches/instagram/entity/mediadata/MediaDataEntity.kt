@@ -27,76 +27,61 @@ val mediaDataEntity =
         dependsOn(decoderEntity)
         execute {
             GetHelperClassExtensionFingerprint.changeFirstString(classNameToExtension(MEDIAEXT_CLASS_NAME))
-
             GetOriginalSoundDataIntfExtensionFingerprint.changeFirstString(GetOriginalSoundDataIntfFromMediaFingerprint.method.name)
             GetUserDataWithUserSessionExtensionFingerprint.changeFirstString(GetUserDataFromMediaFingerprint.method.name)
 
             AyuMidcardMediaHelperImageObjectMethodFingerprint.method.apply {
                 val imageVariantsIndex = instructions.indexOfLast { it.opcode == Opcode.INVOKE_INTERFACE }
-                val imageVariantsMethodName = getInstruction(imageVariantsIndex).methodExtractor().name
-                GetImageVariantsExtensionFingerprint.changeStringAt(1, imageVariantsMethodName)
+                GetImageVariantsExtensionFingerprint.changeStringAt(1, getInstruction(imageVariantsIndex).methodExtractor().name)
             }
 
             ReelsMentionDoubleTapFingerprint.method.apply {
-                val userInteractionListMethodInvoke = instructions.first { it.opcode == Opcode.INVOKE_INTERFACE }.methodExtractor()
-                GetMentionSetExtensionFingerprint.changeFirstString(userInteractionListMethodInvoke.name)
+                GetMentionSetExtensionFingerprint.changeFirstString(instructions.first { it.opcode == Opcode.INVOKE_INTERFACE }.methodExtractor().name)
             }
             InstagramMainActivityNotificationRelatedFingerprint.apply {
                 val strIndex = stringMatches.last().index
                 method.apply {
-                    val getUserDataInvokeIndex =
-                        instructions.indexOfLast {
-                            it.opcode == Opcode.INVOKE_INTERFACE &&
-                                it.location.index < strIndex
-                        }
-                    val methodName = getInstruction(getUserDataInvokeIndex).methodExtractor().name
-                    GetMentionSetExtensionFingerprint.changeStringAt(1, methodName)
+                    val getUserDataInvokeIndex = instructions.indexOfLast { it.opcode == Opcode.INVOKE_INTERFACE && it.location.index < strIndex }
+                    GetMentionSetExtensionFingerprint.changeStringAt(1, getInstruction(getUserDataInvokeIndex).methodExtractor().name)
                 }
             }
 
             VideoMediaInIGTVFeedHasVideoVariantsFingerprint.method.apply {
-                val firstInvokeInterfaceInstruction = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_INTERFACE))
-                val getVideoVariantsMethodName = firstInvokeInterfaceInstruction.methodExtractor().name
-                GetVideoVariantsV1ExtensionFingerprint.changeFirstString(getVideoVariantsMethodName)
+                GetVideoVariantsV1ExtensionFingerprint.changeFirstString(getInstruction(indexOfFirstInstruction(Opcode.INVOKE_INTERFACE)).methodExtractor().name)
             }
 
             AslSessionRelatedFingerprint.method.apply {
                 val stringIndex = AslSessionRelatedFingerprint.stringMatches[1].index
                 val isVideoVirtualInvokeIndex = indexOfFirstInstruction(stringIndex, Opcode.INVOKE_VIRTUAL)
-                val isVideoCallingMethodName = getInstruction(isVideoVirtualInvokeIndex).methodExtractor().name
-                IsVideoExtensionFingerprint.changeFirstString(isVideoCallingMethodName)
+                IsVideoExtensionFingerprint.changeFirstString(getInstruction(isVideoVirtualInvokeIndex).methodExtractor().name)
             }
 
             EditMediaInfoFragmentMediaSizeFingerprint.method.apply {
                 val firstReturnIndex = indexOfFirstInstruction(Opcode.RETURN)
                 val extendedDataFieldIndex = indexOfFirstInstruction(firstReturnIndex, Opcode.IGET_OBJECT)
-                if (extendedDataFieldIndex > 0) {
+                if (extendedDataFieldIndex >= 0) {
                     val extendedDataFieldName = getInstruction(extendedDataFieldIndex).fieldExtractor().name
-                    val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
-                    GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
-                    GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
+                    val mediaListInvokeIndex = indexOfFirstInstruction(extendedDataFieldIndex + 1, Opcode.INVOKE_INTERFACE)
+                    if (mediaListInvokeIndex >= 0) {
+                        GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
+                        GetMediaListExtensionFingerprint.changeFirstString(getInstruction(mediaListInvokeIndex).methodExtractor().name)
+                    }
                 }
             }
 
             FanClubContentPreviewInteractorImplFingerprint.method.apply {
                 val strIndex = FanClubContentPreviewInteractorImplFingerprint.stringMatches[1].index
-                val mediaPkIdMethodName = instructions[indexOfFirstInstruction(strIndex, Opcode.INVOKE_VIRTUAL)].methodExtractor().name
-                GetMediaPkIdExtensionFingerprint.changeFirstString(mediaPkIdMethodName)
+                GetMediaPkIdExtensionFingerprint.changeFirstString(instructions[indexOfFirstInstruction(strIndex, Opcode.INVOKE_VIRTUAL)].methodExtractor().name)
             }
 
             DirectShareTargetRelatedFingerprint.method.apply {
                 val firstIfEqz = indexOfFirstInstruction(Opcode.IF_EQZ)
-                val userDataMethodName = getInstruction(indexOfFirstInstruction(firstIfEqz, Opcode.INVOKE_INTERFACE)).methodExtractor().name
-                GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(userDataMethodName)
+                GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(getInstruction(indexOfFirstInstruction(firstIfEqz, Opcode.INVOKE_INTERFACE)).methodExtractor().name)
             }
 
             EditMediaInfoGetCurrentMediaIdFingerprint.method.apply {
-                val getCommentDataFromMediaMethodName =
-                    getInstruction(instructions.indexOfLast { it.opcode == Opcode.INVOKE_STATIC }).methodExtractor().name
-                val getCommentTextFieldName =
-                    getInstruction(instructions.indexOfLast { it.opcode == Opcode.IGET_OBJECT }).fieldExtractor().name
-                GetDescriptionTextExtensionFingerprint.changeFirstString(getCommentDataFromMediaMethodName)
-                GetDescriptionTextExtensionFingerprint.changeStringAt(1, getCommentTextFieldName)
+                GetDescriptionTextExtensionFingerprint.changeFirstString(getInstruction(instructions.indexOfLast { it.opcode == Opcode.INVOKE_STATIC }).methodExtractor().name)
+                GetDescriptionTextExtensionFingerprint.changeStringAt(1, getInstruction(instructions.indexOfLast { it.opcode == Opcode.IGET_OBJECT }).fieldExtractor().name)
             }
 
             MusicAudioTypeEnumStringFingerprint.matchOrNull()?.method?.apply {
@@ -122,28 +107,29 @@ val mediaDataEntity =
             AudioIntfMapperFingerprint.apply {
                 val strIndex = stringMatches.first { it.string == AUDIO_SRC_KEY }.index
                 method.apply {
-                    val getAudioSrcInvokeIndex = indexOfFirstInstruction(strIndex, Opcode.INVOKE_INTERFACE)
-                    val methodName = getInstruction(getAudioSrcInvokeIndex).methodExtractor().name
-                    GetMessageAudioUrlExtensionFingerprint.changeStringAt(1, methodName)
+                    GetMessageAudioUrlExtensionFingerprint.changeStringAt(1, getInstruction(indexOfFirstInstruction(strIndex, Opcode.INVOKE_INTERFACE)).methodExtractor().name)
                 }
             }
 
             ExtMediaDictVideoInfoMapperFingerprint.apply {
-                val moreExtendedMediaDataFieldName =
-                    LiveTreeMediaDictClinitFingerprint.classDef.fields.first { it.type == classDef.type }.name
+                val moreExtendedMediaDataFieldName = LiveTreeMediaDictClinitFingerprint.classDef.fields.first { it.type == classDef.type }.name
                 GetMoreExtendedDataExtensionFingerprint.changeFirstString(moreExtendedMediaDataFieldName)
 
                 val strIndex = stringMatches.last().index
                 method.apply {
-                    val videoVariantsListFieldName = getInstruction(strIndex + 2).fieldExtractor().name
-                    GetVideoVariantsV2ExtensionFingerprint.changeFirstString(videoVariantsListFieldName)
+                    val videoVariantsFieldIndex = indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT)
+                    if (videoVariantsFieldIndex >= 0) {
+                        GetVideoVariantsV2ExtensionFingerprint.changeFirstString(getInstruction(videoVariantsFieldIndex).fieldExtractor().name)
+                    }
                 }
 
                 ExtMediaDictImageInfoMapperFingerprint.apply {
                     val strIndex = stringMatches.first().index
                     method.apply {
-                        val imageInfoListFieldName = getInstruction(strIndex + 2).fieldExtractor().name
-                        GetImageVariantsExtensionFingerprint.changeFirstString(imageInfoListFieldName)
+                        val imageInfoFieldIndex = indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT)
+                        if (imageInfoFieldIndex >= 0) {
+                            GetImageVariantsExtensionFingerprint.changeFirstString(getInstruction(imageInfoFieldIndex).fieldExtractor().name)
+                        }
                     }
                 }
             }
@@ -151,9 +137,10 @@ val mediaDataEntity =
             ProductInfoMapperFingerprint.apply {
                 val strIndex = stringMatches.last().index
                 method.apply {
-                    val productTypeIGetObjectInstruction = getInstruction(indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT))
-                    val productTypeFieldName = productTypeIGetObjectInstruction.fieldExtractor().name
-                    GetPostTypeExtensionFingerprint.changeFirstString(productTypeFieldName)
+                    val fieldIndex = indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT)
+                    if (fieldIndex >= 0) {
+                        GetPostTypeExtensionFingerprint.changeFirstString(getInstruction(fieldIndex).fieldExtractor().name)
+                    }
                 }
             }
         }
