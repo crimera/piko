@@ -24,20 +24,15 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/UserData;"
 
-/**
- * Classes that have carried the LiveTree-backed user getters.
- *
- * Up to v439 these lived on their own `LiveTreeUserDict` wrapper. v441 deleted that class (along
- * with its `LiveTreeMediaDict` sibling) and folded the identical getters — same JSON keys, same
- * `LiveTreeJNI` field ids — straight into `User`. Accepting either keeps both builds working.
- */
-private val USER_MODEL_CLASSES =
-    setOf(
-        "Lcom/instagram/user/model/LiveTreeUserDict;",
-        "Lcom/instagram/user/model/User;",
-    )
+internal const val LIVE_TREE_USER_DICT_CLASS = "Lcom/instagram/user/model/LiveTreeUserDict;"
 
-private fun Method.inUserModel(): Boolean = definingClass in USER_MODEL_CLASSES
+/**
+ * Class carrying the LiveTree-backed user getters. Both candidates ship together and `User` has
+ * look-alike delegates, so `userDataEntity` pins one before these resolve.
+ */
+internal var userModelClass: String = LIVE_TREE_USER_DICT_CLASS
+
+private fun Method.inUserModel(): Boolean = definingClass == userModelClass
 
 private const val GET_OPTIONAL_STRING_VALUE_NATIVE = "getOptionalStringValueNative"
 
@@ -45,9 +40,8 @@ private const val GET_OPTIONAL_STRING_VALUE_NATIVE = "getOptionalStringValueNati
  * True for the `username` getter, which — unlike its siblings — never spells its JSON key out as a
  * `const-string`; it decodes it from a byte blob at runtime.
  *
- * The username field id alone is not enough to pin it on v441: three String-returning methods on
- * `User` mention that literal. Requiring "reads a LiveTree string value and has no literal key"
- * narrows it back to exactly one method in both builds (v439 `LiveTreeUserDict.DYW`, v441 `User.A81`).
+ * The field id alone can match several String-returning methods, so also require that the method
+ * reads a LiveTree string value and carries no literal key — that leaves exactly one.
  */
 private fun Method.readsLiveTreeStringWithoutLiteralKey(): Boolean {
     val instructions = implementation?.instructions ?: return false

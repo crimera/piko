@@ -7,6 +7,7 @@
 package app.crimera.patches.instagram.entity.mediadata
 
 import app.crimera.patches.instagram.entity.decoder.EditMediaInfoGetCurrentMediaIdFingerprint
+import app.crimera.patches.instagram.entity.decoder.MEDIA_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.MEDIAEXT_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.utils.Constants.MUSIC_INFO_CLASS
@@ -37,6 +38,10 @@ val mediaDataEntity =
     ) {
         dependsOn(decoderEntity)
         execute {
+            // Pin the getter class before any fingerprint resolves.
+            mediaModelClass =
+                if (classDefByOrNull(LIVE_TREE_MEDIA_DICT_CLASS) != null) LIVE_TREE_MEDIA_DICT_CLASS else MEDIA_CLASS_NAME
+
             GetHelperClassExtensionFingerprint.changeFirstString(classNameToExtension(MEDIAEXT_CLASS_NAME))
 
             // Extracting get original sound info data using media and user session.
@@ -83,14 +88,7 @@ val mediaDataEntity =
                 IsVideoExtensionFingerprint.changeFirstString(isVideoCallingMethodName)
             }
 
-            // Extraction of extended media data field.
-            // Extraction of media list from extended media data.
-            // Up to v439 the list lives on a mutable dict hanging off the media object
-            // (media.A04.A89()), so the getter is preceded by the iget-object for that field. v441
-            // folded the dict into Media, so the list is fetched straight off the media object
-            // (media.A8V()) and the extended-data placeholder is left alone — the extension then
-            // falls back to the media object itself. Anchoring on the first List-returning virtual
-            // call covers both shapes.
+            // Extraction of the media list, and of the extended data field it hangs off when present.
             fun Method.resolveMediaList(): Boolean {
                 val listInvokeIndex =
                     instructions.indexOfFirst {
@@ -148,11 +146,7 @@ val mediaDataEntity =
                     }.name
             GetDescriptionTextExtensionFingerprint.changeFirstString(getCommentDataFromMediaMethodName)
 
-            // Extraction of trackInfo.
-            // The track container is the object the media helper builds out of a MusicInfo, so
-            // anchor on that constructor call. Up to v439 this was reached indirectly through the
-            // display-artist helper, but v441 moved that helper onto the container itself, so the
-            // old anchor no longer exists.
+            // Extraction of trackInfo: the media helper method that builds a container from a MusicInfo.
             val trackContainerBuilderName =
                 mutableClassDefBy { it.type == MEDIAEXT_CLASS_NAME }
                     .methods
@@ -170,27 +164,26 @@ val mediaDataEntity =
                 GetTrackDataIntfExtensionFingerprint.changeFirstString(trackContainerBuilderName)
             }
 
-            // Message audio.
-            IgPlayerControllerRelatedFingerprint.method.apply {
-                instructions.filter { it.opcode == Opcode.INVOKE_INTERFACE }.firstOrNull {
-                    val methodExt = it.methodExtractor()
-                    if (methodExt.returnType.endsWith("AudioIntf")) {
-                        GetMessageAudioUrlExtensionFingerprint.changeFirstString(methodExt.name)
-                        true
-                    } else {
-                        false
-                    }
+            // Message audio (voice notes): media -> audio interface -> url. The interface is taken
+            // from the "audio_src" getter, since its name changes between builds.
+            val audioIntfClass =
+                AudioIntfMapperFingerprint.run {
+                    val strIndex = stringMatches.first { it.string == AUDIO_SRC_KEY }.index
+                    val urlGetter =
+                        method
+                            .getInstruction(method.indexOfFirstInstruction(strIndex, Opcode.INVOKE_INTERFACE))
+                            .methodExtractor()
+                    GetMessageAudioUrlExtensionFingerprint.changeStringAt(1, urlGetter.name)
+                    urlGetter.definingClass
                 }
-            }
 
-            AudioIntfMapperFingerprint.apply {
-                val strIndex = stringMatches.first { it.string == AUDIO_SRC_KEY }.index
-                method.apply {
-                    val getAudioSrcInvokeIndex = indexOfFirstInstruction(strIndex, Opcode.INVOKE_INTERFACE)
-                    val methodName = getInstruction(getAudioSrcInvokeIndex).methodExtractor().name
-                    GetMessageAudioUrlExtensionFingerprint.changeStringAt(1, methodName)
-                }
-            }
+            val messageAudioMethodName =
+                mutableClassDefBy { it.type == mediaModelClass }
+                    .methods
+                    .singleOrNull {
+                        it.parameters.isEmpty() && classNameToExtension(it.returnType) == audioIntfClass
+                    }?.name
+            messageAudioMethodName?.let { GetMessageAudioUrlExtensionFingerprint.changeFirstString(it) }
 
             // More extended data.
             ExtMediaDictVideoInfoMapperFingerprint.apply {
@@ -200,13 +193,13 @@ val mediaDataEntity =
                         .name
                 GetMoreExtendedDataExtensionFingerprint.changeFirstString(moreExtendedMediaDataFieldName)
 
-                // The mapper writes each json key next to the field holding its value, but whether
-                // that field is read before or after the key depends on which serialiser helper
-                // the key goes through, so match on the field type near the key instead of a fixed
-                // offset from it.
-                method.fieldNameNearString("video_versions") { it == "Ljava/util/List;" }?.let {
-                    GetVideoVariantsV2ExtensionFingerprint.changeFirstString(it)
-                }
+                // Match by field type near the key, not a fixed offset — the read can sit on either
+                // side of it, and for video_versions it is in the model's getter, not the mapper.
+                mutableClassDefBy { it.type == mediaModelClass }
+                    .methods
+                    .firstNotNullOfOrNull { m ->
+                        m.fieldNameNearString("video_versions") { type -> type == "Ljava/util/List;" }
+                    }?.let { GetVideoVariantsV2ExtensionFingerprint.changeFirstString(it) }
 
                 ExtMediaDictImageInfoMapperFingerprint.method
                     .fieldNameNearString("image_versions2") { it.endsWith("/ImageInfo;") }

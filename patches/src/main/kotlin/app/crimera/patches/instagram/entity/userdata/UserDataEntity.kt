@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.entity.userdata
 
+import app.crimera.patches.instagram.entity.decoder.USER_MODEL_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.patches.instagram.entity.userfriendshipstatus.userFriendshipStatusEntity
 import app.crimera.patches.instagram.utils.Constants.FRIENDSHIP_STATUS_CLASS
@@ -32,6 +33,10 @@ val userDataEntity =
         execute {
 
             fun Fingerprint.getMethodName(): String = method.name
+
+            // Pin the getter class before any fingerprint resolves.
+            userModelClass =
+                if (classDefByOrNull(LIVE_TREE_USER_DICT_CLASS) != null) LIVE_TREE_USER_DICT_CLASS else USER_MODEL_CLASS_NAME
 
             GetUsernameExtensionFingerprint.changeFirstString(UserNameLiveTreeUserDictFingerprint.getMethodName())
             GetFullNameExtensionFingerprint.changeFirstString(FullNameLiveTreeUserDictFingerprint.getMethodName())

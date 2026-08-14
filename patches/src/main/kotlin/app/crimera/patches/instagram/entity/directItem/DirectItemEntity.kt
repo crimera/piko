@@ -7,10 +7,12 @@
 package app.crimera.patches.instagram.entity.directItem
 
 import app.crimera.utils.changeFirstString
+import app.crimera.utils.changeString
 import app.crimera.utils.changeStringAt
 import app.crimera.utils.classNameToExtension
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -55,8 +57,8 @@ val directItemEntity =
                 GetUserIdExtension.changeFirstString(fieldAfter("user_id").name)
 
                 val textField = fieldAfter("text").name
-                GetTextExtension.changeStringAt(0, textField)
-                SetTextExtension.changeStringAt(0, textField)
+                GetTextExtension.changeString("baseTextField", textField)
+                SetTextExtension.changeString("baseTextField", textField)
 
                 GetTimestampRawExtension.changeFirstString(fieldAfter("timestamp").name)
 
@@ -115,8 +117,8 @@ val directItemEntity =
                         }
                     }
                 subTextField?.let {
-                    GetTextExtension.changeStringAt(1, it)
-                    SetTextExtension.changeStringAt(1, it)
+                    GetTextExtension.changeString("subTextField", it)
+                    SetTextExtension.changeString("subTextField", it)
                 }
                 }
 
@@ -160,7 +162,7 @@ val directItemEntity =
                     }
 
                     // Direct Media fields: type must be Media.
-                    fun direct(key: String, fp: app.morphe.patcher.Fingerprint) = runCatching {
+                    fun direct(key: String, fp: Fingerprint) = runCatching {
                         val f = iputFieldAfter(key) ?: return@runCatching
                         if (f.type != mediaClass) return@runCatching
                         setItemClass(f); fp.changeFirstString(f.name)
@@ -173,8 +175,8 @@ val directItemEntity =
                     // field, found BY TYPE (so the obfuscated wrapper name is never depended on).
                     fun wrapped(
                         key: String,
-                        wrapperFp: app.morphe.patcher.Fingerprint,
-                        innerFp: app.morphe.patcher.Fingerprint,
+                        wrapperFp: Fingerprint,
+                        innerFp: Fingerprint,
                     ) = runCatching {
                         val wf = iputFieldAfter(key) ?: return@runCatching
                         val inner = mutableClassDefBy { it.type == wf.type }
@@ -186,6 +188,8 @@ val directItemEntity =
                     wrapped("clip", FieldClipExtension, FieldClipMediaExtension)
                     wrapped("reel_share", FieldReelExtension, FieldReelMediaExtension)
                     wrapped("voice_media", FieldVoiceExtension, FieldVoiceMediaExtension)
+                    // Disappearing media: carries the payload that raven_media leaves null.
+                    wrapped("visual_media", FieldVisualExtension, FieldVisualMediaExtension)
                 }
 
                 // xma reshare permalink: best-effort, never fatal. An xma reshare (shared post/reel)
@@ -201,11 +205,9 @@ val directItemEntity =
                 runCatching {
                     val itemClass = mutableClassDefBy { it.type == method.definingClass }
 
-                    // On class [clsType], find "target_url" then the next iput-object (before the
-                    // following key) that writes a String on [elementType]. The serializer occurrence
-                    // writes via a call, not an iput, so only the deserializer's iput matches.
-                    fun targetUrlField(clsType: String, elementType: String): FieldReference? {
-                        val cls = runCatching { mutableClassDefBy { it.type == clsType } }.getOrNull()
+                    // Only the deserializer stores target_url with an iput; the serializer uses a call.
+                    fun targetUrlField(parserType: String): FieldReference? {
+                        val cls = runCatching { mutableClassDefBy { it.type == parserType } }.getOrNull()
                             ?: return null
                         return cls.methods.firstNotNullOfOrNull { m ->
                             val insns = runCatching { m.instructions.toList() }.getOrNull()
@@ -222,7 +224,7 @@ val directItemEntity =
                                 .firstOrNull {
                                     it.opcode == Opcode.IPUT_OBJECT &&
                                         ((it as ReferenceInstruction).reference as? FieldReference)
-                                            ?.let { r -> r.type == "Ljava/lang/String;" && r.definingClass == elementType } == true
+                                            ?.type == "Ljava/lang/String;"
                                 }?.let { (it as ReferenceInstruction).reference as FieldReference }
                         }
                     }
@@ -251,12 +253,19 @@ val directItemEntity =
                                 it.opcode == Opcode.IPUT_OBJECT &&
                                     ((it as ReferenceInstruction).reference as? FieldReference)?.type == "Ljava/util/List;"
                             }?.let { (it as ReferenceInstruction).reference as FieldReference } ?: continue
-                            val conv = block.firstNotNullOfOrNull {
-                                if (it.opcode != Opcode.INVOKE_STATIC) return@firstNotNullOfOrNull null
-                                ((it as ReferenceInstruction).reference as? MethodReference)
-                                    ?.takeIf { r -> r.returnType.startsWith("LX/") && r.definingClass.startsWith("LX/") }
-                            } ?: continue
-                            val lf = targetUrlField(conv.definingClass, conv.returnType) ?: continue
+                            // The call is declared on the abstract base, so take the parser class
+                            // from the sget rather than the call itself.
+                            val parseIdx = block.indexOfFirst {
+                                it.opcode == Opcode.INVOKE_VIRTUAL &&
+                                    ((it as ReferenceInstruction).reference as? MethodReference)
+                                        ?.name == "parseFromJsonParser"
+                            }
+                            if (parseIdx < 0) continue
+                            val parserType = block.take(parseIdx)
+                                .lastOrNull { it.opcode == Opcode.SGET_OBJECT }
+                                ?.let { (it as ReferenceInstruction).reference as? FieldReference }
+                                ?.type ?: continue
+                            val lf = targetUrlField(parserType) ?: continue
                             xmaField = listPut
                             linkField = lf
                             return@run

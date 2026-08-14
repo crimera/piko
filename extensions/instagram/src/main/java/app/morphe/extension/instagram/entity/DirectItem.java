@@ -189,6 +189,8 @@ public class DirectItem extends Entity {
     private String fieldReelMedia()    { return "fieldName"; } //   wrapper.Media (by type)
     private String fieldVoice()        { return "fieldName"; } // voice_media  -> wrapper
     private String fieldVoiceMedia()   { return "fieldName"; } //   wrapper.Media (by type)
+    private String fieldVisual()       { return "fieldName"; } // visual_media -> wrapper
+    private String fieldVisualMedia()  { return "fieldName"; } //   wrapper.Media (by type)
 
     /** Link from a Media field declared directly on the item class. */
     private String directMediaUrl(String fieldName) {
@@ -233,6 +235,7 @@ public class DirectItem extends Entity {
             directMediaUrl(this.fieldMedia()),
             directMediaUrl(this.fieldMediaShare()),
             directMediaUrl(this.fieldRavenMedia()),
+            wrappedMediaUrl(this.fieldVisual(), this.fieldVisualMedia()),
             wrappedMediaUrl(this.fieldClip(),  this.fieldClipMedia()),
             wrappedMediaUrl(this.fieldReel(),  this.fieldReelMedia()),
             wrappedAudioUrl(this.fieldVoice(), this.fieldVoiceMedia()),

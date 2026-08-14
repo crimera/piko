@@ -18,16 +18,15 @@ import com.android.tools.smali.dexlib2.iface.Method
 
 internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
-internal const val LIVE_TREE_MEDIA_DICT_CLASS = "/LiveTreeMediaDict;"
+internal const val LIVE_TREE_MEDIA_DICT_CLASS = "Lcom/instagram/feed/media/LiveTreeMediaDict;"
 
 /**
- * True when the method belongs to whichever class currently carries the LiveTree-backed media
- * getters: `LiveTreeMediaDict` up to v439, or `Media` from v441, which absorbed them when that
- * wrapper was deleted (the same move `LiveTreeUserDict` -> `User` made in the user model).
+ * Class carrying the LiveTree-backed media getters. Both candidates ship together, so
+ * `mediaDataEntity` pins one before these fingerprints resolve.
  */
-private fun Method.inMediaModel(): Boolean =
-    definingClass.endsWith(LIVE_TREE_MEDIA_DICT_CLASS) ||
-        definingClass == "Lcom/instagram/feed/media/Media;"
+internal var mediaModelClass: String = LIVE_TREE_MEDIA_DICT_CLASS
+
+private fun Method.inMediaModel(): Boolean = definingClass == mediaModelClass
 
 internal object GetHelperClassExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
@@ -151,14 +150,6 @@ internal object FanClubContentPreviewInteractorImplFingerprint : Fingerprint(
 internal object AudioIntfMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
     strings = listOf(AUDIO_SRC_KEY, "audio_src_expiration_timestamp_us", "codec", "duration", "fallback", "file_format"),
-)
-
-internal object IgPlayerControllerRelatedFingerprint : Fingerprint(
-    strings =
-        listOf(
-            "igPlayerController must be initialized",
-            "audioMetadata must be set before preparing",
-        ),
 )
 
 internal object ExtMediaDictVideoInfoMapperFingerprint : Fingerprint(
