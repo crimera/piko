@@ -237,10 +237,8 @@ public class MediaData extends Entity {
     }
 
     private List getVideoVariantsV2() throws Exception {
-        // Instagram 442 stores video_versions on the extended Media object itself.
-        // getMoreExtendedData() points to a different nested object and causes the
-        // field lookup to fail for this target.
-        List variantList = (List) super.getField(this.getExtendedData(), "fieldName");
+        // Instagram 442 stores video_versions on the Media object.
+        List variantList = (List) super.getMethod(this.obj, "AAY");
         if (variantList == null) {
             return null;
         }
@@ -263,11 +261,11 @@ public class MediaData extends Entity {
     }
 
     public List getImageVariants() throws Exception {
-        Object imageInfoObject = (Object) super.getField(this.getMoreExtendedData(), "fieldName");
+        Object imageInfoObject = super.getMethod(this.obj, "A39");
         if (imageInfoObject == null) {
             return new ArrayList<>();
         }
-        List variantList = (List) super.getMethod(imageInfoObject, "methodName");
+        List variantList = (List) super.getMethod(imageInfoObject, "BZe");
         if (variantList == null) {
             return new ArrayList<>();
         }
@@ -335,8 +333,8 @@ public class MediaData extends Entity {
 
     public String getDescriptionText() throws Exception {
         Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "methodName", this.obj);
-        return result != null ? (String) super.getField(result, "fieldName") : null;
+        Object result = super.getMethod(helperClass, "A0J", this.obj);
+        return result != null ? (String) super.getField(result, "A0Z") : null;
     }
 
     public String getMessageAudioUrl() throws Exception {
