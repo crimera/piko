@@ -104,7 +104,6 @@ private object ContentDisclosureModelFingerprint : Fingerprint(
     name = "toString",
     returnType = "Ljava/lang/String;",
     parameters = emptyList(),
-    custom = { _, classDef -> classDef.type.startsWith("Lcom/x/models/") },
     strings =
         listOf(
             "ContentDisclosure(hasPaidPromotionDisclosure=",

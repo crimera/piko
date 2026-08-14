@@ -363,7 +363,7 @@ internal fun Match.fieldForToStringLabel(value: String): FieldReference {
     val valueRegister = valueAppend.value.singleArgumentRegister()
         ?: throw PatchException("X-Lite model value after '$value' has an unsupported register layout")
 
-    return instructions.subList(0, valueAppend.index)
+    return instructions.subList(labelConsumerIndex + 1, valueAppend.index)
         .asReversed()
         .firstNotNullOfOrNull { instruction ->
             val registerInstruction = instruction as? TwoRegisterInstruction

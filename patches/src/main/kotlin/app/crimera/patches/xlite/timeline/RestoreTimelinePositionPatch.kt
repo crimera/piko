@@ -50,6 +50,18 @@ private fun scrollPositionGetterFingerprint(holderDescriptor: String) =
         returnType = holderDescriptor,
         filters =
             listOf(
+                fieldAccess(
+                    opcode = Opcode.IGET_OBJECT,
+                    type = CONCURRENT_HASH_MAP_DESCRIPTOR,
+                ),
+                methodCall(
+                    opcode = Opcode.INVOKE_VIRTUAL,
+                    definingClass = CONCURRENT_HASH_MAP_DESCRIPTOR,
+                    name = "get",
+                    parameters = listOf("Ljava/lang/Object;"),
+                    returnType = "Ljava/lang/Object;",
+                ),
+                opcode(Opcode.CHECK_CAST),
                 string("Restoring scrolling position for "),
                 opcode(Opcode.RETURN_OBJECT),
             ),
@@ -150,101 +162,6 @@ val restoreTimelinePositionPatch =
                         reference.parameterTypes.map(CharSequence::toString) == listOf("Ljava/lang/Object;") &&
                         reference.returnType.toString() == "Ljava/lang/Object;"
                 }
-            if (mapGetCandidates.isEmpty()) {
-                val holderCalls = getterMethod.instructions.withIndex().filter { indexedInstruction ->
-                    val reference = indexedInstruction.value.getReference<MethodReference>()
-                        ?: return@filter false
-                    reference.returnType.toString() == holderDescriptor &&
-                        reference.parameterTypes.size == 1 &&
-                        reference.parameterTypes[0].toString().startsWith("L")
-                }
-                if (holderCalls.size != 1) {
-                    throw PatchException(
-                        "Expected one X-Lite encapsulated timeline-position read, found " +
-                            "${holderCalls.size}: ${holderCalls.joinToString()}",
-                    )
-                }
-                val holderCall = holderCalls.single()
-                val holderInvoke = holderCall.value as? FiveRegisterInstruction
-                    ?: throw PatchException("Unsupported X-Lite encapsulated position read")
-                if (holderInvoke.registerCount != 2) {
-                    throw PatchException("Unexpected X-Lite encapsulated position read register count")
-                }
-                val resultIndex = holderCall.index + 1
-                val resultInstruction = getterMethod.instructions[resultIndex] as? OneRegisterInstruction
-                    ?: throw PatchException("X-Lite encapsulated position result was not found")
-                if (resultInstruction.opcode != Opcode.MOVE_RESULT_OBJECT) {
-                    throw PatchException("X-Lite encapsulated position result opcode changed")
-                }
-                val holderRegister = resultInstruction.registerA
-                val timelineRegister = holderInvoke.registerD
-                val restoreRegisters =
-                    getterMethod.getFreeRegisterProvider(
-                        resultIndex + 1,
-                        2,
-                        holderRegister,
-                        timelineRegister,
-                    ).let { provider -> List(2) { provider.getFreeRegister4Bit() } }
-                val arrayRegister = restoreRegisters[0]
-                val indexRegister = restoreRegisters[1]
-                val continuation = getterMethod.instructions[resultIndex + 1]
-                getterMethod.addInstructionsWithLabels(
-                    resultIndex + 1,
-                    """
-                        if-nez v$holderRegister, :piko_xlite_restore_position_continue_encapsulated
-                        invoke-static {v$timelineRegister}, $TIMELINE_POSITION_STORE_DESCRIPTOR->restore($ENUM_DESCRIPTOR)[I
-                        move-result-object v$arrayRegister
-                        if-eqz v$arrayRegister, :piko_xlite_restore_position_continue_encapsulated
-                        const/4 v$indexRegister, 0x0
-                        aget v$indexRegister, v$arrayRegister, v$indexRegister
-                        const/4 v$holderRegister, 0x1
-                        aget v$holderRegister, v$arrayRegister, v$holderRegister
-                        new-instance v$arrayRegister, $holderDescriptor
-                        invoke-direct {v$arrayRegister, v$indexRegister, v$holderRegister}, $holderConstructorReference
-                        move-object v$holderRegister, v$arrayRegister
-                    """.trimIndent(),
-                    ExternalLabel("piko_xlite_restore_position_continue_encapsulated", continuation),
-                )
-
-                val componentDescriptor = getterMatch.originalMethod.definingClass
-                val saveMatches = Fingerprint(
-                    definingClass = componentDescriptor,
-                    returnType = "V",
-                    filters = listOf(string("Saving scrolling positions for ")),
-                ).matchAll()
-                if (saveMatches.size != 1) {
-                    throw PatchException(
-                        "Expected one X-Lite encapsulated save-scroll-position method, found " +
-                            "${saveMatches.size}: ${saveMatches.joinToString { it.originalMethod.toString() }}",
-                    )
-                }
-                val saveMethod = saveMatches.single().method
-                val saveCalls = saveMethod.instructions.withIndex().filter { indexedInstruction ->
-                    val reference = indexedInstruction.value.getReference<MethodReference>()
-                        ?: return@filter false
-                    reference.returnType == "V" &&
-                        reference.parameterTypes.size == 2 &&
-                        reference.parameterTypes[1].toString() == holderDescriptor
-                }
-                if (saveCalls.size != 1) {
-                    throw PatchException(
-                        "Expected one X-Lite encapsulated timeline-position write, found " +
-                            "${saveCalls.size}: ${saveCalls.joinToString()}",
-                    )
-                }
-                val saveCall = saveCalls.single()
-                val saveInvoke = saveCall.value as? FiveRegisterInstruction
-                    ?: throw PatchException("Unsupported X-Lite encapsulated position write")
-                if (saveInvoke.registerCount != 3) {
-                    throw PatchException("Unexpected X-Lite encapsulated position write register count")
-                }
-                saveMethod.addInstruction(
-                    saveCall.index,
-                    "invoke-static {v${saveInvoke.registerD}, v${saveInvoke.registerE}}, " +
-                        "$TIMELINE_POSITION_STORE_DESCRIPTOR->save(${ENUM_DESCRIPTOR}Ljava/lang/Object;)V",
-                )
-                return@execute
-            }
             if (mapGetCandidates.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite timeline-position map read, found " +

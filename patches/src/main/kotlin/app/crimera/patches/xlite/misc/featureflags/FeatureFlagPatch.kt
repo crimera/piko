@@ -9,7 +9,6 @@ import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.EXTENSION_PACKAGE
-import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
@@ -29,30 +28,11 @@ private const val FEATURE_SWITCH_STORE_DESCRIPTOR =
 private const val FEATURE_SWITCH_IMPORT_EXPORT_DESCRIPTOR =
     "$EXTENSION_PACKAGE/featureswitches/FeatureSwitchImportExport"
 
+// This owner is preserved in 12.17.3-alpha.01. Resolve it through the patcher's descriptor index;
+// a global string fingerprint is both slower and less reliable because the old DNS string anchor
+// is no longer in this class.
 private const val FEATURE_SWITCH_REPOSITORY_DESCRIPTOR =
     "Lcom/x/featureswitches/FeatureSwitchesRepositoryImpl;"
-
-private object FeatureSwitchRepositoryFingerprint : Fingerprint(
-    name = "getBoolean",
-    parameters = listOf(STRING_TYPE, "Z"),
-    returnType = "Z",
-    custom = { _, classDef ->
-        classDef.type.startsWith("Lcom/x/featureswitches/") &&
-            !AccessFlags.INTERFACE.isSet(classDef.accessFlags) &&
-            listOf(
-                Triple("getFloat", listOf(STRING_TYPE, "F"), "F"),
-                Triple("getInt", listOf(STRING_TYPE, "I"), "I"),
-                Triple("getLong", listOf(STRING_TYPE, "J"), "J"),
-                Triple("getString", listOf(STRING_TYPE, STRING_TYPE), STRING_TYPE),
-            ).all { (name, parameters, returnType) ->
-                classDef.methods.any { method ->
-                    method.name == name &&
-                        method.parameterTypes.map(CharSequence::toString) == parameters &&
-                        method.returnType == returnType
-                }
-            }
-    },
-)
 
 private data class FeatureSwitchAccessor(
     val typeName: String,
@@ -60,6 +40,7 @@ private data class FeatureSwitchAccessor(
     val returnType: String,
     val extensionMethod: String,
 ) {
+    val methodNames = listOf("get$typeName", "peek$typeName")
     val returnOpcode =
         when {
             returnType == "J" || returnType == "D" -> Opcode.RETURN_WIDE
@@ -139,16 +120,7 @@ val featureFlagPatch =
         }
 
         execute {
-            val repositoryMatches = FeatureSwitchRepositoryFingerprint.matchAll()
-            val repositoryMatch =
-                repositoryMatches.singleOrNull { match ->
-                    match.originalClassDef.type == FEATURE_SWITCH_REPOSITORY_DESCRIPTOR
-                } ?: repositoryMatches.singleOrNull()
-                ?: throw PatchException(
-                    "Expected one X-Lite feature-switch repository, found ${repositoryMatches.size}: " +
-                        repositoryMatches.joinToString { it.originalClassDef.type },
-                )
-            val repository = repositoryMatch.classDef
+            val repository = mutableClassDefBy(FEATURE_SWITCH_REPOSITORY_DESCRIPTOR)
             FEATURE_SWITCH_ACCESSORS.forEach { accessor ->
                 val matches = repository.methods.matching(accessor)
                 requireAccessorMatches(accessor, matches)
@@ -162,6 +134,7 @@ private fun Collection<MutableMethod>.matching(
 ) = filter { method ->
     AccessFlags.PUBLIC.isSet(method.accessFlags) &&
         !AccessFlags.STATIC.isSet(method.accessFlags) &&
+        method.name in accessor.methodNames &&
         method.parameterTypes.map(CharSequence::toString) == accessor.parameterTypes &&
         method.returnType == accessor.returnType
 }
@@ -170,11 +143,12 @@ private fun requireAccessorMatches(
     accessor: FeatureSwitchAccessor,
     methods: List<MutableMethod>,
 ) {
-    if (methods.size in 1..2) return
+    val actualNames = methods.map(MutableMethod::getName).toSet()
+    if (methods.size == accessor.methodNames.size && actualNames == accessor.methodNames.toSet()) return
 
     throw PatchException(
-        "Expected one or two X-Lite ${accessor.typeName.lowercase()} accessors, " +
-            "found ${methods.size}: ${methods.joinToString()}",
+        "Expected X-Lite ${accessor.typeName.lowercase()} accessors " +
+            "${accessor.methodNames.joinToString()} exactly once, found ${methods.joinToString()}",
     )
 }
 

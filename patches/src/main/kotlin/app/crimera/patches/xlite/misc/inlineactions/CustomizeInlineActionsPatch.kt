@@ -113,6 +113,11 @@ val customizeXLiteInlineActionsPatch =
                 }?.toString() ?: throw PatchException("Expected one X-Lite contextual canonical-post field")
             xLiteCanonicalPostMediaField =
                 canonicalPostMatch.fieldForToStringLabel(", media=").toString()
+            val canonicalPostInterface =
+                canonicalPostClass.interfaces.singleOrNull()
+                    ?: throw PatchException(
+                        "Expected one X-Lite canonical-post interface, found ${canonicalPostClass.interfaces}",
+                    )
             val inlineActionListType =
                 canonicalPostMatch.fieldForToStringLabel(", inlineActionEntry=").type
             val matches =
@@ -121,6 +126,11 @@ val customizeXLiteInlineActionsPatch =
                     custom = { _, classDef -> classDef.type.startsWith("Lcom/x/inlineactionbar/") },
                     filters =
                         listOf(
+                            methodCall(
+                                definingClass = canonicalPostInterface,
+                                parameters = emptyList(),
+                                returnType = "L",
+                            ),
                             methodCall(smali = "Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z"),
                         ),
                 ).matchAll()

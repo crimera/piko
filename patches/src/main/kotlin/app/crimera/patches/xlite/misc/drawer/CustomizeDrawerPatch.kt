@@ -51,14 +51,15 @@ private object XLiteDrawerMenuItemFingerprint : Fingerprint(
 private object XLiteDrawerFooterItemFingerprint : Fingerprint(
     classFingerprint = XLiteDrawerContentClassFingerprint,
     returnType = "V",
-    custom = { method, _ ->
-        val parameters = method.parameterTypes
-        parameters.size == 6 &&
-            parameters.count { it == "I" } == 1 &&
-            parameters.count { it == "Ljava/lang/String;" } == 1 &&
-            parameters.count { it == "Lkotlin/jvm/functions/Function0;" } == 1 &&
-            parameters.count { it == "Landroidx/compose/runtime/Composer;" } == 1
-    },
+    parameters =
+        listOf(
+            "I",
+            "Landroidx/compose/runtime/Composer;",
+            "L",
+            "L",
+            "Ljava/lang/String;",
+            "Lkotlin/jvm/functions/Function0;",
+        ),
 )
 
 private fun MutableMethod.injectDrawerItemGuard(hiddenItems: MultiChoiceSettingDefinition) {
