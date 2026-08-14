@@ -305,20 +305,21 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
         insertionIndex += 2
     }
 
-    contributions.forEachIndexed { index, contribution ->
+    var iconContinuation = renderer.method.instructions[insertionIndex]
+    contributions.asReversed().forEachIndexed { index, contribution ->
+        val currentIndex = renderer.method.instructions.indexOf(iconContinuation)
         val label = "piko_xlite_post_option_icon_$index"
-        val continuationInstruction = renderer.method.instructions[insertionIndex]
         renderer.method.addInstructionsWithLabels(
-            insertionIndex,
+            currentIndex,
             """
                 invoke-static {v$actionRegister}, ${contribution.handlerDescriptor}->usesIcon(Ljava/lang/Object;)Z
                 move-result v$tempRegister
                 if-eqz v$tempRegister, :$label
                 sget-object v$iconResultRegister, ${iconFields.getValue(contribution)}
             """.trimIndent(),
-            ExternalLabel(label, continuationInstruction),
+            ExternalLabel(label, iconContinuation),
         )
-        insertionIndex = renderer.method.instructions.indexOf(continuationInstruction)
+        iconContinuation = renderer.method.instructions[currentIndex]
     }
 }
 
