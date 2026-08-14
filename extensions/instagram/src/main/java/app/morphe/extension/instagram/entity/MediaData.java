@@ -237,19 +237,13 @@ public class MediaData extends Entity {
     }
 
     private List getVideoVariantsV2() throws Exception {
-        // Instagram 442 stores video_versions on the Media object.
-        List variantList = (List) super.getMethod(this.obj, "AAY");
-        if (variantList == null) {
-            return null;
+        List variantList = (List) super.getField(this.getMoreExtendedData(), "fieldName");
+        if (variantList != null){
+            List<VideoData> videoList = new ArrayList<>();
+            variantList.forEach(item -> videoList.add(new VideoData(item)));
+            return videoList;
         }
-
-        List<VideoData> videoList = new ArrayList<>();
-        variantList.forEach(item -> {
-            if (item != null) {
-                videoList.add(new VideoData(item));
-            }
-        });
-        return videoList;
+        return null;
     }
 
     public List getVideoVariants() throws Exception {
@@ -261,22 +255,16 @@ public class MediaData extends Entity {
     }
 
     public List getImageVariants() throws Exception {
-        Object imageInfoObject = super.getMethod(this.obj, "A39");
-        if (imageInfoObject == null) {
-            return new ArrayList<>();
-        }
-        List variantList = (List) super.getMethod(imageInfoObject, "BZe");
-        if (variantList == null) {
-            return new ArrayList<>();
-        }
-
-        List<ImageData> imageList = new ArrayList<>();
-        variantList.forEach(item -> {
-            if (item != null) {
-                imageList.add(new ImageData(item));
+        Object imageInfoObject = super.getMethod(this.obj, "methodName");
+        if (imageInfoObject != null){
+            List variantList = (List) super.getMethod(imageInfoObject, "methodName");
+            if (variantList != null){
+                List<ImageData> imageList = new ArrayList<>();
+                variantList.forEach(item -> imageList.add(new ImageData(item)));
+                return imageList;
             }
-        });
-        return imageList;
+        }
+        return null;
     }
 
     public String getVideoLink() throws Exception {
