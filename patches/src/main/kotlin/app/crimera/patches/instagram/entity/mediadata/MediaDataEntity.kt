@@ -40,8 +40,12 @@ val mediaDataEntity =
                 }
             }
 
-            // Instagram 442 / VC148: Media.AAY() returns the video_versions list.
-            GetVideoVariantsV1ExtensionFingerprint.changeFirstString("AAY")
+            // Video variants: keep the actual target-build interface method
+            // instead of binding the extraction to a guessed obfuscated name.
+            VideoMediaInIGTVFeedHasVideoVariantsFingerprint.method.apply {
+                val firstInvokeInterfaceInstruction = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_INTERFACE))
+                GetVideoVariantsV1ExtensionFingerprint.changeFirstString(firstInvokeInterfaceInstruction.methodExtractor().name)
+            }
 
             AslSessionRelatedFingerprint.method.apply {
                 val stringIndex = AslSessionRelatedFingerprint.stringMatches[1].index
@@ -49,20 +53,46 @@ val mediaDataEntity =
                 IsVideoExtensionFingerprint.changeFirstString(getInstruction(isVideoVirtualInvokeIndex).methodExtractor().name)
             }
 
-            // Instagram 442 / VC148: MediaData's extended-data/media-list helpers
-            // use Media's backing data object and carousel media getter directly.
-            GetExtendedDataExtensionFingerprint.changeFirstString("A04")
-            GetMediaListExtensionFingerprint.changeFirstString("A8c")
-            GetTrackDataIntfExtensionFingerprint.changeFirstString("A0H")
+            // MediaData expects the media-list getter on the extended-data
+            // backing object. Restore the original fingerprint extraction so
+            // the receiver and obfuscated names stay aligned.
+            var foundMediaListMethod = false
+            EditMediaInfoFragmentMediaSizeFingerprint.method.apply {
+                val firstReturnIndex = indexOfFirstInstruction(Opcode.RETURN)
+                val extendedDataFieldIndex = indexOfFirstInstruction(firstReturnIndex, Opcode.IGET_OBJECT)
+                if (extendedDataFieldIndex > 0) {
+                    val extendedDataFieldName = getInstruction(extendedDataFieldIndex).fieldExtractor().name
+                    val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
+
+                    GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
+                    GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
+                    foundMediaListMethod = true
+                }
+            }
+
+            if (!foundMediaListMethod) {
+                GetAndroidLinkFromMediaObject.method.apply {
+                    val firstIfNeIndex = indexOfFirstInstruction(Opcode.IF_NE)
+                    val extendedDataFieldIndex = indexOfFirstInstruction(firstIfNeIndex, Opcode.IGET_OBJECT)
+                    if (extendedDataFieldIndex > 0) {
+                        val extendedDataFieldName = getInstruction(extendedDataFieldIndex).fieldExtractor().name
+                        val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
+
+                        GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
+                        GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
+                        foundMediaListMethod = true
+                    }
+                }
+            }
 
             // Instagram 442 exposes the media identifier through Media.A7i().
-            // Use the direct String getter instead of the unrelated fan-club mapper;
-            // this value is used to build the download filename.
             GetMediaPkIdExtensionFingerprint.changeFirstString("A7i")
 
             DirectShareTargetRelatedFingerprint.method.apply {
                 val firstIfEqz = indexOfFirstInstruction(Opcode.IF_EQZ)
-                GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(getInstruction(indexOfFirstInstruction(firstIfEqz, Opcode.INVOKE_INTERFACE)).methodExtractor().name)
+                GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(
+                    getInstruction(indexOfFirstInstruction(firstIfEqz, Opcode.INVOKE_INTERFACE)).methodExtractor().name,
+                )
             }
 
             // Instagram 442 / VC148: MediaExtKt.A0J(Media) is the media metadata helper used for description data.
@@ -96,10 +126,17 @@ val mediaDataEntity =
                 }
             }
 
-            // Instagram 442 / VC148: Media.A39() returns ImageInfo. Its DME()
-            // method is the image candidate list consumed by MediaExtKt.A0a().
-            GetImageVariantsExtensionFingerprint.changeFirstString("A39")
-            GetImageVariantsExtensionFingerprint.changeStringAt(1, "DME")
+            // Image variants: derive both the image-info field and the
+            // candidate-list method from the target build.
+            AyuMidcardMediaHelperImageObjectMethodFingerprint.method.apply {
+                val imageVariantsIndex = instructions.indexOfLast { it.opcode == Opcode.INVOKE_INTERFACE }
+                if (imageVariantsIndex >= 0) {
+                    GetImageVariantsExtensionFingerprint.changeStringAt(
+                        1,
+                        getInstruction(imageVariantsIndex).methodExtractor().name,
+                    )
+                }
+            }
 
             ExtMediaDictVideoInfoMapperFingerprint.apply {
                 val moreExtendedMediaDataFieldName = LiveTreeMediaDictClinitFingerprint.classDef.fields.first { it.type == classDef.type }.name
@@ -109,7 +146,21 @@ val mediaDataEntity =
                 method.apply {
                     val videoVariantsFieldIndex = indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT)
                     if (videoVariantsFieldIndex >= 0) {
-                        GetVideoVariantsV2ExtensionFingerprint.changeFirstString(getInstruction(videoVariantsFieldIndex).fieldExtractor().name)
+                        GetVideoVariantsV2ExtensionFingerprint.changeFirstString(
+                            getInstruction(videoVariantsFieldIndex).fieldExtractor().name,
+                        )
+                    }
+                }
+            }
+
+            ExtMediaDictImageInfoMapperFingerprint.apply {
+                val strIndex = stringMatches.first().index
+                method.apply {
+                    val imageInfoFieldIndex = indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT)
+                    if (imageInfoFieldIndex >= 0) {
+                        GetImageVariantsExtensionFingerprint.changeFirstString(
+                            getInstruction(imageInfoFieldIndex).fieldExtractor().name,
+                        )
                     }
                 }
             }
