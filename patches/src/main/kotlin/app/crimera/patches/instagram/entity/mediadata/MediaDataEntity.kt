@@ -40,8 +40,6 @@ val mediaDataEntity =
                 }
             }
 
-            // Video variants: keep the actual target-build interface method
-            // instead of binding the extraction to a guessed obfuscated name.
             VideoMediaInIGTVFeedHasVideoVariantsFingerprint.method.apply {
                 val firstInvokeInterfaceInstruction = getInstruction(indexOfFirstInstruction(Opcode.INVOKE_INTERFACE))
                 GetVideoVariantsV1ExtensionFingerprint.changeFirstString(firstInvokeInterfaceInstruction.methodExtractor().name)
@@ -53,9 +51,6 @@ val mediaDataEntity =
                 IsVideoExtensionFingerprint.changeFirstString(getInstruction(isVideoVirtualInvokeIndex).methodExtractor().name)
             }
 
-            // MediaData expects the media-list getter on the extended-data
-            // backing object. Restore the original fingerprint extraction so
-            // the receiver and obfuscated names stay aligned.
             var foundMediaListMethod = false
             EditMediaInfoFragmentMediaSizeFingerprint.method.apply {
                 val firstReturnIndex = indexOfFirstInstruction(Opcode.RETURN)
@@ -63,7 +58,6 @@ val mediaDataEntity =
                 if (extendedDataFieldIndex > 0) {
                     val extendedDataFieldName = getInstruction(extendedDataFieldIndex).fieldExtractor().name
                     val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
-
                     GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
                     GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
                     foundMediaListMethod = true
@@ -77,7 +71,6 @@ val mediaDataEntity =
                     if (extendedDataFieldIndex > 0) {
                         val extendedDataFieldName = getInstruction(extendedDataFieldIndex).fieldExtractor().name
                         val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
-
                         GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
                         GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
                         foundMediaListMethod = true
@@ -85,7 +78,6 @@ val mediaDataEntity =
                 }
             }
 
-            // Instagram 442 exposes the media identifier through Media.A7i().
             GetMediaPkIdExtensionFingerprint.changeFirstString("A7i")
 
             DirectShareTargetRelatedFingerprint.method.apply {
@@ -95,7 +87,6 @@ val mediaDataEntity =
                 )
             }
 
-            // Instagram 442 / VC148: MediaExtKt.A0J(Media) is the media metadata helper used for description data.
             GetDescriptionTextExtensionFingerprint.changeFirstString("A0J")
             GetDescriptionTextExtensionFingerprint.changeStringAt(1, "A0Z")
 
@@ -126,8 +117,6 @@ val mediaDataEntity =
                 }
             }
 
-            // Image variants: derive both the image-info field and the
-            // candidate-list method from the target build.
             AyuMidcardMediaHelperImageObjectMethodFingerprint.method.apply {
                 val imageVariantsIndex = instructions.indexOfLast { it.opcode == Opcode.INVOKE_INTERFACE }
                 if (imageVariantsIndex >= 0) {
@@ -141,7 +130,6 @@ val mediaDataEntity =
             ExtMediaDictVideoInfoMapperFingerprint.apply {
                 val moreExtendedMediaDataFieldName = LiveTreeMediaDictClinitFingerprint.classDef.fields.first { it.type == classDef.type }.name
                 GetMoreExtendedDataExtensionFingerprint.changeFirstString(moreExtendedMediaDataFieldName)
-
                 val strIndex = stringMatches.last().index
                 method.apply {
                     val videoVariantsFieldIndex = indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT)
@@ -152,6 +140,10 @@ val mediaDataEntity =
                     }
                 }
             }
+
+            // Instagram 442: X.5rs.AAE is the video_versions backing field.
+            // The generic mapper can resolve the wrong field on this build.
+            GetVideoVariantsV2ExtensionFingerprint.changeFirstString("AAE")
 
             ExtMediaDictImageInfoMapperFingerprint.apply {
                 val strIndex = stringMatches.first().index
