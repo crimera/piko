@@ -3,6 +3,7 @@ package app.crimera.patches.xlite.misc.canonicalurls
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
+import app.morphe.patcher.anyInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
@@ -44,17 +45,11 @@ private object MentionEntityModelFingerprint : Fingerprint(
     strings = listOf("MentionEntity(userId=", ", startIdx="),
 )
 
-private object ContextualPostModelFingerprint : Fingerprint(
-    name = "toString",
-    returnType = STRING_DESCRIPTOR,
-    parameters = emptyList(),
-    strings = listOf("ContextualPost(canonicalPost=", ", quotedPost="),
-)
-
 private data class UrlEntityFields(
     val type: String,
     val expandedUrl: FieldReference,
     val url: FieldReference,
+    val expandedUrlGetter: MethodReference?,
 )
 
 private data class CanonicalUrlMatches(
@@ -62,6 +57,7 @@ private data class CanonicalUrlMatches(
     val textEntityNavigation: Match,
     val urlPicker: Match,
     val expandedUrlField: FieldReference,
+    val expandedUrlGetter: MethodReference?,
 )
 
 /**
@@ -86,11 +82,13 @@ val xLiteCanonicalUrlsPatch =
                 matches.postLinkClick,
                 POST_URL_FIELD_FILTER_INDEX,
                 matches.expandedUrlField,
+                matches.expandedUrlGetter,
             )
             replaceUrlEntityFieldRead(
                 matches.textEntityNavigation,
                 TEXT_ENTITY_URL_FIELD_FILTER_INDEX,
                 matches.expandedUrlField,
+                matches.expandedUrlGetter,
             )
             preferExpandedUrlInUrlPicker(matches.urlPicker)
         }
@@ -102,9 +100,24 @@ private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
     val urlEntityFields = resolveUrlEntityFields(urlEntityMatch)
     val mentionType = MentionEntityModelFingerprint.requireSingleMatch("mention entity model")
         .originalClassDef.type
-    val contextualPostType =
-        ContextualPostModelFingerprint.requireSingleMatch("contextual post model")
-            .originalClassDef.type
+    val expandedUrlRead = anyInstruction(
+        fieldAccess(opcode = Opcode.IGET_OBJECT, reference = urlEntityFields.expandedUrl),
+        methodCall(
+            definingClass = urlEntityFields.type,
+            name = "getExpandedUrl",
+            parameters = emptyList(),
+            returnType = STRING_DESCRIPTOR,
+        ),
+    )
+    val shortUrlRead = anyInstruction(
+        fieldAccess(opcode = Opcode.IGET_OBJECT, reference = urlEntityFields.url),
+        methodCall(
+            definingClass = urlEntityFields.type,
+            name = "getUrl",
+            parameters = emptyList(),
+            returnType = STRING_DESCRIPTOR,
+        ),
+    )
 
     val textEntityNavigationFingerprint =
         Fingerprint(
@@ -114,16 +127,10 @@ private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
                 listOf(
                     instanceOf(mentionType),
                     instanceOf(urlEntityFields.type),
-                    fieldAccess(
-                        opcode = Opcode.IGET_OBJECT,
-                        reference = urlEntityFields.expandedUrl,
-                    ),
+                    expandedUrlRead,
                     uriParseCall(),
                     uriAuthorityCall(),
-                    fieldAccess(
-                        opcode = Opcode.IGET_OBJECT,
-                        reference = urlEntityFields.url,
-                    ),
+                    shortUrlRead,
                 ),
         )
     val textEntityNavigationMatch =
@@ -140,26 +147,13 @@ private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
     val postLinkClickMatch =
         Fingerprint(
             returnType = "V",
-            parameters = listOf("L", contextualPostType, "L", "L", "L", "L", "L"),
+            custom = { method, _ -> method.toString() != textEntityNavigationMatch.originalMethod.toString() },
             filters =
                 listOf(
-                    fieldAccess(
-                        opcode = Opcode.IGET_OBJECT,
-                        reference = urlEntityFields.expandedUrl,
-                    ),
+                    expandedUrlRead,
                     uriParseCall(),
                     uriAuthorityCall(),
-                    fieldAccess(
-                        opcode = Opcode.IGET_OBJECT,
-                        reference = urlEntityFields.url,
-                    ),
-                    methodCall(
-                        opcode = Opcode.INVOKE_INTERFACE,
-                        name = "getId",
-                        parameters = emptyList(),
-                        returnType = "L",
-                    ),
-                    fieldAccess(opcode = Opcode.IGET_WIDE, type = "J"),
+                    shortUrlRead,
                 ),
         ).requireSingleMatch("post link click handler")
 
@@ -168,6 +162,7 @@ private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
         textEntityNavigation = textEntityNavigationMatch,
         urlPicker = urlPickerMatch,
         expandedUrlField = urlEntityFields.expandedUrl,
+        expandedUrlGetter = urlEntityFields.expandedUrlGetter,
     )
 }
 
@@ -188,10 +183,20 @@ private fun resolveUrlEntityFields(match: Match): UrlEntityFields {
         throw PatchException("URL entity constructor reuses a String field: ${fields.joinToString()}")
     }
 
+    val expandedUrlGetters = match.originalClassDef.methods.filter { method ->
+        method.name == "getExpandedUrl" &&
+            method.parameterTypes.isEmpty() &&
+            method.returnType == STRING_DESCRIPTOR
+    }
+    if (expandedUrlGetters.size > 1) {
+        throw PatchException("Expected at most one expanded URL getter, found ${expandedUrlGetters.joinToString()}")
+    }
+
     return UrlEntityFields(
         type = owner,
         expandedUrl = fields[1],
         url = fields[2],
+        expandedUrlGetter = expandedUrlGetters.singleOrNull(),
     )
 }
 
@@ -266,25 +271,32 @@ private fun uriAuthorityCall() =
 private fun replaceUrlEntityFieldRead(
     match: Match,
     filterIndex: Int,
-    replacement: FieldReference,
+    replacementField: FieldReference,
+    replacementGetter: MethodReference?,
 ) {
     val method = match.method
-    val fieldReadIndex = match.instructionMatches[filterIndex].index
-    val fieldRead =
-        method.instructions[fieldReadIndex] as? TwoRegisterInstruction
-            ?: throw PatchException(
-                "Expected an encoded URL-entity field read at instruction $fieldReadIndex",
-            )
-    if (fieldRead.opcode != Opcode.IGET_OBJECT) {
-        throw PatchException(
-            "Expected an iget-object URL-entity field read at instruction $fieldReadIndex",
+    val readIndex = match.instructionMatches[filterIndex].index
+    val read = method.instructions[readIndex]
+    if (read.opcode == Opcode.IGET_OBJECT) {
+        val fieldRead = read as? TwoRegisterInstruction
+            ?: throw PatchException("Unsupported URL-entity field read at instruction $readIndex")
+        method.replaceInstruction(
+            readIndex,
+            "iget-object v${fieldRead.registerA}, v${fieldRead.registerB}, $replacementField",
         )
+        return
     }
 
-    method.replaceInstruction(
-        fieldReadIndex,
-        "iget-object v${fieldRead.registerA}, v${fieldRead.registerB}, $replacement",
-    )
+    val getter = replacementGetter
+        ?: throw PatchException("Expanded URL getter is missing for invoke at instruction $readIndex")
+    val invoke = read as? FiveRegisterInstruction
+        ?: throw PatchException("Unsupported URL-entity getter invoke at instruction $readIndex")
+    val opcode = when (read.opcode) {
+        Opcode.INVOKE_VIRTUAL -> "invoke-virtual"
+        Opcode.INVOKE_INTERFACE -> "invoke-interface"
+        else -> throw PatchException("Unexpected URL-entity getter opcode ${read.opcode}")
+    }
+    method.replaceInstruction(readIndex, "$opcode {v${invoke.registerC}}, $getter")
 }
 
 private fun preferExpandedUrlInUrlPicker(match: Match) {

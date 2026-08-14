@@ -10,8 +10,10 @@ import app.crimera.patches.xlite.timeline.fieldForToStringLabel
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.EXTENSION_PACKAGE
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.anyInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.string
 import app.morphe.patcher.patch.BytecodePatchContext
@@ -536,7 +538,7 @@ private fun patchInlineActionTints() {
     if (!actionTypeField.type.startsWith("L")) {
         throw PatchException("X-Lite inline action-type field is not an object: $actionTypeField")
     }
-    val enabledField = inlineActionEntryMatch.fieldForBooleanToStringLabel(", isEnabled=")
+    val enabledField = inlineActionEntryMatch.singleBooleanModelField(", isEnabled=")
     if (enabledField.type != "Z") {
         throw PatchException("X-Lite inline action enabled field is not boolean: $enabledField")
     }
@@ -558,8 +560,22 @@ private fun patchInlineActionTints() {
             ),
             returnType = "V",
             filters = listOf(
-                fieldAccess(opcode = Opcode.IGET_OBJECT, reference = actionTypeField),
-                fieldAccess(opcode = Opcode.IGET_BOOLEAN, reference = enabledField),
+                anyInstruction(
+                    fieldAccess(opcode = Opcode.IGET_OBJECT, reference = actionTypeField),
+                    methodCall(
+                        definingClass = inlineActionEntryClass.type,
+                        parameters = emptyList(),
+                        returnType = actionTypeDescriptor,
+                    ),
+                ),
+                anyInstruction(
+                    fieldAccess(opcode = Opcode.IGET_BOOLEAN, reference = enabledField),
+                    methodCall(
+                        definingClass = inlineActionEntryClass.type,
+                        parameters = emptyList(),
+                        returnType = "Z",
+                    ),
+                ),
             ),
         ).matchAll()
     requireExactlyOne("X-Lite inline action entry renderer", entryMatches)
@@ -614,22 +630,21 @@ private fun patchInlineActionTints() {
     patchLikeIconComposable(likeComposableConstructor.definingClass, activeLikeField)
 }
 
-private fun app.morphe.patcher.Match.fieldForBooleanToStringLabel(
-    label: String,
-): FieldReference {
-    val labelIndex = method.instructions.indexOfFirst { instruction ->
+private fun app.morphe.patcher.Match.singleBooleanModelField(label: String): FieldReference {
+    val hasLabel = method.instructions.any { instruction ->
         instruction.getReference<com.android.tools.smali.dexlib2.iface.reference.StringReference>()
             ?.string == label
     }
-    if (labelIndex < 0) throw PatchException("X-Lite boolean model label was not found: $label")
+    if (!hasLabel) throw PatchException("X-Lite boolean model label was not found: $label")
+
     val fields =
-        method.instructions.drop(labelIndex + 1).mapNotNull { instruction ->
+        method.instructions.mapNotNull { instruction ->
             if (instruction.opcode != Opcode.IGET_BOOLEAN) return@mapNotNull null
             instruction.getReference<FieldReference>()?.takeIf { field ->
                 field.definingClass == originalMethod.definingClass
             }
         }.distinctBy(FieldReference::toString)
-    requireExactlyOne("X-Lite boolean model field after '$label'", fields)
+    requireExactlyOne("X-Lite boolean model field for '$label'", fields)
     return fields.single()
 }
 

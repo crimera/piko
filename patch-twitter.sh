@@ -17,8 +17,8 @@ if [[ ! -f "$MPP" ]]; then
   exit 1
 fi
 
-DEFAULT_APK="$HOME/Downloads/twitter_12.17.3-alpha.01.apk"
-OUTPUT_APK="$HOME/Downloads/piko-twitter-patched.apk"
+DEFAULT_APK="${DEFAULT_APK:-$HOME/Downloads/twitter_12.17.0-beta.1.apkm}"
+OUTPUT_APK="${OUTPUT_APK:-$HOME/Downloads/piko-twitter-patched.apk}"
 APK="$DEFAULT_APK"
 FLAGS=()
 for arg in "$@"; do
@@ -35,40 +35,46 @@ for arg in "$@"; do
   esac
 done
 
-java -jar morphe-desktop-1.11.0-all.jar patch \
-  -p "$MPP" \
-  --keystore Morphe.keystore \
-  --exclusive \
-  -e "X-Lite: Remove ads" \
-  -e "X-Lite: Browse tweet object" \
-  -e "X-Lite: Share post as image" \
-  -e "X-Lite: Disable automatic timeline refresh" \
-  -e "X-Lite: Restore timeline position" \
-  -e "X-Lite: Customize inline actions" \
-  -e "X-Lite: Unlock downloads" \
-  -e "X-Lite: Hide new posts pill" \
-  -e "X-Lite: Filter posts by keyword" \
-  -e "X-Lite: Customize navigation bar items" \
-  -e "X-Lite: Hide premium upsell" \
-  -e "X-Lite: Hide compose button" \
-  -e "X-Lite: Customize drawer items" \
-  -e "X-Lite: Inline download button" \
-  -e "X-Lite: Hide Spaces bar" \
-  -e "X-Lite: Feature switch overrides" \
-  -e "X-Lite: Show sensitive media" \
-  -e "X-Lite: Dynamic color" \
-  -e "X-Lite: Customize default reply sorting" \
-  -e "X-Lite: Hide who to follow" \
-  -e "X-Lite: Hide AI-generated posts" \
-  -e "X-Lite: Customize default media tab" \
-  -e "X-Lite: Custom font" \
-  -e "X-Lite: Open canonical URLs" \
-  --striplibs=arm64-v8a \
-  --force \
-  -o "$OUTPUT_APK" \
-  "${FLAGS[@]}" \
-  -- \
-  "$APK"
+PATCH_ARGS=(
+  java -jar morphe-desktop-1.11.0-all.jar patch
+  -p "$MPP"
+  --keystore Morphe.keystore
+  --exclusive
+  -e "X-Lite: Remove ads"
+  -e "X-Lite: Browse tweet object"
+  -e "X-Lite: Share post as image"
+  -e "X-Lite: Disable automatic timeline refresh"
+  -e "X-Lite: Restore timeline position"
+  -e "X-Lite: Customize inline actions"
+  -e "X-Lite: Unlock downloads"
+  -e "X-Lite: Hide new posts pill"
+  -e "X-Lite: Filter posts by keyword"
+  -e "X-Lite: Customize navigation bar items"
+  -e "X-Lite: Hide premium upsell"
+  -e "X-Lite: Hide compose button"
+  -e "X-Lite: Customize drawer items"
+  -e "X-Lite: Inline download button"
+  -e "X-Lite: Hide Spaces bar"
+  -e "X-Lite: Feature switch overrides"
+  -e "X-Lite: Show sensitive media"
+  -e "X-Lite: Dynamic color"
+  -e "X-Lite: Customize default reply sorting"
+  -e "X-Lite: Hide who to follow"
+  -e "X-Lite: Hide AI-generated posts"
+  -e "X-Lite: Customize default media tab"
+  -e "X-Lite: Custom font"
+  -e "X-Lite: Open canonical URLs"
+  --striplibs=arm64-v8a
+  --force
+  -o "$OUTPUT_APK"
+)
+
+if ((${#FLAGS[@]})); then
+  PATCH_ARGS+=("${FLAGS[@]}")
+fi
+
+PATCH_ARGS+=(-- "$APK")
+"${PATCH_ARGS[@]}"
   # -e "Bring back twitter" \
   # -e "X-Lite: Collect AI-filter training posts" \
 

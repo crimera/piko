@@ -40,7 +40,10 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 private object XLiteComposeReplySortingFingerprint : Fingerprint(
     filters =
         listOf(
-            string("rankingMode"),
+            fieldAccess(
+                opcode = Opcode.SGET_OBJECT,
+                name = "Relevance",
+            ),
             string("timelineRepository"),
         ),
 )
@@ -137,19 +140,7 @@ val xLiteDefaultReplySortingPatch =
 
             val match = matches.single()
             val method = match.method
-            val rankingModeIndex = match.instructionMatches.first().index
-            val instructions = method.instructions
-            val targetSgetIndex = instructions.take(rankingModeIndex).indexOfLast { inst ->
-                if (inst.opcode != Opcode.SGET_OBJECT) false
-                else {
-                    val ref = (inst as? ReferenceInstruction)?.reference as? FieldReference
-                    ref != null && !ref.definingClass.startsWith("Lkotlin/coroutines/")
-                }
-            }
-            if (targetSgetIndex == -1) {
-                throw PatchException("Missing ranking mode sget-object in reply sorting initializer")
-            }
-
+            val targetSgetIndex = match.instructionMatches.first().index
             val sgetInstruction = method.getInstruction<OneRegisterInstruction>(targetSgetIndex)
             val sortRegister = sgetInstruction.registerA
             val fieldRef = sgetInstruction.getReference<FieldReference>()

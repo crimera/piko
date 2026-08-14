@@ -12,6 +12,7 @@ import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
+import app.morphe.patcher.anyInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -139,15 +140,29 @@ val xLiteInlineDownloadButtonPatch =
                         returnType = "V",
                         filters =
                             listOf(
-                                fieldAccess(
-                                    opcode = Opcode.IGET_OBJECT,
-                                    definingClass = xLiteInlineActionEntryType,
-                                    type = xLitePostActionType,
+                                anyInstruction(
+                                    fieldAccess(
+                                        opcode = Opcode.IGET_OBJECT,
+                                        definingClass = xLiteInlineActionEntryType,
+                                        type = xLitePostActionType,
+                                    ),
+                                    methodCall(
+                                        definingClass = xLiteInlineActionEntryType,
+                                        parameters = emptyList(),
+                                        returnType = xLitePostActionType,
+                                    ),
                                 ),
-                                fieldAccess(
-                                    opcode = Opcode.IGET_BOOLEAN,
-                                    definingClass = xLiteInlineActionEntryType,
-                                    type = "Z",
+                                anyInstruction(
+                                    fieldAccess(
+                                        opcode = Opcode.IGET_BOOLEAN,
+                                        definingClass = xLiteInlineActionEntryType,
+                                        type = "Z",
+                                    ),
+                                    methodCall(
+                                        definingClass = xLiteInlineActionEntryType,
+                                        parameters = emptyList(),
+                                        returnType = "Z",
+                                    ),
                                 ),
                             ),
                     ).matchAll(),
@@ -223,10 +238,17 @@ val xLiteInlineDownloadButtonPatch =
                         returnType = "V",
                         filters =
                             listOf(
-                                fieldAccess(
-                                    opcode = Opcode.IGET_OBJECT,
-                                    definingClass = xLiteInlineActionEntryType,
-                                    type = xLitePostActionType,
+                                anyInstruction(
+                                    fieldAccess(
+                                        opcode = Opcode.IGET_OBJECT,
+                                        definingClass = xLiteInlineActionEntryType,
+                                        type = xLitePostActionType,
+                                    ),
+                                    methodCall(
+                                        definingClass = xLiteInlineActionEntryType,
+                                        parameters = emptyList(),
+                                        returnType = xLitePostActionType,
+                                    ),
                                 ),
                                 methodCall(
                                     definingClass = "Ljava/lang/Enum;",
