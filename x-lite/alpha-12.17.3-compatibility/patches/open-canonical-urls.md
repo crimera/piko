@@ -2,7 +2,7 @@
 
 ## Status
 
-**Patch-applied and final-Dex verified on 12.17.3-alpha.01. Runtime verification is pending because no ADB device is connected.**
+**Ported and runtime-tested on 12.17.3-alpha.01: working.**
 
 Source: `patches/src/main/kotlin/app/crimera/patches/xlite/misc/canonicalurls/CanonicalUrlsPatch.kt`
 
@@ -17,7 +17,7 @@ Source: `patches/src/main/kotlin/app/crimera/patches/xlite/misc/canonicalurls/Ca
 
 ## Resolution and mutation
 
-The alpha no longer exposes the old model descriptors/getters used by the previous patch. The port resolves:
+The alpha no longer exposes the old model descriptors/getters used by the previous patch. The port, implemented in commit `33f9bbbf1` (`fix(xlite): port canonical URL patch to alpha`), resolves:
 
 - URL entity from `UrlEntity(displayUrl=..., expandedUrl=..., url=...)` data-class text;
 - mention entity from `MentionEntity(userId=..., startIdx=...)` text;
@@ -40,4 +40,4 @@ The field resolution follows the URL entity constructor's semantic `displayUrl`,
 - Exclusive patch application: passed.
 - Final APK decoded successfully with apktool.
 - Original-vs-final smali comparison confirmed the three expected behavioral mutations and no model mutation.
-- Runtime install/UI verification: pending; no ADB device is connected.
+- User applied the ported patch on `12.17.3-alpha.01` and confirmed canonical URLs open correctly.

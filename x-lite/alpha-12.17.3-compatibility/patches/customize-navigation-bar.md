@@ -2,24 +2,24 @@
 
 ## Status
 
-**Unported / not yet verified on 12.17.3-alpha.01.**
+**Ported and runtime-tested on 12.17.3-alpha.01: working.**
 
 Source: `patches/src/main/kotlin/app/crimera/patches/xlite/misc/navbar/CustomizeNavBarPatch.kt`
 
 ## Breakage
 
-Unknown until this patch is run independently against the exact alpha APK. Do not assume a successful build means its fingerprints or runtime boundary remain valid.
-
-## Port checklist
-
-1. Run this patch alone against 12.17.3-alpha.01 and record the exact match/failure.
-2. Compare the matched alpha bytecode with 12.15.1 and 12.14.0.
-3. Remove hardcoded obfuscated descriptors, method names, generated literals, or removed host resources.
-4. Assert expected fingerprint cardinality.
-5. Build the MPP and inspect the final DEX for a reachable mutation.
-6. Install and test the feature on alpha.
-7. Repatch and regression-test 12.15.1 and 12.14.0.
+The original fingerprint hardcoded the unobfuscated tab enum descriptor and required the old 16-parameter State constructor with a specific `ProfileUser` parameter. The alpha obfuscated the enum descriptor and changed the constructor contract.
 
 ## Findings and fix
 
-Not started. Add exact root cause, stable anchors, mutation, and verification evidence here during the port.
+- Matched `getEntries`, `COMMUNITIES`, and `SPACES` without embedding the alpha enum descriptor.
+- Validated that all three anchors resolve to the same enum type at patch time.
+- Accepted the alpha State constructor variants and located tab data through stable list/map parameter positions instead of the old model descriptor.
+- Added match and reference validation so ambiguous or inconsistent matches fail during patching.
+
+The alpha hardening was implemented in commit `2aad3537b` (`fix(x-lite): harden tab navbar fingerprint for 12.17.3-alpha.01`).
+
+## Verification
+
+- User applied the ported patch on `12.17.3-alpha.01`.
+- Navigation bar customization works successfully.

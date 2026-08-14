@@ -12,6 +12,8 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Timeline model adapter](patches/timeline-model-adapter.md) | Timeline item descriptors are obfuscated | Runtime-tested on alpha through timeline filters; no `NoClassDefFoundError` |
 | [Disable automatic timeline refresh](patches/disable-timeline-refresh.md) | `TimelineType` descriptor became obfuscated | Runtime-tested on alpha: working |
 | [Restore timeline position](patches/restore-timeline-position.md) | Timeline position state moved into an obfuscated URT component and holder/map contracts | Runtime-tested on alpha: working |
+| [Hide Spaces bar](patches/hide-spaces-bar.md) | Existing patch required no alpha-specific changes | User-applied on alpha: working; no port needed |
+| [Customize navigation bar items](patches/customize-navigation-bar.md) | Alpha obfuscated the tab enum and changed the State constructor contract | Ported; user-applied on alpha: working |
 | [Remove ads](patches/remove-ads.md) | Extension DEX referenced unobfuscated timeline models | Runtime-tested on alpha: working |
 | [Hide who to follow](patches/hide-who-to-follow.md) | Extension DEX referenced unobfuscated timeline models | Runtime-tested on alpha: working |
 | [Filter posts by keyword](patches/post-filter.md) | Extension DEX referenced `UrtTimelinePost` and related models | Main-text generic bridge runtime-tested on alpha: working |
@@ -20,31 +22,26 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Inline download button](patches/inline-download-button.md) | Inline models/getters and icon renderer changed; old extension types failed verification | Runtime-tested on alpha: action, icon, and download working |
 | [Hide new posts pill](patches/hide-new-posts-pill.md) | Previous renderer signature referenced the unobfuscated `TimelineShowAlert` model | Runtime-tested on alpha: working |
 | [Hide compose button](patches/hide-compose-button.md) | Renderer owner and method changed from obfuscated `g0->a` to `n->c` | Runtime-tested on alpha: working |
+| [Open canonical URLs](patches/open-canonical-urls.md) | Alpha removed the old URL/contextual-post model descriptors and getters | Ported in `33f9bbbf1`; user-verified on alpha: working |
+| [Feature switch overrides](patches/feature-switch-overrides.md) | The old DNS-string fingerprint no longer identified the alpha repository, and alpha added `peek*` accessors | Patch-applied and final-Dex verified; runtime pending device |
+| [Dynamic color](patches/dynamic-color.md) | Alpha merged palette factories and obfuscated inline-action/Compose contracts | Ported in `e626cd29f`; runtime-confirmed; full behavior matrix pending |
 | [Show sensitive media](patches/show-sensitive-media.md) | Stable media-visibility getter disappeared; alpha retains semantic model labels but uses obfuscated fields | Patch-applied and final-Dex verified; runtime pending device |
 
 ## Unported queue
 
 These patches have not yet been independently run and verified on the alpha. Their documents are placeholders for the exact failure, fix, and evidence discovered during each port.
 
-### Priority 1 — Timeline and user-facing controls
-
-- [Hide Spaces bar](patches/hide-spaces-bar.md)
-
 ### Priority 2 — Premium and navigation
 
 - [Hide premium upsell](patches/hide-premium-upsell.md)
 - [Unlock downloads](patches/unlock-downloads.md)
 - [Customize drawer items](patches/customize-drawer.md)
-- [Customize navigation bar items](patches/customize-navigation-bar.md)
 - [Customize default media tab](patches/default-media-tab.md)
 - [Customize default reply sorting](patches/default-reply-sorting.md)
 
 ### Priority 3 — Miscellaneous features
 
-- [Open canonical URLs](patches/open-canonical-urls.md)
 - [Custom font](patches/custom-font.md)
-- [Dynamic color](patches/dynamic-color.md)
-- [Feature switch overrides](patches/feature-switch-overrides.md)
 - [Share post as image](patches/share-post-as-image.md)
 
 ### Priority 4 — Diagnostics and development tools
@@ -79,6 +76,10 @@ These names are analysis evidence only. Production extension signatures must not
 - User runtime-verified AI-generated post filtering on the alpha after resolving the full timeline post → contextual post → canonical post → content disclosure field chain.
 - User and agent runtime-verified the alpha inline-download action: normal-size download icon appears on media posts, native actions remain usable, and tapping it saves media successfully.
 - Agent runtime-verified Restore timeline position on the alpha: a scrolled For You timeline restored the same item/position after force-stop and relaunch, with no current-process runtime exceptions.
+- User applied the ported Customize navigation bar items patch on the alpha and confirmed it works.
+- User verified the ported Open canonical URLs patch on the alpha and confirmed it works.
+- User confirmed the dynamic-color feature works on-device; the full light/dark/AMOLED, inline-action tint, dynamic-like, and restart-persistence matrix remains pending.
+- Feature switch overrides were independently patch-applied and final-Dex verified on the alpha; runtime/UI verification remains pending because no ADB device was connected.
 
 ## Remaining matrix
 
