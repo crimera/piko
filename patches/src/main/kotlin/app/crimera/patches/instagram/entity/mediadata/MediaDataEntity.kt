@@ -9,6 +9,7 @@ package app.crimera.patches.instagram.entity.mediadata
 import app.crimera.patches.instagram.entity.decoder.EditMediaInfoGetCurrentMediaIdFingerprint
 import app.crimera.patches.instagram.entity.decoder.MEDIAEXT_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
+import app.crimera.patches.instagram.utils.Constants.MUSIC_INFO_CLASS
 import app.crimera.utils.changeFirstString
 import app.crimera.utils.changeStringAt
 import app.crimera.utils.classNameToExtension
@@ -16,9 +17,19 @@ import app.crimera.utils.fieldExtractor
 import app.crimera.utils.methodExtractor
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.util.getReference
 import app.morphe.util.indexOfFirstInstruction
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.Method
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import kotlin.math.abs
+
+// How far from a json key the field holding its value can sit in the mapper.
+private const val FIELD_SEARCH_WINDOW = 8
 
 val mediaDataEntity =
     bytecodePatch(
@@ -74,41 +85,37 @@ val mediaDataEntity =
 
             // Extraction of extended media data field.
             // Extraction of media list from extended media data.
-            var foundMediaListMethod = false
-            EditMediaInfoFragmentMediaSizeFingerprint.method.apply {
-                val firstReturnIndex = indexOfFirstInstruction(Opcode.RETURN)
+            // Up to v439 the list lives on a mutable dict hanging off the media object
+            // (media.A04.A89()), so the getter is preceded by the iget-object for that field. v441
+            // folded the dict into Media, so the list is fetched straight off the media object
+            // (media.A8V()) and the extended-data placeholder is left alone — the extension then
+            // falls back to the media object itself. Anchoring on the first List-returning virtual
+            // call covers both shapes.
+            fun Method.resolveMediaList(): Boolean {
+                val listInvokeIndex =
+                    instructions.indexOfFirst {
+                        it.opcode == Opcode.INVOKE_VIRTUAL && it.methodExtractor().returnType == "java.util.List"
+                    }
+                if (listInvokeIndex < 0) return false
 
-                val extendedDataFieldIndex = indexOfFirstInstruction(firstReturnIndex, Opcode.IGET_OBJECT)
-                // If iget-object is found after return instruction.
-                if (extendedDataFieldIndex > 0) {
-                    val extendedDataFieldName =
-                        getInstruction(
-                            extendedDataFieldIndex,
-                        ).fieldExtractor().name
-                    val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
+                GetMediaListExtensionFingerprint.changeFirstString(getInstruction(listInvokeIndex).methodExtractor().name)
 
-                    GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
-                    GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
-                    foundMediaListMethod = true
+                val fieldReadIndex = listInvokeIndex - 1
+                if (fieldReadIndex >= 0 && getInstruction(fieldReadIndex).opcode == Opcode.IGET_OBJECT) {
+                    GetExtendedDataExtensionFingerprint.changeFirstString(getInstruction(fieldReadIndex).fieldExtractor().name)
                 }
+                return true
             }
+
+            var foundMediaListMethod = EditMediaInfoFragmentMediaSizeFingerprint.method.resolveMediaList()
 
             // Backup for media list extraction if the first fingerprint fails.
             if (!foundMediaListMethod) {
-                GetAndroidLinkFromMediaObject.method.apply {
-                    val firstIfNeIndex = indexOfFirstInstruction(Opcode.IF_NE)
-
-                    val extendedDataFieldIndex = indexOfFirstInstruction(firstIfNeIndex, Opcode.IGET_OBJECT)
-                    val extendedDataFieldName =
-                        getInstruction(
-                            extendedDataFieldIndex,
-                        ).fieldExtractor().name
-                    val mediaListMethodName = getInstruction(extendedDataFieldIndex + 1).methodExtractor().name
-
-                    GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
-                    GetMediaListExtensionFingerprint.changeFirstString(mediaListMethodName)
-                    foundMediaListMethod = true
-                }
+                foundMediaListMethod =
+                    GetAndroidLinkFromMediaObject.matchOrNull()?.method?.resolveMediaList() == true
+            }
+            if (!foundMediaListMethod) {
+                throw PatchException("Could not resolve the media list method")
             }
 
             // Extraction of media pkid from media class.
@@ -141,17 +148,26 @@ val mediaDataEntity =
                     }.name
             GetDescriptionTextExtensionFingerprint.changeFirstString(getCommentDataFromMediaMethodName)
 
-            // Extraction of trackInfo
-            MusicAudioTypeEnumStringFingerprint.method.apply {
-                instructions.filter { it.opcode == Opcode.INVOKE_STATIC }.firstOrNull {
-                    val methodExt = it.methodExtractor()
-                    if (methodExt.returnType != "V") {
-                        GetTrackDataIntfExtensionFingerprint.changeFirstString(methodExt.name)
-                        true
-                    } else {
-                        false
-                    }
-                }
+            // Extraction of trackInfo.
+            // The track container is the object the media helper builds out of a MusicInfo, so
+            // anchor on that constructor call. Up to v439 this was reached indirectly through the
+            // display-artist helper, but v441 moved that helper onto the container itself, so the
+            // old anchor no longer exists.
+            val trackContainerBuilderName =
+                mutableClassDefBy { it.type == MEDIAEXT_CLASS_NAME }
+                    .methods
+                    .firstOrNull { method ->
+                        method.implementation?.instructions?.any {
+                            it.opcode == Opcode.INVOKE_DIRECT &&
+                                it.getReference<MethodReference>()?.let { ref ->
+                                    ref.name == "<init>" &&
+                                        ref.parameterTypes.singleOrNull()?.toString() == MUSIC_INFO_CLASS
+                                } == true
+                        } == true
+                    }?.name
+
+            if (trackContainerBuilderName != null) {
+                GetTrackDataIntfExtensionFingerprint.changeFirstString(trackContainerBuilderName)
             }
 
             // Message audio.
@@ -184,20 +200,17 @@ val mediaDataEntity =
                         .name
                 GetMoreExtendedDataExtensionFingerprint.changeFirstString(moreExtendedMediaDataFieldName)
 
-                val strIndex = stringMatches.last().index
-                method.apply {
-                    val videoVariantsListFieldName = getInstruction(strIndex + 2).fieldExtractor().name
-
-                    GetVideoVariantsV2ExtensionFingerprint.changeFirstString(videoVariantsListFieldName)
+                // The mapper writes each json key next to the field holding its value, but whether
+                // that field is read before or after the key depends on which serialiser helper
+                // the key goes through, so match on the field type near the key instead of a fixed
+                // offset from it.
+                method.fieldNameNearString("video_versions") { it == "Ljava/util/List;" }?.let {
+                    GetVideoVariantsV2ExtensionFingerprint.changeFirstString(it)
                 }
 
-                ExtMediaDictImageInfoMapperFingerprint.apply {
-                    val strIndex = stringMatches.first().index
-                    method.apply {
-                        val imageInfoListFieldName = getInstruction(strIndex + 2).fieldExtractor().name
-                        GetImageVariantsExtensionFingerprint.changeFirstString(imageInfoListFieldName)
-                    }
-                }
+                ExtMediaDictImageInfoMapperFingerprint.method
+                    .fieldNameNearString("image_versions2") { it.endsWith("/ImageInfo;") }
+                    ?.let { GetImageVariantsExtensionFingerprint.changeFirstString(it) }
             }
 
             ProductInfoMapperFingerprint.apply {
@@ -212,3 +225,28 @@ val mediaDataEntity =
             // End.
         }
     }
+
+/**
+ * Name of the field read closest to where [value] is loaded, restricted to fields whose type
+ * satisfies [matchesType]. Returns null when the string or a matching field read is absent.
+ */
+private fun Method.fieldNameNearString(
+    value: String,
+    matchesType: (String) -> Boolean,
+): String? {
+    val stringIndex =
+        instructions.indexOfFirst {
+            (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
+                it.getReference<StringReference>()?.string == value
+        }
+    if (stringIndex < 0) return null
+
+    return instructions
+        .withIndex()
+        .filter { (index, instruction) ->
+            instruction.opcode == Opcode.IGET_OBJECT && abs(index - stringIndex) <= FIELD_SEARCH_WINDOW
+        }.sortedBy { (index, _) -> abs(index - stringIndex) }
+        .firstNotNullOfOrNull { (_, instruction) ->
+            instruction.getReference<FieldReference>()?.takeIf { matchesType(it.type) }?.name
+        }
+}
