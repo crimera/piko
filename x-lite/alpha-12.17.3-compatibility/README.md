@@ -28,6 +28,7 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Show sensitive media](patches/show-sensitive-media.md) | Stable media-visibility getter disappeared; alpha retains semantic model labels but uses obfuscated fields | Patch-applied and final-Dex verified; runtime pending device |
 | [Customize drawer items](patches/customize-drawer.md) | Compose compiler reordered footer item parameters and moved String title to p4 | Ported; patch-applied and final-APK verified |
 | [Customize default media tab](patches/default-media-tab.md) | Existing combined profile timeline constructor fingerprint and dynamic check-cast remain valid on alpha | Ported; patch-applied and final-APK verified |
+| [Customize default reply sorting](patches/default-reply-sorting.md) | PostIdentifier inlined to field access; lambda consolidation required branch-scoped check-cast index and range invocation | Ported; patch-applied and final-APK verified |
 
 ## Unported queue
 
@@ -37,7 +38,6 @@ These patches have not yet been independently run and verified on the alpha. The
 
 - [Hide premium upsell](patches/hide-premium-upsell.md)
 - [Unlock downloads](patches/unlock-downloads.md)
-- [Customize default reply sorting](patches/default-reply-sorting.md)
 
 ### Priority 3 — Miscellaneous features
 

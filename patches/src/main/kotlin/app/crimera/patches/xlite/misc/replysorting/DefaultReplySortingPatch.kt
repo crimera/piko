@@ -40,7 +40,7 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 private object XLiteComposeReplySortingFingerprint : Fingerprint(
     filters =
         listOf(
-            methodCall(smali = "Lcom/x/models/PostIdentifier;->getValue()J"),
+            string("rankingMode"),
             string("timelineRepository"),
         ),
 )
@@ -137,16 +137,18 @@ val xLiteDefaultReplySortingPatch =
 
             val match = matches.single()
             val method = match.method
-            val getValueIndex = match.instructionMatches.first().index
+            val rankingModeIndex = match.instructionMatches.first().index
             val instructions = method.instructions
-            val relativeIndex = instructions.drop(getValueIndex).indexOfFirst { inst ->
+            val targetSgetIndex = instructions.take(rankingModeIndex).indexOfLast { inst ->
                 if (inst.opcode != Opcode.SGET_OBJECT) false
                 else {
                     val ref = (inst as? ReferenceInstruction)?.reference as? FieldReference
                     ref != null && !ref.definingClass.startsWith("Lkotlin/coroutines/")
                 }
             }
-            val targetSgetIndex = if (relativeIndex != -1) getValueIndex + relativeIndex else method.indexOfFirstInstructionOrThrow(getValueIndex, Opcode.SGET_OBJECT)
+            if (targetSgetIndex == -1) {
+                throw PatchException("Missing ranking mode sget-object in reply sorting initializer")
+            }
 
             val sgetInstruction = method.getInstruction<OneRegisterInstruction>(targetSgetIndex)
             val sortRegister = sgetInstruction.registerA
@@ -172,13 +174,23 @@ val xLiteDefaultReplySortingPatch =
                         selectionMatches.joinToString { it.originalMethod.toString() },
                 )
             }
-            val selectionMethod = selectionMatches.single().method
-            val checkCastIndex = selectionMethod.indexOfFirstInstructionOrThrow(Opcode.CHECK_CAST)
+            val selectionMatch = selectionMatches.single()
+            val selectionMethod = selectionMatch.method
+            val defaultUrtIndex = selectionMatch.instructionMatches.first().index
+            val checkCastIndex = selectionMethod.instructions.take(defaultUrtIndex).indexOfLast {
+                it.opcode == Opcode.CHECK_CAST
+            }
+            if (checkCastIndex == -1) {
+                throw PatchException("Missing check-cast in reply sorting selection handler")
+            }
+
+            val checkCastInstruction = selectionMethod.getInstruction<OneRegisterInstruction>(checkCastIndex)
+            val selectedRegister = checkCastInstruction.registerA
 
             selectionMethod.addInstructions(
                 checkCastIndex + 1,
                 """
-                    invoke-static {p1}, $REPLY_SORTING_RESOLVER_DESCRIPTOR->remember(Ljava/lang/Object;)V
+                    invoke-static/range {v$selectedRegister .. v$selectedRegister}, $REPLY_SORTING_RESOLVER_DESCRIPTOR->remember(Ljava/lang/Object;)V
                 """.trimIndent(),
             )
 
