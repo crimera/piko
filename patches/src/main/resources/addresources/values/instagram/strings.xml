@@ -337,6 +337,7 @@
     <string name="piko_delete">Delete</string>
     <string name="piko_unknown">Unknown</string>
     <string name="piko_tap_to_view">tap to view</string>
+    <string name="piko_media_expired">link expired</string>
     <string name="piko_media_not_available">media not available</string>
     <string name="piko_deleted_a_message">%s deleted a message</string>
     <string name="piko_someone">Someone</string>

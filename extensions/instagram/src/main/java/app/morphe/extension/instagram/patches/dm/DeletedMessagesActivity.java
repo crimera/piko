@@ -185,6 +185,24 @@ public class DeletedMessagesActivity extends Activity {
         return ".jpg";
     }
 
+    /**
+     * True when a CDN url has passed the expiry it carries in its own "oe" parameter (hex epoch).
+     * Shared-post permalinks have no such parameter and never expire.
+     */
+    private static boolean isExpiredMediaUrl(String url) {
+        try {
+            int i = url.indexOf("oe=");
+            // Must start a parameter, so "?oe=" or "&oe=" — not a suffix of another name.
+            if (i < 1 || (url.charAt(i - 1) != '?' && url.charAt(i - 1) != '&')) return false;
+            int end = i + 3;
+            while (end < url.length() && Character.digit(url.charAt(end), 16) >= 0) end++;
+            if (end == i + 3) return false;
+            return Long.parseLong(url.substring(i + 3, end), 16) * 1000L < System.currentTimeMillis();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     /** Offers open/download/copy for a captured media url, via a plain framework AlertDialog. */
     private void showMediaOptions(String messageId, String url, String type) {
         try {
@@ -333,7 +351,8 @@ public class DeletedMessagesActivity extends Activity {
             senderView.setText(who);
             boolean isMediaUrl = content != null && content.startsWith("http");
             if (isMediaUrl) {
-                contentView.setText(mediaLabel(type) + "  ·  " + str("piko_tap_to_view"));
+                contentView.setText(mediaLabel(type) + "  ·  "
+                        + str(isExpiredMediaUrl(content) ? "piko_media_expired" : "piko_tap_to_view"));
             } else {
                 contentView.setText(content != null && !content.isEmpty() ? content
                         : (type != null ? "[" + type + "]" : str("piko_media_deleted_generic")));
