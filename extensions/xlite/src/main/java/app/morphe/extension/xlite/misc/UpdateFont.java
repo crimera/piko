@@ -9,8 +9,9 @@ package app.morphe.extension.xlite.misc;
 import static app.morphe.extension.shared.StringRef.str;
 
 import android.app.Activity;
-import android.app.Fragment;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
@@ -18,24 +19,33 @@ import android.graphics.fonts.Font;
 import android.graphics.fonts.FontFamily;
 import android.icu.lang.UCharacter;
 import android.icu.lang.UProperty;
+import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ReplacementSpan;
 
+import androidx.annotation.Nullable;
+
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 import app.morphe.extension.crimera.PikoUtils;
-import app.morphe.extension.shared.ResourceType;
-import app.morphe.extension.shared.ResourceUtils;
+import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.ui.CustomDialog;
 import app.morphe.extension.xlite.settings.SettingsActionHandler;
 import app.morphe.extension.xlite.settings.SettingsRegistry;
 
 public class UpdateFont {
     public static final String FONT_FILE_NAME = "custom_font.ttf";
     public static final String EMOJI_FONT_FILE_NAME = "custom_emoji_font.ttf";
+
+    private static final int PICK_FONT_REQUEST_CODE = 0x5061;
+    private static final int PICK_EMOJI_FONT_REQUEST_CODE = 0x5062;
 
     private static Typeface textTypeface;
     private static Typeface emojiTypeface;
@@ -297,21 +307,95 @@ public class UpdateFont {
     }
 
     private static void openPicker(Activity activity, boolean isEmojiFont) {
-        Fragment fragment = new FontPickerFragment();
-        Bundle arguments = new Bundle();
-        arguments.putBoolean("isEmojiFont", isEmojiFont);
-        fragment.setArguments(arguments);
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        String[] mimeTypes = {"font/ttf", "font/otf", "application/x-font-ttf", "application/x-font-otf", "application/octet-stream"};
+        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
+        activity.startActivityForResult(
+                intent,
+                isEmojiFont ? PICK_EMOJI_FONT_REQUEST_CODE : PICK_FONT_REQUEST_CODE
+        );
+    }
 
-        int containerId =
-                ResourceUtils.getIdentifierOrThrow(
+    public static boolean handleActivityResult(
+            Activity activity,
+            int requestCode,
+            int resultCode,
+            @Nullable Intent data
+    ) {
+        if (requestCode != PICK_FONT_REQUEST_CODE && requestCode != PICK_EMOJI_FONT_REQUEST_CODE) {
+            return false;
+        }
+        if (resultCode != Activity.RESULT_OK || data == null || data.getData() == null) {
+            return true;
+        }
+        boolean isEmojiFont = (requestCode == PICK_EMOJI_FONT_REQUEST_CODE);
+        Uri uri = data.getData();
+        if (hasValidFontHeader(activity, uri)) {
+            if (copyFont(activity, uri, isEmojiFont)) {
+                PikoUtils.toast(str("piko_xlite_font_added"));
+                promptForRestart(activity);
+            } else {
+                PikoUtils.toast(str("piko_xlite_font_add_failed"));
+            }
+        } else {
+            PikoUtils.toast(str("piko_xlite_font_invalid"));
+        }
+        return true;
+    }
+
+    private static boolean hasValidFontHeader(Context ctx, Uri uri) {
+        try (InputStream inputStream = ctx.getContentResolver().openInputStream(uri)) {
+            if (inputStream == null) return false;
+            byte[] header = new byte[4];
+            int read = inputStream.read(header);
+            if (read < 4) return false;
+            String magic = new String(header, StandardCharsets.ISO_8859_1);
+            if (magic.equals("OTTO") || magic.equals("true") || magic.equals("ttcf")) {
+                return true;
+            }
+            if (header[0] == 0x00 && header[1] == 0x01 && header[2] == 0x00 && header[3] == 0x00) {
+                return true;
+            }
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+        }
+        return false;
+    }
+
+    private static boolean copyFont(Context ctx, Uri uri, boolean isEmojiFont) {
+        String filename = isEmojiFont ? EMOJI_FONT_FILE_NAME : FONT_FILE_NAME;
+        File outFile = new File(ctx.getFilesDir(), filename);
+        try (InputStream inputStream = ctx.getContentResolver().openInputStream(uri);
+             OutputStream outputStream = new FileOutputStream(outFile)) {
+            if (inputStream == null) return false;
+            byte[] buffer = new byte[4096];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+            return true;
+        } catch (Exception e) {
+            PikoUtils.logger(e);
+        }
+        return false;
+    }
+
+    private static void promptForRestart(Activity activity) {
+        Dialog dialog =
+                CustomDialog.create(
                         activity,
-                        ResourceType.ID,
-                        "fragment_container"
-                );
-        activity.getFragmentManager()
-                .beginTransaction()
-                .replace(containerId, fragment)
-                .addToBackStack(null)
-                .commit();
+                        str("piko_xlite_restart_title"),
+                        str("piko_xlite_restart_summary"),
+                        null,
+                        str("piko_xlite_restart_now"),
+                        () -> Utils.restartApp(activity),
+                        () -> { },
+                        null,
+                        null,
+                        true
+                ).first;
+        dialog.show();
     }
 }

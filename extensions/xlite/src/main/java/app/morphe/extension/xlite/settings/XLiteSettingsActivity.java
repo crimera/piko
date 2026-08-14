@@ -24,6 +24,7 @@ import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.xlite.featureswitches.FeatureSwitchImportExport;
+import app.morphe.extension.xlite.misc.UpdateFont;
 import app.morphe.extension.xlite.ui.Theme;
 
 @SuppressWarnings("deprecation")
@@ -125,7 +126,10 @@ public final class XLiteSettingsActivity extends Activity {
         if (FeatureSwitchImportExport.handleActivityResult(this, requestCode, resultCode, data)) {
             return;
         }
-        SettingsBackupRestore.handleActivityResult(this, requestCode, resultCode, data);
+        if (SettingsBackupRestore.handleActivityResult(this, requestCode, resultCode, data)) {
+            return;
+        }
+        UpdateFont.handleActivityResult(this, requestCode, resultCode, data);
     }
 
     private void applySystemTheme() {

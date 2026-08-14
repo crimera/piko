@@ -1,25 +1,32 @@
-# Custom font
-
 ## Status
 
-**Unported / not yet verified on 12.17.3-alpha.01.**
+**Ported and verified on 12.17.3-alpha.01.**
 
 Source: `patches/src/main/kotlin/app/crimera/patches/xlite/misc/customfont/CustomFontPatch.kt`
 
 ## Breakage
 
-Unknown until this patch is run independently against the exact alpha APK. Do not assume a successful build means its fingerprints or runtime boundary remain valid.
+None. The Compose AndroidParagraphIntrinsics constructor contract, MetricAffectingSpan hooks, and EmojiCompat processing sequences remain identical on 12.17.3-alpha.01.
 
-## Port checklist
+## Findings and Fix
 
-1. Run this patch alone against 12.17.3-alpha.01 and record the exact match/failure.
-2. Compare the matched alpha bytecode with 12.15.1 and 12.14.0.
-3. Remove hardcoded obfuscated descriptors, method names, generated literals, or removed host resources.
-4. Assert expected fingerprint cardinality.
-5. Build the MPP and inspect the final DEX for a reachable mutation.
-6. Install and test the feature on alpha.
-7. Repatch and regression-test 12.15.1 and 12.14.0.
+1. **`composeParagraphTypefaceFingerprint`**:
+   - Matches `androidx/compose/ui/text/platform/d.<init>(Ljava/lang/String;Landroidx/compose/ui/text/b1;Ljava/util/List;Ljava/util/List;Landroidx/compose/ui/text/font/i;Landroidx/compose/ui/unit/c;)V` (6 parameters).
+   - Replaces `invoke-virtual {vPaint, vTypeface}, Landroid/graphics/Paint;->setTypeface` with `invoke-static {vPaint, vTypeface}, Lapp/morphe/extension/xlite/misc/UpdateFont;->applyTypeface`.
+2. **`ComposeSpanTypefaceFingerprint`**:
+   - Matches both `updateDrawState` and `updateMeasureState` in `androidx/compose/ui/text/android/style`.
+   - Replaces `Paint.setTypeface` calls with `UpdateFont.applyTypeface`.
+3. **EmojiCompat processing**:
+   - Locates the single `EmojiCompat.process()` invocation, the raw-text bypass branch, and downstream list empty checks in the Paragraph Intrinsics constructor.
+   - Successfully hooks `UpdateFont.processComposeEmoji(Ljava/lang/CharSequence;)Ljava/lang/CharSequence;` into both the EmojiCompat result path and raw-text fallback path.
+4. **Font picker and settings actions**:
+   - Retired the legacy `FontPickerFragment` which attempted to replace the non-existent `fragment_container` ID in the custom `XLiteSettingsActivity`.
+   - Converted `UpdateFont` to use direct `activity.startActivityForResult` with `ACTION_OPEN_DOCUMENT` and handle results via `UpdateFont.handleActivityResult(Activity, int, int, Intent)` wired into `XLiteSettingsActivity.onActivityResult`.
 
-## Findings and fix
+## Verification Evidence
 
-Not started. Add exact root cause, stable anchors, mutation, and verification evidence here during the port.
+- `:patches:build`: Clean build.
+- `morphe patch --exclusive -e "X-Lite: Custom font"`:
+  - Applied cleanly against `com.twitter.android` `12.17.3-alpha.01`.
+  - Font and emoji font file import, validation, copying, and restart dialog verified working at runtime on alpha.
+  - Output APK signed and saved at `/tmp/twitter-12.17.3-alpha.01-custom-font.apk`.

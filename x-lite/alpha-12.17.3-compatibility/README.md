@@ -30,6 +30,7 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Customize default media tab](patches/default-media-tab.md) | Existing combined profile timeline constructor fingerprint and dynamic check-cast remain valid on alpha | Ported; patch-applied and final-APK verified |
 | [Customize default reply sorting](patches/default-reply-sorting.md) | PostIdentifier inlined to field access; lambda consolidation required branch-scoped check-cast index and range invocation | Ported; patch-applied and final-APK verified |
 | [Unlock downloads](patches/unlock-downloads.md) | SubscriptionsFeatures & MediaContent obfuscated; feature strings updated; inlined checker handled | Ported; patch-applied and final-APK verified |
+| [Custom font](patches/custom-font.md) | Existing Compose paragraph intrinsics and span hooks remain stable | Ported; patch-applied and final-APK verified |
 
 ## Unported queue
 
@@ -41,7 +42,6 @@ These patches have not yet been independently run and verified on the alpha. The
 
 ### Priority 3 — Miscellaneous features
 
-- [Custom font](patches/custom-font.md)
 - [Share post as image](patches/share-post-as-image.md)
 
 ### Priority 4 — Diagnostics and development tools
