@@ -45,6 +45,7 @@ import java.util.function.Predicate;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.xlite.settings.SettingsRegistry;
+import app.morphe.extension.xlite.utils.ToStringParser;
 
 @SuppressWarnings("unused")
 public final class InlineDownloadButton {
@@ -262,33 +263,50 @@ public final class InlineDownloadButton {
         String text = canonicalPost == null ? null : canonicalPost.toString();
         // Reposts mirror the original media, so the media's source post belongs
         // to the original author; name the file after the original post.
-        String sourcePostId = toStringValue(text, "sourcePostIdentifier=", ", sourceUserIdentifier=");
+        String sourcePostId = sourceMediaField(text, "sourcePostIdentifier");
         if (sourcePostId != null) return safeFileSegment(sourcePostId, "post");
-        return safeFileSegment(toStringValue(text, "CanonicalPost(id=", ", text="), "post");
+        return safeFileSegment(ToStringParser.fieldValue(text, "id"), "post");
     }
 
     private static String sourceUsername(Object post) {
         Object canonicalPost = canonicalPost(post);
         String text = canonicalPost == null ? null : canonicalPost.toString();
-        // Reposted media carries the original author's display name; prefer it
-        // over the reposter's screen name.
-        String sourceName = toStringValue(text, "sourceUserDisplayName=", ",");
-        if (sourceName != null) return safeFileSegment(sourceName, "twitter");
-        String author = toStringValue(text, ", author=", ", legacyCard=");
-        String screenName = toStringValue(author, "screenName=", ",");
+        // Reposted media carries a sourceInfo pointing at the original post;
+        // name the file after the original author's screen name (the first
+        // mention of the "RT @name:" text), falling back to the media's
+        // display name, then the reposter's screen name.
+        if (hasRepostedMedia(text)) {
+            String sourceScreenName = firstMentionScreenName(text);
+            if (sourceScreenName != null) return safeFileSegment(sourceScreenName, "twitter");
+            String sourceDisplayName = sourceMediaField(text, "sourceUserDisplayName");
+            if (sourceDisplayName != null) return safeFileSegment(sourceDisplayName, "twitter");
+        }
+        String author = ToStringParser.fieldValue(text, "author");
+        String screenName = author == null ? null : ToStringParser.fieldValue(author, "screenName");
         return safeFileSegment(screenName, "twitter");
     }
 
-    private static String toStringValue(String value, String prefix, String suffix) {
-        if (value == null) return null;
-        int start = value.indexOf(prefix);
-        if (start < 0) return null;
-        start += prefix.length();
-        int end = value.indexOf(suffix, start);
-        if (end < 0) return null;
-        String result = value.substring(start, end).trim();
-        return result.equals("null") || result.isEmpty() ? null : result;
+    private static boolean hasRepostedMedia(String text) {
+        return sourceMediaField(text, "sourcePostIdentifier") != null;
     }
+
+    private static String firstMentionScreenName(String text) {
+        String entityList = ToStringParser.fieldValue(text, "entityList");
+        if (entityList == null) return null;
+        String mentions = ToStringParser.fieldValue(entityList, "mentions");
+        if (mentions == null) return null;
+        // Mentions are ordered by appearance; the first one is the "RT @name:"
+        // source of a repost.
+        return ToStringParser.fieldValue(mentions, "screenName");
+    }
+
+    private static String sourceMediaField(String text, String fieldName) {
+        if (text == null) return null;
+        String sourceInfo = ToStringParser.fieldValue(text, "sourceInfo");
+        if (sourceInfo == null) return null;
+        return ToStringParser.fieldValue(sourceInfo, fieldName);
+    }
+
 
     private static List<DownloadItem> downloadItems(List<?> media) {
         List<DownloadItem> downloads = new ArrayList<>(media.size());
@@ -308,7 +326,7 @@ public final class InlineDownloadButton {
     private static DownloadItem downloadItem(Object media) {
         String value = media.toString();
         if (value.startsWith("MediaContentImage(")) {
-            String url = toStringValue(value, ", imageUrl=", ", originalImgHeight=");
+            String url = ToStringParser.fieldValue(value, "imageUrl");
             if (!XLiteUtils.isHttpUrl(url)) return null;
             return new DownloadItem(originalImageUrl(url), "jpg", "image/jpeg", "Image");
         }
