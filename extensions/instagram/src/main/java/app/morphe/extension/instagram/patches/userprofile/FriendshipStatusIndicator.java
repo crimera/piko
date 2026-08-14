@@ -25,6 +25,7 @@ import android.graphics.Typeface;
 import android.util.TypedValue;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
@@ -99,28 +100,27 @@ public class FriendshipStatusIndicator {
             friendshipStatusTextView.setTag(tag);
             friendshipStatusTextView.setText(text);
 
-            int secondaryTextColor = UI.getThemedColour("igds_color_secondary_text");
+            float indicatorTextSizeSp = 12;
+            int indicatorTextSizePx = Math.round(TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_SP,
+                    indicatorTextSizeSp,
+                    context.getResources().getDisplayMetrics()
+            ));
+            int primaryTextColor = UI.getThemedColour("igds_color_primary_text");
+            friendshipStatusTextView.setTextColor(primaryTextColor);
 
             int indicatorColor = indicatorColorHex == null
-                    ? secondaryTextColor
+                    ? primaryTextColor
                     : Color.parseColor(indicatorColorHex);
-
-            friendshipStatusTextView.setTextColor(indicatorColor);
-
             Drawable statusIcon = ResourceUtils
                     .getDrawable(indicatorIconDrawable)
                     .mutate();
             statusIcon.setColorFilter(
                     new PorterDuffColorFilter(indicatorColor, PorterDuff.Mode.SRC_ATOP)
             );
-            statusIcon.setBounds(
-                    0,
-                    -Dim.dp2,
-                    statusIcon.getIntrinsicWidth(),
-                    statusIcon.getIntrinsicHeight() - Dim.dp2
-            );
+            statusIcon.setBounds(0, 0, indicatorTextSizePx, indicatorTextSizePx);
 
-            friendshipStatusTextView.setCompoundDrawablePadding(Dim.dp6);
+            friendshipStatusTextView.setCompoundDrawablePadding(Dim.dp4);
             friendshipStatusTextView.setCompoundDrawablesRelative(
                     statusIcon,
                     null,
@@ -128,23 +128,26 @@ public class FriendshipStatusIndicator {
                     null
             );
             GradientDrawable background = new GradientDrawable();
-            int backgroundColor = UI.getThemedColour("igds_color_primary_text");
-            background.setColor(Color.argb(
-                    18,
-                    Color.red(backgroundColor),
-                    Color.green(backgroundColor),
-                    Color.blue(backgroundColor)
-            ));
-            background.setStroke(Dim.dp2, Color.argb(
-                    33,
-                    Color.red(backgroundColor),
-                    Color.green(backgroundColor),
-                    Color.blue(backgroundColor)
-            ));
+            background.setColor(Color.TRANSPARENT);
+            background.setStroke(
+                    Dim.dp2 / 2,
+                    Color.argb(
+                            26,
+                            Color.red(primaryTextColor),
+                            Color.green(primaryTextColor),
+                            Color.blue(primaryTextColor)
+                    )
+            );
             background.setCornerRadius(Dim.dp20);
             friendshipStatusTextView.setBackground(background);
+            friendshipStatusTextView.setGravity(Gravity.CENTER_VERTICAL);
+            friendshipStatusTextView.setIncludeFontPadding(false);
+            friendshipStatusTextView.setSingleLine(true);
             friendshipStatusTextView.setPadding(Dim.dp8, Dim.dp6, Dim.dp8, Dim.dp6);
-            friendshipStatusTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+            friendshipStatusTextView.setTextSize(
+                    TypedValue.COMPLEX_UNIT_SP,
+                    indicatorTextSizeSp
+            );
             friendshipStatusTextView.setTypeface(Typeface.create(
                     "sans-serif-medium",
                     Typeface.NORMAL
@@ -162,8 +165,7 @@ public class FriendshipStatusIndicator {
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
             );
-            layoutParams.topMargin = Dim.dp4;
-            layoutParams.bottomMargin = Dim.dp8;
+            layoutParams.setMargins(0, Dim.dp4, 0, Dim.dp6);
             viewGroup.addView(friendshipStatusTextView, targetIndex + 1, layoutParams);
         }
     }
@@ -217,3 +219,4 @@ public class FriendshipStatusIndicator {
         }
     }
 }
+
