@@ -267,7 +267,7 @@ public class MediaData extends Entity {
     public List getImageVariants() throws Exception {
         Object imageInfoObject = super.getMethod(this.obj, "methodName");
         if (imageInfoObject != null){
-            List variantList = (List) super.getMethod(imageInfoObject, "methodName");
+            List variantList = (List) super.getMethod(imageInfoObject, "imageVariantsMethod");
             if (variantList != null){
                 List<ImageData> imageList = new ArrayList<>();
                 for (Object item : variantList) {
