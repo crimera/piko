@@ -10,8 +10,10 @@ package app.morphe.extension.instagram.patches;
 import android.net.Uri;
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Locale;
 
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
@@ -155,16 +157,98 @@ public class Links {
 
     public static String sanitizeUrl(String url){
         try{
-            return url.replaceAll("([&?])igsh=[^&]*", "")
-                    .replaceAll("([&?])utm_source=[^&]*", "")
-                    .replaceAll("([&?])utm_medium=[^&]*", "")
-                    .replaceAll("([&?])utm_content=[^&]*", "")
-                    .replaceAll("([&?])fbclid=[^&]*", "")
-                    .replaceAll("([&?])si=[^&]*", "");
+            return ShareLinkSanitizer.sanitize(url, Pref.sanitizeShareLinks());
         } catch (Exception e) {
             Logger.printException(() -> "sanitizeUrl failed: ", e);
         }
         return url;
+    }
+
+    static final class ShareLinkSanitizer {
+        private static final String INSTAGRAM_DOMAIN = "instagram.com";
+        private static final List<String> INSTAGRAM_FUNCTIONAL_QUERY_PARAMETERS = Arrays.asList(
+                "comment_id",
+                "img_index",
+                "open_comments",
+                "story_media_id"
+        );
+        private static final List<String> TRACKING_QUERY_PARAMETERS = Arrays.asList(
+                "igsh",
+                "igsi",
+                "utm_source",
+                "utm_medium",
+                "utm_content",
+                "fbclid",
+                "si"
+        );
+
+        private ShareLinkSanitizer() {
+        }
+
+        static String sanitize(String url, boolean enabled) {
+            if (!enabled || url == null) {
+                return url;
+            }
+
+            try {
+                URI uri = new URI(url);
+                String host = uri.getHost();
+                String rawQuery = uri.getRawQuery();
+                if (host == null || rawQuery == null) {
+                    return url;
+                }
+
+                List<String> filteredParameters = filterQuery(rawQuery, isInstagramHost(host));
+                String filteredQuery = String.join("&", filteredParameters);
+                if (filteredQuery.equals(rawQuery)) {
+                    return url;
+                }
+                return replaceQuery(url, filteredQuery, !filteredParameters.isEmpty());
+            } catch (Exception ignored) {
+                return url;
+            }
+        }
+
+        private static boolean isInstagramHost(String host) {
+            String normalizedHost = host.toLowerCase(Locale.ROOT);
+            return normalizedHost.equals(INSTAGRAM_DOMAIN)
+                    || normalizedHost.endsWith("." + INSTAGRAM_DOMAIN);
+        }
+
+        private static List<String> filterQuery(String rawQuery, boolean instagramHost) {
+            List<String> filteredParameters = new ArrayList<>();
+            for (String parameter : rawQuery.split("&", -1)) {
+                String parameterName = parameterName(parameter);
+                boolean keepParameter = parameter.isEmpty()
+                        ? !instagramHost
+                        : instagramHost
+                                ? INSTAGRAM_FUNCTIONAL_QUERY_PARAMETERS.contains(parameterName)
+                                : !TRACKING_QUERY_PARAMETERS.contains(parameterName);
+                if (keepParameter) {
+                    filteredParameters.add(parameter);
+                }
+            }
+            return filteredParameters;
+        }
+
+        private static String parameterName(String parameter) {
+            int separatorIndex = parameter.indexOf('=');
+            return separatorIndex < 0 ? parameter : parameter.substring(0, separatorIndex);
+        }
+
+        private static String replaceQuery(String url, String query, boolean keepQueryDelimiter) {
+            int queryStart = url.indexOf('?');
+            if (queryStart < 0) {
+                return url;
+            }
+
+            int fragmentStart = url.indexOf('#', queryStart);
+            String fragment = fragmentStart < 0 ? "" : url.substring(fragmentStart);
+            String sanitizedUrl = url.substring(0, queryStart);
+            return keepQueryDelimiter
+                    ? sanitizedUrl + "?" + query + fragment
+                    : sanitizedUrl + fragment;
+        }
     }
 
     public static boolean signatureCheck(Object appIdentityObject){
