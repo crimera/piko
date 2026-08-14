@@ -6,7 +6,6 @@
 
 package app.crimera.patches.instagram.entity.mediadata
 
-import app.crimera.patches.instagram.entity.decoder.EditMediaInfoGetCurrentMediaIdFingerprint
 import app.crimera.patches.instagram.entity.decoder.MEDIAEXT_CLASS_NAME
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
 import app.crimera.utils.changeFirstString
@@ -55,18 +54,11 @@ val mediaDataEntity =
                 IsVideoExtensionFingerprint.changeFirstString(getInstruction(isVideoVirtualInvokeIndex).methodExtractor().name)
             }
 
-            EditMediaInfoFragmentMediaSizeFingerprint.method.apply {
-                val firstReturnIndex = indexOfFirstInstruction(Opcode.RETURN)
-                val extendedDataFieldIndex = indexOfFirstInstruction(firstReturnIndex, Opcode.IGET_OBJECT)
-                if (extendedDataFieldIndex >= 0) {
-                    val extendedDataFieldName = getInstruction(extendedDataFieldIndex).fieldExtractor().name
-                    val mediaListInvokeIndex = indexOfFirstInstruction(extendedDataFieldIndex + 1, Opcode.INVOKE_INTERFACE)
-                    if (mediaListInvokeIndex >= 0) {
-                        GetExtendedDataExtensionFingerprint.changeFirstString(extendedDataFieldName)
-                        GetMediaListExtensionFingerprint.changeFirstString(getInstruction(mediaListInvokeIndex).methodExtractor().name)
-                    }
-                }
-            }
+            // Instagram 442 / VC148: MediaData's extended-data/media-list helpers
+            // use Media's backing data object and carousel media getter directly.
+            GetExtendedDataExtensionFingerprint.changeFirstString("A04")
+            GetMediaListExtensionFingerprint.changeFirstString("A8c")
+            GetTrackDataIntfExtensionFingerprint.changeFirstString("A0H")
 
             FanClubContentPreviewInteractorImplFingerprint.method.apply {
                 val strIndex = FanClubContentPreviewInteractorImplFingerprint.stringMatches[1].index
@@ -124,15 +116,9 @@ val mediaDataEntity =
                     }
                 }
 
-                ExtMediaDictImageInfoMapperFingerprint.apply {
-                    val strIndex = stringMatches.first().index
-                    method.apply {
-                        val imageInfoFieldIndex = indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT)
-                        if (imageInfoFieldIndex >= 0) {
-                            GetImageVariantsExtensionFingerprint.changeFirstString(getInstruction(imageInfoFieldIndex).fieldExtractor().name)
-                        }
-                    }
-                }
+                // Keep the 442 Media.A39() mapping authoritative for image variants.
+                // The LiveTree image-info mapper targets a different representation and
+                // must not overwrite the Media image getter used by Download media.
             }
 
             ProductInfoMapperFingerprint.apply {
