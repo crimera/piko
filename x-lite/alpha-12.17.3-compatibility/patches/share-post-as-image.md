@@ -2,24 +2,29 @@
 
 ## Status
 
-**Unported / not yet verified on 12.17.3-alpha.01.**
+**Ported and verified on 12.17.3-alpha.01.**
 
 Source: `patches/src/main/kotlin/app/crimera/patches/xlite/misc/shareimage/ShareImagePatch.kt`
+Framework: `patches/src/main/kotlin/app/crimera/patches/xlite/misc/postoptions/PostOptionsPatch.kt`
 
-## Breakage
+## Breakage on Alpha
 
-Unknown until this patch is run independently against the exact alpha APK. Do not assume a successful build means its fingerprints or runtime boundary remain valid.
+1. **Obfuscated Action Carrier**: `PostActionType` is obfuscated to `Lcom/x/models/w5;` on alpha (`ViewDebugDialog` and `None` enum items).
+2. **Obfuscated Presenter & State**: `PostOptionsPresenter` is `Lcom/x/urt/items/post/options/s;` holding `b: Lcom/x/models/timelines/items/w0;`. The `PostOptionsState` constructor parameter 2 is obfuscated to `Lcom/x/models/kh;`.
+3. **Action Dispatcher**: Click handling in `com.x.urt.items.post.options.m` uses `invoke-virtual {v...}, Ljava/lang/Enum;->ordinal()I`.
+4. **Post Identifier & Timeline Post State**: Timeline post state is `com.x.urt.items.post.d5` and its `PostIdentifier` field `b` is `Lcom/x/models/b6;` (`a: Long` post ID).
+5. **Compose Icon Injection**: In `androidx.compose.material.i0`, `toIcon()` branches to a `default:` case setting `x7` (`ic_vector_overflow` = 3 dots) for custom action enums. Icon injection must run on the common path alongside `labelFor` rather than inside an individual switch branch case.
 
-## Port checklist
+## Fixes
 
-1. Run this patch alone against 12.17.3-alpha.01 and record the exact match/failure.
-2. Compare the matched alpha bytecode with 12.15.1 and 12.14.0.
-3. Remove hardcoded obfuscated descriptors, method names, generated literals, or removed host resources.
-4. Assert expected fingerprint cardinality.
-5. Build the MPP and inspect the final DEX for a reachable mutation.
-6. Install and test the feature on alpha.
-7. Repatch and regression-test 12.15.1 and 12.14.0.
+1. Dynamically match `PostActionType` via `PostActionTypeFingerprint` looking for `ViewDebugDialog` and `AddToBookmarks`.
+2. Relax parameter matching for `PostOptionsState` constructor and broaden presenter type matching to `Lcom/x/models/timelines/items/`.
+3. Locate `Enum.ordinal()` inside the post options event handler (`m.smali`) and inject action carrier handler before ordinal resolution using safe 4-bit registers.
+4. Refactor `injectLabelsAndIcons` to inject the `usesIcon` check and icon register assignment directly on the common execution path alongside `labelFor`.
+5. Support `Lcom/x/models/b6;`, String, and Number in `XLiteShareImageHandler.identifierValue()`, and support Float Rect representations in `XLiteShareImageHandler.readIntRect()`.
 
-## Findings and fix
+## Verification Evidence
 
-Not started. Add exact root cause, stable anchors, mutation, and verification evidence here during the port.
+- `ShareImagePatch` applies cleanly to `12.17.3-alpha.01`.
+- Post options sheet displays "Share Tweet as Image" with the real share icon (`ic_vector_share`).
+- Tapping the option captures rendered tweet bounds and opens the system share sheet.

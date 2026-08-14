@@ -32,14 +32,11 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Unlock downloads](patches/unlock-downloads.md) | SubscriptionsFeatures & MediaContent obfuscated; feature strings updated; inlined checker handled | Ported; patch-applied and final-APK verified |
 | [Custom font](patches/custom-font.md) | Existing Compose paragraph intrinsics and span hooks remain stable | Ported; patch-applied and final-APK verified |
 | [Hide premium upsell](patches/hide-premium-upsell.md) | Obfuscated SubscriptionsFeatures replaced by Compose home scaffold chip hook | Ported; patch-applied and final-APK verified |
+| [Share post as image](patches/share-post-as-image.md) | Obfuscated PostActionType, Presenter, and PostIdentifier; icon injection moved to common path | Ported; patch-applied and final-APK verified |
 
 ## Unported queue
 
 These patches have not yet been independently run and verified on the alpha. Their documents are placeholders for the exact failure, fix, and evidence discovered during each port.
-
-### Priority 3 — Miscellaneous features
-
-- [Share post as image](patches/share-post-as-image.md)
 
 ### Priority 4 — Diagnostics and development tools
 

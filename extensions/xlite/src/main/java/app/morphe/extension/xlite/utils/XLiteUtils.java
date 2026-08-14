@@ -96,7 +96,9 @@ public final class XLiteUtils {
                 if (Modifier.isStatic(field.getModifiers())) continue;
 
                 boolean isContext = Context.class.isAssignableFrom(field.getType());
-                boolean isValue = valueTypeName != null && valueTypeName.equals(field.getType().getName());
+                boolean isValue = (valueTypeName != null && valueTypeName.equals(field.getType().getName()))
+                        || ("com.x.models.timelines.items.UrtTimelinePost".equals(valueTypeName)
+                        && field.getType().getName().startsWith("com.x.models.timelines.items."));
                 if (!isContext && !isValue) continue;
 
                 field.setAccessible(true);
@@ -104,7 +106,7 @@ public final class XLiteUtils {
                 if (context == null && isContext && fieldValue instanceof Context) {
                     context = (Context) fieldValue;
                 }
-                if (value == null && isValue) value = fieldValue;
+                if (value == null && isValue && fieldValue != null && !isContext) value = fieldValue;
             }
         }
         return new PresenterData(context, value);

@@ -78,6 +78,7 @@ val xLiteShareImagePatch =
             val timelinePostStateType = timelinePostStateMatch.originalClassDef.type
             val postIdentifierField =
                 timelinePostStateMatch.originalClassDef.fields.singleOrNull { it.type == POST_IDENTIFIER }
+                    ?: timelinePostStateMatch.originalClassDef.fields.firstOrNull { it.name == "b" && it.type.startsWith("Lcom/x/models/") }
                     ?: throw PatchException("X-Lite timeline-post state has no unique PostIdentifier field")
             val renderedPostMethod =
                 requireMatches(

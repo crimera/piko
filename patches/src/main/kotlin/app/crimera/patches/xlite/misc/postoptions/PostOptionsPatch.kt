@@ -30,18 +30,13 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import java.util.IdentityHashMap
 import java.util.LinkedHashMap
 
-private const val POST_ACTION_TYPE = "Lcom/x/models/PostActionType;"
 private const val POST_OPTIONS_STATE_PREFIX = "PostOptionsState(showOptionsDialog="
 private const val POST_OPTIONS_LIST_PREFIX = ", options="
-private const val URT_POST = "Lcom/x/models/timelines/items/UrtTimelinePost;"
 private const val CONTEXT = "Landroid/content/Context;"
 private const val XLITE_UTILS = "Lapp/morphe/extension/xlite/utils/XLiteUtils;"
 
 internal const val BROWSE_OBJECT_ACTION = "None"
 internal const val SHARE_IMAGE_ACTION = "ViewDebugDialog"
-
-/** The setter block around the confirmed action read is bounded to avoid unrelated state writes. */
-private const val ACTION_STATE_LOOKBACK_INSTRUCTIONS = 12
 
 /** X-Lite icon resource initialization emits the field assignment within this small block. */
 private const val ICON_FIELD_INITIALIZATION_WINDOW = 4
@@ -79,6 +74,16 @@ private object PostOptionContributionIndex {
     }
 }
 
+private object PostActionTypeFingerprint : Fingerprint(
+    name = "<clinit>",
+    returnType = "V",
+    filters =
+        listOf(
+            app.morphe.patcher.string("ViewDebugDialog"),
+            app.morphe.patcher.string("AddToBookmarks"),
+        ),
+)
+
 private object PostOptionsStateFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     filters =
@@ -96,7 +101,7 @@ private object PostOptionsPresenterFingerprint : Fingerprint(
             fieldAccess(
                 opcode = Opcode.IPUT_OBJECT,
                 definingClass = "this",
-                type = URT_POST,
+                type = "Lcom/x/models/timelines/items/",
             ),
             fieldAccess(
                 opcode = Opcode.IPUT_OBJECT,
@@ -163,13 +168,16 @@ private val xLitePostOptionsPatch =
 
 context(context: BytecodePatchContext)
 private fun validateActionCarriers(contributions: List<PostOptionContribution>) {
-    val actionType = context.mutableClassDefBy(POST_ACTION_TYPE)
+    val postActionType =
+        PostActionTypeFingerprint.matchOrNull()?.originalClassDef?.type
+            ?: "Lcom/x/models/PostActionType;"
+    val actionType = context.mutableClassDefBy(postActionType)
     val missing =
         contributions
             .map(PostOptionContribution::actionName)
             .distinct()
             .filter { actionName ->
-                actionType.fields.none { field -> field.name == actionName && field.type == POST_ACTION_TYPE }
+                actionType.fields.none { field -> field.name == actionName && field.type == postActionType }
             }
     if (missing.isNotEmpty()) {
         throw PatchException("Missing X-Lite post-menu action carriers: ${missing.joinToString()}")
@@ -211,7 +219,7 @@ private fun resolveStateConstructor(): Match {
             parameters =
                 listOf(
                     "Z",
-                    "Lcom/x/models/UserResult;",
+                    "L",
                     "Ljava/util/List;",
                     "Ljava/util/Map;",
                     "Lkotlinx/coroutines/flow/",
@@ -260,65 +268,59 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
         ?: throw PatchException("X-Lite post-options Map.get has no action register")
     requireFourBitRegisters("label", actionRegister, labelResult.registerA)
 
-    renderer.method.addInstructions(
-        renderer.instructionMatches[2].index + 1,
-        contributions.joinToString("\n") { contribution ->
-            """
-            invoke-static {v$actionRegister, v${labelResult.registerA}}, ${contribution.handlerDescriptor}->labelFor(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;
-            move-result-object v${labelResult.registerA}
-            """.trimIndent()
-        },
-    )
-
     val iconAssignmentInstruction =
         renderer.method.instructions.withIndex().lastOrNull { (index, instruction) ->
-            instruction.opcode == Opcode.MOVE_OBJECT_FROM16 &&
+            instruction.opcode in setOf(Opcode.MOVE_OBJECT, Opcode.MOVE_OBJECT_FROM16, Opcode.MOVE_OBJECT_16) &&
                 index < renderer.instructionMatches[1].index &&
                 renderer.method.instructions.getOrNull(index + 1)?.opcode in
                 setOf(Opcode.GOTO, Opcode.GOTO_16, Opcode.GOTO_32)
         }?.value ?: throw PatchException("X-Lite post-options icon assignment was not found")
     val iconAssignment = iconAssignmentInstruction as? TwoRegisterInstruction
         ?: throw PatchException("X-Lite post-options icon assignment has no registers")
-    val iconAssignmentIndex = renderer.method.instructions.indexOf(iconAssignmentInstruction)
-    val iconSourceRegister = iconAssignment.registerB
     val iconResultRegister = iconAssignment.registerA
-    val iconType = resolveIconType(renderer, iconAssignmentIndex, iconSourceRegister)
-    requireFourBitRegisters("icon", actionRegister, iconSourceRegister)
+
+    val iconType =
+        renderer.method.instructions
+            .take(renderer.instructionMatches[1].index)
+            .asReversed()
+            .firstNotNullOfOrNull { instruction ->
+                if (instruction.opcode != Opcode.SGET_OBJECT) return@firstNotNullOfOrNull null
+                instruction.getReference<FieldReference>()?.type
+            } ?: throw PatchException("X-Lite post-options icon type was not found")
+
+    val tempRegister = if (actionRegister == 0) 1 else 0
+    requireFourBitRegisters("icon", actionRegister, tempRegister)
 
     val iconFields = contributions.associateWith { resolveIconField(it.iconResourceName, iconType) }
-    var iconContinuation = renderer.method.instructions[iconAssignmentIndex + 1]
-    contributions.asReversed().forEachIndexed { index, contribution ->
-        val insertionIndex = renderer.method.instructions.indexOf(iconContinuation)
+
+    var insertionIndex = renderer.instructionMatches[2].index + 1
+    contributions.forEach { contribution ->
+        renderer.method.addInstructions(
+            insertionIndex,
+            """
+                invoke-static {v$actionRegister, v${labelResult.registerA}}, ${contribution.handlerDescriptor}->labelFor(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/String;
+                move-result-object v${labelResult.registerA}
+            """.trimIndent(),
+        )
+        insertionIndex += 2
+    }
+
+    contributions.forEachIndexed { index, contribution ->
         val label = "piko_xlite_post_option_icon_$index"
+        val continuationInstruction = renderer.method.instructions[insertionIndex]
         renderer.method.addInstructionsWithLabels(
             insertionIndex,
             """
                 invoke-static {v$actionRegister}, ${contribution.handlerDescriptor}->usesIcon(Ljava/lang/Object;)Z
-                move-result v$iconSourceRegister
-                if-eqz v$iconSourceRegister, :$label
+                move-result v$tempRegister
+                if-eqz v$tempRegister, :$label
                 sget-object v$iconResultRegister, ${iconFields.getValue(contribution)}
             """.trimIndent(),
-            ExternalLabel(label, iconContinuation),
+            ExternalLabel(label, continuationInstruction),
         )
-        iconContinuation = renderer.method.instructions[insertionIndex]
+        insertionIndex = renderer.method.instructions.indexOf(continuationInstruction)
     }
 }
-
-private fun resolveIconType(
-    renderer: Match,
-    iconAssignmentIndex: Int,
-    iconSourceRegister: Int,
-): String =
-    renderer.method.instructions
-        .take(iconAssignmentIndex)
-        .asReversed()
-        .firstNotNullOfOrNull { instruction ->
-            if (instruction.opcode != Opcode.SGET_OBJECT) return@firstNotNullOfOrNull null
-            if ((instruction as? OneRegisterInstruction)?.registerA != iconSourceRegister) {
-                return@firstNotNullOfOrNull null
-            }
-            instruction.getReference<FieldReference>()?.type
-        } ?: throw PatchException("X-Lite post-options icon type was not found")
 
 context(_: BytecodePatchContext)
 private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
@@ -344,59 +346,44 @@ private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
     val presenterField =
         eventHandler.originalClassDef.fields.singleOrNull { it.type == presenter.originalClassDef.type }
             ?: throw PatchException("X-Lite post-options event handler has no unique presenter field")
-    val actionFieldInstruction = findActionFieldInstruction(eventHandler)
-    val clickActionRegister =
-        (actionFieldInstruction.value as? OneRegisterInstruction)?.registerA
-            ?: throw PatchException("X-Lite confirmed post-option action has no register")
-    val ordinalResultRegister =
-        eventHandler.method.instructions.getOrNull(actionFieldInstruction.index + 2)
-            ?.let { it as? OneRegisterInstruction }
-            ?.registerA
-            ?: throw PatchException("X-Lite post-option ordinal result has no register")
-    requireFourBitRegisters("action", clickActionRegister, ordinalResultRegister)
+
+    val ordinalIndex = eventHandler.method.instructions.indexOfFirst { instruction ->
+        val methodRef = instruction.getReference<MethodReference>() ?: return@indexOfFirst false
+        instruction.opcode == Opcode.INVOKE_VIRTUAL &&
+            methodRef.definingClass == "Ljava/lang/Enum;" &&
+            methodRef.name == "ordinal"
+    }
+    if (ordinalIndex == -1) {
+        throw PatchException("X-Lite confirmed post-option action extraction was not found (no Enum.ordinal)")
+    }
+    val ordinalInstruction = eventHandler.method.instructions[ordinalIndex]
+    val clickActionRegister = ordinalInstruction.registersUsed.firstOrNull()
+        ?: throw PatchException("X-Lite confirmed post-option action has no register")
+
+    val tempRegister = if (clickActionRegister == 0) 1 else 0
+    requireFourBitRegisters("action", clickActionRegister, tempRegister)
     val unitField = resolveKotlinUnitField()
 
-    var actionContinuation = eventHandler.method.instructions[actionFieldInstruction.index + 1]
+    var actionContinuation = ordinalInstruction
     contributions.asReversed().forEachIndexed { index, contribution ->
         val insertionIndex = eventHandler.method.instructions.indexOf(actionContinuation)
         val label = "piko_xlite_post_option_action_$index"
         eventHandler.method.addInstructionsWithLabels(
             insertionIndex,
             """
-                move-object/from16 v$ordinalResultRegister, p0
-                iget-object v$ordinalResultRegister, v$ordinalResultRegister, $presenterField
-                invoke-static {v$ordinalResultRegister, v$clickActionRegister}, ${contribution.handlerDescriptor}->handleOptionAction(Ljava/lang/Object;Ljava/lang/Object;)Z
-                move-result v$ordinalResultRegister
-                if-eqz v$ordinalResultRegister, :$label
-                sget-object v$ordinalResultRegister, $unitField
-                return-object v$ordinalResultRegister
+                move-object/from16 v$tempRegister, p0
+                iget-object v$tempRegister, v$tempRegister, $presenterField
+                invoke-static {v$tempRegister, v$clickActionRegister}, ${contribution.handlerDescriptor}->handleOptionAction(Ljava/lang/Object;Ljava/lang/Object;)Z
+                move-result v$tempRegister
+                if-eqz v$tempRegister, :$label
+                sget-object v$tempRegister, $unitField
+                return-object v$tempRegister
             """.trimIndent(),
             ExternalLabel(label, actionContinuation),
         )
         actionContinuation = eventHandler.method.instructions[insertionIndex]
     }
 }
-
-private fun findActionFieldInstruction(eventHandler: Match) =
-    eventHandler.method.instructions.withIndex().singleOrNull { (index, instruction) ->
-        val field = instruction.getReference<FieldReference>()
-        if (instruction.opcode != Opcode.IGET_OBJECT || field?.type != POST_ACTION_TYPE) {
-            return@singleOrNull false
-        }
-        val ordinal = eventHandler.method.instructions.getOrNull(index + 1)?.getReference<MethodReference>()
-        if (ordinal?.definingClass != "Ljava/lang/Enum;" || ordinal.name != "ordinal") {
-            return@singleOrNull false
-        }
-        eventHandler.method.instructions
-            .subList(maxOf(0, index - ACTION_STATE_LOOKBACK_INSTRUCTIONS), index)
-            .any { previous ->
-                previous.getReference<MethodReference>()?.let { reference ->
-                    reference.name == "setValue" &&
-                        reference.parameterTypes.map { it.toString() } == listOf("Ljava/lang/Object;") &&
-                        reference.returnType == "V"
-                } == true
-            }
-    } ?: throw PatchException("X-Lite confirmed post-option action extraction was not found uniquely")
 
 context(_: BytecodePatchContext)
 private fun resolveIconField(resourceName: String, iconType: String): FieldReference {

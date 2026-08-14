@@ -254,7 +254,7 @@ public final class XLiteShareImageHandler {
         Field[] fields = value.getClass().getDeclaredFields();
         int coordinateCount = 0;
         for (Field field : fields) {
-            if (field.getType() != int.class || java.lang.reflect.Modifier.isStatic(field.getModifiers())) continue;
+            if ((field.getType() != int.class && field.getType() != float.class) || java.lang.reflect.Modifier.isStatic(field.getModifiers())) continue;
             coordinateCount++;
         }
         if (coordinateCount != 4) return null;
@@ -262,9 +262,13 @@ public final class XLiteShareImageHandler {
         int[] coordinates = new int[4];
         int coordinateIndex = 0;
         for (Field field : fields) {
-            if (field.getType() != int.class || java.lang.reflect.Modifier.isStatic(field.getModifiers())) continue;
+            if ((field.getType() != int.class && field.getType() != float.class) || java.lang.reflect.Modifier.isStatic(field.getModifiers())) continue;
             field.setAccessible(true);
-            coordinates[coordinateIndex++] = field.getInt(value);
+            if (field.getType() == float.class) {
+                coordinates[coordinateIndex++] = Math.round(field.getFloat(value));
+            } else {
+                coordinates[coordinateIndex++] = field.getInt(value);
+            }
         }
         return new Rect(coordinates[0], coordinates[1], coordinates[2], coordinates[3]);
     }
@@ -403,18 +407,33 @@ public final class XLiteShareImageHandler {
     }
 
     private static String identifierValue(Object identifier) {
-        if (identifier == null || !POST_IDENTIFIER_CLASS.equals(identifier.getClass().getName())) return null;
+        if (identifier == null) return null;
+        if (identifier instanceof String string) {
+            string = string.trim();
+            return string.isEmpty() ? null : string;
+        }
+        if (identifier instanceof Number number) {
+            return number.longValue() > 0 ? String.valueOf(number) : null;
+        }
         try {
-            Object value = XLiteUtils.invoke(identifier, "getValue");
+            Object value = XLiteUtils.invokeIfPresent(identifier, "getValue");
             String string = value == null ? null : String.valueOf(value).trim();
             if (string != null && !string.isEmpty()) return string;
 
-            value = XLiteUtils.invoke(identifier, "getStr");
+            value = XLiteUtils.invokeIfPresent(identifier, "getStr");
             string = value == null ? null : String.valueOf(value).trim();
-            return string == null || string.isEmpty() ? null : string;
-        } catch (ReflectiveOperationException exception) {
-            return null;
+            if (string != null && !string.isEmpty()) return string;
+
+            value = XLiteUtils.invokeIfPresent(identifier, "a");
+            string = value == null ? null : String.valueOf(value).trim();
+            if (string != null && !string.isEmpty()) return string;
+        } catch (Exception ignored) {
         }
+        String string = String.valueOf(identifier).trim();
+        if (!string.isEmpty() && !string.startsWith(identifier.getClass().getName())) {
+            return string;
+        }
+        return null;
     }
 
     private static String stringValue(Object value, String fallback) {

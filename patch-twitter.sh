@@ -1,59 +1,42 @@
 #!/usr/bin/env bash
-# Patch Twitter/X with the main bundle plus the complete X-Lite patch delta.
+# Patch Twitter/X with the unified X-Lite patch bundle.
 set -euo pipefail
 
 ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 cd "$ROOT_DIR"
 
+INSTALL=false
+FASTDEPLOY_PLATFORM_TOOLS_VERSION="${FASTDEPLOY_PLATFORM_TOOLS_VERSION:-36.0.0}"
+FASTDEPLOY_PLATFORM_TOOLS_DIR="${FASTDEPLOY_PLATFORM_TOOLS_DIR:-${HOME}/.cache/piko/platform-tools-${FASTDEPLOY_PLATFORM_TOOLS_VERSION}}"
+
 VER=$(grep "^version" gradle.properties | cut -d= -f2 | tr -d ' ')
 MPP="patches/build/libs/patches-${VER}.mpp"
-XLITE_MPP="x-lite/patches-${VER}.mpp"
-for bundle in "$MPP" "$XLITE_MPP"; do
-  if [[ ! -f "$bundle" ]]; then
-    echo "Missing patch bundle: $bundle" >&2
-    echo "Build it first with: bash .gradle-gh.sh ./gradlew :patches:build --no-daemon" >&2
-    exit 1
-  fi
+if [[ ! -f "$MPP" ]]; then
+  echo "Missing patch bundle: $MPP" >&2
+  echo "Build it first with: ./gradlew :patches:build" >&2
+  exit 1
+fi
+
+DEFAULT_APK="$HOME/Downloads/twitter_12.17.3-alpha.01.apk"
+OUTPUT_APK="$HOME/Downloads/piko-twitter-patched.apk"
+APK="$DEFAULT_APK"
+FLAGS=()
+for arg in "$@"; do
+  case "$arg" in
+    --install|--fastdeploy)
+      INSTALL=true
+      ;;
+    *.apk)
+      APK="$arg"
+      ;;
+    *)
+      FLAGS+=("$arg")
+      ;;
+  esac
 done
-
-for entry in \
-  "app/crimera/patches/xlite/misc/aidataset/AiDatasetPatchKt.class" \
-  "app/crimera/patches/xlite/utils/Constants.class" \
-  "app/crimera/patches/xlite/settings/Groups.class" \
-  "extensions/xlite.mpe"; do
-  if ! unzip -q -t "$XLITE_MPP" "$entry"; then
-    echo "X-Lite bundle is missing required entry: $entry" >&2
-    exit 1
-  fi
-done
-
-# Merge the main and X-Lite patch artifacts into one bundle. The patcher must
-# see one bundle because X-Lite's Compose post-option hook is shared by all menu patches.
-TMP_ROOT=$(mktemp -d "${TMPDIR:-/tmp}/piko-patches.XXXXXX")
-MERGED_DIR="$TMP_ROOT/unpacked"
-MERGED_MPP="$TMP_ROOT/patches-${VER}.mpp"
-mkdir -p "$MERGED_DIR"
-cleanup() {
-  rm -rf "$TMP_ROOT"
-}
-trap cleanup EXIT
-
-unzip -q "$MPP" -d "$MERGED_DIR"
-
-# Import every X-Lite-owned class and resource. Copying individual patch
-# classes leaves their shared fingerprints/utilities out of the merged jar.
-unzip -q "$XLITE_MPP" \
-  "app/crimera/patches/xlite/*" \
-  "addresources/values/xlite/*" \
-  "extensions/xlite.mpe" \
-  -d "$MERGED_DIR"
-(
-  cd "$MERGED_DIR"
-  zip -q -X -r "$MERGED_MPP" .
-)
 
 java -jar morphe-desktop-1.11.0-all.jar patch \
-  -p "$MERGED_MPP" \
+  -p "$MPP" \
   --keystore Morphe.keystore \
   --exclusive \
   -e "X-Lite: Remove ads" \
@@ -75,19 +58,80 @@ java -jar morphe-desktop-1.11.0-all.jar patch \
   -e "X-Lite: Show sensitive media" \
   -e "X-Lite: Dynamic color" \
   -e "X-Lite: Customize default reply sorting" \
-  -e "Bring back twitter" \
   -e "X-Lite: Hide who to follow" \
   -e "X-Lite: Hide AI-generated posts" \
   -e "X-Lite: Customize default media tab" \
   -e "X-Lite: Custom font" \
   -e "X-Lite: Open canonical URLs" \
-  -e "X-Lite: Collect AI-filter training posts" \
-  -e "X-Lite: Log network diagnostics" \
   --striplibs=arm64-v8a \
   --force \
-  -o ~/Downloads/piko-twitter-patched.apk \
-  --continue-on-error \
-  ~/Downloads/twitter_12.15.1-release.0.apk
-  # ~/Downloads/twitter_12.12.0-release.0.apk 2>&1
-  # -e "X-Lite Browse Object option" \
-  # -e "Disable auto timeline scroll on launch" \
+  -o "$OUTPUT_APK" \
+  "${FLAGS[@]}" \
+  -- \
+  "$APK"
+  # -e "Bring back twitter" \
+  # -e "X-Lite: Log network diagnostics" \
+  # -e "X-Lite: Collect AI-filter training posts" \
+
+if [[ "$INSTALL" != true ]]; then
+  exit 0
+fi
+
+if [[ -n "${ADB:-}" ]]; then
+  ADB_BIN="$ADB"
+else
+  ADB_BIN="$FASTDEPLOY_PLATFORM_TOOLS_DIR/adb"
+
+  if [[ ! -x "$ADB_BIN" ]]; then
+    case "$(uname -s)" in
+      Darwin) PLATFORM_TOOLS_OS=darwin ;;
+      Linux) PLATFORM_TOOLS_OS=linux ;;
+      *)
+        echo "Unsupported host OS; set ADB=/path/to/adb" >&2
+        exit 1
+        ;;
+    esac
+
+    if ! command -v curl >/dev/null || ! command -v unzip >/dev/null; then
+      echo "curl and unzip are required to download pinned adb" >&2
+      exit 1
+    fi
+
+    DOWNLOAD_DIR=$(mktemp -d "${TMPDIR:-/tmp}/piko-platform-tools.XXXXXX")
+    trap 'rm -rf "$DOWNLOAD_DIR"' EXIT
+    mkdir -p "$(dirname "$FASTDEPLOY_PLATFORM_TOOLS_DIR")"
+
+    echo "Downloading platform-tools ${FASTDEPLOY_PLATFORM_TOOLS_VERSION}"
+    curl -fsSL --retry 3 \
+      -o "$DOWNLOAD_DIR/platform-tools.zip" \
+      "https://dl.google.com/android/repository/platform-tools_r${FASTDEPLOY_PLATFORM_TOOLS_VERSION}-${PLATFORM_TOOLS_OS}.zip"
+    unzip -q "$DOWNLOAD_DIR/platform-tools.zip" -d "$DOWNLOAD_DIR"
+    rm -rf "$FASTDEPLOY_PLATFORM_TOOLS_DIR"
+    mv "$DOWNLOAD_DIR/platform-tools" "$FASTDEPLOY_PLATFORM_TOOLS_DIR"
+    ADB_BIN="$FASTDEPLOY_PLATFORM_TOOLS_DIR/adb"
+  fi
+fi
+
+if [[ ! -x "$ADB_BIN" ]]; then
+  echo "adb not found or not executable: $ADB_BIN" >&2
+  echo "Unset ADB to let the script download platform-tools ${FASTDEPLOY_PLATFORM_TOOLS_VERSION}." >&2
+  exit 1
+fi
+
+ADB_VERSION=$("$ADB_BIN" version | awk '/^Version / { version=$2; sub(/-.*/, "", version); print version; exit }')
+if [[ "$ADB_VERSION" != "$FASTDEPLOY_PLATFORM_TOOLS_VERSION" ]]; then
+  echo "Wrong adb version: ${ADB_VERSION:-unknown} (need $FASTDEPLOY_PLATFORM_TOOLS_VERSION)" >&2
+  echo "Use ADB=/path/to/adb or unset ADB for the pinned copy." >&2
+  exit 1
+fi
+
+echo "Checking fast deploy support"
+FASTDEPLOY_PROBE=$("$ADB_BIN" install --fastdeploy -r "${OUTPUT_APK}.probe.apk" 2>&1 || true)
+if grep -Eq 'Fast Deploy .*ignoring|fastdeploy is disabled' <<<"$FASTDEPLOY_PROBE"; then
+  printf '%s\n' "$FASTDEPLOY_PROBE" >&2
+  echo "This adb cannot use fast deploy; refusing a full APK transfer." >&2
+  exit 1
+fi
+
+echo "Installing APK with fast deploy: $OUTPUT_APK"
+"$ADB_BIN" install --fastdeploy -r "$OUTPUT_APK"

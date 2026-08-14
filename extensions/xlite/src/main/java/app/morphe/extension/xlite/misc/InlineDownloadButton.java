@@ -155,7 +155,10 @@ public final class InlineDownloadButton {
         if (post == null) return false;
 
         try {
-            return !mediaFor(post).isEmpty();
+            List<?> media = mediaFor(post);
+            if (!media.isEmpty()) return true;
+            Object directMedia = XLiteUtils.invokeIfPresent(post, "getMedia");
+            return directMedia instanceof List<?> list && !list.isEmpty();
         } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to check X-Lite post media", exception);
             return false;
