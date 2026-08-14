@@ -55,10 +55,10 @@ val mediaDataEntity =
             GetMediaListExtensionFingerprint.changeFirstString("A8c")
             GetTrackDataIntfExtensionFingerprint.changeFirstString("A0H")
 
-            FanClubContentPreviewInteractorImplFingerprint.method.apply {
-                val strIndex = FanClubContentPreviewInteractorImplFingerprint.stringMatches[1].index
-                GetMediaPkIdExtensionFingerprint.changeFirstString(instructions[indexOfFirstInstruction(strIndex, Opcode.INVOKE_VIRTUAL)].methodExtractor().name)
-            }
+            // Instagram 442 exposes the media identifier through Media.A7i().
+            // Use the direct String getter instead of the unrelated fan-club mapper;
+            // this value is used to build the download filename.
+            GetMediaPkIdExtensionFingerprint.changeFirstString("A7i")
 
             DirectShareTargetRelatedFingerprint.method.apply {
                 val firstIfEqz = indexOfFirstInstruction(Opcode.IF_EQZ)
