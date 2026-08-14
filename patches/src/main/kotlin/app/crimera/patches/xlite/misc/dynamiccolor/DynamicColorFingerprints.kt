@@ -6,9 +6,6 @@ import app.morphe.patcher.opcode
 import com.android.tools.smali.dexlib2.Opcode
 
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
-private const val INLINE_ACTION_ENTRY_DESCRIPTOR = "Lcom/x/models/InlineActionEntry;"
-private const val POST_ACTION_TYPE_DESCRIPTOR = "Lcom/x/models/PostActionType;"
-private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 
 /**
  * Finds the semantic Compose palette provider by package role and its three lazy cache reads.
@@ -58,49 +55,5 @@ internal object XLiteDynamicColorPaletteProviderFingerprint : Fingerprint(
         opcode(Opcode.INVOKE_VIRTUAL),
         opcode(Opcode.MOVE_RESULT_OBJECT),
         opcode(Opcode.CHECK_CAST),
-    ),
-)
-
-/** Renders each model-backed icon in X-Lite's inline post action bar. */
-internal object XLiteInlineActionEntryRendererFingerprint : Fingerprint(
-    parameters = listOf(
-        INLINE_ACTION_ENTRY_DESCRIPTOR,
-        "L",
-        "J",
-        "F",
-        "L",
-        "J",
-        "L",
-        "Z",
-        MODIFIER_DESCRIPTOR,
-        COMPOSER_DESCRIPTOR,
-        "I",
-    ),
-    returnType = "V",
-    filters = listOf(
-        methodCall(smali = "$INLINE_ACTION_ENTRY_DESCRIPTOR->getActionType()$POST_ACTION_TYPE_DESCRIPTOR"),
-        methodCall(smali = "$INLINE_ACTION_ENTRY_DESCRIPTOR->isEnabled()Z"),
-    ),
-)
-
-/** X 12.14 changed the inline-action presentation mode from a boolean to an object. */
-internal object XLiteInlineActionEntryRendererWithModeFingerprint : Fingerprint(
-    parameters = listOf(
-        INLINE_ACTION_ENTRY_DESCRIPTOR,
-        "L",
-        "J",
-        "F",
-        "L",
-        "J",
-        "L",
-        "L",
-        MODIFIER_DESCRIPTOR,
-        COMPOSER_DESCRIPTOR,
-        "I",
-    ),
-    returnType = "V",
-    filters = listOf(
-        methodCall(smali = "$INLINE_ACTION_ENTRY_DESCRIPTOR->getActionType()$POST_ACTION_TYPE_DESCRIPTOR"),
-        methodCall(smali = "$INLINE_ACTION_ENTRY_DESCRIPTOR->isEnabled()Z"),
     ),
 )
