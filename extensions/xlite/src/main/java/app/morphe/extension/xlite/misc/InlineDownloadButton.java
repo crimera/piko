@@ -140,7 +140,9 @@ public final class InlineDownloadButton {
             return true;
         } catch (ReflectiveOperationException | RuntimeException exception) {
             Logger.printException(() -> "Failed to process inline download action", exception);
-            Utils.showToastShort("Could not download post media");
+            Utils.showToastShort(exception instanceof PostIdentityException identityError
+                    ? identityError.getMessage()
+                    : "Could not download post media");
             return true;
         }
     }
@@ -263,8 +265,11 @@ public final class InlineDownloadButton {
         String text = canonicalPost == null ? null : canonicalPost.toString();
         // Reposts mirror the original media, so the media's source post belongs
         // to the original author; name the file after the original post.
-        String sourcePostId = sourceMediaField(text, "sourcePostIdentifier");
-        if (sourcePostId != null) return safeFileSegment(sourcePostId, "post");
+        if (hasRepostedMedia(text)) {
+            String sourcePostId = sourceMediaField(text, "sourcePostIdentifier");
+            if (sourcePostId != null) return safeFileSegment(sourcePostId, "post");
+            throw new PostIdentityException("Reposted media is missing its source post id");
+        }
         return safeFileSegment(ToStringParser.fieldValue(text, "id"), "post");
     }
 
@@ -273,13 +278,11 @@ public final class InlineDownloadButton {
         String text = canonicalPost == null ? null : canonicalPost.toString();
         // Reposted media carries a sourceInfo pointing at the original post;
         // name the file after the original author's screen name (the first
-        // mention of the "RT @name:" text), falling back to the media's
-        // display name, then the reposter's screen name.
+        // mention of the "RT @name:" text) and fail if it cannot be resolved.
         if (hasRepostedMedia(text)) {
             String sourceScreenName = firstMentionScreenName(text);
             if (sourceScreenName != null) return safeFileSegment(sourceScreenName, "twitter");
-            String sourceDisplayName = sourceMediaField(text, "sourceUserDisplayName");
-            if (sourceDisplayName != null) return safeFileSegment(sourceDisplayName, "twitter");
+            throw new PostIdentityException("Reposted media has no source screen name in its mentions");
         }
         String author = ToStringParser.fieldValue(text, "author");
         String screenName = author == null ? null : ToStringParser.fieldValue(author, "screenName");
@@ -1005,6 +1008,12 @@ public final class InlineDownloadButton {
             this.fileName = fileName;
             this.mimeType = mimeType;
             this.url = url;
+        }
+    }
+
+    private static final class PostIdentityException extends RuntimeException {
+        PostIdentityException(String message) {
+            super(message);
         }
     }
 
