@@ -70,7 +70,6 @@ java -jar morphe-desktop-1.11.0-all.jar patch \
   -- \
   "$APK"
   # -e "Bring back twitter" \
-  # -e "X-Lite: Log network diagnostics" \
   # -e "X-Lite: Collect AI-filter training posts" \
 
 if [[ "$INSTALL" != true ]]; then

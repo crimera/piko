@@ -35,14 +35,6 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Share post as image](patches/share-post-as-image.md) | Obfuscated PostActionType, Presenter, and PostIdentifier; icon injection moved to common path | Ported; patch-applied and final-APK verified |
 | [Browse tweet object](patches/browse-tweet-object.md) | Obfuscated PostActionType, Presenter, and UrtTimelinePost model; multi-option icon chaining | Ported; patch-applied and final-APK verified |
 
-## Unported queue
-
-These patches have not yet been independently run and verified on the alpha. Their documents are placeholders for the exact failure, fix, and evidence discovered during each port.
-
-### Priority 4 — Diagnostics and development tools
-
-- [Log network diagnostics](patches/log-network-diagnostics.md)
-
 ## Alpha mappings observed
 
 | Semantic model | Alpha descriptor |

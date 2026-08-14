@@ -126,13 +126,4 @@ internal object Groups {
             iconResourceName = "ic_vector_bug_stroke",
             order = 300,
         )
-
-    val NETWORK_LOGGING =
-        SettingsGroupMetadata(
-            id = "xlite.advanced.debug_tools.network_logging",
-            titleResourceName = "piko_xlite_group_network_logging_title",
-            summaryResourceName = "piko_xlite_group_network_logging_summary",
-            iconResourceName = "ic_vector_network_stroke",
-            order = 400,
-        )
 }
