@@ -29,11 +29,6 @@ val mediaDataEntity =
             GetOriginalSoundDataIntfExtensionFingerprint.changeFirstString(GetOriginalSoundDataIntfFromMediaFingerprint.method.name)
             GetUserDataWithUserSessionExtensionFingerprint.changeFirstString(GetUserDataFromMediaFingerprint.method.name)
 
-            AyuMidcardMediaHelperImageObjectMethodFingerprint.method.apply {
-                val imageVariantsIndex = instructions.indexOfLast { it.opcode == Opcode.INVOKE_INTERFACE }
-                GetImageVariantsExtensionFingerprint.changeStringAt(1, getInstruction(imageVariantsIndex).methodExtractor().name)
-            }
-
             ReelsMentionDoubleTapFingerprint.method.apply {
                 GetMentionSetExtensionFingerprint.changeFirstString(instructions.first { it.opcode == Opcode.INVOKE_INTERFACE }.methodExtractor().name)
             }
@@ -101,8 +96,10 @@ val mediaDataEntity =
                 }
             }
 
-            // Instagram 442 / VC148: Media.A39() is the image_versions2-backed image getter.
+            // Instagram 442 / VC148: Media.A39() returns ImageInfo. Its DME()
+            // method is the image candidate list consumed by MediaExtKt.A0a().
             GetImageVariantsExtensionFingerprint.changeFirstString("A39")
+            GetImageVariantsExtensionFingerprint.changeStringAt(1, "DME")
 
             ExtMediaDictVideoInfoMapperFingerprint.apply {
                 val moreExtendedMediaDataFieldName = LiveTreeMediaDictClinitFingerprint.classDef.fields.first { it.type == classDef.type }.name
@@ -115,10 +112,6 @@ val mediaDataEntity =
                         GetVideoVariantsV2ExtensionFingerprint.changeFirstString(getInstruction(videoVariantsFieldIndex).fieldExtractor().name)
                     }
                 }
-
-                // Keep the 442 Media.A39() mapping authoritative for image variants.
-                // The LiveTree image-info mapper targets a different representation and
-                // must not overwrite the Media image getter used by Download media.
             }
 
             ProductInfoMapperFingerprint.apply {
