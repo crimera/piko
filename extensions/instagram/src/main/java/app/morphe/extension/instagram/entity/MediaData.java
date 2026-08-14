@@ -106,11 +106,11 @@ public class MediaData extends Entity {
         if (mediaList == null || mediaList.isEmpty()){
             carouselMediaData.add(new MediaData(this.obj, this.userSession));
         } else {
-            mediaList.forEach(item->{
+            for (Object item : mediaList) {
                 if (item != null) {
                     carouselMediaData.add(new MediaData(item, this.userSession));
                 }
-            });
+            }
             if (carouselMediaData.isEmpty()) {
                 carouselMediaData.add(new MediaData(this.obj, this.userSession));
             }
