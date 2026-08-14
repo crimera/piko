@@ -11,7 +11,6 @@ import android.content.Intent;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
-import java.lang.reflect.Field;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.db.PikoMessageDb;
@@ -70,21 +69,8 @@ public class SavedMessagesHook {
         }});
     }
 
-    /** Most-recent DM action-bar controller, held weakly. Thread id is read lazily via BFS. */
-    private static java.lang.ref.WeakReference<Object> sOpenThreadController;
-
-    /** Hook 5: records the action-bar controller so its thread id can be read on button click. */
-    public static void noteOpenThreadController(final Object controller) {
-        if (controller == null) return;
-        sOpenThreadController = new java.lang.ref.WeakReference<>(controller);
-    }
-
     private static String resolveOpenThreadId() {
-        if (sCurrentThreadId != null && !sCurrentThreadId.isEmpty()) return sCurrentThreadId;
-        java.lang.ref.WeakReference<Object> ref = sOpenThreadController;
-        Object controller = (ref != null) ? ref.get() : null;
-        if (controller == null) return null;
-        return deepFindThreadId(controller);
+        return (sCurrentThreadId != null && !sCurrentThreadId.isEmpty()) ? sCurrentThreadId : null;
     }
 
     /** Opens the deleted-messages screen for the current thread (or all if unknown). */
@@ -421,66 +407,5 @@ public class SavedMessagesHook {
         }
         return String.format(str("piko_media_deleted"), label);
     }
-
-
-    /** BFS over the controller graph to find a DirectThreadKey and read the thread id string. */
-    private static String deepFindThreadId(Object root) {
-        try {
-            java.util.IdentityHashMap<Object, Boolean> seen = new java.util.IdentityHashMap<>();
-            java.util.ArrayDeque<Object> q = new java.util.ArrayDeque<>();
-            q.add(root); seen.put(root, Boolean.TRUE);
-            int budget = 6000;
-            String digitCandidate = null;
-            while (!q.isEmpty() && budget-- > 0) {
-                Object o = q.poll();
-                Class<?> k = o.getClass();
-                if (k.isArray() && !k.getComponentType().isPrimitive()) {
-                    for (Object el : (Object[]) o) if (el != null && seen.put(el, Boolean.TRUE) == null) q.add(el);
-                    continue;
-                }
-                String kn = k.getName();
-                if (!(kn.startsWith("X.") || kn.startsWith("com.instagram"))) continue;
-                if (kn.equals("com.instagram.model.direct.DirectThreadKey")) {
-                    for (Class<?> cc = k; cc != null && cc != Object.class; cc = cc.getSuperclass()) {
-                        for (Field f : cc.getDeclaredFields()) {
-                            if (f.getType() != String.class) continue;
-                            try {
-                                f.setAccessible(true);
-                                Object fv = f.get(o);
-                                if (fv instanceof String) {
-                                    String s = (String) fv;
-                                    if (s.length() >= 15 && s.matches("\\d+")) return s;
-                                }
-                            } catch (Throwable ignored) {}
-                        }
-                    }
-                    continue;
-                }
-                for (Class<?> cc = k; cc != null && cc != Object.class; cc = cc.getSuperclass()) {
-                    for (Field f : cc.getDeclaredFields()) {
-                        if (java.lang.reflect.Modifier.isStatic(f.getModifiers())) continue;
-                        if (f.getType().isPrimitive()) continue;
-                        Object v;
-                        try { f.setAccessible(true); v = f.get(o); } catch (Throwable t) { continue; }
-                        if (v == null || seen.put(v, Boolean.TRUE) != null) continue;
-                        if (v instanceof String) {
-                            String s = (String) v;
-                            if (s.length() >= 38 && s.matches("\\d+")
-                                    && (digitCandidate == null || s.length() > digitCandidate.length())) {
-                                digitCandidate = s;
-                            }
-                            continue;
-                        }
-                        if (v instanceof CharSequence || v instanceof Number || v instanceof Boolean) continue;
-                        q.add(v);
-                    }
-                }
-            }
-            return digitCandidate;
-        } catch (Throwable t) {
-            return null;
-        }
-    }
-
 
 }

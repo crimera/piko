@@ -14,9 +14,11 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.INTEGRATIONS_PACKAGE
 import app.crimera.patches.instagram.utils.enableSettings
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -35,27 +37,15 @@ val saveDeletedMessagesPatch =
         description = "Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them.",
         default = true,
     ) {
-        // NOTE: userDataEntity is intentionally NOT a hard dependency. It only backs Hook 6's
-        // best-effort username harvesting (UserData reflection), and its resolver is fragile across
-        // Instagram versions (e.g. GetFullNameExtensionFingerprint fails to resolve on v435). Making
-        // it a dependsOn would abort this entire capture feature whenever that resolver breaks. When
-        // userDataEntity IS applied (pulled by another enabled patch) UserData works and Hook 6
-        // enriches names; when it isn't, UserData reflection no-ops and we fall back to thread title
-        // / sender directory. Either way DM capture (Hooks 1/2/4) stays patch-safe.
+        // userDataEntity is deliberately not a dependency: it only backs Hook 6's username
+        // enrichment, so a break in its resolver must not abort capture.
         dependsOn(settingsPatch, chatActionBarButtonPatch, directItemEntity, deletedMessagesResourcePatch)
         compatibleWith(COMPATIBILITY_INSTAGRAM)
 
         execute {
 
-            // PATCH-TIME SAFETY: each hook is wrapped in runCatching so that if a future Instagram
-            // build renames a method, restructures the MQTT converter, or drops an anchor, ONLY that
-            // hook is skipped — the patch still applies and the remaining hooks (and every other
-            // patch in the session) keep working. This mirrors the "best-effort, never fatal"
-            // resolution used in DirectItemEntity. All anchor strings/resources are verified present
-            // in the current target (v435); the wrapping guards against the NEXT version drifting.
-            // The hooks are independent capture points, so partial success still yields a usable
-            // feature: Hook 1 (REST history) and Hook 2 (MQTT live) each capture messages on their
-            // own, Hook 4 detects DB-level deletes, Hook 5/6 only enrich thread-id and usernames.
+            // Each hook is independently runCatching-wrapped: the hooks are separate capture points,
+            // so a drifted anchor should skip only that hook, never abort the patch.
 
             // Hook 1: REST/JSON path — inject at return of parseFromJson (v426) or unsafeParseFromJson (v430+).
             runCatching {
@@ -74,11 +64,8 @@ val saveDeletedMessagesPatch =
                 }
             }
 
-            // Hook 2: MQTT/MSys real-time path — A0P post-processing step, never touched by REST.
-            // Derive delta class from A0P's second parameter, then find the static converter
-            // (delta → DirectThreadKey) by signature search — no dependency on the action-bar builder fingerprint.
-            // The converter-search / field-derivation is the most version-fragile step, so the entire
-            // Hook 2 resolution AND injection share one runCatching (all-or-nothing for this hook).
+            // Hook 2: MQTT/MSys real-time path, which REST never touches. The delta class comes from
+            // the method's own second parameter, then its converter is found by signature.
             runCatching {
                 val deltaClass = DirectItemPostprocessFingerprint.method.parameterTypes[1].toString()
                 fun isConverter(m: com.android.tools.smali.dexlib2.iface.Method) =
@@ -137,17 +124,79 @@ val saveDeletedMessagesPatch =
                 }
             }
 
-            // Hook 5: pass the action-bar controller (p0) to the extension — thread-id is resolved lazily from its object graph.
-            // Reuses the existing chatActionBarButton header builder fingerprint (same layout_direct_thread_header anchor).
             runCatching {
+                val threadIdField =
+                    mutableClassDefBy { it.type == DIRECT_THREAD_KEY }
+                        .methods.first { it.name == "toString" }
+                        .instructions.toList()
+                        .let { insns ->
+                            val literalIndex =
+                                insns.indexOfFirst {
+                                    (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
+                                        (it as ReferenceInstruction).reference.toString().contains("mThreadId")
+                                }
+                            insns.drop(literalIndex + 1).first {
+                                it.opcode == Opcode.IGET_OBJECT &&
+                                    (it as ReferenceInstruction).reference
+                                        .let { r -> r is FieldReference && r.type == "Ljava/lang/String;" }
+                            }
+                        }.let { (it as ReferenceInstruction).reference as FieldReference }
+
                 ChatActionBarBuilderFingerprint.method.apply {
-                    val reg = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 1).getFreeRegister()
-                    addInstructions(
-                        0,
+                    val insns = instructions.toList()
+                    val keyConverter =
+                        insns.first {
+                            it.opcode == Opcode.INVOKE_STATIC &&
+                                (it as ReferenceInstruction).reference
+                                    .let { r -> r is MethodReference && r.returnType == DIRECT_THREAD_KEY }
+                        }.let { (it as ReferenceInstruction).reference as MethodReference }
+                    val descriptorType = keyConverter.parameterTypes[0].toString()
+                    val descriptorField =
+                        insns.first {
+                            it.opcode == Opcode.IGET_OBJECT &&
+                                (it as ReferenceInstruction).reference
+                                    .let { r -> r is FieldReference && r.type == descriptorType }
+                        }.let { (it as ReferenceInstruction).reference as FieldReference }
+                    val viewModelType = descriptorField.definingClass
+
+                    // Inject after the view-model's first consumer, where its two producers rejoin. A
+                    // branch label sits on that call, so anything inserted before it is jumped over.
+                    val joinInstruction =
+                        insns.first {
+                            it.opcode == Opcode.INVOKE_STATIC &&
+                                (it as ReferenceInstruction).reference
+                                    .let { r -> r is MethodReference && r.parameterTypes.firstOrNull()?.toString() == viewModelType }
+                        }
+                    val viewModelRegister = joinInstruction.registersUsed[0]
+                    // A move-result must stay welded to its call, so step past it when present.
+                    val afterJoinIndex =
+                        joinInstruction.location.index + 1
+                    val injectIndex =
+                        if (insns[afterJoinIndex].opcode == Opcode.MOVE_RESULT ||
+                            insns[afterJoinIndex].opcode == Opcode.MOVE_RESULT_OBJECT ||
+                            insns[afterJoinIndex].opcode == Opcode.MOVE_RESULT_WIDE
+                        ) {
+                            afterJoinIndex + 1
+                        } else {
+                            afterJoinIndex
+                        }
+                    val reg = getFreeRegisterProvider(injectIndex, 1).getFreeRegister()
+
+                    // The skip target must be an ExternalLabel; an in-snippet label is not anchored
+                    // where it is written when inserting mid-method.
+                    addInstructionsWithLabels(
+                        injectIndex,
                         """
-                        move-object/from16 v$reg, p0
-                        invoke-static {v$reg}, $HOOK_CLASS->noteOpenThreadController(Ljava/lang/Object;)V
+                        if-eqz v$viewModelRegister, :piko_no_thread
+                        iget-object v$reg, v$viewModelRegister, $viewModelType->${descriptorField.name}:$descriptorType
+                        if-eqz v$reg, :piko_no_thread
+                        invoke-static {v$reg}, ${keyConverter.definingClass}->${keyConverter.name}($descriptorType)$DIRECT_THREAD_KEY
+                        move-result-object v$reg
+                        if-eqz v$reg, :piko_no_thread
+                        iget-object v$reg, v$reg, $DIRECT_THREAD_KEY->${threadIdField.name}:Ljava/lang/String;
+                        invoke-static {v$reg}, $HOOK_CLASS->noteOpenThreadId(Ljava/lang/String;)V
                         """.trimIndent(),
+                        ExternalLabel("piko_no_thread", insns[injectIndex]),
                     )
                 }
             }
