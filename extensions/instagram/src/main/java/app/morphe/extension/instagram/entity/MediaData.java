@@ -229,7 +229,11 @@ public class MediaData extends Entity {
             List variantList = (List) variantObject;
 
             List<VideoData> videoList = new ArrayList<>();
-            variantList.forEach(item -> videoList.add(new VideoData(item)));
+            for (Object item : variantList) {
+                if (item != null) {
+                    videoList.add(new VideoData(item));
+                }
+            }
             return videoList;
 
         }
@@ -244,11 +248,11 @@ public class MediaData extends Entity {
         }
 
         List<VideoData> videoList = new ArrayList<>();
-        variantList.forEach(item -> {
+        for (Object item : variantList) {
             if (item != null) {
                 videoList.add(new VideoData(item));
             }
-        });
+        }
         return videoList;
     }
 
@@ -266,7 +270,11 @@ public class MediaData extends Entity {
             List variantList = (List) super.getMethod(imageInfoObject, "methodName");
             if (variantList != null){
                 List<ImageData> imageList = new ArrayList<>();
-                variantList.forEach(item -> imageList.add(new ImageData(item)));
+                for (Object item : variantList) {
+                    if (item != null) {
+                        imageList.add(new ImageData(item));
+                    }
+                }
                 return imageList;
             }
         }
