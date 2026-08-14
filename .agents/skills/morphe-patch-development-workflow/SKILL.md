@@ -1,11 +1,15 @@
 ---
 name: morphe-patch-development-workflow
-description: End-to-end workflow for developing, repairing, and validating Morphe Android patches against obfuscated apps, including stable-model stubs and patch-time runtime boundaries. Use when tracing app behavior, designing fingerprints, resolving unstable descriptors, mutating bytecode, debugging a patch that applies but does not work, porting patches across app versions/UI implementations, or proving a patched APK through final DEX and runtime testing.
+description: End-to-end workflow for developing and repairing Morphe Android patches against obfuscated apps, including stable-model stubs and patch-time runtime boundaries. Use when tracing app behavior, designing fingerprints, resolving unstable descriptors, mutating bytecode, debugging a patch that applies but does not work, or porting patches across app versions/UI implementations. Final-Dex and runtime validation are optional follow-up stages.
 ---
 
 # Morphe Patch Development Workflow
 
-Follow the gates in order. A Kotlin build or `Applied:` log is not proof that a patch works.
+Follow the gates in order. Default mode ends at a successful MPP build and exclusive APK patch:
+immediately hand the output APK to the user and ask them to test. Do not spend time on output-Dex
+inspection, artifact hashes, installation, or extra verification before that handoff. Use the
+full-proof gates only when the patch fails, the user reports a problem, or the user explicitly
+requests deeper validation.
 
 ## Read First
 
@@ -41,21 +45,23 @@ method descriptors are involved. For the X-Lite customize-navigation patch, also
 6. Know and enforce match cardinality. Never silently skip zero matches.
 7. Apply the smallest mutation that controls the behavior.
 8. Inspect control-flow reachability, not only instruction presence.
-9. Patch exclusively first; test the production patch set afterward.
-10. Runtime verification of the exact original symptom is mandatory.
-11. Diagnose the earliest unique root exception; dependent patch failures are usually one cascade.
-12. Separate compile-time model contracts from release-specific bytecode: keep only verified stable
+9. Patch exclusively first; a successful build + exclusive patch is the default handoff point.
+10. Immediately ask the user to test after `Applied:` and `Saved to:`. Do not insert output-Dex verification or other work before this request.
+11. Final-Dex inspection, installation, runtime verification, and production-matrix testing are conditional: do them only after a failure report or an explicit request for deeper validation.
+12. Diagnose the earliest unique root exception; dependent patch failures are usually one cascade.
+13. Separate compile-time model contracts from release-specific bytecode: keep only verified stable
     models as `compileOnly` stubs and resolve unstable method descriptors at patch time.
-13. Reuse the app family's centralized compatibility constant; never duplicate version targets.
-14. Do not accumulate version artifacts. Delete verification smali dirs once `*-verification.md` hashes are recorded; retire superseded `release-*-decomp`/`-smali` trees when the target advances.
+14. Reuse the app family's centralized compatibility constant; never duplicate version targets.
+15. Do not routinely calculate SHA-256 hashes for MPPs, output APKs, or other artifacts. Record hashes only when stale/ambiguous artifacts require disambiguation or the user requests an evidence record.
+16. Do not accumulate version artifacts. Delete verification smali dirs once `*-verification.md` evidence is recorded; retire superseded `release-*-decomp`/`-smali` trees when the target advances.
 
 ## Workflow Gates
 
 | Gate | Action | Exit evidence |
 |---|---|---|
-| 0. Define | Record package/version/hash, exact UI surface, steps, actual/expected behavior, and a control path | Reproducible symptom statement |
-| 1. Reproduce | Trigger failure on exact unpatched target | Screenshot/log/observation; unpatched bytecode captured |
-| 2. Freeze artifacts | Resolve exact APK, MPP, output, hashes, timestamps, and centralized compatibility declaration | No ambiguous globs, stale outputs, or duplicate target lists |
+| 0. Define | Record package/version, exact UI surface, steps, actual/expected behavior, and a control path | Reproducible symptom statement |
+| 1. Reproduce | Trigger failure on exact unpatched target when available | Screenshot/log/observation; unpatched bytecode captured |
+| 2. Freeze artifacts | Resolve exact APK, MPP, output paths, and centralized compatibility declaration; do not hash routinely | No ambiguous globs, stale outputs, or duplicate target lists |
 | 3. Trace semantics | Follow UI → event → handler → gate → denied/allowed operation in readable build | End-to-end call-path table |
 | 4. Map release | Find corresponding path in exact target smali | Exact target method(s) and instructions |
 | 5. Enumerate | List parallel UIs, feature gates, eligibility checks, downstream checks | All plausible paths/gates documented |
@@ -64,9 +70,9 @@ method descriptors are involved. For the X-Lite customize-navigation patch, also
 | 8. Prove matches | Print and assert expected targets/count | Zero, one, or many is intentional |
 | 9. Mutate | Inject minimal valid bytecode; preserve registers, labels, control flow, and value representation | Patch compiles against real class context |
 | 10. Build/patch | Build actual MPP; patch exact APK in exclusive mode | Correct MPP used; `Applied` and `Saved to` confirmed |
-| 11. Inspect output | Search every final DEX; inspect target smali and branch predecessors | Mutation exists on the executed path |
-| 12. Install/test | Install with `adb install -r`; run primary and regression matrix | Original symptom gone; controls pass |
-| 13. Clean/document | Remove instrumentation; record evidence and tested versions | Reproducible verification record (then delete the verification smali tree — the hashes in the record make it redundant) |
+| 11. Handoff | Immediately ask the user to test the output APK and stop work before optional verification | User has the output path and focused test instruction |
+| 12. Conditional verification | Only after a failure report or explicit request: inspect final DEX, install, and run regression testing | Mutation/reachability/runtime evidence |
+| 13. Clean/document | Remove instrumentation and record evidence when deeper validation is requested | Reproducible verification record; delete disposable verification smali afterward |
 
 Failure returns to the earliest disproven gate. Do not stack speculative hooks.
 
@@ -228,7 +234,7 @@ Before injecting:
 
 Compose/recomposition warning: a visually nearby insertion may be skipped by loop exits, restart-group branches, or labels targeting the original instruction. Verify the injected call is reachable on the real path.
 
-## Build, Patch, and Prove
+## Build, Patch, and Handoff
 
 ```bash
 ./gradlew :patches:build --no-daemon
@@ -246,18 +252,19 @@ java -jar morphe-desktop-1.11.0-all.jar patch \
   "$TARGET"
 ```
 
-Then:
+Default handoff:
 
-1. Hash/check timestamp of input, MPP, and output.
-2. Extract all `classes*.dex` from output.
-3. Find the target class across every DEX.
-4. Inspect final smali: mutation, registers, labels, branch predecessors, returned/passed value.
-5. Count actual host-app invoke sites, not raw strings or extension definitions/annotations.
-6. Install with `adb install -r`.
-7. Trigger the exact primary path, then controls and restart.
-8. Retest with normal production patches after exclusive mode passes.
-9. If a shared fingerprint/dependency changed, run every dependent production patch on the new APK.
-10. Repatch every previously declared target version affected by a weakened/changed fingerprint.
+1. Build `:patches:build`, not only `compileKotlin`.
+2. Resolve one exact MPP path and patch the exact APK in exclusive mode.
+3. Confirm `Applied: Patch Name` and `Saved to ...`.
+4. Immediately ask the user to test the output APK, then stop. Do not calculate artifact hashes, extract/search output DEX, install it, run `adb` checks, or retest the production patch set before this handoff.
+
+Conditional deep validation:
+
+- If the build or patch fails, diagnose the earliest causal failure.
+- If the user reports that the patch does not work, inspect final DEX reachability/value flow, install, and run the focused regression matrix.
+- If the user explicitly requests proof or production validation, perform the full DEX, runtime, dependent-patch, and target-version checks.
+- Hash/check timestamps only when stale or ambiguous artifacts are suspected, or when an evidence record is requested.
 
 ## Fast Failure Triage
 
@@ -325,4 +332,4 @@ Done means all are true:
 - Production patch set retested.
 - Debug instrumentation removed.
 - Stable model stubs are `compileOnly`; unstable descriptors are resolved at patch time and do not leak into extension signatures.
-- Evidence records hashes, targets, anchors omitted, match counts, before/after bytecode, runtime-boundary decisions, and tested versions.
+- Evidence records targets, anchors omitted, match counts, before/after bytecode, runtime-boundary decisions, and tested versions when deeper validation is performed; hashes are optional and only collected when needed.
