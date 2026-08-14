@@ -11,7 +11,8 @@ import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private fun MutableMethod.forceSubscriptionFeatureResults(): Int {
@@ -19,7 +20,7 @@ private fun MutableMethod.forceSubscriptionFeatureResults(): Int {
         instructions
             .filter { instruction ->
                 val reference = instruction.getReference<MethodReference>()
-                reference?.definingClass == "Lcom/x/subscriptions/SubscriptionsFeatures;" &&
+                reference?.definingClass?.startsWith("Lcom/x/subscriptions/") == true &&
                     reference.returnType == "Z"
             }.reversed()
 
@@ -34,6 +35,39 @@ private fun MutableMethod.forceSubscriptionFeatureResults(): Int {
         patchedResults++
     }
     return patchedResults
+}
+
+private fun forceMediaClassDownloadable(match: Match) {
+    val fieldName =
+        match.method.instructions
+            .mapNotNull { it.getReference<FieldReference>() }
+            .firstOrNull { it.type == "Z" }
+            ?.name
+
+    match.method.addInstructions(
+        0,
+        """
+            const/4 v0, 0x1
+            return v0
+        """.trimIndent(),
+    )
+
+    if (fieldName == null) return
+
+    val constructors = match.classDef.methods.filter { it.name == "<init>" }
+    for (constructor in constructors) {
+        val matchingIputs =
+            constructor.instructions
+                .filter { ins ->
+                    ins.opcode == Opcode.IPUT_BOOLEAN &&
+                        ins.getReference<FieldReference>()?.name == fieldName
+                }.reversed()
+
+        for (iput in matchingIputs) {
+            val regA = (iput as TwoRegisterInstruction).registerA
+            constructor.addInstruction(iput.location.index, "const/4 v$regA, 0x1")
+        }
+    }
 }
 
 private fun requireMatches(
@@ -57,11 +91,7 @@ val xLiteDownloadPatch =
         compatibleWith(COMPATIBILITY_X_LITE)
 
         execute {
-            requireMatches(
-                "X-Lite premium subscription checker",
-                XLitePremiumSubscriptionCheckerFingerprint.matchAll(),
-                expectedCount = 2,
-            ).forEach { match ->
+            XLitePremiumSubscriptionCheckerFingerprint.matchAllOrNull()?.forEach { match ->
                 match.method.addInstructions(
                     0,
                     """
@@ -76,13 +106,6 @@ val xLiteDownloadPatch =
                 XLiteVideoTabDownloadHandlerFingerprint.matchAll(),
                 expectedCount = 2,
             ).forEach { match ->
-                val premiumResult = match.instructionMatches[1]
-                val premiumRegister =
-                    (premiumResult.instruction as OneRegisterInstruction).registerA
-                match.method.addInstruction(
-                    premiumResult.index + 1,
-                    "const/16 v$premiumRegister, 0x1",
-                )
                 if (match.method.forceSubscriptionFeatureResults() == 0) {
                     throw PatchException(
                         "X-Lite video download handler has no subscription checks: " +
@@ -95,26 +118,24 @@ val xLiteDownloadPatch =
                 throw PatchException("X-Lite timeline download handler has no subscription checks")
             }
 
-            SubscriptionsFeaturesHasAnyPremiumFingerprint.method.addInstructions(
-                0,
-                """
-                    const/4 v0, 0x1
-                    return v0
-                """.trimIndent(),
-            )
-            MediaContentVideoIsDownloadableFingerprint.method.addInstructions(
-                0,
-                """
-                    const/4 v0, 0x1
-                    return v0
-                """.trimIndent(),
-            )
-            MediaContentGifIsDownloadableFingerprint.method.addInstructions(
-                0,
-                """
-                    const/4 v0, 0x1
-                    return v0
-                """.trimIndent(),
-            )
+            SubscriptionsFeaturesHasAnyPremiumFingerprint.matchAll().forEach { match ->
+                match.method.addInstructions(
+                    0,
+                    """
+                        const/4 v0, 0x1
+                        return v0
+                    """.trimIndent(),
+                )
+            }
+
+            MediaContentVideoIsDownloadableFingerprint.matchAll().forEach { match ->
+                forceMediaClassDownloadable(match)
+            }
+            MediaContentGifIsDownloadableFingerprint.matchAll().forEach { match ->
+                forceMediaClassDownloadable(match)
+            }
+            MediaContentImageIsDownloadableFingerprint.matchAllOrNull()?.forEach { match ->
+                forceMediaClassDownloadable(match)
+            }
         }
     }

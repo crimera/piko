@@ -1,9 +1,3 @@
-/*
- * Copyright (C) 2026 piko <https://github.com/crimera/piko>
- *
- * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
- */
-
 package app.crimera.patches.xlite.premium
 
 import app.morphe.patcher.Fingerprint
@@ -12,6 +6,9 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 internal object XLiteDownloadEventHandlerFingerprint : Fingerprint(
     strings =
@@ -31,89 +28,89 @@ internal object XLiteDownloadEventHandlerFingerprint : Fingerprint(
 internal object XLiteVideoTabDownloadHandlerFingerprint : Fingerprint(
     parameters = listOf("L"),
     returnType = "V",
-    filters =
-        listOf(
-            methodCall(
-                opcode = Opcode.INVOKE_INTERFACE,
-                parameters = listOf(),
-                returnType = "Z",
-            ),
-            opcode(
-                opcode = Opcode.MOVE_RESULT,
-                location = MatchAfterImmediately(),
-            ),
-            opcode(
-                opcode = Opcode.IF_EQZ,
-                location = MatchAfterImmediately(),
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_INTERFACE,
-                name = "isDownloadable",
-                parameters = listOf(),
-                returnType = "Z",
-            ),
-            opcode(
-                opcode = Opcode.MOVE_RESULT,
-                location = MatchAfterImmediately(),
-            ),
-            opcode(
-                opcode = Opcode.IF_EQZ,
-                location = MatchAfterImmediately(),
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_INTERFACE,
-                name = "getVariants",
-                parameters = listOf(),
-            ),
-        ),
+    custom = { method, _ ->
+        val instructions = method.implementation?.instructions
+        val hasSubscriptionCheck = instructions?.any { ins ->
+            val ref = (ins as? ReferenceInstruction)?.reference as? MethodReference
+            ref?.definingClass?.startsWith("Lcom/x/subscriptions/") == true && ref.returnType == "Z"
+        } == true
+        val hasMediaCheck = instructions?.any { ins ->
+            val ref = (ins as? ReferenceInstruction)?.reference as? MethodReference
+            ref?.definingClass?.startsWith("Lcom/x/models/") == true && ref.returnType == "Z" && ref.parameterTypes.isEmpty()
+        } == true
+        hasSubscriptionCheck && hasMediaCheck
+    },
 )
 
 internal object XLitePremiumSubscriptionCheckerFingerprint : Fingerprint(
     parameters = listOf(),
     returnType = "Z",
-    filters =
-        listOf(
-            fieldAccess(
-                opcode = Opcode.IGET_OBJECT,
-                definingClass = "this",
-                type = "Lcom/x/subscriptions/SubscriptionsFeatures;",
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_INTERFACE,
-                definingClass = "Lcom/x/subscriptions/SubscriptionsFeatures;",
-                parameters = listOf(),
-                returnType = "Z",
-                location = MatchAfterImmediately(),
-            ),
-            opcode(
-                opcode = Opcode.MOVE_RESULT,
-                location = MatchAfterImmediately(),
-            ),
-            opcode(
-                opcode = Opcode.RETURN,
-                location = MatchAfterImmediately(),
-            ),
-        ),
+    custom = { method, _ ->
+        val instructions = method.implementation?.instructions
+        instructions != null && instructions.count() in 3..6 && instructions.any { ins ->
+            val ref = (ins as? ReferenceInstruction)?.reference as? MethodReference
+            ref?.definingClass?.startsWith("Lcom/x/subscriptions/") == true && ref.returnType == "Z"
+        }
+    },
 )
 
 internal object SubscriptionsFeaturesHasAnyPremiumFingerprint : Fingerprint(
+    returnType = "Z",
     strings =
         listOf(
-            "feature/twitter_blue",
             "feature/premium_basic",
-            "feature/twitter_blue_verified",
             "feature/premium_plus",
+            "feature/twitter_blue_verified",
         ),
 )
 
 internal object MediaContentVideoIsDownloadableFingerprint : Fingerprint(
-    definingClass = "Lcom/x/models/MediaContent\$MediaContentVideo;",
-    name = "isDownloadable",
-    returnType = "Z",
+    custom = { method, classDef ->
+        (classDef.type == "Lcom/x/models/MediaContent\$MediaContentVideo;" ||
+            classDef.methods.any { m ->
+                m.implementation?.instructions?.any { ins ->
+                    ins.opcode == Opcode.CONST_STRING &&
+                        ((ins as? ReferenceInstruction)?.reference as? StringReference)?.string?.startsWith("MediaContentVideo(mediaId=") == true
+                } == true
+            }) &&
+            method.parameterTypes.isEmpty() &&
+            method.returnType == "Z" &&
+            method.name != "equals" &&
+            method.name != "hashCode" &&
+            method.name != "toString"
+    },
 )
 
 internal object MediaContentGifIsDownloadableFingerprint : Fingerprint(
-    definingClass = "Lcom/x/models/MediaContent\$MediaContentGif;",
-    name = "isDownloadable",
-    returnType = "Z",
+    custom = { method, classDef ->
+        (classDef.type == "Lcom/x/models/MediaContent\$MediaContentGif;" ||
+            classDef.methods.any { m ->
+                m.implementation?.instructions?.any { ins ->
+                    ins.opcode == Opcode.CONST_STRING &&
+                        ((ins as? ReferenceInstruction)?.reference as? StringReference)?.string?.startsWith("MediaContentGif(mediaId=") == true
+                } == true
+            }) &&
+            method.parameterTypes.isEmpty() &&
+            method.returnType == "Z" &&
+            method.name != "equals" &&
+            method.name != "hashCode" &&
+            method.name != "toString"
+    },
+)
+
+internal object MediaContentImageIsDownloadableFingerprint : Fingerprint(
+    custom = { method, classDef ->
+        (classDef.type == "Lcom/x/models/MediaContent\$MediaContentImage;" ||
+            classDef.methods.any { m ->
+                m.implementation?.instructions?.any { ins ->
+                    ins.opcode == Opcode.CONST_STRING &&
+                        ((ins as? ReferenceInstruction)?.reference as? StringReference)?.string?.startsWith("MediaContentImage(mediaId=") == true
+                } == true
+            }) &&
+            method.parameterTypes.isEmpty() &&
+            method.returnType == "Z" &&
+            method.name != "equals" &&
+            method.name != "hashCode" &&
+            method.name != "toString"
+    },
 )
