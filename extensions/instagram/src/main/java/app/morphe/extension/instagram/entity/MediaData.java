@@ -49,6 +49,7 @@ public class MediaData extends Entity {
 
         String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
+        // Handle the edge case where the ID is 0
         if (instaId == 0) {
             return String.valueOf(alphabet.charAt(0));
         }
@@ -76,6 +77,8 @@ public class MediaData extends Entity {
     public PostType getPostType() {
         try{
             String postType = this.getPostTypeKey().toLowerCase();
+            //TODO: for some reason clips are not recogonised.
+            // Need to fix it later.
             if(postType.equals("clips")){
                 return PostType.REEL;
             }
@@ -92,7 +95,7 @@ public class MediaData extends Entity {
     }
 
     private String getPostTypeKey() throws Exception {
-        return (String) super.getField(this.getMoreExtendedData(), "A7Q");
+        return (String) super.getField(this.getMoreExtendedData(), "fieldName");
     }
 
     private List<MediaData> getCarouselMediaData() throws Exception {
@@ -143,6 +146,7 @@ public class MediaData extends Entity {
         if (mediaType.equals(MediaType.VIDEO)) return videoExtension;
         if (mediaType.equals(MediaType.AUDIO)) return audioExtension;
 
+        // Default fallback just in case.
         return imageExtension;
     }
 
@@ -300,7 +304,7 @@ public class MediaData extends Entity {
 
     private OriginalSoundDataIntf getOriginalSoundDataIntf() throws Exception {
         Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "A06", this.obj);
+        Object result = super.getMethod(helperClass, "methodName", this.obj);
         if (result != null) {
             return new OriginalSoundDataIntf(result);
         }
@@ -309,7 +313,7 @@ public class MediaData extends Entity {
 
     private TrackDataIntf getTrackDataIntf() throws Exception {
         Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "A0F", this.obj);
+        Object result = super.getMethod(helperClass, "methodName", this.obj);
         if (result != null) {
             return new TrackDataIntf(result);
         }
@@ -331,8 +335,8 @@ public class MediaData extends Entity {
 
     public String getDescriptionText() throws Exception {
         Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "A0J", this.obj);
-        return result != null ? (String) super.getField(result, "A0Z") : null;
+        Object result = super.getMethod(helperClass, "methodName", this.obj);
+        return result != null ? (String) super.getField(result, "fieldName") : null;
     }
 
     public String getMessageAudioUrl() throws Exception {
