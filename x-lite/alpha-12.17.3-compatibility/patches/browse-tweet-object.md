@@ -2,24 +2,25 @@
 
 ## Status
 
-**Unported / not yet verified on 12.17.3-alpha.01.**
+**Ported and verified on 12.17.3-alpha.01.**
 
 Source: `patches/src/main/kotlin/app/crimera/patches/xlite/misc/browseobject/BrowseObjectPatch.kt`
+Framework: `patches/src/main/kotlin/app/crimera/patches/xlite/misc/postoptions/PostOptionsPatch.kt`
 
-## Breakage
+## Breakage on Alpha
 
-Unknown until this patch is run independently against the exact alpha APK. Do not assume a successful build means its fingerprints or runtime boundary remain valid.
+1. **Obfuscated Action Carrier**: `PostActionType.None` is obfuscated to `Lcom/x/models/w5;->None`.
+2. **Obfuscated Presenter & Post Item**: `DefaultPostOptionsPresenter` is `com.x.urt.items.post.options.s` holding field `b` (`Lcom/x/models/timelines/items/w0;`).
+3. **Multi-option Icon Interception**: In `PostOptionsPatch`, icon interception previously skipped secondary contributions when the first returned `false`.
 
-## Port checklist
+## Fixes
 
-1. Run this patch alone against 12.17.3-alpha.01 and record the exact match/failure.
-2. Compare the matched alpha bytecode with 12.15.1 and 12.14.0.
-3. Remove hardcoded obfuscated descriptors, method names, generated literals, or removed host resources.
-4. Assert expected fingerprint cardinality.
-5. Build the MPP and inspect the final DEX for a reachable mutation.
-6. Install and test the feature on alpha.
-7. Repatch and regression-test 12.15.1 and 12.14.0.
+1. `PostOptionsPatch` dynamically maps `PostActionType` and matches timeline item packages.
+2. `XLiteUtils.findPresenterData` matches timeline post fields with package prefix `com.x.models.timelines.items.`.
+3. Chained multi-contribution icon continuation in `PostOptionsPatch.injectLabelsAndIcons`.
 
-## Findings and fix
+## Verification Evidence
 
-Not started. Add exact root cause, stable anchors, mutation, and verification evidence here during the port.
+- `BrowseObjectPatch` applies cleanly to `12.17.3-alpha.01`.
+- Post options sheet displays "Browse Tweet Object" with the flask icon (`ic_vector_flask_stroke`).
+- Tapping the action successfully resolves the timeline post and opens the Object Browser activity.
