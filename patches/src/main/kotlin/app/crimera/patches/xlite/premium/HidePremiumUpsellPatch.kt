@@ -18,6 +18,7 @@ import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
+import app.morphe.util.p0Register
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -88,6 +89,33 @@ private object XLiteHomeNavUpsellEnabledFingerprint : Fingerprint(
     custom = { _, classDef -> SUBSCRIPTIONS_FEATURES_DESCRIPTOR in classDef.interfaces },
 )
 
+private object XLiteHomeTabbedScaffoldClassFingerprint : Fingerprint(
+    returnType = "V",
+    filters =
+        listOf(
+            string("scaffold_home_tabbed"),
+        ),
+)
+
+/** Top bar header composable in Compose home tabbed scaffold. */
+private object XLiteHomeNavUpsellComposableFingerprint : Fingerprint(
+    classFingerprint = XLiteHomeTabbedScaffoldClassFingerprint,
+    returnType = "V",
+    parameters =
+        listOf(
+            "L",
+            "Lkotlin/jvm/functions/Function0;",
+            "Lkotlin/jvm/functions/Function0;",
+            "Z",
+            "L",
+            "Lkotlin/jvm/functions/Function0;",
+            "Lkotlin/jvm/functions/Function0;",
+            "Landroidx/compose/ui/Modifier;",
+            "Landroidx/compose/runtime/Composer;",
+            "I",
+        ),
+)
+
 private fun MutableMethod.disabledUpsellField(startIndex: Int): FieldReference {
     val directSingletonReturn =
         instructions
@@ -124,6 +152,34 @@ val hidePremiumUpsellPatch =
             )
 
         execute {
+            val composeMatch = XLiteHomeNavUpsellComposableFingerprint.matchOrNull()
+            if (composeMatch != null) {
+                composeMatch.method.apply {
+                    val p4Reg = p0Register + 4
+                    val originalFirstInstruction = instructions.first()
+                    val read =
+                        hidePremiumUpsell.injectRead(
+                            method = this,
+                            index = 0,
+                            registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
+                        )
+                    val overrideInstructions =
+                        """
+                            if-eqz v${read.register}, :piko_xlite_premium_upsell_continue
+                            const/16 v$p4Reg, 0x0
+                        """.trimIndent()
+                    addInstructionsWithLabels(
+                        read.nextIndex,
+                        overrideInstructions,
+                        ExternalLabel(
+                            "piko_xlite_premium_upsell_continue",
+                            originalFirstInstruction,
+                        ),
+                    )
+                }
+                return@execute
+            }
+
             val typeMatches = XLiteHomeNavUpsellTypeFingerprint.matchAllOrNull().orEmpty()
             val enabledMatches = XLiteHomeNavUpsellEnabledFingerprint.matchAllOrNull().orEmpty()
             val matches = typeMatches + enabledMatches

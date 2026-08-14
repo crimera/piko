@@ -31,14 +31,11 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Customize default reply sorting](patches/default-reply-sorting.md) | PostIdentifier inlined to field access; lambda consolidation required branch-scoped check-cast index and range invocation | Ported; patch-applied and final-APK verified |
 | [Unlock downloads](patches/unlock-downloads.md) | SubscriptionsFeatures & MediaContent obfuscated; feature strings updated; inlined checker handled | Ported; patch-applied and final-APK verified |
 | [Custom font](patches/custom-font.md) | Existing Compose paragraph intrinsics and span hooks remain stable | Ported; patch-applied and final-APK verified |
+| [Hide premium upsell](patches/hide-premium-upsell.md) | Obfuscated SubscriptionsFeatures replaced by Compose home scaffold chip hook | Ported; patch-applied and final-APK verified |
 
 ## Unported queue
 
 These patches have not yet been independently run and verified on the alpha. Their documents are placeholders for the exact failure, fix, and evidence discovered during each port.
-
-### Priority 2 — Premium and navigation
-
-- [Hide premium upsell](patches/hide-premium-upsell.md)
 
 ### Priority 3 — Miscellaneous features
 
