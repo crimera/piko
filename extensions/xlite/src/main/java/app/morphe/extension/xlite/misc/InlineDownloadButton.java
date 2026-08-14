@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -128,8 +129,8 @@ public final class InlineDownloadButton {
                 return true;
             }
 
-            String username = username(post);
-            String postId = postId(post);
+            String username = sourceUsername(post);
+            String postId = sourcePostId(post);
             if (downloads.size() == 1) {
                 enqueueSingleDownload(context, downloads.get(0), username, postId, 0, 1);
             } else {
@@ -256,15 +257,23 @@ public final class InlineDownloadButton {
         return media instanceof List<?> list ? list : java.util.Collections.emptyList();
     }
 
-    private static String postId(Object post) {
+    private static String sourcePostId(Object post) {
         Object canonicalPost = canonicalPost(post);
         String text = canonicalPost == null ? null : canonicalPost.toString();
+        // Reposts mirror the original media, so the media's source post belongs
+        // to the original author; name the file after the original post.
+        String sourcePostId = toStringValue(text, "sourcePostIdentifier=", ", sourceUserIdentifier=");
+        if (sourcePostId != null) return safeFileSegment(sourcePostId, "post");
         return safeFileSegment(toStringValue(text, "CanonicalPost(id=", ", text="), "post");
     }
 
-    private static String username(Object post) {
+    private static String sourceUsername(Object post) {
         Object canonicalPost = canonicalPost(post);
         String text = canonicalPost == null ? null : canonicalPost.toString();
+        // Reposted media carries the original author's display name; prefer it
+        // over the reposter's screen name.
+        String sourceName = toStringValue(text, "sourceUserDisplayName=", ",");
+        if (sourceName != null) return safeFileSegment(sourceName, "twitter");
         String author = toStringValue(text, ", author=", ", legacyCard=");
         String screenName = toStringValue(author, "screenName=", ",");
         return safeFileSegment(screenName, "twitter");
