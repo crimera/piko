@@ -13,6 +13,7 @@ import app.morphe.extension.xlite.postfilter.PostFilterRuleStore;
 
 public final class XLiteTimelineFilter {
 
+    private static final String DEBUG_LOG_PREFIX = "[DEBUG-xlite-timeline] ";
     private static final String AI_SOURCE_USER_MARKED = "UserMarked";
     private static final String AI_SOURCE_AUTO_DETECTED = "AutoDetected";
     private static final String AI_SOURCE_NOT_IDENTIFIED = "SourceNotIdentified";
@@ -287,10 +288,22 @@ public final class XLiteTimelineFilter {
             TimelineModelAccess modelAccess
     ) {
         if (item == null) return FilterResult.keep(null);
-        if (filterPromotedItems && isPromoted(item, modelAccess)) return FilterResult.remove();
+        if (filterPromotedItems) {
+            try {
+                if (isPromoted(item, modelAccess)) return FilterResult.remove();
+            } catch (RuntimeException exception) {
+                logDiagnostic("promoted-item check", exception, "item=" + describeValue(item));
+                throw exception;
+            }
+        }
         if (modelAccess.isPost(item)) {
-            if (PostFilterMatcher.findMatchReason(modelAccess.getPostText(item), ruleSnapshot) != null) {
-                return FilterResult.remove();
+            try {
+                if (PostFilterMatcher.findMatchReason(modelAccess.getPostText(item), ruleSnapshot) != null) {
+                    return FilterResult.remove();
+                }
+            } catch (RuntimeException exception) {
+                logDiagnostic("post keyword check", exception, "post=" + describeValue(item));
+                throw exception;
             }
             if (isAiGenerated(item, aiSourcesToHide, modelAccess)) return FilterResult.remove();
         }
@@ -313,13 +326,30 @@ public final class XLiteTimelineFilter {
             TimelineModelAccess modelAccess
     ) {
         if (aiSourcesToHide == null || aiSourcesToHide.isEmpty()) return false;
-        Object disclosure = modelAccess.getContentDisclosure(post);
-        if (disclosure == null || !modelAccess.hasAiGeneratedDisclosure(disclosure)) return false;
+        Object disclosure;
+        try {
+            disclosure = modelAccess.getContentDisclosure(post);
+        } catch (RuntimeException exception) {
+            logDiagnostic("AI disclosure read", exception, "post=" + describeValue(post));
+            throw exception;
+        }
+        if (disclosure == null) return false;
 
-        Object source = modelAccess.getAiDetectionSource(disclosure);
-        if (source == null) return aiSourcesToHide.contains(AI_SOURCE_NOT_IDENTIFIED);
-        if (!(source instanceof Enum<?> enumSource)) return false;
-        return aiSourcesToHide.contains(enumSource.name());
+        try {
+            if (!modelAccess.hasAiGeneratedDisclosure(disclosure)) return false;
+            Object source = modelAccess.getAiDetectionSource(disclosure);
+            if (source == null) return aiSourcesToHide.contains(AI_SOURCE_NOT_IDENTIFIED);
+            if (!(source instanceof Enum<?> enumSource)) return false;
+            return aiSourcesToHide.contains(enumSource.name());
+        } catch (RuntimeException exception) {
+            logDiagnostic(
+                    "AI disclosure classification",
+                    exception,
+                    "post=" + describeValue(post),
+                    "disclosure=" + describeValue(disclosure)
+            );
+            throw exception;
+        }
     }
 
     private static Object getContentDisclosure(Object post) {
@@ -354,15 +384,17 @@ public final class XLiteTimelineFilter {
         List<Object> filteredChildren = new ArrayList<>(originalChildren.size());
         Set<Object> removedPostIds = new HashSet<>();
         boolean changed = false;
-        for (Object originalChild : originalChildren) {
+        for (int childIndex = 0; childIndex < originalChildren.size(); childIndex++) {
+            Object originalChild = originalChildren.get(childIndex);
             if (originalChild == null) {
                 filteredChildren.add(null);
                 continue;
             }
 
-            Object originalItem = modelAccess.getModuleItem(originalChild);
+            Object originalItem = null;
             FilterResult result;
             try {
+                originalItem = modelAccess.getModuleItem(originalChild);
                 result = filterItem(
                         originalItem,
                         filterPromotedItems,
@@ -372,7 +404,20 @@ public final class XLiteTimelineFilter {
                         modelAccess
                 );
             } catch (RuntimeException exception) {
-                logFailure("timeline module child", exception);
+                logFailure(
+                        "timeline module child",
+                        exception,
+                        childContext(
+                                module,
+                                childIndex,
+                                originalChild,
+                                originalItem,
+                                filterPromotedItems,
+                                hideWhoToFollow,
+                                ruleSnapshot,
+                                aiSourcesToHide
+                        )
+                );
                 filteredChildren.add(originalChild);
                 continue;
             }
@@ -398,7 +443,20 @@ public final class XLiteTimelineFilter {
                 ));
                 changed = true;
             } catch (RuntimeException exception) {
-                logFailure("timeline module child reconstruction", exception);
+                logFailure(
+                        "timeline module child reconstruction",
+                        exception,
+                        childContext(
+                                module,
+                                childIndex,
+                                originalChild,
+                                result.item,
+                                filterPromotedItems,
+                                hideWhoToFollow,
+                                ruleSnapshot,
+                                aiSourcesToHide
+                        )
+                );
                 filteredChildren.add(originalChild);
             }
         }
@@ -570,8 +628,52 @@ public final class XLiteTimelineFilter {
         return Collections.unmodifiableList(new ArrayList<>(filtered));
     }
 
-    private static void logFailure(String operation, Throwable exception) {
-        Logger.printException(() -> "Failed X-Lite " + operation, exception);
+    private static String childContext(
+            Object module,
+            int childIndex,
+            Object child,
+            Object item,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide
+    ) {
+        return "module=" + describeValue(module)
+                + ", childIndex=" + childIndex
+                + ", child=" + describeValue(child)
+                + ", item=" + describeValue(item)
+                + ", filters={promoted=" + filterPromotedItems
+                + ", whoToFollow=" + hideWhoToFollow
+                + ", keywordRules=" + hasEnabledRules(ruleSnapshot)
+                + ", aiSources=" + aiSourcesToHide + "}";
+    }
+
+    private static boolean hasEnabledRules(PostFilterRuleStore.Snapshot snapshot) {
+        return snapshot != null && snapshot.hasEnabledRules();
+    }
+
+    private static String describeValue(Object value) {
+        if (value == null) return "null";
+        String description;
+        try {
+            description = value.toString();
+        } catch (RuntimeException exception) {
+            description = "<toString failed: " + exception.getClass().getSimpleName() + ">";
+        }
+        if (description.length() > 400) description = description.substring(0, 400) + "…";
+        return value.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(value))
+                + "=" + description;
+    }
+
+    private static void logFailure(String operation, Exception exception, String... context) {
+        String details = context.length == 0 ? "" : " [" + String.join(", ", context) + "]";
+        // Keep the toast as a visible repro signal while detailed context remains in the log.
+        Logger.printException(() -> DEBUG_LOG_PREFIX + "Failed X-Lite " + operation + details, exception);
+    }
+
+    private static void logDiagnostic(String operation, Exception exception, String... context) {
+        String details = context.length == 0 ? "" : " [" + String.join(", ", context) + "]";
+        Logger.printInfo(() -> DEBUG_LOG_PREFIX + "Failed X-Lite " + operation + details, exception);
     }
 
     private static final class FilterResult {
