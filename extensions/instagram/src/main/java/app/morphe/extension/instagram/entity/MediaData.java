@@ -164,7 +164,7 @@ public class MediaData extends Entity {
     }
 
     public UserData getUserDataWithoutUserSession() throws Exception {
-        Object userData = super.getMethod(this.obj, "methodName");
+        Object userData = super.getMethod(this.getExtendedData(), "methodName");
         return new UserData(userData);
     }
 
@@ -197,7 +197,10 @@ public class MediaData extends Entity {
     }
 
     public List<Object> getMediaList() throws Exception {
-        List mediaList = (List) super.getMethod(this.obj, "methodName");
+        // Carousel media is exposed by the extended-data backing object.
+        // Calling the method on the outer Media object returns an unrelated/null
+        // collection on Instagram 442, which then breaks every download action.
+        List mediaList = (List) super.getMethod(this.getExtendedData(), "methodName");
         if (mediaList != null) {
             return mediaList;
         }
@@ -241,8 +244,9 @@ public class MediaData extends Entity {
     }
 
     private List getVideoVariantsV2() throws Exception {
-        // Instagram 442 stores video_versions on the Media object.
-        List variantList = (List) super.getMethod(this.obj, "AAY");
+        // Keep the original entity layout: video_versions is a field of the
+        // extended media dictionary, not a method on the outer Media object.
+        List variantList = (List) super.getField(this.getMoreExtendedData(), "fieldName");
         if (variantList == null) {
             return null;
         }
@@ -258,27 +262,37 @@ public class MediaData extends Entity {
 
     public List getVideoVariants() throws Exception {
         try {
-            return this.getVideoVariantsV2();
+            List variants = this.getVideoVariantsV2();
+            if (variants != null && !variants.isEmpty()) {
+                return variants;
+            }
         } catch (Exception e) {
-            return this.getVideoVariantsV1();
         }
+
+        return this.getVideoVariantsV1();
     }
 
     public List getImageVariants() throws Exception {
-        Object imageInfoObject = super.getMethod(this.obj, "methodName");
-        if (imageInfoObject != null){
-            List variantList = (List) super.getMethod(imageInfoObject, "imageVariantsMethod");
-            if (variantList != null){
-                List<ImageData> imageList = new ArrayList<>();
-                for (Object item : variantList) {
-                    if (item != null) {
-                        imageList.add(new ImageData(item));
-                    }
-                }
-                return imageList;
+        // image_versions2 is stored in the image-info object under the
+        // more-extended media dictionary. The method name is patched from the
+        // AyuMidcard helper fingerprint.
+        Object imageInfoObject = (Object) super.getField(this.getMoreExtendedData(), "fieldName");
+        if (imageInfoObject == null) {
+            return null;
+        }
+
+        List variantList = (List) super.getMethod(imageInfoObject, "methodName");
+        if (variantList == null) {
+            return null;
+        }
+
+        List<ImageData> imageList = new ArrayList<>();
+        for (Object item : variantList) {
+            if (item != null) {
+                imageList.add(new ImageData(item));
             }
         }
-        return null;
+        return imageList;
     }
 
     public String getVideoLink() throws Exception {
