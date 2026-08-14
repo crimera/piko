@@ -127,6 +127,13 @@ val mediaDataEntity =
                 }
             }
 
+            // Instagram 442 / VC148: Media.A39() returns ImageInfo and its
+            // DME() method returns the image candidate list. Keep this mapping
+            // authoritative; the generic image-info mapper targets another
+            // representation and can overwrite it with a null URL source.
+            GetImageVariantsExtensionFingerprint.changeFirstString("A39")
+            GetImageVariantsExtensionFingerprint.changeStringAt(1, "DME")
+
             ExtMediaDictVideoInfoMapperFingerprint.apply {
                 val moreExtendedMediaDataFieldName = LiveTreeMediaDictClinitFingerprint.classDef.fields.first { it.type == classDef.type }.name
                 GetMoreExtendedDataExtensionFingerprint.changeFirstString(moreExtendedMediaDataFieldName)
@@ -144,18 +151,6 @@ val mediaDataEntity =
             // Instagram 442: X.5rs.AAE is the video_versions backing field.
             // The generic mapper can resolve the wrong field on this build.
             GetVideoVariantsV2ExtensionFingerprint.changeFirstString("AAE")
-
-            ExtMediaDictImageInfoMapperFingerprint.apply {
-                val strIndex = stringMatches.first().index
-                method.apply {
-                    val imageInfoFieldIndex = indexOfFirstInstruction(strIndex, Opcode.IGET_OBJECT)
-                    if (imageInfoFieldIndex >= 0) {
-                        GetImageVariantsExtensionFingerprint.changeFirstString(
-                            getInstruction(imageInfoFieldIndex).fieldExtractor().name,
-                        )
-                    }
-                }
-            }
 
             ProductInfoMapperFingerprint.apply {
                 val strIndex = stringMatches.last().index
