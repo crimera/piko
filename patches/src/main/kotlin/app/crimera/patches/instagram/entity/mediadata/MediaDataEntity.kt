@@ -46,9 +46,8 @@ val mediaDataEntity =
                 }
             }
 
-            VideoMediaInIGTVFeedHasVideoVariantsFingerprint.method.apply {
-                GetVideoVariantsV1ExtensionFingerprint.changeFirstString(getInstruction(indexOfFirstInstruction(Opcode.INVOKE_INTERFACE)).methodExtractor().name)
-            }
+            // Instagram 442 / VC148: Media.AAY() returns the video_versions list.
+            GetVideoVariantsV1ExtensionFingerprint.changeFirstString("AAY")
 
             AslSessionRelatedFingerprint.method.apply {
                 val stringIndex = AslSessionRelatedFingerprint.stringMatches[1].index
@@ -79,10 +78,9 @@ val mediaDataEntity =
                 GetUserDataWithoutUserSessionExtensionFingerprint.changeFirstString(getInstruction(indexOfFirstInstruction(firstIfEqz, Opcode.INVOKE_INTERFACE)).methodExtractor().name)
             }
 
-            EditMediaInfoGetCurrentMediaIdFingerprint.method.apply {
-                GetDescriptionTextExtensionFingerprint.changeFirstString(getInstruction(instructions.indexOfLast { it.opcode == Opcode.INVOKE_STATIC }).methodExtractor().name)
-                GetDescriptionTextExtensionFingerprint.changeStringAt(1, getInstruction(instructions.indexOfLast { it.opcode == Opcode.IGET_OBJECT }).fieldExtractor().name)
-            }
+            // Instagram 442 / VC148: MediaExtKt.A0J(Media) is the media metadata helper used for description data.
+            GetDescriptionTextExtensionFingerprint.changeFirstString("A0J")
+            GetDescriptionTextExtensionFingerprint.changeStringAt(1, "A0Z")
 
             MusicAudioTypeEnumStringFingerprint.matchOrNull()?.method?.apply {
                 instructions.filter { it.opcode == Opcode.INVOKE_STATIC }.firstOrNull {
@@ -110,6 +108,9 @@ val mediaDataEntity =
                     GetMessageAudioUrlExtensionFingerprint.changeStringAt(1, getInstruction(indexOfFirstInstruction(strIndex, Opcode.INVOKE_INTERFACE)).methodExtractor().name)
                 }
             }
+
+            // Instagram 442 / VC148: Media.A39() is the image_versions2-backed image getter.
+            GetImageVariantsExtensionFingerprint.changeFirstString("A39")
 
             ExtMediaDictVideoInfoMapperFingerprint.apply {
                 val moreExtendedMediaDataFieldName = LiveTreeMediaDictClinitFingerprint.classDef.fields.first { it.type == classDef.type }.name
