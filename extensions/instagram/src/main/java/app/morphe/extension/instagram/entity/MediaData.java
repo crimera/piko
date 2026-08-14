@@ -237,13 +237,19 @@ public class MediaData extends Entity {
     }
 
     private List getVideoVariantsV2() throws Exception {
-        List variantList = (List) super.getField(this.getMoreExtendedData(), "fieldName");
-        if (variantList != null){
-            List<VideoData> videoList = new ArrayList<>();
-            variantList.forEach(item -> videoList.add(new VideoData(item)));
-            return videoList;
+        // Instagram 442 stores video_versions on the Media object.
+        List variantList = (List) super.getMethod(this.obj, "AAY");
+        if (variantList == null) {
+            return null;
         }
-        return null;
+
+        List<VideoData> videoList = new ArrayList<>();
+        variantList.forEach(item -> {
+            if (item != null) {
+                videoList.add(new VideoData(item));
+            }
+        });
+        return videoList;
     }
 
     public List getVideoVariants() throws Exception {
