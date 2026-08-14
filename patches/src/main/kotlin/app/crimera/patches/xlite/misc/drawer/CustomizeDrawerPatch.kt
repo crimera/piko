@@ -53,12 +53,12 @@ private object XLiteDrawerFooterItemFingerprint : Fingerprint(
     returnType = "V",
     parameters =
         listOf(
-            "Ljava/lang/String;",
-            "L",
-            "Lkotlin/jvm/functions/Function0;",
-            "L",
-            "Landroidx/compose/runtime/Composer;",
             "I",
+            "Landroidx/compose/runtime/Composer;",
+            "L",
+            "L",
+            "Ljava/lang/String;",
+            "Lkotlin/jvm/functions/Function0;",
         ),
 )
 
@@ -66,7 +66,14 @@ private fun MutableMethod.injectDrawerItemGuard(hiddenItems: MultiChoiceSettingD
     val originalInstruction =
         instructions.firstOrNull()
             ?: throw PatchException("X-Lite drawer item renderer has no instructions")
-    val titleParameterRegister = p0Register
+    val stringParamIndex =
+        parameterTypes.indexOf("Ljava/lang/String;").takeIf { it >= 0 }
+            ?: throw PatchException("X-Lite drawer item renderer does not have a String parameter: $this")
+    val precedingRegisters =
+        parameterTypes.subList(0, stringParamIndex).sumOf { type ->
+            if (type == "J" || type == "D") 2 else 1
+        }
+    val titleParameterRegister = p0Register + precedingRegisters
     val titleRegister =
         getFreeRegisterProvider(0, 1, titleParameterRegister)
             .getFreeRegister4Bit()
@@ -77,7 +84,7 @@ private fun MutableMethod.injectDrawerItemGuard(hiddenItems: MultiChoiceSettingD
             excludedRegisters = listOf(titleParameterRegister, titleRegister),
             registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
         )
-    val continueLabel = "piko_xlite_drawer_item_continue_${parameterTypes.size}"
+    val continueLabel = "piko_xlite_drawer_item_continue_${parameterTypes.size}_$stringParamIndex"
 
     addInstructionsWithLabels(
         read.nextIndex,
