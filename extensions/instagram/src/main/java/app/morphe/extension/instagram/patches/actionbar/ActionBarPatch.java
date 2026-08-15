@@ -9,7 +9,7 @@ package app.morphe.extension.instagram.patches.actionbar;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
-import android.content.Context;
+import android.app.Activity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -90,9 +90,9 @@ public class ActionBarPatch {
         }
     }
 
-    public static void userProfileActionBarButton(ViewGroup viewGroup, UserSession userSession, Object userObject){
+    public static void userProfileActionBarButton(Activity activity, ViewGroup viewGroup, UserSession userSession, Object userObject){
         try {
-            if (viewGroup == null) {
+            if (activity == null || viewGroup == null) {
                 return;
             }
 
@@ -101,17 +101,16 @@ public class ActionBarPatch {
             UserData userData = new UserData(userObject);
             Boolean isSelfProfile = userData.getUserId().equals(userSession.getUserId());
 
+            if(pref.contains(Constants.AB_SETTINGS_ICON) && isSelfProfile) {
+                UI.pikoSettingsGear(viewGroup);
+            }
+
             if(pref.contains(Constants.AB_GHOST_MODE_ICON) && isSelfProfile) {
                 ghostModeToggle(viewGroup);
             }
 
             if(pref.contains(Constants.AB_PROFILE_INFO_ICON)) {
-                Context context = viewGroup.getContext();
-                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_INFO_ICON, () -> ProfileMoreOption.moreOptionsDailogueBox(context, userData));
-            }
-
-            if(pref.contains(Constants.AB_SETTINGS_ICON) && isSelfProfile) {
-                UI.pikoSettingsGear(viewGroup);
+                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_INFO_ICON, () -> ProfileMoreOption.moreOptionsDailogueBox(activity, userData));
             }
 
 
