@@ -77,6 +77,7 @@ val xLiteShowSensitiveMediaPatch =
             val mediaField = contextualPost.fieldForToStringLabel(MEDIA_VISIBILITY_RESULTS_LABEL)
             val mediaWriteMatches =
                 Fingerprint(
+                    definingClass = contextualPost.originalClassDef.type,
                     filters =
                         listOf(
                             fieldAccess(

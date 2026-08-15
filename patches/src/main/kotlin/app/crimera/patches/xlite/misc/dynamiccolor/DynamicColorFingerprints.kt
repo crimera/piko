@@ -12,6 +12,7 @@ private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
  * Cache, palette, and factory descriptors are deliberately resolved from the match.
  */
 internal object HorizonThemePaletteProviderFingerprint : Fingerprint(
+    definingClass = "Lcom/x/compose/theme/",
     parameters = listOf("L", COMPOSER_DESCRIPTOR),
     custom = { method, _ -> method.returnType.startsWith("Lcom/x/compose/theme/") },
     filters = listOf(
@@ -38,6 +39,7 @@ internal object HorizonThemePaletteProviderFingerprint : Fingerprint(
  * cached dark palette, so the first lazy cache is read twice before the standard cache.
  */
 internal object XLiteDynamicColorPaletteProviderFingerprint : Fingerprint(
+    definingClass = "Lcom/x/compose/core/",
     parameters = listOf("L", COMPOSER_DESCRIPTOR),
     custom = { method, _ -> method.returnType.startsWith("Lcom/x/compose/core/") },
     filters = listOf(

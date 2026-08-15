@@ -26,6 +26,7 @@ internal object XLiteDownloadEventHandlerFingerprint : Fingerprint(
  * direct SubscriptionsFeatures checks in that handler gate offline-video availability.
  */
 internal object XLiteVideoTabDownloadHandlerFingerprint : Fingerprint(
+    strings = listOf("subscriptions_watermarked_video_download_enabled"),
     parameters = listOf("L"),
     returnType = "V",
     custom = { method, _ ->
@@ -43,6 +44,7 @@ internal object XLiteVideoTabDownloadHandlerFingerprint : Fingerprint(
 )
 
 internal object XLitePremiumSubscriptionCheckerFingerprint : Fingerprint(
+    definingClass = "Lcom/x/subscriptions/",
     parameters = listOf(),
     returnType = "Z",
     custom = { method, _ ->
@@ -64,52 +66,49 @@ internal object SubscriptionsFeaturesHasAnyPremiumFingerprint : Fingerprint(
         ),
 )
 
+private object MediaContentVideoClassFingerprint : Fingerprint(
+    name = "toString",
+    strings = listOf("MediaContentVideo(mediaId="),
+)
+
 internal object MediaContentVideoIsDownloadableFingerprint : Fingerprint(
-    custom = { method, classDef ->
-        (classDef.type == "Lcom/x/models/MediaContent\$MediaContentVideo;" ||
-            classDef.methods.any { m ->
-                m.implementation?.instructions?.any { ins ->
-                    ins.opcode == Opcode.CONST_STRING &&
-                        ((ins as? ReferenceInstruction)?.reference as? StringReference)?.string?.startsWith("MediaContentVideo(mediaId=") == true
-                } == true
-            }) &&
-            method.parameterTypes.isEmpty() &&
-            method.returnType == "Z" &&
-            method.name != "equals" &&
+    classFingerprint = MediaContentVideoClassFingerprint,
+    returnType = "Z",
+    parameters = emptyList(),
+    custom = { method, _ ->
+        method.name != "equals" &&
             method.name != "hashCode" &&
             method.name != "toString"
     },
+)
+
+private object MediaContentGifClassFingerprint : Fingerprint(
+    name = "toString",
+    strings = listOf("MediaContentGif(mediaId="),
 )
 
 internal object MediaContentGifIsDownloadableFingerprint : Fingerprint(
-    custom = { method, classDef ->
-        (classDef.type == "Lcom/x/models/MediaContent\$MediaContentGif;" ||
-            classDef.methods.any { m ->
-                m.implementation?.instructions?.any { ins ->
-                    ins.opcode == Opcode.CONST_STRING &&
-                        ((ins as? ReferenceInstruction)?.reference as? StringReference)?.string?.startsWith("MediaContentGif(mediaId=") == true
-                } == true
-            }) &&
-            method.parameterTypes.isEmpty() &&
-            method.returnType == "Z" &&
-            method.name != "equals" &&
+    classFingerprint = MediaContentGifClassFingerprint,
+    returnType = "Z",
+    parameters = emptyList(),
+    custom = { method, _ ->
+        method.name != "equals" &&
             method.name != "hashCode" &&
             method.name != "toString"
     },
 )
 
+private object MediaContentImageClassFingerprint : Fingerprint(
+    name = "toString",
+    strings = listOf("MediaContentImage(mediaId="),
+)
+
 internal object MediaContentImageIsDownloadableFingerprint : Fingerprint(
-    custom = { method, classDef ->
-        (classDef.type == "Lcom/x/models/MediaContent\$MediaContentImage;" ||
-            classDef.methods.any { m ->
-                m.implementation?.instructions?.any { ins ->
-                    ins.opcode == Opcode.CONST_STRING &&
-                        ((ins as? ReferenceInstruction)?.reference as? StringReference)?.string?.startsWith("MediaContentImage(mediaId=") == true
-                } == true
-            }) &&
-            method.parameterTypes.isEmpty() &&
-            method.returnType == "Z" &&
-            method.name != "equals" &&
+    classFingerprint = MediaContentImageClassFingerprint,
+    returnType = "Z",
+    parameters = emptyList(),
+    custom = { method, _ ->
+        method.name != "equals" &&
             method.name != "hashCode" &&
             method.name != "toString"
     },

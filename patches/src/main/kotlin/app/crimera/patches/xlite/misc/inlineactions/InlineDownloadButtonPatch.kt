@@ -121,7 +121,7 @@ val xLiteInlineDownloadButtonPatch =
                 requireSingle(
                     "X-Lite inline-action entry renderer",
                     Fingerprint(
-                        custom = { _, classDef -> classDef.type.startsWith("Lcom/x/inlineactionbar/") },
+                        definingClass = "Lcom/x/inlineactionbar/",
                         parameters =
                             listOf(
                                 xLiteInlineActionEntryType,
@@ -176,6 +176,7 @@ val xLiteInlineDownloadButtonPatch =
                 requireSingle(
                     "X-Lite TwitterShare icon lambda",
                     Fingerprint(
+                        definingClass = "Lcom/x/compose/",
                         filters =
                             listOf(
                                 fieldAccess(opcode = Opcode.SGET_OBJECT, reference = shareIconField),

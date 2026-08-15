@@ -27,6 +27,7 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 /** Filters X-Lite navigation state before the landing component consumes it. */
 private object XLiteTabDataFingerprint : Fingerprint(
+    definingClass = "Lcom/x/main/",
     name = "<init>",
     returnType = "V",
     filters =

@@ -43,6 +43,7 @@ private object XLiteHomeReselectFingerprint : Fingerprint(
 )
 
 private object XLiteLifecycleAutoRefreshFingerprint : Fingerprint(
+    definingClass = "Lcom/x/urt/",
     name = "invokeSuspend",
     parameters = listOf("Ljava/lang/Object;"),
     returnType = "Ljava/lang/Object;",

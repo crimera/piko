@@ -122,8 +122,8 @@ val customizeXLiteInlineActionsPatch =
                 canonicalPostMatch.fieldForToStringLabel(", inlineActionEntry=").type
             val matches =
                 Fingerprint(
+                    definingClass = "Lcom/x/inlineactionbar/",
                     parameters = listOf("Landroidx/compose/runtime/Composer;"),
-                    custom = { _, classDef -> classDef.type.startsWith("Lcom/x/inlineactionbar/") },
                     filters =
                         listOf(
                             methodCall(

@@ -543,6 +543,7 @@ private fun patchInlineActionTints() {
     val actionTypeDescriptor = actionTypeField.type
     val entryMatches =
         Fingerprint(
+            definingClass = "Lcom/x/inlineactionbar/",
             parameters = listOf(
                 inlineActionEntryClass.type,
                 "L",

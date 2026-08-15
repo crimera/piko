@@ -59,6 +59,7 @@ private fun isFlowSeed(instruction: Instruction) =
         } == true
 
 private object XLiteCombinedProfileTimelineSeedFingerprint : Fingerprint(
+    definingClass = "Lcom/x/profile/timeline/",
     custom = { method, classDef ->
         // morphe's Fingerprint `name` is only an identifier — it does NOT filter by
         // method name, so the constructor guard has to live here.

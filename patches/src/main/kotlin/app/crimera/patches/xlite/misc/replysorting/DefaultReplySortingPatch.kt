@@ -69,6 +69,7 @@ private object XLiteComposeReplySortingSelectionFingerprint : Fingerprint(
  * configured default so the UI matches the repository's ranking mode.
  */
 private object XLiteComposeReplySortingUiStateFingerprint : Fingerprint(
+    definingClass = "Lcom/x/ui/common/",
     filters =
         listOf(
             fieldAccess(

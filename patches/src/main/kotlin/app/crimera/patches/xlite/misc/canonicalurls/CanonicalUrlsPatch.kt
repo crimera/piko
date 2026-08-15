@@ -34,7 +34,7 @@ private object UrlEntityModelFingerprint : Fingerprint(
     name = "toString",
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
-    strings = listOf("UrlEntity(displayUrl=", ", expandedUrl=", ", url="),
+    strings = listOf("UrlEntity(displayUrl="),
 )
 
 private object MentionEntityModelFingerprint : Fingerprint(
@@ -108,6 +108,7 @@ private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
 
     val textEntityNavigationFingerprint =
         Fingerprint(
+            definingClass = "Lcom/x/",
             parameters = listOf("L", "L"),
             returnType = "V",
             filters =
@@ -139,6 +140,7 @@ private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
 
     val postLinkClickMatch =
         Fingerprint(
+            definingClass = "Lcom/x/",
             returnType = "V",
             parameters = listOf("L", contextualPostType, "L", "L", "L", "L", "L"),
             filters =
@@ -304,7 +306,7 @@ private fun preferExpandedUrlInUrlPicker(match: Match) {
 
 context(_: BytecodePatchContext)
 private fun Fingerprint.requireSingleMatch(label: String): Match {
-    val matches = matchAll()
+    val matches = matchAll().distinctBy { it.originalMethod.toString() }
     return matches.singleOrNull()
         ?: throw PatchException(
             "Expected exactly one $label match, found ${matches.size}: " +
