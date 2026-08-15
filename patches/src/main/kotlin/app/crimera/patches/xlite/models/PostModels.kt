@@ -84,54 +84,66 @@ internal data class ResolvedXLiteInlineDownloadModels(
     val twitterShareActionField: FieldReference,
 )
 
-private object PostModelCache {
-    private val values = WeakHashMap<BytecodePatchContext, ResolvedXLitePostModels>()
+/**
+ * Immutable handles for the shared post-model fingerprints. Feature resolvers derive their own
+ * fields from these handles so media/action requirements do not become core-post requirements.
+ */
+private data class ResolvedXLitePostModelAnchors(
+    val contextualPostDescriptor: String,
+    val contextualPostToStringMethod: MethodReference,
+    val canonicalPostDescriptor: String,
+    val canonicalPostToStringMethod: MethodReference,
+)
 
-    @Synchronized
-    fun getOrPut(
-        context: BytecodePatchContext,
-        resolve: () -> ResolvedXLitePostModels,
-    ): ResolvedXLitePostModels = values.getOrPut(context, resolve)
+private class PostModelResolutionState {
+    private var postModelAnchors: ResolvedXLitePostModelAnchors? = null
+    private var postModels: ResolvedXLitePostModels? = null
+    private var postMediaModels: ResolvedXLitePostMediaModels? = null
+    private var inlineActionModels: ResolvedXLiteInlineActionModels? = null
+    private var inlineActionBarModels: ResolvedXLiteInlineActionBarModels? = null
+    private var inlineDownloadModels: ResolvedXLiteInlineDownloadModels? = null
+
+    context(context: BytecodePatchContext)
+    fun postModelAnchors(): ResolvedXLitePostModelAnchors = synchronized(this) {
+        postModelAnchors ?: resolvePostModelAnchors().also { postModelAnchors = it }
+    }
+
+    context(context: BytecodePatchContext)
+    fun postModels(): ResolvedXLitePostModels = synchronized(this) {
+        postModels ?: resolvePostModels().also { postModels = it }
+    }
+
+    context(context: BytecodePatchContext)
+    fun postMediaModels(): ResolvedXLitePostMediaModels = synchronized(this) {
+        postMediaModels ?: resolvePostMediaModels(postModels()).also { postMediaModels = it }
+    }
+
+    context(context: BytecodePatchContext)
+    fun inlineActionModels(): ResolvedXLiteInlineActionModels = synchronized(this) {
+        inlineActionModels ?: resolveInlineActionModels().also { inlineActionModels = it }
+    }
+
+    context(context: BytecodePatchContext)
+    fun inlineActionBarModels(): ResolvedXLiteInlineActionBarModels = synchronized(this) {
+        inlineActionBarModels ?: resolveInlineActionBarModels(postModels()).also {
+            inlineActionBarModels = it
+        }
+    }
+
+    context(context: BytecodePatchContext)
+    fun inlineDownloadModels(): ResolvedXLiteInlineDownloadModels = synchronized(this) {
+        inlineDownloadModels ?: resolveInlineDownloadModels(inlineActionModels()).also {
+            inlineDownloadModels = it
+        }
+    }
 }
 
-private object PostMediaModelCache {
-    private val values = WeakHashMap<BytecodePatchContext, ResolvedXLitePostMediaModels>()
+private object PostModelResolutionCache {
+    private val values = WeakHashMap<BytecodePatchContext, PostModelResolutionState>()
 
     @Synchronized
-    fun getOrPut(
-        context: BytecodePatchContext,
-        resolve: () -> ResolvedXLitePostMediaModels,
-    ): ResolvedXLitePostMediaModels = values.getOrPut(context, resolve)
-}
-
-private object InlineActionModelCache {
-    private val values = WeakHashMap<BytecodePatchContext, ResolvedXLiteInlineActionModels>()
-
-    @Synchronized
-    fun getOrPut(
-        context: BytecodePatchContext,
-        resolve: () -> ResolvedXLiteInlineActionModels,
-    ): ResolvedXLiteInlineActionModels = values.getOrPut(context, resolve)
-}
-
-private object InlineActionBarModelCache {
-    private val values = WeakHashMap<BytecodePatchContext, ResolvedXLiteInlineActionBarModels>()
-
-    @Synchronized
-    fun getOrPut(
-        context: BytecodePatchContext,
-        resolve: () -> ResolvedXLiteInlineActionBarModels,
-    ): ResolvedXLiteInlineActionBarModels = values.getOrPut(context, resolve)
-}
-
-private object InlineDownloadModelCache {
-    private val values = WeakHashMap<BytecodePatchContext, ResolvedXLiteInlineDownloadModels>()
-
-    @Synchronized
-    fun getOrPut(
-        context: BytecodePatchContext,
-        resolve: () -> ResolvedXLiteInlineDownloadModels,
-    ): ResolvedXLiteInlineDownloadModels = values.getOrPut(context, resolve)
+    fun getOrPut(context: BytecodePatchContext): PostModelResolutionState =
+        values.getOrPut(context) { PostModelResolutionState() }
 }
 
 internal val xLitePostModelResolutionPatch =
@@ -176,43 +188,64 @@ internal val xLiteInlineDownloadModelResolutionPatch =
     }
 
 context(context: BytecodePatchContext)
+private fun postModelResolutionState(): PostModelResolutionState =
+    PostModelResolutionCache.getOrPut(context)
+
+context(context: BytecodePatchContext)
+private fun resolvedXLitePostModelAnchors(): ResolvedXLitePostModelAnchors =
+    postModelResolutionState().postModelAnchors()
+
+context(context: BytecodePatchContext)
 internal fun resolvedXLitePostModels(): ResolvedXLitePostModels =
-    PostModelCache.getOrPut(context) { resolvePostModels() }
+    postModelResolutionState().postModels()
 
 context(context: BytecodePatchContext)
 internal fun resolvedXLitePostMediaModels(): ResolvedXLitePostMediaModels =
-    PostMediaModelCache.getOrPut(context) { resolvePostMediaModels(resolvedXLitePostModels()) }
+    postModelResolutionState().postMediaModels()
 
 context(context: BytecodePatchContext)
 internal fun resolvedXLiteInlineActionModels(): ResolvedXLiteInlineActionModels =
-    InlineActionModelCache.getOrPut(context) { resolveInlineActionModels() }
+    postModelResolutionState().inlineActionModels()
 
 context(context: BytecodePatchContext)
 internal fun resolvedXLiteInlineActionBarModels(): ResolvedXLiteInlineActionBarModels =
-    InlineActionBarModelCache.getOrPut(context) {
-        resolveInlineActionBarModels(resolvedXLitePostModels())
-    }
+    postModelResolutionState().inlineActionBarModels()
 
 context(context: BytecodePatchContext)
 internal fun resolvedXLiteInlineDownloadModels(): ResolvedXLiteInlineDownloadModels =
-    InlineDownloadModelCache.getOrPut(context) {
-        resolveInlineDownloadModels(resolvedXLiteInlineActionModels())
-    }
+    postModelResolutionState().inlineDownloadModels()
+
+context(context: BytecodePatchContext)
+private fun resolvePostModelAnchors(): ResolvedXLitePostModelAnchors {
+    val contextualPostMatch = ContextualPostModelFingerprint.requireSingle("contextual post model")
+    val canonicalPostMatch = CanonicalPostModelFingerprint.requireSingle("canonical post model")
+    return ResolvedXLitePostModelAnchors(
+        contextualPostDescriptor = contextualPostMatch.originalClassDef.type,
+        contextualPostToStringMethod = contextualPostMatch.originalMethod,
+        canonicalPostDescriptor = canonicalPostMatch.originalClassDef.type,
+        canonicalPostToStringMethod = canonicalPostMatch.originalMethod,
+    )
+}
 
 context(context: BytecodePatchContext)
 private fun resolvePostModels(): ResolvedXLitePostModels {
-    val contextualPostMatch = ContextualPostModelFingerprint.requireSingle("contextual post model")
-    val canonicalPostMatch = CanonicalPostModelFingerprint.requireSingle("canonical post model")
-    val canonicalPostDescriptor = canonicalPostMatch.originalClassDef.type
-    val contextualPostClass = contextualPostMatch.originalClassDef
+    val anchors = resolvedXLitePostModelAnchors()
+    val contextualPostClass = context.classDefByOrNull(anchors.contextualPostDescriptor)
+        ?: throw PatchException(
+            "X-Lite contextual-post class was not found: ${anchors.contextualPostDescriptor}",
+        )
+    val canonicalPostDescriptor = anchors.canonicalPostDescriptor
     val contextualCanonicalPostField = contextualPostClass.fields.singleOrNull { field ->
         !AccessFlags.STATIC.isSet(field.accessFlags) && field.type == canonicalPostDescriptor
     } ?: throw PatchException(
         "Expected one X-Lite contextual canonical-post field in " +
             contextualPostClass,
     )
+    val contextualPostMethod = anchors.contextualPostToStringMethod.resolveCurrentMethod(
+        "contextual post toString",
+    )
     val contextualRepostedPostReference =
-        contextualPostMatch.fieldForToStringLabel(", rePostedPost=")
+        contextualPostMethod.fieldForToStringLabel(", rePostedPost=")
     val contextualRepostedPostField = contextualPostClass.fields.singleOrNull { field ->
         field.toString() == contextualRepostedPostReference.toString()
     } ?: throw PatchException(
@@ -234,7 +267,7 @@ private fun resolvePostModels(): ResolvedXLitePostModels {
     )
 
     return ResolvedXLitePostModels(
-        contextualPostDescriptor = contextualPostClass.type,
+        contextualPostDescriptor = anchors.contextualPostDescriptor,
         contextualCanonicalPostField = contextualCanonicalPostField,
         contextualRepostedPostField = contextualRepostedPostField,
         repostedCanonicalPostField = repostedCanonicalPostField,
@@ -244,14 +277,19 @@ private fun resolvePostModels(): ResolvedXLitePostModels {
 
 context(context: BytecodePatchContext)
 private fun resolvePostMediaModels(postModels: ResolvedXLitePostModels): ResolvedXLitePostMediaModels {
-    val contextualPostMatch = ContextualPostModelFingerprint.requireSingle("contextual post model")
-    val canonicalPostMatch = CanonicalPostModelFingerprint.requireSingle("canonical post model")
+    val anchors = resolvedXLitePostModelAnchors()
+    val contextualPostMethod = anchors.contextualPostToStringMethod.resolveCurrentMethod(
+        "contextual post toString",
+    )
+    val canonicalPostMethod = anchors.canonicalPostToStringMethod.resolveCurrentMethod(
+        "canonical post toString",
+    )
 
     return ResolvedXLitePostMediaModels(
         postModels = postModels,
         contextualMediaVisibilityResultsField =
-            contextualPostMatch.fieldForToStringLabel(", mediaVisibilityResults="),
-        canonicalPostMediaField = canonicalPostMatch.fieldForToStringLabel(", media="),
+            contextualPostMethod.fieldForToStringLabel(", mediaVisibilityResults="),
+        canonicalPostMediaField = canonicalPostMethod.fieldForToStringLabel(", media="),
     )
 }
 
@@ -282,8 +320,11 @@ context(context: BytecodePatchContext)
 private fun resolveInlineActionBarModels(
     postModels: ResolvedXLitePostModels,
 ): ResolvedXLiteInlineActionBarModels {
-    val canonicalPostMatch = CanonicalPostModelFingerprint.requireSingle("canonical post model")
-    val canonicalPostClass = canonicalPostMatch.originalClassDef
+    val anchors = resolvedXLitePostModelAnchors()
+    val canonicalPostClass = context.classDefByOrNull(postModels.canonicalPostDescriptor)
+        ?: throw PatchException(
+            "X-Lite canonical-post class was not found: ${postModels.canonicalPostDescriptor}",
+        )
     val canonicalPostInterfaceDescriptor = canonicalPostClass.interfaces.singleOrNull()?.toString()
         ?: throw PatchException(
             "Expected one X-Lite canonical-post interface in $canonicalPostClass: " +
@@ -311,8 +352,9 @@ private fun resolveInlineActionBarModels(
 
     return ResolvedXLiteInlineActionBarModels(
         canonicalPostInterfaceDescriptor = canonicalPostInterfaceDescriptor,
-        canonicalPostInlineActionEntryField =
-            canonicalPostMatch.fieldForToStringLabel(", inlineActionEntry="),
+        canonicalPostInlineActionEntryField = anchors.canonicalPostToStringMethod
+            .resolveCurrentMethod("canonical post toString")
+            .fieldForToStringLabel(", inlineActionEntry="),
         inlineActionBarDescriptor = inlineActionBarMatch.originalClassDef.type,
         inlineActionStateBuilder = inlineActionBarMatch.originalMethod,
     )

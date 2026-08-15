@@ -8,10 +8,12 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
@@ -34,17 +36,20 @@ internal fun Fingerprint.requireSingle(target: String): Match {
 }
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 
-internal fun Match.fieldForToStringLabel(label: String): FieldReference {
-    val instructions = originalMethod.implementation?.instructions?.toList().orEmpty()
+internal fun Match.fieldForToStringLabel(label: String): FieldReference =
+    originalMethod.fieldForToStringLabel(label)
+
+internal fun Method.fieldForToStringLabel(label: String): FieldReference {
+    val instructions = implementation?.instructions?.toList().orEmpty()
     val labelIndex = instructions.indexOfFirst { instruction ->
         instruction.getReference<StringReference>()?.string == label
     }
     if (labelIndex < 0) {
-        throw PatchException("X-Lite model label '$label' was not found in $originalMethod")
+        throw PatchException("X-Lite model label '$label' was not found in $this")
     }
 
     val labelInstruction = instructions[labelIndex] as? OneRegisterInstruction
-        ?: throw PatchException("X-Lite model label '$label' has an unsupported register layout in $originalMethod")
+        ?: throw PatchException("X-Lite model label '$label' has an unsupported register layout in $this")
     val labelRegister = labelInstruction.registerA
     val labelConsumerIndex = instructions.withIndex()
         .drop(labelIndex + 1)
@@ -66,7 +71,7 @@ internal fun Match.fieldForToStringLabel(label: String): FieldReference {
                     register = valueRegister,
                     fromIndex = labelConsumerIndex + 1,
                     untilIndex = valueAppend.index,
-                    definingClass = originalMethod.definingClass,
+                    definingClass = definingClass,
                 )
                 if (directField != null) return directField
             }
@@ -86,11 +91,11 @@ internal fun Match.fieldForToStringLabel(label: String): FieldReference {
                 register = valueArgumentRegister,
                 fromIndex = labelIndex + 1,
                 untilIndex = helperIndex,
-                definingClass = originalMethod.definingClass,
+                definingClass = definingClass,
             )?.let { add(it) }
         }
     }
-    return requireSingleToStringField(label, originalMethod.toString(), helperCandidates)
+    return requireSingleToStringField(label, toString(), helperCandidates)
 }
 
 internal fun requireSingleToStringField(
@@ -209,6 +214,36 @@ internal fun MutableClass.patchBridge(
     }
     matches.single().addInstructions(0, instructions.trimIndent())
 }
+
+context(context: BytecodePatchContext)
+internal fun MethodReference.resolveCurrentMethod(label: String): Method {
+    val owner = context.classDefByOrNull(definingClass)
+        ?: throw PatchException("X-Lite $label owner was not found: $definingClass")
+    val matches = owner.methods.filter { method -> matches(method) }
+    if (matches.size == 1) return matches.single()
+    throw PatchException(
+        "Expected one X-Lite $label matching $this in $owner, found " +
+            "${matches.size}: ${matches.joinToString()}",
+    )
+}
+
+context(context: BytecodePatchContext)
+internal fun MethodReference.resolveMutableMethodOwner(
+    label: String,
+): Pair<MutableClass, MutableMethod> {
+    val owner = context.mutableClassDefBy(definingClass)
+    val matches = owner.methods.filter { method -> matches(method) }
+    if (matches.size == 1) return owner to matches.single()
+    throw PatchException(
+        "Expected one X-Lite $label matching $this in $owner, found " +
+            "${matches.size}: ${matches.joinToString()}",
+    )
+}
+
+private fun MethodReference.matches(method: Method): Boolean =
+    method.name == name &&
+        method.returnType == returnType &&
+        method.parameterTypes.map(CharSequence::toString) == parameterTypes.map(CharSequence::toString)
 
 internal fun MethodReference.smaliReference(): String =
     "$definingClass->$name(${parameterTypes.joinToString("")})$returnType"

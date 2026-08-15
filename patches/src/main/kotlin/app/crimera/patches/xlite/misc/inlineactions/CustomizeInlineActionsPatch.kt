@@ -1,7 +1,7 @@
 package app.crimera.patches.xlite.misc.inlineactions
 
-import app.crimera.patches.utils.scopedMatchAll
 import app.crimera.patches.xlite.models.makeFieldsPublic
+import app.crimera.patches.xlite.models.resolveMutableMethodOwner
 import app.crimera.patches.xlite.models.resolvedXLiteInlineActionBarModels
 import app.crimera.patches.xlite.models.resolvedXLiteInlineActionModels
 import app.crimera.patches.xlite.models.xLiteInlineActionBarModelResolutionPatch
@@ -17,11 +17,9 @@ import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.INLINE_ACTION_FILTER_DESCRIPTOR
-import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -71,38 +69,13 @@ val customizeXLiteInlineActionsPatch =
             prepareInlineActionFields(entryModels)
             patchActionNameBridge(entryModels)
 
-            val matches =
-                Fingerprint(
-                    definingClass = barModels.inlineActionBarDescriptor,
-                    parameters = listOf("Landroidx/compose/runtime/Composer;"),
-                    filters =
-                        listOf(
-                            methodCall(
-                                definingClass = barModels.canonicalPostInterfaceDescriptor,
-                                parameters = emptyList(),
-                                returnType = "L",
-                            ),
-                            methodCall(smali = "Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z"),
-                        ),
-                ).scopedMatchAll()
-            if (matches.size != 1) {
-                throw PatchException(
-                    "Expected one X-Lite inline action state builder, found ${matches.size}: " +
-                        matches.joinToString { it.originalMethod.toString() },
+            val (inlineActionBarClass, originalMethod) =
+                barModels.inlineActionStateBuilder.resolveMutableMethodOwner(
+                    "inline action state builder",
                 )
-            }
-            if (matches.single().originalMethod.toString() != barModels.inlineActionStateBuilder.toString()) {
-                throw PatchException(
-                    "X-Lite inline action state builder changed after resolution: " +
-                        "resolved=${barModels.inlineActionStateBuilder}, current=${matches.single().originalMethod}",
-                )
-            }
-
-            val match = matches.single()
-            val originalMethod = match.method
             val method = originalMethod.cloneMutable(additionalRegisters = 2)
-            match.classDef.methods.remove(originalMethod)
-            match.classDef.methods.add(method)
+            inlineActionBarClass.methods.remove(originalMethod)
+            inlineActionBarClass.methods.add(method)
             if (AccessFlags.STATIC.isSet(method.accessFlags)) {
                 throw PatchException("X-Lite inline action state builder is unexpectedly static: $method")
             }
