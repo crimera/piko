@@ -2,7 +2,7 @@
 
 ## Status
 
-**Ported and runtime-tested on 12.17.3-alpha.01: working.**
+**Text-link and legacy-card paths ported and runtime-tested on 12.17.3-alpha.01.**
 
 Source: `patches/src/main/kotlin/app/crimera/patches/xlite/misc/canonicalurls/CanonicalUrlsPatch.kt`
 
@@ -26,13 +26,23 @@ The alpha no longer exposes the old model descriptors/getters used by the previo
 
 The patch then builds release-specific fingerprints using the resolved fields and stable `android.net.Uri` calls. Cardinality is asserted for the text-entity navigation method, URL picker, and post-link click handler.
 
+The original port did not cover legacy cards. Card clicks emit a separate `com.x.cards.api.m` URL action from a shared navigation lambda; the card's `card_url` is the shortened value, while the matching canonical value remains in the post URL entities.
+
 Final-Dex comparison against the unpatched alpha confirmed:
 
 - `Lcom/x/navigation/ma;->f(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;` returns its expanded second argument when non-null, otherwise retains the original fallback path.
 - The text-entity navigation fallback URL read in `Lcom/x/navigation/ma;` changed from the short URL field to the expanded URL field.
 - The post-link click URL read in `Lcom/x/urt/items/post/x4;` changed from the short URL field to the expanded URL field.
+- The legacy-card callback now resolves the card URL through `CanonicalUrlResolver.resolve(Object, String)` before X-Lite navigation.
 
 The field resolution follows the URL entity constructor's semantic `displayUrl`, `expandedUrl`, and `url` parameter labels to their owner-defined `iput-object` writes. This avoids hardcoded obfuscated field names and does not depend on the alpha compiler's helper-based `toString()` implementation.
+
+## Card-path follow-up
+
+- Reported repro: `https://x.com/i/status/2088451715343548553` (card URL `https://t.co/8Llkkhl9JJ`).
+- The resolver matches that card URL against `UrlEntity.url` in the contextual post and returns `UrlEntity.expandedUrl`.
+- `extensions/xlite` unit tests cover matching, non-matching, and null inputs.
+- Final-Dex inspection confirms the resolver call is immediately after `com/x/cards/api/m;->c()` and before URL navigation.
 
 ## Validation
 
@@ -40,4 +50,5 @@ The field resolution follows the URL entity constructor's semantic `displayUrl`,
 - Exclusive patch application: passed.
 - Final APK decoded successfully with apktool.
 - Original-vs-final smali comparison confirmed the three expected behavioral mutations and no model mutation.
-- User applied the ported patch on `12.17.3-alpha.01` and confirmed canonical URLs open correctly.
+- User applied the original text-link port on `12.17.3-alpha.01` and confirmed canonical URLs open correctly.
+- The card follow-up was patch-applied to `/tmp/twitter-12.17.3-alpha.01-canonical-card-perf-final.apk`, installed on the exact alpha device, and runtime-tested successfully; Pixiv received `https://www.pixiv.net/artworks/62233260`.

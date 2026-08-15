@@ -1,11 +1,13 @@
 package app.crimera.patches.xlite.misc.canonicalurls
 
+import app.crimera.patches.xlite.misc.extension.xLiteExtensionPatch
 import app.crimera.patches.xlite.models.resolvedXLitePostModels
 import app.crimera.patches.xlite.models.xLitePostModelResolutionPatch
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
@@ -28,9 +30,14 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val URI = "Landroid/net/Uri;"
+private const val CANONICAL_URL_RESOLVER =
+    "Lapp/morphe/extension/xlite/misc/CanonicalUrlResolver;"
+private const val CANONICAL_URL_RESOLVE_METHOD =
+    "$CANONICAL_URL_RESOLVER->resolve(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;"
 private const val POST_URL_FIELD_FILTER_INDEX = 3
 private const val TEXT_ENTITY_URL_FIELD_FILTER_INDEX = 5
 
@@ -48,6 +55,14 @@ private object MentionEntityModelFingerprint : Fingerprint(
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
     filters = listOf(string("MentionEntity(userId="), string(", startIdx=")),
+)
+
+private object CardUrlActionModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/cards/api/",
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    filters = listOf(string("Url(url=")),
 )
 
 private data class UrlEntityFields(
@@ -78,9 +93,10 @@ val xLiteCanonicalUrlsPatch =
             "Opens the expanded (canonical) URL directly when clicking links instead of the shortened t.co link.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
-        dependsOn(xLitePostModelResolutionPatch)
+        dependsOn(xLitePostModelResolutionPatch, xLiteExtensionPatch)
 
         execute {
+            val postModels = resolvedXLitePostModels()
             val matches = resolveCanonicalUrlMatches()
             replaceUrlEntityFieldRead(
                 matches.postLinkClick,
@@ -93,6 +109,11 @@ val xLiteCanonicalUrlsPatch =
                 matches.expandedUrlField,
             )
             preferExpandedUrlInUrlPicker(matches.urlPicker)
+
+            val cardUrlActionType =
+                CardUrlActionModelFingerprint.requireSingleMatch("card URL action model")
+                    .originalClassDef.type
+            patchCardNavigation(cardUrlActionType, postModels.contextualPostDescriptor)
         }
     }
 
@@ -307,6 +328,89 @@ private fun preferExpandedUrlInUrlPicker(match: Match) {
         """.trimIndent(),
         ExternalLabel("piko_canonical_url_fallback", firstInstruction),
     )
+}
+
+context(context: BytecodePatchContext)
+private fun patchCardNavigation(cardUrlActionType: String, contextualPostType: String) {
+    val match =
+        Fingerprint(
+            // The alpha repackages this callback into the preserved Compose namespace.
+            definingClass = "Landroidx/compose/animation/core/",
+            parameters = listOf("Ljava/lang/Object;"),
+            returnType = "Ljava/lang/Object;",
+            filters =
+                listOf(
+                    methodCall(
+                        opcode = Opcode.INVOKE_VIRTUAL,
+                        definingClass = cardUrlActionType,
+                        parameters = emptyList(),
+                        returnType = STRING_DESCRIPTOR,
+                    ),
+                    methodCall(
+                        opcode = Opcode.INVOKE_STATIC,
+                        definingClass = "Lcom/x/navigation/",
+                        parameters = listOf(STRING_DESCRIPTOR, "L"),
+                        returnType = STRING_DESCRIPTOR,
+                    ),
+                    methodCall(
+                        opcode = Opcode.INVOKE_INTERFACE,
+                        name = "getId",
+                        parameters = emptyList(),
+                        returnType = "L",
+                    ),
+                    fieldAccess(opcode = Opcode.IGET_WIDE, type = "J"),
+                    methodCall(
+                        definingClass = "Lcom/x/urt/items/post/",
+                        parameters = listOf(STRING_DESCRIPTOR, "J", "L", STRING_DESCRIPTOR),
+                        returnType = "L",
+                    ),
+                ),
+        ).requireSingleMatch("card navigation callback")
+
+    val urlGetterIndex = match.instructionMatches.first().index
+    val urlResultIndex = urlGetterIndex + 1
+    val urlResult = match.method.instructions.getOrNull(urlResultIndex)
+        as? OneRegisterInstruction
+        ?: throw PatchException("Card URL getter has no move-result-object")
+    if (match.method.instructions[urlResultIndex].opcode != Opcode.MOVE_RESULT_OBJECT) {
+        throw PatchException("Card URL getter is not followed by move-result-object")
+    }
+
+    val postRegister = resolveContextualPostRegister(match.method, urlGetterIndex, contextualPostType)
+    val urlRegister = urlResult.registerA
+    if (postRegister !in 0..15 || urlRegister !in 0..15) {
+        throw PatchException(
+            "Card canonical URL resolver requires four-bit registers: " +
+                "post=v$postRegister, url=v$urlRegister",
+        )
+    }
+
+    match.method.addInstructions(
+        urlResultIndex + 1,
+        """
+        invoke-static {v$postRegister, v$urlRegister}, $CANONICAL_URL_RESOLVE_METHOD
+        move-result-object v$urlRegister
+        """.trimIndent(),
+    )
+}
+
+private fun resolveContextualPostRegister(
+    method: Method,
+    beforeIndex: Int,
+    contextualPostType: String,
+): Int {
+    val registers = method.instructions
+        .take(beforeIndex)
+        .mapNotNull { instruction ->
+            if (instruction.opcode != Opcode.CHECK_CAST) return@mapNotNull null
+            if (instruction.getReference<TypeReference>()?.type != contextualPostType) {
+                return@mapNotNull null
+            }
+            (instruction as? OneRegisterInstruction)?.registerA
+        }
+        .distinct()
+    return registers.lastOrNull()
+        ?: throw PatchException("Could not resolve the contextual post register in card navigation callback")
 }
 
 context(_: BytecodePatchContext)
