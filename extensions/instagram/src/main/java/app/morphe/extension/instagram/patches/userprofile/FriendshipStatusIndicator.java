@@ -100,18 +100,19 @@ public class FriendshipStatusIndicator {
             friendshipStatusTextView.setText(text);
 
             int secondaryTextColor = UI.getThemedColour("igds_color_secondary_text");
-            friendshipStatusTextView.setTextColor(secondaryTextColor);
 
             int indicatorColor = indicatorColorHex == null
                     ? secondaryTextColor
                     : Color.parseColor(indicatorColorHex);
+
+            friendshipStatusTextView.setTextColor(indicatorColor);
+
             Drawable statusIcon = ResourceUtils
                     .getDrawable(indicatorIconDrawable)
                     .mutate();
             statusIcon.setColorFilter(
                     new PorterDuffColorFilter(indicatorColor, PorterDuff.Mode.SRC_ATOP)
             );
-            // Keep the text baseline native while optically centering the bottom-heavy friend icon.
             statusIcon.setBounds(
                     0,
                     -Dim.dp2,
@@ -129,14 +130,20 @@ public class FriendshipStatusIndicator {
             GradientDrawable background = new GradientDrawable();
             int backgroundColor = UI.getThemedColour("igds_color_primary_text");
             background.setColor(Color.argb(
-                    13,
+                    18,
+                    Color.red(backgroundColor),
+                    Color.green(backgroundColor),
+                    Color.blue(backgroundColor)
+            ));
+            background.setStroke(Dim.dp2, Color.argb(
+                    33,
                     Color.red(backgroundColor),
                     Color.green(backgroundColor),
                     Color.blue(backgroundColor)
             ));
             background.setCornerRadius(Dim.dp20);
             friendshipStatusTextView.setBackground(background);
-            friendshipStatusTextView.setPadding(Dim.dp8, Dim.dp4, Dim.dp8, 0);
+            friendshipStatusTextView.setPadding(Dim.dp8, Dim.dp6, Dim.dp8, Dim.dp6);
             friendshipStatusTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
             friendshipStatusTextView.setTypeface(Typeface.create(
                     "sans-serif-medium",
@@ -156,6 +163,7 @@ public class FriendshipStatusIndicator {
                     ViewGroup.LayoutParams.WRAP_CONTENT
             );
             layoutParams.topMargin = Dim.dp4;
+            layoutParams.bottomMargin = Dim.dp8;
             viewGroup.addView(friendshipStatusTextView, targetIndex + 1, layoutParams);
         }
     }
@@ -209,4 +217,3 @@ public class FriendshipStatusIndicator {
         }
     }
 }
-
