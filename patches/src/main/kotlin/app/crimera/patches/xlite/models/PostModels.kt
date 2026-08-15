@@ -54,6 +54,8 @@ private object InlineActionEntryModelFingerprint : Fingerprint(
 internal data class ResolvedXLitePostModels(
     val contextualPostDescriptor: String,
     val contextualCanonicalPostField: FieldReference,
+    val contextualRepostedPostField: FieldReference,
+    val repostedCanonicalPostField: FieldReference,
     val canonicalPostDescriptor: String,
 )
 
@@ -202,17 +204,40 @@ private fun resolvePostModels(): ResolvedXLitePostModels {
     val contextualPostMatch = ContextualPostModelFingerprint.requireSingle("contextual post model")
     val canonicalPostMatch = CanonicalPostModelFingerprint.requireSingle("canonical post model")
     val canonicalPostDescriptor = canonicalPostMatch.originalClassDef.type
-    val contextualCanonicalPostField =
-        contextualPostMatch.originalClassDef.fields.singleOrNull { field ->
-            !AccessFlags.STATIC.isSet(field.accessFlags) && field.type == canonicalPostDescriptor
-        } ?: throw PatchException(
-            "Expected one X-Lite contextual canonical-post field in " +
-                contextualPostMatch.originalClassDef,
+    val contextualPostClass = contextualPostMatch.originalClassDef
+    val contextualCanonicalPostField = contextualPostClass.fields.singleOrNull { field ->
+        !AccessFlags.STATIC.isSet(field.accessFlags) && field.type == canonicalPostDescriptor
+    } ?: throw PatchException(
+        "Expected one X-Lite contextual canonical-post field in " +
+            contextualPostClass,
+    )
+    val contextualRepostedPostReference =
+        contextualPostMatch.fieldForToStringLabel(", rePostedPost=")
+    val contextualRepostedPostField = contextualPostClass.fields.singleOrNull { field ->
+        field.toString() == contextualRepostedPostReference.toString()
+    } ?: throw PatchException(
+        "X-Lite contextual reposted-post field was not found in $contextualPostClass",
+    )
+    if (AccessFlags.STATIC.isSet(contextualRepostedPostField.accessFlags)) {
+        throw PatchException(
+            "X-Lite contextual reposted-post field is static: $contextualRepostedPostField",
         )
+    }
+    val repostedPostClass = context.classDefByOrNull(contextualRepostedPostField.type)
+        ?: throw PatchException(
+            "X-Lite reposted-post class was not found: ${contextualRepostedPostField.type}",
+        )
+    val repostedCanonicalPostField = repostedPostClass.fields.singleOrNull { field ->
+        !AccessFlags.STATIC.isSet(field.accessFlags) && field.type == canonicalPostDescriptor
+    } ?: throw PatchException(
+        "Expected one X-Lite reposted canonical-post field in $repostedPostClass",
+    )
 
     return ResolvedXLitePostModels(
-        contextualPostDescriptor = contextualPostMatch.originalClassDef.type,
+        contextualPostDescriptor = contextualPostClass.type,
         contextualCanonicalPostField = contextualCanonicalPostField,
+        contextualRepostedPostField = contextualRepostedPostField,
+        repostedCanonicalPostField = repostedCanonicalPostField,
         canonicalPostDescriptor = canonicalPostDescriptor,
     )
 }

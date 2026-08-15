@@ -99,6 +99,29 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void structuredRepostUsesOriginalMediaWhenWrapperHasNone() {
+        List<?> repostedMedia = Collections.singletonList(new DownloadableMedia());
+
+        assertSame(
+                repostedMedia,
+                InlineDownloadButton.selectMedia(Collections.emptyList(), repostedMedia)
+        );
+    }
+
+    @Test
+    public void structuredRepostUsesOriginalMediaWhenWrapperMediaIsNotDownloadable() {
+        List<?> repostedMedia = Collections.singletonList(new DownloadableMedia());
+
+        assertSame(
+                repostedMedia,
+                InlineDownloadButton.selectMedia(
+                        Collections.singletonList(new UnsupportedMedia()),
+                        repostedMedia
+                )
+        );
+    }
+
+    @Test
     public void hasMediaDoesNotUseReflectiveGetMediaFallback() {
         assertFalse(InlineDownloadButton.hasMedia(null));
         assertFalse(InlineDownloadButton.hasMedia(new MediaPost(null)));
@@ -178,6 +201,22 @@ public final class InlineDownloadButtonTest {
             InlineDownloadButton.markIconSize(new Object(), 18f);
             assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, downloadIcon));
             assertFalse(InlineDownloadButton.renderMarkerPending());
+        }
+    }
+
+    private static final class DownloadableMedia {
+        @Override
+        public String toString() {
+            return "MediaContentVideo(variants=[MediaVariant(" +
+                    "url=https://video.twimg.com/media.mp4, bitRate=100, " +
+                    "contentType=video/mp4)])";
+        }
+    }
+
+    private static final class UnsupportedMedia {
+        @Override
+        public String toString() {
+            return "MediaContentImage(imageUrl=null)";
         }
     }
 

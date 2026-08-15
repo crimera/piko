@@ -53,3 +53,11 @@ The alpha obfuscates `InlineActionEntry` and `PostActionType`, removes their old
   - tapping the synthetic action downloads media successfully;
   - no repeated media-check toast or runtime crash remains.
 - Older X-Lite versions are no longer declared targets.
+
+## Repost follow-up
+
+- Structured reposts can keep the downloadable media in `ContextualPost.rePostedPost.canonicalPost` while the wrapper canonical post has no usable media. The previous media bridge inspected only the wrapper and therefore omitted the inline action.
+- The patch now resolves `ContextualPost` → `RePostedPost` → canonical post at patch time and selects the first media list containing downloadable image/video items.
+- Exact alpha smali confirms `p1.d:Lcom/x/models/h8;`, `h8.a:Lcom/x/models/s0;`, and `s0.d:Lkotlinx/collections/immutable/b;`.
+- Unit coverage exercises empty and unusable wrapper media with downloadable repost media. Exclusive patch output: `/tmp/twitter-12.17.3-alpha.01-inline-download-repost.apk`.
+- Device verification for the two reported posts remains pending because no ADB device is connected.

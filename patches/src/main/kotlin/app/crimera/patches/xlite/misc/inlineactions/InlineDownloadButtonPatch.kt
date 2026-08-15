@@ -55,6 +55,8 @@ private const val EXTENSION = "Lapp/morphe/extension/xlite/misc/InlineDownloadBu
 private const val PRESENTER_POST_HELPER = "getPresenterPost"
 private const val CANONICAL_POST_HELPER = "getCanonicalPost"
 private const val POST_MEDIA_HELPER = "getPostMedia"
+private const val REPOSTED_POST_HELPER = "getRepostedPost"
+private const val REPOSTED_CANONICAL_POST_HELPER = "getRepostedCanonicalPost"
 private const val CREATE_ACTION_HELPER = "createDownloadAction"
 
 private fun requireSingle(
@@ -311,8 +313,13 @@ private fun patchPostModelBridges(
     downloadModels: ResolvedXLiteInlineDownloadModels,
 ) {
     context.mutableClassDefBy(postModels.contextualPostDescriptor).makeFieldsPublic(
-        listOf(postModels.contextualCanonicalPostField),
+        listOf(
+            postModels.contextualCanonicalPostField,
+            postModels.contextualRepostedPostField,
+        ),
     )
+    context.mutableClassDefBy(postModels.contextualRepostedPostField.type)
+        .makeFieldsPublic(listOf(postModels.repostedCanonicalPostField))
     context.mutableClassDefBy(postModels.canonicalPostDescriptor).makeFieldsPublic(
         listOf(mediaModels.canonicalPostMediaField),
     )
@@ -353,6 +360,25 @@ private fun patchPostModelBridges(
         """
             check-cast p0, ${postModels.canonicalPostDescriptor}
             iget-object p0, p0, ${mediaModels.canonicalPostMediaField}
+            return-object p0
+        """.trimIndent(),
+    )
+    extensionClass.requireHelper(REPOSTED_POST_HELPER, listOf("Ljava/lang/Object;")).addInstructions(
+        0,
+        """
+            check-cast p0, ${postModels.contextualPostDescriptor}
+            iget-object p0, p0, ${postModels.contextualRepostedPostField}
+            return-object p0
+        """.trimIndent(),
+    )
+    extensionClass.requireHelper(
+        REPOSTED_CANONICAL_POST_HELPER,
+        listOf("Ljava/lang/Object;"),
+    ).addInstructions(
+        0,
+        """
+            check-cast p0, ${postModels.contextualRepostedPostField.type}
+            iget-object p0, p0, ${postModels.repostedCanonicalPostField}
             return-object p0
         """.trimIndent(),
     )

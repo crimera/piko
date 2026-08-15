@@ -239,6 +239,14 @@ public final class InlineDownloadButton {
         return null;
     }
 
+    private static Object getRepostedPost(Object post) {
+        return null;
+    }
+
+    private static Object getRepostedCanonicalPost(Object repostedPost) {
+        return null;
+    }
+
     private static Object getPresenterPost(Object presenter) {
         return null;
     }
@@ -248,10 +256,30 @@ public final class InlineDownloadButton {
     }
 
     private static List<?> mediaFor(Object post) {
-        Object canonicalPost = canonicalPost(post);
+        if (post == null) return java.util.Collections.emptyList();
+
+        List<?> canonicalMedia = mediaForCanonical(canonicalPost(post));
+        Object repostedPost = getRepostedPost(post);
+        List<?> repostedMedia = repostedPost == null
+                ? java.util.Collections.emptyList()
+                : mediaForCanonical(getRepostedCanonicalPost(repostedPost));
+        return selectMedia(canonicalMedia, repostedMedia);
+    }
+
+    private static List<?> mediaForCanonical(Object canonicalPost) {
         if (canonicalPost == null) return java.util.Collections.emptyList();
         Object media = getPostMedia(canonicalPost);
         return media instanceof List<?> list ? list : java.util.Collections.emptyList();
+    }
+
+    static List<?> selectMedia(List<?> canonicalMedia, List<?> repostedMedia) {
+        if (hasDownloadableMedia(canonicalMedia)) return canonicalMedia;
+        if (hasDownloadableMedia(repostedMedia)) return repostedMedia;
+        return java.util.Collections.emptyList();
+    }
+
+    private static boolean hasDownloadableMedia(List<?> media) {
+        return !downloadItems(media).isEmpty();
     }
 
     private static String sourcePostId(Object post) {
