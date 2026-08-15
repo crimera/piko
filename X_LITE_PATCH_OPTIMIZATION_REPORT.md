@@ -19,7 +19,7 @@ Two optimization passes eliminated full-multidex method scans, legacy partial-st
 | **DEX decode** | Not separated | Not separated | **731.26 ms** | Reported separately |
 | **All 24 X-Lite patches** | 23 PASS / 1 FAIL | 24 PASS | **24 PASS** | **100% pass rate** |
 
-The final sequential figure excludes resource/DEX decode, matching the original patch-execution benchmark. End-to-end decode plus patch execution is approximately **3.52 seconds** in the profiler harness. Profiling itself adds logging overhead; use an unprofiled run for headline comparisons.
+The final sequential figure excludes resource/DEX decode, matching the original patch-execution benchmark. The recorded end-to-end decode plus patch execution was approximately **3.52 seconds**. Profiling adds console overhead; use an unprofiled run for headline comparisons.
 
 ### Second-Pass Gains Over the Previous Handoff
 
@@ -125,7 +125,7 @@ Inspection of Morphe's [`Fingerprint.kt`](https://github.com/MorpheApp/morphe-pa
 
 Final fixes:
 
-- Added shared [`ScopedFingerprintMatching.kt`](file:///Volumes/realme/Dev/piko/patches/src/main/kotlin/app/crimera/patches/utils/ScopedFingerprintMatching.kt) plus X-Lite-specific [`PatchProfiler.kt`](file:///Volumes/realme/Dev/piko/patches/src/main/kotlin/app/crimera/patches/xlite/utils/PatchProfiler.kt).
+- Added shared [`ScopedFingerprintMatching.kt`](file:///Volumes/realme/Dev/piko/patches/src/main/kotlin/app/crimera/patches/utils/ScopedFingerprintMatching.kt).
 - `scopedMatchAll()` prefilters class descriptors once, then runs the fingerprint only inside matching classes while preserving complete match cardinality.
 - Cached all class **descriptors** once per context, then cached scoped descriptor subsets. Class objects are never cached, so lookups always retrieve the current mutable class.
 - Added a lazily built method-shape index for the rare synthetic/repackaged owners that cannot be package-scoped safely.
@@ -148,43 +148,7 @@ This preserves all-match cardinality without relying on first-match behavior or 
 
 ---
 
-## 5. Detailed Profiling
-
-[`PatchProfiler.kt`](file:///Volumes/realme/Dev/piko/patches/src/main/kotlin/app/crimera/patches/xlite/utils/PatchProfiler.kt) is retained as an opt-in development utility, but production patch call sites no longer contain profiling wrappers or diagnostic labels. Temporarily wrap a search or function when deeper instrumentation is needed, then remove that call-site instrumentation before committing.
-
-When temporary wrappers are present, enable them with either:
-
-```bash
--Dpiko.xlite.profile=true
-# or
-PIKO_XLITE_PROFILE=true
-```
-
-Build and run a detailed sequential profile:
-
-```bash
-bash .gradle-gh.sh ./gradlew :patches:build --no-daemon
-rm -rf /tmp/profile-bin
-javac -cp "morphe-desktop-1.11.0-all.jar" \
-  -d /tmp/profile-bin analysis/ProfilePatches.java
-java -cp "/tmp/profile-bin:morphe-desktop-1.11.0-all.jar:patches/build/libs/patches-3.9.0-dev.4.mpp" \
-  analysis.ProfilePatches --bundle-only --profile | tee /tmp/xlite-profile.log
-```
-
-Profiler modes:
-
-| Option | Purpose |
-|---|---|
-| *(none)* | Fresh bundle benchmark, then isolated own-execution benchmarks; updates `baseline_patch_times.txt` |
-| `--bundle-only` | Fast sequential benchmark only |
-| `--profile` | Enable temporary `[X-Lite profile]` wrappers when call-site instrumentation is present |
-| `--diagnostic-rematch` | Rerun fingerprints after mutation for diagnostics only; never use these times as actual search/apply time |
-
-The harness now reports resource decode and DEX decode separately, prints every dependency's own execution path, distinguishes patch-own time from bundle-incremental time, and runs the bundle before isolated diagnostics to avoid warmed-cache headline results.
-
----
-
-## 6. Remaining Floor / Future Opportunities
+## 5. Remaining Floor / Future Opportunities
 
 The remaining **~1.29 s** patch execution is dominated by:
 
