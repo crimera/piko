@@ -214,6 +214,30 @@ val xLiteInlineDownloadButtonPatch =
                     "invoke-static {}, $EXTENSION->finishRender()V",
                 )
                 addInstruction(renderExit + 1, "return-void")
+
+                // The normal cleanup is outside this range so an exception from cleanup does
+                // not re-enter the handler. The catch-all rethrows after clearing the marker.
+                val implementation =
+                    inlineRenderer.method.implementation
+                        ?: throw PatchException("X-Lite inline-action entry renderer has no implementation")
+                if (implementation.tryBlocks.isNotEmpty()) {
+                    throw PatchException(
+                        "X-Lite inline-action entry renderer already has exception handlers: $this",
+                    )
+                }
+                val cleanupTryStart = implementation.newLabelForIndex(0)
+                val cleanupTryEnd = implementation.newLabelForIndex(renderExit)
+                val cleanupHandlerIndex = implementation.instructions.size
+                addInstructions(
+                    cleanupHandlerIndex,
+                    """
+                        move-exception v0
+                        invoke-static {}, $EXTENSION->finishRender()V
+                        throw v0
+                    """.trimIndent(),
+                )
+                val cleanupHandler = implementation.newLabelForIndex(cleanupHandlerIndex)
+                implementation.addCatch(cleanupTryStart, cleanupTryEnd, cleanupHandler)
             }
 
             val shareIconField = resolveIconField("ic_vector_share")

@@ -30,6 +30,7 @@ The alpha obfuscates `InlineActionEntry` and `PostActionType`, removes their old
 - Preserve identity-based interception of the synthetic carrier action before native event handling.
 - Resolve the relocated TwitterShare Compose icon lambda through the share resource field and captured icon-size field.
 - Mark the currently rendered synthetic action with an extension-owned `ThreadLocal<Boolean>` and substitute `ic_vector_incoming_stroke` without changing layout size.
+- Protect the entry renderer with a catch-all that calls `finishRender()` before rethrowing; keep the normal exit cleanup outside the protected range.
 
 ## Verification
 
@@ -52,6 +53,7 @@ The alpha obfuscates `InlineActionEntry` and `PostActionType`, removes their old
   - native inline actions remain usable;
   - tapping the synthetic action downloads media successfully;
   - no repeated media-check toast or runtime crash remains.
+- E4 follow-up output `/tmp/twitter-12.17.3-alpha.01-inline-download-e4.apk` was installed on the exact target device: the entry renderer catch-all is present in final smali, normal rendering launched without verifier/runtime-boundary errors, and repeated scroll/recomposition remained clean. The exception-path unit test covers cleanup before native icon selection.
 - Older X-Lite versions are no longer declared targets.
 
 ## Repost follow-up

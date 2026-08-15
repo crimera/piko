@@ -182,6 +182,25 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void exceptionPathClearsRenderMarker() {
+        Object downloadAction = new Object();
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+
+        try {
+            InlineDownloadButton.markIconSize(downloadAction, 18f);
+            assertTrue(InlineDownloadButton.renderMarkerPending());
+            throw new AssertionError("simulated Compose render failure");
+        } catch (Throwable exception) {
+            InlineDownloadButton.finishRender();
+        }
+
+        assertFalse(InlineDownloadButton.renderMarkerPending());
+        Object nativeIcon = new Object();
+        Object downloadIcon = new Object();
+        assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, downloadIcon));
+    }
+
+    @Test
     public void repeatedRecompositionLeavesNoRenderMarker() {
         Object downloadAction = new Object();
         InlineDownloadButton.registerDownloadAction(downloadAction);
