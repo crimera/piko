@@ -323,6 +323,18 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.customSharingDomain) {
+            String customSharingDomain = Pref.customSharingDomain();
+            addPreference(
+                    helper.editTextPreference(
+                            str("piko_custom_sharing_domain"),
+                            customSharingDomain.isEmpty()
+                                    ? str("piko_custom_sharing_domain_desc")
+                                    : customSharingDomain,
+                            Settings.CUSTOM_SHARING_DOMAIN
+                    )
+            );
+        }
     }
 
     public void distractionFreeSection() {
