@@ -1,6 +1,6 @@
 package app.crimera.patches.xlite.misc.inlineactions
 
-import app.crimera.patches.xlite.models.makeFieldsPublic
+import app.crimera.patches.xlite.models.requirePublicFields
 import app.crimera.patches.xlite.models.resolveMutableMethodOwner
 import app.crimera.patches.xlite.models.resolvedXLiteInlineActionBarModels
 import app.crimera.patches.xlite.models.resolvedXLiteInlineActionModels
@@ -133,7 +133,7 @@ private fun prepareInlineActionFields(
     models: app.crimera.patches.xlite.models.ResolvedXLiteInlineActionModels,
 ) {
     context.mutableClassDefBy(models.inlineActionEntryDescriptor)
-        .makeFieldsPublic(listOf(models.inlineActionTypeField))
+        .requirePublicFields(listOf(models.inlineActionTypeField))
 }
 
 context(context: BytecodePatchContext)

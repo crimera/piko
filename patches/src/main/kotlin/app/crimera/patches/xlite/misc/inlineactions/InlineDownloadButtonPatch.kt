@@ -6,7 +6,7 @@ import app.crimera.patches.xlite.models.ResolvedXLiteInlineActionModels
 import app.crimera.patches.xlite.models.ResolvedXLiteInlineDownloadModels
 import app.crimera.patches.xlite.models.ResolvedXLitePostMediaModels
 import app.crimera.patches.xlite.models.ResolvedXLitePostModels
-import app.crimera.patches.xlite.models.makeFieldsPublic
+import app.crimera.patches.xlite.models.requirePublicFields
 import app.crimera.patches.xlite.models.resolvedXLiteInlineActionBarModels
 import app.crimera.patches.xlite.models.resolvedXLiteInlineActionModels
 import app.crimera.patches.xlite.models.resolvedXLiteInlineDownloadModels
@@ -336,15 +336,15 @@ private fun patchPostModelBridges(
     mediaModels: ResolvedXLitePostMediaModels,
     downloadModels: ResolvedXLiteInlineDownloadModels,
 ) {
-    context.mutableClassDefBy(postModels.contextualPostDescriptor).makeFieldsPublic(
+    context.mutableClassDefBy(postModels.contextualPostDescriptor).requirePublicFields(
         listOf(
             postModels.contextualCanonicalPostField,
             postModels.contextualRepostedPostField,
         ),
     )
     context.mutableClassDefBy(postModels.contextualRepostedPostField.type)
-        .makeFieldsPublic(listOf(postModels.repostedCanonicalPostField))
-    context.mutableClassDefBy(postModels.canonicalPostDescriptor).makeFieldsPublic(
+        .requirePublicFields(listOf(postModels.repostedCanonicalPostField))
+    context.mutableClassDefBy(postModels.canonicalPostDescriptor).requirePublicFields(
         listOf(mediaModels.canonicalPostMediaField),
     )
 
@@ -360,7 +360,7 @@ private fun patchPostModelBridges(
         )
     }
     val presenterPostField = presenterPostFields.single()
-    presenterClass.makeFieldsPublic(listOf(presenterPostField))
+    presenterClass.requirePublicFields(listOf(presenterPostField))
 
     val extensionClass = context.mutableClassDefBy(EXTENSION)
     extensionClass.requireHelper(PRESENTER_POST_HELPER, listOf("Ljava/lang/Object;")).addInstructions(

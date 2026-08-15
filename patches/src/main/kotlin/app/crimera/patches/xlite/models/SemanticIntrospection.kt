@@ -151,13 +151,14 @@ internal fun com.android.tools.smali.dexlib2.iface.ClassDef.requireSingleInstanc
     )
 }
 
-internal fun MutableClass.makeFieldsPublic(fields: List<FieldReference>) {
+internal fun MutableClass.requirePublicFields(fields: List<FieldReference>) {
     fields.forEach { field ->
         val definition = this.fields.singleOrNull { candidate -> candidate.toString() == field.toString() }
             ?: throw PatchException("X-Lite model field definition was not found: $field in $this")
-        val nonPublicFlags = AccessFlags.PRIVATE.value or AccessFlags.PROTECTED.value
-        definition.accessFlags =
-            (definition.accessFlags and nonPublicFlags.inv()) or AccessFlags.PUBLIC.value
+        if (AccessFlags.PUBLIC.isSet(definition.accessFlags)) return@forEach
+        throw PatchException(
+            "X-Lite generated bridge requires a public model field: $field in $this",
+        )
     }
 }
 

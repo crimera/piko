@@ -41,7 +41,7 @@ The current source now keeps release-specific model discovery in two context-sco
 
 - `patches/src/main/kotlin/app/crimera/patches/xlite/models/TimelineModels.kt` resolves the timeline post, module, module-item, and vertical-conversation graph once per patch context.
 - `patches/src/main/kotlin/app/crimera/patches/xlite/models/PostModels.kt` resolves contextual/canonical post and inline-action facts once per patch context.
-- `SemanticIntrospection.kt` owns data-class label extraction, boolean-label extraction, field visibility, bridge injection, and cardinality errors.
+- `SemanticIntrospection.kt` owns data-class label extraction, boolean-label extraction, non-mutating field-visibility checks, bridge injection, and cardinality errors.
 - Feature patches retain direct indexed owner lookups and consume immutable descriptors/references; no mutable match objects are retained across mutations.
 - Timeline filtering now lazily allocates reconstruction lists, returns unchanged input collections, avoids arbitrary model `toString()` checks, and preserves direct generated bridges.
 - Inline action identity, presenter-post access, canonical-post access, and media access use patch-time direct bridges. `ToStringParser` remains a cold-path fallback for download identity/media extraction.
@@ -52,6 +52,7 @@ Validation against the exact `com.twitter.android` `12.17.3-alpha.01` APK:
 - `:patches:build`: passed.
 - Exclusive `Customize inline actions`, `Remove ads`, `Open canonical URLs`, and `Inline download button` patches: applied and signed successfully.
 - The 24-patch X-Lite production set in `patch-twitter.sh`: all 24 patches applied and signed successfully.
+- The Plan F visibility audit found all 24 unique bridge fields already `public final` in the exact alpha; no field access flags are widened. See [`X_LITE_MAKE_FIELDS_PUBLIC_AUDIT.md`](../../X_LITE_MAKE_FIELDS_PUBLIC_AUDIT.md).
 
 ## Alpha mappings observed
 

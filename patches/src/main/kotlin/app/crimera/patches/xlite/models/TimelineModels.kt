@@ -253,23 +253,22 @@ private fun resolveTimelineModels(): ResolvedXLiteTimelineModels {
 context(context: BytecodePatchContext)
 private fun patchTimelineModelBridges(models: ResolvedXLiteTimelineModels) {
     val postClass = context.mutableClassDefBy(models.postDescriptor)
-    postClass.makeFieldsPublic(
+    postClass.requirePublicFields(
         listOf(
-            models.postResultField,
             models.postEntryIdField,
             models.postClientEventInfoField,
             models.postPromotedMetadataField,
         ),
     )
-    context.mutableClassDefBy(models.clientEventInfoDescriptor).makeFieldsPublic(
+    context.mutableClassDefBy(models.clientEventInfoDescriptor).requirePublicFields(
         listOf(models.clientEventInfoComponentField),
     )
 
     val verticalConversationClass = context.mutableClassDefBy(models.verticalConversationDescriptor)
-    verticalConversationClass.makeFieldsPublic(listOf(models.verticalConversationPostIdsField))
+    verticalConversationClass.requirePublicFields(listOf(models.verticalConversationPostIdsField))
 
     val moduleClass = context.mutableClassDefBy(models.moduleDescriptor)
-    moduleClass.makeFieldsPublic(
+    moduleClass.requirePublicFields(
         listOf(
             models.moduleInnerContentField,
             models.moduleHeaderField,
@@ -282,7 +281,7 @@ private fun patchTimelineModelBridges(models: ResolvedXLiteTimelineModels) {
     )
 
     val moduleItemClass = context.mutableClassDefBy(models.moduleItemDescriptor)
-    moduleItemClass.makeFieldsPublic(listOf(models.moduleItemField, models.moduleItemDispensableField))
+    moduleItemClass.requirePublicFields(listOf(models.moduleItemField, models.moduleItemDispensableField))
 
     val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
     filterClass.patchBridge(

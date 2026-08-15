@@ -7,6 +7,7 @@ import app.crimera.patches.xlite.settings.choice
 import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.injectRead
 import app.crimera.patches.xlite.settings.multiChoice
+import app.crimera.patches.xlite.models.requirePublicFields
 import app.crimera.patches.xlite.models.resolvedXLitePostModels
 import app.crimera.patches.xlite.models.resolvedXLiteTimelineModels
 import app.crimera.patches.xlite.models.xLitePostModelResolutionPatch
@@ -142,10 +143,11 @@ private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
                     field.type.endsWith(";")
             },
         )
-    contentDisclosureClass.makePublic(hasAiDisclosureField)
-    contentDisclosureClass.makePublic(sourceField)
+    contentDisclosureClass.requirePublicFields(listOf(hasAiDisclosureField, sourceField))
 
     val timelineModels = resolvedXLiteTimelineModels()
+    context.mutableClassDefBy(timelineModels.postDescriptor)
+        .requirePublicFields(listOf(timelineModels.postResultField))
     val postModels = resolvedXLitePostModels()
 
     val contextualPostClass = context.mutableClassDefBy(postModels.contextualPostDescriptor)
@@ -158,8 +160,8 @@ private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
             },
         )
 
-    contextualPostClass.makePublic(postModels.contextualCanonicalPostField)
-    canonicalPostClass.makePublic(canonicalContentDisclosureField)
+    contextualPostClass.requirePublicFields(listOf(postModels.contextualCanonicalPostField))
+    canonicalPostClass.requirePublicFields(listOf(canonicalContentDisclosureField))
     if (!sourceField.type.startsWith("L") || !sourceField.type.endsWith(";")) {
         throw PatchException("X-Lite content disclosure source is not an object: $sourceField")
     }
@@ -247,14 +249,6 @@ private fun Match.instanceFieldsRead(type: String): List<FieldReference> =
             field.definingClass == originalMethod.definingClass && field.type == type
         }
     }.distinctBy(FieldReference::toString)
-
-private fun app.morphe.patcher.util.proxy.mutableTypes.MutableClass.makePublic(field: FieldReference) {
-    val definition = fields.singleOrNull { candidate -> candidate.toString() == field.toString() }
-        ?: throw PatchException("X-Lite content disclosure field definition was not found: $field")
-    val nonPublicFlags = AccessFlags.PRIVATE.value or AccessFlags.PROTECTED.value
-    definition.accessFlags =
-        (definition.accessFlags and nonPublicFlags.inv()) or AccessFlags.PUBLIC.value
-}
 
 private fun <T> requireExactlyOne(target: String, matches: List<T>): T {
     if (matches.size == 1) return matches.single()
