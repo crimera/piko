@@ -102,6 +102,11 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY) || Pref.getTurnOnAllGhostModes();
     }
 
+    // Return true = report the user as offline while still reading the friends' activity status.
+    public static boolean hideOnlineStatus() {
+        return (SharedPref.getBooleanPref(Settings.HIDE_ONLINE_STATUS) && SettingsStatus.hideOnlineStatus) || Pref.getTurnOnAllGhostModes();
+    }
+
     public static boolean disableVideoAutoplay() {
         return SharedPref.getBooleanPref(Settings.DISABLE_VIDEO_AUTOPLAY);
     }

@@ -40,6 +40,11 @@ object Constants {
     const val USER_SESSION_CLASS = "Lcom/instagram/common/session/UserSession;"
     const val USER_DETAIL_VIEW_MODEL_CLASS = "Lcom/instagram/profile/fragment/UserDetailViewModel;"
     const val ORIGINAL_SOUND_DATA_INTF = "Lcom/instagram/api/schemas/OriginalSoundDataIntf;"
+    const val REALTIME_CLIENT_MANAGER_CLASS = "Lcom/instagram/realtimeclient/RealtimeClientManager;"
+    const val UPDATE_APP_STATE_RUNNABLE_CLASS = "Lcom/instagram/realtimeclient/RealtimeClientManager\$updateAppStateInternal\$1;"
+    const val PRESENCE_UPI_PACKAGE = "Lcom/facebook/presence/model/upi"
+    const val PRESENCE_STATUS_CLASS = "$PRESENCE_UPI_PACKAGE/PresenceStatus;"
+    const val PRESENCE_WRITE_REQUEST_CLASS = "$PRESENCE_UPI_PACKAGE/PresenceWriteRequest;"
 
     // Extension classes.
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/instagram"
@@ -56,6 +61,7 @@ object Constants {
         move-result-object v%s"""
 
     const val LINKS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Links;"
+    const val PRESENCE_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Presence;"
     const val DOWNLOAD_DESCRIPTOR = "$PATCHES_DESCRIPTOR/download"
     const val ACTIONBAR_DESCRIPTOR = "$PATCHES_DESCRIPTOR/actionbar/ActionBarPatch;"
 

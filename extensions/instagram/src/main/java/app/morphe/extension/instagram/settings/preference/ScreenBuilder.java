@@ -298,6 +298,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.hideOnlineStatus) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_hide_online_status"),
+                            str("piko_hide_online_status_desc"),
+                            Settings.HIDE_ONLINE_STATUS
+                    )
+            );
+        }
 
     }
 
