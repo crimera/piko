@@ -271,6 +271,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_disable_typing_status"),SettingsStatus.disableTypingStatus);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.viewLiveAnonymously);
         FLAGS.put(str("piko_view_stories_anonymously"),SettingsStatus.viewStoriesAnonymously);
+        FLAGS.put(str("piko_instants_title"),SettingsStatus.instantsDownload);
 
         FLAGS.put(str("piko_sanitize_share_links"),SettingsStatus.sanitizeShareLinks);
         FLAGS.put(str("piko_open_links_externally"),SettingsStatus.openLinksExternally);

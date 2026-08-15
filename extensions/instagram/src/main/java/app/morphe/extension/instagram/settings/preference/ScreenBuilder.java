@@ -460,7 +460,6 @@ public class ScreenBuilder {
         if (!(SettingsStatus.miscSection())) return;
 
         // PreferenceCategory category= addCategory(str("piko_category_misc"));
-        // Instants controls moved to their own screen (buildInstantsSection).
         if (MaterialYouTheme.isAmoledAvailable()) {
             addPreference(
                     helper.switchPreference(

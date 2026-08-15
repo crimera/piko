@@ -17,11 +17,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.format.DateFormat;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.LruCache;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -31,14 +34,20 @@ import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,6 +55,7 @@ import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.db.PikoInstantsDb;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
+import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 
 /**
@@ -60,9 +70,13 @@ public class InstantsVaultActivity extends Activity {
     private static final int COLUMNS = 3;
 
     private List<String[]> items;
+    private String filter = "";
+    private FrameLayout content;
     private float density;
     private int tileSize;
     private ThumbLoader thumbs;
+    private final Handler ui = new Handler(Looper.getMainLooper());
+    private final Runnable rebuild = this::rebuildContent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,28 +88,21 @@ public class InstantsVaultActivity extends Activity {
         int gap = dp(2);
         tileSize = (screenW - gap * (COLUMNS + 1)) / COLUMNS;
 
-        items = PikoInstantsDb.getInstance(this).getAll();
+        PikoInstantsDb db = PikoInstantsDb.getInstance(this);
+        db.purgeExpired();
+        items = db.getAll();
+        pruneThumbCache();
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(themed("igds_color_primary_background", 0xFF000000));
         root.addView(buildToolbar());
+        if (!items.isEmpty()) root.addView(buildSearchField());
 
-        if (items.isEmpty()) {
-            TextView empty = new TextView(this);
-            empty.setText(str("piko_instants_vault_empty"));
-            empty.setTextColor(themed("igds_color_secondary_text", 0xFFB0B0B0));
-            empty.setGravity(Gravity.CENTER);
-            empty.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
-            empty.setPadding(dp(24), dp(24), dp(24), dp(24));
-            root.addView(empty, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
-        } else {
-            ScrollView scroll = new ScrollView(this);
-            scroll.addView(buildGroupedBody());
-            root.addView(scroll, new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
-        }
+        content = new FrameLayout(this);
+        root.addView(content, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
+        rebuildContent();
 
         root.setOnApplyWindowInsetsListener((v, insets) -> {
             v.setPadding(0, insets.getSystemWindowInsetTop(), 0, 0);
@@ -104,13 +111,119 @@ public class InstantsVaultActivity extends Activity {
         setContentView(root);
     }
 
+    /** Search field over the sender's username. Filtering rebuilds the body only — a full
+     *  recreate() would restart every thumbnail fetch on each keystroke. */
+    private EditText buildSearchField() {
+        EditText search = new EditText(this);
+        search.setSingleLine(true);
+        search.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        search.setHint(str("piko_search_username"));
+        search.setHintTextColor(themed("igds_color_secondary_text", 0xFFB0B0B0));
+        search.setTextColor(themed("igds_color_primary_text", 0xFFFFFFFF));
+        search.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        search.setBackgroundColor(themed("igds_color_secondary_background", 0xFF1A1A1A));
+        search.setPadding(dp(14), dp(10), dp(14), dp(10));
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(dp(12), 0, dp(12), dp(8));
+        search.setLayoutParams(lp);
+
+        search.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) { }
+            @Override public void onTextChanged(CharSequence s, int a, int b, int c) { }
+            @Override public void afterTextChanged(Editable s) {
+                filter = s.toString().trim().toLowerCase(Locale.ROOT);
+                rebuildContent();
+            }
+        });
+        return search;
+    }
+
+    private List<String[]> visibleItems() {
+        if (filter.isEmpty()) return items;
+        List<String[]> out = new ArrayList<>();
+        for (String[] m : items) {
+            String username = m[1];
+            if (username != null && username.toLowerCase(Locale.ROOT).contains(filter)) out.add(m);
+        }
+        return out;
+    }
+
+    private void rebuildContent() {
+        content.removeAllViews();
+        List<String[]> visible = visibleItems();
+
+        if (visible.isEmpty()) {
+            content.addView(centeredMessage(items.isEmpty()
+                    ? str("piko_instants_vault_empty")
+                    : str("piko_instants_no_matches")));
+            return;
+        }
+        ScrollView scroll = new ScrollView(this);
+        scroll.addView(buildGroupedBody(visible));
+        content.addView(scroll, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+    }
+
+    /** Purging expired rows leaves their thumbnails behind, so drop any that no longer have one. */
+    private void pruneThumbCache() {
+        try {
+            File dir = new File(getCacheDir(), "instants_thumbs");
+            File[] files = dir.listFiles();
+            if (files == null) return;
+
+            Set<String> live = new HashSet<>();
+            for (String[] m : items) live.add(m[0] + ".jpg");
+            for (File f : files) {
+                if (!live.contains(f.getName())) f.delete();
+            }
+        } catch (Throwable t) {
+            Logger.printException(() -> "instants vault: thumb cache prune failed", t);
+        }
+    }
+
+    /** Where a tile's thumbnail is kept between visits. Null if the cache dir isn't available. */
+    private File cacheFile(String mediaId) {
+        File dir = getCacheDir();
+        if (dir == null || mediaId == null || mediaId.isEmpty()) return null;
+        return new File(new File(dir, "instants_thumbs"), mediaId + ".jpg");
+    }
+
+    /** Drops a row that is gone for good, coalescing the redraw when several tiles die at once. */
+    private void forget(String mediaId) {
+        PikoInstantsDb.getInstance(this).delete(mediaId);
+        File cached = cacheFile(mediaId);
+        if (cached != null) cached.delete();
+        for (int i = 0; i < items.size(); i++) {
+            if (mediaId.equals(items.get(i)[0])) {
+                items.remove(i);
+                break;
+            }
+        }
+        ui.removeCallbacks(rebuild);
+        ui.post(rebuild);
+    }
+
+    private TextView centeredMessage(CharSequence text) {
+        TextView view = new TextView(this);
+        view.setText(text);
+        view.setTextColor(themed("igds_color_secondary_text", 0xFFB0B0B0));
+        view.setGravity(Gravity.CENTER);
+        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
+        view.setPadding(dp(24), dp(24), dp(24), dp(24));
+        view.setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        return view;
+    }
+
     /** Groups items by a stable user id (fallback: username), preserving recency order of groups. */
-    private LinearLayout buildGroupedBody() {
+    private LinearLayout buildGroupedBody(List<String[]> source) {
         LinearLayout container = new LinearLayout(this);
         container.setOrientation(LinearLayout.VERTICAL);
 
         Map<String, List<String[]>> groups = new LinkedHashMap<>();
-        for (String[] m : items) {
+        for (String[] m : source) {
             String userId = m.length > 6 ? m[6] : null;
             String key = (userId != null && !userId.isEmpty()) ? userId : "name:" + (m[1] == null ? "" : m[1]);
             List<String[]> list = groups.get(key);
@@ -124,7 +237,7 @@ public class InstantsVaultActivity extends Activity {
         for (Map.Entry<String, List<String[]>> e : groups.entrySet()) {
             List<String[]> rows = e.getValue();
             String username = rows.get(0)[1];
-            if (username == null || username.isEmpty()) username = str("piko_media_unknown");
+            if (username == null || username.isEmpty()) username = str("piko_instants_unknown_user");
             container.addView(buildHeader(username));
 
             LinearLayout grid = new LinearLayout(this);
@@ -167,8 +280,24 @@ public class InstantsVaultActivity extends Activity {
         tile.addView(image, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
 
-        // thumbnail source is the image url (present even for video instants)
-        thumbs.load(row[2], image);
+        TextView unavailable = new TextView(this);
+        unavailable.setText(str("piko_instants_unavailable"));
+        unavailable.setTextColor(themed("igds_color_secondary_text", 0xFFB0B0B0));
+        unavailable.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+        unavailable.setGravity(Gravity.CENTER);
+        unavailable.setVisibility(View.GONE);
+        tile.addView(unavailable, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
+        // Normally the image url, which is present even for video instants — but fall back to the
+        // playback url so a video that saved without one isn't mistaken for a dead row.
+        String thumbUrl = (row[2] != null && !row[2].isEmpty()) ? row[2] : urlOf(row);
+        thumbs.load(thumbUrl, row[0], image, dead -> {
+            // A dead link is gone for good, so drop the row. Anything else (no network, a
+            // timeout, a 5xx) may well work later — keep it and just say so on the tile.
+            if (dead) forget(row[0]);
+            else unavailable.setVisibility(View.VISIBLE);
+        });
 
         if ("1".equals(row[4])) {
             TextView badge = new TextView(this);
@@ -186,10 +315,7 @@ public class InstantsVaultActivity extends Activity {
 
         tile.setOnClickListener(v -> showOptions(row));
         tile.setOnLongClickListener(v -> {
-            confirm(str("piko_delete_saved_confirm"), str("piko_delete"), () -> {
-                PikoInstantsDb.getInstance(this).delete(row[0]);
-                recreate();
-            });
+            confirm(str("piko_instants_delete_confirm"), str("piko_delete"), () -> forget(row[0]));
             return true;
         });
         return tile;
@@ -203,13 +329,16 @@ public class InstantsVaultActivity extends Activity {
         bar.setPadding(pad, pad, pad, pad);
         bar.setBackgroundColor(themed("igds_color_primary_background", 0xFF101010));
 
-        TextView back = new TextView(this);
-        back.setText("←");
-        back.setTextColor(themed("igds_color_primary_text", 0xFFFFFFFF));
-        back.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        back.setPadding(0, 0, dp(16), 0);
-        back.setOnClickListener(v -> finish());
-        bar.addView(back);
+        // Instagram's own back arrow, themed. If the drawable can't be resolved on this build we'd
+        // otherwise ship a toolbar with no way back, so fall back to a plain glyph.
+        if (UI.addImageViewToViewGroup(bar, UI.DRAWABLE_ARROW_BACK, this::finish) == null) {
+            TextView back = new TextView(this);
+            back.setText("←");
+            back.setTextColor(themed("igds_color_primary_text", 0xFFFFFFFF));
+            back.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+            back.setOnClickListener(v -> finish());
+            bar.addView(back);
+        }
 
         TextView title = new TextView(this);
         title.setText(str("piko_view_saved_instants"));
@@ -220,10 +349,10 @@ public class InstantsVaultActivity extends Activity {
 
         if (!items.isEmpty()) {
             TextView clear = new TextView(this);
-            clear.setText(str("piko_clear_all"));
+            clear.setText(str("piko_instants_clear_all"));
             clear.setTextColor(themed("igds_color_error_or_destructive", 0xFFFF5C5C));
             clear.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-            clear.setOnClickListener(v -> confirm(str("piko_clear_all_confirm"), str("piko_clear_all"),
+            clear.setOnClickListener(v -> confirm(str("piko_instants_clear_all_confirm"), str("piko_instants_clear_all"),
                     () -> {
                         PikoInstantsDb.getInstance(this).clearAll();
                         recreate();
@@ -233,7 +362,18 @@ public class InstantsVaultActivity extends Activity {
         return bar;
     }
 
-    /** Prefer the video url for a video instant, else the image url. */
+    /** When this instant was captured, or null if the row predates the timestamp column. */
+    private static CharSequence savedOn(String[] row) {
+        try {
+            long ts = Long.parseLong(row[5]);
+            if (ts <= 0) return null;
+            return str("piko_saved_on") + " "
+                    + new SimpleDateFormat("d MMM yyyy, HH:mm", Locale.getDefault()).format(new Date(ts));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private static String urlOf(String[] row) {
         boolean isVideo = "1".equals(row[4]);
         String video = row[3];
@@ -245,7 +385,7 @@ public class InstantsVaultActivity extends Activity {
     private void showOptions(String[] row) {
         String url = urlOf(row);
         if (url == null || !url.startsWith("http")) {
-            Toast.makeText(this, str("piko_media_not_available"), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, str("piko_instants_link_unavailable"), Toast.LENGTH_SHORT).show();
             return;
         }
         boolean isVideo = "1".equals(row[4]);
@@ -273,8 +413,10 @@ public class InstantsVaultActivity extends Activity {
 
         // Plain AlertDialog: the IGDS native box needs an Instagram-themed context, which a
         // standalone piko activity doesn't have (same as DeletedMessagesActivity).
+        // Title carries the date, not setMessage — a message would replace the option list entirely.
+        CharSequence saved = savedOn(row);
         new android.app.AlertDialog.Builder(this)
-                .setTitle(str("piko_download_options"))
+                .setTitle(saved == null ? str("piko_download_options") : saved)
                 .setItems(options, onPick)
                 .show();
     }
@@ -301,8 +443,13 @@ public class InstantsVaultActivity extends Activity {
         }
     }
 
-    /** Loads tile thumbnails off the main thread, caches them, and never throws — a failed fetch
-     *  just leaves the tile's placeholder. Views are url-tagged so scrolled/reused tiles stay correct. */
+    /** Told a thumbnail didn't load. {@code dead} means the CDN answered that it is gone. */
+    private interface OnLoadFailed {
+        void onFailed(boolean dead);
+    }
+
+    /** Thumbnails are cached in memory and on disk, so reopening the vault doesn't refetch the
+     *  whole grid. Views are url-tagged so reused tiles stay correct. */
     private final class ThumbLoader {
         private final ExecutorService pool = Executors.newFixedThreadPool(3);
         private final Handler main = new Handler(Looper.getMainLooper());
@@ -313,19 +460,34 @@ public class InstantsVaultActivity extends Activity {
                     }
                 };
 
-        void load(String url, ImageView view) {
+        void load(String url, String mediaId, ImageView view, OnLoadFailed onFailed) {
             view.setImageBitmap(null);
-            if (url == null || !url.startsWith("http")) return;
             view.setTag(url);
 
-            Bitmap cached = cache.get(url);
+            Bitmap cached = url == null ? null : cache.get(url);
             if (cached != null) {
                 view.setImageBitmap(cached);
                 return;
             }
             pool.execute(() -> {
-                Bitmap bmp = fetch(url);
-                if (bmp == null) return;
+                Bitmap disk = readCached(mediaId);
+                if (disk != null) {
+                    if (url != null) cache.put(url, disk);
+                    main.post(() -> {
+                        if (url == null || url.equals(view.getTag())) view.setImageBitmap(disk);
+                    });
+                    return;
+                }
+                if (url == null || !url.startsWith("http")) {
+                    main.post(() -> onFailed.onFailed(true));
+                    return;
+                }
+                boolean[] dead = new boolean[1];
+                Bitmap bmp = fetch(url, dead, mediaId);
+                if (bmp == null) {
+                    main.post(() -> onFailed.onFailed(dead[0]));
+                    return;
+                }
                 cache.put(url, bmp);
                 main.post(() -> {
                     if (url.equals(view.getTag())) view.setImageBitmap(bmp);
@@ -333,13 +495,45 @@ public class InstantsVaultActivity extends Activity {
             });
         }
 
-        private Bitmap fetch(String url) {
+        private Bitmap readCached(String mediaId) {
+            try {
+                File f = cacheFile(mediaId);
+                if (f == null || !f.isFile()) return null;
+                return BitmapFactory.decodeFile(f.getAbsolutePath());
+            } catch (Throwable t) {
+                return null;
+            }
+        }
+
+        private void writeCached(String mediaId, Bitmap bmp) {
+            try {
+                File f = cacheFile(mediaId);
+                if (f == null) return;
+                File dir = f.getParentFile();
+                if (dir != null && !dir.isDirectory() && !dir.mkdirs()) return;
+                try (FileOutputStream out = new FileOutputStream(f)) {
+                    bmp.compress(Bitmap.CompressFormat.JPEG, 80, out);
+                }
+            } catch (Throwable t) {
+                // A thumbnail we couldn't cache just gets refetched next time.
+            }
+        }
+
+        private Bitmap fetch(String url, boolean[] dead, String mediaId) {
             HttpURLConnection conn = null;
             try {
                 conn = (HttpURLConnection) new URL(url).openConnection();
                 conn.setConnectTimeout(10000);
                 conn.setReadTimeout(15000);
                 conn.setInstanceFollowRedirects(true);
+
+                int code = conn.getResponseCode();
+                if (code != HttpURLConnection.HTTP_OK) {
+                    dead[0] = code == HttpURLConnection.HTTP_FORBIDDEN
+                            || code == HttpURLConnection.HTTP_NOT_FOUND
+                            || code == HttpURLConnection.HTTP_GONE;
+                    return null;
+                }
                 try (InputStream in = new BufferedInputStream(conn.getInputStream())) {
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     byte[] buf = new byte[8192];
@@ -352,7 +546,9 @@ public class InstantsVaultActivity extends Activity {
                     BitmapFactory.decodeByteArray(data, 0, data.length, o);
                     o.inSampleSize = sampleSize(o.outWidth, o.outHeight, tileSize);
                     o.inJustDecodeBounds = false;
-                    return BitmapFactory.decodeByteArray(data, 0, data.length, o);
+                    Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length, o);
+                    if (bmp != null) writeCached(mediaId, bmp);
+                    return bmp;
                 }
             } catch (Throwable t) {
                 return null;

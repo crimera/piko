@@ -327,13 +327,15 @@
     <string name="piko_instants_download_desc">Capture view-once Instants as you view them, so you can re-view and download them later from “View saved Instants”.</string>
     <string name="piko_view_saved_instants">View saved Instants</string>
     <string name="piko_instants_vault_empty">No saved Instants yet. Open some Instants with capture enabled and they\'ll appear here.</string>
-    <string name="piko_media_not_available">Media link not available.</string>
-    <string name="piko_media_photo">Photo</string>
-    <string name="piko_media_video">Video</string>
-    <string name="piko_media_unknown">Unknown</string>
-    <string name="piko_delete_saved_confirm">Remove this saved Instant?</string>
+    <string name="piko_instants_link_unavailable">Media link not available.</string>
+    <string name="piko_instants_unknown_user">Unknown</string>
+    <string name="piko_instants_delete_confirm">Remove this saved Instant?</string>
+    <string name="piko_instants_clear_all">Clear all</string>
+    <string name="piko_instants_clear_all_confirm">Remove all saved Instants?</string>
     <string name="piko_delete">Delete</string>
-    <string name="piko_clear_all">Clear all</string>
-    <string name="piko_clear_all_confirm">Remove all saved Instants?</string>
     <string name="piko_instants_title">Instants</string>
+    <string name="piko_search_username">Search by username</string>
+    <string name="piko_instants_no_matches">No saved Instants from that user.</string>
+    <string name="piko_instants_unavailable">Unavailable</string>
+    <string name="piko_saved_on">Saved on</string>
 </resources>

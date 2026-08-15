@@ -15,19 +15,17 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
 import java.util.List;
 
+import app.morphe.extension.instagram.utils.MediaUrls;
 import app.morphe.extension.shared.Logger;
 
 /**
- * Local persistent store for captured Instants (quicksnap). View-once instants change on tap and
- * vanish after viewing, so InstantsDownloadHook records each one's CDN links as it's viewed; the
- * "Saved Instants" screen (InstantsVaultActivity) reads them back for viewing and download.
- *
- * <p>Modelled on the DM vault (PikoMessageDb) but a separate table/file — instants are not messages.
+ * Store for captured Instants: InstantsDownloadHook writes their CDN links here, and the
+ * "Saved Instants" screen reads them back for viewing and download.
  */
 public class PikoInstantsDb extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "piko_instants_vault.db";
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 3;
     private static final String TABLE = "saved_instants";
 
     private static final String COL_ID = "media_id";
@@ -37,6 +35,7 @@ public class PikoInstantsDb extends SQLiteOpenHelper {
     private static final String COL_IS_VIDEO = "is_video";
     private static final String COL_TS = "ts";
     private static final String COL_USERID = "userid";
+    private static final String COL_EXPIRES_AT = "expires_at";
 
     private static volatile PikoInstantsDb sInstance;
 
@@ -61,7 +60,8 @@ public class PikoInstantsDb extends SQLiteOpenHelper {
                 COL_VIDEO_URL + " TEXT, " +
                 COL_IS_VIDEO + " INTEGER DEFAULT 0, " +
                 COL_TS + " INTEGER, " +
-                COL_USERID + " TEXT" +
+                COL_USERID + " TEXT, " +
+                COL_EXPIRES_AT + " INTEGER DEFAULT 0" +
             ")"
         );
     }
@@ -76,6 +76,15 @@ public class PikoInstantsDb extends SQLiteOpenHelper {
                 Logger.printException(() -> "PikoInstantsDb.onUpgrade v2 failed", t);
             }
         }
+        // v2 -> v3: remember when the CDN link dies so dead rows can be dropped on open.
+        if (oldVersion < 3) {
+            try {
+                db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN " + COL_EXPIRES_AT
+                        + " INTEGER DEFAULT 0");
+            } catch (Throwable t) {
+                Logger.printException(() -> "PikoInstantsDb.onUpgrade v3 failed", t);
+            }
+        }
     }
 
     /** Records an instant, ignoring duplicates (same media id). Best-effort — never throws. */
@@ -83,6 +92,8 @@ public class PikoInstantsDb extends SQLiteOpenHelper {
                                String videoUrl, boolean isVideo) {
         if (mediaId == null || mediaId.isEmpty()) return;
         try {
+            String playbackUrl = isVideo && videoUrl != null && !videoUrl.isEmpty()
+                    ? videoUrl : imageUrl;
             ContentValues cv = new ContentValues();
             cv.put(COL_ID, mediaId);
             cv.put(COL_USERNAME, username);
@@ -91,6 +102,7 @@ public class PikoInstantsDb extends SQLiteOpenHelper {
             cv.put(COL_VIDEO_URL, videoUrl);
             cv.put(COL_IS_VIDEO, isVideo ? 1 : 0);
             cv.put(COL_TS, System.currentTimeMillis());
+            cv.put(COL_EXPIRES_AT, MediaUrls.expiresAt(playbackUrl));
             getWritableDatabase().insertWithOnConflict(
                 TABLE, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
         } catch (Throwable t) {
@@ -109,24 +121,41 @@ public class PikoInstantsDb extends SQLiteOpenHelper {
         }
     }
 
-    /** Newest first. Each row: {media_id, username, image_url, video_url, is_video, ts, userid}. */
+    /**
+     * Newest first. Each row:
+     * {media_id, username, image_url, video_url, is_video, ts, userid, expires_at}.
+     */
     public List<String[]> getAll() {
         List<String[]> out = new ArrayList<>();
         try (Cursor c = getReadableDatabase().query(
                 TABLE,
-                new String[]{COL_ID, COL_USERNAME, COL_IMAGE_URL, COL_VIDEO_URL, COL_IS_VIDEO, COL_TS, COL_USERID},
+                new String[]{COL_ID, COL_USERNAME, COL_IMAGE_URL, COL_VIDEO_URL, COL_IS_VIDEO, COL_TS,
+                        COL_USERID, COL_EXPIRES_AT},
                 null, null, null, null, COL_TS + " DESC")) {
             while (c.moveToNext()) {
                 out.add(new String[]{
                     c.getString(0), c.getString(1), c.getString(2),
                     c.getString(3), String.valueOf(c.getInt(4)), String.valueOf(c.getLong(5)),
-                    c.getString(6),
+                    c.getString(6), String.valueOf(c.getLong(7)),
                 });
             }
         } catch (Throwable t) {
             Logger.printException(() -> "PikoInstantsDb.getAll failed", t);
         }
         return out;
+    }
+
+    /** Drops rows whose CDN link has already died. Returns how many went. */
+    public int purgeExpired() {
+        try {
+            return getWritableDatabase().delete(
+                    TABLE,
+                    COL_EXPIRES_AT + " > 0 AND " + COL_EXPIRES_AT + " <= ?",
+                    new String[]{String.valueOf(System.currentTimeMillis())});
+        } catch (Throwable t) {
+            Logger.printException(() -> "PikoInstantsDb.purgeExpired failed", t);
+            return 0;
+        }
     }
 
     public void delete(String mediaId) {
