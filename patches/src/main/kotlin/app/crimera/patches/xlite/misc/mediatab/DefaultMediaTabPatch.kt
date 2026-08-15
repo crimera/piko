@@ -12,6 +12,7 @@ import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteSingleChoice
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.MEDIA_TAB_RESOLVER_DESCRIPTOR
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -95,7 +96,7 @@ val xLiteDefaultMediaTabPatch =
         )
 
         execute {
-            val match = XLiteCombinedProfileTimelineSeedFingerprint.matchAll()
+            val match = XLiteCombinedProfileTimelineSeedFingerprint.scopedMatchAll()
             if (match.size != 1) {
                 throw PatchException(
                     "Expected one combined profile timeline seed, found ${match.size}: " +

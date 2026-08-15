@@ -5,6 +5,7 @@ import app.crimera.patches.xlite.settings.injectReadWithDefault
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -29,6 +30,7 @@ private const val EXPECTED_MEDIA_WRITE_METHODS = 2
 private const val EXPECTED_MEDIA_WRITES = 2
 
 private object XLiteContextualPostFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
     name = "toString",
     parameters = emptyList(),
     returnType = "Ljava/lang/String;",
@@ -65,7 +67,7 @@ val xLiteShowSensitiveMediaPatch =
             )
 
         execute {
-            val contextualPostMatches = XLiteContextualPostFingerprint.matchAll()
+            val contextualPostMatches = XLiteContextualPostFingerprint.scopedMatchAll()
             if (contextualPostMatches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite contextual-post model, found ${contextualPostMatches.size}: " +
@@ -87,7 +89,7 @@ val xLiteShowSensitiveMediaPatch =
                                 type = mediaField.type,
                             ),
                         ),
-                ).matchAll()
+                ).scopedMatchAll()
             if (mediaWriteMatches.size != EXPECTED_MEDIA_WRITE_METHODS) {
                 throw PatchException(
                     "Expected $EXPECTED_MEDIA_WRITE_METHODS X-Lite media-visibility write methods, " +

@@ -27,6 +27,7 @@ private const val FEATURE_SWITCHES_DESCRIPTOR = "Lcom/x/featureswitches/f0;"
 private const val SUBSCRIPTIONS_FEATURES_DESCRIPTOR = "Lcom/x/subscriptions/SubscriptionsFeatures;"
 
 private object XLiteHomeNavUpsellTypeFingerprint : Fingerprint(
+    definingClass = "Lcom/x/subscriptions/",
     filters =
         listOf(
             string("subscriptions_enabled"),
@@ -65,6 +66,7 @@ private object XLiteHomeNavUpsellTypeFingerprint : Fingerprint(
 
 /** The feature-switch interface's obfuscated short name changes between releases. */
 private object XLiteHomeNavUpsellEnabledFingerprint : Fingerprint(
+    definingClass = "Lcom/x/subscriptions/",
     returnType = "Z",
     parameters = listOf("L"),
     filters =
@@ -90,6 +92,7 @@ private object XLiteHomeNavUpsellEnabledFingerprint : Fingerprint(
 )
 
 private object XLiteHomeTabbedScaffoldClassFingerprint : Fingerprint(
+    definingClass = "Lcom/x/home/tabbed/",
     returnType = "V",
     filters =
         listOf(

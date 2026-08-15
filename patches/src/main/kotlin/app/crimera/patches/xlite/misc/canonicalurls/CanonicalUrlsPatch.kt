@@ -1,6 +1,7 @@
 package app.crimera.patches.xlite.misc.canonicalurls
 
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -10,6 +11,7 @@ import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.instanceOf
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
+import app.morphe.patcher.string
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -31,24 +33,27 @@ private const val POST_URL_FIELD_FILTER_INDEX = 3
 private const val TEXT_ENTITY_URL_FIELD_FILTER_INDEX = 5
 
 private object UrlEntityModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/text/",
     name = "toString",
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
-    strings = listOf("UrlEntity(displayUrl="),
+    filters = listOf(string("UrlEntity(displayUrl=")),
 )
 
 private object MentionEntityModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/text/",
     name = "toString",
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
-    strings = listOf("MentionEntity(userId=", ", startIdx="),
+    filters = listOf(string("MentionEntity(userId="), string(", startIdx=")),
 )
 
 private object ContextualPostModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
     name = "toString",
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
-    strings = listOf("ContextualPost(canonicalPost=", ", quotedPost="),
+    filters = listOf(string("ContextualPost(canonicalPost="), string(", quotedPost=")),
 )
 
 private data class UrlEntityFields(
@@ -108,7 +113,7 @@ private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
 
     val textEntityNavigationFingerprint =
         Fingerprint(
-            definingClass = "Lcom/x/",
+            definingClass = "Lcom/x/navigation/",
             parameters = listOf("L", "L"),
             returnType = "V",
             filters =
@@ -132,7 +137,7 @@ private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
 
     val urlPickerMatch =
         Fingerprint(
-            classFingerprint = textEntityNavigationFingerprint,
+            definingClass = textEntityNavigationMatch.originalClassDef.type,
             parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
             returnType = STRING_DESCRIPTOR,
             filters = listOf(uriParseCall(), uriAuthorityCall()),
@@ -140,7 +145,7 @@ private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
 
     val postLinkClickMatch =
         Fingerprint(
-            definingClass = "Lcom/x/",
+            definingClass = "Lcom/x/urt/items/post/",
             returnType = "V",
             parameters = listOf("L", contextualPostType, "L", "L", "L", "L", "L"),
             filters =
@@ -306,7 +311,7 @@ private fun preferExpandedUrlInUrlPicker(match: Match) {
 
 context(_: BytecodePatchContext)
 private fun Fingerprint.requireSingleMatch(label: String): Match {
-    val matches = matchAll().distinctBy { it.originalMethod.toString() }
+    val matches = scopedMatchAll().distinctBy { it.originalMethod.toString() }
     return matches.singleOrNull()
         ?: throw PatchException(
             "Expected exactly one $label match, found ${matches.size}: " +

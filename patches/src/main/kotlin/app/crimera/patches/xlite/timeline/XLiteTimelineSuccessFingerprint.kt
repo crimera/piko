@@ -1,12 +1,14 @@
 package app.crimera.patches.xlite.timeline
 
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.string
 
 private object XLiteTimelineSuccessClassFingerprint : Fingerprint(
-    strings =
+    definingClass = "Lcom/x/urt/",
+    filters =
         listOf(
-            "Success(timelineType=",
-            ", timelineItems=",
+            string("Success(timelineType="),
+            string(", timelineItems="),
         ),
 )
 

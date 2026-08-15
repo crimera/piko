@@ -2,6 +2,7 @@ package app.crimera.patches.xlite.timeline
 
 import app.crimera.patches.xlite.misc.extension.xLiteExtensionPatch
 import app.crimera.patches.xlite.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -9,6 +10,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableClass
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -25,31 +27,35 @@ private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 
 private object TimelinePostModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/timelines/items/",
     name = "toString",
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
-    strings = listOf("UrtTimelinePost(postResult=", ", promotedMetadata="),
+    filters = listOf(string("UrtTimelinePost(postResult="), string(", promotedMetadata=")),
 )
 
 private object TimelineModuleModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/timelines/items/",
     name = "toString",
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
-    strings = listOf("UrtTimelineModule(innerContent=", ", moduleHeader="),
+    filters = listOf(string("UrtTimelineModule(innerContent="), string(", moduleHeader=")),
 )
 
 private object TimelineModuleItemModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/timelines/items/",
     name = "toString",
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
-    strings = listOf("UrtTimelineModuleItem(item=", ", isDispensable="),
+    filters = listOf(string("UrtTimelineModuleItem(item="), string(", isDispensable=")),
 )
 
 private object VerticalConversationModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/timelinemodule/",
     name = "toString",
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
-    strings = listOf("VerticalConversation(allTweetIds="),
+    filters = listOf(string("VerticalConversation(allTweetIds=")),
 )
 
 private data class TimelineModels(
@@ -327,7 +333,7 @@ private fun patchTimelineFilterBridges(models: TimelineModels) {
 
 context(_: BytecodePatchContext)
 private fun Fingerprint.requireSingle(target: String): Match {
-    val matches = matchAll()
+    val matches = scopedMatchAll()
     if (matches.size == 1) return matches.single()
     throw PatchException(
         "Expected one X-Lite $target, found ${matches.size}: " +

@@ -1,22 +1,13 @@
 package app.crimera.patches.xlite.premium
 
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
-import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.methodCall
-import app.morphe.patcher.opcode
-import com.android.tools.smali.dexlib2.Opcode
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 internal object XLiteDownloadEventHandlerFingerprint : Fingerprint(
-    strings =
-        listOf(
-            "download_video_to_offline",
-            "load_highest_quality",
-            "video_download",
-        ),
+    definingClass = "Lcom/x/urt/items/post/",
+    filters = listOf(string("download_video_to_offline")),
 )
 
 /**
@@ -26,7 +17,8 @@ internal object XLiteDownloadEventHandlerFingerprint : Fingerprint(
  * direct SubscriptionsFeatures checks in that handler gate offline-video availability.
  */
 internal object XLiteVideoTabDownloadHandlerFingerprint : Fingerprint(
-    strings = listOf("subscriptions_watermarked_video_download_enabled"),
+    definingClass = "Lcom/x/video/tab/",
+    filters = listOf(string("subscriptions_watermarked_video_download_enabled")),
     parameters = listOf("L"),
     returnType = "V",
     custom = { method, _ ->
@@ -43,20 +35,8 @@ internal object XLiteVideoTabDownloadHandlerFingerprint : Fingerprint(
     },
 )
 
-internal object XLitePremiumSubscriptionCheckerFingerprint : Fingerprint(
-    definingClass = "Lcom/x/subscriptions/",
-    parameters = listOf(),
-    returnType = "Z",
-    custom = { method, _ ->
-        val instructions = method.implementation?.instructions
-        instructions != null && instructions.count() in 3..6 && instructions.any { ins ->
-            val ref = (ins as? ReferenceInstruction)?.reference as? MethodReference
-            ref?.definingClass?.startsWith("Lcom/x/subscriptions/") == true && ref.returnType == "Z"
-        }
-    },
-)
-
 internal object SubscriptionsFeaturesHasAnyPremiumFingerprint : Fingerprint(
+    definingClass = "Lcom/x/subscriptions/",
     returnType = "Z",
     strings =
         listOf(
@@ -67,8 +47,9 @@ internal object SubscriptionsFeaturesHasAnyPremiumFingerprint : Fingerprint(
 )
 
 private object MediaContentVideoClassFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
     name = "toString",
-    strings = listOf("MediaContentVideo(mediaId="),
+    filters = listOf(string("MediaContentVideo(mediaId=")),
 )
 
 internal object MediaContentVideoIsDownloadableFingerprint : Fingerprint(
@@ -83,8 +64,9 @@ internal object MediaContentVideoIsDownloadableFingerprint : Fingerprint(
 )
 
 private object MediaContentGifClassFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
     name = "toString",
-    strings = listOf("MediaContentGif(mediaId="),
+    filters = listOf(string("MediaContentGif(mediaId=")),
 )
 
 internal object MediaContentGifIsDownloadableFingerprint : Fingerprint(
@@ -99,8 +81,9 @@ internal object MediaContentGifIsDownloadableFingerprint : Fingerprint(
 )
 
 private object MediaContentImageClassFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
     name = "toString",
-    strings = listOf("MediaContentImage(mediaId="),
+    filters = listOf(string("MediaContentImage(mediaId=")),
 )
 
 internal object MediaContentImageIsDownloadableFingerprint : Fingerprint(

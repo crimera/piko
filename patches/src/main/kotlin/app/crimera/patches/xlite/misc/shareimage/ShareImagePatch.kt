@@ -6,6 +6,7 @@ import app.crimera.patches.xlite.settings.Categories
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -29,6 +30,7 @@ private const val POINTER_INPUT_HANDLER = "Landroidx/compose/ui/input/pointer/Po
 private const val SHARE_IMAGE_HANDLER = "Lapp/morphe/extension/xlite/misc/XLiteShareImageHandler;"
 
 private object TimelinePostStateFingerprint : Fingerprint(
+    definingClass = "Lcom/x/urt/items/post/",
     returnType = "Ljava/lang/String;",
     filters =
         listOf(
@@ -73,7 +75,7 @@ val xLiteShareImagePatch =
             val timelinePostStateMatch =
                 requireMatches(
                     "X-Lite timeline-post state",
-                    TimelinePostStateFingerprint.matchAll(),
+                    TimelinePostStateFingerprint.scopedMatchAll(),
                 ).single()
             val timelinePostStateType = timelinePostStateMatch.originalClassDef.type
             val postIdentifierField =
@@ -108,7 +110,7 @@ val xLiteShareImagePatch =
                                     returnType = MODIFIER,
                                 ),
                             ),
-                    ).matchAll(),
+                    ).scopedMatchAll(),
                 ).single()
             val pointerCallMatch = renderedPostMethod.instructionMatches[0]
             val pointerCallReference =

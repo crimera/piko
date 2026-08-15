@@ -4,6 +4,7 @@ import app.crimera.patches.xlite.settings.Categories
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -34,6 +35,7 @@ private const val TIMELINE_POSITION_STORE_DESCRIPTOR =
 private const val RESTORE_TEMPORARY_REGISTER_COUNT = 2
 
 private object XLiteScrollPositionHolderFingerprint : Fingerprint(
+    definingClass = "Lcom/x/urt/",
     name = "toString",
     parameters = emptyList(),
     returnType = STRING_DESCRIPTOR,
@@ -46,6 +48,7 @@ private object XLiteScrollPositionHolderFingerprint : Fingerprint(
 
 private fun scrollPositionGetterFingerprint(holderDescriptor: String) =
     Fingerprint(
+        definingClass = "Lcom/x/urt/",
         parameters = emptyList(),
         returnType = holderDescriptor,
         filters =
@@ -110,7 +113,7 @@ val restoreTimelinePositionPatch =
         )
 
         execute {
-            val holderMatches = XLiteScrollPositionHolderFingerprint.matchAll()
+            val holderMatches = XLiteScrollPositionHolderFingerprint.scopedMatchAll()
             if (holderMatches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite scroll-position holder, found ${holderMatches.size}: " +
@@ -132,7 +135,7 @@ val restoreTimelinePositionPatch =
             }
             val holderConstructorReference = "$holderDescriptor-><init>(II)V"
 
-            val getterMatches = scrollPositionGetterFingerprint(holderDescriptor).matchAll()
+            val getterMatches = scrollPositionGetterFingerprint(holderDescriptor).scopedMatchAll()
             if (getterMatches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite scroll-position getter, found ${getterMatches.size}: " +
@@ -314,7 +317,8 @@ val restoreTimelinePositionPatch =
                 ExternalLabel("piko_xlite_restore_position_continue", originalContinuation),
             )
 
-            val saveMatches = saveScrollPositionFingerprint(componentDescriptor, holderDescriptor).matchAll()
+            val saveMatches =
+                saveScrollPositionFingerprint(componentDescriptor, holderDescriptor).scopedMatchAll()
             if (saveMatches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite save-scroll-position method, found ${saveMatches.size}: " +

@@ -5,12 +5,14 @@ import app.crimera.patches.xlite.settings.returnVoidIfEnabled
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.string
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 
 private object XLiteNewPostsPillFingerprint : Fingerprint(
+    definingClass = "Lcom/x/urt/instructions/",
     parameters =
         listOf(
             "L",
@@ -42,7 +44,7 @@ val hideNewPostPillPatch =
             )
 
         execute {
-            val matches = XLiteNewPostsPillFingerprint.matchAll()
+            val matches = XLiteNewPostsPillFingerprint.scopedMatchAll()
             if (matches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite new-post pill renderer, found ${matches.size}: " +

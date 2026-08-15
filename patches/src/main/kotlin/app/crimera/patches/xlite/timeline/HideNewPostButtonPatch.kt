@@ -5,6 +5,7 @@ import app.crimera.patches.xlite.settings.returnVoidIfEnabled
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
@@ -17,6 +18,7 @@ private const val MODIFIER_DESCRIPTOR = "Landroidx/compose/ui/Modifier;"
 private const val FUNCTION_ZERO_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 
 private object XLiteNewPostButtonFingerprint : Fingerprint(
+    definingClass = "Lcom/x/ui/common/",
     parameters =
         listOf(
             "I",
@@ -59,7 +61,7 @@ val hideNewPostButtonPatch =
             )
 
         execute {
-            val matches = XLiteNewPostButtonFingerprint.matchAll()
+            val matches = XLiteNewPostButtonFingerprint.scopedMatchAll()
             if (matches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite new-post button renderer, found ${matches.size}: " +

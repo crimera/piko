@@ -9,6 +9,7 @@ import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteMultiChoice
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.DRAWER_ITEM_FILTER_DESCRIPTOR
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -21,6 +22,7 @@ import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.p0Register
 
 private object XLiteDrawerContentClassFingerprint : Fingerprint(
+    definingClass = "Lcom/x/main/drawer/",
     returnType = "V",
     filters =
         listOf(
@@ -140,7 +142,7 @@ val customizeXLiteDrawerPatch =
             )
 
         execute {
-            val classMatches = XLiteDrawerContentClassFingerprint.matchAll()
+            val classMatches = XLiteDrawerContentClassFingerprint.scopedMatchAll()
             if (classMatches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite drawer content class, found ${classMatches.size}: " +

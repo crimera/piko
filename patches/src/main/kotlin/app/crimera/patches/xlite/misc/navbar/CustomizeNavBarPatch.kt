@@ -8,6 +8,7 @@ import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteMultiChoice
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.NAV_BAR_FILTER_DESCRIPTOR
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -156,7 +157,7 @@ val customizeXLiteNavBarPatch =
             )
 
         execute {
-            val matches = XLiteTabDataFingerprint.matchAll()
+            val matches = XLiteTabDataFingerprint.scopedMatchAll()
             if (matches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite tabData builder, found ${matches.size}: " +

@@ -10,6 +10,7 @@ import app.crimera.patches.xlite.settings.singleChoice
 import app.crimera.patches.xlite.settings.toggle
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -150,7 +151,7 @@ val xLiteInlineDownloadButtonPatch =
                                     type = "Z",
                                 ),
                             ),
-                    ).matchAll(),
+                    ).scopedMatchAll(),
                 )
             inlineRenderer.method.apply {
                 requireStatic("X-Lite inline-action entry renderer")
@@ -182,7 +183,7 @@ val xLiteInlineDownloadButtonPatch =
                                 fieldAccess(opcode = Opcode.SGET_OBJECT, reference = shareIconField),
                                 fieldAccess(opcode = Opcode.IGET, definingClass = "this", type = "F"),
                             ),
-                    ).matchAll(),
+                    ).scopedMatchAll(),
                 )
             iconRenderer.method.apply {
                 val iconAccess = iconRenderer.instructionMatches[0]
@@ -236,7 +237,7 @@ val xLiteInlineDownloadButtonPatch =
                                     returnType = "I",
                                 ),
                             ),
-                    ).matchAll(),
+                    ).scopedMatchAll(),
                 )
             inlineEventHandler.method.apply {
                 requireStatic("X-Lite inline-action event handler")
@@ -262,7 +263,6 @@ val xLiteInlineDownloadButtonPatch =
                     ExternalLabel("piko_xlite_inline_download_continue", nativeStart),
                 )
             }
-
         }
     }
 
@@ -348,11 +348,12 @@ private fun resolveIconField(resourceName: String): FieldReference {
     val resourceId = getResourceId(ResourceType.DRAWABLE, resourceName)
     val fields =
         Fingerprint(
+            definingClass = "Lcom/x/icons/",
             name = "<clinit>",
             returnType = "V",
             parameters = emptyList(),
             filters = listOf(literal(resourceId)),
-        ).matchAll().mapNotNull { match ->
+        ).scopedMatchAll().mapNotNull { match ->
             val literalIndex = match.instructionMatches.single().index
             match.method.instructions
                 .drop(literalIndex + 1)

@@ -7,19 +7,22 @@ import app.crimera.patches.xlite.timeline.patchObjectFieldGetter
 import app.crimera.patches.xlite.timeline.resolveTimelinePostModelMatch
 import app.crimera.patches.xlite.timeline.xLiteTimelineModelAdapterPatch
 import app.crimera.patches.xlite.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 
 private object TimelineRtbImageAdModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/timelines/items/",
     name = "toString",
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
-    strings = listOf("UrtTimelineRtbImageAd(advertiserAvatarImageUrl="),
+    filters = listOf(string("UrtTimelineRtbImageAd(advertiserAvatarImageUrl=")),
 )
 
 internal val xLiteTimelineAdModelAdapterPatch =
@@ -28,7 +31,7 @@ internal val xLiteTimelineAdModelAdapterPatch =
 
         execute {
             val postMatch = resolveTimelinePostModelMatch()
-            val adMatches = TimelineRtbImageAdModelFingerprint.matchAll()
+            val adMatches = TimelineRtbImageAdModelFingerprint.scopedMatchAll()
             if (adMatches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite timeline RTB image-ad model, found ${adMatches.size}: " +

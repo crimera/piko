@@ -16,6 +16,7 @@ import app.crimera.patches.xlite.settings.toggle
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.REPLY_SORTING_RESOLVER_DESCRIPTOR
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -38,6 +39,7 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
  * the initial ranking mode enum value is fetched for the factory call.
  */
 private object XLiteComposeReplySortingFingerprint : Fingerprint(
+    definingClass = "Lcom/x/postdetail/",
     filters =
         listOf(
             string("rankingMode"),
@@ -51,6 +53,7 @@ private object XLiteComposeReplySortingFingerprint : Fingerprint(
  */
 private object XLiteComposeReplySortingSelectionFingerprint : Fingerprint(
     returnType = "Ljava/lang/Object;",
+    parameters = listOf("Ljava/lang/Object;"),
     custom = { _, classDef ->
         classDef.superclass == "Lkotlin/jvm/internal/FunctionReferenceImpl;" &&
             classDef.interfaces.contains("Lkotlin/jvm/functions/Function1;")
@@ -128,7 +131,7 @@ val xLiteDefaultReplySortingPatch =
 
         execute {
             // Patch the Compose post detail timeline repository initialization
-            val matches = XLiteComposeReplySortingFingerprint.matchAll()
+            val matches = XLiteComposeReplySortingFingerprint.scopedMatchAll()
             if (matches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite Compose reply sorting initializer, found ${matches.size}: " +
@@ -168,7 +171,7 @@ val xLiteDefaultReplySortingPatch =
             )
 
             // Patch the Compose reply sorting selection handler to remember the last choice
-            val selectionMatches = XLiteComposeReplySortingSelectionFingerprint.matchAll()
+            val selectionMatches = XLiteComposeReplySortingSelectionFingerprint.scopedMatchAll()
             if (selectionMatches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite Compose reply sorting selection handler, found ${selectionMatches.size}: " +
@@ -197,7 +200,7 @@ val xLiteDefaultReplySortingPatch =
 
             // Patch the Compose reply sorting UI state initializer so the button label
             // and sheet selection reflect the configured default instead of Relevance.
-            val uiStateMatches = XLiteComposeReplySortingUiStateFingerprint.matchAll()
+            val uiStateMatches = XLiteComposeReplySortingUiStateFingerprint.scopedMatchAll()
             if (uiStateMatches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite Compose reply sorting UI state initializer, found ${uiStateMatches.size}: " +

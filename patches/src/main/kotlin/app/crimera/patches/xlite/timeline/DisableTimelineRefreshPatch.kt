@@ -6,6 +6,7 @@ import app.crimera.patches.xlite.settings.injectRead
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -27,6 +28,7 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private object XLiteHomeReselectFingerprint : Fingerprint(
+    definingClass = "Lcom/x/home/tabbed/",
     parameters = listOf("Z", "Z"),
     returnType = "Z",
     filters =
@@ -72,7 +74,7 @@ val disableTimelineRefreshPatch =
             )
 
         execute {
-            val homeMatches = XLiteHomeReselectFingerprint.matchAll()
+            val homeMatches = XLiteHomeReselectFingerprint.scopedMatchAll()
             if (homeMatches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite home reselect handler, found ${homeMatches.size}: " +
@@ -98,7 +100,7 @@ val disableTimelineRefreshPatch =
                 )
             }
 
-            val lifecycleMatches = XLiteLifecycleAutoRefreshFingerprint.matchAll()
+            val lifecycleMatches = XLiteLifecycleAutoRefreshFingerprint.scopedMatchAll()
             if (lifecycleMatches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite lifecycle auto-refresh coroutine, found " +

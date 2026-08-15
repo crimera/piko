@@ -1,6 +1,8 @@
 package app.crimera.patches.xlite.premium
 
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -58,14 +60,14 @@ private fun forceMediaClassDownloadable(match: Match) {
     for (constructor in constructors) {
         val matchingIputs =
             constructor.instructions
-                .filter { ins ->
-                    ins.opcode == Opcode.IPUT_BOOLEAN &&
-                        ins.getReference<FieldReference>()?.name == fieldName
+                .filter { instruction ->
+                    instruction.opcode == Opcode.IPUT_BOOLEAN &&
+                        instruction.getReference<FieldReference>()?.name == fieldName
                 }.reversed()
 
         for (iput in matchingIputs) {
-            val regA = (iput as TwoRegisterInstruction).registerA
-            constructor.addInstruction(iput.location.index, "const/4 v$regA, 0x1")
+            val register = (iput as TwoRegisterInstruction).registerA
+            constructor.addInstruction(iput.location.index, "const/4 v$register, 0x1")
         }
     }
 }
@@ -91,22 +93,13 @@ val xLiteDownloadPatch =
         compatibleWith(COMPATIBILITY_X_LITE)
 
         execute {
-            XLitePremiumSubscriptionCheckerFingerprint.matchAllOrNull()?.forEach { match ->
-                match.method.addInstructions(
-                    0,
-                    """
-                        const/4 v0, 0x1
-                        return v0
-                    """.trimIndent(),
-                )
-            }
-
             requireMatches(
                 "X-Lite video download handler",
-                XLiteVideoTabDownloadHandlerFingerprint.matchAll(),
+                XLiteVideoTabDownloadHandlerFingerprint.scopedMatchAll(),
                 expectedCount = 2,
             ).forEach { match ->
-                if (match.method.forceSubscriptionFeatureResults() == 0) {
+                val patchedResults = match.method.forceSubscriptionFeatureResults()
+                if (patchedResults == 0) {
                     throw PatchException(
                         "X-Lite video download handler has no subscription checks: " +
                             match.originalMethod,
@@ -114,28 +107,36 @@ val xLiteDownloadPatch =
                 }
             }
 
-            if (XLiteDownloadEventHandlerFingerprint.method.forceSubscriptionFeatureResults() == 0) {
+            val timelineHandler = requireMatches(
+                "X-Lite timeline download handler",
+                XLiteDownloadEventHandlerFingerprint.scopedMatchAll(),
+                expectedCount = 1,
+            ).single()
+            val timelinePatchedResults = timelineHandler.method.forceSubscriptionFeatureResults()
+            if (timelinePatchedResults == 0) {
                 throw PatchException("X-Lite timeline download handler has no subscription checks")
             }
 
-            SubscriptionsFeaturesHasAnyPremiumFingerprint.matchAll().forEach { match ->
-                match.method.addInstructions(
-                    0,
-                    """
-                        const/4 v0, 0x1
-                        return v0
-                    """.trimIndent(),
-                )
-            }
+            SubscriptionsFeaturesHasAnyPremiumFingerprint
+                .scopedMatchAll()
+                .forEach { match ->
+                    match.method.addInstructions(
+                        0,
+                        """
+                            const/4 v0, 0x1
+                            return v0
+                        """.trimIndent(),
+                    )
+                }
 
-            MediaContentVideoIsDownloadableFingerprint.matchAll().forEach { match ->
-                forceMediaClassDownloadable(match)
-            }
-            MediaContentGifIsDownloadableFingerprint.matchAll().forEach { match ->
-                forceMediaClassDownloadable(match)
-            }
-            MediaContentImageIsDownloadableFingerprint.matchAllOrNull()?.forEach { match ->
-                forceMediaClassDownloadable(match)
-            }
+            MediaContentVideoIsDownloadableFingerprint
+                .scopedMatchAll()
+                .forEach(::forceMediaClassDownloadable)
+            MediaContentGifIsDownloadableFingerprint
+                .scopedMatchAll()
+                .forEach(::forceMediaClassDownloadable)
+            MediaContentImageIsDownloadableFingerprint
+                .scopedMatchAllOrNull()
+                ?.forEach(::forceMediaClassDownloadable)
         }
     }

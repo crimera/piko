@@ -5,6 +5,7 @@ import app.crimera.patches.xlite.settings.returnVoidIfEnabled
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -16,6 +17,7 @@ private const val FUNCTION_ZERO_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val FUNCTION_ONE_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 
 private object XLiteSpacesBarFingerprint : Fingerprint(
+    definingClass = "Lcom/x/spaces/ui/home/",
     parameters =
         listOf(
             "L",
@@ -59,7 +61,7 @@ val xLiteHideSpacesBarPatch =
             )
 
         execute {
-            val matches = XLiteSpacesBarFingerprint.matchAll()
+            val matches = XLiteSpacesBarFingerprint.scopedMatchAll()
             if (matches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite Spaces bar renderer, found ${matches.size}: " +

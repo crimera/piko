@@ -4,6 +4,7 @@ import app.crimera.patches.xlite.misc.extension.xLiteExtensionPatch
 import app.crimera.patches.xlite.misc.extension.xLiteInitHook
 import app.crimera.patches.xlite.utils.Constants.COMPOSE_SETTINGS_HOOK_DESCRIPTOR
 import app.crimera.patches.xlite.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -20,6 +21,7 @@ import app.morphe.util.findFreeRegister
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 internal val xLiteSettingsPatch =
     bytecodePatch(default = false) {
@@ -33,7 +35,21 @@ internal val xLiteSettingsPatch =
             addAppResources("shared")
             addAppResources("xlite")
 
-            val matches = ComposeSettingsBasicItemFingerprint.matchAll()
+            val callerMatches =
+                ComposeSettingsBasicItemCallerFingerprint.scopedMatchAll()
+            if (callerMatches.size != 1) {
+                throw PatchException(
+                    "Expected one X-Lite Compose settings row caller, found ${callerMatches.size}: " +
+                        callerMatches.joinToString { it.originalMethod.toString() },
+                )
+            }
+            val rendererReference =
+                callerMatches.single().instructionMatches.single().instruction
+                    .getReference<MethodReference>()
+                    ?: throw PatchException("X-Lite Compose settings row call has no method reference")
+            val matches =
+                composeSettingsBasicItemFingerprint(rendererReference)
+                    .scopedMatchAll()
             if (matches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite Compose settings row renderer, found ${matches.size}: " +
@@ -45,7 +61,7 @@ internal val xLiteSettingsPatch =
                 val originalMethod = match.originalMethod
                 val iconType = originalMethod.parameterTypes[2].toString()
                 val settingsIconField = resolveSettingsIconField(iconType)
-                val rendererReference =
+                val rendererDescriptor =
                     "${originalMethod.definingClass}->${originalMethod.name}(" +
                         originalMethod.parameterTypes.joinToString("") +
                         ")${originalMethod.returnType}"
@@ -75,7 +91,7 @@ internal val xLiteSettingsPatch =
                         sget-object p2, $settingsIconField
                         invoke-static {}, $COMPOSE_SETTINGS_HOOK_DESCRIPTOR->getSettingsClickHandler()Lkotlin/jvm/functions/Function0;
                         move-result-object p3
-                        invoke-static/range {p0 .. p11}, $rendererReference
+                        invoke-static/range {p0 .. p11}, $rendererDescriptor
                         move-object/from16 p0, v$titleRegister
                         move-object/from16 p1, v$summaryRegister
                         move-object/from16 p2, v$iconRegister
@@ -100,13 +116,14 @@ private fun resolveSettingsIconField(iconType: String): FieldReference {
     val drawableId = getResourceId(ResourceType.DRAWABLE, "ic_vector_settings_stroke")
     val fingerprint =
         Fingerprint(
+            definingClass = "Lcom/x/icons/",
             name = "<clinit>",
             returnType = "V",
             parameters = emptyList(),
             filters = listOf(literal(drawableId)),
         )
     val fields =
-        fingerprint.matchAll().mapNotNull { match ->
+        fingerprint.scopedMatchAll().mapNotNull { match ->
             val literalIndex = match.instructionMatches.single().index
             match.method.instructions
                 .drop(literalIndex + 1)

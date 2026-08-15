@@ -9,6 +9,7 @@ import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.timeline.fieldForToStringLabel
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.EXTENSION_PACKAGE
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.fieldAccess
@@ -97,7 +98,8 @@ val dynamicColorPatch =
             }
 
         execute {
-            val providerMatches = HorizonThemePaletteProviderFingerprint.matchAll()
+            val providerMatches =
+                HorizonThemePaletteProviderFingerprint.scopedMatchAll()
             requireExactlyOne("X-Lite Horizon theme palette provider", providerMatches)
             val provider = providerMatches.single().method
             val paletteDescriptor = provider.returnType
@@ -404,7 +406,8 @@ private fun MutableMethod.resolvePaletteIsLight(
 
 context(context: BytecodePatchContext)
 private fun patchDynamicAccentPalettes() {
-    val providerMatches = XLiteDynamicColorPaletteProviderFingerprint.matchAll()
+    val providerMatches =
+        XLiteDynamicColorPaletteProviderFingerprint.scopedMatchAll()
     requireExactlyOne("X-Lite dynamic color-scale provider", providerMatches)
     val provider = providerMatches.single().method
     val paletteInterfaceDescriptor = provider.returnType
@@ -520,6 +523,7 @@ context(context: BytecodePatchContext)
 private fun patchInlineActionTints() {
     val inlineActionEntryMatches =
         Fingerprint(
+            definingClass = "Lcom/x/models/",
             name = "toString",
             returnType = "Ljava/lang/String;",
             parameters = emptyList(),
@@ -527,7 +531,7 @@ private fun patchInlineActionTints() {
                 string("InlineActionEntry(actionType="),
                 string(", isEnabled="),
             ),
-        ).matchAll()
+        ).scopedMatchAll()
     requireExactlyOne("X-Lite inline action entry model", inlineActionEntryMatches)
     val inlineActionEntryMatch = inlineActionEntryMatches.single()
     val inlineActionEntryClass = inlineActionEntryMatch.originalClassDef
@@ -562,7 +566,7 @@ private fun patchInlineActionTints() {
                 fieldAccess(opcode = Opcode.IGET_OBJECT, reference = actionTypeField),
                 fieldAccess(opcode = Opcode.IGET_BOOLEAN, reference = enabledField),
             ),
-        ).matchAll()
+        ).scopedMatchAll()
     requireExactlyOne("X-Lite inline action entry renderer", entryMatches)
     val entryMethod = entryMatches.single().method
     val tintReference =

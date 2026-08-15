@@ -12,6 +12,7 @@ import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.timeline.fieldForToStringLabel
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.INLINE_ACTION_FILTER_DESCRIPTOR
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -20,6 +21,7 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import app.morphe.util.cloneMutable
 import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
@@ -31,10 +33,11 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private object CanonicalPostFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
     name = "toString",
     returnType = "Ljava/lang/String;",
     parameters = emptyList(),
-    strings = listOf("CanonicalPost(id=", ", inlineActionEntry="),
+    filters = listOf(string("CanonicalPost(id="), string(", inlineActionEntry=")),
 )
 
 internal lateinit var xLiteInlineActionBarClassType: String
@@ -86,10 +89,11 @@ val customizeXLiteInlineActionsPatch =
         execute {
             val inlineActionEntryMatch =
                 Fingerprint(
+                    definingClass = "Lcom/x/models/",
                     name = "toString",
                     returnType = "Ljava/lang/String;",
                     parameters = emptyList(),
-                    strings = listOf("InlineActionEntry(actionType=", ", isEnabled="),
+                    filters = listOf(string("InlineActionEntry(actionType="), string(", isEnabled=")),
                 ).requireSingle("inline-action entry model")
             xLiteInlineActionEntryType = inlineActionEntryMatch.originalClassDef.type
             xLitePostActionType =
@@ -97,10 +101,11 @@ val customizeXLiteInlineActionsPatch =
 
             val contextualPostMatch =
                 Fingerprint(
+                    definingClass = "Lcom/x/models/",
                     name = "toString",
                     returnType = "Ljava/lang/String;",
                     parameters = emptyList(),
-                    strings = listOf("ContextualPost(canonicalPost=", ", quotedPost="),
+                    filters = listOf(string("ContextualPost(canonicalPost="), string(", quotedPost=")),
                 ).requireSingle("contextual post model")
 
             val canonicalPostMatch = CanonicalPostFingerprint.requireSingle("canonical post model")
@@ -133,7 +138,7 @@ val customizeXLiteInlineActionsPatch =
                             ),
                             methodCall(smali = "Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z"),
                         ),
-                ).matchAll()
+                ).scopedMatchAll()
             if (matches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite inline action state builder, found ${matches.size}: " +
@@ -221,7 +226,7 @@ private fun app.morphe.patcher.Match.fieldForFirstToStringValue(): com.android.t
 
 context(_: BytecodePatchContext)
 private fun Fingerprint.requireSingle(label: String): app.morphe.patcher.Match {
-    val matches = matchAll()
+    val matches = scopedMatchAll()
     if (matches.size == 1) return matches.single()
     throw PatchException(
         "Expected one X-Lite $label, found ${matches.size}: " +

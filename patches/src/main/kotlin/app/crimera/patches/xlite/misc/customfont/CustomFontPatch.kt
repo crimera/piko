@@ -15,6 +15,8 @@ import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.FONT_CLASS
 import app.crimera.patches.xlite.utils.Constants.FONT_UPDATE_DESCRIPTOR
+import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -144,14 +146,22 @@ val customFontPatch =
         }
 
         execute {
-            val paragraphMethod = composeParagraphTypefaceFingerprint.method
+            val paragraphMatches = composeParagraphTypefaceFingerprint.scopedMatchAll()
+            if (paragraphMatches.size != 1) {
+                throw PatchException(
+                    "Expected one X-Lite Compose paragraph typeface anchor, found " +
+                        paragraphMatches.joinToString { it.originalMethod.toString() },
+                )
+            }
+            val paragraphMatch = paragraphMatches.single()
+            val paragraphMethod = paragraphMatch.method
             if (paragraphMethod.name != "<init>" || paragraphMethod.parameterTypes.size != 6) {
                 throw PatchException(
                     "X-Lite compose paragraph typeface anchor is not the expected intrinsics " +
                         "constructor: ${paragraphMethod}",
                 )
             }
-            val setTypefaceIndex = composeParagraphTypefaceFingerprint.instructionMatches.last().index
+            val setTypefaceIndex = paragraphMatch.instructionMatches.last().index
             val setTypeface = paragraphMethod.instructions.getOrNull(setTypefaceIndex)
             if (setTypeface?.opcode != Opcode.INVOKE_VIRTUAL) {
                 throw PatchException("X-Lite compose paragraph typeface anchor is not invoke-virtual")
@@ -164,7 +174,7 @@ val customFontPatch =
                 """.trimIndent(),
             )
 
-            val spanMatches = ComposeSpanTypefaceFingerprint.matchAllOrNull().orEmpty()
+            val spanMatches = ComposeSpanTypefaceFingerprint.scopedMatchAllOrNull().orEmpty()
             val spanMethodNames = spanMatches.map { it.method.name }.toSet()
             if (spanMatches.size != 2 || spanMethodNames != setOf("updateDrawState", "updateMeasureState")) {
                 throw PatchException(

@@ -11,6 +11,7 @@ import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -18,6 +19,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.AccessFlags
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
@@ -55,7 +57,7 @@ val xLiteHideAiGeneratedPostsPatch =
             val accessors = resolveAiDisclosureAccessors()
             patchAiDisclosureAccessors(accessors)
 
-            val matches = XLiteTimelineSuccessFingerprint.matchAll()
+            val matches = XLiteTimelineSuccessFingerprint.scopedMatchAll()
             if (matches.size != 1) {
                 throw PatchException(
                     "Expected one X-Lite timeline success constructor, found ${matches.size}: " +
@@ -87,29 +89,27 @@ private const val HAS_AI_DISCLOSURE_HELPER = "hasAiGeneratedDisclosure"
 private const val SOURCE_HELPER = "getAiDetectionSource"
 
 private object ContextualPostModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
     name = "toString",
     returnType = "Ljava/lang/String;",
     parameters = emptyList(),
-    strings = listOf("ContextualPost(canonicalPost=", ", quotedPost="),
+    filters = listOf(string("ContextualPost(canonicalPost="), string(", quotedPost=")),
 )
 
 private object CanonicalPostModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
     name = "toString",
     returnType = "Ljava/lang/String;",
     parameters = emptyList(),
-    strings = listOf("CanonicalPost(id=", ", contentDisclosure="),
+    filters = listOf(string("CanonicalPost(id="), string(", contentDisclosure=")),
 )
 
 private object ContentDisclosureModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
     name = "toString",
     returnType = "Ljava/lang/String;",
     parameters = emptyList(),
-    strings =
-        listOf(
-            "ContentDisclosure(hasPaidPromotionDisclosure=",
-            ", hasAIGeneratedDisclosure=",
-            ", aiGeneratedDetectionSource=",
-        ),
+    filters = listOf(string("ContentDisclosure(hasPaidPromotionDisclosure=")),
 )
 
 private data class AiDisclosureAccessors(
@@ -125,7 +125,8 @@ private data class AiDisclosureAccessors(
 
 context(context: BytecodePatchContext)
 private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
-    val contentDisclosureMatches = ContentDisclosureModelFingerprint.matchAll()
+    val contentDisclosureMatches =
+        ContentDisclosureModelFingerprint.scopedMatchAll()
     if (contentDisclosureMatches.size != 1) {
         throw PatchException(
             "Expected one X-Lite content disclosure model, found ${contentDisclosureMatches.size}: " +
@@ -281,7 +282,7 @@ private fun app.morphe.patcher.util.proxy.mutableTypes.MutableClass.makePublic(f
 
 context(_: BytecodePatchContext)
 private fun Fingerprint.requireSingle(target: String): Match {
-    val matches = matchAll()
+    val matches = scopedMatchAll()
     if (matches.size == 1) return matches.single()
     throw PatchException(
         "Expected one X-Lite $target, found ${matches.size}: " +
