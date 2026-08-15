@@ -89,6 +89,8 @@
     <string name="piko_vsm_no_mentions">No mentions on this story</string>
     <string name="piko_disable_story_flipping">Disable story flipping</string>
     <string name="piko_disable_story_flipping_desc">Disable automatic flipping/moving to next story</string>
+    <string name="piko_loop_story">Loop story</string>
+    <string name="piko_loop_story_desc">Replay the current story when it ends</string>
     <string name="piko_disable_video_autoplay">Disable video autoplay</string>
     <string name="piko_stories_audio_autoplay">Stories audio autoplay</string>
     <string name="piko_customise_story_timestamp">Customise story timestamp</string>
