@@ -67,7 +67,7 @@ public class ButtonPref extends Preference {
                         ActivityHook.launchFragment((Activity) context, key);
                         
                     } else if (key.equals("piko_reset_pref")) {
-                        InstaUtils.deletePref();
+                        InstaUtils.showResetSettingsDialog(context);
 
                     } else if (key.equals("piko_delete_analytics_cache")) {
                         Block.deleteAnalyticsCacheFolder();
