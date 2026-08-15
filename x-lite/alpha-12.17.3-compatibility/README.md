@@ -22,7 +22,7 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Inline download button](patches/inline-download-button.md) | Inline models/getters and icon renderer changed; old extension types failed verification | Runtime-tested on alpha: action, icon, and download working |
 | [Hide new posts pill](patches/hide-new-posts-pill.md) | Previous renderer signature referenced the unobfuscated `TimelineShowAlert` model | Runtime-tested on alpha: working |
 | [Hide compose button](patches/hide-compose-button.md) | Renderer owner and method changed from obfuscated `g0->a` to `n->c` | Runtime-tested on alpha: working |
-| [Open canonical URLs](patches/open-canonical-urls.md) | Alpha removed the old URL/contextual-post model descriptors and getters | Ported in `33f9bbbf1`; user-verified on alpha: working |
+| [Open canonical URLs](patches/open-canonical-urls.md) | Alpha removed the old URL/contextual-post model descriptors and getters; legacy cards use a separate URL action path | Text-link path user-verified; card path runtime-tested and working |
 | [Feature switch overrides](patches/feature-switch-overrides.md) | The old DNS-string fingerprint no longer identified the alpha repository, and alpha added `peek*` accessors | Patch-applied and final-Dex verified; runtime pending device |
 | [Dynamic color](patches/dynamic-color.md) | Alpha merged palette factories and obfuscated inline-action/Compose contracts | Ported in `e626cd29f`; runtime-confirmed; full behavior matrix pending |
 | [Show sensitive media](patches/show-sensitive-media.md) | Stable media-visibility getter disappeared; alpha retains semantic model labels but uses obfuscated fields | Patch-applied and final-Dex verified; runtime pending device |
@@ -34,6 +34,24 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Hide premium upsell](patches/hide-premium-upsell.md) | Obfuscated SubscriptionsFeatures replaced by Compose home scaffold chip hook | Ported; patch-applied and final-APK verified |
 | [Share post as image](patches/share-post-as-image.md) | Obfuscated PostActionType, Presenter, and PostIdentifier; icon injection moved to common path | Ported; patch-applied and final-APK verified |
 | [Browse tweet object](patches/browse-tweet-object.md) | Obfuscated PostActionType, Presenter, and UrtTimelinePost model; multi-option icon chaining | Ported; patch-applied and final-APK verified |
+
+## Shared resolver and runtime-safety pass
+
+The current source now keeps release-specific model discovery in two context-scoped immutable seams:
+
+- `patches/src/main/kotlin/app/crimera/patches/xlite/models/TimelineModels.kt` resolves the timeline post, module, module-item, and vertical-conversation graph once per patch context.
+- `patches/src/main/kotlin/app/crimera/patches/xlite/models/PostModels.kt` resolves contextual/canonical post and inline-action facts once per patch context.
+- `SemanticIntrospection.kt` owns data-class label extraction, boolean-label extraction, field visibility, bridge injection, and cardinality errors.
+- Feature patches retain direct indexed owner lookups and consume immutable descriptors/references; no mutable match objects are retained across mutations.
+- Timeline filtering now lazily allocates reconstruction lists, returns unchanged input collections, avoids arbitrary model `toString()` checks, and preserves direct generated bridges.
+- Inline action identity, presenter-post access, canonical-post access, and media access use patch-time direct bridges. `ToStringParser` remains a cold-path fallback for download identity/media extraction.
+
+Validation against the exact `com.twitter.android` `12.17.3-alpha.01` APK:
+
+- `:extensions:xlite:test`: passed.
+- `:patches:build`: passed.
+- Exclusive `Customize inline actions`, `Remove ads`, `Open canonical URLs`, and `Inline download button` patches: applied and signed successfully.
+- The 24-patch X-Lite production set in `patch-twitter.sh`: all 24 patches applied and signed successfully.
 
 ## Alpha mappings observed
 
@@ -63,7 +81,7 @@ These names are analysis evidence only. Production extension signatures must not
 - User and agent runtime-verified the alpha inline-download action: normal-size download icon appears on media posts, native actions remain usable, and tapping it saves media successfully.
 - Agent runtime-verified Restore timeline position on the alpha: a scrolled For You timeline restored the same item/position after force-stop and relaunch, with no current-process runtime exceptions.
 - User applied the ported Customize navigation bar items patch on the alpha and confirmed it works.
-- User verified the ported Open canonical URLs patch on the alpha and confirmed it works.
+- User verified the ported Open canonical URLs text-link path on the alpha. Agent runtime-tested the legacy-card path on the exact repro; it opened `https://www.pixiv.net/artworks/62233260`.
 - User confirmed the dynamic-color feature works on-device; the full light/dark/AMOLED, inline-action tint, dynamic-like, and restart-persistence matrix remains pending.
 - Feature switch overrides were independently patch-applied and final-Dex verified on the alpha; runtime/UI verification remains pending because no ADB device was connected.
 

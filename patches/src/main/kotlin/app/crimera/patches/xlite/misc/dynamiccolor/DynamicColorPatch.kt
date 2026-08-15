@@ -20,7 +20,9 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.addInstructionsAtControlFlowLabel
+import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
+import app.morphe.util.numberOfParameterRegisters
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22t
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
@@ -37,6 +39,8 @@ private const val ACCENT_TONE_COUNT = 13
 private const val COLOR_SCALE_COUNT = 10
 private const val EXPECTED_FACTORY_COUNT = 3
 private const val REQUIRED_FACTORY_REGISTER_COUNT = 37
+private const val ACCENT_SETTINGS_SCRATCH_REGISTER_COUNT = 3
+private const val ACCENT_SETTINGS_SNAPSHOT_INSTRUCTION_COUNT = 2
 private const val FUNCTION0_DESCRIPTOR = "Lkotlin/jvm/functions/Function0;"
 private const val DYNAMIC_COLOR_PALETTE_DESCRIPTOR =
     "$EXTENSION_PACKAGE/theme/DynamicColorPalette;"
@@ -55,6 +59,11 @@ private data class ResolvedFactory(
     val kind: PaletteKind,
     val method: MutableMethod,
     val paletteAllocationIndex: Int,
+)
+
+private data class ExpandedAccentConstructor(
+    val method: MutableMethod,
+    val scratchRegisterStart: Int,
 )
 
 @Suppress("unused")
@@ -469,8 +478,18 @@ private fun patchDynamicAccentPalettes() {
         standardAccentFields
             .mapIndexed { tone, field -> field.toString() to tone }
             .toMap()
-    standardConstructor.injectDynamicAccentTones(tonesByField)
-    darkConstructor.injectDynamicAccentTones(tonesByField)
+    val expandedStandard =
+        standardConstructor.expandForDynamicAccentTones(standardDescriptor)
+    val expandedDark =
+        darkConstructor.expandForDynamicAccentTones(darkDescriptor)
+    expandedStandard.method.injectDynamicAccentTones(
+        tonesByField,
+        expandedStandard.scratchRegisterStart,
+    )
+    expandedDark.method.injectDynamicAccentTones(
+        tonesByField,
+        expandedDark.scratchRegisterStart,
+    )
 }
 
 context(context: BytecodePatchContext)
@@ -487,6 +506,27 @@ private fun resolveNoArgConstructor(descriptor: String): MutableMethod {
     throw PatchException(
         "Expected one no-argument X-Lite dynamic palette constructor for $descriptor, found " +
             "${constructors.size}: ${constructors.joinToString()}",
+    )
+}
+
+context(context: BytecodePatchContext)
+private fun MutableMethod.expandForDynamicAccentTones(
+    ownerDescriptor: String,
+): ExpandedAccentConstructor {
+    val originalRegisterCount =
+        implementation?.registerCount
+            ?: throw PatchException("X-Lite dynamic accent constructor has no implementation: $this")
+    val expandedMethod =
+        cloneMutable(
+            additionalRegisters =
+                numberOfParameterRegisters + ACCENT_SETTINGS_SCRATCH_REGISTER_COUNT,
+        )
+    val owner = context.mutableClassDefBy(ownerDescriptor)
+    owner.methods.remove(this)
+    owner.methods.add(expandedMethod)
+    return ExpandedAccentConstructor(
+        method = expandedMethod,
+        scratchRegisterStart = originalRegisterCount,
     )
 }
 
@@ -703,7 +743,10 @@ private fun MutableMethod.injectLottieFallbackTint(activeLikeField: FieldReferen
     )
 }
 
-private fun MutableMethod.injectDynamicAccentTones(tonesByField: Map<String, Int>) {
+private fun MutableMethod.injectDynamicAccentTones(
+    tonesByField: Map<String, Int>,
+    scratchRegisterStart: Int,
+) {
     val toneLoads =
         instructions.withIndex().mapNotNull { indexed ->
             if (indexed.value.opcode != Opcode.SGET_WIDE) return@mapNotNull null
@@ -717,9 +760,25 @@ private fun MutableMethod.injectDynamicAccentTones(tonesByField: Map<String, Int
         )
     }
 
-    if (implementation == null) {
-        throw PatchException("X-Lite dynamic palette constructor has no implementation: $this")
+    val enabledRegister = scratchRegisterStart + 2
+    val registerCount =
+        implementation?.registerCount
+            ?: throw PatchException("X-Lite dynamic palette constructor has no implementation: $this")
+    if (enabledRegister >= registerCount) {
+        throw PatchException(
+            "X-Lite dynamic accent settings snapshot register v$enabledRegister is out of bounds " +
+                "for $this with $registerCount registers",
+        )
     }
+
+    val firstToneIndex = toneLoads.minOf { (index, _, _) -> index }
+    addInstructions(
+        firstToneIndex,
+        """
+            invoke-static {}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->isEnabled()Z
+            move-result v$enabledRegister
+        """.trimIndent(),
+    )
 
     toneLoads.asReversed().forEach { (index, instruction, tone) ->
         val colorRegister =
@@ -731,9 +790,10 @@ private fun MutableMethod.injectDynamicAccentTones(tonesByField: Map<String, Int
             )
         }
         addInstructions(
-            index + 1,
+            index + ACCENT_SETTINGS_SNAPSHOT_INSTRUCTION_COUNT + 1,
             """
-            invoke-static {v$colorRegister, v${colorRegister + 1}}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->accentTone$tone(J)J
+            move-wide/from16 v$scratchRegisterStart, v$colorRegister
+            invoke-static/range {v$scratchRegisterStart .. v$enabledRegister}, $DYNAMIC_COLOR_PALETTE_DESCRIPTOR->accentTone$tone(JZ)J
             move-result-wide v$colorRegister
             """.trimIndent(),
         )

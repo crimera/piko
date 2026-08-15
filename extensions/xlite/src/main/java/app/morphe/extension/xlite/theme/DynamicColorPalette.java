@@ -106,61 +106,61 @@ public final class DynamicColorPalette {
         return !isLikeThemingEnabled() && originalValue;
     }
 
-    public static long accentTone0(long originalColor) {
-        return accentTone(0, originalColor);
+    public static long accentTone0(long originalColor, boolean enabled) {
+        return accentTone(0, originalColor, enabled);
     }
 
-    public static long accentTone1(long originalColor) {
-        return accentTone(1, originalColor);
+    public static long accentTone1(long originalColor, boolean enabled) {
+        return accentTone(1, originalColor, enabled);
     }
 
-    public static long accentTone2(long originalColor) {
-        return accentTone(2, originalColor);
+    public static long accentTone2(long originalColor, boolean enabled) {
+        return accentTone(2, originalColor, enabled);
     }
 
-    public static long accentTone3(long originalColor) {
-        return accentTone(3, originalColor);
+    public static long accentTone3(long originalColor, boolean enabled) {
+        return accentTone(3, originalColor, enabled);
     }
 
-    public static long accentTone4(long originalColor) {
-        return accentTone(4, originalColor);
+    public static long accentTone4(long originalColor, boolean enabled) {
+        return accentTone(4, originalColor, enabled);
     }
 
-    public static long accentTone5(long originalColor) {
-        return accentTone(5, originalColor);
+    public static long accentTone5(long originalColor, boolean enabled) {
+        return accentTone(5, originalColor, enabled);
     }
 
-    public static long accentTone6(long originalColor) {
-        return accentTone(6, originalColor);
+    public static long accentTone6(long originalColor, boolean enabled) {
+        return accentTone(6, originalColor, enabled);
     }
 
-    public static long accentTone7(long originalColor) {
-        return accentTone(7, originalColor);
+    public static long accentTone7(long originalColor, boolean enabled) {
+        return accentTone(7, originalColor, enabled);
     }
 
-    public static long accentTone8(long originalColor) {
-        return accentTone(8, originalColor);
+    public static long accentTone8(long originalColor, boolean enabled) {
+        return accentTone(8, originalColor, enabled);
     }
 
-    public static long accentTone9(long originalColor) {
-        return accentTone(9, originalColor);
+    public static long accentTone9(long originalColor, boolean enabled) {
+        return accentTone(9, originalColor, enabled);
     }
 
-    public static long accentTone10(long originalColor) {
-        return accentTone(10, originalColor);
+    public static long accentTone10(long originalColor, boolean enabled) {
+        return accentTone(10, originalColor, enabled);
     }
 
-    public static long accentTone11(long originalColor) {
-        return accentTone(11, originalColor);
+    public static long accentTone11(long originalColor, boolean enabled) {
+        return accentTone(11, originalColor, enabled);
     }
 
-    public static long accentTone12(long originalColor) {
-        return accentTone(12, originalColor);
+    public static long accentTone12(long originalColor, boolean enabled) {
+        return accentTone(12, originalColor, enabled);
     }
 
     /** Replaces X-Lite's 13-step blue ramp while retaining its original pre-Android-12 value. */
-    private static long accentTone(int tone, long originalColor) {
-        if (!isEnabled()) return originalColor;
+    private static long accentTone(int tone, long originalColor, boolean enabled) {
+        if (!enabled) return originalColor;
 
         String resourceName = switch (tone) {
             case 0 -> "material_dynamic_primary100";

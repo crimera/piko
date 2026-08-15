@@ -78,10 +78,27 @@ internal object SettingsRegistrationState {
 
     @Synchronized
     fun prepare(context: BytecodePatchContext, loadMethod: MutableMethod) {
+        val originalFirstInstruction =
+            loadMethod.instructions.firstOrNull()
+                ?: error("X-Lite settings registry load target has no instructions")
+        val sizeBefore = loadMethod.instructions.size
+        loadMethod.addInstructionsWithLabels(
+            0,
+            """
+                invoke-static {}, $SETTINGS_REGISTRY_DESCRIPTOR->isLoaded()Z
+                move-result v0
+                if-nez v0, :piko_xlite_settings_registration_done
+            """.trimIndent(),
+            ExternalLabel(
+                "piko_xlite_settings_registration_done",
+                originalFirstInstruction,
+            ),
+        )
         states[context] =
             ContextState(
                 loadMethod = WeakReference(loadMethod),
                 groupTracker = SettingsGroupRegistrationTracker(),
+                nextRegistrationIndex = loadMethod.instructions.size - sizeBefore,
             )
     }
 

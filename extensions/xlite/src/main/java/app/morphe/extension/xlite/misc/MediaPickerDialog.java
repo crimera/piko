@@ -58,25 +58,26 @@ public final class MediaPickerDialog {
 
         boolean hasMultiple = downloads.size() > 1;
         boolean showCopyLinkButton = showCopyLinkButton();
+        Theme.SettingsSnapshot themeSettings = Theme.snapshot();
 
         // Add individual media rows
         for (int i = 0; i < downloads.size(); i++) {
             final int selectedIndex = i;
             InlineDownloadButton.DownloadItem item = downloads.get(i);
 
-            ListItem itemRow = new ListItem(current);
+            ListItem itemRow = new ListItem(current, themeSettings);
             itemRow.setTitle(item.label + (hasMultiple ? " " + (i + 1) : ""));
 
             itemRow.setSubtitle(null);
 
             IconView.IconType iconType = resolveIconType(item);
-            int primaryAccent = Theme.primaryAccent(current);
-            itemRow.setLeadingIcon(iconType, primaryAccent, Theme.surfaceVariant(current));
+            int primaryAccent = themeSettings.primaryAccent(current);
+            itemRow.setLeadingIcon(iconType, primaryAccent, themeSettings.surfaceVariant(current));
 
             if (showCopyLinkButton) {
                 View copyLinkButton = itemRow.createTrailingIconButton(
                         IconView.IconType.COPY_LINK,
-                        Theme.secondaryText(current),
+                        themeSettings.secondaryText(current),
                         v -> {
                             dialog.dismiss();
                             Utils.setClipboard(item.url);

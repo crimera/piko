@@ -221,6 +221,8 @@ public final class SettingsRegistry {
 
     /** Patches inject contribution registration calls at the start of this method. */
     public static synchronized void load() {
+        if (frozen) return;
+
         Object register0 = null;
         Object register1 = null;
         Object register2 = null;
@@ -236,6 +238,10 @@ public final class SettingsRegistry {
             Logger.printException(() -> "Failed to initialize X-Lite settings", exception);
             throw exception;
         }
+    }
+
+    public static synchronized boolean isLoaded() {
+        return frozen;
     }
 
     public static synchronized List<SettingsNode.Category> catalog() {

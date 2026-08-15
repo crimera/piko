@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
  */
 public class ListItem extends LinearLayout {
 
+    private final Theme.SettingsSnapshot themeSettings;
     private FrameLayout leadingContainer;
     private IconView leadingIconView;
     private LinearLayout textContainer;
@@ -31,7 +32,15 @@ public class ListItem extends LinearLayout {
     private FrameLayout trailingContainer;
 
     public ListItem(Context context) {
+        this(context, Theme.snapshot());
+    }
+
+    public ListItem(Context context, Theme.SettingsSnapshot themeSettings) {
         super(context);
+        if (themeSettings == null) {
+            throw new IllegalArgumentException("Theme settings snapshot is required");
+        }
+        this.themeSettings = themeSettings;
         init();
     }
 
@@ -49,7 +58,7 @@ public class ListItem extends LinearLayout {
         GradientDrawable mask = new GradientDrawable();
         mask.setColor(Color.BLACK);
         RippleDrawable ripple = new RippleDrawable(
-                ColorStateList.valueOf(Theme.rippleColor(context)),
+                ColorStateList.valueOf(themeSettings.rippleColor(context)),
                 null,
                 mask
         );
@@ -66,7 +75,7 @@ public class ListItem extends LinearLayout {
 
         GradientDrawable badgeBg = new GradientDrawable();
         badgeBg.setCornerRadius(Theme.dpToPx(context, 12f));
-        badgeBg.setColor(Theme.surfaceVariant(context));
+        badgeBg.setColor(themeSettings.surfaceVariant(context));
         leadingContainer.setBackground(badgeBg);
 
         leadingIconView = new IconView(context);
@@ -91,14 +100,14 @@ public class ListItem extends LinearLayout {
         titleView = new TextView(context);
         titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
         titleView.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        titleView.setTextColor(Theme.primaryText(context));
+        titleView.setTextColor(themeSettings.primaryText(context));
         titleView.setSingleLine(true);
         titleView.setEllipsize(TextUtils.TruncateAt.END);
         textContainer.addView(titleView);
 
         subtitleView = new TextView(context);
         subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        subtitleView.setTextColor(Theme.secondaryText(context));
+        subtitleView.setTextColor(themeSettings.secondaryText(context));
         subtitleView.setSingleLine(true);
         subtitleView.setEllipsize(TextUtils.TruncateAt.END);
         subtitleView.setPadding(0, Theme.dpToPx(context, 2f), 0, 0);
@@ -137,7 +146,9 @@ public class ListItem extends LinearLayout {
 
         GradientDrawable badgeBg = new GradientDrawable();
         badgeBg.setCornerRadius(Theme.dpToPx(getContext(), 12f));
-        badgeBg.setColor(containerBgColor != null ? containerBgColor : Theme.surfaceVariant(getContext()));
+        badgeBg.setColor(containerBgColor != null
+                ? containerBgColor
+                : themeSettings.surfaceVariant(getContext()));
         leadingContainer.setBackground(badgeBg);
     }
 
@@ -161,7 +172,7 @@ public class ListItem extends LinearLayout {
         mask.setShape(GradientDrawable.OVAL);
         mask.setColor(Color.BLACK);
         RippleDrawable ripple = new RippleDrawable(
-                ColorStateList.valueOf(Theme.rippleColor(context)),
+                ColorStateList.valueOf(themeSettings.rippleColor(context)),
                 null,
                 mask
         );

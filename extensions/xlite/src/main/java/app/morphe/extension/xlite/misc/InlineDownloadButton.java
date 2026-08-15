@@ -483,8 +483,17 @@ public final class InlineDownloadButton {
         int queued = 0;
         int skipped = 0;
         int failed = 0;
+        ConflictBehavior behavior = conflictBehavior();
         for (int index = 0; index < downloads.size(); index++) {
-            switch (enqueueDownload(context, downloads.get(index), username, postId, index, downloads.size())) {
+            switch (enqueueDownload(
+                    context,
+                    downloads.get(index),
+                    username,
+                    postId,
+                    index,
+                    downloads.size(),
+                    behavior
+            )) {
                 case QUEUED -> queued++;
                 case SKIPPED -> skipped++;
                 case FAILED -> failed++;
@@ -502,7 +511,15 @@ public final class InlineDownloadButton {
             int mediaCount
     ) {
         EnqueueState state =
-                enqueueDownload(context, download, username, postId, index, mediaCount);
+                enqueueDownload(
+                        context,
+                        download,
+                        username,
+                        postId,
+                        index,
+                        mediaCount,
+                        conflictBehavior()
+                );
         switch (state) {
             case QUEUED -> Utils.showToastShort("Download started");
             case SKIPPED -> Utils.showToastShort("Already downloaded or queued");
@@ -516,7 +533,8 @@ public final class InlineDownloadButton {
             String username,
             String postId,
             int index,
-            int mediaCount
+            int mediaCount,
+            ConflictBehavior behavior
     ) {
         if (!XLiteUtils.isHttpUrl(download.url)) return EnqueueState.FAILED;
 
@@ -526,7 +544,7 @@ public final class InlineDownloadButton {
         String baseFileName = downloadFileName(username, postId, download.extension, index, mediaCount);
         String fileName;
         try {
-            fileName = resolveTargetFileName(context, baseFileName, conflictBehavior());
+            fileName = resolveTargetFileName(context, baseFileName, behavior);
         } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to resolve X-Lite download target", exception);
             return EnqueueState.FAILED;
