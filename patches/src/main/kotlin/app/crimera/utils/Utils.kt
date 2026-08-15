@@ -157,9 +157,10 @@ fun Fingerprint.changeString(
             (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
                 it.getReference<StringReference>()?.string == sentinel
         }
-    val register = (instruction as OneRegisterInstruction).registerA
+    val register = instruction.registersUsed[0]
     method.replaceInstruction(instruction.location.index, "const-string v$register, \"$value\"")
 }
+
 context(patchContext: BytecodePatchContext)
 fun Fingerprint.changeFirstString(value: String) {
     changeStringAt(0, value)
