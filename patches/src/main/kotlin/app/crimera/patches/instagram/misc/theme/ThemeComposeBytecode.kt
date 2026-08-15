@@ -6,6 +6,8 @@
 
 package app.crimera.patches.instagram.misc.theme
 
+import app.crimera.patches.shared.declaredParameterRegister
+import app.crimera.patches.shared.parameterRegisterStart
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -35,7 +37,7 @@ internal fun installComposeNativeThemeModeSync() {
     val composerType =
         method.parameterTypes.firstOrNull()?.toString()
             ?: throw PatchException("Compose dark-mode section has no composer parameter")
-    val composerRegister = firstParameterRegister(method)
+    val composerRegister = parameterRegisterStart(method)
     val settingRows =
         findSettingRowCalls(
             method = method,
@@ -57,7 +59,7 @@ internal fun installComposeNativeThemeModeSync() {
             ?: throw PatchException(
                 "Expected one Compose native theme callback, found ${callbackParameters.size}",
             )
-    val callbackRegister = parameterRegister(method, callbackParameter)
+    val callbackRegister = declaredParameterRegister(method, callbackParameter)
     if (callbackRegister !in 0..0xf) {
         throw PatchException("Compose native theme callback requires a 4-bit register")
     }
@@ -195,20 +197,4 @@ private fun findSettingRowCalls(
     }
 
     return candidates.single()
-}
-
-private fun parameterRegister(
-    method: MutableMethod,
-    parameterIndex: Int,
-): Int {
-    if (parameterIndex !in method.parameterTypes.indices) {
-        throw PatchException(
-            "Could not derive parameter register $parameterIndex for " +
-                "${method.definingClass}->${method.name}",
-        )
-    }
-    return firstParameterRegister(method) +
-        method.parameterTypes.take(parameterIndex).sumOf { type ->
-            if (type == "J" || type == "D") 2 else 1
-        }
 }

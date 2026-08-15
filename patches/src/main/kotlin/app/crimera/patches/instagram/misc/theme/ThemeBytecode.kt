@@ -8,6 +8,7 @@ package app.crimera.patches.instagram.misc.theme
 
 import app.crimera.patches.instagram.misc.extension.hooks.instagramInitHook
 import app.crimera.patches.instagram.misc.settings.IgFragmentActivityOnCreate
+import app.crimera.patches.shared.parameterRegisterStart
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -189,24 +190,6 @@ internal fun MutableMethod.invokeCalls(): List<InvokeCall> =
         )
     }
 
-internal fun firstParameterRegister(method: MutableMethod): Int {
-    val implementation =
-        method.implementation
-            ?: throw PatchException("${method.name} has no implementation")
-    val parameterRegisterCount =
-        method.parameterTypes.sumOf { type ->
-            if (type == "J" || type == "D") 2 else 1
-        } + if (AccessFlags.STATIC.isSet(method.accessFlags)) 0 else 1
-    val firstParameterRegister = implementation.registerCount - parameterRegisterCount
-    if (firstParameterRegister < 0) {
-        throw PatchException(
-            "Invalid register count for ${method.definingClass}->${method.name}",
-        )
-    }
-
-    return firstParameterRegister
-}
-
 internal fun String.isObjectDescriptor(): Boolean =
     length >= 3 && startsWith("L") && endsWith(";")
 
@@ -296,7 +279,7 @@ internal fun findLegacyBinding(method: MutableMethod): LegacyBinding? {
                 listOf(COLLECTION_DESCRIPTOR) ||
                 bindReference.definingClass == method.definingClass ||
                 bindRegisters.size != 2 ||
-                bindRegisters[0] != firstParameterRegister(method) ||
+                bindRegisters[0] != parameterRegisterStart(method) ||
                 bindRegisters[1] != addRegisters[0]
             ) {
                 return@mapNotNull null
