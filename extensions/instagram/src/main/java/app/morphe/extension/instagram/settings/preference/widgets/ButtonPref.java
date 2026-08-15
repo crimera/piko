@@ -7,6 +7,7 @@
 package app.morphe.extension.instagram.settings.preference.widgets;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.preference.Preference;
 import android.util.AttributeSet;
@@ -26,6 +27,8 @@ import app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.utils.InstaUtils;
+
+import static app.morphe.extension.instagram.utils.IgStr.str;
 
 public class ButtonPref extends Preference {
     private final Context context;
@@ -67,7 +70,7 @@ public class ButtonPref extends Preference {
                         ActivityHook.launchFragment((Activity) context, key);
                         
                     } else if (key.equals("piko_reset_pref")) {
-                        InstaUtils.deletePref();
+                        showResetSettingsDialog();
 
                     } else if (key.equals("piko_delete_analytics_cache")) {
                         Block.deleteAnalyticsCacheFolder();
@@ -96,6 +99,17 @@ public class ButtonPref extends Preference {
                 return true;
             }
         });
+    }
+
+    private void showResetSettingsDialog() {
+        new AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(context))
+                .setTitle(str("piko_reset_pref_confirm"))
+                .setNegativeButton(str("piko_cancel"), null)
+                .setPositiveButton(
+                        str("piko_ok"),
+                        (dialogInterface, which) -> InstaUtils.deletePref()
+                )
+                .show();
     }
 
     private static Runnable recreateActivityOnComplete(Context context) {
