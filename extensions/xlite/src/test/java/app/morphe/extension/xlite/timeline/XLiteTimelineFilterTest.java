@@ -20,6 +20,8 @@ import java.util.Set;
 public class XLiteTimelineFilterTest {
     private static final FakeModelAccess MODELS = new FakeModelAccess();
     private static final ThrowingModelAccess THROWING_MODELS = new ThrowingModelAccess();
+    private static final UnsupportedDisclosureModelAccess UNSUPPORTED_DISCLOSURE_MODELS =
+            new UnsupportedDisclosureModelAccess();
 
     @Test
     public void disabledFilterReturnsOriginalList() {
@@ -159,6 +161,23 @@ public class XLiteTimelineFilterTest {
                 MODELS
         );
         assertEquals(List.of(), filtered);
+    }
+
+    @Test
+    public void preservesPostWhenDisclosureModelVariantIsUnsupported() {
+        FakePost tombstone = post("tombstone");
+        FakeModule module = module("conversationthread-1", item(tombstone));
+        List<Object> input = items(module);
+
+        Object result = XLiteTimelineFilter.filterAiGeneratedPosts(
+                input,
+                Set.of("SourceNotIdentified"),
+                UNSUPPORTED_DISCLOSURE_MODELS
+        );
+
+        assertSame(input, result);
+        FakeModule preserved = (FakeModule) ((List<?>) result).get(0);
+        assertSame(tombstone, preserved.children.get(0).item);
     }
 
     @Test
@@ -463,6 +482,13 @@ public class XLiteTimelineFilterTest {
         }
         @Override Object getAiDetectionSource(Object disclosure) {
             return ((FakeDisclosure) disclosure).source;
+        }
+    }
+
+    private static final class UnsupportedDisclosureModelAccess extends FakeModelAccess {
+        @Override
+        Object getContentDisclosure(Object post) {
+            throw new ClassCastException("unsupported post-result variant");
         }
     }
 

@@ -26,7 +26,10 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import com.android.tools.smali.dexlib2.AccessFlags
+import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
+import app.morphe.util.numberOfParameterRegisters
+import app.morphe.util.numberOfParameterRegistersLogical
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
 @Suppress("unused")
@@ -188,6 +191,8 @@ private fun patchAiDisclosureAccessors(accessors: AiDisclosureAccessors) {
         name: String,
         parameters: String,
         returnType: String,
+        additionalRegisters: Int = 0,
+        replaceBody: Boolean = false,
         instructions: String,
     ) {
         val matches =
@@ -202,21 +207,57 @@ private fun patchAiDisclosureAccessors(accessors: AiDisclosureAccessors) {
                     "${matches.size}: ${matches.joinToString()}",
             )
         }
-        matches.single().addInstructions(0, instructions.trimIndent())
+
+        val originalMethod = matches.single()
+        val method =
+            if (additionalRegisters == 0) {
+                originalMethod
+            } else {
+                val clonedMethod =
+                    originalMethod.cloneMutable(
+                        additionalRegisters = originalMethod.numberOfParameterRegisters + additionalRegisters,
+                    )
+                filterClass.methods.remove(originalMethod)
+                filterClass.methods.add(clonedMethod)
+                clonedMethod
+            }
+        if (replaceBody) {
+            val implementation =
+                method.implementation
+                    ?: throw PatchException("X-Lite helper $name has no implementation")
+            while (implementation.instructions.isNotEmpty()) {
+                implementation.removeInstruction(implementation.instructions.lastIndex)
+            }
+            method.addInstructions(0, instructions.trimIndent())
+            return
+        }
+
+        val insertionIndex =
+            if (additionalRegisters == 0) 0 else originalMethod.numberOfParameterRegistersLogical
+        method.addInstructions(insertionIndex, instructions.trimIndent())
     }
 
     patchHelper(
         name = CONTENT_DISCLOSURE_HELPER,
         parameters = OBJECT_DESCRIPTOR,
         returnType = OBJECT_DESCRIPTOR,
+        additionalRegisters = 1,
+        replaceBody = true,
         instructions =
             """
-                check-cast p0, ${accessors.timelinePostDescriptor}
-                iget-object p0, p0, ${accessors.timelinePostResultField}
-                check-cast p0, ${accessors.contextualPostDescriptor}
-                iget-object p0, p0, ${accessors.contextualCanonicalPostField}
-                iget-object p0, p0, ${accessors.canonicalContentDisclosureField}
-                return-object p0
+                # Timeline post results are a sealed union; tombstones have no disclosure.
+                move-object/from16 v0, p0
+                check-cast v0, ${accessors.timelinePostDescriptor}
+                iget-object v0, v0, ${accessors.timelinePostResultField}
+                instance-of v1, v0, ${accessors.contextualPostDescriptor}
+                if-eqz v1, :piko_xlite_no_contextual_post_result
+                check-cast v0, ${accessors.contextualPostDescriptor}
+                iget-object v0, v0, ${accessors.contextualCanonicalPostField}
+                iget-object v0, v0, ${accessors.canonicalContentDisclosureField}
+                return-object v0
+                :piko_xlite_no_contextual_post_result
+                const/4 v0, 0x0
+                return-object v0
             """.trimIndent(),
     )
     patchHelper(
