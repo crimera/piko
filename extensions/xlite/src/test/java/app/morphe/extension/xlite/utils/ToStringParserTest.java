@@ -25,6 +25,16 @@ public final class ToStringParserTest {
                     "author=MinimalUser(id=1, screenName=pokorakun, name=pokorakun), " +
                     "legacyCard=null, rePostedPost=null)";
 
+    private static final String STRUCTURED_REPOST =
+            "ContextualPost(canonicalPost=CanonicalPost(id=2088334976651792559, " +
+                    "author=MinimalUser(id=9, screenName=retweeter, name=Retweeter), " +
+                    "media=[MediaContentImage(mediaId=1, sourceInfo=null)]), " +
+                    "quotedPost=null, rePostedPost=RePostedPost(" +
+                    "canonicalPost=CanonicalPost(id=2088221458740969716, " +
+                    "author=MinimalUser(id=1423483994084048906, screenName=hige_hurai, " +
+                    "name=Hige Hurai), media=[]), quotedPost=null), " +
+                    "tweetInterstitial=null)";
+
     @Test
     public void extractsPrimitiveField() {
         assertEquals("2088336364039184458", ToStringParser.fieldValue(REPOST_POST, "id"));
@@ -71,6 +81,15 @@ public final class ToStringParserTest {
         String entityList = ToStringParser.fieldValue(REPOST_POST, "entityList");
         String mentions = ToStringParser.fieldValue(entityList, "mentions");
         assertEquals("chachironi3", ToStringParser.fieldValue(mentions, "screenName"));
+    }
+
+    @Test
+    public void extractsOriginalAuthorFromStructuredRepost() {
+        String repostedPost = ToStringParser.fieldValue(STRUCTURED_REPOST, "rePostedPost");
+        String originalPost = ToStringParser.fieldValue(repostedPost, "canonicalPost");
+        String author = ToStringParser.fieldValue(originalPost, "author");
+        assertEquals("2088221458740969716", ToStringParser.fieldValue(originalPost, "id"));
+        assertEquals("hige_hurai", ToStringParser.fieldValue(author, "screenName"));
     }
 
     @Test

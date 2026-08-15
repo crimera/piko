@@ -261,32 +261,71 @@ public final class InlineDownloadButton {
     }
 
     private static String sourcePostId(Object post) {
-        Object canonicalPost = canonicalPost(post);
-        String text = canonicalPost == null ? null : canonicalPost.toString();
-        // Reposts mirror the original media, so the media's source post belongs
-        // to the original author; name the file after the original post.
-        if (hasRepostedMedia(text)) {
-            String sourcePostId = sourceMediaField(text, "sourcePostIdentifier");
-            if (sourcePostId != null) return safeFileSegment(sourcePostId, "post");
-            throw new PostIdentityException("Reposted media is missing its source post id");
+        String postText = postText(post);
+        String originalPostText = originalRepostedPostText(postText);
+        if (originalPostText != null) {
+            String originalPostId = ToStringParser.fieldValue(originalPostText, "id");
+            if (originalPostId != null) return safeFileSegment(originalPostId, "post");
+            throw unresolvedIdentity("Reposted post is missing its original post id", postText);
         }
-        return safeFileSegment(ToStringParser.fieldValue(text, "id"), "post");
+
+        if (hasRepostedMedia(postText)) {
+            String sourcePostId = sourceMediaField(postText, "sourcePostIdentifier");
+            if (sourcePostId != null) return safeFileSegment(sourcePostId, "post");
+            throw unresolvedIdentity("Reposted media is missing its source post id", postText);
+        }
+
+        String canonicalText = canonicalPostText(post);
+        String postId = ToStringParser.fieldValue(canonicalText, "id");
+        if (postId != null) return safeFileSegment(postId, "post");
+        throw unresolvedIdentity("Could not resolve the post id", postText);
     }
 
     private static String sourceUsername(Object post) {
-        Object canonicalPost = canonicalPost(post);
-        String text = canonicalPost == null ? null : canonicalPost.toString();
-        // Reposted media carries a sourceInfo pointing at the original post;
-        // name the file after the original author's screen name (the first
-        // mention of the "RT @name:" text) and fail if it cannot be resolved.
-        if (hasRepostedMedia(text)) {
-            String sourceScreenName = firstMentionScreenName(text);
-            if (sourceScreenName != null) return safeFileSegment(sourceScreenName, "twitter");
-            throw new PostIdentityException("Reposted media has no source screen name in its mentions");
+        String postText = postText(post);
+        String originalPostText = originalRepostedPostText(postText);
+        if (originalPostText != null) {
+            String originalAuthor = ToStringParser.fieldValue(originalPostText, "author");
+            String originalScreenName = originalAuthor == null
+                    ? null
+                    : ToStringParser.fieldValue(originalAuthor, "screenName");
+            if (originalScreenName != null) return safeFileSegment(originalScreenName, "twitter");
+            throw unresolvedIdentity("Reposted post has no original author's screen name", postText);
         }
-        String author = ToStringParser.fieldValue(text, "author");
+
+        // Folded RT posts carry sourceInfo on their mirrored media and the
+        // original author's screen name as the first RT mention.
+        if (hasRepostedMedia(postText)) {
+            String sourceScreenName = firstMentionScreenName(postText);
+            if (sourceScreenName != null) return safeFileSegment(sourceScreenName, "twitter");
+            throw unresolvedIdentity("Reposted media has no source screen name in its mentions", postText);
+        }
+
+        String canonicalText = canonicalPostText(post);
+        String author = ToStringParser.fieldValue(canonicalText, "author");
         String screenName = author == null ? null : ToStringParser.fieldValue(author, "screenName");
-        return safeFileSegment(screenName, "twitter");
+        if (screenName != null) return safeFileSegment(screenName, "twitter");
+        throw unresolvedIdentity("Could not resolve the post's screen name", postText);
+    }
+
+    private static String postText(Object post) {
+        return post == null ? null : post.toString();
+    }
+
+    private static String canonicalPostText(Object post) {
+        Object canonicalPost = canonicalPost(post);
+        return canonicalPost == null ? null : canonicalPost.toString();
+    }
+
+    private static String originalRepostedPostText(String postText) {
+        String repostedPost = ToStringParser.fieldValue(postText, "rePostedPost");
+        if (repostedPost == null) return null;
+        return ToStringParser.fieldValue(repostedPost, "canonicalPost");
+    }
+
+    private static PostIdentityException unresolvedIdentity(String message, String postText) {
+        Logger.printInfo(() -> "Post identity unresolved (" + message + "): " + postText);
+        return new PostIdentityException(message);
     }
 
     private static boolean hasRepostedMedia(String text) {
