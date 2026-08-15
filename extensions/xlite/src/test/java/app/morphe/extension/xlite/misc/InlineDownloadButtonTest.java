@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -98,11 +99,11 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
-    public void detectsWhetherPostHasMedia() {
+    public void hasMediaDoesNotUseReflectiveGetMediaFallback() {
         assertFalse(InlineDownloadButton.hasMedia(null));
         assertFalse(InlineDownloadButton.hasMedia(new MediaPost(null)));
         assertFalse(InlineDownloadButton.hasMedia(new MediaPost(Collections.emptyList())));
-        assertTrue(InlineDownloadButton.hasMedia(new MediaPost(Collections.singletonList(new Object()))));
+        assertFalse(InlineDownloadButton.hasMedia(new MediaPost(Collections.singletonList(new Object()))));
     }
 
     @Test
@@ -118,6 +119,69 @@ public final class InlineDownloadButtonTest {
         );
     }
 
+    @Test
+    public void selectIconConsumesRenderMarker() {
+        Object downloadAction = new Object();
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+        assertFalse(InlineDownloadButton.renderMarkerPending());
+
+        Object nativeIcon = new Object();
+        Object downloadIcon = new Object();
+        InlineDownloadButton.markIconSize(downloadAction, 18f);
+        assertTrue(InlineDownloadButton.renderMarkerPending());
+        assertSame(downloadIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, downloadIcon));
+        assertFalse(InlineDownloadButton.renderMarkerPending());
+
+        // A consumed marker must not substitute the download icon a second time.
+        assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, downloadIcon));
+    }
+
+    @Test
+    public void nativeActionRenderIsUntouched() {
+        InlineDownloadButton.markIconSize(new Object(), 18f);
+
+        Object nativeIcon = new Object();
+        assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, new Object()));
+        assertFalse(InlineDownloadButton.renderMarkerPending());
+    }
+
+    @Test
+    public void finishRenderClearsMarkerWhenIconRenderingExitsEarly() {
+        Object downloadAction = new Object();
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+        InlineDownloadButton.markIconSize(downloadAction, 18f);
+        assertTrue(InlineDownloadButton.renderMarkerPending());
+
+        // Icon lambda never reached selectIcon (Compose skip path); entry-render exit
+        // cleanup must still clear the marker.
+        InlineDownloadButton.finishRender();
+        assertFalse(InlineDownloadButton.renderMarkerPending());
+    }
+
+    @Test
+    public void repeatedRecompositionLeavesNoRenderMarker() {
+        Object downloadAction = new Object();
+        InlineDownloadButton.registerDownloadAction(downloadAction);
+        Object nativeIcon = new Object();
+        Object downloadIcon = new Object();
+
+        for (int pass = 0; pass < 5; pass++) {
+            InlineDownloadButton.markIconSize(downloadAction, 18f);
+            assertSame(downloadIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, downloadIcon));
+            assertFalse(InlineDownloadButton.renderMarkerPending());
+
+            // Early-exit render pass: marker staged, icon lambda never consumes it.
+            InlineDownloadButton.markIconSize(downloadAction, 18f);
+            InlineDownloadButton.finishRender();
+            assertFalse(InlineDownloadButton.renderMarkerPending());
+
+            InlineDownloadButton.markIconSize(new Object(), 18f);
+            assertSame(nativeIcon, InlineDownloadButton.selectIcon(nativeIcon, 18f, downloadIcon));
+            assertFalse(InlineDownloadButton.renderMarkerPending());
+        }
+    }
+
+    /** Probes that hasMedia does not consult a reflective getMedia() accessor. */
     public static final class MediaPost {
         private final List<?> media;
 

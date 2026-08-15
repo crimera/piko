@@ -24,9 +24,12 @@ public final class InlineActionFilter {
     public static List<?> filter(List<?> actions) {
         Set<String> hiddenActionIds = HIDDEN_ACTION_IDS.get();
         Object presenter = PRESENTER.get();
-        HIDDEN_ACTION_IDS.remove();
-        PRESENTER.remove();
-        return filter(actions, hiddenActionIds, presenter);
+        try {
+            return filter(actions, hiddenActionIds, presenter);
+        } finally {
+            HIDDEN_ACTION_IDS.remove();
+            PRESENTER.remove();
+        }
     }
 
     public static List<?> filter(
@@ -71,7 +74,19 @@ public final class InlineActionFilter {
         };
     }
 
+    private static String getActionName(Object action) {
+        return null;
+    }
+
     private static String inlineActionName(Object action) {
+        String directName = null;
+        try {
+            directName = getActionName(action);
+        } catch (RuntimeException ignored) {
+            // Unknown native action shapes retain the legacy parser fallback.
+        }
+        if (directName != null) return directName;
+
         String value = action.toString();
         String prefix = "InlineActionEntry(actionType=";
         if (!value.startsWith(prefix)) return value;

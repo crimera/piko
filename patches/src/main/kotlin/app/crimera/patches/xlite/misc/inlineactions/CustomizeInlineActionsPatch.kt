@@ -1,5 +1,11 @@
 package app.crimera.patches.xlite.misc.inlineactions
 
+import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.xlite.models.makeFieldsPublic
+import app.crimera.patches.xlite.models.resolvedXLiteInlineActionBarModels
+import app.crimera.patches.xlite.models.resolvedXLiteInlineActionModels
+import app.crimera.patches.xlite.models.xLiteInlineActionBarModelResolutionPatch
+import app.crimera.patches.xlite.models.xLiteInlineActionModelResolutionPatch
 import app.crimera.patches.xlite.settings.Categories
 import app.crimera.patches.xlite.settings.Groups
 import app.crimera.patches.xlite.settings.SettingReadRegisterConstraint
@@ -9,10 +15,8 @@ import app.crimera.patches.xlite.settings.injectRead
 import app.crimera.patches.xlite.settings.multiChoice
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteSettings
-import app.crimera.patches.xlite.timeline.fieldForToStringLabel
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.INLINE_ACTION_FILTER_DESCRIPTOR
-import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -21,39 +25,13 @@ import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.string
 import app.morphe.util.cloneMutable
 import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
-import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-
-private object CanonicalPostFingerprint : Fingerprint(
-    definingClass = "Lcom/x/models/",
-    name = "toString",
-    returnType = "Ljava/lang/String;",
-    parameters = emptyList(),
-    filters = listOf(string("CanonicalPost(id="), string(", inlineActionEntry=")),
-)
-
-internal lateinit var xLiteInlineActionBarClassType: String
-    private set
-internal lateinit var xLiteInlineActionEntryType: String
-    private set
-internal lateinit var xLitePostActionType: String
-    private set
-internal lateinit var xLiteCanonicalPostType: String
-    private set
-internal lateinit var xLiteCanonicalPostMediaField: String
-    private set
-internal lateinit var xLiteContextualPostType: String
-    private set
-internal lateinit var xLiteContextualCanonicalPostField: String
-    private set
 
 @Suppress("unused")
 val customizeXLiteInlineActionsPatch =
@@ -62,6 +40,7 @@ val customizeXLiteInlineActionsPatch =
         description = "Lets you hide selected actions from X-Lite post action bars.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
+        dependsOn(xLiteInlineActionModelResolutionPatch, xLiteInlineActionBarModelResolutionPatch)
 
         val hiddenInlineActions =
             xLiteSettings {
@@ -87,52 +66,19 @@ val customizeXLiteInlineActionsPatch =
             }
 
         execute {
-            val inlineActionEntryMatch =
-                Fingerprint(
-                    definingClass = "Lcom/x/models/",
-                    name = "toString",
-                    returnType = "Ljava/lang/String;",
-                    parameters = emptyList(),
-                    filters = listOf(string("InlineActionEntry(actionType="), string(", isEnabled=")),
-                ).requireSingle("inline-action entry model")
-            xLiteInlineActionEntryType = inlineActionEntryMatch.originalClassDef.type
-            xLitePostActionType =
-                inlineActionEntryMatch.fieldForFirstToStringValue().type
+            val entryModels = resolvedXLiteInlineActionModels()
+            val barModels = resolvedXLiteInlineActionBarModels()
+            prepareInlineActionFields(entryModels)
+            patchActionNameBridge(entryModels)
 
-            val contextualPostMatch =
-                Fingerprint(
-                    definingClass = "Lcom/x/models/",
-                    name = "toString",
-                    returnType = "Ljava/lang/String;",
-                    parameters = emptyList(),
-                    filters = listOf(string("ContextualPost(canonicalPost="), string(", quotedPost=")),
-                ).requireSingle("contextual post model")
-
-            val canonicalPostMatch = CanonicalPostFingerprint.requireSingle("canonical post model")
-            val canonicalPostClass = canonicalPostMatch.originalClassDef
-            xLiteCanonicalPostType = canonicalPostClass.type
-            xLiteContextualPostType = contextualPostMatch.originalClassDef.type
-            xLiteContextualCanonicalPostField =
-                contextualPostMatch.originalClassDef.fields.singleOrNull { field ->
-                    !AccessFlags.STATIC.isSet(field.accessFlags) && field.type == xLiteCanonicalPostType
-                }?.toString() ?: throw PatchException("Expected one X-Lite contextual canonical-post field")
-            xLiteCanonicalPostMediaField =
-                canonicalPostMatch.fieldForToStringLabel(", media=").toString()
-            val canonicalPostInterface =
-                canonicalPostClass.interfaces.singleOrNull()
-                    ?: throw PatchException(
-                        "Expected one X-Lite canonical-post interface, found ${canonicalPostClass.interfaces}",
-                    )
-            val inlineActionListType =
-                canonicalPostMatch.fieldForToStringLabel(", inlineActionEntry=").type
             val matches =
                 Fingerprint(
-                    definingClass = "Lcom/x/inlineactionbar/",
+                    definingClass = barModels.inlineActionBarDescriptor,
                     parameters = listOf("Landroidx/compose/runtime/Composer;"),
                     filters =
                         listOf(
                             methodCall(
-                                definingClass = canonicalPostInterface,
+                                definingClass = barModels.canonicalPostInterfaceDescriptor,
                                 parameters = emptyList(),
                                 returnType = "L",
                             ),
@@ -145,91 +91,100 @@ val customizeXLiteInlineActionsPatch =
                         matches.joinToString { it.originalMethod.toString() },
                 )
             }
-
-            matches.single().let { match ->
-                xLiteInlineActionBarClassType = match.originalClassDef.type
-                val originalMethod = match.method
-                val method = originalMethod.cloneMutable(additionalRegisters = 2)
-                match.classDef.methods.remove(originalMethod)
-                match.classDef.methods.add(method)
-                if (AccessFlags.STATIC.isSet(method.accessFlags)) {
-                    throw PatchException("X-Lite inline action state builder is unexpectedly static: $method")
-                }
-                val conversionInstruction =
-                    method.instructions
-                        .mapIndexedNotNull { index, instruction ->
-                            val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
-                            if (instruction.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)) {
-                                return@mapIndexedNotNull null
-                            }
-                            if (reference.returnType != inlineActionListType) return@mapIndexedNotNull null
-                            index to reference
-                        }.singleOrNull()
-                        ?: throw PatchException("Expected one X-Lite inline action list conversion")
-                val conversionIndex = conversionInstruction.first
-                val conversionReference = conversionInstruction.second
-                val resultIndex = conversionIndex + 1
-                val resultInstruction = method.getInstruction<OneRegisterInstruction>(resultIndex)
-                if (resultInstruction.opcode != Opcode.MOVE_RESULT_OBJECT) {
-                    throw PatchException("X-Lite inline action list conversion result not found")
-                }
-                val resultRegister = resultInstruction.registerA
-                val freeRegisters =
-                    method.getFreeRegisterProvider(resultIndex + 1, 1, resultRegister)
-                val listRegister = freeRegisters.getFreeRegister4Bit()
-                val read =
-                    hiddenInlineActions.injectRead(
-                        method = method,
-                        index = resultIndex + 1,
-                        excludedRegisters = listOf(resultRegister, listRegister),
-                        registerConstraint = SettingReadRegisterConstraint.BYTE,
-                    )
-
-                // Loop exits target the immutable conversion. Hook its result, then restore the
-                // exact immutable representation before the consumer sees it.
-                method.addInstructions(
-                    read.nextIndex,
-                    """
-                        invoke-static/range {v${read.register} .. v${read.register}}, $INLINE_ACTION_FILTER_DESCRIPTOR->prepareHiddenActions(Ljava/util/Set;)V
-                        invoke-static/range {p0 .. p0}, $INLINE_ACTION_FILTER_DESCRIPTOR->preparePresenter(Ljava/lang/Object;)V
-                        move-object/from16 v$listRegister, v$resultRegister
-                        invoke-static {v$listRegister}, $INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;)Ljava/util/List;
-                        move-result-object v$resultRegister
-                        invoke-static/range {v$resultRegister .. v$resultRegister}, $conversionReference
-                        move-result-object v$resultRegister
-                    """.trimIndent(),
+            if (matches.single().originalMethod.toString() != barModels.inlineActionStateBuilder.toString()) {
+                throw PatchException(
+                    "X-Lite inline action state builder changed after resolution: " +
+                        "resolved=${barModels.inlineActionStateBuilder}, current=${matches.single().originalMethod}",
                 )
             }
+
+            val match = matches.single()
+            val originalMethod = match.method
+            val method = originalMethod.cloneMutable(additionalRegisters = 2)
+            match.classDef.methods.remove(originalMethod)
+            match.classDef.methods.add(method)
+            if (AccessFlags.STATIC.isSet(method.accessFlags)) {
+                throw PatchException("X-Lite inline action state builder is unexpectedly static: $method")
+            }
+
+            val inlineActionListType = barModels.canonicalPostInlineActionEntryField.type
+            val conversionInstruction =
+                method.instructions
+                    .mapIndexedNotNull { index, instruction ->
+                        val reference = instruction.getReference<MethodReference>()
+                            ?: return@mapIndexedNotNull null
+                        if (instruction.opcode !in setOf(Opcode.INVOKE_STATIC, Opcode.INVOKE_STATIC_RANGE)) {
+                            return@mapIndexedNotNull null
+                        }
+                        if (reference.returnType != inlineActionListType) return@mapIndexedNotNull null
+                        index to reference
+                    }.singleOrNull()
+                    ?: throw PatchException("Expected one X-Lite inline action list conversion in $method")
+            val conversionIndex = conversionInstruction.first
+            val conversionReference = conversionInstruction.second
+            val resultIndex = conversionIndex + 1
+            val resultInstruction = method.getInstruction<OneRegisterInstruction>(resultIndex)
+            if (resultInstruction.opcode != Opcode.MOVE_RESULT_OBJECT) {
+                throw PatchException("X-Lite inline action list conversion result not found in $method")
+            }
+            val resultRegister = resultInstruction.registerA
+            val freeRegisters = method.getFreeRegisterProvider(resultIndex + 1, 1, resultRegister)
+            val listRegister = freeRegisters.getFreeRegister4Bit()
+            val read =
+                hiddenInlineActions.injectRead(
+                    method = method,
+                    index = resultIndex + 1,
+                    excludedRegisters = listOf(resultRegister, listRegister),
+                    registerConstraint = SettingReadRegisterConstraint.BYTE,
+                )
+
+            // Loop exits target the immutable conversion. Hook its result, then restore the
+            // exact immutable representation before the consumer sees it.
+            method.addInstructions(
+                read.nextIndex,
+                """
+                    invoke-static/range {v${read.register} .. v${read.register}}, $INLINE_ACTION_FILTER_DESCRIPTOR->prepareHiddenActions(Ljava/util/Set;)V
+                    invoke-static/range {p0 .. p0}, $INLINE_ACTION_FILTER_DESCRIPTOR->preparePresenter(Ljava/lang/Object;)V
+                    move-object/from16 v$listRegister, v$resultRegister
+                    invoke-static {v$listRegister}, $INLINE_ACTION_FILTER_DESCRIPTOR->filter(Ljava/util/List;)Ljava/util/List;
+                    move-result-object v$resultRegister
+                    invoke-static/range {v$resultRegister .. v$resultRegister}, $conversionReference
+                    move-result-object v$resultRegister
+                """.trimIndent(),
+            )
         }
     }
 
-private fun app.morphe.patcher.Match.fieldForFirstToStringValue(): com.android.tools.smali.dexlib2.iface.reference.FieldReference {
-    val appendIndex =
-        method.instructions.indexOfFirst { instruction ->
-            instruction.getReference<MethodReference>()?.let { reference ->
-                reference.definingClass == "Ljava/lang/StringBuilder;" &&
-                    reference.name == "append" &&
-                    reference.parameterTypes.size == 1 &&
-                    reference.parameterTypes.single().toString().startsWith("L")
-            } == true
-        }
-    if (appendIndex < 0) throw PatchException("X-Lite inline-action toString value append was not found")
-    val append = method.getInstruction<FiveRegisterInstruction>(appendIndex)
-    return method.instructions.take(appendIndex).asReversed().firstNotNullOfOrNull { instruction ->
-        val read = instruction as? TwoRegisterInstruction ?: return@firstNotNullOfOrNull null
-        if (read.registerA != append.registerD) return@firstNotNullOfOrNull null
-        instruction.getReference<com.android.tools.smali.dexlib2.iface.reference.FieldReference>()?.takeIf { field ->
-            field.definingClass == originalMethod.definingClass
-        }
-    } ?: throw PatchException("X-Lite inline-action type field was not found")
+context(context: BytecodePatchContext)
+private fun prepareInlineActionFields(
+    models: app.crimera.patches.xlite.models.ResolvedXLiteInlineActionModels,
+) {
+    context.mutableClassDefBy(models.inlineActionEntryDescriptor)
+        .makeFieldsPublic(listOf(models.inlineActionTypeField))
 }
 
-context(_: BytecodePatchContext)
-private fun Fingerprint.requireSingle(label: String): app.morphe.patcher.Match {
-    val matches = scopedMatchAll()
-    if (matches.size == 1) return matches.single()
-    throw PatchException(
-        "Expected one X-Lite $label, found ${matches.size}: " +
-            matches.joinToString { it.originalMethod.toString() },
+context(context: BytecodePatchContext)
+private fun patchActionNameBridge(models: app.crimera.patches.xlite.models.ResolvedXLiteInlineActionModels) {
+    val extensionClass = context.mutableClassDefBy(INLINE_ACTION_FILTER_DESCRIPTOR)
+    val helpers = extensionClass.methods.filter { method ->
+        method.name == "getActionName" &&
+            method.parameterTypes.map(CharSequence::toString) == listOf("Ljava/lang/Object;") &&
+            method.returnType == "Ljava/lang/String;"
+    }
+    if (helpers.size != 1) {
+        throw PatchException(
+            "Expected one X-Lite inline-action name bridge, found ${helpers.size}: " +
+                helpers.joinToString(),
+        )
+    }
+    helpers.single().addInstructions(
+        0,
+        """
+            check-cast p0, ${models.inlineActionEntryDescriptor}
+            iget-object p0, p0, ${models.inlineActionTypeField}
+            invoke-virtual {p0}, Ljava/lang/Enum;->name()Ljava/lang/String;
+            move-result-object p0
+            return-object p0
+        """.trimIndent(),
     )
 }

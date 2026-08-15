@@ -1,6 +1,19 @@
 package app.crimera.patches.xlite.misc.inlineactions
 
 import app.crimera.patches.xlite.misc.extension.xLiteInitHook
+import app.crimera.patches.xlite.models.ResolvedXLiteInlineActionBarModels
+import app.crimera.patches.xlite.models.ResolvedXLiteInlineActionModels
+import app.crimera.patches.xlite.models.ResolvedXLiteInlineDownloadModels
+import app.crimera.patches.xlite.models.ResolvedXLitePostMediaModels
+import app.crimera.patches.xlite.models.ResolvedXLitePostModels
+import app.crimera.patches.xlite.models.makeFieldsPublic
+import app.crimera.patches.xlite.models.resolvedXLiteInlineActionBarModels
+import app.crimera.patches.xlite.models.resolvedXLiteInlineActionModels
+import app.crimera.patches.xlite.models.resolvedXLiteInlineDownloadModels
+import app.crimera.patches.xlite.models.resolvedXLitePostMediaModels
+import app.crimera.patches.xlite.models.resolvedXLitePostModels
+import app.crimera.patches.xlite.models.xLiteInlineDownloadModelResolutionPatch
+import app.crimera.patches.xlite.models.xLitePostMediaModelResolutionPatch
 import app.crimera.patches.xlite.settings.Categories
 import app.crimera.patches.xlite.settings.Groups
 import app.crimera.patches.xlite.settings.choice
@@ -17,6 +30,7 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.extensions.InstructionExtensions.replaceInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.literal
 import app.morphe.patcher.methodCall
@@ -38,7 +52,7 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 private const val MODIFIER = "Landroidx/compose/ui/Modifier;"
 private const val COMPOSER = "Landroidx/compose/runtime/Composer;"
 private const val EXTENSION = "Lapp/morphe/extension/xlite/misc/InlineDownloadButton;"
-private const val POST_CLASS_NAME_HELPER = "getPresenterPostClassName"
+private const val PRESENTER_POST_HELPER = "getPresenterPost"
 private const val CANONICAL_POST_HELPER = "getCanonicalPost"
 private const val POST_MEDIA_HELPER = "getPostMedia"
 private const val CREATE_ACTION_HELPER = "createDownloadAction"
@@ -78,7 +92,11 @@ val xLiteInlineDownloadButtonPatch =
         description = "Adds a Download button below X-Lite posts and saves media to Pictures/Twitter.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
-        dependsOn(customizeXLiteInlineActionsPatch)
+        dependsOn(
+            customizeXLiteInlineActionsPatch,
+            xLitePostMediaModelResolutionPatch,
+            xLiteInlineDownloadModelResolutionPatch,
+        )
 
         xLiteSettings {
             category(Categories.POST_ACTIONS_MEDIA) {
@@ -112,7 +130,17 @@ val xLiteInlineDownloadButtonPatch =
         }
 
         execute {
-            patchPostModelBridges()
+            val entryModels = resolvedXLiteInlineActionModels()
+            val barModels = resolvedXLiteInlineActionBarModels()
+            val mediaModels = resolvedXLitePostMediaModels()
+            val downloadModels = resolvedXLiteInlineDownloadModels()
+            patchPostModelBridges(
+                resolvedXLitePostModels(),
+                entryModels,
+                barModels,
+                mediaModels,
+                downloadModels,
+            )
             xLiteInitHook.fingerprint.method.addInstruction(
                 0,
                 "invoke-static/range {p0 .. p0}, $EXTENSION->initialize(Landroid/content/Context;)V",
@@ -125,7 +153,7 @@ val xLiteInlineDownloadButtonPatch =
                         definingClass = "Lcom/x/inlineactionbar/",
                         parameters =
                             listOf(
-                                xLiteInlineActionEntryType,
+                                entryModels.inlineActionEntryDescriptor,
                                 "L",
                                 "J",
                                 "F",
@@ -142,12 +170,12 @@ val xLiteInlineDownloadButtonPatch =
                             listOf(
                                 fieldAccess(
                                     opcode = Opcode.IGET_OBJECT,
-                                    definingClass = xLiteInlineActionEntryType,
-                                    type = xLitePostActionType,
+                                    definingClass = entryModels.inlineActionEntryDescriptor,
+                                    type = entryModels.postActionTypeDescriptor,
                                 ),
                                 fieldAccess(
                                     opcode = Opcode.IGET_BOOLEAN,
-                                    definingClass = xLiteInlineActionEntryType,
+                                    definingClass = entryModels.inlineActionEntryDescriptor,
                                     type = "Z",
                                 ),
                             ),
@@ -166,6 +194,24 @@ val xLiteInlineDownloadButtonPatch =
                         move/from16 p4, v$sizeRegister
                     """.trimIndent(),
                 )
+
+                // Unconditional marker cleanup: replace the shared exit location (every
+                // predecessor targets it) with finishRender and re-append the return. A
+                // plain insertion before it would be skippable when a branch targets the
+                // original return instruction.
+                val exits = instructions.filter { it.opcode == Opcode.RETURN_VOID }
+                if (exits.size != 1) {
+                    throw PatchException(
+                        "Expected one X-Lite inline-action entry renderer exit, found " +
+                            "${exits.size}: $this",
+                    )
+                }
+                val renderExit = instructions.indexOf(exits.single())
+                replaceInstruction(
+                    renderExit,
+                    "invoke-static {}, $EXTENSION->finishRender()V",
+                )
+                addInstruction(renderExit + 1, "return-void")
             }
 
             val shareIconField = resolveIconField("ic_vector_share")
@@ -191,19 +237,9 @@ val xLiteInlineDownloadButtonPatch =
                     (iconAccess.instruction as? OneRegisterInstruction)?.registerA
                         ?: throw PatchException("X-Lite share icon access has no register")
                 val sizeAccess = iconRenderer.instructionMatches[1]
-                val sizeRegister =
-                    (sizeAccess.instruction as? OneRegisterInstruction)?.registerA
-                        ?: throw PatchException("X-Lite share icon size has no register")
                 val sizeField =
                     sizeAccess.instruction.getReference<FieldReference>()
                         ?: throw PatchException("X-Lite share icon size field was not found")
-                addInstructions(
-                    sizeAccess.index + 1,
-                    """
-                        invoke-static {v$sizeRegister}, $EXTENSION->normalizeIconSize(F)F
-                        move-result v$sizeRegister
-                    """.trimIndent(),
-                )
                 addInstructions(
                     iconAccess.index + 1,
                     """
@@ -216,7 +252,7 @@ val xLiteInlineDownloadButtonPatch =
                 )
             }
 
-            val inlinePresenterType = xLiteInlineActionBarClassType
+            val inlinePresenterType = barModels.inlineActionBarDescriptor
             val inlineEventHandler =
                 requireSingle(
                     "X-Lite inline-action event handler",
@@ -227,8 +263,8 @@ val xLiteInlineDownloadButtonPatch =
                             listOf(
                                 fieldAccess(
                                     opcode = Opcode.IGET_OBJECT,
-                                    definingClass = xLiteInlineActionEntryType,
-                                    type = xLitePostActionType,
+                                    definingClass = entryModels.inlineActionEntryDescriptor,
+                                    type = entryModels.postActionTypeDescriptor,
                                 ),
                                 methodCall(
                                     definingClass = "Ljava/lang/Enum;",
@@ -267,47 +303,74 @@ val xLiteInlineDownloadButtonPatch =
     }
 
 context(context: BytecodePatchContext)
-private fun patchPostModelBridges() {
-    val presenterClass = context.mutableClassDefBy(xLiteInlineActionBarClassType)
-    val constructor = presenterClass.methods.singleOrNull { method -> method.name == "<init>" }
-        ?: throw PatchException("Expected one X-Lite inline presenter constructor")
-    val postType = constructor.parameterTypes.firstOrNull { type -> type.toString().startsWith("Lcom/x/models/") }
-        ?: throw PatchException("X-Lite inline presenter post parameter was not found")
+private fun patchPostModelBridges(
+    postModels: ResolvedXLitePostModels,
+    entryModels: ResolvedXLiteInlineActionModels,
+    barModels: ResolvedXLiteInlineActionBarModels,
+    mediaModels: ResolvedXLitePostMediaModels,
+    downloadModels: ResolvedXLiteInlineDownloadModels,
+) {
+    context.mutableClassDefBy(postModels.contextualPostDescriptor).makeFieldsPublic(
+        listOf(postModels.contextualCanonicalPostField),
+    )
+    context.mutableClassDefBy(postModels.canonicalPostDescriptor).makeFieldsPublic(
+        listOf(mediaModels.canonicalPostMediaField),
+    )
+
+    val presenterClass = context.mutableClassDefBy(barModels.inlineActionBarDescriptor)
+    val presenterPostFields = presenterClass.fields.filter { field ->
+        !AccessFlags.STATIC.isSet(field.accessFlags) &&
+            field.type == postModels.contextualPostDescriptor
+    }
+    if (presenterPostFields.size != 1) {
+        throw PatchException(
+            "Expected one X-Lite inline presenter contextual-post field, found " +
+                "${presenterPostFields.size}: ${presenterPostFields.joinToString()}",
+        )
+    }
+    val presenterPostField = presenterPostFields.single()
+    presenterClass.makeFieldsPublic(listOf(presenterPostField))
+
     val extensionClass = context.mutableClassDefBy(EXTENSION)
-    val classNameHelper = extensionClass.requireHelper(POST_CLASS_NAME_HELPER, emptyList())
-    classNameHelper.addInstructions(
+    extensionClass.requireHelper(PRESENTER_POST_HELPER, listOf("Ljava/lang/Object;")).addInstructions(
         0,
         """
-            const-string v0, "${postType.toString().removePrefix("L").removeSuffix(";").replace('/', '.')}"
-            return-object v0
+            check-cast p0, ${barModels.inlineActionBarDescriptor}
+            iget-object p0, p0, $presenterPostField
+            return-object p0
         """.trimIndent(),
     )
     extensionClass.requireHelper(CANONICAL_POST_HELPER, listOf("Ljava/lang/Object;")).addInstructions(
         0,
         """
-            check-cast p0, $xLiteContextualPostType
-            iget-object p0, p0, $xLiteContextualCanonicalPostField
+            check-cast p0, ${postModels.contextualPostDescriptor}
+            iget-object p0, p0, ${postModels.contextualCanonicalPostField}
             return-object p0
         """.trimIndent(),
     )
     extensionClass.requireHelper(POST_MEDIA_HELPER, listOf("Ljava/lang/Object;")).addInstructions(
         0,
         """
-            check-cast p0, $xLiteCanonicalPostType
-            iget-object p0, p0, $xLiteCanonicalPostMediaField
+            check-cast p0, ${postModels.canonicalPostDescriptor}
+            iget-object p0, p0, ${mediaModels.canonicalPostMediaField}
             return-object p0
         """.trimIndent(),
     )
-    val entryClass = context.mutableClassDefBy(xLiteInlineActionEntryType)
+
+    val entryClass = context.mutableClassDefBy(entryModels.inlineActionEntryDescriptor)
     val actionConstructor = entryClass.methods.singleOrNull { method ->
-        method.name == "<init>" && method.parameterTypes.map { it.toString() } ==
-            listOf(xLitePostActionType, "Ljava/lang/Long;", "Z")
-    } ?: throw PatchException("Expected one X-Lite inline-action constructor")
-    val actionTypeClass = context.mutableClassDefBy(xLitePostActionType)
+        method.toString() == downloadModels.inlineActionEntryConstructor.toString()
+    } ?: throw PatchException(
+        "Resolved X-Lite inline-action constructor is no longer present: " +
+            downloadModels.inlineActionEntryConstructor,
+    )
+    val actionTypeClass = context.mutableClassDefBy(entryModels.postActionTypeDescriptor)
     val carrierField = actionTypeClass.fields.singleOrNull { field ->
-        AccessFlags.STATIC.isSet(field.accessFlags) && field.type == xLitePostActionType &&
-            field.name == "TwitterShare"
-    } ?: throw PatchException("Expected X-Lite TwitterShare action constant")
+        field.toString() == downloadModels.twitterShareActionField.toString()
+    } ?: throw PatchException(
+        "Resolved X-Lite TwitterShare action constant is no longer present: " +
+            downloadModels.twitterShareActionField,
+    )
     val createActionPlaceholder = extensionClass.requireHelper(CREATE_ACTION_HELPER, emptyList())
     val registerCount = createActionPlaceholder.implementation?.registerCount ?: 0
     val createActionHelper =
@@ -322,7 +385,7 @@ private fun patchPostModelBridges() {
     createActionHelper.addInstructions(
         0,
         """
-            new-instance v0, $xLiteInlineActionEntryType
+            new-instance v0, ${entryModels.inlineActionEntryDescriptor}
             sget-object v1, $carrierField
             const/4 v2, 0x0
             const/4 v3, 0x1
@@ -337,10 +400,9 @@ private fun app.morphe.patcher.util.proxy.mutableTypes.MutableClass.requireHelpe
     parameters: List<String>,
 ): MutableMethod =
     methods.singleOrNull { method ->
-        method.name == name && method.parameterTypes.map { it.toString() } == parameters &&
-            method.returnType == "Ljava/lang/Object;" ||
-            method.name == name && parameters.isEmpty() && method.parameterTypes.isEmpty() &&
-                method.returnType == "Ljava/lang/String;"
+        method.name == name &&
+            method.parameterTypes.map { it.toString() } == parameters &&
+            method.returnType == "Ljava/lang/Object;"
     } ?: throw PatchException("X-Lite inline helper $name was not found")
 
 context(_: BytecodePatchContext)

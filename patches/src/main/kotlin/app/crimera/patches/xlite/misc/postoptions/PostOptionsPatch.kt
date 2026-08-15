@@ -1,6 +1,8 @@
 package app.crimera.patches.xlite.misc.postoptions
 
 import app.crimera.patches.xlite.misc.extension.xLiteInitHook
+import app.crimera.patches.xlite.models.resolvedXLiteInlineActionModels
+import app.crimera.patches.xlite.models.xLiteInlineActionModelResolutionPatch
 import app.crimera.patches.xlite.settings.xLiteSettingsPatch
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
@@ -74,16 +76,6 @@ private object PostOptionContributionIndex {
     }
 }
 
-private object PostActionTypeFingerprint : Fingerprint(
-    name = "<clinit>",
-    returnType = "V",
-    filters =
-        listOf(
-            app.morphe.patcher.string("ViewDebugDialog"),
-            app.morphe.patcher.string("AddToBookmarks"),
-        ),
-)
-
 private object PostOptionsStateFingerprint : Fingerprint(
     returnType = "Ljava/lang/String;",
     filters =
@@ -145,7 +137,7 @@ private fun xLitePostOptionContributionPatch(contribution: PostOptionContributio
 
 private val xLitePostOptionsPatch =
     bytecodePatch(default = false) {
-        dependsOn(xLiteSettingsPatch)
+        dependsOn(xLiteSettingsPatch, xLiteInlineActionModelResolutionPatch)
 
         execute {
             PostOptionContributionIndex.clear(this)
@@ -168,9 +160,7 @@ private val xLitePostOptionsPatch =
 
 context(context: BytecodePatchContext)
 private fun validateActionCarriers(contributions: List<PostOptionContribution>) {
-    val postActionType =
-        PostActionTypeFingerprint.matchOrNull()?.originalClassDef?.type
-            ?: "Lcom/x/models/PostActionType;"
+    val postActionType = resolvedXLiteInlineActionModels().postActionTypeDescriptor
     val actionType = context.mutableClassDefBy(postActionType)
     val missing =
         contributions

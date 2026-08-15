@@ -1,5 +1,7 @@
 package app.crimera.patches.xlite.timeline
 
+import app.crimera.patches.xlite.models.resolvedXLitePostMediaModels
+import app.crimera.patches.xlite.models.xLitePostMediaModelResolutionPatch
 import app.crimera.patches.xlite.settings.Categories
 import app.crimera.patches.xlite.settings.injectReadWithDefault
 import app.crimera.patches.xlite.settings.settingStrings
@@ -13,7 +15,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.cloneMutable
 import app.morphe.util.getReference
@@ -24,18 +25,8 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
-private const val CONTEXTUAL_POST_PREFIX = "ContextualPost(canonicalPost="
-private const val MEDIA_VISIBILITY_RESULTS_LABEL = ", mediaVisibilityResults="
 private const val EXPECTED_MEDIA_WRITE_METHODS = 2
 private const val EXPECTED_MEDIA_WRITES = 2
-
-private object XLiteContextualPostFingerprint : Fingerprint(
-    definingClass = "Lcom/x/models/",
-    name = "toString",
-    parameters = emptyList(),
-    returnType = "Ljava/lang/String;",
-    filters = listOf(string(CONTEXTUAL_POST_PREFIX), string(MEDIA_VISIBILITY_RESULTS_LABEL)),
-)
 
 private data class MediaVisibilityWrite(
     val match: Match,
@@ -56,6 +47,7 @@ val xLiteShowSensitiveMediaPatch =
         description = "Shows sensitive media without requiring confirmation in X-Lite.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
+        dependsOn(xLitePostMediaModelResolutionPatch)
 
         val showSensitiveMedia =
             xLiteToggle(
@@ -67,24 +59,17 @@ val xLiteShowSensitiveMediaPatch =
             )
 
         execute {
-            val contextualPostMatches = XLiteContextualPostFingerprint.scopedMatchAll()
-            if (contextualPostMatches.size != 1) {
-                throw PatchException(
-                    "Expected one X-Lite contextual-post model, found ${contextualPostMatches.size}: " +
-                        contextualPostMatches.joinToString { it.originalMethod.toString() },
-                )
-            }
-
-            val contextualPost = contextualPostMatches.single()
-            val mediaField = contextualPost.fieldForToStringLabel(MEDIA_VISIBILITY_RESULTS_LABEL)
+            val mediaModels = resolvedXLitePostMediaModels()
+            val contextualPostDescriptor = mediaModels.postModels.contextualPostDescriptor
+            val mediaField = mediaModels.contextualMediaVisibilityResultsField
             val mediaWriteMatches =
                 Fingerprint(
-                    definingClass = contextualPost.originalClassDef.type,
+                    definingClass = contextualPostDescriptor,
                     filters =
                         listOf(
                             fieldAccess(
                                 opcode = Opcode.IPUT_OBJECT,
-                                definingClass = contextualPost.originalClassDef.type,
+                                definingClass = contextualPostDescriptor,
                                 name = mediaField.name,
                                 type = mediaField.type,
                             ),

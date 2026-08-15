@@ -2,6 +2,7 @@ package app.morphe.extension.xlite.timeline;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -12,11 +13,13 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 public class XLiteTimelineFilterTest {
     private static final FakeModelAccess MODELS = new FakeModelAccess();
+    private static final ThrowingModelAccess THROWING_MODELS = new ThrowingModelAccess();
 
     @Test
     public void disabledFilterReturnsOriginalList() {
@@ -158,6 +161,181 @@ public class XLiteTimelineFilterTest {
         assertEquals(List.of(), filtered);
     }
 
+    @Test
+    public void preservesMalformedAndUnknownItems() {
+        Object unknown = new Object();
+        FakeModule mixed = module(
+                "conversationthread-1",
+                item(post("inner-a")),
+                item(unknown),
+                item(new FakeRtbAd()),
+                item(post("inner-b"))
+        );
+        List<Object> input = items(post("safe"), unknown, null, mixed, new FakeRtbAd(), post("kept"));
+
+        List<?> result = (List<?>) XLiteTimelineFilter.filterPromotedItems(input, true, MODELS);
+
+        assertEquals(5, result.size());
+        assertSame(input.get(0), result.get(0));
+        assertSame(input.get(1), result.get(1));
+        assertNull(result.get(2));
+
+        FakeModule filteredMixed = (FakeModule) result.get(3);
+        assertNotSame(mixed, filteredMixed);
+        assertEquals(3, filteredMixed.children.size());
+        assertSame(mixed.children.get(0), filteredMixed.children.get(0));
+        assertSame(mixed.children.get(1), filteredMixed.children.get(1));
+        assertSame(mixed.children.get(3), filteredMixed.children.get(2));
+
+        assertSame(input.get(5), result.get(4));
+    }
+
+    @Test
+    public void keepsItemWhenModelAccessThrows() {
+        FakePost throwing = post("throwing");
+        FakePost safe = post("safe");
+        List<Object> input = items(throwing, new FakeRtbAd(), safe);
+
+        List<?> result = (List<?>) XLiteTimelineFilter.filterPromotedItems(input, true, THROWING_MODELS);
+
+        assertEquals(2, result.size());
+        assertSame(throwing, result.get(0));
+        assertSame(safe, result.get(1));
+    }
+
+    @Test
+    public void keepsModuleChildWhenModelAccessThrows() {
+        FakeModule conversation = module(
+                "conversationthread-1",
+                item(post("throwing")),
+                item(new FakeRtbAd()),
+                item(post("ok"))
+        );
+
+        List<?> result = (List<?>) XLiteTimelineFilter.filterPromotedItems(
+                items(conversation),
+                true,
+                THROWING_MODELS
+        );
+        FakeModule filtered = (FakeModule) result.get(0);
+
+        assertNotSame(conversation, filtered);
+        assertEquals(2, filtered.children.size());
+        assertSame(conversation.children.get(0), filtered.children.get(0));
+        assertSame(conversation.children.get(2), filtered.children.get(1));
+    }
+
+    @Test
+    public void preservesIdentityOfUnchangedPrefixAndSuffix() {
+        FakePost p0 = post("p0");
+        FakePost p1 = post("p1");
+        FakePost p2 = post("p2");
+        FakePost p3 = post("p3");
+        List<Object> input = items(p0, p1, new FakeRtbAd(), p2, p3);
+
+        List<?> result = (List<?>) XLiteTimelineFilter.filterPromotedItems(input, true, MODELS);
+
+        assertEquals(4, result.size());
+        assertNotSame(input, result);
+        assertSame(p0, result.get(0));
+        assertSame(p1, result.get(1));
+        assertSame(p2, result.get(2));
+        assertSame(p3, result.get(3));
+    }
+
+    @Test
+    public void keepsUnchangedNestedModuleInstance() {
+        FakeModule inner = module("conversationthread-1", item(post("a")), item(post("b")));
+        FakeModule outer = module("conversationthread-2", item(inner), item(new FakeRtbAd()));
+
+        List<?> result = (List<?>) XLiteTimelineFilter.filterPromotedItems(items(outer), true, MODELS);
+        FakeModule filteredOuter = (FakeModule) result.get(0);
+
+        assertNotSame(outer, filteredOuter);
+        assertEquals(1, filteredOuter.children.size());
+        assertSame(inner, filteredOuter.children.get(0).item);
+    }
+
+    @Test
+    public void unchangedNonListIterableReturnsSameInstance() {
+        FakeIterable input = new FakeIterable(items(post("a"), post("b")));
+
+        assertSame(input, XLiteTimelineFilter.filterPromotedItems(input, true, MODELS));
+    }
+
+    @Test
+    public void changedNonListIterableBuildsListInOrder() {
+        FakeIterable input = new FakeIterable(items(post("a"), new FakeRtbAd(), post("b"), post("c")));
+
+        Object filtered = XLiteTimelineFilter.filterPromotedItems(input, true, MODELS);
+
+        assertTrue(filtered instanceof List);
+        List<?> result = (List<?>) filtered;
+        assertEquals(3, result.size());
+        assertSame(input.values.get(0), result.get(0));
+        assertSame(input.values.get(2), result.get(1));
+        assertSame(input.values.get(3), result.get(2));
+    }
+
+    @Test
+    public void filtersRealisticLargeTimeline() {
+        List<Object> input = new ArrayList<>();
+        int postCount = 0;
+        final int total = 5000;
+        for (int i = 0; i < total; i++) {
+            switch (i % 50) {
+                case 5:
+                    input.add(new FakeRtbAd());
+                    break;
+                case 13:
+                    input.add(module("who-to-follow-" + i, item(post("suggested-" + i))));
+                    break;
+                case 29:
+                    input.add(module(
+                            "conversationthread-" + i,
+                            item(post("a-" + i)),
+                            item(new FakeRtbAd()),
+                            item(post("b-" + i))
+                    ));
+                    break;
+                default:
+                    input.add(post("post-" + postCount));
+                    postCount++;
+                    break;
+            }
+        }
+        assertEquals(4700, postCount);
+
+        Object promotedResult = XLiteTimelineFilter.filterPromotedItems(input, true, MODELS);
+        assertEquals(4900, ((List<?>) promotedResult).size());
+
+        List<?> result = (List<?>) XLiteTimelineFilter.filterWhoToFollow(promotedResult, true, MODELS);
+        assertEquals(4800, result.size());
+        assertSame(input.get(0), result.get(0));
+
+        int standalonePosts = 0;
+        int conversationModules = 0;
+        int expectedPostNumber = 0;
+        for (Object entry : result) {
+            if (entry instanceof FakeModule) {
+                FakeModule module = (FakeModule) entry;
+                conversationModules++;
+                assertTrue(module.entryId.startsWith("conversationthread-"));
+                assertEquals(2, module.children.size());
+                assertTrue(((FakePost) module.children.get(0).item).text.startsWith("a-"));
+                assertTrue(((FakePost) module.children.get(1).item).text.startsWith("b-"));
+            } else {
+                assertTrue(entry instanceof FakePost);
+                assertEquals("post-" + expectedPostNumber, ((FakePost) entry).text);
+                expectedPostNumber++;
+                standalonePosts++;
+            }
+        }
+        assertEquals(100, conversationModules);
+        assertEquals(4700, standalonePosts);
+        assertEquals(4700, expectedPostNumber);
+    }
+
     @SuppressWarnings("unchecked")
     private static List<Object> filterWhoToFollow(Object... values) {
         return (List<Object>) XLiteTimelineFilter.filterWhoToFollow(items(values), true, MODELS);
@@ -239,7 +417,7 @@ public class XLiteTimelineFilterTest {
         }
     }
 
-    private static final class FakeModelAccess extends TimelineModelAccess {
+    private static class FakeModelAccess extends TimelineModelAccess {
         @Override boolean isModuleItem(Object value) { return value instanceof FakeModuleItem; }
         @Override boolean isPost(Object value) { return value instanceof FakePost; }
         @Override boolean isModule(Object value) { return value instanceof FakeModule; }
@@ -285,6 +463,32 @@ public class XLiteTimelineFilterTest {
         }
         @Override Object getAiDetectionSource(Object disclosure) {
             return ((FakeDisclosure) disclosure).source;
+        }
+    }
+
+    private static final class FakeIterable implements Iterable<Object> {
+        private final List<Object> values;
+
+        private FakeIterable(List<Object> values) {
+            this.values = values;
+        }
+
+        @Override
+        public Iterator<Object> iterator() {
+            return values.iterator();
+        }
+    }
+
+    private static final class ThrowingModelAccess extends FakeModelAccess {
+        @Override
+        String getPostEntryId(Object post) {
+            if (post instanceof FakePost) {
+                FakePost fake = (FakePost) post;
+                if ("throwing".equals(fake.text)) {
+                    throw new IllegalStateException("entry id unavailable");
+                }
+            }
+            return super.getPostEntryId(post);
         }
     }
 }

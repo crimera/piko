@@ -64,6 +64,9 @@ public final class XLiteTimelineFilter {
         @Override Object getPostPromotedMetadata(Object post) {
             return XLiteTimelineFilter.getPostPromotedMetadata(post);
         }
+        @Override boolean isPromotedClientEventInfo(Object eventInfo) {
+            return XLiteTimelineFilter.isPromotedClientEventInfo(eventInfo);
+        }
         @Override String getPostText(Object post) { return XLiteTimelineFilter.getPostText(post); }
         @Override Object getContentDisclosure(Object post) { return XLiteTimelineFilter.getContentDisclosure(post); }
         @Override boolean hasAiGeneratedDisclosure(Object disclosure) {
@@ -193,8 +196,10 @@ public final class XLiteTimelineFilter {
         if (!(timelineItems instanceof Iterable<?> iterable)) return timelineItems;
 
         try {
-            List<Object> filtered = new ArrayList<>();
-            boolean changed = false;
+            List<Object> filtered = null;
+            List<Object> unchangedPrefix = null;
+            List<?> sourceList = timelineItems instanceof List<?> list ? list : null;
+            int index = 0;
             for (Object original : iterable) {
                 FilterResult result = filterObject(
                         original,
@@ -204,14 +209,30 @@ public final class XLiteTimelineFilter {
                         aiSourcesToHide,
                         modelAccess
                 );
-                if (result.remove) {
-                    changed = true;
+                boolean changed = result.remove || result.item != original;
+                if (!changed) {
+                    if (filtered != null) filtered.add(original);
+                    else if (sourceList == null) {
+                        if (unchangedPrefix == null) unchangedPrefix = new ArrayList<>();
+                        unchangedPrefix.add(original);
+                    }
+                    index++;
                     continue;
                 }
-                filtered.add(result.item);
-                changed |= result.item != original;
+
+                if (filtered == null) {
+                    filtered = new ArrayList<>(sourceList != null ? sourceList.size() : index + 1);
+                    if (sourceList != null) {
+                        filtered.addAll(sourceList.subList(0, index));
+                    } else if (unchangedPrefix != null) {
+                        filtered.addAll(unchangedPrefix);
+                        unchangedPrefix = null;
+                    }
+                }
+                if (!result.remove) filtered.add(result.item);
+                index++;
             }
-            if (!changed) return timelineItems;
+            if (filtered == null) return timelineItems;
             return immutableList(filtered);
         } catch (RuntimeException exception) {
             logFailure("top-level timeline filtering", exception);
@@ -381,13 +402,13 @@ public final class XLiteTimelineFilter {
             return FilterResult.keep(module);
         }
 
-        List<Object> filteredChildren = new ArrayList<>(originalChildren.size());
-        Set<Object> removedPostIds = new HashSet<>();
+        List<Object> filteredChildren = null;
+        Set<Object> removedPostIds = null;
         boolean changed = false;
         for (int childIndex = 0; childIndex < originalChildren.size(); childIndex++) {
             Object originalChild = originalChildren.get(childIndex);
             if (originalChild == null) {
-                filteredChildren.add(null);
+                if (filteredChildren != null) filteredChildren.add(null);
                 continue;
             }
 
@@ -418,29 +439,39 @@ public final class XLiteTimelineFilter {
                                 aiSourcesToHide
                         )
                 );
-                filteredChildren.add(originalChild);
+                if (filteredChildren != null) filteredChildren.add(originalChild);
                 continue;
             }
 
             if (result.remove) {
+                if (filteredChildren == null) {
+                    filteredChildren = copyChildrenPrefix(originalChildren, childIndex);
+                }
                 changed = true;
                 if (modelAccess.isPost(originalItem)) {
                     Object postId = modelAccess.getPostId(originalItem);
-                    if (postId != null) removedPostIds.add(postId);
+                    if (postId != null) {
+                        if (removedPostIds == null) removedPostIds = new HashSet<>();
+                        removedPostIds.add(postId);
+                    }
                 }
                 continue;
             }
             if (result.item == originalItem) {
-                filteredChildren.add(originalChild);
+                if (filteredChildren != null) filteredChildren.add(originalChild);
                 continue;
             }
 
             try {
-                filteredChildren.add(modelAccess.copyModuleItem(
+                Object replacement = modelAccess.copyModuleItem(
                         originalChild,
                         result.item,
                         modelAccess.isModuleItemDispensable(originalChild)
-                ));
+                );
+                if (filteredChildren == null) {
+                    filteredChildren = copyChildrenPrefix(originalChildren, childIndex);
+                }
+                filteredChildren.add(replacement);
                 changed = true;
             } catch (RuntimeException exception) {
                 logFailure(
@@ -457,17 +488,17 @@ public final class XLiteTimelineFilter {
                                 aiSourcesToHide
                         )
                 );
-                filteredChildren.add(originalChild);
+                if (filteredChildren != null) filteredChildren.add(originalChild);
             }
         }
 
         if (!changed) return FilterResult.keep(module);
-        if (filteredChildren.isEmpty()) return FilterResult.remove();
+        if (filteredChildren == null || filteredChildren.isEmpty()) return FilterResult.remove();
 
         try {
             Object displayType = repairDisplayType(
                     modelAccess.getModuleDisplayType(module),
-                    removedPostIds,
+                    removedPostIds == null ? Collections.emptySet() : removedPostIds,
                     modelAccess
             );
             return FilterResult.replace(modelAccess.copyModule(module, filteredChildren, displayType));
@@ -475,6 +506,14 @@ public final class XLiteTimelineFilter {
             logFailure("timeline module reconstruction", exception);
             return FilterResult.keep(module);
         }
+    }
+
+    private static List<Object> copyChildrenPrefix(List<?> children, int endExclusive) {
+        List<Object> prefix = new ArrayList<>(children.size());
+        for (int index = 0; index < endExclusive; index++) {
+            prefix.add(children.get(index));
+        }
+        return prefix;
     }
 
     private static Object repairDisplayType(
@@ -513,8 +552,7 @@ public final class XLiteTimelineFilter {
         }
         if (isPromotedEntryId(entryId)) return true;
 
-        return eventInfo != null
-                && eventInfo.toString().toLowerCase(Locale.ROOT).contains("promoted");
+        return eventInfo != null && modelAccess.isPromotedClientEventInfo(eventInfo);
     }
 
     private static boolean isPromotedEntryId(String entryId) {
@@ -591,6 +629,14 @@ public final class XLiteTimelineFilter {
         return null;
     }
 
+    private static boolean isPromotedClientEventInfo(Object eventInfo) {
+        return false;
+    }
+
+    private static boolean hasPromotedClientEventInfoComponent(String component) {
+        return component != null && component.toLowerCase(Locale.ROOT).contains("promoted");
+    }
+
     private static Object getPostId(Object post) {
         return null;
     }
@@ -625,7 +671,7 @@ public final class XLiteTimelineFilter {
     }
 
     private static Object immutableList(List<Object> filtered) {
-        return Collections.unmodifiableList(new ArrayList<>(filtered));
+        return Collections.unmodifiableList(filtered);
     }
 
     private static String childContext(

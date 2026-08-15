@@ -1,9 +1,9 @@
 package app.crimera.patches.xlite.timeline.postfilter
 
-import app.crimera.patches.xlite.timeline.patchBridge
-import app.crimera.patches.xlite.timeline.resolveTimelinePostModelMatch
-import app.crimera.patches.xlite.timeline.smaliReference
-import app.crimera.patches.xlite.timeline.xLiteTimelineModelAdapterPatch
+import app.crimera.patches.xlite.models.patchBridge
+import app.crimera.patches.xlite.models.resolvedXLiteTimelineModels
+import app.crimera.patches.xlite.models.smaliReference
+import app.crimera.patches.xlite.models.xLiteTimelineModelAdapterPatch
 import app.crimera.patches.xlite.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
@@ -17,23 +17,10 @@ internal val xLiteTimelineTextModelAdapterPatch =
         dependsOn(xLiteTimelineModelAdapterPatch)
 
         execute {
-            val postClass = resolveTimelinePostModelMatch().classDef
-            val textGetters =
-                postClass.methods.filter { method ->
-                    method.name == "getText" &&
-                        method.parameterTypes.isEmpty() &&
-                        method.returnType == STRING_DESCRIPTOR
-                }
-            if (textGetters.size != 1) {
-                throw PatchException(
-                    "Expected one X-Lite timeline post getText(), found ${textGetters.size}: " +
-                        textGetters.joinToString(),
-                )
-            }
-
+            val models = resolvedXLiteTimelineModels()
             patchPostTextBridge(
-                postDescriptor = postClass.type,
-                textGetter = textGetters.single(),
+                postDescriptor = models.postDescriptor,
+                textGetter = models.postTextGetter,
             )
         }
     }

@@ -5,8 +5,9 @@ import app.crimera.patches.xlite.settings.Groups
 import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.toggle
+import app.crimera.patches.xlite.models.resolvedXLiteInlineActionModels
+import app.crimera.patches.xlite.models.xLiteInlineActionModelResolutionPatch
 import app.crimera.patches.xlite.settings.xLiteSettings
-import app.crimera.patches.xlite.timeline.fieldForToStringLabel
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.EXTENSION_PACKAGE
 import app.crimera.patches.utils.scopedMatchAll
@@ -14,7 +15,6 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.string
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
@@ -65,6 +65,7 @@ val dynamicColorPatch =
         default = false,
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
+        dependsOn(xLiteInlineActionModelResolutionPatch)
 
         val useAmoledBlack =
             xLiteSettings {
@@ -521,30 +522,11 @@ private fun resolveAccentRamp(
 
 context(context: BytecodePatchContext)
 private fun patchInlineActionTints() {
-    val inlineActionEntryMatches =
-        Fingerprint(
-            definingClass = "Lcom/x/models/",
-            name = "toString",
-            returnType = "Ljava/lang/String;",
-            parameters = emptyList(),
-            filters = listOf(
-                string("InlineActionEntry(actionType="),
-                string(", isEnabled="),
-            ),
-        ).scopedMatchAll()
-    requireExactlyOne("X-Lite inline action entry model", inlineActionEntryMatches)
-    val inlineActionEntryMatch = inlineActionEntryMatches.single()
-    val inlineActionEntryClass = inlineActionEntryMatch.originalClassDef
-    val actionTypeField =
-        inlineActionEntryMatch.fieldForToStringLabel("InlineActionEntry(actionType=")
-    if (!actionTypeField.type.startsWith("L")) {
-        throw PatchException("X-Lite inline action-type field is not an object: $actionTypeField")
-    }
-    val enabledField = inlineActionEntryMatch.fieldForBooleanToStringLabel(", isEnabled=")
-    if (enabledField.type != "Z") {
-        throw PatchException("X-Lite inline action enabled field is not boolean: $enabledField")
-    }
-    val actionTypeDescriptor = actionTypeField.type
+    val models = resolvedXLiteInlineActionModels()
+    val inlineActionEntryClass = context.mutableClassDefBy(models.inlineActionEntryDescriptor)
+    val actionTypeField = models.inlineActionTypeField
+    val enabledField = models.inlineActionEnabledField
+    val actionTypeDescriptor = models.postActionTypeDescriptor
     val entryMatches =
         Fingerprint(
             definingClass = "Lcom/x/inlineactionbar/",
@@ -617,25 +599,6 @@ private fun patchInlineActionTints() {
     )
     val activeLikeField = tintMethod.injectActivatedLikeTint(unfavoriteIndex)
     patchLikeIconComposable(likeComposableConstructor.definingClass, activeLikeField)
-}
-
-private fun app.morphe.patcher.Match.fieldForBooleanToStringLabel(
-    label: String,
-): FieldReference {
-    val labelIndex = method.instructions.indexOfFirst { instruction ->
-        instruction.getReference<com.android.tools.smali.dexlib2.iface.reference.StringReference>()
-            ?.string == label
-    }
-    if (labelIndex < 0) throw PatchException("X-Lite boolean model label was not found: $label")
-    val fields =
-        method.instructions.drop(labelIndex + 1).mapNotNull { instruction ->
-            if (instruction.opcode != Opcode.IGET_BOOLEAN) return@mapNotNull null
-            instruction.getReference<FieldReference>()?.takeIf { field ->
-                field.definingClass == originalMethod.definingClass
-            }
-        }.distinctBy(FieldReference::toString)
-    requireExactlyOne("X-Lite boolean model field after '$label'", fields)
-    return fields.single()
 }
 
 context(context: BytecodePatchContext)

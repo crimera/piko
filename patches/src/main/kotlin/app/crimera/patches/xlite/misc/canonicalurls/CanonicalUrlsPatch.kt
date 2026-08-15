@@ -1,5 +1,7 @@
 package app.crimera.patches.xlite.misc.canonicalurls
 
+import app.crimera.patches.xlite.models.resolvedXLitePostModels
+import app.crimera.patches.xlite.models.xLitePostModelResolutionPatch
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
@@ -48,14 +50,6 @@ private object MentionEntityModelFingerprint : Fingerprint(
     filters = listOf(string("MentionEntity(userId="), string(", startIdx=")),
 )
 
-private object ContextualPostModelFingerprint : Fingerprint(
-    definingClass = "Lcom/x/models/",
-    name = "toString",
-    returnType = STRING_DESCRIPTOR,
-    parameters = emptyList(),
-    filters = listOf(string("ContextualPost(canonicalPost="), string(", quotedPost=")),
-)
-
 private data class UrlEntityFields(
     val type: String,
     val expandedUrl: FieldReference,
@@ -84,6 +78,7 @@ val xLiteCanonicalUrlsPatch =
             "Opens the expanded (canonical) URL directly when clicking links instead of the shortened t.co link.",
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
+        dependsOn(xLitePostModelResolutionPatch)
 
         execute {
             val matches = resolveCanonicalUrlMatches()
@@ -103,14 +98,11 @@ val xLiteCanonicalUrlsPatch =
 
 context(_: BytecodePatchContext)
 private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
+    val postModels = resolvedXLitePostModels()
     val urlEntityMatch = UrlEntityModelFingerprint.requireSingleMatch("URL entity model")
     val urlEntityFields = resolveUrlEntityFields(urlEntityMatch)
     val mentionType = MentionEntityModelFingerprint.requireSingleMatch("mention entity model")
         .originalClassDef.type
-    val contextualPostType =
-        ContextualPostModelFingerprint.requireSingleMatch("contextual post model")
-            .originalClassDef.type
-
     val textEntityNavigationFingerprint =
         Fingerprint(
             definingClass = "Lcom/x/navigation/",
@@ -147,7 +139,15 @@ private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
         Fingerprint(
             definingClass = "Lcom/x/urt/items/post/",
             returnType = "V",
-            parameters = listOf("L", contextualPostType, "L", "L", "L", "L", "L"),
+            parameters = listOf(
+                "L",
+                postModels.contextualPostDescriptor,
+                "L",
+                "L",
+                "L",
+                "L",
+                "L",
+            ),
             filters =
                 listOf(
                     fieldAccess(

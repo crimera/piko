@@ -1,6 +1,7 @@
 package app.morphe.extension.xlite.timeline;
 
 import java.util.List;
+import java.util.Locale;
 
 abstract class TimelineModelAccess {
     boolean isModuleItem(Object value) {
@@ -77,6 +78,11 @@ abstract class TimelineModelAccess {
 
     Object getPostPromotedMetadata(Object post) {
         return null;
+    }
+
+    boolean isPromotedClientEventInfo(Object eventInfo) {
+        return eventInfo != null
+                && eventInfo.toString().toLowerCase(Locale.ROOT).contains("promoted");
     }
 
     String getPostText(Object post) {

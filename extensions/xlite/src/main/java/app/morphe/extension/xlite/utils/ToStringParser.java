@@ -7,6 +7,8 @@ package app.morphe.extension.xlite.utils;
  * CanonicalPost(id=123, text=hi, media=[MediaContentImage(imageUrl=..., sourceInfo=SourceInfo(...))])
  * </pre>
  *
+ * This parser is intentionally limited to cold paths such as media extraction and diagnostics.
+ * Timeline and Compose adapters use patch-time direct bridges instead.
  * Field values are extracted by name; list and object values are matched
  * bracket-for-bracket so nested structures arrive intact. Primitive values
  * run until the next comma.

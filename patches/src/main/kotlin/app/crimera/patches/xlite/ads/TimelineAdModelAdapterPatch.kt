@@ -1,11 +1,7 @@
 package app.crimera.patches.xlite.ads
 
-import app.crimera.patches.xlite.timeline.fieldForToStringLabel
-import app.crimera.patches.xlite.timeline.makeFieldsPublic
-import app.crimera.patches.xlite.timeline.patchBridge
-import app.crimera.patches.xlite.timeline.patchObjectFieldGetter
-import app.crimera.patches.xlite.timeline.resolveTimelinePostModelMatch
-import app.crimera.patches.xlite.timeline.xLiteTimelineModelAdapterPatch
+import app.crimera.patches.xlite.models.patchBridge
+import app.crimera.patches.xlite.models.xLiteTimelineModelAdapterPatch
 import app.crimera.patches.xlite.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
@@ -30,7 +26,6 @@ internal val xLiteTimelineAdModelAdapterPatch =
         dependsOn(xLiteTimelineModelAdapterPatch)
 
         execute {
-            val postMatch = resolveTimelinePostModelMatch()
             val adMatches = TimelineRtbImageAdModelFingerprint.scopedMatchAll()
             if (adMatches.size != 1) {
                 throw PatchException(
@@ -39,45 +34,17 @@ internal val xLiteTimelineAdModelAdapterPatch =
                 )
             }
 
-            patchAdModelBridges(
-                postMatch = postMatch,
-                adDescriptor = adMatches.single().classDef.type,
-            )
+            patchAdModelBridges(adMatches.single().classDef.type)
         }
     }
 
 context(context: BytecodePatchContext)
-private fun patchAdModelBridges(
-    postMatch: app.morphe.patcher.Match,
-    adDescriptor: String,
-) {
-    val postClass = postMatch.classDef
-    val entryIdField = postMatch.fieldForToStringLabel(", entryId=")
-    val clientEventInfoField = postMatch.fieldForToStringLabel(", clientEventInfo=")
-    val promotedMetadataField = postMatch.fieldForToStringLabel(", promotedMetadata=")
-    postClass.makeFieldsPublic(listOf(entryIdField, clientEventInfoField, promotedMetadataField))
-
+private fun patchAdModelBridges(adDescriptor: String) {
     val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
     filterClass.patchBridge(
         "isTimelineRtbImageAd",
         OBJECT_DESCRIPTOR,
         "Z",
         "instance-of p0, p0, $adDescriptor\nreturn p0",
-    )
-    filterClass.patchObjectFieldGetter(
-        "getPostEntryId",
-        postClass.type,
-        entryIdField,
-        STRING_DESCRIPTOR,
-    )
-    filterClass.patchObjectFieldGetter(
-        "getPostClientEventInfo",
-        postClass.type,
-        clientEventInfoField,
-    )
-    filterClass.patchObjectFieldGetter(
-        "getPostPromotedMetadata",
-        postClass.type,
-        promotedMetadataField,
     )
 }

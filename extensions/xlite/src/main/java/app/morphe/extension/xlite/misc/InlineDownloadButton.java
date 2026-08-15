@@ -94,6 +94,8 @@ public final class InlineDownloadButton {
         }
     }
 
+    /** Stages the rendered entry's identity for the icon lambda; consumed by
+     *  {@link #selectIcon} and unconditionally cleared by {@link #finishRender}. */
     public static float markIconSize(Object action, float iconSize) {
         RENDERING_DOWNLOAD_ACTION.set(isDownloadAction(action));
         return iconSize;
@@ -105,8 +107,14 @@ public final class InlineDownloadButton {
         return useDownloadIcon ? downloadIcon : nativeIcon;
     }
 
-    public static float normalizeIconSize(float markedIconSize) {
-        return Math.abs(markedIconSize);
+    /** Unconditional marker cleanup; injected at the entry renderer's exit so an icon
+     *  lambda that exits before {@link #selectIcon} cannot leave stale state. */
+    public static void finishRender() {
+        RENDERING_DOWNLOAD_ACTION.remove();
+    }
+
+    static boolean renderMarkerPending() {
+        return RENDERING_DOWNLOAD_ACTION.get() != null;
     }
 
     public static boolean handleEvent(Object presenter, Object event) {
@@ -115,10 +123,8 @@ public final class InlineDownloadButton {
 
         Context context = null;
         try {
-            XLiteUtils.PresenterData presenterData =
-                    XLiteUtils.findPresenterData(presenter, presenterPostClassName());
-            context = presenterData.getContext();
-            Object post = presenterData.getValue();
+            context = XLiteUtils.findUsableActivity(null);
+            Object post = getPresenterPost(presenter);
             if (context == null || post == null) {
                 Utils.showToastShort("Could not find the selected post");
                 return true;
@@ -138,7 +144,7 @@ public final class InlineDownloadButton {
                 showMediaPicker(context, downloads, username, postId);
             }
             return true;
-        } catch (ReflectiveOperationException | RuntimeException exception) {
+        } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to process inline download action", exception);
             Utils.showToastShort(exception instanceof PostIdentityException identityError
                     ? identityError.getMessage()
@@ -159,10 +165,7 @@ public final class InlineDownloadButton {
         if (post == null) return false;
 
         try {
-            List<?> media = mediaFor(post);
-            if (!media.isEmpty()) return true;
-            Object directMedia = XLiteUtils.invokeIfPresent(post, "getMedia");
-            return directMedia instanceof List<?> list && !list.isEmpty();
+            return !mediaFor(post).isEmpty();
         } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to check X-Lite post media", exception);
             return false;
@@ -180,7 +183,7 @@ public final class InlineDownloadButton {
         return false;
     }
 
-    private static void registerDownloadAction(Object action) {
+    static void registerDownloadAction(Object action) {
         synchronized (DOWNLOAD_ACTIONS) {
             removeClearedDownloadActions();
             if (DOWNLOAD_ACTIONS.size() >= MAX_TRACKED_OBJECTS) DOWNLOAD_ACTIONS.clear();
@@ -224,14 +227,6 @@ public final class InlineDownloadButton {
         return null;
     }
 
-    private static String presenterPostClassName() {
-        return getPresenterPostClassName();
-    }
-
-    private static String getPresenterPostClassName() {
-        return "";
-    }
-
     private static Object canonicalPost(Object post) {
         return getCanonicalPost(post);
     }
@@ -244,13 +239,12 @@ public final class InlineDownloadButton {
         return null;
     }
 
+    private static Object getPresenterPost(Object presenter) {
+        return null;
+    }
+
     private static Object postFor(Object presenter) {
-        try {
-            return XLiteUtils.findPresenterData(presenter, presenterPostClassName()).getValue();
-        } catch (IllegalAccessException | RuntimeException exception) {
-            Logger.printException(() -> "Failed to find the X-Lite inline action post", exception);
-            return null;
-        }
+        return getPresenterPost(presenter);
     }
 
     private static List<?> mediaFor(Object post) {

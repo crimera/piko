@@ -1,5 +1,6 @@
 package app.crimera.patches.xlite.timeline
 
+import app.crimera.patches.xlite.models.xLiteTimelineModelAdapterPatch
 import app.crimera.patches.xlite.settings.Categories
 import app.crimera.patches.xlite.settings.Groups
 import app.crimera.patches.xlite.settings.SettingReadRegisterConstraint
