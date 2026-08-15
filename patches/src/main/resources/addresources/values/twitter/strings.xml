@@ -94,6 +94,7 @@
 
     <string name="piko_title_native_share_menu">Native share menu</string>
     <string name="piko_native_share_menu_toggle">Enable native share menu</string>
+    <string name="piko_native_share_menu_items_to_hide">Native share menu items to hide</string>
 
     <!-- Ads Settings -->
     <string name="piko_title_ads">Ads</string>

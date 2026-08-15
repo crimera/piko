@@ -466,5 +466,9 @@ public class Pref {
         return Utils.getBooleanPref(Settings.MORE_INFO_ON_PROFILE) && SettingsStatus.moreInfoOnProfile;
     }
 
+    public static ArrayList nativeShareMenuToHide() {
+        return getList(Settings.NATIVE_SHARE_MENU_ITEMS_TO_HIDE.key);
+    }
+
     //end
 }
