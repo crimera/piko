@@ -223,6 +223,6 @@
     <string name="piko_xlite_action_failed">The X-Lite settings action failed</string>
     <string name="piko_xlite_settings_search_hint">Search settings</string>
     <string name="piko_xlite_settings_search_clear">Clear search</string>
-    <string name="piko_xlite_settings_search_no_results">No results for &quot;%s&quot;</string>
+    <string name="piko_xlite_settings_search_no_results">No results for \"%s\"</string>
 
 </resources>
