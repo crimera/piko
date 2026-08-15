@@ -13,3 +13,7 @@
 ## X-Lite ports
 
 - Load `.agents/skills/xlite-alpha-porting/SKILL.md` before porting or repairing an X-Lite patch.
+
+## Patch performance
+
+- Load `.agents/skills/morphe-patch-performance/SKILL.md` before optimizing or reviewing fingerprint and patch execution performance.
