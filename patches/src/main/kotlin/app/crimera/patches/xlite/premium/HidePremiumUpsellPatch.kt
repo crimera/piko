@@ -6,6 +6,7 @@ import app.crimera.patches.xlite.settings.injectRead
 import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteToggle
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
@@ -23,17 +24,17 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 
-private const val FEATURE_SWITCHES_DESCRIPTOR = "Lcom/x/featureswitches/f0;"
-private const val SUBSCRIPTIONS_FEATURES_DESCRIPTOR = "Lcom/x/subscriptions/SubscriptionsFeatures;"
+private const val FEATURE_SWITCHES_SCOPE = "Lcom/x/featureswitches/"
+private const val SUBSCRIPTIONS_SCOPE = "Lcom/x/subscriptions/"
 
 private object XLiteHomeNavUpsellTypeFingerprint : Fingerprint(
-    definingClass = "Lcom/x/subscriptions/",
+    definingClass = SUBSCRIPTIONS_SCOPE,
     filters =
         listOf(
             string("subscriptions_enabled"),
             methodCall(
                 opcode = Opcode.INVOKE_INTERFACE,
-                definingClass = FEATURE_SWITCHES_DESCRIPTOR,
+                definingClass = FEATURE_SWITCHES_SCOPE,
                 name = "getBoolean",
                 parameters = listOf("Ljava/lang/String;", "Z"),
                 returnType = "Z",
@@ -42,7 +43,7 @@ private object XLiteHomeNavUpsellTypeFingerprint : Fingerprint(
             string("subscriptions_upsells_home_nav_premium_tier_check_enabled"),
             methodCall(
                 opcode = Opcode.INVOKE_INTERFACE,
-                definingClass = FEATURE_SWITCHES_DESCRIPTOR,
+                definingClass = FEATURE_SWITCHES_SCOPE,
                 name = "getBoolean",
                 parameters = listOf("Ljava/lang/String;", "Z"),
                 returnType = "Z",
@@ -51,7 +52,7 @@ private object XLiteHomeNavUpsellTypeFingerprint : Fingerprint(
             string("subscriptions_upsells_premium_home_nav"),
             methodCall(
                 opcode = Opcode.INVOKE_INTERFACE,
-                definingClass = FEATURE_SWITCHES_DESCRIPTOR,
+                definingClass = FEATURE_SWITCHES_SCOPE,
                 name = "getString",
                 parameters = listOf("Ljava/lang/String;", "Ljava/lang/String;"),
                 returnType = "Ljava/lang/String;",
@@ -59,14 +60,14 @@ private object XLiteHomeNavUpsellTypeFingerprint : Fingerprint(
             opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
         ),
     custom = { method, classDef ->
-        SUBSCRIPTIONS_FEATURES_DESCRIPTOR in classDef.interfaces &&
+        classDef.interfaces.any { it.startsWith(SUBSCRIPTIONS_SCOPE) } &&
             method.returnType.startsWith("L")
     },
 )
 
 /** The feature-switch interface's obfuscated short name changes between releases. */
 private object XLiteHomeNavUpsellEnabledFingerprint : Fingerprint(
-    definingClass = "Lcom/x/subscriptions/",
+    definingClass = SUBSCRIPTIONS_SCOPE,
     returnType = "Z",
     parameters = listOf("L"),
     filters =
@@ -88,7 +89,7 @@ private object XLiteHomeNavUpsellEnabledFingerprint : Fingerprint(
             ),
             opcode(Opcode.MOVE_RESULT, MatchAfterImmediately()),
         ),
-    custom = { _, classDef -> SUBSCRIPTIONS_FEATURES_DESCRIPTOR in classDef.interfaces },
+    custom = { _, classDef -> classDef.interfaces.any { it.startsWith(SUBSCRIPTIONS_SCOPE) } },
 )
 
 private object XLiteHomeTabbedScaffoldClassFingerprint : Fingerprint(
@@ -183,8 +184,8 @@ val hidePremiumUpsellPatch =
                 return@execute
             }
 
-            val typeMatches = XLiteHomeNavUpsellTypeFingerprint.matchAllOrNull().orEmpty()
-            val enabledMatches = XLiteHomeNavUpsellEnabledFingerprint.matchAllOrNull().orEmpty()
+            val typeMatches = XLiteHomeNavUpsellTypeFingerprint.scopedMatchAllOrNull().orEmpty()
+            val enabledMatches = XLiteHomeNavUpsellEnabledFingerprint.scopedMatchAllOrNull().orEmpty()
             val matches = typeMatches + enabledMatches
             if (matches.size != 1) {
                 throw PatchException(

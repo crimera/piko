@@ -2,7 +2,6 @@ package app.crimera.patches.xlite.premium
 
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.utils.scopedMatchAll
-import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -16,6 +15,9 @@ import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+
+private const val VIDEO_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT = 3
+private const val TIMELINE_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT = 9
 
 private fun MutableMethod.forceSubscriptionFeatureResults(): Int {
     val subscriptionChecks =
@@ -99,9 +101,10 @@ val xLiteDownloadPatch =
                 expectedCount = 2,
             ).forEach { match ->
                 val patchedResults = match.method.forceSubscriptionFeatureResults()
-                if (patchedResults == 0) {
+                if (patchedResults != VIDEO_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT) {
                     throw PatchException(
-                        "X-Lite video download handler has no subscription checks: " +
+                        "Expected $VIDEO_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT subscription checks in " +
+                            "the X-Lite video download handler, found $patchedResults: " +
                             match.originalMethod,
                     )
                 }
@@ -113,13 +116,19 @@ val xLiteDownloadPatch =
                 expectedCount = 1,
             ).single()
             val timelinePatchedResults = timelineHandler.method.forceSubscriptionFeatureResults()
-            if (timelinePatchedResults == 0) {
-                throw PatchException("X-Lite timeline download handler has no subscription checks")
+            if (timelinePatchedResults != TIMELINE_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT) {
+                throw PatchException(
+                    "Expected $TIMELINE_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT subscription checks in " +
+                        "the X-Lite timeline download handler, found $timelinePatchedResults: " +
+                        timelineHandler.originalMethod,
+                )
             }
 
-            SubscriptionsFeaturesHasAnyPremiumFingerprint
-                .scopedMatchAll()
-                .forEach { match ->
+            requireMatches(
+                "X-Lite premium subscription checker",
+                SubscriptionsFeaturesHasAnyPremiumFingerprint.scopedMatchAll(),
+                expectedCount = 1,
+            ).forEach { match ->
                     match.method.addInstructions(
                         0,
                         """
@@ -129,14 +138,20 @@ val xLiteDownloadPatch =
                     )
                 }
 
-            MediaContentVideoIsDownloadableFingerprint
-                .scopedMatchAll()
-                .forEach(::forceMediaClassDownloadable)
-            MediaContentGifIsDownloadableFingerprint
-                .scopedMatchAll()
-                .forEach(::forceMediaClassDownloadable)
-            MediaContentImageIsDownloadableFingerprint
-                .scopedMatchAllOrNull()
-                ?.forEach(::forceMediaClassDownloadable)
+            requireMatches(
+                "X-Lite video media downloadability method",
+                MediaContentVideoIsDownloadableFingerprint.scopedMatchAll(),
+                expectedCount = 1,
+            ).forEach(::forceMediaClassDownloadable)
+            requireMatches(
+                "X-Lite GIF media downloadability method",
+                MediaContentGifIsDownloadableFingerprint.scopedMatchAll(),
+                expectedCount = 1,
+            ).forEach(::forceMediaClassDownloadable)
+            requireMatches(
+                "X-Lite image media downloadability method",
+                MediaContentImageIsDownloadableFingerprint.scopedMatchAll(),
+                expectedCount = 1,
+            ).forEach(::forceMediaClassDownloadable)
         }
     }

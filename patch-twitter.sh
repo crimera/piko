@@ -35,7 +35,7 @@ for arg in "$@"; do
   esac
 done
 
-java -jar morphe-desktop-1.11.0-all.jar patch \
+java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -p "$MPP" \
   --keystore Morphe.keystore \
   --exclusive \

@@ -52,6 +52,9 @@ private object XLiteComposeReplySortingFingerprint : Fingerprint(
  * the reply sorting mode from the bottom sheet dialog.
  */
 private object XLiteComposeReplySortingSelectionFingerprint : Fingerprint(
+    // R8 places this synthetic callback in the preserved photo-editor owner package.
+    // Do not search every FunctionReferenceImpl in the APK: those are unrelated callbacks.
+    definingClass = "Lcom/x/photoeditor/",
     returnType = "Ljava/lang/Object;",
     parameters = listOf("Ljava/lang/Object;"),
     custom = { _, classDef ->
