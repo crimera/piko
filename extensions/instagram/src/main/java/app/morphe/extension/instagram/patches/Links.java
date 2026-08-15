@@ -18,6 +18,7 @@ import app.morphe.extension.instagram.entity.MediaData;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
+import app.morphe.extension.shared.ShareLinkSanitizer;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.constants.PostType;
 import app.morphe.extension.instagram.constants.Constants;
@@ -40,6 +41,11 @@ public class Links {
     private static final boolean DISABLE_HIGHLIGHTS;
     private static final boolean DISABLE_ONBOARDING_PERMISSION_PROMPTS;
     private static final List<String> META_PACKAGES;
+    private static final ShareLinkSanitizer SHARE_LINK_SANITIZER = new ShareLinkSanitizer(
+            "instagram.com",
+            Arrays.asList("comment_id", "img_index", "open_comments", "story_media_id"),
+            Arrays.asList("igsh", "igsi", "utm_source", "utm_medium", "utm_content", "fbclid", "si")
+    );
 
     static {
         DISABLE_ANALYTICS = Pref.disableAnalytics() && SettingsStatus.disableAnalytics;
@@ -155,12 +161,7 @@ public class Links {
 
     public static String sanitizeUrl(String url){
         try{
-            return url.replaceAll("([&?])igsh=[^&]*", "")
-                    .replaceAll("([&?])utm_source=[^&]*", "")
-                    .replaceAll("([&?])utm_medium=[^&]*", "")
-                    .replaceAll("([&?])utm_content=[^&]*", "")
-                    .replaceAll("([&?])fbclid=[^&]*", "")
-                    .replaceAll("([&?])si=[^&]*", "");
+            return SHARE_LINK_SANITIZER.sanitize(url, Pref.sanitizeShareLinks());
         } catch (Exception e) {
             Logger.printException(() -> "sanitizeUrl failed: ", e);
         }
