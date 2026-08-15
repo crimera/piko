@@ -2,6 +2,7 @@ package app.crimera.patches.xlite.settings
 
 import app.crimera.patches.xlite.utils.Constants.SETTINGS_REGISTRY_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.toInstruction
 import com.android.tools.smali.dexlib2.AccessFlags
@@ -23,8 +24,10 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 class SettingsContributionPatchTest {
     @Test
@@ -80,6 +83,26 @@ class SettingsContributionPatchTest {
         assertFourBitInvoke(method.instructions[2], "getStringSet", "Ljava/util/Set;", read.register)
         assertMoveResult(method.instructions[3], Opcode.MOVE_RESULT_OBJECT, read.register)
         assertEquals(Opcode.RETURN_VOID, method.instructions[read.nextIndex].opcode)
+    }
+
+    @Test
+    fun `group registration tracker emits compatible metadata once`() {
+        val tracker = SettingsGroupRegistrationTracker()
+        val group =
+            SettingsGroupDefinition(
+                id = "xlite.test.group",
+                titleResourceName = "piko_xlite_test_group_title",
+                summaryResourceName = null,
+                iconResourceName = null,
+                order = 0,
+                children = listOf(toggle),
+            )
+
+        assertTrue(tracker.shouldEmit(null, group, category = true))
+        assertFalse(tracker.shouldEmit(null, group, category = true))
+        assertFailsWith<PatchException> {
+            tracker.shouldEmit("xlite.test.parent", group, category = false)
+        }
     }
 
     @Test

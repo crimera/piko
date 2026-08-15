@@ -5,12 +5,14 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
+import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.patcher.util.smali.ExternalLabel
-import app.morphe.util.cloneMutable
 import app.morphe.util.getFreeRegisterProvider
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import java.lang.ref.WeakReference
+import java.util.WeakHashMap
 
 internal fun xLiteSettingsContributionPatch(
     contribution: SettingsContributionCatalog,
@@ -22,26 +24,93 @@ internal fun xLiteSettingsContributionPatch(
     }
 }
 
+private data class SettingsGroupRegistration(
+    val parentId: String?,
+    val id: String,
+    val titleResourceName: String,
+    val summaryResourceName: String?,
+    val iconResourceName: String?,
+    val order: Int,
+    val category: Boolean,
+)
+
+internal class SettingsGroupRegistrationTracker {
+    private val registrations = linkedMapOf<String, SettingsGroupRegistration>()
+
+    fun shouldEmit(
+        parentId: String?,
+        group: SettingsGroupDefinition,
+        category: Boolean,
+    ): Boolean {
+        val candidate =
+            SettingsGroupRegistration(
+                parentId = parentId,
+                id = group.id,
+                titleResourceName = group.titleResourceName,
+                summaryResourceName = group.summaryResourceName,
+                iconResourceName = group.iconResourceName,
+                order = group.order,
+                category = category,
+            )
+        val existing = registrations[candidate.id]
+        if (existing == null) {
+            registrations[candidate.id] = candidate
+            return true
+        }
+        if (existing != candidate) {
+            throw PatchException(
+                "Conflicting X-Lite settings group registration for ${candidate.id}: " +
+                    "existing=$existing, candidate=$candidate",
+            )
+        }
+        return false
+    }
+}
+
+internal object SettingsRegistrationState {
+    private data class ContextState(
+        val loadMethod: WeakReference<MutableMethod>,
+        val groupTracker: SettingsGroupRegistrationTracker,
+        var nextRegistrationIndex: Int = 0,
+    )
+
+    private val states = WeakHashMap<BytecodePatchContext, ContextState>()
+
+    @Synchronized
+    fun prepare(context: BytecodePatchContext, loadMethod: MutableMethod) {
+        states[context] =
+            ContextState(
+                loadMethod = WeakReference(loadMethod),
+                groupTracker = SettingsGroupRegistrationTracker(),
+            )
+    }
+
+    @Synchronized
+    fun shouldEmit(
+        context: BytecodePatchContext,
+        parentId: String?,
+        group: SettingsGroupDefinition,
+        category: Boolean,
+    ): Boolean =
+        states[context]?.groupTracker?.shouldEmit(parentId, group, category)
+            ?: error("X-Lite settings registration state was not prepared")
+
+    @Synchronized
+    fun inject(context: BytecodePatchContext, instructions: String) {
+        val state = states[context] ?: error("X-Lite settings registration state was not prepared")
+        val loadMethod = state.loadMethod.get()
+            ?: error("X-Lite settings registry load target was not prepared")
+        // Keep parent registration before later contribution items. Inserting every block at zero
+        // would reverse the blocks and allow an item to run before its shared group.
+        val sizeBefore = loadMethod.instructions.size
+        loadMethod.addInstructions(state.nextRegistrationIndex, instructions)
+        state.nextRegistrationIndex += loadMethod.instructions.size - sizeBefore
+    }
+}
+
 context(context: BytecodePatchContext)
 internal fun injectSettingsContribution(contribution: SettingsContributionCatalog) {
-    val registryClass = context.mutableClassDefBy(SETTINGS_REGISTRY_DESCRIPTOR)
-    var loadMethod =
-        registryClass.methods.singleOrNull { method ->
-            method.name == "load" &&
-                method.parameterTypes.isEmpty() &&
-                method.returnType == "V"
-        } ?: error("X-Lite SettingsRegistry.load() was not found")
-    val registerCount = loadMethod.implementation?.registerCount ?: 0
-    if (registerCount < REGISTRATION_REGISTER_COUNT) {
-        val expandedMethod =
-            loadMethod.cloneMutable(
-                additionalRegisters = REGISTRATION_REGISTER_COUNT - registerCount,
-            )
-        registryClass.methods.remove(loadMethod)
-        registryClass.methods.add(expandedMethod)
-        loadMethod = expandedMethod
-    }
-    loadMethod.addInstructions(0, contribution.registrationInstructions())
+    SettingsRegistrationState.inject(context, contribution.registrationInstructions(context))
 }
 
 internal data class InjectedSettingRead(
@@ -234,22 +303,29 @@ private fun SettingItemDefinition.valueReadWithDefaultInstructions(
     """.trimIndent()
 }
 
-private fun SettingsContributionCatalog.registrationInstructions(): String =
+private fun SettingsContributionCatalog.registrationInstructions(
+    context: BytecodePatchContext,
+): String =
     buildString {
         categories.forEach { category ->
-            appendGroupRegistration("registerCategory", null, category)
-            category.children.forEach { child -> appendNodeRegistration(category.id, child) }
+            appendGroupRegistrationIfNeeded(context, null, category, category = true)
+            category.children.forEach { child ->
+                appendNodeRegistration(context, category.id, child)
+            }
         }
     }.trim()
 
 private fun StringBuilder.appendNodeRegistration(
+    context: BytecodePatchContext,
     parentId: String,
     node: SettingsNodeDefinition,
 ) {
     when (node) {
         is SettingsGroupDefinition -> {
-            appendGroupRegistration("registerGroup", parentId, node)
-            node.children.forEach { child -> appendNodeRegistration(node.id, child) }
+            appendGroupRegistrationIfNeeded(context, parentId, node, category = false)
+            node.children.forEach { child ->
+                appendNodeRegistration(context, node.id, child)
+            }
         }
 
         is ToggleSettingDefinition -> {
@@ -345,6 +421,20 @@ private fun StringBuilder.appendNodeRegistration(
     }
 }
 
+private fun StringBuilder.appendGroupRegistrationIfNeeded(
+    context: BytecodePatchContext,
+    parentId: String?,
+    group: SettingsGroupDefinition,
+    category: Boolean,
+) {
+    if (!SettingsRegistrationState.shouldEmit(context, parentId, group, category)) return
+    appendGroupRegistration(
+        method = if (category) "registerCategory" else "registerGroup",
+        parentId = parentId,
+        group = group,
+    )
+}
+
 private fun StringBuilder.appendGroupRegistration(
     method: String,
     parentId: String?,
@@ -400,7 +490,7 @@ private fun StringBuilder.appendInvoke(
     values: List<SmaliValue>,
     method: String,
 ) {
-    require(values.size <= REGISTRATION_REGISTER_COUNT) {
+    require(values.size <= SETTINGS_REGISTRATION_REGISTER_COUNT) {
         "X-Lite registry call uses too many registers: $method"
     }
     values.forEachIndexed { index, value -> appendLine(value.instruction(index)) }
@@ -444,7 +534,6 @@ private fun smaliString(value: String) =
         .replace("\n", "\\n")
         .replace("\r", "\\r")
 
-private const val REGISTRATION_REGISTER_COUNT = 6
 private const val READ_INSTRUCTION_COUNT = 3
 private const val READ_WITH_DEFAULT_INSTRUCTION_COUNT = 4
 

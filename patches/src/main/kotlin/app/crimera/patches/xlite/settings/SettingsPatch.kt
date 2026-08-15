@@ -17,6 +17,7 @@ import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.addAppResources
 import app.morphe.patches.all.misc.resources.addResourcesPatch
 import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.util.cloneMutable
 import app.morphe.util.findFreeRegister
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
@@ -34,6 +35,7 @@ internal val xLiteSettingsPatch =
         execute {
             addAppResources("shared")
             addAppResources("xlite")
+            prepareSettingsRegistryLoad()
 
             val callerMatches =
                 ComposeSettingsBasicItemCallerFingerprint.scopedMatchAll()
@@ -111,6 +113,30 @@ internal val xLiteSettingsPatch =
         }
     }
 
+context(context: BytecodePatchContext)
+private fun prepareSettingsRegistryLoad() {
+    val registryClass = context.mutableClassDefBy(SETTINGS_REGISTRY_DESCRIPTOR)
+    val loadMethod =
+        registryClass.methods.singleOrNull { method ->
+            method.name == "load" &&
+                method.parameterTypes.isEmpty() &&
+                method.returnType == "V"
+        } ?: error("X-Lite SettingsRegistry.load() was not found")
+    val registerCount = loadMethod.implementation?.registerCount ?: 0
+    val preparedLoadMethod =
+        if (registerCount >= SETTINGS_REGISTRATION_REGISTER_COUNT) {
+            loadMethod
+        } else {
+            loadMethod.cloneMutable(
+                additionalRegisters = SETTINGS_REGISTRATION_REGISTER_COUNT - registerCount,
+            ).also { expandedMethod ->
+                registryClass.methods.remove(loadMethod)
+                registryClass.methods.add(expandedMethod)
+            }
+        }
+    SettingsRegistrationState.prepare(context, preparedLoadMethod)
+}
+
 context(_: BytecodePatchContext)
 private fun resolveSettingsIconField(iconType: String): FieldReference {
     val drawableId = getResourceId(ResourceType.DRAWABLE, "ic_vector_settings_stroke")
@@ -142,3 +168,5 @@ private fun resolveSettingsIconField(iconType: String): FieldReference {
     }
     return fields.single()
 }
+
+internal const val SETTINGS_REGISTRATION_REGISTER_COUNT = 6
