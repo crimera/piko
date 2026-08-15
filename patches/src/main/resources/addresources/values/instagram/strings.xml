@@ -38,6 +38,8 @@
     <string name="piko_disable_typing_status">Disable typing status</string>
     <string name="piko_disable_screenshot_detection">Disable screenshot detection</string>
     <string name="piko_view_dm_anonymously">View direct messages anonymously</string>
+    <string name="piko_hide_online_status">Hide online status</string>
+    <string name="piko_hide_online_status_desc">Stops reporting your activity status, while you can still see the activity status of others</string>
     <string name="piko_turn_on_all_ghost_modes">Turn on all ghost modes</string>
     <string name="piko_ghost_modes_on">Ghost mode: ON</string>
     <string name="piko_ghost_modes_default">Ghost mode: DEFAULT</string>

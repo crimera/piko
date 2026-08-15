@@ -81,8 +81,12 @@ public class SettingsStatus {
     public static void viewDmAnonymously() {
         viewDmAnonymously = true;
     }
+    public static boolean hideOnlineStatus = false;
+    public static void hideOnlineStatus() {
+        hideOnlineStatus = true;
+    }
     public static boolean ghostSection() {
-        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously);
+        return (viewStoriesAnonymously || viewLiveAnonymously || disableScreenshotDetection || disableTypingStatus || viewDmAnonymously || hideOnlineStatus);
     }
 
     public static boolean disableStories = false;
@@ -263,6 +267,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_disable_swipe_to_create"), SettingsStatus.disableSwipeToCreate);
 
         FLAGS.put(str("piko_view_dm_anonymously"),SettingsStatus.viewDmAnonymously);
+        FLAGS.put(str("piko_hide_online_status"),SettingsStatus.hideOnlineStatus);
         FLAGS.put(str("piko_view_live_anonymously"),SettingsStatus.disableScreenshotDetection);
         FLAGS.put(str("piko_disable_typing_status"),SettingsStatus.disableTypingStatus);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.viewLiveAnonymously);

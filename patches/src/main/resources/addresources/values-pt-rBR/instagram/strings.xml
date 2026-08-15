@@ -35,6 +35,8 @@
     <string name="piko_disable_typing_status">Desativar o status de digitação</string>
     <string name="piko_disable_screenshot_detection">Desativar a detecção de captura de tela</string>
     <string name="piko_view_dm_anonymously">Visualizar mensagens no direct anonimamente</string>
+    <string name="piko_hide_online_status">Ocultar status online</string>
+    <string name="piko_hide_online_status_desc">Deixa de enviar o seu status de atividade, mas você continua vendo o status dos outros</string>
     <string name="piko_turn_on_all_ghost_modes">Ativar todos os recursos do modo fantasma</string>
     <string name="piko_ghost_modes_on">Modo Fantasma: ATIVADO</string>
     <string name="piko_ghost_modes_default">Modo fantasma: PADRÃO</string>
