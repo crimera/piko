@@ -2,11 +2,11 @@
 
 Target APK: `12.17.3-alpha.01`. Do **not** add compatibility aliases, legacy shims, or version-gated fallbacks for obfuscated names — resolve at patch time or don't ship it. Workstream letters reference `X_LITE_PATCH_IMPROVEMENT_PLAN.md` (B, C, D, E, F).
 
-## 1. Simplify SemanticIntrospection duplicated direct/helper walks (Plan B)
+## 1. [x] Simplify SemanticIntrospection duplicated direct/helper walks (Plan B)
 
 - Deduplicate the direct-resolution and helper-walk paths in `patches/src/main/kotlin/app/crimera/patches/xlite/models/SemanticIntrospection.kt` without weakening required cardinality.
 - Keep helper/property discovery gated by the same cardinality policy; do not widen partial matches.
-- **Evidence:** unit tests (`SemanticIntrospectionTest`) pass with exact-target match counts and resolved descriptors unchanged; green build.
+- **Evidence:** `:patches:test` and `:patches:assemble` pass; the exact `12.17.3-alpha.01` production run applied all 24 patches. Direct/helper field resolution now shares one register-to-field walk without changing the cardinality gate.
 
 ## 2. Inspect Morphe patcher 1.6.0 source before touching ScopedFingerprintMatching (Plan C2)
 

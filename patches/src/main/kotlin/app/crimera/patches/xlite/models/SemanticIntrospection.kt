@@ -13,6 +13,7 @@ import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
@@ -61,18 +62,12 @@ internal fun Match.fieldForToStringLabel(label: String): FieldReference {
         if (valueAppend != null) {
             val valueRegister = valueAppend.value.singleArgumentRegister()
             if (valueRegister != null) {
-                val directField = instructions.subList(labelConsumerIndex + 1, valueAppend.index)
-                    .asReversed()
-                    .firstNotNullOfOrNull { instruction ->
-                        val registerInstruction = instruction as? TwoRegisterInstruction
-                            ?: return@firstNotNullOfOrNull null
-                        if (registerInstruction.registerA != valueRegister) {
-                            return@firstNotNullOfOrNull null
-                        }
-                        instruction.getReference<FieldReference>()?.takeIf { field ->
-                            field.definingClass == originalMethod.definingClass
-                        }
-                    }
+                val directField = instructions.findFieldForRegister(
+                    register = valueRegister,
+                    fromIndex = labelConsumerIndex + 1,
+                    untilIndex = valueAppend.index,
+                    definingClass = originalMethod.definingClass,
+                )
                 if (directField != null) return directField
             }
         }
@@ -87,19 +82,12 @@ internal fun Match.fieldForToStringLabel(label: String): FieldReference {
                 return@forEach
             }
             val valueArgumentRegister = argumentRegisters[labelArgumentIndex + 1]
-            instructions.subList(labelIndex + 1, helperIndex)
-                .asReversed()
-                .firstNotNullOfOrNull { previous ->
-                    val registerInstruction = previous as? TwoRegisterInstruction
-                        ?: return@firstNotNullOfOrNull null
-                    if (registerInstruction.registerA != valueArgumentRegister) {
-                        return@firstNotNullOfOrNull null
-                    }
-                    previous.getReference<FieldReference>()?.takeIf { field ->
-                        field.definingClass == originalMethod.definingClass
-                    }
-                }
-                ?.let { add(it) }
+            instructions.findFieldForRegister(
+                register = valueArgumentRegister,
+                fromIndex = labelIndex + 1,
+                untilIndex = helperIndex,
+                definingClass = originalMethod.definingClass,
+            )?.let { add(it) }
         }
     }
     return requireSingleToStringField(label, originalMethod.toString(), helperCandidates)
@@ -235,7 +223,26 @@ private fun MethodReference.isStringBuilderValueAppend(): Boolean =
         name == "append" &&
         parameterTypes.size == 1
 
-private fun com.android.tools.smali.dexlib2.iface.instruction.Instruction.singleArgumentRegister(): Int? =
+private fun List<Instruction>.findFieldForRegister(
+    register: Int,
+    fromIndex: Int,
+    untilIndex: Int,
+    definingClass: String,
+): FieldReference? =
+    subList(fromIndex, untilIndex)
+        .asReversed()
+        .firstNotNullOfOrNull { instruction ->
+            val registerInstruction = instruction as? TwoRegisterInstruction
+                ?: return@firstNotNullOfOrNull null
+            if (registerInstruction.registerA != register) {
+                return@firstNotNullOfOrNull null
+            }
+            instruction.getReference<FieldReference>()?.takeIf { field ->
+                field.definingClass == definingClass
+            }
+        }
+
+private fun Instruction.singleArgumentRegister(): Int? =
     when (this) {
         is FiveRegisterInstruction -> registerD
         is RegisterRangeInstruction -> startRegister + 1
