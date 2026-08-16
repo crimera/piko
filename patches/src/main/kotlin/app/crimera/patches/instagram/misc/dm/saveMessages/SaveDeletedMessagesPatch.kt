@@ -107,18 +107,16 @@ val saveDeletedMessagesPatch =
             // Hook 4: SQLite DAO delete — inject at entry so our DB record is still present when the hook fires.
             runCatching {
                 DirectItemDbHideFingerprint.method.apply {
-                    val regs = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 3)
+                    val regs = getFreeRegisterProvider(index = 0, numberOfFreeRegistersNeeded = 2)
                     val r0 = regs.getFreeRegister()
                     val r1 = regs.getFreeRegister()
-                    val r2 = regs.getFreeRegister()
 
                     addInstructions(
                         0,
                         """
-                        move-object/from16 v$r0, p0
-                        move-object/from16 v$r1, p2
-                        move-object/from16 v$r2, p3
-                        invoke-static {v$r0, v$r1, v$r2}, $HOOK_CLASS->onMessageHiddenFromDb(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;)V
+                        move-object/from16 v$r0, p2
+                        move-object/from16 v$r1, p3
+                        invoke-static {v$r0, v$r1}, $HOOK_CLASS->onMessageHiddenFromDb(Ljava/lang/String;Ljava/lang/String;)V
                         """.trimIndent(),
                     )
                 }
