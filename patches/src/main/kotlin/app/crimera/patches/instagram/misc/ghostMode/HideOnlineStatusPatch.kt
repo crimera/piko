@@ -19,7 +19,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
-private const val EXTENSION_CLASS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Presence;"
+private const val EXTENSION_CLASS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/dm/UserPresence;"
 
 private const val REALTIME_CLIENT_MANAGER_CLASS = "Lcom/instagram/realtimeclient/RealtimeClientManager;"
 private const val UPDATE_APP_STATE_RUNNABLE_CLASS =

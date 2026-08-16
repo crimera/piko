@@ -5,7 +5,7 @@
 */
 
 
-package app.morphe.extension.instagram.patches;
+package app.morphe.extension.instagram.patches.dm;
 
 import com.facebook.presence.model.upi.PresenceStatus;
 
@@ -13,7 +13,7 @@ import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Logger;
 
 @SuppressWarnings("unused")
-public class Presence {
+public class UserPresence {
     private static final String ACTIVE = "ACTIVE";
     private static final String IDLE = "IDLE";
     private static final String OFFLINE = "OFFLINE";
