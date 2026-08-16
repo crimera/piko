@@ -138,6 +138,7 @@ public class Links {
     public static String sanitizeUrl(String url){
         try{
             return url.replaceAll("([&?])igsh=[^&]*", "")
+                    .replaceAll("([&?])igsi=[^&]*", "")
                     .replaceAll("([&?])utm_source=[^&]*", "")
                     .replaceAll("([&?])utm_medium=[^&]*", "")
                     .replaceAll("([&?])utm_content=[^&]*", "")
