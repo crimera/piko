@@ -4,7 +4,7 @@
  * See the included NOTICE file for GPLv3 §7(b) terms that apply to this code.
  */
 
-package app.crimera.patches.instagram.links.sanitizeShareLinks
+package app.crimera.patches.instagram.links.shareLinks
 
 import app.morphe.patcher.Fingerprint
 

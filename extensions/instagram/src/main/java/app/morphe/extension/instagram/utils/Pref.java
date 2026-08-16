@@ -61,6 +61,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.SANITIZE_SHARE_LINKS);
     }
 
+    public static String customSharingDomain() {
+        return SharedPref.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
+    }
+
     public static boolean getTurnOnAllGhostModes() {
         return SharedPref.getBooleanPref(Settings.TURN_ON_ALL_GHOST_MODES);
     }

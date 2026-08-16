@@ -7,11 +7,14 @@
 
 package app.morphe.extension.instagram.patches;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.net.Uri;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.entity.MediaData;
@@ -32,6 +35,8 @@ public class Links {
             "com.bloks.www.bloks.ig.ndx.ci.entry.screen";
     private static final String NDX_LOCATION_SERVICES_SCREEN =
             "com.bloks.www.bloks.ig.ndx.ls.entry.screen";
+    private static final Pattern VALID_DOMAIN =
+            Pattern.compile("[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(:\\d{1,5})?");
     private static final boolean DISABLE_ANALYTICS;
     private static final boolean DISABLE_STORIES;
     private static final boolean DISABLE_EXPLORE;
@@ -166,6 +171,49 @@ public class Links {
             Logger.printException(() -> "sanitizeUrl failed: ", e);
         }
         return url;
+    }
+
+    public static String changeDomain(String url) {
+        try {
+            String domain = normalizeCustomDomain(Pref.customSharingDomain());
+            if (domain.isEmpty()) return url;
+
+            Uri uri = Uri.parse(url);
+            String host = uri.getHost();
+
+            if (host == null
+                    || !(host.equalsIgnoreCase("instagram.com") || host.equalsIgnoreCase("www.instagram.com"))
+                    || host.equalsIgnoreCase(domain)) {
+                return url;
+            }
+
+            return uri.buildUpon().encodedAuthority(domain).build().toString();
+        } catch (Exception e) {
+            Logger.printException(() -> "changeDomain failed: ", e);
+        }
+        return url;
+    }
+
+    public static String customSharingDomainSummary(String customDomain) {
+        String domain = normalizeCustomDomain(customDomain);
+        return domain.isEmpty() ? str("piko_custom_sharing_domain_desc") : domain;
+    }
+
+    private static String normalizeCustomDomain(String customDomain) {
+        String domain = customDomain.trim()
+                .replaceFirst("^[^/?#]*://", "")
+                .replaceFirst("[/?#].*", "")
+                .replaceFirst("^[^@]*@", "");
+
+        int portStart = domain.lastIndexOf(':');
+        String host = portStart < 0 ? domain : domain.substring(0, portStart);
+        String port = portStart < 0 ? "" : domain.substring(portStart);
+
+        String bareHost = host.regionMatches(true, 0, "www.", 0, 4) ? host.substring(4) : host;
+        if (!bareHost.isEmpty() && bareHost.indexOf('.') < 0) host += ".com";
+
+        domain = host + port;
+        return VALID_DOMAIN.matcher(domain).matches() ? domain : "";
     }
 
     public static boolean signatureCheck(Object appIdentityObject){

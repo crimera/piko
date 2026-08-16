@@ -30,6 +30,8 @@
     <string name="piko_open_links_externally">Open links externally</string>
     <string name="piko_open_links_externally_desc">Open links in external browser instead of in-app browser</string>
     <string name="piko_sanitize_share_links">Sanitize share links</string>
+    <string name="piko_custom_sharing_domain">Custom sharing domain</string>
+    <string name="piko_custom_sharing_domain_desc">Domain to use when sharing links</string>
 
     <!-- Ghost Section -->
     <string name="piko_category_ghost">Ghost</string>
