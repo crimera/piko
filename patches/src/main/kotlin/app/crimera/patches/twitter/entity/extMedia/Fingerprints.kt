@@ -46,6 +46,7 @@ object MediaOptionSheetMediaListVideoDownloaderImplDownloadMethodFingerprint : F
 )
 
 internal object MediaResolutionToStringFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/util/math",
     name = "toString",
     strings =
         listOf(
