@@ -188,7 +188,7 @@ private val materialYouSurfaceBaselineMappings =
         "igds_prism_gray_09" to "@color/piko_dynamic_pressed_background",
         "igds_prism_gray_13" to "@color/piko_dynamic_prism_black",
         "igds_prism_gray_14" to "@color/piko_dynamic_prism_black",
-        "igds_prism_gray_1500" to "@color/piko_dynamic_prism_black",
+        "igds_prism_gray_1500" to "@color/piko_dynamic_neutral_deep",
         "igds_prism_gray_09_alpha_95" to "@color/piko_dynamic_prism_black",
         "igds_prism_gray_10_alpha_95" to "@color/piko_dynamic_prism_black",
         "bds_grey_9_95_transparent" to "@color/piko_dynamic_prism_black",

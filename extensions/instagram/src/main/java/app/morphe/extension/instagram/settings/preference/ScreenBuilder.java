@@ -25,6 +25,7 @@ import  app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import  app.morphe.extension.instagram.patches.devFlags.Flag;
 
 import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
@@ -323,6 +324,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.customSharingDomain) {
+            addPreference(
+                    helper.editTextPreference(
+                            str("piko_custom_sharing_domain"),
+                            Links.customSharingDomainSummary(Pref.customSharingDomain()),
+                            Settings.CUSTOM_SHARING_DOMAIN
+                    )
+            );
+        }
     }
 
     public void distractionFreeSection() {
@@ -580,6 +590,15 @@ public class ScreenBuilder {
                             str("piko_disable_story_flipping"),
                             str("piko_disable_story_flipping_desc"),
                             Settings.DISABLE_STORY_FLIPPING
+                    )
+            );
+        }
+        if (SettingsStatus.loopStory) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_loop_story"),
+                            str("piko_loop_story_desc"),
+                            Settings.LOOP_STORY
                     )
             );
         }
