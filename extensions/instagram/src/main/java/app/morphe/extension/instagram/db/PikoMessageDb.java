@@ -81,13 +81,6 @@ public class PikoMessageDb extends SQLiteOpenHelper {
      * Insert a captured message. If the row already exists (same message_id), the insert is
      * ignored — EXCEPT that any newly-arriving non-empty content / username / sender_id is
      * written into the existing row when its corresponding column is still empty.
-     *
-     * This matters because the feature captures the same message from multiple hooks at
-     * different times: an early hook may store an empty-content placeholder, and the later
-     * authoritative source (e.g. Hook 4 reading Instagram's own "messages" table at delete
-     * time, or a username resolved after the fact) must be able to fill those blanks in.
-     * A plain CONFLICT_IGNORE would silently drop that better data, leaving the UI showing
-     * "[text]" / "Unknown".
      */
     public void insertOrIgnore(String messageId, String threadId, String senderId,
                                String senderUsername, String content, String type, long timestamp) {
@@ -196,6 +189,16 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         if (c.moveToFirst()) alive = c.getInt(0) == 0;
         c.close();
         return alive;
+    }
+
+    public boolean isStored(String messageId) {
+        if (messageId == null) return false;
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.query(TABLE, new String[]{"message_id"}, "message_id = ?",
+                new String[]{messageId}, null, null, null);
+        boolean stored = c.moveToFirst();
+        c.close();
+        return stored;
     }
 
     /** Permanently remove one saved message from the vault. */
@@ -322,11 +325,15 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         return (result != null && !result.isEmpty()) ? result : null;
     }
 
+    private static final String HAS_CONTENT =
+        " AND (COALESCE(content, '') <> '' OR COALESCE(sender_id, '') <> ''"
+            + " OR COALESCE(sender_username, '') <> '')";
+
     // Returns [messageId, threadId, senderUsername, content, messageType, timestamp, senderId]
     public List<String[]> getDeletedMessages() {
         List<String[]> result = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(TABLE, null, "is_deleted = 1", null, null, null, "timestamp DESC");
+        Cursor c = db.query(TABLE, null, "is_deleted = 1" + HAS_CONTENT, null, null, null, "timestamp DESC");
         while (c.moveToNext()) {
             result.add(rowToStringArray(c));
         }
@@ -340,7 +347,7 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         // (thread id was unknown at capture) and must not surface as a specific chat's history.
         if (threadId == null || threadId.isEmpty()) return result;
         SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(TABLE, null, "is_deleted = 1 AND thread_id = ?",
+        Cursor c = db.query(TABLE, null, "is_deleted = 1 AND thread_id = ?" + HAS_CONTENT,
             new String[]{threadId}, null, null, "timestamp DESC");
         while (c.moveToNext()) {
             result.add(rowToStringArray(c));
