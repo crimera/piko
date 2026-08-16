@@ -14,11 +14,19 @@ import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CL
 import app.crimera.patches.instagram.utils.Constants.ORIGINAL_SOUND_DATA_INTF
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
-import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.iface.Method
 
 internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
-internal const val LIVE_TREE_MEDIA_DICT_CLASS = "/LiveTreeMediaDict;"
+internal const val LIVE_TREE_MEDIA_DICT_CLASS = "Lcom/instagram/feed/media/LiveTreeMediaDict;"
+
+/**
+ * Class carrying the LiveTree-backed media getters. Both candidates ship together, so
+ * `mediaDataEntity` pins one before these fingerprints resolve.
+ */
+internal var mediaModelClass: String = LIVE_TREE_MEDIA_DICT_CLASS
+
+private fun Method.inMediaModel(): Boolean = definingClass == mediaModelClass
 
 internal object GetHelperClassExtensionFingerprint : Fingerprint(
     definingClass = EXTENSION_CLASS_DESCRIPTOR,
@@ -139,29 +147,9 @@ internal object FanClubContentPreviewInteractorImplFingerprint : Fingerprint(
     strings = listOf("subscription_exclusive_content_public_preview_select", "creator_igid"),
 )
 
-internal object GetDisplayArtistFromMusicInfoAndOriginalSoundDataFingerprint : Fingerprint(
-    returnType = "Ljava/lang/String;",
-    parameters = listOf("Lcom/instagram/api/schemas/MusicInfo;", ORIGINAL_SOUND_DATA_INTF),
-)
-
-internal object MusicAudioTypeEnumStringFingerprint : Fingerprint(
-    classFingerprint = GetDisplayArtistFromMusicInfoAndOriginalSoundDataFingerprint,
-    returnType = "Ljava/lang/String;",
-    parameters = listOf("Landroid/content/Context;", USER_SESSION_CLASS, MEDIA_CLASS_NAME),
-    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
-)
-
 internal object AudioIntfMapperFingerprint : Fingerprint(
     returnType = "Ljava/util/Map;",
     strings = listOf(AUDIO_SRC_KEY, "audio_src_expiration_timestamp_us", "codec", "duration", "fallback", "file_format"),
-)
-
-internal object IgPlayerControllerRelatedFingerprint : Fingerprint(
-    strings =
-        listOf(
-            "igPlayerController must be initialized",
-            "audioMetadata must be set before preparing",
-        ),
 )
 
 internal object ExtMediaDictVideoInfoMapperFingerprint : Fingerprint(
@@ -176,13 +164,13 @@ internal object ExtMediaDictVideoInfoMapperFingerprint : Fingerprint(
 internal object LiveTreeMediaDictReelsMentionFingerprint : Fingerprint(
     returnType = "Ljava/util/List;",
     strings = listOf("reel_mentions"),
-    definingClass = LIVE_TREE_MEDIA_DICT_CLASS,
+    custom = { methodDef, _ -> methodDef.inMediaModel() },
 )
 
 internal object LiveTreeMediaDictGetUserFingerprint : Fingerprint(
     returnType = USER_MODEL_CLASS_NAME,
     strings = listOf("user"),
-    definingClass = LIVE_TREE_MEDIA_DICT_CLASS,
+    custom = { methodDef, _ -> methodDef.inMediaModel() },
 )
 
 internal object ExtMediaDictImageInfoMapperFingerprint : Fingerprint(
