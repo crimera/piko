@@ -148,7 +148,6 @@
     <string name="piko_category_about">關於</string>
     <string name="piko_export_pref">匯出 Piko 偏好設定</string>
     <string name="piko_import_pref">匯入 Piko 偏好設定</string>
-    <string name="piko_reset_pref">重設 Piko 偏好設定</string>
     <string name="piko_app_version">應用程式版本：%s</string>
     <string name="piko_patch_version">補丁版本：%s</string>
     <string name="piko_patch_info_title">補丁資訊</string>
@@ -201,4 +200,5 @@
     <string name="piko_settings_on_action_bar_desc">將 Piko 設定入口移至動態首頁的操作列上</string>
     <!-- Developer Options Section -->
     <!-- Story filters -->
+    <!-- Save & view deleted (unsent) direct messages -->
 </resources>

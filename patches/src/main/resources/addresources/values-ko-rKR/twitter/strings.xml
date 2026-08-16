@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">캐시를 삭제할 수 없습니다</string>
     <string name="piko_title_native_share_menu">기본 공유 메뉴</string>
     <string name="piko_native_share_menu_toggle">기본 공유 메뉴 활성화하기</string>
+    <string name="piko_native_share_menu_items_to_hide">숨길 기본 공유 메뉴 항목</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">광고</string>
     <string name="piko_pref_hide_promoted_posts">광고 게시물 숨기기</string>
@@ -205,6 +206,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">프로필 정보 더보기</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">프로필 페이지에 더 자세한 정보를 추가합니다</string>
     <string name="piko_fast_follower">빠른 팔로워</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">폰트 스타일</string>
     <string name="piko_pref_add_font">폰트 추가하기</string>
