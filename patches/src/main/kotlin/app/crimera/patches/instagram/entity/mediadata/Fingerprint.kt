@@ -14,7 +14,10 @@ import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CL
 import app.crimera.patches.instagram.utils.Constants.ORIGINAL_SOUND_DATA_INTF
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterWithin
+import app.morphe.patcher.opcode
 import com.android.tools.smali.dexlib2.AccessFlags
+import com.android.tools.smali.dexlib2.Opcode
 
 internal const val AUDIO_SRC_KEY = "audio_src"
 internal const val EXTENSION_CLASS_DESCRIPTOR = "${Constants.ENTITY_CLASS}/MediaData;"
@@ -105,7 +108,10 @@ internal object GetPostTypeExtensionFingerprint : Fingerprint(
     name = "getPostType",
 )
 
-// -----------------------------------
+internal object ReelsMentionDoubleTapFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("userSession", "direct_add_mention_tap"),
+)
 
 internal object InstagramMainActivityNotificationRelatedFingerprint : Fingerprint(
     definingClass = "/InstagramMainActivity;",
@@ -128,7 +134,6 @@ internal object EditMediaInfoFragmentMediaSizeFingerprint : Fingerprint(
     definingClass = EDIT_MEDIA_INFO_FRAGMENT_CLASS,
 )
 
-// Backup fingerprint to find a media list method.
 internal object GetAndroidLinkFromMediaObject : Fingerprint(
     returnType = "Lcom/instagram/model/androidlink/AndroidLink;",
     definingClass = "Lcom/instagram/profile/fragment/UserDetailFragment;",
@@ -139,16 +144,24 @@ internal object FanClubContentPreviewInteractorImplFingerprint : Fingerprint(
     strings = listOf("subscription_exclusive_content_public_preview_select", "creator_igid"),
 )
 
-internal object GetDisplayArtistFromMusicInfoAndOriginalSoundDataFingerprint : Fingerprint(
-    returnType = "Ljava/lang/String;",
-    parameters = listOf("Lcom/instagram/api/schemas/MusicInfo;", ORIGINAL_SOUND_DATA_INTF),
+internal object DirectShareTargetRelatedFingerprint : Fingerprint(
+    returnType = "V",
+    strings = listOf("", "https://www.instagram.com/p/"),
+    custom = { methodDef, _ ->
+        methodDef.parameters.size == 3 && methodDef.parameters.last().type == "Lcom/instagram/model/direct/DirectShareTarget;"
+    },
 )
 
 internal object MusicAudioTypeEnumStringFingerprint : Fingerprint(
-    classFingerprint = GetDisplayArtistFromMusicInfoAndOriginalSoundDataFingerprint,
     returnType = "Ljava/lang/String;",
     parameters = listOf("Landroid/content/Context;", USER_SESSION_CLASS, MEDIA_CLASS_NAME),
     accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC, AccessFlags.FINAL),
+    filters = listOf(
+        opcode(
+            opcode = Opcode.IF_EQZ,
+            location = MatchAfterWithin(4),
+        ),
+    ),
 )
 
 internal object AudioIntfMapperFingerprint : Fingerprint(
@@ -157,20 +170,17 @@ internal object AudioIntfMapperFingerprint : Fingerprint(
 )
 
 internal object IgPlayerControllerRelatedFingerprint : Fingerprint(
-    strings =
-        listOf(
-            "igPlayerController must be initialized",
-            "audioMetadata must be set before preparing",
-        ),
+    strings = listOf("igPlayerController must be initialized", "audioMetadata must be set before preparing"),
 )
 
 internal object ExtMediaDictVideoInfoMapperFingerprint : Fingerprint(
-    strings =
-        listOf(
-            "video_subtitles_uri",
-            "video_to_carousel_cut_info",
-        ),
+    strings = listOf("video_subtitles_uri", "video_to_carousel_cut_info", "video_versions"),
     returnType = "Ljava/util/Map;",
+)
+
+internal object LiveTreeMediaDictClinitFingerprint : Fingerprint(
+    name = "<clinit>",
+    strings = listOf("video_to_carousel_cut_info"),
 )
 
 internal object LiveTreeMediaDictReelsMentionFingerprint : Fingerprint(
@@ -186,11 +196,7 @@ internal object LiveTreeMediaDictGetUserFingerprint : Fingerprint(
 )
 
 internal object ExtMediaDictImageInfoMapperFingerprint : Fingerprint(
-    strings =
-        listOf(
-            "igtv_shopping_info",
-            "image_versions2",
-        ),
+    strings = listOf("igtv_shopping_info", "image_versions2"),
     returnType = "Ljava/util/Map;",
 )
 
@@ -201,12 +207,7 @@ internal object GetProductTileMediaFromUserSessionFingerprint : Fingerprint(
 )
 
 internal object ProductInfoMapperFingerprint : Fingerprint(
-    strings =
-        listOf(
-            "product_suggestions",
-            "product_tags",
-            "product_type",
-        ),
+    strings = listOf("product_suggestions", "product_tags", "product_type"),
     returnType = "Ljava/util/Map;",
 )
 
@@ -228,5 +229,5 @@ internal object GetUserDataFromMediaFingerprint : Fingerprint(
 
 internal object CommentToStringFingerprint : Fingerprint(
     name = "toString",
-    strings = listOf("Comment{mCreatedAtSeconds=%d, mUser=@%s, mText=\'%s\'}"),
+    strings = listOf("Comment{mCreatedAtSeconds=%d, mUser=@%s, mText=\\'%s\\'}"),
 )

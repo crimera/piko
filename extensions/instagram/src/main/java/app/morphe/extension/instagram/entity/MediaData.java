@@ -95,18 +95,25 @@ public class MediaData extends Entity {
     }
 
     private String getPostTypeKey() throws Exception {
-        return (String) super.getField(this.getMoreExtendedData(), "A7Q");
+        return (String) super.getField(this.getMoreExtendedData(), "fieldName");
     }
 
     private List<MediaData> getCarouselMediaData() throws Exception {
         List<MediaData> carouselMediaData = new ArrayList<>();
         List<Object> mediaList = this.getMediaList();
-        if (mediaList.isEmpty()){
+        // Some 442 media objects do not expose the carousel list for a normal
+        // single-media post. Treat a null/empty result as the media object itself.
+        if (mediaList == null || mediaList.isEmpty()){
             carouselMediaData.add(new MediaData(this.obj, this.userSession));
         } else {
-            mediaList.forEach(item->{
-                carouselMediaData.add(new MediaData(item, this.userSession));
-            });
+            for (Object item : mediaList) {
+                if (item != null) {
+                    carouselMediaData.add(new MediaData(item, this.userSession));
+                }
+            }
+            if (carouselMediaData.isEmpty()) {
+                carouselMediaData.add(new MediaData(this.obj, this.userSession));
+            }
         }
         return carouselMediaData;
     }
@@ -190,6 +197,9 @@ public class MediaData extends Entity {
     }
 
     public List<Object> getMediaList() throws Exception {
+        // Carousel media is exposed by the extended-data backing object.
+        // Calling the method on the outer Media object returns an unrelated/null
+        // collection on Instagram 442, which then breaks every download action.
         List mediaList = (List) super.getMethod(this.getExtendedData(), "methodName");
         if (mediaList != null) {
             return mediaList;
@@ -198,11 +208,15 @@ public class MediaData extends Entity {
     }
 
     public int getCarouselSize() throws Exception {
-        return this.getMediaList().size();
+        List<Object> mediaList = this.getMediaList();
+        return mediaList == null || mediaList.isEmpty() ? 1 : mediaList.size();
     }
 
     public MediaData getMediaAt(int position) throws Exception {
         List<MediaData> mediaList = this.getCarouselMediaData();
+        if (mediaList == null || mediaList.isEmpty()) {
+            return new MediaData(this.obj, this.userSession);
+        }
 
         int safePosition = Math.max(0, Math.min(position, mediaList.size() - 1));
         return mediaList.get(safePosition);
@@ -218,7 +232,11 @@ public class MediaData extends Entity {
             List variantList = (List) variantObject;
 
             List<VideoData> videoList = new ArrayList<>();
-            variantList.forEach(item -> videoList.add(new VideoData(item)));
+            for (Object item : variantList) {
+                if (item != null) {
+                    videoList.add(new VideoData(item));
+                }
+            }
             return videoList;
 
         }
@@ -226,33 +244,60 @@ public class MediaData extends Entity {
     }
 
     private List getVideoVariantsV2() throws Exception {
+        // Keep the original entity layout: video_versions is a field of the
+        // extended media dictionary, not a method on the outer Media object.
         List variantList = (List) super.getField(this.getMoreExtendedData(), "fieldName");
+        if (variantList == null) {
+            return null;
+        }
 
         List<VideoData> videoList = new ArrayList<>();
-        variantList.forEach(item -> videoList.add(new VideoData(item)));
+        for (Object item : variantList) {
+            if (item != null) {
+                videoList.add(new VideoData(item));
+            }
+        }
         return videoList;
     }
 
     public List getVideoVariants() throws Exception {
         try {
-            return this.getVideoVariantsV2();
+            List variants = this.getVideoVariantsV2();
+            if (variants != null && !variants.isEmpty()) {
+                return variants;
+            }
         } catch (Exception e) {
-            return this.getVideoVariantsV1();
         }
+
+        return this.getVideoVariantsV1();
     }
 
     public List getImageVariants() throws Exception {
+        // image_versions2 is stored in the image-info object under the
+        // more-extended media dictionary. The method name is patched from the
+        // AyuMidcard helper fingerprint.
         Object imageInfoObject = (Object) super.getField(this.getMoreExtendedData(), "fieldName");
+        if (imageInfoObject == null) {
+            return null;
+        }
+
         List variantList = (List) super.getMethod(imageInfoObject, "methodName");
+        if (variantList == null) {
+            return null;
+        }
 
         List<ImageData> imageList = new ArrayList<>();
-        variantList.forEach(item -> imageList.add(new ImageData(item)));
+        for (Object item : variantList) {
+            if (item != null) {
+                imageList.add(new ImageData(item));
+            }
+        }
         return imageList;
     }
 
     public String getVideoLink() throws Exception {
         List<VideoData> videoDataList = this.getVideoVariants();
-        if(videoDataList!=null){
+        if(videoDataList != null && !videoDataList.isEmpty()){
             return videoDataList.get(0).getUrl();
         }
         return null;
@@ -260,7 +305,7 @@ public class MediaData extends Entity {
     
     public String getImageLink() throws Exception {
         List<ImageData> imageDataList = this.getImageVariants();
-        if(imageDataList!=null){
+        if(imageDataList!=null && !imageDataList.isEmpty()){
             return imageDataList.get(0).getUrl();
         }
         return null;
@@ -273,7 +318,7 @@ public class MediaData extends Entity {
 
     private OriginalSoundDataIntf getOriginalSoundDataIntf() throws Exception {
         Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "A06", this.obj);
+        Object result = super.getMethod(helperClass, "methodName", this.obj);
         if (result != null) {
             return new OriginalSoundDataIntf(result);
         }
@@ -282,7 +327,7 @@ public class MediaData extends Entity {
 
     private TrackDataIntf getTrackDataIntf() throws Exception {
         Class<?> helperClass = this.getHelperClass();
-        Object result = super.getMethod(helperClass, "A0F", this.obj);
+        Object result = super.getMethod(helperClass, "methodName", this.obj);
         if (result != null) {
             return new TrackDataIntf(result);
         }

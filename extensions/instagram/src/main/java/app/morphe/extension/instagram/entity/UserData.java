@@ -18,7 +18,7 @@ public class UserData extends Entity {
     }
 
     private Object getAdditionalUserInfo() throws Exception {
-        return super.getField(this.obj, "fieldName");
+        return this.obj;
     }
 
     public Boolean isVerified() throws Exception {
