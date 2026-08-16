@@ -7,6 +7,8 @@
 
 package app.morphe.extension.instagram.patches;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import android.net.Uri;
 import java.io.IOException;
 import java.net.URI;
@@ -190,6 +192,11 @@ public class Links {
             Logger.printException(() -> "changeDomain failed: ", e);
         }
         return url;
+    }
+
+    public static String customSharingDomainSummary(String customDomain) {
+        String domain = normalizeCustomDomain(customDomain);
+        return domain.isEmpty() ? str("piko_custom_sharing_domain_desc") : domain;
     }
 
     private static String normalizeCustomDomain(String customDomain) {

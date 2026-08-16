@@ -25,6 +25,7 @@ import  app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
 import  app.morphe.extension.instagram.patches.devFlags.Flag;
 
 import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
@@ -324,13 +325,10 @@ public class ScreenBuilder {
             );
         }
         if (SettingsStatus.customSharingDomain) {
-            String customSharingDomain = Pref.customSharingDomain();
             addPreference(
                     helper.editTextPreference(
                             str("piko_custom_sharing_domain"),
-                            customSharingDomain.isEmpty()
-                                    ? str("piko_custom_sharing_domain_desc")
-                                    : customSharingDomain,
+                            Links.customSharingDomainSummary(Pref.customSharingDomain()),
                             Settings.CUSTOM_SHARING_DOMAIN
                     )
             );
