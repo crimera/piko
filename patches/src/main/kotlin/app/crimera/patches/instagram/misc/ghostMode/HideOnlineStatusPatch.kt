@@ -10,15 +10,64 @@ import app.crimera.patches.instagram.misc.actionBar.chatActionBarButton.chatActi
 import app.crimera.patches.instagram.misc.actionBar.inboxActionBarButton.inboxActionBarButtonPatch
 import app.crimera.patches.instagram.misc.settings.settingsPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
-import app.crimera.patches.instagram.utils.Constants.PRESENCE_DESCRIPTOR
-import app.crimera.patches.instagram.utils.Constants.PRESENCE_STATUS_CLASS
+import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.enableSettings
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
+
+private const val EXTENSION_CLASS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/Presence;"
+
+private const val REALTIME_CLIENT_MANAGER_CLASS = "Lcom/instagram/realtimeclient/RealtimeClientManager;"
+private const val UPDATE_APP_STATE_RUNNABLE_CLASS =
+    "Lcom/instagram/realtimeclient/RealtimeClientManager\$updateAppStateInternal\$1;"
+private const val PRESENCE_UPI_PACKAGE = "Lcom/facebook/presence/model/upi"
+private const val PRESENCE_STATUS_CLASS = "$PRESENCE_UPI_PACKAGE/PresenceStatus;"
+private const val PRESENCE_WRITE_REQUEST_CLASS = "$PRESENCE_UPI_PACKAGE/PresenceWriteRequest;"
+
+/**
+ * The single constructor every outgoing presence write funnels through, from both
+ * `LX/6uW` (stream setup and teardown) and `LX/8zp` (foreground/background transitions).
+ * The class survives obfuscation because it is `@Serializable`.
+ */
+private object PresenceWriteRequestConstructorFingerprint : Fingerprint(
+    definingClass = PRESENCE_WRITE_REQUEST_CLASS,
+    name = "<init>",
+    returnType = "V",
+    parameters =
+        listOf(
+            "$PRESENCE_UPI_PACKAGE/AppState;",
+            "$PRESENCE_UPI_PACKAGE/PresencePollingMode;",
+            PRESENCE_STATUS_CLASS,
+            "$PRESENCE_UPI_PACKAGE/PresenceWriteRequestType;",
+            "Ljava/lang/Long;",
+            "Ljava/lang/String;",
+        ),
+)
+
+/**
+ * Builds the initial MQTT subscription list, which contains `/disable_presence_reporting`
+ * only when the UPI rollout flag (`LX/DA7;->A03`) is on.
+ */
+private object CreateMqttClientFingerprint : Fingerprint(
+    definingClass = REALTIME_CLIENT_MANAGER_CLASS,
+    name = "createMqttClient",
+    strings = listOf("/disable_presence_reporting"),
+)
+
+/**
+ * Calls `HET(isForegrounded, sendLegacyMqttPresence)` on the MQTT client, the only call site
+ * of that interface method in the app.
+ */
+private object UpdateAppStateRunnableFingerprint : Fingerprint(
+    definingClass = UPDATE_APP_STATE_RUNNABLE_CLASS,
+    name = "run",
+    returnType = "V",
+)
 
 /**
  * Instagram's native "Show activity status" toggle is bilateral: switching it off also stops
@@ -43,7 +92,7 @@ val hideOnlineStatusPatch =
                 addInstructions(
                     superCallIndex + 1,
                     """
-                    invoke-static {p3}, $PRESENCE_DESCRIPTOR->overridePresenceStatus($PRESENCE_STATUS_CLASS)$PRESENCE_STATUS_CLASS
+                    invoke-static {p3}, $EXTENSION_CLASS_DESCRIPTOR->overridePresenceStatus($PRESENCE_STATUS_CLASS)$PRESENCE_STATUS_CLASS
                     move-result-object p3
                     """.trimIndent(),
                 )
@@ -66,7 +115,7 @@ val hideOnlineStatusPatch =
                     addInstructions(
                         flagResultInstruction.location.index + 1,
                         """
-                        invoke-static {v$flagRegister}, $PRESENCE_DESCRIPTOR->shouldDisablePresenceReporting(Z)Z
+                        invoke-static {v$flagRegister}, $EXTENSION_CLASS_DESCRIPTOR->shouldDisablePresenceReporting(Z)Z
                         move-result v$flagRegister
                         """.trimIndent(),
                     )
@@ -83,7 +132,7 @@ val hideOnlineStatusPatch =
                 addInstructions(
                     hetCallIndex,
                     """
-                    invoke-static {v$sendPresenceRegister}, $PRESENCE_DESCRIPTOR->shouldSendLegacyPresence(Z)Z
+                    invoke-static {v$sendPresenceRegister}, $EXTENSION_CLASS_DESCRIPTOR->shouldSendLegacyPresence(Z)Z
                     move-result v$sendPresenceRegister
                     """.trimIndent(),
                 )
