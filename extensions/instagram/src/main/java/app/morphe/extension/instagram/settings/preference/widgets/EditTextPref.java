@@ -50,6 +50,7 @@ public class EditTextPref extends EditTextPreference {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 helper.setValue(preference,newValue);
+                //TODO: Implement better soution for summary.
                 String summary = (String) newValue;
                 if (Settings.CUSTOM_SHARING_DOMAIN.key.equals(preference.getKey())) {
                     summary = Links.customSharingDomainSummary(summary);
