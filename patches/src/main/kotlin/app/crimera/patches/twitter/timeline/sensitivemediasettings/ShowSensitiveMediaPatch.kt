@@ -19,7 +19,6 @@ import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.util.proxy.mutableTypes.MutableField
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod.Companion.toMutable
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.resourceLiteral
@@ -64,7 +63,6 @@ internal fun getJsonObjectMapperFingerprint(classPrefix: String) = object : Fing
         )
     )
 ) {}
-
 
 private object SensitiveMediaInterstitialProfileFingerprint : Fingerprint(
     name = "<init>",
@@ -125,14 +123,14 @@ val sensitiveMediaPatch =
             // region Override the sensitive media fields in API response
 
             getJsonFingerprint(JSON_BLURRED_IMAGE_INTERSTITIAL_CLASS_PREFIX).classDef.apply {
+                interfaces.add(EXTENSION_JSON_BLURRED_IMAGE_INTERSTITIAL_INTERFACE)
+
                 val interstitialActionField = fields.find { field ->
                     field.type == "Ljava/lang/String;"
                 }
                 val verificationOptionsField = fields.find { field ->
                     field.type == "Ljava/lang/Object;"
                 }
-
-                interfaces.add(EXTENSION_JSON_BLURRED_IMAGE_INTERSTITIAL_INTERFACE)
 
                 methods.add(
                     ImmutableMethod(
@@ -161,28 +159,22 @@ val sensitiveMediaPatch =
             }
 
             getJsonFingerprint(JSON_SENSITIVE_MEDIA_WARNING_CLASS_PREFIX).classDef.apply {
-                val jsonFields = mutableListOf<MutableField>()
+                interfaces.add(EXTENSION_JSON_SENSITIVE_MEDIA_WARNING_INTERFACE)
+
                 var smaliInstructions =
                     """
                         const/4 v0, 0x0
                     """
-                fields.forEach { field ->
-                    if (!jsonFields.contains(field) && field.type == "Z") {
-                        jsonFields.add(field)
-
-                        smaliInstructions +=
-                            """
-                                iput-boolean v0, p0, $field
-                            """
-                    }
+                fields.filter { it.type == "Z" }.forEach { field ->
+                    smaliInstructions +=
+                        """
+                            iput-boolean v0, p0, $field
+                        """
                 }
-
                 smaliInstructions +=
                     """
                         return-void
                     """
-
-                interfaces.add(EXTENSION_JSON_SENSITIVE_MEDIA_WARNING_INTERFACE)
 
                 methods.add(
                     ImmutableMethod(
