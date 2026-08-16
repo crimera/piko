@@ -16,7 +16,6 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.util.indexOfFirstInstruction
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -86,17 +85,13 @@ val hideOnlineStatusPatch =
         execute {
 
             // DGW/UPI channel. Hooking the constructor covers all of its call sites at once.
-            PresenceWriteRequestConstructorFingerprint.method.apply {
-                val superCallIndex = indexOfFirstInstruction(Opcode.INVOKE_DIRECT)
-
-                addInstructions(
-                    superCallIndex + 1,
-                    """
-                    invoke-static {p3}, $EXTENSION_CLASS_DESCRIPTOR->overridePresenceStatus($PRESENCE_STATUS_CLASS)$PRESENCE_STATUS_CLASS
-                    move-result-object p3
-                    """.trimIndent(),
-                )
-            }
+            PresenceWriteRequestConstructorFingerprint.method.addInstructions(
+                0,
+                """
+                invoke-static {p3}, $EXTENSION_CLASS_DESCRIPTOR->overridePresenceStatus($PRESENCE_STATUS_CLASS)$PRESENCE_STATUS_CLASS
+                move-result-object p3
+                """.trimIndent(),
+            )
 
             // MQTT connection inference, silenced by subscribing to the topic that the app
             // otherwise only subscribes to when the UPI rollout flag is on.
