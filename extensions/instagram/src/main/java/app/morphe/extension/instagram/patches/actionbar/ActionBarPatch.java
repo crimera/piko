@@ -10,6 +10,7 @@ package app.morphe.extension.instagram.patches.actionbar;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Activity;
+import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -138,7 +139,7 @@ public class ActionBarPatch {
             }
 
             if(SettingsStatus.saveDeletedMessages) {
-                android.content.Context context = viewGroup.getContext();
+                Context context = viewGroup.getContext();
                 UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_HISTORY_ICON,
                         () -> SavedMessagesHook.openDeletedMessages(context));
             }
