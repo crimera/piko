@@ -11,6 +11,7 @@ import static app.morphe.extension.shared.StringRef.str;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.x.models.interstitial.BlurImageInterstitial;
 import com.twitter.model.json.mediavisibility.JsonBlurredImageInterstitial;
 import com.twitter.model.json.timeline.urt.JsonTimelineEntry;
 import com.twitter.model.json.core.JsonSensitiveMediaWarning;
@@ -129,6 +130,9 @@ public class TimelineEntry {
             patchInterface.patch_showSensitiveMedia();
         }
         return (JsonSensitiveMediaWarning) patchInterface;
+    }
+    public static BlurImageInterstitial showSensitiveMedia(BlurImageInterstitial interstitial) {
+        return showSensitiveMedia ? null : interstitial;
     }
     public static void showSensitiveImage(View view) {
         if (showSensitiveMedia && view != null) {
