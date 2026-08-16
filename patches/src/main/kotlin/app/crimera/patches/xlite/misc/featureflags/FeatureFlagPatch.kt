@@ -28,19 +28,22 @@ private const val FEATURE_SWITCH_STORE_DESCRIPTOR =
 private const val FEATURE_SWITCH_IMPORT_EXPORT_DESCRIPTOR =
     "$EXTENSION_PACKAGE/featureswitches/FeatureSwitchImportExport"
 
-// This owner is preserved in 12.17.3-alpha.01. Resolve it through the patcher's descriptor index;
-// a global string fingerprint is both slower and less reliable because the old DNS string anchor
-// is no longer in this class.
+// ALPHA PATH: preserved repository owner in 12.17.3-alpha.01.
+// TODO: Remove this repository and its accessor table when alpha compatibility is deprecated.
 private const val FEATURE_SWITCH_REPOSITORY_DESCRIPTOR =
     "Lcom/x/featureswitches/FeatureSwitchesRepositoryImpl;"
+
+// BETA PATH: repository owner introduced by 12.18.0-beta.0.
+private const val BETA_FEATURE_SWITCH_REPOSITORY_DESCRIPTOR =
+    "Lcom/x/featureswitches/h0;"
 
 private data class FeatureSwitchAccessor(
     val typeName: String,
     val parameterTypes: List<String>,
     val returnType: String,
     val extensionMethod: String,
+    val methodNames: List<String> = listOf("get$typeName", "peek$typeName"),
 ) {
-    val methodNames = listOf("get$typeName", "peek$typeName")
     val returnOpcode =
         when {
             returnType == "J" || returnType == "D" -> Opcode.RETURN_WIDE
@@ -66,6 +69,7 @@ private fun scalarAccessor(
     extensionMethod = extensionMethod,
 )
 
+// ALPHA PATH: named accessors from FeatureSwitchesRepositoryImpl.
 private val FEATURE_SWITCH_ACCESSORS =
     listOf(
         scalarAccessor("Boolean", "Z", "resolveBoolean"),
@@ -80,6 +84,24 @@ private val FEATURE_SWITCH_ACCESSORS =
             "resolveString",
         ),
         FeatureSwitchAccessor("List", listOf(STRING_TYPE), LIST_TYPE, "resolveList"),
+    )
+
+// BETA PATH: obfuscated repository accessors from 12.18.0-beta.0.
+private val BETA_FEATURE_SWITCH_ACCESSORS =
+    listOf(
+        FeatureSwitchAccessor("Boolean", listOf(STRING_TYPE, "Z"), "Z", "resolveBoolean", listOf("getBoolean")),
+        FeatureSwitchAccessor("Float", listOf(STRING_TYPE, "F"), "F", "resolveFloat", listOf("getFloat")),
+        FeatureSwitchAccessor("Int", listOf(STRING_TYPE, "I"), "I", "resolveInt", listOf("getInt")),
+        FeatureSwitchAccessor("Long", listOf(STRING_TYPE, "J"), "J", "resolveLong", listOf("getLong")),
+        FeatureSwitchAccessor("Double", listOf(STRING_TYPE, "D"), "D", "resolveDouble", listOf("a")),
+        FeatureSwitchAccessor(
+            "String",
+            listOf(STRING_TYPE, STRING_TYPE),
+            STRING_TYPE,
+            "resolveString",
+            listOf("getString"),
+        ),
+        FeatureSwitchAccessor("List", listOf(STRING_TYPE), LIST_TYPE, "resolveList", listOf("d")),
     )
 
 @Suppress("unused")
@@ -120,8 +142,28 @@ val featureFlagPatch =
         }
 
         execute {
-            val repository = mutableClassDefBy(FEATURE_SWITCH_REPOSITORY_DESCRIPTOR)
-            FEATURE_SWITCH_ACCESSORS.forEach { accessor ->
+            val repositoryDescriptor =
+                listOf(
+                    FEATURE_SWITCH_REPOSITORY_DESCRIPTOR,
+                    BETA_FEATURE_SWITCH_REPOSITORY_DESCRIPTOR,
+                ).firstOrNull { descriptor -> classDefByOrNull(descriptor) != null }
+                    ?: throw PatchException(
+                        "X-Lite feature-switch repository was not found; checked " +
+                            listOf(
+                                FEATURE_SWITCH_REPOSITORY_DESCRIPTOR,
+                                BETA_FEATURE_SWITCH_REPOSITORY_DESCRIPTOR,
+                            ).joinToString(),
+                    )
+            val repository = mutableClassDefBy(repositoryDescriptor)
+            // BETA PATH: select the beta repository and accessor table when present.
+            // ALPHA PATH: fall back to the legacy repository and named accessors.
+            val accessors =
+                if (repositoryDescriptor == BETA_FEATURE_SWITCH_REPOSITORY_DESCRIPTOR) {
+                    BETA_FEATURE_SWITCH_ACCESSORS
+                } else {
+                    FEATURE_SWITCH_ACCESSORS
+                }
+            accessors.forEach { accessor ->
                 val matches = repository.methods.matching(accessor)
                 requireAccessorMatches(accessor, matches)
                 matches.forEach { it.cloneParameters(repository).hookReturns(accessor) }

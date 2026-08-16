@@ -14,10 +14,8 @@ import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
-import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -67,12 +65,18 @@ internal fun Method.fieldForToStringLabel(label: String): FieldReference {
         if (valueAppend != null) {
             val valueRegister = valueAppend.value.singleArgumentRegister()
             if (valueRegister != null) {
-                val directField = instructions.findFieldForRegister(
-                    register = valueRegister,
-                    fromIndex = labelConsumerIndex + 1,
-                    untilIndex = valueAppend.index,
-                    definingClass = definingClass,
-                )
+                val directField =
+                    instructions.findFieldForRegister(
+                        register = valueRegister,
+                        fromIndex = labelConsumerIndex + 1,
+                        untilIndex = valueAppend.index,
+                        definingClass = definingClass,
+                    ) ?: instructions.findFieldForRegister(
+                        register = valueRegister,
+                        fromIndex = 0,
+                        untilIndex = labelIndex,
+                        definingClass = definingClass,
+                    )
                 if (directField != null) return directField
             }
         }
@@ -87,12 +91,17 @@ internal fun Method.fieldForToStringLabel(label: String): FieldReference {
                 return@forEach
             }
             val valueArgumentRegister = argumentRegisters[labelArgumentIndex + 1]
-            instructions.findFieldForRegister(
+            (instructions.findFieldForRegister(
                 register = valueArgumentRegister,
                 fromIndex = labelIndex + 1,
                 untilIndex = helperIndex,
                 definingClass = definingClass,
-            )?.let { add(it) }
+            ) ?: instructions.findFieldForRegister(
+                register = valueArgumentRegister,
+                fromIndex = 0,
+                untilIndex = labelIndex,
+                definingClass = definingClass,
+            ))?.let { add(it) }
         }
     }
     return requireSingleToStringField(label, toString(), helperCandidates)
@@ -124,7 +133,7 @@ internal fun Match.fieldForBooleanToStringLabel(label: String): FieldReference {
     if (labelIndex < 0) {
         throw PatchException("X-Lite boolean model label '$label' was not found in $originalMethod")
     }
-    val fields = instructions.drop(labelIndex + 1).mapNotNull { instruction ->
+    val fields = instructions.mapNotNull { instruction ->
         if (instruction.opcode != Opcode.IGET_BOOLEAN) return@mapNotNull null
         instruction.getReference<FieldReference>()?.takeIf { field ->
             field.definingClass == originalMethod.definingClass
@@ -162,6 +171,68 @@ internal fun MutableClass.requirePublicFields(fields: List<FieldReference>) {
     }
 }
 
+internal data class ModelFieldAccessor(
+    val field: FieldReference,
+    val getter: MethodReference?,
+)
+
+/**
+ * Resolves release-specific model access at patch time.
+ *
+ * BETA PATH: private model fields are read through generated getters.
+ * ALPHA PATH: public model fields use direct iget instructions.
+ * TODO: Remove the public-field fallback when alpha compatibility is deprecated.
+ */
+internal fun MutableClass.resolveFieldAccessor(
+    field: FieldReference,
+    semanticName: String,
+): ModelFieldAccessor {
+    val suffix = field.name.replaceFirstChar { character -> character.uppercaseChar() }
+    val getterNames =
+        if (field.type == "Z") listOf(field.name, "is$suffix", "get$suffix").distinct()
+        else listOf("get$suffix")
+    val getterMatches = methods.filter { method ->
+        method.name in getterNames &&
+            method.parameterTypes.isEmpty() &&
+            method.returnType == field.type
+    }
+    // BETA PATH: prefer the stable getter exposed by the private model.
+    if (getterMatches.size == 1) return ModelFieldAccessor(field, getterMatches.single())
+    if (getterMatches.isNotEmpty()) {
+        throw PatchException(
+            "Expected one X-Lite $semanticName getter for $field in $this, found " +
+                getterMatches.joinToString(),
+        )
+    }
+    // ALPHA PATH: fall back to the validated public field.
+    val definition = fields.singleOrNull { candidate -> candidate.toString() == field.toString() }
+    if (definition != null && AccessFlags.PUBLIC.isSet(definition.accessFlags)) {
+        return ModelFieldAccessor(field, null)
+    }
+    throw PatchException("X-Lite $semanticName has neither a getter nor a public field: $field in $this")
+}
+
+internal fun MutableClass.requireGetter(
+    field: FieldReference,
+    semanticName: String,
+): MethodReference = resolveFieldAccessor(field, semanticName).getter
+    ?: throw PatchException("X-Lite $semanticName has no getter: $field in $this")
+
+internal fun ModelFieldAccessor.readObject(register: String): String =
+    getter?.let { getter ->
+        "invoke-virtual {$register}, ${getter.smaliReference()}\nmove-result-object $register"
+    } ?: "iget-object $register, $register, $field"
+
+internal fun ModelFieldAccessor.readBoolean(register: String): String =
+    getter?.let { getter ->
+        "invoke-virtual {$register}, ${getter.smaliReference()}\nmove-result $register"
+    } ?: "iget-boolean $register, $register, $field"
+
+internal fun ModelFieldAccessor.readWide(receiver: String, destination: String): String =
+    getter?.let { getter ->
+        "invoke-virtual {$receiver}, ${getter.smaliReference()}\nmove-result-wide $destination"
+    } ?: "iget-wide $destination, $receiver, $field"
+
 internal fun MutableClass.patchObjectFieldGetter(
     name: String,
     ownerDescriptor: String,
@@ -172,6 +243,33 @@ internal fun MutableClass.patchObjectFieldGetter(
     OBJECT_DESCRIPTOR,
     returnType,
     "check-cast p0, $ownerDescriptor\niget-object p0, p0, $field\nreturn-object p0",
+)
+
+internal fun MutableClass.patchObjectMethodGetter(
+    name: String,
+    ownerDescriptor: String,
+    getter: MethodReference,
+    returnType: String = OBJECT_DESCRIPTOR,
+) = patchBridge(
+    name,
+    OBJECT_DESCRIPTOR,
+    returnType,
+    "check-cast p0, $ownerDescriptor\n" +
+        "invoke-virtual {p0}, ${getter.smaliReference()}\n" +
+        "move-result-object p0\nreturn-object p0",
+)
+
+internal fun MutableClass.patchObjectAccessorGetter(
+    name: String,
+    ownerDescriptor: String,
+    accessor: ModelFieldAccessor,
+    returnType: String = OBJECT_DESCRIPTOR,
+) = patchBridge(
+    name,
+    OBJECT_DESCRIPTOR,
+    returnType,
+    "check-cast p0, $ownerDescriptor\n" +
+        "${accessor.readObject("p0")}\nreturn-object p0",
 )
 
 internal fun MutableClass.patchBooleanFieldGetter(
@@ -185,6 +283,31 @@ internal fun MutableClass.patchBooleanFieldGetter(
     "check-cast p0, $ownerDescriptor\niget-boolean p0, p0, $field\nreturn p0",
 )
 
+internal fun MutableClass.patchBooleanMethodGetter(
+    name: String,
+    ownerDescriptor: String,
+    getter: MethodReference,
+) = patchBridge(
+    name,
+    OBJECT_DESCRIPTOR,
+    "Z",
+    "check-cast p0, $ownerDescriptor\n" +
+        "invoke-virtual {p0}, ${getter.smaliReference()}\n" +
+        "move-result p0\nreturn p0",
+)
+
+internal fun MutableClass.patchBooleanAccessorGetter(
+    name: String,
+    ownerDescriptor: String,
+    accessor: ModelFieldAccessor,
+) = patchBridge(
+    name,
+    OBJECT_DESCRIPTOR,
+    "Z",
+    "check-cast p0, $ownerDescriptor\n" +
+        "${accessor.readBoolean("p0")}\nreturn p0",
+)
+
 internal fun MutableClass.patchWideFieldGetter(
     name: String,
     ownerDescriptor: String,
@@ -194,6 +317,31 @@ internal fun MutableClass.patchWideFieldGetter(
     OBJECT_DESCRIPTOR,
     "J",
     "check-cast p0, $ownerDescriptor\niget-wide v0, p0, $field\nreturn-wide v0",
+)
+
+internal fun MutableClass.patchWideMethodGetter(
+    name: String,
+    ownerDescriptor: String,
+    getter: MethodReference,
+) = patchBridge(
+    name,
+    OBJECT_DESCRIPTOR,
+    "J",
+    "check-cast p0, $ownerDescriptor\n" +
+        "invoke-virtual {p0}, ${getter.smaliReference()}\n" +
+        "move-result-wide v0\nreturn-wide v0",
+)
+
+internal fun MutableClass.patchWideAccessorGetter(
+    name: String,
+    ownerDescriptor: String,
+    accessor: ModelFieldAccessor,
+) = patchBridge(
+    name,
+    OBJECT_DESCRIPTOR,
+    "J",
+    "check-cast p0, $ownerDescriptor\n" +
+        "${accessor.readWide("p0", "v0")}\nreturn-wide v0",
 )
 
 internal fun MutableClass.patchBridge(
@@ -278,9 +426,4 @@ private fun List<Instruction>.findFieldForRegister(
             }
         }
 
-private fun Instruction.singleArgumentRegister(): Int? =
-    when (this) {
-        is FiveRegisterInstruction -> registerD
-        is RegisterRangeInstruction -> startRegister + 1
-        else -> null
-    }
+private fun Instruction.singleArgumentRegister(): Int? = registersUsed.getOrNull(1)

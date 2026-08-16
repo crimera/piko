@@ -252,36 +252,63 @@ private fun resolveTimelineModels(): ResolvedXLiteTimelineModels {
 
 context(context: BytecodePatchContext)
 private fun patchTimelineModelBridges(models: ResolvedXLiteTimelineModels) {
+    // ALPHA PATH uses public model fields; BETA PATH uses private-model getters.
+    // The shared bridges keep the extension API stable while this compatibility split remains.
     val postClass = context.mutableClassDefBy(models.postDescriptor)
-    postClass.requirePublicFields(
-        listOf(
-            models.postEntryIdField,
+    val postEntryIdAccessor =
+        postClass.resolveFieldAccessor(models.postEntryIdField, "timeline post entry ID")
+    val postClientEventInfoAccessor =
+        postClass.resolveFieldAccessor(
             models.postClientEventInfoField,
+            "timeline post client-event info",
+        )
+    val postPromotedMetadataAccessor =
+        postClass.resolveFieldAccessor(
             models.postPromotedMetadataField,
-        ),
-    )
-    context.mutableClassDefBy(models.clientEventInfoDescriptor).requirePublicFields(
-        listOf(models.clientEventInfoComponentField),
-    )
+            "timeline post promoted metadata",
+        )
+
+    val clientEventInfoClass = context.mutableClassDefBy(models.clientEventInfoDescriptor)
+    val clientEventInfoComponentAccessor =
+        clientEventInfoClass.resolveFieldAccessor(
+            models.clientEventInfoComponentField,
+            "client-event-info component",
+        )
 
     val verticalConversationClass = context.mutableClassDefBy(models.verticalConversationDescriptor)
-    verticalConversationClass.requirePublicFields(listOf(models.verticalConversationPostIdsField))
+    val verticalConversationPostIdsAccessor =
+        verticalConversationClass.resolveFieldAccessor(
+            models.verticalConversationPostIdsField,
+            "vertical-conversation post IDs",
+        )
 
     val moduleClass = context.mutableClassDefBy(models.moduleDescriptor)
-    moduleClass.requirePublicFields(
-        listOf(
-            models.moduleInnerContentField,
-            models.moduleHeaderField,
-            models.moduleFooterField,
-            models.moduleDisplayTypeField,
-            models.moduleSortIndexField,
-            models.moduleEntryIdField,
+    val moduleInnerContentAccessor =
+        moduleClass.resolveFieldAccessor(models.moduleInnerContentField, "timeline module inner content")
+    val moduleHeaderAccessor =
+        moduleClass.resolveFieldAccessor(models.moduleHeaderField, "timeline module header")
+    val moduleFooterAccessor =
+        moduleClass.resolveFieldAccessor(models.moduleFooterField, "timeline module footer")
+    val moduleDisplayTypeAccessor =
+        moduleClass.resolveFieldAccessor(models.moduleDisplayTypeField, "timeline module display type")
+    val moduleSortIndexAccessor =
+        moduleClass.resolveFieldAccessor(models.moduleSortIndexField, "timeline module sort index")
+    val moduleEntryIdAccessor =
+        moduleClass.resolveFieldAccessor(models.moduleEntryIdField, "timeline module entry ID")
+    val moduleClientEventInfoAccessor =
+        moduleClass.resolveFieldAccessor(
             models.moduleClientEventInfoField,
-        ),
-    )
+            "timeline module client-event info",
+        )
 
     val moduleItemClass = context.mutableClassDefBy(models.moduleItemDescriptor)
-    moduleItemClass.requirePublicFields(listOf(models.moduleItemField, models.moduleItemDispensableField))
+    val moduleItemAccessor =
+        moduleItemClass.resolveFieldAccessor(models.moduleItemField, "timeline module item")
+    val moduleItemDispensableAccessor =
+        moduleItemClass.resolveFieldAccessor(
+            models.moduleItemDispensableField,
+            "timeline module-item dispensable flag",
+        )
 
     val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
     filterClass.patchBridge(
@@ -308,7 +335,7 @@ private fun patchTimelineModelBridges(models: ResolvedXLiteTimelineModels) {
         "Z",
         """
             check-cast p0, ${models.clientEventInfoDescriptor}
-            iget-object p0, p0, ${models.clientEventInfoComponentField}
+            ${clientEventInfoComponentAccessor.readObject("p0")}
             invoke-static {p0}, $TIMELINE_FILTER_DESCRIPTOR->hasPromotedClientEventInfoComponent(Ljava/lang/String;)Z
             move-result p0
             return p0
@@ -331,10 +358,10 @@ private fun patchTimelineModelBridges(models: ResolvedXLiteTimelineModels) {
         "Z",
         "instance-of p0, p0, ${models.verticalConversationDescriptor}\nreturn p0",
     )
-    filterClass.patchObjectFieldGetter(
+    filterClass.patchObjectAccessorGetter(
         "getVerticalConversationPostIds",
         models.verticalConversationDescriptor,
-        models.verticalConversationPostIdsField,
+        verticalConversationPostIdsAccessor,
         LIST_DESCRIPTOR,
     )
     filterClass.patchBridge(
@@ -347,15 +374,15 @@ private fun patchTimelineModelBridges(models: ResolvedXLiteTimelineModels) {
             return-object p0
         """.trimIndent(),
     )
-    filterClass.patchObjectFieldGetter(
+    filterClass.patchObjectAccessorGetter(
         "getModuleItem",
         models.moduleItemDescriptor,
-        models.moduleItemField,
+        moduleItemAccessor,
     )
-    filterClass.patchBooleanFieldGetter(
+    filterClass.patchBooleanAccessorGetter(
         "isModuleItemDispensable",
         models.moduleItemDescriptor,
-        models.moduleItemDispensableField,
+        moduleItemDispensableAccessor,
     )
     filterClass.patchBridge(
         "copyModuleItem",
@@ -368,46 +395,58 @@ private fun patchTimelineModelBridges(models: ResolvedXLiteTimelineModels) {
             return-object p0
         """.trimIndent(),
     )
-    filterClass.patchObjectFieldGetter(
+    filterClass.patchObjectAccessorGetter(
         "getModuleInnerContent",
         models.moduleDescriptor,
-        models.moduleInnerContentField,
+        moduleInnerContentAccessor,
         LIST_DESCRIPTOR,
     )
-    filterClass.patchObjectFieldGetter("getModuleHeader", models.moduleDescriptor, models.moduleHeaderField)
-    filterClass.patchObjectFieldGetter("getModuleFooter", models.moduleDescriptor, models.moduleFooterField)
-    filterClass.patchObjectFieldGetter(
+    filterClass.patchObjectAccessorGetter(
+        "getModuleHeader",
+        models.moduleDescriptor,
+        moduleHeaderAccessor,
+    )
+    filterClass.patchObjectAccessorGetter(
+        "getModuleFooter",
+        models.moduleDescriptor,
+        moduleFooterAccessor,
+    )
+    filterClass.patchObjectAccessorGetter(
         "getModuleDisplayType",
         models.moduleDescriptor,
-        models.moduleDisplayTypeField,
+        moduleDisplayTypeAccessor,
     )
-    filterClass.patchWideFieldGetter("getModuleSortIndex", models.moduleDescriptor, models.moduleSortIndexField)
-    filterClass.patchObjectFieldGetter(
+    filterClass.patchWideAccessorGetter(
+        "getModuleSortIndex",
+        models.moduleDescriptor,
+        moduleSortIndexAccessor,
+    )
+    filterClass.patchObjectAccessorGetter(
         "getModuleEntryId",
         models.moduleDescriptor,
-        models.moduleEntryIdField,
+        moduleEntryIdAccessor,
         STRING_DESCRIPTOR,
     )
-    filterClass.patchObjectFieldGetter(
+    filterClass.patchObjectAccessorGetter(
         "getModuleClientEventInfo",
         models.moduleDescriptor,
-        models.moduleClientEventInfoField,
+        moduleClientEventInfoAccessor,
     )
-    filterClass.patchObjectFieldGetter(
+    filterClass.patchObjectAccessorGetter(
         "getPostEntryId",
         models.postDescriptor,
-        models.postEntryIdField,
+        postEntryIdAccessor,
         STRING_DESCRIPTOR,
     )
-    filterClass.patchObjectFieldGetter(
+    filterClass.patchObjectAccessorGetter(
         "getPostClientEventInfo",
         models.postDescriptor,
-        models.postClientEventInfoField,
+        postClientEventInfoAccessor,
     )
-    filterClass.patchObjectFieldGetter(
+    filterClass.patchObjectAccessorGetter(
         "getPostPromotedMetadata",
         models.postDescriptor,
-        models.postPromotedMetadataField,
+        postPromotedMetadataAccessor,
     )
     filterClass.patchBridge(
         "copyModule",

@@ -22,6 +22,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.getResourceId
+import app.morphe.util.getFreeRegisterProvider
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
@@ -278,7 +279,24 @@ private fun injectLabelsAndIcons(contributions: List<PostOptionContribution>) {
                 instruction.getReference<FieldReference>()?.type
             } ?: throw PatchException("X-Lite post-options icon type was not found")
 
-    val tempRegister = if (actionRegister == 0) 1 else 0
+    // Compose keeps the lambda receiver/state in low registers; a Boolean result must not
+    // overwrite a live object register such as v0.
+    val tempRegister =
+        try {
+            renderer.method
+                .getFreeRegisterProvider(
+                    renderer.instructionMatches[1].index,
+                    1,
+                    actionRegister,
+                    labelResult.registerA,
+                    iconResultRegister,
+                ).getFreeRegister4Bit()
+        } catch (exception: RuntimeException) {
+            throw PatchException(
+                "No safe low register available for X-Lite post-options icon checks: " +
+                    exception.message,
+            )
+        }
     requireFourBitRegisters("icon", actionRegister, tempRegister)
 
     val iconFields = contributions.associateWith { resolveIconField(it.iconResourceName, iconType) }
@@ -351,7 +369,18 @@ private fun injectActionHandlers(contributions: List<PostOptionContribution>) {
     val clickActionRegister = ordinalInstruction.registersUsed.firstOrNull()
         ?: throw PatchException("X-Lite confirmed post-option action has no register")
 
-    val tempRegister = if (clickActionRegister == 0) 1 else 0
+    // The action result is Boolean, so choose a register that is dead at this insertion point.
+    val tempRegister =
+        try {
+            eventHandler.method
+                .getFreeRegisterProvider(ordinalIndex, 1, clickActionRegister)
+                .getFreeRegister4Bit()
+        } catch (exception: RuntimeException) {
+            throw PatchException(
+                "No safe low register available for X-Lite post-options action checks: " +
+                    exception.message,
+            )
+        }
     requireFourBitRegisters("action", clickActionRegister, tempRegister)
     val unitField = resolveKotlinUnitField()
 

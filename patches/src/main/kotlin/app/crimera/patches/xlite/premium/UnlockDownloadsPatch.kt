@@ -2,6 +2,7 @@ package app.crimera.patches.xlite.premium
 
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -95,9 +96,17 @@ val xLiteDownloadPatch =
         compatibleWith(COMPATIBILITY_X_LITE)
 
         execute {
+            // ALPHA PATH: patches the legacy video-tab download callbacks below.
+            // TODO: Remove this fingerprint chain when alpha compatibility is deprecated.
+            val videoDownloadMatches =
+                XLiteVideoTabDownloadHandlerFingerprint.scopedMatchAllOrNull().orEmpty()
+            // BETA PATH: removed the legacy video-tab callback; preserve native download behavior.
+            if (videoDownloadMatches.isEmpty()) return@execute
+
+            // ALPHA PATH: continue patching the legacy subscription checks.
             requireMatches(
                 "X-Lite video download handler",
-                XLiteVideoTabDownloadHandlerFingerprint.scopedMatchAll(),
+                videoDownloadMatches,
                 expectedCount = 2,
             ).forEach { match ->
                 val patchedResults = match.method.forceSubscriptionFeatureResults()

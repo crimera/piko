@@ -5,13 +5,27 @@ import app.morphe.patcher.patch.AppTarget
 import app.morphe.patcher.patch.Compatibility
 
 internal object Constants {
+    /*
+     * Compatibility paths:
+     * - BETA PATH (12.18.0-beta.0): current path; keep this as the source for future updates.
+     * - ALPHA PATH (12.17.3-alpha.01): temporary backwards-compatibility path.
+     *
+     * Deprecation note: if future releases continue the BETA PATH structure, remove the alpha
+     * target and all ALPHA PATH branches after the last alpha release is dropped.
+     * TODO: Reconfirm the target list and run both compatibility checks before removing alpha.
+     */
     val COMPATIBILITY_X_LITE =
         Compatibility(
             name = "X-Lite",
             packageName = "com.twitter.android",
             apkFileType = ApkFileType.APKM,
             appIconColor = 0x000000,
-            targets = listOf(AppTarget(version = "12.17.3-alpha.01")),
+            targets = listOf(
+                // ALPHA PATH: temporary compatibility target.
+                AppTarget(version = "12.17.3-alpha.01"),
+                // BETA PATH: current compatibility target.
+                AppTarget(version = "12.18.0-beta.0"),
+            ),
         )
 
     const val EXTENSION_PACKAGE = "Lapp/morphe/extension/xlite"

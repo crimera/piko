@@ -1,6 +1,7 @@
 package app.crimera.patches.xlite.models
 
 import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.BytecodePatchContext
@@ -40,13 +41,28 @@ private object CanonicalPostModelFingerprint : Fingerprint(
     filters = listOf(string("CanonicalPost(id=")),
 )
 
-private object InlineActionEntryModelFingerprint : Fingerprint(
+// ALPHA PATH: the inline-action model has no count field.
+// TODO: Remove this fingerprint when alpha compatibility is deprecated.
+private object InlineActionEntryModelWithoutCountFingerprint : Fingerprint(
     definingClass = "Lcom/x/models/",
     name = "toString",
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
     filters = listOf(
         string("InlineActionEntry(actionType="),
+        string(", isEnabled="),
+    ),
+)
+
+// BETA PATH: the inline-action model adds a count field; keep this shape for future updates.
+private object InlineActionEntryModelWithCountFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    filters = listOf(
+        string("InlineActionEntry(actionType="),
+        string(", count="),
         string(", isEnabled="),
     ),
 )
@@ -295,8 +311,22 @@ private fun resolvePostMediaModels(postModels: ResolvedXLitePostModels): Resolve
 
 context(context: BytecodePatchContext)
 private fun resolveInlineActionModels(): ResolvedXLiteInlineActionModels {
-    val inlineActionEntryMatch =
-        InlineActionEntryModelFingerprint.requireSingle("inline-action entry model")
+    val inlineActionEntryMatches =
+        listOf(
+            // ALPHA PATH: model without count.
+            InlineActionEntryModelWithoutCountFingerprint.scopedMatchAll(),
+            // BETA PATH: model with count.
+            InlineActionEntryModelWithCountFingerprint.scopedMatchAll(),
+        ).flatten()
+            .distinctBy { it.originalMethod.toString() }
+    if (inlineActionEntryMatches.size != 1) {
+        throw PatchException(
+            "Expected one X-Lite inline-action entry model across known shapes, found " +
+                "${inlineActionEntryMatches.size}: " +
+                inlineActionEntryMatches.joinToString { it.originalMethod.toString() },
+        )
+    }
+    val inlineActionEntryMatch = inlineActionEntryMatches.single()
     val inlineActionEntryClass = inlineActionEntryMatch.originalClassDef
     val inlineActionTypeField =
         inlineActionEntryMatch.fieldForToStringLabel("InlineActionEntry(actionType=")
@@ -330,18 +360,34 @@ private fun resolveInlineActionBarModels(
             "Expected one X-Lite canonical-post interface in $canonicalPostClass: " +
                 canonicalPostClass.interfaces.joinToString(),
         )
-    val inlineActionBarMatches = Fingerprint(
-        definingClass = INLINE_ACTION_BAR_SCOPE,
-        parameters = listOf(COMPOSER_DESCRIPTOR),
-        filters = listOf(
-            methodCall(
-                definingClass = canonicalPostInterfaceDescriptor,
-                parameters = emptyList(),
-                returnType = "L",
-            ),
-            methodCall(smali = "Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z"),
-        ),
-    ).scopedMatchAll()
+    val inlineActionBarMatches =
+        listOf(
+            Fingerprint(
+                definingClass = INLINE_ACTION_BAR_SCOPE,
+                parameters = listOf(COMPOSER_DESCRIPTOR),
+                filters = listOf(
+                    methodCall(
+                        definingClass = canonicalPostInterfaceDescriptor,
+                        parameters = emptyList(),
+                        returnType = "L",
+                    ),
+                    methodCall(smali = "Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z"),
+                ),
+            ).scopedMatchAllOrNull().orEmpty(),
+            Fingerprint(
+                definingClass = INLINE_ACTION_BAR_SCOPE,
+                parameters = listOf(COMPOSER_DESCRIPTOR),
+                filters = listOf(
+                    methodCall(
+                        smali =
+                            "Lcom/x/models/ContextualPost;->getInlineActionEntry()" +
+                                "Lkotlinx/collections/immutable/c;",
+                    ),
+                    methodCall(smali = "Ljava/util/ArrayList;->add(Ljava/lang/Object;)Z"),
+                ),
+            ).scopedMatchAllOrNull().orEmpty(),
+        ).flatten()
+            .distinctBy { it.originalMethod.toString() }
     if (inlineActionBarMatches.size != 1) {
         throw PatchException(
             "Expected one X-Lite inline action state builder, found ${inlineActionBarMatches.size}: " +

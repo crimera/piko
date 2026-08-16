@@ -121,6 +121,13 @@ val restoreTimelinePositionPatch =
                 )
             }
             val holderDescriptor = holderMatches.single().originalClassDef.type
+            val holderClass = mutableClassDefBy(holderDescriptor)
+            // BETA PATH: replaced the legacy map-backed component path; preserve native behavior.
+            // ALPHA PATH: continues through the legacy holder patch below.
+            // TODO: Remove the legacy path and this compatibility guard when alpha is deprecated.
+            if (holderClass.fields.map { field -> field.name }.toSet() == setOf("a", "b")) {
+                return@execute
+            }
             val holderConstructorMatches =
                 mutableClassDefBy(holderDescriptor).methods.filter { method ->
                     method.name == "<init>" &&

@@ -6,12 +6,14 @@ import app.crimera.patches.xlite.models.ResolvedXLiteInlineActionModels
 import app.crimera.patches.xlite.models.ResolvedXLiteInlineDownloadModels
 import app.crimera.patches.xlite.models.ResolvedXLitePostMediaModels
 import app.crimera.patches.xlite.models.ResolvedXLitePostModels
+import app.crimera.patches.xlite.models.readObject
 import app.crimera.patches.xlite.models.requirePublicFields
 import app.crimera.patches.xlite.models.resolvedXLiteInlineActionBarModels
 import app.crimera.patches.xlite.models.resolvedXLiteInlineActionModels
 import app.crimera.patches.xlite.models.resolvedXLiteInlineDownloadModels
 import app.crimera.patches.xlite.models.resolvedXLitePostMediaModels
 import app.crimera.patches.xlite.models.resolvedXLitePostModels
+import app.crimera.patches.xlite.models.resolveFieldAccessor
 import app.crimera.patches.xlite.models.xLiteInlineDownloadModelResolutionPatch
 import app.crimera.patches.xlite.models.xLitePostMediaModelResolutionPatch
 import app.crimera.patches.xlite.settings.Categories
@@ -24,6 +26,7 @@ import app.crimera.patches.xlite.settings.toggle
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -148,9 +151,10 @@ val xLiteInlineDownloadButtonPatch =
                 "invoke-static/range {p0 .. p0}, $EXTENSION->initialize(Landroid/content/Context;)V",
             )
 
-            val inlineRenderer =
-                requireSingle(
-                    "X-Lite inline-action entry renderer",
+            val inlineRendererMatches =
+                listOf(
+                    // ALPHA PATH: field-based inline-action model and legacy renderer shape.
+                    // TODO: Remove this fingerprint when alpha compatibility is deprecated.
                     Fingerprint(
                         definingClass = "Lcom/x/inlineactionbar/",
                         parameters =
@@ -181,8 +185,40 @@ val xLiteInlineDownloadButtonPatch =
                                     type = "Z",
                                 ),
                             ),
-                    ).scopedMatchAll(),
-                )
+                    ).scopedMatchAllOrNull().orEmpty(),
+                    // BETA PATH: getter-based inline-action model and beta renderer shape.
+                    Fingerprint(
+                        definingClass = "Lcom/x/inlineactionbar/",
+                        parameters =
+                            listOf(
+                                entryModels.inlineActionEntryDescriptor,
+                                "L",
+                                "J",
+                                "F",
+                                "L",
+                                "J",
+                                "L",
+                                MODIFIER,
+                                COMPOSER,
+                                "I",
+                            ),
+                        returnType = "V",
+                        filters =
+                            listOf(
+                                methodCall(
+                                    smali =
+                                        "${entryModels.inlineActionEntryDescriptor}->getActionType()" +
+                                            entryModels.postActionTypeDescriptor,
+                                ),
+                                methodCall(
+                                    smali = "${entryModels.inlineActionEntryDescriptor}->isEnabled()Z",
+                                ),
+                            ),
+                    ).scopedMatchAllOrNull().orEmpty(),
+                ).flatten()
+                    .distinctBy { it.originalMethod.toString() }
+            val inlineRenderer =
+                requireSingle("X-Lite inline-action entry renderer", inlineRendererMatches)
             inlineRenderer.method.apply {
                 requireStatic("X-Lite inline-action entry renderer")
                 val (entryRegister, sizeRegister) = freeRegisters4Bit(index = 0, count = 2)
@@ -245,18 +281,22 @@ val xLiteInlineDownloadButtonPatch =
             if (shareIconField.type != incomingIconField.type) {
                 throw PatchException("X-Lite inline icon types differ")
             }
-            val iconRenderer =
-                requireSingle(
-                    "X-Lite TwitterShare icon lambda",
+            val iconRendererMatches =
+                // ALPHA PATH: icon lambda under com/x/compose/.
+                // BETA PATH: icon lambda may move under com/x/ui/common/.
+                // TODO: Remove the alpha owner scope when alpha compatibility is deprecated.
+                listOf("Lcom/x/compose/", "Lcom/x/ui/common/").flatMap { ownerScope ->
                     Fingerprint(
-                        definingClass = "Lcom/x/compose/",
+                        definingClass = ownerScope,
                         filters =
                             listOf(
                                 fieldAccess(opcode = Opcode.SGET_OBJECT, reference = shareIconField),
                                 fieldAccess(opcode = Opcode.IGET, definingClass = "this", type = "F"),
                             ),
-                    ).scopedMatchAll(),
-                )
+                    ).scopedMatchAllOrNull().orEmpty()
+                }.distinctBy { it.originalMethod.toString() }
+            val iconRenderer =
+                requireSingle("X-Lite TwitterShare icon lambda", iconRendererMatches)
             iconRenderer.method.apply {
                 val iconAccess = iconRenderer.instructionMatches[0]
                 val iconRegister =
@@ -279,9 +319,10 @@ val xLiteInlineDownloadButtonPatch =
             }
 
             val inlinePresenterType = barModels.inlineActionBarDescriptor
-            val inlineEventHandler =
-                requireSingle(
-                    "X-Lite inline-action event handler",
+            val inlineEventHandlerMatches =
+                listOf(
+                    // ALPHA PATH: event handler reads the action-type field.
+                    // TODO: Remove this fingerprint when alpha compatibility is deprecated.
                     Fingerprint(
                         definingClass = inlinePresenterType,
                         returnType = "V",
@@ -299,8 +340,30 @@ val xLiteInlineDownloadButtonPatch =
                                     returnType = "I",
                                 ),
                             ),
-                    ).scopedMatchAll(),
-                )
+                    ).scopedMatchAllOrNull().orEmpty(),
+                    // BETA PATH: event handler calls getActionType().
+                    Fingerprint(
+                        definingClass = inlinePresenterType,
+                        returnType = "V",
+                        filters =
+                            listOf(
+                                methodCall(
+                                    smali =
+                                        "${entryModels.inlineActionEntryDescriptor}->getActionType()" +
+                                            entryModels.postActionTypeDescriptor,
+                                ),
+                                methodCall(
+                                    definingClass = "Ljava/lang/Enum;",
+                                    name = "ordinal",
+                                    parameters = emptyList(),
+                                    returnType = "I",
+                                ),
+                            ),
+                    ).scopedMatchAllOrNull().orEmpty(),
+                ).flatten()
+                    .distinctBy { it.originalMethod.toString() }
+            val inlineEventHandler =
+                requireSingle("X-Lite inline-action event handler", inlineEventHandlerMatches)
             inlineEventHandler.method.apply {
                 requireStatic("X-Lite inline-action event handler")
                 if (parameterTypes.firstOrNull().toString() != inlinePresenterType) {
@@ -336,17 +399,31 @@ private fun patchPostModelBridges(
     mediaModels: ResolvedXLitePostMediaModels,
     downloadModels: ResolvedXLiteInlineDownloadModels,
 ) {
-    context.mutableClassDefBy(postModels.contextualPostDescriptor).requirePublicFields(
-        listOf(
+    val contextualPostClass = context.mutableClassDefBy(postModels.contextualPostDescriptor)
+    // ALPHA PATH uses public fields; BETA PATH uses private-model getters.
+    // See resolveFieldAccessor for the temporary compatibility split.
+    val contextualCanonicalPostAccessor =
+        contextualPostClass.resolveFieldAccessor(
             postModels.contextualCanonicalPostField,
+            "contextual canonical post",
+        )
+    val contextualRepostedPostAccessor =
+        contextualPostClass.resolveFieldAccessor(
             postModels.contextualRepostedPostField,
-        ),
-    )
-    context.mutableClassDefBy(postModels.contextualRepostedPostField.type)
-        .requirePublicFields(listOf(postModels.repostedCanonicalPostField))
-    context.mutableClassDefBy(postModels.canonicalPostDescriptor).requirePublicFields(
-        listOf(mediaModels.canonicalPostMediaField),
-    )
+            "contextual reposted post",
+        )
+    val repostedPostClass = context.mutableClassDefBy(postModels.contextualRepostedPostField.type)
+    val repostedCanonicalPostAccessor =
+        repostedPostClass.resolveFieldAccessor(
+            postModels.repostedCanonicalPostField,
+            "reposted canonical post",
+        )
+    val canonicalPostClass = context.mutableClassDefBy(postModels.canonicalPostDescriptor)
+    val canonicalPostMediaAccessor =
+        canonicalPostClass.resolveFieldAccessor(
+            mediaModels.canonicalPostMediaField,
+            "canonical post media",
+        )
 
     val presenterClass = context.mutableClassDefBy(barModels.inlineActionBarDescriptor)
     val presenterPostFields = presenterClass.fields.filter { field ->
@@ -375,7 +452,7 @@ private fun patchPostModelBridges(
         0,
         """
             check-cast p0, ${postModels.contextualPostDescriptor}
-            iget-object p0, p0, ${postModels.contextualCanonicalPostField}
+            ${contextualCanonicalPostAccessor.readObject("p0")}
             return-object p0
         """.trimIndent(),
     )
@@ -383,7 +460,7 @@ private fun patchPostModelBridges(
         0,
         """
             check-cast p0, ${postModels.canonicalPostDescriptor}
-            iget-object p0, p0, ${mediaModels.canonicalPostMediaField}
+            ${canonicalPostMediaAccessor.readObject("p0")}
             return-object p0
         """.trimIndent(),
     )
@@ -391,7 +468,7 @@ private fun patchPostModelBridges(
         0,
         """
             check-cast p0, ${postModels.contextualPostDescriptor}
-            iget-object p0, p0, ${postModels.contextualRepostedPostField}
+            ${contextualRepostedPostAccessor.readObject("p0")}
             return-object p0
         """.trimIndent(),
     )
@@ -402,7 +479,7 @@ private fun patchPostModelBridges(
         0,
         """
             check-cast p0, ${postModels.contextualRepostedPostField.type}
-            iget-object p0, p0, ${postModels.repostedCanonicalPostField}
+            ${repostedCanonicalPostAccessor.readObject("p0")}
             return-object p0
         """.trimIndent(),
     )

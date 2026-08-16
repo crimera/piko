@@ -12,6 +12,8 @@ public final class DrawerItemFilter {
     private DrawerItemFilter() {
     }
 
+    // ALPHA/LEGACY PATH: legacy drawer rows expose their localized title.
+    // TODO: Remove this API when no supported release uses title-based drawer rows.
     public static boolean shouldHide(String title, Set<String> hiddenItemIds) {
         if (title == null || hiddenItemIds == null || hiddenItemIds.isEmpty()) return false;
 
@@ -23,6 +25,11 @@ public final class DrawerItemFilter {
             Logger.printException(() -> "Failed to customize X-Lite drawer", exception);
         }
         return false;
+    }
+
+    // BETA PATH: the settings footer exposes a stable logical item ID instead of a title.
+    public static boolean shouldHideId(String itemId, Set<String> hiddenItemIds) {
+        return itemId != null && hiddenItemIds != null && hiddenItemIds.contains(itemId);
     }
 
     private static boolean matches(String title, String itemId) {

@@ -17,6 +17,7 @@ import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.REPLY_SORTING_RESOLVER_DESCRIPTOR
 import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
@@ -38,6 +39,8 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
  * Targets the X-Lite Compose post detail timeline repository initialization, where
  * the initial ranking mode enum value is fetched for the factory call.
  */
+// ALPHA PATH: explicit rankingMode label in the repository initializer.
+// TODO: Remove this fingerprint when alpha compatibility is deprecated.
 private object XLiteComposeReplySortingFingerprint : Fingerprint(
     definingClass = "Lcom/x/postdetail/",
     filters =
@@ -47,14 +50,47 @@ private object XLiteComposeReplySortingFingerprint : Fingerprint(
         ),
 )
 
+/** Supports the beta path where the ranking parameter name is optimized away. */
+// BETA PATH: ranking parameter name optimized away.
+private object XLiteComposeReplySortingEnumFingerprint : Fingerprint(
+    definingClass = "Lcom/x/postdetail/",
+    filters =
+        listOf(
+            fieldAccess(
+                opcode = Opcode.SGET_OBJECT,
+                name = "Relevance",
+            ),
+            string("timelineRepository"),
+        ),
+)
+
 /**
  * Targets the X-Lite Compose reply sorting selection handler callback where user changes
  * the reply sorting mode from the bottom sheet dialog.
  */
+// ALPHA PATH: selection callback under the photo-editor owner.
+// TODO: Remove this owner fingerprint when alpha compatibility is deprecated.
 private object XLiteComposeReplySortingSelectionFingerprint : Fingerprint(
     // R8 places this synthetic callback in the preserved photo-editor owner package.
     // Do not search every FunctionReferenceImpl in the APK: those are unrelated callbacks.
     definingClass = "Lcom/x/photoeditor/",
+    returnType = "Ljava/lang/Object;",
+    parameters = listOf("Ljava/lang/Object;"),
+    custom = { _, classDef ->
+        classDef.superclass == "Lkotlin/jvm/internal/FunctionReferenceImpl;" &&
+            classDef.interfaces.contains("Lkotlin/jvm/functions/Function1;")
+    },
+    filters =
+        listOf(
+            string("defaultUrtTimelineComponent"),
+            string("timelineRepository"),
+        ),
+)
+
+/** The beta moves the same callback into the post-detail owner package. */
+// BETA PATH: selection callback moved under the post-detail owner.
+private object XLiteComposeReplySortingPostDetailSelectionFingerprint : Fingerprint(
+    definingClass = "Lcom/x/postdetail/",
     returnType = "Ljava/lang/Object;",
     parameters = listOf("Ljava/lang/Object;"),
     custom = { _, classDef ->
@@ -74,6 +110,8 @@ private object XLiteComposeReplySortingSelectionFingerprint : Fingerprint(
  * `mutableStateOf(TimelineRankingMode.Relevance)`). Must be seeded with the
  * configured default so the UI matches the repository's ranking mode.
  */
+// ALPHA PATH: separate Relevance-seeded Compose state lambda.
+// TODO: Remove this fingerprint when alpha compatibility is deprecated.
 private object XLiteComposeReplySortingUiStateFingerprint : Fingerprint(
     definingClass = "Lcom/x/ui/common/",
     filters =
@@ -134,10 +172,18 @@ val xLiteDefaultReplySortingPatch =
 
         execute {
             // Patch the Compose post detail timeline repository initialization
-            val matches = XLiteComposeReplySortingFingerprint.scopedMatchAll()
+            val matches =
+                listOf(
+                    // ALPHA PATH: explicit rankingMode initializer.
+                    XLiteComposeReplySortingFingerprint.scopedMatchAllOrNull().orEmpty(),
+                    // BETA PATH: optimized-away ranking parameter initializer.
+                    XLiteComposeReplySortingEnumFingerprint.scopedMatchAllOrNull().orEmpty(),
+                ).flatten()
+                    .distinctBy { it.originalMethod.toString() }
             if (matches.size != 1) {
                 throw PatchException(
-                    "Expected one X-Lite Compose reply sorting initializer, found ${matches.size}: " +
+                    "Expected one X-Lite Compose reply sorting initializer across known shapes, " +
+                        "found ${matches.size}: " +
                         matches.joinToString { it.originalMethod.toString() },
                 )
             }
@@ -174,10 +220,20 @@ val xLiteDefaultReplySortingPatch =
             )
 
             // Patch the Compose reply sorting selection handler to remember the last choice
-            val selectionMatches = XLiteComposeReplySortingSelectionFingerprint.scopedMatchAll()
+            val selectionMatches =
+                listOf(
+                    // ALPHA PATH: photo-editor owner.
+                    XLiteComposeReplySortingSelectionFingerprint.scopedMatchAllOrNull().orEmpty(),
+                    // BETA PATH: post-detail owner.
+                    XLiteComposeReplySortingPostDetailSelectionFingerprint
+                        .scopedMatchAllOrNull()
+                        .orEmpty(),
+                ).flatten()
+                    .distinctBy { it.originalMethod.toString() }
             if (selectionMatches.size != 1) {
                 throw PatchException(
-                    "Expected one X-Lite Compose reply sorting selection handler, found ${selectionMatches.size}: " +
+                    "Expected one X-Lite Compose reply sorting selection handler across known " +
+                        "owners, found ${selectionMatches.size}: " +
                         selectionMatches.joinToString { it.originalMethod.toString() },
                 )
             }
@@ -203,13 +259,19 @@ val xLiteDefaultReplySortingPatch =
 
             // Patch the Compose reply sorting UI state initializer so the button label
             // and sheet selection reflect the configured default instead of Relevance.
-            val uiStateMatches = XLiteComposeReplySortingUiStateFingerprint.scopedMatchAll()
-            if (uiStateMatches.size != 1) {
+            val uiStateMatches =
+                XLiteComposeReplySortingUiStateFingerprint.scopedMatchAllOrNull().orEmpty()
+            if (uiStateMatches.size > 1) {
                 throw PatchException(
-                    "Expected one X-Lite Compose reply sorting UI state initializer, found ${uiStateMatches.size}: " +
+                    "Expected at most one X-Lite Compose reply sorting UI state initializer, " +
+                        "found ${uiStateMatches.size}: " +
                         uiStateMatches.joinToString { it.originalMethod.toString() },
                 )
             }
+            // BETA PATH: passes the current ranking mode directly to the shared sort sheet and
+            // no longer materializes a separate Relevance-seeded Compose state lambda.
+            if (uiStateMatches.isEmpty()) return@execute
+            // ALPHA PATH: patch the separate UI state initializer below.
             val uiStateMethod = uiStateMatches.single().method
             val uiStateIndex = uiStateMethod.instructions.indexOfFirst { ins ->
                 ins.opcode == Opcode.SGET_OBJECT &&

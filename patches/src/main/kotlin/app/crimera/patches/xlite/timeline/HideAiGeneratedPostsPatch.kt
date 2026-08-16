@@ -7,8 +7,10 @@ import app.crimera.patches.xlite.settings.choice
 import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.injectRead
 import app.crimera.patches.xlite.settings.multiChoice
-import app.crimera.patches.xlite.models.requirePublicFields
+import app.crimera.patches.xlite.models.readBoolean
+import app.crimera.patches.xlite.models.readObject
 import app.crimera.patches.xlite.models.resolvedXLitePostModels
+import app.crimera.patches.xlite.models.resolveFieldAccessor
 import app.crimera.patches.xlite.models.resolvedXLiteTimelineModels
 import app.crimera.patches.xlite.models.xLitePostModelResolutionPatch
 import app.crimera.patches.xlite.models.xLiteTimelineModelAdapterPatch
@@ -106,17 +108,19 @@ private object ContentDisclosureModelFingerprint : Fingerprint(
 
 private data class AiDisclosureAccessors(
     val timelinePostDescriptor: String,
-    val timelinePostResultField: String,
+    val timelinePostResultRead: String,
     val contextualPostDescriptor: String,
-    val contextualCanonicalPostField: String,
-    val canonicalContentDisclosureField: String,
+    val contextualCanonicalPostRead: String,
+    val canonicalContentDisclosureRead: String,
     val contentDisclosureDescriptor: String,
-    val hasAiDisclosureField: String,
-    val sourceField: String,
+    val hasAiDisclosureRead: String,
+    val sourceRead: String,
 )
 
 context(context: BytecodePatchContext)
 private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
+    // ALPHA PATH uses public disclosure fields; BETA PATH uses generated model getters.
+    // TODO: Remove the field fallback when alpha compatibility is deprecated.
     val contentDisclosureMatches =
         ContentDisclosureModelFingerprint.scopedMatchAll()
     if (contentDisclosureMatches.size != 1) {
@@ -126,8 +130,8 @@ private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
         )
     }
     val contentDisclosureMatch = contentDisclosureMatches.single()
-    val contentDisclosureClass = contentDisclosureMatch.classDef
-    val contentDisclosureDescriptor = contentDisclosureClass.type
+    val contentDisclosureDescriptor = contentDisclosureMatch.classDef.type
+    val contentDisclosureClass = context.mutableClassDefBy(contentDisclosureDescriptor)
     val disclosureBooleanFields =
         contentDisclosureMatch.instanceFieldsRead("Z")
     if (disclosureBooleanFields.size != 3) {
@@ -146,11 +150,15 @@ private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
                     field.type.endsWith(";")
             },
         )
-    contentDisclosureClass.requirePublicFields(listOf(hasAiDisclosureField, sourceField))
+    val hasAiDisclosureAccessor =
+        contentDisclosureClass.resolveFieldAccessor(hasAiDisclosureField, "AI disclosure")
+    val sourceAccessor =
+        contentDisclosureClass.resolveFieldAccessor(sourceField, "AI disclosure source")
 
     val timelineModels = resolvedXLiteTimelineModels()
-    context.mutableClassDefBy(timelineModels.postDescriptor)
-        .requirePublicFields(listOf(timelineModels.postResultField))
+    val timelinePostClass = context.mutableClassDefBy(timelineModels.postDescriptor)
+    val timelinePostResultAccessor =
+        timelinePostClass.resolveFieldAccessor(timelineModels.postResultField, "timeline post result")
     val postModels = resolvedXLitePostModels()
 
     val contextualPostClass = context.mutableClassDefBy(postModels.contextualPostDescriptor)
@@ -163,8 +171,16 @@ private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
             },
         )
 
-    contextualPostClass.requirePublicFields(listOf(postModels.contextualCanonicalPostField))
-    canonicalPostClass.requirePublicFields(listOf(canonicalContentDisclosureField))
+    val contextualCanonicalPostAccessor =
+        contextualPostClass.resolveFieldAccessor(
+            postModels.contextualCanonicalPostField,
+            "contextual canonical post",
+        )
+    val canonicalContentDisclosureAccessor =
+        canonicalPostClass.resolveFieldAccessor(
+            canonicalContentDisclosureField,
+            "canonical content disclosure",
+        )
     if (!sourceField.type.startsWith("L") || !sourceField.type.endsWith(";")) {
         throw PatchException("X-Lite content disclosure source is not an object: $sourceField")
     }
@@ -173,13 +189,13 @@ private fun resolveAiDisclosureAccessors(): AiDisclosureAccessors {
     }
     return AiDisclosureAccessors(
         timelinePostDescriptor = timelineModels.postDescriptor,
-        timelinePostResultField = timelineModels.postResultField.toString(),
+        timelinePostResultRead = timelinePostResultAccessor.readObject("v0"),
         contextualPostDescriptor = postModels.contextualPostDescriptor,
-        contextualCanonicalPostField = postModels.contextualCanonicalPostField.toString(),
-        canonicalContentDisclosureField = canonicalContentDisclosureField.toString(),
+        contextualCanonicalPostRead = contextualCanonicalPostAccessor.readObject("v0"),
+        canonicalContentDisclosureRead = canonicalContentDisclosureAccessor.readObject("v0"),
         contentDisclosureDescriptor = contentDisclosureDescriptor,
-        hasAiDisclosureField = hasAiDisclosureField.toString(),
-        sourceField = sourceField.toString(),
+        hasAiDisclosureRead = hasAiDisclosureAccessor.readBoolean("p0"),
+        sourceRead = sourceAccessor.readObject("p0"),
     )
 }
 
@@ -248,12 +264,12 @@ private fun patchAiDisclosureAccessors(accessors: AiDisclosureAccessors) {
                 # Timeline post results are a sealed union; tombstones have no disclosure.
                 move-object/from16 v0, p0
                 check-cast v0, ${accessors.timelinePostDescriptor}
-                iget-object v0, v0, ${accessors.timelinePostResultField}
+                ${accessors.timelinePostResultRead}
                 instance-of v1, v0, ${accessors.contextualPostDescriptor}
                 if-eqz v1, :piko_xlite_no_contextual_post_result
                 check-cast v0, ${accessors.contextualPostDescriptor}
-                iget-object v0, v0, ${accessors.contextualCanonicalPostField}
-                iget-object v0, v0, ${accessors.canonicalContentDisclosureField}
+                ${accessors.contextualCanonicalPostRead}
+                ${accessors.canonicalContentDisclosureRead}
                 return-object v0
                 :piko_xlite_no_contextual_post_result
                 const/4 v0, 0x0
@@ -267,7 +283,7 @@ private fun patchAiDisclosureAccessors(accessors: AiDisclosureAccessors) {
         instructions =
             """
                 check-cast p0, ${accessors.contentDisclosureDescriptor}
-                iget-boolean p0, p0, ${accessors.hasAiDisclosureField}
+                ${accessors.hasAiDisclosureRead}
                 return p0
             """.trimIndent(),
     )
@@ -278,7 +294,7 @@ private fun patchAiDisclosureAccessors(accessors: AiDisclosureAccessors) {
         instructions =
             """
                 check-cast p0, ${accessors.contentDisclosureDescriptor}
-                iget-object p0, p0, ${accessors.sourceField}
+                ${accessors.sourceRead}
                 return-object p0
             """.trimIndent(),
     )

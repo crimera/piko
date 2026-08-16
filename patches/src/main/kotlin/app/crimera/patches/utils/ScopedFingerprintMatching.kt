@@ -81,7 +81,19 @@ private fun String.isExactTypeDeclaration(): Boolean =
  */
 context(context: BytecodePatchContext)
 internal fun Fingerprint.scopedMatchAllOrNull(): List<Match>? {
-    if (classFingerprint != null) return matchAllOrNull()
+    val nestedClassFingerprint = classFingerprint
+    if (nestedClassFingerprint != null) {
+        val originalClass = nestedClassFingerprint.matchOrNull()?.originalClassDef ?: return null
+        val classDef = context.classDefByOrNull(originalClass.type) ?: return null
+        val matches = buildList {
+            classDef.methods.forEach { method ->
+                val match = matchOrNull(method, classDef) ?: return@forEach
+                add(match)
+                clearMatch()
+            }
+        }
+        return matches.ifEmpty { null }
+    }
 
     val classScope = definingClass
     if (classScope == null) {

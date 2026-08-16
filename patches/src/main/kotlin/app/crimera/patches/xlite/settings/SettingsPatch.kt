@@ -37,18 +37,33 @@ internal val xLiteSettingsPatch =
             addAppResources("xlite")
             prepareSettingsRegistryLoad()
 
+            // ALPHA PATH: usually has one Compose settings caller.
+            // BETA PATH: may have multiple callers for the same renderer; collapse them below.
+            // TODO: Re-evaluate the alpha caller shape when alpha is deprecated; retain beta deduplication.
             val callerMatches =
                 ComposeSettingsBasicItemCallerFingerprint.scopedMatchAll()
-            if (callerMatches.size != 1) {
+            if (callerMatches.isEmpty()) {
+                throw PatchException("Expected at least one X-Lite Compose settings row caller")
+            }
+            val rendererReferences =
+                callerMatches
+                    .map { caller ->
+                        caller.instructionMatches.single().instruction
+                            .getReference<MethodReference>()
+                            ?: throw PatchException(
+                                "X-Lite Compose settings row call has no method reference in " +
+                                    caller.originalMethod,
+                            )
+                    }
+                    .distinctBy(MethodReference::toString)
+            if (rendererReferences.size != 1) {
                 throw PatchException(
-                    "Expected one X-Lite Compose settings row caller, found ${callerMatches.size}: " +
-                        callerMatches.joinToString { it.originalMethod.toString() },
+                    "Expected one X-Lite Compose settings row renderer across " +
+                        "${callerMatches.size} callers, found ${rendererReferences.size}: " +
+                        rendererReferences.joinToString(),
                 )
             }
-            val rendererReference =
-                callerMatches.single().instructionMatches.single().instruction
-                    .getReference<MethodReference>()
-                    ?: throw PatchException("X-Lite Compose settings row call has no method reference")
+            val rendererReference = rendererReferences.single()
             val matches =
                 composeSettingsBasicItemFingerprint(rendererReference)
                     .scopedMatchAll()

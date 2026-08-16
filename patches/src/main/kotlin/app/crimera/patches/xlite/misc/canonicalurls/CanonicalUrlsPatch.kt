@@ -81,9 +81,9 @@ private data class CanonicalUrlMatches(
 /**
  * Opens expanded URL values in the Compose/URT navigation paths instead of shortened URLs.
  *
- * The alpha obfuscates model descriptors and removes the model getters. Model classes and
- * fields are therefore resolved from their stable data-class labels, then used only to build
- * release-specific fingerprints at patch time.
+ * ALPHA PATH: resolves model fields from stable data-class labels and patches the legacy
+ * navigation callbacks. TODO: Remove this path when alpha compatibility is deprecated.
+ * BETA PATH: already uses the expanded URL navigation behavior and returns without mutation.
  */
 @Suppress("unused")
 val xLiteCanonicalUrlsPatch =
@@ -97,6 +97,12 @@ val xLiteCanonicalUrlsPatch =
 
         execute {
             val postModels = resolvedXLitePostModels()
+            val contextualPostClass = classDefByOrNull(postModels.contextualPostDescriptor)
+            // BETA PATH: native expandedUrl navigation already handles this behavior.
+            if (contextualPostClass?.methods?.any { method -> method.name == "getCanonicalPost" } == true) {
+                return@execute
+            }
+            // ALPHA PATH: patch the legacy canonical-URL callbacks below.
             val matches = resolveCanonicalUrlMatches()
             replaceUrlEntityFieldRead(
                 matches.postLinkClick,

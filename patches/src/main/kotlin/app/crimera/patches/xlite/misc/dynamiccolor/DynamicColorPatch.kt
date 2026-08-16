@@ -11,9 +11,11 @@ import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.EXTENSION_PACKAGE
 import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.fieldAccess
+import app.morphe.patcher.methodCall
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
@@ -568,27 +570,56 @@ private fun patchInlineActionTints() {
     val enabledField = models.inlineActionEnabledField
     val actionTypeDescriptor = models.postActionTypeDescriptor
     val entryMatches =
-        Fingerprint(
-            definingClass = "Lcom/x/inlineactionbar/",
-            parameters = listOf(
-                inlineActionEntryClass.type,
-                "L",
-                "J",
-                "F",
-                "L",
-                "J",
-                "L",
-                "L",
-                "Landroidx/compose/ui/Modifier;",
-                "Landroidx/compose/runtime/Composer;",
-                "I",
-            ),
-            returnType = "V",
-            filters = listOf(
-                fieldAccess(opcode = Opcode.IGET_OBJECT, reference = actionTypeField),
-                fieldAccess(opcode = Opcode.IGET_BOOLEAN, reference = enabledField),
-            ),
-        ).scopedMatchAll()
+        listOf(
+            // ALPHA PATH: field reads and the legacy 11-parameter Compose renderer.
+            // TODO: Remove this fingerprint when alpha compatibility is deprecated.
+            Fingerprint(
+                definingClass = "Lcom/x/inlineactionbar/",
+                parameters = listOf(
+                    inlineActionEntryClass.type,
+                    "L",
+                    "J",
+                    "F",
+                    "L",
+                    "J",
+                    "L",
+                    "L",
+                    "Landroidx/compose/ui/Modifier;",
+                    "Landroidx/compose/runtime/Composer;",
+                    "I",
+                ),
+                returnType = "V",
+                filters = listOf(
+                    fieldAccess(opcode = Opcode.IGET_OBJECT, reference = actionTypeField),
+                    fieldAccess(opcode = Opcode.IGET_BOOLEAN, reference = enabledField),
+                ),
+            ).scopedMatchAllOrNull().orEmpty(),
+            // BETA PATH: getter calls and the beta 10-parameter Compose renderer.
+            Fingerprint(
+                definingClass = "Lcom/x/inlineactionbar/",
+                parameters = listOf(
+                    inlineActionEntryClass.type,
+                    "L",
+                    "J",
+                    "F",
+                    "L",
+                    "J",
+                    "L",
+                    "Landroidx/compose/ui/Modifier;",
+                    "Landroidx/compose/runtime/Composer;",
+                    "I",
+                ),
+                returnType = "V",
+                filters = listOf(
+                    methodCall(
+                        smali =
+                            "${inlineActionEntryClass.type}->getActionType()$actionTypeDescriptor",
+                    ),
+                    methodCall(smali = "${inlineActionEntryClass.type}->isEnabled()Z"),
+                ),
+            ).scopedMatchAllOrNull().orEmpty(),
+        ).flatten()
+            .distinctBy { it.originalMethod.toString() }
     requireExactlyOne("X-Lite inline action entry renderer", entryMatches)
     val entryMethod = entryMatches.single().method
     val tintReference =

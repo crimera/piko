@@ -66,7 +66,6 @@ val customizeXLiteInlineActionsPatch =
         execute {
             val entryModels = resolvedXLiteInlineActionModels()
             val barModels = resolvedXLiteInlineActionBarModels()
-            prepareInlineActionFields(entryModels)
             patchActionNameBridge(entryModels)
 
             val (inlineActionBarClass, originalMethod) =
@@ -129,15 +128,24 @@ val customizeXLiteInlineActionsPatch =
     }
 
 context(context: BytecodePatchContext)
-private fun prepareInlineActionFields(
-    models: app.crimera.patches.xlite.models.ResolvedXLiteInlineActionModels,
-) {
-    context.mutableClassDefBy(models.inlineActionEntryDescriptor)
-        .requirePublicFields(listOf(models.inlineActionTypeField))
-}
-
-context(context: BytecodePatchContext)
 private fun patchActionNameBridge(models: app.crimera.patches.xlite.models.ResolvedXLiteInlineActionModels) {
+    val inlineActionEntryClass = context.mutableClassDefBy(models.inlineActionEntryDescriptor)
+    val actionTypeGetter = inlineActionEntryClass.methods.singleOrNull { method ->
+        method.name == "getActionType" &&
+            method.parameterTypes.isEmpty() &&
+            method.returnType == models.postActionTypeDescriptor
+    }
+    val actionTypeRead =
+        if (actionTypeGetter != null) {
+            // BETA PATH: action type is private and exposed through getActionType().
+            // Keep this branch as the source for future model updates.
+            "invoke-virtual {p0}, $actionTypeGetter\nmove-result-object p0"
+        } else {
+            // ALPHA PATH: action type remains a public field.
+            // TODO: Remove this fallback when alpha compatibility is deprecated.
+            inlineActionEntryClass.requirePublicFields(listOf(models.inlineActionTypeField))
+            "iget-object p0, p0, ${models.inlineActionTypeField}"
+        }
     val extensionClass = context.mutableClassDefBy(INLINE_ACTION_FILTER_DESCRIPTOR)
     val helpers = extensionClass.methods.filter { method ->
         method.name == "getActionName" &&
@@ -154,7 +162,7 @@ private fun patchActionNameBridge(models: app.crimera.patches.xlite.models.Resol
         0,
         """
             check-cast p0, ${models.inlineActionEntryDescriptor}
-            iget-object p0, p0, ${models.inlineActionTypeField}
+            $actionTypeRead
             invoke-virtual {p0}, Ljava/lang/Enum;->name()Ljava/lang/String;
             move-result-object p0
             return-object p0
