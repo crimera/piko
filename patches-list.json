@@ -3885,6 +3885,36 @@
         }
       ],
       "options": []
+    },
+    {
+      "name": "Profile Coin Flip Downloader",
+      "description": "Allows downloading all profile pictures and avatars.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "435.0.0.37.76",
+              "versionCodes": {
+                "ARM64_V8A": 384109456
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
     }
   ]
 }
