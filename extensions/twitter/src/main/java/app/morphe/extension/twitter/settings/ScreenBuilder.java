@@ -550,6 +550,14 @@ public class ScreenBuilder {
                             Settings.NATIVE_SHARE_MENU
                     )
             );
+
+            addPreference(category,
+                    helper.multiSelectListPref(
+                            str("piko_native_share_menu_items_to_hide"),
+                            "",
+                            Settings.NATIVE_SHARE_MENU_ITEMS_TO_HIDE
+                    )
+            );
         }
     }
 

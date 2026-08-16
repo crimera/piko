@@ -270,6 +270,12 @@ public final class InstagramPreferenceStyle {
         }
     }
 
+    public static void bindIcon(View view, String iconResName) {
+        if (view instanceof PreferenceRow) {
+            ((PreferenceRow) view).setIcon(iconResName);
+        }
+    }
+
     public static void setPressedHighlightEnabled(View view, boolean enabled) {
         if (view instanceof PreferenceRow) {
             ((PreferenceRow) view).setPressedHighlightEnabled(enabled);
@@ -362,7 +368,7 @@ public final class InstagramPreferenceStyle {
             setWillNotDraw(false);
         }
 
-        private void initIconView(Context context, String iconResName) {
+        private void initIconView(Context context) {
             iconView = new ImageView(context);
 
             int iconSize = dp(context, 24);
@@ -372,15 +378,23 @@ public final class InstagramPreferenceStyle {
             params.setMarginEnd(dp(context, 16));
             iconView.setLayoutParams(params);
 
-            UI.setThemedIcon(iconView, iconResName);
             iconView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             addView(iconView, 0);
         }
 
         void setIcon(String iconResName) {
-            if (iconResName != null) {
-                initIconView(getContext(), iconResName);
+            if (iconResName == null) {
+                if (iconView != null) {
+                    iconView.setImageDrawable(null);
+                    iconView.setVisibility(View.GONE);
+                }
+                return;
             }
+            if (iconView == null) {
+                initIconView(getContext());
+            }
+            UI.setThemedIcon(iconView, iconResName);
+            iconView.setVisibility(View.VISIBLE);
         }
 
         void setHighlightView(View highlightView) {

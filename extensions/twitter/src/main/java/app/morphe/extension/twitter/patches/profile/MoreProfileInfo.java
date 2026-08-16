@@ -86,7 +86,9 @@ public class MoreProfileInfo {
             if(Pref.moreInfoOnProfile()) {
                 TwitterUser twitterUserEntity = new TwitterUser(TwitterUserObject);
                 long userId = twitterUserEntity.getId();
-                return userName + "\n#" + Long.valueOf(userId);
+
+                String userIdstr = str("piko_pref_account_id", String.valueOf(userId));
+                return userName + "\n" + userIdstr;
             }
             return userName;
         } catch (Exception e) {

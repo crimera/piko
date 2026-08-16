@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.utils;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Build;
 import android.os.Environment;
@@ -21,6 +22,7 @@ import java.net.HttpURLConnection;
 
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.entity.DeveloperOptions;
+import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.crimera.PikoUtils;
 
 import app.morphe.extension.shared.Utils;
@@ -72,6 +74,17 @@ public class InstaUtils {
         fileDone = PikoUtils.pikoWriteFile(fileName, Constants.DEFAULT_PIKO_FOLDER, data, false);
         fileDoneTxt = fileDone ? " created" : fileDoneTxt;
         PikoUtils.toast(fileName + fileDoneTxt);
+    }
+
+    public static void showResetSettingsDialog(Context context) {
+        new AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(context))
+                .setTitle(str("piko_reset_pref_confirm"))
+                .setNegativeButton(str("piko_cancel"), null)
+                .setPositiveButton(
+                        str("piko_ok"),
+                        (dialogInterface, which) -> deletePref()
+                )
+                .show();
     }
 
     public static void deletePref(){

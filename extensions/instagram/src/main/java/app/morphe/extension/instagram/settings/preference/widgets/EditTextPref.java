@@ -13,6 +13,8 @@ import android.preference.Preference;
 import android.text.InputType;
 import android.view.View;
 import android.view.ViewGroup;
+import app.morphe.extension.instagram.patches.Links;
+import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.Helper;
 
 public class EditTextPref extends EditTextPreference {
@@ -48,7 +50,12 @@ public class EditTextPref extends EditTextPreference {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 helper.setValue(preference,newValue);
-                preference.setSummary((String) newValue);
+                //TODO: Implement better soution for summary.
+                String summary = (String) newValue;
+                if (Settings.CUSTOM_SHARING_DOMAIN.key.equals(preference.getKey())) {
+                    summary = Links.customSharingDomainSummary(summary);
+                }
+                preference.setSummary(summary);
                 return true;
             }
         });

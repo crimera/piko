@@ -30,6 +30,8 @@
     <string name="piko_open_links_externally">Open links externally</string>
     <string name="piko_open_links_externally_desc">Open links in external browser instead of in-app browser</string>
     <string name="piko_sanitize_share_links">Sanitize share links</string>
+    <string name="piko_custom_sharing_domain">Custom sharing domain</string>
+    <string name="piko_custom_sharing_domain_desc">Domain to use when sharing links</string>
 
     <!-- Ghost Section -->
     <string name="piko_category_ghost">Ghost</string>
@@ -89,6 +91,8 @@
     <string name="piko_vsm_no_mentions">No mentions on this story</string>
     <string name="piko_disable_story_flipping">Disable story flipping</string>
     <string name="piko_disable_story_flipping_desc">Disable automatic flipping/moving to next story</string>
+    <string name="piko_loop_story">Loop story</string>
+    <string name="piko_loop_story_desc">Replay the current story when it ends</string>
     <string name="piko_disable_video_autoplay">Disable video autoplay</string>
     <string name="piko_stories_audio_autoplay">Stories audio autoplay</string>
     <string name="piko_customise_story_timestamp">Customise story timestamp</string>
@@ -181,9 +185,10 @@
     <string name="piko_category_about">About</string>
     <string name="piko_export_pref">Export Piko preferences</string>
     <string name="piko_import_pref">Import Piko preferences</string>
-    <string name="piko_reset_pref">Reset Piko preferences</string>
-    <string name="piko_reset_pref_success">Piko preferences deleted</string>
-    <string name="piko_reset_pref_failed">Failed to delete Piko preferences</string>
+    <string name="piko_reset_pref">Reset Piko settings</string>
+    <string name="piko_reset_pref_confirm">Reset Piko settings?</string>
+    <string name="piko_reset_pref_success">Piko settings reset</string>
+    <string name="piko_reset_pref_failed">Failed to reset Piko settings</string>
     <string name="piko_app_version">App version: %s</string>
     <string name="piko_patch_version">Patch version: %s</string>
     <string name="piko_patch_info_title">Patch information</string>

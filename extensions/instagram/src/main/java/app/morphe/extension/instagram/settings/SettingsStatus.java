@@ -56,8 +56,10 @@ public class SettingsStatus {
     }
     public static boolean sanitizeShareLinks = false;
     public static void sanitizeShareLinks() {sanitizeShareLinks = true;}
+    public static boolean customSharingDomain = false;
+    public static void customSharingDomain() {customSharingDomain = true;}
     public static boolean linksSection() {
-        return (openLinksExternally || sanitizeShareLinks);
+        return (openLinksExternally || sanitizeShareLinks || customSharingDomain);
     }
 
 
@@ -164,6 +166,10 @@ public class SettingsStatus {
     public static void disableStoryFlipping() {
         disableStoryFlipping = true;
     }
+    public static boolean loopStory = false;
+    public static void loopStory() {
+        loopStory = true;
+    }
     public static boolean customiseStoryTimestamp = false;
     public static void customiseStoryTimestamp() {
         customiseStoryTimestamp = true;
@@ -196,7 +202,7 @@ public class SettingsStatus {
     public static void moreOptionsOnPost() { moreOptionsOnPost = true; }
     public static boolean moreOptionsOnProfile = false;
     public static void moreOptionsOnProfile() { moreOptionsOnProfile = true; }
-    public static boolean miscSection() {return ( saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || storiesAudioAutoplay || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || hideReshareButton);}
+    public static boolean miscSection() {return ( saveMediaCommentButton || moreOptionsOnProfile || moreOptionsOnPost || customiseStoryRingSize || changeLikeAnimation || unlockPlusBenefits || storiesAudioAutoplay || disableVideoAutoplay || removeEmptyBottomSpace || copyCommentButton || improveImageViewing || customiseStoryTimestamp || disableAnalytics || disableDiscoverPeople || followBackIndicator || viewStoryMentions || disableStoryFlipping || loopStory || hideReshareButton);}
 
     //DM section
     public static boolean unlimitedReplaysOnEphemeralMedia = false;
@@ -246,6 +252,7 @@ public class SettingsStatus {
 
         FLAGS.put(str("piko_customise_story_timestamp"),SettingsStatus.customiseStoryTimestamp);
         FLAGS.put(str("piko_disable_story_flipping"),SettingsStatus.disableStoryFlipping);
+        FLAGS.put(str("piko_loop_story"),SettingsStatus.loopStory);
         FLAGS.put(str("piko_view_story_mentions"),SettingsStatus.viewStoryMentions);
         FLAGS.put(str("piko_follow_back_indicator"),SettingsStatus.followBackIndicator);
         FLAGS.put(str("piko_disable_discover_people"),SettingsStatus.disableDiscoverPeople);
@@ -274,6 +281,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_view_stories_anonymously"),SettingsStatus.viewStoriesAnonymously);
 
         FLAGS.put(str("piko_sanitize_share_links"),SettingsStatus.sanitizeShareLinks);
+        FLAGS.put(str("piko_custom_sharing_domain"),SettingsStatus.customSharingDomain);
         FLAGS.put(str("piko_open_links_externally"),SettingsStatus.openLinksExternally);
         FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
         FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);

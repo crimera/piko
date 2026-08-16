@@ -6,6 +6,7 @@
 
 package app.crimera.patches.instagram.misc.theme
 
+import app.crimera.patches.shared.parameterRegisterStart
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
@@ -333,7 +334,7 @@ private fun installLegacyOnResumeThemeSync(
             selectedIdReads.single() + 1,
             selectedIdRegister,
         )
-    val firstParameter = firstParameterRegister(method)
+    val firstParameter = parameterRegisterStart(method)
     val injectedRegisters =
         listOf(
             listenerRegister,

@@ -94,6 +94,7 @@
 
     <string name="piko_title_native_share_menu">Native share menu</string>
     <string name="piko_native_share_menu_toggle">Enable native share menu</string>
+    <string name="piko_native_share_menu_items_to_hide">Native share menu items to hide</string>
 
     <!-- Ads Settings -->
     <string name="piko_title_ads">Ads</string>
@@ -218,6 +219,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">More information on profile</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Adds more details on the profile page</string>
     <string name="piko_fast_follower">Fast follower</string>
+    <string name="piko_pref_account_id">ID: %s</string>
 
     <!-- Font Settings -->
     <string name="piko_title_font">Font style</string>

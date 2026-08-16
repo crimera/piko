@@ -102,7 +102,7 @@ public class ProfileMoreOption {
                             }
 
                         } else if (selectedOption.equals(str("piko_view_profile_picture"))) {
-                            ActivityHook.handleUrlIntent(false, userData.getProfilePictureUrl());
+                            ProfilePictureViewer.show(context, userData);
 
                         } else if (selectedOption.equals(str("piko_download_profile_picture"))) {
                             String url = userData.getProfilePictureUrl();
@@ -187,4 +187,3 @@ public class ProfileMoreOption {
         }
     }
 }
-

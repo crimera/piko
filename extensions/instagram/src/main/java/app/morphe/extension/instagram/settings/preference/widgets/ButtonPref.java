@@ -68,7 +68,7 @@ public class ButtonPref extends Preference {
                         ActivityHook.launchFragment((Activity) context, key);
                         
                     } else if (key.equals("piko_reset_pref")) {
-                        InstaUtils.deletePref();
+                        InstaUtils.showResetSettingsDialog(context);
 
                     } else if (key.equals("piko_delete_analytics_cache")) {
                         Block.deleteAnalyticsCacheFolder();
@@ -124,6 +124,7 @@ public class ButtonPref extends Preference {
     protected void onBindView(View view) {
         String key = getKey();
         InstagramPreferenceStyle.bindText(this, view);
+        InstagramPreferenceStyle.bindIcon(view, getIconResourceName(key));
         InstagramPreferenceStyle.setTrailingVisible(view, hasVisibleTrail(key));
         InstagramPreferenceStyle.setPressedHighlightEnabled(
                 view,
@@ -159,6 +160,9 @@ public class ButtonPref extends Preference {
     }
 
     private String getIconResourceName(String key) {
+        if (key == null) {
+            return null;
+        }
         if(key.equals(Constants.PIKO_FRAGMENT_ADS)){
             return UI.DRAWABLE_SHEILD_ICON;
         }
