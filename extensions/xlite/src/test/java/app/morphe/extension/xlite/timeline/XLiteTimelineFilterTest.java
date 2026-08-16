@@ -42,6 +42,32 @@ public class XLiteTimelineFilterTest {
     }
 
     @Test
+    public void disabledDiscoverMoreFilterReturnsOriginalList() {
+        List<Object> items = items(module("tweetdetailrelatedtweets", item(post("recommended"))));
+        assertSame(items, XLiteTimelineFilter.filterDiscoverMore(items, false, MODELS));
+    }
+
+    @Test
+    public void removesDiscoverMoreModuleByEntryId() {
+        List<Object> filtered = filterDiscoverMore(module("tweetdetailrelatedtweets", item(post("recommended"))));
+        assertTrue(filtered.isEmpty());
+    }
+
+    @Test
+    public void removesDiscoverMoreModuleWithEntryIdSuffix() {
+        List<Object> filtered = filterDiscoverMore(module("tweetdetailrelatedtweets-123", item(post("recommended"))));
+        assertTrue(filtered.isEmpty());
+    }
+
+    @Test
+    public void keepsSimilarDiscoverMoreEntryIds() {
+        FakeModule module = module("tweetdetailrelatedtweetsx", item(post("kept")));
+        List<Object> input = items(module);
+
+        assertSame(input, XLiteTimelineFilter.filterDiscoverMore(input, true, MODELS));
+    }
+
+    @Test
     public void removesNestedModuleAndReconstructsParent() {
         FakeModule outer = module(
                 "conversationthread-1",
@@ -353,6 +379,11 @@ public class XLiteTimelineFilterTest {
         assertEquals(100, conversationModules);
         assertEquals(4700, standalonePosts);
         assertEquals(4700, expectedPostNumber);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<Object> filterDiscoverMore(Object... values) {
+        return (List<Object>) XLiteTimelineFilter.filterDiscoverMore(items(values), true, MODELS);
     }
 
     @SuppressWarnings("unchecked")

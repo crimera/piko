@@ -16,6 +16,7 @@ The alpha removes or obfuscates several contracts previously treated as stable. 
 | [Customize navigation bar items](patches/customize-navigation-bar.md) | Alpha obfuscated the tab enum and changed the State constructor contract | Ported; user-applied on alpha: working |
 | [Remove ads](patches/remove-ads.md) | Extension DEX referenced unobfuscated timeline models | Runtime-tested on alpha: working |
 | [Hide who to follow](patches/hide-who-to-follow.md) | Extension DEX referenced unobfuscated timeline models | Runtime-tested on alpha: working |
+| Hide Discover more | Timeline module descriptors are obfuscated; the stable entry ID is preserved | Ported; exact alpha model path verified against the supplied decomp; runtime pending |
 | [Filter posts by keyword](patches/post-filter.md) | Extension DEX referenced `UrtTimelinePost` and related models | Main-text generic bridge runtime-tested on alpha: working |
 | [Hide AI-generated posts](patches/hide-ai-generated.md) | Timeline, contextual-post, canonical-post, and disclosure models are obfuscated | Runtime-tested on alpha: working |
 | [Customize inline actions](patches/customize-inline-actions.md) | Presenter/model descriptors changed and the final Compose list conversion had severe register pressure | Ported and exercised through inline-download dependency; hide-option matrix pending |

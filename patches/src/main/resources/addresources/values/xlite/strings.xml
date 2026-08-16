@@ -31,6 +31,8 @@
     <string name="piko_xlite_filter_promoted_posts_summary">Removes promoted posts and promoted timeline modules</string>
     <string name="piko_xlite_hide_who_to_follow_title">Hide who to follow</string>
     <string name="piko_xlite_hide_who_to_follow_summary">Removes recommended-user sections from timelines and profile pages</string>
+    <string name="piko_xlite_hide_discover_more_title">Hide Discover more</string>
+    <string name="piko_xlite_hide_discover_more_summary">Removes the Discover more section from post-detail timelines</string>
     <string name="piko_xlite_hide_ai_generated_posts_title">Hide AI-generated posts</string>
     <string name="piko_xlite_hide_ai_generated_posts_summary">Hides selected AI-generated posts from X-Lite timelines</string>
     <string name="piko_xlite_hide_ai_generated_posts_user_marked">User-marked</string>

@@ -17,6 +17,7 @@ public final class XLiteTimelineFilter {
     private static final String AI_SOURCE_USER_MARKED = "UserMarked";
     private static final String AI_SOURCE_AUTO_DETECTED = "AutoDetected";
     private static final String AI_SOURCE_NOT_IDENTIFIED = "SourceNotIdentified";
+    private static final String DISCOVER_MORE_ENTRY_ID = "tweetdetailrelatedtweets";
     private static final TimelineModelAccess PRODUCTION_MODEL_ACCESS = new TimelineModelAccess() {
         @Override boolean isModuleItem(Object value) { return isTimelineModuleItem(value); }
         @Override boolean isPost(Object value) { return isTimelinePost(value); }
@@ -88,6 +89,15 @@ public final class XLiteTimelineFilter {
         return filterTimelineItems(timelineItems, enabled, false, null, modelAccess);
     }
 
+    public static Object filterDiscoverMore(Object timelineItems, boolean enabled) {
+        return filterDiscoverMore(timelineItems, enabled, PRODUCTION_MODEL_ACCESS);
+    }
+
+    static Object filterDiscoverMore(Object timelineItems, boolean enabled, TimelineModelAccess modelAccess) {
+        if (!enabled) return timelineItems;
+        return filterTimelineItems(timelineItems, false, false, null, Collections.emptySet(), true, modelAccess);
+    }
+
     public static Object filterWhoToFollow(Object timelineItems, boolean enabled) {
         return filterWhoToFollow(timelineItems, enabled, PRODUCTION_MODEL_ACCESS);
     }
@@ -106,6 +116,8 @@ public final class XLiteTimelineFilter {
                     false,
                     false,
                     store.snapshot(),
+                    Collections.emptySet(),
+                    false,
                     PRODUCTION_MODEL_ACCESS
             );
         } catch (RuntimeException exception) {
@@ -129,7 +141,7 @@ public final class XLiteTimelineFilter {
             TimelineModelAccess modelAccess
     ) {
         if (!enabled) return timelineItems;
-        return filterTimelineItems(timelineItems, false, false, snapshot, modelAccess);
+        return filterTimelineItems(timelineItems, false, false, snapshot, Collections.emptySet(), false, modelAccess);
     }
 
     public static Object filterAiGeneratedPosts(Object timelineItems, Set<String> sourcesToHide) {
@@ -143,7 +155,7 @@ public final class XLiteTimelineFilter {
     ) {
         Set<String> sources = parseAiSources(sourcesToHide);
         if (sources.isEmpty()) return timelineItems;
-        return filterTimelineItems(timelineItems, false, false, null, sources, modelAccess);
+        return filterTimelineItems(timelineItems, false, false, null, sources, false, modelAccess);
     }
 
     private static Set<String> parseAiSources(Set<String> sourcesToHide) {
@@ -174,6 +186,7 @@ public final class XLiteTimelineFilter {
                 hideWhoToFollow,
                 ruleSnapshot,
                 Collections.emptySet(),
+                false,
                 modelAccess
         );
     }
@@ -184,13 +197,15 @@ public final class XLiteTimelineFilter {
             boolean hideWhoToFollow,
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
             TimelineModelAccess modelAccess
     ) {
         if (timelineItems == null) return null;
         if (!filterPromotedItems
                 && !hideWhoToFollow
                 && (ruleSnapshot == null || !ruleSnapshot.hasEnabledRules())
-                && (aiSourcesToHide == null || aiSourcesToHide.isEmpty())) {
+                && (aiSourcesToHide == null || aiSourcesToHide.isEmpty())
+                && !hideDiscoverMore) {
             return timelineItems;
         }
         if (!(timelineItems instanceof Iterable<?> iterable)) return timelineItems;
@@ -207,6 +222,7 @@ public final class XLiteTimelineFilter {
                         hideWhoToFollow,
                         ruleSnapshot,
                         aiSourcesToHide,
+                        hideDiscoverMore,
                         modelAccess
                 );
                 boolean changed = result.remove || result.item != original;
@@ -246,6 +262,7 @@ public final class XLiteTimelineFilter {
             boolean hideWhoToFollow,
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
             TimelineModelAccess modelAccess
     ) {
         if (original == null) return FilterResult.keep(null);
@@ -257,6 +274,7 @@ public final class XLiteTimelineFilter {
                         hideWhoToFollow,
                         ruleSnapshot,
                         aiSourcesToHide,
+                        hideDiscoverMore,
                         modelAccess
                 );
             }
@@ -266,6 +284,7 @@ public final class XLiteTimelineFilter {
                     hideWhoToFollow,
                     ruleSnapshot,
                     aiSourcesToHide,
+                    hideDiscoverMore,
                     modelAccess
             );
         } catch (RuntimeException exception) {
@@ -280,6 +299,7 @@ public final class XLiteTimelineFilter {
             boolean hideWhoToFollow,
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
             TimelineModelAccess modelAccess
     ) {
         Object originalItem = modelAccess.getModuleItem(wrapper);
@@ -289,6 +309,7 @@ public final class XLiteTimelineFilter {
                 hideWhoToFollow,
                 ruleSnapshot,
                 aiSourcesToHide,
+                hideDiscoverMore,
                 modelAccess
         );
         if (result.remove) return result;
@@ -306,6 +327,7 @@ public final class XLiteTimelineFilter {
             boolean hideWhoToFollow,
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
             TimelineModelAccess modelAccess
     ) {
         if (item == null) return FilterResult.keep(null);
@@ -335,6 +357,7 @@ public final class XLiteTimelineFilter {
                     hideWhoToFollow,
                     ruleSnapshot,
                     aiSourcesToHide,
+                    hideDiscoverMore,
                     modelAccess
             );
         }
@@ -391,9 +414,14 @@ public final class XLiteTimelineFilter {
             boolean hideWhoToFollow,
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
             TimelineModelAccess modelAccess
     ) {
-        if (hideWhoToFollow && isWhoToFollowEntryId(modelAccess.getModuleEntryId(module))) {
+        String entryId = modelAccess.getModuleEntryId(module);
+        if (hideWhoToFollow && isWhoToFollowEntryId(entryId)) {
+            return FilterResult.remove();
+        }
+        if (hideDiscoverMore && isDiscoverMoreEntryId(entryId)) {
             return FilterResult.remove();
         }
 
@@ -422,6 +450,7 @@ public final class XLiteTimelineFilter {
                         hideWhoToFollow,
                         ruleSnapshot,
                         aiSourcesToHide,
+                        hideDiscoverMore,
                         modelAccess
                 );
             } catch (RuntimeException exception) {
@@ -536,6 +565,12 @@ public final class XLiteTimelineFilter {
 
     private static boolean isWhoToFollowEntryId(String entryId) {
         return entryId != null && entryId.startsWith("who-to-follow");
+    }
+
+    private static boolean isDiscoverMoreEntryId(String entryId) {
+        return entryId != null
+                && (DISCOVER_MORE_ENTRY_ID.equals(entryId)
+                || entryId.startsWith(DISCOVER_MORE_ENTRY_ID + "-"));
     }
 
     private static boolean isPromoted(Object item, TimelineModelAccess modelAccess) {

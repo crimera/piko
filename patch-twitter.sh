@@ -61,6 +61,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "X-Lite: Show sensitive media" \
   -e "X-Lite: Dynamic color" \
   -e "X-Lite: Customize default reply sorting" \
+  -e "X-Lite: Hide Discover more" \
   -e "X-Lite: Hide who to follow" \
   -e "X-Lite: Hide AI-generated posts" \
   -e "X-Lite: Customize default media tab" \
