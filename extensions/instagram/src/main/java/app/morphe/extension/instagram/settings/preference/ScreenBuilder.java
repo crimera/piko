@@ -583,6 +583,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.loopStory) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_loop_story"),
+                            str("piko_loop_story_desc"),
+                            Settings.LOOP_STORY
+                    )
+            );
+        }
 
         if (SettingsStatus.customiseStoryTimestamp) {
             addPreference(
