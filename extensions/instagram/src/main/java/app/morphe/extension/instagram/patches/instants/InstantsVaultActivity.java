@@ -78,6 +78,30 @@ public class InstantsVaultActivity extends Activity {
     private final Handler ui = new Handler(Looper.getMainLooper());
     private final Runnable rebuild = this::rebuildContent;
 
+    private final List<Tile> tiles = new ArrayList<>();
+    private ScrollView scroll;
+    private final Runnable sweep = this::sweepVisible;
+    /** Rows whose link came back dead, drained in one pass so a bad batch redraws once. */
+    private final Set<String> doomed = new HashSet<>();
+    private final Runnable drainDoomed = this::forgetDoomed;
+
+    private static final class Tile {
+        final FrameLayout view;
+        final ImageView image;
+        final TextView unavailable;
+        final String[] row;
+        final String thumbUrl;
+        boolean loaded;
+
+        Tile(FrameLayout view, ImageView image, TextView unavailable, String[] row, String thumbUrl) {
+            this.view = view;
+            this.image = image;
+            this.unavailable = unavailable;
+            this.row = row;
+            this.thumbUrl = thumbUrl;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -109,6 +133,14 @@ public class InstantsVaultActivity extends Activity {
             return insets;
         });
         setContentView(root);
+    }
+
+    @Override
+    protected void onDestroy() {
+        ui.removeCallbacksAndMessages(null);
+        releaseTiles();
+        if (thumbs != null) thumbs.shutdown();
+        super.onDestroy();
     }
 
     /** Search field over the sender's username. Filtering rebuilds the body only — a full
@@ -151,19 +183,76 @@ public class InstantsVaultActivity extends Activity {
     }
 
     private void rebuildContent() {
+        releaseTiles();
         content.removeAllViews();
         List<String[]> visible = visibleItems();
 
         if (visible.isEmpty()) {
+            scroll = null;
             content.addView(centeredMessage(items.isEmpty()
                     ? str("piko_instants_vault_empty")
                     : str("piko_instants_no_matches")));
             return;
         }
-        ScrollView scroll = new ScrollView(this);
+        scroll = new ScrollView(this);
         scroll.addView(buildGroupedBody(visible));
         content.addView(scroll, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+
+        scroll.setOnScrollChangeListener((v, x, y, ox, oy) -> scheduleSweep());
+        scroll.getViewTreeObserver().addOnGlobalLayoutListener(this::scheduleSweep);
+        scheduleSweep();
+    }
+
+    private void scheduleSweep() {
+        ui.removeCallbacks(sweep);
+        ui.post(sweep);
+    }
+
+    private void sweepVisible() {
+        if (scroll == null || tiles.isEmpty()) return;
+
+        int top = scroll.getScrollY();
+        int height = scroll.getHeight();
+        if (height == 0) return;
+        int from = top - height;
+        int to = top + height * 2;
+
+        for (Tile tile : tiles) {
+            int tileTop = topWithinScroll(tile.view);
+            boolean wanted = tileTop >= 0 && tileTop + tileSize >= from && tileTop <= to;
+            if (wanted && !tile.loaded) {
+                tile.loaded = true;
+                thumbs.load(tile.thumbUrl, tile.row[0], tile.image, dead -> {
+                    if (dead) forgetLater(tile.row[0]);
+                    else tile.unavailable.setVisibility(View.VISIBLE);
+                });
+            } else if (!wanted && tile.loaded) {
+                tile.loaded = false;
+                tile.image.setImageBitmap(null);
+                tile.image.setTag(null);
+            }
+        }
+    }
+
+    private int topWithinScroll(View view) {
+        int offset = 0;
+        View node = view;
+        while (node != null && node != scroll) {
+            offset += node.getTop();
+            if (!(node.getParent() instanceof View)) return -1;
+            node = (View) node.getParent();
+        }
+        return node == scroll ? offset : -1;
+    }
+
+    private void releaseTiles() {
+        for (Tile tile : tiles) {
+            tile.image.setImageBitmap(null);
+            tile.image.setTag(null);
+        }
+        tiles.clear();
+        ui.removeCallbacks(sweep);
     }
 
     /** Purging expired rows leaves their thumbnails behind, so drop any that no longer have one. */
@@ -190,8 +279,28 @@ public class InstantsVaultActivity extends Activity {
         return new File(new File(dir, "instants_thumbs"), mediaId + ".jpg");
     }
 
-    /** Drops a row that is gone for good, coalescing the redraw when several tiles die at once. */
+    /** Drops a row that is gone for good and redraws. */
     private void forget(String mediaId) {
+        drop(mediaId);
+        ui.removeCallbacks(rebuild);
+        ui.post(rebuild);
+    }
+
+    private void forgetLater(String mediaId) {
+        doomed.add(mediaId);
+        ui.removeCallbacks(drainDoomed);
+        ui.postDelayed(drainDoomed, 400);
+    }
+
+    private void forgetDoomed() {
+        if (doomed.isEmpty()) return;
+        for (String mediaId : doomed) drop(mediaId);
+        doomed.clear();
+        ui.removeCallbacks(rebuild);
+        ui.post(rebuild);
+    }
+
+    private void drop(String mediaId) {
         PikoInstantsDb.getInstance(this).delete(mediaId);
         File cached = cacheFile(mediaId);
         if (cached != null) cached.delete();
@@ -201,8 +310,6 @@ public class InstantsVaultActivity extends Activity {
                 break;
             }
         }
-        ui.removeCallbacks(rebuild);
-        ui.post(rebuild);
     }
 
     private TextView centeredMessage(CharSequence text) {
@@ -292,12 +399,7 @@ public class InstantsVaultActivity extends Activity {
         // Normally the image url, which is present even for video instants — but fall back to the
         // playback url so a video that saved without one isn't mistaken for a dead row.
         String thumbUrl = (row[2] != null && !row[2].isEmpty()) ? row[2] : urlOf(row);
-        thumbs.load(thumbUrl, row[0], image, dead -> {
-            // A dead link is gone for good, so drop the row. Anything else (no network, a
-            // timeout, a 5xx) may well work later — keep it and just say so on the tile.
-            if (dead) forget(row[0]);
-            else unavailable.setVisibility(View.VISIBLE);
-        });
+        tiles.add(new Tile(tile, image, unavailable, row, thumbUrl));
 
         if ("1".equals(row[4])) {
             TextView badge = new TextView(this);
@@ -460,6 +562,11 @@ public class InstantsVaultActivity extends Activity {
                     }
                 };
 
+        void shutdown() {
+            pool.shutdownNow();
+            cache.evictAll();
+        }
+
         void load(String url, String mediaId, ImageView view, OnLoadFailed onFailed) {
             view.setImageBitmap(null);
             view.setTag(url);
@@ -499,7 +606,14 @@ public class InstantsVaultActivity extends Activity {
             try {
                 File f = cacheFile(mediaId);
                 if (f == null || !f.isFile()) return null;
-                return BitmapFactory.decodeFile(f.getAbsolutePath());
+                String path = f.getAbsolutePath();
+
+                BitmapFactory.Options o = new BitmapFactory.Options();
+                o.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(path, o);
+                o.inSampleSize = sampleSize(o.outWidth, o.outHeight, tileSize);
+                o.inJustDecodeBounds = false;
+                return BitmapFactory.decodeFile(path, o);
             } catch (Throwable t) {
                 return null;
             }
@@ -560,7 +674,7 @@ public class InstantsVaultActivity extends Activity {
         private int sampleSize(int w, int h, int reqPx) {
             int sample = 1;
             if (reqPx <= 0) return 1;
-            while (w / sample > reqPx * 2 || h / sample > reqPx * 2) sample *= 2;
+            while (w / sample > reqPx || h / sample > reqPx) sample *= 2;
             return sample;
         }
     }
