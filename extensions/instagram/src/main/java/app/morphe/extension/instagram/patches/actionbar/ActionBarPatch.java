@@ -139,7 +139,7 @@ public class ActionBarPatch {
             }
 
             if(SettingsStatus.saveDeletedMessages) {
-                Context context = viewGroup.getContext();
+                android.content.Context context = viewGroup.getContext();
                 UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_HISTORY_ICON,
                         () -> SavedMessagesHook.openDeletedMessages(context));
             }
