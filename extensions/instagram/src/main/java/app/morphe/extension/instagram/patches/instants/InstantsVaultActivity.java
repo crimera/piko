@@ -53,6 +53,7 @@ import java.util.concurrent.Executors;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.constants.UI;
+import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.instagram.db.PikoInstantsDb;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.shared.Logger;
@@ -120,6 +121,7 @@ public class InstantsVaultActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(themed("igds_color_primary_background", 0xFF000000));
+        applySystemBarStyle();
         root.addView(buildToolbar());
         if (!items.isEmpty()) root.addView(buildSearchField());
 
@@ -517,18 +519,33 @@ public class InstantsVaultActivity extends Activity {
         // standalone piko activity doesn't have (same as DeletedMessagesActivity).
         // Title carries the date, not setMessage — a message would replace the option list entirely.
         CharSequence saved = savedOn(row);
-        new android.app.AlertDialog.Builder(this)
+        new android.app.AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(this))
                 .setTitle(saved == null ? str("piko_download_options") : saved)
                 .setItems(options, onPick)
                 .show();
     }
 
     private void confirm(CharSequence message, String positiveText, Runnable onConfirm) {
-        new android.app.AlertDialog.Builder(this)
+        new android.app.AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(this))
                 .setMessage(message)
                 .setPositiveButton(positiveText, (d, w) -> onConfirm.run())
                 .setNegativeButton(str("piko_cancel"), null)
                 .show();
+    }
+    private void applySystemBarStyle() {
+        int background = themed("igds_color_primary_background", 0xFF000000);
+        getWindow().setStatusBarColor(background);
+        getWindow().setNavigationBarColor(background);
+
+        int flags = getWindow().getDecorView().getSystemUiVisibility();
+        if (UI.isDarkMode()) {
+            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        } else {
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        }
+        getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
     private int dp(int v) {
