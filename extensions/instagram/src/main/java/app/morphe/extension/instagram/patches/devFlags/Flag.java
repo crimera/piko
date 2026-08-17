@@ -15,14 +15,20 @@ public class Flag {
 
     private String name;
     private String desc;
+    private String type;
     private StringSetting code;
 
     public Flag(JSONObject jsonObject) {
         try {
             this.name = jsonObject.optString("name");
             this.desc = jsonObject.optString("desc");
+            this.type = jsonObject.optString("type", "bool");
             String codeKey = jsonObject.optString("code");
-            this.code = new StringSetting(codeKey,FlagState.DEFAULT.toString());
+            // Long-typed flags default to an empty override (rendered as a blank
+            // numeric field) instead of the "default" sentinel bool flags use,
+            // since showing the literal word "default" in a number box reads wrong.
+            String defaultValue = isLongType() ? "" : FlagState.DEFAULT.toString();
+            this.code = new StringSetting(codeKey, defaultValue);
         } catch (Exception e) {
         }
     }
@@ -33,6 +39,10 @@ public class Flag {
 
     public String getDesc() {
         return desc;
+    }
+
+    public boolean isLongType() {
+        return "long".equals(type);
     }
 
     public StringSetting getCode() {

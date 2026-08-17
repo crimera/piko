@@ -47,10 +47,35 @@ public class FlagsSharedPref extends BaseSharedPref {
             while (keys.hasNext()) {
                 String key = keys.next();
                 String flagState = (String) flags.get(key);
-                if (flagState.equals(FlagState.DEFAULT.toString())) continue;
+                // Long-typed flags share this same pref file, so their stored
+                // value (a number, or empty) won't match either bool state --
+                // only treat it as a bool override if it actually looks like one.
+                if (!flagState.equals(FlagState.ENABLE.toString()) && !flagState.equals(FlagState.DISABLE.toString())) continue;
                 Boolean value = flagState.equals(FlagState.ENABLE.toString()) ? true:false;
                 PikoUtils.logger(key+" : "+Boolean.valueOf(value));
                 outFlags.put(key, value);
+            }
+        } catch (Exception e) {
+
+        }
+        return outFlags;
+    }
+
+    public static Map<String, Long> getAllLong(){
+        Map<String, Long> outFlags = new HashMap();
+        try {
+            JSONObject flags = INSTANCE.all();
+            Iterator<String> keys = flags.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                String flagState = (String) flags.get(key);
+                try {
+                    Long value = Long.parseLong(flagState);
+                    PikoUtils.logger(key+" : "+value);
+                    outFlags.put(key, value);
+                } catch (NumberFormatException ignored) {
+                    // Not a long override (empty, or a bool flag's own state) -- skip.
+                }
             }
         } catch (Exception e) {
 
