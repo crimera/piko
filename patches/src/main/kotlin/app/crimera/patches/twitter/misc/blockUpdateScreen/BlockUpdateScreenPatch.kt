@@ -64,7 +64,6 @@ private fun getShowDialogFingerprint(dismissButtonField: FieldReference) = objec
     )
 ) {}
 
-
 @Suppress("unused")
 val blockUpdateScreenPatch =
     bytecodePatch(
