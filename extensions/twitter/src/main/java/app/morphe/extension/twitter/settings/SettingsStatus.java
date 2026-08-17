@@ -393,6 +393,11 @@ public class SettingsStatus {
         blockRedirectingToXLite = true;
     }
 
+    public static boolean blockUpdateScreen = false;
+    public static void blockUpdateScreen() {
+        blockUpdateScreen = true;
+    }
+
     public static boolean enableNativeShareMenu = false;
     public static void enableNativeShareMenu() {
         enableNativeShareMenu = true;

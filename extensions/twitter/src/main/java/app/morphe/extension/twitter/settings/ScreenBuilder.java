@@ -568,6 +568,15 @@ public class ScreenBuilder {
         LegacyTwitterPreferenceCategory category = null;
         if(buildCategory)
             category = preferenceCategory(str("piko_title_misc"));
+        if (SettingsStatus.blockUpdateScreen) {
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_block_update_screen"),
+                            str("piko_pref_block_update_screen_desc"),
+                            Settings.MISC_BLOCK_UPDATE_SCREEN
+                    )
+            );
+        }
         if (SettingsStatus.enableFontMod) {
             addPreference(category,
                     helper.switchPreference(
