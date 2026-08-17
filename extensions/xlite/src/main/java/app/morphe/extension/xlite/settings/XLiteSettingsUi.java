@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import app.morphe.extension.xlite.misc.UpdateFont;
 import app.morphe.extension.xlite.ui.Theme;
 
 /** Reusable themed views for extension-owned X-Lite settings screens. */
@@ -40,6 +41,7 @@ public final class XLiteSettingsUi {
         TextView title = new TextView(context);
         title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
         title.setTextColor(Theme.primaryText(context));
+        title.setTypeface(UpdateFont.customTypefaceOr(title.getTypeface()));
         title.setSingleLine(false);
         return title;
     }
@@ -48,6 +50,7 @@ public final class XLiteSettingsUi {
         TextView summary = new TextView(context);
         summary.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         summary.setTextColor(Theme.secondaryText(context));
+        summary.setTypeface(UpdateFont.customTypefaceOr(summary.getTypeface()));
         summary.setLineSpacing(Theme.dpToPx(context, 1f), 1f);
         return summary;
     }
@@ -69,6 +72,7 @@ public final class XLiteSettingsUi {
         );
         input.setMinHeight(Theme.dpToPx(context, 56f));
         input.setInputType(inputType);
+        input.setTypeface(UpdateFont.customTypefaceOr(input.getTypeface()));
         return input;
     }
 

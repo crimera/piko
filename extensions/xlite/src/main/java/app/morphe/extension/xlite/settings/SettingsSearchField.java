@@ -21,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import app.morphe.extension.shared.StringRef;
+import app.morphe.extension.xlite.misc.UpdateFont;
 import app.morphe.extension.xlite.ui.Theme;
 
 /** The rounded search field used by the X-Lite settings root screen. */
@@ -71,6 +72,7 @@ final class SettingsSearchField extends LinearLayout {
         input.setTextColor(Theme.primaryText(context));
         input.setHintTextColor(Theme.secondaryText(context));
         input.setHint(StringRef.str("piko_xlite_settings_search_hint"));
+        input.setTypeface(UpdateFont.customTypefaceOr(input.getTypeface()));
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         input.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         input.setBackgroundColor(Color.TRANSPARENT);
@@ -148,7 +150,10 @@ final class SettingsSearchField extends LinearLayout {
 
         noResults = XLiteSettingsUi.titleText(context);
         noResults.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        noResults.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        noResults.setTypeface(
+                UpdateFont.customTypefaceOr(Typeface.DEFAULT),
+                Typeface.BOLD
+        );
         noResults.setTextColor(Theme.primaryText(context));
         noResults.setPadding(
                 dp(24),
