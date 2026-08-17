@@ -33,6 +33,7 @@ public final class XLiteSettingsActivity extends Activity {
 
     private LinearLayout toolbar;
     private TextView toolbarTitle;
+    private TextView patchVersionFooter;
     private Object backCallback;
     private boolean backCallbackRegistered;
 
@@ -178,6 +179,33 @@ public final class XLiteSettingsActivity extends Activity {
                         1f
                 )
         );
+
+        patchVersionFooter = new TextView(this);
+        patchVersionFooter.setText(StringRef.str(
+                "piko_xlite_patch_version",
+                Utils.getPatchesReleaseVersion()
+        ));
+        patchVersionFooter.setTextColor(Theme.secondaryText(this));
+        patchVersionFooter.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
+        patchVersionFooter.setGravity(Gravity.CENTER);
+        patchVersionFooter.setSingleLine(true);
+        patchVersionFooter.setTypeface(app.morphe.extension.xlite.misc.UpdateFont.customTypefaceOr(
+                patchVersionFooter.getTypeface()
+        ));
+        patchVersionFooter.setPadding(
+                0,
+                Theme.dpToPx(this, 12f),
+                0,
+                Theme.dpToPx(this, 24f)
+        );
+        root.addView(
+                patchVersionFooter,
+                new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+        );
+
         setContentView(root);
         return SETTINGS_CONTAINER_ID;
     }
@@ -237,6 +265,11 @@ public final class XLiteSettingsActivity extends Activity {
         if (toolbarTitle == null) return;
         toolbarTitle.setText(title);
         applyCustomFontToToolbar();
+    }
+
+    public void setPatchVersionFooterVisible(boolean visible) {
+        if (patchVersionFooter == null) return;
+        patchVersionFooter.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     private void applyCustomFontToToolbar() {

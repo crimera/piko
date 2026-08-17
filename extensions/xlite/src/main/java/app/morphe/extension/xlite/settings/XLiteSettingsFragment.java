@@ -117,6 +117,7 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
                         ? app.morphe.extension.shared.StringRef.str("piko_xlite_settings_title")
                         : group.title.toString()
         );
+        settingsActivity.setPatchVersionFooterVisible(group == null);
     }
 
     private void openGroup(SettingsNode.Group group) {
