@@ -7,7 +7,6 @@
 package app.morphe.extension.twitter.settings;
 
 import app.morphe.extension.shared.ResourceUtils;
-import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.crimera.settings.StringSetting;
 
@@ -24,6 +23,7 @@ public class Settings {
     public static final BooleanSetting EXTERNAL_DOWNLOADER = new BooleanSetting("external_downloader", true);
     public static final StringSetting EXTERNAL_DOWNLOADER_PACKAGE_NAME = new StringSetting("external_downloader_package_name", "");
 
+    public static final BooleanSetting MISC_BLOCK_UPDATE_SCREEN = new BooleanSetting("misc_block_update_screen", true);
     public static final BooleanSetting MISC_FONT = new BooleanSetting("misc_font", false);
     public static final BooleanSetting MISC_HIDE_FAB = new BooleanSetting("misc_hide_fab", false);
     public static final BooleanSetting MISC_HIDE_FAB_BTN = new BooleanSetting("misc_hide_fab_btns", false);
