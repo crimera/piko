@@ -1,3 +1,11 @@
+## [3.9.0-dev.9](https://github.com/crimera/piko/compare/v3.9.0-dev.8...v3.9.0-dev.9) (2026-08-17)
+
+### 🐛 Bug Fixes
+
+* **Instagram:** don't record an unsend we never captured ([#1728](https://github.com/crimera/piko/issues/1728)) ([e38bc52](https://github.com/crimera/piko/commit/e38bc52c246992cb5ada60c826b27a2d89163e52))
+* **Twitter:** `Block redirecting to X Lite` patch failed on X 12.6.0-release.0 ([01d4452](https://github.com/crimera/piko/commit/01d445211b68f43cd4dd56f962854f3df20d1f5e))
+* **Twitter:** Add `Block update screen` patch ([9f257f7](https://github.com/crimera/piko/commit/9f257f71f927d03b09c1dd1212ccd74d1e5d8413))
+
 ## [3.9.0-dev.8](https://github.com/crimera/piko/compare/v3.9.0-dev.7...v3.9.0-dev.8) (2026-08-16)
 
 ### 🐛 Bug Fixes

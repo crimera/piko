@@ -72,9 +72,9 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.9.0-dev.8](https://github.com/crimera/piko/releases/tag/v3.9.0-dev.8)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;132 patches total
+> **[v3.9.0-dev.9](https://github.com/crimera/piko/releases/tag/v3.9.0-dev.9)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;133 patches total
 <details>
-<summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;73 patches</summary>
+<summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;74 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -86,6 +86,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 |----------|----------------|-----------|
 | [Add ability to copy media link](#add-ability-to-copy-media-link) |  |  |
 | [Block redirecting to X Lite](#block-redirecting-to-x-lite) | Blocks redirecting to the new X Android UI on launch |  |
+| [Block update screen](#block-update-screen) | Blocks the 'This app is out of date' update screen from being shown on launch |  |
 | [Bring back twitter](#bring-back-twitter) | Bring back old twitter logo and name |  |
 | [Change app icon](#change-app-icon) |  |  |
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
