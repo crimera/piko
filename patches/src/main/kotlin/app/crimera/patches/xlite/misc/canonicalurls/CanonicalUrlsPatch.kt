@@ -21,12 +21,12 @@ import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getReference
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.Method
-import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
-import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
@@ -83,7 +83,8 @@ private data class CanonicalUrlMatches(
  *
  * ALPHA PATH: resolves model fields from stable data-class labels and patches the legacy
  * navigation callbacks. TODO: Remove this path when alpha compatibility is deprecated.
- * BETA PATH: already uses the expanded URL navigation behavior and returns without mutation.
+ * BETA PATH: patches the shared text/TimelineUrl helpers, the URT post callback, and legacy
+ * card navigation; each still has a short-URL fallback.
  */
 @Suppress("unused")
 val xLiteCanonicalUrlsPatch =
@@ -98,8 +99,17 @@ val xLiteCanonicalUrlsPatch =
         execute {
             val postModels = resolvedXLitePostModels()
             val contextualPostClass = classDefByOrNull(postModels.contextualPostDescriptor)
-            // BETA PATH: native expandedUrl navigation already handles this behavior.
-            if (contextualPostClass?.methods?.any { method -> method.name == "getCanonicalPost" } == true) {
+            val isBetaPath = contextualPostClass?.methods?.any { method ->
+                method.name == "getCanonicalPost" &&
+                    method.parameterTypes.isEmpty() &&
+                    method.returnType == postModels.canonicalPostDescriptor
+            } == true
+            if (isBetaPath) {
+                val urlEntityType = resolveUrlEntityType()
+                patchBetaTextNavigation(urlEntityType)
+                patchBetaPostLinkNavigation(urlEntityType, postModels.contextualPostDescriptor)
+                val cardUrlActionType = resolveCardUrlActionType()
+                patchBetaCardNavigation(cardUrlActionType, postModels.contextualPostDescriptor)
                 return@execute
             }
             // ALPHA PATH: patch the legacy canonical-URL callbacks below.
@@ -116,9 +126,7 @@ val xLiteCanonicalUrlsPatch =
             )
             preferExpandedUrlInUrlPicker(matches.urlPicker)
 
-            val cardUrlActionType =
-                CardUrlActionModelFingerprint.requireSingleMatch("card URL action model")
-                    .originalClassDef.type
+            val cardUrlActionType = resolveCardUrlActionType()
             patchCardNavigation(cardUrlActionType, postModels.contextualPostDescriptor)
         }
     }
@@ -272,12 +280,8 @@ private fun Method.findNamedParameterRegister(label: String): Int? {
     return null
 }
 
-private fun com.android.tools.smali.dexlib2.iface.instruction.Instruction.argumentRegistersOrNull(): List<Int>? =
-    when (this) {
-        is FiveRegisterInstruction -> listOf(registerC, registerD)
-        is RegisterRangeInstruction -> listOf(startRegister, startRegister + 1)
-        else -> null
-    }
+private fun Instruction.argumentRegistersOrNull(): List<Int>? =
+    registersUsed.takeIf { registers -> registers.size == 2 }
 
 private fun uriParseCall() =
     methodCall(
@@ -337,6 +341,240 @@ private fun preferExpandedUrlInUrlPicker(match: Match) {
 }
 
 context(context: BytecodePatchContext)
+private fun resolveUrlEntityType(): String =
+    UrlEntityModelFingerprint.requireSingleMatch("URL entity model")
+        .originalClassDef.type
+
+context(context: BytecodePatchContext)
+private fun resolveCardUrlActionType(): String =
+    CardUrlActionModelFingerprint.requireSingleMatch("card URL action model")
+        .originalClassDef.type
+
+context(context: BytecodePatchContext)
+private fun patchBetaTextNavigation(urlEntityType: String) {
+    val mentionType = MentionEntityModelFingerprint.requireSingleMatch("mention entity model")
+        .originalClassDef.type
+    val textEntityNavigationMatch =
+        Fingerprint(
+            definingClass = "Lcom/x/navigation/",
+            parameters = listOf("L", "L"),
+            returnType = "V",
+            filters =
+                listOf(
+                    instanceOf(mentionType),
+                    instanceOf(urlEntityType),
+                    urlEntityGetter("getExpandedUrl", urlEntityType),
+                    uriParseCall(),
+                    uriAuthorityCall(),
+                    urlEntityGetter("getUrl", urlEntityType),
+                ),
+        ).requireSingleMatch("beta text-entity navigation")
+    val urlPickerMatch =
+        Fingerprint(
+            definingClass = textEntityNavigationMatch.originalClassDef.type,
+            parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
+            returnType = STRING_DESCRIPTOR,
+            filters = listOf(uriParseCall(), uriAuthorityCall()),
+        ).requireSingleMatch("beta URL picker")
+
+    replaceUrlEntityGetter(
+        textEntityNavigationMatch,
+        filterIndex = 5,
+        urlEntityType = urlEntityType,
+        label = "beta text-entity URL getter",
+    )
+    preferExpandedUrlInUrlPicker(urlPickerMatch)
+}
+
+context(context: BytecodePatchContext)
+private fun patchBetaPostLinkNavigation(
+    urlEntityType: String,
+    contextualPostType: String,
+) {
+    val match =
+        Fingerprint(
+            definingClass = "Lcom/x/urt/items/post/",
+            parameters = listOf("L", contextualPostType, "L", "L", "L", "L", "L"),
+            returnType = "V",
+            filters =
+                listOf(
+                    instanceOf(urlEntityType),
+                    urlEntityGetter("getExpandedUrl", urlEntityType),
+                    uriParseCall(),
+                    uriAuthorityCall(),
+                    urlEntityGetter("getUrl", urlEntityType),
+                    methodCall(
+                        opcode = Opcode.INVOKE_STATIC,
+                        definingClass = "Lcom/x/navigation/",
+                        parameters = listOf(STRING_DESCRIPTOR, "L", "Z"),
+                        returnType = STRING_DESCRIPTOR,
+                    ),
+                    methodCall(
+                        opcode = Opcode.INVOKE_VIRTUAL,
+                        name = "getId",
+                        parameters = emptyList(),
+                        returnType = "L",
+                    ),
+                    methodCall(
+                        opcode = Opcode.INVOKE_VIRTUAL,
+                        name = "getValue",
+                        parameters = emptyList(),
+                        returnType = "J",
+                    ),
+                ),
+        ).requireSingleMatch("beta post link click handler")
+
+    replaceUrlEntityGetter(
+        match,
+        filterIndex = 4,
+        urlEntityType = urlEntityType,
+        label = "beta post link URL getter",
+    )
+}
+
+private fun urlEntityGetter(name: String, urlEntityType: String) =
+    methodCall(
+        opcode = Opcode.INVOKE_VIRTUAL,
+        definingClass = urlEntityType,
+        name = name,
+        parameters = emptyList(),
+        returnType = STRING_DESCRIPTOR,
+    )
+
+private fun replaceUrlEntityGetter(
+    match: Match,
+    filterIndex: Int,
+    urlEntityType: String,
+    label: String,
+) {
+    val getterIndex = match.instructionMatches[filterIndex].index
+    val getter = match.method.instructions[getterIndex]
+    val getterReference = getter.getReference<MethodReference>()
+        ?: throw PatchException("$label reference is missing")
+    if (getterReference.name != "getUrl") {
+        throw PatchException("Unexpected $label: $getterReference")
+    }
+
+    match.method.replaceInstruction(
+        getterIndex,
+        singleRegisterInvoke(
+            getter.singleRegister(label),
+            "$urlEntityType->getExpandedUrl()$STRING_DESCRIPTOR",
+        ),
+    )
+}
+
+private fun Instruction.singleRegister(label: String): Int =
+    registersUsed.singleOrNull()
+        ?: throw PatchException("$label does not have exactly one receiver register")
+
+private fun singleRegisterInvoke(receiverRegister: Int, methodReference: String): String {
+    if (receiverRegister !in 0..0xffff) {
+        throw PatchException("Invoke receiver register is out of range: v$receiverRegister")
+    }
+    val opcode = if (receiverRegister <= 15) "invoke-virtual" else "invoke-virtual/range"
+    val registers =
+        if (receiverRegister <= 15) "{v$receiverRegister}"
+        else "{v$receiverRegister .. v$receiverRegister}"
+    return "$opcode $registers, $methodReference"
+}
+
+context(context: BytecodePatchContext)
+private fun patchBetaCardNavigation(cardUrlActionType: String, contextualPostType: String) {
+    val filters =
+        listOf(
+            instanceOf(cardUrlActionType),
+            fieldAccess(
+                opcode = Opcode.IGET_OBJECT,
+                type = contextualPostType,
+            ),
+            fieldAccess(
+                opcode = Opcode.IGET_OBJECT,
+                definingClass = cardUrlActionType,
+                type = STRING_DESCRIPTOR,
+            ),
+            methodCall(
+                opcode = Opcode.INVOKE_STATIC,
+                definingClass = "Lcom/x/navigation/",
+                parameters = listOf(STRING_DESCRIPTOR, "L", "Z"),
+                returnType = STRING_DESCRIPTOR,
+            ),
+            methodCall(
+                opcode = Opcode.INVOKE_VIRTUAL,
+                name = "getId",
+                parameters = emptyList(),
+                returnType = "L",
+            ),
+            methodCall(
+                opcode = Opcode.INVOKE_VIRTUAL,
+                name = "getValue",
+                parameters = emptyList(),
+                returnType = "J",
+            ),
+            methodCall(
+                definingClass = "Lcom/x/urt/items/post/",
+                parameters = listOf(STRING_DESCRIPTOR, "J", "L", STRING_DESCRIPTOR),
+                returnType = "L",
+            ),
+        )
+    val match =
+        Fingerprint(
+            definingClass = "Lcom/x/urt/items/post/",
+            parameters = listOf("Ljava/lang/Object;"),
+            returnType = "Ljava/lang/Object;",
+            filters = filters,
+        ).requireSingleMatch("beta card navigation callback")
+
+    val postFieldReadIndex = match.instructionMatches[1].index
+    val postFieldRead = match.method.objectFieldRead(
+        postFieldReadIndex,
+        "Beta card callback contextual-post",
+    )
+    val urlFieldReadIndex = match.instructionMatches[2].index
+    val urlFieldRead = match.method.objectFieldRead(urlFieldReadIndex, "Beta card callback URL")
+    val urlField = urlFieldRead.getReference<FieldReference>()
+        ?: throw PatchException("Beta card callback card URL field reference is missing")
+    if (urlField.type != STRING_DESCRIPTOR || urlField.definingClass != cardUrlActionType) {
+        throw PatchException("Unexpected beta card URL field: $urlField")
+    }
+
+    patchCardUrl(
+        match,
+        urlFieldReadIndex + 1,
+        postFieldRead.registerA,
+        urlFieldRead.registerA,
+    )
+}
+
+private fun Method.objectFieldRead(index: Int, label: String): TwoRegisterInstruction {
+    val instruction = instructions.toList().getOrNull(index) as? TwoRegisterInstruction
+    if (instruction?.opcode == Opcode.IGET_OBJECT) return instruction
+    throw PatchException("$label is not an iget-object")
+}
+
+private fun patchCardUrl(
+    match: Match,
+    insertionIndex: Int,
+    postRegister: Int,
+    urlRegister: Int,
+) {
+    if (postRegister !in 0..15 || urlRegister !in 0..15) {
+        throw PatchException(
+            "Card canonical URL resolver requires four-bit registers: " +
+                "post=v$postRegister, url=v$urlRegister",
+        )
+    }
+
+    match.method.addInstructions(
+        insertionIndex,
+        """
+        invoke-static {v$postRegister, v$urlRegister}, $CANONICAL_URL_RESOLVE_METHOD
+        move-result-object v$urlRegister
+        """.trimIndent(),
+    )
+}
+
+context(context: BytecodePatchContext)
 private fun patchCardNavigation(cardUrlActionType: String, contextualPostType: String) {
     val match =
         Fingerprint(
@@ -383,21 +621,7 @@ private fun patchCardNavigation(cardUrlActionType: String, contextualPostType: S
     }
 
     val postRegister = resolveContextualPostRegister(match.method, urlGetterIndex, contextualPostType)
-    val urlRegister = urlResult.registerA
-    if (postRegister !in 0..15 || urlRegister !in 0..15) {
-        throw PatchException(
-            "Card canonical URL resolver requires four-bit registers: " +
-                "post=v$postRegister, url=v$urlRegister",
-        )
-    }
-
-    match.method.addInstructions(
-        urlResultIndex + 1,
-        """
-        invoke-static {v$postRegister, v$urlRegister}, $CANONICAL_URL_RESOLVE_METHOD
-        move-result-object v$urlRegister
-        """.trimIndent(),
-    )
+    patchCardUrl(match, urlResultIndex + 1, postRegister, urlResult.registerA)
 }
 
 private fun resolveContextualPostRegister(
