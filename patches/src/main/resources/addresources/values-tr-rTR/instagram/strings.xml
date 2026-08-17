@@ -49,6 +49,7 @@
     <string name="piko_limit_following_feed">Akışı takip edilen profillerle sınırla</string>
     <string name="piko_limit_following_feed_desc">Ana sayfa akışını yalnızca takip ettiğiniz profillerin içerikleriyle sınırlar</string>
     <string name="piko_disable_reels_scrolling">Reels kaydırmayı devre dışı bırak</string>
+    <string name="piko_disable_reels_scrolling_desc">Instagram Reels\'deki sonsuz kaydırma özelliğini devre dışı bırakarak sonraki Reel\'a kaydırmayı engeller. Not: Temiz bir kurulumda \'İpucu\' animasyonu görünebilir ancak birkaç saniye sonra kendiliğinden duracaktır.</string>
     <string name="piko_disable_swipe_to_create">Kaydırarak içerik oluşturmayı kapat</string>
     <string name="piko_disable_swipe_to_create_desc">Ana sekmede sağa kaydırarak oluşturma ekranının açılmasını engeller.</string>
     <string name="piko_hide_stories_tray">Hikayeler tepsisini gizle</string>
@@ -67,6 +68,7 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Analizleri devre dışı bırak</string>
     <string name="piko_delete_analytics_cache">Analiz önbelleğini sil</string>
+    <string name="piko_disable_analytics_desc">Instagram/Facebook sunucularına gönderilen analitikleri engeller.</string>
     <string name="piko_disable_discover_people">Kişileri keşfetmeyi kapat</string>
     <string name="piko_disable_discover_people_desc">Kullanıcı profilindeki Kişileri keşfet bölümünü devre dışı bırak</string>
     <string name="piko_follow_back_indicator">Arkadaşlık durumu göstergesini etkinleştir</string>
@@ -169,9 +171,6 @@
     <string name="piko_category_about">Hakkında</string>
     <string name="piko_export_pref">Piko tercihlerini dışa aktar</string>
     <string name="piko_import_pref">Piko tercihlerini içe aktar</string>
-    <string name="piko_reset_pref">Piko tercihlerini sıfırla</string>
-    <string name="piko_reset_pref_success">Piko tercihleri silindi</string>
-    <string name="piko_reset_pref_failed">Piko tercihleri silinemedi</string>
     <string name="piko_app_version">Uygulama sürümü: %s</string>
     <string name="piko_patch_version">Yama sürümü: %s</string>
     <string name="piko_patch_info_title">Yama bilgisi</string>
@@ -206,6 +205,8 @@
     <string name="piko_array_detailed_timestamp">Detaylı zaman damgası (Hafta günü/Ay/Tarih/Saat/Dakika/Saniye)</string>
     <string name="piko_array_post_time">Paylaşım zamanı (Saat/Dakika/Saniye)</string>
     <string name="piko_array_time_left">Kalan süre (Kalan Saat/Dakika/Saniye)</string>
+    <string name="piko_array_recmd_flag_state_enable">Etkinleştir</string>
+    <string name="piko_array_recmd_flag_state_disable">Devre dışı bırak</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Piko\'ya hoşgeldiniz</string>
     <string name="piko_welcome_message">Piko deneyiminizi iyileştirmek için lütfen Piko ayarlarına gidin ve tercihlerinizi düzenleyin</string>
@@ -290,4 +291,5 @@
     <string name="piko_filter_story_minimum_item_count_desc">X öğeden az hikayeler gizlenecek (varsayılan 1)</string>
     <string name="piko_filter_story_maximum_item_count">Maksimum hikaye öğesi sayısı</string>
     <string name="piko_filter_story_maximum_item_count_desc">x\'ten fazla öğe içeren hikayeler gizlenecektir (varsayılan 9999).</string>
+    <!-- Save & view deleted (unsent) direct messages -->
 </resources>

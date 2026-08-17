@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.9.0-dev.7",
+  "version": "3.9.0-dev.9",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -19,7 +19,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -37,6 +37,7 @@
       "dependencies": [
         "BytecodePatch",
         "ResourcePatch",
+        "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
@@ -118,7 +119,36 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Block update screen",
+      "description": "Blocks the 'This app is out of date' update screen from being shown on launch",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "Twitter",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -146,7 +176,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -175,7 +205,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -231,7 +261,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -291,7 +321,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -368,7 +398,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -432,7 +462,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -461,7 +491,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -490,7 +520,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -522,8 +552,38 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Custom sharing domain",
+      "description": "Allows for using custom domains when sharing posts, reels and stories.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -551,7 +611,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -579,7 +639,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -668,7 +728,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -697,7 +757,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -725,7 +785,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -753,7 +813,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -781,7 +841,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -809,7 +869,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -837,7 +897,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -865,7 +925,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -893,7 +953,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -921,7 +981,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -949,7 +1009,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1067,7 +1127,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1096,7 +1156,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1267,7 +1327,7 @@
     },
     {
       "name": "Disable onboarding permission prompts",
-      "description": "Prevents contacts and location permission onboarding prompts from appearing on launch.",
+      "description": "Prevents contacts and location permission onboarding prompts from appearing.",
       "default": true,
       "dependencies": [
         "BytecodePatch",
@@ -1538,7 +1598,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1595,7 +1655,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1623,7 +1683,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1651,7 +1711,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1680,7 +1740,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1709,7 +1769,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1735,7 +1795,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1829,7 +1889,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1889,7 +1949,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1943,7 +2003,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1972,7 +2032,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2000,7 +2060,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2029,7 +2089,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2057,7 +2117,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2085,7 +2145,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2113,7 +2173,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2142,7 +2202,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2170,7 +2230,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2198,7 +2258,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2256,7 +2316,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2285,7 +2345,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2374,7 +2434,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2402,7 +2462,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2431,7 +2491,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2460,7 +2520,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2581,7 +2641,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2611,7 +2671,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2670,7 +2730,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2728,8 +2788,38 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Loop story",
+      "description": "Replay the current story when it ends",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2822,7 +2912,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2921,7 +3011,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2954,7 +3044,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2986,7 +3076,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3014,7 +3104,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3072,7 +3162,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3133,7 +3223,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3221,7 +3311,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3249,7 +3339,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3278,7 +3368,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3307,7 +3397,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3324,6 +3414,39 @@
       "default": true,
       "dependencies": [
         "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Save deleted messages",
+      "description": "Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "ResourcePatch"
       ],
       "compatiblePackages": [
         {
@@ -3402,7 +3525,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3434,7 +3557,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3462,7 +3585,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3490,7 +3613,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3518,7 +3641,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3534,7 +3657,8 @@
       "description": null,
       "default": true,
       "dependencies": [
-        "BytecodePatch"
+        "BytecodePatch",
+        "ResourcePatch"
       ],
       "compatiblePackages": [
         {
@@ -3546,7 +3670,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3607,7 +3731,7 @@
           "signatures": null,
           "targets": [
             {
-              "version": "12.11.0-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,

@@ -49,6 +49,7 @@
     <string name="piko_limit_following_feed">Ограничить ленту подписками</string>
     <string name="piko_limit_following_feed_desc">Показывать в главной ленте только содержимое от профилей, на которые вы подписаны.</string>
     <string name="piko_disable_reels_scrolling">Отключить пролистывание Reels</string>
+    <string name="piko_disable_reels_scrolling_desc">Отключает бесконечную прокрутку в Instagram Reels, предотвращая свайп к следующему Reel. Примечание: при чистой установке может появляться анимация «Подсказка», но она прекратится сама через несколько секунд.</string>
     <string name="piko_disable_swipe_to_create">Отключить создание свайпом</string>
     <string name="piko_disable_swipe_to_create_desc">Блокирует открытие экрана создания при свайпе вправо на главной вкладке</string>
     <string name="piko_hide_stories_tray">Скрыть панель историй</string>
@@ -67,6 +68,7 @@
     <string name="piko_amoled_title">Amoled</string>
     <string name="piko_disable_analytics">Отключить аналитику</string>
     <string name="piko_delete_analytics_cache">Очистить кэш аналитики</string>
+    <string name="piko_disable_analytics_desc">Блокирует аналитику, отправляемую на серверы Instagram/Facebook.</string>
     <string name="piko_disable_discover_people">Отключить раздел «Возможные знакомые»</string>
     <string name="piko_disable_discover_people_desc">Отключает раздел «Возможные знакомые» в профиле пользователя</string>
     <string name="piko_follow_back_indicator">Включить индикатор статуса дружбы</string>
@@ -169,9 +171,6 @@
     <string name="piko_category_about">Информация</string>
     <string name="piko_export_pref">Экспорт настроек Piko</string>
     <string name="piko_import_pref">Импорт настроек Piko</string>
-    <string name="piko_reset_pref">Сброс настроек Piko</string>
-    <string name="piko_reset_pref_success">Настройки Piko удалены</string>
-    <string name="piko_reset_pref_failed">Не удалось удалить настройки Piko</string>
     <string name="piko_app_version">Версия приложения: %s</string>
     <string name="piko_patch_version">Версия патча: %s</string>
     <string name="piko_patch_info_title">Информация о патчах</string>
@@ -206,6 +205,8 @@
     <string name="piko_array_detailed_timestamp">Подробная отметка времени (день недели/месяц/дата/час/минута/секунда)</string>
     <string name="piko_array_post_time">Время публикации (час/минута/секунда)</string>
     <string name="piko_array_time_left">Осталось времени (Осталось часов/минут/секунд)</string>
+    <string name="piko_array_recmd_flag_state_enable">Включить</string>
+    <string name="piko_array_recmd_flag_state_disable">Отключить</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Добро пожаловать в Piko</string>
     <string name="piko_welcome_message">Для более комфортной работы с Piko откройте настройки Piko и настройте их под свои предпочтения</string>
@@ -290,4 +291,5 @@
     <string name="piko_filter_story_minimum_item_count_desc">Истории с менее чем X элементами будут скрыты (по умолч. 1)</string>
     <string name="piko_filter_story_maximum_item_count">Макс. количество элементов в истории</string>
     <string name="piko_filter_story_maximum_item_count_desc">Истории с более чем X элементами будут скрыты (по умолч. 9999)</string>
+    <!-- Save & view deleted (unsent) direct messages -->
 </resources>

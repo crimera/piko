@@ -28,6 +28,8 @@
     <string name="piko_open_links_externally">リンクを外部ブラウザで開く</string>
     <string name="piko_open_links_externally_desc">アプリ内ブラウザではなく外部ブラウザでリンクを開きます</string>
     <string name="piko_sanitize_share_links">共有リンクから追跡情報を削除</string>
+    <string name="piko_custom_sharing_domain">カスタム共有ドメイン</string>
+    <string name="piko_custom_sharing_domain_desc">リンクを共有する際に使用するドメインです</string>
     <!-- Ghost Section -->
     <string name="piko_category_ghost">匿名</string>
     <string name="piko_view_stories_anonymously">ストーリーを匿名で閲覧</string>
@@ -49,6 +51,7 @@
     <string name="piko_limit_following_feed">フィードにフォロー中のアカウントのみ表示</string>
     <string name="piko_limit_following_feed_desc">ホームフィードにフォローしているアカウントの投稿のみ表示します。</string>
     <string name="piko_disable_reels_scrolling">リールのスクロールを無効化</string>
+    <string name="piko_disable_reels_scrolling_desc">リールでのスクロールを無効化し、次のリールをスワイプして視聴できないようにします。初めてリールを視聴する際、「上にスワイプしてさらに表示」と表示される場合がありますが、数秒後に自動で停止します。</string>
     <string name="piko_disable_swipe_to_create">作成画面へのスワイプを無効化</string>
     <string name="piko_disable_swipe_to_create_desc">ホームタブで右にスワイプしても、作成画面が開かないようにします。</string>
     <string name="piko_hide_stories_tray">ストーリーズ欄を非表示</string>
@@ -67,6 +70,7 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">分析データの送信を無効化</string>
     <string name="piko_delete_analytics_cache">分析キャッシュを削除</string>
+    <string name="piko_disable_analytics_desc">InstagramとFacebookのサーバーへ送信される分析データをブロックします</string>
     <string name="piko_disable_discover_people">おすすめのユーザーを無効化</string>
     <string name="piko_disable_discover_people_desc">プロフィール内の「おすすめのユーザー」欄を非表示にします</string>
     <string name="piko_follow_back_indicator">フレンド状態の表示を有効化</string>
@@ -82,6 +86,8 @@
     <string name="piko_vsm_no_mentions">このストーリーでメンションされたアカウントはありません</string>
     <string name="piko_disable_story_flipping">ストーリーの自動切り替えを無効化</string>
     <string name="piko_disable_story_flipping_desc">次のストーリーに自動で移動しないようにします</string>
+    <string name="piko_loop_story">ストーリーをループ再生</string>
+    <string name="piko_loop_story_desc">終了時に現在のストーリーを再生します</string>
     <string name="piko_disable_video_autoplay">動画を自動で再生しない</string>
     <string name="piko_stories_audio_autoplay">ストーリーズの音声を自動で再生</string>
     <string name="piko_customise_story_timestamp">ストーリーの時刻表示をカスタマイズ</string>
@@ -170,6 +176,7 @@
     <string name="piko_export_pref">Piko設定をエクスポート</string>
     <string name="piko_import_pref">Piko設定をインポート</string>
     <string name="piko_reset_pref">Piko設定をリセット</string>
+    <string name="piko_reset_pref_confirm">Piko設定をリセットしますか？</string>
     <string name="piko_reset_pref_success">Piko設定をリセットしました</string>
     <string name="piko_reset_pref_failed">Piko設定のリセットに失敗しました</string>
     <string name="piko_app_version">アプリバージョン：v%s</string>
@@ -232,7 +239,7 @@
     <string name="piko_rec_flags_read_error">キャッシュされたフラグファイルの読み込みに失敗しました</string>
     <string name="piko_rec_flags_no_file">おすすめのフラグファイルが見つかりません</string>
     <string name="piko_rec_flags_refresh_file">フラグを更新</string>
-    <string name="piko_rec_flags_last_modified_at">最終更新: %s</string>
+    <string name="piko_rec_flags_last_modified_at">最終更新：%s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">コンテンツをフィルタリング</string>
     <string name="piko_filter_story">ストーリーをフィルタリング</string>
@@ -292,4 +299,41 @@
     <string name="piko_filter_story_minimum_item_count_desc">指定した項目数未満のストーリーを非表示にします(デフォルト: 1)</string>
     <string name="piko_filter_story_maximum_item_count">ストーリー内の最大件数</string>
     <string name="piko_filter_story_maximum_item_count_desc">指定した項目数を超えるストーリーを非表示にします(デフォルト: 9999)</string>
+    <!-- Save & view deleted (unsent) direct messages -->
+    <string name="piko_open_share_in_instagram">Instagramで開く</string>
+    <string name="piko_open_voice_with_player">音楽プレーヤーで開く</string>
+    <string name="piko_save_deleted_messages">削除したメッセージを保存</string>
+    <string name="piko_save_deleted_messages_desc">サーバーから届いたDMを受信時にローカルへ保存します。送信を取り消したメッセージには削除済みのマークを付けるため、送信者が削除した後でも確認できます。</string>
+    <string name="piko_view_deleted_messages">削除したメッセージを表示</string>
+    <string name="piko_deleted_in_chat">このチャットで削除</string>
+    <string name="piko_all_deleted_messages">すべての削除したメッセージ</string>
+    <string name="piko_clear">削除</string>
+    <string name="piko_clear_chat_confirm">このチャットの削除したメッセージを削除しますか？</string>
+    <string name="piko_clear_all_confirm">削除したメッセージをすべて削除しますか？</string>
+    <string name="piko_no_deleted_messages">削除したメッセージはありません。\nこの機能を有効にすると、メッセージを受信時に保存されます。</string>
+    <string name="piko_delete_saved_confirm">この保存したメッセージを削除しますか？</string>
+    <string name="piko_delete">削除</string>
+    <string name="piko_unknown">不明</string>
+    <string name="piko_tap_to_view">タップして表示</string>
+    <string name="piko_media_expired">リンクは期限切れです</string>
+    <string name="piko_media_not_available">メディアは利用できません</string>
+    <string name="piko_deleted_a_message">%sがメッセージを削除しました</string>
+    <string name="piko_someone">誰か</string>
+    <string name="piko_deleted_messages_channel">削除したメッセージ</string>
+    <string name="piko_deleted_messages_channel_desc">受信したメッセージが送信を取り消しされたときに通知します</string>
+    <string name="piko_media_label">[%s]</string>
+    <string name="piko_media_deleted">[%s削除]</string>
+    <string name="piko_media_deleted_generic">[削除済み]</string>
+    <string name="piko_media_unknown">メディア</string>
+    <string name="piko_media_photo">写真</string>
+    <string name="piko_media_disappearing_photo">消える写真</string>
+    <string name="piko_media_video">動画</string>
+    <string name="piko_media_voice">ボイスメッセージ</string>
+    <string name="piko_media_gif">GIF</string>
+    <string name="piko_media_reel">リール</string>
+    <string name="piko_media_story">ストーリー</string>
+    <string name="piko_media_post">投稿</string>
+    <string name="piko_media_like">いいね</string>
+    <string name="piko_media_link">リンク</string>
+    <string name="piko_media_activity">アクティビティ</string>
 </resources>

@@ -10,12 +10,15 @@ import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.enableSettings
 import app.crimera.patches.twitter.utils.is_11_98_or_greater
+import app.crimera.patches.twitter.utils.is_12_07_or_greater
 import app.crimera.patches.twitter.utils.versionCheckPatch
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
-import app.morphe.patcher.extensions.InstructionExtensions.instructions
+import app.morphe.patcher.methodCall
+import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.string
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.resourceLiteral
 import app.morphe.patches.all.misc.resources.resourceMappingPatch
@@ -25,27 +28,43 @@ import java.util.logging.Logger
 
 private object RedirectingToXLiteFlagCheckFingerprint : Fingerprint(
     returnType = "Z",
-    strings =
+    filters =
         listOf(
-            "x_lite_in_tfa_for_existing_users_enabled",
-            "existing_user_redirected_to_x_lite",
-            "x_lite_in_tfa_for_existing_users_exit_enabled",
+            string("existing_user_redirected_to_x_lite"),
+            methodCall(
+                opcode = Opcode.INVOKE_INTERFACE,
+                name = "putBoolean",
+                parameters = listOf("Ljava/lang/String;", "Z"),
+            )
         ),
 )
 
-private object XLiteSettingItemsAdderFingerprint : Fingerprint(
+private fun getXLiteSettingItemsAdderFingerprint(migratedToXLite: Boolean) = object : Fingerprint(
     filters =
         listOf(
-            resourceLiteral(ResourceType.STRING, "settings_back_to_x_item_title"),
+            methodCall(
+                opcode = Opcode.INVOKE_INTERFACE,
+                returnType = "Z",
+            ),
+            opcode(
+                opcode = Opcode.MOVE_RESULT,
+                location = MatchAfterImmediately()
+            ),
+            resourceLiteral(
+                type = ResourceType.STRING,
+                name = if (migratedToXLite)
+                    "settings_back_to_x_item_title"
+                else
+                    "x_lite_settings_back_to_x_item_title"
+            )
         ),
-)
+) {}
 
 @Suppress("unused")
 val blockRedirectingToXLitePatch =
     bytecodePatch(
         name = "Block redirecting to X Lite",
         description = "Blocks redirecting to the new X Android UI on launch",
-        default = true,
     ) {
         compatibleWith(COMPATIBILITY_X)
         dependsOn(settingsPatch, versionCheckPatch, resourceMappingPatch)
@@ -53,29 +72,21 @@ val blockRedirectingToXLitePatch =
         execute {
 
             if (is_11_98_or_greater) {
-                RedirectingToXLiteFlagCheckFingerprint.method.apply {
-                    val lastMoveResultObjectInstruction = instructions.last { it.opcode == Opcode.MOVE_RESULT_OBJECT }
-                    val lastMoveResultObjectIndex = lastMoveResultObjectInstruction.location.index
-
-                    val putBooleanIntoSharedPrefIndex = lastMoveResultObjectIndex + 1
-                    val putBooleanIntoSharedPrefInstruction = getInstruction(putBooleanIntoSharedPrefIndex)
-                    val boolRegister = putBooleanIntoSharedPrefInstruction.registersUsed[2]
-
-                    addInstruction(
-                        putBooleanIntoSharedPrefIndex,
-                        """
-                        const v$boolRegister, 0x0
-                        """.trimIndent(),
-                    )
+                RedirectingToXLiteFlagCheckFingerprint.let {
+                    it.method.apply {
+                        val match = it.instructionMatches.last()
+                        val index = match.index
+                        val register = match.instruction.registersUsed[2]
+                        addInstruction(index, "const v$register, 0x0")
+                    }
                 }
 
-                XLiteSettingItemsAdderFingerprint.apply {
-                    val strIndex = instructionMatches.first().index
-                    method.apply {
-                        val originalXItemCheckInstruction =
-                            instructions.last { it.opcode == Opcode.IF_EQZ && it.location.index < strIndex }
-                        val register = originalXItemCheckInstruction.registersUsed[0]
-                        addInstruction(originalXItemCheckInstruction.location.index, "const v$register, 0x1")
+                getXLiteSettingItemsAdderFingerprint(is_12_07_or_greater).let {
+                    it.method.apply {
+                        val match = it.instructionMatches[1]
+                        val index = match.index
+                        val register = match.instruction.registersUsed[0]
+                        addInstruction(index + 1, "const v$register, 0x1")
                     }
                 }
 

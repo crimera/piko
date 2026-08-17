@@ -152,8 +152,6 @@
     <string name="piko_category_about">Informazioni</string>
     <string name="piko_export_pref">Esporta preferenze Piko</string>
     <string name="piko_import_pref">Importa preferenze Piko</string>
-    <string name="piko_reset_pref">Reimposta preferenze Piko</string>
-    <string name="piko_reset_pref_success">Preferenze di Piko eliminate</string>
     <string name="piko_app_version">Versione dell\'app: %s</string>
     <string name="piko_patch_version">Versione patch: %s</string>
     <string name="piko_patch_info_title">Informazioni patch</string>
@@ -209,4 +207,5 @@
     <string name="piko_filter_story_minimum_item_count_desc">Le storie che hanno meno di x elementi saranno nascoste (predefinito 1)</string>
     <string name="piko_filter_story_maximum_item_count">Oggetti minimi della storia</string>
     <string name="piko_filter_story_maximum_item_count_desc">Le storie che hanno più di x elementi saranno nascoste (predefinito 9999)</string>
+    <!-- Save & view deleted (unsent) direct messages -->
 </resources>

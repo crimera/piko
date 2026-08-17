@@ -72,20 +72,21 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 ## ⚙️ Patch Details
 
 <!-- PATCHES_START -->
-> **[v3.9.0-dev.7](https://github.com/crimera/piko/releases/tag/v3.9.0-dev.7)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;129 patches total
+> **[v3.9.0-dev.9](https://github.com/crimera/piko/releases/tag/v3.9.0-dev.9)**&nbsp;&nbsp;•&nbsp;&nbsp;`dev`&nbsp;&nbsp;•&nbsp;&nbsp;133 patches total
 <details>
-<summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;73 patches</summary>
+<summary>📦 Twitter&nbsp;&nbsp;•&nbsp;&nbsp;74 patches</summary>
 <br>
 
 **🎯 Supported versions:**
 
-| 12.11.0-release.0 |
+| 12.17.0-release.0 |
 | :---: |
 
 | 💊&nbsp;Patch | 📜&nbsp;Description | ⚙️&nbsp;Options |
 |----------|----------------|-----------|
 | [Add ability to copy media link](#add-ability-to-copy-media-link) |  |  |
 | [Block redirecting to X Lite](#block-redirecting-to-x-lite) | Blocks redirecting to the new X Android UI on launch |  |
+| [Block update screen](#block-update-screen) | Blocks the 'This app is out of date' update screen from being shown on launch |  |
 | [Bring back twitter](#bring-back-twitter) | Bring back old twitter logo and name |  |
 | [Change app icon](#change-app-icon) |  |  |
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
@@ -161,7 +162,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 </details>
 
 <details>
-<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;56 patches</summary>
+<summary>📦 Instagram&nbsp;&nbsp;•&nbsp;&nbsp;59 patches</summary>
 <br>
 
 **🎯 Supported versions:**
@@ -177,6 +178,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Change version code](#change-version-code) | Changes the version code of the app. This will turn off app store updates and allows downgrading an existing app install to an older app version. | • Version code |
 | [Clone](#clone) | Changes the package name and the app name. This allows you to install the patched app alongside the original Instagram app.<br>Caution: Do not select the official Morphe's "Change package name" universal patch. | • Package name<br>• App name |
 | [Copy comment](#copy-comment) | Adds a button to copy comments on posts and reels. |  |
+| [Custom sharing domain](#custom-sharing-domain) | Allows for using custom domains when sharing posts, reels and stories. |  |
 | [Customise story ring size](#customise-story-ring-size) |  |  |
 | [Customise story timestamp](#customise-story-timestamp) | Customise the timestamp that shows when the story was posted |  |
 | [Disable Reels scrolling](#disable-reels-scrolling) | Disables the endless scrolling behavior in Instagram Reels, preventing swiping to the next Reel. Note: On a clean install, the 'Tip' animation may appear but will stop on its own after a few seconds. |  |
@@ -187,7 +189,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Disable double tap like](#disable-double-tap-like) | Disable double tap like on post, reel, comment and message |  |
 | [Disable explore](#disable-explore) |  |  |
 | [Disable highlights](#disable-highlights) |  |  |
-| [Disable onboarding permission prompts](#disable-onboarding-permission-prompts) | Prevents contacts and location permission onboarding prompts from appearing on launch. |  |
+| [Disable onboarding permission prompts](#disable-onboarding-permission-prompts) | Prevents contacts and location permission onboarding prompts from appearing. |  |
 | [Disable screenshot detection](#disable-screenshot-detection) | Disables screenshots detection in DM |  |
 | [Disable stories](#disable-stories) |  |  |
 | [Disable story flipping](#disable-story-flipping) | Disable automatic flipping/moving to next story |  |
@@ -207,6 +209,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Hide suggested content](#hide-suggested-content) | Hides suggested stories, reels, threads (Suggested posts will still be shown). |  |
 | [Improve image viewing](#improve-image-viewing) | Fetches max resolution images from server. |  |
 | [Limit feed to following profiles](#limit-feed-to-following-profiles) | Filters the home feed to display only content from profiles you follow. |  |
+| [Loop story](#loop-story) | Replay the current story when it ends |  |
 | [Make ephemeral media permanent](#make-ephemeral-media-permanent) | Changes unexpired view once, view twice media to permanent view. |  |
 | [Mark chat as read manually](#mark-chat-as-read-manually) | Adds option to mark a thread aka message as read manually |  |
 | [More options on post](#more-options-on-post) | Adds an overflow menu button to get more options on post/reels, like copy description, copy username etc |  |
@@ -216,6 +219,7 @@ To patch with Twitter/X version 11.88 and above, you must include patches from a
 | [Remove build expired popup](#remove-build-expired-popup) | Removes the popup that appears after a while, when the app version ages. |  |
 | [Remove empty bottom space](#remove-empty-bottom-space) | Removes empty space below bottom navigation bar |  |
 | [Sanitize share links](#sanitize-share-links) |  |  |
+| [Save deleted messages](#save-deleted-messages) | Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them. |  |
 | [Save media comment](#save-media-comment) | Adds a button to save media comments on posts and reels. |  |
 | [Stories audio autoplay](#stories-audio-autoplay) |  |  |
 | [Theme](#theme) | Adds Material You and AMOLED controls to Piko settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme. | • Pure-black AMOLED theme for Android 8–11 |

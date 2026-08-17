@@ -1,0 +1,36 @@
+name: "⭐ Twitter feature"
+description: Request a Twitter/X feature.
+title: "feature(Twitter): "
+labels: ["feature", "twitter"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature requests are accepted only for Instagram and Twitter.
+        Search open and closed issues before posting. Keep the title prefix unchanged.
+
+  - type: textarea
+    id: feature
+    attributes:
+      label: What do you want?
+      description: Describe the feature clearly.
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why?
+      description: State the use case and benefit.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Confirm
+      options:
+        - label: I searched open and closed issues; this is not a duplicate.
+          required: true
+        - label: This request is for Twitter.
+          required: true

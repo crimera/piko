@@ -150,6 +150,8 @@
     <string name="piko_pref_search_suggestion_desc">Hides search suggestion in explore section</string>
     <string name="piko_legacy_share_link">Legacy share links</string>
     <string name="piko_block_redirecting_to_x_lite">Block redirecting to X Lite</string>
+    <string name="piko_pref_block_update_screen">Block update screen</string>
+    <string name="piko_pref_block_update_screen_desc">Blocks the \'This app is out of date\' update screen from being shown on launch</string>
 
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature flags</string>

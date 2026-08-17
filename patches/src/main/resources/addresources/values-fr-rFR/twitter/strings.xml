@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Échec de la suppression du cache</string>
     <string name="piko_title_native_share_menu">Menu de partage natif</string>
     <string name="piko_native_share_menu_toggle">Activer le menu de partage natif</string>
+    <string name="piko_native_share_menu_items_to_hide">Éléments du menu de partage natif à masquer</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Publicités</string>
     <string name="piko_pref_hide_promoted_posts">Masquer les publications promues</string>
@@ -205,6 +206,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">Plus d\'informations sur le profil</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Ajoute plus de détails sur la page de profil</string>
     <string name="piko_fast_follower">Abonné rapide</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Style de police</string>
     <string name="piko_pref_add_font">Ajouter une police</string>

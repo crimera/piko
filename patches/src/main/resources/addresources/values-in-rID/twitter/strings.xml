@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Penghapusan cache gagal</string>
     <string name="piko_title_native_share_menu">Menu berbagi bawaan</string>
     <string name="piko_native_share_menu_toggle">Aktifkan menu berbagi bawaan</string>
+    <string name="piko_native_share_menu_items_to_hide">Menu berbagi bawaan yang akan disembunyikan</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Iklan</string>
     <string name="piko_pref_hide_promoted_posts">Sembunyikan postingan yang dipromosikan</string>
@@ -205,6 +206,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">Informasi selengkapnya pada profil</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Menambahkan detail selengkapnya di halaman profil</string>
     <string name="piko_fast_follower">Pengikut cepat</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Gaya font</string>
     <string name="piko_pref_add_font">Tambahkan font</string>

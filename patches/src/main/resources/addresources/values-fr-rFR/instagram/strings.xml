@@ -28,6 +28,8 @@
     <string name="piko_open_links_externally">Ouvrir les liens en externe</string>
     <string name="piko_open_links_externally_desc">Ouvrir les liens dans un navigateur externe au lieu du navigateur intégré à l’application</string>
     <string name="piko_sanitize_share_links">Nettoyer les liens de partage</string>
+    <string name="piko_custom_sharing_domain">Domaine de partage personnalisé</string>
+    <string name="piko_custom_sharing_domain_desc">Le domaine à utiliser lors du partage de liens</string>
     <!-- Ghost Section -->
     <string name="piko_category_ghost">Fantôme</string>
     <string name="piko_view_stories_anonymously">Voir les stories anonymement</string>
@@ -49,7 +51,7 @@
     <string name="piko_limit_following_feed">Limiter le fil aux comptes suivis</string>
     <string name="piko_limit_following_feed_desc">Filtre le fil d’accueil pour n’afficher que le contenu des comptes que vous suivez.</string>
     <string name="piko_disable_reels_scrolling">Désactiver le défilement des Reels</string>
-    <string name="piko_disable_reels_scrolling_desc">Désactive le défilement infini dans les Reels Instagram, empêchant de passer au Reel suivant par balayage. Remarque : Lors d’une installation propre, l’animation \'Astuce\' peut apparaître, mais elle s’arrêtera d’elle-même après quelques secondes.</string>
+    <string name="piko_disable_reels_scrolling_desc">Désactive le défilement sans fin des Reels Instagram et empêche de passer au Reel suivant. Remarque : Après une nouvelle installation, l’animation \'Astuce\' peut apparaître, mais elle s’arrête automatiquement après quelques secondes</string>
     <string name="piko_disable_swipe_to_create">Désactiver le balayage pour créer</string>
     <string name="piko_disable_swipe_to_create_desc">Empêche l\'ouverture de l\'écran de création en balayant vers la droite depuis l\'onglet accueil</string>
     <string name="piko_hide_stories_tray">Masquer le bandeau des stories</string>
@@ -68,6 +70,7 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Désactiver les analyses</string>
     <string name="piko_delete_analytics_cache">Supprimer le cache des analyses</string>
+    <string name="piko_disable_analytics_desc">Bloquer les analyses envoyées aux serveurs d’Instagram/Facebook. </string>
     <string name="piko_disable_discover_people">Désactiver “Découvrir des personnes”</string>
     <string name="piko_disable_discover_people_desc">Désactive la section “Découvrir des personnes” sur le profil utilisateur</string>
     <string name="piko_follow_back_indicator">Activer l\'indicateur de statut d\'amitié</string>
@@ -83,6 +86,8 @@
     <string name="piko_vsm_no_mentions">Aucune mention dans cette story</string>
     <string name="piko_disable_story_flipping">Désactiver le défilement de story</string>
     <string name="piko_disable_story_flipping_desc">Désactiver le défilement/passage automatique vers la prochaine story</string>
+    <string name="piko_loop_story">Story en boucle</string>
+    <string name="piko_loop_story_desc">Rejouer la story actuelle lorsqu’elle se termine</string>
     <string name="piko_disable_video_autoplay">Désactiver la lecture automatique des vidéos</string>
     <string name="piko_stories_audio_autoplay">Lecture automatique de l’audio des stories</string>
     <string name="piko_customise_story_timestamp">Personnaliser l’horodatage de story</string>
@@ -170,9 +175,10 @@
     <string name="piko_category_about">À propos</string>
     <string name="piko_export_pref">Exporter les préférences de Piko</string>
     <string name="piko_import_pref">Importer les préférences de Piko</string>
-    <string name="piko_reset_pref">Réinitialiser les préférences de Piko</string>
-    <string name="piko_reset_pref_success">Préférences de Piko supprimées</string>
-    <string name="piko_reset_pref_failed">Échec de la suppression des préférences de Piko</string>
+    <string name="piko_reset_pref">Réinitialiser les paramètres de Piko</string>
+    <string name="piko_reset_pref_confirm">Réinitialiser les paramètres de Piko ?</string>
+    <string name="piko_reset_pref_success">Réinitialisation des paramètres de Piko</string>
+    <string name="piko_reset_pref_failed">Échec de la réinitialisation des paramètres de Piko</string>
     <string name="piko_app_version">Version de l\'application: %s</string>
     <string name="piko_patch_version">Version du patch: %s</string>
     <string name="piko_patch_info_title">Informations sur le patch</string>
@@ -293,4 +299,41 @@
     <string name="piko_filter_story_minimum_item_count_desc">Les stories contenant moins de x éléments seront masquées (par défaut : 1)</string>
     <string name="piko_filter_story_maximum_item_count">Nombre maximal d’éléments par story</string>
     <string name="piko_filter_story_maximum_item_count_desc">Les stories contenant plus de x éléments seront masquées (par défaut : 9999) </string>
+    <!-- Save & view deleted (unsent) direct messages -->
+    <string name="piko_open_share_in_instagram">Ouvrir dans Instagram</string>
+    <string name="piko_open_voice_with_player">Ouvrir avec le lecteur de musique</string>
+    <string name="piko_save_deleted_messages">Enregistrer les messages supprimés</string>
+    <string name="piko_save_deleted_messages_desc">Capture localement les messages privés entrants dès qu’ils arrivent du serveur. Marque les messages comme supprimés lorsqu’ils sont retirés, afin que vous puissiez encore les consulter même après que l’expéditeur les supprime.</string>
+    <string name="piko_view_deleted_messages">Voir les messages supprimés</string>
+    <string name="piko_deleted_in_chat">Supprimé dans cette discussion</string>
+    <string name="piko_all_deleted_messages">Tous les messages supprimés</string>
+    <string name="piko_clear">Effacer</string>
+    <string name="piko_clear_chat_confirm">Effacer les messages supprimés de cette discussion ?</string>
+    <string name="piko_clear_all_confirm">Effacer TOUS les messages supprimés enregistrés ?</string>
+    <string name="piko_no_deleted_messages">Aucun message supprimé n’a encore été enregistré.\nActivez la fonctionnalité et les messages seront enregistrés dès leur réception.</string>
+    <string name="piko_delete_saved_confirm">Supprimer ce message enregistré ?</string>
+    <string name="piko_delete">Supprimer</string>
+    <string name="piko_unknown">Inconnu</string>
+    <string name="piko_tap_to_view">appuyer pour afficher</string>
+    <string name="piko_media_expired">lien expiré</string>
+    <string name="piko_media_not_available">média indisponible</string>
+    <string name="piko_deleted_a_message">%s a supprimé un message</string>
+    <string name="piko_someone">Quelqu\'un</string>
+    <string name="piko_deleted_messages_channel">Messages supprimés</string>
+    <string name="piko_deleted_messages_channel_desc">Notifie lorsqu’un message reçu n’est plus envoyé</string>
+    <string name="piko_media_label">[%s]</string>
+    <string name="piko_media_deleted">[%s supprimé]</string>
+    <string name="piko_media_deleted_generic">[supprimé]</string>
+    <string name="piko_media_unknown">média</string>
+    <string name="piko_media_photo">photo</string>
+    <string name="piko_media_disappearing_photo">photo qui disparaît</string>
+    <string name="piko_media_video">vidéo</string>
+    <string name="piko_media_voice">message vocal</string>
+    <string name="piko_media_gif">GIF</string>
+    <string name="piko_media_reel">reel</string>
+    <string name="piko_media_story">story</string>
+    <string name="piko_media_post">publication</string>
+    <string name="piko_media_like">like</string>
+    <string name="piko_media_link">lien</string>
+    <string name="piko_media_activity">activité</string>
 </resources>

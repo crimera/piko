@@ -162,9 +162,6 @@
     <string name="piko_category_about">關於</string>
     <string name="piko_export_pref">匯出 Piko 偏好設定</string>
     <string name="piko_import_pref">匯入 Piko 偏好設定</string>
-    <string name="piko_reset_pref">重設 Piko 偏好設定</string>
-    <string name="piko_reset_pref_success">已刪除 Piko 偏好設定</string>
-    <string name="piko_reset_pref_failed">無法刪除 Piko 偏好設定</string>
     <string name="piko_app_version">應用程式版本：%s</string>
     <string name="piko_patch_version">補丁版本：%s</string>
     <string name="piko_patch_info_title">補丁資訊</string>
@@ -277,4 +274,5 @@
     <string name="piko_filter_story_minimum_item_count_desc">少於 X 個項目的限時動態將會隱藏 (預設值：1)</string>
     <string name="piko_filter_story_maximum_item_count">最多限時動態項目數量</string>
     <string name="piko_filter_story_maximum_item_count_desc">多於 X 個項目的限時動態將會隱藏 (預設值：9999)</string>
+    <!-- Save & view deleted (unsent) direct messages -->
 </resources>

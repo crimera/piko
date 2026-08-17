@@ -355,7 +355,7 @@ public class SavedMessagesHook {
         }
     }
 
-    public static void onMessageHiddenFromDb(Object dao, String serverId, String clientId) {
+    public static void onMessageHiddenFromDb(String serverId, String clientId) {
         try {
             if (!Pref.saveDeletedMessages()) return;
 
@@ -363,14 +363,14 @@ public class SavedMessagesHook {
             if (itemId == null) return;
 
             PikoMessageDb vault = PikoMessageDb.getInstance(PikoUtils.getContext());
+            if (!vault.isStored(itemId)) return;
+
             boolean wasReceived = vault.isStoredAlive(itemId);
             String messageType = vault.getMessageType(itemId);
-            boolean own = isOwnSender(vault.getSenderId(itemId));
 
-            vault.insertOrIgnore(itemId, "", null, null, null, messageType, System.currentTimeMillis());
             vault.markDeleted(itemId);
 
-            if (wasReceived && !own && claimNotification(itemId)) {
+            if (wasReceived && claimNotification(itemId)) {
                 String stored = vault.getStoredContent(itemId);
                 boolean isMedia = stored == null || stored.isEmpty()
                         || stored.startsWith("http") || stored.startsWith("[");
