@@ -119,9 +119,8 @@ private object SensitiveMediaInterstitialViewFingerprint : Fingerprint(
 )
 
 private object ComposeSensitiveMediaInterstitialFingerprint : Fingerprint(
-    definingClass = "Lcom/x/sensitivemedia/impl/p;",
-    name = "c",
     returnType = "Ljava/lang/Object;",
+    parameters = listOf("Landroidx/compose/runtime/Composer;", "I"),
     filters = listOf(
         methodCall(
             opcode = Opcode.INVOKE_VIRTUAL,
