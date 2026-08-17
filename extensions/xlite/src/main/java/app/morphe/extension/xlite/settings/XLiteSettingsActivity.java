@@ -84,7 +84,9 @@ public final class XLiteSettingsActivity extends Activity {
         updateBackCallback();
         if (getFragmentManager().getBackStackEntryCount() == 0) {
             setPageTitle(StringRef.str("piko_xlite_settings_title"));
+            return;
         }
+        setPatchVersionFooterVisible(false);
     }
 
     private void updateBackCallback() {

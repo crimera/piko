@@ -78,6 +78,7 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
         if (group != null || screen == null) return;
 
         String query = SettingsSearchSession.query();
+        updatePatchVersionFooterVisibility();
         screen.removeAll();
         if (query.trim().isEmpty()) {
             setSearchEmptyState(false, query);
@@ -107,6 +108,14 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
         searchField.setNoResults(visible, message);
     }
 
+    private void updatePatchVersionFooterVisibility() {
+        Activity activity = getActivity();
+        if (!(activity instanceof XLiteSettingsActivity settingsActivity)) return;
+        settingsActivity.setPatchVersionFooterVisible(
+                group == null && SettingsSearchSession.query().trim().isEmpty()
+        );
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -117,11 +126,14 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
                         ? app.morphe.extension.shared.StringRef.str("piko_xlite_settings_title")
                         : group.title.toString()
         );
-        settingsActivity.setPatchVersionFooterVisible(group == null);
+        updatePatchVersionFooterVisibility();
     }
 
     private void openGroup(SettingsNode.Group group) {
-        requireActivity();
+        Activity activity = requireActivity();
+        if (activity instanceof XLiteSettingsActivity settingsActivity) {
+            settingsActivity.setPatchVersionFooterVisible(false);
+        }
         int containerId = XLiteSettingsActivity.SETTINGS_CONTAINER_ID;
         getFragmentManager()
                 .beginTransaction()
@@ -132,6 +144,9 @@ public final class XLiteSettingsFragment extends PreferenceFragment {
 
     private void openScreen(SettingsNode.CustomScreen screen) {
         Activity activity = requireActivity();
+        if (activity instanceof XLiteSettingsActivity settingsActivity) {
+            settingsActivity.setPatchVersionFooterVisible(false);
+        }
         try {
             Fragment fragment = instantiateFragment(activity, screen.fragmentClassDescriptor);
             int containerId = XLiteSettingsActivity.SETTINGS_CONTAINER_ID;
