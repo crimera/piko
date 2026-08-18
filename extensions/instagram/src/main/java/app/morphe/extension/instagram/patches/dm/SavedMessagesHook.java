@@ -69,7 +69,8 @@ public class SavedMessagesHook {
         }});
     }
 
-    private static String resolveOpenThreadId() {
+    /** The currently-open DM thread id, or null when unknown (e.g. before any thread has loaded). */
+    public static String resolveOpenThreadId() {
         return (sCurrentThreadId != null && !sCurrentThreadId.isEmpty()) ? sCurrentThreadId : null;
     }
 
@@ -374,7 +375,7 @@ public class SavedMessagesHook {
                 String stored = vault.getStoredContent(itemId);
                 boolean isMedia = stored == null || stored.isEmpty()
                         || stored.startsWith("http") || stored.startsWith("[");
-                String notifBody = isMedia ? describeMediaType(messageType) : stored;
+                String notifBody = isMedia ? describeMediaType(messageType, stored) : stored;
                 String storedThreadId = vault.getThreadIdOf(itemId);
                 String name = vault.getThreadUsername(storedThreadId);
                 if (name == null) name = openChatTitleFor(vault, storedThreadId);
@@ -386,14 +387,27 @@ public class SavedMessagesHook {
         }
     }
 
-    private static String describeMediaType(String type) {
+    /** @param url the stored CDN url, when the deleted item was media (may be null). */
+    private static String describeMediaType(String type, String url) {
         if (type == null) return str("piko_media_deleted_generic");
+
+        // item_type alone can't tell a photo from a video — both come through as "media" (or
+        // "raven_media" for disappearing media); the actual type lives on the Media object, not
+        // the DirectItem. Sniff the real CDN url extension instead, same as DeletedMessagesActivity.
+        String effectiveType = type;
+        if (("media".equals(type) || "raven_media".equals(type))
+                && url != null && url.matches("(?i).*\\.(mp4|mov|m4v|webm)(\\?.*)?$")) {
+            effectiveType = "video";
+        }
+
         String label;
-        switch (type) {
+        switch (effectiveType) {
             case "media":
             case "image":           label = str("piko_media_photo"); break;
             case "raven_media":     label = str("piko_media_disappearing_photo"); break;
             case "video":           label = str("piko_media_video"); break;
+            case "clip":
+            case "xma_clip":        label = str("piko_media_reel"); break;
             case "voice_media":
             case "audio":           label = str("piko_media_voice"); break;
             case "animated_media":  label = str("piko_media_gif"); break;
@@ -403,7 +417,7 @@ public class SavedMessagesHook {
             case "like":            label = str("piko_media_like"); break;
             case "link":            label = str("piko_media_link"); break;
             case "action_log":      label = str("piko_media_activity"); break;
-            default:                label = type; break;
+            default:                label = effectiveType; break;
         }
         return String.format(str("piko_media_deleted"), label);
     }
