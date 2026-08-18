@@ -15,9 +15,12 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import java.util.ArrayList;
 
@@ -135,6 +138,92 @@ public class UI {
             return imageView;
         } catch (Exception e) {
             Logger.printException(() -> "Failed addImageViewToViewGroup: ", e);
+        }
+        return null;
+    }
+
+    /**
+     * Same as {@link #addImageViewToViewGroup}, but wraps the icon in a FrameLayout so an
+     * optional small colored dot can be overlaid on its top-right corner — used for the
+     * unseen-deleted-message indicator on the DM history icon. The wrapper keeps this safe to
+     * use regardless of the actual parent ViewGroup type (LinearLayout, Toolbar, etc.), since the
+     * overlay only ever happens inside the FrameLayout we control.
+     */
+    public static ImageView addImageViewWithBadge(
+            ViewGroup viewGroup,
+            String iconDrawable,
+            Runnable action,
+            boolean showBadge,
+            int badgeColor,
+            int badgeStrokeColor,
+            int badgeStrokeWidth
+    ) {
+        try {
+            if (viewGroup == null) {
+                return null;
+            }
+
+            Context context = viewGroup.getContext();
+            ImageView imageView = new ImageView(context);
+
+            setThemedIcon(imageView, iconDrawable);
+            imageView.setLayoutParams(new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            ));
+            if (action != null) {
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            action.run();
+                        } catch (Exception ex) {
+                            Logger.printException(() -> "addImageViewWithBadge click failed: ", ex);
+                        }
+                    }
+                });
+            }
+            int padding = Dim.dp16;
+            imageView.setPadding(padding, padding, padding, padding);
+
+            FrameLayout wrapper = new FrameLayout(context);
+            wrapper.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+            ));
+            wrapper.addView(imageView);
+
+            if (showBadge) {
+                View badge = new View(context);
+                GradientDrawable dot = new GradientDrawable();
+                dot.setShape(GradientDrawable.OVAL);
+                dot.setColor(badgeColor);
+                if (badgeStrokeWidth > 0) {
+                    dot.setStroke(badgeStrokeWidth, badgeStrokeColor);
+                }
+                badge.setBackground(dot);
+                badge.setTag("piko_unseen_deleted_badge");
+
+                int badgeSize = Dim.dp8 + Dim.dp4;
+                FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(badgeSize, badgeSize);
+                badgeParams.gravity = Gravity.END | Gravity.TOP;
+                // Sits just inside the icon's dp16 touch padding, over its top-right corner.
+                badgeParams.topMargin = Dim.dp8;
+                badgeParams.rightMargin = Dim.dp8;
+                badge.setLayoutParams(badgeParams);
+                wrapper.addView(badge);
+            }
+
+            int count = viewGroup.getChildCount();
+            int insertIndex = count - 1;
+            if (insertIndex < 0) {
+                insertIndex = 0;
+            }
+
+            viewGroup.addView(wrapper, insertIndex);
+            return imageView;
+        } catch (Exception e) {
+            Logger.printException(() -> "Failed addImageViewWithBadge: ", e);
         }
         return null;
     }
