@@ -121,7 +121,7 @@ public class InstantsVaultActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(themed("igds_color_primary_background", 0xFF000000));
-        applySystemBarStyle();
+        InstagramPreferenceStyle.applySystemBarStyle(this);
         root.addView(buildToolbar());
         if (!items.isEmpty()) root.addView(buildSearchField());
 
@@ -531,21 +531,6 @@ public class InstantsVaultActivity extends Activity {
                 .setPositiveButton(positiveText, (d, w) -> onConfirm.run())
                 .setNegativeButton(str("piko_cancel"), null)
                 .show();
-    }
-    private void applySystemBarStyle() {
-        int background = themed("igds_color_primary_background", 0xFF000000);
-        getWindow().setStatusBarColor(background);
-        getWindow().setNavigationBarColor(background);
-
-        int flags = getWindow().getDecorView().getSystemUiVisibility();
-        if (UI.isDarkMode()) {
-            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        } else {
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        }
-        getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
     private int dp(int v) {
