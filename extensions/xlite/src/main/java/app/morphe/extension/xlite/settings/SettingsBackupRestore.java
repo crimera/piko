@@ -145,7 +145,7 @@ public final class SettingsBackupRestore {
 
     private static void ensureAllSettingsLoaded() {
         FeatureSwitchStore.shared();
-        ForYouTopicFilter.initialize();
+        ForYouTopicFilter.shared().enabled.get();
         PostFilterRuleStore.shared();
     }
 

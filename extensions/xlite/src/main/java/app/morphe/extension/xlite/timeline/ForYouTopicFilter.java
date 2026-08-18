@@ -35,21 +35,22 @@ public final class ForYouTopicFilter {
     private static final CopyOnWriteArrayList<Runnable> TOPIC_LISTENERS = new CopyOnWriteArrayList<>();
     private static boolean topicCatalogLoaded;
 
+    public static final class Settings {
+        public final BooleanSetting enabled = new BooleanSetting(ENABLED_KEY, false);
+        public final StringSetting selectedTopicIds =
+                new StringSetting(SELECTED_TOPIC_IDS_KEY, "");
+        public final StringSetting topicCatalog =
+                new StringSetting(TOPIC_CATALOG_KEY, "");
+
+        private Settings() {
+        }
+    }
+
     private ForYouTopicFilter() {
     }
 
-    public static void initialize() {
-        settings();
-    }
-
-    private static Settings settings() {
+    public static Settings shared() {
         return Holder.INSTANCE;
-    }
-
-    private static final class Settings {
-        private final BooleanSetting enabled = new BooleanSetting(ENABLED_KEY, false);
-        private final StringSetting selectedTopicIds = new StringSetting(SELECTED_TOPIC_IDS_KEY, "");
-        private final StringSetting topicCatalog = new StringSetting(TOPIC_CATALOG_KEY, "");
     }
 
     private static final class Holder {
@@ -102,7 +103,7 @@ public final class ForYouTopicFilter {
         }
         if (captured.isEmpty()) return;
 
-        Settings settings = settings();
+        Settings settings = shared();
         boolean changed;
         synchronized (LOCK) {
             loadTopicCatalogLocked(settings);
@@ -124,38 +125,20 @@ public final class ForYouTopicFilter {
     }
 
     public static List<Topic> topicOptions() {
-        Settings settings = settings();
+        Settings settings = shared();
         synchronized (LOCK) {
             loadTopicCatalogLocked(settings);
             return Collections.unmodifiableList(new ArrayList<>(TOPIC_CATALOG.values()));
         }
     }
 
-    public static boolean isEnabled() {
-        return settings().enabled.get();
-    }
-
-    public static void setEnabled(boolean enabled) {
-        settings().enabled.save(enabled);
-    }
-
-    public static Set<String> selectedTopicIds() {
-        return parseTopicIds(settings().selectedTopicIds.get());
-    }
-
-    public static void setSelectedTopicIds(Set<String> topicIds) {
-        LinkedHashSet<String> validIds = new LinkedHashSet<>();
-        if (topicIds != null) {
-            for (String topicId : topicIds) {
-                if (isPositiveTopicId(topicId)) validIds.add(topicId);
-            }
-        }
-        settings().selectedTopicIds.save(String.join(",", validIds));
-    }
-
     @Nullable
     public static List<String> resolveForYouTopicIds(@Nullable List<String> originalTopicIds) {
-        return resolveForYouTopicIds(originalTopicIds, isEnabled(), selectedTopicIds());
+        return resolveForYouTopicIds(
+                originalTopicIds,
+                shared().enabled.get(),
+                parseTopicIds(shared().selectedTopicIds.get())
+        );
     }
 
     @Nullable
@@ -238,7 +221,7 @@ public final class ForYouTopicFilter {
                 || "TOPIC".equalsIgnoreCase(value.substring(value.lastIndexOf('.') + 1));
     }
 
-    private static Set<String> parseTopicIds(@Nullable String serialized) {
+    static Set<String> parseTopicIds(@Nullable String serialized) {
         if (serialized == null || serialized.isEmpty()) return Collections.emptySet();
         LinkedHashSet<String> topicIds = new LinkedHashSet<>();
         for (String topicId : serialized.split(",")) {

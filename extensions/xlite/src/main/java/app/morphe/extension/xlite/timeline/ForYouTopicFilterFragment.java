@@ -43,7 +43,7 @@ public final class ForYouTopicFilterFragment extends Fragment {
                 context,
                 StringRef.str("piko_xlite_topic_filter_enabled_title"),
                 StringRef.str("piko_xlite_topic_filter_enabled_summary"),
-                ForYouTopicFilter.isEnabled()
+                ForYouTopicFilter.shared().enabled.get()
         );
         masterSwitch.setOnCheckedChangeListener(this::setFilteringEnabled);
         root.addView(masterSwitch, new LinearLayout.LayoutParams(-1, -2));
@@ -86,7 +86,7 @@ public final class ForYouTopicFilterFragment extends Fragment {
     private void refreshTopics() {
         if (topicsContainer == null || masterSwitch == null) return;
 
-        boolean enabled = ForYouTopicFilter.isEnabled();
+        boolean enabled = ForYouTopicFilter.shared().enabled.get();
         if (masterSwitch.isChecked() != enabled) {
             masterSwitch.setOnCheckedChangeListener(null);
             masterSwitch.setChecked(enabled, false);
@@ -105,7 +105,9 @@ public final class ForYouTopicFilterFragment extends Fragment {
             return;
         }
 
-        Set<String> selected = ForYouTopicFilter.selectedTopicIds();
+        Set<String> selected = ForYouTopicFilter.parseTopicIds(
+                ForYouTopicFilter.shared().selectedTopicIds.get()
+        );
         for (ForYouTopicFilter.Topic topic : topics) {
             XLiteSettingsUi.SwitchRow row = XLiteSettingsUi.switchRow(
                     requireContext(),
@@ -121,18 +123,21 @@ public final class ForYouTopicFilterFragment extends Fragment {
     }
 
     private void setFilteringEnabled(boolean enabled) {
-        ForYouTopicFilter.setEnabled(enabled);
+        ForYouTopicFilter.shared().enabled.save(enabled);
         refreshTopics();
     }
 
     private void setTopicSelected(String topicId, boolean selected) {
-        LinkedHashSet<String> topicIds = new LinkedHashSet<>(ForYouTopicFilter.selectedTopicIds());
+        Set<String> currentSelected = ForYouTopicFilter.parseTopicIds(
+                ForYouTopicFilter.shared().selectedTopicIds.get()
+        );
+        LinkedHashSet<String> topicIds = new LinkedHashSet<>(currentSelected);
         if (selected) {
             topicIds.add(topicId);
         } else {
             topicIds.remove(topicId);
         }
-        ForYouTopicFilter.setSelectedTopicIds(topicIds);
+        ForYouTopicFilter.shared().selectedTopicIds.save(String.join(",", topicIds));
     }
 
     private Context requireContext() {
