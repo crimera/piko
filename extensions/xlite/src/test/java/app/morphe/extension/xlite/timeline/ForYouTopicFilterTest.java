@@ -45,7 +45,7 @@ public class ForYouTopicFilterTest {
     @Test
     public void configuredTopicsReplaceNativeTopicsWithPositiveIds() {
         List<String> nativeTopics = Collections.singletonList("-123");
-        LinkedHashSet<String> configuredTopics = new LinkedHashSet<>(Arrays.asList("123", "-456", "0", "789"));
+        LinkedHashSet<String> configuredTopics = new LinkedHashSet<>(Arrays.asList("123", "789"));
 
         List<String> resolved = ForYouTopicFilter.resolveForYouTopicIds(
                 nativeTopics,
@@ -75,5 +75,34 @@ public class ForYouTopicFilterTest {
                 "HomeFilterOption(identifier=-123, displayName=Muted, tabDisplayName=Muted, iconName=null)"
         ));
         assertNull(ForYouTopicFilter.parseTopicOptionText("RegionOption(identifier=123, displayName=US)"));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void malformedTopicOptionFailsDuringCapture() {
+        ForYouTopicFilter.captureTopicOptions("TOPIC", Collections.singletonList("unexpected"));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void nonIterableTopicOptionsFailDuringCapture() {
+        ForYouTopicFilter.captureTopicOptions("TOPIC", "unexpected");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void emptyTopicOptionsFailDuringCapture() {
+        ForYouTopicFilter.captureTopicOptions("TOPIC", Collections.emptyList());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void malformedSerializedTopicIdFailsParsing() {
+        ForYouTopicFilter.parseTopicIds("123,-456");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void invalidConfiguredTopicIdFailsResolution() {
+        ForYouTopicFilter.resolveForYouTopicIds(
+                Collections.singletonList("-123"),
+                true,
+                new LinkedHashSet<>(Arrays.asList("123", "-456"))
+        );
     }
 }

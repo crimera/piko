@@ -92,16 +92,41 @@ public final class ForYouTopicFilter {
             @Nullable Object filterType,
             @Nullable Object options
     ) {
+        if (filterType == null) {
+            throw new IllegalStateException("X-Lite topic filter type is missing");
+        }
         if (!isTopicFilterType(filterType)) return;
-        if (!(options instanceof Iterable<?> iterable)) return;
+        if (!(options instanceof Iterable<?> iterable)) {
+            throw new IllegalStateException(
+                    "X-Lite topic filter options are not iterable: " + options
+            );
+        }
 
         LinkedHashMap<String, Topic> captured = new LinkedHashMap<>();
+        int optionIndex = 0;
         for (Object option : iterable) {
-            if (option == null) continue;
-            Topic topic = parseTopicOptionText(String.valueOf(option));
-            if (topic != null) captured.put(topic.id, topic);
+            if (option == null) {
+                throw new IllegalStateException(
+                        "X-Lite topic filter option " + optionIndex + " is null"
+                );
+            }
+            String optionText = String.valueOf(option);
+            Topic topic = parseTopicOptionText(optionText);
+            if (topic == null) {
+                throw new IllegalStateException(
+                        "X-Lite topic filter option format changed: " + optionText
+                );
+            }
+            if (captured.put(topic.id, topic) != null) {
+                throw new IllegalStateException(
+                        "X-Lite topic filter contains duplicate topic ID: " + topic.id
+                );
+            }
+            optionIndex++;
         }
-        if (captured.isEmpty()) return;
+        if (captured.isEmpty()) {
+            throw new IllegalStateException("X-Lite topic filter returned no topic options");
+        }
 
         Settings settings = shared();
         boolean changed;
@@ -147,16 +172,22 @@ public final class ForYouTopicFilter {
             boolean enabled,
             @Nullable Set<String> configuredTopicIds
     ) {
-        if (!enabled || configuredTopicIds == null || configuredTopicIds.isEmpty()) {
-            return originalTopicIds;
+        if (!enabled) return originalTopicIds;
+        if (configuredTopicIds == null) {
+            throw new IllegalStateException("X-Lite topic filter selection is missing");
         }
+        if (configuredTopicIds.isEmpty()) return originalTopicIds;
 
-        LinkedHashSet<String> validTopicIds = new LinkedHashSet<>();
+        LinkedHashSet<String> selectedTopicIds = new LinkedHashSet<>();
         for (String topicId : configuredTopicIds) {
-            if (isPositiveTopicId(topicId)) validTopicIds.add(topicId);
+            if (!isPositiveTopicId(topicId)) {
+                throw new IllegalStateException(
+                        "X-Lite topic filter selection contains an invalid ID: " + topicId
+                );
+            }
+            selectedTopicIds.add(topicId);
         }
-        if (validTopicIds.isEmpty()) return originalTopicIds;
-        return new ArrayList<>(validTopicIds);
+        return new ArrayList<>(selectedTopicIds);
     }
 
     @Nullable
@@ -224,8 +255,14 @@ public final class ForYouTopicFilter {
     static Set<String> parseTopicIds(@Nullable String serialized) {
         if (serialized == null || serialized.isEmpty()) return Collections.emptySet();
         LinkedHashSet<String> topicIds = new LinkedHashSet<>();
-        for (String topicId : serialized.split(",")) {
-            if (isPositiveTopicId(topicId)) topicIds.add(topicId);
+        for (String serializedTopicId : serialized.split(",", -1)) {
+            String topicId = serializedTopicId.trim();
+            if (!isPositiveTopicId(topicId)) {
+                throw new IllegalArgumentException(
+                        "X-Lite topic filter setting contains an invalid ID: " + serializedTopicId
+                );
+            }
+            topicIds.add(topicId);
         }
         return Collections.unmodifiableSet(topicIds);
     }
@@ -240,12 +277,19 @@ public final class ForYouTopicFilter {
             JSONArray array = new JSONArray(serialized);
             for (int index = 0; index < array.length(); index++) {
                 JSONObject object = array.optJSONObject(index);
-                if (object == null) continue;
+                if (object == null) {
+                    throw new JSONException("entry " + index + " is not an object");
+                }
                 Topic topic = createTopic(object.optString("id", ""), object.optString("name", ""));
-                if (topic != null) TOPIC_CATALOG.put(topic.id, topic);
+                if (topic == null) {
+                    throw new JSONException("entry " + index + " is not a valid topic");
+                }
+                if (TOPIC_CATALOG.put(topic.id, topic) != null) {
+                    throw new JSONException("entry " + index + " duplicates topic ID " + topic.id);
+                }
             }
-        } catch (JSONException ignored) {
-            settings.topicCatalog.save("");
+        } catch (JSONException exception) {
+            throw new IllegalStateException("X-Lite topic catalog is invalid", exception);
         }
     }
 
@@ -257,8 +301,8 @@ public final class ForYouTopicFilter {
                 object.put("id", topic.id);
                 object.put("name", topic.name);
                 array.put(object);
-            } catch (JSONException ignored) {
-                return;
+            } catch (JSONException exception) {
+                throw new IllegalStateException("X-Lite topic catalog could not be serialized", exception);
             }
         }
         settings.topicCatalog.save(array.toString());
@@ -266,11 +310,7 @@ public final class ForYouTopicFilter {
 
     private static void notifyTopicListeners() {
         for (Runnable listener : TOPIC_LISTENERS) {
-            try {
-                listener.run();
-            } catch (RuntimeException ignored) {
-                // A settings-screen observer must not break GraphQL response handling.
-            }
+            listener.run();
         }
     }
 }

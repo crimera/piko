@@ -37,13 +37,15 @@ private const val ARRAY_LIST_DESCRIPTOR = "Ljava/util/ArrayList;"
 private const val TIMELINE_TYPE_DESCRIPTOR = "Lcom/x/models/timelines/TimelineType;"
 private const val HOME_TIMELINE_PACKAGE = "Lcom/x/android/main/"
 private const val HOME_MODELS_PACKAGE = "Lcom/x/models/"
+private const val HOME_FILTER_GROUP_FILTER_TYPE_LABEL = "HomeFilterGroup(filterType="
+private const val HOME_FILTER_GROUP_OPTIONS_LABEL = ", options="
 
 private object HomeFilterGroupFingerprint : Fingerprint(
     definingClass = HOME_MODELS_PACKAGE,
     name = "toString",
     returnType = STRING_DESCRIPTOR,
     parameters = emptyList(),
-    filters = listOf(string("HomeFilterGroup(filterType=")),
+    filters = listOf(string(HOME_FILTER_GROUP_FILTER_TYPE_LABEL)),
 )
 
 private object HomeTimelineQueryFingerprint : Fingerprint(
@@ -132,6 +134,8 @@ private fun patchHomeFilterGroupConstructor() {
     }
 
     val match = matches.single()
+    val filterTypeField = match.fieldForToStringLabel(HOME_FILTER_GROUP_FILTER_TYPE_LABEL)
+    val optionsField = match.fieldForToStringLabel(HOME_FILTER_GROUP_OPTIONS_LABEL)
     val parameterTypes = { method: Method -> method.parameterTypes.map(CharSequence::toString) }
     val constructors = match.classDef.methods.filter { method ->
         val parameters = parameterTypes(method)
@@ -152,6 +156,18 @@ private fun patchHomeFilterGroupConstructor() {
 
     val constructor = constructors.single() as? MutableMethod
         ?: throw PatchException("X-Lite HomeTimelineFilters group constructor is not mutable")
+    val filterTypeParameterIndex = constructor.parameterIndexForField(filterTypeField)
+    val optionsParameterIndex = constructor.parameterIndexForField(
+        optionsField,
+        setOf(LIST_DESCRIPTOR, ARRAY_LIST_DESCRIPTOR),
+    )
+    if (filterTypeParameterIndex != 0 || optionsParameterIndex != 3) {
+        throw PatchException(
+            "X-Lite HomeFilterGroup constructor parameter mapping changed: " +
+                "filterType=$filterTypeParameterIndex, options=$optionsParameterIndex",
+        )
+    }
+
     val superIndex = constructor.instructions.withIndex().firstOrNull { (_, instruction) ->
         if (instruction.opcode != Opcode.INVOKE_DIRECT) return@firstOrNull false
         val reference = instruction.getReference<MethodReference>() ?: return@firstOrNull false
@@ -183,10 +199,30 @@ private fun resolveForYouRequestTarget(): ResolvedForYouRequestTarget {
             method.returnType == STRING_DESCRIPTOR
     } ?: throw PatchException("X-Lite HomeTimeline query has no toString(): $queryClass")
     val topicField = queryToString.fieldForToStringLabel(", topic_ids=")
+    val queryDocuments = queryClass.methods.filter { method ->
+        method.returnType == STRING_DESCRIPTOR && method.containsStringFragment("query HomeTimeline(")
+    }
+    val topicWriters = queryClass.methods.filter { method ->
+        method.returnType == "V" && method.containsStringFragment("topic_ids")
+    }
+    if (queryDocuments.size != 1 ||
+        !queryDocuments.single().containsStringFragment("home_timeline_urt") ||
+        !queryDocuments.single().containsStringFragment("topic_ids:") ||
+        topicWriters.size != 1 ||
+        !topicWriters.single().containsFieldReference(topicField)) {
+        throw PatchException(
+            "X-Lite HomeTimeline query does not serialize the expected topic_ids field: " +
+                "documents=${queryDocuments.joinToString { it.toString() }}, " +
+                "writers=${topicWriters.joinToString { it.toString() }}",
+        )
+    }
     val constructorCandidates =
         queryClass.methods.mapNotNull { constructor ->
             if (constructor.name != "<init>" || constructor.returnType != "V") return@mapNotNull null
-            val topicParameterIndex = constructor.parameterIndexForField(topicField) ?: return@mapNotNull null
+            val topicParameterIndex = constructor.parameterIndexForField(
+                topicField,
+                setOf(LIST_DESCRIPTOR),
+            ) ?: return@mapNotNull null
             constructor to topicParameterIndex
         }
 
@@ -227,7 +263,10 @@ private fun resolveForYouRequestTarget(): ResolvedForYouRequestTarget {
     )
 }
 
-private fun Method.parameterIndexForField(field: FieldReference): Int? {
+private fun Method.parameterIndexForField(
+    field: FieldReference,
+    expectedParameterTypes: Set<String> = emptySet(),
+): Int? {
     val implementation = implementation ?: return null
     val instructions = implementation.instructions.toList()
     val parameterRegisterCount = parameterTypes.sumOf { type -> type.toString().registerWidth() }
@@ -244,7 +283,11 @@ private fun Method.parameterIndexForField(field: FieldReference): Int? {
     val sourceRegister = instructions.resolveObjectOriginRegister(writes.single().index, write.registerA)
     val parameterIndex = sourceRegister - thisRegister - 1
     if (parameterIndex !in parameterTypes.indices) return null
-    if (parameterTypes[parameterIndex].toString() != LIST_DESCRIPTOR) return null
+    if (expectedParameterTypes.isNotEmpty() &&
+        parameterTypes[parameterIndex].toString() !in expectedParameterTypes
+    ) {
+        return null
+    }
     return parameterIndex
 }
 
@@ -294,6 +337,18 @@ private fun Instruction.topicArgumentRegister(
 }
 
 private fun String.registerWidth(): Int = if (this == "J" || this == "D") 2 else 1
+
+private fun Method.containsStringFragment(fragment: String): Boolean =
+    implementation?.instructions?.any { instruction ->
+        instruction.getReference<com.android.tools.smali.dexlib2.iface.reference.StringReference>()
+            ?.string
+            ?.contains(fragment) == true
+    } == true
+
+private fun Method.containsFieldReference(field: FieldReference): Boolean =
+    implementation?.instructions?.any { instruction ->
+        instruction.getReference<FieldReference>()?.toString() == field.toString()
+    } == true
 
 private fun MethodReference.matches(method: Method): Boolean =
     definingClass == method.definingClass &&
