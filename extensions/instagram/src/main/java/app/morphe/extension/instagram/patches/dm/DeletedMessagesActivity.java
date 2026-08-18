@@ -26,6 +26,7 @@ import java.util.List;
 
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.settings.preference.widgets.InstagramPreferenceStyle;
 import app.morphe.extension.instagram.db.PikoMessageDb;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
 import app.morphe.extension.crimera.PikoUtils;
@@ -62,10 +63,13 @@ public class DeletedMessagesActivity extends Activity {
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
+        InstagramPreferenceStyle.applySystemBarStyle(this);
 
         // Toolbar
         LinearLayout toolbar = new LinearLayout(this);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
+        toolbar.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
         toolbar.setPadding(Dim.dp8, Dim.dp8, Dim.dp8, Dim.dp8);
 
         ImageView back = new ImageView(this);
@@ -79,7 +83,7 @@ public class DeletedMessagesActivity extends Activity {
         TextView title = new TextView(this);
         title.setText(titleText);
         title.setTextSize(TypedValue.COMPLEX_UNIT_PX, PikoUtils.spToPixels(20));
-        title.setTextColor(UI.getThemedColour("igds_color_primary_icon"));
+        title.setTextColor(InstagramPreferenceStyle.primaryTextColor());
         LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
@@ -96,7 +100,7 @@ public class DeletedMessagesActivity extends Activity {
         TextView clear = new TextView(this);
         clear.setText(str("piko_clear"));
         clear.setTextSize(TypedValue.COMPLEX_UNIT_PX, PikoUtils.spToPixels(16));
-        clear.setTextColor(UI.getThemedColour("igds_color_primary_icon"));
+        clear.setTextColor(InstagramPreferenceStyle.primaryTextColor());
         clear.setPadding(Dim.dp8, Dim.dp8, Dim.dp8, Dim.dp8);
         LinearLayout.LayoutParams clearParams = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 0);
@@ -105,7 +109,7 @@ public class DeletedMessagesActivity extends Activity {
         // push Clear to the right
         LinearLayout.LayoutParams titleP = (LinearLayout.LayoutParams) title.getLayoutParams();
         titleP.weight = 1; title.setLayoutParams(titleP);
-        clear.setOnClickListener(v -> new android.app.AlertDialog.Builder(this)
+        clear.setOnClickListener(v -> new android.app.AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(this))
             .setMessage(clearThreadId != null ? str("piko_clear_chat_confirm") : str("piko_clear_all_confirm"))
             .setPositiveButton(str("piko_clear"), (d, w) -> {
                 PikoMessageDb.getInstance(this).clearSaved(clearThreadId);
@@ -122,7 +126,7 @@ public class DeletedMessagesActivity extends Activity {
             empty.setText(str("piko_no_deleted_messages"));
             empty.setGravity(Gravity.CENTER);
             empty.setPadding(Dim.dp8 * 2, Dim.dp8 * 4, Dim.dp8 * 2, Dim.dp8 * 4);
-            empty.setTextColor(UI.getThemedColour("igds_color_primary_icon"));
+            empty.setTextColor(InstagramPreferenceStyle.secondaryTextColor());
             root.addView(empty, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -132,6 +136,9 @@ public class DeletedMessagesActivity extends Activity {
             ListView listView = new ListView(this);
             adapter = new MessageAdapter();
             listView.setAdapter(adapter);
+            listView.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
+            listView.setDivider(new android.graphics.drawable.ColorDrawable(
+                    UI.getThemedColour("igds_color_separator")));
             listView.setDividerHeight(1);
             listView.setOnItemClickListener((parent, view, pos, idLong) -> {
                 String[] m = messages.get(pos);
@@ -147,7 +154,7 @@ public class DeletedMessagesActivity extends Activity {
             });
             listView.setOnItemLongClickListener((parent, view, pos, idLong) -> {
                 String[] m = messages.get(pos);
-                new android.app.AlertDialog.Builder(this)
+                new android.app.AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(this))
                     .setMessage(str("piko_delete_saved_confirm"))
                     .setPositiveButton(str("piko_delete"), (d, w) -> {
                         PikoMessageDb.getInstance(this).deleteSaved(m[0]); // m[0] = message_id
@@ -223,7 +230,7 @@ public class DeletedMessagesActivity extends Activity {
                 str("piko_copy_media_link"),
             };
 
-            new android.app.AlertDialog.Builder(this)
+            new android.app.AlertDialog.Builder(InstagramPreferenceStyle.dialogContext(this))
                 .setTitle(str("piko_download_options"))
                 .setItems(options, (d, which) -> {
                     try {
@@ -306,15 +313,17 @@ public class DeletedMessagesActivity extends Activity {
 
                 senderView = new TextView(DeletedMessagesActivity.this);
                 senderView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
-                senderView.setTextColor(UI.getThemedColour("igds_color_primary_icon"));
+                senderView.setTextColor(InstagramPreferenceStyle.secondaryTextColor());
                 senderView.setTag("s");
 
                 contentView = new TextView(DeletedMessagesActivity.this);
                 contentView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+                contentView.setTextColor(InstagramPreferenceStyle.primaryTextColor());
                 contentView.setTag("c");
 
                 metaView = new TextView(DeletedMessagesActivity.this);
                 metaView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+                metaView.setTextColor(InstagramPreferenceStyle.secondaryTextColor());
                 metaView.setTag("m");
 
                 row.addView(senderView);
