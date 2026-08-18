@@ -216,6 +216,8 @@
     <string name="piko_open_video_externally">Open video externally</string>
     <string name="piko_open_image_with">Open image with</string>
     <string name="piko_open_video_with">Open video with</string>
+    <string name="piko_opening_media">Opening %s\u2026</string>
+    <string name="piko_download_error">Could not open media</string>
 
     <!-- Like Animation Section -->
     <string name="piko_change_like_animation">Change like animation</string>
