@@ -18,7 +18,7 @@ import java.util.List;
 public class PikoMessageDb extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "piko_dm_vault.db";
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 3;
     private static final String TABLE = "saved_messages";
     // sender_id → username directory. MQTT-delivered items carry only a numeric sender_id;
     // the REST path occasionally carries a full UserInfo. Every time we resolve a username we
@@ -54,7 +54,8 @@ public class PikoMessageDb extends SQLiteOpenHelper {
             "content TEXT," +
             "message_type TEXT," +
             "timestamp INTEGER NOT NULL," +
-            "is_deleted INTEGER DEFAULT 0" +
+            "is_deleted INTEGER DEFAULT 0," +
+            "is_seen INTEGER DEFAULT 0" +
             ")"
         );
         db.execSQL("CREATE INDEX idx_thread_id ON " + TABLE + "(thread_id)");
@@ -73,8 +74,9 @@ public class PikoMessageDb extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Additive upgrade: keep captured messages, just add the new directory table.
+        // Additive upgrade: keep captured messages, just add the new directory table / columns.
         if (oldVersion < 2) createDirTable(db);
+        if (oldVersion < 3) db.execSQL("ALTER TABLE " + TABLE + " ADD COLUMN is_seen INTEGER DEFAULT 0");
     }
 
     /**
@@ -221,6 +223,30 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         ContentValues cv = new ContentValues();
         cv.put("is_deleted", 1);
         db.update(TABLE, cv, "message_id = ?", new String[]{messageId});
+    }
+
+    /** True when a thread has at least one deleted message the user hasn't opened the
+     *  deleted-messages screen for yet. Drives the unseen-deletion badge next to the thread's
+     *  history icon inside the conversation. */
+    public boolean hasUnseenDeletedMessages(String threadId) {
+        if (threadId == null || threadId.isEmpty()) return false;
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.query(TABLE, new String[]{"message_id"},
+                "thread_id = ? AND is_deleted = 1 AND is_seen = 0" + HAS_CONTENT,
+                new String[]{threadId}, null, null, null, "1");
+        boolean unseen = c.moveToFirst();
+        c.close();
+        return unseen;
+    }
+
+    /** Marks every deleted message in a thread as seen — call when the user opens the
+     *  thread-scoped deleted-messages screen, so the badge clears. */
+    public void markThreadSeen(String threadId) {
+        if (threadId == null || threadId.isEmpty()) return;
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("is_seen", 1);
+        db.update(TABLE, cv, "thread_id = ? AND is_deleted = 1", new String[]{threadId});
     }
 
     /** Returns sender_username if non-empty, else sender_id (numeric), else null. */
