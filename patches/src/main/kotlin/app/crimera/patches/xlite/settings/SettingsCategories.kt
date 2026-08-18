@@ -91,15 +91,6 @@ internal object Groups {
             order = 100,
         )
 
-    val TOPIC_FILTERING =
-        SettingsGroupMetadata(
-            id = "xlite.content.topic_filtering",
-            titleResourceName = "piko_xlite_group_topic_filtering_title",
-            summaryResourceName = "piko_xlite_group_topic_filtering_summary",
-            iconResourceName = "ic_vector_filter",
-            order = 200,
-        )
-
     val DYNAMIC_COLORS =
         SettingsGroupMetadata(
             id = "xlite.appearance.dynamic_colors",

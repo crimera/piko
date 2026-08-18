@@ -45,8 +45,6 @@
     <string name="piko_xlite_default_reply_sorting_summary">Default reply-sort order for tweet detail (Relevance, Recency, or Likes)</string>
     <string name="piko_xlite_group_content_filtering_title">Content filtering</string>
     <string name="piko_xlite_group_content_filtering_summary">Control promotions, recommendations, AI-generated posts, and keyword filters</string>
-    <string name="piko_xlite_group_topic_filtering_title">Topic filtering</string>
-    <string name="piko_xlite_group_topic_filtering_summary">Restrict the For You timeline to selected topics</string>
     <string name="piko_xlite_topic_filtering_title">For You topic filter</string>
     <string name="piko_xlite_topic_filtering_summary">Choose topics discovered from X at runtime</string>
     <string name="piko_xlite_topic_filter_enabled_title">Enable topic filtering</string>

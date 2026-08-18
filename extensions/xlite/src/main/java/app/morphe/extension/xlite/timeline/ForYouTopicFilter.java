@@ -1,8 +1,5 @@
 package app.morphe.extension.xlite.timeline;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-
 import androidx.annotation.Nullable;
 
 import org.json.JSONArray;
@@ -19,13 +16,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import app.morphe.extension.shared.Utils;
+import app.morphe.extension.shared.settings.BooleanSetting;
+import app.morphe.extension.shared.settings.StringSetting;
 
 public final class ForYouTopicFilter {
-    private static final String PREFERENCES_NAME = "xlite_for_you_topic_filter";
-    private static final String ENABLED_KEY = "enabled";
-    private static final String SELECTED_TOPIC_IDS_KEY = "selected_topic_ids";
-    private static final String TOPIC_CATALOG_KEY = "topic_catalog";
+    private static final String ENABLED_KEY = "xlite.timeline.topic_filtering.enabled";
+    private static final String SELECTED_TOPIC_IDS_KEY = "xlite.timeline.topic_filtering.selected_topic_ids";
+    private static final String TOPIC_CATALOG_KEY = "xlite.timeline.topic_filtering.topic_catalog";
     private static final String HOME_FILTER_OPTION_PREFIX = "HomeFilterOption(identifier=";
     private static final String RAW_FILTER_OPTION_PREFIX = "Filter(label=";
     private static final String DISPLAY_NAME_SEPARATOR = ", displayName=";
@@ -39,6 +36,24 @@ public final class ForYouTopicFilter {
     private static boolean topicCatalogLoaded;
 
     private ForYouTopicFilter() {
+    }
+
+    public static void initialize() {
+        settings();
+    }
+
+    private static Settings settings() {
+        return Holder.INSTANCE;
+    }
+
+    private static final class Settings {
+        private final BooleanSetting enabled = new BooleanSetting(ENABLED_KEY, false);
+        private final StringSetting selectedTopicIds = new StringSetting(SELECTED_TOPIC_IDS_KEY, "");
+        private final StringSetting topicCatalog = new StringSetting(TOPIC_CATALOG_KEY, "");
+    }
+
+    private static final class Holder {
+        private static final Settings INSTANCE = new Settings();
     }
 
     public static final class Topic {
@@ -87,17 +102,15 @@ public final class ForYouTopicFilter {
         }
         if (captured.isEmpty()) return;
 
-        SharedPreferences preferences = preferences();
-        if (preferences == null) return;
-
+        Settings settings = settings();
         boolean changed;
         synchronized (LOCK) {
-            loadTopicCatalogLocked(preferences);
+            loadTopicCatalogLocked(settings);
             changed = !TOPIC_CATALOG.equals(captured);
             if (!changed) return;
             TOPIC_CATALOG.clear();
             TOPIC_CATALOG.putAll(captured);
-            saveTopicCatalogLocked(preferences);
+            saveTopicCatalogLocked(settings);
         }
         notifyTopicListeners();
     }
@@ -111,56 +124,33 @@ public final class ForYouTopicFilter {
     }
 
     public static List<Topic> topicOptions() {
-        SharedPreferences preferences = preferences();
+        Settings settings = settings();
         synchronized (LOCK) {
-            loadTopicCatalogLocked(preferences);
+            loadTopicCatalogLocked(settings);
             return Collections.unmodifiableList(new ArrayList<>(TOPIC_CATALOG.values()));
         }
     }
 
     public static boolean isEnabled() {
-        SharedPreferences preferences = preferences();
-        if (preferences == null) return false;
-        try {
-            return preferences.getBoolean(ENABLED_KEY, false);
-        } catch (ClassCastException exception) {
-            preferences.edit().remove(ENABLED_KEY).apply();
-            return false;
-        }
+        return settings().enabled.get();
     }
 
     public static void setEnabled(boolean enabled) {
-        SharedPreferences preferences = preferences();
-        if (preferences == null) return;
-        preferences.edit().putBoolean(ENABLED_KEY, enabled).apply();
+        settings().enabled.save(enabled);
     }
 
     public static Set<String> selectedTopicIds() {
-        SharedPreferences preferences = preferences();
-        if (preferences == null) return Collections.emptySet();
-        String serialized;
-        try {
-            serialized = preferences.getString(SELECTED_TOPIC_IDS_KEY, "");
-        } catch (ClassCastException exception) {
-            preferences.edit().remove(SELECTED_TOPIC_IDS_KEY).apply();
-            return Collections.emptySet();
-        }
-        return parseTopicIds(serialized);
+        return parseTopicIds(settings().selectedTopicIds.get());
     }
 
     public static void setSelectedTopicIds(Set<String> topicIds) {
-        SharedPreferences preferences = preferences();
-        if (preferences == null) return;
-
         LinkedHashSet<String> validIds = new LinkedHashSet<>();
         if (topicIds != null) {
             for (String topicId : topicIds) {
                 if (isPositiveTopicId(topicId)) validIds.add(topicId);
             }
         }
-        preferences.edit()
-                .putString(SELECTED_TOPIC_IDS_KEY, String.join(",", validIds))
-                .apply();
+        settings().selectedTopicIds.save(String.join(",", validIds));
     }
 
     @Nullable
@@ -257,24 +247,11 @@ public final class ForYouTopicFilter {
         return Collections.unmodifiableSet(topicIds);
     }
 
-    @Nullable
-    private static SharedPreferences preferences() {
-        Context context = Utils.getContext();
-        if (context == null) return null;
-        return context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
-    }
-
-    private static void loadTopicCatalogLocked(@Nullable SharedPreferences preferences) {
-        if (topicCatalogLoaded || preferences == null) return;
+    private static void loadTopicCatalogLocked(Settings settings) {
+        if (topicCatalogLoaded) return;
         topicCatalogLoaded = true;
-        String serialized;
-        try {
-            serialized = preferences.getString(TOPIC_CATALOG_KEY, "");
-        } catch (ClassCastException exception) {
-            preferences.edit().remove(TOPIC_CATALOG_KEY).apply();
-            return;
-        }
-        if (serialized == null || serialized.isEmpty()) return;
+        String serialized = settings.topicCatalog.get();
+        if (serialized.isEmpty()) return;
 
         try {
             JSONArray array = new JSONArray(serialized);
@@ -285,11 +262,11 @@ public final class ForYouTopicFilter {
                 if (topic != null) TOPIC_CATALOG.put(topic.id, topic);
             }
         } catch (JSONException ignored) {
-            preferences.edit().remove(TOPIC_CATALOG_KEY).apply();
+            settings.topicCatalog.save("");
         }
     }
 
-    private static void saveTopicCatalogLocked(SharedPreferences preferences) {
+    private static void saveTopicCatalogLocked(Settings settings) {
         JSONArray array = new JSONArray();
         for (Topic topic : TOPIC_CATALOG.values()) {
             JSONObject object = new JSONObject();
@@ -301,7 +278,7 @@ public final class ForYouTopicFilter {
                 return;
             }
         }
-        preferences.edit().putString(TOPIC_CATALOG_KEY, array.toString()).apply();
+        settings.topicCatalog.save(array.toString());
     }
 
     private static void notifyTopicListeners() {

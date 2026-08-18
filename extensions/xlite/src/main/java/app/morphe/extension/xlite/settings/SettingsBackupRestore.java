@@ -24,7 +24,9 @@ import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.Setting;
 import app.morphe.extension.shared.ui.CustomDialog;
+import app.morphe.extension.xlite.featureswitches.FeatureSwitchStore;
 import app.morphe.extension.xlite.postfilter.PostFilterRuleStore;
+import app.morphe.extension.xlite.timeline.ForYouTopicFilter;
 
 public final class SettingsBackupRestore {
     private static final int BACKUP_REQUEST_CODE = 0x5042;
@@ -142,6 +144,8 @@ public final class SettingsBackupRestore {
     }
 
     private static void ensureAllSettingsLoaded() {
+        FeatureSwitchStore.shared();
+        ForYouTopicFilter.initialize();
         PostFilterRuleStore.shared();
     }
 

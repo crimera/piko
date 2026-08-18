@@ -1,7 +1,6 @@
 package app.crimera.patches.xlite.timeline
 
 import app.crimera.patches.xlite.settings.Categories
-import app.crimera.patches.xlite.settings.Groups
 import app.crimera.patches.xlite.settings.customScreen
 import app.crimera.patches.xlite.settings.group
 import app.crimera.patches.xlite.settings.settingStrings
@@ -70,15 +69,14 @@ val xLiteForYouTopicFilterPatch =
         compatibleWith(COMPATIBILITY_X_LITE)
 
         xLiteSettings {
-            category(Categories.CONTENT) {
-                group(Groups.TOPIC_FILTERING) {
-                    customScreen(
-                        id = "xlite.content.topic_filtering.manage",
-                        strings = settingStrings("piko_xlite_topic_filtering"),
-                        order = 100,
-                        fragmentClassDescriptor = FOR_YOU_TOPIC_FILTER_FRAGMENT_DESCRIPTOR,
-                    )
-                }
+            category(Categories.TIMELINE) {
+                customScreen(
+                    id = "xlite.content.topic_filtering.manage",
+                    strings = settingStrings("piko_xlite_topic_filtering"),
+                    order = 100,
+                    iconResourceName = "ic_vector_filter",
+                    fragmentClassDescriptor = FOR_YOU_TOPIC_FILTER_FRAGMENT_DESCRIPTOR,
+                )
             }
         }
 
