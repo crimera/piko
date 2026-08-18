@@ -67,6 +67,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "X-Lite: Customize default media tab" \
   -e "X-Lite: Custom font" \
   -e "X-Lite: Open canonical URLs" \
+  -e "X-Lite: Filter For You by topic" \
   --striplibs=arm64-v8a \
   --force \
   -o "$OUTPUT_APK" \
