@@ -85,7 +85,7 @@ public class SettingsActivity extends Activity {
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
 
-        applySystemBarStyle();
+        InstagramPreferenceStyle.applySystemBarStyle(this);
 
         // ---------- Toolbar ----------
         toolbar = new LinearLayout(this);
@@ -180,21 +180,6 @@ public class SettingsActivity extends Activity {
 
     public LinearLayout getCustomContainer() {
         return customContainer;
-    }
-
-    private void applySystemBarStyle() {
-        getWindow().setStatusBarColor(InstagramPreferenceStyle.backgroundColor());
-        getWindow().setNavigationBarColor(InstagramPreferenceStyle.backgroundColor());
-
-        int flags = getWindow().getDecorView().getSystemUiVisibility();
-        if (UI.isDarkMode()) {
-            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        } else {
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        }
-        getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
     // (Keep the nested static SettingsFragment class unchanged)

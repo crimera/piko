@@ -64,7 +64,7 @@ public class DeletedMessagesActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(InstagramPreferenceStyle.backgroundColor());
-        applySystemBarStyle();
+        InstagramPreferenceStyle.applySystemBarStyle(this);
 
         // Toolbar
         LinearLayout toolbar = new LinearLayout(this);
@@ -178,22 +178,6 @@ public class DeletedMessagesActivity extends Activity {
         });
 
         setContentView(root);
-    }
-
-
-    private void applySystemBarStyle() {
-        getWindow().setStatusBarColor(InstagramPreferenceStyle.backgroundColor());
-        getWindow().setNavigationBarColor(InstagramPreferenceStyle.backgroundColor());
-
-        int flags = getWindow().getDecorView().getSystemUiVisibility();
-        if (UI.isDarkMode()) {
-            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        } else {
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
-            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-        }
-        getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
     /** Extension guess from the captured CDN url, falling back to the stored message type. */
