@@ -363,8 +363,9 @@ private fun StringBuilder.appendNodeRegistration(
                         stringValue(node.defaultValue),
                         intValue(node.inputKind.ordinal),
                         booleanValue(node.rebootApp),
+                        nullableStringValue(node.validatorClassDescriptor),
                     ),
-                method = "configureTextInput(Ljava/lang/String;Ljava/lang/String;IZ)V",
+                method = "configureTextInput(Ljava/lang/String;Ljava/lang/String;IZLjava/lang/String;)V",
             )
         }
 

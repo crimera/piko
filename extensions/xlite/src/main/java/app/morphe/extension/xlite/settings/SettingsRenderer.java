@@ -271,11 +271,49 @@ public final class SettingsRenderer {
         preference.setOnPreferenceChangeListener((ignored, newValue) -> {
             String value = String.valueOf(newValue);
             if (item.setting.get().equals(value)) return true;
+            if (!validateTextInput(activity, item, value)) return false;
             item.setting.save(value);
             promptForRestart(activity, item.setting);
             return true;
         });
         return preference;
+    }
+
+    private static boolean validateTextInput(
+            Activity activity,
+            SettingsNode.TextInput item,
+            String value
+    ) {
+        String descriptor = item.validatorClassDescriptor;
+        if (descriptor == null) return true;
+
+        try {
+            SettingsValueValidator validator = instantiateValidator(activity, descriptor);
+            String errorMessage = validator.errorMessage(value);
+            if (errorMessage == null) return true;
+            Utils.showToastShort(errorMessage);
+        } catch (Exception exception) {
+            Logger.printException(
+                    () -> "X-Lite text input validation failed: " + item.id,
+                    exception
+            );
+            Utils.showToastShort(StringRef.str("piko_xlite_setting_validation_failed"));
+        }
+        return false;
+    }
+
+    private static SettingsValueValidator instantiateValidator(
+            Activity activity,
+            String descriptor
+    ) throws ReflectiveOperationException {
+        String className = descriptor.substring(1, descriptor.length() - 1).replace('/', '.');
+        Class<?> validatorClass = Class.forName(className, true, activity.getClassLoader());
+        if (!SettingsValueValidator.class.isAssignableFrom(validatorClass)) {
+            throw new IllegalArgumentException("Not an X-Lite settings validator: " + className);
+        }
+        Constructor<?> constructor = validatorClass.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        return (SettingsValueValidator) constructor.newInstance();
     }
 
     private static ListPreference singleChoice(

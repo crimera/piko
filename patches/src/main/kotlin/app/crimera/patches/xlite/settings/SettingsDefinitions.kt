@@ -53,6 +53,7 @@ internal data class TextInputSettingDefinition(
     override val defaultValue: String,
     override val rebootApp: Boolean = false,
     val inputKind: InputKind = InputKind.TEXT,
+    val validatorClassDescriptor: String? = null,
 ) : ValueSettingDefinition<String>
 
 internal data class ChoiceOption(
@@ -199,6 +200,7 @@ internal class SettingsGroupBuilder(
         defaultValue: String,
         rebootApp: Boolean = false,
         inputKind: InputKind = InputKind.TEXT,
+        validatorClassDescriptor: String? = null,
     ): TextInputSettingDefinition =
         add(
             TextInputSettingDefinition(
@@ -209,6 +211,7 @@ internal class SettingsGroupBuilder(
                 defaultValue,
                 rebootApp,
                 inputKind,
+                validatorClassDescriptor,
             ),
         )
 
@@ -405,8 +408,14 @@ private fun validateSetting(setting: SettingItemDefinition) {
             }
         }
 
-        is TextInputSettingDefinition,
-        is ToggleSettingDefinition,
-        -> Unit
+        is TextInputSettingDefinition -> {
+            setting.validatorClassDescriptor?.let { descriptor ->
+                require(HANDLER_DESCRIPTOR_PATTERN.matches(descriptor)) {
+                    "Invalid text input validator descriptor for ${setting.id}: $descriptor"
+                }
+            }
+        }
+
+        is ToggleSettingDefinition -> Unit
     }
 }

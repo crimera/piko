@@ -112,15 +112,29 @@ public final class SettingsRegistry {
             int inputKind,
             boolean rebootApp
     ) {
+        configureTextInput(id, defaultValue, inputKind, rebootApp, null);
+    }
+
+    public static synchronized void configureTextInput(
+            String id,
+            String defaultValue,
+            int inputKind,
+            boolean rebootApp,
+            @Nullable String validatorClassDescriptor
+    ) {
         ItemBuilder item = requireItem(id, ItemType.TEXT_INPUT);
         requireUnconfigured(item);
         SettingsNode.InputKind[] inputKinds = SettingsNode.InputKind.values();
         if (inputKind < 0 || inputKind >= inputKinds.length) {
             throw failure("Invalid input kind for " + id + ": " + inputKind);
         }
+        if (validatorClassDescriptor != null) {
+            validateClassDescriptor(id, validatorClassDescriptor);
+        }
         item.defaultValue = Objects.requireNonNull(defaultValue);
         item.inputKind = inputKinds[inputKind];
         item.rebootApp = rebootApp;
+        item.validatorClassDescriptor = validatorClassDescriptor;
         item.configured = true;
     }
 
@@ -498,7 +512,8 @@ public final class SettingsRegistry {
                         summary,
                         item.order,
                         setting,
-                        item.inputKind
+                        item.inputKind,
+                        item.validatorClassDescriptor
                 );
             }
             case SINGLE_CHOICE -> {
@@ -713,6 +728,7 @@ public final class SettingsRegistry {
         boolean rebootApp;
         @Nullable Object defaultValue;
         @Nullable SettingsNode.InputKind inputKind;
+        @Nullable String validatorClassDescriptor;
         @Nullable String handlerClassDescriptor;
         @Nullable String fragmentClassDescriptor;
         @Nullable String iconResourceName;

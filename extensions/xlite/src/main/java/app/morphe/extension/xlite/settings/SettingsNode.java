@@ -95,6 +95,7 @@ public abstract class SettingsNode {
 
     public static final class TextInput extends ValueItem<String> {
         public final InputKind inputKind;
+        @Nullable public final String validatorClassDescriptor;
 
         TextInput(
                 String id,
@@ -102,10 +103,12 @@ public abstract class SettingsNode {
                 @Nullable StringRef summary,
                 int order,
                 StringSetting setting,
-                InputKind inputKind
+                InputKind inputKind,
+                @Nullable String validatorClassDescriptor
         ) {
             super(id, title, summary, order, setting);
             this.inputKind = Objects.requireNonNull(inputKind);
+            this.validatorClassDescriptor = validatorClassDescriptor;
         }
     }
 

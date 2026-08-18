@@ -78,6 +78,7 @@ internal fun SettingsGroupBuilder.input(
     defaultValue: String,
     rebootApp: Boolean = false,
     inputKind: InputKind = InputKind.TEXT,
+    validatorClassDescriptor: String? = null,
 ): TextInputSettingDefinition =
     input(
         id = id,
@@ -87,6 +88,7 @@ internal fun SettingsGroupBuilder.input(
         defaultValue = defaultValue,
         rebootApp = rebootApp,
         inputKind = inputKind,
+        validatorClassDescriptor = validatorClassDescriptor,
     )
 
 internal fun SettingsGroupBuilder.singleChoice(
@@ -195,6 +197,7 @@ internal fun BytecodePatchBuilder.xLiteTextInput(
     defaultValue: String,
     rebootApp: Boolean = false,
     inputKind: InputKind = InputKind.TEXT,
+    validatorClassDescriptor: String? = null,
 ): TextInputSettingDefinition =
     xLiteSettings {
         category(category) {
@@ -206,6 +209,7 @@ internal fun BytecodePatchBuilder.xLiteTextInput(
                 defaultValue = defaultValue,
                 rebootApp = rebootApp,
                 inputKind = inputKind,
+                validatorClassDescriptor = validatorClassDescriptor,
             )
         }
     }
