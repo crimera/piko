@@ -26,20 +26,36 @@ public final class ReplySortingResolver {
     }
 
     public static Object getEnumDefault(Class<?> enumClass) {
+        if (enumClass == null || !enumClass.isEnum()) {
+            Logger.printException(
+                    () -> "Failed to resolve X-Lite reply sorting enum: target is not an enum",
+                    new IllegalArgumentException("Expected an enum class: " + enumClass)
+            );
+            return null;
+        }
+
         try {
             Object[] constants = enumClass.getEnumConstants();
-            if (constants != null && constants.length > 0) {
-                String mode = getDefault();
-                for (Object constant : constants) {
-                    if (constant instanceof Enum<?> e && e.name().equalsIgnoreCase(mode)) {
-                        return constant;
-                    }
-                }
+            if (constants == null || constants.length == 0) {
+                throw new IllegalStateException("Enum has no constants: " + enumClass.getName());
             }
+
+            String mode = getDefault();
+            Object fallback = null;
+            for (Object constant : constants) {
+                if (!(constant instanceof Enum<?> enumConstant)) continue;
+                if (DEFAULT_FALLBACK.equalsIgnoreCase(enumConstant.name())) fallback = constant;
+                if (enumConstant.name().equalsIgnoreCase(mode)) return constant;
+            }
+            if (fallback != null) return fallback;
+
+            throw new IllegalStateException(
+                    "Enum " + enumClass.getName() + " has no reply sorting mode: " + mode
+            );
         } catch (Throwable t) {
             Logger.printException(() -> "Failed to resolve X-Lite reply sorting enum", t);
+            return null;
         }
-        return null;
     }
 
     public static String getDefault() {
@@ -65,15 +81,18 @@ public final class ReplySortingResolver {
 
     public static void remember(Object enumObject) {
         if (enumObject == null) return;
+        if (!(enumObject instanceof Enum<?> enumValue)) {
+            Logger.printException(
+                    () -> "Ignoring non-enum X-Lite reply sorting value",
+                    new IllegalArgumentException("Expected an enum value: " + enumObject.getClass().getName())
+            );
+            return;
+        }
+
         try {
             if (!SettingsRegistry.getBoolean(REMEMBER_SETTING)) return;
-            String name = null;
-            if (enumObject instanceof Enum<?> e && isValidMode(e.name())) {
-                name = e.name();
-            } else {
-                name = enumObject.toString();
-            }
-            if (name == null || name.isEmpty()) return;
+            String name = enumValue.name();
+            if (!isValidMode(name)) return;
 
             preferences().saveString(LAST_KEY, name);
         } catch (RuntimeException exception) {
