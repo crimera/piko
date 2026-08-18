@@ -1,7 +1,6 @@
 package app.morphe.extension.xlite.theme;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 
@@ -249,8 +248,7 @@ public final class DynamicColorPalette {
                     "X-Lite dynamic color needs the initialized host application context"
             );
         }
-        int nightMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        return nightMode == Configuration.UI_MODE_NIGHT_YES;
+        return TwitterTheme.fromContext(context).isDark();
     }
 
     private static long colorWithAlpha(String resourceName, int alpha) {

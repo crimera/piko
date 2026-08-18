@@ -3,7 +3,6 @@ package app.morphe.extension.xlite.settings;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -25,6 +24,7 @@ import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.xlite.featureswitches.FeatureSwitchImportExport;
 import app.morphe.extension.xlite.misc.UpdateFont;
+import app.morphe.extension.xlite.theme.TwitterTheme;
 import app.morphe.extension.xlite.ui.Theme;
 
 @SuppressWarnings("deprecation")
@@ -140,21 +140,16 @@ public final class XLiteSettingsActivity extends Activity {
         if (baseStyle == 0) baseStyle = style("Theme.AppCompat.DayNight.NoActionBar");
         if (baseStyle != 0) getTheme().applyStyle(baseStyle, true);
 
-        int paletteStyle = style(isSystemDark(this) ? "Twitter.LightsOut" : "Twitter.Standard");
+        TwitterTheme appTheme = TwitterTheme.fromContext(this);
+        int paletteStyle = style(appTheme.styleResourceName());
         if (paletteStyle != 0) getTheme().applyStyle(paletteStyle, true);
     }
 
     static Context createPreferenceContext(Context context) {
-        int theme = isSystemDark(context)
+        int theme = Theme.isDark(context)
                 ? android.R.style.Theme_Material_NoActionBar
                 : android.R.style.Theme_Material_Light_NoActionBar;
         return new ContextThemeWrapper(context, theme);
-    }
-
-    private static boolean isSystemDark(Context context) {
-        int nightMode = context.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK;
-        return nightMode == Configuration.UI_MODE_NIGHT_YES;
     }
 
     private int createContentView() {
@@ -298,7 +293,7 @@ public final class XLiteSettingsActivity extends Activity {
         int lightBarFlags = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
                 | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
         decorView.setSystemUiVisibility(
-                isSystemDark(this) ? visibility & ~lightBarFlags : visibility | lightBarFlags
+                Theme.isDark(this) ? visibility & ~lightBarFlags : visibility | lightBarFlags
         );
         if (Build.VERSION.SDK_INT < 35) return;
 

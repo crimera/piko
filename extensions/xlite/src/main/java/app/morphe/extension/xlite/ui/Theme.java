@@ -1,12 +1,12 @@
 package app.morphe.extension.xlite.ui;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
 import android.util.TypedValue;
 
 import app.morphe.extension.xlite.settings.SettingsRegistry;
+import app.morphe.extension.xlite.theme.TwitterTheme;
 
 /**
  * Material design system color tokens and metrics for X-Lite UI components.
@@ -19,9 +19,7 @@ public final class Theme {
     }
 
     public static boolean isDark(Context context) {
-        if (context == null) return true;
-        int nightMode = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        return nightMode == Configuration.UI_MODE_NIGHT_YES;
+        return TwitterTheme.fromContext(context).isDark();
     }
 
     public static int dpToPx(Context context, float dp) {
