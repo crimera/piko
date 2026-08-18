@@ -259,18 +259,52 @@ public class MediaData extends Entity {
 
     public String getVideoLink() throws Exception {
         List<VideoData> videoDataList = this.getVideoVariants();
-        if(videoDataList!=null){
-            return videoDataList.get(0).getUrl();
-        }
-        return null;
+        VideoData best = highestResolutionVideo(videoDataList);
+        return best != null ? best.getUrl() : null;
     }
-    
+
     public String getImageLink() throws Exception {
         List<ImageData> imageDataList = this.getImageVariants();
-        if(imageDataList!=null){
-            return imageDataList.get(0).getUrl();
+        ImageData best = highestResolutionImage(imageDataList);
+        return best != null ? best.getUrl() : null;
+    }
+
+    /** Picks the variant with the largest width*height, falling back to index 0 if any
+     *  dimension lookup fails (variant lists aren't guaranteed to be sorted by resolution). */
+    private static VideoData highestResolutionVideo(List<VideoData> variants) {
+        if (variants == null || variants.isEmpty()) return null;
+        VideoData best = variants.get(0);
+        long bestArea = -1;
+        for (VideoData variant : variants) {
+            try {
+                long area = (long) variant.getWidth() * (long) variant.getHeight();
+                if (area > bestArea) {
+                    bestArea = area;
+                    best = variant;
+                }
+            } catch (Exception ignored) {
+                // Keep whatever "best" already holds; a variant we can't measure never wins.
+            }
         }
-        return null;
+        return best;
+    }
+
+    private static ImageData highestResolutionImage(List<ImageData> variants) {
+        if (variants == null || variants.isEmpty()) return null;
+        ImageData best = variants.get(0);
+        long bestArea = -1;
+        for (ImageData variant : variants) {
+            try {
+                long area = (long) variant.getWidth() * (long) variant.getHeight();
+                if (area > bestArea) {
+                    bestArea = area;
+                    best = variant;
+                }
+            } catch (Exception ignored) {
+                // Keep whatever "best" already holds; a variant we can't measure never wins.
+            }
+        }
+        return best;
     }
 
 
