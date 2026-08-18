@@ -6,6 +6,7 @@
 
 package app.morphe.extension.instagram.settings.preference.widgets;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -98,6 +99,21 @@ public final class InstagramPreferenceStyle {
 
     public static int disabledTextColor() {
         return UI.getThemedColour("igds_color_separator");
+    }
+
+    public static void applySystemBarStyle(Activity activity) {
+        activity.getWindow().setStatusBarColor(backgroundColor());
+        activity.getWindow().setNavigationBarColor(backgroundColor());
+
+        int flags = activity.getWindow().getDecorView().getSystemUiVisibility();
+        if (UI.isDarkMode()) {
+            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        } else {
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        }
+        activity.getWindow().getDecorView().setSystemUiVisibility(flags);
     }
 
     public static View createPreferenceView(Context context, int trailingType) {
