@@ -227,6 +227,10 @@
     <string name="piko_xlite_font_delete_failed">Font deletion failed</string>
     <string name="piko_xlite_font_not_found">No custom font found to be deleted</string>
 
+    <string name="piko_xlite_custom_sharing_domain_title">Custom sharing domain</string>
+    <string name="piko_xlite_custom_sharing_domain_summary">Replace x.com with a custom domain (like fxtwitter.com) when sharing posts</string>
+    <string name="piko_xlite_custom_sharing_domain_invalid">Malformed custom sharing domain</string>
+
     <string name="piko_xlite_restart_title">Restart X?</string>
     <string name="piko_xlite_restart_summary">Restart the app now to apply this change.</string>
     <string name="piko_xlite_restart_now">Restart now</string>
