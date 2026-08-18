@@ -28,6 +28,7 @@ import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.constants.Constants;
 import app.morphe.extension.instagram.db.PikoMessageDb;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
+import app.morphe.extension.instagram.settings.ActivityHook;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.ui.Dim;
@@ -57,6 +58,9 @@ public class DeletedMessagesActivity extends Activity {
         messages = threadId != null
             ? PikoMessageDb.getInstance(this).getDeletedMessagesForThread(threadId)
             : PikoMessageDb.getInstance(this).getDeletedMessages();
+
+        // Clears the unseen-deletion badge shown next to the history icon in the conversation.
+        if (threadId != null) PikoMessageDb.getInstance(this).markThreadSeen(threadId);
 
         String titleText = threadId != null ? str("piko_deleted_in_chat") : str("piko_all_deleted_messages");
 
@@ -208,7 +212,12 @@ public class DeletedMessagesActivity extends Activity {
         try {
             final boolean isAudio = "voice_media".equals(type) || "audio".equals(type)
                     || url.matches("(?i).*\\.(m4a|aac|mp3|ogg)(\\?.*)?$");
-            final boolean isVideo = "video".equals(type) || "clip".equals(type) || "xma_clip".equals(type);
+            // item_type alone can't tell photo from video — a plain photo and a plain video DM
+            // both come through as "media" (or "raven_media" for disappearing media); the actual
+            // type lives on the Media object, not the DirectItem. "clip"/"xma_clip" cover reel
+            // shares, but for everything else we fall back to sniffing the real CDN url extension.
+            final boolean isVideo = "clip".equals(type) || "xma_clip".equals(type)
+                    || url.matches("(?i).*\\.(mp4|mov|m4v|webm)(\\?.*)?$");
             // A shared post/reel is stored as an instagram.com permalink and opens inside the IG app,
             // so label its action "Open in Instagram" rather than "open externally".
             final boolean isShare = url.contains("instagram.com/reel/")
@@ -233,29 +242,26 @@ public class DeletedMessagesActivity extends Activity {
                         } else if (which == 2) {
                             Utils.setClipboard(url);
                             Utils.showToastShort(str("piko_copied_media_link"));
-                        } else {
+                        } else if (isShare) {
                             android.net.Uri uri = android.net.Uri.parse(url);
-                            // Reels/posts are stored as instagram.com permalinks — open them inside
-                            // the Instagram app itself (setPackage) so they render natively; only fall
-                            // back to a browser chooser if IG can't handle the link.
-                            boolean igLink = url.contains("instagram.com/reel/")
-                                    || url.contains("instagram.com/p/")
-                                    || url.contains("instagram.com/tv/");
-                            boolean opened = false;
-                            if (igLink) {
-                                try {
-                                    startActivity(new android.content.Intent(
-                                            android.content.Intent.ACTION_VIEW, uri)
-                                            .setPackage("com.instagram.android"));
-                                    opened = true;
-                                } catch (android.content.ActivityNotFoundException ignored) {}
+                            try {
+                                startActivity(new android.content.Intent(
+                                        android.content.Intent.ACTION_VIEW, uri)
+                                        .setPackage("com.instagram.android"));
+                            } catch (android.content.ActivityNotFoundException ignored) {
+                                startActivity(android.content.Intent.createChooser(
+                                        new android.content.Intent(android.content.Intent.ACTION_VIEW, uri), null));
                             }
-                            if (!opened) {
-                                android.content.Intent i = new android.content.Intent(
-                                        android.content.Intent.ACTION_VIEW, uri);
-                                if (isAudio) i.setDataAndType(uri, "audio/*");
-                                startActivity(android.content.Intent.createChooser(i, null));
-                            }
+                        } else if (isAudio) {
+                            android.net.Uri uri = android.net.Uri.parse(url);
+                            android.content.Intent i = new android.content.Intent(android.content.Intent.ACTION_VIEW, uri);
+                            i.setDataAndType(uri, "audio/*");
+                            startActivity(android.content.Intent.createChooser(i, null));
+                        } else {
+                            // Photo/video: same helper used for regular post media downloads/open —
+                            // it takes care of getting a local/content URI so gallery apps can open it,
+                            // instead of handing them a raw remote CDN url.
+                            ActivityHook.handleUrlIntent(isVideo, url);
                         }
                     } catch (Exception e) {
                         android.util.Log.e("piko", "showMediaOptions action: " + e);
