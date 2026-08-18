@@ -1,12 +1,9 @@
 package app.morphe.extension.xlite.featureswitches;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -17,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -35,6 +31,8 @@ import java.util.List;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.xlite.settings.XLiteSettingsActivity;
 import app.morphe.extension.xlite.settings.XLiteSettingsUi;
+import app.morphe.extension.xlite.ui.ButtonView;
+import app.morphe.extension.xlite.ui.DialogView;
 import app.morphe.extension.xlite.ui.Theme;
 
 @SuppressWarnings("deprecation")
@@ -145,14 +143,7 @@ public final class FeatureSwitchFragment extends Fragment implements FeatureSwit
 
     private void showAddDialog() {
         Context context = requireContext();
-        LinearLayout form = new LinearLayout(context);
-        form.setOrientation(LinearLayout.VERTICAL);
-        form.setPadding(
-                Theme.dpToPx(context, 24f),
-                Theme.dpToPx(context, 8f),
-                Theme.dpToPx(context, 24f),
-                0
-        );
+        LinearLayout form = dialogForm(context);
 
         EditText key = XLiteSettingsUi.textInput(
                 context,
@@ -162,55 +153,76 @@ public final class FeatureSwitchFragment extends Fragment implements FeatureSwit
         key.setSingleLine(true);
         form.addView(key, new LinearLayout.LayoutParams(-1, -2));
 
-        Spinner type = new Spinner(context);
+        LinearLayout typeRow = new LinearLayout(context);
+        typeRow.setGravity(Gravity.CENTER_VERTICAL);
+        typeRow.setMinimumHeight(Theme.dpToPx(context, 56f));
+        typeRow.setPadding(
+                Theme.dpToPx(context, 16f),
+                0,
+                Theme.dpToPx(context, 8f),
+                0
+        );
+
+        TextView typeTitle = XLiteSettingsUi.titleText(context);
+        typeTitle.setText(StringRef.str("piko_xlite_feature_switch_value_type"));
+        typeTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        typeTitle.setSingleLine(true);
+        typeRow.addView(typeTitle, new LinearLayout.LayoutParams(0, -2, 1f));
+
+        Spinner type = new Spinner(context, Spinner.MODE_DROPDOWN);
         String[] typeLabels = Arrays.stream(FeatureSwitchStore.ValueType.values())
                 .map(this::typeLabel)
                 .toArray(String[]::new);
-        ArrayAdapter<String> typeAdapter = new ArrayAdapter<>(
+        ArrayAdapter<String> typeAdapter = new ArrayAdapter<String>(
                 context,
                 android.R.layout.simple_spinner_item,
                 typeLabels
-        );
+        ) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                TextView item = (TextView) super.getView(position, convertView, parent);
+                item.setTextColor(Theme.primaryText(context));
+                item.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+                item.setGravity(Gravity.CENTER_VERTICAL | Gravity.END);
+                item.setPadding(0, 0, Theme.dpToPx(context, 8f), 0);
+                return item;
+            }
+        };
         typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         type.setAdapter(typeAdapter);
-        form.addView(type, new LinearLayout.LayoutParams(-1, -2));
+        type.setMinimumHeight(Theme.dpToPx(context, 56f));
+        typeRow.addView(type, new LinearLayout.LayoutParams(-2, -1));
+        form.addView(typeRow, new LinearLayout.LayoutParams(-1, -2));
 
-        TextView validation = new TextView(context);
-        validation.setTextColor(Color.rgb(244, 33, 46));
-        validation.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        validation.setPadding(0, Theme.dpToPx(context, 8f), 0, 0);
-        validation.setVisibility(View.GONE);
+        TextView validation = validationText(context);
         form.addView(validation, new LinearLayout.LayoutParams(-1, -2));
 
-        AlertDialog dialog = new AlertDialog.Builder(context)
+        DialogView dialog = new DialogView(context)
                 .setTitle(StringRef.str("piko_xlite_feature_switch_add_title"))
-                .setView(form)
-                .setPositiveButton(StringRef.str("piko_xlite_feature_switch_next"), null)
-                .setNegativeButton(StringRef.str("piko_xlite_feature_switch_cancel"), null)
-                .create();
-        dialog.setOnShowListener(ignored -> {
-            styleDialogButtons(dialog);
-            Button next = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-            if (next == null) return;
-            next.setOnClickListener(button -> {
-                String featureKey = key.getText().toString().trim();
-                if (featureKey.isEmpty()) {
-                    validation.setText(StringRef.str("piko_xlite_feature_switch_invalid_key"));
-                    validation.setVisibility(View.VISIBLE);
-                    return;
-                }
-                if (store.hasEntry(featureKey)) {
-                    validation.setText(StringRef.str("piko_xlite_feature_switch_duplicate_key"));
-                    validation.setVisibility(View.VISIBLE);
-                    return;
-                }
-                FeatureSwitchStore.ValueType valueType =
-                        FeatureSwitchStore.ValueType.values()[type.getSelectedItemPosition()];
-                dialog.dismiss();
-                showValueEditor(featureKey, valueType, defaultValue(valueType), false);
-            });
+                .setBodyView(form);
+        dialog.getDialog().setCanceledOnTouchOutside(true);
+
+        ButtonView next = new ButtonView(
+                context,
+                ButtonView.ButtonStyle.TEXT,
+                StringRef.str("piko_xlite_feature_switch_next")
+        );
+        next.setOnClickListener(ignored -> {
+            String featureKey = key.getText().toString().trim();
+            if (featureKey.isEmpty()) {
+                showValidation(validation, "piko_xlite_feature_switch_invalid_key");
+                return;
+            }
+            if (store.hasEntry(featureKey)) {
+                showValidation(validation, "piko_xlite_feature_switch_duplicate_key");
+                return;
+            }
+            FeatureSwitchStore.ValueType valueType =
+                    FeatureSwitchStore.ValueType.values()[type.getSelectedItemPosition()];
+            dialog.dismiss();
+            showValueEditor(featureKey, valueType, defaultValue(valueType), false);
         });
-        dialog.show();
+        dialog.addButton(next).show();
     }
 
     private void showValueEditor(
@@ -220,19 +232,7 @@ public final class FeatureSwitchFragment extends Fragment implements FeatureSwit
             boolean overridden
     ) {
         Context context = requireContext();
-        LinearLayout form = new LinearLayout(context);
-        form.setOrientation(LinearLayout.VERTICAL);
-        form.setPadding(
-                Theme.dpToPx(context, 24f),
-                Theme.dpToPx(context, 8f),
-                Theme.dpToPx(context, 24f),
-                0
-        );
-
-        TextView key = XLiteSettingsUi.summaryText(context);
-        key.setText(featureKey);
-        key.setTextIsSelectable(true);
-        form.addView(key, new LinearLayout.LayoutParams(-1, -2));
+        LinearLayout form = dialogForm(context);
 
         XLiteSettingsUi.SwitchRow booleanValue = null;
         EditText textValue = null;
@@ -243,6 +243,7 @@ public final class FeatureSwitchFragment extends Fragment implements FeatureSwit
                     null,
                     Boolean.TRUE.equals(effectiveValue)
             );
+            booleanValue.setBackgroundColor(Color.TRANSPARENT);
             form.addView(booleanValue, new LinearLayout.LayoutParams(-1, -2));
         } else {
             textValue = XLiteSettingsUi.textInput(
@@ -259,86 +260,91 @@ public final class FeatureSwitchFragment extends Fragment implements FeatureSwit
             form.addView(textValue, new LinearLayout.LayoutParams(-1, -2));
         }
 
-        TextView validation = new TextView(context);
-        validation.setTextColor(Color.rgb(244, 33, 46));
-        validation.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        validation.setPadding(0, Theme.dpToPx(context, 8f), 0, 0);
-        validation.setVisibility(View.GONE);
+        TextView validation = validationText(context);
         form.addView(validation, new LinearLayout.LayoutParams(-1, -2));
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context)
+        DialogView dialog = new DialogView(context)
                 .setTitle(StringRef.str("piko_xlite_feature_switch_edit_title"))
-                .setView(form)
-                .setPositiveButton(StringRef.str("piko_xlite_feature_switch_save"), null)
-                .setNegativeButton(StringRef.str("piko_xlite_feature_switch_cancel"), null);
+                .setSubtitle(featureKey)
+                .setBodyView(form);
+        ButtonView remove = null;
         if (overridden) {
-            builder.setNeutralButton(StringRef.str("piko_xlite_feature_switch_remove"), null);
+            remove = new ButtonView(
+                    context,
+                    ButtonView.ButtonStyle.TEXT,
+                    StringRef.str("piko_xlite_feature_switch_remove")
+            );
+            remove.setTextColor(Color.rgb(244, 33, 46));
+            remove.setOnClickListener(ignored -> {
+                store.removeOverride(featureKey);
+                refresh();
+                dialog.dismiss();
+            });
         }
 
-        AlertDialog dialog = builder.create();
+        dialog.getDialog().setCanceledOnTouchOutside(true);
+
+        ButtonView save = new ButtonView(
+                context,
+                ButtonView.ButtonStyle.TEXT,
+                StringRef.str("piko_xlite_feature_switch_save")
+        );
         XLiteSettingsUi.SwitchRow finalBooleanValue = booleanValue;
         EditText finalTextValue = textValue;
-        dialog.setOnShowListener(ignored -> configureDialog(
+        save.setOnClickListener(ignored -> saveValue(
                 dialog,
                 featureKey,
                 featureType,
-                overridden,
                 finalBooleanValue,
                 finalTextValue,
                 validation
         ));
-        dialog.show();
-        if (dialog.getWindow() == null) return;
-        GradientDrawable background = new GradientDrawable();
-        background.setColor(Theme.surfaceContainerHigh(context));
-        background.setCornerRadius(Theme.dpToPx(context, 28f));
-        dialog.getWindow().setBackgroundDrawable(background);
+
+        if (remove != null) dialog.addButton(remove);
+        dialog.addButton(save).show();
     }
 
-    private void configureDialog(
-            AlertDialog dialog,
+    private LinearLayout dialogForm(Context context) {
+        LinearLayout form = new LinearLayout(context);
+        form.setOrientation(LinearLayout.VERTICAL);
+        form.setPadding(
+                Theme.dpToPx(context, 24f),
+                0,
+                Theme.dpToPx(context, 24f),
+                0
+        );
+        return form;
+    }
+
+    private TextView validationText(Context context) {
+        TextView validation = XLiteSettingsUi.summaryText(context);
+        validation.setTextColor(Color.rgb(244, 33, 46));
+        validation.setPadding(0, Theme.dpToPx(context, 8f), 0, 0);
+        validation.setVisibility(View.GONE);
+        return validation;
+    }
+
+    private void showValidation(TextView validation, String resourceName) {
+        validation.setText(StringRef.str(resourceName));
+        validation.setVisibility(View.VISIBLE);
+    }
+
+    private void saveValue(
+            DialogView dialog,
             String featureKey,
             FeatureSwitchStore.ValueType featureType,
-            boolean overridden,
             @Nullable XLiteSettingsUi.SwitchRow booleanValue,
             @Nullable EditText textValue,
             TextView validation
     ) {
-        Context context = dialog.getContext();
-        styleDialogButtons(dialog);
-        Button save = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        if (save != null) {
-            save.setOnClickListener(ignored -> {
-                try {
-                    Object value = parseValue(featureType, booleanValue, textValue);
-                    store.setOverride(featureKey, featureType, value);
-                    refresh();
-                    dialog.dismiss();
-                } catch (IllegalArgumentException exception) {
-                    validation.setText(StringRef.str("piko_xlite_feature_switch_invalid_value"));
-                    validation.setVisibility(View.VISIBLE);
-                }
-            });
-        }
-
-        if (!overridden) return;
-
-        Button remove = dialog.getButton(DialogInterface.BUTTON_NEUTRAL);
-        if (remove == null) return;
-        remove.setTextColor(Color.rgb(244, 33, 46));
-        remove.setOnClickListener(ignored -> {
-            store.removeOverride(featureKey);
+        try {
+            Object value = parseValue(featureType, booleanValue, textValue);
+            store.setOverride(featureKey, featureType, value);
             refresh();
             dialog.dismiss();
-        });
-    }
-
-    private void styleDialogButtons(AlertDialog dialog) {
-        int actionColor = Theme.primaryAccent(dialog.getContext());
-        Button positive = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        if (positive != null) positive.setTextColor(actionColor);
-        Button negative = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-        if (negative != null) negative.setTextColor(actionColor);
+        } catch (IllegalArgumentException exception) {
+            showValidation(validation, "piko_xlite_feature_switch_invalid_value");
+        }
     }
 
     private Object parseValue(

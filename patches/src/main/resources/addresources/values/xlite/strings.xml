@@ -165,11 +165,14 @@
     <string name="piko_xlite_feature_switch_add">Add feature switch</string>
     <string name="piko_xlite_feature_switch_add_title">Add feature switch</string>
     <string name="piko_xlite_feature_switch_key_hint">Feature switch key</string>
+    <string name="piko_xlite_feature_switch_value_type">Value type</string>
     <string name="piko_xlite_feature_switch_next">Next</string>
     <string name="piko_xlite_feature_switch_invalid_key">Enter a feature switch key.</string>
     <string name="piko_xlite_feature_switch_duplicate_key">This feature switch is already listed.</string>
     <string name="piko_xlite_feature_switch_empty">No feature switches have been observed yet. Use X, then return to this screen.</string>
     <string name="piko_xlite_feature_switch_no_results">No matching feature switches</string>
+    <string name="piko_xlite_feature_switch_overridden_section">Overridden</string>
+    <string name="piko_xlite_feature_switch_not_overridden_section">Default</string>
     <string name="piko_xlite_feature_switch_edit_title">Edit feature switch</string>
     <string name="piko_xlite_feature_switch_boolean_value">Boolean value</string>
     <string name="piko_xlite_feature_switch_number_value">Number value</string>
@@ -179,7 +182,6 @@
     <string name="piko_xlite_feature_switch_cancel">Cancel</string>
     <string name="piko_xlite_feature_switch_remove">Remove override</string>
     <string name="piko_xlite_feature_switch_invalid_value">Enter a valid value for this switch type.</string>
-    <string name="piko_xlite_feature_switch_override_summary">Override · %1$s · %2$s</string>
     <string name="piko_xlite_feature_switch_null">null</string>
     <string name="piko_xlite_feature_switch_type_boolean">Boolean</string>
     <string name="piko_xlite_feature_switch_type_int">Integer</string>
