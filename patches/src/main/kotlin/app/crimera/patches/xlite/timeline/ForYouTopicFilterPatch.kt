@@ -2,19 +2,17 @@ package app.crimera.patches.xlite.timeline
 
 import app.crimera.patches.xlite.settings.Categories
 import app.crimera.patches.xlite.settings.Groups
-import app.crimera.patches.xlite.settings.SettingReadRegisterConstraint
-import app.crimera.patches.xlite.settings.choice
+import app.crimera.patches.xlite.settings.customScreen
 import app.crimera.patches.xlite.settings.group
-import app.crimera.patches.xlite.settings.injectRead
-import app.crimera.patches.xlite.settings.multiChoice
 import app.crimera.patches.xlite.settings.settingStrings
-import app.crimera.patches.xlite.settings.toggle
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.models.fieldForToStringLabel
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.FOR_YOU_TOPIC_FILTER_DESCRIPTOR
+import app.crimera.patches.xlite.utils.Constants.FOR_YOU_TOPIC_FILTER_FRAGMENT_DESCRIPTOR
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.Match
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
@@ -23,10 +21,10 @@ import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
 import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.ClassDef
 import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
@@ -36,24 +34,18 @@ import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
-private const val SET_DESCRIPTOR = "Ljava/util/Set;"
+private const val ARRAY_LIST_DESCRIPTOR = "Ljava/util/ArrayList;"
 private const val TIMELINE_TYPE_DESCRIPTOR = "Lcom/x/models/timelines/TimelineType;"
 private const val HOME_TIMELINE_PACKAGE = "Lcom/x/android/main/"
-private const val TOPIC_FILTER_ENABLED_ID = "xlite.content.topic_filtering.enabled"
-private const val TOPIC_FILTER_TOPICS_ID = "xlite.content.topic_filtering.topics"
+private const val HOME_MODELS_PACKAGE = "Lcom/x/models/"
 
-private val HOME_TOPIC_OPTIONS =
-    listOf(
-        choice("1925952771733262336", "piko_xlite_topic_filter_politics"),
-        choice("1000000000000000034", "piko_xlite_topic_filter_sports"),
-        choice("1000000000000000033", "piko_xlite_topic_filter_business"),
-        choice("1000000000000000031", "piko_xlite_topic_filter_science"),
-        choice("1000000000000000032", "piko_xlite_topic_filter_entertainment"),
-        choice("1925953013547450368", "piko_xlite_topic_filter_ai"),
-        choice("1925949766673797120", "piko_xlite_topic_filter_gaming"),
-        choice("1925949693290295298", "piko_xlite_topic_filter_crypto"),
-        choice("42", "piko_xlite_topic_filter_videos"),
-    )
+private object HomeFilterGroupFingerprint : Fingerprint(
+    definingClass = HOME_MODELS_PACKAGE,
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    filters = listOf(string("HomeFilterGroup(filterType=")),
+)
 
 private object HomeTimelineQueryFingerprint : Fingerprint(
     definingClass = HOME_TIMELINE_PACKAGE,
@@ -77,29 +69,22 @@ val xLiteForYouTopicFilterPatch =
     ) {
         compatibleWith(COMPATIBILITY_X_LITE)
 
-        val (topicFilterEnabled, topicFilterTopics) =
-            xLiteSettings {
-                category(Categories.CONTENT) {
-                    group(Groups.TOPIC_FILTERING) {
-                        toggle(
-                            id = TOPIC_FILTER_ENABLED_ID,
-                            strings = settingStrings("piko_xlite_topic_filtering_enabled"),
-                            order = 100,
-                            defaultValue = false,
-                            rebootApp = true,
-                        ) to
-                            multiChoice(
-                                id = TOPIC_FILTER_TOPICS_ID,
-                                strings = settingStrings("piko_xlite_topic_filtering_topics"),
-                                order = 200,
-                                defaultValue = emptySet(),
-                                options = HOME_TOPIC_OPTIONS,
-                            )
-                    }
+        xLiteSettings {
+            category(Categories.CONTENT) {
+                group(Groups.TOPIC_FILTERING) {
+                    customScreen(
+                        id = "xlite.content.topic_filtering.manage",
+                        strings = settingStrings("piko_xlite_topic_filtering"),
+                        order = 100,
+                        fragmentClassDescriptor = FOR_YOU_TOPIC_FILTER_FRAGMENT_DESCRIPTOR,
+                    )
                 }
             }
+        }
 
         execute {
+            patchHomeFilterGroupConstructor()
+
             val target = resolveForYouRequestTarget()
             val matches = target.requestFingerprint.scopedMatchAll()
             if (matches.size != 1) {
@@ -128,36 +113,60 @@ val xLiteForYouTopicFilterPatch =
                 target.queryConstructor,
                 target.topicParameterIndex,
             )
-            if (topicRegister !in 0..15) {
-                throw PatchException(
-                    "X-Lite For You topic list uses unsupported register v$topicRegister; " +
-                        "expected a four-bit register",
-                )
-            }
-
-            val enabledRead =
-                topicFilterEnabled.injectRead(
-                    method = method,
-                    index = constructorIndex,
-                    excludedRegisters = listOf(topicRegister),
-                    registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
-                )
-            val topicsRead =
-                topicFilterTopics.injectRead(
-                    method = method,
-                    index = enabledRead.nextIndex,
-                    excludedRegisters = listOf(topicRegister, enabledRead.register),
-                    registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
-                )
             method.addInstructions(
-                topicsRead.nextIndex,
+                constructorIndex,
                 """
-                    invoke-static {v$topicRegister, v${enabledRead.register}, v${topicsRead.register}}, $FOR_YOU_TOPIC_FILTER_DESCRIPTOR->resolveForYouTopicIds(Ljava/util/List;ZLjava/util/Set;)Ljava/util/List;
+                    invoke-static/range {v$topicRegister .. v$topicRegister}, $FOR_YOU_TOPIC_FILTER_DESCRIPTOR->resolveForYouTopicIds(Ljava/util/List;)Ljava/util/List;
                     move-result-object v$topicRegister
                 """.trimIndent(),
             )
         }
     }
+
+context(context: BytecodePatchContext)
+private fun patchHomeFilterGroupConstructor() {
+    val matches = HomeFilterGroupFingerprint.scopedMatchAll()
+    if (matches.size != 1) {
+        throw PatchException(
+            "Expected one X-Lite HomeTimelineFilters group model, found ${matches.size}: " +
+                matches.joinToString { it.originalMethod.toString() },
+        )
+    }
+
+    val match = matches.single()
+    val parameterTypes = { method: Method -> method.parameterTypes.map(CharSequence::toString) }
+    val constructors = match.classDef.methods.filter { method ->
+        val parameters = parameterTypes(method)
+        method.name == "<init>" &&
+            method.returnType == "V" &&
+            parameters.size == 4 &&
+            parameters[0].startsWith(HOME_MODELS_PACKAGE) &&
+            parameters[1] == STRING_DESCRIPTOR &&
+            parameters[2] == "Z" &&
+            parameters[3] in listOf(LIST_DESCRIPTOR, ARRAY_LIST_DESCRIPTOR)
+    }
+    if (constructors.size != 1) {
+        throw PatchException(
+            "Expected one X-Lite HomeTimelineFilters group constructor, found " +
+                "${constructors.size}: ${constructors.joinToString()}",
+        )
+    }
+
+    val constructor = constructors.single() as? MutableMethod
+        ?: throw PatchException("X-Lite HomeTimelineFilters group constructor is not mutable")
+    val superIndex = constructor.instructions.withIndex().firstOrNull { (_, instruction) ->
+        if (instruction.opcode != Opcode.INVOKE_DIRECT) return@firstOrNull false
+        val reference = instruction.getReference<MethodReference>() ?: return@firstOrNull false
+        reference.name == "<init>" && reference.definingClass != constructor.definingClass
+    }?.index ?: throw PatchException(
+        "X-Lite HomeTimelineFilters group constructor has no super call: $constructor",
+    )
+
+    constructor.addInstructions(
+        superIndex + 1,
+        "invoke-static {p1, p4}, $FOR_YOU_TOPIC_FILTER_DESCRIPTOR->captureTopicOptions(Ljava/lang/Object;Ljava/lang/Object;)V",
+    )
+}
 
 context(context: BytecodePatchContext)
 private fun resolveForYouRequestTarget(): ResolvedForYouRequestTarget {

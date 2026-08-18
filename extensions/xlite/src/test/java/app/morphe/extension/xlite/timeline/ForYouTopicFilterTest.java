@@ -1,7 +1,9 @@
 package app.morphe.extension.xlite.timeline;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import java.util.Arrays;
@@ -41,9 +43,9 @@ public class ForYouTopicFilterTest {
     }
 
     @Test
-    public void configuredTopicsReplaceNativeTopics() {
+    public void configuredTopicsReplaceNativeTopicsWithPositiveIds() {
         List<String> nativeTopics = Collections.singletonList("-123");
-        LinkedHashSet<String> configuredTopics = new LinkedHashSet<>(Arrays.asList("123", "456"));
+        LinkedHashSet<String> configuredTopics = new LinkedHashSet<>(Arrays.asList("123", "-456", "0", "789"));
 
         List<String> resolved = ForYouTopicFilter.resolveForYouTopicIds(
                 nativeTopics,
@@ -51,7 +53,27 @@ public class ForYouTopicFilterTest {
                 configuredTopics
         );
 
-        assertEquals(Arrays.asList("123", "456"), resolved);
+        assertEquals(Arrays.asList("123", "789"), resolved);
         assertNotSame(configuredTopics, resolved);
+    }
+
+    @Test
+    public void parsesRuntimeHomeFilterOption() {
+        ForYouTopicFilter.Topic topic = ForYouTopicFilter.parseTopicOptionText(
+                "HomeFilterOption(identifier=123456789, displayName=Politics, " +
+                        "tabDisplayName=Politics, iconName=politics)"
+        );
+
+        assertNotNull(topic);
+        assertEquals("123456789", topic.getId());
+        assertEquals("Politics", topic.getName());
+    }
+
+    @Test
+    public void ignoresNegativeAndNonTopicOptions() {
+        assertNull(ForYouTopicFilter.parseTopicOptionText(
+                "HomeFilterOption(identifier=-123, displayName=Muted, tabDisplayName=Muted, iconName=null)"
+        ));
+        assertNull(ForYouTopicFilter.parseTopicOptionText("RegionOption(identifier=123, displayName=US)"));
     }
 }
