@@ -17,9 +17,12 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
+// ALPHA-ONLY PATH: each video-tab handler has three direct subscription checks.
 private const val VIDEO_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT = 3
+// ALPHA + BETA PATH: the shared URT/Compose timeline handler has nine checks.
 private const val TIMELINE_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT = 9
 
+// ALPHA + BETA: override subscription results at the actual media-action call sites.
 private fun MutableMethod.forceSubscriptionFeatureResults(): Int {
     val subscriptionChecks =
         instructions
@@ -42,13 +45,7 @@ private fun MutableMethod.forceSubscriptionFeatureResults(): Int {
     return patchedResults
 }
 
-private fun forceMediaClassDownloadable(match: Match) {
-    val fieldName =
-        match.method.instructions
-            .mapNotNull { it.getReference<FieldReference>() }
-            .firstOrNull { it.type == "Z" }
-            ?.name
-
+private fun forceBooleanResult(match: Match) {
     match.method.addInstructions(
         0,
         """
@@ -56,22 +53,52 @@ private fun forceMediaClassDownloadable(match: Match) {
             return v0
         """.trimIndent(),
     )
+}
 
-    if (fieldName == null) return
+private fun forceMediaClassDownloadable(match: Match) {
+    val booleanFields =
+        match.method.instructions
+            .mapNotNull { it.getReference<FieldReference>() }
+            .filter { it.type == "Z" }
+            .distinctBy(FieldReference::toString)
+    if (booleanFields.size != 1) {
+        throw PatchException(
+            "Expected one X-Lite downloadable boolean field in ${match.originalMethod}, found " +
+                "${booleanFields.size}: ${booleanFields.joinToString()}",
+        )
+    }
+    val downloadableField = booleanFields.single()
+
+    forceBooleanResult(match)
 
     val constructors = match.classDef.methods.filter { it.name == "<init>" }
+    if (constructors.isEmpty()) {
+        throw PatchException("X-Lite downloadable media class has no constructors: ${match.originalClassDef.type}")
+    }
+
+    var patchedConstructorWrites = 0
     for (constructor in constructors) {
         val matchingIputs =
             constructor.instructions
                 .filter { instruction ->
                     instruction.opcode == Opcode.IPUT_BOOLEAN &&
-                        instruction.getReference<FieldReference>()?.name == fieldName
+                        instruction.getReference<FieldReference>()?.toString() == downloadableField.toString()
                 }.reversed()
 
         for (iput in matchingIputs) {
-            val register = (iput as TwoRegisterInstruction).registerA
+            val register =
+                (iput as? TwoRegisterInstruction)?.registerA
+                    ?: throw PatchException(
+                        "X-Lite downloadable field write has an unexpected instruction shape: $iput",
+                    )
             constructor.addInstruction(iput.location.index, "const/4 v$register, 0x1")
+            patchedConstructorWrites++
         }
+    }
+    if (patchedConstructorWrites == 0) {
+        throw PatchException(
+            "X-Lite downloadable field is never initialized in a constructor: $downloadableField",
+        )
     }
 }
 
@@ -97,28 +124,28 @@ val xLiteDownloadPatch =
 
         execute {
             // ALPHA PATH: patches the legacy video-tab download callbacks below.
+            // BETA PATH: this is intentionally empty; shared hooks below still must execute.
             // TODO: Remove this fingerprint chain when alpha compatibility is deprecated.
             val videoDownloadMatches =
                 XLiteVideoTabDownloadHandlerFingerprint.scopedMatchAllOrNull().orEmpty()
-            // BETA PATH: removed the legacy video-tab callback; preserve native download behavior.
-            if (videoDownloadMatches.isEmpty()) return@execute
-
-            // ALPHA PATH: continue patching the legacy subscription checks.
-            requireMatches(
-                "X-Lite video download handler",
-                videoDownloadMatches,
-                expectedCount = 2,
-            ).forEach { match ->
-                val patchedResults = match.method.forceSubscriptionFeatureResults()
-                if (patchedResults != VIDEO_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT) {
-                    throw PatchException(
-                        "Expected $VIDEO_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT subscription checks in " +
-                            "the X-Lite video download handler, found $patchedResults: " +
-                            match.originalMethod,
-                    )
+            if (videoDownloadMatches.isNotEmpty()) {
+                requireMatches(
+                    "X-Lite video download handler",
+                    videoDownloadMatches,
+                    expectedCount = 2,
+                ).forEach { match ->
+                    val patchedResults = match.method.forceSubscriptionFeatureResults()
+                    if (patchedResults != VIDEO_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT) {
+                        throw PatchException(
+                            "Expected $VIDEO_DOWNLOAD_HANDLER_SUBSCRIPTION_CHECK_COUNT subscription checks in " +
+                                "the X-Lite video download handler, found $patchedResults: " +
+                                match.originalMethod,
+                        )
+                    }
                 }
             }
 
+            // ALPHA + BETA PATH: shared URT/Compose timeline media-action handler.
             val timelineHandler = requireMatches(
                 "X-Lite timeline download handler",
                 XLiteDownloadEventHandlerFingerprint.scopedMatchAll(),
@@ -133,20 +160,26 @@ val xLiteDownloadPatch =
                 )
             }
 
+            // ALPHA: e()Z. BETA: Q()Z. Global all-tier premium status used by media saving.
             requireMatches(
                 "X-Lite premium subscription checker",
                 SubscriptionsFeaturesHasAnyPremiumFingerprint.scopedMatchAll(),
                 expectedCount = 1,
-            ).forEach { match ->
-                    match.method.addInstructions(
-                        0,
-                        """
-                            const/4 v0, 0x1
-                            return v0
-                        """.trimIndent(),
-                    )
-                }
+            ).forEach(::forceBooleanResult)
+            // ALPHA: g()Z. BETA: M()Z. Offline/media-gallery premium gate.
+            requireMatches(
+                "X-Lite offline-video premium checker",
+                SubscriptionsFeaturesOfflinePremiumFingerprint.scopedMatchAll(),
+                expectedCount = 1,
+            ).forEach(::forceBooleanResult)
+            // ALPHA: i()Z. BETA: s()Z. Feature flag shared by timeline, gallery, and video-tab paths.
+            requireMatches(
+                "X-Lite offline-video feature gate",
+                SubscriptionsFeaturesOfflineVideoEnabledFingerprint.scopedMatchAll(),
+                expectedCount = 1,
+            ).forEach(::forceBooleanResult)
 
+            // ALPHA: q4/u4/x4 h()Z. BETA: MediaContent nested classes isDownloadable()Z.
             requireMatches(
                 "X-Lite video media downloadability method",
                 MediaContentVideoIsDownloadableFingerprint.scopedMatchAll(),

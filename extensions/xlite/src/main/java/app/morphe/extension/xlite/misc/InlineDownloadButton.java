@@ -77,10 +77,12 @@ public final class InlineDownloadButton {
     }
 
     public static List<?> addAction(List<?> actions, Object presenter) {
-        if (!isEnabled() || actions == null || !hasMedia(postFor(presenter))) return actions;
-        if (containsDownloadAction(actions)) return actions;
+        if (!isEnabled() || actions == null) return actions;
 
         try {
+            if (!hasMedia(postFor(presenter))) return actions;
+            if (containsDownloadAction(actions)) return actions;
+
             Object downloadAction = createDownloadAction();
             registerDownloadAction(downloadAction);
 
@@ -157,6 +159,7 @@ public final class InlineDownloadButton {
         try {
             return SettingsRegistry.getBoolean(SETTING_ID);
         } catch (RuntimeException exception) {
+            Logger.printException(() -> "Failed to read X-Lite inline download setting", exception);
             return false;
         }
     }
@@ -172,8 +175,9 @@ public final class InlineDownloadButton {
         }
     }
 
+    // Release-neutral placeholder: alpha and beta action constructors are injected at patch time.
     private static Object createDownloadAction() {
-        return null;
+        throw unpatchedBridge("createDownloadAction");
     }
 
     private static boolean containsDownloadAction(List<?> actions) {
@@ -184,6 +188,7 @@ public final class InlineDownloadButton {
     }
 
     static void registerDownloadAction(Object action) {
+        if (action == null) throw unpatchedBridge("createDownloadAction returned null");
         synchronized (DOWNLOAD_ACTIONS) {
             removeClearedDownloadActions();
             if (DOWNLOAD_ACTIONS.size() >= MAX_TRACKED_OBJECTS) DOWNLOAD_ACTIONS.clear();
@@ -221,7 +226,7 @@ public final class InlineDownloadButton {
                 Object value = field.get(event);
                 if (isDownloadAction(value)) return value;
             }
-        } catch (IllegalAccessException exception) {
+        } catch (IllegalAccessException | RuntimeException exception) {
             Logger.printException(() -> "Failed to read the X-Lite inline action event", exception);
         }
         return null;
@@ -231,24 +236,30 @@ public final class InlineDownloadButton {
         return getCanonicalPost(post);
     }
 
+    // Alpha and beta model descriptors/getters differ; these bridges are resolved by the patch,
+    // keeping release-specific types out of the extension's compile-time API.
     private static Object getCanonicalPost(Object post) {
-        return null;
+        throw unpatchedBridge("getCanonicalPost");
     }
 
     private static Object getPostMedia(Object canonicalPost) {
-        return null;
+        throw unpatchedBridge("getPostMedia");
     }
 
     private static Object getRepostedPost(Object post) {
-        return null;
+        throw unpatchedBridge("getRepostedPost");
     }
 
     private static Object getRepostedCanonicalPost(Object repostedPost) {
-        return null;
+        throw unpatchedBridge("getRepostedCanonicalPost");
     }
 
     private static Object getPresenterPost(Object presenter) {
-        return null;
+        throw unpatchedBridge("getPresenterPost");
+    }
+
+    private static IllegalStateException unpatchedBridge(String bridgeName) {
+        return new IllegalStateException("X-Lite inline download bridge was not patched: " + bridgeName);
     }
 
     private static Object postFor(Object presenter) {
