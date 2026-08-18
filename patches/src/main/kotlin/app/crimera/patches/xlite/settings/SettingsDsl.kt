@@ -144,6 +144,7 @@ internal fun SettingsGroupBuilder.customScreen(
     strings: SettingStrings,
     order: Int = 0,
     fragmentClassDescriptor: String,
+    iconResourceName: String? = null,
 ): CustomScreenSettingDefinition =
     customScreen(
         id = id,
@@ -151,6 +152,7 @@ internal fun SettingsGroupBuilder.customScreen(
         summaryResourceName = strings.summaryResourceName,
         order = order,
         fragmentClassDescriptor = fragmentClassDescriptor,
+        iconResourceName = iconResourceName,
     )
 
 internal fun <T> BytecodePatchBuilder.xLiteSettings(
@@ -260,6 +262,7 @@ internal fun BytecodePatchBuilder.xLiteCustomScreen(
     strings: SettingStrings,
     order: Int = 0,
     fragmentClassDescriptor: String,
+    iconResourceName: String? = null,
 ): CustomScreenSettingDefinition =
     xLiteSettings {
         category(category) {
@@ -269,6 +272,7 @@ internal fun BytecodePatchBuilder.xLiteCustomScreen(
                 summaryResourceName = strings.summaryResourceName,
                 order = order,
                 fragmentClassDescriptor = fragmentClassDescriptor,
+                iconResourceName = iconResourceName,
             )
         }
     }

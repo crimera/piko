@@ -195,6 +195,13 @@ public final class SettingsRenderer {
     ) {
         Preference preference = new XLitePreferenceStyle.Navigation(context);
         applyMetadata(preference, screen);
+        if (screen.iconResourceName != null) {
+            preference.setIcon(ResourceUtils.getIdentifierOrThrow(
+                    context,
+                    ResourceType.DRAWABLE,
+                    screen.iconResourceName
+            ));
+        }
         preference.setOnPreferenceClickListener(ignored -> {
             navigator.open(screen);
             return true;

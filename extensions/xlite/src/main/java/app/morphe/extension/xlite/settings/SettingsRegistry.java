@@ -208,7 +208,27 @@ public final class SettingsRegistry {
             @Nullable String summaryResourceName,
             int order
     ) {
+        registerCustomScreen(
+                parentId,
+                id,
+                titleResourceName,
+                summaryResourceName,
+                null,
+                order
+        );
+    }
+
+    public static synchronized void registerCustomScreen(
+            String parentId,
+            String id,
+            String titleResourceName,
+            @Nullable String summaryResourceName,
+            @Nullable String iconResourceName,
+            int order
+    ) {
         registerItem(parentId, id, titleResourceName, summaryResourceName, order, ItemType.CUSTOM_SCREEN);
+        ItemBuilder item = requireItem(id, ItemType.CUSTOM_SCREEN);
+        item.iconResourceName = iconResourceName;
     }
 
     public static synchronized void configureCustomScreen(String id, String fragmentClassDescriptor) {
@@ -410,6 +430,7 @@ public final class SettingsRegistry {
         }
         validateStringResource(item.titleResourceName);
         validateStringResource(item.summaryResourceName);
+        validateDrawableResource(item.iconResourceName);
         if (item.type != ItemType.SINGLE_CHOICE && item.type != ItemType.MULTI_CHOICE) return;
         if (item.options.isEmpty()) {
             throw failure("Choice setting has no options: " + item.id);
@@ -536,6 +557,7 @@ public final class SettingsRegistry {
                     title,
                     summary,
                     item.order,
+                    item.iconResourceName,
                     item.fragmentClassDescriptor
             );
         };
@@ -693,6 +715,7 @@ public final class SettingsRegistry {
         @Nullable SettingsNode.InputKind inputKind;
         @Nullable String handlerClassDescriptor;
         @Nullable String fragmentClassDescriptor;
+        @Nullable String iconResourceName;
 
         ItemBuilder(
                 String parentId,

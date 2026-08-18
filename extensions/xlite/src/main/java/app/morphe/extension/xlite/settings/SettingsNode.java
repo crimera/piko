@@ -167,6 +167,7 @@ public abstract class SettingsNode {
     }
 
     public static final class CustomScreen extends Item {
+        @Nullable public final String iconResourceName;
         public final String fragmentClassDescriptor;
 
         CustomScreen(
@@ -174,9 +175,11 @@ public abstract class SettingsNode {
                 StringRef title,
                 @Nullable StringRef summary,
                 int order,
+                @Nullable String iconResourceName,
                 String fragmentClassDescriptor
         ) {
             super(id, title, summary, order);
+            this.iconResourceName = iconResourceName;
             this.fragmentClassDescriptor = Objects.requireNonNull(fragmentClassDescriptor);
         }
     }

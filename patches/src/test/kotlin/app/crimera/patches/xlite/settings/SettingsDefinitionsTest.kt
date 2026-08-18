@@ -99,9 +99,11 @@ class SettingsDefinitionsTest {
                     customScreen(
                         id = customScreenId,
                         titleResourceName = "piko_xlite_custom_screen_title",
+                        iconResourceName = "ic_vector_filter",
                         fragmentClassDescriptor =
                             "Lapp/morphe/extension/xlite/settings/CustomFragment;",
                     )
+                assertEquals("ic_vector_filter", customScreen.iconResourceName)
                 listOf(toggle, input, multiChoice, action, customScreen)
             }
 

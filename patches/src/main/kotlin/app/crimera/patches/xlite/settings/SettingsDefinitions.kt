@@ -94,6 +94,7 @@ internal data class CustomScreenSettingDefinition(
     override val summaryResourceName: String?,
     override val order: Int,
     val fragmentClassDescriptor: String,
+    val iconResourceName: String? = null,
 ) : SettingItemDefinition
 
 internal data class SettingsContributionCatalog(
@@ -276,6 +277,7 @@ internal class SettingsGroupBuilder(
         summaryResourceName: String? = null,
         order: Int = 0,
         fragmentClassDescriptor: String,
+        iconResourceName: String? = null,
     ): CustomScreenSettingDefinition =
         add(
             CustomScreenSettingDefinition(
@@ -284,6 +286,7 @@ internal class SettingsGroupBuilder(
                 summaryResourceName,
                 order,
                 fragmentClassDescriptor,
+                iconResourceName,
             ),
         )
 
@@ -391,10 +394,16 @@ private fun validateSetting(setting: SettingItemDefinition) {
                 "Invalid action handler descriptor for ${setting.id}: ${setting.handlerClassDescriptor}"
             }
 
-        is CustomScreenSettingDefinition ->
+        is CustomScreenSettingDefinition -> {
+            setting.iconResourceName?.let { iconResourceName ->
+                require(DRAWABLE_RESOURCE_NAME_PATTERN.matches(iconResourceName)) {
+                    "Invalid custom screen icon resource for ${setting.id}: $iconResourceName"
+                }
+            }
             require(HANDLER_DESCRIPTOR_PATTERN.matches(setting.fragmentClassDescriptor)) {
                 "Invalid custom screen fragment descriptor for ${setting.id}: ${setting.fragmentClassDescriptor}"
             }
+        }
 
         is TextInputSettingDefinition,
         is ToggleSettingDefinition,
