@@ -24,8 +24,10 @@ import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.instagram.patches.userprofile.ProfileMoreOption;
 import app.morphe.extension.instagram.patches.dm.SavedMessagesHook;
+import app.morphe.extension.instagram.db.PikoMessageDb;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.shared.ui.Dim;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Utils;
@@ -140,8 +142,14 @@ public class ActionBarPatch {
 
             if(SettingsStatus.saveDeletedMessages) {
                 Context context = viewGroup.getContext();
-                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_HISTORY_ICON,
-                        () -> SavedMessagesHook.openDeletedMessages(context));
+                String threadId = SavedMessagesHook.resolveOpenThreadId();
+                boolean hasUnseen = threadId != null
+                        && PikoMessageDb.getInstance(context).hasUnseenDeletedMessages(threadId);
+                int badgeColor = android.graphics.Color.parseColor("#FFD400");
+                int badgeStrokeColor = android.graphics.Color.BLACK;
+                UI.addImageViewWithBadge(viewGroup, UI.DRAWABLE_HISTORY_ICON,
+                        () -> SavedMessagesHook.openDeletedMessages(context),
+                        hasUnseen, badgeColor, badgeStrokeColor, Dim.dp2);
             }
 
         } catch (Exception e) {
