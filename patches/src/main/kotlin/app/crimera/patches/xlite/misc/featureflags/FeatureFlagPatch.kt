@@ -1,5 +1,6 @@
 package app.crimera.patches.xlite.misc.featureflags
 
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.crimera.patches.xlite.settings.Categories
 import app.crimera.patches.xlite.settings.Groups
 import app.crimera.patches.xlite.settings.action
@@ -9,6 +10,7 @@ import app.crimera.patches.xlite.settings.settingStrings
 import app.crimera.patches.xlite.settings.xLiteSettings
 import app.crimera.patches.xlite.utils.Constants.COMPATIBILITY_X_LITE
 import app.crimera.patches.xlite.utils.Constants.EXTENSION_PACKAGE
+import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
@@ -33,9 +35,21 @@ private const val FEATURE_SWITCH_IMPORT_EXPORT_DESCRIPTOR =
 private const val FEATURE_SWITCH_REPOSITORY_DESCRIPTOR =
     "Lcom/x/featureswitches/FeatureSwitchesRepositoryImpl;"
 
-// BETA PATH: repository owner introduced by 12.18.0-beta.0.
-private const val BETA_FEATURE_SWITCH_REPOSITORY_DESCRIPTOR =
-    "Lcom/x/featureswitches/h0;"
+private const val FEATURE_SWITCHES_SCOPE = "Lcom/x/featureswitches/"
+
+// BETA PATH: repository fingerprint scoped to com/x/featureswitches/.
+private object XLiteFeatureSwitchRepositoryFingerprint : Fingerprint(
+    definingClass = FEATURE_SWITCHES_SCOPE,
+    name = "getBoolean",
+    parameters = listOf(STRING_TYPE, "Z"),
+    returnType = "Z",
+    custom = { method, classDef ->
+        AccessFlags.PUBLIC.isSet(method.accessFlags) &&
+            !AccessFlags.STATIC.isSet(method.accessFlags) &&
+            !AccessFlags.INTERFACE.isSet(classDef.accessFlags) &&
+            !AccessFlags.ABSTRACT.isSet(classDef.accessFlags)
+    },
+)
 
 private data class FeatureSwitchAccessor(
     val typeName: String,
@@ -86,7 +100,7 @@ private val FEATURE_SWITCH_ACCESSORS =
         FeatureSwitchAccessor("List", listOf(STRING_TYPE), LIST_TYPE, "resolveList"),
     )
 
-// BETA PATH: obfuscated repository accessors from 12.18.0-beta.0.
+// BETA PATH: obfuscated repository accessors from 12.18.0-beta.0 and later.
 private val BETA_FEATURE_SWITCH_ACCESSORS =
     listOf(
         FeatureSwitchAccessor("Boolean", listOf(STRING_TYPE, "Z"), "Z", "resolveBoolean", listOf("getBoolean")),
@@ -142,27 +156,22 @@ val featureFlagPatch =
         }
 
         execute {
-            val repositoryDescriptor =
-                listOf(
-                    FEATURE_SWITCH_REPOSITORY_DESCRIPTOR,
-                    BETA_FEATURE_SWITCH_REPOSITORY_DESCRIPTOR,
-                ).firstOrNull { descriptor -> classDefByOrNull(descriptor) != null }
-                    ?: throw PatchException(
-                        "X-Lite feature-switch repository was not found; checked " +
-                            listOf(
-                                FEATURE_SWITCH_REPOSITORY_DESCRIPTOR,
-                                BETA_FEATURE_SWITCH_REPOSITORY_DESCRIPTOR,
-                            ).joinToString(),
-                    )
-            val repository = mutableClassDefBy(repositoryDescriptor)
-            // BETA PATH: select the beta repository and accessor table when present.
-            // ALPHA PATH: fall back to the legacy repository and named accessors.
-            val accessors =
-                if (repositoryDescriptor == BETA_FEATURE_SWITCH_REPOSITORY_DESCRIPTOR) {
-                    BETA_FEATURE_SWITCH_ACCESSORS
+            val isAlpha = classDefByOrNull(FEATURE_SWITCH_REPOSITORY_DESCRIPTOR) != null
+            val (repositoryDescriptor, accessors) =
+                if (isAlpha) {
+                    FEATURE_SWITCH_REPOSITORY_DESCRIPTOR to FEATURE_SWITCH_ACCESSORS
                 } else {
-                    FEATURE_SWITCH_ACCESSORS
+                    val matches =
+                        XLiteFeatureSwitchRepositoryFingerprint.scopedMatchAllOrNull().orEmpty()
+                    if (matches.size != 1) {
+                        throw PatchException(
+                            "Expected one X-Lite feature-switch repository in $FEATURE_SWITCHES_SCOPE, found ${matches.size}: " +
+                                matches.joinToString { it.originalClassDef.type },
+                        )
+                    }
+                    matches.single().originalClassDef.type to BETA_FEATURE_SWITCH_ACCESSORS
                 }
+            val repository = mutableClassDefBy(repositoryDescriptor)
             accessors.forEach { accessor ->
                 val matches = repository.methods.matching(accessor)
                 requireAccessorMatches(accessor, matches)

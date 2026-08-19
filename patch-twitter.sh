@@ -20,7 +20,7 @@ fi
 # BETA PATH: current default input for future X-Lite updates.
 # ALPHA PATH: pass the 12.17.3-alpha.01 APK explicitly while compatibility is retained.
 # TODO: Remove the alpha invocation note when the alpha target is deprecated.
-DEFAULT_APK="$HOME/Downloads/twitter_12.18.0-beta.0.apk"
+DEFAULT_APK="$HOME/Downloads/x-12.19.0-beta.0.apk"
 OUTPUT_APK="$HOME/Downloads/piko-twitter-patched.apk"
 APK="$DEFAULT_APK"
 FLAGS=()
@@ -68,6 +68,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "X-Lite: Custom font" \
   -e "X-Lite: Open canonical URLs" \
   -e "X-Lite: Filter For You by topic" \
+  -e "X-Lite: Custom sharing domain" \
   --striplibs=arm64-v8a \
   --force \
   -o "$OUTPUT_APK" \

@@ -25,6 +25,7 @@ internal object Constants {
                 AppTarget(version = "12.17.3-alpha.01"),
                 // BETA PATH: current compatibility target.
                 AppTarget(version = "12.18.0-beta.0"),
+                AppTarget(version = "12.19.0-beta.0"),
             ),
         )
 
