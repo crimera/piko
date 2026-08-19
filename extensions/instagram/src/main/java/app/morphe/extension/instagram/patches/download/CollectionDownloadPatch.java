@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.patches.download;
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
 import android.app.Dialog;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -112,6 +113,7 @@ public final class CollectionDownloadPatch {
         Dialog confirmationDialog;
         MediaDownloader downloader;
         MediaDownloader.BatchHandle batchHandle;
+        boolean serviceStarted;
         boolean refreshAttempted;
         boolean waitingForTransition;
         boolean waitingForRefresh;
@@ -464,9 +466,17 @@ public final class CollectionDownloadPatch {
             return;
         }
 
+        final DownloadUtils.CollectionDownloadPlan plan =
+                DownloadUtils.prepareCollectionDownload(pending.userSession, media);
+        final List<DownloadRequest> requests = plan.getRequests();
+        if (requests.isEmpty()) {
+            failPending(pending, "Saved collection produced no download requests", null);
+            return;
+        }
+
         InstagramDialogBox dialog = new InstagramDialogBox(context);
         dialog.setTitle(str("piko_download_collection"));
-        dialog.setMessage(str("piko_download_collection_confirm", media.size()));
+        dialog.setMessage(str("piko_download_collection_confirm", media.size(), requests.size()));
         dialog.setNegativeButton(
                 context.getString(android.R.string.cancel),
                 new DialogInterface.OnClickListener() {
@@ -476,13 +486,16 @@ public final class CollectionDownloadPatch {
                     }
                 }
         );
-        dialog.setPositiveButton(str("piko_download_all"), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface ignored, int which) {
-                pending.downloadStarted = true;
-                download(pending, media);
-            }
-        });
+        dialog.setPositiveButton(
+                str("piko_download_files", requests.size()),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface ignored, int which) {
+                        pending.downloadStarted = true;
+                        download(pending, plan);
+                    }
+                }
+        );
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface ignored) {
@@ -498,11 +511,16 @@ public final class CollectionDownloadPatch {
         Dialog nativeDialog = dialog.getDialog();
         if (nativeDialog == null) throw new IllegalStateException("Instagram dialog is unavailable");
         pending.confirmationDialog = nativeDialog;
-        if (pending.notification != null) pending.notification.showReady(media.size());
+        if (pending.notification != null) {
+            pending.notification.showReady(media.size(), requests.size());
+        }
         nativeDialog.show();
     }
 
-    private static void download(PendingDownload pending, List<Object> media) {
+    private static void download(
+            PendingDownload pending,
+            DownloadUtils.CollectionDownloadPlan plan
+    ) {
         try {
             if (!Utils.isNetworkConnected()) {
                 Utils.showToastShort(str("piko_no_internet"));
@@ -516,16 +534,12 @@ public final class CollectionDownloadPatch {
                 return;
             }
 
-            DownloadUtils.CollectionDownloadPlan plan =
-                    DownloadUtils.prepareCollectionDownload(pending.userSession, media);
             final int preparationFailures = plan.getFailedPosts();
             final List<DownloadRequest> requests = plan.getRequests();
-            if (requests.isEmpty()) {
-                failDownload(pending, "Saved collection produced no download requests", null);
-                return;
-            }
 
-            pending.notification.showDownloading(0, requests.size());
+            Notification notification = pending.notification.showDownloading(0, requests.size());
+            CollectionDownloadService.start(context, notification);
+            pending.serviceStarted = true;
             pending.downloader = new MediaDownloader(context);
             pending.batchHandle = pending.downloader.downloadBatch(
                     requests,
@@ -725,8 +739,10 @@ public final class CollectionDownloadPatch {
         if (error != null) logError(message, error);
         else PikoUtils.logger(message);
 
-        if (pending.notification != null) pending.notification.showFailed();
-        cleanupPending(pending, false);
+        Notification terminalNotification = pending.notification != null
+                ? pending.notification.buildFailed()
+                : null;
+        cleanupPending(pending, false, terminalNotification);
         Utils.showToastShort(str("piko_download_collection_failed"));
     }
 
@@ -745,8 +761,10 @@ public final class CollectionDownloadPatch {
         else PikoUtils.logger(message);
 
         if (pending.batchHandle != null) pending.batchHandle.cancel();
-        if (pending.notification != null) pending.notification.showFailed();
-        cleanupPending(pending, false);
+        Notification terminalNotification = pending.notification != null
+                ? pending.notification.buildFailed()
+                : null;
+        cleanupPending(pending, false, terminalNotification);
         if (showToast) Utils.showToastShort(str("piko_collection_download_failed"));
     }
 
@@ -757,8 +775,9 @@ public final class CollectionDownloadPatch {
             int failed
     ) {
         if (pendingDownload != pending || pending.cancelled) return;
-        pending.notification.showComplete(downloaded, skipped, failed);
-        cleanupPending(pending, false);
+        Notification terminalNotification =
+                pending.notification.buildComplete(downloaded, skipped, failed);
+        cleanupPending(pending, false, terminalNotification);
         Utils.showToastShort(str("piko_collection_download_complete"));
     }
 
@@ -778,12 +797,30 @@ public final class CollectionDownloadPatch {
     }
 
     private static void cleanupPending(PendingDownload pending, boolean cancelNotification) {
+        cleanupPending(pending, cancelNotification, null);
+    }
+
+    private static void cleanupPending(
+            PendingDownload pending,
+            boolean cancelNotification,
+            Notification terminalNotification
+    ) {
         if (pendingDownload == pending) {
             pendingDownload = null;
             requestGeneration++;
         }
         pending.releaseReceiver();
         if (cancelNotification && pending.notification != null) pending.notification.cancel();
+        if (pending.serviceStarted) {
+            pending.serviceStarted = false;
+            if (terminalNotification != null) {
+                CollectionDownloadService.finish(pending.applicationContext, terminalNotification);
+            } else {
+                CollectionDownloadService.stop(pending.applicationContext);
+            }
+        } else if (terminalNotification != null && pending.notification != null) {
+            pending.notification.show(terminalNotification);
+        }
         pending.confirmationDialog = null;
         pending.batchHandle = null;
         pending.downloader = null;

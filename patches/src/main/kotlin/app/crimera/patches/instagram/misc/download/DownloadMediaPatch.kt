@@ -50,6 +50,7 @@ val downloadMediaPatch =
     ) {
         dependsOn(
             settingsPatch,
+            collectionDownloadResourcePatch,
             instagramDialogBoxEntity,
             mediaDataEntity,
             videoDataEntity,

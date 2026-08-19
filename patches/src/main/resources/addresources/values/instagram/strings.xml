@@ -147,8 +147,9 @@
     <string name="piko_download_notification_channel">Downloads</string>
     <string name="piko_preparing_collection_download">Preparing collection download</string>
     <string name="piko_collection_posts_loaded">Posts loaded: %1$d</string>
-    <string name="piko_collection_posts_ready">Posts ready: %1$d</string>
-    <string name="piko_download_collection_confirm">Download all media in this collection?\n\nPosts: %1$d</string>
+    <string name="piko_collection_media_ready">Ready: %1$d posts · %2$d files</string>
+    <string name="piko_download_collection_confirm">Download all media in this collection?\n\nPosts: %1$d\nFiles: %2$d</string>
+    <string name="piko_download_files">Download %1$d files</string>
     <string name="piko_download_collection_failed">Could not load this collection. Try again.</string>
     <string name="piko_download_collection_empty">This collection has no downloadable posts.</string>
     <string name="piko_collection_download_in_progress">A collection download is already in progress.</string>

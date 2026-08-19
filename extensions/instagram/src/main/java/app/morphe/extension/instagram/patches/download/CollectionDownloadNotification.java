@@ -20,7 +20,7 @@ import app.morphe.extension.crimera.downloader.MediaDownloader;
 
 final class CollectionDownloadNotification {
     // Reusing one ID turns loading, downloading, and completion into one notification lifecycle.
-    private static final int NOTIFICATION_ID = 0x50494B43;
+    static final int NOTIFICATION_ID = 0x50494B43;
 
     private final Context context;
     private final NotificationManager manager;
@@ -45,25 +45,25 @@ final class CollectionDownloadNotification {
         notify(builder);
     }
 
-    void showReady(int posts) {
+    void showReady(int posts, int files) {
         Notification.Builder builder = activeBuilder(
                 str("piko_download_collection"),
-                str("piko_collection_posts_ready", posts)
+                str("piko_collection_media_ready", posts, files)
         );
         builder.setProgress(0, 0, false);
         notify(builder);
     }
 
-    void showDownloading(int processedFiles, int totalFiles) {
+    Notification showDownloading(int processedFiles, int totalFiles) {
         Notification.Builder builder = activeBuilder(
                 str("piko_downloading_collection"),
                 str("piko_collection_download_progress", processedFiles, totalFiles)
         );
         builder.setProgress(Math.max(totalFiles, 1), processedFiles, false);
-        notify(builder);
+        return notify(builder);
     }
 
-    void showComplete(int downloaded, int skipped, int failed) {
+    Notification buildComplete(int downloaded, int skipped, int failed) {
         String summary;
         if (failed > 0) {
             summary = str(
@@ -86,10 +86,10 @@ final class CollectionDownloadNotification {
                 .setAutoCancel(true)
                 .setOngoing(false)
                 .setProgress(0, 0, false);
-        notify(builder);
+        return builder.build();
     }
 
-    void showFailed() {
+    Notification buildFailed() {
         Notification.Builder builder = baseBuilder(
                 str("piko_collection_download_failed"),
                 str("piko_collection_download_try_again")
@@ -97,7 +97,12 @@ final class CollectionDownloadNotification {
         builder.setAutoCancel(true)
                 .setOngoing(false)
                 .setProgress(0, 0, false);
-        notify(builder);
+        return builder.build();
+    }
+
+    @SuppressLint("NotificationPermission") // The patched Instagram host declares this permission.
+    void show(Notification notification) {
+        manager.notify(NOTIFICATION_ID, notification);
     }
 
     void cancel() {
@@ -128,8 +133,10 @@ final class CollectionDownloadNotification {
     }
 
     @SuppressLint("NotificationPermission") // The patched Instagram host declares this permission.
-    private void notify(Notification.Builder builder) {
-        manager.notify(NOTIFICATION_ID, builder.build());
+    private Notification notify(Notification.Builder builder) {
+        Notification notification = builder.build();
+        show(notification);
+        return notification;
     }
 
     private void createChannel() {
