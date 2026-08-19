@@ -14,6 +14,8 @@ import app.morphe.extension.xlite.theme.TwitterTheme;
 public final class Theme {
     private static final String DYNAMIC_COLOR_SETTING = "xlite.theme.dynamic_color";
     private static final String AMOLED_BLACK_SETTING = "xlite.theme.amoled_black";
+    // Keep elevated surfaces visible against the AMOLED base surface.
+    private static final int AMOLED_ELEVATED_SURFACE = Color.rgb(19, 24, 29);
 
     private Theme() {
     }
@@ -62,7 +64,7 @@ public final class Theme {
 
     public static int surfaceContainerHigh(Context context) {
         int fallback = isDark(context) ? Color.rgb(40, 42, 48) : Color.rgb(243, 237, 247);
-        if (useAmoledBlack(context)) return Color.BLACK;
+        if (useAmoledBlack(context)) fallback = AMOLED_ELEVATED_SURFACE;
         return dynamicColor(context, "surface_container_high", fallback);
     }
 
@@ -161,7 +163,7 @@ public final class Theme {
             int fallback = Theme.isDark(context)
                     ? Color.rgb(40, 42, 48)
                     : Color.rgb(243, 237, 247);
-            if (amoledBlack && Theme.isDark(context)) return Color.BLACK;
+            if (amoledBlack && Theme.isDark(context)) fallback = AMOLED_ELEVATED_SURFACE;
             return dynamicColor(context, "surface_container_high", fallback);
         }
 

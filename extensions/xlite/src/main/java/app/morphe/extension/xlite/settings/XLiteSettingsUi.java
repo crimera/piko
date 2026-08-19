@@ -98,6 +98,15 @@ public final class XLiteSettingsUi {
         return new SwitchRow(context, title, summary, checked);
     }
 
+    public static ChoiceRow choiceRow(
+            Context context,
+            CharSequence title,
+            boolean checked,
+            boolean multiple
+    ) {
+        return new ChoiceRow(context, title, checked, multiple);
+    }
+
     public static View divider(Context context) {
         View divider = new View(context);
         divider.setBackgroundColor(Theme.dividerColor(context));
@@ -126,6 +135,152 @@ public final class XLiteSettingsUi {
                 Color.green(color),
                 Color.blue(color)
         );
+    }
+
+    public static final class ChoiceRow extends LinearLayout {
+        private final ChoiceIndicator indicator;
+        private final boolean multiple;
+        private boolean checked;
+        @Nullable private CheckedChangeListener listener;
+
+        private ChoiceRow(
+                Context context,
+                CharSequence title,
+                boolean checked,
+                boolean multiple
+        ) {
+            super(context);
+            this.multiple = multiple;
+            setOrientation(HORIZONTAL);
+            setGravity(Gravity.CENTER_VERTICAL);
+            setMinimumHeight(Theme.dpToPx(context, 56f));
+            setPadding(
+                    Theme.dpToPx(context, 24f),
+                    Theme.dpToPx(context, 4f),
+                    Theme.dpToPx(context, 24f),
+                    Theme.dpToPx(context, 4f)
+            );
+            applyRippleBackground(this);
+            setClickable(true);
+            setFocusable(true);
+
+            TextView titleView = titleText(context);
+            titleView.setText(title);
+            titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+            LayoutParams titleParams = new LayoutParams(
+                    0,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    1f
+            );
+            titleParams.setMarginEnd(Theme.dpToPx(context, 16f));
+            addView(titleView, titleParams);
+
+            indicator = new ChoiceIndicator(context, multiple);
+            addView(indicator, new LayoutParams(
+                    Theme.dpToPx(context, 24f),
+                    Theme.dpToPx(context, 24f)
+            ));
+            setChecked(checked);
+
+            setOnClickListener(ignored -> toggle());
+        }
+
+        public boolean isChecked() {
+            return checked;
+        }
+
+        public void setChecked(boolean checked) {
+            this.checked = checked;
+            indicator.setChecked(checked);
+        }
+
+        public void setOnCheckedChangeListener(@Nullable CheckedChangeListener listener) {
+            this.listener = listener;
+        }
+
+        private void toggle() {
+            if (!multiple && checked) {
+                if (listener != null) listener.onCheckedChanged(true);
+                return;
+            }
+            boolean nextChecked = multiple ? !checked : true;
+            setChecked(nextChecked);
+            if (listener != null) listener.onCheckedChanged(nextChecked);
+        }
+    }
+
+    private static final class ChoiceIndicator extends View {
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final boolean multiple;
+        private boolean checked;
+
+        private ChoiceIndicator(Context context, boolean multiple) {
+            super(context);
+            this.multiple = multiple;
+        }
+
+        private void setChecked(boolean checked) {
+            this.checked = checked;
+            invalidate();
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            Context context = getContext();
+            float centerX = getWidth() / 2f;
+            float centerY = getHeight() / 2f;
+            float strokeWidth = Theme.dpToPx(context, 2f);
+            int accent = Theme.primaryAccent(context);
+            int secondary = Theme.secondaryText(context);
+
+            if (!multiple) {
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(strokeWidth);
+                paint.setColor(checked ? accent : secondary);
+                canvas.drawCircle(centerX, centerY, Theme.dpToPx(context, 9f), paint);
+                if (!checked) return;
+                paint.setStyle(Paint.Style.FILL);
+                canvas.drawCircle(centerX, centerY, Theme.dpToPx(context, 5f), paint);
+                return;
+            }
+
+            float inset = Theme.dpToPx(context, 3f);
+            float radius = Theme.dpToPx(context, 4f);
+            paint.setStyle(checked ? Paint.Style.FILL : Paint.Style.STROKE);
+            paint.setStrokeWidth(strokeWidth);
+            paint.setColor(checked ? accent : secondary);
+            canvas.drawRoundRect(
+                    inset,
+                    inset,
+                    getWidth() - inset,
+                    getHeight() - inset,
+                    radius,
+                    radius,
+                    paint
+            );
+            if (!checked) return;
+
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeWidth(strokeWidth);
+            paint.setStrokeCap(Paint.Cap.ROUND);
+            paint.setStrokeJoin(Paint.Join.ROUND);
+            paint.setColor(Theme.onPrimaryAccent(context));
+            float checkSize = Theme.dpToPx(context, 5f);
+            canvas.drawLine(
+                    centerX - checkSize,
+                    centerY,
+                    centerX - checkSize / 3f,
+                    centerY + checkSize,
+                    paint
+            );
+            canvas.drawLine(
+                    centerX - checkSize / 3f,
+                    centerY + checkSize,
+                    centerX + checkSize,
+                    centerY - checkSize,
+                    paint
+            );
+        }
     }
 
     public static final class SwitchRow extends LinearLayout {

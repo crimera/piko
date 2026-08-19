@@ -1,11 +1,7 @@
 package app.morphe.extension.xlite.settings;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
-import android.preference.EditTextPreference;
-import android.preference.ListPreference;
-import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceGroup;
 import android.preference.PreferenceScreen;
@@ -14,6 +10,8 @@ import android.text.InputType;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import java.lang.reflect.Constructor;
 import java.util.LinkedHashSet;
@@ -26,7 +24,8 @@ import app.morphe.extension.shared.ResourceUtils;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.Setting;
-import app.morphe.extension.shared.ui.CustomDialog;
+import app.morphe.extension.xlite.ui.ButtonView;
+import app.morphe.extension.xlite.ui.DialogView;
 import app.morphe.extension.xlite.ui.Theme;
 
 @SuppressWarnings("deprecation")
@@ -253,30 +252,80 @@ public final class SettingsRenderer {
         return preference;
     }
 
-    private static EditTextPreference textInput(
+    private static Preference textInput(
             Activity activity,
             Context context,
             SettingsNode.TextInput item
     ) {
-        EditTextPreference preference = new XLitePreferenceStyle.TextInput(context);
+        Preference preference = new XLitePreferenceStyle.TextInput(context);
         preference.setPersistent(false);
-        preference.setText(item.setting.get());
-        if (item.inputKind == SettingsNode.InputKind.MULTILINE) {
-            preference.getEditText().setInputType(
-                    InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
-            );
-        } else {
-            preference.getEditText().setInputType(InputType.TYPE_CLASS_TEXT);
-        }
-        preference.setOnPreferenceChangeListener((ignored, newValue) -> {
-            String value = String.valueOf(newValue);
-            if (item.setting.get().equals(value)) return true;
-            if (!validateTextInput(activity, item, value)) return false;
-            item.setting.save(value);
-            promptForRestart(activity, item.setting);
+        preference.setOnPreferenceClickListener(ignored -> {
+            showTextInputDialog(activity, item);
             return true;
         });
         return preference;
+    }
+
+    private static void showTextInputDialog(
+            Activity activity,
+            SettingsNode.TextInput item
+    ) {
+        Context context = activity;
+        LinearLayout form = dialogForm(context);
+        EditText input = XLiteSettingsUi.textInput(
+                context,
+                null,
+                item.inputKind == SettingsNode.InputKind.MULTILINE
+                        ? InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                        : InputType.TYPE_CLASS_TEXT
+        );
+        String currentValue = item.setting.get();
+        input.setText(currentValue);
+        input.setSelection(input.length());
+        form.addView(input, new LinearLayout.LayoutParams(-1, -2));
+
+        DialogView dialog = new DialogView(context)
+                .setTitle(item.title.toString())
+                .setBodyView(form);
+        dialog.getDialog().setCanceledOnTouchOutside(true);
+
+        ButtonView cancel = dialogButton(context, "piko_xlite_settings_cancel");
+        cancel.setOnClickListener(ignored -> dialog.dismiss());
+
+        ButtonView save = dialogButton(context, "piko_xlite_settings_ok");
+        save.setOnClickListener(ignored -> {
+            String value = input.getText().toString();
+            if (item.setting.get().equals(value)) {
+                dialog.dismiss();
+                return;
+            }
+            if (!validateTextInput(activity, item, value)) return;
+            item.setting.save(value);
+            dialog.dismiss();
+            promptForRestart(activity, item.setting);
+        });
+
+        dialog.addButton(cancel).addButton(save).show();
+    }
+
+    private static LinearLayout dialogForm(Context context) {
+        LinearLayout form = new LinearLayout(context);
+        form.setOrientation(LinearLayout.VERTICAL);
+        form.setPadding(
+                Theme.dpToPx(context, 24f),
+                0,
+                Theme.dpToPx(context, 24f),
+                0
+        );
+        return form;
+    }
+
+    private static ButtonView dialogButton(Context context, String textResourceName) {
+        return new ButtonView(
+                context,
+                ButtonView.ButtonStyle.TEXT,
+                StringRef.str(textResourceName)
+        );
     }
 
     private static boolean validateTextInput(
@@ -316,64 +365,119 @@ public final class SettingsRenderer {
         return (SettingsValueValidator) constructor.newInstance();
     }
 
-    private static ListPreference singleChoice(
+    private static Preference singleChoice(
             Activity activity,
             Context context,
             SettingsNode.SingleChoice item
     ) {
-        ListPreference preference = new XLitePreferenceStyle.SingleChoice(context);
+        Preference preference = new XLitePreferenceStyle.SingleChoice(context);
         preference.setPersistent(false);
-        CharSequence[] entries = new CharSequence[item.options.size()];
-        CharSequence[] values = new CharSequence[item.options.size()];
-        for (int index = 0; index < item.options.size(); index++) {
-            SettingsNode.ChoiceOption option = item.options.get(index);
-            entries[index] = option.title.toString();
-            values[index] = option.id;
-        }
-        preference.setEntries(entries);
-        preference.setEntryValues(values);
-        preference.setValue(item.setting.get());
-        preference.setOnPreferenceChangeListener((ignored, newValue) -> {
-            String value = String.valueOf(newValue);
-            if (item.setting.get().equals(value)) return true;
-            item.setting.save(value);
-            promptForRestart(activity, item.setting);
+        preference.setOnPreferenceClickListener(ignored -> {
+            showSingleChoiceDialog(activity, item);
             return true;
         });
         return preference;
     }
 
-    private static MultiSelectListPreference multiChoice(
+    private static void showSingleChoiceDialog(
+            Activity activity,
+            SettingsNode.SingleChoice item
+    ) {
+        Context context = activity;
+        DialogView dialog = new DialogView(context)
+                .setTitle(item.title.toString());
+        dialog.getDialog().setCanceledOnTouchOutside(true);
+
+        LinearLayout options = choiceList(context);
+        dialog.setScrollableBodyView(options);
+        for (SettingsNode.ChoiceOption option : item.options) {
+            XLiteSettingsUi.ChoiceRow row = XLiteSettingsUi.choiceRow(
+                    context,
+                    option.title.toString(),
+                    option.id.equals(item.setting.get()),
+                    false
+            );
+            row.setOnCheckedChangeListener(checked -> {
+                if (!checked) return;
+                if (!item.setting.get().equals(option.id)) {
+                    item.setting.save(option.id);
+                    dialog.dismiss();
+                    promptForRestart(activity, item.setting);
+                    return;
+                }
+                dialog.dismiss();
+            });
+            options.addView(row, new LinearLayout.LayoutParams(-1, -2));
+        }
+
+        ButtonView cancel = dialogButton(context, "piko_xlite_settings_cancel");
+        cancel.setOnClickListener(ignored -> dialog.dismiss());
+        dialog.addButton(cancel).show();
+    }
+
+    private static Preference multiChoice(
             Activity activity,
             Context context,
             SettingsNode.MultiChoice item
     ) {
-        MultiSelectListPreference preference = new XLitePreferenceStyle.MultiChoice(context);
+        Preference preference = new XLitePreferenceStyle.MultiChoice(context);
         preference.setPersistent(false);
-        CharSequence[] entries = new CharSequence[item.options.size()];
-        CharSequence[] values = new CharSequence[item.options.size()];
-        for (int index = 0; index < item.options.size(); index++) {
-            SettingsNode.ChoiceOption option = item.options.get(index);
-            entries[index] = option.title.toString();
-            values[index] = option.id;
-        }
-        preference.setEntries(entries);
-        preference.setEntryValues(values);
-        preference.setValues(new LinkedHashSet<>(item.setting.get()));
-        preference.setOnPreferenceChangeListener((ignored, newValue) -> {
-            if (!(newValue instanceof Set<?> rawValues)) return false;
-            Set<String> valuesToSave = new LinkedHashSet<>();
-            for (Object rawValue : rawValues) {
-                if (!(rawValue instanceof String value)) return false;
-                valuesToSave.add(value);
-            }
-            Set<String> immutableValues = StringSetSetting.immutableCopy(valuesToSave);
-            if (item.setting.get().equals(immutableValues)) return true;
-            item.setting.save(immutableValues);
-            promptForRestart(activity, item.setting);
+        preference.setOnPreferenceClickListener(ignored -> {
+            showMultiChoiceDialog(activity, item);
             return true;
         });
         return preference;
+    }
+
+    private static void showMultiChoiceDialog(
+            Activity activity,
+            SettingsNode.MultiChoice item
+    ) {
+        Context context = activity;
+        Set<String> selectedValues = new LinkedHashSet<>(item.setting.get());
+        DialogView dialog = new DialogView(context)
+                .setTitle(item.title.toString());
+        dialog.getDialog().setCanceledOnTouchOutside(true);
+
+        LinearLayout options = choiceList(context);
+        dialog.setScrollableBodyView(options);
+        for (SettingsNode.ChoiceOption option : item.options) {
+            XLiteSettingsUi.ChoiceRow row = XLiteSettingsUi.choiceRow(
+                    context,
+                    option.title.toString(),
+                    selectedValues.contains(option.id),
+                    true
+            );
+            row.setOnCheckedChangeListener(checked -> {
+                if (checked) {
+                    selectedValues.add(option.id);
+                    return;
+                }
+                selectedValues.remove(option.id);
+            });
+            options.addView(row, new LinearLayout.LayoutParams(-1, -2));
+        }
+
+        ButtonView cancel = dialogButton(context, "piko_xlite_settings_cancel");
+        cancel.setOnClickListener(ignored -> dialog.dismiss());
+        ButtonView save = dialogButton(context, "piko_xlite_settings_ok");
+        save.setOnClickListener(ignored -> {
+            Set<String> immutableValues = StringSetSetting.immutableCopy(selectedValues);
+            if (item.setting.get().equals(immutableValues)) {
+                dialog.dismiss();
+                return;
+            }
+            item.setting.save(immutableValues);
+            dialog.dismiss();
+            promptForRestart(activity, item.setting);
+        });
+        dialog.addButton(cancel).addButton(save).show();
+    }
+
+    private static LinearLayout choiceList(Context context) {
+        LinearLayout options = new LinearLayout(context);
+        options.setOrientation(LinearLayout.VERTICAL);
+        return options;
     }
 
     private static Preference action(
@@ -409,19 +513,24 @@ public final class SettingsRenderer {
 
     private static void promptForRestart(Activity activity, Setting<?> setting) {
         if (!setting.rebootApp) return;
-        Dialog dialog = CustomDialog.create(
+
+        DialogView dialog = new DialogView(activity)
+                .setTitle(StringRef.str("piko_xlite_restart_title"))
+                .setSubtitle(StringRef.str("piko_xlite_restart_summary"));
+        dialog.getDialog().setCanceledOnTouchOutside(true);
+
+        ButtonView cancel = dialogButton(activity, "piko_xlite_settings_cancel");
+        cancel.setOnClickListener(ignored -> dialog.dismiss());
+        ButtonView restart = new ButtonView(
                 activity,
-                StringRef.str("piko_xlite_restart_title"),
-                StringRef.str("piko_xlite_restart_summary"),
-                null,
-                StringRef.str("piko_xlite_restart_now"),
-                () -> Utils.restartApp(activity),
-                () -> { },
-                null,
-                null,
-                true
-        ).first;
-        dialog.show();
+                ButtonView.ButtonStyle.FILLED,
+                StringRef.str("piko_xlite_restart_now")
+        );
+        restart.setOnClickListener(ignored -> {
+            dialog.dismiss();
+            Utils.restartApp(activity);
+        });
+        dialog.addButton(cancel).addButton(restart).show();
     }
 
     private static void applyMetadata(Preference preference, SettingsNode node) {

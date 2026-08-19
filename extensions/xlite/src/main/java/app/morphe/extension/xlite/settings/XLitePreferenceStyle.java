@@ -4,9 +4,6 @@ import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.preference.EditTextPreference;
-import android.preference.ListPreference;
-import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
 import android.preference.SwitchPreference;
 import android.text.TextUtils;
@@ -254,7 +251,7 @@ final class XLitePreferenceStyle {
         }
     }
 
-    static final class TextInput extends EditTextPreference {
+    static final class TextInput extends Preference {
         TextInput(Context context) {
             super(context);
         }
@@ -270,7 +267,7 @@ final class XLitePreferenceStyle {
         }
     }
 
-    static final class SingleChoice extends ListPreference {
+    static final class SingleChoice extends Preference {
         SingleChoice(Context context) {
             super(context);
         }
@@ -286,7 +283,7 @@ final class XLitePreferenceStyle {
         }
     }
 
-    static final class MultiChoice extends MultiSelectListPreference {
+    static final class MultiChoice extends Preference {
         MultiChoice(Context context) {
             super(context);
         }

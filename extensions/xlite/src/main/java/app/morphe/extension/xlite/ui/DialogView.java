@@ -31,6 +31,10 @@ public class DialogView {
     private final TextView subtitleView;
     private final FrameLayout bodyContainer;
     private final LinearLayout actionContainer;
+    private final View topDivider;
+    private final View bottomDivider;
+    @Nullable
+    private MaxHeightScrollView scrollableBody;
 
     public DialogView(Context context) {
         this.context = context;
@@ -82,12 +86,18 @@ public class DialogView {
 
         mainContainer.addView(headerContainer);
 
+        topDivider = createDivider();
+        mainContainer.addView(topDivider);
+
         // 2. Body Container
         bodyContainer = new FrameLayout(context);
         mainContainer.addView(bodyContainer, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         ));
+
+        bottomDivider = createDivider();
+        mainContainer.addView(bottomDivider);
 
         // 3. Action Container
         actionContainer = new LinearLayout(context);
@@ -120,12 +130,15 @@ public class DialogView {
     }
 
     public DialogView setBodyView(View view) {
+        scrollableBody = null;
+        setDividersVisible(false);
         bodyContainer.removeAllViews();
         bodyContainer.addView(view);
         return this;
     }
 
     public DialogView setScrollableBodyView(View view) {
+        setDividersVisible(false);
         MaxHeightScrollView scrollView = new MaxHeightScrollView(context);
         scrollView.setVerticalScrollBarEnabled(false);
         scrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
@@ -133,8 +146,13 @@ public class DialogView {
         int maxScreenHeight = context.getResources().getDisplayMetrics().heightPixels;
         scrollView.setMaxHeightPx((int) (maxScreenHeight * 0.6f));
         scrollView.addView(view);
+        scrollView.addOnLayoutChangeListener((changedView, left, top, right, bottom,
+                                               oldLeft, oldTop, oldRight, oldBottom) ->
+                updateScrollableDividers());
 
-        setBodyView(scrollView);
+        scrollableBody = scrollView;
+        bodyContainer.removeAllViews();
+        bodyContainer.addView(scrollView);
         return this;
     }
 
@@ -166,7 +184,36 @@ public class DialogView {
                 );
                 window.setLayout(targetWidth, ViewGroup.LayoutParams.WRAP_CONTENT);
             }
+            mainContainer.post(this::updateScrollableDividers);
         }
+    }
+
+    private View createDivider() {
+        View divider = new View(context);
+        divider.setBackgroundColor(Theme.dividerColor(context));
+        divider.setVisibility(View.GONE);
+        divider.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                Theme.dpToPx(context, 1f)
+        ));
+        return divider;
+    }
+
+    private void updateScrollableDividers() {
+        if (scrollableBody == null) {
+            setDividersVisible(false);
+            return;
+        }
+
+        boolean hasOverflow = scrollableBody.canScrollVertically(1)
+                || scrollableBody.canScrollVertically(-1);
+        setDividersVisible(hasOverflow);
+    }
+
+    private void setDividersVisible(boolean visible) {
+        int visibility = visible ? View.VISIBLE : View.GONE;
+        topDivider.setVisibility(visibility);
+        bottomDivider.setVisibility(visibility);
     }
 
     public void dismiss() {

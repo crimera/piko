@@ -1,12 +1,9 @@
 package app.morphe.extension.xlite.postfilter;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.TypedValue;
@@ -14,7 +11,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -26,6 +22,8 @@ import androidx.annotation.Nullable;
 import app.morphe.extension.shared.StringRef;
 import app.morphe.extension.xlite.settings.XLiteSettingsActivity;
 import app.morphe.extension.xlite.settings.XLiteSettingsUi;
+import app.morphe.extension.xlite.ui.ButtonView;
+import app.morphe.extension.xlite.ui.DialogView;
 import app.morphe.extension.xlite.ui.Theme;
 
 @SuppressWarnings("deprecation")
@@ -170,89 +168,65 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         validation.setVisibility(View.GONE);
         form.addView(validation, new LinearLayout.LayoutParams(-1, -2));
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context)
+        DialogView dialog = new DialogView(context)
                 .setTitle(StringRef.str(editingRule == null
                         ? "piko_xlite_post_filtering_add_title"
                         : "piko_xlite_post_filtering_edit_title"))
-                .setView(form)
-                .setPositiveButton(StringRef.str("piko_xlite_post_filtering_save"), null)
-                .setNegativeButton(StringRef.str("piko_xlite_post_filtering_cancel"), null);
-        if (editingRule != null) {
-            builder.setNeutralButton(StringRef.str("piko_xlite_post_filtering_remove"), null);
-        }
+                .setScrollableBodyView(form);
+        dialog.getDialog().setCanceledOnTouchOutside(true);
 
-        AlertDialog dialog = builder.create();
-        if (dialog.getWindow() != null) {
-            GradientDrawable dialogBg = new GradientDrawable();
-            dialogBg.setColor(Theme.surfaceContainerHigh(context));
-            dialogBg.setCornerRadius(Theme.dpToPx(context, 28f));
-            dialog.getWindow().setBackgroundDrawable(dialogBg);
-        }
+        ButtonView cancel = new ButtonView(
+                context,
+                ButtonView.ButtonStyle.TEXT,
+                StringRef.str("piko_xlite_post_filtering_cancel")
+        );
+        cancel.setOnClickListener(ignored -> dialog.dismiss());
 
-        dialog.setOnShowListener(ignored -> configureDialogButtons(
-                dialog,
-                editingRule,
-                phrase,
-                matchContent,
-                matchUsernames,
-                validation
-        ));
-        dialog.show();
-    }
-
-    private void configureDialogButtons(
-            AlertDialog dialog,
-            @Nullable PostFilterRule editingRule,
-            EditText phrase,
-            XLiteSettingsUi.SwitchRow matchContent,
-            XLiteSettingsUi.SwitchRow matchUsernames,
-            TextView validation
-    ) {
-        Context context = dialog.getContext();
-        Button posBtn = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        if (posBtn != null) {
-            posBtn.setTextColor(Theme.primaryAccent(context));
-            posBtn.setOnClickListener(ignored -> {
-                try {
-                    if (editingRule == null) {
-                        store.add(
-                                phrase.getText().toString(),
-                                matchContent.isChecked(),
-                                matchUsernames.isChecked()
-                        );
-                    } else {
-                        store.update(
-                                editingRule.getId(),
-                                phrase.getText().toString(),
-                                matchContent.isChecked(),
-                                matchUsernames.isChecked()
-                        );
-                    }
-                    refreshRules();
-                    dialog.dismiss();
-                } catch (PostFilterRuleStore.ValidationException exception) {
-                    validation.setText(validationMessage(exception.getError()));
-                    validation.setVisibility(View.VISIBLE);
+        ButtonView save = new ButtonView(
+                context,
+                ButtonView.ButtonStyle.TEXT,
+                StringRef.str("piko_xlite_post_filtering_save")
+        );
+        save.setOnClickListener(ignored -> {
+            try {
+                if (editingRule == null) {
+                    store.add(
+                            phrase.getText().toString(),
+                            matchContent.isChecked(),
+                            matchUsernames.isChecked()
+                    );
+                } else {
+                    store.update(
+                            editingRule.getId(),
+                            phrase.getText().toString(),
+                            matchContent.isChecked(),
+                            matchUsernames.isChecked()
+                    );
                 }
-            });
-        }
-
-        Button negBtn = dialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-        if (negBtn != null) {
-            negBtn.setTextColor(Theme.secondaryText(context));
-        }
-
-        if (editingRule != null) {
-            Button neuBtn = dialog.getButton(DialogInterface.BUTTON_NEUTRAL);
-            if (neuBtn != null) {
-                neuBtn.setTextColor(Color.rgb(244, 33, 46));
-                neuBtn.setOnClickListener(ignored -> {
-                    store.remove(editingRule.getId());
-                    refreshRules();
-                    dialog.dismiss();
-                });
+                refreshRules();
+                dialog.dismiss();
+            } catch (PostFilterRuleStore.ValidationException exception) {
+                validation.setText(validationMessage(exception.getError()));
+                validation.setVisibility(View.VISIBLE);
             }
+        });
+
+        dialog.addButton(cancel);
+        if (editingRule != null) {
+            ButtonView remove = new ButtonView(
+                    context,
+                    ButtonView.ButtonStyle.TEXT,
+                    StringRef.str("piko_xlite_post_filtering_remove")
+            );
+            remove.setTextColor(Color.rgb(244, 33, 46));
+            remove.setOnClickListener(ignored -> {
+                store.remove(editingRule.getId());
+                refreshRules();
+                dialog.dismiss();
+            });
+            dialog.addButton(remove);
         }
+        dialog.addButton(save).show();
     }
 
     private CharSequence validationMessage(PostFilterRuleStore.ValidationError error) {

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="piko_xlite_settings_title">Piko X-Lite settings</string>
+    <string name="piko_xlite_settings_ok">OK</string>
+    <string name="piko_xlite_settings_cancel">Cancel</string>
     <string name="piko_xlite_patch_version" translatable="false">Piko %s</string>
     <string name="piko_xlite_settings_open_failed">Could not open Piko X-Lite settings</string>
     <string name="piko_xlite_category_timeline_title">Timeline</string>
