@@ -69,6 +69,17 @@ public final class XLiteTimelineFilter {
             return XLiteTimelineFilter.isPromotedClientEventInfo(eventInfo);
         }
         @Override String getPostText(Object post) { return XLiteTimelineFilter.getPostText(post); }
+        @Override List<?> getPostMentions(Object post) { return XLiteTimelineFilter.getPostMentions(post); }
+        @Override int getMentionStartIdx(Object mention) {
+            return XLiteTimelineFilter.getMentionStartIdx(mention);
+        }
+        @Override int getMentionEndIdx(Object mention) { return XLiteTimelineFilter.getMentionEndIdx(mention); }
+        @Override String getMentionScreenName(Object mention) {
+            return XLiteTimelineFilter.getMentionScreenName(mention);
+        }
+        @Override String getPostAuthorScreenName(Object post) {
+            return XLiteTimelineFilter.getPostAuthorScreenName(post);
+        }
         @Override Object getContentDisclosure(Object post) { return XLiteTimelineFilter.getContentDisclosure(post); }
         @Override boolean hasAiGeneratedDisclosure(Object disclosure) {
             return XLiteTimelineFilter.hasAiGeneratedDisclosure(disclosure);
@@ -341,7 +352,9 @@ public final class XLiteTimelineFilter {
         }
         if (modelAccess.isPost(item)) {
             try {
-                if (PostFilterMatcher.findMatchReason(modelAccess.getPostText(item), ruleSnapshot) != null) {
+                String textForFilter = modelAccess.getPostTextForFilter(item);
+                String authorScreenName = modelAccess.getPostAuthorScreenName(item);
+                if (PostFilterMatcher.findMatchReason(textForFilter, authorScreenName, ruleSnapshot) != null) {
                     return FilterResult.remove();
                 }
             } catch (RuntimeException exception) {
@@ -689,6 +702,26 @@ public final class XLiteTimelineFilter {
     }
 
     private static String getPostText(Object post) {
+        return null;
+    }
+
+    private static List<?> getPostMentions(Object post) {
+        return null;
+    }
+
+    private static int getMentionStartIdx(Object mention) {
+        return 0;
+    }
+
+    private static int getMentionEndIdx(Object mention) {
+        return 0;
+    }
+
+    private static String getMentionScreenName(Object mention) {
+        return null;
+    }
+
+    private static String getPostAuthorScreenName(Object post) {
         return null;
     }
 

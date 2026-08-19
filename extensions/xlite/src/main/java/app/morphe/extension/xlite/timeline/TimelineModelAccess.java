@@ -89,6 +89,58 @@ abstract class TimelineModelAccess {
         return null;
     }
 
+    List<?> getPostMentions(Object post) {
+        return null;
+    }
+
+    int getMentionStartIdx(Object mention) {
+        return 0;
+    }
+
+    int getMentionEndIdx(Object mention) {
+        return 0;
+    }
+
+    String getMentionScreenName(Object mention) {
+        return null;
+    }
+
+    String getPostAuthorScreenName(Object post) {
+        return null;
+    }
+
+    String getPostTextForFilter(Object post) {
+        String text = getPostText(post);
+        if (text == null || text.isEmpty()) return text;
+
+        List<?> mentions = getPostMentions(post);
+        if (mentions == null || mentions.isEmpty()) return text;
+
+        int cursor = 0;
+        for (Object mention : mentions) {
+            int start = getMentionStartIdx(mention);
+            int end = getMentionEndIdx(mention);
+            if (start < cursor || end <= start || end > text.length()) break;
+            if (start > cursor && !isWhitespaceRegion(text, cursor, start)) break;
+            cursor = end;
+        }
+        if (cursor <= 0) return text;
+
+        int bodyStart = cursor;
+        while (bodyStart < text.length() && Character.isWhitespace(text.charAt(bodyStart))) {
+            bodyStart++;
+        }
+        if (bodyStart >= text.length()) return "";
+        return text.substring(bodyStart);
+    }
+
+    private static boolean isWhitespaceRegion(String text, int from, int to) {
+        for (int index = from; index < to; index++) {
+            if (!Character.isWhitespace(text.charAt(index))) return false;
+        }
+        return true;
+    }
+
     Object getContentDisclosure(Object post) {
         return null;
     }

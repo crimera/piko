@@ -8,11 +8,22 @@ public final class PostFilterMatcher {
 
     public static String findMatchReason(
             String postText,
+            String authorScreenName,
             PostFilterRuleStore.Snapshot snapshot
     ) {
-        if (postText == null || snapshot == null || !snapshot.hasEnabledRules()) return null;
-        if (matches(postText, snapshot.contentPhrases())) return "KEYWORD_MAIN_TEXT";
+        if (snapshot == null || !snapshot.hasEnabledRules()) return null;
+        if (postText != null && matches(postText, snapshot.contentPhrases())) return "KEYWORD_MAIN_TEXT";
+        if (authorScreenName != null && matches(authorScreenName, snapshot.usernamePhrases())) {
+            return "KEYWORD_USERNAME";
+        }
         return null;
+    }
+
+    public static String findMatchReason(
+            String postText,
+            PostFilterRuleStore.Snapshot snapshot
+    ) {
+        return findMatchReason(postText, null, snapshot);
     }
 
     public static String normalize(String value) {

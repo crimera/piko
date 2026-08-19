@@ -53,6 +53,50 @@ public class PostFilterMatcherTest {
         assertNull(PostFilterMatcher.findMatchReason("blocked", null));
     }
 
+    @Test
+    public void matchesUsernameScopeAuthorScreenName() {
+        assertEquals(
+                "KEYWORD_USERNAME",
+                reason("clean body", "@rezero", usernameRule("rezero"))
+        );
+    }
+
+    @Test
+    public void contentScopeDoesNotMatchAuthorScreenName() {
+        assertNull(reason("clean body", "@rezero", contentRule("rezero")));
+    }
+
+    @Test
+    public void usernameScopeDoesNotMatchCleanBody() {
+        assertNull(reason("clean body", "@someone", usernameRule("rezero")));
+    }
+
+    @Test
+    public void matchesMainTextWhenAuthorDoesNotMatch() {
+        assertEquals(
+                "KEYWORD_MAIN_TEXT",
+                reason("rezero is blocked", "@someone", contentRule("rezero"))
+        );
+    }
+
+    @Test
+    public void nullAuthorWithUsernameRuleDoesNotMatch() {
+        assertNull(reason("clean body", null, usernameRule("rezero")));
+    }
+
+    @Test
+    public void legacyOverloadIgnoresUsernameScope() {
+        assertNull(PostFilterMatcher.findMatchReason("rezero", snapshot(usernameRule("rezero"))));
+        assertEquals(
+                "KEYWORD_MAIN_TEXT",
+                PostFilterMatcher.findMatchReason("has rezero", snapshot(contentRule("rezero")))
+        );
+    }
+
+    private static String reason(String text, String authorScreenName, PostFilterRule rule) {
+        return PostFilterMatcher.findMatchReason(text, authorScreenName, snapshot(rule));
+    }
+
     private static String reason(String text, PostFilterRule rule) {
         return PostFilterMatcher.findMatchReason(text, snapshot(rule));
     }
@@ -63,5 +107,9 @@ public class PostFilterMatcherTest {
 
     private static PostFilterRule contentRule(String phrase) {
         return new PostFilterRule("content-" + phrase, phrase, true, false, true);
+    }
+
+    private static PostFilterRule usernameRule(String phrase) {
+        return new PostFilterRule("username-" + phrase, phrase, false, true, true);
     }
 }

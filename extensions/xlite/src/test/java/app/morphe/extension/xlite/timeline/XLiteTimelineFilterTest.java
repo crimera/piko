@@ -162,6 +162,84 @@ public class XLiteTimelineFilterTest {
     }
 
     @Test
+    public void keepsReplyToUserMatchingContentKeywordWhenBodyIsClean() {
+        FakePost reply = reply("@rezero This is a clean take", "steven", "rezero");
+
+        Object filtered = filterByContentKeyword(items(reply), "rezero");
+        assertEquals(List.of(reply), filtered);
+    }
+
+    @Test
+    public void removesPostWithContentKeywordInBody() {
+        FakePost body = post("this mentions rezero in the body");
+
+        Object filtered = filterByContentKeyword(items(body), "rezero");
+        assertTrue(((List<?>) filtered).isEmpty());
+    }
+
+    @Test
+    public void removesPostWithMidTextMentionContainingKeyword() {
+        FakePost midText = post("hello @rezero world");
+        midText.mentions = List.of(new FakeMention(6, 13, "rezero"));
+
+        Object filtered = filterByContentKeyword(items(midText), "rezero");
+        assertTrue(((List<?>) filtered).isEmpty());
+    }
+
+    @Test
+    public void removesPostWhenLeadingMentionIsFollowedByKeywordBody() {
+        FakePost reply = reply("@steven rezero is great", "steven", "steven");
+
+        Object filtered = filterByContentKeyword(items(reply), "rezero");
+        assertTrue(((List<?>) filtered).isEmpty());
+    }
+
+    @Test
+    public void removesPostWhenAuthorMatchesUsernameRule() {
+        FakePost post = post("clean body");
+        post.authorScreenName = "rezero";
+
+        Object filtered = filterByUsernameKeyword(items(post), "rezero");
+        assertTrue(((List<?>) filtered).isEmpty());
+    }
+
+    @Test
+    public void keepsReplyToUserMatchingUsernameRuleWhenAuthorDiffers() {
+        FakePost reply = reply("@rezero clean body", "steven", "rezero");
+
+        Object filtered = filterByUsernameKeyword(items(reply), "rezero");
+        assertEquals(List.of(reply), filtered);
+    }
+
+    @Test
+    public void stripsAllLeadingMentionsFromMultiTargetReply() {
+        FakePost reply = reply("@u1 @u2 body", "steven", "u1", "u2");
+
+        assertEquals(List.of(reply), filterByContentKeyword(items(reply), "u1"));
+        assertEquals(List.of(reply), filterByContentKeyword(items(reply), "u2"));
+        assertTrue(((List<?>) filterByContentKeyword(items(reply), "body")).isEmpty());
+    }
+
+    @Test
+    public void handlesNullEmptyAndMentionOnlyPosts() {
+        FakePost nullText = post(null);
+        FakePost emptyText = post("");
+        FakePost mentionsOnly = reply("@u1 @u2", "steven", "u1", "u2");
+        List<Object> input = items(nullText, emptyText, mentionsOnly);
+
+        Object filtered = filterByContentKeyword(input, "u1");
+        assertEquals(input, filtered);
+    }
+
+    @Test
+    public void stripsLeadingMentionsWithInterstitialWhitespace() {
+        FakePost spaced = reply("@u1  @u2 body", "steven", "u1", "u2");
+
+        Object filtered = filterByContentKeyword(items(spaced), "u2");
+        assertEquals(List.of(spaced), filtered);
+    }
+
+    @Test
     public void removesSelectedAiDisclosureSource() {
         FakePost userMarked = post("generated");
         userMarked.disclosure = new FakeDisclosure(true, AiSource.UserMarked);
@@ -399,6 +477,44 @@ public class XLiteTimelineFilterTest {
         return new FakePost(text);
     }
 
+    private static FakePost reply(String text, String authorScreenName, String... mentionScreenNames) {
+        FakePost post = new FakePost(text);
+        post.authorScreenName = authorScreenName;
+        List<FakeMention> mentions = new ArrayList<>();
+        int searchFrom = 0;
+        for (String screenName : mentionScreenNames) {
+            String token = "@" + screenName;
+            int start = text.indexOf(token, searchFrom);
+            if (start < 0) {
+                throw new IllegalArgumentException("Mention " + token + " not found in " + text);
+            }
+            mentions.add(new FakeMention(start, start + token.length(), screenName));
+            searchFrom = start + token.length();
+        }
+        post.mentions = mentions;
+        return post;
+    }
+
+    private static Object filterByContentKeyword(List<Object> input, String phrase) {
+        PostFilterRule rule = new PostFilterRule("content-" + phrase, phrase, true, false, true);
+        return XLiteTimelineFilter.filterPostsByKeyword(
+                input,
+                true,
+                PostFilterRuleStore.snapshotOf(List.of(rule)),
+                MODELS
+        );
+    }
+
+    private static Object filterByUsernameKeyword(List<Object> input, String phrase) {
+        PostFilterRule rule = new PostFilterRule("username-" + phrase, phrase, false, true, true);
+        return XLiteTimelineFilter.filterPostsByKeyword(
+                input,
+                true,
+                PostFilterRuleStore.snapshotOf(List.of(rule)),
+                MODELS
+        );
+    }
+
     private static FakeModuleItem item(Object value) {
         return new FakeModuleItem(value, false);
     }
@@ -419,9 +535,23 @@ public class XLiteTimelineFilterTest {
         private Object promotedMetadata;
         private Object clientEventInfo;
         private FakeDisclosure disclosure;
+        private String authorScreenName;
+        private List<FakeMention> mentions;
 
         private FakePost(String text) {
             this.text = text;
+        }
+    }
+
+    private static final class FakeMention {
+        private final int start;
+        private final int end;
+        private final String screenName;
+
+        private FakeMention(int start, int end, String screenName) {
+            this.start = start;
+            this.end = end;
+            this.screenName = screenName;
         }
     }
 
@@ -507,6 +637,15 @@ public class XLiteTimelineFilterTest {
             return ((FakePost) post).clientEventInfo;
         }
         @Override String getPostText(Object post) { return ((FakePost) post).text; }
+        @Override List<?> getPostMentions(Object post) { return ((FakePost) post).mentions; }
+        @Override int getMentionStartIdx(Object mention) { return ((FakeMention) mention).start; }
+        @Override int getMentionEndIdx(Object mention) { return ((FakeMention) mention).end; }
+        @Override String getMentionScreenName(Object mention) {
+            return ((FakeMention) mention).screenName;
+        }
+        @Override String getPostAuthorScreenName(Object post) {
+            return ((FakePost) post).authorScreenName;
+        }
         @Override Object getContentDisclosure(Object post) { return ((FakePost) post).disclosure; }
         @Override boolean hasAiGeneratedDisclosure(Object disclosure) {
             return ((FakeDisclosure) disclosure).aiGenerated;
