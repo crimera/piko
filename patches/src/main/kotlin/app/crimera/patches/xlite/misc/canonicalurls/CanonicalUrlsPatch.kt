@@ -486,10 +486,6 @@ private fun patchBetaCardNavigation(cardUrlActionType: String, contextualPostTyp
             instanceOf(cardUrlActionType),
             fieldAccess(
                 opcode = Opcode.IGET_OBJECT,
-                type = contextualPostType,
-            ),
-            fieldAccess(
-                opcode = Opcode.IGET_OBJECT,
                 definingClass = cardUrlActionType,
                 type = STRING_DESCRIPTOR,
             ),
@@ -501,6 +497,7 @@ private fun patchBetaCardNavigation(cardUrlActionType: String, contextualPostTyp
             ),
             methodCall(
                 opcode = Opcode.INVOKE_VIRTUAL,
+                definingClass = contextualPostType,
                 name = "getId",
                 parameters = emptyList(),
                 returnType = "L",
@@ -525,12 +522,7 @@ private fun patchBetaCardNavigation(cardUrlActionType: String, contextualPostTyp
             filters = filters,
         ).requireSingleMatch("beta card navigation callback")
 
-    val postFieldReadIndex = match.instructionMatches[1].index
-    val postFieldRead = match.method.objectFieldRead(
-        postFieldReadIndex,
-        "Beta card callback contextual-post",
-    )
-    val urlFieldReadIndex = match.instructionMatches[2].index
+    val urlFieldReadIndex = match.instructionMatches[1].index
     val urlFieldRead = match.method.objectFieldRead(urlFieldReadIndex, "Beta card callback URL")
     val urlField = urlFieldRead.getReference<FieldReference>()
         ?: throw PatchException("Beta card callback card URL field reference is missing")
@@ -538,10 +530,14 @@ private fun patchBetaCardNavigation(cardUrlActionType: String, contextualPostTyp
         throw PatchException("Unexpected beta card URL field: $urlField")
     }
 
+    val postGetIdIndex = match.instructionMatches[3].index
+    val postGetIdInstruction = match.method.instructions[postGetIdIndex]
+    val postRegister = postGetIdInstruction.singleRegister("Beta card callback contextual-post")
+
     patchCardUrl(
         match,
         urlFieldReadIndex + 1,
-        postFieldRead.registerA,
+        postRegister,
         urlFieldRead.registerA,
     )
 }
