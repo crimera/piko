@@ -147,11 +147,10 @@ private object XLiteComposeReplySortingUiStateFingerprint : Fingerprint(
 /**
  * Beta keeps the reply-sort selection state in a shared Function0 used by the post action row.
  * Its default branch creates mutableStateOf(TimelineRankingMode.Relevance) through a synthetic
- * selector in the preserved Twitter model-core package.
+ * selector whose enclosing package can shift across R8 lambda merging passes.
  */
 // BETA PATH: shared synthetic state initializer used by the post action row.
 private object XLiteComposeReplySortingBetaUiStateFingerprint : Fingerprint(
-    definingClass = "Lcom/twitter/model/core/",
     returnType = "Ljava/lang/Object;",
     parameters = emptyList(),
     filters =
