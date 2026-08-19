@@ -65,6 +65,14 @@ private object CardUrlActionModelFingerprint : Fingerprint(
     filters = listOf(string("Url(url=")),
 )
 
+private object ProfileUserModelFingerprint : Fingerprint(
+    definingClass = "Lcom/x/models/",
+    name = "toString",
+    returnType = STRING_DESCRIPTOR,
+    parameters = emptyList(),
+    filters = listOf(string("ProfileUser(id=")),
+)
+
 private data class UrlEntityFields(
     val type: String,
     val expandedUrl: FieldReference,
@@ -110,6 +118,7 @@ val xLiteCanonicalUrlsPatch =
                 patchBetaPostLinkNavigation(urlEntityType, postModels.contextualPostDescriptor)
                 val cardUrlActionType = resolveCardUrlActionType()
                 patchBetaCardNavigation(cardUrlActionType, postModels.contextualPostDescriptor)
+                patchProfileWebsiteNavigation(urlEntityType)
                 return@execute
             }
             // ALPHA PATH: patch the legacy canonical-URL callbacks below.
@@ -128,6 +137,7 @@ val xLiteCanonicalUrlsPatch =
 
             val cardUrlActionType = resolveCardUrlActionType()
             patchCardNavigation(cardUrlActionType, postModels.contextualPostDescriptor)
+            patchProfileWebsiteNavigation(matches.expandedUrlField.definingClass)
         }
     }
 
@@ -349,6 +359,48 @@ context(context: BytecodePatchContext)
 private fun resolveCardUrlActionType(): String =
     CardUrlActionModelFingerprint.requireSingleMatch("card URL action model")
         .originalClassDef.type
+
+context(context: BytecodePatchContext)
+private fun patchProfileWebsiteNavigation(urlEntityType: String) {
+    val profileUserType =
+        ProfileUserModelFingerprint.requireSingleMatch("profile user model")
+            .originalClassDef.type
+    val match =
+        Fingerprint(
+            definingClass = "Lcom/x/profile/header/",
+            filters =
+                listOf(
+                    methodCall(
+                        opcode = Opcode.INVOKE_VIRTUAL,
+                        definingClass = profileUserType,
+                        name = "getWebsite",
+                        parameters = emptyList(),
+                        returnType = urlEntityType,
+                    ),
+                    methodCall(
+                        opcode = Opcode.INVOKE_VIRTUAL,
+                        definingClass = urlEntityType,
+                        name = "getDisplayUrl",
+                        parameters = emptyList(),
+                        returnType = STRING_DESCRIPTOR,
+                    ),
+                    methodCall(
+                        opcode = Opcode.INVOKE_VIRTUAL,
+                        definingClass = urlEntityType,
+                        name = "getUrl",
+                        parameters = emptyList(),
+                        returnType = STRING_DESCRIPTOR,
+                    ),
+                ),
+        ).requireSingleMatch("profile website link builder")
+
+    replaceUrlEntityGetter(
+        match,
+        filterIndex = 2,
+        urlEntityType = urlEntityType,
+        label = "profile website URL getter",
+    )
+}
 
 context(context: BytecodePatchContext)
 private fun patchBetaTextNavigation(urlEntityType: String) {
