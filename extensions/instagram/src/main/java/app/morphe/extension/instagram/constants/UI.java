@@ -16,12 +16,14 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.Typeface;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import java.util.ArrayList;
 
 import app.morphe.extension.crimera.PikoUtils;
@@ -144,19 +146,20 @@ public class UI {
 
     /**
      * Same as {@link #addImageViewToViewGroup}, but wraps the icon in a FrameLayout so an
-     * optional small colored dot can be overlaid on its top-right corner — used for the
-     * unseen-deleted-message indicator on the DM history icon. The wrapper keeps this safe to
+     * optional small counter badge can be overlaid on its top-right corner — used for the
+     * unseen-deleted-message count on the DM history icon. The wrapper keeps this safe to
      * use regardless of the actual parent ViewGroup type (LinearLayout, Toolbar, etc.), since the
      * overlay only ever happens inside the FrameLayout we control.
+     *
+     * @param badgeCount 0 (or less) hides the badge entirely; otherwise shows the count, capped
+     *                   at "99+" so it never overflows the pill.
      */
     public static ImageView addImageViewWithBadge(
             ViewGroup viewGroup,
             String iconDrawable,
             Runnable action,
-            boolean showBadge,
-            int badgeColor,
-            int badgeStrokeColor,
-            int badgeStrokeWidth
+            int badgeCount,
+            int badgeColor
     ) {
         try {
             if (viewGroup == null) {
@@ -193,23 +196,41 @@ public class UI {
             ));
             wrapper.addView(imageView);
 
-            if (showBadge) {
-                View badge = new View(context);
-                GradientDrawable dot = new GradientDrawable();
-                dot.setShape(GradientDrawable.OVAL);
-                dot.setColor(badgeColor);
-                if (badgeStrokeWidth > 0) {
-                    dot.setStroke(badgeStrokeWidth, badgeStrokeColor);
-                }
-                badge.setBackground(dot);
+            if (badgeCount > 0) {
+                TextView badge = new TextView(context);
                 badge.setTag("piko_unseen_deleted_badge");
+                badge.setText((badgeCount > 99 ? "99" : String.valueOf(badgeCount)) + "+");
+                badge.setTextColor(Color.WHITE);
+                badge.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11);
+                badge.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+                badge.setGravity(Gravity.CENTER);
+                badge.setIncludeFontPadding(false);
 
-                int badgeSize = Dim.dp8 + Dim.dp4;
-                FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(badgeSize, badgeSize);
+                GradientDrawable pill = new GradientDrawable();
+                pill.setShape(GradientDrawable.OVAL);
+                pill.setColor(badgeColor);
+                // No border — a hard stroke made it look heavy/detached from the icon. A flat
+                // fill reads as a badge on its own without needing an outline.
+                badge.setBackground(pill);
+
+                // Fixed height keeps it circular for a single digit; horizontal padding lets it
+                // stretch into a pill for "99+" without the text getting clipped.
+                int badgeMinSize = Dim.dp8 + Dim.dp6;
+                badge.setMinWidth(badgeMinSize);
+                badge.setMinHeight(badgeMinSize);
+                int horizontalPadding = Dim.dp2;
+                badge.setPadding(horizontalPadding, 0, horizontalPadding, 0);
+
+                FrameLayout.LayoutParams badgeParams = new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT, badgeMinSize);
                 badgeParams.gravity = Gravity.END | Gravity.TOP;
-                // Sits just inside the icon's dp16 touch padding, over its top-right corner.
-                badgeParams.topMargin = Dim.dp8;
-                badgeParams.rightMargin = Dim.dp8;
+                // The icon itself has Dim.dp16 padding around its visible glyph (for a bigger
+                // touch target), so a small margin here sits near the wrapper's outer edge —
+                // far from the icon you actually see. Compensating most of that padding puts the
+                // badge right against the visible icon's corner instead.
+                int badgeInset = Dim.dp16 - Dim.dp4;
+                badgeParams.topMargin = badgeInset;
+                badgeParams.rightMargin = badgeInset;
                 badge.setLayoutParams(badgeParams);
                 wrapper.addView(badge);
             }
@@ -226,6 +247,17 @@ public class UI {
             Logger.printException(() -> "Failed addImageViewWithBadge: ", e);
         }
         return null;
+    }
+
+    /** System Material You accent color (Android 12+), or the given fallback on older devices
+     *  or if the dynamic color resource can't be resolved for any reason. */
+    public static int resolveDynamicOrFallbackColor(Context context, int fallbackColor) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            try {
+                return context.getColor(android.R.color.system_accent1_600);
+            } catch (Exception ignored) {}
+        }
+        return fallbackColor;
     }
 
     public static void pikoSettingsGear(ViewGroup viewGroup) {
