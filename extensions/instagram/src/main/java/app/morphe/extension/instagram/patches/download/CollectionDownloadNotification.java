@@ -63,14 +63,27 @@ final class CollectionDownloadNotification {
         return notify(builder);
     }
 
-    Notification buildComplete(int downloaded, int skipped, int failed) {
+    Notification buildComplete(
+            int downloaded,
+            int skipped,
+            int failedFiles,
+            int skippedPosts
+    ) {
         String summary;
-        if (failed > 0) {
+        if (skippedPosts > 0) {
+            summary = str(
+                    "piko_collection_download_summary_with_skipped_posts",
+                    downloaded,
+                    skipped,
+                    failedFiles,
+                    skippedPosts
+            );
+        } else if (failedFiles > 0) {
             summary = str(
                     "piko_collection_download_summary_with_failures",
                     downloaded,
                     skipped,
-                    failed
+                    failedFiles
             );
         } else if (skipped > 0) {
             summary = str("piko_collection_download_summary_with_existing", downloaded, skipped);

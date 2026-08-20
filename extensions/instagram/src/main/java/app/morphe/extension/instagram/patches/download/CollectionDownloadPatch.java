@@ -429,7 +429,11 @@ public final class CollectionDownloadPatch {
     }
 
     private static boolean stateRequestAllowed(Object state) throws Exception {
-        Method method = findMethod(state.getClass(), STATE_REQUEST_ALLOWED_METHOD_NAME, boolean.class);
+        Method method = findMethod(
+                state.getClass(),
+                STATE_REQUEST_ALLOWED_METHOD_NAME,
+                boolean.class
+        );
         return (Boolean) method.invoke(state, false);
     }
 
@@ -503,7 +507,15 @@ public final class CollectionDownloadPatch {
 
         InstagramDialogBox dialog = new InstagramDialogBox(context);
         dialog.setTitle(str("piko_download_collection"));
-        dialog.setMessage(str("piko_download_collection_confirm", media.size(), requests.size()));
+        String confirmationMessage = plan.getFailedPosts() > 0
+                ? str(
+                        "piko_download_collection_confirm_with_skipped_posts",
+                        media.size(),
+                        requests.size(),
+                        plan.getFailedPosts()
+                )
+                : str("piko_download_collection_confirm", media.size(), requests.size());
+        dialog.setMessage(confirmationMessage);
         dialog.setNegativeButton(
                 context.getString(android.R.string.cancel),
                 new DialogInterface.OnClickListener() {

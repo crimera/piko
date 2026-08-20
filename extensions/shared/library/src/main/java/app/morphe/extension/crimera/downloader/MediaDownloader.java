@@ -302,9 +302,11 @@ public class MediaDownloader {
 
             URL url = new URL(request.url);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
-            connection.setReadTimeout(READ_TIMEOUT_MS);
-            if (handle != null) handle.setConnection(connection);
+            if (handle != null) {
+                connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+                connection.setReadTimeout(READ_TIMEOUT_MS);
+                handle.setConnection(connection);
+            }
             throwIfCancelled(handle);
             connection.connect();
 

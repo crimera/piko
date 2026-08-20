@@ -149,6 +149,7 @@
     <string name="piko_collection_posts_loaded">Posts loaded: %1$d</string>
     <string name="piko_collection_media_ready">Ready: %1$d posts · %2$d files</string>
     <string name="piko_download_collection_confirm">Download all media in this collection?\n\nPosts: %1$d\nFiles: %2$d</string>
+    <string name="piko_download_collection_confirm_with_skipped_posts">Download all available media in this collection?\n\nPosts: %1$d\nFiles: %2$d\nSkipped posts: %3$d</string>
     <string name="piko_download_files">Download %1$d files</string>
     <string name="piko_download_collection_failed">Could not load this collection. Try again.</string>
     <string name="piko_download_collection_empty">This collection has no downloadable posts.</string>
@@ -159,7 +160,8 @@
     <string name="piko_collection_download_complete">Collection download finished</string>
     <string name="piko_collection_download_summary">Downloaded: %1$d</string>
     <string name="piko_collection_download_summary_with_existing">Downloaded: %1$d, already existed: %2$d</string>
-    <string name="piko_collection_download_summary_with_failures">Downloaded: %1$d, already existed: %2$d, failed: %3$d</string>
+    <string name="piko_collection_download_summary_with_failures">Downloaded: %1$d, already existed: %2$d, failed files: %3$d</string>
+    <string name="piko_collection_download_summary_with_skipped_posts">Downloaded: %1$d, already existed: %2$d, failed files: %3$d, skipped posts: %4$d</string>
     <string name="piko_collection_download_failed">Collection download failed</string>
     <string name="piko_collection_download_try_again">Try again.</string>
     <string name="piko_downloading_media">Downloading: </string>
