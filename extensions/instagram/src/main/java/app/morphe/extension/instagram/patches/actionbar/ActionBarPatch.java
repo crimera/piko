@@ -27,7 +27,7 @@ import app.morphe.extension.instagram.patches.dm.SavedMessagesHook;
 import app.morphe.extension.instagram.db.PikoMessageDb;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.constants.Constants;
-import app.morphe.extension.shared.ui.Dim;
+import app.morphe.extension.instagram.theme.MaterialYouTheme;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Utils;
@@ -142,14 +142,24 @@ public class ActionBarPatch {
 
             if(SettingsStatus.saveDeletedMessages) {
                 Context context = viewGroup.getContext();
-                String threadId = SavedMessagesHook.resolveOpenThreadId();
-                boolean hasUnseen = threadId != null
-                        && PikoMessageDb.getInstance(context).hasUnseenDeletedMessages(threadId);
-                int badgeColor = android.graphics.Color.parseColor("#FFD400");
-                int badgeStrokeColor = android.graphics.Color.BLACK;
-                UI.addImageViewWithBadge(viewGroup, UI.DRAWABLE_HISTORY_ICON,
-                        () -> SavedMessagesHook.openDeletedMessages(context),
-                        hasUnseen, badgeColor, badgeStrokeColor, Dim.dp2);
+                // Deferred: Hook 5 (noteOpenThreadId) and this icon's own injection point live in
+                // the same patched method but at different instruction offsets, so their relative
+                // order isn't guaranteed. Posting reads the thread id on the next UI frame, after
+                // the whole method (and both injected calls) has already finished running.
+                viewGroup.post(() -> {
+                    String threadId = SavedMessagesHook.resolveOpenThreadId();
+                    int unseenCount = threadId != null
+                            ? PikoMessageDb.getInstance(context).getUnseenDeletedCount(threadId)
+                            : 0;
+                    // Blue by default; only follows the system's dynamic accent color when the
+                    // user has Piko's own "Material You theme" setting turned on.
+                    int badgeColor = MaterialYouTheme.isMaterialYouEnabled()
+                            ? UI.resolveDynamicOrFallbackColor(context, android.graphics.Color.parseColor("#1E88E5"))
+                            : android.graphics.Color.parseColor("#1E88E5");
+                    UI.addImageViewWithBadge(viewGroup, UI.DRAWABLE_HISTORY_ICON,
+                            () -> SavedMessagesHook.openDeletedMessages(context),
+                            unseenCount, badgeColor);
+                });
             }
 
         } catch (Exception e) {
