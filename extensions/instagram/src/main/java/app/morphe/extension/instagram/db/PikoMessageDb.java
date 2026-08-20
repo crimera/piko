@@ -239,6 +239,22 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         return unseen;
     }
 
+    /** How many deleted messages in a thread the user hasn't seen yet — drives the counter
+     *  badge next to the thread's history icon. Resets to 0 once {@link #markThreadSeen}
+     *  runs, and counts back up from there for messages deleted after that point. */
+    public int getUnseenDeletedCount(String threadId) {
+        if (threadId == null || threadId.isEmpty()) return 0;
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT COUNT(*) FROM " + TABLE
+                        + " WHERE thread_id = ? AND is_deleted = 1 AND is_seen = 0" + HAS_CONTENT,
+                new String[]{threadId});
+        int count = 0;
+        if (c.moveToFirst()) count = c.getInt(0);
+        c.close();
+        return count;
+    }
+
     /** Marks every deleted message in a thread as seen — call when the user opens the
      *  thread-scoped deleted-messages screen, so the badge clears. */
     public void markThreadSeen(String threadId) {
