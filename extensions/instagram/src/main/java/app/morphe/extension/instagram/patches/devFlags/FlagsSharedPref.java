@@ -52,7 +52,7 @@ public class FlagsSharedPref extends BaseSharedPref {
                 // only treat it as a bool override if it actually looks like one.
                 if (!flagState.equals(FlagState.ENABLE.toString()) && !flagState.equals(FlagState.DISABLE.toString())) continue;
                 Boolean value = flagState.equals(FlagState.ENABLE.toString()) ? true:false;
-                PikoUtils.logger(key+" : "+Boolean.valueOf(value));
+                // PikoUtils.logger(key+" : "+Boolean.valueOf(value));
                 outFlags.put(key, value);
             }
         } catch (Exception e) {
@@ -71,7 +71,6 @@ public class FlagsSharedPref extends BaseSharedPref {
                 String flagState = (String) flags.get(key);
                 try {
                     Long value = Long.parseLong(flagState);
-                    PikoUtils.logger(key+" : "+value);
                     outFlags.put(key, value);
                 } catch (NumberFormatException ignored) {
                     // Not a long override (empty, or a bool flag's own state) -- skip.

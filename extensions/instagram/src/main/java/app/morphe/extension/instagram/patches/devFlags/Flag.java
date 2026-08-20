@@ -24,11 +24,10 @@ public class Flag {
             this.desc = jsonObject.optString("desc");
             this.type = jsonObject.optString("type", "bool");
             String codeKey = jsonObject.optString("code");
-            // Long-typed flags default to an empty override (rendered as a blank
-            // numeric field) instead of the "default" sentinel bool flags use,
-            // since showing the literal word "default" in a number box reads wrong.
-            String defaultValue = isLongType() ? "" : FlagState.DEFAULT.toString();
-            this.code = new StringSetting(codeKey, defaultValue);
+            // No override by default -- both bool and long flags use FlagState.DEFAULT
+            // as the "no override" sentinel, so dev-options and override-backup restores
+            // (which don't touch this store) remain free to take effect unopposed.
+            this.code = new StringSetting(codeKey, FlagState.DEFAULT.toString());
         } catch (Exception e) {
         }
     }
