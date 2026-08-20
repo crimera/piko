@@ -15,14 +15,21 @@ public class Flag {
 
     private String name;
     private String desc;
-    private String type;
+    private FlagType type;
     private StringSetting code;
 
     public Flag(JSONObject jsonObject) {
         try {
             this.name = jsonObject.optString("name");
             this.desc = jsonObject.optString("desc");
-            this.type = jsonObject.optString("type", "bool");
+            String rawType = jsonObject.optString("type", "bool");
+            this.type = FlagType.BOOL;
+            for (FlagType candidate : FlagType.values()) {
+                if (candidate.toString().equals(rawType)) {
+                    this.type = candidate;
+                    break;
+                }
+            }
             String codeKey = jsonObject.optString("code");
             // No override by default -- both bool and long flags use FlagState.DEFAULT
             // as the "no override" sentinel, so dev-options and override-backup restores
@@ -41,7 +48,7 @@ public class Flag {
     }
 
     public boolean isLongType() {
-        return "long".equals(type);
+        return type == FlagType.LONG;
     }
 
     public StringSetting getCode() {
