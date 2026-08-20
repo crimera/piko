@@ -13,30 +13,30 @@ Total Patches      : 24
 --------------------------------------------------------------------------------------------------
 #    Patch Name                                       | Own execute (ms) | Bundle incremental (ms) | Status
 --------------------------------------------------------------------------------------------------
-1    X-Lite: Customize default reply sorting          |           459.43 |                 44.32 | PASS
-2    X-Lite: Share post as image                      |           432.81 |                440.60 | PASS
-3    X-Lite: Unlock downloads                         |            39.98 |                 47.07 | PASS
-4    X-Lite: Open canonical URLs                      |            28.65 |                 20.42 | PASS
-5    X-Lite: Customize inline actions                 |            21.17 |                 46.77 | PASS
-6    X-Lite: Hide AI-generated posts                  |            19.40 |                 23.88 | PASS
-7    X-Lite: Dynamic color                            |            18.57 |                 36.15 | PASS
-8    X-Lite: Show sensitive media                     |            11.77 |                 22.10 | PASS
-9    X-Lite: Feature switch overrides                 |            11.76 |                 29.74 | PASS
-10   X-Lite: Disable automatic timeline refresh       |             9.01 |                 27.48 | PASS
-11   X-Lite: Inline download button                   |             7.62 |                 16.77 | PASS
-12   X-Lite: Remove ads                               |             7.60 |                439.87 | PASS
-13   X-Lite: Restore timeline position                |             7.42 |                 28.80 | PASS
-14   X-Lite: Custom font                              |             5.27 |                 28.39 | PASS
-15   X-Lite: Customize drawer items                   |             4.32 |                 11.90 | PASS
-16   X-Lite: Hide compose button                      |             3.40 |                  5.70 | PASS
-17   X-Lite: Hide premium upsell                      |             2.89 |                  4.95 | PASS
-18   X-Lite: Customize navigation bar items           |             2.77 |                  7.89 | PASS
-19   X-Lite: Hide Spaces bar                          |             2.49 |                  3.73 | PASS
-20   X-Lite: Hide new posts pill                      |             1.51 |                  6.09 | PASS
-21   X-Lite: Customize default media tab              |             1.10 |                  3.80 | PASS
-22   X-Lite: Hide who to follow                       |             0.41 |                  2.01 | PASS
-23   X-Lite: Filter posts by keyword                  |             0.18 |                  2.88 | PASS
-24   X-Lite: Browse tweet object                      |             0.01 |                  4.24 | PASS
+1    NewX: Customize default reply sorting          |           459.43 |                 44.32 | PASS
+2    NewX: Share post as image                      |           432.81 |                440.60 | PASS
+3    NewX: Unlock downloads                         |            39.98 |                 47.07 | PASS
+4    NewX: Open canonical URLs                      |            28.65 |                 20.42 | PASS
+5    NewX: Customize inline actions                 |            21.17 |                 46.77 | PASS
+6    NewX: Hide AI-generated posts                  |            19.40 |                 23.88 | PASS
+7    NewX: Dynamic color                            |            18.57 |                 36.15 | PASS
+8    NewX: Show sensitive media                     |            11.77 |                 22.10 | PASS
+9    NewX: Feature switch overrides                 |            11.76 |                 29.74 | PASS
+10   NewX: Disable automatic timeline refresh       |             9.01 |                 27.48 | PASS
+11   NewX: Inline download button                   |             7.62 |                 16.77 | PASS
+12   NewX: Remove ads                               |             7.60 |                439.87 | PASS
+13   NewX: Restore timeline position                |             7.42 |                 28.80 | PASS
+14   NewX: Custom font                              |             5.27 |                 28.39 | PASS
+15   NewX: Customize drawer items                   |             4.32 |                 11.90 | PASS
+16   NewX: Hide compose button                      |             3.40 |                  5.70 | PASS
+17   NewX: Hide premium upsell                      |             2.89 |                  4.95 | PASS
+18   NewX: Customize navigation bar items           |             2.77 |                  7.89 | PASS
+19   NewX: Hide Spaces bar                          |             2.49 |                  3.73 | PASS
+20   NewX: Hide new posts pill                      |             1.51 |                  6.09 | PASS
+21   NewX: Customize default media tab              |             1.10 |                  3.80 | PASS
+22   NewX: Hide who to follow                       |             0.41 |                  2.01 | PASS
+23   NewX: Filter posts by keyword                  |             0.18 |                  2.88 | PASS
+24   NewX: Browse tweet object                      |             0.01 |                  4.24 | PASS
 --------------------------------------------------------------------------------------------------
 TOT  TOTAL (ALL 24 PATCHES)                           |          1099.52 |               1305.55 |
 --------------------------------------------------------------------------------------------------
@@ -45,129 +45,129 @@ TOT  TOTAL (ALL 24 PATCHES)                           |          1099.52 |      
 2. BUNDLE HOTSPOTS (> 100 ms INCREMENTAL)
 --------------------------------------------------------------------------------------------------
 Bundle incremental time includes dependencies first executed for that row.
-• X-Lite: Share post as image                      :   440.60 ms
-• X-Lite: Remove ads                               :   439.87 ms
+• NewX: Share post as image                      :   440.60 ms
+• NewX: Remove ads                               :   439.87 ms
 
 --------------------------------------------------------------------------------------------------
 3. DETAILED PER-PATCH EXECUTION BREAKDOWN
 --------------------------------------------------------------------------------------------------
 ==================================================================================================
-Patch: X-Lite: Remove ads
+Patch: NewX: Remove ads
 Own execute: 7.60 ms | Bundle incremental: 439.87 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Browse tweet object
+Patch: NewX: Browse tweet object
 Own execute: 0.01 ms | Bundle incremental: 4.24 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Share post as image
+Patch: NewX: Share post as image
 Own execute: 432.81 ms | Bundle incremental: 440.60 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Disable automatic timeline refresh
+Patch: NewX: Disable automatic timeline refresh
 Own execute: 9.01 ms | Bundle incremental: 27.48 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Restore timeline position
+Patch: NewX: Restore timeline position
 Own execute: 7.42 ms | Bundle incremental: 28.80 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Customize inline actions
+Patch: NewX: Customize inline actions
 Own execute: 21.17 ms | Bundle incremental: 46.77 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Unlock downloads
+Patch: NewX: Unlock downloads
 Own execute: 39.98 ms | Bundle incremental: 47.07 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Hide new posts pill
+Patch: NewX: Hide new posts pill
 Own execute: 1.51 ms | Bundle incremental: 6.09 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Filter posts by keyword
+Patch: NewX: Filter posts by keyword
 Own execute: 0.18 ms | Bundle incremental: 2.88 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Customize navigation bar items
+Patch: NewX: Customize navigation bar items
 Own execute: 2.77 ms | Bundle incremental: 7.89 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Hide premium upsell
+Patch: NewX: Hide premium upsell
 Own execute: 2.89 ms | Bundle incremental: 4.95 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Hide compose button
+Patch: NewX: Hide compose button
 Own execute: 3.40 ms | Bundle incremental: 5.70 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Customize drawer items
+Patch: NewX: Customize drawer items
 Own execute: 4.32 ms | Bundle incremental: 11.90 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Inline download button
+Patch: NewX: Inline download button
 Own execute: 7.62 ms | Bundle incremental: 16.77 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Hide Spaces bar
+Patch: NewX: Hide Spaces bar
 Own execute: 2.49 ms | Bundle incremental: 3.73 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Feature switch overrides
+Patch: NewX: Feature switch overrides
 Own execute: 11.76 ms | Bundle incremental: 29.74 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Show sensitive media
+Patch: NewX: Show sensitive media
 Own execute: 11.77 ms | Bundle incremental: 22.10 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Dynamic color
+Patch: NewX: Dynamic color
 Own execute: 18.57 ms | Bundle incremental: 36.15 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Customize default reply sorting
+Patch: NewX: Customize default reply sorting
 Own execute: 459.43 ms | Bundle incremental: 44.32 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Hide who to follow
+Patch: NewX: Hide who to follow
 Own execute: 0.41 ms | Bundle incremental: 2.01 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Hide AI-generated posts
+Patch: NewX: Hide AI-generated posts
 Own execute: 19.40 ms | Bundle incremental: 23.88 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Customize default media tab
+Patch: NewX: Customize default media tab
 Own execute: 1.10 ms | Bundle incremental: 3.80 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Custom font
+Patch: NewX: Custom font
 Own execute: 5.27 ms | Bundle incremental: 28.39 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 
 ==================================================================================================
-Patch: X-Lite: Open canonical URLs
+Patch: NewX: Open canonical URLs
 Own execute: 28.65 ms | Bundle incremental: 20.42 ms | Status: OK
 --------------------------------------------------------------------------------------------------
 

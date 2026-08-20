@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Patch Twitter/X with the unified X-Lite patch bundle.
+# Patch Twitter/X with the unified NewX patch bundle.
 set -euo pipefail
 
 ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -17,10 +17,10 @@ if [[ ! -f "$MPP" ]]; then
   exit 1
 fi
 
-# BETA PATH: current default input for future X-Lite updates.
+# BETA PATH: current default input for future NewX updates.
 # ALPHA PATH: pass the 12.17.3-alpha.01 APK explicitly while compatibility is retained.
 # TODO: Remove the alpha invocation note when the alpha target is deprecated.
-DEFAULT_APK="$HOME/Downloads/x-12.19.0-beta.0.apk"
+DEFAULT_APK="$HOME/Downloads/twitter_12.18.0-beta.0.apk"
 OUTPUT_APK="$HOME/Downloads/piko-twitter-patched.apk"
 APK="$DEFAULT_APK"
 FLAGS=()
@@ -42,33 +42,33 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -p "$MPP" \
   --keystore Morphe.keystore \
   --exclusive \
-  -e "X-Lite: Remove ads" \
-  -e "X-Lite: Browse tweet object" \
-  -e "X-Lite: Share post as image" \
-  -e "X-Lite: Disable automatic timeline refresh" \
-  -e "X-Lite: Restore timeline position" \
-  -e "X-Lite: Customize inline actions" \
-  -e "X-Lite: Unlock downloads" \
-  -e "X-Lite: Hide new posts pill" \
-  -e "X-Lite: Filter posts by keyword" \
-  -e "X-Lite: Customize navigation bar items" \
-  -e "X-Lite: Hide premium upsell" \
-  -e "X-Lite: Hide compose button" \
-  -e "X-Lite: Customize drawer items" \
-  -e "X-Lite: Inline download button" \
-  -e "X-Lite: Hide Spaces bar" \
-  -e "X-Lite: Feature switch overrides" \
-  -e "X-Lite: Show sensitive media" \
-  -e "X-Lite: Dynamic color" \
-  -e "X-Lite: Customize default reply sorting" \
-  -e "X-Lite: Hide Discover more" \
-  -e "X-Lite: Hide who to follow" \
-  -e "X-Lite: Hide AI-generated posts" \
-  -e "X-Lite: Customize default media tab" \
-  -e "X-Lite: Custom font" \
-  -e "X-Lite: Open canonical URLs" \
-  -e "X-Lite: Filter For You by topic" \
-  -e "X-Lite: Custom sharing domain" \
+  -e "NewX: Remove ads" \
+  -e "NewX: Browse tweet object" \
+  -e "NewX: Share post as image" \
+  -e "NewX: Disable automatic timeline refresh" \
+  -e "NewX: Restore timeline position" \
+  -e "NewX: Customize inline actions" \
+  -e "NewX: Unlock downloads" \
+  -e "NewX: Hide new posts pill" \
+  -e "NewX: Filter posts by keyword" \
+  -e "NewX: Customize navigation bar items" \
+  -e "NewX: Hide premium upsell" \
+  -e "NewX: Hide compose button" \
+  -e "NewX: Customize drawer items" \
+  -e "NewX: Inline download button" \
+  -e "NewX: Hide Spaces bar" \
+  -e "NewX: Feature switch overrides" \
+  -e "NewX: Show sensitive media" \
+  -e "NewX: Dynamic color" \
+  -e "NewX: Customize default reply sorting" \
+  -e "NewX: Hide Discover more" \
+  -e "NewX: Hide who to follow" \
+  -e "NewX: Hide AI-generated posts" \
+  -e "NewX: Customize default media tab" \
+  -e "NewX: Custom font" \
+  -e "NewX: Open canonical URLs" \
+  -e "NewX: Filter For You by topic" \
+  -e "NewX: Custom sharing domain" \
   --striplibs=arm64-v8a \
   --force \
   -o "$OUTPUT_APK" \
@@ -76,7 +76,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -- \
   "$APK"
   # -e "Bring back twitter" \
-  # -e "X-Lite: Collect AI-filter training posts" \
+  # -e "NewX: Collect AI-filter training posts" \
 
 if [[ "$INSTALL" != true ]]; then
   exit 0

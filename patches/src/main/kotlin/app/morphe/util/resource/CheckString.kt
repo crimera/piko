@@ -55,7 +55,7 @@ internal fun main(args: Array<String>) {
             "twitter",
             "twitter-bring-back",
         )
-    val defaultOnlyAppIds = listOf("xlite")
+    val defaultOnlyAppIds = listOf("newx")
 
     localizedAppIds.forEach { appId ->
         locales.forEach { locale ->
