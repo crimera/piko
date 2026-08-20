@@ -473,7 +473,6 @@ public final class MaterialYouTheme {
 
     private static void applyComposePrismMode(Context context, ThemeMode mode) {
         int materialYouBackgroundArgb = 0;
-        int materialYouSearchRowArgb = 0;
         if (MaterialYouState.hasMaterialYou(mode)) {
             int backgroundResourceId = ResourceUtils.getIdentifier(
                     context,
@@ -483,17 +482,6 @@ public final class MaterialYouTheme {
             if (backgroundResourceId != 0) {
                 try {
                     materialYouBackgroundArgb = context.getColor(backgroundResourceId);
-                } catch (Resources.NotFoundException ignored) {
-                }
-            }
-            int searchRowResourceId = ResourceUtils.getIdentifier(
-                    context,
-                    ResourceType.COLOR,
-                    "igds_prism_gray_09"
-            );
-            if (searchRowResourceId != 0) {
-                try {
-                    materialYouSearchRowArgb = context.getColor(searchRowResourceId);
                 } catch (Resources.NotFoundException ignored) {
                 }
             }
@@ -509,7 +497,7 @@ public final class MaterialYouTheme {
         lastComposeSearchRowOverrideArgb =
                 MaterialYouState.composeSearchRowOverrideArgb(
                         mode,
-                        materialYouSearchRowArgb
+                        materialYouBackgroundArgb
                 );
     }
 

@@ -21,11 +21,14 @@ internal data class OverlayValues(
     val night: Map<String, String>,
     val dayApi34: Map<String, String>? = null,
     val nightApi34: Map<String, String>? = null,
+    val dayDrawables: Map<String, String> = emptyMap(),
+    val nightDrawables: Map<String, String> = emptyMap(),
 ) {
     init {
         require((dayApi34 == null) == (nightApi34 == null))
         require(dayApi34 == null || dayApi34.keys == day.keys)
         require(nightApi34 == null || nightApi34.keys == night.keys)
+        require(dayDrawables.keys == nightDrawables.keys)
     }
 }
 
@@ -63,6 +66,16 @@ internal fun buildThemeOverlayTable(
             targetPackage.resolve("res/values-night-v31/colors.xml"),
             values.night,
         )
+        writeTypedItemsXml(
+            targetPackage.resolve("res/values-v31/drawables.xml"),
+            "drawable",
+            values.dayDrawables,
+        )
+        writeTypedItemsXml(
+            targetPackage.resolve("res/values-night-v31/drawables.xml"),
+            "drawable",
+            values.nightDrawables,
+        )
         values.dayApi34?.let { api34Values ->
             writeValuesXml(
                 targetPackage.resolve("res/values-v34/colors.xml"),
@@ -85,6 +98,35 @@ internal fun buildThemeOverlayTable(
         return outputFile
     } finally {
         workRoot.deleteRecursively()
+    }
+}
+
+private fun writeTypedItemsXml(
+    output: File,
+    type: String,
+    values: Map<String, String>,
+) {
+    if (values.isEmpty()) return
+
+    output.parentFile.mkdirs()
+    val document = DocumentBuilderFactory.newInstance()
+        .newDocumentBuilder()
+        .newDocument()
+    val resources = document.createElement("resources")
+    document.appendChild(resources)
+
+    values.forEach { (name, value) ->
+        resources.appendChild(
+            document.createElement("item").apply {
+                setAttribute("type", type)
+                setAttribute("name", name)
+                textContent = value
+            },
+        )
+    }
+    TransformerFactory.newInstance().newTransformer().apply {
+        setOutputProperty(OutputKeys.INDENT, "yes")
+        transform(DOMSource(document), StreamResult(output))
     }
 }
 
@@ -132,11 +174,14 @@ private fun writePublicSubset(
     val required = mutableSetOf<PublicName>()
 
     values.day.keys.forEach { required += PublicName("color", it) }
+    values.dayDrawables.keys.forEach { required += PublicName("drawable", it) }
     (
         values.day.values +
             values.night.values +
             values.dayApi34.orEmpty().values +
-            values.nightApi34.orEmpty().values
+            values.nightApi34.orEmpty().values +
+            values.dayDrawables.values +
+            values.nightDrawables.values
     ).forEach { value ->
         collectLocalReferences(value, required)
     }
