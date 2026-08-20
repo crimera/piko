@@ -267,6 +267,8 @@ public class DownloadUtils {
                 int carouselSize = mediaInfo.getCarouselSize();
                 List<DownloadRequest> postRequests = new ArrayList<>(carouselSize);
 
+                // Confirmation shows top-level saved posts. The batch expands each carousel child
+                // into its own file request, so file count can legitimately exceed post count.
                 for (int index = 0; index < carouselSize; index++) {
                     MediaData currentMediaData = mediaInfo.getMediaAt(index);
                     String fileName = username + "_" + currentMediaData.getDownloadFilename(MediaType.ANY);

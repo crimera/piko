@@ -53,6 +53,15 @@ public final class CollectionDownloadPatch {
     private static final int FRAGMENT_SEARCH_DEPTH = 3;
     private static final String SAVED_COLLECTION_CLASS = "com.instagram.save.model.SavedCollection";
     private static final String MEDIA_CLASS = "com.instagram.feed.media.Media";
+    private static final String SOURCE_FIELD_NAME = "sourceFieldName";
+    private static final String SOURCE_STATE_FIELD_NAME = "sourceStateFieldName";
+    private static final String SOURCE_HAS_CURSOR_METHOD_NAME = "sourceHasCursorMethodName";
+    private static final String SOURCE_CAN_LOAD_MORE_METHOD_NAME = "sourceCanLoadMoreMethodName";
+    private static final String STATE_HAS_MORE_FIELD_NAME = "stateHasMoreFieldName";
+    private static final String STATE_REQUEST_ALLOWED_METHOD_NAME =
+            "stateRequestAllowedMethodName";
+    private static final String LOAD_NEXT_PAGE_METHOD_NAME = "loadNextPageMethodName";
+    private static final String REFRESH_COLLECTION_METHOD_NAME = "refreshCollectionMethodName";
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
 
     private static PendingDownload pendingDownload;
@@ -187,6 +196,17 @@ public final class CollectionDownloadPatch {
 
     private CollectionDownloadPatch() {}
 
+    /*
+     * This patch drives Instagram's native saved-collection Posts paginator until the collection is
+     * fully loaded, then hands the resulting media set to the downloader batch path.
+     *
+     * The Posts tab is authoritative here. Live comparison on Instagram 439 showed the Reels tab
+     * was a strict subset of the fully loaded Posts grid, so combining both would duplicate work.
+     *
+     * The placeholder field and method names below are rewritten by the bytecode patch to the real
+     * obfuscated members for the current Instagram target.
+     */
+
     public static void addMenuItem(final Object actionBuilder, final Object optionsSheet) {
         try {
             if (!Pref.enableDownload()) return;
@@ -288,6 +308,13 @@ public final class CollectionDownloadPatch {
                 }
             }
 
+            if (!state.sourceReady && !pending.refreshAttempted) {
+                pending.refreshAttempted = true;
+                invokeRefresh(postsFragment);
+                waitForTransition(pending, state, true);
+                return;
+            }
+
             if (!state.sourceReady || !state.requestAllowed) {
                 if (!state.signature().equals(pending.passiveSignature)) {
                     pending.passiveSignature = state.signature();
@@ -382,36 +409,36 @@ public final class CollectionDownloadPatch {
     }
 
     private static Object readSource(Object postsFragment) throws Exception {
-        return readNamedField(postsFragment, "sourceFieldName");
+        return readNamedField(postsFragment, SOURCE_FIELD_NAME);
     }
 
     private static Object readSourceState(Object source) throws Exception {
-        return readNamedField(source, "sourceStateFieldName");
+        return readNamedField(source, SOURCE_STATE_FIELD_NAME);
     }
 
     private static boolean sourceHasCursor(Object source) throws Exception {
-        return invokeBoolean(source, "sourceHasCursorMethodName");
+        return invokeBoolean(source, SOURCE_HAS_CURSOR_METHOD_NAME);
     }
 
     private static boolean sourceCanLoadMore(Object source) throws Exception {
-        return invokeBoolean(source, "sourceCanLoadMoreMethodName");
+        return invokeBoolean(source, SOURCE_CAN_LOAD_MORE_METHOD_NAME);
     }
 
     private static boolean stateHasMore(Object state) throws Exception {
-        return (Boolean) readNamedField(state, "stateHasMoreFieldName");
+        return (Boolean) readNamedField(state, STATE_HAS_MORE_FIELD_NAME);
     }
 
     private static boolean stateRequestAllowed(Object state) throws Exception {
-        Method method = findMethod(state.getClass(), "stateRequestAllowedMethodName", boolean.class);
+        Method method = findMethod(state.getClass(), STATE_REQUEST_ALLOWED_METHOD_NAME, boolean.class);
         return (Boolean) method.invoke(state, false);
     }
 
     private static void invokeLoadNext(Object postsFragment) throws Exception {
-        invokeVoid(postsFragment, "loadNextPageMethodName");
+        invokeVoid(postsFragment, LOAD_NEXT_PAGE_METHOD_NAME);
     }
 
     private static void invokeRefresh(Object postsFragment) throws Exception {
-        invokeVoid(postsFragment, "refreshCollectionMethodName");
+        invokeVoid(postsFragment, REFRESH_COLLECTION_METHOD_NAME);
     }
 
     private static boolean invokeBoolean(Object owner, String methodName) throws Exception {
@@ -565,7 +592,8 @@ public final class CollectionDownloadPatch {
                                             pending,
                                             downloaded,
                                             skipped,
-                                            failed + preparationFailures
+                                            failed,
+                                            preparationFailures
                                     );
                                 }
                             });
@@ -772,11 +800,17 @@ public final class CollectionDownloadPatch {
             PendingDownload pending,
             int downloaded,
             int skipped,
-            int failed
+            int failedFiles,
+            int skippedPosts
     ) {
         if (pendingDownload != pending || pending.cancelled) return;
         Notification terminalNotification =
-                pending.notification.buildComplete(downloaded, skipped, failed);
+                pending.notification.buildComplete(
+                        downloaded,
+                        skipped,
+                        failedFiles,
+                        skippedPosts
+                );
         cleanupPending(pending, false, terminalNotification);
         Utils.showToastShort(str("piko_collection_download_complete"));
     }
