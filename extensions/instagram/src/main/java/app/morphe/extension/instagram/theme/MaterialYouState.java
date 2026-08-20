@@ -51,9 +51,12 @@ final class MaterialYouState {
 
     static int composeSearchRowOverrideArgb(
             ThemeMode mode,
-            int materialYouSearchRowArgb
+            int materialYouBackgroundArgb
     ) {
-        return hasMaterialYou(mode) ? materialYouSearchRowArgb : 0;
+        if (mode == ThemeMode.AMOLED_MATERIAL_YOU) {
+            return 0xff000000;
+        }
+        return mode == ThemeMode.MATERIAL_YOU ? materialYouBackgroundArgb : 0;
     }
 
     static long composeSearchRowBackground(
