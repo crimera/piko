@@ -13,9 +13,12 @@ import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
+import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.bytecodePatch
+import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.patches.all.misc.resources.ResourceType
 import app.morphe.patches.all.misc.resources.resourceLiteral
 import app.morphe.patches.all.misc.resources.resourceMappingPatch
@@ -44,6 +47,15 @@ private object FullCoverDialogInflateFingerprint : Fingerprint(
             type = "Landroid/view/View;"
         )
     )
+)
+
+private object ClientShutdownStateFingerprint : Fingerprint(
+    name = "<init>",
+    returnType = "V",
+    strings = listOf("is_shutdown", "shutdown_min_version"),
+    custom = { _, classDef ->
+        classDef.type.startsWith("Lcom/twitter/subsystem/clientshutdown/")
+    },
 )
 
 private fun getShowDialogFingerprint(dismissButtonField: FieldReference) = object : Fingerprint(
@@ -78,6 +90,26 @@ val blockUpdateScreenPatch =
         )
 
         execute {
+            val isShutdownMethod =
+                ClientShutdownStateFingerprint.classDef.methods.single { method ->
+                    method.name == "isShutdown" &&
+                        method.parameters.isEmpty() &&
+                        method.returnType == "Z"
+                }
+            val originalIsShutdownInstruction = isShutdownMethod.getInstruction(0)
+
+            isShutdownMethod.addInstructionsWithLabels(
+                0,
+                """
+                invoke-static {}, $PREF_DESCRIPTOR;->blockUpdateScreen()Z
+                move-result v0
+                if-eqz v0, :piko_continue
+                const/4 v0, 0x0
+                return v0
+                """.trimIndent(),
+                ExternalLabel("piko_continue", originalIsShutdownInstruction),
+            )
+
             val dismissButtonField = FullCoverDialogInflateFingerprint
                 .instructionMatches
                 .last()
