@@ -13,52 +13,39 @@ import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.util.getReference
+import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val FOLLOWER_TIMELINE_STACK_FLAG =
     "android_follower_timelines_stack_enabled"
 
-private const val TIMELINE_USER_ACTION_FACTORY =
-    "Lcom/twitter/app/common/timeline/di/view/l;"
-
-private const val TIMELINE_USER_ACTION_FACTORY_ALTERNATE =
-    "Lcom/twitter/app/common/timeline/di/view/i0;"
-
-private const val TIMELINE_USER_ACTION_HANDLER =
-    "Lcom/twitter/users/timeline/l;"
-
-private val timelineUserActionFactoryParameters =
-    listOf(
-        "Landroid/content/Context;",
-        "Landroidx/fragment/app/FragmentManager;",
-        "Lcom/twitter/safetymode/common/h;",
-        "Lcom/twitter/async/http/f;",
-        "Lcom/twitter/util/user/UserIdentifier;",
-        "Lcom/twitter/cache/twitteruser/a;",
-        "Lcom/twitter/app/common/z;",
-        "Lcom/twitter/analytics/feature/model/p1;",
-        "Landroidx/fragment/app/Fragment;",
-        "Lcom/twitter/onboarding/gating/a;",
-        "Lcom/twitter/onboarding/gating/c;",
-    )
-
 private object TimelineUserActionFactoryFingerprint : Fingerprint(
-    definingClass = TIMELINE_USER_ACTION_FACTORY,
-    parameters = timelineUserActionFactoryParameters,
-    returnType = TIMELINE_USER_ACTION_HANDLER,
-)
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.STATIC),
+    custom = { methodDef, classDef ->
+        val parameters = methodDef.parameters
 
-private object TimelineUserActionFactoryAlternateFingerprint : Fingerprint(
-    definingClass = TIMELINE_USER_ACTION_FACTORY_ALTERNATE,
-    parameters = timelineUserActionFactoryParameters,
-    returnType = TIMELINE_USER_ACTION_HANDLER,
+        classDef.type.startsWith("Lcom/twitter/app/common/timeline/di/view/") &&
+            methodDef.returnType.startsWith("Lcom/twitter/users/timeline/") &&
+            parameters.size == 11 &&
+            parameters[0].type == "Landroid/content/Context;" &&
+            parameters[1].type == "Landroidx/fragment/app/FragmentManager;" &&
+            parameters[4].type == "Lcom/twitter/util/user/UserIdentifier;" &&
+            parameters[8].type == "Landroidx/fragment/app/Fragment;" &&
+            methodDef.implementation?.instructions?.any { instruction ->
+                instruction.getReference<FieldReference>()?.type ==
+                    "Lcom/twitter/util/user/UserIdentifier;"
+            } == true
+    },
 )
 
 private object UserTimelineNavigationFingerprint : Fingerprint(
-    definingClass = "Lcom/twitter/users/timeline/b;",
     strings = listOf(FOLLOWER_TIMELINE_STACK_FLAG),
+    custom = { _, classDef ->
+        classDef.type.startsWith("Lcom/twitter/users/timeline/")
+    },
 )
 
 private object ProfileHeaderRelationshipNavigationFingerprint : Fingerprint(
@@ -114,11 +101,8 @@ val fixListRelationshipActionsPatch =
                 method.addInstructions(resultIndex + 1, "const/4 v$resultRegister, 0x0")
             }
 
-            listOf(
-                TimelineUserActionFactoryFingerprint,
-                TimelineUserActionFactoryAlternateFingerprint,
-            ).forEach { fingerprint ->
-                fingerprint.method.addInstructions(0, USE_CURRENT_USER.trimIndent())
+            TimelineUserActionFactoryFingerprint.matchAll(2..2).forEach { match ->
+                match.method.addInstructions(0, USE_CURRENT_USER.trimIndent())
             }
         }
     }
