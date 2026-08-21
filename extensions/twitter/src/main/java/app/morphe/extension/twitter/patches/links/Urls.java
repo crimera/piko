@@ -59,20 +59,14 @@ public class Urls {
         return urlString;
     }
 
-    private static String rewritePostUrl(ContextualPost contextualPost, String link) {
-        Matcher matcher = POST_URL_PATTERN.matcher(link);
-        if (!matcher.matches()) {
-            return link;
-        }
-
-        String username = contextualPost.getCanonicalPost().getAuthor().getScreenName();
-        return matcher.group(1) + username + matcher.group(2);
-    }
-
     public static String hookShareSheetLink(ContextualPost contextualPost, String link){
         try {
             if (SettingsStatus.legacyShareLink) {
-                link = rewritePostUrl(contextualPost, link);
+                Matcher matcher = POST_URL_PATTERN.matcher(link);
+                if (matcher.matches()) {
+                    String username = contextualPost.getCanonicalPost().getAuthor().getScreenName();
+                    link = matcher.group(1) + username + matcher.group(2);
+                }
             }
         }catch (Exception ex) {
             PikoUtils.logger(ex);
