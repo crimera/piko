@@ -7,6 +7,7 @@
 package app.crimera.patches.instagram.misc.download
 
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
+import app.crimera.patches.instagram.utils.Constants.ENTITY_CLASS
 import app.morphe.patcher.Fingerprint
 
 internal object FeedButtonOnClickFingerprint : Fingerprint(
@@ -43,7 +44,7 @@ internal object SavedCollectionPageRequestFingerprint : Fingerprint(
 
 internal object AddCollectionMenuItemExtensionFingerprint : Fingerprint(
     name = "addNormalAction",
-    definingClass = "$DOWNLOAD_DESCRIPTOR/CollectionDownloadPatch;",
+    definingClass = "$ENTITY_CLASS/InstagramActionSheetBuilder;",
 )
 
 internal object ReadCollectionSourceExtensionFingerprint : Fingerprint(

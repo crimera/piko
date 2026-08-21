@@ -41,6 +41,7 @@ import java.util.UUID;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.crimera.downloader.DownloadRequest;
 import app.morphe.extension.crimera.downloader.MediaDownloader;
+import app.morphe.extension.instagram.entity.InstagramActionSheetBuilder;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.shared.Utils;
@@ -212,26 +213,18 @@ public final class CollectionDownloadPatch {
             if (!Pref.enableDownload()) return;
 
             final Context context = findFieldValue(optionsSheet, Context.class);
-            addNormalAction(actionBuilder, str("piko_download_collection"), new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    beginDownload(optionsSheet, context);
-                }
-            });
+            new InstagramActionSheetBuilder(actionBuilder).addNormalAction(
+                    str("piko_download_collection"),
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            beginDownload(optionsSheet, context);
+                        }
+                    }
+            );
         } catch (Throwable error) {
             logError("Could not add the saved collection download action", error);
         }
-    }
-
-    private static void addNormalAction(Object actionBuilder, String title, View.OnClickListener listener)
-            throws Exception {
-        Method method = actionBuilder.getClass().getDeclaredMethod(
-                "normalActionMethod",
-                String.class,
-                View.OnClickListener.class
-        );
-        method.setAccessible(true);
-        method.invoke(actionBuilder, title, listener);
     }
 
     private static void beginDownload(Object optionsSheet, Context context) {
