@@ -24,7 +24,8 @@ internal val newXSettingsResourcePatch =
                         appendChild(
                             document.createElement("meta-data").apply {
                                 setAttribute("android:name", "appFamilies")
-                                setAttribute("android:value", "newx")
+                                // This is X's internal app-family ID, not the patch name.
+                                setAttribute("android:value", "x-lite")
                             },
                         )
                     }
