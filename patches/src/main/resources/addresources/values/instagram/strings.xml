@@ -98,7 +98,7 @@
     <string name="piko_customise_story_timestamp">Customise story timestamp</string>
     <string name="piko_customise_story_timestamp_desc">Customise the timestamp that shows when the story was posted</string>
     <string name="piko_improve_image_viewing">Improve image viewing</string>
-    <string name="piko_improve_image_viewing_desc">Fetches max resolution images from server</string>
+    <string name="piko_improve_image_viewing_desc">Fetches max resolution images from server. May reduce performance or cause the app to switch to an older layout</string>
     <string name="piko_hide_reshare_button">Hide reshare button</string>
     <string name="piko_copy_comment">Copy comment</string>
     <string name="piko_copy_comment_desc">Adds a button to copy comments on posts and reels</string>
