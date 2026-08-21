@@ -9,6 +9,7 @@ package app.crimera.patches.twitter.misc.blockUpdateScreen
 import app.crimera.patches.twitter.misc.settings.settingsPatch
 import app.crimera.patches.twitter.utils.Constants.COMPATIBILITY_X
 import app.crimera.patches.twitter.utils.Constants.PREF_DESCRIPTOR
+import app.crimera.patches.twitter.utils.Constants.UTILS_DESCRIPTOR
 import app.crimera.patches.twitter.utils.enableSettings
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterWithin
@@ -49,14 +50,20 @@ private object FullCoverDialogInflateFingerprint : Fingerprint(
     )
 )
 
-private object ClientShutdownStateFingerprint : Fingerprint(
+private object ClientShutdownStateConstructorFingerprint : Fingerprint(
+    definingClass = "Lcom/twitter/subsystem/clientshutdown/",
     name = "<init>",
     returnType = "V",
     strings = listOf("is_shutdown", "shutdown_min_version"),
-    custom = { _, classDef ->
-        classDef.type.startsWith("Lcom/twitter/subsystem/clientshutdown/")
-    },
 )
+
+private fun getClientShutdownStateFingerprint(definingClass: String) = object : Fingerprint(
+    definingClass = definingClass,
+    name = "isShutdown",
+    accessFlags = listOf(AccessFlags.PUBLIC, AccessFlags.FINAL),
+    parameters = listOf(),
+    returnType = "Z",
+) {}
 
 private fun getShowDialogFingerprint(dismissButtonField: FieldReference) = object : Fingerprint(
     name = "get",
@@ -90,18 +97,15 @@ val blockUpdateScreenPatch =
         )
 
         execute {
-            val isShutdownMethod =
-                ClientShutdownStateFingerprint.classDef.methods.single { method ->
-                    method.name == "isShutdown" &&
-                        method.parameters.isEmpty() &&
-                        method.returnType == "Z"
-                }
+            val isShutdownMethod = getClientShutdownStateFingerprint(
+                ClientShutdownStateConstructorFingerprint.classDef.type
+            ).method
             val originalIsShutdownInstruction = isShutdownMethod.getInstruction(0)
 
             isShutdownMethod.addInstructionsWithLabels(
                 0,
                 """
-                invoke-static {}, $PREF_DESCRIPTOR;->blockUpdateScreen()Z
+                invoke-static {}, $UTILS_DESCRIPTOR;->blockUpdateScreen()Z
                 move-result v0
                 if-eqz v0, :piko_continue
                 const/4 v0, 0x0

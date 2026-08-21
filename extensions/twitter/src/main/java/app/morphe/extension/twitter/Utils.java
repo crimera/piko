@@ -172,6 +172,10 @@ public class Utils {
         return sp.getBoolean(setting.key, setting.defaultValue);
     }
 
+    public static boolean blockUpdateScreen() {
+        return getBooleanPref(Settings.MISC_BLOCK_UPDATE_SCREEN);
+    }
+
     public static String getAll(boolean no_flags) {
         JSONObject prefs = sp.getAll();
         prefs.remove(Settings.LAST_CHANGELOG.key);

@@ -144,12 +144,8 @@ public class Pref {
 
     public static boolean redirect(TabLayout$g g) {return Utils.redirect(g);}
 
-    public static boolean blockUpdateScreen() {
-        return Utils.getBooleanPref(Settings.MISC_BLOCK_UPDATE_SCREEN);
-    }
-
     public static void blockUpdateScreen(View view) {
-        if (blockUpdateScreen() && view != null) {
+        if (Utils.blockUpdateScreen() && view != null) {
             if (view.getParent() instanceof ViewGroup container &&
                     container.getParent() instanceof ViewGroup scrollView) {
                 // Hide the alert dialog container first
