@@ -217,6 +217,8 @@
     <string name="piko_newx_add_font_title">Add font</string>
     <string name="piko_newx_add_font_summary">Make sure the font is of type .ttf or .otf</string>
     <string name="piko_newx_delete_font_title">Delete font</string>
+    <string name="piko_newx_system_font_title">Use system font</string>
+    <string name="piko_newx_system_font_summary">Use the default system font</string>
     <string name="piko_newx_custom_emoji_font_title">Custom emoji font</string>
     <string name="piko_newx_custom_emoji_font_summary">Apply a custom font to emojis</string>
     <string name="piko_newx_add_emoji_font_title">Add emoji font</string>

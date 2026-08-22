@@ -51,11 +51,13 @@ public class UpdateFont {
     private static Typeface emojiTypeface;
     private static final Context context;
     private static final boolean isCustomFontEnabled;
+    private static final boolean isSystemFontEnabled;
     private static final boolean isCustomEmojiFontEnabled;
 
     static {
         context = app.morphe.extension.shared.Utils.getContext();
         isCustomFontEnabled = SettingsRegistry.getBooleanOrDefault("newx.content.custom_font.enabled", false);
+        isSystemFontEnabled = SettingsRegistry.getBooleanOrDefault("newx.content.system_font.enabled", false);
         isCustomEmojiFontEnabled = SettingsRegistry.getBooleanOrDefault("newx.content.custom_emoji_font.enabled", false);
 
         if (isCustomFontEnabled) {
@@ -219,20 +221,33 @@ public class UpdateFont {
      * (NewX settings), which do not pass through the Compose paragraph typeface hook.
      */
     public static Typeface customTypefaceOr(Typeface fallback) {
-        return isCustomFontEnabled && textTypeface != null
-                ? styledTypeface(textTypeface, fallback)
-                : fallback;
+        if (isCustomFontEnabled && textTypeface != null) {
+            return styledTypeface(textTypeface, fallback);
+        }
+        if (isSystemFontEnabled) {
+            return styledTypeface(Typeface.DEFAULT, fallback);
+        }
+        return fallback;
     }
 
     private static Typeface processTypeface(Typeface original) {
-        return isCustomFontEnabled && textTypeface != null
-                ? styledTypeface(textTypeface, original)
-                : original;
+        if (isCustomFontEnabled && textTypeface != null) {
+            return styledTypeface(textTypeface, original);
+        }
+        if (isSystemFontEnabled) {
+            return styledTypeface(Typeface.DEFAULT, original);
+        }
+        return original;
     }
 
     private static Typeface styledTypeface(Typeface custom, Typeface original) {
-        int style = original == null ? Typeface.NORMAL : original.getStyle();
-        return Typeface.create(custom, style);
+        if (original == null) {
+            return custom;
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            return Typeface.create(custom, original.getWeight(), (original.getStyle() & Typeface.ITALIC) != 0);
+        }
+        return Typeface.create(custom, original.getStyle());
     }
 
     private static final class ComposeEmojiSpan extends ReplacementSpan {
