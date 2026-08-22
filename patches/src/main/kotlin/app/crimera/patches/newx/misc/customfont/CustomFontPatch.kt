@@ -107,7 +107,7 @@ val customFontPatch =
                         id = "newx.content.system_font.enabled",
                         strings = settingStrings("piko_newx_system_font"),
                         order = 50,
-                        defaultValue = false,
+                        defaultValue = true,
                         rebootApp = true,
                     )
                     toggle(
