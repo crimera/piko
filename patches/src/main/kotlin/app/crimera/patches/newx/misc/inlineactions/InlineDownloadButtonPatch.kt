@@ -215,6 +215,37 @@ val newXInlineDownloadButtonPatch =
                                 ),
                             ),
                     ).scopedMatchAllOrNull().orEmpty(),
+                    // BETA PATH: getter-based inline-action model and the 11-parameter renderer
+                    // introduced in 12.19.1.
+                    Fingerprint(
+                        definingClass = "Lcom/x/inlineactionbar/",
+                        parameters =
+                            listOf(
+                                entryModels.inlineActionEntryDescriptor,
+                                "L",
+                                "J",
+                                "F",
+                                "L",
+                                "J",
+                                "L",
+                                "L",
+                                MODIFIER,
+                                COMPOSER,
+                                "I",
+                            ),
+                        returnType = "V",
+                        filters =
+                            listOf(
+                                methodCall(
+                                    smali =
+                                        "${entryModels.inlineActionEntryDescriptor}->getActionType()" +
+                                            entryModels.postActionTypeDescriptor,
+                                ),
+                                methodCall(
+                                    smali = "${entryModels.inlineActionEntryDescriptor}->isEnabled()Z",
+                                ),
+                            ),
+                    ).scopedMatchAllOrNull().orEmpty(),
                 ).flatten()
                     .distinctBy { it.originalMethod.toString() }
             val inlineRenderer =

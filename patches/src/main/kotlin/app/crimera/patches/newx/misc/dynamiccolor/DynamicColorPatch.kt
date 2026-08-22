@@ -618,6 +618,31 @@ private fun patchInlineActionTints() {
                     methodCall(smali = "${inlineActionEntryClass.type}->isEnabled()Z"),
                 ),
             ).scopedMatchAllOrNull().orEmpty(),
+            // BETA PATH: getter calls and the 11-parameter renderer introduced in 12.19.1.
+            Fingerprint(
+                definingClass = "Lcom/x/inlineactionbar/",
+                parameters = listOf(
+                    inlineActionEntryClass.type,
+                    "L",
+                    "J",
+                    "F",
+                    "L",
+                    "J",
+                    "L",
+                    "L",
+                    "Landroidx/compose/ui/Modifier;",
+                    "Landroidx/compose/runtime/Composer;",
+                    "I",
+                ),
+                returnType = "V",
+                filters = listOf(
+                    methodCall(
+                        smali =
+                            "${inlineActionEntryClass.type}->getActionType()$actionTypeDescriptor",
+                    ),
+                    methodCall(smali = "${inlineActionEntryClass.type}->isEnabled()Z"),
+                ),
+            ).scopedMatchAllOrNull().orEmpty(),
         ).flatten()
             .distinctBy { it.originalMethod.toString() }
     requireExactlyOne("NewX inline action entry renderer", entryMatches)
@@ -649,13 +674,26 @@ private fun patchInlineActionTints() {
             .mapNotNull { instruction -> instruction.getReference<MethodReference>() }
             .filter { reference ->
                 reference.name == "<init>" &&
-                    reference.parameterTypes.size == 5 &&
-                    reference.parameterTypes[0] == "Ljava/lang/String;" &&
-                    reference.parameterTypes[1] == "Z" &&
-                    reference.parameterTypes[2] == "Ljava/lang/Long;" &&
-                    reference.parameterTypes[3] == "F" &&
-                    reference.parameterTypes[4].toString()
-                        .startsWith("Landroidx/compose/runtime/") &&
+                    reference.parameterTypes.let { parameters ->
+                        when (parameters.size) {
+                            5 ->
+                                parameters[0] == "Ljava/lang/String;" &&
+                                    parameters[1] == "Z" &&
+                                    parameters[2] == "Ljava/lang/Long;" &&
+                                    parameters[3] == "F" &&
+                                    parameters[4].toString()
+                                        .startsWith("Landroidx/compose/runtime/")
+                            6 ->
+                                parameters[0] == "Ljava/lang/String;" &&
+                                    parameters[1] == "Z" &&
+                                    parameters[2] == "Ljava/lang/Long;" &&
+                                    parameters[3] == "F" &&
+                                    parameters[4] == "Lkotlin/jvm/functions/Function1;" &&
+                                    parameters[5].toString()
+                                        .startsWith("Landroidx/compose/runtime/")
+                            else -> false
+                        }
+                    } &&
                     reference.definingClass.hasComposableLambdaInvoke()
             }.distinctBy(MethodReference::toString)
     requireExactlyOne("NewX like icon composable constructor", likeComposableConstructors)
@@ -724,14 +762,28 @@ private fun patchLikeIconComposable(
     val lottieCall =
         composable.instructions.withIndex().singleOrNull { (_, instruction) ->
             val reference = instruction.getReference<MethodReference>() ?: return@singleOrNull false
-            reference.parameterTypes.size == 8 &&
-                reference.parameterTypes[0] == "Z" &&
-                reference.parameterTypes[2] == "Z" &&
-                reference.parameterTypes[3] == "Lkotlin/jvm/functions/Function0;" &&
-                reference.parameterTypes[4] == "Landroidx/compose/ui/Modifier;" &&
-                reference.parameterTypes[5] == "Ljava/lang/String;" &&
-                reference.parameterTypes[6] == "Landroidx/compose/runtime/Composer;" &&
-                reference.parameterTypes[7] == "I" &&
+            reference.parameterTypes.let { parameters ->
+                when (parameters.size) {
+                    8 ->
+                        parameters[0] == "Z" &&
+                            parameters[2] == "Z" &&
+                            parameters[3] == "Lkotlin/jvm/functions/Function0;" &&
+                            parameters[4] == "Landroidx/compose/ui/Modifier;" &&
+                            parameters[5] == "Ljava/lang/String;" &&
+                            parameters[6] == "Landroidx/compose/runtime/Composer;" &&
+                            parameters[7] == "I"
+                    9 ->
+                        parameters[0] == "Z" &&
+                            parameters[2] == "Z" &&
+                            parameters[3] == "Lkotlin/jvm/functions/Function0;" &&
+                            parameters[4] == "Landroidx/compose/ui/Modifier;" &&
+                            parameters[5] == "Ljava/lang/String;" &&
+                            parameters[6] == "Landroidx/compose/runtime/Composer;" &&
+                            parameters[7] == "I" &&
+                            parameters[8] == "I"
+                    else -> false
+                }
+            } &&
                 reference.returnType == "V"
         } ?: throw PatchException("NewX like Lottie renderer call not found: $composable")
     val rangeInstruction = lottieCall.value as? RegisterRangeInstruction
