@@ -120,11 +120,7 @@ public final class MediaPickerDialog {
     }
 
     private static boolean showCopyLinkButton() {
-        try {
-            return SettingsRegistry.getBoolean(COPY_LINK_SETTING_ID);
-        } catch (RuntimeException exception) {
-            return true;
-        }
+        return SettingsRegistry.getBooleanOrDefault(COPY_LINK_SETTING_ID, true);
     }
 
     private static IconView.IconType resolveIconType(InlineDownloadButton.DownloadItem item) {

@@ -60,11 +60,14 @@ public final class ReplySortingResolver {
 
     public static String getDefault() {
         try {
-            if (SettingsRegistry.getBoolean(REMEMBER_SETTING)) {
+            if (SettingsRegistry.getBooleanOrDefault(REMEMBER_SETTING, false)) {
                 String last = readLast();
                 if (isValidMode(last)) return last;
             }
-            String configured = SettingsRegistry.getString(DEFAULT_SETTING);
+            String configured = SettingsRegistry.getStringOrDefault(
+                    DEFAULT_SETTING,
+                    DEFAULT_FALLBACK
+            );
             if (isValidMode(configured)) return configured;
             return DEFAULT_FALLBACK;
         } catch (RuntimeException exception) {
@@ -90,7 +93,7 @@ public final class ReplySortingResolver {
         }
 
         try {
-            if (!SettingsRegistry.getBoolean(REMEMBER_SETTING)) return;
+            if (!SettingsRegistry.getBooleanOrDefault(REMEMBER_SETTING, false)) return;
             String name = enumValue.name();
             if (!isValidMode(name)) return;
 

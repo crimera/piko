@@ -33,7 +33,7 @@ public final class MediaTabResolver {
             return current;
         }
         try {
-            String configuredDefault = SettingsRegistry.getString(DEFAULT_SETTING);
+            String configuredDefault = SettingsRegistry.getStringOrDefault(DEFAULT_SETTING, "");
             if (!"Photos".equalsIgnoreCase(configuredDefault)) return current;
             // Enum.valueOf returns the same instance as the enum-constant scan, without cloning
             // the constants array; a missing constant throws IllegalArgumentException, which is

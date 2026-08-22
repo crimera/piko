@@ -58,11 +58,7 @@ public final class NewXObjectBrowserHandler {
     }
 
     private static boolean isEnabled() {
-        try {
-            return SettingsRegistry.getBoolean(SETTING_ID);
-        } catch (RuntimeException exception) {
-            return false;
-        }
+        return SettingsRegistry.getBooleanOrDefault(SETTING_ID, false);
     }
 
     private static boolean isBrowseObjectAction(Object action) {

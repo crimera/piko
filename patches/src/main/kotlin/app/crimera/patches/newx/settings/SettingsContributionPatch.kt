@@ -151,7 +151,7 @@ internal fun ToggleSettingDefinition.injectRead(
         index = index,
         excludedRegisters = excludedRegisters,
         registerConstraint = registerConstraint,
-        methodName = "getBoolean",
+        methodName = "getBooleanOrDefault",
         returnType = "Z",
     )
 
@@ -193,7 +193,7 @@ internal fun TextInputSettingDefinition.injectRead(
         index = index,
         excludedRegisters = excludedRegisters,
         registerConstraint = registerConstraint,
-        methodName = "getString",
+        methodName = "getStringOrDefault",
         returnType = "Ljava/lang/String;",
     )
 
@@ -208,7 +208,7 @@ internal fun SingleChoiceSettingDefinition.injectRead(
         index = index,
         excludedRegisters = excludedRegisters,
         registerConstraint = registerConstraint,
-        methodName = "getString",
+        methodName = "getStringOrDefault",
         returnType = "Ljava/lang/String;",
     )
 
@@ -223,7 +223,7 @@ internal fun MultiChoiceSettingDefinition.injectRead(
         index = index,
         excludedRegisters = excludedRegisters,
         registerConstraint = registerConstraint,
-        methodName = "getStringSet",
+        methodName = "getStringSetOrDefault",
         returnType = "Ljava/util/Set;",
     )
 

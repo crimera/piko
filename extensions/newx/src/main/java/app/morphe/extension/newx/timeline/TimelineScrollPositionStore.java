@@ -27,7 +27,10 @@ public final class TimelineScrollPositionStore {
 
     @Nullable
     public static int[] restore(Enum<?> timeline) {
-        if (timeline == null || !SettingsRegistry.getBoolean(RESTORE_TIMELINE_POSITION_SETTING)) {
+        if (timeline == null || !SettingsRegistry.getBooleanOrDefault(
+                RESTORE_TIMELINE_POSITION_SETTING,
+                false
+        )) {
             return null;
         }
 
@@ -50,7 +53,10 @@ public final class TimelineScrollPositionStore {
 
     public static void save(Enum<?> timeline, Object holder) {
         if (timeline == null || holder == null ||
-                !SettingsRegistry.getBoolean(RESTORE_TIMELINE_POSITION_SETTING)) return;
+                !SettingsRegistry.getBooleanOrDefault(
+                        RESTORE_TIMELINE_POSITION_SETTING,
+                        false
+                )) return;
 
         try {
             SharedPreferences preferences = preferences();

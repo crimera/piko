@@ -57,6 +57,7 @@ public final class InlineDownloadButton {
     private static final int MAX_TRACKED_OBJECTS = 128;
     private static final ExecutorService DOWNLOAD_EXECUTOR = Executors.newSingleThreadExecutor();
     private static final List<WeakReference<Object>> DOWNLOAD_ACTIONS = new ArrayList<>();
+    private static volatile boolean patchApplied;
     private static boolean initialized;
     private static boolean downloadReceiverRegistered;
     private static final ThreadLocal<Boolean> RENDERING_DOWNLOAD_ACTION = new ThreadLocal<>();
@@ -65,10 +66,13 @@ public final class InlineDownloadButton {
     }
 
     public static synchronized void initialize(Context context) {
-        if (initialized || context == null) return;
+        if (context == null) return;
 
         Context applicationContext = context.getApplicationContext();
         if (!(applicationContext instanceof Application application)) return;
+
+        patchApplied = true;
+        if (initialized) return;
 
         NewXUtils.initialize(application);
         registerDownloadReceiver(application);
@@ -77,7 +81,7 @@ public final class InlineDownloadButton {
     }
 
     public static List<?> addAction(List<?> actions, Object presenter) {
-        if (!isEnabled() || actions == null) return actions;
+        if (!patchApplied || !isEnabled() || actions == null) return actions;
 
         try {
             if (!hasMedia(postFor(presenter))) return actions;
@@ -120,6 +124,8 @@ public final class InlineDownloadButton {
     }
 
     public static boolean handleEvent(Object presenter, Object event) {
+        if (!patchApplied) return false;
+
         Object action = findActionEntry(event);
         if (!isDownloadAction(action)) return false;
 
@@ -156,12 +162,7 @@ public final class InlineDownloadButton {
     }
 
     private static boolean isEnabled() {
-        try {
-            return SettingsRegistry.getBoolean(SETTING_ID);
-        } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to read NewX inline download setting", exception);
-            return false;
-        }
+        return SettingsRegistry.getBooleanOrDefault(SETTING_ID, false);
     }
 
     static boolean hasMedia(Object post) {
@@ -958,15 +959,12 @@ public final class InlineDownloadButton {
     }
 
     private static ConflictBehavior conflictBehavior() {
-        try {
-            String value = SettingsRegistry.getString(CONFLICT_SETTING);
-            if (value != null) {
-                for (ConflictBehavior behavior : ConflictBehavior.values()) {
-                    if (behavior.name().equalsIgnoreCase(value)) return behavior;
-                }
-            }
-        } catch (RuntimeException exception) {
-            Logger.printException(() -> "Failed to read NewX download conflict behavior", exception);
+        String value = SettingsRegistry.getStringOrDefault(
+                CONFLICT_SETTING,
+                DEFAULT_CONFLICT_BEHAVIOR.name()
+        );
+        for (ConflictBehavior behavior : ConflictBehavior.values()) {
+            if (behavior.name().equalsIgnoreCase(value)) return behavior;
         }
         return DEFAULT_CONFLICT_BEHAVIOR;
     }

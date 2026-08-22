@@ -44,7 +44,7 @@ class SettingsContributionPatchTest {
         assertEquals(0, read.register)
         assertEquals(3, read.nextIndex)
         assertSettingId(method.instructions[0], toggle.id, read.register)
-        assertFourBitInvoke(method.instructions[1], "getBoolean", "Z", read.register)
+        assertFourBitInvoke(method.instructions[1], "getBooleanOrDefault", "Z", read.register)
         assertMoveResult(method.instructions[2], Opcode.MOVE_RESULT, read.register)
     }
 
@@ -62,7 +62,7 @@ class SettingsContributionPatchTest {
         assertEquals(16, read.register)
         assertEquals(3, read.nextIndex)
         assertSettingId(method.instructions[0], textInput.id, read.register)
-        assertByteInvoke(method.instructions[1], "getString", "Ljava/lang/String;", read.register)
+        assertByteInvoke(method.instructions[1], "getStringOrDefault", "Ljava/lang/String;", read.register)
         assertMoveResult(method.instructions[2], Opcode.MOVE_RESULT_OBJECT, read.register)
     }
 
@@ -80,7 +80,7 @@ class SettingsContributionPatchTest {
         assertEquals(1, read.register)
         assertEquals(4, read.nextIndex)
         assertSettingId(method.instructions[1], multiChoice.id, read.register)
-        assertFourBitInvoke(method.instructions[2], "getStringSet", "Ljava/util/Set;", read.register)
+        assertFourBitInvoke(method.instructions[2], "getStringSetOrDefault", "Ljava/util/Set;", read.register)
         assertMoveResult(method.instructions[3], Opcode.MOVE_RESULT_OBJECT, read.register)
         assertEquals(Opcode.RETURN_VOID, method.instructions[read.nextIndex].opcode)
     }
@@ -148,7 +148,7 @@ class SettingsContributionPatchTest {
 
         inject(method)
 
-        assertFourBitInvoke(method.instructions[1], "getBoolean", "Z", register = 0)
+        assertFourBitInvoke(method.instructions[1], "getBooleanOrDefault", "Z", register = 0)
         val branch = assertIs<BuilderOffsetInstruction>(method.instructions[3])
         assertEquals(expectedBranchOpcode, branch.opcode)
         assertEquals(0, assertIs<OneRegisterInstruction>(branch).registerA)
@@ -172,7 +172,7 @@ class SettingsContributionPatchTest {
 
         inject(method, target)
 
-        assertFourBitInvoke(method.instructions[1], "getBoolean", "Z", register = 0)
+        assertFourBitInvoke(method.instructions[1], "getBooleanOrDefault", "Z", register = 0)
         val branch = assertIs<BuilderOffsetInstruction>(method.instructions[3])
         assertEquals(expectedBranchOpcode, branch.opcode)
         assertEquals(0, assertIs<OneRegisterInstruction>(branch).registerA)

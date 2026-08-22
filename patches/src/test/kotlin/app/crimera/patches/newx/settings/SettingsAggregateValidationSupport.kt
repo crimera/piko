@@ -234,7 +234,9 @@ internal object NewXValidationInputs {
     private val constantPattern =
         Regex("""(?:public|protected|private)?\s*static\s+final\s+String\s+(\w+)\s*=\s*\"(newx\.[^\"]+)\"\s*;""")
     private val registryReadPattern =
-        Regex("""SettingsRegistry\s*\.\s*get(Boolean|String|StringSet)\s*\(\s*(\"newx\.[^\"]+\"|\w+)\s*\)""")
+        Regex(
+            """SettingsRegistry\s*\.\s*get(Boolean|String|StringSet)(?:OrDefault)?\s*\(\s*(\"newx\.[^\"]+\"|\w+)""",
+        )
 
     fun repositoryRoot(): Path {
         var path = Path.of(System.getProperty("user.dir")).toAbsolutePath()

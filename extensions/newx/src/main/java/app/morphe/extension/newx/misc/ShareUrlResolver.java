@@ -35,7 +35,7 @@ public final class ShareUrlResolver {
     public static String changeDomain(String urlString) {
         try {
             String customDomain = normalizeCustomDomain(
-                    SettingsRegistry.getString(CUSTOM_DOMAIN_SETTING)
+                    SettingsRegistry.getStringOrDefault(CUSTOM_DOMAIN_SETTING, "")
             );
             if (customDomain.isEmpty()) return urlString;
             if (!isValidNormalizedDomain(customDomain)) return urlString;

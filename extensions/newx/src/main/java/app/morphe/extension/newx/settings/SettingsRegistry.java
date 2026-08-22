@@ -292,12 +292,12 @@ public final class SettingsRegistry {
         throw failure("Unknown NewX settings group: " + id);
     }
 
-    public static synchronized boolean getBoolean(String key) {
-        Setting<?> setting = requireSetting(key);
-        if (!(setting instanceof BooleanSetting booleanSetting)) {
-            throw failure("NewX setting is not boolean: " + key);
-        }
-        return booleanSetting.get();
+    /**
+     * Reads an optional setting without treating an omitted feature contribution as an error.
+     * Contributions are selected independently by the user, so absence is a normal runtime state.
+     */
+    public static synchronized boolean getBooleanOrDefault(String key) {
+        return getBooleanOrDefault(key, false);
     }
 
     public static synchronized boolean getBooleanOrDefault(String key, boolean defaultValue) {
@@ -309,16 +309,31 @@ public final class SettingsRegistry {
         return booleanSetting.get();
     }
 
-    public static synchronized String getString(String key) {
-        Setting<?> setting = requireSetting(key);
+    public static synchronized String getStringOrDefault(String key) {
+        return getStringOrDefault(key, "");
+    }
+
+    public static synchronized String getStringOrDefault(String key, String defaultValue) {
+        Objects.requireNonNull(defaultValue);
+        Setting<?> setting = SETTINGS.get(key);
+        if (setting == null) return defaultValue;
         if (!(setting instanceof StringSetting stringSetting)) {
             throw failure("NewX setting is not a string: " + key);
         }
         return stringSetting.get();
     }
 
-    public static synchronized Set<String> getStringSet(String key) {
-        Setting<?> setting = requireSetting(key);
+    public static synchronized Set<String> getStringSetOrDefault(String key) {
+        return getStringSetOrDefault(key, Collections.emptySet());
+    }
+
+    public static synchronized Set<String> getStringSetOrDefault(
+            String key,
+            Set<String> defaultValue
+    ) {
+        Objects.requireNonNull(defaultValue);
+        Setting<?> setting = SETTINGS.get(key);
+        if (setting == null) return defaultValue;
         if (!(setting instanceof StringSetSetting stringSetSetting)) {
             throw failure("NewX setting is not a string set: " + key);
         }
@@ -621,13 +636,6 @@ public final class SettingsRegistry {
             throw failure("Unknown NewX " + type + " setting: " + id);
         }
         return item;
-    }
-
-    private static Setting<?> requireSetting(String key) {
-        requireFrozen();
-        Setting<?> setting = SETTINGS.get(key);
-        if (setting == null) throw failure("Unknown NewX setting: " + key);
-        return setting;
     }
 
     private static void requireUnconfigured(ItemBuilder item) {

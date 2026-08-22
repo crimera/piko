@@ -130,6 +130,13 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void downloadActionIsNotAddedBeforeItsPatchInitializes() {
+        List<?> actions = Collections.singletonList(new Object());
+
+        assertSame(actions, InlineDownloadButton.addAction(actions, new Object()));
+    }
+
+    @Test
     public void conflictCleanupExcludesPublishedDestination() {
         assertTrue(InlineDownloadButton.existingMediaSelection().contains("!=?"));
         assertArrayEquals(
