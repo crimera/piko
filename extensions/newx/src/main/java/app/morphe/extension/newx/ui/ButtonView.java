@@ -9,6 +9,8 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.TextView;
 
+import app.morphe.extension.newx.misc.UpdateFont;
+
 /**
  * Reusable button component supporting TEXT, TONAL, and FILLED styles.
  */
@@ -45,7 +47,7 @@ public class ButtonView extends TextView {
         setClickable(true);
 
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        setTypeface(UpdateFont.customTypefaceOr(android.graphics.Typeface.DEFAULT_BOLD));
 
         int height = Theme.dpToPx(getContext(), 40f);
         int paddingHoriz = Theme.dpToPx(getContext(), 20f);

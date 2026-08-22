@@ -23,10 +23,11 @@ import java.util.Locale;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.Setting;
-import app.morphe.extension.shared.ui.CustomDialog;
 import app.morphe.extension.newx.featureswitches.FeatureSwitchStore;
 import app.morphe.extension.newx.postfilter.PostFilterRuleStore;
 import app.morphe.extension.newx.timeline.ForYouTopicFilter;
+import app.morphe.extension.newx.ui.ButtonView;
+import app.morphe.extension.newx.ui.DialogView;
 
 public final class SettingsBackupRestore {
     private static final int BACKUP_REQUEST_CODE = 0x5042;
@@ -155,18 +156,27 @@ public final class SettingsBackupRestore {
     }
 
     private static void promptForRestart(Activity activity) {
-        Dialog dialog = CustomDialog.create(
+        DialogView dialog = new DialogView(activity)
+                .setTitle(str("piko_newx_restart_title"))
+                .setSubtitle(str("piko_newx_restart_summary"));
+        dialog.getDialog().setCanceledOnTouchOutside(true);
+
+        ButtonView cancel = new ButtonView(
                 activity,
-                str("piko_newx_restart_title"),
-                str("piko_newx_restart_summary"),
-                null,
-                str("piko_newx_restart_now"),
-                () -> Utils.restartApp(activity),
-                () -> { },
-                null,
-                null,
-                true
-        ).first;
-        dialog.show();
+                ButtonView.ButtonStyle.TEXT,
+                str("piko_newx_settings_cancel")
+        );
+        cancel.setOnClickListener(ignored -> dialog.dismiss());
+
+        ButtonView restart = new ButtonView(
+                activity,
+                ButtonView.ButtonStyle.FILLED,
+                str("piko_newx_restart_now")
+        );
+        restart.setOnClickListener(ignored -> {
+            dialog.dismiss();
+            Utils.restartApp(activity);
+        });
+        dialog.addButton(cancel).addButton(restart).show();
     }
 }

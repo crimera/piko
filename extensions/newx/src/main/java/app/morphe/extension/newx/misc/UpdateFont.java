@@ -36,9 +36,10 @@ import java.nio.charset.StandardCharsets;
 
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.shared.ui.CustomDialog;
 import app.morphe.extension.newx.settings.SettingsActionHandler;
 import app.morphe.extension.newx.settings.SettingsRegistry;
+import app.morphe.extension.newx.ui.ButtonView;
+import app.morphe.extension.newx.ui.DialogView;
 
 public class UpdateFont {
     public static final String FONT_FILE_NAME = "custom_font.ttf";
@@ -398,19 +399,27 @@ public class UpdateFont {
     }
 
     private static void promptForRestart(Activity activity) {
-        Dialog dialog =
-                CustomDialog.create(
-                        activity,
-                        str("piko_newx_restart_title"),
-                        str("piko_newx_restart_summary"),
-                        null,
-                        str("piko_newx_restart_now"),
-                        () -> Utils.restartApp(activity),
-                        () -> { },
-                        null,
-                        null,
-                        true
-                ).first;
-        dialog.show();
+        DialogView dialog = new DialogView(activity)
+                .setTitle(str("piko_newx_restart_title"))
+                .setSubtitle(str("piko_newx_restart_summary"));
+        dialog.getDialog().setCanceledOnTouchOutside(true);
+
+        ButtonView cancel = new ButtonView(
+                activity,
+                ButtonView.ButtonStyle.TEXT,
+                str("piko_newx_settings_cancel")
+        );
+        cancel.setOnClickListener(ignored -> dialog.dismiss());
+
+        ButtonView restart = new ButtonView(
+                activity,
+                ButtonView.ButtonStyle.FILLED,
+                str("piko_newx_restart_now")
+        );
+        restart.setOnClickListener(ignored -> {
+            dialog.dismiss();
+            Utils.restartApp(activity);
+        });
+        dialog.addButton(cancel).addButton(restart).show();
     }
 }

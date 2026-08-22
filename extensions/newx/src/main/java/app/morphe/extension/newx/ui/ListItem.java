@@ -16,6 +16,8 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import app.morphe.extension.newx.misc.UpdateFont;
+
 /**
  * Reusable List Item component.
  * Supports leading icon badge (40x40dp tonal box), title, supporting subtitle text,
@@ -99,7 +101,7 @@ public class ListItem extends LinearLayout {
 
         titleView = new TextView(context);
         titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        titleView.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        titleView.setTypeface(UpdateFont.customTypefaceOr(android.graphics.Typeface.DEFAULT_BOLD));
         titleView.setTextColor(themeSettings.primaryText(context));
         titleView.setSingleLine(true);
         titleView.setEllipsize(TextUtils.TruncateAt.END);
@@ -107,6 +109,7 @@ public class ListItem extends LinearLayout {
 
         subtitleView = new TextView(context);
         subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        subtitleView.setTypeface(UpdateFont.customTypefaceOr(subtitleView.getTypeface()));
         subtitleView.setTextColor(themeSettings.secondaryText(context));
         subtitleView.setSingleLine(true);
         subtitleView.setEllipsize(TextUtils.TruncateAt.END);

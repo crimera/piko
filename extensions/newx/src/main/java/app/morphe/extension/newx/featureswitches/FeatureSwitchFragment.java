@@ -183,8 +183,16 @@ public final class FeatureSwitchFragment extends Fragment implements FeatureSwit
                 TextView item = (TextView) super.getView(position, convertView, parent);
                 item.setTextColor(Theme.primaryText(context));
                 item.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+                item.setTypeface(app.morphe.extension.newx.misc.UpdateFont.customTypefaceOr(item.getTypeface()));
                 item.setGravity(Gravity.CENTER_VERTICAL | Gravity.END);
                 item.setPadding(0, 0, Theme.dpToPx(context, 8f), 0);
+                return item;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                TextView item = (TextView) super.getDropDownView(position, convertView, parent);
+                item.setTypeface(app.morphe.extension.newx.misc.UpdateFont.customTypefaceOr(item.getTypeface()));
                 return item;
             }
         };

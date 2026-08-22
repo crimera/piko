@@ -161,9 +161,8 @@ public final class PostFilterFragment extends Fragment implements PostFilterRule
         );
         form.addView(matchUsernames, new LinearLayout.LayoutParams(-1, -2));
 
-        TextView validation = new TextView(context);
+        TextView validation = NewXSettingsUi.summaryText(context);
         validation.setTextColor(Color.rgb(244, 33, 46));
-        validation.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         validation.setPadding(0, Theme.dpToPx(context, 8f), 0, 0);
         validation.setVisibility(View.GONE);
         form.addView(validation, new LinearLayout.LayoutParams(-1, -2));

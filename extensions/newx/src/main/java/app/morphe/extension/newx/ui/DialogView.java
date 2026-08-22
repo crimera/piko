@@ -18,6 +18,8 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
+import app.morphe.extension.newx.misc.UpdateFont;
+
 /**
  * Reusable Dialog builder and view container.
  */
@@ -73,12 +75,13 @@ public class DialogView {
 
         titleView = new TextView(context);
         titleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
-        titleView.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        titleView.setTypeface(UpdateFont.customTypefaceOr(android.graphics.Typeface.DEFAULT_BOLD));
         titleView.setTextColor(Theme.primaryText(context));
         headerContainer.addView(titleView);
 
         subtitleView = new TextView(context);
         subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        subtitleView.setTypeface(UpdateFont.customTypefaceOr(subtitleView.getTypeface()));
         subtitleView.setTextColor(Theme.secondaryText(context));
         subtitleView.setPadding(0, Theme.dpToPx(context, 6f), 0, 0);
         subtitleView.setVisibility(View.GONE);
