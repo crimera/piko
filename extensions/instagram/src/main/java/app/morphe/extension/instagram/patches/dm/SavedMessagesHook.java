@@ -159,20 +159,17 @@ public class SavedMessagesHook {
     static String resolveThreadIdHint(Object delta) {
         if (delta == null) return null;
         try {
-            Field match = null;
-            for (Field field : delta.getClass().getDeclaredFields()) {
-                if (field.getType() != String.class || Modifier.isStatic(field.getModifiers())) {
-                    continue;
-                }
-                if (match != null) return null;
-                match = field;
-            }
-            if (match == null) return null;
-            match.setAccessible(true);
-            return (String) match.get(delta);
+            Field field = delta.getClass().getDeclaredField(deltaThreadIdFieldName());
+            if (field.getType() != String.class || Modifier.isStatic(field.getModifiers())) return null;
+            field.setAccessible(true);
+            return (String) field.get(delta);
         } catch (Exception ignored) {
             return null;
         }
+    }
+
+    private static String deltaThreadIdFieldName() {
+        return "deltaThreadIdField";
     }
 
     private static void processReceivedItem(Object item, String threadIdHint,

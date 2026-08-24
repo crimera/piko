@@ -324,7 +324,7 @@ public class DeletedMessagesActivity extends Activity {
                 .setMessage(prompt)
                 .setPositiveButton(str("piko_delete"), (dialog, which) -> {
                     PikoMessageDb db = PikoMessageDb.getInstance(this);
-                    for (String messageId : selectedIds) db.deleteSaved(messageId);
+                    db.deleteSaved(selectedIds);
                     selectionMode = false;
                     messageList.clearChoices();
                     messageList.setChoiceMode(ListView.CHOICE_MODE_NONE);

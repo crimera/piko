@@ -12,6 +12,7 @@ import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
 import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.crimera.patches.instagram.utils.Constants.USER_SESSION_CLASS
 import app.crimera.patches.instagram.utils.enableSettings
+import app.crimera.utils.changeString
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
@@ -81,6 +82,10 @@ val saveDeletedMessagesPatch =
                         "found ${deltaStringFields.size}",
                 )
             }
+            DeltaThreadIdFieldExtensionFingerprint.changeString(
+                "deltaThreadIdField",
+                deltaStringFields.single().name,
+            )
             postprocess.apply {
                 addInstructions(
                     0,
