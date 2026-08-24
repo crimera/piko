@@ -13,7 +13,7 @@ internal object DirectItemFieldParserFingerprint : Fingerprint(
     strings = listOf("item_id", "hide_in_thread"),
 )
 
-// MQTT post-processing step (not on REST path). returnType omitted to avoid hardcoding the obfuscated class name.
+// MQTT post-processing step (not on REST path). Its return type varies between app versions.
 internal object DirectItemPostprocessFingerprint : Fingerprint(
     strings = listOf("DirectMessage.postprocess.%s", "Encountered DirectMessage with null type"),
 )
