@@ -148,10 +148,6 @@ public class SettingsStatus {
     public static void customiseStoryRingSize() { customiseStoryRingSize = true; }
     public static boolean disableAnalytics = false;
     public static void disableAnalytics() { disableAnalytics = true; }
-    public static boolean disableOnboardingPermissionPrompts = false;
-    public static void disableOnboardingPermissionPrompts() {
-        disableOnboardingPermissionPrompts = true;
-    }
     public static boolean disableDiscoverPeople = false;
     public static void disableDiscoverPeople() {
         disableDiscoverPeople = true;
