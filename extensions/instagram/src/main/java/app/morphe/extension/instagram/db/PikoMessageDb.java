@@ -373,15 +373,6 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         getWritableDatabase().delete(TABLE, "message_id = ?", new String[]{messageId});
     }
 
-    /** Compatibility for the existing thread-scoped history screen until its UI commit. */
-    public int clearSaved(String threadId) {
-        if (threadId != null && !threadId.isEmpty()) {
-            return getWritableDatabase().delete(
-                    TABLE, "thread_id = ?", new String[]{threadId});
-        }
-        return getWritableDatabase().delete(TABLE, null, null);
-    }
-
     public void markDeleted(String messageId) {
         if (messageId == null) return;
         SQLiteDatabase db = getWritableDatabase();
@@ -433,21 +424,6 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         List<String[]> result = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.query(TABLE, null, "is_deleted = 1" + HAS_CONTENT, null, null, null, "timestamp DESC");
-        while (c.moveToNext()) {
-            result.add(rowToStringArray(c));
-        }
-        c.close();
-        return result;
-    }
-
-    /** Compatibility for the existing thread-scoped history screen until its UI commit. */
-    public List<String[]> getDeletedMessagesForThread(String threadId) {
-        List<String[]> result = new ArrayList<>();
-        if (threadId == null || threadId.isEmpty()) return result;
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(TABLE, null,
-                "is_deleted = 1 AND thread_id = ?" + HAS_CONTENT,
-                new String[]{threadId}, null, null, "timestamp DESC");
         while (c.moveToNext()) {
             result.add(rowToStringArray(c));
         }
