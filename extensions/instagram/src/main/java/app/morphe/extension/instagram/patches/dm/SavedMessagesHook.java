@@ -14,6 +14,8 @@ import com.instagram.common.session.UserSession;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import static app.morphe.extension.instagram.utils.IgStr.str;
+
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.db.PikoMessageDb;
 import app.morphe.extension.instagram.entity.DirectItem;
@@ -217,8 +219,7 @@ public class SavedMessagesHook {
             if (hidden) {
                 String messageId = db.resolveAndMergeMessageId(serverId, clientContext);
                 if (messageId == null) return;
-                boolean storedAlive = db.isStoredAlive(messageId);
-                if (storedAlive) db.markDeleted(messageId);
+                markDeletedAndNotify(db, messageId);
                 String storedContent = db.getStoredContent(messageId);
                 antiRevokeItem(directItem,
                         !isBlank(storedContent) ? storedContent : content);
@@ -237,6 +238,90 @@ public class SavedMessagesHook {
         if (!isBlank(restoredContent)) directItem.setText(restoredContent);
     }
 
+    private static void markDeletedAndNotify(PikoMessageDb db, String messageId) {
+        if (!db.markDeleted(messageId)) return;
+
+        String type = db.getMessageType(messageId);
+        String content = db.getStoredContent(messageId);
+        boolean isMedia = isBlank(content) || content.startsWith("http")
+                || content.startsWith("[");
+        notifyDeletion(db.getSenderDisplay(messageId),
+                isMedia ? describeMediaType(type) : content, type);
+    }
+
+    private static void notifyDeletion(String sender, String content, String type) {
+        try {
+            Context context = PikoUtils.getContext();
+            if (context == null) return;
+
+            android.app.NotificationManager manager =
+                    (android.app.NotificationManager) context.getSystemService(
+                            Context.NOTIFICATION_SERVICE);
+            if (manager == null) return;
+
+            String channelId = "piko_deleted_messages";
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                android.app.NotificationChannel channel = new android.app.NotificationChannel(
+                        channelId, str("piko_deleted_messages_channel"),
+                        android.app.NotificationManager.IMPORTANCE_DEFAULT);
+                channel.setDescription(str("piko_deleted_messages_channel_desc"));
+                manager.createNotificationChannel(channel);
+            }
+
+            String who = !isBlank(sender) ? sender : str("piko_someone");
+            String body = !isBlank(content)
+                    ? content
+                    : !isBlank(type) ? "[" + type + "]" : str("piko_media_deleted_generic");
+
+            Intent intent = new Intent(context, DeletedMessagesActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            int pendingIntentFlags = android.app.PendingIntent.FLAG_UPDATE_CURRENT
+                    | (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
+                    ? android.app.PendingIntent.FLAG_IMMUTABLE : 0);
+            android.app.PendingIntent pendingIntent = android.app.PendingIntent.getActivity(
+                    context, 0, intent, pendingIntentFlags);
+
+            int icon = context.getApplicationInfo().icon;
+            android.app.Notification.Builder builder =
+                    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O
+                            ? new android.app.Notification.Builder(context, channelId)
+                            : new android.app.Notification.Builder(context);
+            android.app.Notification notification = builder
+                    .setSmallIcon(icon != 0 ? icon : android.R.drawable.ic_dialog_info)
+                    .setContentTitle(String.format(str("piko_deleted_a_message"), who))
+                    .setContentText(body)
+                    .setAutoCancel(true)
+                    .setContentIntent(pendingIntent)
+                    .build();
+
+            manager.notify((int) (System.currentTimeMillis() & 0x7fffffff), notification);
+        } catch (Exception e) {
+            piko("SavedMessagesHook.notifyDeletion: " + e);
+        }
+    }
+
+    private static String describeMediaType(String type) {
+        if (type == null) return str("piko_media_deleted_generic");
+        String label;
+        switch (type) {
+            case "media":
+            case "image":           label = str("piko_media_photo"); break;
+            case "raven_media":     label = str("piko_media_disappearing_photo"); break;
+            case "video":           label = str("piko_media_video"); break;
+            case "voice_media":
+            case "audio":           label = str("piko_media_voice"); break;
+            case "animated_media":  label = str("piko_media_gif"); break;
+            case "reel_share":      label = str("piko_media_reel"); break;
+            case "story_share":     label = str("piko_media_story"); break;
+            case "media_share":     label = str("piko_media_post"); break;
+            case "like":            label = str("piko_media_like"); break;
+            case "link":            label = str("piko_media_link"); break;
+            case "action_log":      label = str("piko_media_activity"); break;
+            default:                 label = type; break;
+        }
+        return String.format(str("piko_media_deleted"), label);
+    }
+
     public static void onMessageHiddenFromDb(String serverId, String clientContext) {
         if (!Pref.saveDeletedMessages()) return;
         if (isBlank(serverId) && isBlank(clientContext)) return;
@@ -248,9 +333,9 @@ public class SavedMessagesHook {
             if (!Pref.saveDeletedMessages()) return;
             PikoMessageDb db = PikoMessageDb.getInstance(PikoUtils.getContext());
             String messageId = db.resolveAndMergeMessageId(serverId, clientContext);
-            if (messageId == null || !db.isStoredAlive(messageId)) return;
+            if (messageId == null) return;
             if (!shouldCaptureStored(db.getSenderId(messageId), myUserId())) return;
-            db.markDeleted(messageId);
+            markDeletedAndNotify(db, messageId);
         } catch (Exception e) {
             piko("SavedMessagesHook.processMessageHiddenFromDb: " + e);
         }

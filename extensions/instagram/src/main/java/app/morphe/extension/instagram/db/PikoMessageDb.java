@@ -355,18 +355,6 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         return (result != null && !result.isEmpty()) ? result : null;
     }
 
-    /** True if a row for messageId already exists and is not yet marked deleted. */
-    public boolean isStoredAlive(String messageId) {
-        if (messageId == null) return false;
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.query(TABLE, new String[]{"is_deleted"}, "message_id = ?",
-                new String[]{messageId}, null, null, null);
-        boolean alive = false;
-        if (c.moveToFirst()) alive = c.getInt(0) == 0;
-        c.close();
-        return alive;
-    }
-
     /** Permanently remove saved messages from the vault as one atomic operation. */
     public void deleteSaved(List<String> messageIds) {
         if (messageIds == null || messageIds.isEmpty()) return;
@@ -384,12 +372,44 @@ public class PikoMessageDb extends SQLiteOpenHelper {
         }
     }
 
-    public void markDeleted(String messageId) {
-        if (messageId == null) return;
+    /** Marks a live row deleted and returns true only for the first successful transition. */
+    public boolean markDeleted(String messageId) {
+        if (messageId == null) return false;
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("is_deleted", 1);
-        db.update(TABLE, cv, "message_id = ? AND is_deleted = 0", new String[]{messageId});
+        return db.update(TABLE, cv, "message_id = ? AND is_deleted = 0",
+                new String[]{messageId}) == 1;
+    }
+
+    /** Returns the best available sender name for a notification. */
+    public String getSenderDisplay(String messageId) {
+        if (messageId == null) return null;
+        Cursor cursor = getReadableDatabase().query(
+                TABLE, new String[]{"sender_username", "sender_id"},
+                "message_id = ?", new String[]{messageId}, null, null, null);
+        String username = null;
+        String senderId = null;
+        if (cursor.moveToFirst()) {
+            username = cursor.getString(0);
+            senderId = cursor.getString(1);
+        }
+        cursor.close();
+        if (username != null && !username.isEmpty()) return username;
+        if (senderId == null || senderId.isEmpty()) return null;
+        String directoryUsername = getUsername(senderId);
+        return directoryUsername != null ? directoryUsername : senderId;
+    }
+
+    /** Returns the stored message type, or null when it is unknown. */
+    public String getMessageType(String messageId) {
+        if (messageId == null) return null;
+        Cursor cursor = getReadableDatabase().query(
+                TABLE, new String[]{"message_type"},
+                "message_id = ?", new String[]{messageId}, null, null, null);
+        String type = cursor.moveToFirst() ? cursor.getString(0) : null;
+        cursor.close();
+        return type != null && !type.isEmpty() && !"unknown".equals(type) ? type : null;
     }
 
     /** sender_id stored for a message, or null. */
