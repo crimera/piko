@@ -268,24 +268,15 @@ public class SettingsStatus {
 
         FLAGS.put(str("piko_view_dm_anonymously"),SettingsStatus.viewDmAnonymously);
         FLAGS.put(str("piko_save_deleted_messages"),SettingsStatus.saveDeletedMessages);
-        FLAGS.put(str("piko_view_live_anonymously"),SettingsStatus.disableScreenshotDetection);
+        FLAGS.put(str("piko_view_live_anonymously"),SettingsStatus.viewLiveAnonymously);
+        FLAGS.put(str("piko_disable_screenshot_detection"),SettingsStatus.disableScreenshotDetection);
         FLAGS.put(str("piko_disable_typing_status"),SettingsStatus.disableTypingStatus);
-        FLAGS.put(str("piko_more_profile_options"),SettingsStatus.viewLiveAnonymously);
         FLAGS.put(str("piko_view_stories_anonymously"),SettingsStatus.viewStoriesAnonymously);
 
         FLAGS.put(str("piko_sanitize_share_links"),SettingsStatus.sanitizeShareLinks);
         FLAGS.put(str("piko_custom_sharing_domain"),SettingsStatus.customSharingDomain);
         FLAGS.put(str("piko_open_links_externally"),SettingsStatus.openLinksExternally);
-        FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
-        FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
-        FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
-        FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.moreOptionsOnPost);
-        FLAGS.put(str("piko_disable_ads"),SettingsStatus.disableAds);
-        FLAGS.put(str("piko_category_download_media"),SettingsStatus.downloadMedia);
-        FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
-        FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
-        FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);
-        FLAGS.put(str("piko_enable_more_options_on_post"),SettingsStatus.moreOptionsOnPost);
+
         FLAGS.put(str("piko_enable_dev_options"),SettingsStatus.enableDeveloperOptions);
         FLAGS.put(str("piko_remove_build_expire_popup"),SettingsStatus.removeBuildExpirePopup);
         FLAGS.put(str("piko_enable_emp_options"),SettingsStatus.unlockEmployeeOptions);
