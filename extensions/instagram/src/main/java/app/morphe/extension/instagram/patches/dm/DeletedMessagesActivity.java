@@ -292,6 +292,7 @@ public class DeletedMessagesActivity extends Activity {
         if (!selecting) {
             toolbarTitle.setTranslationY(0f);
             cancelSelectionAction.setTranslationY(0f);
+            selectAllAction.setTranslationY(0f);
             InstagramPreferenceStyle.applyToolbarLayout(
                     this, toolbar, (ImageView) backAction, toolbarTitle, false);
             return;
@@ -301,12 +302,13 @@ public class DeletedMessagesActivity extends Activity {
                 Dim.dp8, toolbar.getPaddingBottom());
         LinearLayout.LayoutParams titleParams =
                 (LinearLayout.LayoutParams) toolbarTitle.getLayoutParams();
-        titleParams.leftMargin = Dim.dp8 / 2;
+        titleParams.leftMargin = InstagramPreferenceStyle.dp(this, 10);
         toolbarTitle.setLayoutParams(titleParams);
 
         float topRowOffset = selectAllLabel.getLineHeight() / 2f;
-        toolbarTitle.setTranslationY(-topRowOffset);
-        cancelSelectionAction.setTranslationY(-topRowOffset);
+        toolbarTitle.setTranslationY(0f);
+        cancelSelectionAction.setTranslationY(0f);
+        selectAllAction.setTranslationY(topRowOffset);
         selectAllLabel.setTranslationX(selectAllCheck.getTranslationX());
     }
 
