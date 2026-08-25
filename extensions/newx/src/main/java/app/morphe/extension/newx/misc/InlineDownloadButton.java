@@ -42,6 +42,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.newx.settings.SettingsRegistry;
@@ -154,9 +156,7 @@ public final class InlineDownloadButton {
             return true;
         } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to process inline download action", exception);
-            Utils.showToastShort(exception instanceof PostIdentityException identityError
-                    ? identityError.getMessage()
-                    : "Could not download post media");
+            Utils.showToastShort("Could not download post media");
             return true;
         }
     }
@@ -294,28 +294,33 @@ public final class InlineDownloadButton {
         return !downloadItems(media).isEmpty();
     }
 
-    private static String sourcePostId(Object post) {
+    private static final Pattern STATUS_URL_PATTERN =
+            Pattern.compile("https?://(?:[a-zA-Z0-9-]+\\.)*(?:twitter|x|fxtwitter|vxtwitter|fixupx|twx)\\.com/([A-Za-z0-9_]+)/status/\\d+");
+
+    static String sourcePostId(Object post) {
         String postText = postText(post);
         String originalPostText = originalRepostedPostText(postText);
         if (originalPostText != null) {
             String originalPostId = ToStringParser.fieldValue(originalPostText, "id");
             if (originalPostId != null) return safeFileSegment(originalPostId, "post");
-            throw unresolvedIdentity("Reposted post is missing its original post id", postText);
         }
 
         if (hasRepostedMedia(postText)) {
             String sourcePostId = sourceMediaField(postText, "sourcePostIdentifier");
             if (sourcePostId != null) return safeFileSegment(sourcePostId, "post");
-            throw unresolvedIdentity("Reposted media is missing its source post id", postText);
         }
 
         String canonicalText = canonicalPostText(post);
         String postId = ToStringParser.fieldValue(canonicalText, "id");
         if (postId != null) return safeFileSegment(postId, "post");
-        throw unresolvedIdentity("Could not resolve the post id", postText);
+
+        String rawPostId = ToStringParser.fieldValue(postText, "id");
+        if (rawPostId != null) return safeFileSegment(rawPostId, "post");
+
+        return safeFileSegment(null, "post");
     }
 
-    private static String sourceUsername(Object post) {
+    static String sourceUsername(Object post) {
         String postText = postText(post);
         String originalPostText = originalRepostedPostText(postText);
         if (originalPostText != null) {
@@ -324,22 +329,29 @@ public final class InlineDownloadButton {
                     ? null
                     : ToStringParser.fieldValue(originalAuthor, "screenName");
             if (originalScreenName != null) return safeFileSegment(originalScreenName, "twitter");
-            throw unresolvedIdentity("Reposted post has no original author's screen name", postText);
         }
 
-        // Folded RT posts carry sourceInfo on their mirrored media and the
-        // original author's screen name as the first RT mention.
+        // Folded RT posts or posts with credited/reposted media carry sourceInfo
+        // on their media, and the original author's screen name in the first RT
+        // mention, in expandedUrl, or on the post author.
         if (hasRepostedMedia(postText)) {
             String sourceScreenName = firstMentionScreenName(postText);
             if (sourceScreenName != null) return safeFileSegment(sourceScreenName, "twitter");
-            throw unresolvedIdentity("Reposted media has no source screen name in its mentions", postText);
+
+            String expandedUrlScreenName = mediaExpandedUrlScreenName(postText);
+            if (expandedUrlScreenName != null) return safeFileSegment(expandedUrlScreenName, "twitter");
         }
 
         String canonicalText = canonicalPostText(post);
         String author = ToStringParser.fieldValue(canonicalText, "author");
         String screenName = author == null ? null : ToStringParser.fieldValue(author, "screenName");
         if (screenName != null) return safeFileSegment(screenName, "twitter");
-        throw unresolvedIdentity("Could not resolve the post's screen name", postText);
+
+        String rawAuthor = ToStringParser.fieldValue(postText, "author");
+        String rawScreenName = rawAuthor == null ? null : ToStringParser.fieldValue(rawAuthor, "screenName");
+        if (rawScreenName != null) return safeFileSegment(rawScreenName, "twitter");
+
+        return safeFileSegment(null, "twitter");
     }
 
     private static String postText(Object post) {
@@ -347,19 +359,23 @@ public final class InlineDownloadButton {
     }
 
     private static String canonicalPostText(Object post) {
-        Object canonicalPost = canonicalPost(post);
-        return canonicalPost == null ? null : canonicalPost.toString();
+        try {
+            Object canonicalPost = canonicalPost(post);
+            if (canonicalPost != null) return canonicalPost.toString();
+        } catch (RuntimeException ignored) {
+        }
+        String postText = postText(post);
+        if (postText == null) return null;
+        String canonicalField = ToStringParser.fieldValue(postText, "canonicalPost");
+        return canonicalField != null ? canonicalField : postText;
     }
 
     private static String originalRepostedPostText(String postText) {
+        if (postText == null) return null;
         String repostedPost = ToStringParser.fieldValue(postText, "rePostedPost");
         if (repostedPost == null) return null;
-        return ToStringParser.fieldValue(repostedPost, "canonicalPost");
-    }
-
-    private static PostIdentityException unresolvedIdentity(String message, String postText) {
-        Logger.printInfo(() -> "Post identity unresolved (" + message + "): " + postText);
-        return new PostIdentityException(message);
+        String canonical = ToStringParser.fieldValue(repostedPost, "canonicalPost");
+        return canonical != null ? canonical : repostedPost;
     }
 
     private static boolean hasRepostedMedia(String text) {
@@ -374,6 +390,22 @@ public final class InlineDownloadButton {
         // Mentions are ordered by appearance; the first one is the "RT @name:"
         // source of a repost.
         return ToStringParser.fieldValue(mentions, "screenName");
+    }
+
+    private static String mediaExpandedUrlScreenName(String text) {
+        if (text == null) return null;
+        String entityList = ToStringParser.fieldValue(text, "entityList");
+        String searchScope = entityList != null ? entityList : text;
+        String expandedUrl = ToStringParser.fieldValue(searchScope, "expandedUrl");
+        String screenName = screenNameFromUrl(expandedUrl);
+        if (screenName != null) return screenName;
+        return screenNameFromUrl(searchScope);
+    }
+
+    private static String screenNameFromUrl(String url) {
+        if (url == null) return null;
+        Matcher matcher = STATUS_URL_PATTERN.matcher(url);
+        return matcher.find() ? matcher.group(1) : null;
     }
 
     private static String sourceMediaField(String text, String fieldName) {
@@ -1096,12 +1128,6 @@ public final class InlineDownloadButton {
             this.fileName = fileName;
             this.mimeType = mimeType;
             this.url = url;
-        }
-    }
-
-    private static final class PostIdentityException extends RuntimeException {
-        PostIdentityException(String message) {
-            super(message);
         }
     }
 

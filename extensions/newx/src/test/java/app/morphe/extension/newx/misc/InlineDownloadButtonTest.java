@@ -230,6 +230,75 @@ public final class InlineDownloadButtonTest {
         }
     }
 
+    @Test
+    public void repostWithAttachedMediaExtractsScreenNameFromExpandedUrl() {
+        String post = "ContextualPost(canonicalPost=CanonicalPost(id=2091833522717663582, " +
+                "text=菊地姫奈さんのお尻って国宝だよな！\nhttps://t.co/KfA7O5wSze, " +
+                "timestamp=2026-08-24T10:22:30Z, " +
+                "media=[MediaContentImage(mediaId=2088553798574944256, " +
+                "imageUrl=https://pbs.twimg.com/media/HPwInTpaMAA4y6q.jpg, " +
+                "sourceInfo=SourceInfo(sourcePostIdentifier=2088553803364843766, " +
+                "sourceUserIdentifier=2044418450530181120, " +
+                "sourceUserDisplayName=写真集探偵, " +
+                "sourceUserAvatarUrl=https://pbs.twimg.com/profile_images/2044419200387780608/ErcK3mbv_normal.jpg, " +
+                "sourceUserVerifiedType=NotVerified), isDownloadable=true)], " +
+                "entityList=PostEntityList(mentions=[], urls=[], " +
+                "media=[MediaEntity(id=2088553798574944256, displayUrl=pic.x.com/KfA7O5wSze, " +
+                "expandedUrl=https://x.com/Phot0_detective/status/2088553803364843766/photo/1, " +
+                "url=https://t.co/KfA7O5wSze, startIdx=18, endIdx=41, grokPostId=null)]), " +
+                "author=MinimalUser(id=1252509176015790080, screenName=Chetanc54455628, name=一日一グラビア), " +
+                "legacyCard=null, rePostedPost=null)";
+
+        assertEquals("Phot0_detective", InlineDownloadButton.sourceUsername(post));
+        assertEquals("2088553803364843766", InlineDownloadButton.sourcePostId(post));
+    }
+
+    @Test
+    public void repostWithAttachedMediaFallsBackToAuthorWhenNoExpandedUrlOrMentions() {
+        String post = "ContextualPost(canonicalPost=CanonicalPost(id=2091833522717663582, " +
+                "media=[MediaContentImage(mediaId=2088553798574944256, " +
+                "sourceInfo=SourceInfo(sourcePostIdentifier=2088553803364843766))], " +
+                "entityList=PostEntityList(mentions=[], urls=[], media=[]), " +
+                "author=MinimalUser(id=1252509176015790080, screenName=Chetanc54455628, name=一日一グラビア), " +
+                "rePostedPost=null)";
+
+        assertEquals("Chetanc54455628", InlineDownloadButton.sourceUsername(post));
+        assertEquals("2088553803364843766", InlineDownloadButton.sourcePostId(post));
+    }
+
+    @Test
+    public void foldedRetweetWithMentionsExtractsMentionScreenName() {
+        String post = "ContextualPost(canonicalPost=CanonicalPost(id=2088336364039184458, " +
+                "media=[MediaContentImage(mediaId=1, " +
+                "sourceInfo=SourceInfo(sourcePostIdentifier=2088279482146898407))], " +
+                "entityList=PostEntityList(mentions=[MentionEntity(screenName=chachironi3)]), " +
+                "author=MinimalUser(id=1, screenName=pokorakun, name=pokorakun), " +
+                "rePostedPost=null)";
+
+        assertEquals("chachironi3", InlineDownloadButton.sourceUsername(post));
+        assertEquals("2088279482146898407", InlineDownloadButton.sourcePostId(post));
+    }
+
+    @Test
+    public void structuredRepostExtractsOriginalAuthorAndId() {
+        String post = "ContextualPost(canonicalPost=CanonicalPost(id=2088334976651792559, " +
+                "author=MinimalUser(id=9, screenName=retweeter, name=Retweeter), media=[]), " +
+                "rePostedPost=RePostedPost(canonicalPost=CanonicalPost(id=2088221458740969716, " +
+                "author=MinimalUser(id=1423483994084048906, screenName=hige_hurai, name=Hige Hurai), " +
+                "media=[MediaContentImage(mediaId=1)])))";
+
+        assertEquals("hige_hurai", InlineDownloadButton.sourceUsername(post));
+        assertEquals("2088221458740969716", InlineDownloadButton.sourcePostId(post));
+    }
+
+    @Test
+    public void completelyUnresolvablePostGracefullyFallsBackToDefaults() {
+        String post = "CorruptedPost()";
+
+        assertEquals("twitter", InlineDownloadButton.sourceUsername(post));
+        assertEquals("post", InlineDownloadButton.sourcePostId(post));
+    }
+
     private static final class DownloadableMedia {
         @Override
         public String toString() {
