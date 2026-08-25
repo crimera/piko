@@ -7,6 +7,7 @@
 package app.crimera.patches.instagram.misc.download
 
 import app.crimera.patches.instagram.entity.decoder.decoderEntity
+import app.crimera.patches.instagram.entity.dialogbox.instagramDialogBoxEntity
 import app.crimera.patches.instagram.entity.mediadata.mediaDataEntity
 import app.crimera.patches.instagram.entity.originalSoundDataIntf.originalSoundDataIntfEntity
 import app.crimera.patches.instagram.entity.trackDataIntf.trackDataIntfEntity
@@ -36,6 +37,7 @@ val downloadMediaPatch =
     ) {
         dependsOn(
             settingsPatch,
+            instagramDialogBoxEntity,
             mediaDataEntity,
             videoDataEntity,
             originalSoundDataIntfEntity,
