@@ -19,7 +19,9 @@ public class IconView extends View {
         GIF,
         DOWNLOAD,
         CLOSE,
-        COPY_LINK
+        COPY_LINK,
+        CHECKBOX_CHECKED,
+        CHECKBOX_UNCHECKED
     }
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -84,6 +86,12 @@ public class IconView extends View {
                 break;
             case COPY_LINK:
                 drawCopyLinkIcon(canvas, cx, cy, size, strokeWidth);
+                break;
+            case CHECKBOX_CHECKED:
+                drawCheckboxChecked(canvas, cx, cy, size, strokeWidth);
+                break;
+            case CHECKBOX_UNCHECKED:
+                drawCheckboxUnchecked(canvas, cx, cy, size, strokeWidth);
                 break;
         }
     }
@@ -223,5 +231,42 @@ public class IconView extends View {
 
         // Center connecting line: line x1="8" x2="16" y1="12" y2="12"
         canvas.drawLine(left + 8f * scale, top + 12f * scale, left + 16f * scale, top + 12f * scale, paint);
+    }
+
+    private void drawCheckboxChecked(Canvas canvas, float cx, float cy, float size, float strokeWidth) {
+        float boxSize = size * 0.82f;
+        float rx = Theme.dpToPx(getContext(), 5f);
+        rectF.set(cx - boxSize / 2f, cy - boxSize / 2f, cx + boxSize / 2f, cy + boxSize / 2f);
+
+        // Filled rounded box
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(iconColor);
+        canvas.drawRoundRect(rectF, rx, rx, paint);
+
+        // White checkmark
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(Color.WHITE);
+        paint.setStrokeWidth(strokeWidth * 1.15f);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+
+        path.reset();
+        path.moveTo(cx - boxSize * 0.28f, cy + boxSize * 0.02f);
+        path.lineTo(cx - boxSize * 0.08f, cy + boxSize * 0.22f);
+        path.lineTo(cx + boxSize * 0.28f, cy - boxSize * 0.18f);
+        canvas.drawPath(path, paint);
+    }
+
+    private void drawCheckboxUnchecked(Canvas canvas, float cx, float cy, float size, float strokeWidth) {
+        float boxSize = size * 0.82f;
+        float rx = Theme.dpToPx(getContext(), 5f);
+        rectF.set(cx - boxSize / 2f, cy - boxSize / 2f, cx + boxSize / 2f, cy + boxSize / 2f);
+
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(strokeWidth * 1.1f);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setColor(iconColor);
+        canvas.drawRoundRect(rectF, rx, rx, paint);
     }
 }

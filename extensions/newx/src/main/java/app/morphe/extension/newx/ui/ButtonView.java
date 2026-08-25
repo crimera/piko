@@ -41,6 +41,12 @@ public class ButtonView extends TextView {
         updateStyle();
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        setAlpha(enabled ? 1.0f : 0.4f);
+    }
+
     private void init() {
         setGravity(Gravity.CENTER);
         setFocusable(true);
