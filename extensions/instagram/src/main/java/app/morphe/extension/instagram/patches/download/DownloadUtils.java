@@ -42,6 +42,27 @@ import com.instagram.common.session.UserSession;
 
 public class DownloadUtils {
 
+    public static final class CollectionDownloadPlan {
+        private final List<DownloadRequest> requests;
+        private final int failedPosts;
+
+        CollectionDownloadPlan(
+                List<DownloadRequest> requests,
+                int failedPosts
+        ) {
+            this.requests = requests;
+            this.failedPosts = failedPosts;
+        }
+
+        public List<DownloadRequest> getRequests() {
+            return requests;
+        }
+
+        public int getFailedPosts() {
+            return failedPosts;
+        }
+    }
+
     public static String getSubfolderName(String username){
         boolean SPLIT_BY_USERNAME = Pref.downloadUsernameFolder() && SettingsStatus.downloadMedia;
         return SPLIT_BY_USERNAME ? username : null;
@@ -227,6 +248,45 @@ public class DownloadUtils {
             Utils.showToastShort("There is nothing to download");
         }
 
+    }
+
+    public static CollectionDownloadPlan prepareCollectionDownload(
+            UserSession userSession,
+            List<?> mediaObjects
+    ) {
+        List<DownloadRequest> requests = new ArrayList<>();
+        int failedPosts = 0;
+
+        for (Object mediaObject : mediaObjects) {
+            try {
+                MediaData mediaInfo = new MediaData(mediaObject, userSession);
+                UserData userData = mediaInfo.getUserData();
+                String username = userData == null ? null : userData.getUsername();
+                if (username == null || username.trim().isEmpty()) username = "instagram";
+                String subFolder = getSubfolderName(username);
+                int carouselSize = mediaInfo.getCarouselSize();
+                List<DownloadRequest> postRequests = new ArrayList<>(carouselSize);
+
+                // Confirmation shows top-level saved posts. The batch expands each carousel child
+                // into its own file request, so file count can legitimately exceed post count.
+                for (int index = 0; index < carouselSize; index++) {
+                    MediaData currentMediaData = mediaInfo.getMediaAt(index);
+                    String fileName = username + "_" + currentMediaData.getDownloadFilename(MediaType.ANY);
+                    postRequests.add(new DownloadRequest(
+                            currentMediaData.getMediaLink(),
+                            subFolder,
+                            fileName
+                    ));
+                }
+                requests.addAll(postRequests);
+            } catch (Throwable error) {
+                failedPosts++;
+                PikoUtils.logger(error);
+                Logger.printException(() -> "Error preparing a saved collection item", error);
+            }
+        }
+
+        return new CollectionDownloadPlan(requests, failedPosts);
     }
 
 
