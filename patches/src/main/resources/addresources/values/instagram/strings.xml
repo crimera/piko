@@ -137,6 +137,9 @@ Note: On a clean install, the \'Tip\' animation may appear but will stop on its 
     <string name="piko_download_options">Download options</string>
     <string name="piko_copy_media_link">Copy media link</string>
     <string name="piko_copied_media_link">Copied media link</string>
+    <string name="piko_copy_current_media_link">Copy current media link</string>
+    <string name="piko_copy_audio_link">Copy audio link</string>
+    <string name="piko_copy_all_media_links">Copy all media links</string>
     <string name="piko_download_all">Download all</string>
     <string name="piko_downloading_media">Downloading: </string>
     <string name="piko_downloaded_media">Downloaded: </string>

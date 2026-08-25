@@ -55,7 +55,7 @@ public class SettingsStatus {
     public static boolean sanitizeShareLinks = false;
     public static void sanitizeShareLinks() {sanitizeShareLinks = true;}
     public static boolean linksSection() {
-        return (openLinksExternally || sanitizeShareLinks);
+        return (openLinksExternally || sanitizeShareLinks || copyMediaLink);
     }
 
 
@@ -204,6 +204,10 @@ public class SettingsStatus {
     public static void downloadWithExternalDownloader() { downloadWithExternalDownloader = true; }
     public static boolean downloadSection(){return (SettingsStatus.downloadMedia || SettingsStatus.downloadWithExternalDownloader);}
 
+    //Copy media link.
+    public static boolean copyMediaLink = false;
+    public static void copyMediaLink() { copyMediaLink = true; }
+
     public static boolean hideNavigationButtons = false;
     public static void hideNavigationButtons() { hideNavigationButtons = true; }
 
@@ -264,6 +268,7 @@ public class SettingsStatus {
 
         FLAGS.put(str("piko_sanitize_share_links"),SettingsStatus.sanitizeShareLinks);
         FLAGS.put(str("piko_open_links_externally"),SettingsStatus.openLinksExternally);
+        FLAGS.put(str("piko_copy_media_link"),SettingsStatus.copyMediaLink);
         FLAGS.put(str("piko_download_voice_media"),SettingsStatus.downloadVoiceMessage);
         FLAGS.put(str("piko_download_with_external_downloader"),SettingsStatus.downloadWithExternalDownloader);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.moreOptionsOnProfile);

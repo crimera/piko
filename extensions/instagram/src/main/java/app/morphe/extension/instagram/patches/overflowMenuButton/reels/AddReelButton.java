@@ -28,6 +28,7 @@ import app.morphe.extension.instagram.patches.overflowMenuButton.reels.buttons.D
 import app.morphe.extension.instagram.patches.overflowMenuButton.reels.buttons.DebugButton;
 import app.morphe.extension.instagram.patches.overflowMenuButton.reels.buttons.InfoButton;
 import app.morphe.extension.instagram.patches.overflowMenuButton.reels.buttons.ExternalDownloadButton;
+import app.morphe.extension.instagram.patches.overflowMenuButton.reels.buttons.CopyMediaLinkButton;
 
 public class AddReelButton {
 
@@ -97,6 +98,16 @@ public class AddReelButton {
         AddReelButton.addReelButton(context,reelOverflowButton,helperObject);
     }
 
+    private static void addCopyMediaLinkButton(Context context, Object helperObject, Object mediaObject){
+        String icon = UI.DRAWABLE_LINK_ICON;
+        ReelButton reelButton = new CopyMediaLinkButton(context,mediaObject);
+        String buttonText = str("piko_copy_media_link");
+
+        ReelOverflowButton reelOverflowButton = new ReelOverflowButton(icon,reelButton,buttonText);
+
+        AddReelButton.addReelButton(context,reelOverflowButton,helperObject);
+    }
+
     public static void includeCustomReelOverflowButtons(Context context, Object helperObject, Object mediaObject){
         if(Pref.pikoDebug()){
             AddReelButton.addDebugButton(context, helperObject, mediaObject);
@@ -106,6 +117,9 @@ public class AddReelButton {
         }
         if(Pref.downloadWithExternalDownloader()){
             AddReelButton.addExternalDownloadButton(context, helperObject, mediaObject);
+        }
+        if(Pref.copyMediaLink()){
+            AddReelButton.addCopyMediaLinkButton(context, helperObject, mediaObject);
         }
         if(Pref.moreOptionsOnPost()){
             AddReelButton.addInfoButton(context, helperObject, mediaObject);

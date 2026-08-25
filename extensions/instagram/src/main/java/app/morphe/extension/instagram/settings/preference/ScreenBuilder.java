@@ -305,6 +305,15 @@ public class ScreenBuilder {
                     )
             );
         }
+        if (SettingsStatus.copyMediaLink) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_copy_media_link"),
+                            "",
+                            Settings.COPY_MEDIA_LINK
+                    )
+            );
+        }
     }
 
     public void distractionFreeSection() {

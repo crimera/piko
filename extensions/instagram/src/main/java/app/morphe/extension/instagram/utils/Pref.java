@@ -285,6 +285,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER) && SettingsStatus.downloadWithExternalDownloader;
     }
 
+    public static boolean copyMediaLink() {
+        return SharedPref.getBooleanPref(Settings.COPY_MEDIA_LINK) && SettingsStatus.copyMediaLink;
+    }
+
     public static String externalDownloaderPackageName() {
         return SharedPref.getStringPref(Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME);
     }
