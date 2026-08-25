@@ -263,6 +263,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_disable_explore"),SettingsStatus.disableExplore);
         FLAGS.put(str("piko_disable_highlights"),SettingsStatus.disableHighlights);
         FLAGS.put(str("piko_disable_stories"),SettingsStatus.disableStories);
+        FLAGS.put(str("piko_disable_reels_scrolling"),SettingsStatus.disableReelsScrolling);
         FLAGS.put(str("piko_disable_swipe_to_create"), SettingsStatus.disableSwipeToCreate);
 
         FLAGS.put(str("piko_view_dm_anonymously"),SettingsStatus.viewDmAnonymously);
