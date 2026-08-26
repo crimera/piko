@@ -314,7 +314,7 @@ private fun SettingItemDefinition.valueReadWithDefaultInstructions(
     val defaultRegister = registerRange.last
     return """
         const-string v$settingRegister, "${smaliString(id)}"
-        const/4 v$defaultRegister, ${if (defaultValue) "0x1" else "0x0"}
+        const/16 v$defaultRegister, ${if (defaultValue) "0x1" else "0x0"}
         invoke-static/range {v$settingRegister .. v$defaultRegister}, $SETTINGS_REGISTRY_DESCRIPTOR->getBooleanOrDefault(Ljava/lang/String;Z)Z
         move-result v$settingRegister
     """.trimIndent()
