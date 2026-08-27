@@ -133,7 +133,7 @@ public final class MediaPickerDialog {
                             ? IconView.IconType.CHECKBOX_CHECKED
                             : IconView.IconType.CHECKBOX_UNCHECKED;
                     int cbColor = isSelected
-                            ? themeSettings.primaryAccent(current)
+                            ? themeSettings.checkboxChecked(current)
                             : themeSettings.secondaryText(current);
 
                     itemRow.createTrailingIconButton(cbType, cbColor, v -> {

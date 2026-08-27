@@ -234,39 +234,41 @@ public class IconView extends View {
     }
 
     private void drawCheckboxChecked(Canvas canvas, float cx, float cy, float size, float strokeWidth) {
-        float boxSize = size * 0.82f;
-        float rx = Theme.dpToPx(getContext(), 5f);
-        rectF.set(cx - boxSize / 2f, cy - boxSize / 2f, cx + boxSize / 2f, cy + boxSize / 2f);
+        float radius = (size - strokeWidth) / 2f;
 
-        // Filled rounded box
+        // Filled circle
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(iconColor);
-        canvas.drawRoundRect(rectF, rx, rx, paint);
+        canvas.drawCircle(cx, cy, radius, paint);
 
-        // White checkmark
+        // High-contrast checkmark with sharp edges
         paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.WHITE);
-        paint.setStrokeWidth(strokeWidth * 1.15f);
-        paint.setStrokeCap(Paint.Cap.ROUND);
-        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setColor(isColorLight(iconColor) ? Color.BLACK : Color.WHITE);
+        paint.setStrokeWidth(Math.max(strokeWidth * 1.1f, Theme.dpToPx(getContext(), 2f)));
+        paint.setStrokeCap(Paint.Cap.BUTT);
+        paint.setStrokeJoin(Paint.Join.MITER);
+        paint.setStrokeMiter(4f);
 
         path.reset();
-        path.moveTo(cx - boxSize * 0.28f, cy + boxSize * 0.02f);
-        path.lineTo(cx - boxSize * 0.08f, cy + boxSize * 0.22f);
-        path.lineTo(cx + boxSize * 0.28f, cy - boxSize * 0.18f);
+        path.moveTo(cx - radius * 0.48f, cy - radius * 0.02f);
+        path.lineTo(cx - radius * 0.15f, cy + radius * 0.38f);
+        path.lineTo(cx + radius * 0.50f, cy - radius * 0.35f);
         canvas.drawPath(path, paint);
     }
 
     private void drawCheckboxUnchecked(Canvas canvas, float cx, float cy, float size, float strokeWidth) {
-        float boxSize = size * 0.82f;
-        float rx = Theme.dpToPx(getContext(), 5f);
-        rectF.set(cx - boxSize / 2f, cy - boxSize / 2f, cx + boxSize / 2f, cy + boxSize / 2f);
+        float radius = (size - strokeWidth) / 2f;
 
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(strokeWidth * 1.1f);
+        paint.setStrokeWidth(strokeWidth);
         paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStrokeJoin(Paint.Join.ROUND);
         paint.setColor(iconColor);
-        canvas.drawRoundRect(rectF, rx, rx, paint);
+        canvas.drawCircle(cx, cy, radius, paint);
+    }
+
+    private static boolean isColorLight(int color) {
+        double luminance = (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255.0;
+        return luminance > 0.5;
     }
 }

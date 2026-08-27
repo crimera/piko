@@ -137,6 +137,11 @@ public final class NewXSettingsUi {
         );
     }
 
+    private static boolean isColorLight(int color) {
+        double luminance = (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255.0;
+        return luminance > 0.5;
+    }
+
     public static final class ChoiceRow extends LinearLayout {
         private final ChoiceIndicator indicator;
         private final boolean multiple;
@@ -244,42 +249,33 @@ public final class NewXSettingsUi {
                 return;
             }
 
-            float inset = Theme.dpToPx(context, 3f);
-            float radius = Theme.dpToPx(context, 4f);
-            paint.setStyle(checked ? Paint.Style.FILL : Paint.Style.STROKE);
-            paint.setStrokeWidth(strokeWidth);
-            paint.setColor(checked ? accent : secondary);
-            canvas.drawRoundRect(
-                    inset,
-                    inset,
-                    getWidth() - inset,
-                    getHeight() - inset,
-                    radius,
-                    radius,
-                    paint
-            );
-            if (!checked) return;
+            float radius = Theme.dpToPx(context, 9f);
+            if (checked) {
+                int checkBg = Theme.checkboxChecked(context);
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(checkBg);
+                canvas.drawCircle(centerX, centerY, radius, paint);
 
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(strokeWidth);
-            paint.setStrokeCap(Paint.Cap.ROUND);
-            paint.setStrokeJoin(Paint.Join.ROUND);
-            paint.setColor(Theme.onPrimaryAccent(context));
-            float checkSize = Theme.dpToPx(context, 5f);
-            canvas.drawLine(
-                    centerX - checkSize,
-                    centerY,
-                    centerX - checkSize / 3f,
-                    centerY + checkSize,
-                    paint
-            );
-            canvas.drawLine(
-                    centerX - checkSize / 3f,
-                    centerY + checkSize,
-                    centerX + checkSize,
-                    centerY - checkSize,
-                    paint
-            );
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setColor(isColorLight(checkBg) ? Color.BLACK : Color.WHITE);
+                paint.setStrokeWidth(Theme.dpToPx(context, 2f));
+                paint.setStrokeCap(Paint.Cap.BUTT);
+                paint.setStrokeJoin(Paint.Join.MITER);
+                paint.setStrokeMiter(4f);
+
+                android.graphics.Path path = new android.graphics.Path();
+                path.moveTo(centerX - radius * 0.48f, centerY - radius * 0.02f);
+                path.lineTo(centerX - radius * 0.15f, centerY + radius * 0.38f);
+                path.lineTo(centerX + radius * 0.50f, centerY - radius * 0.35f);
+                canvas.drawPath(path, paint);
+            } else {
+                paint.setStyle(Paint.Style.STROKE);
+                paint.setStrokeWidth(strokeWidth);
+                paint.setStrokeCap(Paint.Cap.ROUND);
+                paint.setStrokeJoin(Paint.Join.ROUND);
+                paint.setColor(secondary);
+                canvas.drawCircle(centerX, centerY, radius, paint);
+            }
         }
     }
 

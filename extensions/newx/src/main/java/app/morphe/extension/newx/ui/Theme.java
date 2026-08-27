@@ -111,6 +111,14 @@ public final class Theme {
         return withAlpha(primaryText(context), alpha);
     }
 
+    public static int checkboxChecked(Context context) {
+        if (usesDynamicColors()) {
+            int base = isDark(context) ? Color.WHITE : Color.rgb(15, 20, 25);
+            return blend(base, primaryAccent(context), 0.35f);
+        }
+        return isDark(context) ? Color.WHITE : Color.rgb(15, 20, 25);
+    }
+
     private static int dynamicColor(Context context, String role, int fallback) {
         if (!usesDynamicColors()) return fallback;
         if (context == null) return fallback;
@@ -126,7 +134,7 @@ public final class Theme {
         return context.getResources().getColor(resourceId, context.getTheme());
     }
 
-    private static boolean usesDynamicColors() {
+    public static boolean usesDynamicColors() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                 && SettingsRegistry.getBooleanOrDefault(DYNAMIC_COLOR_SETTING, false);
     }
@@ -144,6 +152,18 @@ public final class Theme {
         private SettingsSnapshot(boolean dynamicColors, boolean amoledBlack) {
             this.dynamicColors = dynamicColors;
             this.amoledBlack = amoledBlack;
+        }
+
+        public boolean usesDynamicColors() {
+            return dynamicColors;
+        }
+
+        public int checkboxChecked(Context context) {
+            if (dynamicColors) {
+                int base = Theme.isDark(context) ? Color.WHITE : Color.rgb(15, 20, 25);
+                return Theme.blend(base, primaryAccent(context), 0.35f);
+            }
+            return Theme.isDark(context) ? Color.WHITE : Color.rgb(15, 20, 25);
         }
 
         public int surface(Context context) {
