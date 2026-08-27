@@ -53,6 +53,27 @@ import app.morphe.extension.newx.utils.ToStringParser;
 public final class InlineDownloadButton {
     private static final String SETTING_ID = "newx.content.inline_download_button";
     private static final String DOWNLOAD_DIRECTORY = "Twitter";
+    // Primary public directories. These literal values match Environment.DIRECTORY_PICTURES /
+    // DIRECTORY_MOVIES and are exactly the strings MediaStore accepts as RELATIVE_PATH primary
+    // directories. Kept explicit so the path is deterministic and not dependent on framework
+    // constants that resolve to null under some test runtimes.
+    private static final String PICTURES_DIRECTORY = "Pictures";
+    private static final String MOVIES_DIRECTORY = "Movies";
+
+    /** Primary public directory for a MIME type: videos publish to Movies, all other media
+     *  (images) to Pictures. Required because MediaStore restricts each collection to specific
+     *  primary directories (Video allows only DCIM/Movies; Images allows only DCIM/Pictures). */
+    private static String primaryDirectoryForMime(String mimeType) {
+        return mimeType != null && mimeType.startsWith("video/")
+                ? MOVIES_DIRECTORY
+                : PICTURES_DIRECTORY;
+    }
+
+    /** Scoped-storage relative path under which a download is published, e.g. "Movies/Twitter/"
+     *  for videos and "Pictures/Twitter/" for images. */
+    static String relativeDownloadPath(String mimeType) {
+        return primaryDirectoryForMime(mimeType) + "/" + DOWNLOAD_DIRECTORY + "/";
+    }
     private static final String PENDING_DOWNLOADS_PREFS = "piko_newx_inline_downloads";
     private static final String CONFLICT_SETTING = "newx.content.inline_download_conflict";
     private static final ConflictBehavior DEFAULT_CONFLICT_BEHAVIOR = ConflictBehavior.SKIP;
@@ -588,7 +609,7 @@ public final class InlineDownloadButton {
         String baseFileName = downloadFileName(username, postId, download.extension, index, mediaCount);
         String fileName;
         try {
-            fileName = resolveTargetFileName(context, baseFileName, behavior);
+            fileName = resolveTargetFileName(context, baseFileName, behavior, download.mimeType);
         } catch (RuntimeException exception) {
             Logger.printException(() -> "Failed to resolve NewX download target", exception);
             return EnqueueState.FAILED;
@@ -638,9 +659,12 @@ public final class InlineDownloadButton {
                             DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
                     )
                     .setDestinationInExternalPublicDir(
-                            Environment.DIRECTORY_PICTURES,
+                            primaryDirectoryForMime(mimeType),
                             DOWNLOAD_DIRECTORY + "/" + temporaryFileName
                     );
+            // setDestinationInExternalPublicDir accepts any public-directory name; the literal
+            // "Pictures"/"Movies" values equal Environment.DIRECTORY_* and route the staged file
+            // to the matching volume root so the later MediaStore publish lands in the same place.
 
             long downloadId = manager.enqueue(request);
             try {
@@ -769,7 +793,7 @@ public final class InlineDownloadButton {
         try {
             boolean moved = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
                     ? publishDownload(context, manager, downloadId, pending.fileName, pending.mimeType)
-                    : moveLegacyDownload(context, pending.temporaryFileName, pending.fileName);
+                    : moveLegacyDownload(context, pending.temporaryFileName, pending.fileName, pending.mimeType);
             if (!moved) {
                 Utils.showToastShort("Could not finalize download: " + pending.fileName);
                 return;
@@ -830,7 +854,7 @@ public final class InlineDownloadButton {
         Uri collection = mimeType.startsWith("video/")
                 ? MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
                 : MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
-        String relativePath = Environment.DIRECTORY_PICTURES + "/" + DOWNLOAD_DIRECTORY + "/";
+        String relativePath = relativeDownloadPath(mimeType);
 
         ContentValues values = new ContentValues();
         values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
@@ -898,10 +922,12 @@ public final class InlineDownloadButton {
     private static boolean moveLegacyDownload(
             Context context,
             String temporaryFileName,
-            String fileName
+            String fileName,
+            String mimeType
     ) throws IOException {
-        File pictures = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        File directory = new File(pictures, DOWNLOAD_DIRECTORY);
+        File primary = Environment.getExternalStoragePublicDirectory(primaryDirectoryForMime(mimeType));
+        File directory = new File(primary, DOWNLOAD_DIRECTORY);
+        if (!directory.isDirectory()) return false;
         File temporaryFile = new File(directory, temporaryFileName);
         if (!temporaryFile.isFile()) return false;
 
@@ -1005,12 +1031,13 @@ public final class InlineDownloadButton {
     private static String resolveTargetFileName(
             Context context,
             String baseFileName,
-            ConflictBehavior behavior
+            ConflictBehavior behavior,
+            String mimeType
     ) {
         return resolveTargetFileName(
                 baseFileName,
                 behavior,
-                fileName -> mediaExists(context, fileName) || pendingFileExists(context, fileName)
+                fileName -> mediaExists(context, fileName, mimeType) || pendingFileExists(context, fileName)
         );
     }
 
@@ -1054,20 +1081,27 @@ public final class InlineDownloadButton {
         return false;
     }
 
-    private static boolean mediaExists(Context context, String fileName) {
+    private static boolean mediaExists(Context context, String fileName, String mimeType) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ContentResolver resolver = context.getContentResolver();
-            String relativePath = Environment.DIRECTORY_PICTURES + "/" + DOWNLOAD_DIRECTORY + "/";
             String selection = MediaStore.MediaColumns.DISPLAY_NAME + "=? AND " +
                     MediaStore.MediaColumns.RELATIVE_PATH + "=?";
-            String[] selectionArgs = new String[]{fileName, relativePath};
+            // Each MediaStore collection permits only specific primary directories: the Images
+            // collection accepts Pictures, the Video collection accepts Movies. Query each with
+            // its own relative path so videos are found under Movies/Twitter and images under
+            // Pictures/Twitter.
             Uri[] collections = {
                     MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
                     MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY),
             };
-            for (Uri collection : collections) {
+            String[] relativePaths = {
+                    PICTURES_DIRECTORY + "/" + DOWNLOAD_DIRECTORY + "/",
+                    MOVIES_DIRECTORY + "/" + DOWNLOAD_DIRECTORY + "/",
+            };
+            for (int index = 0; index < collections.length; index++) {
+                String[] selectionArgs = new String[]{fileName, relativePaths[index]};
                 try (Cursor cursor = resolver.query(
-                        collection,
+                        collections[index],
                         new String[]{MediaStore.MediaColumns._ID},
                         selection,
                         selectionArgs,
@@ -1081,8 +1115,8 @@ public final class InlineDownloadButton {
             return false;
         }
 
-        File pictures = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        File directory = new File(pictures, DOWNLOAD_DIRECTORY);
+        File primary = Environment.getExternalStoragePublicDirectory(primaryDirectoryForMime(mimeType));
+        File directory = new File(primary, DOWNLOAD_DIRECTORY);
         return new File(directory, fileName).isFile();
     }
 

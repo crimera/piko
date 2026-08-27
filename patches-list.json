@@ -4041,7 +4041,7 @@
     },
     {
       "name": "NewX: Inline download button",
-      "description": "Adds a Download button below NewX posts and saves media to Pictures/Twitter.",
+      "description": "Adds a Download button below NewX posts and saves images to Pictures/Twitter and videos to Movies/Twitter.",
       "default": true,
       "dependencies": [
         "BytecodePatch",

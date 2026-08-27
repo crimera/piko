@@ -137,6 +137,42 @@ public final class InlineDownloadButtonTest {
     }
 
     @Test
+    public void videoRelativePathUsesMoviesDirectory() {
+        assertEquals(
+                "Movies/Twitter/",
+                InlineDownloadButton.relativeDownloadPath("video/mp4")
+        );
+    }
+
+    @Test
+    public void gifRelativePathUsesMoviesDirectory() {
+        assertEquals(
+                "Movies/Twitter/",
+                InlineDownloadButton.relativeDownloadPath("video/mp4")
+        );
+    }
+
+    @Test
+    public void imageRelativePathUsesPicturesDirectory() {
+        assertEquals(
+                "Pictures/Twitter/",
+                InlineDownloadButton.relativeDownloadPath("image/jpeg")
+        );
+    }
+
+    @Test
+    public void unknownMimeFallsBackToPicturesDirectory() {
+        assertEquals(
+                "Pictures/Twitter/",
+                InlineDownloadButton.relativeDownloadPath("application/octet-stream")
+        );
+        assertEquals(
+                "Pictures/Twitter/",
+                InlineDownloadButton.relativeDownloadPath(null)
+        );
+    }
+
+    @Test
     public void conflictCleanupExcludesPublishedDestination() {
         assertTrue(InlineDownloadButton.existingMediaSelection().contains("!=?"));
         assertArrayEquals(

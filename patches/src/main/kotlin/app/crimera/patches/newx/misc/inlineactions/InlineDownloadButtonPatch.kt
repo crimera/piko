@@ -94,7 +94,7 @@ private fun MutableMethod.freeRegisters4Bit(
 val newXInlineDownloadButtonPatch =
     bytecodePatch(
         name = "NewX: Inline download button",
-        description = "Adds a Download button below NewX posts and saves media to Pictures/Twitter.",
+        description = "Adds a Download button below NewX posts and saves images to Pictures/Twitter and videos to Movies/Twitter.",
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(
