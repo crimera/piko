@@ -73,7 +73,6 @@ val dynamicColorPatch =
     bytecodePatch(
         name = "NewX: Dynamic color",
         description = "Applies the system Material You palette to NewX.",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXInlineActionModelResolutionPatch)

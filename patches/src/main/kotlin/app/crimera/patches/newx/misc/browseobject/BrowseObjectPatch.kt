@@ -18,6 +18,7 @@ val newXBrowseObjectPatch =
     bytecodePatch(
         name = "NewX: Browse tweet object",
         description = "Adds a debug option to browse the tweet object in NewX post menus.",
+        default = false,
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
 

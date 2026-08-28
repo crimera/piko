@@ -18,7 +18,6 @@ val postFilterPatch =
     bytecodePatch(
         name = "NewX: Filter posts by keyword",
         description = "Filters NewX posts using user-defined words and phrases.",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
         dependsOn(newXTimelineTextModelAdapterPatch)

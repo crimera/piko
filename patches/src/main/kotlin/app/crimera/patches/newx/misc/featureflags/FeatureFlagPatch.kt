@@ -123,7 +123,6 @@ val featureFlagPatch =
     bytecodePatch(
         name = "NewX: Feature switch overrides",
         description = "Adds searchable, typed NewX feature switch overrides.",
-        default = false,
     ) {
         compatibleWith(COMPATIBILITY_NEW_X)
 
