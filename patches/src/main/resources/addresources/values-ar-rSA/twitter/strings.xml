@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">فشل حذف ذاكرة التخزين المؤقت</string>
     <string name="piko_title_native_share_menu">قائمة المشاركة المحلية</string>
     <string name="piko_native_share_menu_toggle">تمكين قائمة المشاركة المحلية</string>
+    <string name="piko_native_share_menu_items_to_hide">عناصر قائمة المشاركة المحلية المراد إخفاؤها</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">الإعلانات</string>
     <string name="piko_pref_hide_promoted_posts">إخفاء منشورات المحتوى المُروَّج</string>
@@ -139,6 +140,8 @@
     <string name="piko_pref_search_suggestion_desc">يخفي اقتراحات البحث في قسم استكشف</string>
     <string name="piko_legacy_share_link">روابط المشاركة الكلاسيكية</string>
     <string name="piko_block_redirecting_to_x_lite">منع التحويل التلقائي إلى X Lite</string>
+    <string name="piko_pref_block_update_screen">منع شاشة التحديث</string>
+    <string name="piko_pref_block_update_screen_desc">يمنع عرض شاشة التحديث \'هذا التطبيق قديم\' عند التشغيل</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature Flags</string>
     <string name="piko_pref_feature_flags">Feature Flags إضافة</string>
@@ -205,6 +208,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">المزيد من المعلومات في الملف الشخصي</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">يضيف المزيد من التفاصيل على صفحة الملف الشخصي</string>
     <string name="piko_fast_follower">متابِع سريع</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">نمط الخط</string>
     <string name="piko_pref_add_font">إضافة خط</string>

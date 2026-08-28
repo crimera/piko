@@ -140,6 +140,8 @@
     <string name="piko_pref_search_suggestion_desc">Ukrywa sugestie wyszukiwania w sekcji przeglądania</string>
     <string name="piko_legacy_share_link">Klasyczne linki udostępniania</string>
     <string name="piko_block_redirecting_to_x_lite">Zablokuj przekierowania do X Lite</string>
+    <string name="piko_pref_block_update_screen">Zablokuj ekran aktualizacji</string>
+    <string name="piko_pref_block_update_screen_desc">Blokuje wyświetlanie ekranu aktualizacji \"Twoja aplikacja jest nieaktualna\" podczas uruchamiania</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Flagi</string>
     <string name="piko_pref_feature_flags">Zarządzaj flagami</string>

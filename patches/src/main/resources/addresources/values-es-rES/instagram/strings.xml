@@ -28,6 +28,8 @@
     <string name="piko_open_links_externally">Abrir los enlaces en una ventana nueva</string>
     <string name="piko_open_links_externally_desc">Abrir los enlaces en un navegador externo en lugar de en el navegador integrado en la aplicación</string>
     <string name="piko_sanitize_share_links">Limpiar enlaces compartidos</string>
+    <string name="piko_custom_sharing_domain">Dominio de uso compartido personalizado</string>
+    <string name="piko_custom_sharing_domain_desc">Dominio que se debe usar al compartir enlaces</string>
     <!-- Ghost Section -->
     <string name="piko_category_ghost">Modo Fantasma</string>
     <string name="piko_view_stories_anonymously">Ver historias de forma anónima</string>
@@ -84,12 +86,14 @@
     <string name="piko_vsm_no_mentions">No hay menciones en esta historia</string>
     <string name="piko_disable_story_flipping">Desactiva saltar a la siguiente historia automáticamente</string>
     <string name="piko_disable_story_flipping_desc">Desactiva saltar a la siguiente historia automáticamente</string>
+    <string name="piko_loop_story">Historia en bucle</string>
+    <string name="piko_loop_story_desc">Repite la historia actual cuando termine</string>
     <string name="piko_disable_video_autoplay">Desactivar reproducción automática de videos</string>
     <string name="piko_stories_audio_autoplay">Reproducción automática de audio en historias</string>
     <string name="piko_customise_story_timestamp">Personalizar horario de la historia</string>
     <string name="piko_customise_story_timestamp_desc">Personalizar el horario mostrado de cuando se publicó la historia</string>
     <string name="piko_improve_image_viewing">Mejorar calidad de imágenes</string>
-    <string name="piko_improve_image_viewing_desc">Obtiene imágenes en la resolución máxima del servidor</string>
+    <string name="piko_improve_image_viewing_desc">Obtiene imágenes con la resolución máxima del servidor. Puede reducir el rendimiento, aumentar el tamaño de los datos de la aplicación o hacer que la aplicación cambie a un diseño más antiguo</string>
     <string name="piko_hide_reshare_button">Ocultar botón de republicar</string>
     <string name="piko_copy_comment">Copiar comentario</string>
     <string name="piko_copy_comment_desc">Agrega un botón para copiar comentarios en publicaciones y Reels</string>
@@ -171,6 +175,10 @@
     <string name="piko_category_about">Acerca de</string>
     <string name="piko_export_pref">Exportar preferencias de Piko</string>
     <string name="piko_import_pref">Importar preferencias de Piko</string>
+    <string name="piko_reset_pref">Restablecer la configuración de Piko</string>
+    <string name="piko_reset_pref_confirm">¿Restablecer la configuración de Piko?</string>
+    <string name="piko_reset_pref_success">Restablecimiento de la configuración de Piko</string>
+    <string name="piko_reset_pref_failed">No se pudo restablecer la configuración de Piko</string>
     <string name="piko_app_version">Versión de la aplicación: %s</string>
     <string name="piko_patch_version">Versión del parche: %s</string>
     <string name="piko_patch_info_title">Información del parche</string>
@@ -292,4 +300,40 @@
     <string name="piko_filter_story_maximum_item_count">Elementos de historia máximos</string>
     <string name="piko_filter_story_maximum_item_count_desc">Las historias que tengan más de x elementos se ocultarán (Por defecto 9999)</string>
     <!-- Save & view deleted (unsent) direct messages -->
+    <string name="piko_open_share_in_instagram">Abrir en Instagram</string>
+    <string name="piko_open_voice_with_player">Abrir con reproductor de música</string>
+    <string name="piko_save_deleted_messages">Guardar mensajes eliminados</string>
+    <string name="piko_save_deleted_messages_desc">Captura los DM entrantes localmente a medida que llegan desde el servidor. Marca los mensajes como eliminados cuando no se envían, para que puedas verlos incluso después de que el remitente los elimine.</string>
+    <string name="piko_view_deleted_messages">Ver mensajes eliminados</string>
+    <string name="piko_deleted_in_chat">Eliminado en este chat</string>
+    <string name="piko_all_deleted_messages">Todos los mensajes eliminados</string>
+    <string name="piko_clear">Limpio</string>
+    <string name="piko_clear_chat_confirm">¿Borrar mensajes eliminados de este chat?</string>
+    <string name="piko_clear_all_confirm">¿Borrar TODOS los mensajes eliminados guardados?</string>
+    <string name="piko_no_deleted_messages">Aún no se han capturado mensajes eliminados.\nHabilite la función y los mensajes se guardarán a medida que lleguen.</string>
+    <string name="piko_delete_saved_confirm">¿Eliminar este mensaje guardado?</string>
+    <string name="piko_delete">Eliminar</string>
+    <string name="piko_unknown">Desconocido</string>
+    <string name="piko_tap_to_view">toque para ver</string>
+    <string name="piko_media_expired">enlace caducado</string>
+    <string name="piko_media_not_available">medios no disponibles</string>
+    <string name="piko_deleted_a_message">%s eliminó un mensaje</string>
+    <string name="piko_someone">Alguien</string>
+    <string name="piko_deleted_messages_channel">Mensajes eliminados</string>
+    <string name="piko_deleted_messages_channel_desc">Notifica cuando un mensaje recibido no se envía</string>
+    <string name="piko_media_label">[%s]</string>
+    <string name="piko_media_deleted">[%s eliminado]</string>
+    <string name="piko_media_deleted_generic">[eliminado]</string>
+    <string name="piko_media_unknown">medios</string>
+    <string name="piko_media_photo">foto</string>
+    <string name="piko_media_disappearing_photo">foto desapareciendo</string>
+    <string name="piko_media_video">video</string>
+    <string name="piko_media_voice">mensaje de voz</string>
+    <string name="piko_media_gif">GIF</string>
+    <string name="piko_media_reel">reel</string>
+    <string name="piko_media_story">historia</string>
+    <string name="piko_media_post">publicación</string>
+    <string name="piko_media_like">me gusta</string>
+    <string name="piko_media_link">link</string>
+    <string name="piko_media_activity">actividad</string>
 </resources>

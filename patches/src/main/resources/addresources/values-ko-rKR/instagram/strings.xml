@@ -51,7 +51,7 @@
     <string name="piko_limit_following_feed">팔로우한 프로필만 피드에 표시</string>
     <string name="piko_limit_following_feed_desc">홈 피드에 내가 팔로우하는 프로필의 콘텐츠만 표시합니다</string>
     <string name="piko_disable_reels_scrolling">릴스 스크롤 비활성화</string>
-    <string name="piko_disable_reels_scrolling_desc">인스타그램 릴스에서 계속 스크롤되는 동작을 비활성화하여 다음 릴스로 스와이프할 수 없도록 합니다\n\n알림: 새로 설치한 경우에 ‘Tip’ 애니메이션이 표시될 수 있지만, 몇 초 후 자동으로 멈춥니다</string>
+    <string name="piko_disable_reels_scrolling_desc">인스타그램 릴스에서 무한 스크롤 동작을 비활성화하여 다음 릴스로 넘길 수 없도록 합니다\n\n알림: 앱을 새로 설치한 경우에 \'Tip\' 애니메이션이 표시될 수 있지만, 몇 초 후에 자동으로 사라집니다</string>
     <string name="piko_disable_swipe_to_create">스와이프하여 만들기 비활성화</string>
     <string name="piko_disable_swipe_to_create_desc">홈 탭에서 오른쪽으로 스와이프하여 만들기 화면이 실행되는 것을 방지합니다</string>
     <string name="piko_hide_stories_tray">스토리 선반 숨기기</string>
@@ -93,7 +93,7 @@
     <string name="piko_customise_story_timestamp">스토리 시간 표시 설정</string>
     <string name="piko_customise_story_timestamp_desc">스토리가 게시된 시간을 표시하는 방식을 변경합니다</string>
     <string name="piko_improve_image_viewing">이미지 보기 개선</string>
-    <string name="piko_improve_image_viewing_desc">서버에서 최대 해상도의 이미지를 가져옵니다</string>
+    <string name="piko_improve_image_viewing_desc">서버에서 최대 해상도의 이미지를 가져옵니다\n\n성능이 저하되거나 앱의 데이터 크기가 증가할 수 있으며, 앱이 이전 레이아웃으로 전환될 수도 있습니다</string>
     <string name="piko_hide_reshare_button">리포스트 버튼 숨기기</string>
     <string name="piko_copy_comment">댓글 복사</string>
     <string name="piko_copy_comment_desc">게시물 및 릴스에서 댓글을 복사하는 버튼을 추가합니다</string>

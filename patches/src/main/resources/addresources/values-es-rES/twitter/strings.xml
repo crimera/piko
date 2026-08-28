@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Error al eliminar la caché</string>
     <string name="piko_title_native_share_menu">Menú compartido nativo</string>
     <string name="piko_native_share_menu_toggle">Habilitar el menú de compartir nativo</string>
+    <string name="piko_native_share_menu_items_to_hide">Elementos del menú de compartir nativo que se deben ocultar</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Anuncios</string>
     <string name="piko_pref_hide_promoted_posts">Ocultar publicaciones promocionadas</string>
@@ -139,6 +140,8 @@
     <string name="piko_pref_search_suggestion_desc">Oculta sugerencias de búsqueda en la sección Explorar</string>
     <string name="piko_legacy_share_link">Enlaces compartidos heredados</string>
     <string name="piko_block_redirecting_to_x_lite">Bloquear la redirección a X Lite</string>
+    <string name="piko_pref_block_update_screen">Bloquear pantalla de actualización</string>
+    <string name="piko_pref_block_update_screen_desc">Bloquea la pantalla de actualización \'Esta aplicación está desactualizada\' para que no se muestre al iniciarse</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Flags de características</string>
     <string name="piko_pref_feature_flags">Añadir Flags de características</string>
@@ -205,6 +208,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">Más información en el perfil</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Agrega más detalles en la página de perfil</string>
     <string name="piko_fast_follower">Seguidor rápido</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Estilo de fuente</string>
     <string name="piko_pref_add_font">Agregar fuente</string>

@@ -37,7 +37,7 @@
     <string name="piko_title_native_downloader">ネイティブダウンローダー</string>
     <string name="piko_title_native_downloader_toggle">ネイティブダウンローダーを有効化</string>
     <string name="piko_pref_native_downloader_autodownload_highest_video_res">常に最高画質の動画を自動でダウンロード</string>
-    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">単一の動画ではダイアログを表示せず、利用可能な最高画質ですぐにダウンロードします。</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">選択ダイアログをスキップし、単一の動画では利用可能な最高解像度ですぐにダウンロードします。</string>
     <string name="piko_pref_native_downloader_show_download_icon">ダウンロードアイコンを表示</string>
     <string name="piko_pref_native_downloader_show_copy_icon">コピーアイコンを表示</string>
     <string name="piko_pref_native_downloader_show_variants_icon">解像度アイコンを表示</string>
@@ -140,6 +140,8 @@
     <string name="piko_pref_search_suggestion_desc">[話題を検索] タブの検索候補を非表示または削除します</string>
     <string name="piko_legacy_share_link">旧式の共有リンク</string>
     <string name="piko_block_redirecting_to_x_lite">X Liteへのリダイレクトを無効化</string>
+    <string name="piko_pref_block_update_screen">アップデート要求画面をブロック</string>
+    <string name="piko_pref_block_update_screen_desc">「このアプリは旧バージョンのため利用できません。」というアプリのアップデートを要求する画面をブロックします</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">機能フラグ</string>
     <string name="piko_pref_feature_flags">機能フラグを追加</string>
@@ -167,7 +169,7 @@
     <string name="piko_pref_show_poll_result_desc">投票せずに投票結果を表示できるようにします</string>
     <string name="piko_pref_hide_community_notes">コミュニティノートを削除</string>
     <string name="piko_pref_hide_immersive_player">没入型プレーヤーを無効化</string>
-    <string name="piko_pref_hide_immersive_player_desc">上にスワイプしてより多くの動画を視聴できる新しいビデオプレーヤーを無効にします</string>
+    <string name="piko_pref_hide_immersive_player_desc">上にスワイプしてより多くの動画を視聴できる新しい動画プレーヤーを無効にします</string>
     <string name="piko_pref_enable_vid_auto_advance">動画の自動スクロールを有効化</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">没入型プレーヤーで自動スクロールを有効化します</string>
     <string name="piko_pref_hide_hidden_replies">「非表示の返信」を削除</string>
@@ -259,7 +261,7 @@
     <string name="piko_array_grok">Grok</string>
     <string name="piko_array_money">Money</string>
     <string name="piko_array_xchat">チャット</string>
-    <string name="piko_array_x_lite">New X Android</string>
+    <string name="piko_array_x_lite">新しい X Android</string>
     <string name="piko_array_conference">会議</string>
     <string name="piko_array_creator_studio">クリエイタースタジオ</string>
     <string name="piko_array_jobs">求人</string>

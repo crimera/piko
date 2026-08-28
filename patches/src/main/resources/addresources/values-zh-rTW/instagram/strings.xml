@@ -85,7 +85,6 @@
     <string name="piko_customise_story_timestamp">自訂限時動態的時間格式</string>
     <string name="piko_customise_story_timestamp_desc">自訂顯示限時動態發佈時間的格式</string>
     <string name="piko_improve_image_viewing">提高相片畫質</string>
-    <string name="piko_improve_image_viewing_desc">從伺服器擷取最高解析度的圖片</string>
     <string name="piko_hide_reshare_button">隱藏轉發按鈕</string>
     <string name="piko_copy_comment">複製留言</string>
     <string name="piko_copy_comment_desc">在貼文和 Reels 新增一個複製留言的按鈕</string>

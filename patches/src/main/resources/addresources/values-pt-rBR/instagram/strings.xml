@@ -93,7 +93,7 @@
     <string name="piko_customise_story_timestamp">Personalizar o formato do horário nos stories</string>
     <string name="piko_customise_story_timestamp_desc">Personalize o formato do horário mostrado de quando o stories foi postado.</string>
     <string name="piko_improve_image_viewing">Melhorar qualidade de imagens</string>
-    <string name="piko_improve_image_viewing_desc">Obtém imagens na resolução máxima do servidor.</string>
+    <string name="piko_improve_image_viewing_desc">Busca imagens com resolução máxima do servidor. Pode reduzir o desempenho, aumentar o tamanho dos dados do aplicativo ou fazer com que o aplicativo mude para um layout mais antigo</string>
     <string name="piko_hide_reshare_button">Ocultar botão de repostar</string>
     <string name="piko_copy_comment">Copiar comentário</string>
     <string name="piko_copy_comment_desc">Adiciona um botão para copiar comentários em posts e reels.</string>
@@ -310,7 +310,7 @@
     <string name="piko_clear">Limpar</string>
     <string name="piko_clear_chat_confirm">Limpar mensagens excluídas desta conversa?</string>
     <string name="piko_clear_all_confirm">Limpar TODAS as mensagens excluídas excluídas?</string>
-    <string name="piko_no_deleted_messages">Nenhuma mensagem excluída foi capturada ainda. U\nAtivar o recurso e as mensagens serão salvas quando chegarem.</string>
+    <string name="piko_no_deleted_messages">Nenhuma mensagem excluída foi capturada ainda. \nAtive o recurso e as mensagens serão salvas quando chegarem.</string>
     <string name="piko_delete_saved_confirm">Excluir esta mensagem salva?</string>
     <string name="piko_delete">Apagar</string>
     <string name="piko_unknown">Desconhecido</string>
@@ -321,6 +321,7 @@
     <string name="piko_someone">Alguém</string>
     <string name="piko_deleted_messages_channel">Excluir mensagens</string>
     <string name="piko_deleted_messages_channel_desc">Notifica quando uma mensagem recebida não é enviada</string>
+    <string name="piko_media_label">[%s]</string>
     <string name="piko_media_deleted">[%s excluído]</string>
     <string name="piko_media_deleted_generic">[excluído]</string>
     <string name="piko_media_unknown">mídia</string>

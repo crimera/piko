@@ -28,6 +28,8 @@
     <string name="piko_open_links_externally">Otwieraj linki zewnętrznie</string>
     <string name="piko_open_links_externally_desc">Otwiera linki w zewnętrznej przeglądarce zamiast we wbudowanej</string>
     <string name="piko_sanitize_share_links">Oczyść udostępniane linki</string>
+    <string name="piko_custom_sharing_domain">Własna domena udostępniania</string>
+    <string name="piko_custom_sharing_domain_desc">Domena używana podczas udostępniania linków</string>
     <!-- Ghost Section -->
     <string name="piko_category_ghost">Tryb ducha</string>
     <string name="piko_view_stories_anonymously">Oglądaj relacje anonimowo</string>
@@ -84,12 +86,14 @@
     <string name="piko_vsm_no_mentions">Brak wzmianek w tej relacji</string>
     <string name="piko_disable_story_flipping">Wyłącz automatyczne przełączanie relacji</string>
     <string name="piko_disable_story_flipping_desc">Blokuje automatyczne przejście do następnej relacji po zakończeniu obecnej</string>
+    <string name="piko_loop_story">Zapętl relację</string>
+    <string name="piko_loop_story_desc">Odtwarzaj ponownie bieżącą relację po jej zakończeniu</string>
     <string name="piko_disable_video_autoplay">Wyłącz autoodtwarzanie filmu</string>
     <string name="piko_stories_audio_autoplay">Autoodtwarzanie dźwięku w relacjach</string>
     <string name="piko_customise_story_timestamp">Dostosuj format czasu relacji</string>
     <string name="piko_customise_story_timestamp_desc">Zmienia format wyświetlania czasu publikacji relacji</string>
     <string name="piko_improve_image_viewing">Popraw jakość obrazów</string>
-    <string name="piko_improve_image_viewing_desc">Wymusza pobieranie obrazów w maksymalnej rozdzielczości z serwera</string>
+    <string name="piko_improve_image_viewing_desc">Pobiera z serwera obrazy w maksymalnej rozdzielczości. Może obniżyć wydajność, zwiększyć rozmiar danych aplikacji lub spowodować przełączenie aplikacji na starszy układ</string>
     <string name="piko_hide_reshare_button">Ukryj przycisk Udostępnij</string>
     <string name="piko_copy_comment">Kopiuj komentarz</string>
     <string name="piko_copy_comment_desc">Dodaje przycisk pozwalający skopiować treść komentarza pod postami i rolkami</string>
@@ -296,4 +300,40 @@
     <string name="piko_filter_story_maximum_item_count">Maksymalna liczba elementów relacji</string>
     <string name="piko_filter_story_maximum_item_count_desc">Relacje mające więcej niż x elementów zostaną ukryte (domyślnie 9999)</string>
     <!-- Save & view deleted (unsent) direct messages -->
+    <string name="piko_open_share_in_instagram">Otwórz w Instagramie</string>
+    <string name="piko_open_voice_with_player">Otwórz w odtwarzaczu muzyki</string>
+    <string name="piko_save_deleted_messages">Zapisuj usunięte wiadomości</string>
+    <string name="piko_save_deleted_messages_desc">Przechwytuje przychodzące wiadomości prywatne lokalnie, gdy docierają z serwera. Oznacza wiadomości jako usunięte w przypadku cofnięcia ich wysłania, dzięki czemu możesz je odczytać nawet po usunięciu przez nadawcę.</string>
+    <string name="piko_view_deleted_messages">Wyświetl usunięte wiadomości</string>
+    <string name="piko_deleted_in_chat">Usunięte w tym czacie</string>
+    <string name="piko_all_deleted_messages">Wszystkie usunięte wiadomości</string>
+    <string name="piko_clear">Wyczyść</string>
+    <string name="piko_clear_chat_confirm">Wyczyścić usunięte wiadomości w tym czacie?</string>
+    <string name="piko_clear_all_confirm">Wyczyścić WSZYSTKIE zapisane usunięte wiadomości?</string>
+    <string name="piko_no_deleted_messages">Nie przechwycono jeszcze żadnych usuniętych wiadomości.\nWłącz tę funkcję, a wiadomości będą zapisywane w momencie ich nadejścia.</string>
+    <string name="piko_delete_saved_confirm">Usunąć tę zapisaną wiadomość?</string>
+    <string name="piko_delete">Usuń</string>
+    <string name="piko_unknown">Nieznane</string>
+    <string name="piko_tap_to_view">dotknij, aby wyświetlić</string>
+    <string name="piko_media_expired">link wygasł</string>
+    <string name="piko_media_not_available">multimedia niedostępne</string>
+    <string name="piko_deleted_a_message">%s usunął/ęła wiadomość</string>
+    <string name="piko_someone">Ktoś</string>
+    <string name="piko_deleted_messages_channel">Usunięte wiadomości</string>
+    <string name="piko_deleted_messages_channel_desc">Powiadamia o cofnięciu wysłania otrzymanej wiadomości</string>
+    <string name="piko_media_label">[%s]</string>
+    <string name="piko_media_deleted">[usunięto: %s]</string>
+    <string name="piko_media_deleted_generic">[usunięto]</string>
+    <string name="piko_media_unknown">multimedia</string>
+    <string name="piko_media_photo">zdjęcie</string>
+    <string name="piko_media_disappearing_photo">znikające zdjęcie</string>
+    <string name="piko_media_video">film</string>
+    <string name="piko_media_voice">wiadomość głosowa</string>
+    <string name="piko_media_gif">GIF</string>
+    <string name="piko_media_reel">rolka</string>
+    <string name="piko_media_story">relacja</string>
+    <string name="piko_media_post">post</string>
+    <string name="piko_media_like">polubienie</string>
+    <string name="piko_media_link">link</string>
+    <string name="piko_media_activity">aktywność</string>
 </resources>

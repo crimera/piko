@@ -86,7 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">캐시를 삭제할 수 없습니다</string>
     <string name="piko_title_native_share_menu">기본 공유 메뉴</string>
     <string name="piko_native_share_menu_toggle">기본 공유 메뉴 활성화하기</string>
-    <string name="piko_native_share_menu_items_to_hide">숨길 기본 공유 메뉴 항목</string>
+    <string name="piko_native_share_menu_items_to_hide">숨겨질 기본 공유 메뉴 항목</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">광고</string>
     <string name="piko_pref_hide_promoted_posts">광고 게시물 숨기기</string>
@@ -140,6 +140,8 @@
     <string name="piko_pref_search_suggestion_desc">탐색 영역에서 검색어 추천을 숨길 수 있습니다</string>
     <string name="piko_legacy_share_link">이전 공유 링크</string>
     <string name="piko_block_redirecting_to_x_lite">X Lite로 리디렉션 차단하기</string>
+    <string name="piko_pref_block_update_screen">업데이트 화면 차단하기</string>
+    <string name="piko_pref_block_update_screen_desc">앱 실행 시 ‘이 앱은 이전 버전입니다’ 업데이트 화면이 표시되지 않도록 차단합니다</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">기능 플래그</string>
     <string name="piko_pref_feature_flags">플래그 추가하기</string>
@@ -167,7 +169,7 @@
     <string name="piko_pref_show_poll_result_desc">투표 없이 투표 결과를 볼 수 있습니다</string>
     <string name="piko_pref_hide_community_notes">커뮤니티 메모 숨기기</string>
     <string name="piko_pref_hide_immersive_player">몰입형 플레이어 비활성화하기</string>
-    <string name="piko_pref_hide_immersive_player_desc">위로 스와이프하여 더 많은 동영상을 시청할 수 있는 새로운 동영상 플레이어을 비활성화합니다</string>
+    <string name="piko_pref_hide_immersive_player_desc">위로 스와이프하여 더 많은 동영상을 시청할 수 있는 새로운 동영상 플레이어를 비활성화합니다</string>
     <string name="piko_pref_enable_vid_auto_advance">동영상 자동 스크롤 활성화하기</string>
     <string name="piko_pref_enable_vid_auto_advance_desc">몰입형 플레이어에서 동영상 자동 스크롤을 활성화합니다</string>
     <string name="piko_pref_hide_hidden_replies">숨겨진 답글 숨기기</string>

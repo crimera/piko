@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Önbellek silme başarısız</string>
     <string name="piko_title_native_share_menu">Yerel paylaşım menüsü</string>
     <string name="piko_native_share_menu_toggle">Yerel paylaşım menüsünü etkinleştir</string>
+    <string name="piko_native_share_menu_items_to_hide">Yerel paylaşım menüsü öğelerini gizlemek için</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Reklamlar</string>
     <string name="piko_pref_hide_promoted_posts">Sponsorlu gönderileri gizle</string>
@@ -139,6 +140,8 @@
     <string name="piko_pref_search_suggestion_desc">Keşfet bölümünde arama önerilerini gizler</string>
     <string name="piko_legacy_share_link">Türkçe</string>
     <string name="piko_block_redirecting_to_x_lite">X Lite sürümüne yönlendirmeyi engelle</string>
+    <string name="piko_pref_block_update_screen">Güncelleme ekranını engelle</string>
+    <string name="piko_pref_block_update_screen_desc">Açılışta \'Bu uygulamanın sürümü eski\' güncelleme ekranının gösterilmesini engeller</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Özellik bayrakları</string>
     <string name="piko_pref_feature_flags">Özellik bayrağı ekle</string>
@@ -205,6 +208,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">Profilde daha fazla bilgi</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Profil sayfasında daha fazla ayrıntı ekler</string>
     <string name="piko_fast_follower">Hızlı takipçi</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Yazı tipi stili</string>
     <string name="piko_pref_add_font">Yazı tipi ekle</string>

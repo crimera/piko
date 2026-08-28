@@ -80,7 +80,6 @@
     <string name="piko_customise_story_timestamp">自定义 story 时间戳</string>
     <string name="piko_customise_story_timestamp_desc">自定义快拍发布时间的时间戳格式</string>
     <string name="piko_improve_image_viewing">提高图像分辨率</string>
-    <string name="piko_improve_image_viewing_desc">从服务器中获取最高分辨率图片</string>
     <string name="piko_hide_reshare_button">隐藏转发按钮</string>
     <string name="piko_copy_comment">复制评论</string>
     <string name="piko_copy_comment_desc">在帖子和 Reels 上添加了一个用于复制评论的按钮</string>
