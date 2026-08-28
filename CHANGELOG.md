@@ -1,3 +1,16 @@
+## [3.9.0-dev.10](https://github.com/crimera/piko/compare/v3.9.0-dev.9...v3.9.0-dev.10) (2026-08-28)
+
+### 🐛 Bug Fixes
+
+* **Bring back Twitter:** restore omitted Twitter 9.98 terminology ([a435e35](https://github.com/crimera/piko/commit/a435e35f9bb5008b39d2f9e2a08bd2c27450913f))
+* **instagram:** add dialog entity dependency for media downloads ([5987d0b](https://github.com/crimera/piko/commit/5987d0be5704abdf1da15a8609924aa8a1118dbb))
+* **Instagram:** follow app theme in deleted messages screen ([36b21b2](https://github.com/crimera/piko/commit/36b21b28d5f5ff5aad85a7329b39d50e7f490375))
+* **instagram:** preserve material you surface contrast ([0c1fff3](https://github.com/crimera/piko/commit/0c1fff3f8510cfa818e237bf36f74a7ac35a0080))
+* **resources:** support plural overrides for bundled resources ([3acd3aa](https://github.com/crimera/piko/commit/3acd3aa4f7326e606f0bd81e978b735ef0fdc9e9))
+* **Twitter:** Don't rely on obfuscated names in `Show sensitive media` fingerprint ([d70c4d0](https://github.com/crimera/piko/commit/d70c4d008402547055a03777664702e65f2c18eb))
+* **Twitter:** Fix `Show sensitive media` on the Compose timeline ([aeeb178](https://github.com/crimera/piko/commit/aeeb178390a8a52ecec1897dd278b6ac38f8f371))
+* **twitter:** rewrite repost share links with original author ([11e7222](https://github.com/crimera/piko/commit/11e72222b5b6a974535991e34cf0e9daefb2b537))
+
 ## [3.9.0-dev.9](https://github.com/crimera/piko/compare/v3.9.0-dev.8...v3.9.0-dev.9) (2026-08-17)
 
 ### 🐛 Bug Fixes
