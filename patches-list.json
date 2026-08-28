@@ -3446,6 +3446,55 @@
       "options": []
     },
     {
+      "name": "NewX: Disable video player scrolling",
+      "description": "Disables vertical swipes in the NewX video player while keeping playback controls and other gestures available.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "NewX",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "12.17.3-alpha.01",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.18.0-beta.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.19.0-beta.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            },
+            {
+              "version": "12.19.1-release.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
       "name": "NewX: Dynamic color",
       "description": "Applies the system Material You palette to NewX.",
       "default": false,

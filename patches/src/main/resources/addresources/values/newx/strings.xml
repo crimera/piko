@@ -65,6 +65,8 @@
     <string name="piko_newx_media_tab_default_summary">Default sub-tab shown when opening a profile media tab</string>
     <string name="piko_newx_force_highest_video_quality_title">Force highest video and audio quality</string>
     <string name="piko_newx_force_highest_video_quality_summary">Plays videos and audio at the highest available stream quality without adaptive quality downscaling or network bitrate caps</string>
+    <string name="piko_newx_disable_video_scrolling_title">Disable video player scrolling</string>
+    <string name="piko_newx_disable_video_scrolling_summary">Prevents vertical swipes from advancing to the next video in the NewX player</string>
     <string name="piko_newx_media_tab_photos">Photos</string>
     <string name="piko_newx_media_tab_videos">Videos</string>
     <string name="piko_newx_hide_premium_upsell_title">Hide premium upsell</string>
