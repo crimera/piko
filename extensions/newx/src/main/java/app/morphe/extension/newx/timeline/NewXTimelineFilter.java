@@ -794,6 +794,10 @@ public final class NewXTimelineFilter {
         return null;
     }
 
+    /**
+     * The timeline adapter replaces this body with NewX's immutable-list converter at patch time.
+     * Keep a Java-list fallback so host-side filtering tests can run without a patched APK.
+     */
     private static Object immutableList(List<Object> filtered) {
         return Collections.unmodifiableList(filtered);
     }

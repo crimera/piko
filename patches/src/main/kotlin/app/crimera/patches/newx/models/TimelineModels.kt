@@ -2,6 +2,7 @@ package app.crimera.patches.newx.models
 
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.utils.Constants.TIMELINE_FILTER_DESCRIPTOR
+import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
@@ -16,6 +17,15 @@ import java.util.WeakHashMap
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
+private const val ITERABLE_DESCRIPTOR = "Ljava/lang/Iterable;"
+private const val IMMUTABLE_LIST_DESCRIPTOR = "Lkotlinx/collections/immutable/b;"
+private const val MEDIA_MODEL_SCOPE = "Lcom/x/models/media/"
+
+private object TimelineItemsImmutableListConverterFingerprint : Fingerprint(
+    definingClass = MEDIA_MODEL_SCOPE,
+    parameters = listOf(ITERABLE_DESCRIPTOR),
+    returnType = IMMUTABLE_LIST_DESCRIPTOR,
+)
 
 private object TimelinePostModelFingerprint : Fingerprint(
     definingClass = "Lcom/x/models/timelines/items/",
@@ -254,6 +264,17 @@ context(context: BytecodePatchContext)
 private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
     // ALPHA PATH uses public model fields; BETA PATH uses private-model getters.
     // The shared bridges keep the extension API stable while this compatibility split remains.
+    val immutableListMatches = TimelineItemsImmutableListConverterFingerprint.scopedMatchAll()
+    if (immutableListMatches.size != 1) {
+        throw PatchException(
+            "Expected one NewX timeline immutable-list converter, found " +
+                "${immutableListMatches.size}: ${immutableListMatches.joinToString { it.originalMethod.toString() }}",
+        )
+    }
+    val immutableListConverter = immutableListMatches.single().originalMethod
+    if (!AccessFlags.STATIC.isSet(immutableListConverter.accessFlags)) {
+        throw PatchException("NewX timeline immutable-list converter is not static: $immutableListConverter")
+    }
     val postClass = context.mutableClassDefBy(models.postDescriptor)
     val postEntryIdAccessor =
         postClass.resolveFieldAccessor(models.postEntryIdField, "timeline post entry ID")
@@ -311,6 +332,14 @@ private fun patchTimelineModelBridges(models: ResolvedNewXTimelineModels) {
         )
 
     val filterClass = context.mutableClassDefBy(TIMELINE_FILTER_DESCRIPTOR)
+    filterClass.patchBridge(
+        "immutableList",
+        LIST_DESCRIPTOR,
+        OBJECT_DESCRIPTOR,
+        "check-cast p0, $ITERABLE_DESCRIPTOR\n" +
+            "invoke-static {p0}, ${immutableListConverter.smaliReference()}\n" +
+            "move-result-object p0\nreturn-object p0",
+    )
     filterClass.patchBridge(
         "isTimelineModuleItem",
         OBJECT_DESCRIPTOR,
