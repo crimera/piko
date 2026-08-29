@@ -80,6 +80,42 @@ abstract class TimelineModelAccess {
         return null;
     }
 
+    boolean isTrend(Object value) {
+        return false;
+    }
+
+    String getTrendEntryId(Object trend) {
+        return null;
+    }
+
+    Object getTrendClientEventInfo(Object trend) {
+        return null;
+    }
+
+    Object getTrendPromotedMetadata(Object trend) {
+        return null;
+    }
+
+    String getTrendPromotedDescription(Object trend) {
+        return null;
+    }
+
+    boolean isEventSummary(Object value) {
+        return false;
+    }
+
+    String getEventSummaryEntryId(Object eventSummary) {
+        return null;
+    }
+
+    Object getEventSummaryClientEventInfo(Object eventSummary) {
+        return null;
+    }
+
+    Object getEventSummaryPromotedMetadata(Object eventSummary) {
+        return null;
+    }
+
     boolean isPromotedClientEventInfo(Object eventInfo) {
         return eventInfo != null
                 && eventInfo.toString().toLowerCase(Locale.ROOT).contains("promoted");

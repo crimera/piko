@@ -117,6 +117,41 @@ public class NewXTimelineFilterTest {
     }
 
     @Test
+    public void removesPromotedTrendByMetadataAndDescription() {
+        FakeTrend promotedTrend1 = new FakeTrend();
+        promotedTrend1.entryId = "trend-1";
+        promotedTrend1.promotedMetadata = new Object();
+
+        FakeTrend promotedTrend2 = new FakeTrend();
+        promotedTrend2.entryId = "trend-2";
+        promotedTrend2.promotedDescription = "Promoted by Sponsor";
+
+        FakeTrend organicTrend = new FakeTrend();
+        organicTrend.entryId = "trend-3";
+
+        List<Object> input = items(promotedTrend1, promotedTrend2, organicTrend);
+        Object filtered = NewXTimelineFilter.filterPromotedItems(input, true, MODELS);
+        assertEquals(List.of(organicTrend), filtered);
+    }
+
+    @Test
+    public void removesPromotedEventSummaryAndExploreAdEntryIds() {
+        FakeEventSummary promotedEvent = new FakeEventSummary();
+        promotedEvent.entryId = "eventsummary-1";
+        promotedEvent.promotedMetadata = new Object();
+
+        FakeEventSummary superheroAd = new FakeEventSummary();
+        superheroAd.entryId = "superhero-spotlight-123";
+
+        FakeEventSummary organicEvent = new FakeEventSummary();
+        organicEvent.entryId = "organic-event-456";
+
+        List<Object> input = items(promotedEvent, superheroAd, organicEvent);
+        Object filtered = NewXTimelineFilter.filterPromotedItems(input, true, MODELS);
+        assertEquals(List.of(organicEvent), filtered);
+    }
+
+    @Test
     public void removesFilteredPostIdFromVerticalConversationMetadata() {
         FakePost promoted = post("promoted");
         promoted.id = "post-1";
@@ -597,11 +632,33 @@ public class NewXTimelineFilterTest {
         }
     }
 
+    private static final class FakeTrend {
+        private String entryId;
+        private Object clientEventInfo;
+        private Object promotedMetadata;
+        private String promotedDescription;
+    }
+
+    private static final class FakeEventSummary {
+        private String entryId;
+        private Object clientEventInfo;
+        private Object promotedMetadata;
+    }
+
     private static class FakeModelAccess extends TimelineModelAccess {
         @Override boolean isModuleItem(Object value) { return value instanceof FakeModuleItem; }
         @Override boolean isPost(Object value) { return value instanceof FakePost; }
         @Override boolean isModule(Object value) { return value instanceof FakeModule; }
         @Override boolean isRtbImageAd(Object value) { return value instanceof FakeRtbAd; }
+        @Override boolean isTrend(Object value) { return value instanceof FakeTrend; }
+        @Override String getTrendEntryId(Object trend) { return ((FakeTrend) trend).entryId; }
+        @Override Object getTrendClientEventInfo(Object trend) { return ((FakeTrend) trend).clientEventInfo; }
+        @Override Object getTrendPromotedMetadata(Object trend) { return ((FakeTrend) trend).promotedMetadata; }
+        @Override String getTrendPromotedDescription(Object trend) { return ((FakeTrend) trend).promotedDescription; }
+        @Override boolean isEventSummary(Object value) { return value instanceof FakeEventSummary; }
+        @Override String getEventSummaryEntryId(Object eventSummary) { return ((FakeEventSummary) eventSummary).entryId; }
+        @Override Object getEventSummaryClientEventInfo(Object eventSummary) { return ((FakeEventSummary) eventSummary).clientEventInfo; }
+        @Override Object getEventSummaryPromotedMetadata(Object eventSummary) { return ((FakeEventSummary) eventSummary).promotedMetadata; }
         @Override Object getModuleItem(Object wrapper) { return ((FakeModuleItem) wrapper).item; }
         @Override boolean isModuleItemDispensable(Object wrapper) {
             return ((FakeModuleItem) wrapper).dispensable;

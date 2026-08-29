@@ -65,6 +65,15 @@ public final class NewXTimelineFilter {
         @Override Object getPostPromotedMetadata(Object post) {
             return NewXTimelineFilter.getPostPromotedMetadata(post);
         }
+        @Override boolean isTrend(Object value) { return isTimelineTrend(value); }
+        @Override String getTrendEntryId(Object trend) { return NewXTimelineFilter.getTrendEntryId(trend); }
+        @Override Object getTrendClientEventInfo(Object trend) { return NewXTimelineFilter.getTrendClientEventInfo(trend); }
+        @Override Object getTrendPromotedMetadata(Object trend) { return NewXTimelineFilter.getTrendPromotedMetadata(trend); }
+        @Override String getTrendPromotedDescription(Object trend) { return NewXTimelineFilter.getTrendPromotedDescription(trend); }
+        @Override boolean isEventSummary(Object value) { return isTimelineEventSummary(value); }
+        @Override String getEventSummaryEntryId(Object eventSummary) { return NewXTimelineFilter.getEventSummaryEntryId(eventSummary); }
+        @Override Object getEventSummaryClientEventInfo(Object eventSummary) { return NewXTimelineFilter.getEventSummaryClientEventInfo(eventSummary); }
+        @Override Object getEventSummaryPromotedMetadata(Object eventSummary) { return NewXTimelineFilter.getEventSummaryPromotedMetadata(eventSummary); }
         @Override boolean isPromotedClientEventInfo(Object eventInfo) {
             return NewXTimelineFilter.isPromotedClientEventInfo(eventInfo);
         }
@@ -597,6 +606,15 @@ public final class NewXTimelineFilter {
         } else if (modelAccess.isModule(item)) {
             entryId = modelAccess.getModuleEntryId(item);
             eventInfo = modelAccess.getModuleClientEventInfo(item);
+        } else if (modelAccess.isTrend(item)) {
+            entryId = modelAccess.getTrendEntryId(item);
+            eventInfo = modelAccess.getTrendClientEventInfo(item);
+            if (modelAccess.getTrendPromotedMetadata(item) != null) return true;
+            if (modelAccess.getTrendPromotedDescription(item) != null) return true;
+        } else if (modelAccess.isEventSummary(item)) {
+            entryId = modelAccess.getEventSummaryEntryId(item);
+            eventInfo = modelAccess.getEventSummaryClientEventInfo(item);
+            if (modelAccess.getEventSummaryPromotedMetadata(item) != null) return true;
         }
         if (isPromotedEntryId(entryId)) return true;
 
@@ -606,7 +624,45 @@ public final class NewXTimelineFilter {
     private static boolean isPromotedEntryId(String entryId) {
         if (entryId == null) return false;
         if (entryId.contains("promoted")) return true;
-        return entryId.startsWith("ad-") || entryId.contains("-ad-");
+        if (entryId.startsWith("ad-") || entryId.contains("-ad-")) return true;
+        if (entryId.contains("superhero") || entryId.contains("eventsummary") || entryId.contains("rtb")) return true;
+        return false;
+    }
+
+    private static boolean isTimelineTrend(Object value) {
+        return false;
+    }
+
+    private static String getTrendEntryId(Object trend) {
+        return null;
+    }
+
+    private static Object getTrendClientEventInfo(Object trend) {
+        return null;
+    }
+
+    private static Object getTrendPromotedMetadata(Object trend) {
+        return null;
+    }
+
+    private static String getTrendPromotedDescription(Object trend) {
+        return null;
+    }
+
+    private static boolean isTimelineEventSummary(Object value) {
+        return false;
+    }
+
+    private static String getEventSummaryEntryId(Object eventSummary) {
+        return null;
+    }
+
+    private static Object getEventSummaryClientEventInfo(Object eventSummary) {
+        return null;
+    }
+
+    private static Object getEventSummaryPromotedMetadata(Object eventSummary) {
+        return null;
     }
 
     private static boolean isTimelineModuleItem(Object value) {
