@@ -11,11 +11,9 @@ import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.EXTENSION_PACKAGE
 import app.crimera.patches.utils.scopedMatchAll
-import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.fieldAccess
-import app.morphe.patcher.methodCall
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.BytecodePatchContext
 import app.morphe.patcher.patch.PatchException
@@ -27,9 +25,13 @@ import app.morphe.util.getReference
 import app.morphe.util.numberOfParameterRegisters
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction22t
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderInstruction31t
+import com.android.tools.smali.dexlib2.builder.instruction.BuilderSwitchElement
+import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.NarrowLiteralInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.RegisterRangeInstruction
+import com.android.tools.smali.dexlib2.iface.instruction.SwitchPayload
 import com.android.tools.smali.dexlib2.iface.instruction.ThreeRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
@@ -327,24 +329,20 @@ private fun resolveFactory(
     }
 
     val storeIndex = stores.single().index
-    val allocation =
+    val factoryAllocation =
         initializer.instructions
             .take(storeIndex)
             .withIndex()
             .lastOrNull { indexed -> indexed.value.opcode == Opcode.NEW_INSTANCE }
             ?: throw PatchException("No Function0 allocation found for NewX $kind palette cache")
     val factoryDescriptor =
-        allocation.value.getReference<TypeReference>()?.type
+        factoryAllocation.value.getReference<TypeReference>()?.type
             ?: throw PatchException("NewX $kind palette factory allocation has no type")
-    val initializesAllocation =
-        initializer.instructions
-            .drop(allocation.index + 1)
-            .take(storeIndex - allocation.index - 1)
-            .mapNotNull { instruction -> instruction.getReference<MethodReference>() }
-            .any { reference -> reference.name == "<init>" && reference.returnType == "V" }
-    if (!initializesAllocation) {
-        throw PatchException("NewX $kind palette cache allocation is not initialized: $factoryDescriptor")
-    }
+    val factorySelector = initializer.resolveFactorySelector(
+        allocationIndex = factoryAllocation.index,
+        storeIndex = storeIndex,
+        factoryDescriptor = factoryDescriptor,
+    )
 
     val factoryClass = context.mutableClassDefBy(factoryDescriptor)
     if (FUNCTION0_DESCRIPTOR !in factoryClass.interfaces) {
@@ -364,22 +362,95 @@ private fun resolveFactory(
     }
 
     val invoke = invokes.single()
-    val paletteAllocations =
-        invoke.instructions.withIndex().filter { indexed ->
-            indexed.value.opcode == Opcode.NEW_INSTANCE &&
-                indexed.value.getReference<TypeReference>()?.type == paletteDescriptor
-        }
-    val matchingAllocations =
-        paletteAllocations.filter { allocation ->
-            invoke.resolvePaletteIsLight(allocation.index, constructorReference) == kind.isLight
-        }
-    if (matchingAllocations.size != 1) {
+    val paletteAllocationIndex = invoke.resolvePaletteAllocationIndex(
+        factorySelector = factorySelector,
+        paletteDescriptor = paletteDescriptor,
+        kind = kind,
+    )
+    val isLight = invoke.resolvePaletteIsLight(paletteAllocationIndex, constructorReference)
+    if (isLight != kind.isLight) {
         throw PatchException(
-            "Expected one ${kind.name} NewX palette allocation branch, found " +
-                "${matchingAllocations.size} of ${paletteAllocations.size}: $invoke",
+            "NewX ${kind.name} palette branch has unexpected isLight=$isLight: $invoke",
         )
     }
-    return ResolvedFactory(kind, invoke, matchingAllocations.single().index)
+    return ResolvedFactory(kind, invoke, paletteAllocationIndex)
+}
+
+private fun MutableMethod.resolveFactorySelector(
+    allocationIndex: Int,
+    storeIndex: Int,
+    factoryDescriptor: String,
+): Int {
+    val allocationRegister =
+        (instructions.getOrNull(allocationIndex) as? OneRegisterInstruction)?.registerA
+            ?: throw PatchException("NewX palette factory allocation has no destination register: $this")
+    val constructorReference = "$factoryDescriptor-><init>(I)V"
+    val constructor =
+        instructions.withIndex().singleOrNull { indexed ->
+            indexed.index > allocationIndex &&
+                indexed.index < storeIndex &&
+                indexed.value.getReference<MethodReference>()?.toString() == constructorReference
+        } ?: throw PatchException(
+            "NewX palette factory constructor was not found between allocation and cache store: $this",
+        )
+    val constructorInstruction = constructor.value as? FiveRegisterInstruction
+        ?: throw PatchException("NewX palette factory constructor is not a five-register invoke: $this")
+    if (constructorInstruction.registerCount != 2 ||
+        constructorInstruction.registerC != allocationRegister
+    ) {
+        throw PatchException("NewX palette factory constructor has an unexpected register shape: $this")
+    }
+    return instructions.resolveLatestLiteral(constructor.index, constructorInstruction.registerD)
+        ?: throw PatchException("NewX palette factory selector literal was not found: $this")
+}
+
+private fun MutableMethod.resolvePaletteAllocationIndex(
+    factorySelector: Int,
+    paletteDescriptor: String,
+    kind: PaletteKind,
+): Int {
+    val switchInstructions = instructions.withIndex().filter { indexed ->
+        indexed.value.opcode == Opcode.PACKED_SWITCH
+    }
+    if (switchInstructions.size != 1) {
+        throw PatchException(
+            "Expected one NewX palette factory packed switch, found " +
+                "${switchInstructions.size}: $this",
+        )
+    }
+    val switchInstruction = switchInstructions.single().value as? BuilderInstruction31t
+        ?: throw PatchException("NewX palette factory switch is not mutable: $this")
+    val payload = switchInstruction.target.location.instruction as? SwitchPayload
+        ?: throw PatchException("NewX palette factory switch payload is missing: $this")
+    val switchElements = payload.switchElements.map { element ->
+        element as? BuilderSwitchElement
+            ?: throw PatchException("NewX palette factory switch case is not mutable: $this")
+    }
+    val caseStart =
+        switchElements.singleOrNull { element -> element.key == factorySelector }
+            ?.target?.location?.index
+            ?: throw PatchException(
+                "NewX ${kind.name} palette factory selector $factorySelector has no switch case: $this",
+            )
+    val caseEnd = switchElements
+        .mapNotNull { element -> element.target.location.index.takeIf { index -> index > caseStart } }
+        .minOrNull() ?: instructions.size
+    val paletteAllocations = instructions.withIndex().filter { indexed ->
+        indexed.index in caseStart until caseEnd &&
+            indexed.value.opcode == Opcode.NEW_INSTANCE &&
+            indexed.value.getReference<TypeReference>()?.type == paletteDescriptor
+    }
+    if (paletteAllocations.size != 1) {
+        val totalAllocations = instructions.count { instruction ->
+            instruction.opcode == Opcode.NEW_INSTANCE &&
+                instruction.getReference<TypeReference>()?.type == paletteDescriptor
+        }
+        throw PatchException(
+            "Expected one ${kind.name} NewX palette allocation in selector case, found " +
+                "${paletteAllocations.size} of $totalAllocations: $this",
+        )
+    }
+    return paletteAllocations.single().index
 }
 
 private fun MutableMethod.resolvePaletteIsLight(
@@ -569,81 +640,28 @@ private fun patchInlineActionTints() {
     val enabledField = models.inlineActionEnabledField
     val actionTypeDescriptor = models.postActionTypeDescriptor
     val entryMatches =
-        listOf(
-            // ALPHA PATH: field reads and the legacy 11-parameter Compose renderer.
-            // TODO: Remove this fingerprint when alpha compatibility is deprecated.
-            Fingerprint(
-                definingClass = "Lcom/x/inlineactionbar/",
-                parameters = listOf(
-                    inlineActionEntryClass.type,
-                    "L",
-                    "J",
-                    "F",
-                    "L",
-                    "J",
-                    "L",
-                    "L",
-                    "Landroidx/compose/ui/Modifier;",
-                    "Landroidx/compose/runtime/Composer;",
-                    "I",
-                ),
-                returnType = "V",
-                filters = listOf(
-                    fieldAccess(opcode = Opcode.IGET_OBJECT, reference = actionTypeField),
-                    fieldAccess(opcode = Opcode.IGET_BOOLEAN, reference = enabledField),
-                ),
-            ).scopedMatchAllOrNull().orEmpty(),
-            // BETA PATH: getter calls and the beta 10-parameter Compose renderer.
-            Fingerprint(
-                definingClass = "Lcom/x/inlineactionbar/",
-                parameters = listOf(
-                    inlineActionEntryClass.type,
-                    "L",
-                    "J",
-                    "F",
-                    "L",
-                    "J",
-                    "L",
-                    "Landroidx/compose/ui/Modifier;",
-                    "Landroidx/compose/runtime/Composer;",
-                    "I",
-                ),
-                returnType = "V",
-                filters = listOf(
-                    methodCall(
-                        smali =
-                            "${inlineActionEntryClass.type}->getActionType()$actionTypeDescriptor",
-                    ),
-                    methodCall(smali = "${inlineActionEntryClass.type}->isEnabled()Z"),
-                ),
-            ).scopedMatchAllOrNull().orEmpty(),
-            // BETA PATH: getter calls and the 11-parameter renderer introduced in 12.19.1.
-            Fingerprint(
-                definingClass = "Lcom/x/inlineactionbar/",
-                parameters = listOf(
-                    inlineActionEntryClass.type,
-                    "L",
-                    "J",
-                    "F",
-                    "L",
-                    "J",
-                    "L",
-                    "L",
-                    "Landroidx/compose/ui/Modifier;",
-                    "Landroidx/compose/runtime/Composer;",
-                    "I",
-                ),
-                returnType = "V",
-                filters = listOf(
-                    methodCall(
-                        smali =
-                            "${inlineActionEntryClass.type}->getActionType()$actionTypeDescriptor",
-                    ),
-                    methodCall(smali = "${inlineActionEntryClass.type}->isEnabled()Z"),
-                ),
-            ).scopedMatchAllOrNull().orEmpty(),
-        ).flatten()
-            .distinctBy { it.originalMethod.toString() }
+        Fingerprint(
+            definingClass = "Lcom/x/inlineactionbar/",
+            parameters = listOf(
+                inlineActionEntryClass.type,
+                "L",
+                "J",
+                "F",
+                "L",
+                "L",
+                "J",
+                "L",
+                "L",
+                "Landroidx/compose/ui/Modifier;",
+                "Landroidx/compose/runtime/Composer;",
+                "I",
+            ),
+            returnType = "V",
+            filters = listOf(
+                fieldAccess(opcode = Opcode.IGET_OBJECT, reference = actionTypeField),
+                fieldAccess(opcode = Opcode.IGET_BOOLEAN, reference = enabledField),
+            ),
+        ).scopedMatchAll()
     requireExactlyOne("NewX inline action entry renderer", entryMatches)
     val entryMethod = entryMatches.single().method
     val tintReference =
