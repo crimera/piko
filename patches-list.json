@@ -3003,7 +3003,7 @@
     {
       "name": "NewX: Browse tweet object",
       "description": "Adds a debug option to browse the tweet object in NewX post menus.",
-      "default": true,
+      "default": false,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
@@ -3497,7 +3497,7 @@
     {
       "name": "NewX: Dynamic color",
       "description": "Applies the system Material You palette to NewX.",
-      "default": false,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"
@@ -3547,7 +3547,7 @@
     {
       "name": "NewX: Feature switch overrides",
       "description": "Adds searchable, typed NewX feature switch overrides.",
-      "default": false,
+      "default": true,
       "dependencies": [
         "BytecodePatch"
       ],
@@ -3645,7 +3645,7 @@
     {
       "name": "NewX: Filter posts by keyword",
       "description": "Filters NewX posts using user-defined words and phrases.",
-      "default": false,
+      "default": true,
       "dependencies": [
         "BytecodePatch",
         "BytecodePatch"

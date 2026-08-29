@@ -91,15 +91,6 @@ internal object Groups {
             order = 100,
         )
 
-    val TRENDS =
-        SettingsGroupMetadata(
-            id = "newx.content.trends",
-            titleResourceName = "piko_newx_group_trends_title",
-            summaryResourceName = "piko_newx_group_trends_summary",
-            iconResourceName = "ic_vector_filter",
-            order = 150,
-        )
-
     val DYNAMIC_COLORS =
         SettingsGroupMetadata(
             id = "newx.appearance.dynamic_colors",
