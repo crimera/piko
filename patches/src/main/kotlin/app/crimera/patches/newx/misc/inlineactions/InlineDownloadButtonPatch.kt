@@ -6,14 +6,12 @@ import app.crimera.patches.newx.models.ResolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.ResolvedNewXInlineDownloadModels
 import app.crimera.patches.newx.models.ResolvedNewXPostMediaModels
 import app.crimera.patches.newx.models.ResolvedNewXPostModels
-import app.crimera.patches.newx.models.readObject
 import app.crimera.patches.newx.models.requirePublicFields
 import app.crimera.patches.newx.models.resolvedNewXInlineActionBarModels
 import app.crimera.patches.newx.models.resolvedNewXInlineActionModels
 import app.crimera.patches.newx.models.resolvedNewXInlineDownloadModels
 import app.crimera.patches.newx.models.resolvedNewXPostMediaModels
 import app.crimera.patches.newx.models.resolvedNewXPostModels
-import app.crimera.patches.newx.models.resolveFieldAccessor
 import app.crimera.patches.newx.models.newXInlineDownloadModelResolutionPatch
 import app.crimera.patches.newx.models.newXPostMediaModelResolutionPatch
 import app.crimera.patches.newx.settings.Categories
@@ -26,7 +24,6 @@ import app.crimera.patches.newx.settings.toggle
 import app.crimera.patches.newx.settings.newXSettings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.utils.scopedMatchAll
-import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
@@ -151,105 +148,39 @@ val newXInlineDownloadButtonPatch =
                 "invoke-static/range {p0 .. p0}, $EXTENSION->initialize(Landroid/content/Context;)V",
             )
 
-            val inlineRendererMatches =
-                listOf(
-                    // ALPHA PATH: field-based inline-action model and legacy renderer shape.
-                    // TODO: Remove this fingerprint when alpha compatibility is deprecated.
-                    Fingerprint(
-                        definingClass = "Lcom/x/inlineactionbar/",
-                        parameters =
-                            listOf(
-                                entryModels.inlineActionEntryDescriptor,
-                                "L",
-                                "J",
-                                "F",
-                                "L",
-                                "J",
-                                "L",
-                                "L",
-                                MODIFIER,
-                                COMPOSER,
-                                "I",
+            val inlineRenderer = requireSingle(
+                "NewX inline-action entry renderer",
+                Fingerprint(
+                    definingClass = "Lcom/x/inlineactionbar/",
+                    parameters =
+                        listOf(
+                            entryModels.inlineActionEntryDescriptor,
+                            "L",
+                            "J",
+                            "F",
+                            "L",
+                            "L",
+                            "J",
+                            "L",
+                            "L",
+                            MODIFIER,
+                            COMPOSER,
+                            "I",
+                        ),
+                    returnType = "V",
+                    filters =
+                        listOf(
+                            fieldAccess(
+                                opcode = Opcode.IGET_OBJECT,
+                                reference = entryModels.inlineActionTypeField,
                             ),
-                        returnType = "V",
-                        filters =
-                            listOf(
-                                fieldAccess(
-                                    opcode = Opcode.IGET_OBJECT,
-                                    definingClass = entryModels.inlineActionEntryDescriptor,
-                                    type = entryModels.postActionTypeDescriptor,
-                                ),
-                                fieldAccess(
-                                    opcode = Opcode.IGET_BOOLEAN,
-                                    definingClass = entryModels.inlineActionEntryDescriptor,
-                                    type = "Z",
-                                ),
+                            fieldAccess(
+                                opcode = Opcode.IGET_BOOLEAN,
+                                reference = entryModels.inlineActionEnabledField,
                             ),
-                    ).scopedMatchAllOrNull().orEmpty(),
-                    // BETA PATH: getter-based inline-action model and beta renderer shape.
-                    Fingerprint(
-                        definingClass = "Lcom/x/inlineactionbar/",
-                        parameters =
-                            listOf(
-                                entryModels.inlineActionEntryDescriptor,
-                                "L",
-                                "J",
-                                "F",
-                                "L",
-                                "J",
-                                "L",
-                                MODIFIER,
-                                COMPOSER,
-                                "I",
-                            ),
-                        returnType = "V",
-                        filters =
-                            listOf(
-                                methodCall(
-                                    smali =
-                                        "${entryModels.inlineActionEntryDescriptor}->getActionType()" +
-                                            entryModels.postActionTypeDescriptor,
-                                ),
-                                methodCall(
-                                    smali = "${entryModels.inlineActionEntryDescriptor}->isEnabled()Z",
-                                ),
-                            ),
-                    ).scopedMatchAllOrNull().orEmpty(),
-                    // BETA PATH: getter-based inline-action model and the 11-parameter renderer
-                    // introduced in 12.19.1.
-                    Fingerprint(
-                        definingClass = "Lcom/x/inlineactionbar/",
-                        parameters =
-                            listOf(
-                                entryModels.inlineActionEntryDescriptor,
-                                "L",
-                                "J",
-                                "F",
-                                "L",
-                                "J",
-                                "L",
-                                "L",
-                                MODIFIER,
-                                COMPOSER,
-                                "I",
-                            ),
-                        returnType = "V",
-                        filters =
-                            listOf(
-                                methodCall(
-                                    smali =
-                                        "${entryModels.inlineActionEntryDescriptor}->getActionType()" +
-                                            entryModels.postActionTypeDescriptor,
-                                ),
-                                methodCall(
-                                    smali = "${entryModels.inlineActionEntryDescriptor}->isEnabled()Z",
-                                ),
-                            ),
-                    ).scopedMatchAllOrNull().orEmpty(),
-                ).flatten()
-                    .distinctBy { it.originalMethod.toString() }
-            val inlineRenderer =
-                requireSingle("NewX inline-action entry renderer", inlineRendererMatches)
+                        ),
+                ).scopedMatchAll(),
+            )
             inlineRenderer.method.apply {
                 requireStatic("NewX inline-action entry renderer")
                 val (entryRegister, sizeRegister) = freeRegisters4Bit(index = 0, count = 2)
@@ -312,28 +243,29 @@ val newXInlineDownloadButtonPatch =
             if (shareIconField.type != incomingIconField.type) {
                 throw PatchException("NewX inline icon types differ")
             }
-            val iconRendererMatches =
-                // ALPHA PATH: icon lambda under com/x/compose/.
-                // BETA PATH: icon lambda may move under com/x/ui/common/.
-                // TODO: Remove the alpha owner scope when alpha compatibility is deprecated.
-                listOf("Lcom/x/compose/", "Lcom/x/ui/common/").flatMap { ownerScope ->
-                    Fingerprint(
-                        definingClass = ownerScope,
-                        filters =
-                            listOf(
-                                fieldAccess(opcode = Opcode.SGET_OBJECT, reference = shareIconField),
-                                fieldAccess(opcode = Opcode.IGET, definingClass = "this", type = "F"),
-                            ),
-                    ).scopedMatchAllOrNull().orEmpty()
-                }.distinctBy { it.originalMethod.toString() }
-            val iconRenderer =
-                requireSingle("NewX TwitterShare icon lambda", iconRendererMatches)
+            val iconRenderer = requireSingle(
+                "NewX TwitterShare icon lambda",
+                Fingerprint(
+                    definingClass = "Lcom/x/cards/impl/unified/components/appstore/",
+                    filters =
+                        listOf(
+                            fieldAccess(opcode = Opcode.IGET, definingClass = "this", type = "F"),
+                            fieldAccess(opcode = Opcode.SGET_OBJECT, reference = shareIconField),
+                        ),
+                ).scopedMatchAll(),
+            )
             iconRenderer.method.apply {
-                val iconAccess = iconRenderer.instructionMatches[0]
+                val iconAccess = iconRenderer.instructionMatches.singleOrNull { match ->
+                    match.instruction.opcode == Opcode.SGET_OBJECT &&
+                        match.instruction.getReference<FieldReference>()?.toString() == shareIconField.toString()
+                } ?: throw PatchException("NewX share icon access was not found")
                 val iconRegister =
                     (iconAccess.instruction as? OneRegisterInstruction)?.registerA
                         ?: throw PatchException("NewX share icon access has no register")
-                val sizeAccess = iconRenderer.instructionMatches[1]
+                val sizeAccess = iconRenderer.instructionMatches.singleOrNull { match ->
+                    val field = match.instruction.getReference<FieldReference>()
+                    match.instruction.opcode == Opcode.IGET && field?.type == "F"
+                } ?: throw PatchException("NewX share icon size access was not found")
                 val sizeField =
                     sizeAccess.instruction.getReference<FieldReference>()
                         ?: throw PatchException("NewX share icon size field was not found")
@@ -350,51 +282,27 @@ val newXInlineDownloadButtonPatch =
             }
 
             val inlinePresenterType = barModels.inlineActionBarDescriptor
-            val inlineEventHandlerMatches =
-                listOf(
-                    // ALPHA PATH: event handler reads the action-type field.
-                    // TODO: Remove this fingerprint when alpha compatibility is deprecated.
-                    Fingerprint(
-                        definingClass = inlinePresenterType,
-                        returnType = "V",
-                        filters =
-                            listOf(
-                                fieldAccess(
-                                    opcode = Opcode.IGET_OBJECT,
-                                    definingClass = entryModels.inlineActionEntryDescriptor,
-                                    type = entryModels.postActionTypeDescriptor,
-                                ),
-                                methodCall(
-                                    definingClass = "Ljava/lang/Enum;",
-                                    name = "ordinal",
-                                    parameters = emptyList(),
-                                    returnType = "I",
-                                ),
+            val inlineEventHandler = requireSingle(
+                "NewX inline-action event handler",
+                Fingerprint(
+                    definingClass = inlinePresenterType,
+                    returnType = "V",
+                    filters =
+                        listOf(
+                            fieldAccess(
+                                opcode = Opcode.IGET_OBJECT,
+                                definingClass = entryModels.inlineActionEntryDescriptor,
+                                type = entryModels.postActionTypeDescriptor,
                             ),
-                    ).scopedMatchAllOrNull().orEmpty(),
-                    // BETA PATH: event handler calls getActionType().
-                    Fingerprint(
-                        definingClass = inlinePresenterType,
-                        returnType = "V",
-                        filters =
-                            listOf(
-                                methodCall(
-                                    smali =
-                                        "${entryModels.inlineActionEntryDescriptor}->getActionType()" +
-                                            entryModels.postActionTypeDescriptor,
-                                ),
-                                methodCall(
-                                    definingClass = "Ljava/lang/Enum;",
-                                    name = "ordinal",
-                                    parameters = emptyList(),
-                                    returnType = "I",
-                                ),
+                            methodCall(
+                                definingClass = "Ljava/lang/Enum;",
+                                name = "ordinal",
+                                parameters = emptyList(),
+                                returnType = "I",
                             ),
-                    ).scopedMatchAllOrNull().orEmpty(),
-                ).flatten()
-                    .distinctBy { it.originalMethod.toString() }
-            val inlineEventHandler =
-                requireSingle("NewX inline-action event handler", inlineEventHandlerMatches)
+                        ),
+                ).scopedMatchAll(),
+            )
             inlineEventHandler.method.apply {
                 requireStatic("NewX inline-action event handler")
                 if (parameterTypes.firstOrNull().toString() != inlinePresenterType) {
@@ -430,31 +338,10 @@ private fun patchPostModelBridges(
     mediaModels: ResolvedNewXPostMediaModels,
     downloadModels: ResolvedNewXInlineDownloadModels,
 ) {
-    val contextualPostClass = context.mutableClassDefBy(postModels.contextualPostDescriptor)
-    // ALPHA PATH uses public fields; BETA PATH uses private-model getters.
-    // See resolveFieldAccessor for the temporary compatibility split.
-    val contextualCanonicalPostAccessor =
-        contextualPostClass.resolveFieldAccessor(
-            postModels.contextualCanonicalPostField,
-            "contextual canonical post",
-        )
-    val contextualRepostedPostAccessor =
-        contextualPostClass.resolveFieldAccessor(
-            postModels.contextualRepostedPostField,
-            "contextual reposted post",
-        )
-    val repostedPostClass = context.mutableClassDefBy(postModels.contextualRepostedPostField.type)
-    val repostedCanonicalPostAccessor =
-        repostedPostClass.resolveFieldAccessor(
-            postModels.repostedCanonicalPostField,
-            "reposted canonical post",
-        )
-    val canonicalPostClass = context.mutableClassDefBy(postModels.canonicalPostDescriptor)
-    val canonicalPostMediaAccessor =
-        canonicalPostClass.resolveFieldAccessor(
-            mediaModels.canonicalPostMediaField,
-            "canonical post media",
-        )
+    val contextualCanonicalPostField = postModels.contextualCanonicalPostField
+    val contextualRepostedPostField = postModels.contextualRepostedPostField
+    val repostedCanonicalPostField = postModels.repostedCanonicalPostField
+    val canonicalPostMediaField = mediaModels.canonicalPostMediaField
 
     val presenterClass = context.mutableClassDefBy(barModels.inlineActionBarDescriptor)
     val presenterPostFields = presenterClass.fields.filter { field ->
@@ -483,7 +370,7 @@ private fun patchPostModelBridges(
         0,
         """
             check-cast p0, ${postModels.contextualPostDescriptor}
-            ${contextualCanonicalPostAccessor.readObject("p0")}
+            iget-object p0, p0, $contextualCanonicalPostField
             return-object p0
         """.trimIndent(),
     )
@@ -491,7 +378,7 @@ private fun patchPostModelBridges(
         0,
         """
             check-cast p0, ${postModels.canonicalPostDescriptor}
-            ${canonicalPostMediaAccessor.readObject("p0")}
+            iget-object p0, p0, $canonicalPostMediaField
             return-object p0
         """.trimIndent(),
     )
@@ -499,7 +386,7 @@ private fun patchPostModelBridges(
         0,
         """
             check-cast p0, ${postModels.contextualPostDescriptor}
-            ${contextualRepostedPostAccessor.readObject("p0")}
+            iget-object p0, p0, $contextualRepostedPostField
             return-object p0
         """.trimIndent(),
     )
@@ -510,7 +397,7 @@ private fun patchPostModelBridges(
         0,
         """
             check-cast p0, ${postModels.contextualRepostedPostField.type}
-            ${repostedCanonicalPostAccessor.readObject("p0")}
+            iget-object p0, p0, $repostedCanonicalPostField
             return-object p0
         """.trimIndent(),
     )
