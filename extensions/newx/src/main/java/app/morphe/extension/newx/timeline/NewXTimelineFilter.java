@@ -10,6 +10,7 @@ import java.util.Set;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.newx.postfilter.PostFilterMatcher;
 import app.morphe.extension.newx.postfilter.PostFilterRuleStore;
+import app.morphe.extension.newx.settings.SettingsRegistry;
 
 public final class NewXTimelineFilter {
 
@@ -98,6 +99,9 @@ public final class NewXTimelineFilter {
         }
     };
 
+    public static final String FILTER_PROMOTED_TRENDS_SETTING = "newx.content.trends.filter_promoted_trends";
+    public static final String FILTER_EVENT_SUMMARIES_SETTING = "newx.content.trends.filter_event_summaries";
+
     private NewXTimelineFilter() {
     }
 
@@ -106,7 +110,39 @@ public final class NewXTimelineFilter {
     }
 
     static Object filterPromotedItems(Object timelineItems, boolean enabled, TimelineModelAccess modelAccess) {
-        return filterTimelineItems(timelineItems, enabled, false, null, modelAccess);
+        boolean filterPromotedTrends = SettingsRegistry.getBooleanOrDefault(FILTER_PROMOTED_TRENDS_SETTING, false);
+        boolean filterEventSummaries = SettingsRegistry.getBooleanOrDefault(FILTER_EVENT_SUMMARIES_SETTING, false);
+        return filterTimelineItems(
+                timelineItems,
+                enabled,
+                false,
+                null,
+                Collections.emptySet(),
+                false,
+                filterPromotedTrends,
+                filterEventSummaries,
+                modelAccess
+        );
+    }
+
+    static Object filterPromotedItems(
+            Object timelineItems,
+            boolean enabled,
+            boolean filterPromotedTrends,
+            boolean filterEventSummaries,
+            TimelineModelAccess modelAccess
+    ) {
+        return filterTimelineItems(
+                timelineItems,
+                enabled,
+                false,
+                null,
+                Collections.emptySet(),
+                false,
+                filterPromotedTrends,
+                filterEventSummaries,
+                modelAccess
+        );
     }
 
     public static Object filterDiscoverMore(Object timelineItems, boolean enabled) {
@@ -207,6 +243,8 @@ public final class NewXTimelineFilter {
                 ruleSnapshot,
                 Collections.emptySet(),
                 false,
+                false,
+                false,
                 modelAccess
         );
     }
@@ -220,12 +258,38 @@ public final class NewXTimelineFilter {
             boolean hideDiscoverMore,
             TimelineModelAccess modelAccess
     ) {
+        return filterTimelineItems(
+                timelineItems,
+                filterPromotedItems,
+                hideWhoToFollow,
+                ruleSnapshot,
+                aiSourcesToHide,
+                hideDiscoverMore,
+                false,
+                false,
+                modelAccess
+        );
+    }
+
+    private static Object filterTimelineItems(
+            Object timelineItems,
+            boolean filterPromotedItems,
+            boolean hideWhoToFollow,
+            PostFilterRuleStore.Snapshot ruleSnapshot,
+            Set<String> aiSourcesToHide,
+            boolean hideDiscoverMore,
+            boolean filterPromotedTrends,
+            boolean filterEventSummaries,
+            TimelineModelAccess modelAccess
+    ) {
         if (timelineItems == null) return null;
         if (!filterPromotedItems
                 && !hideWhoToFollow
                 && (ruleSnapshot == null || !ruleSnapshot.hasEnabledRules())
                 && (aiSourcesToHide == null || aiSourcesToHide.isEmpty())
-                && !hideDiscoverMore) {
+                && !hideDiscoverMore
+                && !filterPromotedTrends
+                && !filterEventSummaries) {
             return timelineItems;
         }
         if (!(timelineItems instanceof Iterable<?> iterable)) return timelineItems;
@@ -243,6 +307,8 @@ public final class NewXTimelineFilter {
                         ruleSnapshot,
                         aiSourcesToHide,
                         hideDiscoverMore,
+                        filterPromotedTrends,
+                        filterEventSummaries,
                         modelAccess
                 );
                 boolean changed = result.remove || result.item != original;
@@ -283,6 +349,8 @@ public final class NewXTimelineFilter {
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
             boolean hideDiscoverMore,
+            boolean filterPromotedTrends,
+            boolean filterEventSummaries,
             TimelineModelAccess modelAccess
     ) {
         if (original == null) return FilterResult.keep(null);
@@ -295,6 +363,8 @@ public final class NewXTimelineFilter {
                         ruleSnapshot,
                         aiSourcesToHide,
                         hideDiscoverMore,
+                        filterPromotedTrends,
+                        filterEventSummaries,
                         modelAccess
                 );
             }
@@ -305,6 +375,8 @@ public final class NewXTimelineFilter {
                     ruleSnapshot,
                     aiSourcesToHide,
                     hideDiscoverMore,
+                    filterPromotedTrends,
+                    filterEventSummaries,
                     modelAccess
             );
         } catch (RuntimeException exception) {
@@ -320,6 +392,8 @@ public final class NewXTimelineFilter {
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
             boolean hideDiscoverMore,
+            boolean filterPromotedTrends,
+            boolean filterEventSummaries,
             TimelineModelAccess modelAccess
     ) {
         Object originalItem = modelAccess.getModuleItem(wrapper);
@@ -330,6 +404,8 @@ public final class NewXTimelineFilter {
                 ruleSnapshot,
                 aiSourcesToHide,
                 hideDiscoverMore,
+                filterPromotedTrends,
+                filterEventSummaries,
                 modelAccess
         );
         if (result.remove) return result;
@@ -348,6 +424,8 @@ public final class NewXTimelineFilter {
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
             boolean hideDiscoverMore,
+            boolean filterPromotedTrends,
+            boolean filterEventSummaries,
             TimelineModelAccess modelAccess
     ) {
         if (item == null) return FilterResult.keep(null);
@@ -358,6 +436,17 @@ public final class NewXTimelineFilter {
                 logDiagnostic("promoted-item check", exception, "item=" + describeValue(item));
                 throw exception;
             }
+        }
+        if (filterPromotedTrends) {
+            try {
+                if (isPromotedTrend(item, modelAccess)) return FilterResult.remove();
+            } catch (RuntimeException exception) {
+                logDiagnostic("promoted-trend check", exception, "item=" + describeValue(item));
+                throw exception;
+            }
+        }
+        if (filterEventSummaries && modelAccess.isEventSummary(item)) {
+            return FilterResult.remove();
         }
         if (modelAccess.isPost(item)) {
             try {
@@ -380,6 +469,8 @@ public final class NewXTimelineFilter {
                     ruleSnapshot,
                     aiSourcesToHide,
                     hideDiscoverMore,
+                    filterPromotedTrends,
+                    filterEventSummaries,
                     modelAccess
             );
         }
@@ -437,6 +528,8 @@ public final class NewXTimelineFilter {
             PostFilterRuleStore.Snapshot ruleSnapshot,
             Set<String> aiSourcesToHide,
             boolean hideDiscoverMore,
+            boolean filterPromotedTrends,
+            boolean filterEventSummaries,
             TimelineModelAccess modelAccess
     ) {
         String entryId = modelAccess.getModuleEntryId(module);
@@ -473,6 +566,8 @@ public final class NewXTimelineFilter {
                         ruleSnapshot,
                         aiSourcesToHide,
                         hideDiscoverMore,
+                        filterPromotedTrends,
+                        filterEventSummaries,
                         modelAccess
                 );
             } catch (RuntimeException exception) {
@@ -606,18 +701,19 @@ public final class NewXTimelineFilter {
         } else if (modelAccess.isModule(item)) {
             entryId = modelAccess.getModuleEntryId(item);
             eventInfo = modelAccess.getModuleClientEventInfo(item);
-        } else if (modelAccess.isTrend(item)) {
-            entryId = modelAccess.getTrendEntryId(item);
-            eventInfo = modelAccess.getTrendClientEventInfo(item);
-            if (modelAccess.getTrendPromotedMetadata(item) != null) return true;
-            if (modelAccess.getTrendPromotedDescription(item) != null) return true;
-        } else if (modelAccess.isEventSummary(item)) {
-            entryId = modelAccess.getEventSummaryEntryId(item);
-            eventInfo = modelAccess.getEventSummaryClientEventInfo(item);
-            if (modelAccess.getEventSummaryPromotedMetadata(item) != null) return true;
         }
         if (isPromotedEntryId(entryId)) return true;
 
+        return eventInfo != null && modelAccess.isPromotedClientEventInfo(eventInfo);
+    }
+
+    private static boolean isPromotedTrend(Object item, TimelineModelAccess modelAccess) {
+        if (!modelAccess.isTrend(item)) return false;
+        if (modelAccess.getTrendPromotedMetadata(item) != null) return true;
+        if (modelAccess.getTrendPromotedDescription(item) != null) return true;
+        String entryId = modelAccess.getTrendEntryId(item);
+        if (isPromotedEntryId(entryId)) return true;
+        Object eventInfo = modelAccess.getTrendClientEventInfo(item);
         return eventInfo != null && modelAccess.isPromotedClientEventInfo(eventInfo);
     }
 
@@ -625,7 +721,7 @@ public final class NewXTimelineFilter {
         if (entryId == null) return false;
         if (entryId.contains("promoted")) return true;
         if (entryId.startsWith("ad-") || entryId.contains("-ad-")) return true;
-        if (entryId.contains("superhero") || entryId.contains("eventsummary") || entryId.contains("rtb")) return true;
+        if (entryId.contains("superhero") || entryId.contains("rtb")) return true;
         return false;
     }
 

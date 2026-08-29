@@ -117,7 +117,7 @@ public class NewXTimelineFilterTest {
     }
 
     @Test
-    public void removesPromotedTrendByMetadataAndDescription() {
+    public void removesPromotedTrendWhenTrendFilterEnabled() {
         FakeTrend promotedTrend1 = new FakeTrend();
         promotedTrend1.entryId = "trend-1";
         promotedTrend1.promotedMetadata = new Object();
@@ -130,25 +130,43 @@ public class NewXTimelineFilterTest {
         organicTrend.entryId = "trend-3";
 
         List<Object> input = items(promotedTrend1, promotedTrend2, organicTrend);
-        Object filtered = NewXTimelineFilter.filterPromotedItems(input, true, MODELS);
+        Object filtered = NewXTimelineFilter.filterPromotedItems(input, true, true, false, MODELS);
         assertEquals(List.of(organicTrend), filtered);
     }
 
     @Test
-    public void removesPromotedEventSummaryAndExploreAdEntryIds() {
-        FakeEventSummary promotedEvent = new FakeEventSummary();
-        promotedEvent.entryId = "eventsummary-1";
-        promotedEvent.promotedMetadata = new Object();
+    public void keepsPromotedTrendWhenTrendFilterDisabled() {
+        FakeTrend promotedTrend = new FakeTrend();
+        promotedTrend.entryId = "trend-1";
+        promotedTrend.promotedMetadata = new Object();
 
-        FakeEventSummary superheroAd = new FakeEventSummary();
-        superheroAd.entryId = "superhero-spotlight-123";
+        List<Object> input = items(promotedTrend);
+        Object filtered = NewXTimelineFilter.filterPromotedItems(input, true, false, false, MODELS);
+        assertEquals(input, filtered);
+    }
 
-        FakeEventSummary organicEvent = new FakeEventSummary();
-        organicEvent.entryId = "organic-event-456";
+    @Test
+    public void removesEventSummariesWhenEventSummaryFilterEnabled() {
+        FakeEventSummary eventSummary = new FakeEventSummary();
+        eventSummary.entryId = "eventsummary-123";
 
-        List<Object> input = items(promotedEvent, superheroAd, organicEvent);
-        Object filtered = NewXTimelineFilter.filterPromotedItems(input, true, MODELS);
-        assertEquals(List.of(organicEvent), filtered);
+        FakePost post = post("kept");
+        List<Object> input = items(eventSummary, post);
+
+        Object filtered = NewXTimelineFilter.filterPromotedItems(input, true, false, true, MODELS);
+        assertEquals(List.of(post), filtered);
+    }
+
+    @Test
+    public void keepsOrganicEventSummariesWhenEventSummaryFilterDisabled() {
+        FakeEventSummary eventSummary = new FakeEventSummary();
+        eventSummary.entryId = "eventsummary-123";
+
+        FakePost post = post("kept");
+        List<Object> input = items(eventSummary, post);
+
+        Object filtered = NewXTimelineFilter.filterPromotedItems(input, true, false, false, MODELS);
+        assertEquals(input, filtered);
     }
 
     @Test

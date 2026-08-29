@@ -35,6 +35,20 @@ val newXHideAdsPatch =
                             defaultValue = true,
                         )
                     }
+                    group(Groups.TRENDS) {
+                        toggle(
+                            id = "newx.content.trends.filter_promoted_trends",
+                            strings = settingStrings("piko_newx_filter_promoted_trends"),
+                            order = 100,
+                            defaultValue = false,
+                        )
+                        toggle(
+                            id = "newx.content.trends.filter_event_summaries",
+                            strings = settingStrings("piko_newx_filter_event_summaries"),
+                            order = 200,
+                            defaultValue = false,
+                        )
+                    }
                 }
             }
 

@@ -47,6 +47,12 @@
     <string name="piko_newx_default_reply_sorting_summary">Default reply-sort order for tweet detail (Relevance, Recency, or Likes)</string>
     <string name="piko_newx_group_content_filtering_title">Content filtering</string>
     <string name="piko_newx_group_content_filtering_summary">Control promotions, recommendations, AI-generated posts, and keyword filters</string>
+    <string name="piko_newx_group_trends_title">Trends and Explore</string>
+    <string name="piko_newx_group_trends_summary">Control trends, promoted trends, and event summaries in Explore</string>
+    <string name="piko_newx_filter_promoted_trends_title">Filter promoted trends</string>
+    <string name="piko_newx_filter_promoted_trends_summary">Removes promoted and sponsored trends from Explore and Search</string>
+    <string name="piko_newx_filter_event_summaries_title">Filter event summaries</string>
+    <string name="piko_newx_filter_event_summaries_summary">Removes event summary and news cards from Explore</string>
     <string name="piko_newx_topic_filtering_title">For You topic filter</string>
     <string name="piko_newx_topic_filtering_summary">Choose topics discovered from X at runtime</string>
     <string name="piko_newx_topic_filter_enabled_title">Enable topic filtering</string>
