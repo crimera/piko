@@ -20,7 +20,7 @@ fi
 # BETA PATH: current default input for future NewX updates.
 # ALPHA PATH: pass the 12.17.3-alpha.01 APK explicitly while compatibility is retained.
 # TODO: Remove the alpha invocation note when the alpha target is deprecated.
-DEFAULT_APK="../twitter-analysis/apks/twitter_12.19.1-release.0-merged.apk"
+DEFAULT_APK="../twitter-analysis/apks/X_com,twitter,android_12,20,5-prod,01.apks"
 OUTPUT_APK="$HOME/Downloads/piko-twitter-patched.apk"
 APK="$DEFAULT_APK"
 FLAGS=()
@@ -45,32 +45,22 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Remove ads" \
   -e "NewX: Browse tweet object" \
   -e "NewX: Share post as image" \
-  -e "NewX: Disable automatic timeline refresh" \
-  -e "NewX: Restore timeline position" \
   -e "NewX: Customize inline actions" \
   -e "NewX: Unlock downloads" \
   -e "NewX: Hide new posts pill" \
-  -e "NewX: Filter posts by keyword" \
   -e "NewX: Customize navigation bar items" \
   -e "NewX: Hide premium upsell" \
   -e "NewX: Hide compose button" \
   -e "NewX: Customize drawer items" \
-  -e "NewX: Inline download button" \
   -e "NewX: Hide Spaces bar" \
   -e "NewX: Feature switch overrides" \
   -e "NewX: Show sensitive media" \
-  -e "NewX: Dynamic color" \
-  -e "NewX: Customize default reply sorting" \
   -e "NewX: Hide Discover more" \
   -e "NewX: Hide who to follow" \
   -e "NewX: Hide AI-generated posts" \
   -e "NewX: Customize default media tab" \
   -e "NewX: Custom font" \
-  -e "NewX: Open canonical URLs" \
-  -e "NewX: Filter For You by topic" \
   -e "NewX: Custom sharing domain" \
-  -e "NewX: Force highest video/audio quality" \
-  -e "NewX: Disable video player scrolling" \
   --striplibs=arm64-v8a \
   --force \
   -o "$OUTPUT_APK" \

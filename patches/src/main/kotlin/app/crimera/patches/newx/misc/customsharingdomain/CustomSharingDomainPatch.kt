@@ -2,21 +2,22 @@ package app.crimera.patches.newx.misc.customsharingdomain
 
 import app.crimera.patches.newx.misc.extension.newXExtensionPatch
 import app.crimera.patches.newx.settings.Categories
-import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXTextInput
+import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
-import app.morphe.patcher.methodCall
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
+import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
+import com.android.tools.smali.dexlib2.iface.reference.FieldReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val SHARE_URL_RESOLVER_DESCRIPTOR =
     "Lapp/morphe/extension/newx/misc/ShareUrlResolver;"
@@ -24,47 +25,18 @@ private const val CHANGE_DOMAIN_METHOD =
     "$SHARE_URL_RESOLVER_DESCRIPTOR->changeDomain(Ljava/lang/String;)Ljava/lang/String;"
 private const val CUSTOM_DOMAIN_VALIDATOR_DESCRIPTOR =
     "Lapp/morphe/extension/newx/misc/CustomSharingDomainValidator;"
+private const val SHARE_SHEET_DESCRIPTOR_PREFIX = "Lcom/x/dms/components/sharesheet/"
+private const val SHARE_STATUS_URL_PREFIX = "https://x.com/i/status/"
+private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 
 /**
- * Session-token share-link builder (m57188a in 12.18.0). The share targets funnel their link
- * builds through it: it parses the URL, strips/re-appends the `s`/`t` share parameters, and
- * returns the final share URL. This is the NewX counterpart of the legacy Twitter
- * AddSessionTokenFingerprint; the parameter-name strings are const-strings from the Kotlin
- * null-checks, not debug metadata.
+ * Share-sheet constructor that owns the final URL field. The status URL is a stable semantic
+ * anchor; the void return shape identifies the share-sheet constructor.
  */
-internal object AddSessionTokenFingerprint : Fingerprint(
-    parameters =
-        listOf(
-            "Ljava/lang/String;",
-            "L",
-            "Ljava/lang/String;",
-        ),
-    returnType = "Ljava/lang/String;",
-    strings =
-        listOf(
-            "<this>",
-            "shareParam",
-            "sessionToken",
-        ),
-)
-
-/**
- * URL consumers owned by the Compose share sheet. Do not hook the shared model getter: quote-post
- * composition also calls it and sends the rewritten host as `quotedPostUrl` to the post API.
- * The share sheet has its own URL consumers, so rewrite only these call sites.
- */
-internal object ShareSheetPostUrlFingerprint : Fingerprint(
-    definingClass = "Lcom/x/dms/components/sharesheet/",
-    filters =
-        listOf(
-            methodCall(
-                definingClass = "Lcom/x/models/",
-                name = "getUrl",
-                parameters = emptyList(),
-                returnType = "Ljava/lang/String;",
-            ),
-            string("https://x.com/i/status/"),
-        ),
+internal object ShareSheetUrlConstructorFingerprint : Fingerprint(
+    definingClass = SHARE_SHEET_DESCRIPTOR_PREFIX,
+    returnType = "V",
+    filters = listOf(string(SHARE_STATUS_URL_PREFIX)),
 )
 
 @Suppress("unused")
@@ -87,86 +59,92 @@ val newXCustomSharingDomainPatch =
         dependsOn(newXExtensionPatch)
 
         execute {
-            hookShareLinkBuilder()
             hookShareSheetPostUrls()
         }
     }
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
-private fun hookShareLinkBuilder() {
-    val matches = AddSessionTokenFingerprint.scopedMatchAll()
+private fun hookShareSheetPostUrls() {
+    val matches = ShareSheetUrlConstructorFingerprint.scopedMatchAll()
     if (matches.size != 1) {
         throw PatchException(
-            "Expected one NewX share-link builder match, found ${matches.size}: " +
+            "Expected one NewX share-sheet URL constructor match, found ${matches.size}: " +
                 matches.joinToString { it.originalMethod.toString() },
         )
     }
 
-    matches.single().method.addInstructions(
-        0,
-        """
-        invoke-static {p0}, $CHANGE_DOMAIN_METHOD
-        move-result-object p0
-        """.trimIndent(),
-    )
+    matches.forEach { match -> hookShareSheetUrlConstructor(match.method) }
 }
 
-context(_: app.morphe.patcher.patch.BytecodePatchContext)
-private fun hookShareSheetPostUrls() {
-    val matches = ShareSheetPostUrlFingerprint.scopedMatchAll()
-    if (matches.size != 2) {
+private fun hookShareSheetUrlConstructor(method: MutableMethod) {
+    val statusResultIndices = method.findStatusUrlResultIndices()
+    if (statusResultIndices.size != 1) {
         throw PatchException(
-            "Expected two NewX share-sheet URL consumer matches, found ${matches.size}: " +
-                matches.joinToString { it.originalMethod.toString() },
+            "Expected one status URL result in NewX share-sheet constructor $method, found " +
+                statusResultIndices.size,
         )
     }
 
-    matches.forEach { match ->
-        val method = match.method
-        val urlCallIndices =
-            method.instructions.mapIndexedNotNull { index, instruction ->
-                val reference = instruction.getReference<MethodReference>() ?: return@mapIndexedNotNull null
-                if (
-                    instruction.opcode != Opcode.INVOKE_INTERFACE &&
-                        instruction.opcode != Opcode.INVOKE_INTERFACE_RANGE &&
-                        instruction.opcode != Opcode.INVOKE_VIRTUAL &&
-                        instruction.opcode != Opcode.INVOKE_VIRTUAL_RANGE
-                ) {
-                    return@mapIndexedNotNull null
-                }
-                if (
-                    !reference.definingClass.startsWith("Lcom/x/models/") ||
-                        reference.name != "getUrl" ||
-                        reference.parameterTypes.isNotEmpty() ||
-                        reference.returnType != "Ljava/lang/String;"
-                ) {
-                    return@mapIndexedNotNull null
-                }
-                index
+    val statusResultIndex = statusResultIndices.single()
+    val urlFieldStoreIndices =
+        method.instructions.mapIndexedNotNull { index, instruction ->
+            if (index <= statusResultIndex || instruction.opcode != Opcode.IPUT_OBJECT) {
+                return@mapIndexedNotNull null
             }
-        if (urlCallIndices.isEmpty()) {
-            throw PatchException("Expected a NewX share-sheet post URL call in $method")
+            val field = instruction.getReference<FieldReference>() ?: return@mapIndexedNotNull null
+            if (field.definingClass != method.definingClass || field.type != STRING_DESCRIPTOR) {
+                return@mapIndexedNotNull null
+            }
+            index
         }
+    if (urlFieldStoreIndices.size != 1) {
+        throw PatchException(
+            "Expected one final share URL field store in NewX share-sheet constructor $method, found " +
+                urlFieldStoreIndices.size,
+        )
+    }
 
-        urlCallIndices.asReversed().forEach { callIndex ->
-            val resultIndex = callIndex + 1
-            val resultInstruction = method.instructions.getOrNull(resultIndex)
-            if (resultInstruction?.opcode != Opcode.MOVE_RESULT_OBJECT) {
-                throw PatchException(
-                    "Expected getUrl() to be followed by move-result-object in $method at " +
-                        "instruction $callIndex",
-                )
-            }
-            val register = (resultInstruction as OneRegisterInstruction).registerA
-            val invokeOpcode = if (register <= 15) "invoke-static" else "invoke-static/range"
-            val registerRange = if (register <= 15) "{v$register}" else "{v$register .. v$register}"
-            method.addInstructions(
-                resultIndex + 1,
-                """
-                $invokeOpcode $registerRange, $CHANGE_DOMAIN_METHOD
-                move-result-object v$register
-                """.trimIndent(),
+    val fieldStoreIndex = urlFieldStoreIndices.single()
+    val valueRegister =
+        (method.instructions[fieldStoreIndex] as? TwoRegisterInstruction)?.registerA
+            ?: throw PatchException("Expected a two-register share URL field store in $method")
+    method.addDomainRewrite(fieldStoreIndex, valueRegister)
+}
+
+private fun MutableMethod.findStatusUrlResultIndices(): List<Int> =
+    instructions.mapIndexedNotNull { index, instruction ->
+        if (instruction.opcode != Opcode.CONST_STRING && instruction.opcode != Opcode.CONST_STRING_JUMBO) {
+            return@mapIndexedNotNull null
+        }
+        val reference = instruction.getReference<StringReference>() ?: return@mapIndexedNotNull null
+        if (reference.string != SHARE_STATUS_URL_PREFIX) return@mapIndexedNotNull null
+
+        val builderIndex = index + 1
+        val builderOpcode = instructions.getOrNull(builderIndex)?.opcode
+        if (builderOpcode != Opcode.INVOKE_STATIC && builderOpcode != Opcode.INVOKE_STATIC_RANGE) {
+            throw PatchException(
+                "Expected status URL prefix to be followed by a static builder invoke in $this at " +
+                    "instruction $index",
             )
         }
+        val resultIndex = index + 2
+        if (instructions.getOrNull(resultIndex)?.opcode != Opcode.MOVE_RESULT_OBJECT) {
+            throw PatchException(
+                "Expected status URL builder to be followed by move-result-object in $this at " +
+                    "instruction $builderIndex",
+            )
+        }
+        resultIndex
     }
+
+private fun MutableMethod.addDomainRewrite(instructionIndex: Int, register: Int) {
+    val invokeOpcode = if (register <= 15) "invoke-static" else "invoke-static/range"
+    val registerRange = if (register <= 15) "{v$register}" else "{v$register .. v$register}"
+    addInstructions(
+        instructionIndex,
+        """
+        $invokeOpcode $registerRange, $CHANGE_DOMAIN_METHOD
+        move-result-object v$register
+        """.trimIndent(),
+    )
 }
