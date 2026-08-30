@@ -66,6 +66,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Customize default reply sorting" \
   -e "NewX: Filter posts by keyword" \
   -e "NewX: Force highest video/audio quality" \
+  -e "NewX: Filter For You by topic" \
   --striplibs=arm64-v8a \
   --force \
   -o "$OUTPUT_APK" \

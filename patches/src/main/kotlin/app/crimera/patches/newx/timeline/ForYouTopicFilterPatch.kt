@@ -29,12 +29,12 @@ import com.android.tools.smali.dexlib2.iface.instruction.Instruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 
 private const val OBJECT_DESCRIPTOR = "Ljava/lang/Object;"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val ARRAY_LIST_DESCRIPTOR = "Ljava/util/ArrayList;"
-private const val TIMELINE_TYPE_DESCRIPTOR = "Lcom/x/models/timelines/TimelineType;"
 private const val HOME_TIMELINE_PACKAGE = "Lcom/x/android/main/"
 private const val HOME_MODELS_PACKAGE = "Lcom/x/models/"
 private const val HOME_FILTER_GROUP_FILTER_TYPE_LABEL = "HomeFilterGroup(filterType="
@@ -193,12 +193,6 @@ private fun resolveForYouRequestTarget(): ResolvedForYouRequestTarget {
     }
 
     val queryClass = queryMatches.single().originalClassDef
-    val queryToString = queryClass.methods.singleOrNull { method ->
-        method.name == "toString" &&
-            method.parameterTypes.isEmpty() &&
-            method.returnType == STRING_DESCRIPTOR
-    } ?: throw PatchException("NewX HomeTimeline query has no toString(): $queryClass")
-    val topicField = queryToString.fieldForToStringLabel(", topic_ids=")
     val queryDocuments = queryClass.methods.filter { method ->
         method.returnType == STRING_DESCRIPTOR && method.containsStringFragment("query HomeTimeline(")
     }
@@ -208,14 +202,18 @@ private fun resolveForYouRequestTarget(): ResolvedForYouRequestTarget {
     if (queryDocuments.size != 1 ||
         !queryDocuments.single().containsStringFragment("home_timeline_urt") ||
         !queryDocuments.single().containsStringFragment("topic_ids:") ||
-        topicWriters.size != 1 ||
-        !topicWriters.single().containsFieldReference(topicField)) {
+        topicWriters.size != 1) {
         throw PatchException(
-            "NewX HomeTimeline query does not serialize the expected topic_ids field: " +
+            "NewX HomeTimeline query does not serialize the expected topic_ids argument: " +
                 "documents=${queryDocuments.joinToString { it.toString() }}, " +
                 "writers=${topicWriters.joinToString { it.toString() }}",
         )
     }
+    val topicField = topicWriters.single().fieldForSerializedArgument(
+        argumentName = "topic_ids",
+        ownerDescriptor = queryClass.type,
+        expectedFieldType = LIST_DESCRIPTOR,
+    )
     val constructorCandidates =
         queryClass.methods.mapNotNull { constructor ->
             if (constructor.name != "<init>" || constructor.returnType != "V") return@mapNotNull null
@@ -244,9 +242,7 @@ private fun resolveForYouRequestTarget(): ResolvedForYouRequestTarget {
                     string("requestType"),
                     fieldAccess(
                         opcode = Opcode.SGET_OBJECT,
-                        definingClass = TIMELINE_TYPE_DESCRIPTOR,
                         name = "FOR_YOU",
-                        type = TIMELINE_TYPE_DESCRIPTOR,
                     ),
                     methodCall(
                         definingClass = queryClass.type,
@@ -345,10 +341,42 @@ private fun Method.containsStringFragment(fragment: String): Boolean =
             ?.contains(fragment) == true
     } == true
 
-private fun Method.containsFieldReference(field: FieldReference): Boolean =
-    implementation?.instructions?.any { instruction ->
-        instruction.getReference<FieldReference>()?.toString() == field.toString()
-    } == true
+private fun Method.fieldForSerializedArgument(
+    argumentName: String,
+    ownerDescriptor: String,
+    expectedFieldType: String,
+): FieldReference {
+    val instructions = implementation?.instructions?.toList().orEmpty()
+    val argumentIndices = instructions.withIndex().filter { (_, instruction) ->
+        instruction.getReference<StringReference>()?.string == argumentName
+    }
+    if (argumentIndices.size != 1) {
+        throw PatchException(
+            "Expected one NewX serialized argument '$argumentName' in $this, found " +
+                "${argumentIndices.size}",
+        )
+    }
+
+    val argumentIndex = argumentIndices.single().index
+    val nextArgumentIndex = instructions.withIndex()
+        .drop(argumentIndex + 1)
+        .firstOrNull { (_, instruction) ->
+            instruction.getReference<StringReference>() != null
+        }?.index ?: instructions.size
+    val fields = instructions.subList(argumentIndex + 1, nextArgumentIndex)
+        .mapNotNull { instruction ->
+            if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
+            instruction.getReference<FieldReference>()?.takeIf { field ->
+                field.definingClass == ownerDescriptor && field.type == expectedFieldType
+            }
+        }
+        .distinctBy(FieldReference::toString)
+    if (fields.size == 1) return fields.single()
+    throw PatchException(
+        "Expected one NewX serialized field for '$argumentName' in $this, found " +
+            "${fields.size}: ${fields.joinToString()}",
+    )
+}
 
 private fun MethodReference.matches(method: Method): Boolean =
     definingClass == method.definingClass &&
