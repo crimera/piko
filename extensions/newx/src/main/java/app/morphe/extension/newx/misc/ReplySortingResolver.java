@@ -3,7 +3,6 @@ package app.morphe.extension.newx.misc;
 import androidx.annotation.Nullable;
 
 import app.morphe.extension.shared.Logger;
-import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.settings.preference.PikoSharedPrefCategory;
 import app.morphe.extension.newx.settings.SettingsRegistry;
 
@@ -41,13 +40,12 @@ public final class ReplySortingResolver {
             }
 
             String mode = getDefault();
-            Object fallback = null;
             for (Object constant : constants) {
-                if (!(constant instanceof Enum<?> enumConstant)) continue;
-                if (DEFAULT_FALLBACK.equalsIgnoreCase(enumConstant.name())) fallback = constant;
-                if (enumConstant.name().equalsIgnoreCase(mode)) return constant;
+                if (constant instanceof Enum<?> enumConstant
+                        && enumConstant.name().equalsIgnoreCase(mode)) {
+                    return constant;
+                }
             }
-            if (fallback != null) return fallback;
 
             throw new IllegalStateException(
                     "Enum " + enumClass.getName() + " has no reply sorting mode: " + mode

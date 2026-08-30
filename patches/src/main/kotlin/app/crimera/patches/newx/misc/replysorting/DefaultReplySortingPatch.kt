@@ -18,13 +18,11 @@ import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.newx.utils.Constants.REPLY_SORTING_RESOLVER_DESCRIPTOR
 import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
-import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.fieldAccess
 import app.morphe.patcher.patch.PatchException
-import app.morphe.patcher.opcode
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.util.getReference
@@ -35,6 +33,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private fun isRelevanceSget(instruction: Instruction): Boolean {
@@ -44,23 +43,10 @@ private fun isRelevanceSget(instruction: Instruction): Boolean {
 }
 
 /**
- * Targets the NewX Compose post detail timeline repository initialization, where
- * the initial ranking mode enum value is fetched for the factory call.
+ * Targets the NewX Compose post-detail timeline repository initialization that seeds
+ * TimelineRankingMode.Relevance before the repository factory call.
  */
-// ALPHA PATH: explicit rankingMode label in the repository initializer.
-// TODO: Remove this fingerprint when alpha compatibility is deprecated.
 private object NewXComposeReplySortingFingerprint : Fingerprint(
-    definingClass = "Lcom/x/postdetail/",
-    filters =
-        listOf(
-            string("rankingMode"),
-            string("timelineRepository"),
-        ),
-)
-
-/** Supports the beta path where the ranking parameter name is optimized away. */
-// BETA PATH: ranking parameter name optimized away.
-private object NewXComposeReplySortingEnumFingerprint : Fingerprint(
     definingClass = "Lcom/x/postdetail/",
     filters =
         listOf(
@@ -68,58 +54,37 @@ private object NewXComposeReplySortingEnumFingerprint : Fingerprint(
                 opcode = Opcode.SGET_OBJECT,
                 name = "Relevance",
             ),
+            string("rankingMode"),
             string("timelineRepository"),
         ),
 )
 
 /**
- * Targets the NewX Compose reply sorting selection handler callback where user changes
- * the reply sorting mode from the bottom sheet dialog.
+ * Targets the synthetic FunctionReference that handles a reply-sorting choice from the sheet.
+ * Both supported builds place this callback in the payments transaction package.
  */
-// ALPHA PATH: selection callback under the photo-editor owner.
-// TODO: Remove this owner fingerprint when alpha compatibility is deprecated.
 private object NewXComposeReplySortingSelectionFingerprint : Fingerprint(
-    // R8 places this synthetic callback in the preserved photo-editor owner package.
-    // Do not search every FunctionReferenceImpl in the APK: those are unrelated callbacks.
-    definingClass = "Lcom/x/photoeditor/",
+    definingClass = "Lcom/x/payments/transaction/",
     returnType = "Ljava/lang/Object;",
     parameters = listOf("Ljava/lang/Object;"),
-    custom = { _, classDef ->
+    custom = { method, classDef ->
         classDef.superclass == "Lkotlin/jvm/internal/FunctionReferenceImpl;" &&
-            classDef.interfaces.contains("Lkotlin/jvm/functions/Function1;")
+            classDef.interfaces.contains("Lkotlin/jvm/functions/Function1;") &&
+            method.implementation?.instructions?.any { instruction ->
+                val reference = (instruction as? ReferenceInstruction)?.reference
+                reference is StringReference && reference.string == "timelineRepository"
+            } == true
     },
     filters =
         listOf(
             string("defaultUrtTimelineComponent"),
-            string("timelineRepository"),
-        ),
-)
-
-/** The beta moves the same callback into the post-detail owner package. */
-// BETA PATH: selection callback moved under the post-detail owner.
-private object NewXComposeReplySortingPostDetailSelectionFingerprint : Fingerprint(
-    definingClass = "Lcom/x/postdetail/",
-    returnType = "Ljava/lang/Object;",
-    parameters = listOf("Ljava/lang/Object;"),
-    custom = { _, classDef ->
-        classDef.superclass == "Lkotlin/jvm/internal/FunctionReferenceImpl;" &&
-            classDef.interfaces.contains("Lkotlin/jvm/functions/Function1;")
-    },
-    filters =
-        listOf(
-            string("defaultUrtTimelineComponent"),
-            string("timelineRepository"),
         ),
 )
 
 /**
- * Targets the Compose reply sorting UI state initializer (the lambda passed to
- * rememberSaveable that seeds the button label and sheet selection with
- * `mutableStateOf(TimelineRankingMode.Relevance)`). Must be seeded with the
- * configured default so the UI matches the repository's ranking mode.
+ * Targets the Compose state initializer that seeds the reply-sorting sheet with
+ * `mutableStateOf(TimelineRankingMode.Relevance)`.
  */
-// ALPHA PATH: separate Relevance-seeded Compose state lambda.
-// TODO: Remove this fingerprint when alpha compatibility is deprecated.
 private object NewXComposeReplySortingUiStateFingerprint : Fingerprint(
     definingClass = "Lcom/x/ui/common/",
     filters =
@@ -132,42 +97,11 @@ private object NewXComposeReplySortingUiStateFingerprint : Fingerprint(
     custom = { method, classDef ->
         val instructions = method.implementation?.instructions
         classDef.interfaces.contains("Lkotlin/jvm/functions/Function0;") &&
-            // mutableStateOf: androidx.compose.runtime static factory taking Object and
-            // returning a runtime state type. Matched on the stable descriptor/package
-            // parts because the short class names (p5, k3) are R8-obfuscated and can
-            // shift between Compose runtime versions.
             instructions?.any { ins ->
                 ins.opcode == Opcode.INVOKE_STATIC &&
                     ((ins as? ReferenceInstruction)?.reference as? MethodReference)
                         ?.definingClass?.startsWith("Landroidx/compose/runtime/") == true
             } == true
-    },
-)
-
-/**
- * Beta keeps the reply-sort selection state in a shared Function0 used by the post action row.
- * Its default branch creates mutableStateOf(TimelineRankingMode.Relevance) through a synthetic
- * selector whose enclosing package can shift across R8 lambda merging passes.
- */
-// BETA PATH: shared synthetic state initializer used by the post action row.
-private object NewXComposeReplySortingBetaUiStateFingerprint : Fingerprint(
-    returnType = "Ljava/lang/Object;",
-    parameters = emptyList(),
-    filters =
-        listOf(
-            fieldAccess(
-                opcode = Opcode.SGET_OBJECT,
-                name = "Relevance",
-            ),
-            opcode(Opcode.INVOKE_STATIC, MatchAfterImmediately()),
-            opcode(Opcode.MOVE_RESULT_OBJECT, MatchAfterImmediately()),
-            opcode(Opcode.RETURN_OBJECT, MatchAfterImmediately()),
-        ),
-    custom = { _, classDef ->
-        classDef.interfaces.contains("Lkotlin/jvm/functions/Function0;") &&
-            classDef.methods.any { method ->
-                method.name == "<init>" && method.parameterTypes == listOf("I")
-            }
     },
 )
 
@@ -206,66 +140,27 @@ val newXDefaultReplySortingPatch =
         }
 
         execute {
-            // Patch the Compose post detail timeline repository initialization
-            val matches =
-                listOf(
-                    // ALPHA PATH: explicit rankingMode initializer.
-                    NewXComposeReplySortingFingerprint.scopedMatchAllOrNull().orEmpty(),
-                    // BETA PATH: optimized-away ranking parameter initializer.
-                    NewXComposeReplySortingEnumFingerprint.scopedMatchAllOrNull().orEmpty(),
-                ).flatten()
-                    .distinctBy { it.originalMethod.toString() }
+            // Patch the Compose post-detail timeline repository initialization.
+            val matches = NewXComposeReplySortingFingerprint.scopedMatchAllOrNull().orEmpty()
             if (matches.size != 1) {
                 throw PatchException(
-                    "Expected one NewX Compose reply sorting initializer across known shapes, " +
-                        "found ${matches.size}: " +
+                    "Expected one NewX Compose reply sorting initializer, found ${matches.size}: " +
                         matches.joinToString { it.originalMethod.toString() },
                 )
             }
 
             val match = matches.single()
             val method = match.method
-            val instructions = method.instructions
-            val firstMatchIndex =
+            val targetSgetIndex =
                 match.instructionMatches.firstOrNull()?.index
                     ?: throw PatchException("Missing reply sorting initializer fingerprint instruction")
-            val firstMatchedInstruction = instructions.getOrNull(firstMatchIndex)
-            if (firstMatchedInstruction?.opcode == Opcode.SGET_OBJECT &&
-                !isRelevanceSget(firstMatchedInstruction)
-            ) {
-                throw PatchException(
-                    "Reply sorting initializer matched an unexpected sget-object: " +
-                        firstMatchedInstruction,
-                )
-            }
-
-            // Alpha matches the semantic label after the enum load; beta matches the exact
-            // TimelineRankingMode.Relevance sget-object. Never fall back to an arbitrary prior
-            // sget-object: beta has a LimitedActionType.Reply load immediately before it.
-            val rankingModeSgetIndices =
-                if (firstMatchedInstruction?.let { isRelevanceSget(it) } == true) {
-                    listOf(firstMatchIndex)
-                } else {
-                    (0 until firstMatchIndex).filter { index ->
-                        isRelevanceSget(instructions[index])
-                    }
-                }
-            if (rankingModeSgetIndices.size != 1) {
-                throw PatchException(
-                    "Expected one TimelineRankingMode.Relevance sget-object in reply sorting " +
-                        "initializer, found ${rankingModeSgetIndices.size}: " +
-                        rankingModeSgetIndices.joinToString(),
-                )
-            }
-
-            val targetSgetIndex = rankingModeSgetIndices.single()
             val sgetInstruction = method.getInstruction<OneRegisterInstruction>(targetSgetIndex)
+            if (!isRelevanceSget(sgetInstruction)) {
+                throw PatchException("Reply sorting initializer did not match Relevance sget-object")
+            }
             val sortRegister = sgetInstruction.registerA
             val fieldRef = sgetInstruction.getReference<FieldReference>()
                 ?: throw PatchException("Missing field reference in reply sorting sget-object")
-            if (fieldRef.name != "Relevance" || fieldRef.type != fieldRef.definingClass) {
-                throw PatchException("Unexpected reply sorting enum field: $fieldRef")
-            }
             val enumClass = fieldRef.definingClass
 
             method.addInstructions(
@@ -278,21 +173,14 @@ val newXDefaultReplySortingPatch =
                 """.trimIndent(),
             )
 
-            // Patch the Compose reply sorting selection handler to remember the last choice
-            val selectionMatches =
-                listOf(
-                    // ALPHA PATH: photo-editor owner.
-                    NewXComposeReplySortingSelectionFingerprint.scopedMatchAllOrNull().orEmpty(),
-                    // BETA PATH: post-detail owner.
-                    NewXComposeReplySortingPostDetailSelectionFingerprint
-                        .scopedMatchAllOrNull()
-                        .orEmpty(),
-                ).flatten()
-                    .distinctBy { it.originalMethod.toString() }
+            // Patch the Compose reply-sorting selection handler to remember the last choice.
+            val selectionMatches = NewXComposeReplySortingSelectionFingerprint
+                .scopedMatchAllOrNull()
+                .orEmpty()
             if (selectionMatches.size != 1) {
                 throw PatchException(
-                    "Expected one NewX Compose reply sorting selection handler across known " +
-                        "owners, found ${selectionMatches.size}: " +
+                    "Expected one NewX Compose reply sorting selection handler, found " +
+                        "${selectionMatches.size}: " +
                         selectionMatches.joinToString { it.originalMethod.toString() },
                 )
             }
@@ -318,10 +206,8 @@ val newXDefaultReplySortingPatch =
                 throw PatchException("Invalid reply sorting selection handler register layout")
             }
 
-            // The beta callback casts p1 directly. Alpha moves p1 into a local before the cast
-            // because the same Function1 method contains a packed switch of unrelated callbacks.
-            // Resolve the cast from parameter data flow, not from the receiver cast before the
-            // null-property guard.
+            // The merged callback may move p1 into a local before casting it. Resolve the cast
+            // from parameter data flow rather than the receiver cast.
             val selectionInstructions = selectionMethod.instructions
             val directParameterCheckCasts =
                 selectionInstructions.withIndex()
@@ -378,20 +264,13 @@ val newXDefaultReplySortingPatch =
 
             // Patch the Compose reply sorting UI state initializer so the button label
             // and sheet selection reflect the configured default instead of Relevance.
-            val uiStateMatches =
-                listOf(
-                    // ALPHA PATH: dedicated Compose state lambda.
-                    NewXComposeReplySortingUiStateFingerprint.scopedMatchAllOrNull().orEmpty(),
-                    // BETA PATH: shared synthetic mutableStateOf initializer.
-                    NewXComposeReplySortingBetaUiStateFingerprint
-                        .scopedMatchAllOrNull()
-                        .orEmpty(),
-                ).flatten()
-                    .distinctBy { it.originalMethod.toString() }
+            val uiStateMatches = NewXComposeReplySortingUiStateFingerprint
+                .scopedMatchAllOrNull()
+                .orEmpty()
             if (uiStateMatches.size != 1) {
                 throw PatchException(
-                    "Expected one NewX Compose reply sorting UI state initializer across " +
-                        "known shapes, found ${uiStateMatches.size}: " +
+                    "Expected one NewX Compose reply sorting UI state initializer, found " +
+                        "${uiStateMatches.size}: " +
                         uiStateMatches.joinToString { it.originalMethod.toString() },
                 )
             }
