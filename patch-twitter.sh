@@ -70,6 +70,7 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Disable video player scrolling" \
   -e "NewX: Disable automatic timeline refresh" \
   -e "NewX: Restore timeline position" \
+  -e "NewX: Open canonical URLs" \
   --striplibs=arm64-v8a \
   --force \
   -o "$OUTPUT_APK" \

@@ -65,14 +65,6 @@ private object CardUrlActionModelFingerprint : Fingerprint(
     filters = listOf(string("Url(url=")),
 )
 
-private object ProfileUserModelFingerprint : Fingerprint(
-    definingClass = "Lcom/x/models/",
-    name = "toString",
-    returnType = STRING_DESCRIPTOR,
-    parameters = emptyList(),
-    filters = listOf(string("ProfileUser(id=")),
-)
-
 private data class UrlEntityFields(
     val type: String,
     val expandedUrl: FieldReference,
@@ -86,14 +78,7 @@ private data class CanonicalUrlMatches(
     val expandedUrlField: FieldReference,
 )
 
-/**
- * Opens expanded URL values in the Compose/URT navigation paths instead of shortened URLs.
- *
- * ALPHA PATH: resolves model fields from stable data-class labels and patches the legacy
- * navigation callbacks. TODO: Remove this path when alpha compatibility is deprecated.
- * BETA PATH: patches the shared text/TimelineUrl helpers, the URT post callback, and legacy
- * card navigation; each still has a short-URL fallback.
- */
+/** Opens expanded URL values in the Compose/URT navigation paths. */
 @Suppress("unused")
 val newXCanonicalUrlsPatch =
     bytecodePatch(
@@ -106,23 +91,10 @@ val newXCanonicalUrlsPatch =
 
         execute {
             val postModels = resolvedNewXPostModels()
-            val contextualPostClass = classDefByOrNull(postModels.contextualPostDescriptor)
-            val isBetaPath = contextualPostClass?.methods?.any { method ->
-                method.name == "getCanonicalPost" &&
-                    method.parameterTypes.isEmpty() &&
-                    method.returnType == postModels.canonicalPostDescriptor
-            } == true
-            if (isBetaPath) {
-                val urlEntityType = resolveUrlEntityType()
-                patchBetaTextNavigation(urlEntityType)
-                patchBetaPostLinkNavigation(urlEntityType, postModels.contextualPostDescriptor)
-                val cardUrlActionType = resolveCardUrlActionType()
-                patchBetaCardNavigation(cardUrlActionType, postModels.contextualPostDescriptor)
-                patchProfileWebsiteNavigation(urlEntityType)
-                return@execute
-            }
-            // ALPHA PATH: patch the legacy canonical-URL callbacks below.
-            val matches = resolveCanonicalUrlMatches()
+            val urlEntityFields = resolveUrlEntityFields(
+                UrlEntityModelFingerprint.requireSingleMatch("URL entity model"),
+            )
+            val matches = resolveCanonicalUrlMatches(urlEntityFields)
             replaceUrlEntityFieldRead(
                 matches.postLinkClick,
                 POST_URL_FIELD_FILTER_INDEX,
@@ -137,15 +109,12 @@ val newXCanonicalUrlsPatch =
 
             val cardUrlActionType = resolveCardUrlActionType()
             patchCardNavigation(cardUrlActionType, postModels.contextualPostDescriptor)
-            patchProfileWebsiteNavigation(matches.expandedUrlField.definingClass)
         }
     }
 
 context(_: BytecodePatchContext)
-private fun resolveCanonicalUrlMatches(): CanonicalUrlMatches {
+private fun resolveCanonicalUrlMatches(urlEntityFields: UrlEntityFields): CanonicalUrlMatches {
     val postModels = resolvedNewXPostModels()
-    val urlEntityMatch = UrlEntityModelFingerprint.requireSingleMatch("URL entity model")
-    val urlEntityFields = resolveUrlEntityFields(urlEntityMatch)
     val mentionType = MentionEntityModelFingerprint.requireSingleMatch("mention entity model")
         .originalClassDef.type
     val textEntityNavigationFingerprint =
@@ -351,254 +320,9 @@ private fun preferExpandedUrlInUrlPicker(match: Match) {
 }
 
 context(context: BytecodePatchContext)
-private fun resolveUrlEntityType(): String =
-    UrlEntityModelFingerprint.requireSingleMatch("URL entity model")
-        .originalClassDef.type
-
-context(context: BytecodePatchContext)
 private fun resolveCardUrlActionType(): String =
     CardUrlActionModelFingerprint.requireSingleMatch("card URL action model")
         .originalClassDef.type
-
-context(context: BytecodePatchContext)
-private fun patchProfileWebsiteNavigation(urlEntityType: String) {
-    val profileUserType =
-        ProfileUserModelFingerprint.requireSingleMatch("profile user model")
-            .originalClassDef.type
-    val match =
-        Fingerprint(
-            definingClass = "Lcom/x/profile/header/",
-            filters =
-                listOf(
-                    methodCall(
-                        opcode = Opcode.INVOKE_VIRTUAL,
-                        definingClass = profileUserType,
-                        name = "getWebsite",
-                        parameters = emptyList(),
-                        returnType = urlEntityType,
-                    ),
-                    methodCall(
-                        opcode = Opcode.INVOKE_VIRTUAL,
-                        definingClass = urlEntityType,
-                        name = "getDisplayUrl",
-                        parameters = emptyList(),
-                        returnType = STRING_DESCRIPTOR,
-                    ),
-                    methodCall(
-                        opcode = Opcode.INVOKE_VIRTUAL,
-                        definingClass = urlEntityType,
-                        name = "getUrl",
-                        parameters = emptyList(),
-                        returnType = STRING_DESCRIPTOR,
-                    ),
-                ),
-        ).requireSingleMatch("profile website link builder")
-
-    replaceUrlEntityGetter(
-        match,
-        filterIndex = 2,
-        urlEntityType = urlEntityType,
-        label = "profile website URL getter",
-    )
-}
-
-context(context: BytecodePatchContext)
-private fun patchBetaTextNavigation(urlEntityType: String) {
-    val mentionType = MentionEntityModelFingerprint.requireSingleMatch("mention entity model")
-        .originalClassDef.type
-    val textEntityNavigationMatch =
-        Fingerprint(
-            definingClass = "Lcom/x/navigation/",
-            parameters = listOf("L", "L"),
-            returnType = "V",
-            filters =
-                listOf(
-                    instanceOf(mentionType),
-                    instanceOf(urlEntityType),
-                    urlEntityGetter("getExpandedUrl", urlEntityType),
-                    uriParseCall(),
-                    uriAuthorityCall(),
-                    urlEntityGetter("getUrl", urlEntityType),
-                ),
-        ).requireSingleMatch("beta text-entity navigation")
-    val urlPickerMatch =
-        Fingerprint(
-            definingClass = textEntityNavigationMatch.originalClassDef.type,
-            parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
-            returnType = STRING_DESCRIPTOR,
-            filters = listOf(uriParseCall(), uriAuthorityCall()),
-        ).requireSingleMatch("beta URL picker")
-
-    replaceUrlEntityGetter(
-        textEntityNavigationMatch,
-        filterIndex = 5,
-        urlEntityType = urlEntityType,
-        label = "beta text-entity URL getter",
-    )
-    preferExpandedUrlInUrlPicker(urlPickerMatch)
-}
-
-context(context: BytecodePatchContext)
-private fun patchBetaPostLinkNavigation(
-    urlEntityType: String,
-    contextualPostType: String,
-) {
-    val match =
-        Fingerprint(
-            definingClass = "Lcom/x/urt/items/post/",
-            parameters = listOf("L", contextualPostType, "L", "L", "L", "L", "L"),
-            returnType = "V",
-            filters =
-                listOf(
-                    instanceOf(urlEntityType),
-                    urlEntityGetter("getExpandedUrl", urlEntityType),
-                    uriParseCall(),
-                    uriAuthorityCall(),
-                    urlEntityGetter("getUrl", urlEntityType),
-                    methodCall(
-                        opcode = Opcode.INVOKE_STATIC,
-                        definingClass = "Lcom/x/navigation/",
-                        parameters = listOf(STRING_DESCRIPTOR, "L", "Z"),
-                        returnType = STRING_DESCRIPTOR,
-                    ),
-                    methodCall(
-                        opcode = Opcode.INVOKE_VIRTUAL,
-                        name = "getId",
-                        parameters = emptyList(),
-                        returnType = "L",
-                    ),
-                    methodCall(
-                        opcode = Opcode.INVOKE_VIRTUAL,
-                        name = "getValue",
-                        parameters = emptyList(),
-                        returnType = "J",
-                    ),
-                ),
-        ).requireSingleMatch("beta post link click handler")
-
-    replaceUrlEntityGetter(
-        match,
-        filterIndex = 4,
-        urlEntityType = urlEntityType,
-        label = "beta post link URL getter",
-    )
-}
-
-private fun urlEntityGetter(name: String, urlEntityType: String) =
-    methodCall(
-        opcode = Opcode.INVOKE_VIRTUAL,
-        definingClass = urlEntityType,
-        name = name,
-        parameters = emptyList(),
-        returnType = STRING_DESCRIPTOR,
-    )
-
-private fun replaceUrlEntityGetter(
-    match: Match,
-    filterIndex: Int,
-    urlEntityType: String,
-    label: String,
-) {
-    val getterIndex = match.instructionMatches[filterIndex].index
-    val getter = match.method.instructions[getterIndex]
-    val getterReference = getter.getReference<MethodReference>()
-        ?: throw PatchException("$label reference is missing")
-    if (getterReference.name != "getUrl") {
-        throw PatchException("Unexpected $label: $getterReference")
-    }
-
-    match.method.replaceInstruction(
-        getterIndex,
-        singleRegisterInvoke(
-            getter.singleRegister(label),
-            "$urlEntityType->getExpandedUrl()$STRING_DESCRIPTOR",
-        ),
-    )
-}
-
-private fun Instruction.singleRegister(label: String): Int =
-    registersUsed.singleOrNull()
-        ?: throw PatchException("$label does not have exactly one receiver register")
-
-private fun singleRegisterInvoke(receiverRegister: Int, methodReference: String): String {
-    if (receiverRegister !in 0..0xffff) {
-        throw PatchException("Invoke receiver register is out of range: v$receiverRegister")
-    }
-    val opcode = if (receiverRegister <= 15) "invoke-virtual" else "invoke-virtual/range"
-    val registers =
-        if (receiverRegister <= 15) "{v$receiverRegister}"
-        else "{v$receiverRegister .. v$receiverRegister}"
-    return "$opcode $registers, $methodReference"
-}
-
-context(context: BytecodePatchContext)
-private fun patchBetaCardNavigation(cardUrlActionType: String, contextualPostType: String) {
-    val filters =
-        listOf(
-            instanceOf(cardUrlActionType),
-            fieldAccess(
-                opcode = Opcode.IGET_OBJECT,
-                definingClass = cardUrlActionType,
-                type = STRING_DESCRIPTOR,
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_STATIC,
-                definingClass = "Lcom/x/navigation/",
-                parameters = listOf(STRING_DESCRIPTOR, "L", "Z"),
-                returnType = STRING_DESCRIPTOR,
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                definingClass = contextualPostType,
-                name = "getId",
-                parameters = emptyList(),
-                returnType = "L",
-            ),
-            methodCall(
-                opcode = Opcode.INVOKE_VIRTUAL,
-                name = "getValue",
-                parameters = emptyList(),
-                returnType = "J",
-            ),
-            methodCall(
-                definingClass = "Lcom/x/urt/items/post/",
-                parameters = listOf(STRING_DESCRIPTOR, "J", "L", STRING_DESCRIPTOR),
-                returnType = "L",
-            ),
-        )
-    val match =
-        Fingerprint(
-            definingClass = "Lcom/x/urt/items/post/",
-            parameters = listOf("Ljava/lang/Object;"),
-            returnType = "Ljava/lang/Object;",
-            filters = filters,
-        ).requireSingleMatch("beta card navigation callback")
-
-    val urlFieldReadIndex = match.instructionMatches[1].index
-    val urlFieldRead = match.method.objectFieldRead(urlFieldReadIndex, "Beta card callback URL")
-    val urlField = urlFieldRead.getReference<FieldReference>()
-        ?: throw PatchException("Beta card callback card URL field reference is missing")
-    if (urlField.type != STRING_DESCRIPTOR || urlField.definingClass != cardUrlActionType) {
-        throw PatchException("Unexpected beta card URL field: $urlField")
-    }
-
-    val postGetIdIndex = match.instructionMatches[3].index
-    val postGetIdInstruction = match.method.instructions[postGetIdIndex]
-    val postRegister = postGetIdInstruction.singleRegister("Beta card callback contextual-post")
-
-    patchCardUrl(
-        match,
-        urlFieldReadIndex + 1,
-        postRegister,
-        urlFieldRead.registerA,
-    )
-}
-
-private fun Method.objectFieldRead(index: Int, label: String): TwoRegisterInstruction {
-    val instruction = instructions.toList().getOrNull(index) as? TwoRegisterInstruction
-    if (instruction?.opcode == Opcode.IGET_OBJECT) return instruction
-    throw PatchException("$label is not an iget-object")
-}
 
 private fun patchCardUrl(
     match: Match,
@@ -626,7 +350,6 @@ context(context: BytecodePatchContext)
 private fun patchCardNavigation(cardUrlActionType: String, contextualPostType: String) {
     val match =
         Fingerprint(
-            // The alpha repackages this callback into the preserved Compose namespace.
             definingClass = "Landroidx/compose/animation/core/",
             parameters = listOf("Ljava/lang/Object;"),
             returnType = "Ljava/lang/Object;",
