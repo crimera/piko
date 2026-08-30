@@ -20,6 +20,7 @@ import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
+import com.android.tools.smali.dexlib2.iface.reference.TypeReference
 
 private const val SHARE_URL_RESOLVER_DESCRIPTOR =
     "Lapp/morphe/extension/newx/misc/ShareUrlResolver;"
@@ -29,6 +30,7 @@ private const val CUSTOM_DOMAIN_VALIDATOR_DESCRIPTOR =
     "Lapp/morphe/extension/newx/misc/CustomSharingDomainValidator;"
 private const val SHARE_SHEET_DESCRIPTOR_PREFIX = "Lcom/x/dms/components/sharesheet/"
 private const val SHARE_IMPL_DESCRIPTOR_PREFIX = "Lcom/x/share/impl/"
+private const val LEGACY_SHARE_COPY_DESCRIPTOR_PREFIX = "Lcom/x/reactwithvideo/"
 private const val NAVIGATION_DESCRIPTOR_PREFIX = "Lcom/x/navigation/"
 private const val SHARE_STATUS_URL_PREFIX = "https://x.com/i/status/"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
@@ -44,6 +46,22 @@ internal object ShareSheetUrlConstructorFingerprint : Fingerprint(
     definingClass = SHARE_SHEET_DESCRIPTOR_PREFIX,
     returnType = "V",
     filters = listOf(string(SHARE_STATUS_URL_PREFIX)),
+)
+
+/** Copy callback that writes the post URL to the clipboard in newer NewX builds. */
+internal object ShareSheetCopyCallbackFingerprint : Fingerprint(
+    definingClass = SHARE_IMPL_DESCRIPTOR_PREFIX,
+    parameters = listOf(STRING_DESCRIPTOR),
+    returnType = "V",
+    filters = listOf(string("link"), string("copy_link")),
+)
+
+/** Legacy share-sheet callback that receives both media URIs and post URLs. */
+internal object LegacyShareSheetCopyFingerprint : Fingerprint(
+    definingClass = LEGACY_SHARE_COPY_DESCRIPTOR_PREFIX,
+    parameters = listOf("Ljava/lang/Object;"),
+    returnType = "Ljava/lang/Object;",
+    filters = listOf(string("url")),
 )
 
 /** Shared Intent builder used by both the system chooser and direct-app share actions. */
@@ -84,6 +102,7 @@ val newXCustomSharingDomainPatch =
 
         execute {
             hookShareSheetPostUrls()
+            hookShareSheetCopyCallbacks()
             hookShareIntentBuilder()
             hookPostNavigationUrls()
         }
@@ -108,6 +127,50 @@ private fun hookShareSheetPostUrls() {
             .requireSingleMatch("NewX share-sheet URL constructor")
             .method
     hookShareSheetUrlConstructor(method)
+}
+
+context(_: app.morphe.patcher.patch.BytecodePatchContext)
+private fun hookShareSheetCopyCallbacks() {
+    val currentMatches = ShareSheetCopyCallbackFingerprint.scopedMatchAllOrNull().orEmpty()
+    val legacyMatches = LegacyShareSheetCopyFingerprint.scopedMatchAllOrNull().orEmpty()
+    if (currentMatches.size + legacyMatches.size != 1) {
+        throw PatchException(
+            "Expected one NewX share-sheet copy callback variant, found " +
+                (currentMatches.size + legacyMatches.size),
+        )
+    }
+
+    if (currentMatches.size == 1) {
+        currentMatches.single().method.addInstructions(
+            0,
+            """
+            invoke-static {p1}, $CHANGE_DOMAIN_METHOD
+            move-result-object p1
+            """.trimIndent(),
+        )
+        return
+    }
+
+    val legacyMethod = legacyMatches.single().method
+    val stringCastIndices =
+        legacyMethod.instructions.mapIndexedNotNull { index, instruction ->
+            if (instruction.opcode != Opcode.CHECK_CAST) return@mapIndexedNotNull null
+            if (instruction.getReference<TypeReference>()?.type != STRING_DESCRIPTOR) {
+                return@mapIndexedNotNull null
+            }
+            index
+        }
+    if (stringCastIndices.size != 1) {
+        throw PatchException(
+            "Expected one legacy NewX share URL cast in $legacyMethod, found " +
+                stringCastIndices.size,
+        )
+    }
+
+    val castIndex = stringCastIndices.single()
+    val castInstruction = legacyMethod.instructions[castIndex] as? OneRegisterInstruction
+        ?: throw PatchException("Expected a one-register legacy NewX share URL cast in $legacyMethod")
+    legacyMethod.addDomainRewrite(castIndex + 1, castInstruction.registerA)
 }
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
