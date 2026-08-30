@@ -40,6 +40,7 @@ private const val CANONICAL_URL_RESOLVE_METHOD =
     "$CANONICAL_URL_RESOLVER->resolve(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/String;"
 private const val POST_URL_FIELD_FILTER_INDEX = 3
 private const val TEXT_ENTITY_URL_FIELD_FILTER_INDEX = 5
+private const val RICH_TEXT_DISPLAY_URL_FIELD_FILTER_INDEX = 1
 
 private object UrlEntityModelFingerprint : Fingerprint(
     definingClass = "Lcom/x/models/text/",
@@ -67,6 +68,7 @@ private object CardUrlActionModelFingerprint : Fingerprint(
 
 private data class UrlEntityFields(
     val type: String,
+    val displayUrl: FieldReference,
     val expandedUrl: FieldReference,
     val url: FieldReference,
 )
@@ -106,6 +108,7 @@ val newXCanonicalUrlsPatch =
                 matches.expandedUrlField,
             )
             preferExpandedUrlInUrlPicker(matches.urlPicker)
+            patchRichTextUrlDisplay(urlEntityFields)
 
             val cardUrlActionType = resolveCardUrlActionType()
             patchCardNavigation(cardUrlActionType, postModels.contextualPostDescriptor)
@@ -211,6 +214,7 @@ private fun resolveUrlEntityFields(match: Match): UrlEntityFields {
 
     return UrlEntityFields(
         type = owner,
+        displayUrl = fields[0],
         expandedUrl = fields[1],
         url = fields[2],
     )
@@ -316,6 +320,29 @@ private fun preferExpandedUrlInUrlPicker(match: Match) {
         return-object p1
         """.trimIndent(),
         ExternalLabel("piko_canonical_url_fallback", firstInstruction),
+    )
+}
+
+context(_: BytecodePatchContext)
+private fun patchRichTextUrlDisplay(urlEntityFields: UrlEntityFields) {
+    val match =
+        Fingerprint(
+            definingClass = "Lcom/x/ui/common/text/",
+            name = "g",
+            returnType = "Landroidx/compose/ui/text/g;",
+            filters = listOf(
+                instanceOf(urlEntityFields.type),
+                fieldAccess(
+                    opcode = Opcode.IGET_OBJECT,
+                    reference = urlEntityFields.displayUrl,
+                ),
+            ),
+        ).requireSingleMatch("rich-text URL display")
+
+    replaceUrlEntityFieldRead(
+        match,
+        RICH_TEXT_DISPLAY_URL_FIELD_FILTER_INDEX,
+        urlEntityFields.expandedUrl,
     )
 }
 
