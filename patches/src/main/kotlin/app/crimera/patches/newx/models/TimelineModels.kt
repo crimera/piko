@@ -19,11 +19,12 @@ private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 private const val LIST_DESCRIPTOR = "Ljava/util/List;"
 private const val ITERABLE_DESCRIPTOR = "Ljava/lang/Iterable;"
 private const val IMMUTABLE_LIST_DESCRIPTOR = "Lkotlinx/collections/immutable/b;"
-private const val MEDIA_MODEL_SCOPE = "Lcom/x/models/media/"
+private const val X_PACKAGE_SCOPE = "Lcom/x/"
 
 private object TimelineItemsImmutableListConverterFingerprint : Fingerprint(
-    definingClass = MEDIA_MODEL_SCOPE,
+    definingClass = X_PACKAGE_SCOPE,
     parameters = listOf(ITERABLE_DESCRIPTOR),
+    custom = { method, _ -> AccessFlags.STATIC.isSet(method.accessFlags) },
     returnType = IMMUTABLE_LIST_DESCRIPTOR,
 )
 
