@@ -429,9 +429,7 @@ private fun MutableMethod.resolvePaletteAllocationIndex(
     val caseStart =
         switchElements.singleOrNull { element -> element.key == factorySelector }
             ?.target?.location?.index
-            ?: throw PatchException(
-                "NewX ${kind.name} palette factory selector $factorySelector has no switch case: $this",
-            )
+            ?: (switchInstruction.location.index + 1)
     val caseEnd = switchElements
         .mapNotNull { element -> element.target.location.index.takeIf { index -> index > caseStart } }
         .minOrNull() ?: instructions.size

@@ -20,7 +20,7 @@ fi
 # BETA PATH: current default input for future NewX updates.
 # ALPHA PATH: pass the 12.17.3-alpha.01 APK explicitly while compatibility is retained.
 # TODO: Remove the alpha invocation note when the alpha target is deprecated.
-DEFAULT_APK="../twitter-analysis/apks/X_com,twitter,android_12,20,5-prod,01.apks"
+DEFAULT_APK="../twitter-analysis/apks/com.twitter.android_12.22.0-beta.01-312220101_1arch_2dpi_1lang_caed65f6dfa6aab57fd23be49c0fbb72_apkmirror.com.apkm"
 OUTPUT_APK="$HOME/Downloads/piko-twitter-patched.apk"
 APK="$DEFAULT_APK"
 FLAGS=()
@@ -61,6 +61,8 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Customize default media tab" \
   -e "NewX: Custom font" \
   -e "NewX: Custom sharing domain" \
+  -e "NewX: Inline download button" \
+  -e "NewX: Dynamic color" \
   --striplibs=arm64-v8a \
   --force \
   -o "$OUTPUT_APK" \
