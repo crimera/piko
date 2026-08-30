@@ -10,7 +10,6 @@ import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.InstructionLocation.MatchAfterImmediately
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
-import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.methodCall
 import app.morphe.patcher.opcode
@@ -34,21 +33,6 @@ private object NewXHomeReselectFingerprint : Fingerprint(
                 returnType = "I",
             ),
             opcode(Opcode.MOVE_RESULT, MatchAfterImmediately()),
-        ),
-)
-
-private object NewXLifecycleRefreshLaunchFingerprint : Fingerprint(
-    definingClass = "Lcom/x/urt/",
-    name = "onResume",
-    parameters = emptyList(),
-    returnType = "V",
-    filters =
-        listOf(
-            methodCall(
-                opcode = Opcode.INVOKE_STATIC,
-                parameters = listOf("L", "L", "L", "L", "I"),
-                returnType = "L",
-            ),
         ),
 )
 
@@ -93,36 +77,6 @@ val disableTimelineRefreshPatch =
                         return v${read.register}
                     """.trimIndent(),
                     ExternalLabel("piko_newx_refresh_home_continue", originalFirstInstruction),
-                )
-            }
-
-            val lifecycleMatches = NewXLifecycleRefreshLaunchFingerprint.scopedMatchAll()
-            if (lifecycleMatches.size != 1) {
-                throw PatchException(
-                    "Expected one NewX lifecycle refresh launch, found ${lifecycleMatches.size}: " +
-                        lifecycleMatches.joinToString { it.originalMethod.toString() },
-                )
-            }
-            val lifecycleMatch = lifecycleMatches.single()
-            val refreshLaunchIndex = lifecycleMatch.instructionMatches.single().index
-            lifecycleMatch.method.apply {
-                val refreshLaunch = getInstruction(refreshLaunchIndex)
-                val read =
-                    disableTimelineRefresh.injectRead(
-                        method = this,
-                        index = refreshLaunchIndex,
-                        registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
-                    )
-                addInstructionsWithLabels(
-                    read.nextIndex,
-                    """
-                        if-eqz v${read.register}, :piko_newx_refresh_lifecycle_continue
-                        return-void
-                    """.trimIndent(),
-                    ExternalLabel(
-                        "piko_newx_refresh_lifecycle_continue",
-                        refreshLaunch,
-                    ),
                 )
             }
         }
