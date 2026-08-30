@@ -63,6 +63,9 @@ java -jar ../piko/morphe-desktop-1.11.0-all.jar patch \
   -e "NewX: Custom sharing domain" \
   -e "NewX: Inline download button" \
   -e "NewX: Dynamic color" \
+  -e "NewX: Customize default reply sorting" \
+  -e "NewX: Filter posts by keyword" \
+  -e "NewX: Force highest video/audio quality" \
   --striplibs=arm64-v8a \
   --force \
   -o "$OUTPUT_APK" \
