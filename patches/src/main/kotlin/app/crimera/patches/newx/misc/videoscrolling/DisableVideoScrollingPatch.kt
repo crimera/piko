@@ -32,8 +32,10 @@ private const val FUNCTION1_DESCRIPTOR = "Lkotlin/jvm/functions/Function1;"
 private const val FUNCTION4_DESCRIPTOR = "Lkotlin/jvm/functions/Function4;"
 private const val COMPOSER_DESCRIPTOR = "Landroidx/compose/runtime/Composer;"
 
-// PagerState, PageSize, alignment, fling, and pager policy types are short Compose symbols that
-// change between the alpha and beta libraries. Keep only the public ABI types as hard anchors.
+private const val VERTICAL_PAGER_OWNER_SCOPE = "Lcom/google/android/play/core/appupdate/"
+
+// R8 merges Compose PagerKt into a repackaged library holder. Match the stable Compose ABI and
+// the non-obfuscated orientation enum instead of the holder's generated class and method names.
 private val VERTICAL_PAGER_PARAMETERS =
     listOf(
         "L",
@@ -64,18 +66,8 @@ private fun isVerticalPagerMethod(method: Method): Boolean =
             field.definingClass.startsWith("Landroidx/compose/foundation/gestures/")
     } == true
 
-// The alpha Compose pager implementation was relocated into a repackaged library class.
-private object AlphaVerticalPagerFingerprint : Fingerprint(
-    definingClass = "Lcom/bumptech/glide/",
-    returnType = "V",
-    parameters = VERTICAL_PAGER_PARAMETERS,
-    custom = { method, _ -> isVerticalPagerMethod(method) },
-)
-
-// Beta and later releases keep PagerKt under the preserved Compose package, while its short class
-// and method names, plus several internal parameter types, continue to change.
-private object ComposeVerticalPagerFingerprint : Fingerprint(
-    definingClass = "Landroidx/compose/foundation/pager/",
+private object VerticalPagerFingerprint : Fingerprint(
+    definingClass = VERTICAL_PAGER_OWNER_SCOPE,
     returnType = "V",
     parameters = VERTICAL_PAGER_PARAMETERS,
     custom = { method, _ -> isVerticalPagerMethod(method) },
@@ -145,13 +137,10 @@ val newXDisableVideoScrollingPatch =
             )
 
         execute {
-            val alphaMatches = AlphaVerticalPagerFingerprint.scopedMatchAllOrNull().orEmpty()
-            val composeMatches = ComposeVerticalPagerFingerprint.scopedMatchAllOrNull().orEmpty()
-            val matches = alphaMatches + composeMatches
+            val matches = VerticalPagerFingerprint.scopedMatchAllOrNull().orEmpty()
             if (matches.size != 1) {
                 throw PatchException(
-                    "Expected one NewX VerticalPager implementation, found " +
-                        "alpha=${alphaMatches.size}, compose=${composeMatches.size}: " +
+                    "Expected one NewX VerticalPager implementation, found ${matches.size}: " +
                         matches.joinToString { it.originalMethod.toString() },
                 )
             }
