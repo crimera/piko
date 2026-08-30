@@ -5,8 +5,9 @@ import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.newXTextInput
 import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
-import app.crimera.patches.utils.scopedMatchAll
+import app.crimera.patches.utils.scopedMatchAllOrNull
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.Match
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.PatchException
@@ -15,6 +16,7 @@ import app.morphe.patcher.string
 import app.morphe.patcher.util.proxy.mutableTypes.MutableMethod
 import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.StringReference
@@ -26,8 +28,13 @@ private const val CHANGE_DOMAIN_METHOD =
 private const val CUSTOM_DOMAIN_VALIDATOR_DESCRIPTOR =
     "Lapp/morphe/extension/newx/misc/CustomSharingDomainValidator;"
 private const val SHARE_SHEET_DESCRIPTOR_PREFIX = "Lcom/x/dms/components/sharesheet/"
+private const val SHARE_IMPL_DESCRIPTOR_PREFIX = "Lcom/x/share/impl/"
+private const val NAVIGATION_DESCRIPTOR_PREFIX = "Lcom/x/navigation/"
 private const val SHARE_STATUS_URL_PREFIX = "https://x.com/i/status/"
 private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
+private const val INTENT_DESCRIPTOR = "Landroid/content/Intent;"
+private const val SEND_ACTION = "android.intent.action.SEND"
+private const val EXTRA_TEXT = "android.intent.extra.TEXT"
 
 /**
  * Share-sheet constructor that owns the final URL field. The status URL is a stable semantic
@@ -36,6 +43,23 @@ private const val STRING_DESCRIPTOR = "Ljava/lang/String;"
 internal object ShareSheetUrlConstructorFingerprint : Fingerprint(
     definingClass = SHARE_SHEET_DESCRIPTOR_PREFIX,
     returnType = "V",
+    filters = listOf(string(SHARE_STATUS_URL_PREFIX)),
+)
+
+/** Shared Intent builder used by both the system chooser and direct-app share actions. */
+internal object ShareIntentBuilderFingerprint : Fingerprint(
+    definingClass = SHARE_IMPL_DESCRIPTOR_PREFIX,
+    parameters = listOf(STRING_DESCRIPTOR, STRING_DESCRIPTOR),
+    returnType = INTENT_DESCRIPTOR,
+    filters = listOf(string(SEND_ACTION), string(EXTRA_TEXT)),
+)
+
+/** URL getter used by post-detail navigation and quote/interactor links. */
+internal object PostNavigationUrlFingerprint : Fingerprint(
+    definingClass = NAVIGATION_DESCRIPTOR_PREFIX,
+    name = "l",
+    parameters = emptyList(),
+    returnType = STRING_DESCRIPTOR,
     filters = listOf(string(SHARE_STATUS_URL_PREFIX)),
 )
 
@@ -60,20 +84,74 @@ val newXCustomSharingDomainPatch =
 
         execute {
             hookShareSheetPostUrls()
+            hookShareIntentBuilder()
+            hookPostNavigationUrls()
         }
     }
 
 context(_: app.morphe.patcher.patch.BytecodePatchContext)
-private fun hookShareSheetPostUrls() {
-    val matches = ShareSheetUrlConstructorFingerprint.scopedMatchAll()
+private fun Fingerprint.requireSingleMatch(label: String): Match {
+    val matches = scopedMatchAllOrNull().orEmpty()
     if (matches.size != 1) {
         throw PatchException(
-            "Expected one NewX share-sheet URL constructor match, found ${matches.size}: " +
+            "Expected one $label match, found ${matches.size}: " +
+                matches.joinToString { it.originalMethod.toString() },
+        )
+    }
+    return matches.single()
+}
+
+context(_: app.morphe.patcher.patch.BytecodePatchContext)
+private fun hookShareSheetPostUrls() {
+    val method =
+        ShareSheetUrlConstructorFingerprint
+            .requireSingleMatch("NewX share-sheet URL constructor")
+            .method
+    hookShareSheetUrlConstructor(method)
+}
+
+context(_: app.morphe.patcher.patch.BytecodePatchContext)
+private fun hookShareIntentBuilder() {
+    ShareIntentBuilderFingerprint
+        .requireSingleMatch("NewX share Intent builder")
+        .method
+        .addInstructions(
+            0,
+            """
+            invoke-static {p0}, $CHANGE_DOMAIN_METHOD
+            move-result-object p0
+            """.trimIndent(),
+        )
+}
+
+context(_: app.morphe.patcher.patch.BytecodePatchContext)
+private fun hookPostNavigationUrls() {
+    val matches = PostNavigationUrlFingerprint.scopedMatchAllOrNull().orEmpty()
+    if (matches.size != 2) {
+        throw PatchException(
+            "Expected two NewX post navigation URL getters, found ${matches.size}: " +
                 matches.joinToString { it.originalMethod.toString() },
         )
     }
 
-    matches.forEach { match -> hookShareSheetUrlConstructor(match.method) }
+    matches.forEach { match ->
+        val method = match.method
+        val returnIndices =
+            method.instructions.mapIndexedNotNull { index, instruction ->
+                if (instruction.opcode == Opcode.RETURN_OBJECT) index else null
+            }
+        if (returnIndices.size != 1) {
+            throw PatchException(
+                "Expected one returned URL in NewX post navigation getter $method, found " +
+                    returnIndices.size,
+            )
+        }
+
+        val returnIndex = returnIndices.single()
+        val returnInstruction = method.instructions[returnIndex] as? OneRegisterInstruction
+            ?: throw PatchException("Expected a one-register URL return in $method")
+        method.addDomainRewrite(returnIndex, returnInstruction.registerA)
+    }
 }
 
 private fun hookShareSheetUrlConstructor(method: MutableMethod) {
