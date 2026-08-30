@@ -41,6 +41,8 @@ private const val CANONICAL_URL_RESOLVE_METHOD =
 private const val POST_URL_FIELD_FILTER_INDEX = 3
 private const val TEXT_ENTITY_URL_FIELD_FILTER_INDEX = 5
 private const val RICH_TEXT_DISPLAY_URL_FIELD_FILTER_INDEX = 1
+private const val PROFILE_LINK_DISPLAY_URL_FIELD_FILTER_INDEX = 0
+private const val PROFILE_LINK_OPEN_URL_FIELD_FILTER_INDEX = 1
 
 private object UrlEntityModelFingerprint : Fingerprint(
     definingClass = "Lcom/x/models/text/",
@@ -108,6 +110,7 @@ val newXCanonicalUrlsPatch =
                 matches.expandedUrlField,
             )
             preferExpandedUrlInUrlPicker(matches.urlPicker)
+            patchProfileLinkValues(urlEntityFields)
             patchRichTextUrlDisplay(urlEntityFields)
 
             val cardUrlActionType = resolveCardUrlActionType()
@@ -320,6 +323,35 @@ private fun preferExpandedUrlInUrlPicker(match: Match) {
         return-object p1
         """.trimIndent(),
         ExternalLabel("piko_canonical_url_fallback", firstInstruction),
+    )
+}
+
+context(_: BytecodePatchContext)
+private fun patchProfileLinkValues(urlEntityFields: UrlEntityFields) {
+    val match =
+        Fingerprint(
+            definingClass = "Lcom/x/media/imageloader/telemetry/",
+            filters = listOf(
+                fieldAccess(
+                    opcode = Opcode.IGET_OBJECT,
+                    reference = urlEntityFields.displayUrl,
+                ),
+                fieldAccess(
+                    opcode = Opcode.IGET_OBJECT,
+                    reference = urlEntityFields.url,
+                ),
+            ),
+        ).requireSingleMatch("profile link values")
+
+    replaceUrlEntityFieldRead(
+        match,
+        PROFILE_LINK_DISPLAY_URL_FIELD_FILTER_INDEX,
+        urlEntityFields.expandedUrl,
+    )
+    replaceUrlEntityFieldRead(
+        match,
+        PROFILE_LINK_OPEN_URL_FIELD_FILTER_INDEX,
+        urlEntityFields.expandedUrl,
     )
 }
 
