@@ -119,9 +119,7 @@ val disableTimelineRefreshPatch =
                         if-eqz v$settingRegister, :piko_newx_refresh_urt_continue
                         if-nez p2, :piko_newx_refresh_urt_continue
                         sget-object v$settingRegister, Lcom/x/models/timelines/d;->AUTO_REFRESH:Lcom/x/models/timelines/d;
-                        if-ne p1, v$settingRegister, :piko_newx_refresh_urt_check_timeline
-                        goto :piko_newx_refresh_urt_continue
-                        :piko_newx_refresh_urt_check_timeline
+                        if-ne p1, v$settingRegister, :piko_newx_refresh_urt_continue
                         iget-object v$timelineRegister, p0, $repoDescriptor->a:Lcom/x/models/timelines/v;
                         sget-object v$settingRegister, Lcom/x/models/timelines/v;->FOR_YOU:Lcom/x/models/timelines/v;
                         if-eq v$timelineRegister, v$settingRegister, :piko_newx_refresh_urt_convert
