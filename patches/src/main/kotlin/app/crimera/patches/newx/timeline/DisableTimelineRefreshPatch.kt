@@ -3,8 +3,8 @@ package app.crimera.patches.newx.timeline
 import app.crimera.patches.newx.settings.Categories
 import app.crimera.patches.newx.settings.SettingReadRegisterConstraint
 import app.crimera.patches.newx.settings.injectRead
-import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.settings.newXToggle
+import app.crimera.patches.newx.settings.settingStrings
 import app.crimera.patches.newx.utils.Constants.COMPATIBILITY_NEW_X
 import app.crimera.patches.utils.scopedMatchAll
 import app.morphe.patcher.Fingerprint
@@ -18,11 +18,7 @@ import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.string
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.getFreeRegisterProvider
-import app.morphe.util.getReference
 import com.android.tools.smali.dexlib2.Opcode
-import com.android.tools.smali.dexlib2.iface.instruction.TwoRegisterInstruction
-import com.android.tools.smali.dexlib2.iface.reference.FieldReference
-import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private object NewXHomeReselectFingerprint : Fingerprint(
     definingClass = "Lcom/x/home/tabbed/",
@@ -41,19 +37,12 @@ private object NewXHomeReselectFingerprint : Fingerprint(
         ),
 )
 
-private object NewXLifecycleRefreshLaunchFingerprint : Fingerprint(
-    definingClass = "Lcom/x/urt/",
-    name = "onResume",
-    parameters = emptyList(),
+private object NewXUrtRepositoryRequestFingerprint : Fingerprint(
+    definingClass = "Lcom/x/repositories/urt/",
+    name = "i",
+    parameters = listOf("Lcom/x/models/timelines/d;", "Lcom/x/models/timelines/items/j0;"),
     returnType = "V",
-    filters =
-        listOf(
-            methodCall(
-                opcode = Opcode.INVOKE_STATIC,
-                parameters = listOf("L", "L", "L", "L", "I"),
-                returnType = "L",
-            ),
-        ),
+    filters = listOf(string("requestType")),
 )
 
 @Suppress("unused")
@@ -100,93 +89,51 @@ val disableTimelineRefreshPatch =
                 )
             }
 
-            val lifecycleMatches = NewXLifecycleRefreshLaunchFingerprint.scopedMatchAll()
-            if (lifecycleMatches.size != 1) {
+            val urtRepoMatches = NewXUrtRepositoryRequestFingerprint.scopedMatchAll()
+            if (urtRepoMatches.size != 1) {
                 throw PatchException(
-                    "Expected one NewX lifecycle refresh launch, found ${lifecycleMatches.size}: " +
-                        lifecycleMatches.joinToString { it.originalMethod.toString() },
+                    "Expected one NewX URT repository request handler, found ${urtRepoMatches.size}: " +
+                        urtRepoMatches.joinToString { it.originalMethod.toString() },
                 )
             }
-            val lifecycleMatch = lifecycleMatches.single()
-            val lifecycleDescriptor = lifecycleMatch.originalMethod.definingClass
-            val timelineGetter =
-                lifecycleMatch.method.instructions
-                    .mapNotNull { instruction ->
-                        if (instruction.opcode != Opcode.INVOKE_INTERFACE) return@mapNotNull null
-                        instruction.getReference<MethodReference>()
-                    }
-                    .singleOrNull { reference ->
-                        reference.name == "a" &&
-                            reference.parameterTypes.isEmpty() &&
-                            reference.returnType.toString() == "Lcom/x/models/timelines/v;"
-                    } ?: throw PatchException("NewX lifecycle timeline getter was not found")
-            val controllerRead =
-                lifecycleMatch.method.instructions
-                    .mapNotNull { instruction ->
-                        if (instruction.opcode != Opcode.IGET_OBJECT) return@mapNotNull null
-                        val field = instruction.getReference<FieldReference>() ?: return@mapNotNull null
-                        if (field.definingClass.toString() != lifecycleDescriptor) {
-                            return@mapNotNull null
-                        }
-                        val registers = instruction as? TwoRegisterInstruction
-                            ?: return@mapNotNull null
-                        field to registers.registerA
-                    }
-                    .singleOrNull()
-                    ?: throw PatchException("NewX lifecycle controller field was not found")
-            val controllerField = controllerRead.first
-            val controllerRegister = controllerRead.second
-            val controllerDescriptor = controllerField.type.toString()
-            val repositoryField =
-                mutableClassDefBy(controllerDescriptor).fields
-                    .singleOrNull { field ->
-                        field.type.toString() == timelineGetter.definingClass.toString()
-                    } ?: throw PatchException("NewX lifecycle timeline repository field was not found")
-            val repositoryFieldDescriptor =
-                "$controllerDescriptor->${repositoryField.name}:${repositoryField.type}"
-            val timelineGetterDescriptor =
-                "${timelineGetter.definingClass}->${timelineGetter.name}(" +
-                    timelineGetter.parameterTypes.joinToString("") + ")${timelineGetter.returnType}"
-            val refreshLaunchIndex = lifecycleMatch.instructionMatches.single().index
-            val controllerReadIndex =
-                lifecycleMatch.method.instructions.indexOfFirst { instruction ->
-                    instruction.opcode == Opcode.IGET_OBJECT &&
-                        instruction.getReference<FieldReference>() == controllerField
-                }
-            if (controllerReadIndex < 0 || controllerReadIndex >= refreshLaunchIndex) {
-                throw PatchException("NewX lifecycle controller read precedes no refresh launch")
-            }
-            val lifecycleGuardIndex = controllerReadIndex + 1
-            lifecycleMatch.method.apply {
-                val originalNextInstruction = instructions[lifecycleGuardIndex]
-                val timelineRegister =
-                    getFreeRegisterProvider(lifecycleGuardIndex, 1, controllerRegister)
-                        .getFreeRegister4Bit()
+            val urtRepoMatch = urtRepoMatches.single()
+            val repoDescriptor = urtRepoMatch.originalMethod.definingClass
+            urtRepoMatch.method.apply {
+                val originalFirstInstruction = instructions.first()
                 val read =
                     disableTimelineRefresh.injectRead(
                         method = this,
-                        index = lifecycleGuardIndex,
-                        excludedRegisters = listOf(controllerRegister, timelineRegister),
+                        index = 0,
                         registerConstraint = SettingReadRegisterConstraint.FOUR_BIT,
                     )
+                val settingRegister = read.register
+                val timelineRegister =
+                    getFreeRegisterProvider(
+                        0,
+                        1,
+                        settingRegister,
+                    ).getFreeRegister4Bit()
                 addInstructionsWithLabels(
                     read.nextIndex,
                     """
-                        if-eqz v${read.register}, :piko_newx_refresh_lifecycle_continue
-                        iget-object v$timelineRegister, v$controllerRegister, $repositoryFieldDescriptor
-                        invoke-interface {v$timelineRegister}, $timelineGetterDescriptor
-                        move-result-object v$timelineRegister
-                        sget-object v${read.register}, Lcom/x/models/timelines/v;->FOR_YOU:Lcom/x/models/timelines/v;
-                        if-eq v$timelineRegister, v${read.register}, :piko_newx_refresh_lifecycle_return
-                        sget-object v${read.register}, Lcom/x/models/timelines/v;->FOLLOWING:Lcom/x/models/timelines/v;
-                        if-eq v$timelineRegister, v${read.register}, :piko_newx_refresh_lifecycle_return
-                        goto :piko_newx_refresh_lifecycle_continue
-                        :piko_newx_refresh_lifecycle_return
-                        return-void
+                        if-eqz v$settingRegister, :piko_newx_refresh_urt_continue
+                        if-nez p2, :piko_newx_refresh_urt_continue
+                        sget-object v$settingRegister, Lcom/x/models/timelines/d;->AUTO_REFRESH:Lcom/x/models/timelines/d;
+                        if-ne p1, v$settingRegister, :piko_newx_refresh_urt_check_timeline
+                        goto :piko_newx_refresh_urt_continue
+                        :piko_newx_refresh_urt_check_timeline
+                        iget-object v$timelineRegister, p0, $repoDescriptor->a:Lcom/x/models/timelines/v;
+                        sget-object v$settingRegister, Lcom/x/models/timelines/v;->FOR_YOU:Lcom/x/models/timelines/v;
+                        if-eq v$timelineRegister, v$settingRegister, :piko_newx_refresh_urt_convert
+                        sget-object v$settingRegister, Lcom/x/models/timelines/v;->FOLLOWING:Lcom/x/models/timelines/v;
+                        if-eq v$timelineRegister, v$settingRegister, :piko_newx_refresh_urt_convert
+                        goto :piko_newx_refresh_urt_continue
+                        :piko_newx_refresh_urt_convert
+                        sget-object p1, Lcom/x/models/timelines/d;->VIEWPORT_AWARE_AUTO_REFRESH:Lcom/x/models/timelines/d;
                     """.trimIndent(),
                     ExternalLabel(
-                        "piko_newx_refresh_lifecycle_continue",
-                        originalNextInstruction,
+                        "piko_newx_refresh_urt_continue",
+                        originalFirstInstruction,
                     ),
                 )
             }
