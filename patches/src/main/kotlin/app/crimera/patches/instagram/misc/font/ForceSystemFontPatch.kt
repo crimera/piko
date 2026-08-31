@@ -131,11 +131,7 @@ val forceSystemFontPatch =
                     move/from16 v1, p3
                     move/from16 v2, p4
 
-                    invoke-static {v0, v1, v2},
-                        $EXTENSION_CLASS->getSystemTypeface(
-                            Landroid/content/Context;
-                            II
-                        )Landroid/graphics/Typeface;
+                    invoke-static {v0, v1, v2}, $EXTENSION_CLASS->getSystemTypeface(Landroid/content/Context;II)Landroid/graphics/Typeface;
 
                     move-result-object v0
 
@@ -283,8 +279,7 @@ val forceSystemFontPatch =
             reactNativeMethod.addInstructions(
                 typefaceFactoryIndex + 2,
                 """
-                    invoke-static {v$weightRegister},
-                        $EXTENSION_CLASS->getSystemTypefaceForWeight(I)Landroid/graphics/Typeface;
+                    invoke-static {v$weightRegister}, $EXTENSION_CLASS->getSystemTypefaceForWeight(I)Landroid/graphics/Typeface;
 
                     move-result-object v$resultRegister
                 """.trimIndent(),
