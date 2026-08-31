@@ -326,6 +326,23 @@
     <string name="piko_filter_story_maximum_item_count">Maximum story items</string>
     <string name="piko_filter_story_maximum_item_count_desc">Stories having more than x items will be hidden (default 9999)</string>
 
+    <!-- Save Instants -->
+    <string name="piko_instants_download">Save Instants</string>
+    <string name="piko_instants_download_desc">Capture view-once Instants as you view them, so you can re-view and download them later from “View saved Instants”.</string>
+    <string name="piko_view_saved_instants">View saved Instants</string>
+    <string name="piko_instants_vault_empty">No saved Instants yet. Open some Instants with capture enabled and they\'ll appear here.</string>
+    <string name="piko_instants_link_unavailable">Media link not available.</string>
+    <string name="piko_instants_unknown_user">Unknown</string>
+    <string name="piko_instants_delete_confirm">Remove this saved Instant?</string>
+    <string name="piko_instants_clear_all">Clear all</string>
+    <string name="piko_instants_clear_all_confirm">Remove all saved Instants?</string>
+    <string name="piko_delete">Delete</string>
+    <string name="piko_instants_title">Instants</string>
+    <string name="piko_search_username">Search by username</string>
+    <string name="piko_instants_no_matches">No saved Instants from that user.</string>
+    <string name="piko_instants_unavailable">Unavailable</string>
+    <string name="piko_saved_on">Saved on</string>
+
     <!-- Save & view deleted (unsent) direct messages -->
     <string name="piko_open_share_in_instagram">Open in Instagram</string>
     <string name="piko_open_voice_with_player">Open with music player</string>
@@ -339,7 +356,6 @@
     <string name="piko_clear_all_confirm">Clear ALL saved deleted messages?</string>
     <string name="piko_no_deleted_messages">No deleted messages captured yet.\nEnable the feature and messages will be saved as they arrive.</string>
     <string name="piko_delete_saved_confirm">Delete this saved message?</string>
-    <string name="piko_delete">Delete</string>
     <string name="piko_unknown">Unknown</string>
     <string name="piko_tap_to_view">tap to view</string>
     <string name="piko_media_expired">link expired</string>

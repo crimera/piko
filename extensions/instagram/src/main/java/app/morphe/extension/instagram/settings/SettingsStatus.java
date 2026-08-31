@@ -83,6 +83,10 @@ public class SettingsStatus {
     public static void viewDmAnonymously() {
         viewDmAnonymously = true;
     }
+    public static boolean instantsDownload = false;
+    public static void instantsDownload() {
+        instantsDownload = true;
+    }
     public static boolean saveDeletedMessages = false;
     public static void saveDeletedMessages() {
         saveDeletedMessages = true;
@@ -279,6 +283,7 @@ public class SettingsStatus {
         FLAGS.put(str("piko_disable_typing_status"),SettingsStatus.disableTypingStatus);
         FLAGS.put(str("piko_more_profile_options"),SettingsStatus.viewLiveAnonymously);
         FLAGS.put(str("piko_view_stories_anonymously"),SettingsStatus.viewStoriesAnonymously);
+        FLAGS.put(str("piko_instants_title"),SettingsStatus.instantsDownload);
 
         FLAGS.put(str("piko_sanitize_share_links"),SettingsStatus.sanitizeShareLinks);
         FLAGS.put(str("piko_custom_sharing_domain"),SettingsStatus.customSharingDomain);
