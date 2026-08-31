@@ -30,7 +30,7 @@ import app.morphe.extension.instagram.entity.AudioMediaInterface;
 import app.morphe.extension.instagram.entity.MediaInterface;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
-import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.utils.InstaUtils;
 import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.crimera.ObjectBrowser;
 import app.morphe.extension.crimera.downloader.MediaDownloader;
@@ -136,7 +136,7 @@ public class DownloadUtils {
                         Utils.showToastShort(str("piko_copied_media_link"));
 
                     } else if (selectedOption.equals(str("piko_open_video_externally")) || selectedOption.equals(str("piko_open_image_externally"))) {
-                        ActivityHook.handleUrlIntent(isCurrentMediaVideo, currentMediaData.getMediaLink());
+                        InstaUtils.handleUrlIntent(isCurrentMediaVideo, currentMediaData.getMediaLink());
 
                     } else if (selectedOption.equals(str("piko_download_all"))) {
                         downloadMedia(context, mediaInfo, -1, MediaType.ANY);
