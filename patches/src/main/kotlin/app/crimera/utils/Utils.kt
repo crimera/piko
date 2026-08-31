@@ -26,10 +26,12 @@ import com.android.tools.smali.dexlib2.iface.Method
 import com.android.tools.smali.dexlib2.iface.MethodImplementation
 import com.android.tools.smali.dexlib2.iface.MethodParameter
 import com.android.tools.smali.dexlib2.iface.instruction.Instruction
+import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.formats.*
 import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
+import com.android.tools.smali.dexlib2.iface.reference.StringReference
 import com.android.tools.smali.dexlib2.iface.reference.Reference
 import jdk.javadoc.internal.doclets.formats.html.markup.HtmlStyle
 import org.w3c.dom.Element
@@ -142,6 +144,21 @@ fun Fingerprint.changeStringAt(
         val register = (instruction as BuilderInstruction21c).registerA
         method.replaceInstruction(instruction.location.index, "const-string v$register, \"$value\"")
     }
+}
+
+/** Rewrites the placeholder equal to [sentinel], so slot order can shift without breaking. */
+context(patchContext: BytecodePatchContext)
+fun Fingerprint.changeString(
+    sentinel: String,
+    value: String,
+) {
+    val instruction =
+        method.instructions.first {
+            (it.opcode == Opcode.CONST_STRING || it.opcode == Opcode.CONST_STRING_JUMBO) &&
+                it.getReference<StringReference>()?.string == sentinel
+        }
+    val register = instruction.registersUsed[0]
+    method.replaceInstruction(instruction.location.index, "const-string v$register, \"$value\"")
 }
 
 context(patchContext: BytecodePatchContext)

@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Search Piko settings</string>
     <string name="piko_settings_search_clear">Clear input</string>
-    <string name="piko_settings_search_no_results">No results for \"%1$s\"</string>
+    <string name="piko_settings_search_no_results">No results for \"%s\"</string>
 
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
@@ -94,6 +94,7 @@
 
     <string name="piko_title_native_share_menu">Native share menu</string>
     <string name="piko_native_share_menu_toggle">Enable native share menu</string>
+    <string name="piko_native_share_menu_items_to_hide">Native share menu items to hide</string>
 
     <!-- Ads Settings -->
     <string name="piko_title_ads">Ads</string>
@@ -147,10 +148,10 @@
     <string name="piko_pref_pause_search_suggestion_desc">Search suggestions will not be saved locally</string>
     <string name="piko_pref_search_suggestion">Hide search suggestions</string>
     <string name="piko_pref_search_suggestion_desc">Hides search suggestion in explore section</string>
-    <string name="piko_disunify_xchat_system">Disunify xchat system</string>
-    <string name="piko_disunify_xchat_system_desc">Bring back legacy features like messages and share sheet</string>
     <string name="piko_legacy_share_link">Legacy share links</string>
     <string name="piko_block_redirecting_to_x_lite">Block redirecting to X Lite</string>
+    <string name="piko_pref_block_update_screen">Block update screen</string>
+    <string name="piko_pref_block_update_screen_desc">Blocks the \'This app is out of date\' update screen from being shown on launch</string>
 
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature flags</string>
@@ -179,10 +180,10 @@
     <string name="piko_pref_show_poll_result">Show poll results</string>
     <string name="piko_pref_show_poll_result_desc">View poll results without voting</string>
     <string name="piko_pref_hide_community_notes">Hide community notes</string>
-    <string name="piko_pref_hide_immersive_player">Hide immersive player</string>
-    <string name="piko_pref_hide_immersive_player_desc">Removes swipe up for more videos in video player</string>
+    <string name="piko_pref_hide_immersive_player">Disable immersive player</string>
+    <string name="piko_pref_hide_immersive_player_desc">Disable the new video player that allows you to watch more videos by swiping up</string>
     <string name="piko_pref_enable_vid_auto_advance">Enable video auto scroll</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Enables video auto scroll in immersive view</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Enables video auto scroll in immersive player</string>
     <string name="piko_pref_hide_hidden_replies">Hide hidden replies</string>
     <string name="piko_pref_force_hd">Force HD videos</string>
     <string name="piko_pref_force_hd_desc">Videos will be played in the highest quality always</string>
@@ -220,6 +221,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">More information on profile</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Adds more details on the profile page</string>
     <string name="piko_fast_follower">Fast follower</string>
+    <string name="piko_pref_account_id">ID: %s</string>
 
     <!-- Font Settings -->
     <string name="piko_title_font">Font style</string>
@@ -308,6 +310,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">Legacy Icon 4</string>
     <string name="piko_app_icon_name_legacy_blue">Legacy Blue</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Blue</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
 
     <string name="piko_app_icon_name_earth">Earth</string>
     <string name="piko_app_icon_name_moon">Moon</string>

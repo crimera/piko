@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">البحث في إعدادات Piko</string>
     <string name="piko_settings_search_clear">مسح الإدخال</string>
-    <string name="piko_settings_search_no_results">لا توجد نتائج ل \"%1$s\"</string>
+    <string name="piko_settings_search_no_results">لا توجد نتائج لـ \"%s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">تمكين التراجع عن المنشورات</string>
@@ -37,7 +37,7 @@
     <string name="piko_title_native_downloader">أداة التنزيل المحلية</string>
     <string name="piko_title_native_downloader_toggle">تمكين التنزيل المحلي</string>
     <string name="piko_pref_native_downloader_autodownload_highest_video_res">تنزيل أعلى دقة للفيديو تلقائيًا</string>
-    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">تخطي نافذة اختيار الجودة وتنزيل مباشرة أفضل دقة متاحة للفيديوهات الفردية.</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">تخطي نافذة اختيار الجودة وتنزيل مباشرة أفضل دقة متاحة للفيديوهات الفردية</string>
     <string name="piko_pref_native_downloader_show_download_icon">عرض أيقونة التنزيل</string>
     <string name="piko_pref_native_downloader_show_copy_icon">عرض أيقونة النسخ</string>
     <string name="piko_pref_native_downloader_show_variants_icon">عرض أيقونة الخيارات</string>
@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">فشل حذف ذاكرة التخزين المؤقت</string>
     <string name="piko_title_native_share_menu">قائمة المشاركة المحلية</string>
     <string name="piko_native_share_menu_toggle">تمكين قائمة المشاركة المحلية</string>
+    <string name="piko_native_share_menu_items_to_hide">عناصر قائمة المشاركة المحلية المراد إخفاؤها</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">الإعلانات</string>
     <string name="piko_pref_hide_promoted_posts">إخفاء منشورات المحتوى المُروَّج</string>
@@ -137,10 +138,10 @@
     <string name="piko_pref_pause_search_suggestion_desc">لن يتم حفظ اقتراحات البحث محليًا</string>
     <string name="piko_pref_search_suggestion">إخفاء اقتراحات البحث</string>
     <string name="piko_pref_search_suggestion_desc">يخفي اقتراحات البحث في قسم استكشف</string>
-    <string name="piko_disunify_xchat_system">Disunify xchat system</string>
-    <string name="piko_disunify_xchat_system_desc">استعادة الميزات القديمة مثل الرسائل و نافذة المشاركة</string>
     <string name="piko_legacy_share_link">روابط المشاركة الكلاسيكية</string>
     <string name="piko_block_redirecting_to_x_lite">منع التحويل التلقائي إلى X Lite</string>
+    <string name="piko_pref_block_update_screen">منع شاشة التحديث</string>
+    <string name="piko_pref_block_update_screen_desc">يمنع عرض شاشة التحديث \'هذا التطبيق قديم\' عند التشغيل</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Feature Flags</string>
     <string name="piko_pref_feature_flags">Feature Flags إضافة</string>
@@ -167,10 +168,10 @@
     <string name="piko_pref_show_poll_result">عرض نتائج التصويت</string>
     <string name="piko_pref_show_poll_result_desc">عرض نتائج التصويت دون التصويت</string>
     <string name="piko_pref_hide_community_notes">إخفاء ملاحظات المجتمع</string>
-    <string name="piko_pref_hide_immersive_player">إخفاء مشغل Immersive</string>
-    <string name="piko_pref_hide_immersive_player_desc">يزيل التمرير السريع لمزيد من مقاطع الفيديو في مشغل الفيديو</string>
+    <string name="piko_pref_hide_immersive_player">تعطيل مشغل Immersive</string>
+    <string name="piko_pref_hide_immersive_player_desc">تعطيل مشغل الفيديو الجديد الذي يتيح مشاهدة المزيد من الفيديوهات بالتمرير للأعلى</string>
     <string name="piko_pref_enable_vid_auto_advance">تمكين تمرير الفيديو تلقائيًا</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">تمكين التمرير التلقائي للفيديو في العرض الشامل</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">تمكين التمرير التلقائي للفيديو في مشغل Immersive</string>
     <string name="piko_pref_hide_hidden_replies">إخفاء الردود المخفية</string>
     <string name="piko_pref_force_hd">فرض فيديوهات عالية الدقة HD</string>
     <string name="piko_pref_force_hd_desc">سيتم تشغيل الفيديوهات بأعلى جودة دائمًا</string>
@@ -207,6 +208,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">المزيد من المعلومات في الملف الشخصي</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">يضيف المزيد من التفاصيل على صفحة الملف الشخصي</string>
     <string name="piko_fast_follower">متابِع سريع</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">نمط الخط</string>
     <string name="piko_pref_add_font">إضافة خط</string>
@@ -285,6 +287,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">أيقونة قديمة 4</string>
     <string name="piko_app_icon_name_legacy_blue">الزرقاء القديمة</string>
     <string name="piko_app_icon_name_twitter_blue">تويتر الأزرق</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">الأرض</string>
     <string name="piko_app_icon_name_moon">القمر</string>
     <string name="piko_app_icon_name_mars">المريخ</string>

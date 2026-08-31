@@ -1,0 +1,132 @@
+[
+  {
+    "name" : "Add blurred background when reposting in Stories: Reels, Post and Stories mentioned",
+    "desc" : "",
+    "code" : "110215"
+  },
+  {
+    "name" : "Button with a black layout that appears when clicking on something in Stories",
+    "desc" : "",
+    "code" : "73245"
+  },
+  {
+    "name" : "Edit stories after you have been posted",
+    "desc" : "Limit of 15 minutes to modify.",
+    "code" : "118413"
+  },
+  {
+    "name" : "New fonts and animations for Stories",
+    "desc" : "",
+    "code" : "85030"
+  },
+  {
+    "name" : "New Instagram Plus fonts for Stories",
+    "desc" : "Make sure to enable the option to access Instagram Plus features.",
+    "code" : "125004"
+  },
+  {
+    "name" : "New style for the timestamp on the posted Stories",
+    "desc" : "",
+    "code" : "126445"
+  },
+  {
+    "name" : "Post a Stories directly to Highlights",
+    "desc" : "and add a sticker redirecting to the selected highlight",
+    "code" : "93316"
+  },
+  {
+    "name" : "Redesign Stories viewer",
+    "desc" : "",
+    "code" : "90996"
+  },
+  {
+    "name" : "Remove yourself from someone's Stories Close Friends list",
+    "desc" : "Click the Close Friends icon, and you'll see a button to leave.",
+    "code" : "105130"
+  },
+  {
+    "name" : "Send Stories by pressing and holding the Stories airplane button",
+    "desc" : "",
+    "code" : "119043"
+  },
+  {
+    "name" : "Stories viewer list redesign",
+    "desc" : "",
+    "code" : "119728"
+  },
+  {
+    "name" : "Upload progress percentage while posting a Stories",
+    "desc" : "Shows upload progress percentage while posting a Story, giving real-time feedback on upload status.",
+    "code" : "115501"
+  },
+  {
+    "name" : "Replace the Instagram logo with 'For You' in the feed.",
+    "desc" : "",
+    "code" : "58803"
+  },
+  {
+    "name" : "Watching Reels and videos in the feed at 2x playback speed",
+    "desc" : "Press and hold the corners to play in the feed.",
+    "code" : "103957"
+  },
+  {
+    "name" : "Overflow menu playback speed in reels",
+    "desc" : "",
+    "code" : "109947"
+  },
+  {
+    "name" : "Quick playback menu in reels",
+    "desc" : "When pressing and holding, it will open a quick playback menu.",
+    "code" : "121815"
+  },
+  {
+    "name" : "Show a spoiler of the temporary photo/video in direct",
+    "desc" : "",
+    "code" : "98405"
+  },
+  {
+    "name" : "Allow profile photo expansion",
+    "desc" : "Display a new button in the 'Account Privacy' settings section that allows users to enable or disable zooming on their profile picture.",
+    "code" : "46551"
+  },
+  {
+    "name" : "Explore zoom animation",
+    "desc" : "",
+    "code" : "93842"
+  },
+  {
+    "name" : "Redesign in the explore tab",
+    "desc" : "",
+    "code" : "124823"
+  },
+  {
+    "name" : "Display the user's username instead of the nickname",
+    "desc" : "for notifications and in direct",
+    "code" : "77064"
+  },
+  {
+    "name" : "New Instagram logo",
+    "desc" : "",
+    "code" : "111259"
+  },
+  {
+    "name" : "Redesign for notification settings",
+    "desc" : "",
+    "code" : "91066"
+  },
+  {
+    "name" : "Send quick emoji reactions by long-pressing the Story Like button",
+    "desc" : "",
+    "code" : "127260"
+  },
+  {
+    "name" : "Add Meta AI in reels overflow menu",
+    "desc" : "",
+    "code" : "109730"
+  },
+  {
+    "name" : "Add Meta AI reels description pills",
+    "desc" : "",
+    "code" : "80654"
+  }
+]

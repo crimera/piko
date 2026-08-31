@@ -21,7 +21,7 @@ internal object ProfileStatViewFormerFingerprint : Fingerprint(
 internal object ProfileStatViewLoaderFingerprint : Fingerprint(
     filters =
         listOf(
-            resourceLiteral(ResourceType.ID, "icon"),
+            resourceLiteral(ResourceType.DRAWABLE, "avatar_bg_gray"),
             resourceLiteral(ResourceType.PLURALS, "profile_follower_count"),
         ),
 )

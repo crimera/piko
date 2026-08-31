@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Wyszukaj w ustawieniach Piko</string>
     <string name="piko_settings_search_clear">Wyczyść pole</string>
-    <string name="piko_settings_search_no_results">Brak wyników dla \"%1$s\"</string>
+    <string name="piko_settings_search_no_results">Brak wyników dla \"%s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Włącz cofanie wpisów</string>
@@ -24,7 +24,7 @@
     <string name="piko_pref_download_media_link_handle_download">Bezpośrednie pobieranie</string>
     <string name="piko_pref_download_media_link_handle_copy_link">Bezpośrednie kopiowanie linku</string>
     <string name="piko_pref_download_media_link_handle_always_ask">Zawsze pytaj</string>
-    <string name="piko_pref_download_media_link_handle_copy_media_link">Skopiuj link</string>
+    <string name="piko_pref_download_media_link_handle_copy_media_link">Kopiuj link</string>
     <string name="piko_pref_download_media_link_handle_share_media_link">Udostępnij link</string>
     <string name="piko_pref_external_downloader_toggle">Włącz zewnętrzne pobieranie</string>
     <string name="piko_pref_external_downloader_text">Pobierz przez zewnętrzną aplikację</string>
@@ -80,12 +80,13 @@
     <string name="piko_native_reader_mode_pref_text_only_mode">Tryb samego tekstu</string>
     <string name="piko_native_reader_mode_pref_hide_quoted_posts">Ukryj cytowane wpisy</string>
     <string name="piko_native_reader_mode_pref_no_grok">Bez analiz Groka</string>
-    <string name="piko_native_reader_mode_copy_post">Skopiuj link do wpisu</string>
+    <string name="piko_native_reader_mode_copy_post">Kopiuj link do wpisu</string>
     <string name="piko_native_reader_mode_cache_delete">Wyczyść pamięć podręczną</string>
     <string name="piko_native_reader_mode_cache_delete_success">Pamięć podręczna została wyczyszczona</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Nie udało się wyczyścić pamięci podręcznej</string>
     <string name="piko_title_native_share_menu">Natywne menu udostępniania</string>
     <string name="piko_native_share_menu_toggle">Włącz natywne menu udostępniania</string>
+    <string name="piko_native_share_menu_items_to_hide">Elementy natywnego menu udostępniania do ukrycia</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Reklamy</string>
     <string name="piko_pref_hide_promoted_posts">Ukryj promowane wpisy</string>
@@ -137,10 +138,10 @@
     <string name="piko_pref_pause_search_suggestion_desc">Sugestie wyszukiwania nie będą zapisywane lokalnie</string>
     <string name="piko_pref_search_suggestion">Ukryj sugestie wyszukiwania</string>
     <string name="piko_pref_search_suggestion_desc">Ukrywa sugestie wyszukiwania w sekcji przeglądania</string>
-    <string name="piko_disunify_xchat_system">Rozdziel system XChat</string>
-    <string name="piko_disunify_xchat_system_desc">Przywraca klasyczne funkcje, takie jak wiadomości i menu udostępniania</string>
     <string name="piko_legacy_share_link">Klasyczne linki udostępniania</string>
     <string name="piko_block_redirecting_to_x_lite">Zablokuj przekierowania do X Lite</string>
+    <string name="piko_pref_block_update_screen">Zablokuj ekran aktualizacji</string>
+    <string name="piko_pref_block_update_screen_desc">Blokuje wyświetlanie ekranu aktualizacji \"Twoja aplikacja jest nieaktualna\" podczas uruchamiania</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Flagi</string>
     <string name="piko_pref_feature_flags">Zarządzaj flagami</string>
@@ -167,10 +168,10 @@
     <string name="piko_pref_show_poll_result">Pokaż wyniki ankiet</string>
     <string name="piko_pref_show_poll_result_desc">Pozwala zobaczyć wyniki ankiety bez oddawania głosu</string>
     <string name="piko_pref_hide_community_notes">Ukryj uwagi społeczności</string>
-    <string name="piko_pref_hide_immersive_player">Ukryj pełnoekranowy odtwarzacz</string>
-    <string name="piko_pref_hide_immersive_player_desc">Wyłącza gest przesuwania w górę dla kolejnych filmów</string>
+    <string name="piko_pref_hide_immersive_player">Wyłącz odtwarzacz immersyjny</string>
+    <string name="piko_pref_hide_immersive_player_desc">Wyłącza nowy odtwarzacz filmów, który pozwala oglądać kolejne filmy po przesunięciu w górę</string>
     <string name="piko_pref_enable_vid_auto_advance">Włącz auto-przewijanie filmów</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Włącza automatyczne przechodzenie do kolejnego filmu w widoku pełnoekranowym</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Włącza automatyczne przewijanie filmów w trybie immersyjnym</string>
     <string name="piko_pref_hide_hidden_replies">Ukryj ukryte odpowiedzi</string>
     <string name="piko_pref_force_hd">Wymuś jakość filmów w HD</string>
     <string name="piko_pref_force_hd_desc">Filmy będą zawsze odtwarzane w najwyższej dostępnej jakości</string>
@@ -207,6 +208,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">Więcej informacji w profilu</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Dodaje więcej szczegółów na stronie profilu</string>
     <string name="piko_fast_follower">Szybki obserwujący</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Styl czcionki</string>
     <string name="piko_pref_add_font">Dodaj czcionkę</string>
@@ -285,6 +287,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">Klasyczna 4</string>
     <string name="piko_app_icon_name_legacy_blue">Klasyczny błękit</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Blue</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">Ziemia</string>
     <string name="piko_app_icon_name_moon">Księżyc</string>
     <string name="piko_app_icon_name_mars">Mars</string>
@@ -379,7 +382,7 @@ Szczegóły znajdziesz na tej stronie:
 https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
 Zalecamy zapoznanie się z tym dokumentem przed użyciem funkcji. Zawiera on ważne informacje, między innymi o tym, jak importować tokeny."</string>
     <string name="piko_login_token_select_account">Wybierz konto:</string>
-    <string name="piko_login_token_export_copy_to_clipboard">Skopiuj do schowka</string>
+    <string name="piko_login_token_export_copy_to_clipboard">Kopiuj do schowka</string>
     <string name="piko_login_token_export_save_to_file">Zapisz do pliku</string>
     <string name="piko_login_token_export_no_accounts_message">Uwaga: Nie jesteś zalogowany na żadnym koncie. Aby wyeksportować tokeny, najpierw się zaloguj.</string>
     <string name="piko_login_token_import_token_button_text">Zaloguj przez token JSON</string>

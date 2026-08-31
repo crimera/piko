@@ -13,16 +13,26 @@ import android.content.Context;
 import android.preference.PreferenceScreen;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
+import android.text.format.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TreeMap;
 import java.util.Map;
+import java.util.List;
+import java.util.Locale;
+
+import  app.morphe.extension.instagram.patches.devFlags.RecommendedFlags;
+import  app.morphe.extension.instagram.patches.devFlags.Flag;
 
 import app.morphe.extension.crimera.downloader.StorageUtils;
+import app.morphe.extension.instagram.patches.Links;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.preference.widgets.*;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.instagram.utils.Pref;
 import app.morphe.extension.instagram.constants.Constants;
+import app.morphe.extension.instagram.theme.MaterialYouTheme;
 
 public class ScreenBuilder {
     private final Context context;
@@ -84,6 +94,15 @@ public class ScreenBuilder {
         if (!(SettingsStatus.developerOptionsSection())) return;
 
         // PreferenceCategory category= addCategory(str("piko_category_dev_options"));
+        if (SettingsStatus.recommendedFlags) {
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_category_rec_flags"),
+                            str("piko_category_rec_flags_desc"),
+                            Constants.PIKO_FRAGMENT_REC_FLAGS
+                    )
+            );
+        }
 
         if (SettingsStatus.removeBuildExpirePopup) {
             addPreference(
@@ -219,6 +238,23 @@ public class ScreenBuilder {
             );
         }
 
+        if (SettingsStatus.saveDeletedMessages) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_save_deleted_messages"),
+                            str("piko_save_deleted_messages_desc"),
+                            Settings.SAVE_DELETED_MESSAGES
+                    )
+            );
+            addPreference(
+                    helper.buttonPreference(
+                            str("piko_view_deleted_messages"),
+                            "",
+                            "view_deleted_messages"
+                    )
+            );
+        }
+
 
     }
 
@@ -302,6 +338,15 @@ public class ScreenBuilder {
                             str("piko_sanitize_share_links"),
                             "",
                             Settings.SANITIZE_SHARE_LINKS
+                    )
+            );
+        }
+        if (SettingsStatus.customSharingDomain) {
+            addPreference(
+                    helper.editTextPreference(
+                            str("piko_custom_sharing_domain"),
+                            Links.customSharingDomainSummary(Pref.customSharingDomain()),
+                            Settings.CUSTOM_SHARING_DOMAIN
                     )
             );
         }
@@ -442,6 +487,24 @@ public class ScreenBuilder {
         if (!(SettingsStatus.miscSection())) return;
 
         // PreferenceCategory category= addCategory(str("piko_category_misc"));
+        if (MaterialYouTheme.isAmoledAvailable()) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_amoled_title"),
+                            "",
+                            Settings.AMOLED_THEME
+                    )
+            );
+        }
+        if (MaterialYouTheme.isMaterialYouAvailable()) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_material_you_title"),
+                            "",
+                            Settings.MATERIAL_YOU_THEME
+                    )
+            );
+        }
         if (SettingsStatus.unlockPlusBenefits) {
             addPreference(
                     helper.switchPreference(
@@ -544,6 +607,15 @@ public class ScreenBuilder {
                             str("piko_disable_story_flipping"),
                             str("piko_disable_story_flipping_desc"),
                             Settings.DISABLE_STORY_FLIPPING
+                    )
+            );
+        }
+        if (SettingsStatus.loopStory) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_loop_story"),
+                            str("piko_loop_story_desc"),
+                            Settings.LOOP_STORY
                     )
             );
         }
@@ -651,21 +723,23 @@ public class ScreenBuilder {
                 )
         );
 
-        addPreference(
-                helper.switchPreference(
-                        str("piko_download_with_external_downloader"),
-                        "",
-                        Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER
-                )
-        );
+        if(SettingsStatus.downloadWithExternalDownloader) {
+            addPreference(
+                    helper.switchPreference(
+                            str("piko_download_with_external_downloader"),
+                            "",
+                            Settings.DOWNLOAD_WITH_EXTERNAL_DOWNLOADER
+                    )
+            );
 
-        addPreference(
-                helper.editTextPreference(
-                        str("piko_external_downloader_package_name"),
-                        Pref.externalDownloaderPackageName(),
-                        Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
-                )
-        );
+            addPreference(
+                    helper.editTextPreference(
+                            str("piko_external_downloader_package_name"),
+                            Pref.externalDownloaderPackageName(),
+                            Settings.EXTERNAL_DOWNLOADER_PACKAGE_NAME
+                    )
+            );
+        }
     }
 
     public void buildActionBarSection() {
@@ -791,6 +865,40 @@ public class ScreenBuilder {
                         Settings.HIDE_NAVIGATION_CREATE
                 )
         );
+    }
+
+    public void buildRecommendedFlagsSection() {
+
+        long lastModified = RecommendedFlags.getLastModified();
+        String lastModifiedAtString = "";
+        if (lastModified > 0L) {
+            Locale locale = context.getResources().getConfiguration().getLocales().get(0);
+            String skeleton = DateFormat.is24HourFormat(context) ? "yMMMEdHm" : "yMMMEdhm";
+            String pattern = DateFormat.getBestDateTimePattern(locale, skeleton);
+            String formattedDate = new SimpleDateFormat(pattern, locale).format(new Date(lastModified));
+            lastModifiedAtString = String.format(str("piko_rec_flags_last_modified_at"), formattedDate);
+        }
+        addPreference(
+            helper.buttonPreference(
+                    str("piko_rec_flags_refresh_file"),
+                    lastModifiedAtString,
+                    "piko_rec_flags_refresh_file"
+            )
+        );
+        List<Flag> recFlags = RecommendedFlags.getFlags();
+        // The flag names will be English only,
+        // as I want to keep it as a live service
+        // rather than triggering new build
+        // for every a new flag.
+        for(Flag flag : recFlags) {
+            addPreference(
+                    helper.listPreference(
+                            flag.getName(),
+                            flag.getDesc(),
+                            flag.getCode()
+                    )
+            );
+        }
     }
 
     public void aboutSection(TreeMap<String, Boolean> flags) {
@@ -974,7 +1082,6 @@ public class ScreenBuilder {
                     )
             );
         }
-
 
         addPreference(
                 helper.buttonPreference(

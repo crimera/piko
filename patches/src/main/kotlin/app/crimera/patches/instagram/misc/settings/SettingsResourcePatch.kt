@@ -25,6 +25,15 @@ val addSettingsActivityPatch =
                 activity.setAttribute("android:exported", "false")
                 application.appendChild(activity)
 
+                val service = document.createElement("service")
+                service.setAttribute(
+                    "android:name",
+                    "app.morphe.extension.instagram.settings.SettingsTaskService",
+                )
+                service.setAttribute("android:exported", "false")
+                service.setAttribute("android:stopWithTask", "false")
+                application.appendChild(service)
+
                 listOf(
                     "app.morphe.extension.instagram.settings.preference.fragments.BackupPrefActivity",
                     "app.morphe.extension.instagram.settings.preference.fragments.RestorePrefActivity",

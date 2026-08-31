@@ -116,8 +116,6 @@
     <string name="piko_pref_pause_search_suggestion_desc">將不會於本機儲存搜尋建議</string>
     <string name="piko_pref_search_suggestion">隱藏搜尋建議</string>
     <string name="piko_pref_search_suggestion_desc">隱藏探索分頁中的搜尋建議</string>
-    <string name="piko_disunify_xchat_system">分離 XChat 系統</string>
-    <string name="piko_disunify_xchat_system_desc">恢復舊版功能，如訊息和分享面板</string>
     <string name="piko_legacy_share_link">舊版分享連結</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">功能標誌</string>
@@ -145,10 +143,7 @@
     <string name="piko_pref_show_poll_result">顯示投票結果</string>
     <string name="piko_pref_show_poll_result_desc">在沒有投票的情況下查看投票結果</string>
     <string name="piko_pref_hide_community_notes">隱藏社群徽章</string>
-    <string name="piko_pref_hide_immersive_player">隱藏沉浸式播放器（上下滑動）</string>
-    <string name="piko_pref_hide_immersive_player_desc">移除影片播放器中向上滑動瀏覽其他影片的功能</string>
     <string name="piko_pref_enable_vid_auto_advance">啟用影片自動捲動</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">在沉浸式檢視中啟用影片自動捲動</string>
     <string name="piko_pref_hide_hidden_replies">隱藏隱藏的回覆</string>
     <string name="piko_pref_force_hd">強制高畫質影片</string>
     <string name="piko_pref_force_hd_desc">始終選取最高畫質影片播放</string>

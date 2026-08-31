@@ -131,6 +131,7 @@ private enum class BundledResourceType {
     // Add more resource XML files as needed.
     ARRAYS,
     COLORS,
+    PLURALS,
     STRINGS;
 
     override fun toString(): String {
@@ -151,7 +152,8 @@ internal val addResourcesPatch = resourcePatch(
     description = "Add resources such as strings or arrays to the app."
 ) {
 
-    val defaultResourcesAdded = mutableSetOf<String>()
+    // Includes the app and XML element type so resources from different bundles do not collide.
+    val defaultResourcesAdded = mutableSetOf<Triple<String, String, String>>()
 
 
     finalize {
@@ -249,10 +251,25 @@ internal val addResourcesPatch = resourcePatch(
                                 return@forEachChildElement
                             }
 
+                            val resourceKey = srcNode.tagName to resourceName
+                            val defaultResourceKey = Triple(appId, srcNode.tagName, resourceName)
+                            val existingNode = existingNodes[resourceKey]
+
+                            if (replaceExisting && isDefaultLocale && existingNode == null) {
+                                // Bring-back resources are overrides, not new app resources.
+                                // Skip keys that do not exist in the target version so renamed
+                                // resources can coexist across multiple supported app versions.
+                                logger.fine {
+                                    "Skipping replacement resource absent from target: " +
+                                            "$srcFolderName resource: $resourceName"
+                                }
+                                return@forEachChildElement
+                            }
+
                             if (isDefaultLocale) {
                                 // Duplicate check already handled above.
-                                defaultResourcesAdded.add(resourceName)
-                            } else if (!defaultResourcesAdded.contains(resourceName)) {
+                                defaultResourcesAdded.add(defaultResourceKey)
+                            } else if (!defaultResourcesAdded.contains(defaultResourceKey)) {
                                 logger.fine {
                                     "Ignoring removed default resource for locale " +
                                             "(Issue will be fixed after next Crowdin sync): " +
@@ -265,8 +282,7 @@ internal val addResourcesPatch = resourcePatch(
                             // ARSCLib doesn't check for duplicates and uses the last added,
                             // but Apktool crashes if duplicates exist.
                             if (replaceExisting) {
-                                val key = srcNode.tagName to resourceName
-                                existingNodes[key]?.let { existing ->
+                                existingNode?.let { existing ->
                                     destResourceNode.removeChild(existing)
                                 }
                             }

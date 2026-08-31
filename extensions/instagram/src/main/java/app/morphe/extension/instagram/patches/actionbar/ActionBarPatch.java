@@ -9,6 +9,7 @@ package app.morphe.extension.instagram.patches.actionbar;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.UI;
 import app.morphe.extension.instagram.entity.ProfileInfo;
 import app.morphe.extension.instagram.patches.userprofile.ProfileMoreOption;
+import app.morphe.extension.instagram.patches.dm.SavedMessagesHook;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.constants.Constants;
 
@@ -90,9 +92,9 @@ public class ActionBarPatch {
         }
     }
 
-    public static void userProfileActionBarButton(ViewGroup viewGroup, UserSession userSession, Object userObject){
+    public static void userProfileActionBarButton(Activity activity, ViewGroup viewGroup, UserSession userSession, Object userObject){
         try {
-            if (viewGroup == null) {
+            if (activity == null || viewGroup == null) {
                 return;
             }
 
@@ -110,8 +112,7 @@ public class ActionBarPatch {
             }
 
             if(pref.contains(Constants.AB_PROFILE_INFO_ICON)) {
-                Context context = viewGroup.getContext();
-                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_INFO_ICON, () -> ProfileMoreOption.moreOptionsDailogueBox(context, userData));
+                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_INFO_ICON, () -> ProfileMoreOption.moreOptionsDailogueBox(activity, userData));
             }
 
 
@@ -135,6 +136,12 @@ public class ActionBarPatch {
 
             if(pref.contains(Constants.AB_GHOST_MODE_ICON)) {
                 ghostModeToggle(viewGroup);
+            }
+
+            if(SettingsStatus.saveDeletedMessages) {
+                Context context = viewGroup.getContext();
+                UI.addImageViewToViewGroup(viewGroup, UI.DRAWABLE_HISTORY_ICON,
+                        () -> SavedMessagesHook.openDeletedMessages(context));
             }
 
         } catch (Exception e) {

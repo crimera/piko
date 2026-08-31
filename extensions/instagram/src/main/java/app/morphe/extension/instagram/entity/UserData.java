@@ -62,6 +62,11 @@ public class UserData extends Entity {
         return (ImageUrl) imageUrlObject;
     }
 
+    /** The public permalink of this profile: what "share" and "copy link" both hand out. */
+    public String getProfileLink() throws Exception {
+        return "https://www.instagram.com/" + getUsername() + "/";
+    }
+
     public String getUserId() throws Exception {
         return (String) super.getMethod(this.obj, "getId");
     }

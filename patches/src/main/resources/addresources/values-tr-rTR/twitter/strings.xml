@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Piko ayarlarında ara</string>
     <string name="piko_settings_search_clear">Girişi temizle</string>
-    <string name="piko_settings_search_no_results">\"%1$s\" için sonuç bulunamadı</string>
+    <string name="piko_settings_search_no_results">\"%s\" için sonuç bulunamadı</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Gönderileri geri alma özelliğini etkinleştirin</string>
@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Önbellek silme başarısız</string>
     <string name="piko_title_native_share_menu">Yerel paylaşım menüsü</string>
     <string name="piko_native_share_menu_toggle">Yerel paylaşım menüsünü etkinleştir</string>
+    <string name="piko_native_share_menu_items_to_hide">Yerel paylaşım menüsü öğelerini gizlemek için</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Reklamlar</string>
     <string name="piko_pref_hide_promoted_posts">Sponsorlu gönderileri gizle</string>
@@ -137,10 +138,10 @@
     <string name="piko_pref_pause_search_suggestion_desc">Arama önerileri yerel olarak kaydedilmez</string>
     <string name="piko_pref_search_suggestion">Arama önerilerini gizle</string>
     <string name="piko_pref_search_suggestion_desc">Keşfet bölümünde arama önerilerini gizler</string>
-    <string name="piko_disunify_xchat_system">Xchat sistemini ayırma</string>
-    <string name="piko_disunify_xchat_system_desc">Mesajlar ve paylaşım sayfası gibi eski özellikleri geri getirir</string>
     <string name="piko_legacy_share_link">Türkçe</string>
     <string name="piko_block_redirecting_to_x_lite">X Lite sürümüne yönlendirmeyi engelle</string>
+    <string name="piko_pref_block_update_screen">Güncelleme ekranını engelle</string>
+    <string name="piko_pref_block_update_screen_desc">Açılışta \'Bu uygulamanın sürümü eski\' güncelleme ekranının gösterilmesini engeller</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Özellik bayrakları</string>
     <string name="piko_pref_feature_flags">Özellik bayrağı ekle</string>
@@ -167,10 +168,10 @@
     <string name="piko_pref_show_poll_result">Anket sonuçlarını göster</string>
     <string name="piko_pref_show_poll_result_desc">Oy vermeden anket sonuçlarını görüntüle</string>
     <string name="piko_pref_hide_community_notes">Topluluk notlarını gizle</string>
-    <string name="piko_pref_hide_immersive_player">Tam ekran oynatıcıyı gizle</string>
-    <string name="piko_pref_hide_immersive_player_desc">Video oynatıcıda yukarı kaydırarak daha fazla video açma özelliğini kaldırır</string>
+    <string name="piko_pref_hide_immersive_player">Sürükleyici oynatıcıyı devre dışı bırak</string>
+    <string name="piko_pref_hide_immersive_player_desc">Yukarı kaydırarak daha fazla video izlemenizi sağlayan yeni video oynatıcıyı devre dışı bırakır</string>
     <string name="piko_pref_enable_vid_auto_advance">Otomatik kaydırmayı etkinleştir</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Immersive görünümde video otomatik kaydırmayı etkinleştirir</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Sürükleyici oynatıcıda otomatik video kaydırmayı etkinleştirir</string>
     <string name="piko_pref_hide_hidden_replies">Gizli yanıtları gizle</string>
     <string name="piko_pref_force_hd">HD videoları zorla</string>
     <string name="piko_pref_force_hd_desc">Videolar her zaman en yüksek kalitede oynatılır</string>
@@ -207,6 +208,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">Profilde daha fazla bilgi</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Profil sayfasında daha fazla ayrıntı ekler</string>
     <string name="piko_fast_follower">Hızlı takipçi</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Yazı tipi stili</string>
     <string name="piko_pref_add_font">Yazı tipi ekle</string>
@@ -285,6 +287,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">Eski İkon 4</string>
     <string name="piko_app_icon_name_legacy_blue">Eski Mavi</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Mavi</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">Dünya</string>
     <string name="piko_app_icon_name_moon">Ay</string>
     <string name="piko_app_icon_name_mars">Mars</string>

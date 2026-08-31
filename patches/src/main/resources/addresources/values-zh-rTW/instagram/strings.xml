@@ -49,9 +49,8 @@
     <string name="piko_limit_following_feed">僅顯示已追蹤的帳號的動態</string>
     <string name="piko_limit_following_feed_desc">篩選動態首頁，僅顯示您已追蹤的帳號所發布的內容。</string>
     <string name="piko_disable_reels_scrolling">停用 Reels 捲動</string>
-    <string name="piko_disable_reels_scrolling_desc">"停用 Instagram Reels 中的無限捲動功能，防止自動滑動至下一則 Reel。
-
-注意：在全新安裝的情況下，可能會出現「提示」動畫，但幾秒鐘後會自動停止。"</string>
+    <string name="piko_disable_swipe_to_create">停用滑動建立</string>
+    <string name="piko_disable_swipe_to_create_desc">防止在首頁分頁向右滑動開啟創作畫面。</string>
     <string name="piko_hide_stories_tray">隱藏限時動態欄</string>
     <string name="piko_hide_stories_tray_desc">從動態首頁中限時動態欄</string>
     <string name="piko_hide_notes_tray">隱藏筆記欄</string>
@@ -66,7 +65,6 @@
     <string name="piko_category_misc">其他</string>
     <string name="piko_disable_analytics">停用資料分析</string>
     <string name="piko_delete_analytics_cache">刪除資料分析快取</string>
-    <string name="piko_disable_analytics_desc">封鎖傳送至 Instagram / Facebook 伺服器的分析資料</string>
     <string name="piko_disable_discover_people">停用「為你推薦」功能</string>
     <string name="piko_disable_discover_people_desc">在其他人主頁中停用「為你推薦」功能</string>
     <string name="piko_follow_back_indicator">啟用好友關係狀態指示器</string>
@@ -87,7 +85,6 @@
     <string name="piko_customise_story_timestamp">自訂限時動態的時間格式</string>
     <string name="piko_customise_story_timestamp_desc">自訂顯示限時動態發佈時間的格式</string>
     <string name="piko_improve_image_viewing">提高相片畫質</string>
-    <string name="piko_improve_image_viewing_desc">從伺服器擷取最高解析度的圖片</string>
     <string name="piko_hide_reshare_button">隱藏轉發按鈕</string>
     <string name="piko_copy_comment">複製留言</string>
     <string name="piko_copy_comment_desc">在貼文和 Reels 新增一個複製留言的按鈕</string>
@@ -108,7 +105,11 @@
     <string name="piko_customise_story_ring_size">自訂限時動態光圈尺寸</string>
     <string name="piko_customise_story_ring_size_desc">按百分比調整限時動態光圈尺寸 (預設值：100)</string>
     <!-- DM Section -->
+    <string name="piko_category_dm">私訊 (DM)</string>
+    <string name="piko_unlimited_replays">使限時媒體變為永久</string>
     <string name="piko_unlimited_replays_desc">將未過期的單次或雙次檢視媒體變更為永久檢視</string>
+    <string name="piko_enable_mark_chat_as_read">啟用標記聊天為已讀選項</string>
+    <string name="piko_enable_mark_chat_as_read_desc">長按聊天時獲得將其標記為已讀的選項</string>
     <!-- Download Media Section -->
     <string name="piko_category_download_media">下載媒體</string>
     <string name="piko_enable_download">啟用下載</string>
@@ -129,7 +130,13 @@
     <string name="piko_downloaded_media">已下載： </string>
     <string name="piko_media_exists">媒體已存在</string>
     <string name="piko_download_failed_media">下載失敗： </string>
+    <string name="piko_download_set_path">選擇下載資料夾</string>
     <string name="piko_download_set_path_success">下載路徑已更新！</string>
+    <string name="piko_download_set_path_failed">無法儲存下載資料夾</string>
+    <string name="piko_download_choose_folder">請選擇下載資料夾以繼續</string>
+    <string name="piko_download_choose_folder_failed">無法開啟資料夾選擇器</string>
+    <string name="piko_download_grant_permission">請選擇下載資料夾以繼續</string>
+    <string name="piko_download_grant_permission_failed">無法開啟資料夾選擇器</string>
     <string name="piko_download_with_external_downloader">使用外部下載程式下載</string>
     <string name="piko_external_downloader_package_name">外部下載程式的套件名稱</string>
     <string name="piko_external_downloader_package_name_not_found">找不到外部下載程式</string>
@@ -154,9 +161,6 @@
     <string name="piko_category_about">關於</string>
     <string name="piko_export_pref">匯出 Piko 偏好設定</string>
     <string name="piko_import_pref">匯入 Piko 偏好設定</string>
-    <string name="piko_reset_pref">重設 Piko 偏好設定</string>
-    <string name="piko_reset_pref_success">已刪除 Piko 偏好設定</string>
-    <string name="piko_reset_pref_failed">無法刪除 Piko 偏好設定</string>
     <string name="piko_app_version">應用程式版本：%s</string>
     <string name="piko_patch_version">補丁版本：%s</string>
     <string name="piko_patch_info_title">補丁資訊</string>
@@ -209,5 +213,65 @@
     <string name="piko_action_bar_button_profile_info_icon">個人檔案圖示</string>
     <string name="piko_settings_on_action_bar">操作列上的 Piko 設定</string>
     <string name="piko_settings_on_action_bar_desc">將 Piko 設定入口移至動態首頁的操作列上</string>
+    <!-- Developer Options Section -->
     <!-- Story filters -->
+    <string name="piko_category_filter_content">內容過濾</string>
+    <string name="piko_filter_story">過濾限時動態</string>
+    <string name="piko_filter_story_types_to_hide">要隱藏的限時動態類型</string>
+    <string name="piko_reel_type_ads_reel">廣告 Reel</string>
+    <string name="piko_reel_type_ar_effect_preview">AR 特效預覽</string>
+    <string name="piko_reel_type_archive_day_media_reel">典藏單日媒體 Reel</string>
+    <string name="piko_reel_type_archive_day_reel">典藏單日 Reel</string>
+    <string name="piko_reel_type_archive_friend_reel">典藏好友 Reel</string>
+    <string name="piko_reel_type_archive_map_reel">典藏地圖 Reel</string>
+    <string name="piko_reel_type_archive_scheduled_for_deletion_reel">典藏預定刪除 Reel</string>
+    <string name="piko_reel_type_archive_shop_reel">典藏商店 Reel</string>
+    <string name="piko_reel_type_axe_reel">Axe Reel</string>
+    <string name="piko_reel_type_birthday_highlights">生日精選</string>
+    <string name="piko_reel_type_bloks">Blox</string>
+    <string name="piko_reel_type_broadcast_reel">廣播 Reel</string>
+    <string name="piko_reel_type_daily_snapshot_reel">每日快照 Reel</string>
+    <string name="piko_reel_type_election_reel">選舉 Reel</string>
+    <string name="piko_reel_type_empty_story_state_reel">空白動態狀態 Reel</string>
+    <string name="piko_reel_type_end_of_year">年度回顧</string>
+    <string name="piko_reel_type_expiring_story_reel">即將過期限時動態 Reel</string>
+    <string name="piko_reel_type_fan_club_story">粉絲俱樂部限時動態</string>
+    <string name="piko_reel_type_follow_versaries">追蹤週年紀念</string>
+    <string name="piko_reel_type_friend_map_reel">好友地圖 Reel</string>
+    <string name="piko_reel_type_group_mention">群組提及</string>
+    <string name="piko_reel_type_group_reel">群組 Reel</string>
+    <string name="piko_reel_type_hallpass_reel">Hall Pass Reel</string>
+    <string name="piko_reel_type_highlight_reel">精選 Reel</string>
+    <string name="piko_reel_type_highlight_rewind_reel">精選重溫 Reel</string>
+    <string name="piko_reel_type_inactive_hallpass_reel">未啟用的 Hall Pass Reel</string>
+    <string name="piko_reel_type_mas_reel">Mas Reel</string>
+    <string name="piko_reel_type_media_reshare">媒體轉發</string>
+    <string name="piko_reel_type_memory_reel">回憶 Reel</string>
+    <string name="piko_reel_type_my_week_reel">我的本週 Reel</string>
+    <string name="piko_reel_type_netego_reel">NetEgo Reel</string>
+    <string name="piko_reel_type_nux_reel">Nux Reel</string>
+    <string name="piko_reel_type_private_story">私人限時動態</string>
+    <string name="piko_reel_type_prompt_sticker_reel">提示貼紙 Reel</string>
+    <string name="piko_reel_type_reconsideration_injected_story">重新考慮插入的限時動態</string>
+    <string name="piko_reel_type_shopping_auto_highlight_reel">購物智慧 Reel</string>
+    <string name="piko_reel_type_shopping_pdp_reel">購物 PDP Reel</string>
+    <string name="piko_reel_type_shopping_smart_reel">購物智慧 Reel</string>
+    <string name="piko_reel_type_stars_welcome_reel">歡迎 Reel</string>
+    <string name="piko_reel_type_story_stationary_timeline_reel">限時動態靜止時間軸 Reel</string>
+    <string name="piko_reel_type_subscription_shoutout_mention">訂閱感謝提及</string>
+    <string name="piko_reel_type_suggested_creator_reel">建議創作者 Reel</string>
+    <string name="piko_reel_type_suggested_user">建議使用者</string>
+    <string name="piko_reel_type_suggested_user_reel">建議使用者 Reel</string>
+    <string name="piko_reel_type_superlative_reel">最佳回顧 Reel</string>
+    <string name="piko_reel_type_third_party_app_story">第三方應用程式限時動態</string>
+    <string name="piko_reel_type_typed_container">類型容器</string>
+    <string name="piko_reel_type_user_reel">使用者 Reel</string>
+    <string name="piko_filter_story_user_types_to_hide">要隱藏的使用者類型</string>
+    <string name="piko_user_type_unverified">未驗證使用者</string>
+    <string name="piko_user_type_verified">已驗證使用者</string>
+    <string name="piko_filter_story_minimum_item_count">最少限時動態項目數量</string>
+    <string name="piko_filter_story_minimum_item_count_desc">少於 X 個項目的限時動態將會隱藏 (預設值：1)</string>
+    <string name="piko_filter_story_maximum_item_count">最多限時動態項目數量</string>
+    <string name="piko_filter_story_maximum_item_count_desc">多於 X 個項目的限時動態將會隱藏 (預設值：9999)</string>
+    <!-- Save & view deleted (unsent) direct messages -->
 </resources>

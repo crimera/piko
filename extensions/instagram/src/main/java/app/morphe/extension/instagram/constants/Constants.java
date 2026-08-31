@@ -23,6 +23,8 @@ public class Constants {
     // https://www.instagram.com/p/<short code>/
     // https://www.instagram.com/reel/<short code>/
     // https://www.instagram.com/stories/<user name>/<post id>
+    public static final String REC_FLAGS = PIKO + "_recommended_flags_v3";
+    public static final String PIKO_MAPPINGS_PATH = "https://github.com/crimera/piko/raw/refs/heads/dev/docs/mappings/";
 
     public static final String AB_SETTINGS_ICON = "SETTINGS_ICON";
     public static final String AB_GHOST_MODE_ICON = "GHOST_MODE_ICON";
@@ -44,6 +46,7 @@ public class Constants {
     public static final String PIKO_FRAGMENT_ACTION_BAR = "piko_frag_action_bar";
     public static final String PIKO_FRAGMENT_DM = "piko_frag_dm";
     public static final String PIKO_FRAGMENT_FILTER_CONTENT = "piko_frag_filter_content";
+    public static final String PIKO_FRAGMENT_REC_FLAGS = "piko_frag_rec_flags";
 
     public static void load() {
         ExtensionStrings.setDefaultPikoFolder(Constants.DEFAULT_PIKO_FOLDER);

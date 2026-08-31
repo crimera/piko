@@ -28,6 +28,8 @@
     <string name="piko_open_links_externally">Открывать ссылки во внешнем браузере</string>
     <string name="piko_open_links_externally_desc">Открывать ссылки во внешнем браузере вместо встроенного браузера приложения</string>
     <string name="piko_sanitize_share_links">Очищать ссылки при отправке</string>
+    <string name="piko_custom_sharing_domain">Пользовательский домен для обмена</string>
+    <string name="piko_custom_sharing_domain_desc">Домен, используемый при отправке ссылок</string>
     <!-- Ghost Section -->
     <string name="piko_category_ghost">Режим невидимки</string>
     <string name="piko_view_stories_anonymously">Смотреть истории анонимно</string>
@@ -49,9 +51,7 @@
     <string name="piko_limit_following_feed">Ограничить ленту подписками</string>
     <string name="piko_limit_following_feed_desc">Показывать в главной ленте только содержимое от профилей, на которые вы подписаны.</string>
     <string name="piko_disable_reels_scrolling">Отключить пролистывание Reels</string>
-    <string name="piko_disable_reels_scrolling_desc">"Отключает бесконечное пролистывание в Reels, не позволяя переходить к следующему видео.
-
-Примечание: при чистой установке анимация «Подсказка» может появиться, но через несколько секунд остановится сама."</string>
+    <string name="piko_disable_reels_scrolling_desc">Отключает бесконечную прокрутку в Instagram Reels, предотвращая свайп к следующему Reel. Примечание: при чистой установке может появляться анимация «Подсказка», но она прекратится сама через несколько секунд.</string>
     <string name="piko_disable_swipe_to_create">Отключить создание свайпом</string>
     <string name="piko_disable_swipe_to_create_desc">Блокирует открытие экрана создания при свайпе вправо на главной вкладке</string>
     <string name="piko_hide_stories_tray">Скрыть панель историй</string>
@@ -66,9 +66,11 @@
     <string name="piko_disable_double_tap_to_like">Отключить двойное нажатие для отметки «Нравится»</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Разное</string>
+    <string name="piko_material_you_title">Material You</string>
+    <string name="piko_amoled_title">Amoled</string>
     <string name="piko_disable_analytics">Отключить аналитику</string>
     <string name="piko_delete_analytics_cache">Очистить кэш аналитики</string>
-    <string name="piko_disable_analytics_desc">Блокировать отправку данных анализа в серверы Instagram/Facebook</string>
+    <string name="piko_disable_analytics_desc">Блокирует аналитику, отправляемую на серверы Instagram/Facebook.</string>
     <string name="piko_disable_discover_people">Отключить раздел «Возможные знакомые»</string>
     <string name="piko_disable_discover_people_desc">Отключает раздел «Возможные знакомые» в профиле пользователя</string>
     <string name="piko_follow_back_indicator">Включить индикатор статуса дружбы</string>
@@ -84,12 +86,14 @@
     <string name="piko_vsm_no_mentions">В этой истории нет упоминаний</string>
     <string name="piko_disable_story_flipping">Отключить перелистывание историй</string>
     <string name="piko_disable_story_flipping_desc">Отключает автоматическое перелистывание к следующей истории</string>
+    <string name="piko_loop_story">Зацикливать историю</string>
+    <string name="piko_loop_story_desc">Повторно воспроизводит текущую историю после её завершения</string>
     <string name="piko_disable_video_autoplay">Отключить автозапуск видео</string>
     <string name="piko_stories_audio_autoplay">Автозапуск звука в историях</string>
     <string name="piko_customise_story_timestamp">Настроить отметку времени истории</string>
     <string name="piko_customise_story_timestamp_desc">Настроить отображение времени публикации истории</string>
     <string name="piko_improve_image_viewing">Улучшить качество отображения контента</string>
-    <string name="piko_improve_image_viewing_desc">Загружает контент в максимальном качестве с сервера</string>
+    <string name="piko_improve_image_viewing_desc">Загружает изображения в максимальном разрешении с сервера. Может снизить производительность, увеличить размер данных приложения или привести к переключению на старый интерфейс</string>
     <string name="piko_hide_reshare_button">Скрыть кнопку «Репост»</string>
     <string name="piko_copy_comment">Скопировать комментарий</string>
     <string name="piko_copy_comment_desc">Добавляет кнопку для копирования комментариев в публикациях и Reels</string>
@@ -101,6 +105,11 @@
     <string name="piko_copy_full_name">Скопировать полное имя</string>
     <string name="piko_copy_user_id">Скопировать id пользователя</string>
     <string name="piko_copy_bio">Скопировать описание профиля</string>
+    <string name="piko_view_profile_picture">Посмотреть фото профиля</string>
+    <string name="piko_copy_profile_link">Скопировать ссылку на профиль</string>
+    <string name="piko_share_this_profile">Поделиться этим профилем</string>
+    <string name="piko_copy_links_from_bio">Скопировать ссылки из описания профиля</string>
+    <string name="piko_no_links_in_bio">В описании профиля нет ссылок</string>
     <string name="piko_download_profile_picture">Скачать фото профиля</string>
     <string name="piko_copied">Скопировано</string>
     <string name="piko_more_profile_options">Дополнительные действия с профилем</string>
@@ -166,9 +175,10 @@
     <string name="piko_category_about">Информация</string>
     <string name="piko_export_pref">Экспорт настроек Piko</string>
     <string name="piko_import_pref">Импорт настроек Piko</string>
-    <string name="piko_reset_pref">Сброс настроек Piko</string>
-    <string name="piko_reset_pref_success">Настройки Piko удалены</string>
-    <string name="piko_reset_pref_failed">Не удалось удалить настройки Piko</string>
+    <string name="piko_reset_pref">Сбросить настройки Piko</string>
+    <string name="piko_reset_pref_confirm">Сбросить настройки Piko?</string>
+    <string name="piko_reset_pref_success">Настройки Piko сброшены</string>
+    <string name="piko_reset_pref_failed">Не удалось сбросить настройки Piko</string>
     <string name="piko_app_version">Версия приложения: %s</string>
     <string name="piko_patch_version">Версия патча: %s</string>
     <string name="piko_patch_info_title">Информация о патчах</string>
@@ -203,6 +213,8 @@
     <string name="piko_array_detailed_timestamp">Подробная отметка времени (день недели/месяц/дата/час/минута/секунда)</string>
     <string name="piko_array_post_time">Время публикации (час/минута/секунда)</string>
     <string name="piko_array_time_left">Осталось времени (Осталось часов/минут/секунд)</string>
+    <string name="piko_array_recmd_flag_state_enable">Включить</string>
+    <string name="piko_array_recmd_flag_state_disable">Отключить</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Добро пожаловать в Piko</string>
     <string name="piko_welcome_message">Для более комфортной работы с Piko откройте настройки Piko и настройте их под свои предпочтения</string>
@@ -221,6 +233,13 @@
     <string name="piko_action_bar_button_profile_info_icon">Иконка информации профиля</string>
     <string name="piko_settings_on_action_bar">Кнопка настроек Piko на панели действий</string>
     <string name="piko_settings_on_action_bar_desc">Переместить кнопку настроек Piko на панель действий главной ленты</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_rec_flags">Рекомендуемые флаги</string>
+    <string name="piko_category_rec_flags_desc">Флаги разработчика, предложенные сообществом</string>
+    <string name="piko_rec_flags_read_error">Не удалось прочитать кэшированный файл флагов</string>
+    <string name="piko_rec_flags_no_file">Файл рекомендуемых флагов не найден</string>
+    <string name="piko_rec_flags_refresh_file">Обновить флаги</string>
+    <string name="piko_rec_flags_last_modified_at">Последнее изменение: %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">Фильтрация контента</string>
     <string name="piko_filter_story">Фильтрация историй</string>
@@ -280,4 +299,41 @@
     <string name="piko_filter_story_minimum_item_count_desc">Истории с менее чем X элементами будут скрыты (по умолч. 1)</string>
     <string name="piko_filter_story_maximum_item_count">Макс. количество элементов в истории</string>
     <string name="piko_filter_story_maximum_item_count_desc">Истории с более чем X элементами будут скрыты (по умолч. 9999)</string>
+    <!-- Save & view deleted (unsent) direct messages -->
+    <string name="piko_open_share_in_instagram">Открыть в Instagram</string>
+    <string name="piko_open_voice_with_player">Открыть в аудиоплеере</string>
+    <string name="piko_save_deleted_messages">Сохранять удалённые сообщения</string>
+    <string name="piko_save_deleted_messages_desc">Локально сохраняет входящие сообщения при их поступлении с сервера. Отмечает сообщения как удалённые при их отмене, чтобы вы могли просмотреть их даже после удаления отправителем.</string>
+    <string name="piko_view_deleted_messages">Просмотреть удалённые сообщения</string>
+    <string name="piko_deleted_in_chat">Удалено в этом чате</string>
+    <string name="piko_all_deleted_messages">Все удалённые сообщения</string>
+    <string name="piko_clear">Очистить</string>
+    <string name="piko_clear_chat_confirm">Очистить удалённые сообщения для этого чата?</string>
+    <string name="piko_clear_all_confirm">Очистить ВСЕ сохранённые удалённые сообщения?</string>
+    <string name="piko_no_deleted_messages">Удалённые сообщения пока не перехвачены.\nВключите функцию, и сообщения будут сохраняться по мере поступления.</string>
+    <string name="piko_delete_saved_confirm">Удалить это сохранённое сообщение?</string>
+    <string name="piko_delete">Удалить</string>
+    <string name="piko_unknown">Неизвестно</string>
+    <string name="piko_tap_to_view">нажмите, чтобы просмотреть</string>
+    <string name="piko_media_expired">срок действия ссылки истёк</string>
+    <string name="piko_media_not_available">медиафайлы недоступны</string>
+    <string name="piko_deleted_a_message">%s удалил(а) сообщение</string>
+    <string name="piko_someone">Кто-то</string>
+    <string name="piko_deleted_messages_channel">Удалённые сообщения</string>
+    <string name="piko_deleted_messages_channel_desc">Уведомляет, когда полученное сообщение отменяется</string>
+    <string name="piko_media_label">[%s]</string>
+    <string name="piko_media_deleted">[%s удалено]</string>
+    <string name="piko_media_deleted_generic">[удалено]</string>
+    <string name="piko_media_unknown">медиа</string>
+    <string name="piko_media_photo">фото</string>
+    <string name="piko_media_disappearing_photo">исчезающее фото</string>
+    <string name="piko_media_video">видео</string>
+    <string name="piko_media_voice">голосовое сообщение</string>
+    <string name="piko_media_gif">GIF</string>
+    <string name="piko_media_reel">reel</string>
+    <string name="piko_media_story">история</string>
+    <string name="piko_media_post">публикация</string>
+    <string name="piko_media_like">лайк</string>
+    <string name="piko_media_link">ссылка</string>
+    <string name="piko_media_activity">активность</string>
 </resources>

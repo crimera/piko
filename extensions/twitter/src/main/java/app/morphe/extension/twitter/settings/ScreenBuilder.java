@@ -21,6 +21,7 @@ import app.morphe.extension.twitter.settings.SettingsSearchMatcher.SearchMatch;
 import app.morphe.extension.twitter.settings.SettingsSearchMatcher.SearchResult;
 import app.morphe.extension.twitter.settings.widgets.*;
 import androidx.annotation.Nullable;
+
 import app.morphe.extension.twitter.Pref;
 
 
@@ -549,6 +550,14 @@ public class ScreenBuilder {
                             Settings.NATIVE_SHARE_MENU
                     )
             );
+
+            addPreference(category,
+                    helper.multiSelectListPref(
+                            str("piko_native_share_menu_items_to_hide"),
+                            "",
+                            Settings.NATIVE_SHARE_MENU_ITEMS_TO_HIDE
+                    )
+            );
         }
     }
 
@@ -559,6 +568,15 @@ public class ScreenBuilder {
         LegacyTwitterPreferenceCategory category = null;
         if(buildCategory)
             category = preferenceCategory(str("piko_title_misc"));
+        if (SettingsStatus.blockUpdateScreen) {
+            addPreference(category,
+                    helper.switchPreference(
+                            str("piko_pref_block_update_screen"),
+                            str("piko_pref_block_update_screen_desc"),
+                            Settings.MISC_BLOCK_UPDATE_SCREEN
+                    )
+            );
+        }
         if (SettingsStatus.enableFontMod) {
             addPreference(category,
                     helper.switchPreference(
@@ -663,17 +681,6 @@ public class ScreenBuilder {
                             str("piko_pref_pause_search_suggestion"),
                             str("piko_pref_pause_search_suggestion_desc"),
                             Settings.MISC_PAUSE_SEARCH_SUGGESTIONS
-                    )
-            );
-        }
-
-
-        if (SettingsStatus.disUnifyXChatSystem) {
-            addPreference(category,
-                    helper.switchPreference(
-                            str("piko_disunify_xchat_system"),
-                            str("piko_disunify_xchat_system_desc"),
-                            Settings.MISC_DISUNIFY_XCHAT_SYSTEM
                     )
             );
         }
@@ -853,23 +860,25 @@ public class ScreenBuilder {
                     )
             );
         }
+
+        addPreference(category,
+                helper.switchPreference(
+                        str("piko_pref_quick_settings"),
+                        str("piko_pref_quick_settings_summary"),
+                        Settings.MISC_QUICK_SETTINGS_BUTTON
+                )
+        );
+
         if (SettingsStatus.moreInfoOnProfile) {
             addPreference(category,
                     helper.switchPreference(
-                            str("piko_pref_quick_settings"),
-                            str("piko_pref_quick_settings_summary"),
-                            Settings.MISC_QUICK_SETTINGS_BUTTON
+                            str("piko_pref_customisation_more_info_on_profile"),
+                            str("piko_pref_customisation_more_info_on_profile_desc"),
+                            Settings.MORE_INFO_ON_PROFILE
                     )
             );
         }
 
-        addPreference(category,
-                helper.switchPreference(
-                        str("piko_pref_customisation_more_info_on_profile"),
-                        str("piko_pref_customisation_more_info_on_profile_desc"),
-                        Settings.MORE_INFO_ON_PROFILE
-                )
-        );
     }
 
     public void buildFontSection(boolean buildCategory){

@@ -19,7 +19,7 @@ import android.os.LocaleList;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 
-import app.morphe.extension.crimera.SharedPref;
+import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.crimera.constants.ExtensionStrings;
 import app.morphe.extension.crimera.PikoUtils;
 

@@ -52,6 +52,7 @@ val bringBackTwitterPatch =
             val drawableIcons =
                 arrayOf(
                     "ic_vector_twitter.xml",
+                    "ic_vector_x.xml",
                     "ic_vector_home.xml",
                     "ic_vector_twitter_white.xml",
                     "ic_vector_home_stroke.xml",

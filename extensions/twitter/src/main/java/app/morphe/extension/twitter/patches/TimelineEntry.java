@@ -6,12 +6,22 @@
 
 package app.morphe.extension.twitter.patches;
 
+import static app.morphe.extension.shared.StringRef.str;
+
+import android.text.TextUtils;
+import android.view.View;
+
+import com.x.models.interstitial.BlurImageInterstitial;
+import com.twitter.model.json.mediavisibility.JsonBlurredImageInterstitial;
 import com.twitter.model.json.timeline.urt.JsonTimelineEntry;
 import com.twitter.model.json.core.JsonSensitiveMediaWarning;
 import com.twitter.model.json.timeline.urt.JsonTimelineModuleItem;
+
+import app.morphe.extension.shared.Utils;
 import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.twitter.settings.SettingsStatus;
 import app.morphe.extension.twitter.entity.Video;
+
 import java.util.List;
 import java.util.ArrayList;
 import app.morphe.extension.crimera.PikoUtils;
@@ -82,50 +92,87 @@ public class TimelineEntry {
     public static JsonTimelineEntry checkEntry(JsonTimelineEntry jsonTimelineEntry) {
         try {
             String entryId = jsonTimelineEntry.a;
-            if(isEntryIdRemove(entryId)){
+            if (isEntryIdRemove(entryId)) {
                 return null;
             }
-        } catch (Exception unused) {
-
+        } catch (Exception ignored) {
         }
         return jsonTimelineEntry;
     }
     public static JsonTimelineModuleItem checkEntry(JsonTimelineModuleItem jsonTimelineModuleItem) {
         try {
             String entryId = jsonTimelineModuleItem.a;
-            if(isEntryIdRemove(entryId)){
+            if (isEntryIdRemove(entryId)) {
                 return null;
             }
-        } catch (Exception unused) {
-
+        } catch (Exception ignored) {
         }
         return jsonTimelineModuleItem;
     }
-    public static JsonSensitiveMediaWarning sensitiveMedia(JsonSensitiveMediaWarning jsonSensitiveMediaWarning) {
-        try {
-            if(showSensitiveMedia){
-                jsonSensitiveMediaWarning.a = false;
-                jsonSensitiveMediaWarning.b = false;
-                jsonSensitiveMediaWarning.c = false;
-            }
-        } catch (Exception unused) {
-
+    // Interface to reset obfuscated fields
+    // This is one of the methods to avoid using Java Reflection, which has high overhead
+    public interface JsonBlurredImageInterstitialPatchInterface {
+        // Method is added during patching
+        void patch_showSensitiveMedia();
+    }
+    public interface JsonSensitiveMediaWarningPatchInterface {
+        // Method is added during patching
+        void patch_showSensitiveMedia();
+    }
+    public static JsonBlurredImageInterstitial showSensitiveMedia(JsonBlurredImageInterstitialPatchInterface patchInterface) {
+        if (showSensitiveMedia && patchInterface != null) {
+            patchInterface.patch_showSensitiveMedia();
         }
-        return jsonSensitiveMediaWarning;
+        return (JsonBlurredImageInterstitial) patchInterface;
+    }
+    public static JsonSensitiveMediaWarning showSensitiveMedia(JsonSensitiveMediaWarningPatchInterface patchInterface) {
+        if (showSensitiveMedia && patchInterface != null) {
+            patchInterface.patch_showSensitiveMedia();
+        }
+        return (JsonSensitiveMediaWarning) patchInterface;
+    }
+    public static BlurImageInterstitial showSensitiveMedia(BlurImageInterstitial interstitial) {
+        return showSensitiveMedia ? null : interstitial;
+    }
+    public static void showSensitiveImage(View view) {
+        if (showSensitiveMedia && view != null) {
+            // Click the 'Show' button on the timeline to make the blurred image visible
+            Utils.runOnMainThread(view::callOnClick);
+        }
+    }
+    // Caution: This profile may include potentially sensitive content
+    private static final String sensitiveProfileHeader = str("profile_interstitial_sensitive_media_header");
+    private static boolean isSensitiveProfile = false;
+    public static int setSensitiveProfileWarningDialogTitle(String title, int visibility) {
+        if (showSensitiveMedia) {
+            // Check the title of the alert dialog to prevent other profile warnings (such as racism or terrorism) from closing
+            isSensitiveProfile = TextUtils.equals(sensitiveProfileHeader, title);
+
+            if (isSensitiveProfile) {
+                // If it is a general sensitive media warning, hide the alert dialog
+                return View.GONE;
+            }
+        }
+
+        return visibility;
+    }
+    public static void showSensitiveProfile(View view) {
+        if (isSensitiveProfile && view != null) {
+            // If it is a general sensitive media warning, also click the dismiss button on the alert dialog
+            // This is to prevent the UI from breaking due to incorrect WindowInsets calculations, even though the alert dialog is hidden
+            Utils.runOnMainThread(view::callOnClick);
+        }
     }
     public static boolean hidePromotedTrend(Object data) {
-        if (data != null && hideAds) {
-            return true;
-        }
-        return false;
+        return data != null && hideAds;
     }
 
-    public static List timelineVideos(List videoEnities){
+    public static List<Object> timelineVideos(List<Object> videoEntities){
         int maxBitrate = 0;
         Object maxVideoObject = null;
         try{
             if(Pref.ENABLE_FORCE_HD) {
-                for (Object vidObj : videoEnities) {
+                for (Object vidObj : videoEntities) {
                     Video vid = new Video(vidObj);
                     String mediaExt = vid.getExtension();
                     if (!(mediaExt.equals("mp4"))) continue;
@@ -136,17 +183,17 @@ public class TimelineEntry {
                     maxVideoObject = vidObj;
                 }
                 if (maxVideoObject != null) {
-                    ArrayList result = new ArrayList();
+                    ArrayList<Object> result = new ArrayList<>();
                     result.add(maxVideoObject);
                     return result;
                 }
             }
 
-        }catch(Exception ex){
+        } catch (Exception ex) {
             PikoUtils.logger(ex);
         }
 
-        return videoEnities;
+        return videoEntities;
     }
 
 //end

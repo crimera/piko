@@ -74,7 +74,7 @@ public class BackupPrefActivity extends AppCompatActivity {
         fileName = fileName + "_" + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date()) + extension;
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("application/json");
+        intent.setType(".xml".equals(extension) ? "application/xml" : "application/json");
         intent.putExtra(Intent.EXTRA_TITLE, fileName);
 
         startActivityForResult(intent, 1);

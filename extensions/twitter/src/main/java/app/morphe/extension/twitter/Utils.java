@@ -13,6 +13,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -326,16 +327,18 @@ public class Utils {
     }
 
     public static String getTheme() {
-        String theme = "light";
-        String three_state_night_mode = defsp.getString("three_state_night_mode", theme);
-        if (!(three_state_night_mode.equals("0"))) {
-            String dark_mode_appr = defsp.getString("dark_mode_appearance", "lights_out");
-            if (dark_mode_appr.equals("lights_out"))
-                theme = "dark";
-            else if (dark_mode_appr.equals("dim"))
-                theme = "dim";
-        }
-        return theme;
+        String nightMode = defsp.getString("three_state_night_mode", "2");
+        String darkModeAppearance = defsp.getString("dark_mode_appearance", "lights_out");
+        int uiMode = ctx.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return resolveTheme(nightMode, darkModeAppearance, uiMode == Configuration.UI_MODE_NIGHT_YES);
+    }
+
+    private static String resolveTheme(String nightMode, String darkModeAppearance, boolean systemDark) {
+        boolean darkTheme = "1".equals(nightMode) || ("2".equals(nightMode) && systemDark);
+        if (!darkTheme) return "light";
+        if ("lights_out".equals(darkModeAppearance)) return "dark";
+        if ("dim".equals(darkModeAppearance)) return "dim";
+        return "light";
     }
 
     public static int resolveColor(Context context, String attrName) {
@@ -343,6 +346,10 @@ public class Utils {
         int attrId = ResourceUtils.getAttrIdentifier(attrName);
         context.getTheme().resolveAttribute(attrId, tv, true);
         return tv.data;
+    }
+
+    public static int resolveColor(String attrName) {
+        return resolveColor(ctx, attrName);
     }
 
     private static void toast(String msg){

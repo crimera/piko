@@ -1,6 +1,6 @@
 {
   "NOTE": "Do NOT manually edit this file. This file is automatically updated when semantic release (release.yml) runs. Manually editing this file can break your releases and break third party tools that use this file.",
-  "version": "3.8.0",
+  "version": "3.9.0-dev.10",
   "patches": [
     {
       "name": "Add ability to copy media link",
@@ -12,14 +12,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -43,6 +43,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "ResourcePatch"
       ],
       "compatiblePackages": [
@@ -55,9 +56,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -86,9 +87,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -111,14 +112,43 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
+              "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Block update screen",
+      "description": "Blocks the 'This app is out of date' update screen from being shown on launch",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.twitter.android",
+          "name": "Twitter",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#000000",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -139,14 +169,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -168,14 +198,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -203,9 +233,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -224,14 +254,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -248,9 +278,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -284,14 +314,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -319,9 +349,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -361,14 +391,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -402,9 +432,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -425,14 +455,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -454,14 +484,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -483,14 +513,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -515,15 +545,45 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Custom sharing domain",
+      "description": "Allows for using custom domains when sharing posts, reels and stories.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -544,14 +604,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -572,14 +632,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -608,9 +668,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -638,9 +698,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -661,14 +721,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -690,14 +750,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -718,14 +778,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -746,14 +806,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -774,14 +834,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -802,14 +862,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -830,14 +890,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -858,14 +918,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -886,14 +946,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -914,14 +974,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -942,14 +1002,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -975,9 +1035,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1006,9 +1066,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1037,9 +1097,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1060,14 +1120,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1089,14 +1149,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1125,9 +1185,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1156,9 +1216,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1190,9 +1250,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1221,9 +1281,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1252,9 +1312,40 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Disable onboarding permission prompts",
+      "description": "Prevents contacts and location permission onboarding prompts from appearing.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1282,9 +1373,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1313,9 +1404,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1343,9 +1434,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1373,9 +1464,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1406,9 +1497,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1436,46 +1527,10 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            }
-          ]
-        }
-      ],
-      "options": []
-    },
-    {
-      "name": "Disunify xchat system",
-      "description": "Bring back legacy features like messages and share sheet.",
-      "default": false,
-      "dependencies": [
-        "BytecodePatch",
-        "BytecodePatch"
-      ],
-      "compatiblePackages": [
-        {
-          "packageName": "com.twitter.android",
-          "name": "X",
-          "description": null,
-          "apkFileType": "APKM",
-          "appIconColor": "#000000",
-          "signatures": null,
-          "targets": [
-            {
-              "version": "12.7.1-release.0",
-              "versionCodes": null,
-              "isExperimental": false,
-              "minSdk": null,
-              "description": null
-            },
-            {
-              "version": "11.69.0-release.0",
-              "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -1501,6 +1556,7 @@
         "BytecodePatch",
         "BytecodePatch",
         "BytecodePatch",
+        "BytecodePatch",
         "BytecodePatch"
       ],
       "compatiblePackages": [
@@ -1513,9 +1569,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1536,14 +1592,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1572,9 +1628,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1593,14 +1649,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1621,14 +1677,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1649,14 +1705,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1678,14 +1734,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1707,14 +1763,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1733,14 +1789,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1771,9 +1827,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1803,9 +1859,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1827,14 +1883,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1864,9 +1920,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -1887,14 +1943,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1941,14 +1997,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1970,14 +2026,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -1998,14 +2054,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2027,14 +2083,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2055,14 +2111,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2083,14 +2139,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2111,14 +2167,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2140,14 +2196,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2168,14 +2224,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2196,14 +2252,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2231,9 +2287,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2254,14 +2310,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2283,14 +2339,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2318,9 +2374,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2349,9 +2405,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2372,14 +2428,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2400,14 +2456,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2429,14 +2485,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2458,14 +2514,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2494,9 +2550,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2525,9 +2581,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2555,9 +2611,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2579,14 +2635,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2609,14 +2665,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2644,9 +2700,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2668,14 +2724,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2703,9 +2759,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2726,15 +2782,45 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Loop story",
+      "description": "Replay the current story when it ends",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -2763,9 +2849,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2793,9 +2879,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2820,14 +2906,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2859,9 +2945,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2891,9 +2977,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -2919,14 +3005,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2952,14 +3038,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -2984,14 +3070,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3012,14 +3098,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3047,9 +3133,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3070,15 +3156,47 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Recommended flags",
+      "description": "Developer flags suggested by the community",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
+              },
               "isExperimental": false,
               "minSdk": null,
               "description": null
@@ -3099,14 +3217,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3134,9 +3252,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3164,9 +3282,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3179,7 +3297,7 @@
     },
     {
       "name": "Remove premium upsell",
-      "description": "Removes premium upsell in home timeline",
+      "description": "Removes premium upsells",
       "default": true,
       "dependencies": [
         "BytecodePatch"
@@ -3187,14 +3305,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3215,14 +3333,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3244,14 +3362,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3273,14 +3391,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3308,9 +3426,42 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
+              },
+              "isExperimental": false,
+              "minSdk": null,
+              "description": null
+            }
+          ]
+        }
+      ],
+      "options": []
+    },
+    {
+      "name": "Save deleted messages",
+      "description": "Captures incoming DMs locally as they arrive from the server and marks them when the sender deletes them.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "BytecodePatch",
+        "ResourcePatch"
+      ],
+      "compatiblePackages": [
+        {
+          "packageName": "com.instagram.android",
+          "name": "Instagram",
+          "description": null,
+          "apkFileType": "APKM",
+          "appIconColor": "#FC483C",
+          "signatures": null,
+          "targets": [
+            {
+              "version": "439.0.0.37.89",
+              "versionCodes": {
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3344,9 +3495,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3368,14 +3519,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3400,14 +3551,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3428,14 +3579,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3456,14 +3607,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3484,14 +3635,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3507,19 +3658,20 @@
       "description": null,
       "default": true,
       "dependencies": [
-        "BytecodePatch"
+        "BytecodePatch",
+        "ResourcePatch"
       ],
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3547,9 +3699,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3573,14 +3725,14 @@
       "compatiblePackages": [
         {
           "packageName": "com.twitter.android",
-          "name": "X",
+          "name": "Twitter",
           "description": null,
           "apkFileType": "APKM",
           "appIconColor": "#000000",
           "signatures": null,
           "targets": [
             {
-              "version": "12.7.1-release.0",
+              "version": "12.17.0-release.0",
               "versionCodes": null,
               "isExperimental": false,
               "minSdk": null,
@@ -3593,9 +3745,14 @@
     },
     {
       "name": "Theme",
-      "description": "Applies either amoled or material you theme for Instagram at patch time. [default = material you]",
-      "default": false,
-      "dependencies": [],
+      "description": "Adds Material You and AMOLED controls to Piko settings on Android 12 and later. On Android 8–11, it applies a fixed Material You-style theme or an optional AMOLED theme.",
+      "default": true,
+      "dependencies": [
+        "BytecodePatch",
+        "BytecodePatch",
+        "ResourcePatch",
+        "BytecodePatch"
+      ],
       "compatiblePackages": [
         {
           "packageName": "com.instagram.android",
@@ -3606,9 +3763,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3620,8 +3777,8 @@
       "options": [
         {
           "key": "amoled",
-          "title": "Pure-black AMOLED theme",
-          "description": "By default this patch applies a Material You dynamic theme that follows your device's light/dark setting. Turn this on to override it with a pure-black AMOLED theme instead. Note: a few server-driven pages (notifications, DM inbox, About-this-account) and full-screen media/Reels keep Instagram's own colours in both modes.",
+          "title": "Pure-black AMOLED theme for Android 8–11",
+          "description": "Use a fixed pure-black AMOLED theme instead of the fixed Material You-style theme on Android 8–11. On Android 12 and later, use the AMOLED control in Piko settings.",
           "required": false,
           "type": "kotlin.Boolean",
           "default": false,
@@ -3646,9 +3803,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3678,9 +3835,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3710,9 +3867,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3740,9 +3897,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3772,9 +3929,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3805,9 +3962,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3838,9 +3995,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,
@@ -3873,9 +4030,9 @@
           "signatures": null,
           "targets": [
             {
-              "version": "435.0.0.37.76",
+              "version": "439.0.0.37.89",
               "versionCodes": {
-                "ARM64_V8A": 384109456
+                "ARM64_V8A": 384510827
               },
               "isExperimental": false,
               "minSdk": null,

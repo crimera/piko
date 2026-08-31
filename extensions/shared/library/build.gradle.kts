@@ -4,7 +4,7 @@ plugins {
 
 android {
     namespace = "app.morphe.extension.shared"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 28

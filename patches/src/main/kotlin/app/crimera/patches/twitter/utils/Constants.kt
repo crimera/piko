@@ -7,25 +7,17 @@ import app.morphe.patcher.patch.Compatibility
 object Constants {
     val COMPATIBILITY_X =
         Compatibility(
-            name = "X",
+            name = "Twitter",
             packageName = "com.twitter.android",
             apkFileType = ApkFileType.APKM,
             appIconColor = 0x000000,
             targets =
                 listOf(
                     AppTarget(
-                        version = "12.7.1-release.0",
+                        version = "12.19.1-release.0",
                     ),
                 ),
         )
-    val COMPATIBILITY_X_11_69 =
-        COMPATIBILITY_X
-            .including(
-                AppTarget(
-                    version = "11.69.0-release.0",
-                    description = "Last stable version which had old share sheet and DMs (Disunify XChat Subsystem patch)",
-                ),
-            ).excluding(null)
 
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/twitter"
     const val STRING_REF_DESCRIPTOR = "Lapp/morphe/extension/shared/StringRef"

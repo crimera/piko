@@ -23,6 +23,7 @@ public class IconListBuilder {
         list.add(RowItem.icon("piko_app_icon_name_legacy_icon_4","ic_app_icon_legacy_icon_4","84"));
         list.add(RowItem.icon("piko_app_icon_name_legacy_blue","ic_app_icon_legacy_blue","80"));
         list.add(RowItem.icon("piko_app_icon_name_twitter_blue","ic_app_icon_blue","79"));
+        list.add(RowItem.exclusiveIcon("piko_app_icon_name_material_you","ic_app_icon_material_you","89"));
 
         list.add(RowItem.header("piko_app_icon_category_space"));
         list.add(RowItem.icon("piko_app_icon_name_earth","ic_app_icon_10","40"));

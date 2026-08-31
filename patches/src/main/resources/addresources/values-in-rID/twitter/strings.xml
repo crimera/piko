@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Cari pengaturan Piko</string>
     <string name="piko_settings_search_clear">Hapus masukan</string>
-    <string name="piko_settings_search_no_results">Tidak ada hasil untuk \"%1$s\"</string>
+    <string name="piko_settings_search_no_results">Tidak ada hasil untuk \"%s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Aktifkan batalkan postingan</string>
@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Penghapusan cache gagal</string>
     <string name="piko_title_native_share_menu">Menu berbagi bawaan</string>
     <string name="piko_native_share_menu_toggle">Aktifkan menu berbagi bawaan</string>
+    <string name="piko_native_share_menu_items_to_hide">Menu berbagi bawaan yang akan disembunyikan</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Iklan</string>
     <string name="piko_pref_hide_promoted_posts">Sembunyikan postingan yang dipromosikan</string>
@@ -137,10 +138,10 @@
     <string name="piko_pref_pause_search_suggestion_desc">Saran pencarian tidak akan disimpan secara lokal</string>
     <string name="piko_pref_search_suggestion">Sembunyikan saran pencarian</string>
     <string name="piko_pref_search_suggestion_desc">Menyembunyikan saran pencarian di bagian jelajahi</string>
-    <string name="piko_disunify_xchat_system">Memisahkan sistem xchat</string>
-    <string name="piko_disunify_xchat_system_desc">Kembalikan fitur-fitur usang seperti pesan dan lembar bagikan</string>
     <string name="piko_legacy_share_link">Tautan berbagi versi lama</string>
     <string name="piko_block_redirecting_to_x_lite">Blokir pengalihan ke X Lite</string>
+    <string name="piko_pref_block_update_screen">Blokir halaman pembaruan</string>
+    <string name="piko_pref_block_update_screen_desc">Memblokir tampilan halaman pembaruan \'Aplikasi ini sudah kedaluwarsa\' saat aplikasi dibuka</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Fitur flag</string>
     <string name="piko_pref_feature_flags">Tambahkan fitur flag</string>
@@ -167,10 +168,10 @@
     <string name="piko_pref_show_poll_result">Tampilkan hasil polling</string>
     <string name="piko_pref_show_poll_result_desc">Lihat hasil polling tanpa memberikan suara</string>
     <string name="piko_pref_hide_community_notes">Sembunyikan catatan komunitas</string>
-    <string name="piko_pref_hide_immersive_player">Sembunyikan pemutar imersif</string>
-    <string name="piko_pref_hide_immersive_player_desc">Menghapus geser ke atas untuk video lainnya di pemutar video</string>
+    <string name="piko_pref_hide_immersive_player">Nonaktifkan pemutar imersif</string>
+    <string name="piko_pref_hide_immersive_player_desc">Nonaktifkan pemutar video baru yang memungkinkan Anda menonton lebih banyak video dengan menggeser ke atas</string>
     <string name="piko_pref_enable_vid_auto_advance">Aktifkan pengguliran video otomatis</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Mengaktifkan gulir otomatis video di tampilan imersif</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Mengaktifkan pengguliran otomatis video di pemutar imersif</string>
     <string name="piko_pref_hide_hidden_replies">Sembunyikan balasan yang disembunyikan</string>
     <string name="piko_pref_force_hd">Paksa video HD</string>
     <string name="piko_pref_force_hd_desc">Video akan selalu diputar dalam kualitas tertinggi</string>
@@ -207,6 +208,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">Informasi selengkapnya pada profil</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Menambahkan detail selengkapnya di halaman profil</string>
     <string name="piko_fast_follower">Pengikut cepat</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Gaya font</string>
     <string name="piko_pref_add_font">Tambahkan font</string>
@@ -285,6 +287,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">Ikon usang 4</string>
     <string name="piko_app_icon_name_legacy_blue">Biru Usang</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Biru</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">Bumi</string>
     <string name="piko_app_icon_name_moon">Bulan</string>
     <string name="piko_app_icon_name_mars">Mars</string>

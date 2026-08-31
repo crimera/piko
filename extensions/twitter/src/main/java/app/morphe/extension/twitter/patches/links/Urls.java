@@ -12,12 +12,15 @@ import app.morphe.extension.twitter.Pref;
 import app.morphe.extension.twitter.settings.SettingsStatus;
 import app.morphe.extension.crimera.PikoUtils;
 import com.x.models.ContextualPost;
-import com.x.models.CanonicalPost;
-import com.x.models.UserResult;
-import com.x.models.XUser;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Urls {
+    private static final Pattern POST_URL_PATTERN = Pattern.compile(
+            "^(https://(?:x\\.com|twitter\\.com)/)[^/]+(/status/.*)$",
+            Pattern.CASE_INSENSITIVE
+    );
     private static final boolean unShortUrl;
     static {
         unShortUrl = SettingsStatus.unshortenlink && Pref.unShortUrl();
@@ -39,7 +42,8 @@ public class Urls {
             if(customDomainName.length()<1) return urlString;
 
             // Check for domain extension
-            if(!(customDomainName.matches("^[A-Za-z0-9-]{1,63}\\.[A-Za-z]{2,6}$"))) {
+            String regex  = "(?:https?://)?(?:[\\w-]+\\.)+[a-z]{2,}(?:/[^\\s]*)?";
+            if(!(customDomainName.matches(regex))) {
                 //have .com as default extension just for safety reasons
                 customDomainName += ".com";
             }
@@ -58,10 +62,11 @@ public class Urls {
     public static String hookShareSheetLink(ContextualPost contextualPost, String link){
         try {
             if (SettingsStatus.legacyShareLink) {
-                CanonicalPost canonicalPost = contextualPost.getCanonicalPost();
-                XUser userResult = canonicalPost.getAuthor();
-                String username = userResult.getScreenName();
-                link = link.replace("/i/", "/" + username + "/");
+                Matcher matcher = POST_URL_PATTERN.matcher(link);
+                if (matcher.matches()) {
+                    String username = contextualPost.getCanonicalPost().getAuthor().getScreenName();
+                    link = matcher.group(1) + username + matcher.group(2);
+                }
             }
         }catch (Exception ex) {
             PikoUtils.logger(ex);

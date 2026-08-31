@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Поиск в настройках Piko</string>
     <string name="piko_settings_search_clear">Очистить поле</string>
-    <string name="piko_settings_search_no_results">Ничего не найдено для \"%1$s\"</string>
+    <string name="piko_settings_search_no_results">Ничего не найдено для \"%s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Премиум</string>
     <string name="piko_pref_undo_posts">Включить отмену постов</string>
@@ -44,6 +44,7 @@
     <string name="piko_pref_native_downloader_inline_button">Показывать кнопку загрузки в строке</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Добавляет кнопку загрузки непосредственно в панель действий поста</string>
     <string name="piko_pref_native_downloader_alert_title">Скачать медиа</string>
+    <string name="piko_video_variants">Варианты видео</string>
     <string name="piko_pref_native_downloader_download_all">Скачать все</string>
     <string name="piko_pref_native_downloader_no_media">Медиа не найдено</string>
     <string name="piko_pref_native_downloader_filename_title">Сохранить шаблон имени файла</string>
@@ -83,8 +84,9 @@
     <string name="piko_native_reader_mode_cache_delete">Удалить кэш режима чтения</string>
     <string name="piko_native_reader_mode_cache_delete_success">Кэш успешно удалён</string>
     <string name="piko_native_reader_mode_cache_delete_failed">Не удалось удалить кэш</string>
-    <string name="piko_title_native_share_menu">Системное меню «Поделиться»</string>
-    <string name="piko_native_share_menu_toggle">Включить системное меню «Поделиться»</string>
+    <string name="piko_title_native_share_menu">Нативное меню «Поделиться»</string>
+    <string name="piko_native_share_menu_toggle">Включить нативное меню «Поделиться»</string>
+    <string name="piko_native_share_menu_items_to_hide">Элементы нативного меню «Поделиться» для скрытия</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Реклама</string>
     <string name="piko_pref_hide_promoted_posts">Скрыть продвигаемые посты</string>
@@ -120,7 +122,7 @@
     <string name="piko_pref_hide_fab_menu">Скрывать кнопки плавающего меню</string>
     <string name="piko_pref_rec_users">Скрывать рекомендуемых пользователей</string>
     <string name="piko_pref_hide_view_count">Скрывать количество просмотров</string>
-    <string name="piko_pref_custom_share_domain">Кастомный домен ссылки</string>
+    <string name="piko_pref_custom_share_domain">Пользовательский домен для обмена</string>
     <string name="piko_pref_custom_share_domain_desc">Изменить домен ссылки на пост</string>
     <string name="piko_pref_show_sensitive_media">Показывать деликатный контент</string>
     <string name="piko_pref_selectable_text">Включить копирование текста</string>
@@ -129,8 +131,17 @@
     <string name="piko_pref_unshorten_link_desc">Не использовать t.co в ссылках</string>
     <string name="piko_pref_round_off_numbers">Округление чисел</string>
     <string name="piko_pref_round_off_numbers_desc">Округлять числа до K и M</string>
+    <string name="piko_pref_debug_menu">Включить меню отладки для постов</string>
     <string name="piko_pref_quick_settings">Включить быстрый доступ</string>
     <string name="piko_pref_quick_settings_summary">Переход в настройки Piko через боковое меню</string>
+    <string name="piko_pref_pause_search_suggestion">Приостановить подсказки поиска</string>
+    <string name="piko_pref_pause_search_suggestion_desc">Подсказки поиска не будут сохраняться локально</string>
+    <string name="piko_pref_search_suggestion">Скрывать подсказки поиска</string>
+    <string name="piko_pref_search_suggestion_desc">Скрывает подсказки поиска в разделе «Обзор»</string>
+    <string name="piko_legacy_share_link">Старый формат ссылок «Поделиться»</string>
+    <string name="piko_block_redirecting_to_x_lite">Блокировать перенаправление на X Lite</string>
+    <string name="piko_pref_block_update_screen">Блокировать экран обновления</string>
+    <string name="piko_pref_block_update_screen_desc">Блокирует показ экрана обновления «Эта версия приложения устарела» при запуске</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Флаги функций</string>
     <string name="piko_pref_feature_flags">Флаги функций</string>
@@ -143,27 +154,40 @@
     <!-- Timeline Settings -->
     <string name="piko_title_timeline">Лента</string>
     <string name="piko_pref_disable_auto_timeline_scroll">Отключить автопрокрутку ленты</string>
+    <string name="piko_pref_show_post_source">Показывать метку источника поста</string>
+    <string name="piko_pref_show_post_source_desc">Возможна задержка при открытии информации о посте, также метка отображается только в публичных постах</string>
     <string name="piko_pref_hide_live_threads">Скрыть активные треды</string>
     <string name="piko_pref_hide_live_threads_desc">Баннер прямых эфиров поверх ленты</string>
     <string name="piko_pref_hide_banner">Скрыть баннер</string>
+    <string name="piko_pref_hide_banner_desc">Скрывает плашку «Новые посты»</string>
+    <string name="piko_pref_hide_bmk_timeline">Скрывать значок закладок в ленте</string>
     <string name="piko_pref_force_translate">Принудительный перевод</string>
     <string name="piko_pref_force_translate_desc">Кнопка перевода текста во всех постах</string>
+    <string name="piko_pref_hide_quick_promote">Скрывать кнопку «Продвигать»</string>
     <string name="piko_pref_hide_quick_promote_desc">Кнопка продвижения под своими постами</string>
     <string name="piko_pref_show_poll_result">Показывать результаты опросов</string>
     <string name="piko_pref_show_poll_result_desc">Отображение результатов без голосования</string>
-    <string name="piko_pref_hide_immersive_player_desc">Переключение видео свайпами</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Автоматически переключать видео в новом видеоплеере</string>
+    <string name="piko_pref_hide_community_notes">Скрывать примечания сообщества</string>
+    <string name="piko_pref_hide_immersive_player">Отключить иммерсивный плеер</string>
+    <string name="piko_pref_hide_immersive_player_desc">Отключает новый видеоплеер, позволяющий смотреть больше видео свайпом вверх</string>
+    <string name="piko_pref_enable_vid_auto_advance">Включить автопрокрутку видео</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Включает автопрокрутку видео в иммерсивном плеере</string>
+    <string name="piko_pref_hide_hidden_replies">Скрывать скрытые ответы</string>
+    <string name="piko_pref_force_hd">Принудительное HD-качество видео</string>
     <string name="piko_pref_force_hd_desc">Воспроизведение видео только в высоком качестве</string>
     <string name="piko_pref_hide_nudge_button">Скрывать кнопку Читать в постах</string>
     <string name="piko_pref_hide_nudge_button_desc">Кнопка Читать в постах авторов, на которых вы не подписаны</string>
     <string name="piko_pref_hide_social_proof">Скрывать В читаемых у..</string>
     <string name="piko_pref_hide_social_proof_desc">Панель В читаемых у... в профилях</string>
+    <string name="piko_pref_hide_community_badge">Скрывать значки сообществ</string>
+    <string name="piko_pref_hide_badge_nav_bar">Скрывать значки в панели навигации</string>
+    <string name="piko_pref_hide_badge_nav_bar_desc">Скрывает точки и счетчики уведомлений на значках панели навигации</string>
     <string name="piko_pref_hide_post_inline_metrics">Скрыть метрики встроенного просмотра поста</string>
     <string name="piko_pref_hide_post_inline_metrics_desc">Скрывает количество лайков, репостов и т. д. во встроенном просмотре</string>
     <string name="piko_pref_hide_post_detailed_metrics">Скрыть метрики детального просмотра поста</string>
     <string name="piko_pref_hide_post_detailed_metrics_desc">Скрывает количество лайков, репостов и т. д. в детальном просмотре</string>
     <!-- Customization Settings -->
-    <string name="piko_title_customisation">Кастомизация</string>
+    <string name="piko_title_customisation">Персонализация</string>
     <string name="piko_pref_customisation_profiletabs">Скрыть разделы профиля</string>
     <string name="piko_pref_customisation_timelinetabs">Скрыть разделы ленты</string>
     <string name="piko_pref_customisation_timelinetabs_foryou">Скрыть \"Для вас\"</string>
@@ -172,35 +196,202 @@
     <string name="piko_pref_customisation_sidebartabs">Скрыть разделы боковой панели</string>
     <string name="piko_pref_customisation_navbartabs">Скрыть кнопки меню навигации</string>
     <string name="piko_pref_customisation_inlinetabs">Скрыть кнопки под постом</string>
+    <string name="piko_pref_customisation_exploretabs">Вкладки в «Обзоре» для скрытия</string>
+    <string name="piko_pref_customisation_searchtabs">Вкладки в поиске для скрытия</string>
+    <string name="piko_pref_customisation_notificationtabs">Вкладки в уведомлениях для скрытия</string>
     <string name="piko_pref_customisation_reply_sorting">Сортировка ответов по умолчанию</string>
     <string name="piko_pref_customisation_reply_sorting_remember">Ранее выбранное</string>
+    <string name="piko_pref_customisation_post_font_size">Размер шрифта постов</string>
+    <string name="piko_pref_customisation_search_type_ahead">Подсказки поиска для скрытия</string>
+    <string name="piko_pref_customisation_change_app_icon">Изменить значок приложения</string>
+    <string name="piko_notifications_tab_priority">Приоритет</string>
+    <string name="piko_pref_customisation_more_info_on_profile">Подробная информация в профиле</string>
+    <string name="piko_pref_customisation_more_info_on_profile_desc">Добавляет больше деталей на странице профиля</string>
+    <string name="piko_fast_follower">Быстрый подписчик</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
+    <string name="piko_title_font">Стиль шрифта</string>
+    <string name="piko_pref_add_font">Добавить шрифт</string>
+    <string name="piko_pref_add_font_desc">Убедитесь, что шрифт имеет формат .ttf или .otf</string>
+    <string name="piko_pref_delete_font">Удалить шрифт</string>
+    <string name="piko_pref_add_emoji_font">Добавить шрифт эмодзи</string>
+    <string name="piko_pref_delete_emoji_font">Удалить шрифт эмодзи</string>
+    <string name="piko_pref_add_font_success">Шрифт успешно добавлен</string>
+    <string name="piko_pref_add_font_fail">Не удалось добавить шрифт</string>
+    <string name="piko_pref_delete_font_success">Шрифт успешно удален</string>
+    <string name="piko_pref_delete_font_fail">Не удалось удалить шрифт</string>
+    <string name="piko_pref_delete_font_warn">Пользовательский шрифт для удаления не найден</string>
     <!-- Logging Settings -->
+    <string name="piko_title_logging">Логирование</string>
+    <string name="piko_pref_server_response_logging">Логировать ответы сервера</string>
+    <string name="piko_pref_server_response_logging_desc">Сохранять json-ответы сервера в папку \'Download/Piko\'</string>
+    <string name="piko_pref_server_response_logging_file_overwrite">Перезаписывать файл логов ответов</string>
+    <string name="piko_pref_server_response_logging_file_overwrite_desc">Очищать существующие логи ответов при запуске</string>
     <!-- Backup and Restore -->
     <string name="piko_title_backup">Бэкап и восстановление</string>
+    <string name="piko_pref_import_settings">Импорт настроек Piko</string>
+    <string name="piko_pref_export_settings">Экспорт настроек Piko</string>
+    <string name="piko_pref_reset_settings">Сбросить настройки Piko</string>
+    <string name="piko_pref_export_success">Экспорт успешно завершен</string>
+    <string name="piko_pref_import_success">Импорт успешно завершен</string>
     <string name="piko_pref_export_failed">Сбой: ошибка экспорта %s</string>
     <string name="piko_pref_import_failed">Сбой: ошибка импорта %s</string>
     <string name="piko_pref_export_no_uri">Сбой: не выбрана папка</string>
     <string name="piko_pref_import_no_uri">Сбой: не выбран файл</string>
+    <string name="piko_pref_export_login_token">Экспорт токена авторизации</string>
+    <string name="piko_pref_import_login_token">Импорт токена авторизации</string>
     <!-- About -->
     <string name="piko_title_about">О приложении</string>
     <string name="piko_pref_app_version">Версия приложения</string>
     <string name="piko_pref_patch_info">Информация о патче</string>
     <string name="piko_pref_version_info">Информация о версии</string>
+    <string name="piko_changelogs_title">Список изменений</string>
+    <string name="piko_debug">Отладка Piko</string>
     <string name="piko_pref_patches">Патчи</string>
     <string name="piko_pref_included">Применен</string>
     <string name="piko_pref_excluded">Не применен</string>
     <string name="piko_pref_app_restart_rec">Рекомендуется перезапуск приложения</string>
+    <string name="piko_dialog_delete_title">Удалить</string>
+    <string name="piko_dialog_delete_message">Удалить %s?</string>
+    <string name="piko_pref_search_type_ahead_users">Пользователи</string>
+    <string name="piko_pref_search_type_ahead_events">События</string>
+    <string name="piko_pref_search_type_ahead_ordered_section">Упорядоченный раздел</string>
+    <string name="piko_settings_supported_links">Открывать поддерживаемые ссылки</string>
     <!-- For arrays-->
     <string name="piko_array_grok">Grok</string>
+    <string name="piko_array_money">Деньги</string>
     <string name="piko_array_xchat">X Чат</string>
+    <string name="piko_array_x_lite">Новый X Android</string>
+    <string name="piko_array_conference">Конференция</string>
+    <string name="piko_array_creator_studio">Творческая студия</string>
+    <string name="piko_array_jobs">Вакансии</string>
+    <string name="piko_array_media">Мультимедиа</string>
+    <string name="piko_array_light_mode">Светлая тема</string>
     <!-- App icon strings -->
+    <string name="piko_app_icon_thanks">Спасибо @NeoFreeBird за иконки приложений из iOS</string>
+    <string name="piko_app_icon_piko_exclusive">(Эксклюзивно для Piko)</string>
     <!-- Category -->
+    <string name="piko_app_icon_category_legacy">Архивные</string>
+    <string name="piko_app_icon_category_seasonal_event">Сезонные события</string>
+    <string name="piko_app_icon_category_sports">Спорт</string>
+    <string name="piko_app_icon_category_cultural_and_celebrations">Культурные события и празднования</string>
+    <string name="piko_app_icon_category_pride">Pride</string>
+    <string name="piko_app_icon_category_misc">Разное</string>
+    <string name="piko_app_icon_category_space">Космос</string>
+    <string name="piko_app_icon_category_movies_n_series">Фильмы и сериалы</string>
     <!-- Icon names -->
     <string name="piko_app_icon_name_default">По умолчанию</string>
     <string name="piko_app_icon_name_legacy_icon_1">Старая иконка 1</string>
     <string name="piko_app_icon_name_legacy_icon_2">Старая иконка 2</string>
     <string name="piko_app_icon_name_legacy_icon_3">Старая иконка 3</string>
     <string name="piko_app_icon_name_legacy_icon_4">Старая иконка 4</string>
+    <string name="piko_app_icon_name_legacy_blue">Архивный синий</string>
+    <string name="piko_app_icon_name_twitter_blue">Twitter Blue</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
+    <string name="piko_app_icon_name_earth">Земля</string>
+    <string name="piko_app_icon_name_moon">Луна</string>
+    <string name="piko_app_icon_name_mars">Марс</string>
+    <string name="piko_app_icon_name_sun">Солнце</string>
+    <string name="piko_app_icon_name_stars">Звёзды</string>
+    <string name="piko_app_icon_name_milky_way">Млечный Путь</string>
+    <string name="piko_app_icon_name_autumn_2021">Осень 2021</string>
+    <string name="piko_app_icon_name_autumn_2022">Осень 2022</string>
+    <string name="piko_app_icon_name_south_spring_2021">Южная весна 2021</string>
+    <string name="piko_app_icon_name_south_spring_2022">Южная весна 2022</string>
+    <string name="piko_app_icon_name_winter_1">Зимняя 1</string>
+    <string name="piko_app_icon_name_winter_2">Зимняя 2</string>
+    <string name="piko_app_icon_name_summer_1">Летняя 1</string>
+    <string name="piko_app_icon_name_summer_2">Летняя 2</string>
+    <string name="piko_app_icon_name_autumn_southern">Осенняя Юга</string>
+    <string name="piko_app_icon_name_summer">Летняя</string>
+    <string name="piko_app_icon_name_winter">Зимняя</string>
+    <string name="piko_app_icon_name_beijing_olympics_1">Олимпийские игры в Пекине 1</string>
+    <string name="piko_app_icon_name_beijing_olympics_2">Олимпийские игры в Пекине 2</string>
+    <string name="piko_app_icon_name_daytona">Daytona</string>
+    <string name="piko_app_icon_name_formulaone">Формула 1</string>
+    <string name="piko_app_icon_name_kentucky_derby">Кентукский Дерби</string>
+    <string name="piko_app_icon_name_mlb">Главная лига бейсбола (MLB)</string>
+    <string name="piko_app_icon_name_nba">Национальная баскетбольная ассоциация (NBA)</string>
+    <string name="piko_app_icon_name_nba_2">NBA 2</string>
+    <string name="piko_app_icon_name_ncaa">Национальная ассоциация студенческого спорта (NCAA)</string>
+    <string name="piko_app_icon_name_masters">Мастер спорта</string>
+    <string name="piko_app_icon_name_nba_finals">Финал НБА</string>
+    <string name="piko_app_icon_name_stanley_cup">Кубок Стэнли</string>
+    <string name="piko_app_icon_name_commonwealth">Содружество</string>
+    <string name="piko_app_icon_name_mothers_day">День матери</string>
+    <string name="piko_app_icon_name_womansday">Женский день</string>
+    <string name="piko_app_icon_name_halloween_2021">Хэллоуин 2021</string>
+    <string name="piko_app_icon_name_halloween_2022">Хэллоуин 2022</string>
+    <string name="piko_app_icon_name_halloween_2024_1">Хэллоуин 2024 1</string>
+    <string name="piko_app_icon_name_halloween_2024_2">Хэллоуин 2024 2</string>
+    <string name="piko_app_icon_name_halloween_2024_3">Хэллоуин 2024 3</string>
+    <string name="piko_app_icon_name_holi">Праздник Холи</string>
+    <string name="piko_app_icon_name_stpatricks_day">День святого Патрика</string>
+    <string name="piko_app_icon_name_easter">Пасха</string>
+    <string name="piko_app_icon_name_anzac">Anzac</string>
+    <string name="piko_app_icon_name_ramadan">Рамадан</string>
+    <string name="piko_app_icon_name_black_history">История чернокожих</string>
+    <string name="piko_app_icon_name_eurovisionfinal">Финал \"Евровидение\"</string>
+    <string name="piko_app_icon_name_lunar_new_year_1">Китайский Новый год 1</string>
+    <string name="piko_app_icon_name_lunar_new_year_2">Китайский Новый год 2</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_1">Японский Новый год 1</string>
+    <string name="piko_app_icon_name_japanese_new_year_2024_2">Японский Новый год 2</string>
+    <string name="piko_app_icon_name_may_the_fourth">День «Звёздных войн»</string>
+    <string name="piko_app_icon_name_barbie">Барби</string>
+    <string name="piko_app_icon_name_thanksgiving_1">День Благодарения 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2">День Благодарения 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_1">День Благодарения 2024 1</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_2">День Благодарения 2024 2</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_3">День Благодарения 2024 3</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_4">День Благодарения 2024 4</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_5">День Благодарения 2024 5</string>
+    <string name="piko_app_icon_name_thanksgiving_2024_6">День Благодарения 2024 6</string>
+    <string name="piko_app_icon_name_canada_day">День Канады</string>
+    <string name="piko_app_icon_name_canada_indigenous">Коренные народы Канады</string>
+    <string name="piko_app_icon_name_earth_hour">Час Земли</string>
+    <string name="piko_app_icon_name_euro">Евро</string>
+    <string name="piko_app_icon_name_independence_day">День независимости</string>
+    <string name="piko_app_icon_name_juneteenth">День эмансипации</string>
+    <string name="piko_app_icon_name_naidoc">Naidoc</string>
+    <string name="piko_app_icon_name_christmas_2024_1">Рождество 2024 1</string>
+    <string name="piko_app_icon_name_christmas_2024_2">Рождество 2024 2</string>
+    <string name="piko_app_icon_name_christmas_2024_3">Рождество 2024 3</string>
+    <string name="piko_app_icon_name_christmas_2024_4">Рождество 2024 4</string>
+    <string name="piko_app_icon_name_upsidedown">Вверх ногами</string>
+    <string name="piko_app_icon_name_games_chamber">Games Chamber</string>
+    <string name="piko_app_icon_name_pridesouthern">Гордость Юга</string>
+    <string name="piko_app_icon_name_newzealand_pride_1">Гордость Новой Зеландии 1</string>
+    <string name="piko_app_icon_name_newzealand_pride_2">Гордость Новой Зеландии 2</string>
+    <string name="piko_app_icon_name_pride_month">Месяц гордости</string>
+    <string name="piko_app_icon_name_fancy">Шик</string>
+    <string name="piko_app_icon_name_broken">Сломанная</string>
+    <string name="piko_app_icon_name_cyber">Кибер</string>
+    <string name="piko_app_icon_name_soft_pastel_pink">Нежно-розовый</string>
+    <string name="piko_app_icon_name_electric_indigo">Электрический индиго</string>
+    <string name="piko_app_icon_name_neon_pink">Неоновый Розовый</string>
+    <string name="piko_app_icon_name_tropical_teal">Тропический бирюзовый</string>
+    <string name="piko_app_icon_name_vivid_orange">Ярко-оранжевый</string>
     <!-- Import / export login tokens -->
+    <string name="piko_login_token_export_screen_description">"Эта функция экспортирует токены сессии для текущего вошедшего аккаунта.
+
+ВНИМАНИЕ: Экспортированные токены являются конфиденциальной информацией.
+Никогда никому их не передавайте!
+Если кто-то получит этот токен, он сможет свободно получить доступ к вашему аккаунту, пока вы не выйдете из сессии.
+
+Для получения подробных сведений, пожалуйста, ознакомьтесь с этой страницей:
+https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
+Рекомендуется прочитать ее перед использованием этой функции. Она содержит важную информацию, например, о том, как импортировать токены."</string>
+    <string name="piko_login_token_select_account">Выберите аккаунт:</string>
+    <string name="piko_login_token_export_copy_to_clipboard">Копировать в буфер обмена</string>
+    <string name="piko_login_token_export_save_to_file">Сохранить в файл</string>
+    <string name="piko_login_token_export_no_accounts_message">Инфо: Вы не вошли ни в один аккаунт. Чтобы экспортировать токены, сначала войдите в аккаунт.</string>
+    <string name="piko_login_token_import_token_button_text">Вход через json с токеном</string>
+    <string name="piko_login_token_import_from_text">Импорт из текста</string>
+    <string name="piko_login_token_import_from_file">Импорт из файла</string>
+    <string name="piko_login_token_import_about">Об этой функции (открыть сайт)</string>
+    <string name="piko_login_token_import_success_reopen_required">Перезапустить приложение</string>
+    <string name="piko_login_token_import_failed_missing_info">Ошибка: отсутствует «username», «token» или «secret»</string>
+    <string name="piko_login_token_import_failed_already_exist">Не удалось добавить аккаунт (возможно, он уже существует)</string>
+    <string name="piko_ok">ОК</string>
+    <string name="piko_cancel">Отмена</string>
 </resources>

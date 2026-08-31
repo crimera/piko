@@ -6,35 +6,15 @@
 
 package app.morphe.extension.twitter.settings;
 
-final class SettingsSearchColors {
-    private static final SettingsSearchColors DARK = new SettingsSearchColors(
-            0xff000000,
-            0xff202327,
-            0x2aeff3f4,
-            0xffe7e9ea,
-            0xff71767b,
-            0x2eeff3f4
-    );
-    private static final SettingsSearchColors DIM = new SettingsSearchColors(
-            0xff15202b,
-            0xff273340,
-            0x2aeff3f4,
-            0xffe7e9ea,
-            0xff71767b,
-            0x2eeff3f4
-    );
-    private static final SettingsSearchColors LIGHT = new SettingsSearchColors(
-            0xffffffff,
-            0xffeff3f4,
-            0x220f1419,
-            0xff0f1419,
-            0xff536471,
-            0x1e0f1419
-    );
+import android.content.Context;
 
+import app.morphe.extension.twitter.Utils;
+
+final class SettingsSearchColors {
     final int settingsBackgroundColor;
     final int searchFieldBackgroundColor;
-    final int searchFieldTapHighlightColor;
+    final int searchFieldPressedColor;
+    final int searchFieldBorderColor;
     final int searchTextColor;
     final int searchHintColor;
     final int searchTargetRowHighlightColor;
@@ -42,30 +22,33 @@ final class SettingsSearchColors {
     private SettingsSearchColors(
             int settingsBackgroundColor,
             int searchFieldBackgroundColor,
-            int searchFieldTapHighlightColor,
+            int searchFieldPressedColor,
+            int searchFieldBorderColor,
             int searchTextColor,
             int searchHintColor,
             int searchTargetRowHighlightColor
     ) {
         this.settingsBackgroundColor = settingsBackgroundColor;
         this.searchFieldBackgroundColor = searchFieldBackgroundColor;
-        this.searchFieldTapHighlightColor = searchFieldTapHighlightColor;
+        this.searchFieldPressedColor = searchFieldPressedColor;
+        this.searchFieldBorderColor = searchFieldBorderColor;
         this.searchTextColor = searchTextColor;
         this.searchHintColor = searchHintColor;
         this.searchTargetRowHighlightColor = searchTargetRowHighlightColor;
     }
 
-    static SettingsSearchColors current() {
-        return forTheme(app.morphe.extension.twitter.Utils.getTheme());
-    }
+    static SettingsSearchColors current(Context context) {
+        int settingsBackgroundColor = Utils.resolveColor(context, "coreColorAppBackground");
+        int searchTextColor = Utils.resolveColor(context, "coreColorPrimaryText");
 
-    static SettingsSearchColors forTheme(String theme) {
-        if ("dark".equals(theme)) {
-            return DARK;
-        }
-        if ("dim".equals(theme)) {
-            return DIM;
-        }
-        return LIGHT;
+        return new SettingsSearchColors(
+                settingsBackgroundColor,
+                Utils.resolveColor(context, "abstractColorFadedGray"),
+                Utils.resolveColor(context, "coreColorPressed"),
+                Utils.resolveColor(context, "coreColorBorder"),
+                searchTextColor,
+                Utils.resolveColor(context, "coreColorSecondaryText"),
+                Utils.resolveColor(context, "abstractColorHighlightBackground")
+        );
     }
 }

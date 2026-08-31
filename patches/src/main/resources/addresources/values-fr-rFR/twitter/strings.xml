@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Rechercher des paramètres de Piko</string>
     <string name="piko_settings_search_clear">Effacer la saisie</string>
-    <string name="piko_settings_search_no_results">Aucun résultat pour \"%1$s\" </string>
+    <string name="piko_settings_search_no_results">Aucun résultat pour \"%s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">Activer l\'annulation des publications</string>
@@ -38,9 +38,9 @@
     <string name="piko_title_native_downloader_toggle">Activer le téléchargeur natif</string>
     <string name="piko_pref_native_downloader_autodownload_highest_video_res">Télécharger automatiquement la résolution vidéo la plus élevée</string>
     <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">Ignorer la boîte de dialogue de sélection et télécharger immédiatement la meilleure résolution disponible pour les vidéos individuelles.</string>
-    <string name="piko_pref_native_downloader_show_download_icon">Afficher l’icône de téléchargement</string>
-    <string name="piko_pref_native_downloader_show_copy_icon">Afficher l’icône de copie</string>
-    <string name="piko_pref_native_downloader_show_variants_icon">Afficher l’icône des variantes</string>
+    <string name="piko_pref_native_downloader_show_download_icon">Afficher l\'icône de téléchargement</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">Afficher l\'icône de copie</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">Afficher l\'icône des variantes</string>
     <string name="piko_pref_native_downloader_inline_button">Afficher le bouton de téléchargement en ligne</string>
     <string name="piko_pref_native_downloader_inline_button_desc">Ajoute un bouton de téléchargement directement à la barre d\'action de publication</string>
     <string name="piko_pref_native_downloader_alert_title">Télécharger le média</string>
@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Échec de la suppression du cache</string>
     <string name="piko_title_native_share_menu">Menu de partage natif</string>
     <string name="piko_native_share_menu_toggle">Activer le menu de partage natif</string>
+    <string name="piko_native_share_menu_items_to_hide">Éléments du menu de partage natif à masquer</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Publicités</string>
     <string name="piko_pref_hide_promoted_posts">Masquer les publications promues</string>
@@ -137,10 +138,10 @@
     <string name="piko_pref_pause_search_suggestion_desc">Les suggestions de recherche ne seront pas enregistrées localement</string>
     <string name="piko_pref_search_suggestion">Masquer les suggestions de recherche</string>
     <string name="piko_pref_search_suggestion_desc">Masque la suggestion de recherche dans la section Explorer</string>
-    <string name="piko_disunify_xchat_system">Désactiver le système xchat unifié</string>
-    <string name="piko_disunify_xchat_system_desc">Restaurer les anciennes fonctionnalités comme les messages et le menu de partage</string>
     <string name="piko_legacy_share_link">Liens de partage hérités</string>
     <string name="piko_block_redirecting_to_x_lite">Bloquer la redirection vers X Lite</string>
+    <string name="piko_pref_block_update_screen">Bloquer l\'écran de mise à jour</string>
+    <string name="piko_pref_block_update_screen_desc">Bloque l\'affichage de l\'écran de mise à jour \'Cette application n\'est plus à jour\' au lancement</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Drapeaux de fonctionnalités</string>
     <string name="piko_pref_feature_flags">Ajouter des feature flags</string>
@@ -167,10 +168,10 @@
     <string name="piko_pref_show_poll_result">Afficher les résultats du sondage</string>
     <string name="piko_pref_show_poll_result_desc">Voir les résultats du sondage sans voter</string>
     <string name="piko_pref_hide_community_notes">Masquer les notes de la communauté</string>
-    <string name="piko_pref_hide_immersive_player">Masquer le joueur immersif</string>
-    <string name="piko_pref_hide_immersive_player_desc">Supprime le balayage vers le haut pour plus de vidéos dans le lecteur vidéo</string>
+    <string name="piko_pref_hide_immersive_player">Désactiver le lecteur immersif</string>
+    <string name="piko_pref_hide_immersive_player_desc">Désactiver le nouveau lecteur vidéo qui permet de regarder davantage de vidéos en faisant glisser vers le haut</string>
     <string name="piko_pref_enable_vid_auto_advance">Activer le défilement automatique de la vidéo</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Active le défilement automatique des vidéos en vue immersive</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Active le défilement automatique des vidéos dans le lecteur immersif</string>
     <string name="piko_pref_hide_hidden_replies">Masquer les réponses cachées</string>
     <string name="piko_pref_force_hd">Forcer les vidéos HD</string>
     <string name="piko_pref_force_hd_desc">Les vidéos seront toujours lues dans la plus haute qualité</string>
@@ -182,9 +183,9 @@
     <string name="piko_pref_hide_badge_nav_bar">Masquer les badges de la barre de navigation</string>
     <string name="piko_pref_hide_badge_nav_bar_desc">Masque les notifications et compteurs des icônes de la barre de navigation</string>
     <string name="piko_pref_hide_post_inline_metrics">Masquer les métriques de la vue intégrée de la publication</string>
-    <string name="piko_pref_hide_post_inline_metrics_desc">Masque les compteurs de J\'aime, republications, etc. dans la vue intégrée</string>
+    <string name="piko_pref_hide_post_inline_metrics_desc">Masque les j\'aime, les republications, etc dans la vue intégrée</string>
     <string name="piko_pref_hide_post_detailed_metrics">Masquer les métriques de la vue détaillée de la publication</string>
-    <string name="piko_pref_hide_post_detailed_metrics_desc">Masque les compteurs de J\'aime, republications, etc. dans la vue détaillée</string>
+    <string name="piko_pref_hide_post_detailed_metrics_desc">Masque les j\'aime, les republications, etc dans la vue détaillée</string>
     <!-- Customization Settings -->
     <string name="piko_title_customisation">Personnalisation</string>
     <string name="piko_pref_customisation_profiletabs">Onglets du profil à masquer</string>
@@ -207,6 +208,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">Plus d\'informations sur le profil</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Ajoute plus de détails sur la page de profil</string>
     <string name="piko_fast_follower">Abonné rapide</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Style de police</string>
     <string name="piko_pref_add_font">Ajouter une police</string>
@@ -285,6 +287,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">Icône classique 4</string>
     <string name="piko_app_icon_name_legacy_blue">Classique bleu</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Bleu</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">Terre</string>
     <string name="piko_app_icon_name_moon">Lune</string>
     <string name="piko_app_icon_name_mars">Mars</string>
@@ -373,21 +376,22 @@
 
 AVERTISSEMENT : les jetons exportés sont des informations hautement confidentielles.
 Ne les partagez jamais avec qui que ce soit !
-Si quelqu’un obtient ce jeton, il peut accéder librement à votre compte jusqu’à ce que vous vous déconnectiez de la session.
+Si quelqu'un obtient ce jeton, il peut accéder librement à votre compte jusqu'à ce que vous vous déconnectiez de la session.
 
 Pour plus de détails, veuillez consulter cette page :
 https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
-Il est recommandé de la lire avant d’utiliser cette fonctionnalité. Elle contient des informations importantes, notamment sur la manière d’importer des jetons."</string>
+
+Il est recommandé de la lire avant d'utiliser cette fonctionnalité. Elle contient des informations importantes, notamment sur la manière d'importer des jetons."</string>
     <string name="piko_login_token_select_account">Sélectionnez un compte:</string>
     <string name="piko_login_token_export_copy_to_clipboard">Copier dans le presse-papiers</string>
     <string name="piko_login_token_export_save_to_file">Enregistrer dans un fichier</string>
-    <string name="piko_login_token_export_no_accounts_message">Info : Vous n’êtes connecté à aucun compte. Pour exporter des jetons, veuillez d’abord vous connecter à un compte.</string>
+    <string name="piko_login_token_export_no_accounts_message">Info : Vous n\'êtes connecté à aucun compte. Pour exporter des jetons, veuillez d\'abord vous connecter à un compte.</string>
     <string name="piko_login_token_import_token_button_text">Connexion via jeton JSON</string>
     <string name="piko_login_token_import_from_text">Importer à partir du texte</string>
     <string name="piko_login_token_import_from_file">Importer à partir d\'un fichier</string>
     <string name="piko_login_token_import_about">À propos de cette fonctionnalité (Ouvrir le site web)</string>
     <string name="piko_login_token_import_success_reopen_required">Rouvrez l\'application</string>
-    <string name="piko_login_token_import_failed_missing_info">Erreur : \"nom d’utilisateur\", \"jeton\" ou \"secret\" est manquant</string>
+    <string name="piko_login_token_import_failed_missing_info">Erreur : \"nom d\'utilisateur\", \"jeton\" ou \"secret\" est manquant</string>
     <string name="piko_login_token_import_failed_already_exist">Impossible d\'ajouter le compte (il existe peut-être déjà)</string>
     <string name="piko_ok">OK</string>
     <string name="piko_cancel">Annuler</string>

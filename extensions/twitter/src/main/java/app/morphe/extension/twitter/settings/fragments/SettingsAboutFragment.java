@@ -92,7 +92,7 @@ public class SettingsAboutFragment extends PreferenceFragment {
                 )
         );
 
-        TreeMap<String,Boolean> flags = new TreeMap();
+        TreeMap<String,Boolean> flags = new TreeMap<>();
         flags.put(str("piko_pref_customisation_more_info_on_profile"),SettingsStatus.moreInfoOnProfile);
         flags.put(str("piko_pref_external_downloader_toggle"),SettingsStatus.externalDownloader);
         flags.put(str("piko_title_native_share_menu"),SettingsStatus.enableNativeShareMenu);
@@ -165,10 +165,10 @@ public class SettingsAboutFragment extends PreferenceFragment {
         flags.put(str("piko_pref_customisation_change_app_icon"),SettingsStatus.appIconCustomisation);
         flags.put(str("piko_pref_hide_badge_nav_bar"),SettingsStatus.hideNavbarBadge);
         flags.put(str("piko_pref_hide_post_inline_metrics"),SettingsStatus.hidePostMetrics);
-        flags.put(str("piko_disunify_xchat_system"),SettingsStatus.disUnifyXChatSystem);
         flags.put(str("piko_legacy_share_link"),SettingsStatus.legacyShareLink);
         flags.put(str("piko_pref_export_login_token"),SettingsStatus.exportLoginToken);
         flags.put(str("piko_block_redirecting_to_x_lite"),SettingsStatus.blockRedirectingToXLite);
+        flags.put(str("piko_pref_block_update_screen"),SettingsStatus.blockUpdateScreen);
 
         LegacyTwitterPreferenceCategory patPref = preferenceCategory(str("piko_pref_patches"), screen);
 

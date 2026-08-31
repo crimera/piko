@@ -13,10 +13,11 @@ import app.morphe.extension.instagram.settings.Settings;
 import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
 
-import app.morphe.extension.crimera.SharedPref;
+import app.morphe.extension.crimera.sharedPreference.SharedPref;
 
 @SuppressWarnings("unused")
 public class Pref {
+    private static final int MAX_IMAGE_SIZE = 4096;
     public static boolean SHOULD_MARK_CHAT_AS_READ;
     static {
         SHOULD_MARK_CHAT_AS_READ = false;
@@ -52,12 +53,20 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.HIDE_SUGGESTED_CONTENT);
     }
 
+    public static boolean saveDeletedMessages() {
+        return SharedPref.getBooleanPref(Settings.SAVE_DELETED_MESSAGES);
+    }
+
     public static boolean openLinksExternally() {
         return SharedPref.getBooleanPref(Settings.OPEN_LINKS_EXTERNALLY);
     }
 
     public static boolean sanitizeShareLinks() {
         return SharedPref.getBooleanPref(Settings.SANITIZE_SHARE_LINKS);
+    }
+
+    public static String customSharingDomain() {
+        return SharedPref.getStringPref(Settings.CUSTOM_SHARING_DOMAIN);
     }
 
     public static boolean getTurnOnAllGhostModes() {
@@ -194,6 +203,10 @@ public class Pref {
         return SharedPref.getBooleanPref(Settings.DISABLE_STORY_FLIPPING);
     }
 
+    public static boolean loopStory() {
+        return SharedPref.getBooleanPref(Settings.LOOP_STORY);
+    }
+
     public static boolean viewStoryMentions() {
         return SharedPref.getBooleanPref(Settings.VIEW_STORY_MENTIONS);
     }
@@ -203,11 +216,11 @@ public class Pref {
     }
 
     public static int improveImageViewing(int defaultSize) {
-        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? 2048 : defaultSize;
+        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
     }
 
     public static Integer improveImageViewing(Integer defaultSize) {
-        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? 2048 : defaultSize;
+        return SharedPref.getBooleanPref(Settings.IMPROVE_IMAGE_VIEWING) ? MAX_IMAGE_SIZE : defaultSize;
     }
 
     public static boolean enableDownload() {

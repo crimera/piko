@@ -5,7 +5,7 @@
  */
 
 
-package app.morphe.extension.instagram.patches;
+package app.morphe.extension.instagram.patches.dm;
 
 import app.morphe.extension.instagram.entity.Entity;
 import app.morphe.extension.instagram.utils.Pref;

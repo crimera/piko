@@ -16,11 +16,13 @@ import app.crimera.patches.instagram.utils.enableSettings
 import app.crimera.utils.extensionToClassName
 import app.crimera.utils.fieldExtractor
 import app.morphe.patcher.Fingerprint
+import app.morphe.patcher.extensions.InstructionExtensions.addInstruction
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.indexOfFirstInstruction
+import app.morphe.util.registersUsed
 import com.android.tools.smali.dexlib2.AccessFlags
 import com.android.tools.smali.dexlib2.Opcode
 
@@ -52,10 +54,11 @@ val friendshipStatusIndicatorPatch =
                 // This is needed in order to find the profile info parameter.
                 val isStaticMethod = AccessFlags.STATIC.isSet(method.accessFlags)
 
+                val internalBadgeStringIndex = stringMatches[0].index
+
                 method.apply {
                     val viewType = "Landroid/view/View;"
 
-                    val internalBadgeStringIndex = BindInternalBadgeFingerprint.stringMatches[0].index
                     val profileInfoClassType = ProfileUserInfoViewBinderFingerprint.method.parameters[1].type
 
                     // Identify the profile info in the method parameter, which is later passed to our custom hook.
@@ -77,20 +80,6 @@ val friendshipStatusIndicatorPatch =
                     val internalBadgeFieldName = internalBadgeInstructionExtraction.name
                     val internalBadgeReturnType = extensionToClassName(internalBadgeInstructionExtraction.returnType)
 
-                    // Instruction to which the call needs to transfer after our hook.
-                    val moveFrom16Index =
-                        indexOfFirstInstruction(internalBadgeInstructionIndex, Opcode.MOVE_OBJECT_FROM16)
-
-                    // Added instructions:
-                    // Bypass the internal badge visibility checks.
-                    addInstructionsWithLabels(
-                        internalBadgeInstructionIndex + 1,
-                        """
-                        goto :piko
-                        """.trimIndent(),
-                        ExternalLabel("piko", getInstruction(moveFrom16Index)),
-                    )
-
                     // Added instructions:
                     // Get the view  and check if its not null
                     // and then cast it to the profile model class*.
@@ -104,7 +93,7 @@ val friendshipStatusIndicatorPatch =
                         check-cast v1, $internalBadgeDefiningClassName
                         iget-object v2, v1, $internalBadgeDefiningClassName->$internalBadgeFieldName:$internalBadgeReturnType
                         move-object/from16 v0, p$profileInfoParameter
-                        invoke-static {v0, v2}, ${PATCHES_DESCRIPTOR}/userprofile/FriendshipStatusIndicator;->indicators(Ljava/lang/Object;Ljava/lang/Object;)V
+                        invoke-static {v0, v2}, ${PATCHES_DESCRIPTOR}/userprofile/FriendshipStatusIndicator;->addFriendshipIndicator(Ljava/lang/Object;Ljava/lang/Object;)V
                         """.trimIndent(),
                         ExternalLabel("cond_piko", getInstruction(0)),
                     )

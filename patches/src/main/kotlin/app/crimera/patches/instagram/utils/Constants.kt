@@ -22,10 +22,10 @@ object Constants {
                 listOf(
                     // Stable
                     AppTarget(
-                        version = "435.0.0.37.76",
+                        version = "439.0.0.37.89",
                         versionCodes =
                             mapOf(
-                                ARM64_V8A to 384109456,
+                                ARM64_V8A to 384510827,
                             ),
                     ),
                 ),
@@ -39,6 +39,8 @@ object Constants {
     const val MEDIA_OPTIONS_CLASS = "Lcom/instagram/feed/media/mediaoption/MediaOption\$Option;"
     const val USER_SESSION_CLASS = "Lcom/instagram/common/session/UserSession;"
     const val USER_DETAIL_VIEW_MODEL_CLASS = "Lcom/instagram/profile/fragment/UserDetailViewModel;"
+    const val ORIGINAL_SOUND_DATA_INTF = "Lcom/instagram/api/schemas/OriginalSoundDataIntf;"
+    const val MUSIC_INFO_CLASS = "Lcom/instagram/api/schemas/MusicInfo;"
 
     // Extension classes.
     const val INTEGRATIONS_PACKAGE = "Lapp/morphe/extension/instagram"
@@ -63,7 +65,7 @@ object Constants {
     const val FEED_OVERFLOW_MENU_BUTTON_CLASS = "$OVERFLOW_MENU_BUTTON_CLASS/FeedButton;"
     const val ACTIVITY_SETTINGS_STATUS_CLASS = "$ACTIVITY_SETTINGS_CLASS/SettingsStatus;"
     const val SSTS_DESCRIPTOR = "invoke-static {}, $ACTIVITY_SETTINGS_STATUS_CLASS->%s()V"
-    const val HOOK_FLAGS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/HookFlags;"
+    const val HOOK_FLAGS_DESCRIPTOR = "$PATCHES_DESCRIPTOR/devFlags/HookFlags;"
     const val LOAD_FLAGS_DESCRIPTOR = "invoke-static {}, $HOOK_FLAGS_DESCRIPTOR->%s()V"
 
     const val COMMENT_BUTTON_EXTENSION_CLASS = "${PATCHES_DESCRIPTOR}/comment"

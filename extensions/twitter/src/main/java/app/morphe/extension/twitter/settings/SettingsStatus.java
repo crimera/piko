@@ -88,6 +88,7 @@ public class SettingsStatus {
     public static boolean inlineDownloadButton = false;
 
     public static boolean moreInfoOnProfile = false;
+
     public static void moreInfoOnProfile() {
         moreInfoOnProfile = true;
     }
@@ -380,10 +381,7 @@ public class SettingsStatus {
         hidePostMetrics = true;
     }
 
-    public static boolean disUnifyXChatSystem = false;
-    public static void disUnifyXChatSystem() {
-        disUnifyXChatSystem = true;
-    }
+
 
     public static boolean exportLoginToken = false;
     public static void exportLoginToken() {
@@ -393,6 +391,11 @@ public class SettingsStatus {
     public static boolean blockRedirectingToXLite = false;
     public static void blockRedirectingToXLite() {
         blockRedirectingToXLite = true;
+    }
+
+    public static boolean blockUpdateScreen = false;
+    public static void blockUpdateScreen() {
+        blockUpdateScreen = true;
     }
 
     public static boolean enableNativeShareMenu = false;
@@ -411,7 +414,7 @@ public class SettingsStatus {
     }
 
     public static boolean enableMiscSection() {
-        return ( disUnifyXChatSystem || pauseSearchSuggestions || removeSearchSuggestions || hideSocialProof || roundOffNumbers || enableFontMod || hideRecommendedUsers || hideFAB || hideViewCount || customSharingDomainEnabled || hideFABBtns);
+        return ( pauseSearchSuggestions || removeSearchSuggestions || hideSocialProof || roundOffNumbers || enableFontMod || hideRecommendedUsers || hideFAB || hideViewCount || customSharingDomainEnabled || hideFABBtns);
     }
 
     public static boolean enableAdsSection() {

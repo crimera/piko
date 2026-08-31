@@ -7,11 +7,7 @@
 package app.crimera.patches.instagram.misc.download
 
 import app.crimera.patches.instagram.utils.Constants.DOWNLOAD_DESCRIPTOR
-import app.crimera.patches.instagram.utils.Constants.EDIT_MEDIA_INFO_FRAGMENT_CLASS
 import app.morphe.patcher.Fingerprint
-
-val FEED_BUTTON_DESCRIPTOR = "$DOWNLOAD_DESCRIPTOR/FeedButton;"
-val REEL_BUTTON_DESCRIPTOR = "$DOWNLOAD_DESCRIPTOR/ReelButton;"
 
 internal object FeedButtonOnClickFingerprint : Fingerprint(
     parameters = listOf("Lcom/instagram/feed/media/mediaoption/MediaOption\$Option;"),
@@ -20,7 +16,7 @@ internal object FeedButtonOnClickFingerprint : Fingerprint(
 )
 
 internal object AddReelButtonFingerprint : Fingerprint(
-    strings = listOf("ClipsOrganicMediaItemViewMoreOptionsController"),
+    strings = listOf("ClipsOrganicMediaItemViewMoreOptionsController", "reels"),
 )
 
 internal object GetDirectThreadMediaSaverModuleNameFingerprint : Fingerprint(

@@ -9,25 +9,20 @@ package app.morphe.extension.instagram.patches.download;
 
 import static app.morphe.extension.instagram.utils.IgStr.str;
 
-import android.os.Handler;
-import android.os.Looper;
 import androidx.fragment.app.Fragment;
 
-import java.net.HttpURLConnection;
 import java.io.File;
 
 import android.content.Context;
 import android.app.Dialog;
 import android.content.DialogInterface;
 
-import app.morphe.extension.shared.requests.Requester;
-import app.morphe.extension.shared.requests.Route;
-import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.crimera.PikoUtils;
 import app.morphe.extension.instagram.entity.InstagramDialogBox;
+import app.morphe.extension.instagram.utils.InstaUtils;
 import app.morphe.extension.instagram.constants.UI;
-import static app.morphe.extension.shared.requests.Route.Method.GET;
+import app.morphe.extension.instagram.constants.Constants;
 
 public class DownloadMapping {
 
@@ -86,38 +81,11 @@ public class DownloadMapping {
     }
 
     public static void downloadMapping() {
-        Context context = Utils.getContext();
-
-        if (!Utils.isNetworkConnected()) {
-            PikoUtils.toast(str("piko_no_internet"));
-            return;
-        }
-        Utils.runOnBackgroundThread(() -> {
-            String appVersionName = Utils.getAppVersionName();
-            String mappings_filename = appVersionName + ".json";
-
-            try {
-                String url = "https://github.com/crimera/piko/raw/refs/heads/dev/docs/mappings/";
-
-                Route route = new Route(GET, mappings_filename);
-                HttpURLConnection connection = Requester.getConnectionFromRoute(url, route);
-                String response = Requester.parseString(connection);
-
-                File destinationFile = new File(DownloadMapping.mappingsPath);
-                PikoUtils.writeFile(destinationFile, response.getBytes(), false);
-
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    PikoUtils.toast(str("piko_downloaded_media") + mappings_filename);
-                    Utils.restartApp(context);
-                });
-
-            } catch (Exception e) {
-                PikoUtils.logger(e);
-                PikoUtils.toast(str("piko_download_failed_media") + mappings_filename);
-            }
-
-        });
-
+        String host = Constants.PIKO_MAPPINGS_PATH;
+        String appVersionName = Utils.getAppVersionName();
+        String mappings_filename = appVersionName + ".json";
+        File destinationFile = new File(DownloadMapping.mappingsPath);
+        InstaUtils.downloadFile(host, mappings_filename, destinationFile, ()->Utils.restartApp(context));
     }
 
 }

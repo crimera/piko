@@ -49,9 +49,6 @@
     <string name="piko_limit_following_feed">僅顯示已追蹤的帳號的動態</string>
     <string name="piko_limit_following_feed_desc">篩選動態首頁，僅顯示您已追蹤的帳號所發布的內容。</string>
     <string name="piko_disable_reels_scrolling">停用 Reels 捲動</string>
-    <string name="piko_disable_reels_scrolling_desc">"停用 Instagram Reels 中的無限捲動功能，防止自動滑動至下一則 Reel。
-
-注意：在全新安裝的情況下，可能會出現「提示」動畫，但幾秒鐘後會自動停止。"</string>
     <string name="piko_hide_stories_tray">隱藏限時動態欄</string>
     <string name="piko_hide_stories_tray_desc">從動態首頁中限時動態欄</string>
     <string name="piko_hide_notes_tray">隱藏筆記欄</string>
@@ -66,7 +63,6 @@
     <string name="piko_category_misc">其他</string>
     <string name="piko_disable_analytics">停用資料分析</string>
     <string name="piko_delete_analytics_cache">刪除資料分析快取</string>
-    <string name="piko_disable_analytics_desc">封鎖傳送至 Instagram / Facebook 伺服器的分析資料</string>
     <string name="piko_disable_discover_people">停用「為你推薦」功能</string>
     <string name="piko_disable_discover_people_desc">在個人檔案頁面中停用「為你推薦」功能</string>
     <string name="piko_follow_back_indicator">啟用好友關係狀態指示器</string>
@@ -85,7 +81,6 @@
     <string name="piko_customise_story_timestamp">自訂限時動態的時間格式</string>
     <string name="piko_customise_story_timestamp_desc">自訂顯示限時動態發佈時間的格式</string>
     <string name="piko_improve_image_viewing">提高相片畫質</string>
-    <string name="piko_improve_image_viewing_desc">從伺服器擷取最高解像度的圖片</string>
     <string name="piko_hide_reshare_button">隱藏轉發按鈕</string>
     <string name="piko_copy_comment">複製留言</string>
     <string name="piko_copy_comment_desc">在貼文和 Reels 新增一個複製留言的按鈕</string>
@@ -152,7 +147,6 @@
     <string name="piko_category_about">關於</string>
     <string name="piko_export_pref">匯出 Piko 偏好設定</string>
     <string name="piko_import_pref">匯入 Piko 偏好設定</string>
-    <string name="piko_reset_pref">重設 Piko 偏好設定</string>
     <string name="piko_app_version">應用程式版本：%s</string>
     <string name="piko_patch_version">補丁版本：%s</string>
     <string name="piko_patch_info_title">補丁資訊</string>
@@ -203,5 +197,7 @@
     <string name="piko_action_bar_button_profile_info_icon">個人檔案圖標</string>
     <string name="piko_settings_on_action_bar">操作列上顯示 Piko 設定</string>
     <string name="piko_settings_on_action_bar_desc">將 Piko 設定入口移至動態首頁的操作列上</string>
+    <!-- Developer Options Section -->
     <!-- Story filters -->
+    <!-- Save & view deleted (unsent) direct messages -->
 </resources>

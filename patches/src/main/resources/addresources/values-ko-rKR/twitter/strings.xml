@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Piko 설정 검색</string>
     <string name="piko_settings_search_clear">입력 지우기</string>
-    <string name="piko_settings_search_no_results">\'%1$s\'에 대한 검색 결과가 없습니다</string>
+    <string name="piko_settings_search_no_results">\'%s\'에 대한 검색 결과가 없습니다</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">게시물 취소 활성화하기</string>
@@ -37,7 +37,7 @@
     <string name="piko_title_native_downloader">기본 다운로더</string>
     <string name="piko_title_native_downloader_toggle">기본 다운로더 활성화하기</string>
     <string name="piko_pref_native_downloader_autodownload_highest_video_res">최고 화질 동영상 자동 다운로드</string>
-    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">단일 동영상은 화질 선택 다이얼로그를 건너뛰고, 사용 가능한 가장 높은 화질으로 즉시 다운로드합니다</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">단일 동영상은 화질 선택 대화 상자를 건너뛰고, 사용 가능한 가장 높은 화질으로 즉시 다운로드합니다</string>
     <string name="piko_pref_native_downloader_show_download_icon">다운로드 아이콘 표시</string>
     <string name="piko_pref_native_downloader_show_copy_icon">복사 아이콘 표시</string>
     <string name="piko_pref_native_downloader_show_variants_icon">변형 아이콘 표시</string>
@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">캐시를 삭제할 수 없습니다</string>
     <string name="piko_title_native_share_menu">기본 공유 메뉴</string>
     <string name="piko_native_share_menu_toggle">기본 공유 메뉴 활성화하기</string>
+    <string name="piko_native_share_menu_items_to_hide">숨겨질 기본 공유 메뉴 항목</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">광고</string>
     <string name="piko_pref_hide_promoted_posts">광고 게시물 숨기기</string>
@@ -137,10 +138,10 @@
     <string name="piko_pref_pause_search_suggestion_desc">검색어 추천은 로컬에 저장되지 않습니다</string>
     <string name="piko_pref_search_suggestion">검색어 추천 숨기기</string>
     <string name="piko_pref_search_suggestion_desc">탐색 영역에서 검색어 추천을 숨길 수 있습니다</string>
-    <string name="piko_disunify_xchat_system">Disunify xchat 시스템</string>
-    <string name="piko_disunify_xchat_system_desc">메시지 및 공유 시트와 같은 기존 기능을 복원할 수 있습니다</string>
     <string name="piko_legacy_share_link">이전 공유 링크</string>
     <string name="piko_block_redirecting_to_x_lite">X Lite로 리디렉션 차단하기</string>
+    <string name="piko_pref_block_update_screen">업데이트 화면 차단하기</string>
+    <string name="piko_pref_block_update_screen_desc">앱 실행 시 ‘이 앱은 이전 버전입니다’ 업데이트 화면이 표시되지 않도록 차단합니다</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">기능 플래그</string>
     <string name="piko_pref_feature_flags">플래그 추가하기</string>
@@ -167,10 +168,10 @@
     <string name="piko_pref_show_poll_result">투표 결과 표시하기</string>
     <string name="piko_pref_show_poll_result_desc">투표 없이 투표 결과를 볼 수 있습니다</string>
     <string name="piko_pref_hide_community_notes">커뮤니티 메모 숨기기</string>
-    <string name="piko_pref_hide_immersive_player">몰입형 플레이어 숨기기</string>
-    <string name="piko_pref_hide_immersive_player_desc">동영상 플레이어에서 위로 스와이프하여 다음 동영상을 볼 수 없습니다</string>
+    <string name="piko_pref_hide_immersive_player">몰입형 플레이어 비활성화하기</string>
+    <string name="piko_pref_hide_immersive_player_desc">위로 스와이프하여 더 많은 동영상을 시청할 수 있는 새로운 동영상 플레이어를 비활성화합니다</string>
     <string name="piko_pref_enable_vid_auto_advance">동영상 자동 스크롤 활성화하기</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">몰입형 뷰에서 동영상을 자동 스크롤을 할 수 있습니다</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">몰입형 플레이어에서 동영상 자동 스크롤을 활성화합니다</string>
     <string name="piko_pref_hide_hidden_replies">숨겨진 답글 숨기기</string>
     <string name="piko_pref_force_hd">HD 동영상 강제 활성화하기</string>
     <string name="piko_pref_force_hd_desc">동영상을 항상 높은 화질로 재생할 수 있습니다</string>
@@ -207,6 +208,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">프로필 정보 더보기</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">프로필 페이지에 더 자세한 정보를 추가합니다</string>
     <string name="piko_fast_follower">빠른 팔로워</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">폰트 스타일</string>
     <string name="piko_pref_add_font">폰트 추가하기</string>
@@ -285,6 +287,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">이전 아이콘 4</string>
     <string name="piko_app_icon_name_legacy_blue">이전 블루</string>
     <string name="piko_app_icon_name_twitter_blue">트위터 블루</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">지구</string>
     <string name="piko_app_icon_name_moon">달</string>
     <string name="piko_app_icon_name_mars">화성</string>

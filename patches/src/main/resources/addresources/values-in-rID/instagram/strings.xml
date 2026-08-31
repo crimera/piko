@@ -28,6 +28,8 @@
     <string name="piko_open_links_externally">Buka tautan secara eksternal</string>
     <string name="piko_open_links_externally_desc">Buka tautan di peramban eksternal alih-alih peramban dalam aplikasi</string>
     <string name="piko_sanitize_share_links">Bersihkan tautan berbagi</string>
+    <string name="piko_custom_sharing_domain">Domain berbagi khusus</string>
+    <string name="piko_custom_sharing_domain_desc">Domain yang digunakan saat membagikan tautan</string>
     <!-- Ghost Section -->
     <string name="piko_category_ghost">Hantu</string>
     <string name="piko_view_stories_anonymously">Lihat cerita secara anonim</string>
@@ -49,9 +51,7 @@
     <string name="piko_limit_following_feed">Batasi feed hanya untuk profil yang diikuti</string>
     <string name="piko_limit_following_feed_desc">Menyaring feed beranda untuk hanya menampilkan konten dari profil yang Anda ikuti.</string>
     <string name="piko_disable_reels_scrolling">Nonaktifkan pengguliran Reels</string>
-    <string name="piko_disable_reels_scrolling_desc">"Menonaktifkan perilaku pengguliran tak terbatas di Instagram Reels, mencegah usapan ke Reels berikutnya.
-
-Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan berhenti dengan sendirinya setelah beberapa detik."</string>
+    <string name="piko_disable_reels_scrolling_desc">Menonaktifkan perilaku pengguliran tak terbatas di Instagram Reels, mencegah usapan ke Reels berikutnya. Catatan: Pada pemasangan pertama kali, animasi \'Tips\' mungkin muncul tetapi akan berhenti dengan sendirinya setelah beberapa detik.</string>
     <string name="piko_disable_swipe_to_create">Nonaktifkan fitur usap untuk membuat</string>
     <string name="piko_disable_swipe_to_create_desc">Mencegah layar pembuatan terbuka saat mengusap ke kanan pada tab beranda.</string>
     <string name="piko_hide_stories_tray">Sembunyikan deretan cerita</string>
@@ -66,9 +66,11 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_disable_double_tap_to_like">Nonaktifkan ketuk dua kali untuk menyukai</string>
     <!-- Miscellaneous Section -->
     <string name="piko_category_misc">Lain-lain</string>
+    <string name="piko_material_you_title">Material You</string>
+    <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Nonaktifkan analitik</string>
     <string name="piko_delete_analytics_cache">Hapus cache analitik</string>
-    <string name="piko_disable_analytics_desc">Blokir analitik yang dikirim ke server Instagram/Facebook</string>
+    <string name="piko_disable_analytics_desc">Blokir data analitik yang dikirim ke server Instagram/Facebook.</string>
     <string name="piko_disable_discover_people">Nonaktifkan temukan orang</string>
     <string name="piko_disable_discover_people_desc">Menonaktifkan bagian temukan orang di profil pengguna</string>
     <string name="piko_follow_back_indicator">Aktifkan indikator status pertemanan</string>
@@ -84,12 +86,13 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_vsm_no_mentions">Tidak ada sebutan di cerita ini</string>
     <string name="piko_disable_story_flipping">Nonaktifkan pembalikan cerita</string>
     <string name="piko_disable_story_flipping_desc">Nonaktifkan pembalikan/perpindahan otomatis ke cerita berikutnya</string>
+    <string name="piko_loop_story">Ulangi cerita</string>
+    <string name="piko_loop_story_desc">Putar ulang cerita yang sedang ditayangkan saat cerita tersebut berakhir</string>
     <string name="piko_disable_video_autoplay">Nonaktifkan putar otomatis video</string>
     <string name="piko_stories_audio_autoplay">Putar otomatis audio cerita</string>
     <string name="piko_customise_story_timestamp">Sesuaikan stempel waktu cerita</string>
     <string name="piko_customise_story_timestamp_desc">Sesuaikan stempel waktu yang menunjukkan kapan cerita diposting</string>
     <string name="piko_improve_image_viewing">Tingkatkan tampilan gambar</string>
-    <string name="piko_improve_image_viewing_desc">Mengambil gambar resolusi maksimum dari server</string>
     <string name="piko_hide_reshare_button">Sembunyikan tombol bagikan ulang</string>
     <string name="piko_copy_comment">Salin komentar</string>
     <string name="piko_copy_comment_desc">Menambahkan tombol untuk menyalin komentar pada postingan dan reel</string>
@@ -101,6 +104,11 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_copy_full_name">Salin nama lengkap</string>
     <string name="piko_copy_user_id">Salin id pengguna</string>
     <string name="piko_copy_bio">Salin bio</string>
+    <string name="piko_view_profile_picture">Lihat foto profil</string>
+    <string name="piko_copy_profile_link">Salin tautan profil</string>
+    <string name="piko_share_this_profile">Bagikan profil ini</string>
+    <string name="piko_copy_links_from_bio">Salin tautan dari bio</string>
+    <string name="piko_no_links_in_bio">Tidak ada tautan di bio ini</string>
     <string name="piko_download_profile_picture">Unduh foto profil</string>
     <string name="piko_copied">Disalin</string>
     <string name="piko_more_profile_options">Pilihan profil lainnya</string>
@@ -166,9 +174,10 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_category_about">Tentang</string>
     <string name="piko_export_pref">Ekspor preferensi Piko</string>
     <string name="piko_import_pref">Impor preferensi Piko</string>
-    <string name="piko_reset_pref">Atur ulang preferensi Piko</string>
-    <string name="piko_reset_pref_success">Preferensi Piko telah dihapus</string>
-    <string name="piko_reset_pref_failed">Gagal menghapus preferensi Piko</string>
+    <string name="piko_reset_pref">Atur ulang pengaturan Piko</string>
+    <string name="piko_reset_pref_confirm">Atur ulang pengaturan Piko?</string>
+    <string name="piko_reset_pref_success">Pengaturan Piko diatur ulang</string>
+    <string name="piko_reset_pref_failed">Gagal mengatur ulang pengaturan Piko</string>
     <string name="piko_app_version">Versi aplikasi: %s</string>
     <string name="piko_patch_version">Versi tambalan: %s</string>
     <string name="piko_patch_info_title">Informasi tambalan</string>
@@ -203,6 +212,8 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_array_detailed_timestamp">Stempel waktu terperinci (Hari Kerja/Bulan/Tanggal/Jam/Menit/Detik)</string>
     <string name="piko_array_post_time">Waktu posting (Jam/Menit/Detik)</string>
     <string name="piko_array_time_left">Waktu tersisa (Jam/Menit/Detik tersisa)</string>
+    <string name="piko_array_recmd_flag_state_enable">Aktifkan</string>
+    <string name="piko_array_recmd_flag_state_disable">Nonaktifkan</string>
     <!-- Welcome Message -->
     <string name="piko_welcome_title">Selamat datang di Piko</string>
     <string name="piko_welcome_message">Untuk meningkatkan pengalaman Anda menggunakan Piko, silakan buka pengaturan Piko dan sesuaikan preferensi Anda</string>
@@ -221,6 +232,13 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_action_bar_button_profile_info_icon">Ikon info profil</string>
     <string name="piko_settings_on_action_bar">Pengaturan Piko di bilah tindakan</string>
     <string name="piko_settings_on_action_bar_desc">Pindahkan titik masuk pengaturan Piko ke bilah tindakan feed utama</string>
+    <!-- Developer Options Section -->
+    <string name="piko_category_rec_flags">Tanda yang direkomendasikan</string>
+    <string name="piko_category_rec_flags_desc">Tanda pengembang yang disarankan oleh komunitas</string>
+    <string name="piko_rec_flags_read_error">Gagal membaca berkas tanda yang di-cache</string>
+    <string name="piko_rec_flags_no_file">Berkas tanda yang direkomendasikan tidak ditemukan</string>
+    <string name="piko_rec_flags_refresh_file">Segarkan tanda</string>
+    <string name="piko_rec_flags_last_modified_at">Terakhir diubah: %s</string>
     <!-- Story filters -->
     <string name="piko_category_filter_content">Saring konten</string>
     <string name="piko_filter_story">Saring Cerita</string>
@@ -280,4 +298,41 @@ Catatan: Pada pemasangan pertama kali, animasi 'Tips' mungkin muncul tetapi akan
     <string name="piko_filter_story_minimum_item_count_desc">Cerita yang berisi kurang dari x item akan disembunyikan (nilai bawaan 1)</string>
     <string name="piko_filter_story_maximum_item_count">Item cerita maksimum</string>
     <string name="piko_filter_story_maximum_item_count_desc">Cerita yang memiliki lebih dari x item akan disembunyikan (nilai bawaan 9999)</string>
+    <!-- Save & view deleted (unsent) direct messages -->
+    <string name="piko_open_share_in_instagram">Buka di Instagram</string>
+    <string name="piko_open_voice_with_player">Buka dengan pemutar musik</string>
+    <string name="piko_save_deleted_messages">Simpan pesan yang telah dihapus</string>
+    <string name="piko_save_deleted_messages_desc">Menyimpan pesan DM yang masuk secara lokal begitu pesan tersebut tiba dari server. Menandai pesan sebagai telah dihapus jika pesan tersebut belum terkirim, sehingga Anda tetap dapat melihatnya meskipun pengirim telah menghapusnya.</string>
+    <string name="piko_view_deleted_messages">Lihat pesan yang telah dihapus</string>
+    <string name="piko_deleted_in_chat">Dihapus dalam obrolan ini</string>
+    <string name="piko_all_deleted_messages">Semua pesan yang telah dihapus</string>
+    <string name="piko_clear">Bersihkan</string>
+    <string name="piko_clear_chat_confirm">Bersihkan pesan yang telah dihapus dari obrolan ini?</string>
+    <string name="piko_clear_all_confirm">Bersihkan SEMUA pesan yang telah dihapus dan disimpan?</string>
+    <string name="piko_no_deleted_messages">Belum ada pesan yang dihapus yang tersimpan.\nAktifkan fitur ini dan pesan akan disimpan begitu diterima.</string>
+    <string name="piko_delete_saved_confirm">Hapus pesan yang tersimpan ini?</string>
+    <string name="piko_delete">Hapus</string>
+    <string name="piko_unknown">Tak diketahui</string>
+    <string name="piko_tap_to_view">ketuk untuk melihat</string>
+    <string name="piko_media_expired">tautan kedaluwarsa</string>
+    <string name="piko_media_not_available">media tidak tersedia</string>
+    <string name="piko_deleted_a_message">%s telah menghapus pesan</string>
+    <string name="piko_someone">Seseorang</string>
+    <string name="piko_deleted_messages_channel">Pesan yang telah dihapus</string>
+    <string name="piko_deleted_messages_channel_desc">Beritahu ketika pesan yang diterima belum terkirim</string>
+    <string name="piko_media_label">[%s]</string>
+    <string name="piko_media_deleted">[%s dihapus]</string>
+    <string name="piko_media_deleted_generic">[dihapus]</string>
+    <string name="piko_media_unknown">media</string>
+    <string name="piko_media_photo">foto</string>
+    <string name="piko_media_disappearing_photo">foto yang menghilang</string>
+    <string name="piko_media_video">video</string>
+    <string name="piko_media_voice">pesan suara</string>
+    <string name="piko_media_gif">GIF</string>
+    <string name="piko_media_reel">reel</string>
+    <string name="piko_media_story">cerita</string>
+    <string name="piko_media_post">postingan</string>
+    <string name="piko_media_like">suka</string>
+    <string name="piko_media_link">tautan</string>
+    <string name="piko_media_activity">aktivitas</string>
 </resources>

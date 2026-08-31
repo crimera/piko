@@ -41,7 +41,14 @@ public class MediaData extends Entity {
     }
 
     private Object getExtendedData() throws Exception {
-        return super.getField("fieldName");
+        try {
+            Object extendedData = super.getField("fieldName");
+            if (extendedData != null) return extendedData;
+        } catch (Exception ignored) {
+            // v441 folded the mutable media dict into Media itself, so there is no wrapper field to
+            // hop through and the getters sit directly on the media object.
+        }
+        return this.obj;
     }
 
     public String getShortcode() {

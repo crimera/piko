@@ -3,7 +3,7 @@
     <!-- Settings Search -->
     <string name="piko_settings_search_hint">Buscar configuración de Piko</string>
     <string name="piko_settings_search_clear">Entrada limpia</string>
-    <string name="piko_settings_search_no_results">No se encontraron resultados para \"%1$s\"</string>
+    <string name="piko_settings_search_no_results">No hay resultados para \"%s\"</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Prémium</string>
     <string name="piko_pref_undo_posts">Habilitar deshacer publicaciones</string>
@@ -86,6 +86,7 @@
     <string name="piko_native_reader_mode_cache_delete_failed">Error al eliminar la caché</string>
     <string name="piko_title_native_share_menu">Menú compartido nativo</string>
     <string name="piko_native_share_menu_toggle">Habilitar el menú de compartir nativo</string>
+    <string name="piko_native_share_menu_items_to_hide">Elementos del menú de compartir nativo que se deben ocultar</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">Anuncios</string>
     <string name="piko_pref_hide_promoted_posts">Ocultar publicaciones promocionadas</string>
@@ -137,10 +138,10 @@
     <string name="piko_pref_pause_search_suggestion_desc">Las sugerencias de búsqueda no se guardarán localmente</string>
     <string name="piko_pref_search_suggestion">Ocultar sugerencias de búsqueda</string>
     <string name="piko_pref_search_suggestion_desc">Oculta sugerencias de búsqueda en la sección Explorar</string>
-    <string name="piko_disunify_xchat_system">Desunificar el sistema xchat</string>
-    <string name="piko_disunify_xchat_system_desc">Recupere funciones como mensajes y hojas compartidas</string>
     <string name="piko_legacy_share_link">Enlaces compartidos heredados</string>
     <string name="piko_block_redirecting_to_x_lite">Bloquear la redirección a X Lite</string>
+    <string name="piko_pref_block_update_screen">Bloquear pantalla de actualización</string>
+    <string name="piko_pref_block_update_screen_desc">Bloquea la pantalla de actualización \'Esta aplicación está desactualizada\' para que no se muestre al iniciarse</string>
     <!-- Feature flags Settings -->
     <string name="piko_title_feature_flags">Flags de características</string>
     <string name="piko_pref_feature_flags">Añadir Flags de características</string>
@@ -167,10 +168,10 @@
     <string name="piko_pref_show_poll_result">Mostrar resultados de encuestas</string>
     <string name="piko_pref_show_poll_result_desc">Ver resultados de encuestas sin votar</string>
     <string name="piko_pref_hide_community_notes">Ocultar notas de la comunidad</string>
-    <string name="piko_pref_hide_immersive_player">Ocultar reproductor inmersivo</string>
-    <string name="piko_pref_hide_immersive_player_desc">Elimina el deslizamiento hacia arriba para más videos en el reproductor de video</string>
+    <string name="piko_pref_hide_immersive_player">Desactivar reproductor inmersivo</string>
+    <string name="piko_pref_hide_immersive_player_desc">Desactiva el nuevo reproductor de video que te permite ver más videos deslizando hacia arriba</string>
     <string name="piko_pref_enable_vid_auto_advance">Habilitar el desplazamiento automático del vídeo</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">Habilita el desplazamiento automático de video en modo inmersivo</string>
+    <string name="piko_pref_enable_vid_auto_advance_desc">Activa el desplazamiento automático de video en el reproductor inmersivo</string>
     <string name="piko_pref_hide_hidden_replies">Ocultar respuestas ocultas</string>
     <string name="piko_pref_force_hd">Forzar videos HD</string>
     <string name="piko_pref_force_hd_desc">Los videos se reproducirán siempre en la calidad más alta</string>
@@ -207,6 +208,7 @@
     <string name="piko_pref_customisation_more_info_on_profile">Más información en el perfil</string>
     <string name="piko_pref_customisation_more_info_on_profile_desc">Agrega más detalles en la página de perfil</string>
     <string name="piko_fast_follower">Seguidor rápido</string>
+    <string name="piko_pref_account_id">ID: %s</string>
     <!-- Font Settings -->
     <string name="piko_title_font">Estilo de fuente</string>
     <string name="piko_pref_add_font">Agregar fuente</string>
@@ -285,6 +287,7 @@
     <string name="piko_app_icon_name_legacy_icon_4">Icono Legado 4</string>
     <string name="piko_app_icon_name_legacy_blue">Legado Azúl</string>
     <string name="piko_app_icon_name_twitter_blue">Twitter Azúl</string>
+    <string name="piko_app_icon_name_material_you">Material You</string>
     <string name="piko_app_icon_name_earth">Planeta</string>
     <string name="piko_app_icon_name_moon">Luna</string>
     <string name="piko_app_icon_name_mars">Marte</string>

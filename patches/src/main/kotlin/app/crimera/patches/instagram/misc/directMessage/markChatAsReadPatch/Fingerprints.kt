@@ -44,7 +44,7 @@ internal object GetButtonEnumClassNameExtensionFingerprint : Fingerprint(
 internal object DmInfoJsonParserFingerprint : Fingerprint(
     strings = listOf("visual_messages_newest_cursor"),
     custom = { methodDef, _ ->
-        methodDef.name.lowercase().contains("parsefromjson")
+        methodDef.returnType != "V"
     },
 )
 

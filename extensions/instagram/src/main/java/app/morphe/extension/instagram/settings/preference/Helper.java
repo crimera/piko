@@ -16,13 +16,17 @@ import app.morphe.extension.instagram.settings.preference.widgets.ListPref;
 import app.morphe.extension.instagram.settings.preference.widgets.ButtonPref;
 import app.morphe.extension.instagram.settings.preference.widgets.EditTextPref;
 import app.morphe.extension.instagram.settings.preference.widgets.MultiSelectListPref;
+import app.morphe.extension.instagram.settings.SettingsRestart;
+import app.morphe.extension.instagram.settings.Settings;
+import app.morphe.extension.instagram.theme.MaterialYouTheme;
 import app.morphe.extension.shared.Utils;
 import app.morphe.extension.shared.Logger;
 
-import app.morphe.extension.crimera.SharedPref;
+import app.morphe.extension.crimera.sharedPreference.SharedPref;
 import app.morphe.extension.crimera.settings.BooleanSetting;
 import app.morphe.extension.crimera.settings.StringSetting;
 
+import  app.morphe.extension.instagram.patches.devFlags.FlagsSharedPref;
 
 public class Helper {
     private final Context context;
@@ -37,7 +41,11 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(setting.key);
         preference.setDefaultValue(setting.defaultValue);
-        preference.setSingleLineTitle(false);
+        if (Settings.AMOLED_THEME.key.equals(setting.key)) {
+            preference.setSwitchInteractionEnabled(
+                    MaterialYouTheme.canEnableAmoled(context)
+            );
+        }
         return preference;
     }
 
@@ -49,7 +57,6 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(key);
         preference.setDefaultValue(setting.defaultValue);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
@@ -58,7 +65,6 @@ public class Helper {
         preference.setTitle(title);
         preference.setSummary(summary);
         preference.setKey(setting);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
@@ -69,14 +75,12 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(setting.key);
         preference.setDefaultValue(setting.defaultValue);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
     public Preference editTextNumPreference(String title, String summary, StringSetting setting) {
         EditTextPref preference = (EditTextPref)editTextPreference(title,summary,setting);
         preference.setNumericOnly(true);
-        preference.setSingleLineTitle(false);
         return preference;
     }
     public Preference multiSelectListPref(String title, String summary, StringSetting setting) {
@@ -87,28 +91,62 @@ public class Helper {
         preference.setSummary(summary);
         preference.setKey(key);
         preference.setInitialValue(key);
-        preference.setSingleLineTitle(false);
         return preference;
     }
 
-    public void setValue(Preference preference, Object newValue) {
+    public boolean setValue(Preference preference, Object newValue) {
         String key = preference.getKey();
         try {
             if (newValue != null) {
+                Object previousValue = getValue(preference);
                 String newValClass = newValue.getClass().getSimpleName();
+                boolean saved = false;
 
                 if (newValClass.equals("Boolean")) {
-                    SharedPref.setBooleanPref(key, (Boolean) newValue);
+                    Boolean val = (Boolean) newValue;
+                    if (Settings.AMOLED_THEME.key.equals(key)) {
+                        return MaterialYouTheme.requestAmoledChange(context, val);
+                    }
+                    if (Settings.MATERIAL_YOU_THEME.key.equals(key)) {
+                        return MaterialYouTheme.requestMaterialYouChange(context, val);
+                    }
+                    saved = SharedPref.setBooleanPref(key, val);
                 } else if (newValClass.equals("String")) {
-                    SharedPref.setStringPref(key, (String) newValue);
+                    String val = (String) newValue;
+                    if(key.contains("_")) {
+                        saved = SharedPref.setStringPref(key, val);
+                    }else{
+                        saved = FlagsSharedPref.setStringPref(key, val);
+                    }
                 } else if (newValClass.equals("HashSet")) {
-                    SharedPref.setSetPref(key, (Set) newValue);
+                    saved = SharedPref.setSetPref(key, (Set) newValue);
+                }
+
+                if (saved) {
+                    SettingsRestart.markChanged(previousValue, newValue);
                 }
             }
-
+            return true;
         } catch (Exception ex) {
             Utils.showToastShort(ex.toString());
             Logger.printException(() -> "Failed setting pref: ", ex);
+            return false;
         }
+    }
+
+    private Object getValue(Preference preference) {
+        if (preference instanceof SwitchPref) {
+            return ((SwitchPref) preference).isChecked();
+        }
+        if (preference instanceof ListPref) {
+            return ((ListPref) preference).getValue();
+        }
+        if (preference instanceof EditTextPref) {
+            return ((EditTextPref) preference).getText();
+        }
+        if (preference instanceof MultiSelectListPref) {
+            return ((MultiSelectListPref) preference).getValues();
+        }
+        return null;
     }
 }

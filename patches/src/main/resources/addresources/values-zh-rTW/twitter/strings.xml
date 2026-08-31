@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Settings Search -->
+    <string name="piko_settings_search_hint">搜尋 Piko 設定</string>
+    <string name="piko_settings_search_clear">清除輸入</string>
+    <string name="piko_settings_search_no_results">沒有找到與「%s」相關的結果</string>
     <!-- Premium Settings -->
     <string name="piko_title_premium">Premium</string>
     <string name="piko_pref_undo_posts">啟用推文收回</string>
@@ -33,9 +36,15 @@
     <string name="piko_pref_native_page_desc">這些 Piko 原生功能可在貼文選單中取得。</string>
     <string name="piko_title_native_downloader">原生下載器</string>
     <string name="piko_title_native_downloader_toggle">啟用原生下載器</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res">自動下載最高影片解析度</string>
+    <string name="piko_pref_native_downloader_autodownload_highest_video_res_desc">跳過選擇對話方塊，直接下載單個影片的最佳可用解析度。</string>
+    <string name="piko_pref_native_downloader_show_download_icon">顯示下載圖示</string>
+    <string name="piko_pref_native_downloader_show_copy_icon">顯示複製圖示</string>
+    <string name="piko_pref_native_downloader_show_variants_icon">顯示解析度選項圖示</string>
     <string name="piko_pref_native_downloader_inline_button">內嵌顯示下載按鈕</string>
     <string name="piko_pref_native_downloader_inline_button_desc">在貼文互動欄直接加入下載媒體按鈕</string>
     <string name="piko_pref_native_downloader_alert_title">下載媒體</string>
+    <string name="piko_video_variants">影片解析度</string>
     <string name="piko_pref_native_downloader_download_all">下載全部</string>
     <string name="piko_pref_native_downloader_no_media">沒有找到媒體</string>
     <string name="piko_pref_native_downloader_filename_title">儲存文件名稱模式</string>
@@ -51,6 +60,8 @@
     <string name="piko_share_image_capture_failed">擷取圖片失敗</string>
     <string name="piko_share_image_error">錯誤：%s</string>
     <string name="piko_share_image_app_error">找不到 %s</string>
+    <string name="piko_share_image_instagram_stories">分享至 Instagram 限時動態</string>
+    <string name="piko_share_image_whatsapp_status">分享至 WhatsApp 動態</string>
     <string name="piko_title_native_translator">原生推文翻譯</string>
     <string name="piko_native_translator_toggle">啟用原生推文翻譯</string>
     <string name="piko_native_translator_provider">翻譯服務</string>
@@ -73,6 +84,8 @@
     <string name="piko_native_reader_mode_cache_delete">刪除閱讀器快取</string>
     <string name="piko_native_reader_mode_cache_delete_success">快取刪除成功</string>
     <string name="piko_native_reader_mode_cache_delete_failed">快取刪除失敗</string>
+    <string name="piko_title_native_share_menu">原生分享選單</string>
+    <string name="piko_native_share_menu_toggle">啟用原生分享選單</string>
     <!-- Ads Settings -->
     <string name="piko_title_ads">廣告</string>
     <string name="piko_pref_hide_promoted_posts">隱藏推廣推文</string>
@@ -81,6 +94,7 @@
     <string name="piko_pref_ctj_section">隱藏探索新的社群</string>
     <string name="piko_pref_ryb_section">隱藏重新訪問您的書籤</string>
     <string name="piko_pref_pinned_posts_section">隱藏已被你跟隨的人釘選</string>
+    <string name="piko_pref_hide_unrelated_replies">隱藏不相關的回覆</string>
     <string name="piko_pref_hide_premium_prompt">隱藏資訊推廣</string>
     <string name="piko_pref_hide_todays_news">隱藏今日新聞</string>
     <string name="piko_pref_del_from_db">從資料庫中刪除記錄</string>
@@ -90,6 +104,7 @@
     <string name="piko_pref_db_ctj_section">探索新的社群</string>
     <string name="piko_pref_db_ryb_section">重新訪問您的書籤</string>
     <string name="piko_pref_db_pinned_posts_section">已被你跟隨的人釘選</string>
+    <string name="piko_pref_db_unrelated_replies">不相關的回覆</string>
     <string name="piko_pref_db_premium_prompt">資訊推廣</string>
     <string name="piko_pref_db_todays_news">今日新聞</string>
     <string name="piko_pref_db_not_found">找不到資料庫</string>
@@ -122,8 +137,6 @@
     <string name="piko_pref_pause_search_suggestion_desc">將不會於本機儲存搜尋建議</string>
     <string name="piko_pref_search_suggestion">隱藏搜尋建議</string>
     <string name="piko_pref_search_suggestion_desc">隱藏探索分頁中的搜尋建議</string>
-    <string name="piko_disunify_xchat_system">分離 XChat 系統</string>
-    <string name="piko_disunify_xchat_system_desc">恢復舊版功能，如訊息和分享面板</string>
     <string name="piko_legacy_share_link">舊版分享連結</string>
     <string name="piko_block_redirecting_to_x_lite">封鎖重導向至 X Lite</string>
     <!-- Feature flags Settings -->
@@ -152,10 +165,7 @@
     <string name="piko_pref_show_poll_result">顯示投票結果</string>
     <string name="piko_pref_show_poll_result_desc">在沒有投票的情況下查看投票結果</string>
     <string name="piko_pref_hide_community_notes">隱藏社群徽章</string>
-    <string name="piko_pref_hide_immersive_player">隱藏沉浸式播放器（上下滑動）</string>
-    <string name="piko_pref_hide_immersive_player_desc">移除影片播放器中向上滑動瀏覽其他影片的功能</string>
     <string name="piko_pref_enable_vid_auto_advance">啟用影片自動捲動</string>
-    <string name="piko_pref_enable_vid_auto_advance_desc">在沉浸式檢視中啟用影片自動捲動</string>
     <string name="piko_pref_hide_hidden_replies">隱藏隱藏的回覆</string>
     <string name="piko_pref_force_hd">強制高畫質影片</string>
     <string name="piko_pref_force_hd_desc">始終選取最高畫質影片播放</string>
@@ -189,6 +199,9 @@
     <string name="piko_pref_customisation_search_type_ahead">隱藏搜尋建議</string>
     <string name="piko_pref_customisation_change_app_icon">變更應用程式圖示</string>
     <string name="piko_notifications_tab_priority">優先</string>
+    <string name="piko_pref_customisation_more_info_on_profile">個人資料頁顯示更多資訊</string>
+    <string name="piko_pref_customisation_more_info_on_profile_desc">在個人資料頁面上新增更多詳細資訊</string>
+    <string name="piko_fast_follower">Fast Follower</string>
     <!-- Font Settings -->
     <string name="piko_title_font">字體樣式</string>
     <string name="piko_pref_add_font">新增字型</string>
@@ -226,6 +239,7 @@
     <string name="piko_pref_patch_info">修補資訊</string>
     <string name="piko_pref_version_info">版本資訊</string>
     <string name="piko_changelogs_title">變更日誌</string>
+    <string name="piko_debug">Piko 偵錯</string>
     <string name="piko_pref_patches">補丁</string>
     <string name="piko_pref_included">包含</string>
     <string name="piko_pref_excluded">排除</string>
@@ -350,12 +364,26 @@
     <string name="piko_app_icon_name_tropical_teal">熱帶藍綠</string>
     <string name="piko_app_icon_name_vivid_orange">鮮豔橘</string>
     <!-- Import / export login tokens -->
+    <string name="piko_login_token_export_screen_description">"此功能可匯出當前已登入帳戶的會話權杖 (Session Token)。
+
+警告：匯出的權杖屬於高度機密資訊。
+切勿分享給任何人！
+若他人取得此權杖，他們便能自由存取您的帳戶，直到您登出該會話為止。
+
+詳細資訊請參考此頁面：
+https://github.com/crimera/piko/blob/dev/docs/about_login_token_patch.md
+建議在使用此功能前閱讀該說明，其中包含權杖匯入方式等重要資訊。"</string>
     <string name="piko_login_token_select_account">選擇帳戶：</string>
     <string name="piko_login_token_export_copy_to_clipboard">複製到剪貼簿</string>
     <string name="piko_login_token_export_save_to_file">儲存到檔案</string>
+    <string name="piko_login_token_export_no_accounts_message">資訊：您尚未登入任何帳戶。欲匯出權杖，請先登入帳戶。</string>
     <string name="piko_login_token_import_token_button_text">透過工作權杖登入</string>
     <string name="piko_login_token_import_from_text">從文字匯入</string>
     <string name="piko_login_token_import_from_file">從檔案匯入</string>
     <string name="piko_login_token_import_about">關於此功能（開啟網站）</string>
+    <string name="piko_login_token_import_success_reopen_required">重新開啟應用程式</string>
+    <string name="piko_login_token_import_failed_missing_info">錯誤：缺少「username」、「token」或「secret」</string>
     <string name="piko_login_token_import_failed_already_exist">加入帳戶失敗（可能已存在）</string>
+    <string name="piko_ok">確認</string>
+    <string name="piko_cancel">取消</string>
 </resources>

@@ -28,4 +28,5 @@ internal object UserTagInfoDictInitFingerprint : Fingerprint(
 
 object ReelsInlineQualitySurveyRelatedFingerprint : Fingerprint(
     strings = listOf("reels_inline_quality_survey"),
+    parameters = listOf(MEDIA_CLASS_NAME),
 )

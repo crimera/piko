@@ -14,6 +14,7 @@ import app.morphe.patcher.Fingerprint
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructionsWithLabels
 import app.morphe.patcher.extensions.InstructionExtensions.getInstruction
+import app.morphe.patcher.extensions.InstructionExtensions.instructions
 import app.morphe.patcher.patch.bytecodePatch
 import app.morphe.patcher.util.smali.ExternalLabel
 import app.morphe.util.indexOfFirstInstruction
@@ -56,17 +57,25 @@ val handleStoryButtonPatch =
             val STORY_BUTTON_EXTENSION_CLASS = "${PATCHES_DESCRIPTOR}/story/StoryButton;"
             // Add button on self story bottom sheet.
             SelfStoryAddStoryButtonFingerprint.method.apply {
-                val firstIfEqz = indexOfFirstInstruction(Opcode.IF_EQZ)
-                val arrayMoveResultObjectIndex = firstIfEqz - 1
-                val arrayListRegister = getInstruction(arrayMoveResultObjectIndex).registersUsed[0]
+                instructions.filter { it.opcode == Opcode.IF_EQZ }.first { it ->
+                    val index = it.location.index
+                    val nextOpcode = getInstruction(index + 1).opcode
+                    if (nextOpcode == Opcode.IGET_OBJECT) {
+                        val arrayMoveResultObjectIndex = index - 1
+                        val arrayListRegister = getInstruction(arrayMoveResultObjectIndex).registersUsed[0]
 
-                addInstructions(
-                    arrayMoveResultObjectIndex + 1,
-                    """
-                    invoke-static {v$arrayListRegister},$STORY_BUTTON_EXTENSION_CLASS ->addButtons(Ljava/util/ArrayList;)Ljava/util/ArrayList;
-                    move-result-object v$arrayListRegister
-                    """.trimIndent(),
-                )
+                        addInstructions(
+                            arrayMoveResultObjectIndex + 1,
+                            """
+                            invoke-static {v$arrayListRegister},$STORY_BUTTON_EXTENSION_CLASS ->addButtons(Ljava/util/ArrayList;)Ljava/util/ArrayList;
+                            move-result-object v$arrayListRegister
+                            """.trimIndent(),
+                        )
+                        true
+                    } else {
+                        false
+                    }
+                }
             }
 
             // Add button on story bottom sheet.
