@@ -39,7 +39,7 @@ import app.morphe.extension.instagram.entity.InstagramButton;
 import app.morphe.extension.instagram.entity.InstagramButtonStyleEnum;
 import app.morphe.extension.instagram.entity.UserData;
 import app.morphe.extension.instagram.patches.download.DownloadUtils;
-import app.morphe.extension.instagram.settings.ActivityHook;
+import app.morphe.extension.instagram.utils.InstaUtils;
 import app.morphe.extension.shared.Logger;
 import app.morphe.extension.shared.Utils;
 
@@ -88,7 +88,7 @@ public class ProfilePictureViewer {
             panel.addView(buildImageArea(context, imageUrl, placeholderColor));
             panel.addView(buildActionButton(context, str("piko_open_image_externally"), () -> {
                 dialog.dismiss();
-                ActivityHook.handleUrlIntent(false, imageUrl);
+                InstaUtils.handleUrlIntent(false, imageUrl);
             }));
             panel.addView(buildActionButton(context, str("piko_download_profile_picture"), () -> {
                 try {
