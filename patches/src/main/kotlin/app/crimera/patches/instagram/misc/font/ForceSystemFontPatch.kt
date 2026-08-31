@@ -8,98 +8,19 @@ package app.crimera.patches.instagram.misc.font
 
 import app.crimera.patches.instagram.misc.extension.sharedExtensionPatch
 import app.crimera.patches.instagram.utils.Constants.COMPATIBILITY_INSTAGRAM
+import app.crimera.patches.instagram.utils.Constants.PATCHES_DESCRIPTOR
 import app.morphe.patcher.extensions.InstructionExtensions.addInstructions
+import app.morphe.patcher.extensions.InstructionExtensions.registersUsed
 import app.morphe.patcher.patch.PatchException
 import app.morphe.patcher.patch.bytecodePatch
-import app.morphe.patcher.patch.resourcePatch
 import com.android.tools.smali.dexlib2.Opcode
 import com.android.tools.smali.dexlib2.iface.instruction.FiveRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.OneRegisterInstruction
 import com.android.tools.smali.dexlib2.iface.instruction.ReferenceInstruction
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
-import org.w3c.dom.Element
 
 private const val EXTENSION_CLASS =
-    "Lapp/morphe/extension/instagram/patches/font/ForceSystemFontPatch;"
-
-/*
- * Changes Instagram's default theme font from prism_sans
- * to the Android system sans-serif font.
- */
-private val forceSystemFontThemePatch =
-    resourcePatch(
-        name = "Force system font theme",
-        description = "Internal dependency patch for Instagram's default theme font.",
-        default = true,
-    ) {
-        compatibleWith(COMPATIBILITY_INSTAGRAM)
-
-        execute {
-            document("res/values/styles.xml").use { stylesDocument ->
-
-                val styles =
-                    stylesDocument.getElementsByTagName("style")
-
-                var fontFamilyItem: Element? = null
-
-                for (styleIndex in 0 until styles.length) {
-
-                    val style =
-                        styles.item(styleIndex) as? Element
-                            ?: continue
-
-                    if (
-                        style.getAttribute("name") !=
-                        "Base.Theme.Instagram"
-                    ) {
-                        continue
-                    }
-
-                    val items =
-                        style.getElementsByTagName("item")
-
-                    for (itemIndex in 0 until items.length) {
-
-                        val item =
-                            items.item(itemIndex) as? Element
-                                ?: continue
-
-                        if (
-                            item.getAttribute("name") !=
-                            "android:fontFamily"
-                        ) {
-                            continue
-                        }
-
-                        if (fontFamilyItem != null) {
-                            throw PatchException(
-                                "Found multiple Instagram theme font declarations."
-                            )
-                        }
-
-                        fontFamilyItem = item
-                    }
-                }
-
-                val item =
-                    fontFamilyItem
-                        ?: throw PatchException(
-                            "Could not find Instagram's default theme font declaration."
-                        )
-
-                if (
-                    item.textContent.trim() !=
-                    "@font/prism_sans"
-                ) {
-                    throw PatchException(
-                        "Instagram's default theme font has an unexpected value."
-                    )
-                }
-
-                item.textContent = "sans-serif"
-            }
-        }
-    }
+    "$PATCHES_DESCRIPTOR/font/ForceSystemFontPatch;"
 
 /*
  * Forces Instagram's custom fonts to use
@@ -203,7 +124,7 @@ val forceSystemFontPatch =
                 (
                     instructions[typefaceFactoryIndex]
                         as ReferenceInstruction
-                    ).reference as MethodReference
+                ).reference as MethodReference
 
             /*
              * Find the variable font weight setter.
@@ -262,12 +183,10 @@ val forceSystemFontPatch =
                 )
             }
 
-            val weightInstruction =
-                instructions[weightSetterIndex]
-                    as FiveRegisterInstruction
-
             val weightRegister =
-                weightInstruction.registerD
+                instructions[weightSetterIndex]
+                    .registersUsed
+                    .last()
 
             val resultRegister =
                 resultInstruction.registerA
