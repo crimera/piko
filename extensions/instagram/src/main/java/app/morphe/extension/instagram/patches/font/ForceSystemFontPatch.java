@@ -8,6 +8,7 @@ package app.morphe.extension.instagram.patches.font;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.os.Build;
 
 import java.util.Locale;
 
@@ -38,15 +39,24 @@ public final class ForceSystemFontPatch {
         }
 
         if (resourceName.equals("iguibetav9_regular")) {
-            return Typeface.create(Typeface.DEFAULT, 400, false);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                return Typeface.create(Typeface.DEFAULT, 400, false);
+            }
+            return Typeface.create(Typeface.DEFAULT, Typeface.NORMAL);
         }
 
         if (resourceName.equals("iguibetav9_semibold")) {
-            return Typeface.create(Typeface.DEFAULT, 600, false);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                return Typeface.create(Typeface.DEFAULT, 600, false);
+            }
+            return Typeface.create(Typeface.DEFAULT, Typeface.BOLD);
         }
 
         if (resourceName.equals("iguibetav9_bold")) {
-            return Typeface.create(Typeface.DEFAULT, 700, false);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                return Typeface.create(Typeface.DEFAULT, 700, false);
+            }
+            return Typeface.create(Typeface.DEFAULT, Typeface.BOLD);
         }
 
         if (resourceName.equals("prism_sans")) {
@@ -59,10 +69,19 @@ public final class ForceSystemFontPatch {
     public static Typeface getSystemTypefaceForWeight(int weight) {
         int normalizedWeight = Math.max(1, Math.min(1000, weight));
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            return Typeface.create(
+                    Typeface.DEFAULT,
+                    normalizedWeight,
+                    false
+            );
+        }
+
         return Typeface.create(
                 Typeface.DEFAULT,
-                normalizedWeight,
-                false
+                normalizedWeight >= 600
+                        ? Typeface.BOLD
+                        : Typeface.NORMAL
         );
     }
 }
