@@ -83,7 +83,7 @@ public class ButtonPref extends Preference {
                         DownloadMapping.downloadMapping();
 
                     } else if (key.equals("view_deleted_messages")) {
-                        SavedMessagesHook.openDeletedMessages(context, false);
+                        SavedMessagesHook.openDeletedMessages(context);
 
                     } else if (isFragmentNavigation(key)) {
                         FragmentHook.startFragment(key);
