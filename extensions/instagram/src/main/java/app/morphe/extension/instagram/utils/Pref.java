@@ -14,17 +14,11 @@ import app.morphe.extension.instagram.settings.SettingsStatus;
 import app.morphe.extension.instagram.constants.Constants;
 
 import app.morphe.extension.crimera.sharedPreference.SharedPref;
+import app.morphe.extension.shared.MarkChatAsReadScope;
 
 @SuppressWarnings("unused")
 public class Pref {
     private static final int MAX_IMAGE_SIZE = 4096;
-    public static boolean SHOULD_MARK_CHAT_AS_READ;
-    static {
-        SHOULD_MARK_CHAT_AS_READ = false;
-    }
-    public static void setMarkChatAsReadIndicator(boolean bool) {
-        SHOULD_MARK_CHAT_AS_READ = bool;
-    }
 
     public static boolean clearAllPreferences() {
         return SharedPref.clearAll();
@@ -104,10 +98,22 @@ public class Pref {
     // Return false = call the message seen api.
     // Return true = blocks the message seen api.
     public static boolean viewDmAnonymously() {
-        if(enableMarkChatAsReadOption() && SHOULD_MARK_CHAT_AS_READ){
+        return shouldBlockDmSeen(
+                SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY),
+                Pref.getTurnOnAllGhostModes(),
+                enableMarkChatAsReadOption()
+        );
+    }
+
+    static boolean shouldBlockDmSeen(
+            boolean viewDmAnonymously,
+            boolean allGhostModes,
+            boolean manualReadOptionEnabled
+    ) {
+        if (manualReadOptionEnabled && MarkChatAsReadScope.isActive()) {
             return false;
         }
-        return SharedPref.getBooleanPref(Settings.VIEW_DM_ANONYMOUSLY) || Pref.getTurnOnAllGhostModes();
+        return viewDmAnonymously || allGhostModes;
     }
 
     public static boolean disableVideoAutoplay() {

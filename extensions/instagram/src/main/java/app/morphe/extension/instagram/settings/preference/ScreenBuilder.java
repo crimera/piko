@@ -198,26 +198,6 @@ public class ScreenBuilder {
     public void dmSection() {
         if (!(SettingsStatus.dmSection())) return;
 
-        if (SettingsStatus.disableTypingStatus) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_disable_typing_status"),
-                            "",
-                            Settings.DISABLE_TYPING_STATUS
-                    )
-            );
-        }
-
-        if (SettingsStatus.viewDmAnonymously) {
-            addPreference(
-                    helper.switchPreference(
-                            str("piko_view_dm_anonymously"),
-                            "",
-                            Settings.VIEW_DM_ANONYMOUSLY
-                    )
-            );
-        }
-
         if (SettingsStatus.unlimitedReplaysOnEphemeralMedia) {
             addPreference(
                     helper.switchPreference(
@@ -311,7 +291,7 @@ public class ScreenBuilder {
             addPreference(
                     helper.switchPreference(
                             str("piko_view_dm_anonymously"),
-                            "",
+                            str("piko_view_dm_anonymously_desc"),
                             Settings.VIEW_DM_ANONYMOUSLY
                     )
             );
