@@ -60,6 +60,33 @@ val hookFlagsPatch =
                                 """.trimIndent(),
                             )
                         }
+
+                    methods
+                        .first {
+                            it.returnType == "J" && it.parameters.size == 3 &&
+                                it.parameters[0].type == configValueSourceWrapperClassType
+                        }.apply {
+                            val isStaticMethod = AccessFlags.STATIC.isSet(method.accessFlags)
+
+                            var configSpecifierRegister = parameters.indexOfFirst { it.type == "J" }
+                            if (!isStaticMethod) {
+                                configSpecifierRegister += 1
+                            }
+                            addInstructions(
+                                0,
+                                """
+                                invoke-static/range {p$configSpecifierRegister .. p${configSpecifierRegister + 1}}, $HOOK_FLAGS_DESCRIPTOR->handleLongFlags(J)Ljava/lang/Long;
+                                move-result-object v0
+                                # 1. Check if the result is NULL
+                                if-eqz v0, :piko
+                                invoke-virtual {v0}, Ljava/lang/Long;->longValue()J
+                                move-result-wide v1
+                                return-wide v1
+                                :piko
+                                nop
+                                """.trimIndent(),
+                            )
+                        }
                 }
             }
         }

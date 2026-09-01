@@ -891,13 +891,23 @@ public class ScreenBuilder {
         // rather than triggering new build
         // for every a new flag.
         for(Flag flag : recFlags) {
-            addPreference(
-                    helper.listPreference(
-                            flag.getName(),
-                            flag.getDesc(),
-                            flag.getCode()
-                    )
-            );
+            if (flag.isLongType()) {
+                addPreference(
+                        helper.editTextNumPreference(
+                                flag.getName(),
+                                flag.getDesc(),
+                                flag.getCode()
+                        )
+                );
+            } else {
+                addPreference(
+                        helper.listPreference(
+                                flag.getName(),
+                                flag.getDesc(),
+                                flag.getCode()
+                        )
+                );
+            }
         }
     }
 
