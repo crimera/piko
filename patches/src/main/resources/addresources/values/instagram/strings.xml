@@ -40,6 +40,7 @@
     <string name="piko_disable_typing_status">Disable typing status</string>
     <string name="piko_disable_screenshot_detection">Disable screenshot detection</string>
     <string name="piko_view_dm_anonymously">View direct messages anonymously</string>
+    <string name="piko_view_dm_anonymously_desc">When enabled, others can\'t see when you\'ve read their messages. When both this setting and Turn on all ghost modes are disabled, Instagram\'s Show read receipts setting is used</string>
     <string name="piko_turn_on_all_ghost_modes">Turn on all ghost modes</string>
     <string name="piko_ghost_modes_on">Ghost mode: ON</string>
     <string name="piko_ghost_modes_default">Ghost mode: DEFAULT</string>
@@ -129,7 +130,7 @@
     <string name="piko_unlimited_replays">Make ephemeral media permanent</string>
     <string name="piko_unlimited_replays_desc">Changes unexpired view once, view twice media to permanent view</string>
     <string name="piko_enable_mark_chat_as_read">Enable mark chat as read option</string>
-    <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read</string>
+    <string name="piko_enable_mark_chat_as_read_desc">Get an option, on long pressing the chat, to mark it as read. When you mark a chat as read, others can see that you\'ve read their messages, even when View direct messages anonymously is enabled</string>
 
     <!-- Download Media Section -->
     <string name="piko_category_download_media">Download media</string>
