@@ -33,8 +33,6 @@ import com.android.tools.smali.dexlib2.iface.reference.FieldReference
 import com.android.tools.smali.dexlib2.iface.reference.MethodReference
 
 private const val MAXIMUM_VIDEO_BITRATE = 0x7fffffff
-private const val MEDIA_VARIANT_SELECTOR_CLASS = "Lcom/x/media/playback/r;"
-private const val MEDIA_VARIANT_BITRATE_FIELD = "d"
 
 private object AudioTrackOverrideFingerprint : Fingerprint(
     definingClass = "Lcom/x/media/playback/",
@@ -62,8 +60,11 @@ private object MediaBitrateLimiterFingerprint : Fingerprint(
     ),
     custom = { method, _ ->
         method.name == "invokeSuspend" &&
-            method.implementation?.instructions?.any { instruction ->
-                isBitrateFlowRead(instruction)
+            method.implementation?.instructions?.toList()?.let { instructions ->
+                instructions.indices.any { index ->
+                    isBitrateFlowRead(instructions[index]) &&
+                        instructions.getOrNull(index + 1)?.let(::isIntegerMathMin) == true
+                }
             } == true
     },
 )
@@ -111,8 +112,7 @@ private fun isBitrateFlowRead(instruction: Instruction?): Boolean {
     if (instruction?.opcode != Opcode.IGET_OBJECT) return false
 
     val reference = instruction.getReference<FieldReference>() ?: return false
-    return reference.definingClass == MEDIA_VARIANT_SELECTOR_CLASS &&
-        reference.name == MEDIA_VARIANT_BITRATE_FIELD
+    return reference.type.startsWith("Lkotlinx/coroutines/flow/")
 }
 
 private fun isIntegerMathMin(instruction: Instruction): Boolean {

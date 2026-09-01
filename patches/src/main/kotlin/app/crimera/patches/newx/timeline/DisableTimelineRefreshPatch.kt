@@ -39,8 +39,7 @@ private object NewXHomeReselectFingerprint : Fingerprint(
 
 private object NewXUrtRepositoryRequestFingerprint : Fingerprint(
     definingClass = "Lcom/x/repositories/urt/",
-    name = "i",
-    parameters = listOf("Lcom/x/models/timelines/d;", "Lcom/x/models/timelines/items/j0;"),
+    parameters = listOf("L", "L"),
     returnType = "V",
     filters = listOf(string("requestType")),
 )

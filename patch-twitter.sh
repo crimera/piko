@@ -20,7 +20,7 @@ fi
 # BETA PATH: current default input for future NewX updates.
 # ALPHA PATH: pass the 12.17.3-alpha.01 APK explicitly while compatibility is retained.
 # TODO: Remove the alpha invocation note when the alpha target is deprecated.
-DEFAULT_APK="../twitter-analysis/apks/com.twitter.android_12.22.0-beta.01-312220101_1arch_2dpi_1lang_caed65f6dfa6aab57fd23be49c0fbb72_apkmirror.com.apkm"
+DEFAULT_APK="../twitter-analysis/apks/X_com,twitter,android_12,21,1-prod,05.apks"
 OUTPUT_APK="$HOME/Downloads/piko-twitter-patched.apk"
 APK="$DEFAULT_APK"
 FLAGS=()
