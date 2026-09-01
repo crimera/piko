@@ -75,7 +75,7 @@
     <string name="piko_amoled_title">AMOLED</string>
     <string name="piko_disable_analytics">Disable analytics</string>
     <string name="piko_delete_analytics_cache">Delete analytic cache</string>
-    <string name="piko_disable_analytics_desc">Block analytics that are sent to Instagram/Facebook servers.</string>
+    <string name="piko_disable_analytics_desc">Block analytics that are sent to Instagram/Facebook servers</string>
     <string name="piko_disable_discover_people">Disable discover people</string>
     <string name="piko_disable_discover_people_desc">Disables discover people section on user profile</string>
     <string name="piko_follow_back_indicator">Enable friendship status indicator</string>
